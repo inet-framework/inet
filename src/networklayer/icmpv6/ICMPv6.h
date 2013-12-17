@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 #include "ICMPv6Message_m.h"
+#include "ILifecycle.h"
 
 
 //foreign declarations:
@@ -34,7 +35,7 @@ class PingPayload;
 /**
  * ICMPv6 implementation.
  */
-class INET_API ICMPv6 : public cSimpleModule
+class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
 {
   public:
     /**
@@ -75,7 +76,8 @@ class INET_API ICMPv6 : public cSimpleModule
     /**
      * Initialization
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      *  Processing of messages that arrive in this module. Messages arrived here
@@ -83,6 +85,8 @@ class INET_API ICMPv6 : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
     virtual void processICMPv6Message(ICMPv6Message *);
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     /**
      *  Respond to the machine that tried to ping us.

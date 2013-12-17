@@ -1,15 +1,74 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-08-23  Andras Varga
+
+	InterfaceTable: revert to earlier behavior of determining networkLayerGateIndex.
+	Now the module connected to a NIC *must* have gate vectors called ifIn and ifOut.
+	If they don't, the code decides that the NIC is *not* directly connected to
+	a network layer, and leaves networkLayerGateIndex unfilled.
+
+	ASSUMPTIONS:
+	 1. The NIC module (ifmod) may or may not be connected to a network layer 
+	    module (e.g. IPv4NetworkLayer or MPLS)
+	 2. If it *is* connected to a network layer (or a relay unit), the network 
+	    layer module's gates must be called ifIn[] and ifOut[], and NIC must be 
+	    connected to identical gate indices in both vectors.
+	 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] 
+	    gates, we assume that it is NOT connected to a network layer, and leave 
+	    networkLayerGateIndex in InterfaceEntry unfilled.
+	4. The NIC may or may not connect to gates of the containing host compound module.
+
+2013-07-05  Zoltan Bojthe
+
+	InterfaceTable: remove explicit registration of a loopback interface;
+	it will be done by the newly introduced LoopbackInterface module
+
+2013-07-25  Tamas Borbely
+
+	InterfaceEntry: renamed protocol3data/protocol4data to isisdata/trilldata
+	(they will be needed by the ANSA project)
+
+2013-07-31  Zoltan Bojthe
+
+	InterfaceEntry: bugfixes
+
+	- resetInterface() and destructor code were different
+	- uses resetInterface() in destructor
+	- always check owner of protocoldata pointer before deleting it
+	- removed some unnecessary type conversions
+	- setProtocol[34]Data(): deletion of old data was missing
+
+2013-05-15  Alfonso Ariza Quintana
+
+	InterfaceEntry leaks fixed: InterfaceEntry now deletes protocol-specific
+	data in the destructor
+
+2013-05-10  Levente Meszaros
+
+	InterfaceTable: Changed the way how interfaces are registered.
+
+	Interfaces are unconditionally registered from initialize. Interfaces
+	are no longer registered during node startup. Interfaces are no longer
+	removed during node startup.
+
+2013-04-27  Andras Varga
+
+	InterfaceTable: added lifecycle support
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
 
 2012-06-15  Zoltan Bojthe
 
-	- InterfaceEntry constructor changed: Now it stores a pointer to related 
+	- InterfaceEntry constructor changed: Now it stores a pointer to related
 	  interface module
 
 	- InterfaceTable uses the stored interfaceModule ptr in InterfaceEntry instead
 	  of taking it as a parameter
-	  
+
 	- modified gate/connection validation in InterfaceTable
 
 	- bugfix: cGate::getDisplayString() has a side effect by creating an

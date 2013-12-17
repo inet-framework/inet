@@ -58,6 +58,22 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     return frame;
 }
 
+cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
+{
+    cPacket *payload = frame->decapsulate();
+
+    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+    ctrl->setSrc(frame->getTransmitterAddress());
+    ctrl->setDest(frame->getReceiverAddress());
+    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+    if (frameWithSNAP)
+        ctrl->setEtherType(frameWithSNAP->getEtherType());
+    payload->setControlInfo(ctrl);
+
+    delete frame;
+    return payload;
+}
+
 void Ieee80211MgmtAdhoc::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
@@ -118,5 +134,4 @@ void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *f
 {
     dropManagementFrame(frame);
 }
-
 

@@ -32,9 +32,11 @@
 
 Define_Module(HttpServerDirect);
 
-void HttpServerDirect::initialize()
+void HttpServerDirect::initialize(int stage)
 {
-    HttpServerBase::initialize();
+    HttpServerBase::initialize(stage);
+    if (stage != 0)
+        return;
 
     EV_DEBUG << "Initializing direct server component\n";
 

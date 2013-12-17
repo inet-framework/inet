@@ -1,0 +1,92 @@
+%description:
+
+Test for basic UDP application lifecycle handling.
+
+Sequence of operations:
+ - at 0 client initializes to up
+ - at 0 server initializes to down
+ - at 1 client executes shutdown operation
+ - at 2 server executes startup operation
+ - simulation stops at 3
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 3s
+record-eventlog = true
+
+**.hasStatus = true
+**.client.status.initialStatus = "up"
+**.server.status.initialStatus = "down"
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+**.arp.retryCount = 0
+**.arp.retryTimeout = 100ms
+
+# udp apps
+**.numUdpApps = 1
+**.client.udpApp[0].typename = "UDPBasicApp"
+**.client.udpApp[0].startTime = 0s
+**.client.udpApp[0].destAddresses = "10.0.0.2"
+**.client.udpApp[0].destPort = 1000
+**.client.udpApp[0].messageLength = 1000B 
+**.client.udpApp[0].sendInterval = 100ms
+
+**.server.udpApp[0].typename = "UDPSink"
+**.server.udpApp[0].localPort = 1000
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        configurator: IPv4NetworkConfigurator;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.pppg++ <--> Eth10M <--> server.pppg++;
+}
+
+%file: scenario.xml
+ 
+<scenario>
+    <at t="1">
+        <tell module="lifecycleController" target="client" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="2">
+        <tell module="lifecycleController" target="server" operation="NodeStartOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+
+.*
+Test.client shutting down
+.*
+Test.client shut down
+.*
+Test.server starting up
+.*
+Test.server started
+.*
+Test.server.udpApp\[0\]: received 0 packets
+.*
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

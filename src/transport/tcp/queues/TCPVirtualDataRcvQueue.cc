@@ -274,3 +274,10 @@ uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
 
     return toSeqNum;
 }
+
+uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
+{
+    if (regionList.empty())
+        return rcv_nxt;
+    return seqMin(regionList.front()->getBegin(), rcv_nxt);
+}

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,15 +20,15 @@
 #define __SCTPSERVER_H_
 
 #include "INETDefs.h"
-
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Implements the SCTPServer simple module. See the NED file for more info.
  */
-class INET_API SCTPServer : public cSimpleModule
+class INET_API SCTPServer : public cSimpleModule, public ILifecycle
 {
     protected:
         int32 notifications;
@@ -92,7 +92,13 @@ class INET_API SCTPServer : public cSimpleModule
 
     public:
         virtual ~SCTPServer();
-        void initialize();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    protected:
+        void initialize(int stage);
+        int numInitStages() const { return 2; }
         void handleMessage(cMessage *msg);
         void finish();
         void handleTimer(cMessage *msg);

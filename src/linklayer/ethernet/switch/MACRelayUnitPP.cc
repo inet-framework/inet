@@ -42,12 +42,19 @@ MACRelayUnitPP::MACRelayUnitPP()
 
 MACRelayUnitPP::~MACRelayUnitPP()
 {
+    for (int i = 0; i < numPorts; ++i)
+    {
+        cancelAndDelete(buffer[i].timer);
+    }
     delete [] buffer;
 }
 
-void MACRelayUnitPP::initialize()
+void MACRelayUnitPP::initialize(int stage)
 {
-    MACRelayUnitBase::initialize();
+    MACRelayUnitBase::initialize(stage);
+
+    if (stage != 0)
+        return;
 
     numProcessedFrames = numDroppedFrames = 0;
     WATCH(numProcessedFrames);
@@ -60,7 +67,7 @@ void MACRelayUnitPP::initialize()
 
     processedBytesSignal = registerSignal("processed");
     droppedBytesSignal = registerSignal("dropped");
-    usedBufferBytesSignal = registerSignal("usedByfferBytes");
+    usedBufferBytesSignal = registerSignal("usedBufferBytes");
 
     bufferUsed = 0;
     WATCH(bufferUsed);
@@ -70,7 +77,8 @@ void MACRelayUnitPP::initialize()
     {
         buffer[i].port = i;
         buffer[i].cpuBusy = false;
-
+        buffer[i].timer = new cMessage("endProcessing");
+        buffer[i].timer->setContextPointer(&buffer[i]);
         char qname[40];
         sprintf(qname, "portQueue%d", i);
         buffer[i].queue.setName(qname);
@@ -91,11 +99,19 @@ void MACRelayUnitPP::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
     {
+        if(!isOperational)
+        {
+            EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+            delete msg;
+            return;
+        }
         // Frame received from MAC unit
         handleIncomingFrame(check_and_cast<EtherFrame *>(msg));
     }
     else
     {
+        if(!isOperational)
+            throw cRuntimeError("model error: self message arrived when module status is DOWN");
         // Self message signal used to indicate a frame has been finished processing
         processFrame(msg);
     }
@@ -125,9 +141,7 @@ void MACRelayUnitPP::handleIncomingFrame(EtherFrame *frame)
         {
             EV << "Port CPU " << inputport << " free, begin processing of incoming frame " << frame << endl;
             buffer[inputport].cpuBusy = true;
-            cMessage *msg = new cMessage("endProcessing");
-            msg->setContextPointer(&buffer[inputport]);
-            scheduleAt(simTime() + processingTime, msg);
+            scheduleAt(simTime() + processingTime, buffer[inputport].timer);
         }
     }
     // Drop the frame and record the number of dropped frames
@@ -172,7 +186,22 @@ void MACRelayUnitPP::processFrame(cMessage *msg)
     {
         EV << "Port CPU idle\n";
         pBuff->cpuBusy = false;
-        delete msg;
     }
+}
+
+void MACRelayUnitPP::start()
+{
+    MACRelayUnitBase::start();
+}
+
+void MACRelayUnitPP::stop()
+{
+    for (int i = 0; i < numPorts; ++i)
+    {
+        cancelEvent(buffer[i].timer);
+        buffer[i].queue.clear();
+        buffer[i].cpuBusy = false;
+    }
+    MACRelayUnitBase::stop();
 }
 

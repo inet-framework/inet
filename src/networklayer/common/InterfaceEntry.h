@@ -34,6 +34,8 @@ class IInterfaceTable;
 class InterfaceProtocolData;
 class IPv4InterfaceData;
 class IPv6InterfaceData;
+class TRILLInterfaceData;
+class ISISInterfaceData;
 
 class INET_API MacEstimateCostProcess
 {
@@ -78,6 +80,8 @@ class INET_API InterfaceProtocolData : public cObject
 class INET_API InterfaceEntry : public cNamedObject
 {
     friend class InterfaceProtocolData; // to call protocolDataChanged()
+  public:
+    enum State {UP, DOWN, GOING_UP, GOING_DOWN};
   protected:
     IInterfaceTable *ownerp; ///< IInterfaceTable that contains this interface, or NULL
     cModule *interfaceModule;  ///< interface module, or NULL
@@ -85,8 +89,9 @@ class INET_API InterfaceEntry : public cNamedObject
     int nwLayerGateIndex; ///< index of ifIn[],ifOut[] gates to that interface (or -1 if virtual interface)
     int nodeOutputGateId; ///< id of the output gate of this host/router (or -1 if this is a virtual interface)
     int nodeInputGateId;  ///< id of the input gate of this host/router (or -1 if this is a virtual interface)
-    int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet)
-    bool down;            ///< current state (up or down)
+    int mtu;              ///< Maximum Transmission Unit (e.g. 1500 on Ethernet); 0 means infinite (i.e. never fragment)
+    State state;          ///< requested interface state, similar to Linux ifup/ifdown
+    bool carrier;         ///< current state (up/down) of the physical layer, e.g. Ethernet cable
     bool broadcast;       ///< interface supports broadcast
     bool multicast;       ///< interface supports multicast
     bool pointToPoint;    ///< interface is point-to-point link
@@ -97,8 +102,8 @@ class INET_API InterfaceEntry : public cNamedObject
 
     IPv4InterfaceData *ipv4data;   ///< IPv4-specific interface info (IPv4 address, etc)
     IPv6InterfaceData *ipv6data;   ///< IPv6-specific interface info (IPv6 addresses, etc)
-    InterfaceProtocolData *protocol3data; ///< extension point: data for a 3rd network-layer protocol
-    InterfaceProtocolData *protocol4data; ///< extension point: data for a 4th network-layer protocol
+    ISISInterfaceData *isisdata; ///< ISIS-specific interface info
+    TRILLInterfaceData *trilldata; ///< TRILL-specific interface info
     std::vector<MacEstimateCostProcess *> estimateCostProcessArray;
 
   private:
@@ -116,10 +121,11 @@ class INET_API InterfaceEntry : public cNamedObject
     // internal: to be invoked from InterfaceTable only!
     virtual void setInterfaceTable(IInterfaceTable *t) {ownerp = t;}
     virtual void setInterfaceId(int id) {interfaceId = id;}
+    virtual void resetInterface();
 
   public:
     InterfaceEntry(cModule *interfaceModule);
-    virtual ~InterfaceEntry() {}
+    virtual ~InterfaceEntry();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     virtual std::string getFullPath() const;
@@ -129,6 +135,15 @@ class INET_API InterfaceEntry : public cNamedObject
      */
     IInterfaceTable *getInterfaceTable() const {return ownerp;}
 
+    /**
+     * Returns the requested state of this interface.
+     */
+    State getState() const            {return state;}
+    /**
+     * Returns the combined state of the carrier and the interface requested state.
+     */
+    bool isUp() const                 {return getState()==UP && hasCarrier();}
+
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
     int getInterfaceId() const        {return interfaceId;}
@@ -137,7 +152,7 @@ class INET_API InterfaceEntry : public cNamedObject
     int getNodeOutputGateId() const   {return nodeOutputGateId;}
     int getNodeInputGateId() const    {return nodeInputGateId;}
     int getMTU() const                {return mtu;}
-    bool isDown() const               {return down;}
+    bool hasCarrier() const           {return carrier;}
     bool isBroadcast() const          {return broadcast;}
     bool isMulticast() const          {return multicast;}
     bool isPointToPoint() const       {return pointToPoint;}
@@ -154,7 +169,8 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual void setNodeOutputGateId(int i) {nodeOutputGateId = i; configChanged();}
     virtual void setNodeInputGateId(int i)  {nodeInputGateId = i; configChanged();}
     virtual void setMtu(int m)           {mtu = m; configChanged();}
-    virtual void setDown(bool b)         {down = b; stateChanged();}
+    virtual void setState(State s)       {state = s; stateChanged();}
+    virtual void setCarrier(bool b)      {carrier = b; stateChanged();}
     virtual void setBroadcast(bool b)    {broadcast = b; configChanged();}
     virtual void setMulticast(bool b)    {multicast = b; configChanged();}
     virtual void setPointToPoint(bool b) {pointToPoint = b; configChanged();}
@@ -168,16 +184,16 @@ class INET_API InterfaceEntry : public cNamedObject
     //@{
     IPv4InterfaceData *ipv4Data() const {return ipv4data;}
     IPv6InterfaceData *ipv6Data() const  {return ipv6data;}
-    InterfaceProtocolData *getProtocol3Data() const {return protocol3data;}
-    InterfaceProtocolData *getProtocol4Data() const {return protocol4data;}
+    TRILLInterfaceData *trillData() const {return trilldata;}
+    ISISInterfaceData *isisData() const {return isisdata;}
     //@}
 
     /** @name Installing protocol-specific interface data */
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p);
     virtual void setIPv6Data(IPv6InterfaceData *p);
-    virtual void setProtocol3Data(InterfaceProtocolData *p)  {protocol3data = p; configChanged();}
-    virtual void setProtocol4Data(InterfaceProtocolData *p)  {protocol4data = p; configChanged();}
+    virtual void setTRILLInterfaceData(TRILLInterfaceData *p);
+    virtual void setISISInterfaceData(ISISInterfaceData *p);
     //@}
 
     /** @name access to the cost process estimation  */

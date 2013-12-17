@@ -109,6 +109,7 @@ class INET_API IPv4Address
     static const IPv4Address ALL_DVMRP_ROUTERS_MCAST;  ///< 224.0.0.4 All DVMRP routers
     static const IPv4Address ALL_OSPF_ROUTERS_MCAST;   ///< 224.0.0.5 All OSPF routers (DR Others)
     static const IPv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;  ///< 224.0.0.6 All OSPF Designated Routers
+    static const IPv4Address ALL_IGMPV3_ROUTERS_MCAST;  ///< 224.0.0.22 All IGMPv3 routers
     static const IPv4Address LL_MANET_ROUTERS;  ///< 224.0.0.109 Manet all designated routers
     //@}
 
@@ -284,9 +285,9 @@ class INET_API IPv4Address
                                    const IPv4Address& netmask);
 
     /**
-      * Returns the broadcast address for the given netmask
-      */
-    IPv4Address getBroadcastAddress(IPv4Address netmask);
+     * Returns the broadcast address for the given netmask
+     */
+    IPv4Address makeBroadcastAddress(IPv4Address netmask) const;
 
     /**
      * Returns equals(addr).

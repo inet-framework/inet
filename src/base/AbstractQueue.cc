@@ -65,7 +65,7 @@ void AbstractQueue::handleMessage(cMessage *msg)
 void AbstractQueue::doStartService()
 {
     simtime_t serviceTime = startService( msgServiced );
-    if (serviceTime != 0)
+    if (serviceTime != SIMTIME_ZERO)
         scheduleAt( simTime()+serviceTime, endServiceMsg );
     else
         doEndService();
@@ -85,3 +85,15 @@ void AbstractQueue::doEndService()
     }
 }
 
+cPacket *AbstractQueue::cancelService()
+{
+    if (!msgServiced)
+        return NULL;
+    else
+    {
+        cancelEvent(endServiceMsg);
+        cPacket *ret = msgServiced;
+        msgServiced = NULL;
+        return ret;
+    }
+}

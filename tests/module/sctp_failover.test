@@ -1,0 +1,66 @@
+%description:
+Testing SCTP failover: Client and server are multi-homed. When the connection to the server is lost, 
+the client will retransmit the data and finally switch to the second path. Thus there will be timer-based
+retransmissions, but still the expected amount of data. 
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=failover
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+**.scenarioManager.script = xmldoc("../../lib/sctp_scenario.xml")
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+
+**.sctp_client.sctpApp[*].localAddress = "10.1.1.1 10.2.1.1"
+
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1 10.2.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 1452
+**.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
+**.sctp_client.sctpApp[0].stopTime = -1s
+**.sctp_client.sctpApp[0].numRequestsPerSession = 50
+**.sctp_client.sctpApp[0].queueSize = 0
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[*].localAddress = "10.1.3.1 10.2.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 50
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+Association 1: number of Fast RTX=0, number of Timer-Based RTX=[1-9][0-9]*
+%contains: stdout
+Association 1: sent bytes=72600, acked bytes=72600
+%#--------------------------------------------------------------------------------------------------------------

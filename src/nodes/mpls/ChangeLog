@@ -1,3 +1,19 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-05  Zoltan Bojthe
+
+	Follow the factoring of a loopback interface module from IPv4/IPv6:
+	added LoopbackInterface to LDP_LSR and RSVP_LSR
+
+2013-04-27  Levente Meszaros
+
+	Removed obsolete ways of shutdown/restart: LDP_FAILED, RSVP_FAILED;
+	removed LDP_ROUTER_BASE, RSVP_ROUTER_BASE
+
+	Added NodeStatus to LDP_LSR and RSVP_LSR, required for lifecycle operations
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

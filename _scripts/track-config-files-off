@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Runing this script will prevent GIT to pick up the changes on the next 
+# commit for the files that the IDE is using to store its configuration.
+# This will prevent the leaking of your local configuration (e.g. .cproject)
+# into the GIT repo, causing unnecessary merge conflicts later.
+#
+
+cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+git update-index --assume-unchanged .cproject .nedfolders .oppbuildspec .project

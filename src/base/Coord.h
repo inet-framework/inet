@@ -65,11 +65,7 @@ public:
         : cObject(other) { copy(other); }
 
     /** @brief Returns a string with the value of the coordinate. */
-    std::string info() const {
-        std::stringstream os;
-        os << this;
-        return os.str();
-    }
+    std::string info() const;
 
     /** @brief Adds two coordinate vectors. */
     friend Coord operator+(const Coord& a, const Coord& b) {
@@ -243,6 +239,12 @@ public:
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
     return os << "(" << coord.x << "," << coord.y << "," << coord.z << ")";
+}
+
+inline std::string Coord::info() const {
+    std::stringstream os;
+    os << *this;
+    return os.str();
 }
 
 #endif

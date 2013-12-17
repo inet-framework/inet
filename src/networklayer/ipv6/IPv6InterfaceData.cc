@@ -27,9 +27,64 @@
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
+std::string IPv6InterfaceData::HostMulticastData::info()
+{
+    std::stringstream out;
+    if (!joinedMulticastGroups.empty() &&
+            (joinedMulticastGroups[0]!=IPv6Address::ALL_NODES_1 || joinedMulticastGroups.size() > 1))
+    {
+        out << "\tmcastgrps:";
+        bool addComma = false;
+        for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
+        {
+            if (joinedMulticastGroups[i] != IPv6Address::ALL_NODES_1)
+            {
+                out << (addComma?",":"") << joinedMulticastGroups[i];
+                addComma = true;
+            }
+        }
+    }
+    return out.str();
+}
+
+std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
+{
+
+    std::stringstream out;
+    out << "Joined Groups:";
+    for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
+        out << " " << joinedMulticastGroups[i] << "(" << refCounts[i] << ")";
+    out << "\n";
+    return out.str();
+}
+
+std::string IPv6InterfaceData::RouterMulticastData::info()
+{
+    std::stringstream out;
+    if (reportedMulticastGroups.size() > 0)
+    {
+        out << "\tmcast_listeners:";
+        for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i)
+            out << (i>0?",":"") << reportedMulticastGroups[i];
+    }
+    return out.str();
+}
+
+std::string IPv6InterfaceData::RouterMulticastData::detailedInfo()
+{
+    std::stringstream out;
+    out << "Multicast Listeners:";
+    for (int i = 0; i < (int)reportedMulticastGroups.size(); ++i)
+        out << " " << reportedMulticastGroups[i];
+    out << "\n";
+    return out.str();
+}
 
 IPv6InterfaceData::IPv6InterfaceData()
 {
+    hostMcastData = NULL;
+    routerMcastData = NULL;
+    nb = NULL;
 #ifdef WITH_xMIPv6
     rt6 = RoutingTable6Access().get();
 #endif /* WITH_xMIPv6 */
@@ -95,6 +150,12 @@ IPv6InterfaceData::IPv6InterfaceData()
 #endif
 }
 
+IPv6InterfaceData::~IPv6InterfaceData()
+{
+    delete hostMcastData;
+    delete routerMcastData;
+}
+
 std::string IPv6InterfaceData::info() const
 {
     // FIXME FIXME FIXME FIXME info() should never print a newline
@@ -116,6 +177,9 @@ std::string IPv6InterfaceData::info() const
            << endl;
     }
 
+    if (hostMcastData)
+        os << hostMcastData->info();
+
     for (int i=0; i<getNumAdvPrefixes(); i++)
     {
         const AdvPrefix& a = getAdvPrefix(i);
@@ -136,6 +200,9 @@ std::string IPv6InterfaceData::info() const
         os << ")" << endl;
     }
     os << " ";
+
+    if (routerMcastData)
+        os << routerMcastData->info();
 
     // uncomment the following as needed!
     os << "\tNode:";
@@ -380,6 +447,102 @@ simtime_t IPv6InterfaceData::generateReachableTime()
     return uniform(_getMinRandomFactor(), _getMaxRandomFactor()) * getBaseReachableTime();
 }
 
+bool IPv6InterfaceData::isMemberOfMulticastGroup(const IPv6Address &multicastAddress) const
+{
+    const IPv6AddressVector &multicastGroups = getJoinedMulticastGroups();
+    return find(multicastGroups.begin(), multicastGroups.end(), multicastAddress) != multicastGroups.end();
+}
+
+void IPv6InterfaceData::joinMulticastGroup(const IPv6Address& multicastAddress)
+{
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv6InterfaceData::joinMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    IPv6AddressVector &multicastGroups = getHostData()->joinedMulticastGroups;
+
+    std::vector<int> &refCounts = getHostData()->refCounts;
+    for (int i = 0; i < (int)multicastGroups.size(); ++i)
+    {
+        if (multicastGroups[i] == multicastAddress)
+        {
+            refCounts[i]++;
+            return;
+        }
+    }
+
+    multicastGroups.push_back(multicastAddress);
+    refCounts.push_back(1);
+
+
+    changed1();
+
+    if(!nb)
+        nb = NotificationBoardAccess().get();
+    IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+    nb->fireChangeNotification(NF_IPv6_MCAST_JOIN, &info);
+}
+
+void IPv6InterfaceData::leaveMulticastGroup(const IPv6Address& multicastAddress)
+{
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv6InterfaceData::leaveMulticastGroup(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    IPv6AddressVector &multicastGroups = getHostData()->joinedMulticastGroups;
+    std::vector<int> &refCounts = getHostData()->refCounts;
+    for (int i = 0; i < (int)multicastGroups.size(); ++i)
+    {
+        if (multicastGroups[i] == multicastAddress)
+        {
+            if (--refCounts[i] == 0)
+            {
+                multicastGroups.erase(multicastGroups.begin()+i);
+                refCounts.erase(refCounts.begin()+i);
+
+                changed1();
+
+                if (!nb)
+                    nb = NotificationBoardAccess().get();
+                IPv6MulticastGroupInfo info(ownerp, multicastAddress);
+                nb->fireChangeNotification(NF_IPv6_MCAST_LEAVE, &info);
+            }
+        }
+    }
+}
+
+bool IPv6InterfaceData::hasMulticastListener(const IPv6Address &multicastAddress) const
+{
+    const IPv6AddressVector &multicastGroups = getRouterData()->reportedMulticastGroups;
+    return find(multicastGroups.begin(),  multicastGroups.end(), multicastAddress) != multicastGroups.end();
+}
+
+void IPv6InterfaceData::addMulticastListener(const IPv6Address &multicastAddress)
+{
+    if(!multicastAddress.isMulticast())
+        throw cRuntimeError("IPv6InterfaceData::addMulticastListener(): multicast address expected, received %s.", multicastAddress.str().c_str());
+
+    if (!hasMulticastListener(multicastAddress))
+    {
+        getRouterData()->reportedMulticastGroups.push_back(multicastAddress);
+        changed1();
+    }
+}
+
+void IPv6InterfaceData::removeMulticastListener(const IPv6Address &multicastAddress)
+{
+    IPv6AddressVector &multicastGroups = getRouterData()->reportedMulticastGroups;
+
+    int n = multicastGroups.size();
+    int i;
+    for (i = 0; i < n; i++)
+        if (multicastGroups[i] == multicastAddress)
+            break;
+    if (i != n)
+    {
+        multicastGroups.erase(multicastGroups.begin() + i);
+        changed1();
+    }
+}
+
 #ifdef WITH_xMIPv6
 //#############    Additional function definitions added by Zarrar Yousaf @ CNI UNI Dortmund 23.05.07######
 
@@ -420,7 +583,7 @@ void IPv6InterfaceData::deduceAdvPrefix()
         IPv6InterfaceData::AdvPrefix& p = rtrVars.advPrefixList[i];
         /*IPv6Address globalAddr = */
         autoConfRouterGlobalScopeAddress(p);
-        assignAddress(p.rtrAddress, false, 0, 0);
+        assignAddress(p.rtrAddress, false, SIMTIME_ZERO, SIMTIME_ZERO);
     }
 }
 
@@ -467,6 +630,6 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
     IPv6Address addr = getGlobalAddress(HoA);
 
     if ( addr == IPv6Address::UNSPECIFIED_ADDRESS )
-        this->assignAddress(hoa, false, 0, 0, true);
+        this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
 #endif /* WITH_xMIPv6 */

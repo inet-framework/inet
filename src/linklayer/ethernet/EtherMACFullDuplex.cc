@@ -22,6 +22,7 @@
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
 #include "NotifierConsts.h"
+#include "InterfaceEntry.h"
 
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
@@ -32,13 +33,17 @@ EtherMACFullDuplex::EtherMACFullDuplex()
 {
 }
 
-void EtherMACFullDuplex::initialize()
+void EtherMACFullDuplex::initialize(int stage)
 {
-    EtherMACBase::initialize();
-    if (!par("duplexMode").boolValue())
-        throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
+    EtherMACBase::initialize(stage);
 
-    beginSendFrames();
+    if (stage == 0)
+    {
+        if (!par("duplexMode").boolValue())
+            throw cRuntimeError("Half duplex operation is not supported by EtherMACFullDuplex, use the EtherMAC module for that! (Please enable csmacdSupport on EthernetInterface)");
+
+        beginSendFrames();
+    }
 }
 
 void EtherMACFullDuplex::initializeStatistics()
@@ -59,6 +64,12 @@ void EtherMACFullDuplex::initializeFlags()
 
 void EtherMACFullDuplex::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        handleMessageWhenDown(msg);
+        return;
+    }
+
     if (channelsDiffer)
         readChannelParameters(true);
 
@@ -91,6 +102,7 @@ void EtherMACFullDuplex::handleSelfMessage(cMessage *msg)
 
 void EtherMACFullDuplex::startFrameTransmission()
 {
+    ASSERT(curTxFrame);
     EV << "Transmitting a copy of frame " << curTxFrame << endl;
 
     EtherFrame *frame = curTxFrame->dup();  // note: we need to duplicate the frame because we emit a signal with it in endTxPeriod()
@@ -115,7 +127,7 @@ void EtherMACFullDuplex::startFrameTransmission()
 void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
 {
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        throw cRuntimeError("Ethernet frame too short, must be at least 64 bytes (padding should be done at encapsulation)");
+        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);  // "padding"
 
     frame->setFrameByteLength(frame->getByteLength());
 
@@ -179,7 +191,7 @@ void EtherMACFullDuplex::processFrameFromUpperLayer(EtherFrame *frame)
     }
 
     if (transmitState == TX_IDLE_STATE)
-        scheduleEndIFGPeriod();
+        startFrameTransmission();
 }
 
 void EtherMACFullDuplex::processMsgFromNetwork(EtherTraffic *msg)
@@ -240,13 +252,10 @@ void EtherMACFullDuplex::handleEndIFGPeriod()
     if (transmitState != WAIT_IFG_STATE)
         error("Not in WAIT_IFG_STATE at the end of IFG period");
 
-    if (NULL == curTxFrame)
-        error("End of IFG and no frame to transmit");
-
     // End of IFG period, okay to transmit
-    EV << "IFG elapsed, now begin transmission of frame " << curTxFrame << endl;
+    EV << "IFG elapsed" << endl;
 
-    startFrameTransmission();
+    beginSendFrames();
 }
 
 void EtherMACFullDuplex::handleEndTxPeriod()
@@ -277,6 +286,7 @@ void EtherMACFullDuplex::handleEndTxPeriod()
     delete curTxFrame;
     curTxFrame = NULL;
     lastTxFinishTime = simTime();
+    getNextFrameFromQueue();
 
     if (pauseUnitsRequested > 0)
     {
@@ -288,8 +298,8 @@ void EtherMACFullDuplex::handleEndTxPeriod()
     }
     else
     {
-        getNextFrameFromQueue();
-        beginSendFrames();
+        EV << "Start IFG period\n";
+        scheduleEndIFGPeriod();
     }
 }
 
@@ -359,19 +369,15 @@ void EtherMACFullDuplex::processPauseCommand(int pauseUnits)
 
 void EtherMACFullDuplex::scheduleEndIFGPeriod()
 {
-    ASSERT(curTxFrame);
-
-    EtherIFG gap;
     transmitState = WAIT_IFG_STATE;
-    scheduleAt(simTime() + transmissionChannel->calculateDuration(&gap), endIFGMsg);
+    simtime_t endIFGTime = simTime() + (INTERFRAME_GAP_BITS / curEtherDescr->txrate);
+    scheduleAt(endIFGTime, endIFGMsg);
 }
 
 void EtherMACFullDuplex::scheduleEndPausePeriod(int pauseUnits)
 {
     // length is interpreted as 512-bit-time units
-    cPacket pause;
-    pause.setBitLength(pauseUnits * PAUSE_UNIT_BITS);
-    simtime_t pausePeriod = transmissionChannel->calculateDuration(&pause);
+    simtime_t pausePeriod = ((pauseUnits * PAUSE_UNIT_BITS) / curEtherDescr->txrate);
     scheduleAt(simTime() + pausePeriod, endPauseMsg);
     transmitState = PAUSE_STATE;
 }
@@ -380,15 +386,19 @@ void EtherMACFullDuplex::beginSendFrames()
 {
     if (curTxFrame)
     {
-        // Other frames are queued, therefore wait IFG period and transmit next frame
-        EV << "Transmit next frame in output queue, after IFG period\n";
-        scheduleEndIFGPeriod();
+        // Other frames are queued, transmit next frame
+        EV << "Transmit next frame in output queue\n";
+        startFrameTransmission();
     }
     else
     {
-        transmitState = TX_IDLE_STATE;
         // No more frames set transmitter to idle
-        EV << "No more frames to send, transmitter set to idle\n";
+        transmitState = TX_IDLE_STATE;
+        if (!txQueue.extQueue){
+            // Output only for internal queue (we cannot be shure that there
+            //are no other frames in external queue)
+            EV << "No more frames to send, transmitter set to idle\n";
+        }
     }
 }
 

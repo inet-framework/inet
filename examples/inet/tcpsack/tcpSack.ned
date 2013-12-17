@@ -33,8 +33,7 @@ network tcpsack
             gates:
                 pppg[1];
         }
-        networkConfigurator: IPv4NetworkConfigurator {
-        }
+        configurator: IPv4NetworkConfigurator;
     connections:
         router.pppg[0] <--> NormalPath <--> client.pppg[0];
         router.pppg[1] <--> NormalPath <--> server.pppg[0];

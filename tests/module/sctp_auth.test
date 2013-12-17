@@ -1,0 +1,76 @@
+%description:
+Testing SCTP AUTH: DATA and SACK chunks should be authenticated. 
+The number of sent AUTH chunks should be > 0.
+The number of accepted AUTH chunks should be > 0.
+The number of rejected AUTH chunks should be equal to 0.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=SCTPFeatureTest
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 800
+**.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
+**.sctp_client.sctpApp[0].numRequestsPerSession = 100
+**.sctp_client.sctpApp[0].queueSize = 0
+**.sctp_client.sctpApp[0].outboundStreams = 1
+
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[0].localAddress = "10.1.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 100
+**.sctp_server.sctpApp[*].outboundStreams = 1
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.sctp.auth = true
+**.sctp.chunks = "SACK,DATA"
+
+# NIC configuration
+#**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.mtu = 1500 B
+
+#**.vector-recording = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar SCTPFeatureTest.sctp_client.sctp[ \t]*"Number of AUTH chunks sent"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_client.sctp[ \t]*"Number of AUTH chunks accepted"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_client.sctp[ \t]*"Number of AUTH chunks rejected"[ \t]*0
+%contains-regex: results/General-0.sca
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of AUTH chunks sent"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of AUTH chunks accepted"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of AUTH chunks rejected"[ \t]*0
+%#--------------------------------------------------------------------------------------------------------------

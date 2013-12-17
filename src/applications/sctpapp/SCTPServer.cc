@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,6 +22,8 @@
 
 #include "SCTPServer.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
@@ -31,57 +33,78 @@
 
 Define_Module(SCTPServer);
 
-void SCTPServer::initialize()
+void SCTPServer::initialize(int stage)
 {
-    sctpEV3 << "initialize SCTP Server\n";
-    numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
-    WATCH(numSessions);
-    WATCH(packetsSent);
-    WATCH(packetsRcvd);
-    WATCH(bytesSent);
-    WATCH(numRequestsToSend);
+    sctpEV3 << "initialize SCTP Server stage " << stage << endl;
 
-    // parameters
-    finishEndsSimulation = (bool)par("finishEndsSimulation");
-    const char *addressesString = par("localAddress");
-    AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-    int32 port = par("localPort");
-    echo = par("echo");
-    delay = par("echoDelay");
-    delayFirstRead = par("delayFirstRead");
-    cPar *delT = &par("readingInterval");
-    if (delT->isNumeric() && (double)*delT==0)
-        readInt = false;
-    else
-        readInt = true;
-    int32 messagesToPush = par("messagesToPush");
-    inboundStreams = par("inboundStreams");
-    outboundStreams = par("outboundStreams");
-    ordered = (bool)par("ordered");
-    queueSize = par("queueSize");
-    lastStream = 0;
-    //abort = NULL;
-    //abortSent = false;
-    timeoutMsg = new cMessage("SrvAppTimer");
-    delayTimer = new cMessage("delayTimer");
-    delayTimer->setContextPointer(this);
-    delayFirstReadTimer = new cMessage("delayFirstReadTimer");
-    firstData = true;
+    if (stage == 0)
+    {
+        numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
+        WATCH(numSessions);
+        WATCH(packetsSent);
+        WATCH(packetsRcvd);
+        WATCH(bytesSent);
+        WATCH(numRequestsToSend);
 
-    socket = new SCTPSocket();
-    socket->setOutputGate(gate("sctpOut"));
-    socket->setInboundStreams(inboundStreams);
-    socket->setOutboundStreams(outboundStreams);
+        // parameters
+        finishEndsSimulation = (bool)par("finishEndsSimulation");
+        const char *addressesString = par("localAddress");
+        AddressVector addresses = IPvXAddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        int32 port = par("localPort");
+        echo = par("echo");
+        delay = par("echoDelay");
+        delayFirstRead = par("delayFirstRead");
+        cPar *delT = &par("readingInterval");
+        if (delT->isNumeric() && (double)*delT==0)
+            readInt = false;
+        else
+            readInt = true;
+        int32 messagesToPush = par("messagesToPush");
+        inboundStreams = par("inboundStreams");
+        outboundStreams = par("outboundStreams");
+        ordered = (bool)par("ordered");
+        queueSize = par("queueSize");
+        lastStream = 0;
+        //abort = NULL;
+        //abortSent = false;
+        timeoutMsg = new cMessage("SrvAppTimer");
+        delayTimer = new cMessage("delayTimer");
+        delayTimer->setContextPointer(this);
+        delayFirstReadTimer = new cMessage("delayFirstReadTimer");
+        firstData = true;
 
-    if (addresses.size() == 0)
-        socket->bind(port);
-    else
-        socket->bindx(addresses, port);
+        socket = new SCTPSocket();
+        socket->setOutputGate(gate("sctpOut"));
+        socket->setInboundStreams(inboundStreams);
+        socket->setOutboundStreams(outboundStreams);
 
-    socket->listen(true, par("numPacketsToSendPerClient").longValue(), messagesToPush);
-    sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
-    schedule = false;
-    shutdownReceived = false;
+        if (addresses.size() == 0)
+            socket->bind(port);
+        else
+            socket->bindx(addresses, port);
+
+        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient").longValue(), messagesToPush);
+        sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
+        schedule = false;
+        shutdownReceived = false;
+        uint32 streamNum = 0;
+        cStringTokenizer tokenizer(par("streamPriorities").stringValue());
+        while (tokenizer.hasMoreTokens())
+        {
+            const char *token = tokenizer.nextToken();
+            socket->setStreamPriority(streamNum, (uint32) atoi(token));
+
+            streamNum++;
+        }
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void SCTPServer::sendOrSchedule(cPacket *msg)
@@ -102,6 +125,7 @@ void SCTPServer::generateAndSend()
         msg->setData(i, 's');
 
     msg->setDataLen(numBytes);
+    msg->setEncaps(false);
     msg->setBitLength(numBytes * 8);
     cmsg->encapsulate(msg);
     SCTPSendCommand *cmd = new SCTPSendCommand("Send1");
@@ -109,6 +133,8 @@ void SCTPServer::generateAndSend()
     cmd->setSendUnordered(ordered ? COMPLETE_MESG_ORDERED : COMPLETE_MESG_UNORDERED);
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
+    cmd->setPrValue(par("prValue"));
+    cmd->setPrMethod((int32)par("prMethod"));
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
     else
@@ -387,6 +413,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     bytesSent += smsg->getBitLength()/8;
                     cmd->setSendUnordered(cmd->getSendUnordered());
                     lastStream = (lastStream+1)%outboundStreams;
+                    cmd->setPrValue(0);
                     cmd->setSid(lastStream);
                     cmd->setLast(true);
                     cmsg->encapsulate(smsg);
@@ -421,6 +448,14 @@ void SCTPServer::handleMessage(cMessage *msg)
                 delete msg;
                 break;
             }
+            case SCTP_I_SEND_STREAMS_RESETTED:
+            case SCTP_I_RCV_STREAMS_RESETTED:
+            {
+                EV << "Streams have been resetted\n";
+                delete msg;
+                break;
+            }
+
             case SCTP_I_CLOSED:
                 if (delayTimer->isScheduled())
                     cancelEvent(delayTimer);
@@ -503,21 +538,21 @@ void SCTPServer::finish()
     delete delayTimer;
     delete delayFirstReadTimer;
 
-    ev << getFullPath() << ": opened " << numSessions << " sessions\n";
-    ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); ++l)
     {
-        ev << getFullPath() << " Assoc: " << l->first << "\n";
-        ev << "\tstart time: " << l->second.start << "\n";
-        ev << "\tstop time: " << l->second.stop << "\n";
-        ev << "\tlife time: " << l->second.lifeTime << "\n";
-        ev << "\treceived bytes:" << l->second.rcvdBytes << "\n";
-        ev << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
+        EV << getFullPath() << " Assoc: " << l->first << "\n";
+        EV << "\tstart time: " << l->second.start << "\n";
+        EV << "\tstop time: " << l->second.stop << "\n";
+        EV << "\tlife time: " << l->second.lifeTime << "\n";
+        EV << "\treceived bytes:" << l->second.rcvdBytes << "\n";
+        EV << "\tthroughput: " << (l->second.rcvdBytes / l->second.lifeTime.dbl())*8 << " bit/sec\n";
         recordScalar("bytes rcvd", l->second.rcvdBytes);
         recordScalar("throughput", (l->second.rcvdBytes / l->second.lifeTime.dbl())*8);
     }
-    ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
+    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 
     BytesPerAssoc::iterator j;
     while ((j = bytesPerAssoc.begin()) != bytesPerAssoc.end())

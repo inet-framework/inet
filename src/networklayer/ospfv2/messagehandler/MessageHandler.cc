@@ -36,7 +36,7 @@ OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, cSimpleModu
 void OSPF::MessageHandler::messageReceived(cMessage* message)
 {
     if (message->isSelfMessage()) {
-        handleTimer(check_and_cast<OSPFTimer*> (message));
+        handleTimer(message);
     } else if (dynamic_cast<ICMPMessage *>(message)) {
         EV << "ICMP error received -- discarding\n";
         delete message;
@@ -52,9 +52,9 @@ void OSPF::MessageHandler::messageReceived(cMessage* message)
     }
 }
 
-void OSPF::MessageHandler::handleTimer(OSPFTimer* timer)
+void OSPF::MessageHandler::handleTimer(cMessage* timer)
 {
-    switch (timer->getTimerKind()) {
+    switch (timer->getKind()) {
         case INTERFACE_HELLO_TIMER:
             {
                 OSPF::Interface* intf;
@@ -339,12 +339,12 @@ void OSPF::MessageHandler::sendPacket(OSPFPacket* packet, IPv4Address destinatio
     ospfModule->send(packet, "ipOut");
 }
 
-void OSPF::MessageHandler::clearTimer(OSPFTimer* timer)
+void OSPF::MessageHandler::clearTimer(cMessage* timer)
 {
     ospfModule->cancelEvent(timer);
 }
 
-void OSPF::MessageHandler::startTimer(OSPFTimer* timer, simtime_t delay)
+void OSPF::MessageHandler::startTimer(cMessage* timer, simtime_t delay)
 {
     ospfModule->scheduleAt(simTime() + delay, timer);
 }
@@ -418,7 +418,7 @@ void OSPF::MessageHandler::printDatabaseDescriptionPacket(const OSPFDatabaseDesc
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        printLSAHeader(ddPacket->getLsaHeaders(i), ev.getOStream());
+        printLSAHeader(ddPacket->getLsaHeaders(i), EVSTREAM);
         EV << "\n";
     }
 }
@@ -446,7 +446,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFRouterLSA& lsa = updatePacket->getRouterLSAs(i);
         EV << "  ";
-        printLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), EVSTREAM);
         EV << "\n";
 
         EV << "  bits="
@@ -478,7 +478,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFNetworkLSA& lsa = updatePacket->getNetworkLSAs(i);
         EV << "  ";
-        printLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), EVSTREAM);
         EV << "\n";
 
         EV << "  netMask=" << lsa.getNetworkMask() << "\n";
@@ -494,7 +494,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFSummaryLSA& lsa = updatePacket->getSummaryLSAs(i);
         EV << "  ";
-        printLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), EVSTREAM);
         EV << "\n";
         EV << "  netMask=" << lsa.getNetworkMask() << "\n";
         EV << "  cost=" << lsa.getRouteCost() << "\n";
@@ -504,7 +504,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     for (i = 0; i < updateCount; i++) {
         const OSPFASExternalLSA& lsa = updatePacket->getAsExternalLSAs(i);
         EV << "  ";
-        printLSAHeader(lsa.getHeader(), ev.getOStream());
+        printLSAHeader(lsa.getHeader(), EVSTREAM);
         EV << "\n";
 
         const OSPFASExternalLSAContents& contents = lsa.getContents();
@@ -522,7 +522,7 @@ void OSPF::MessageHandler::printLinkStateAcknowledgementPacket(const OSPFLinkSta
     unsigned int lsaCount = ackPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
         EV << "    ";
-        printLSAHeader(ackPacket->getLsaHeaders(i), ev.getOStream());
+        printLSAHeader(ackPacket->getLsaHeaders(i), EVSTREAM);
         EV << "\n";
     }
 }

@@ -7,7 +7,7 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.StandardHost;
 import ned.DatarateChannel;
 
@@ -38,7 +38,7 @@ network UdpClientServer
             parameters:
                 @display("p=181,67;i=device/pc2");
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             parameters:
                 @display("p=109,142");
         }
@@ -80,8 +80,6 @@ sim-time-limit = 20s
 
 **.host*snap.eth[*].useSNAP = true
 **.host*.eth[*].queue.frameCapacity = 1
-
-*.configurator.networkAddress = "192.168.1.0"
 
 %#--------------------------------------------------------------------------------------------------------------
 %postprocess-script: check.r

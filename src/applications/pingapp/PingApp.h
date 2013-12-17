@@ -19,6 +19,8 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
+#include "ILifecycle.h"
+#include "NodeStatus.h"
 
 class PingPayload;
 
@@ -31,17 +33,27 @@ class PingPayload;
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingApp : public cSimpleModule
+class INET_API PingApp : public cSimpleModule, public ILifecycle
 {
+  public:
+    PingApp();
+    virtual ~PingApp();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 4; }
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
   protected:
-    virtual void sendPing();
-    virtual void scheduleNextPing(cMessage *timer);
+    virtual void startSendingPingRequests();
+    virtual void stopSendingPingRequests();
+    virtual void scheduleNextPingRequest(simtime_t previous);
+    virtual void cancelNextPingRequest();
+    virtual bool isNodeUp();
+    virtual bool isEnabled();
+    virtual void sendPingRequest();
     virtual void sendToICMP(cMessage *payload, const IPvXAddress& destAddr, const IPvXAddress& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
@@ -51,7 +63,7 @@ class INET_API PingApp : public cSimpleModule
     IPvXAddress destAddr;
     IPvXAddress srcAddr;
     int packetSize;
-    cPar *sendIntervalp;
+    cPar *sendIntervalPar;
     int hopLimit;
     int count;
     simtime_t startTime;
@@ -59,6 +71,10 @@ class INET_API PingApp : public cSimpleModule
     bool printPing;
 
     // state
+    int pid;
+    cMessage *timer;
+    NodeStatus *nodeStatus;
+    simtime_t lastStart;
     long sendSeqNo;
     long expectedReplySeqNo;
     simtime_t sendTimeHistory[PING_HISTORY_SIZE];
@@ -70,9 +86,8 @@ class INET_API PingApp : public cSimpleModule
     static simsignal_t outOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
+    long sentCount;
     long lossCount;
     long outOfOrderArrivalCount;
     long numPongs;
 };
-
-

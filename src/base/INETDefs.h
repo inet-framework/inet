@@ -36,16 +36,25 @@
 #  define INET_API
 #endif
 
+#if OMNETPP_VERSION < 0x500
+#  define EV_FATAL  EV << "FATAL: "
+#  define EV_ERROR  EV << "ERROR: "
+#  define EV_WARN   EV << "WARN: "
+#  define EV_INFO   EV
+#  define EV_DETAIL EV << "DETAIL: "
+#  define EV_DEBUG  EV << "DEBUG: "
+#  define EV_TRACE  EV << "TRACE: "
+#endif
+
+#if OMNETPP_VERSION < 0x500
+#  define EVSTREAM  ev.getOStream()
+#else
+#  define EVSTREAM  EV
+#endif
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
-
-
-//
-// Macro to prevent executing ev<< statements in Express mode.
-// Compare ev/sec values with code compiled with #define EV ev.
-//
-#define EV ev.isDisabled()?ev:ev
 
 // used at several places as
 #define SPEED_OF_LIGHT 299792458.0

@@ -1,3 +1,34 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-14  Tamas Borbely
+
+	IPProtocolId.msg: added new constant: IP_PROT_PIM
+
+2013-05-15  Alfonso Ariza
+
+	IPvXAddressResolver: added findHostWithAddress() method (was called
+	findModuleWithAddress() in the original patch)
+
+2013-05-15  Levente Meszaros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup: when the
+	interface is not yet configured for IPv4, it tries to get the address
+	from IPv4NetworkConfigurator.
+
+2013-02-01  Andras Varga
+
+	IPv4Address: renamed getBroadcastAddress() to makeBroadcastAddress()
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-10-24  Zoltan Bojthe
+
+	IPv6Address:
+	- Removed Uint128 related functions
+	- Added an additional constructMask() method
+	- The convert to Uint128 operator has been replaced with
+	  converter function
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -5,13 +36,13 @@
 2012-06-15  Zoltan Bojthe
 
 	IPv4Address:
-	- added a parameter to str() function that allows choosing 
-	  between "0.0.0.0" and "<unspec>" when the address is unspecified 
+	- added a parameter to str() function that allows choosing
+	  between "0.0.0.0" and "<unspec>" when the address is unspecified
 	  (when its value is 0)
 	- made the uint32 constructor explicit
 
 	IPvXAddressResolver: resolving netmask if needed
-	- added support for 'x.x.x.x/' syntax 
+	- added support for 'x.x.x.x/' syntax
 	  (which will return the netmask instead of the ip address)
 	- added ADDR_MASK enum (to get the netmask instead of the address)
 	- NOTE: netmask resolving is implemented only for IPv4

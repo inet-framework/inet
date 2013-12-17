@@ -18,8 +18,12 @@
 
 package inet.nodes.ethernet;
 
+import inet.base.NotificationBoard;
 import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.IEtherMAC;
+import inet.linklayer.IWiredNic;
+import inet.networklayer.common.InterfaceTable;
+import inet.status.NodeStatus;
+
 
 //
 // Model of an Ethernet switch.
@@ -37,30 +41,40 @@ module EtherSwitch
         @node();
         @labels(node,ethernet-node);
         @display("i=device/switch");
+        bool hasStatus = default(false);
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string relayUnitType = default("MACRelayUnitNP"); // type of the ~IMACRelayUnit; currently possible
+        eth[*].encapType = "EtherEncapDummy";
+        eth[*].csmacdSupport = csmacdSupport;
+        eth[*].macType = macType;
                                                           // values are ~MACRelayUnitNP and ~MACRelayUnitPP
     gates:
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50;is=s");
+        }
+        interfaceTable: InterfaceTable {
+            @display("p=50,100;is=s");
+        }
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=50,150;is=s");
+        }
         relayUnit: <relayUnitType> like IMACRelayUnit {
             parameters:
-                @display("p=200,50");
-            gates:
-                lowerLayerIn[sizeof(ethg)];
-                lowerLayerOut[sizeof(ethg)];
+                @display("p=270,50");
         }
-        mac[sizeof(ethg)]: <macType> like IEtherMAC {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                promiscuous = true;
-                queueModule = "";
-                @display("p=70,150,row;q=txQueue");
+                mac.promiscuous = true;
+                @display("p=170,150,row;q=txQueue");
         }
     connections:
         for i=0..sizeof(ethg)-1 {
-            mac[i].upperLayerIn <-- relayUnit.lowerLayerOut[i];
-            mac[i].upperLayerOut --> relayUnit.lowerLayerIn[i];
-            mac[i].phys <--> ethg[i];
+            eth[i].upperLayerIn <-- relayUnit.ifOut++;
+            eth[i].upperLayerOut --> relayUnit.ifIn++;
+            eth[i].phys <--> ethg[i];
         }
 }

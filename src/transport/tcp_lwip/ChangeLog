@@ -1,3 +1,19 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-17  Zoltan Bojthe
+
+	TCP_lwIP,TCP_NSC: added ILifecycle as base class, but operations throw
+	error for now:
+	- throw error when nodeStatus is not UP in initialize()
+	- throw error when a lifecycle operation arrives
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-15  Zoltan Bojthe
+
+	Now using localPort in active_open. Previously
+	active open ignored localPort parameter.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

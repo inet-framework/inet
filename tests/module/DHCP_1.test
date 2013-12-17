@@ -43,8 +43,9 @@ network DhcpExample
 [General]
 tkenv-plugin-path = ../../../etc/plugins
 ned-path = .;../../../../src;../../lib
-
-sim-time-limit = 900s
+cmdenv-express-mode = false
+sim-time-limit = 1000s
+record-eventlog = true
 
 network = DhcpExample
 
@@ -56,34 +57,40 @@ network = DhcpExample
 **.cli[*].udpApp[0].interface="eth0"   # interface toward dhcp server
 
 **.srv.udpApp[0].typename = "DHCPServer"
-**.srv.udpApp[0].net = "192.168.1.0"        # IP network to assign
-**.srv.udpApp[0].mask = "255.255.255.0"        # netmask to assign
-**.srv.udpApp[0].ipBegin = "192.168.1.100"    # ip to start to lease
-**.srv.udpApp[0].clientNum = 100     # number of ip to lease
+**.srv.udpApp[0].subnetMask = "255.255.255.0"        # netmask to assign
+**.srv.udpApp[0].ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.srv.udpApp[0].maxNumClients = 100     # number of ip to lease
 **.srv.udpApp[0].gateway = "192.168.1.1"     # gateway to assign
 **.srv.udpApp[0].dns = ""         # dns to assign
 **.srv.udpApp[0].leaseTime = 1000s     # lease time in seconds
 **.srv.udpApp[0].interface="eth0"   # interface to listen
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
-%contains: stdout
-Host cli[0] got ip: 192.168.1.100/255.255.255.0
-%contains: stdout
-Host cli[1] got ip: 192.168.1.101/255.255.255.0
-%contains: stdout
-Host cli[2] got ip: 192.168.1.102/255.255.255.0
-%contains: stdout
-Host cli[3] got ip: 192.168.1.103/255.255.255.0
-%contains: stdout
-Host cli[4] got ip: 192.168.1.104/255.255.255.0
-%contains: stdout
-Host cli[5] got ip: 192.168.1.105/255.255.255.0
-%contains: stdout
-Host cli[6] got ip: 192.168.1.106/255.255.255.0
-%contains: stdout
-Host cli[7] got ip: 192.168.1.107/255.255.255.0
-%contains: stdout
-Host cli[8] got ip: 192.168.1.108/255.255.255.0
-%contains: stdout
-Host cli[9] got ip: 192.168.1.109/255.255.255.0
+%contains-regex: stdout
+.*
+The requested IP 192\.168\.1\.100/255\.255\.255\.0 is available. Assigning it to cli\[0\].
+.*
+The requested IP 192\.168\.1\.101/255\.255\.255\.0 is available. Assigning it to cli\[1\].
+.*
+The requested IP 192\.168\.1\.102/255\.255\.255\.0 is available. Assigning it to cli\[2\].
+.*
+The requested IP 192\.168\.1\.103/255\.255\.255\.0 is available. Assigning it to cli\[3\].
+.*
+The requested IP 192\.168\.1\.104/255\.255\.255\.0 is available. Assigning it to cli\[4\].
+.*
+The requested IP 192\.168\.1\.105/255\.255\.255\.0 is available. Assigning it to cli\[5\].
+.*
+The requested IP 192\.168\.1\.106/255\.255\.255\.0 is available. Assigning it to cli\[6\].
+.*
+The requested IP 192\.168\.1\.107/255\.255\.255\.0 is available. Assigning it to cli\[7\].
+.*
+The requested IP 192\.168\.1\.108/255\.255\.255\.0 is available. Assigning it to cli\[8\].
+.*
+The requested IP 192\.168\.1\.109/255\.255\.255\.0 is available. Assigning it to cli\[9\].
+.*
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

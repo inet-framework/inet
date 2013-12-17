@@ -42,6 +42,9 @@
 #include "TcpLwipVirtualDataQueues.h"
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
+#include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 
 Define_Module(TCP_lwIP);
@@ -52,8 +55,8 @@ bool TCP_lwIP::logverboseS;
 #ifdef tcpEV
 #undef tcpEV
 #endif
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.isDisabled()) || (TCP_lwIP::testingS)) ? ev : ev
+// macro for normal EV<< logging (note: deliberately no parens in macro def)
+#define tcpEV  TCP_lwIP::testingS ? EV : EV
 
 TCP_lwIP::TCP_lwIP()
   :
@@ -77,10 +80,12 @@ TCP_lwIP::TCP_lwIP()
     netIf.state = NULL;
 }
 
-void TCP_lwIP::initialize()
+void TCP_lwIP::initialize(int stage)
 {
-    tcpEV << this << ": initialize\n";
+    tcpEV << this << ": initialize stage " << stage << endl;
 
+  if (stage == 0)
+  {
     const char *q;
     q = par("sendQueueClass");
     if (*q != '\0')
@@ -97,6 +102,14 @@ void TCP_lwIP::initialize()
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
 
     recordStatisticsM = par("recordStats");
+  }
+  else if (stage == 1)
+  {
+    bool isOperational;
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    if (!isOperational)
+        throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
     pLwipTcpLayerM = new LwipTcpLayer(*this);
 
@@ -105,6 +118,7 @@ void TCP_lwIP::initialize()
     tcpEV << "TCP_lwIP " << this << " has stack " << pLwipTcpLayerM << "\n";
 
     isAliveM = true;
+  }
 }
 
 TCP_lwIP::~TCP_lwIP()
@@ -777,5 +791,13 @@ TcpLwipReceiveQueue* TCP_lwIP::createReceiveQueue(TCPDataTransferMode transferMo
         case TCP_TRANSFER_BYTESTREAM:   return new TcpLwipByteStreamReceiveQueue();
         default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
+}
+
+bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 

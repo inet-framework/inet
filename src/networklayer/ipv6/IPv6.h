@@ -37,7 +37,7 @@ class ICMPv6Message;
 /**
  * IPv6 implementation.
  */
-class INET_API IPv6 : public QueueBase
+class INET_API IPv6 : public QueueBase, public ILifecycle
 {
   protected:
     IInterfaceTable *ift;
@@ -85,12 +85,6 @@ class INET_API IPv6 : public QueueBase
      * Encapsulate packet coming from higher layers into IPv6Datagram
      */
     virtual IPv6Datagram *encapsulate(cPacket *transportPacket, IPv6ControlInfo *ctrlInfo);
-
-    /**
-     * Handle IPv6Datagram messages arriving from lower layer.
-     * Decrements TTL, then invokes routePacket().
-     */
-    virtual void handleDatagramFromNetwork(IPv6Datagram *datagram);
 
     /**
      * Handle messages (typically packets to be send in IPv6) from transport or ICMP.
@@ -144,7 +138,8 @@ class INET_API IPv6 : public QueueBase
     /**
      * Initialization
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Processing of IPv6 datagrams. Called when a datagram reaches the front
@@ -152,11 +147,13 @@ class INET_API IPv6 : public QueueBase
      */
     virtual void endService(cPacket *msg);
 
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
     /**
      * Determines the correct interface for the specified destination address.
      */
     bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
-            IPv6Datagram* datagram);
+            IPv6Datagram* datagram, bool fromHL);
 
 #ifdef WITH_xMIPv6
     /**

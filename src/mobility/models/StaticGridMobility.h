@@ -35,22 +35,11 @@
 class INET_API StaticGridMobility : public StationaryMobility
 {
   protected:
-    double marginX;
-    double marginY;
-    int numHosts;
-
-  protected:
-    /** @brief Initializes mobility model parameters.*/
-    virtual void initialize(int stage);
-
     /** @brief Initializes the position according to the mobility model. */
     virtual void initializePosition();
 
-    /** @brief Save the host position. */
-    virtual void finish();
-
   public:
-    StaticGridMobility();
+    StaticGridMobility() {};
 };
 
 #endif

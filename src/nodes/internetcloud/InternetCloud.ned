@@ -23,6 +23,7 @@ package inet.nodes.internetcloud;
 import inet.base.NotificationBoard;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.arp.ARP;
+import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.internetcloud.ICloudDelayer;
 import inet.networklayer.internetcloud.InternetCloudTaggerChannel;
@@ -31,6 +32,7 @@ import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.RoutingTable;
 import inet.util.PcapRecorder;
+
 
 //
 // This module is an IPv4 router that can delay or drop packets (while retaining their order) 
@@ -66,6 +68,7 @@ module InternetCloud
                 input ifIn[] @labels(IPDatagram);
                 output ifOut[];
             submodules:
+                configurator: IPv4NodeConfigurator;
                 ip: IPv4 {
                     parameters:
                         timeToLive = 32;

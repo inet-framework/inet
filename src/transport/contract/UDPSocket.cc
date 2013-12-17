@@ -169,6 +169,16 @@ void UDPSocket::setMulticastLoop(bool value)
     sendToUDP(msg);
 }
 
+void UDPSocket::setReuseAddress(bool value)
+{
+    cMessage *msg = new cMessage("SetReuseAddress", UDP_C_SETOPTION);
+    UDPSetReuseAddressCommand *ctrl = new UDPSetReuseAddressCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setReuseAddress(value);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
 void UDPSocket::joinMulticastGroup(const IPvXAddress& multicastAddr, int interfaceId)
 {
     cMessage *msg = new cMessage("JoinMulticastGroups", UDP_C_SETOPTION);

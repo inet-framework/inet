@@ -28,7 +28,7 @@ void TCPTesterBase::initialize()
 {
     fromASeq = 0;
     fromBSeq = 0;
-    tcpdump.setOutStream(ev.getOStream());
+    tcpdump.setOutStream(EVSTREAM);
 }
 
 void TCPTesterBase::dump(TCPSegment *seg, bool fromA, const char *comment)

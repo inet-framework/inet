@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -43,9 +43,18 @@ simple SCTPClient like ISCTPApp
         bool echo = default(false);  // echoes received packages when true
         bool ordered = default(true);
         int queueSize = default(0);
-        double stopTime @unit(s) = default(0s);
+        int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
+        double prValue = default(0); //for PR-SCTP
+        bool streamReset = default(false);
+        double streamRequestTime @unit(s) = default(0s);
+        int streamResetType = default(5);  //NO_RESET=5, RESET_OUTGOING=6, RESET_INCOMING=7, RESET_BOTH=8, SSN_TSN=9
+        bool streamAnswer = default(false);
+        double stopTime @unit(s) = default(-1s);  // time of finishing sending, negative values mean forever
         double primaryTime @unit(s) = default(0s);
         string newPrimary = default("");
+        string streamRequestLengths = default("");
+        string streamRequestRatio = default("");
+        string streamPriorities = default("");
         bool finishEndsSimulation = default(false);
         @signal[sentPk](type=SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);

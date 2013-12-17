@@ -503,7 +503,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     else*/
     if (!(buIfEntry->ackTimeout < ie->ipv6Data()->_getMaxBindAckTimeout()))
     {
-        ev << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl; //buIfEntry->nextBindAckTimeout << " ++++++\n";
+        EV << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl; //buIfEntry->nextBindAckTimeout << " ++++++\n";
         //ev << "\n++++Present Sent Time: " << buIfEntry->presentSentTimeBU << " Present TimeOut: " << buIfEntry->ackTimeout << endl;
         //buIfEntry->nextScheduledTime = buIfEntry->presentSentTimeBU + buIfEntry->maxBindAckTimeout;
         buIfEntry->ackTimeout = ie->ipv6Data()->_getMaxBindAckTimeout();

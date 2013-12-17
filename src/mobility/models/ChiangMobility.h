@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include <LineSegmentsMobilityBase.h>
+#include "LineSegmentsMobilityBase.h"
 
 
 /**

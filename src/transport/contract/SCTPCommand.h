@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 by Irene Ruengeler
-// Copyright (C) 2010 by Thomas Dreibholz
+// Copyright (C) 2012 by Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -41,7 +41,10 @@ enum SctpCommandCode
     SCTP_C_QUEUE_BYTES_LIMIT    = 12,   // set send queue limit (in bytes)
     SCTP_C_QUEUE_MSGS_LIMIT     = 13,   // set send queue limit (in messages)
     SCTP_C_SHUTDOWN             = 14,
-    SCTP_C_NO_OUTSTANDING       = 15
+    SCTP_C_NO_OUTSTANDING       = 15,
+    SCTP_C_STREAM_RESET         = 16,   // send StreamResetChunk
+    SCTP_C_SEND_ASCONF          = 19,
+    SCTP_C_SET_STREAM_PRIO      = 20
 };
 
 //
@@ -66,7 +69,12 @@ enum SctpStatusInd
     SCTP_I_SEND_MSG             = 12,
     SCTP_I_SHUTDOWN_RECEIVED    = 13,
     SCTP_I_SENDQUEUE_FULL       = 14,
-    SCTP_I_SENDQUEUE_ABATED     = 15
+    SCTP_I_SENDQUEUE_ABATED     = 15,
+    SCTP_I_ABANDONED            = 16,
+    SCTP_I_SEND_STREAMS_RESETTED = 17,
+    SCTP_I_RCV_STREAMS_RESETTED = 18,
+    SCTP_I_RESET_REQUEST_FAILED = 19,
+    SCTP_I_ADDRESS_ADDED = 20 // used for AddIP and multihomed NAT
 };
 
 enum SCTPFlags

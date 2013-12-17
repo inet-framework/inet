@@ -33,6 +33,7 @@ void DSDV_2::initialize(int stage)
         InterfaceEntry *   ie;
         InterfaceEntry *   i_face;
         const char *name;
+        broadcastDelay = &par("broadcastDelay");
         for (int i = 0; i < ift->getNumInterfaces(); i++)
         {
             ie = ift->getInterface(i);
@@ -190,7 +191,7 @@ void DSDV_2::handleMessage(cMessage *msg)
             Hello = NULL;
 
             //schedule new brodcast hello message event
-            scheduleAt(simTime()+hellomsgperiod_DSDV+uniform(0, 0.01), event);
+            scheduleAt(simTime()+hellomsgperiod_DSDV+broadcastDelay->doubleValue(), event);
             bubble("Sending new hello message");
         }
         else

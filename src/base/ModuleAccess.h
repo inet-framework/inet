@@ -20,6 +20,11 @@
 
 #include "INETDefs.h"
 
+/**
+ * Returns true if the given module is a network node, i.e. a module
+ * with the @node property set.
+ */
+INET_API bool isNetworkNode(cModule *mod);
 
 /**
  * Find a module with given name, and "closest" to module "from".
@@ -46,16 +51,16 @@ INET_API cModule *findModuleWhereverInNode(const char *name, cModule *from);
 INET_API cModule *findModuleSomewhereUp(const char *name, cModule *from);
 
 /**
- * Checks if the module is node, i.e. it has a @node attribute.
- */
-bool isNode(cModule *mod);
-
-/**
  * Find the node containing the given module.
  * Returns NULL, if no containing node.
  */
 INET_API cModule *findContainingNode(cModule *from);
 
+/**
+ * Find the ancestor module under the node containing the given module.
+ * Returns NULL, if no such node found.
+ */
+INET_API cModule *findModuleUnderContainingNode(cModule *from);
 
 /**
  * Finds and returns the pointer to a module of type T and name N.

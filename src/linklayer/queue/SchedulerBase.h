@@ -29,11 +29,11 @@
  * and decide from which queue a packet needs to be
  * dequeued.
  *
- * Schedulers behaves as a passive queue (the provide a view
+ * Schedulers behave as passive queues (they provide a view
  * for the actual queues behind them), and can be cascaded.
- * They also must be able to notice if a new packet arrived
- * at one of its input without dequeueing it, so they
- * registers themselves as listener of their inputs.
+ * They must be able to notice when a new packet arrives
+ * at one of their inputs without dequeueing it, so they
+ * hook themselves as listeners on their inputs.
  */
 class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, public IPassiveQueueListener
 {
@@ -62,6 +62,7 @@ class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, publi
       virtual int getNumPendingRequests() { return packetsRequestedFromUs; }
       virtual bool isEmpty();
       virtual void clear();
+      virtual cMessage *pop();
       virtual void packetEnqueued(IPassiveQueue *inputQueue);
       virtual void addListener(IPassiveQueueListener *listener);
       virtual void removeListener(IPassiveQueueListener *listener);

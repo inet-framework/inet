@@ -235,6 +235,20 @@ class UDPSetMulticastLoopCommand extends UDPSetOptionCommand
 }
 
 //
+// Control info for setting the ReuseAddress option on an UDP socket.
+// When the option is true, then the socket is allowed to bind to an already bound
+// local address.
+// To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
+// and an and instance of this control info class attached.
+//
+// @see ~UDPCommandCode
+//
+class UDPSetReuseAddressCommand extends UDPSetOptionCommand
+{
+    bool reuseAddress;
+}
+
+//
 // Control info for letting an UDP socket join multicast groups.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.

@@ -123,6 +123,15 @@ TCPEventCode TCPConnection::process_RCV_SEGMENT(TCPSegment *tcpseg, IPvXAddress 
     return event;
 }
 
+bool TCPConnection::hasEnoughSpaceForSegmentInReceiveQueue(TCPSegment *tcpseg)
+{
+    //TODO must rewrite it
+    //return (state->freeRcvBuffer >= tcpseg->getPayloadLength()); // enough freeRcvBuffer in rcvQueue for new segment?
+
+    uint32 firstSeq = receiveQueue->getFirstSeqNo();
+    return seqLE(firstSeq, tcpseg->getSequenceNo()) && seqLE(tcpseg->getSequenceNo()+tcpseg->getPayloadLength(), firstSeq + state->maxRcvBuffer);
+}
+
 TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 {
     //
@@ -494,7 +503,7 @@ TCPEventCode TCPConnection::processSegment1stThru8th(TCPSegment *tcpseg)
 
             updateRcvQueueVars();
 
-            if (state->freeRcvBuffer >= tcpseg->getPayloadLength()) // enough freeRcvBuffer in rcvQueue for new segment?
+            if (hasEnoughSpaceForSegmentInReceiveQueue(tcpseg)) // enough freeRcvBuffer in rcvQueue for new segment?
             {
                 tcpEV2 << "Processing segment text in a data transfer state\n";
 
@@ -875,7 +884,7 @@ TCPEventCode TCPConnection::processSegmentInListen(TCPSegment *tcpseg, IPvXAddre
         {
             updateRcvQueueVars();
 
-            if (state->freeRcvBuffer >= tcpseg->getPayloadLength()) // enough freeRcvBuffer in rcvQueue for new segment?
+            if (hasEnoughSpaceForSegmentInReceiveQueue(tcpseg)) // enough freeRcvBuffer in rcvQueue for new segment?
             {
                 receiveQueue->insertBytesFromSegment(tcpseg);
             }
@@ -1040,7 +1049,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
             {
                 updateRcvQueueVars();
 
-                if (state->freeRcvBuffer >= tcpseg->getPayloadLength()) // enough freeRcvBuffer in rcvQueue for new segment?
+                if (hasEnoughSpaceForSegmentInReceiveQueue(tcpseg)) // enough freeRcvBuffer in rcvQueue for new segment?
                 {
                     receiveQueue->insertBytesFromSegment(tcpseg);  // TBD forward to app, etc.
                 }
@@ -1099,7 +1108,7 @@ TCPEventCode TCPConnection::processSegmentInSynSent(TCPSegment *tcpseg, IPvXAddr
         {
             updateRcvQueueVars();
 
-            if (state->freeRcvBuffer >= tcpseg->getPayloadLength()) // enough freeRcvBuffer in rcvQueue for new segment?
+            if (hasEnoughSpaceForSegmentInReceiveQueue(tcpseg)) // enough freeRcvBuffer in rcvQueue for new segment?
             {
                 receiveQueue->insertBytesFromSegment(tcpseg);  // TBD forward to app, etc.
             }

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2009 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -42,6 +42,10 @@ simple SCTPServer like ISCTPApp
         int inboundStreams = default(17);
         int outboundStreams = default(1);
         int queueSize = default(0);
+        int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
+        double prValue = default(0); //for PR-SCTP
+        bool streamReset = default(false);
+        string streamPriorities = default("");
     gates:
         input sctpIn;
         output sctpOut;

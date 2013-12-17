@@ -26,12 +26,15 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 network ClientServer
 {
-    @display("bgb=232,193");
+    parameters:
+        double per = default(0);
+        @display("bgb=232,193");
     types:
         channel C extends DatarateChannel
         {
             datarate = 10Mbps;
             delay = 0.1us;
+            per = per;
         }
     submodules:
         client1: StandardHost {

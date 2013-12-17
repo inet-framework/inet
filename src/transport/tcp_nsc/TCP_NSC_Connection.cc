@@ -35,8 +35,8 @@
 #include <netinet/in.h>
 
 
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.isDisabled())||(TCP_NSC::testingS)) ? ev : ev
+// macro for normal EV<< logging (note: deliberately no parens in macro def)
+#define tcpEV  TCP_NSC::testingS ? EV : EV
 
 
 struct nsc_iphdr

@@ -25,6 +25,7 @@
 
 #include "INETDefs.h"
 
+#include "NotificationBoard.h"
 #include "IPv6Address.h"
 #include "InterfaceEntry.h"
 
@@ -87,6 +88,17 @@ class RoutingTable6;
 /***************END of RFC 3775 Protocol Constants*****************************/
 #endif /* WITH_xMIPv6 */
 
+/*
+ * Info for NF_IPv6_MCAST_JOIN and NF_IPv6_MCAST_LEAVE notifications
+ */
+struct INET_API IPv6MulticastGroupInfo : public cObject
+{
+    IPv6MulticastGroupInfo(InterfaceEntry * const ie, const IPv6Address &groupAddress)
+        : ie(ie), groupAddress(groupAddress) {}
+    InterfaceEntry* ie;
+    IPv6Address groupAddress;
+};
+
 /**
  * IPv6-specific data for InterfaceEntry. Most of this comes from
  * section 6.2.1 of RFC 2461 (IPv6 Neighbor Discovery, Router Configuration
@@ -94,6 +106,33 @@ class RoutingTable6;
  */
 class INET_API IPv6InterfaceData : public InterfaceProtocolData
 {
+
+  public:
+    typedef std::vector<IPv6Address> IPv6AddressVector;
+
+  protected:
+    struct HostMulticastData
+    {
+        IPv6AddressVector joinedMulticastGroups;
+        std::vector<int> refCounts;
+
+        std::string info();
+        std::string detailedInfo();
+    };
+
+    struct RouterMulticastData
+    {
+        IPv6AddressVector reportedMulticastGroups; ///< multicast groups that have listeners on the link connected to this interface
+
+        std::string info();
+        std::string detailedInfo();
+    };
+
+    HostMulticastData *hostMcastData;
+    RouterMulticastData *routerMcastData;
+
+    NotificationBoard *nb;
+
   public:
     /**
      * For routers: advertised prefix configuration.
@@ -398,12 +437,16 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     int findAddress(const IPv6Address& addr) const;
     void choosePreferredAddress();
     void changed1() {changed(NF_INTERFACE_IPv6CONFIG_CHANGED);}
+    HostMulticastData *getHostData() { if (!hostMcastData) hostMcastData = new HostMulticastData(); return hostMcastData; }
+    const HostMulticastData *getHostData() const { return const_cast<IPv6InterfaceData*>(this)->getHostData(); }
+    RouterMulticastData *getRouterData() { if (!routerMcastData) routerMcastData = new RouterMulticastData(); return routerMcastData; }
+    const RouterMulticastData *getRouterData() const { return const_cast<IPv6InterfaceData*>(this)->getRouterData(); }
 
     static bool addrLess(const AddressData& a, const AddressData& b);
 
   public:
     IPv6InterfaceData();
-    virtual ~IPv6InterfaceData() {}
+    virtual ~IPv6InterfaceData();
     std::string info() const;
     std::string detailedInfo() const;
 
@@ -489,6 +532,17 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      * Clears the "tentative" flag of an existing interface address.
      */
     virtual void permanentlyAssign(const IPv6Address& addr);
+
+    const IPv6AddressVector& getJoinedMulticastGroups() const { return getHostData()->joinedMulticastGroups;}
+    const IPv6AddressVector& getReportedMulticastGroups() const { return getRouterData()->reportedMulticastGroups;}
+
+    bool isMemberOfMulticastGroup(const IPv6Address &multicastAddress) const;
+    virtual void joinMulticastGroup(const IPv6Address& multicastAddress);
+    virtual void leaveMulticastGroup(const IPv6Address& multicastAddress);
+
+    bool hasMulticastListener(const IPv6Address &multicastAddress) const;
+    virtual void addMulticastListener(const IPv6Address &multicastAddress);
+    virtual void removeMulticastListener(const IPv6Address &multicastAddress);
 
 #ifdef WITH_xMIPv6
     /**

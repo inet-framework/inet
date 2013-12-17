@@ -25,6 +25,13 @@ package inet.networklayer.autorouting.ipv4;
 // It assigns per-interface IP addresses, strives to take subnets into account,
 // and can also optimize the generated routing tables by merging routing entries.
 //
+// IMPORTANT: as of INET 2.2, this module does NOT assign addresses or add
+// routes directly, just stores them in its internal data structures.
+// Network nodes are supposed to contain an instance of ~IPv4NodeConfigurator
+// (normally part of the network layer compound module) that actually
+// configures the node's interface table and routing table based on the
+// information stored in the global network configurator module.
+//
 // The configurator supports both manual and automatic address assignment,
 // and their combinations. You can provide address and netmask templates
 // with unspecified parts, and the configurator automatically completes
@@ -208,6 +215,11 @@ package inet.networklayer.autorouting.ipv4;
 //      Optional parameter attribute to set the Metric parameter in the interface.
 //      When unspecified the interface parameter is left unchanged.
 //
+//    - @groups
+//      Optional parameter attribute; it may contain a list of (multicast)
+//      IP addresses that will be added to the multicast groups of the interface.
+//      See also the <multicast-group> element.
+//
 //  - <wireless>
 //
 //    - @id (optional)
@@ -343,6 +355,7 @@ simple IPv4NetworkConfigurator
         bool addSubnetRoutes = default(true);  // add subnet routes instead of destination interface routes (only where applicable; used only if addStaticRoutes is true)
         bool optimizeRoutes = default(true); // optimize routing tables by merging routes, the resulting routing table might route more packets than the original (used only if addStaticRoutes is true)
         bool dumpTopology = default(false);  // print extracted network topology to the module output
+        bool dumpLinks = default(false);     // print recognized network links to the module output
         bool dumpAddresses = default(false); // print assigned IP addresses for all interfaces to the module output
         bool dumpRoutes = default(false);    // print configured and optimized routing tables for all nodes to the module output
         string dumpConfig = default("");     // write configuration into the given config file that can be fed back to speed up subsequent runs (network configurations)

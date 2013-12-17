@@ -1,0 +1,21 @@
+
+# filename: mcrouter1.mrt
+# routing table for router 1 of multicast network 2
+# connected to host 1,2,3 and router 2
+# author: Jochen Reber
+
+
+ifconfig:
+
+# ethernet card (modelled by point-to-point link)
+name: ppp0  inet_addr: 10.1.1.2 MTU: 1500   Metric: 1  POINTTOPOINT MULTICAST
+name: ppp1  inet_addr: 10.1.2.1 MTU: 1500   Metric: 1  POINTTOPOINT MULTICAST
+
+ifconfigend.
+
+route:
+10.1.1.1     10.1.1.1        255.255.255.255   H   0   ppp0
+0.0.0.0      10.1.2.1        0.0.0.0         G   0   ppp1
+
+routeend.
+

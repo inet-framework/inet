@@ -54,7 +54,7 @@ class INET_API HttpServerDirectEvilA : public HttpServerDirect
         int badLow;
         int badHigh;
     protected:
-        virtual void initialize();
+        virtual void initialize(int stage);
         virtual std::string generateBody();
 };
 

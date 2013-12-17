@@ -26,7 +26,7 @@ network tcptimestamps
             gates:
                 pppg[1];
         }
-        networkConfigurator: IPv4NetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=187,34");
         }
     connections:

@@ -568,6 +568,60 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         }
     }
 
+#ifdef OMNETPP
+    aodv_msg->prevFix=this->isStaticNode();
+    if (this->isStaticNode())
+    {
+        if (dynamic_cast<RREP*>(aodv_msg))
+        {
+            dynamic_cast<RREP*>(aodv_msg)->cost += costStatic;
+        }
+        else if (dynamic_cast<RREQ*> (aodv_msg))
+        {
+            dynamic_cast<RREQ*>(aodv_msg)->cost += costStatic;
+        }
+    }
+    else
+    {
+        if (dynamic_cast<RREP*>(aodv_msg))
+        {
+            dynamic_cast<RREP*>(aodv_msg)->cost += costMobile;
+        }
+        else if (dynamic_cast<RREQ*>(aodv_msg))
+        {
+            dynamic_cast<RREQ*>(aodv_msg)->cost += costMobile;
+        }
+    }
+    ManetAddress destAdd;
+    if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
+    {
+        gettimeofday(&this_host.bcast_time, NULL);
+        if (!this->isInMacLayer())
+            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+        else
+            destAdd = ManetAddress(MACAddress::BROADCAST_ADDRESS);
+    }
+    else
+    {
+        destAdd = dst.s_addr;
+    }
+
+    // if delay is lower than 0 compute the delay using the distributions in the configuration
+    if (delay < 0)
+    {
+        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
+            delay = par ("broadcastDelay").doubleValue();
+        else
+            delay = par ("unicastDelay").doubleValue();
+    }
+    //       IPv4Address   desAddIp4(dst.s_addr);
+    //       IPvXAddress destAdd(desAddIp4);
+    if (useIndex)
+        sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ifindex);
+    else
+        sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ipaddr.s_addr);
+    totalSend++;
+#else
     /* If we broadcast this message we update the time of last broadcast
        to prevent unnecessary broadcasts of HELLO msg's */
     if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
@@ -575,66 +629,8 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         gettimeofday(&this_host.bcast_time, NULL);
 
 #ifdef NS_PORT
-#ifndef OMNETPP
         ch->addr_type() = NS_AF_NONE;
         sendPacket(p, dst, 0.0);
-#else
-//       IPv4Address   desAddIp4(dst.s_addr);
-//       IPvXAddress destAdd(desAddIp4);
-// In the floading proccess the random delay prevent collision for the synchronization between the nodes.
-        ManetAddress destAdd;
-        aodv_msg->prevFix=this->isStaticNode();
-
-        if (this->isStaticNode())
-        {
-            if (dynamic_cast<RREP*>(aodv_msg))
-            {
-                dynamic_cast<RREP*>(aodv_msg)->cost += costStatic;
-            }
-            else if (dynamic_cast<RREQ*> (aodv_msg))
-            {
-                dynamic_cast<RREQ*>(aodv_msg)->cost += costStatic;
-            }
-        }
-        else
-        {
-            if (dynamic_cast<RREP*>(aodv_msg))
-            {
-                dynamic_cast<RREP*>(aodv_msg)->cost += costMobile;
-            }
-            else if (dynamic_cast<RREQ*>(aodv_msg))
-            {
-                dynamic_cast<RREQ*>(aodv_msg)->cost += costMobile;
-            }
-        }
-
-
-
-        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
-        {
-            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
-        }
-        else
-        {
-            destAdd = dst.s_addr;
-        }
-        if (delay>0)
-        {
-            if (useIndex)
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ifindex);
-            else
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, delay, dev->ipaddr.s_addr);
-        }
-        else
-        {
-            if (useIndex)
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadcastDelay").doubleValue(), dev->ifindex);
-            else
-                sendToIp(aodv_msg, 654, destAdd, 654, ttl, par ("broadcastDelay").doubleValue(), dev->ipaddr.s_addr);
-        }
-        totalSend++;
-//       sendToIp(aodv_msg, 654, destAdd, 654,ttl);
-#endif /*omnet++ */
 #else
         retval = sendto(dev->sock, send_buf, len, 0,
                         (struct sockaddr *) &dst_addr, sizeof(dst_addr));
@@ -651,55 +647,12 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     {
 
 #ifdef NS_PORT
-#ifndef OMNETPP
         ch->addr_type() = NS_AF_INET;
         /* We trust the decision of next hop for all AODV messages... */
         if (dst.s_addr == AODV_BROADCAST)
             sendPacket(p, dst, 0.001 * Random::uniform());
         else
             sendPacket(p, dst, 0.0);
-#else
-        // IPv4Address   desAddIp4(dst.s_addr);
-        // IPvXAddress destAdd(desAddIp4);
-        ManetAddress destAdd;
-        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
-        {
-            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
-            if (delay>0)
-            {
-                if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ifindex);
-                else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ipaddr.s_addr);
-            }
-            else
-            {
-                if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadcastDelay").doubleValue(),dev->ifindex);
-                else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("broadcastDelay").doubleValue(),dev->ipaddr.s_addr);
-            }
-        }
-        else
-        {
-            destAdd = dst.s_addr;
-            if (delay>0)
-            {
-                if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ifindex);
-                else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,delay,dev->ipaddr.s_addr);
-            }
-            else
-            {
-                if (useIndex)
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("unicastDelay").doubleValue(),dev->ifindex);
-                else
-                    sendToIp(aodv_msg, 654, destAdd, 654,ttl,par("unicastDelay").doubleValue(),dev->ipaddr.s_addr);
-            }
-        }
-        totalSend++;
-#endif
 #else
         retval = sendto(dev->sock, send_buf, len, 0,
                         (struct sockaddr *) &dst_addr, sizeof(dst_addr));
@@ -712,6 +665,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
         }
 #endif
     }
+#endif // OMNETPP
 
     /* Do not print hello msgs... */
     if (!(aodv_msg->type == AODV_RREP && (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))))
@@ -751,4 +705,6 @@ void aodv_socket_cleanup(void)
     }
 #endif              /* NS_PORT */
 }
+
+
 

@@ -21,11 +21,12 @@
 
 
 #include "INETDefs.h"
+
+#include "ILifecycle.h"
 #include "IPvXAddress.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "UDPSocket.h"
-
 
 /**
  * An RTP is the center of the RTP layer of an endsystem.
@@ -33,13 +34,17 @@
  * and forwards messages.
  * It also communicates with the application.
  */
-class INET_API RTP : public cSimpleModule
+class INET_API RTP : public cSimpleModule, public ILifecycle
 {
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   protected:
     /**
      * Initializes variables.
      */
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
 
     /**
      * Handles incoming messages.
@@ -116,7 +121,7 @@ class INET_API RTP : public cSimpleModule
     /**
      * Creates the profile module.
      */
-    virtual void createProfile();
+    virtual void createProfile(const char *profileName);
 
     /**
      * Requests a server socket from the UDP layer.
@@ -161,11 +166,6 @@ class INET_API RTP : public cSimpleModule
      * The CNAME of this end system.
      */
     const char *_commonName;
-
-    /**
-     * The name of the profile used in this session.
-     */
-    const char *_profileName;
 
     /**
      * The available bandwidth for this session.

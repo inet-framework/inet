@@ -20,6 +20,9 @@
 
 #include "InterfaceEntry.h"
 #include "IPv4Address.h"
+#include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTableAccess.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
@@ -38,16 +41,27 @@ simsignal_t RTP::rcvdPkSignal = SIMSIGNAL_NULL;
 // methods inherited from cSimpleModule
 //
 
-void RTP::initialize()
+void RTP::initialize(int stage)
 {
-    _leaveSession = false;
-    appInGate = findGate("appIn");
-    profileInGate = findGate("profileIn");
-    rtcpInGate = findGate("rtcpIn");
-    udpInGate = findGate("udpIn");
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        _leaveSession = false;
+        appInGate = findGate("appIn");
+        profileInGate = findGate("profileIn");
+        rtcpInGate = findGate("rtcpIn");
+        udpInGate = findGate("udpIn");
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    rcvdPkSignal = registerSignal("rcvdPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void RTP::handleMessage(cMessage *msg)
@@ -142,7 +156,7 @@ void RTP::handleMessageFromProfile(cMessage *msg)
     default:
         throw cRuntimeError("Unknown RTPInnerPacket type %d from profile", rinp->getType());
     }
-    ev << "handleMessageFromProfile(cMessage *msg) Exit" << endl;
+    EV << "handleMessageFromProfile(cMessage *msg) Exit" << endl;
 }
 
 void RTP::handleMessageFromRTCP(cMessage *msg)
@@ -175,7 +189,7 @@ void RTP::handleMessagefromUDP(cMessage *msg)
 
 void RTP::enterSession(RTPCIEnterSession *rifp)
 {
-    _profileName = rifp->getProfileName();
+    const char *profileName = rifp->getProfileName();
     _commonName = rifp->getCommonName();
     _bandwidth = rifp->getBandwidth();
     _destinationAddress = rifp->getDestinationAddress();
@@ -186,7 +200,7 @@ void RTP::enterSession(RTPCIEnterSession *rifp)
 
     _mtu = resolveMTU();
 
-    createProfile();
+    createProfile(profileName);
     initializeProfile();
     delete rifp;
 }
@@ -208,7 +222,7 @@ void RTP::leaveSession(RTPCILeaveSession *rifp)
 void RTP::createSenderModule(RTPCICreateSenderModule *rifp)
 {
     RTPInnerPacket *rinp = new RTPInnerPacket("createSenderModule()");
-    ev << rifp->getSsrc()<<endl;
+    EV << rifp->getSsrc()<<endl;
     rinp->setCreateSenderModulePkt(rifp->getSsrc(), rifp->getPayloadType(), rifp->getFileName());
     send(rinp, "profileOut");
 
@@ -367,11 +381,11 @@ int RTP::resolveMTU()
     return pmtu - 20 - 8;
 }
 
-void RTP::createProfile()
+void RTP::createProfile(const char *profileName)
 {
-    cModuleType *moduleType = cModuleType::find(_profileName);
+    cModuleType *moduleType = cModuleType::find(profileName);
     if (moduleType == NULL)
-        error("Profile type `%s' not found", _profileName);
+        error("Profile type `%s' not found", profileName);
 
     RTPProfile *profile = check_and_cast<RTPProfile *>(moduleType->create("Profile", this));
     profile->finalizeParameters();
@@ -407,3 +421,12 @@ void RTP::initializeRTCP()
     rinp->setInitializeRTCPPkt(_commonName, _mtu, _bandwidth, _rtcpPercentage, _destinationAddress, rtcpPort);
     send(rinp, "rtcpOut");
 }
+
+bool RTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+

@@ -58,7 +58,7 @@ void HttpController::initialize(int stage)
             error("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
-        pspecial = 0.0; // No special events by defaault
+        pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
     else if (stage==1)
@@ -203,7 +203,7 @@ cModule* HttpController::getAnyServerModule()
 
     if (webSiteList.size() == 0)
     {
-        EV_WARNING << "No modules registered. Cannot select a random module" << endl;
+        EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return NULL;
     }
 
@@ -254,7 +254,7 @@ int HttpController::getAnyServerInfo(char* wwwName, char* module, int &port)
 
     if (webSiteList.size() == 0)
     {
-        EV_WARNING << "No modules registered. Cannot select a random module" << endl;
+        EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return -1;
     }
 

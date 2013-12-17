@@ -91,20 +91,12 @@ OLSR_ETX::initialize(int stage)
     {
         if (isInMacLayer())
             OlsrAddressSize::ADDR_SIZE = 6;
-        OLSR_HELLO_INTERVAL = par("OLSR_HELLO_INTERVAL");
-
-     /// TC messages emission interval.
-         OLSR_TC_INTERVAL = par("OLSR_TC_INTERVAL");
-
-     /// MID messages emission interval.
-         OLSR_MID_INTERVAL = par("OLSR_MID_INTERVAL");//   OLSR_TC_INTERVAL
-
-     ///
-     /// \brief Period at which a node must cite every link and every neighbor.
-     ///
-     /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-     ///
-         OLSR_REFRESH_INTERVAL = par("OLSR_REFRESH_INTERVAL");
+ 	///
+ 	/// \brief Period at which a node must cite every link and every neighbor.
+ 	///
+ 	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+ 	///
+ 	    OLSR_REFRESH_INTERVAL = par("OLSR_REFRESH_INTERVAL");
         //
         // Do some initializations
         willingness_ = par("Willingness");
@@ -113,6 +105,14 @@ OLSR_ETX::initialize(int stage)
         mid_ival_ = par("Mid_ival");
         use_mac_ = par("use_mac");
 
+
+        OLSR_HELLO_INTERVAL = SIMTIME_DBL(hello_ival_);
+
+    /// TC messages emission interval.
+        OLSR_TC_INTERVAL = SIMTIME_DBL(tc_ival_);
+
+    /// MID messages emission interval.
+        OLSR_MID_INTERVAL = SIMTIME_DBL(mid_ival_);//   OLSR_TC_INTERVAL
 
 
         if ( par("Fish_eye"))
@@ -185,9 +185,9 @@ OLSR_ETX::initialize(int stage)
         }
 
 
-        hello_timer_.resched(hello_ival_);
-        tc_timer_.resched(hello_ival_);
-        mid_timer_.resched(hello_ival_);
+        hello_timer_.resched(SIMTIME_DBL(hello_ival_));
+        tc_timer_.resched(SIMTIME_DBL(hello_ival_));
+        mid_timer_.resched(SIMTIME_DBL(hello_ival_));
         link_quality_timer_.resched(0.0);
 
         useIndex = false;
@@ -1206,13 +1206,23 @@ OLSR_ETX::rtable_default_computation()
 void
 OLSR_ETX::rtable_dijkstra_computation()
 {
+    nsaddr_t netmask (IPv4Address::ALLONES_ADDRESS);
     // Declare a class that will run the dijkstra algorithm
     Dijkstra *dijkstra = new Dijkstra();
 
     // All the entries from the routing table are removed.
+    if (par("DelOnlyRtEntriesInrtable_").boolValue())
+    {
+        for (rtable_t::const_iterator itRtTable = rtable_.getInternalTable()->begin();itRtTable != rtable_.getInternalTable()->begin();++itRtTable)
+        {
+            nsaddr_t addr = itRtTable->first;
+            omnet_chg_rte(addr, addr,netmask,1, true, addr);
+        }
+    }
+    else
+        omnet_clean_rte(); // clean IP tables
     rtable_.clear();
-    omnet_clean_rte();
-    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS);
+
 
     debug("Current node %s:\n", getNodeId(ra_addr()));
     // Iterate through all out 1 hop neighbors
@@ -1780,7 +1790,7 @@ OLSR_ETX::send_hello()
     msg.msg_seq_num() = msg_seq();
 
     msg.hello().reserved() = 0;
-    msg.hello().htime() = OLSR::seconds_to_emf(hello_ival());
+    msg.hello().htime() = OLSR::seconds_to_emf(SIMTIME_DBL(hello_ival()));
     msg.hello().willingness() = willingness();
     msg.hello().count = 0;
 

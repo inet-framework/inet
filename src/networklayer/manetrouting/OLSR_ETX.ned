@@ -35,16 +35,16 @@ import inet.networklayer.IManetRouting;
 //  - IPv4 address size is assumed in the messages. If you need IPv6, recompile with -DOLSR_IPv6 added to CFLAGS
 //  - Multiple interfaces per OLSR node is supported only with adding -DMULTIPLE_IFACES_SUPPORT to CFLAGS
 //
-// see: <a>http://www.inf.ufrgs.br/~wlccordeiro/resources/olsr/README.html</a>
+// see: <a>http://www.inf.ufrgs.br/~~wlccordeiro/resources/olsr/README.html</a>
 //
 simple OLSR_ETX extends BaseRouting like IManetRouting
 {
     parameters:
         @class(OLSR_ETX);
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)
-        int Hello_ival = default(2); // (s) HELLO messages' emission interval. (section 6.2)
-        int Tc_ival = default(5); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
-        int Mid_ival = default(5); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
+        double Hello_ival  @unit(s)= default(2s); // (s) HELLO messages' emission interval. (section 6.2)
+        double Tc_ival  @unit(s)= default(5s); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
+        double Mid_ival  @unit(s)= default(5s); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
         int use_mac = default(0); // Determines if layer 2 notifications are enabled or not (chapter 13)
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface (EXPERIMENTAL)
         bool reduceFuncionality = default(false);
@@ -61,24 +61,17 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         // non-OLSR standard: publish mpr set only
         // OLSR_ETX_TC_REDUNDANCY_MPR_SET                   3
         bool Link_delay = default(true);  // Determine whether the link delay extension should be enabled
-        double C_alpha = default(0.6);  // Factor that will be used to smooth link delays (0 .. 1)
-
-        double OLSR_HELLO_INTERVAL @unit("s")=default(2s);
-
-    /// TC messages emission interval.
-        double OLSR_TC_INTERVAL @unit("s")=default(5s);
-
-    /// MID messages emission interval.
-        double OLSR_MID_INTERVAL @unit("s")=default(5s);//   OLSR_TC_INTERVAL
-    ///
-    /// \brief Period at which a node must cite every link and every neighbor.
-    ///
-    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-    ///
-        double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
-        bool PublicRoutingTables = default(false);
-
-        bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages
+        double C_alpha = default(0.6);  // Factor that will be used to smooth link delays (0 .. 1)        
+	///
+	/// \brief Period at which a node must cite every link and every neighbor.
+	///
+	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+	///
+	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+	    bool PublicRoutingTables = default(false);
+	    
+	    bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages	    
+	    bool DelOnlyRtEntriesInrtable_ = default(false); // delete only ip entries that are in the interal routing table 
     gates:
         input from_ip;
         output to_ip;

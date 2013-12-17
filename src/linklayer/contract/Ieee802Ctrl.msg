@@ -58,6 +58,8 @@ enum EtherType
 {
     ETHERTYPE_IPv4 = 0x0800;
     ETHERTYPE_ARP = 0x0806;
+    ETHERTYPE_TRILL = 0x22F3;
+    ETHERTYPE_L2_ISIS = 0x22F4;
     ETHERTYPE_RARP = 0x8035;
     ETHERTYPE_IPv6 = 0x86DD;
     ETHERTYPE_MPLS_UNICAST = 0x8847;
@@ -73,8 +75,8 @@ class Ieee802Ctrl
     MACAddress src;  // src MAC address (can be left empty when sending)
     MACAddress dest; // dest MAC address
     int etherType enum (EtherType);   // used with ~EthernetIIFrame
+    int interfaceId; // incoming or outgoing interface (not needed everywhere) 
     int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int pauseUnits;  // used with IEEE802CTRL_SENDPAUSE
-    int inputPort;   // convenience field, used between ~IPv6 and ~IPv6NeighbourDiscovery
 }

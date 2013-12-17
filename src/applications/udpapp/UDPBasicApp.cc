@@ -18,62 +18,58 @@
 
 
 #include "UDPBasicApp.h"
-#include "UDPControlInfo_m.h"
-#include "IPvXAddressResolver.h"
+
 #include "InterfaceTableAccess.h"
+#include "IPvXAddressResolver.h"
+#include "NodeOperations.h"
+#include "UDPControlInfo_m.h"
 
 
 Define_Module(UDPBasicApp);
 
-int UDPBasicApp::counter;
 simsignal_t UDPBasicApp::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t UDPBasicApp::rcvdPkSignal = SIMSIGNAL_NULL;
 
+UDPBasicApp::UDPBasicApp()
+{
+    selfMsg = NULL;
+}
+
+UDPBasicApp::~UDPBasicApp()
+{
+    cancelAndDelete(selfMsg);
+}
+
 void UDPBasicApp::initialize(int stage)
 {
+    AppBase::initialize(stage);
+
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
+    if (stage == 0)
+    {
+        numSent = 0;
+        numReceived = 0;
+        WATCH(numSent);
+        WATCH(numReceived);
+        sentPkSignal = registerSignal("sentPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
 
-    counter = 0;
-    numSent = 0;
-    numReceived = 0;
-    WATCH(numSent);
-    WATCH(numReceived);
-    sentPkSignal = registerSignal("sentPk");
-    rcvdPkSignal = registerSignal("rcvdPk");
-
-    localPort = par("localPort");
-    destPort = par("destPort");
-
-    const char *destAddrs = par("destAddresses");
-    cStringTokenizer tokenizer(destAddrs);
-    const char *token;
-
-    while ((token = tokenizer.nextToken()) != NULL)
-        destAddresses.push_back(IPvXAddressResolver().resolve(token));
-
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
-    setSocketOptions();
-
-    if (destAddresses.empty())
-        return;
-
-    stopTime = par("stopTime").doubleValue();
-    simtime_t startTime = par("startTime").doubleValue();
-    if (stopTime != 0 && stopTime <= startTime)
-        error("Invalid startTime/stopTime parameters");
-
-    cMessage *timerMsg = new cMessage("sendTimer");
-    scheduleAt(startTime, timerMsg);
+        localPort = par("localPort");
+        destPort = par("destPort");
+        startTime = par("startTime").doubleValue();
+        stopTime = par("stopTime").doubleValue();
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
+        selfMsg = new cMessage("sendTimer");
+    }
 }
 
 void UDPBasicApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
+    AppBase::finish();
 }
 
 void UDPBasicApp::setSocketOptions()
@@ -111,19 +107,13 @@ IPvXAddress UDPBasicApp::chooseDestAddr()
     return destAddresses[k];
 }
 
-cPacket *UDPBasicApp::createPacket()
-{
-    char msgName[32];
-    sprintf(msgName, "UDPBasicAppData-%d", counter++);
-
-    cPacket *payload = new cPacket(msgName);
-    payload->setByteLength(par("messageLength").longValue());
-    return payload;
-}
-
 void UDPBasicApp::sendPacket()
 {
-    cPacket *payload = createPacket();
+    char msgName[32];
+    sprintf(msgName, "UDPBasicAppData-%d", numSent);
+    cPacket *payload = new cPacket(msgName);
+    payload->setByteLength(par("messageLength").longValue());
+
     IPvXAddress destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
@@ -131,17 +121,72 @@ void UDPBasicApp::sendPacket()
     numSent++;
 }
 
-void UDPBasicApp::handleMessage(cMessage *msg)
+void UDPBasicApp::processStart()
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
+    setSocketOptions();
+
+    const char *destAddrs = par("destAddresses");
+    cStringTokenizer tokenizer(destAddrs);
+    const char *token;
+
+    while ((token = tokenizer.nextToken()) != NULL) {
+        IPvXAddress result;
+        IPvXAddressResolver().tryResolve(token, result);
+        if (result.isUnspecified())
+            EV << "cannot resolve destination address: " << token << endl;
+        else
+            destAddresses.push_back(result);
+    }
+
+    if (!destAddresses.empty())
+    {
+        selfMsg->setKind(SEND);
+        processSend();
+    }
+    else
+    {
+        if (stopTime >= SIMTIME_ZERO)
+        {
+            selfMsg->setKind(STOP);
+            scheduleAt(stopTime, selfMsg);
+        }
+    }
+}
+
+void UDPBasicApp::processSend()
+{
+    sendPacket();
+    simtime_t d = simTime() + par("sendInterval").doubleValue();
+    if (stopTime < SIMTIME_ZERO || d < stopTime)
+    {
+        selfMsg->setKind(SEND);
+        scheduleAt(d, selfMsg);
+    }
+    else
+    {
+        selfMsg->setKind(STOP);
+        scheduleAt(stopTime, selfMsg);
+    }
+}
+
+void UDPBasicApp::processStop()
+{
+    socket.close();
+}
+
+void UDPBasicApp::handleMessageWhenUp(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        // send, then reschedule next sending
-        sendPacket();
-        simtime_t d = simTime() + par("sendInterval").doubleValue();
-        if (stopTime == 0 || d < stopTime)
-            scheduleAt(d, msg);
-        else
-            delete msg;
+        ASSERT(msg == selfMsg);
+        switch (selfMsg->getKind()) {
+            case START: processStart(); break;
+            case SEND:  processSend(); break;
+            case STOP:  processStop(); break;
+            default: throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+        }
     }
     else if (msg->getKind() == UDP_I_DATA)
     {
@@ -172,5 +217,31 @@ void UDPBasicApp::processPacket(cPacket *pk)
     EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
     delete pk;
     numReceived++;
+}
+
+bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
+{
+    simtime_t start = std::max(startTime, simTime());
+    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
+    {
+        selfMsg->setKind(START);
+        scheduleAt(start, selfMsg);
+    }
+    return true;
+}
+
+bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
+{
+    if (selfMsg)
+        cancelEvent(selfMsg);
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPBasicApp::crashApp(IDoneCallback *doneCallback)
+{
+    if (selfMsg)
+        cancelEvent(selfMsg);
+    return true;
 }
 

@@ -19,6 +19,9 @@
 #include "RTCP.h"
 
 #include "IPv4Address.h"
+#include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RTCPPacket.h"
 #include "RTPInnerPacket.h"
 #include "RTPParticipantInfo.h"
@@ -37,19 +40,30 @@ RTCP::RTCP()
     _senderInfo = NULL;
 }
 
-void RTCP::initialize()
+void RTCP::initialize(int stage)
 {
-    // initialize variables
-    _ssrcChosen = false;
-    _leaveSession = false;
-    _udpSocket.setOutputGate(gate("udpOut"));
+    if (stage == 0)
+    {
+        // initialize variables
+        _ssrcChosen = false;
+        _leaveSession = false;
+        _udpSocket.setOutputGate(gate("udpOut"));
 
-    _packetsCalculated = 0;
-    _averagePacketSize = 0.0;
+        _packetsCalculated = 0;
+        _averagePacketSize = 0.0;
 
-    _participantInfos.setName("ParticipantInfos");
+        _participantInfos.setName("ParticipantInfos");
 
-    rcvdPkSignal = registerSignal("rcvdPk");
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 RTCP::~RTCP()
@@ -241,7 +255,7 @@ void RTCP::chooseSSRC()
         ssrcConflict = findParticipantInfo(ssrc) != NULL;
     } while (ssrcConflict);
 
-    ev << "chooseSSRC" << ssrc;
+    EV << "chooseSSRC" << ssrc;
     _senderInfo->setSsrc(ssrc);
     _participantInfos.add(_senderInfo);
     _ssrcChosen = true;
@@ -365,7 +379,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int 
     }
     else
     {
-        ev << "Incoming packet address/port conflict, packet dropped.\n";
+        EV << "Incoming packet address/port conflict, packet dropped.\n";
         delete packet;
     }
 }
@@ -563,3 +577,12 @@ void RTCP::calculateAveragePacketSize(int size)
     _averagePacketSize += ((double)(size + 20 + 8) - _averagePacketSize) / (double)(++_packetsCalculated);
 #endif
 }
+
+bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+

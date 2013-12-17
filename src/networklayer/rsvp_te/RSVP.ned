@@ -99,7 +99,7 @@ package inet.networklayer.rsvp_te;
 simple RSVP
 {
     parameters:
-        xml traffic; // specifies paths to set up
+        xml traffic = default(xml("<sessions/>")); // specifies paths to set up
         string peers; // names of the interfaces towards RSVP peers
         double helloInterval @unit(s);
         double helloTimeout @unit(s);

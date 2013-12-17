@@ -30,8 +30,8 @@
 #include "TCPSerializer.h"
 
 
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.isDisabled())||(TCP_lwIP::testingS)) ? ev : ev
+// macro for normal EV<< logging (note: deliberately no parens in macro def)
+#define tcpEV TCP_lwIP::testingS ? EV : EV
 
 
 TcpLwipConnection::Stats::Stats()

@@ -64,6 +64,16 @@
 Define_Module(OLSR);
 
 
+std::ostream& operator<<(std::ostream& os, const OLSR_rt_entry& e)
+{
+    os << "dest:"<< e.dest_addr_.str() << " ";
+    os << "gw:" << e.next_addr_.str() << " ";
+    os << "iface:" << e.iface_addr_.str() << " ";
+    os << "dist:" << e.dist_ << " ";
+    return os;
+};
+
+
 uint32 OlsrAddressSize::ADDR_SIZE = ADDR_SIZE_DEFAULT;
 
 /********** Timers **********/
@@ -445,20 +455,12 @@ OLSR::initialize(int stage)
 
        if (isInMacLayer())
            OlsrAddressSize::ADDR_SIZE = 6;
-       OLSR_HELLO_INTERVAL=par("OLSR_HELLO_INTERVAL");
-
-    /// TC messages emission interval.
-        OLSR_TC_INTERVAL=par("OLSR_TC_INTERVAL");
-
-    /// MID messages emission interval.
-        OLSR_MID_INTERVAL=par("OLSR_MID_INTERVAL");//   OLSR_TC_INTERVAL
-
-    ///
-    /// \brief Period at which a node must cite every link and every neighbor.
-    ///
-    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-    ///
-        OLSR_REFRESH_INTERVAL=par("OLSR_REFRESH_INTERVAL");
+	///
+	/// \brief Period at which a node must cite every link and every neighbor.
+	///
+	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+	///
+	    OLSR_REFRESH_INTERVAL=par("OLSR_REFRESH_INTERVAL");
 
         //
         // Do some initializations
@@ -467,6 +469,15 @@ OLSR::initialize(int stage)
         tc_ival_ = par("Tc_ival");
         mid_ival_ = par("Mid_ival");
         use_mac_ = par("use_mac");
+
+        OLSR_HELLO_INTERVAL = SIMTIME_DBL(tc_ival_);
+
+     /// TC messages emission interval.
+         OLSR_TC_INTERVAL = SIMTIME_DBL(tc_ival_);
+
+     /// MID messages emission interval.
+         OLSR_MID_INTERVAL = SIMTIME_DBL(mid_ival_);//   OLSR_TC_INTERVAL
+
 
         if (par("reduceFuncionality"))
             EV << "reduceFuncionality true" << endl;
@@ -513,14 +524,16 @@ OLSR::initialize(int stage)
         }
 
 
-        hello_timer_.resched(hello_ival_);
-        tc_timer_.resched(hello_ival_);
-        mid_timer_.resched(hello_ival_);
+        hello_timer_.resched(SIMTIME_DBL(hello_ival_));
+        tc_timer_.resched(SIMTIME_DBL(hello_ival_));
+        mid_timer_.resched(SIMTIME_DBL(hello_ival_));
         if (use_mac())
         {
             linkLayerFeeback();
         }
         scheduleNextEvent();
+
+        WATCH_PTRMAP(rtable_.rt_);
     }
 }
 
@@ -1260,13 +1273,27 @@ OLSR::mpr_computation()
 void
 OLSR::rtable_computation()
 {
+    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS);
     // 1. All the entries from the routing table are removed.
+    //
+
+    if (par("DelOnlyRtEntriesInrtable_").boolValue())
+    {
+        for (rtable_t::const_iterator itRtTable = rtable_.getInternalTable()->begin();itRtTable != rtable_.getInternalTable()->begin();++itRtTable)
+        {
+            nsaddr_t addr = itRtTable->first;
+            omnet_chg_rte(addr, addr,netmask,1, true, addr);
+        }
+    }
+    else
+        omnet_clean_rte(); // clean IP tables
+
     rtable_.clear();
-    omnet_clean_rte(); // clean IP tables
+
 
     // 2. The new routing entries are added starting with the
     // symmetric neighbors (h=1) as the destination nodes.
-    nsaddr_t netmask(IPv4Address::ALLONES_ADDRESS);
+
     for (nbset_t::iterator it = nbset().begin(); it != nbset().end(); it++)
     {
         OLSR_nb_tuple* nb_tuple = *it;
@@ -1767,7 +1794,11 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    ManetAddress destAdd(IPv4Address::ALLONES_ADDRESS);
+    ManetAddress destAdd;
+    if (!this->isInMacLayer())
+        destAdd.set(IPv4Address::ALLONES_ADDRESS);
+    else
+        destAdd.set(MACAddress::BROADCAST_ADDRESS);
 
     for (int i = 0; i < num_pkts; i++)
     {
@@ -1811,7 +1842,7 @@ OLSR::send_hello()
     msg.msg_seq_num() = msg_seq();
 
     msg.hello().reserved() = 0;
-    msg.hello().htime() = OLSR::seconds_to_emf(hello_ival());
+    msg.hello().htime() = OLSR::seconds_to_emf(SIMTIME_DBL(hello_ival()));
     msg.hello().willingness() = willingness();
     msg.hello().count = 0;
 
@@ -2215,7 +2246,7 @@ OLSR::mac_failed(IPv4Datagram* p)
 
     nsaddr_t dest_addr = ManetAddress(p->getDestAddress());
 
-    ev <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
+    EV <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
     if (dest_addr == ManetAddress(IPv4Address(IP_BROADCAST)))
@@ -2243,7 +2274,7 @@ OLSR::mac_failed(IPv4Datagram* p)
 void
 OLSR::set_hello_timer()
 {
-    hello_timer_.resched((double)(hello_ival() - JITTER));
+    hello_timer_.resched((double)(SIMTIME_DBL(hello_ival()) - JITTER));
 }
 
 ///
@@ -2252,7 +2283,7 @@ OLSR::set_hello_timer()
 void
 OLSR::set_tc_timer()
 {
-    tc_timer_.resched((double)(tc_ival() - JITTER));
+    tc_timer_.resched((double)(SIMTIME_DBL(tc_ival()) - JITTER));
 }
 
 ///
@@ -2261,7 +2292,7 @@ OLSR::set_tc_timer()
 void
 OLSR::set_mid_timer()
 {
-    mid_timer_.resched((double)(mid_ival() - JITTER));
+    mid_timer_.resched((double)(SIMTIME_DBL(mid_ival()) - JITTER));
 }
 
 ///
@@ -2749,7 +2780,7 @@ void OLSR:: processLinkBreak(const cObject *details)
     {
         if (dynamic_cast<IPv4Datagram *>(const_cast<cObject*>(details)))
         {
-            IPv4Datagram * dgram = check_and_cast<IPv4Datagram *>(details);
+            IPv4Datagram * dgram = const_cast<IPv4Datagram *>(check_and_cast<const IPv4Datagram *>(details));
             mac_failed(dgram);
             return;
         }
@@ -2899,7 +2930,7 @@ bool OLSR::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, d
 
             InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
             iface = ie->getInterfaceId();
-            cost = rt_entry->route.size();
+            cost = rt_entry->dist();
             return true;
         }
         return false;
@@ -2915,7 +2946,7 @@ bool OLSR::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, d
 
     InterfaceEntry * ie = getInterfaceWlanByAddress(rt_entry->iface_addr());
     iface = ie->getInterfaceId();
-    cost = rt_entry->route.size();
+    cost = rt_entry->dist();
     return true;
 }
 
@@ -2964,7 +2995,7 @@ int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<ManetAddress> &add)
 
     int distance = 1000;
     add.clear();
-    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
         ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
@@ -2992,7 +3023,7 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr, ManetAddress &add, int &iface
 {
 
     int distance = 1000;
-    for (AddressGroup::const_iterator it = gr.begin(); it!=gr.end(); it++)
+    for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
         ManetAddress dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);

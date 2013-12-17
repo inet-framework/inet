@@ -1,6 +1,9 @@
 # ignore generated files
+.settings/
 *_m.h
 *_m.cc
+*_sm.h
+*_sm.cc
 src/Makefile
 src/Makefile.vc
 /doc/doxy/
@@ -9,6 +12,7 @@ src/Makefile.vc
 /examples/*/*/results/
 /examples/*/*/*/results/
 /tests/*/work/
+*.pyc
 *.pcap
 *.sca
 *.vec
@@ -27,7 +31,10 @@ out/
 *.manifest
 .tkenvrc
 .tkenvlog
+.cmdenv-log
+netanim-trace.txt
 *.out
+gcc-debug
 
 # ignore backup and temp files
 *.bak

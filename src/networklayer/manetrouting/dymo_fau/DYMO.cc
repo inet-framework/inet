@@ -225,8 +225,12 @@ void DYMO::handleMessage(cMessage* apMsg)
             }
             else if (control->getOptionCode() == MANET_ROUTE_UPDATE)
             {
-                updateRouteLifetimes(control->getSrcAddress());
-                updateRouteLifetimes(control->getDestAddress());
+                IPv4Address src = control->getSrcAddress().getIPv4();
+                IPv4Address dst = control->getDestAddress().getIPv4();
+                if (!src.isLimitedBroadcastAddress() && !src.isMulticast() && src.isUnspecified())
+                    updateRouteLifetimes(control->getSrcAddress());
+                if (!dst.isLimitedBroadcastAddress() && !dst.isMulticast() && !dst.isUnspecified())
+                    updateRouteLifetimes(control->getDestAddress());
             }
             delete apMsg;
             return;
@@ -338,21 +342,21 @@ void DYMO::handleLowerMsg(cPacket* apMsg)
     if (dynamic_cast<DYMO_RM*>(apMsg)) handleLowerRM(dynamic_cast<DYMO_RM*>(apMsg));
     else if (dynamic_cast<DYMO_RERR*>(apMsg)) handleLowerRERR(dynamic_cast<DYMO_RERR*>(apMsg));
     else if (dynamic_cast<DYMO_UERR*>(apMsg)) handleLowerUERR(dynamic_cast<DYMO_UERR*>(apMsg));
-    else if (apMsg->getKind() == UDP_I_ERROR) { ev << "discarded UDP error message" << endl; delete apMsg; }
+    else if (apMsg->getKind() == UDP_I_ERROR) { EV << "discarded UDP error message" << endl; delete apMsg; }
     else error("message is no DYMO Packet");
 }
 
 void DYMO::handleLowerRM(DYMO_RM *routingMsg)
 {
     /** message is a routing message **/
-    ev << "received message is a routing message" << endl;
+    EV << "received message is a routing message" << endl;
 
     statsDYMORcvd++;
 
     /** routing message  preprocessing and updating routes from routing blocks **/
     if (updateRoutes(routingMsg) == NULL)
     {
-        ev << "dropping received message" << endl;
+        EV << "dropping received message" << endl;
         delete routingMsg;
         return;
     }
@@ -442,7 +446,7 @@ void DYMO::handleLowerRMForMe(DYMO_RM *routingMsg)
 void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
 {
     /** current node is not the message destination -> find route to destination **/
-    ev << "current node is not the message destination -> find route to destination" << endl;
+    EV << "current node is not the message destination -> find route to destination" << endl;
 
     unsigned int targetAddr = routingMsg->getTargetNode().getAddress();
     unsigned int targetSeqNum = 0;
@@ -464,7 +468,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     if (dynamic_cast<DYMO_RREP*>(routingMsg) && (!entry))
     {
         /* do nothing, just drop the RREP */
-        ev << "no route to destination of RREP was found. Sending RERR and dropping message." << endl;
+        EV << "no route to destination of RREP was found. Sending RERR and dropping message." << endl;
         sendRERR(targetAddr, targetSeqNum);
         delete routingMsg;
         return;
@@ -474,7 +478,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     if (dynamic_cast<DYMO_RREQ*>(routingMsg) && (entry) && (routingMsg->getTargetNode().hasSeqNum()) && (!seqNumIsFresher(routingMsg->getTargetNode().getSeqNum(), entry->routeSeqNum)))
     {
         // yes, we can. Do intermediate DYMO router RREP creation
-        ev << "route to destination of RREQ was found. Sending intermediate DYMO router RREP" << endl;
+        EV << "route to destination of RREQ was found. Sending intermediate DYMO router RREP" << endl;
         sendReplyAsIntermediateRouter(routingMsg->getOrigNode(), routingMsg->getTargetNode(), entry);
         statsRREQRcvd++;
         delete routingMsg;
@@ -482,15 +486,15 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     }
 
     /** check whether a RREQ was sent to discover route to destination **/
-    ev << "received message is a RREQ" << endl;
-    ev << "trying to discover route to node " << targetAddr << endl;
+    EV << "received message is a RREQ" << endl;
+    EV << "trying to discover route to node " << targetAddr << endl;
 
     /** increment distance metric of existing AddressBlocks */
     std::vector<DYMO_AddressBlock> additional_nodes = routingMsg->getAdditionalNodes();
     std::vector<DYMO_AddressBlock> additional_nodes_to_relay;
     if (routingMsg->getOrigNode().hasDist() && (routingMsg->getOrigNode().getDist() >= 0xFF - 1))
     {
-        ev << "passing on this message would overflow OrigNode.Dist -> dropping message" << endl;
+        EV << "passing on this message would overflow OrigNode.Dist -> dropping message" << endl;
         delete routingMsg;
         return;
     }
@@ -499,7 +503,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     {
         if (additional_nodes[i].hasDist() && (additional_nodes[i].getDist() >= 0xFF - 1))
         {
-            ev << "passing on additionalNode would overflow OrigNode.Dist -> dropping additionalNode" << endl;
+            EV << "passing on additionalNode would overflow OrigNode.Dist -> dropping additionalNode" << endl;
             continue;
         }
         additional_nodes[i].incrementDistIfAvailable();
@@ -521,7 +525,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     // check hop limit
     if (routingMsg->getMsgHdrHopLimit() < 1)
     {
-        ev << "received message has reached hop limit -> delete message" << endl;
+        EV << "received message has reached hop limit -> delete message" << endl;
         delete routingMsg;
         return;
     }
@@ -529,7 +533,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     // do not transmit DYMO messages when we lost our sequence number
     if (ownSeqNumLossTimeout->isRunning())
     {
-        ev << "node has lost sequence number -> not transmitting anything" << endl;
+        EV << "node has lost sequence number -> not transmitting anything" << endl;
         delete routingMsg;
         return;
     }
@@ -537,7 +541,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     // do rate limiting
     if ((dynamic_cast<DYMO_RREQ*>(routingMsg)) && (!rateLimiterRREQ->consumeTokens(1, simTime())))
     {
-        ev << "RREQ send rate exceeded maximum -> not transmitting RREQ" << endl;
+        EV << "RREQ send rate exceeded maximum -> not transmitting RREQ" << endl;
         delete routingMsg;
         return;
     }
@@ -568,7 +572,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
     // get RERR's SourceInterface
     InterfaceEntry* sourceInterface = getNextHopInterface(my_rerr);
 
-    ev << "Received RERR from " << sourceAddr << endl;
+    EV << "Received RERR from " << sourceAddr << endl;
 
     // iterate over all unreachableNode entries
     std::vector<DYMO_AddressBlock> unreachableNodes = my_rerr->getUnreachableNodes();
@@ -598,7 +602,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
             // skip if route entry is fresher
             if (!((entry->routeSeqNum == 0) || (!unreachableNode.hasSeqNum()) || (!seqNumIsFresher(entry->routeSeqNum, unreachableNode.getSeqNum())))) continue;
 
-            ev << "RERR invalidates route to " << entry->routeAddress << " via " << entry->routeNextHopAddress << endl;
+            EV << "RERR invalidates route to " << entry->routeAddress << " via " << entry->routeNextHopAddress << endl;
 
             // mark as broken and delete associated forwarding route
             entry->routeBroken = true;
@@ -649,7 +653,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
     my_rerr->setUnreachableNodes(unreachableNodesToForward);
     my_rerr->setMsgHdrHopLimit(my_rerr->getMsgHdrHopLimit() - 1);
 
-    ev << "send down RERR" << endl;
+    EV << "send down RERR" << endl;
     sendDown(my_rerr, IPv4Address::LL_MANET_ROUTERS.getInt());
 
     statsRERRFwd++;
@@ -660,14 +664,14 @@ void DYMO::handleLowerUERR(DYMO_UERR *my_uerr)
     /** message is a UERR. **/
     statsDYMORcvd++;
 
-    ev << "Received unsupported UERR message" << endl;
+    EV << "Received unsupported UERR message" << endl;
     // to be finished
     delete my_uerr;
 }
 
 void DYMO::handleSelfMsg(cMessage* apMsg)
 {
-    ev << "handle self message" << endl;
+    EV << "handle self message" << endl;
     if (apMsg == timerMsg)
     {
         bool hasActive = false;
@@ -772,7 +776,7 @@ void DYMO::sendDown(cPacket* apMsg, int destAddr)
 void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targetSeqNum, unsigned int targetDist)
 {
     /** generate a new RREQ with the given pararmeter **/
-    ev << "send a RREQ to discover route to destination node " << destAddr << endl;
+    EV << "send a RREQ to discover route to destination node " << destAddr << endl;
 
     DYMO_RM *my_rreq = new DYMO_RREQ("RREQ");
     my_rreq->setMsgHdrHopLimit(msgHdrHopLimit);
@@ -789,7 +793,7 @@ void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targ
     // do not transmit DYMO messages when we lost our sequence number
     if (ownSeqNumLossTimeout->isRunning())
     {
-        ev << "node has lost sequence number -> not transmitting RREQ" << endl;
+        EV << "node has lost sequence number -> not transmitting RREQ" << endl;
         delete my_rreq;
         return;
     }
@@ -797,7 +801,7 @@ void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targ
     // do rate limiting
     if (!rateLimiterRREQ->consumeTokens(1, simTime()))
     {
-        ev << "RREQ send rate exceeded maximum -> not transmitting RREQ" << endl;
+        EV << "RREQ send rate exceeded maximum -> not transmitting RREQ" << endl;
         delete my_rreq;
         return;
     }
@@ -809,7 +813,7 @@ void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targ
 void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
 {
     /** create a new RREP and send it to given destination **/
-    ev << "send a reply to destination node " << destAddr << endl;
+    EV << "send a reply to destination node " << destAddr << endl;
 
     DYMO_RM * rrep = new DYMO_RREP("RREP");
     DYMO_RoutingEntry *entry = dymo_routingTable->getForAddress(IPv4Address(destAddr));
@@ -831,7 +835,7 @@ void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
     // do not transmit DYMO messages when we lost our sequence number
     if (ownSeqNumLossTimeout->isRunning())
     {
-        ev << "node has lost sequence number -> not transmitting anything" << endl;
+        EV << "node has lost sequence number -> not transmitting anything" << endl;
         return;
     }
 
@@ -843,7 +847,7 @@ void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
 void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, const DYMO_AddressBlock& targetNode, const DYMO_RoutingEntry* routeToTargetNode)
 {
     /** create a new RREP and send it to given destination **/
-    ev << "sending a reply to OrigNode " << origNode.getAddress() << endl;
+    EV << "sending a reply to OrigNode " << origNode.getAddress() << endl;
 
     DYMO_RoutingEntry* routeToOrigNode = dymo_routingTable->getForAddress(IPv4Address(origNode.getAddress()));
     if (!routeToOrigNode) error("no route to OrigNode found");
@@ -891,7 +895,7 @@ void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, cons
     // do not transmit DYMO messages when we lost our sequence number
     if (ownSeqNumLossTimeout->isRunning())
     {
-        ev << "node has lost sequence number -> not transmitting anything" << endl;
+        EV << "node has lost sequence number -> not transmitting anything" << endl;
         return;
     }
 
@@ -903,7 +907,7 @@ void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, cons
 
 void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
 {
-    ev << "generating an RERR" << endl;
+    EV << "generating an RERR" << endl;
     DYMO_RERR *rerr = new DYMO_RERR("RERR");
     std::vector<DYMO_AddressBlock> unode_vec;
 
@@ -930,7 +934,7 @@ void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
             DYMO_RoutingEntry* entry = RouteVector[i];
             if ((entry->routeNextHopAddress != brokenEntry->routeNextHopAddress) || (entry->routeNextHopInterface != brokenEntry->routeNextHopInterface)) continue;
 
-            ev << "Including in RERR route to " << entry->routeAddress << " via " << entry->routeNextHopAddress << endl;
+            EV << "Including in RERR route to " << entry->routeAddress << " via " << entry->routeNextHopAddress << endl;
 
             DYMO_AddressBlock unode;
             unode.setAddress(entry->routeAddress.getInt());
@@ -982,7 +986,7 @@ void DYMO::updateRouteLifetimes(const ManetAddress& targetAddr)
     rescheduleTimer();
 
     dymo_routingTable->maintainAssociatedRoutingTable();
-    ev << "lifetimes of route to destination node " << targetAddr << " are up to date "  << endl;
+    EV << "lifetimes of route to destination node " << targetAddr << " are up to date "  << endl;
 
     checkAndSendQueuedPkts(entry->routeAddress.getInt(), entry->routePrefix, (entry->routeNextHopAddress).getInt());
 }
@@ -1016,7 +1020,7 @@ bool DYMO::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool 
 
 void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
 {
-    ev << "Handling RREQ Timeouts for RREQ to " << outstandingRREQ.destAddr << endl;
+    EV << "Handling RREQ Timeouts for RREQ to " << outstandingRREQ.destAddr << endl;
 
     if (outstandingRREQ.tries < RREQ_TRIES)
     {
@@ -1024,7 +1028,7 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
         if (entry && (!entry->routeBroken))
         {
             /** an entry was found in the routing table -> get control data from the table, encapsulate message **/
-            ev << "RREQ timed out and we DO have a route" << endl;
+            EV << "RREQ timed out and we DO have a route" << endl;
 
             checkAndSendQueuedPkts(entry->routeAddress.getInt(), entry->routePrefix, entry->routeNextHopAddress.getInt());
 
@@ -1032,7 +1036,7 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
         }
         else
         {
-            ev << "RREQ timed out and we do not have a route yet" << endl;
+            EV << "RREQ timed out and we do not have a route yet" << endl;
             /** number of tries is less than RREQ_TRIES -> backoff and send the rreq **/
             outstandingRREQ.tries = outstandingRREQ.tries + 1;
             outstandingRREQ.wait_time->start(computeBackoff(outstandingRREQ.wait_time->getInterval()));
@@ -1083,13 +1087,13 @@ bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ
 
     if (!entry)
     {
-        ev << "adding routing entry for " << IPv4Address(ab.getAddress()) << endl;
+        EV << "adding routing entry for " << IPv4Address(ab.getAddress()) << endl;
         entry = new DYMO_RoutingEntry(this);
         dymo_routingTable->addRoute(entry);
     }
     else
     {
-        ev << "updating routing entry for " << IPv4Address(ab.getAddress()) << endl;
+        EV << "updating routing entry for " << IPv4Address(ab.getAddress()) << endl;
     }
 
     entry->routeAddress = IPv4Address(ab.getAddress());
@@ -1116,7 +1120,7 @@ bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ
 
 DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
 {
-    ev << "starting update routes from routing blocks in the received message" << endl;
+    EV << "starting update routes from routing blocks in the received message" << endl;
     std::vector<DYMO_AddressBlock> additional_nodes = pkt->getAdditionalNodes();
     std::vector<DYMO_AddressBlock> new_additional_nodes;
 
@@ -1139,13 +1143,13 @@ DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
         }
         else
         {
-            ev << "AdditionalNode AddressBlock has no valid information  -> dropping block from routing message" << endl;
+            EV << "AdditionalNode AddressBlock has no valid information  -> dropping block from routing message" << endl;
         }
     }
 
     if (!origNodeEntryWasSuperior)
     {
-        ev << "OrigNode AddressBlock had no valid information -> deleting received routing message" << endl;
+        EV << "OrigNode AddressBlock had no valid information -> deleting received routing message" << endl;
         return NULL;
     }
 
@@ -1170,11 +1174,11 @@ void DYMO::setMyAddr(unsigned int myAddr)
     if (statsRREQSent || statsRREPSent || statsRERRSent)
     {
         // TODO: Send RERRs, cold-start DYMO, lose sequence number instead?
-        ev << "Ignoring IPv4 Address change request. This node has already participated in DYMO." << endl;
+        EV << "Ignoring IPv4 Address change request. This node has already participated in DYMO." << endl;
         return;
     }
 
-    ev << "Now assuming this node is reachable at address " << myAddr << " (was " << this->myAddr << ")" << endl;
+    EV << "Now assuming this node is reachable at address " << myAddr << " (was " << this->myAddr << ")" << endl;
     this->myAddr = myAddr;
 
     // TODO: if IInterfaceTable was autoconfigured, change IPv4 Address there?

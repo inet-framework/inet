@@ -1,3 +1,27 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-02  Zoltan Bojthe
+
+	RTP: added NodeStatus DOWN detection
+
+2013-05-02  Zoltan Bojthe
+
+	RTP: added "unsupported" lifecycle
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missed in some
+	handleOperationStage() function
+
+2013-04-25  Levente Meszaros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

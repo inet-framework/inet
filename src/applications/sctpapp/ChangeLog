@@ -1,3 +1,47 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-29  Irene Ruengeler
+
+	sctp: Added the packet drop feature (draft-stewart-sctp-pktdrprep-15.txt), 
+	the "sack immediately" feature (draft-ietf-tsvwg-sctp-sack-immediately) 
+	and several alternatives to send fast retransmissions.
+
+2013-07-17  Irene Ruengeler
+
+	- Added 8 new strategies for stream scheduling
+	- Added NED parameters streamRequestLengths, streamRequestRatio, streamPriorities
+	- implemented SCTP Stream Reset (RFC 6525)
+	- new method: SCTPClient::sendStreamResetNotification()
+	- added missing sctp auth test.
+
+2013-07-03  Irene Ruengeler
+
+	Implementation of Partial Reliability SCTP (RFC 3758) 
+
+2013-05-02  Zoltan Bojthe
+
+	- Added NodeStatus::DOWN checks for initialize()
+
+	- lifecycle: Enter_Method_Silent() was missed in some
+	  handleOperationStage() function
+
+2013-04-25  Levente Meszaros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-22  Levente Meszaros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
+2013-04-03  Irene Ruengeler
+
+	Refactoring, doc changes, renames
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

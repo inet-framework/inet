@@ -8,9 +8,11 @@ import inet.applications.IUDPApp;
 import inet.applications.dhcp.DHCPClient;
 import inet.applications.dhcp.DHCPServer;
 import inet.base.NotificationBoard;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
-
+import inet.transport.udp.UDP;
 
 module DHCPNode
 {
@@ -25,6 +27,7 @@ module DHCPNode
         dhcpApp: <dhcpAppType> like IUDPApp {
             @display("p=217,247");
         }
+        udp : UDP;
         notificationBoard: NotificationBoard {
             @display("p=66,65");
         }
@@ -34,9 +37,19 @@ module DHCPNode
         routingTable: RoutingTable {
             @display("p=68,216");
         }
-    connections:
-        dhcpApp.udpOut --> dhcpOut;
-        dhcpIn --> dhcpApp.udpIn;
+        configurator: IPv4NodeConfigurator {
+            parameters:
+                @display("p=39,158");
+                networkConfiguratorModule = "";
+        }
+        lo0: LoopbackInterface {
+            @display("p=78,406");
+        }
+    connections allowunconnected:
+        dhcpApp.udpOut --> udp.appIn++;
+        dhcpApp.udpIn <-- udp.appOut++;
+        udp.ipOut --> dhcpOut;
+        udp.ipIn <-- dhcpIn;
 }
 
 network Dhcptest
@@ -66,14 +79,14 @@ ned-path = .;../../../../src;../../lib
 network = Dhcptest
 
 sim-time-limit = 10500s
+cmdenv-express-mode = true
 
 **.dhcpClient.dhcpApp.interface="lo0"   # interface to be configured
 
 **.dhcpServer.dhcpApp.typename = "DHCPServer"
-**.dhcpServer.dhcpApp.net = "192.168.1.0"        # IP network to assign
-**.dhcpServer.dhcpApp.mask = "255.255.255.0"        # netmask to assign
-**.dhcpServer.dhcpApp.ipBegin = "192.168.1.100"    # ip to start to lease
-**.dhcpServer.dhcpApp.clientNum = 100     # number of ip to lease
+**.dhcpServer.dhcpApp.subnetMask = "255.255.255.0"        # netmask to assign
+**.dhcpServer.dhcpApp.ipAddressStart = "192.168.1.100"    # ip to start to lease
+**.dhcpServer.dhcpApp.maxNumClients = 100     # number of ip to lease
 **.dhcpServer.dhcpApp.gateway = "192.168.1.1"     # gateway to assign
 **.dhcpServer.dhcpApp.dns = ""         # dns to assign
 **.dhcpServer.dhcpApp.leaseTime = 1000s     # lease time in seconds
@@ -82,60 +95,35 @@ sim-time-limit = 10500s
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
-     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
-     Messages:  created: 6   present: 6   in FES: 6
-scheduling process
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-scheduling process
-Host dhcpClient got ip: 192.168.1.100/255.255.255.0
-** Event #92   T=10500.022   Elapsed: 0.004s (0m 00s)  100% completed
-     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
-     Messages:  created: 136   present: 4   in FES: 3
 
-<!> Simulation time limit reached -- simulation stopped at event #92, t=10500.022.
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
+Host dhcpClient got ip: 192.168.1.100/255.255.255.0
 
+%contains: stdout
+<!> Simulation time limit reached -- simulation stopped at event #159, t=10500.
 
-Calling finish() at end of Run #0...
-
-End.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

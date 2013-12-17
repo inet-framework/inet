@@ -105,6 +105,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     //@{
     IPv4Address getIPAddress() const {return inetAddr;}
     IPv4Address getNetmask() const {return netmask;}
+    IPv4Address getNetworkBroadcastAddress() const {return inetAddr.makeBroadcastAddress(netmask);}
     int getMetric() const  {return metric;}
     int getMulticastTtlThreshold() const {return getRouterData()->multicastTtlThreshold;}
     const IPv4AddressVector& getJoinedMulticastGroups() const {return getHostData()->joinedMulticastGroups;}

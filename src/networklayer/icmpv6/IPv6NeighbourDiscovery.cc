@@ -23,6 +23,8 @@
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
 #include "InterfaceTableAccess.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTable6Access.h"
 
 #ifdef WITH_xMIPv6
@@ -64,7 +66,15 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     // We have to wait until the 3rd stage (stage 2) with scheduling messages,
     // because interface registration and IPv6 configuration takes places
     // in the first two stages.
-    if (stage == 3)
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)
     {
         ift = InterfaceTableAccess().get();
         rt6 = RoutingTable6Access().get();
@@ -208,6 +218,11 @@ void IPv6NeighbourDiscovery::processNDMessage(ICMPv6Message *msg, IPv6ControlInf
     {
         error("Unrecognized ND message!");
     }
+}
+
+bool IPv6NeighbourDiscovery::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
 void IPv6NeighbourDiscovery::finish()
@@ -790,7 +805,7 @@ void IPv6NeighbourDiscovery::assignLinkLocalAddress(cMessage *timerMsg)
             //if no link local address exists for this interface, we assign one to it.
                 EV << "No link local address exists. Forming one" << endl;
             linkLocalAddr = IPv6Address().formLinkLocalAddress(ie->getInterfaceToken());
-            ie->ipv6Data()->assignAddress(linkLocalAddr, true, 0, 0);
+            ie->ipv6Data()->assignAddress(linkLocalAddr, true, SIMTIME_ZERO, SIMTIME_ZERO);
         }
 
         //Before we can use this address, we MUST initiate DAD first.
@@ -2689,7 +2704,7 @@ bool IPv6NeighbourDiscovery::canServeWirelessNodes(InterfaceEntry *ie)
     if (connectedGate != NULL)
     {
         cModule* connectedNode = connectedGate->getOwnerModule();
-        ASSERT(isNode(connectedNode));
+        ASSERT(isNetworkNode(connectedNode));
         if (isWirelessAccessPoint(connectedNode))
             return true;
     }
@@ -2709,7 +2724,7 @@ bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule* module)
 {
     // AccessPoint is defined as a node containing "relayUnit" and
     // "wlan" submodules
-    return (isNode(module) && module->getSubmodule("relayUnit") &&
+    return (isNetworkNode(module) && module->getSubmodule("relayUnit") &&
             (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan")));
 }
 #endif /* WITH_xMIPv6 */

@@ -98,3 +98,9 @@ t=142\..* router/eth0/225.0.0.1: CHECKING_MEMBERSHIP --> timer expired <> --> NO
 t=200\..* router/eth0/225.0.0.2: QUERIER NO_MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
 t=20.\..* router/eth0/225.0.0.2: QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> QUERIER MEMBERS_PRESENT NON_MEMBER
 t=30.\..* router/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

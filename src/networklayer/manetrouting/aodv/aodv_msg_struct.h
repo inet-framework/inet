@@ -81,8 +81,15 @@ struct RERR : public AODV_msg
     unsigned short res2;
     u_int8_t dest_count;
     RERR_udest *   _udest;
-  public:
-    explicit RERR(const char *name="RERRAodvMsg") : AODV_msg (name) {setBitLength(12*8); dest_count=0; _udest=NULL;}
+    explicit RERR(const char *name="RERRAodvMsg") : AODV_msg (name)
+    {
+        res1 = 0;
+        n = 0;
+        res2 = 0;
+        dest_count = 0;
+        _udest = NULL;
+        setBitLength(12*8);
+    }
     ~RERR ();
     RERR (const RERR &m);
     unsigned short getRes1() const {return res1;}
@@ -120,10 +127,24 @@ struct RREP : public AODV_msg
     u_int32_t lifetime;
     uint32_t cost;
     uint8_t  hopfix;
-    AODV_ext *extension;
-
-  public:
-    explicit RREP (const char *name="RREPAodvMsg") : AODV_msg (name) {setBitLength(20*8);}
+    uint8_t  totalHops;
+    explicit RREP (const char *name="RREPAodvMsg") : AODV_msg (name)
+    {
+        setBitLength(20*8);
+        res1 = 0;
+        a = 0;
+        r = 0;
+        prefix = 0;
+        res2 = 0;
+        hcnt = 0;
+        dest_addr = ManetAddress::ZERO;
+        dest_seqno = 0;
+        orig_addr = ManetAddress::ZERO;
+        lifetime = 0;
+        cost = 0;
+        hopfix = 0;
+        totalHops = 0;
+    }
     RREP (const RREP &m);
     RREP &  operator= (const RREP &m);
     virtual RREP *dup() const {return new RREP(*this);}
@@ -142,8 +163,6 @@ struct RREP : public AODV_msg
     uint32_t getLifetime() const {return lifetime;}
     uint32_t getCost() const {return cost;}
     uint8_t  getHopfix() const {return hopfix;}
-    AODV_ext& getExtension(int i) const {return extension[i];}
-    int getExtensionArraySize() const {return 0;} //FIXME!!!!!!
   private:
     void copy(const RREP& other);
 } ;
@@ -181,9 +200,25 @@ struct RREQ : public AODV_msg
     u_int32_t orig_seqno;
     uint32_t   cost;
     uint8_t  hopfix;
+    explicit RREQ(const char *name="RREQAodvMsg") : AODV_msg (name)
+    {
+        j = 0;
+        r = 0;     /* Repair flag */
+        g = 0;     /* Gratuitous RREP flag */
+        d = 0;     /* Destination only respond */
+        res1 = 0;
+        res2 = 0;
+        hcnt  = 0;
+        rreq_id = 0;
+        dest_addr = ManetAddress::ZERO;
+        dest_seqno = 0;
+        orig_addr = ManetAddress::ZERO;
+        orig_seqno = 0;
+        cost = 0;
+        hopfix = 0;
+        setBitLength(24*8);
+    }
 
-  public:
-    explicit RREQ(const char *name="RREQAodvMsg") : AODV_msg (name) {setBitLength(24*8);}
     RREQ (const RREQ &m);
     RREQ &  operator= (const RREQ &m);
     virtual RREQ *dup() const {return new RREQ(*this);}

@@ -26,7 +26,7 @@
 
 #include "OSPFcommon.h"
 #include "OSPFNeighbor.h"
-#include "OSPFTimer_m.h"
+#include "OSPFTimer.h"
 
 namespace OSPF {
 
@@ -80,9 +80,9 @@ private:
     short                                                               routerDeadInterval;
     short                                                               interfaceTransmissionDelay;
     unsigned char                                                       routerPriority;
-    OSPFTimer*                                                          helloTimer;
-    OSPFTimer*                                                          waitTimer;
-    OSPFTimer*                                                          acknowledgementTimer;
+    cMessage*                                                           helloTimer;
+    cMessage*                                                           waitTimer;
+    cMessage*                                                           acknowledgementTimer;
     std::map<RouterID, Neighbor*>                                       neighboringRoutersByID;
     std::map<IPv4Address, Neighbor*>                                    neighboringRoutersByAddress;
     std::vector<Neighbor*>                                              neighboringRouters;
@@ -156,9 +156,9 @@ public:
     void                    setAddressRange(IPv4AddressRange range)  { interfaceAddressRange = range; }
     IPv4AddressRange        getAddressRange() const  { return interfaceAddressRange; }
 
-    OSPFTimer*              getHelloTimer()  { return helloTimer; }
-    OSPFTimer*              getWaitTimer()  { return waitTimer; }
-    OSPFTimer*              getAcknowledgementTimer()  { return acknowledgementTimer; }
+    cMessage*               getHelloTimer()  { return helloTimer; }
+    cMessage*               getWaitTimer()  { return waitTimer; }
+    cMessage*               getAcknowledgementTimer()  { return acknowledgementTimer; }
     DesignatedRouterID      getDesignatedRouter() const  { return designatedRouter; }
     DesignatedRouterID      getBackupDesignatedRouter() const  { return backupDesignatedRouter; }
     unsigned long           getNeighborCount() const  { return neighboringRouters.size(); }

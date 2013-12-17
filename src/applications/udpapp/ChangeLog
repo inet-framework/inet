@@ -1,3 +1,39 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-04  Zoltan Bojthe
+
+	apps: stopTime checks changed: send packet when simTime() <= stopTime
+	(some apps tested "simTime() < stopTime", other apps tested for "simTime()<= stopTime")
+
+2013-06-13  Zoltan Bojthe
+
+	- UDPBasicApp: removed static member 'counter', changed how message names are generated
+	- merged createPacket() into sendPacket()
+
+2013-05-08  Levente Meszaros
+
+	- UDPSink: Added some text output for testing.
+	- UDPBasicApp: Added check to skip unresolved destination addresses in.
+
+2013-04-24  Zoltan Bojthe
+
+	udp apps: refactoring to prepare for lifecycle support
+
+	- Added AppBase and subclassed UDP apps from it
+	- bind sockets at startTime
+	- if module hasn't have startTime parameter: at initialize stage 1 or
+	  larger
+	- close sockets at stopTime
+	- UDPBasicBurst: added bool parameter: excludeLocalDestAddresses + 
+	                 minor refactoring (no fingerprint change)
+	- UDPVideoStreamCli: use stages in initialize (fingerprint change)
+
+2013-04-22  Levente Meszaros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

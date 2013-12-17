@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2010 Thomas Dreibholz
+// Copyright (C) 2010-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -26,9 +26,9 @@ SCTPSendStream::SCTPSendStream(const uint16 id)
 
     char queueName[64];
     snprintf(queueName, sizeof(queueName), "OrderedSendQueue ID %d", id);
-    streamQ = new cQueue(queueName);
+    streamQ = new cPacketQueue(queueName);
     snprintf(queueName, sizeof(queueName), "UnorderedSendQueue ID %d", id);
-    uStreamQ = new cQueue(queueName);
+    uStreamQ = new cPacketQueue(queueName);
 }
 
 SCTPSendStream::~SCTPSendStream()
@@ -38,9 +38,9 @@ SCTPSendStream::~SCTPSendStream()
 
 void SCTPSendStream::deleteQueue()
 {
-    SCTPDataMsg*         datMsg;
+    SCTPDataMsg* datMsg;
     SCTPSimpleMessage* smsg;
-    int32                    count = streamQ->length();
+    int32 count = streamQ->length();
     while (!streamQ->empty()) {
         datMsg = check_and_cast<SCTPDataMsg*>(streamQ->pop());
         smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
@@ -56,4 +56,6 @@ void SCTPSendStream::deleteQueue()
     }
     delete streamQ;
     delete uStreamQ;
+    totalLength = 0;
 }
+

@@ -22,8 +22,8 @@ package inet.linklayer.ethernet;
 
 import inet.base.IHook;
 import inet.linklayer.IEtherMAC;
-import inet.linklayer.IWiredNic;
 import inet.linklayer.ITrafficConditioner;
+import inet.linklayer.IWiredNic;
 
 
 //
@@ -34,11 +34,11 @@ module EthernetInterface like IWiredNic
 {
     parameters:
         bool csmacdSupport = default(false);  // by default CSMA/CD is turned off, so only point-to-point duplex links are supported.
-        bool useSNAP = default(false);  // use EtherFrameWithSNAP instead EthernetIIFrame
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // ~DropTailQueue, or a Diffserv queue; set to "" for use of an internal queue
         string ingressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of incoming traffic
         string egressTCType = default(""); // a module type implementing ~ITrafficConditioner for optional traffic conditioning of outgoing traffic
+        string encapType = default("EtherEncap");   // module for encapsulation/decapsulation; use ~EtherEncapDummy for no encapsulation/decapsulation
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         @display("i=block/ifcard;bgl=2");
@@ -70,38 +70,48 @@ module EthernetInterface like IWiredNic
                 txQueueLimit = (queueType == "" ? 10000 : 1); // queue sends one packet at a time
                 @display("p=182,321");
         }
-        encap: EtherEncap {
+        encap: <encapType> like IEtherEncap {
             parameters:
-                useSNAP = useSNAP;
                 @display("p=182,205");
         }
     connections:
-        encap.lowerLayerOut --> queue.in if queueType != "";
-        queue.out --> mac.upperLayerIn if queueType != "";
-        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
-        encap.lowerLayerIn <-- mac.upperLayerOut;
+        mac.upperLayerOut --> encap.lowerLayerIn;
         mac.phys <--> { @display("m=s"); } <--> phys;
 
-        // chain input hooks
-        for i=0..numInputHooks-2 {
-            inputHook[i].out --> inputHook[i+1].in;
+        if queueType != "" {
+            encap.lowerLayerOut --> queue.in ;
+            queue.out --> mac.upperLayerIn;
         }
+
+        encap.lowerLayerOut --> mac.upperLayerIn if queueType == "";
 
         // no input hooks, no ingressTC
         encap.upperLayerOut --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType == "";
 
         // no input hooks, there is ingressTC
-        encap.upperLayerOut --> ingressTC.in if numInputHooks == 0 && ingressTCType != "";
-        ingressTC.out --> { @display("m=n"); } --> upperLayerOut if numInputHooks == 0 && ingressTCType != "";
+        if numInputHooks == 0 && ingressTCType != "" {
+            encap.upperLayerOut --> ingressTC.in;
+            ingressTC.out --> { @display("m=n"); } --> upperLayerOut;
+        }
+
+        // there are input hooks
+        if numInputHooks > 0 {
+            inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut;
+        }
+        for i=0..numInputHooks-2 {
+            inputHook[i].out --> inputHook[i+1].in;
+        }
 
         // there are input hooks, no ingressTC
-        encap.upperLayerOut --> inputHook[0].in if numInputHooks > 0 && ingressTCType == "";
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0 && ingressTCType == "";
+        if numInputHooks > 0 && ingressTCType == "" {
+            encap.upperLayerOut --> inputHook[0].in;
+        }
 
         // there are input hooks, there is ingressTC
-        encap.upperLayerOut --> ingressTC.in if numInputHooks > 0 && ingressTCType != "";
-        ingressTC.out --> inputHook[0].in if numInputHooks > 0 && ingressTCType != "";
-        inputHook[numInputHooks-1].out --> { @display("m=n"); } --> upperLayerOut if numInputHooks > 0 && ingressTCType == "";
+        if numInputHooks > 0 && ingressTCType != "" {
+            encap.upperLayerOut --> ingressTC.in;
+            ingressTC.out --> inputHook[0].in;
+        }
 
         // chain output hooks
         for i=0..numOutputHooks-2 {
@@ -111,17 +121,29 @@ module EthernetInterface like IWiredNic
         // no output hooks, no egressTC
         upperLayerIn --> { @display("m=n"); } --> encap.upperLayerIn if numOutputHooks == 0 && egressTCType == "";
 
+        // there are output hooks
+        if numOutputHooks > 0 {
+            upperLayerIn --> { @display("m=n"); } --> outputHook[0].in;
+        }
+
         // no output hooks, there is egressTC
-        upperLayerIn --> { @display("m=n"); } --> egressTC.in if numOutputHooks == 0 && egressTCType != "";
-        egressTC.out --> encap.upperLayerIn if numOutputHooks == 0 && egressTCType != "";
+        if numOutputHooks == 0 && egressTCType != "" {
+            upperLayerIn --> { @display("m=n"); } --> egressTC.in;
+        }
+
+        // there is egressTC
+        if egressTCType != "" {
+            egressTC.out --> encap.upperLayerIn;
+        }
 
         // there are output hooks, no egressTC
-        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0 && egressTCType == "";
-        outputHook[numOutputHooks-1].out --> encap.upperLayerIn if numOutputHooks > 0 && egressTCType == "";
+        if numOutputHooks > 0 && egressTCType == "" {
+            outputHook[numOutputHooks-1].out --> encap.upperLayerIn;
+        }
 
         // there are output hooks, there is egressTC
-        upperLayerIn --> { @display("m=n"); } --> outputHook[0].in if numOutputHooks > 0 && egressTCType != "";
-        outputHook[numInputHooks-1].out --> egressTC.in if numOutputHooks > 0 && egressTCType != "";
-        egressTC.out --> encap.upperLayerIn if numOutputHooks > 0 && egressTCType != "";
+        if numOutputHooks > 0 && egressTCType != "" {
+            outputHook[numInputHooks-1].out --> egressTC.in;
+        }
 }
 

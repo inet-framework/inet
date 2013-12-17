@@ -26,7 +26,8 @@
 
 #include "IPvXAddress.h"
 #include "IPvXTrafSink.h"
-
+#include "ILifecycle.h"
+#include "NodeStatus.h"
 
 /**
  * IP traffic generator application. See NED for more info.
@@ -34,18 +35,31 @@
 class INET_API IPvXTrafGen : public IPvXTrafSink
 {
   protected:
+    enum Kinds {START=100, NEXT};
+    cMessage *timer;
     int protocol;
     int numPackets;
+    simtime_t startTime;
     simtime_t stopTime;
     std::vector<IPvXAddress> destAddresses;
-    cPar *packetLengthPar;  // volatile packetLength parameter
-
-    static int counter; // counter for generating a global number for each packet
+    cPar *sendIntervalPar;
+    cPar *packetLengthPar;
+    NodeStatus *nodeStatus;
 
     int numSent;
     static simsignal_t sentPkSignal;
 
+  public:
+    IPvXTrafGen();
+    virtual ~IPvXTrafGen();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   protected:
+    virtual void scheduleNextPacket(simtime_t previous);
+    virtual void cancelNextPacket();
+    virtual bool isNodeUp();
+    virtual bool isEnabled();
+
     // chooses random destination address
     virtual IPvXAddress chooseDestAddr();
     virtual void sendPacket();

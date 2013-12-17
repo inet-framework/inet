@@ -1,0 +1,37 @@
+<config>
+  <interface hosts='A1' names='ppp0' address='10.10.10.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='A1' names='ppp1' address='172.1.10.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='A2' names='ppp0' address='10.10.20.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='A2' names='ppp1' address='172.1.20.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='B1' names='ppp0' address='10.10.20.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='B1' names='ppp1' address='10.10.30.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='B1' names='eth0' address='172.10.4.255' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='C1' names='ppp0' address='10.10.10.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C1' names='ppp1' address='172.13.1.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C2' names='ppp0' address='10.10.30.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C2' names='ppp1' address='172.13.2.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C3' names='ppp0' address='10.10.40.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C3' names='ppp1' address='172.13.3.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C4' names='ppp0' address='10.10.50.1' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='C4' names='ppp1' address='172.13.4.255' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='D1' names='ppp0' address='10.10.40.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='D1' names='eth0' address='172.10.8.255' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='E1' names='ppp0' address='10.10.50.2' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='E1' names='eth0' address='172.15.0.255' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='RA3' names='ppp0' address='172.1.10.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RA3' names='ppp1' address='172.1.20.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RA3' names='eth0' address='172.1.0.255' netmask='255.255.255.0' metric='1'/>
+  <interface hosts='RC5' names='ppp0' address='172.13.1.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RC5' names='ppp1' address='172.13.2.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RC5' names='ppp2' address='172.13.3.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='RC5' names='ppp3' address='172.13.4.254' netmask='255.255.255.0' groups='224.0.0.1 224.0.0.2 224.0.0.5' metric='1'/>
+  <interface hosts='HA11' names='eth0' address='172.1.0.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HA12' names='eth0' address='172.1.0.2' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HB11' names='eth0' address='172.10.4.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HB12' names='eth0' address='172.10.4.2' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HD11' names='eth0' address='172.10.8.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HD12' names='eth0' address='172.10.8.2' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HE11' names='eth0' address='172.15.0.1' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <interface hosts='HE12' names='eth0' address='172.15.0.2' netmask='255.255.255.0' mtu='1500' metric='1'/>
+  <route hosts='H*' destination='*' netmask='*' interface='eth0'/>
+</config>

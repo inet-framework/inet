@@ -22,6 +22,8 @@
 
 #include <map>
 #include <list>
+
+#include "ILifecycle.h"
 #include "UDPControlInfo.h"
 
 class IPv4ControlInfo;
@@ -40,7 +42,7 @@ const bool DEFAULT_MULTICAST_LOOP = true;
  *
  * More info in the NED file.
  */
-class INET_API UDP : public cSimpleModule
+class INET_API UDP : public cSimpleModule, public ILifecycle
 {
   public:
     struct SockDesc
@@ -50,6 +52,7 @@ class INET_API UDP : public cSimpleModule
         int appGateIndex;
         bool isBound;
         bool onlyLocalPortIsSet;
+        bool reuseAddr;
         IPvXAddress localAddr;
         IPvXAddress remoteAddr;
         int localPort;
@@ -62,7 +65,7 @@ class INET_API UDP : public cSimpleModule
         std::map<IPvXAddress,int> multicastAddrs; // key: multicast address; value: output interface Id or -1
     };
 
-    typedef std::list<SockDesc *> SockDescList;
+    typedef std::list<SockDesc *> SockDescList;   // might contain duplicated local addresses if their reuseAddr flag is set
     typedef std::map<int,SockDesc *> SocketsByIdMap;
     typedef std::map<int,SockDescList> SocketsByPortMap;
 
@@ -82,6 +85,8 @@ class INET_API UDP : public cSimpleModule
     int numDroppedWrongPort;
     int numDroppedBadChecksum;
 
+    bool isOperational;
+
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
     static simsignal_t passedUpPkSignal;
@@ -99,11 +104,13 @@ class INET_API UDP : public cSimpleModule
     virtual void bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int localPort);
     virtual void connect(int sockId, int gateIndex, const IPvXAddress& remoteAddr, int remotePort);
     virtual void close(int sockId);
+    virtual void clearAllSockets();
     virtual void setTimeToLive(SockDesc *sd, int ttl);
     virtual void setTypeOfService(SockDesc *sd, int typeOfService);
     virtual void setBroadcast(SockDesc *sd, bool broadcast);
     virtual void setMulticastOutputInterface(SockDesc *sd, int interfaceId);
     virtual void setMulticastLoop(SockDesc *sd, bool loop);
+    virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& multicastAddresses);
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const IPvXAddress& multicastAddr);
@@ -113,7 +120,7 @@ class INET_API UDP : public cSimpleModule
 
     virtual SockDesc *findSocketForUnicastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort);
     virtual std::vector<SockDesc*> findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
-    virtual SockDesc *findSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort);
+    virtual SockDesc *findFirstSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
     virtual void sendDown(cPacket *appData, const IPvXAddress& srcAddr, ushort srcPort, const IPvXAddress& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
     virtual void processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl);
@@ -134,12 +141,16 @@ class INET_API UDP : public cSimpleModule
     // create a blank UDP packet; override to subclass UDPPacket
     virtual UDPPacket *createUDPPacket(const char *name);
 
+    // ILifeCycle:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
   public:
-    UDP() {}
+    UDP();
     virtual ~UDP();
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
 };
 

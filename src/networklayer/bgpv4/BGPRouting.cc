@@ -16,6 +16,9 @@
 //
 
 #include "BGPRouting.h"
+
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTableAccess.h"
 #include "OSPFRouting.h"
 #include "BGPSession.h"
@@ -36,7 +39,15 @@ BGPRouting::~BGPRouting(void)
 
 void BGPRouting::initialize(int stage)
 {
-    if (stage==4) // we must wait until RoutingTable is completely initialized
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage==4) // we must wait until RoutingTable is completely initialized
     {
         _rt = RoutingTableAccess().get();
         _inft = InterfaceTableAccess().get();
@@ -92,6 +103,11 @@ void BGPRouting::handleTimer(cMessage *timer)
                 throw cRuntimeError("Invalid timer kind %d", timer->getKind());
         }
     }
+}
+
+bool BGPRouting::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
 void BGPRouting::finish()

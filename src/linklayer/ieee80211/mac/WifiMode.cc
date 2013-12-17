@@ -639,14 +639,14 @@ WifiModulationType::getPayloadDuration(uint64_t size, ModulationType payloadMode
                 aux = numSymbols*symbolDurationUs + 6;
             else
                 aux = numSymbols*symbolDurationUs;
-            val = (aux/1000000);
+            val = (aux/1000000.0);
             return val;
         }
         case MOD_CLASS_DSSS:
             // IEEE Std 802.11-2007, section 18.2.3.5
             double aux;
             aux = lrint(ceil((size) / (payloadMode.getDataRate() / 1.0e6)));
-            val = (aux/1000000);
+            val = (aux/1000000.0);
             return val;
             break;
         default:
@@ -725,15 +725,15 @@ WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamble preambl
             switch (modType.getBandwidth())
             {
                 case 5000000:
-                    return (21/1000000);
+                    return (21.0/1000000.0);
                 case 10000000:
-                    return (13/1000000);
+                    return (13.0/1000000.0);
                 default:
                     // IEEE Std 802.11-2007, 17.3.2
                     // actually this is only the first part of the PlcpHeader,
                     // because the last 16 bits of the PlcpHeader are using the
                     // same mode of the payload
-                    return (9/1000000);
+                    return (9.0/1000000.0);
             }
             break;
         }
@@ -741,18 +741,18 @@ WifiModulationType::getSlotDuration(ModulationType modType, WifiPreamble preambl
             if (preamble == WIFI_PREAMBLE_LONG)
             {
                 // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
-                return (20/1000000);
+                return (20.0/1000000.0);
             }
             else //  WIFI_PREAMBLE_SHORT
             {
                 // IEEE Std 802.11-2007, section 18.2.2.2
-                return (9/1000000);
+                return (9.0/1000000.0);
             }
         case MOD_CLASS_DSSS:
-            return (20/1000000);
+            return (20.0/1000000.0);
         default:
             opp_error("unsupported modulation class");
-            return 0;
+            return SIMTIME_ZERO;
     }
 }
 
@@ -766,26 +766,26 @@ WifiModulationType::getSifsTime(ModulationType modType, WifiPreamble preamble)
             switch (modType.getBandwidth())
             {
                 case 5000000:
-                    return (64/1000000);
+                    return (64.0/1000000.0);
                 case 10000000:
-                    return (32/1000000);
+                    return (32.0/1000000.0);
                 default:
                     // IEEE Std 802.11-2007, 17.3.2
                     // actually this is only the first part of the PlcpHeader,
                     // because the last 16 bits of the PlcpHeader are using the
                     // same mode of the payload
-                    return (16/1000000);
+                    return (16.0/1000000);
             }
             break;
         }
         case MOD_CLASS_ERP_OFDM:
             // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
-            return (10/1000000);
+            return (10.0/1000000.0);
         case MOD_CLASS_DSSS:
-            return (10/1000000);
+            return (10.0/1000000.0);
         default:
             opp_error("unsupported modulation class");
-        return 0;
+        return SIMTIME_ZERO;
     }
 }
 
@@ -799,34 +799,34 @@ WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble
             switch (modType.getBandwidth())
             {
                 case 5000000:
-                    return (97/1000000);
+                    return (97.0/1000000.0);
                 case 10000000:
-                    return (49/1000000);
+                    return (49.0/1000000.0);
                 default:
                     // IEEE Std 802.11-2007, 17.3.2
                     // actually this is only the first part of the PlcpHeader,
                     // because the last 16 bits of the PlcpHeader are using the
                     // same mode of the payload
-                    return (25/1000000);
+                    return (25.0/1000000.0);
             }
         }
         case MOD_CLASS_ERP_OFDM:
             // IEEE Std 802.11-2007, section 18.2.2.2
-            return (24/1000000);
+            return (24.0/1000000.0);
         case MOD_CLASS_DSSS:
             if (preamble == WIFI_PREAMBLE_LONG)
             {
                 // IEEE Std 802.11-2007, sections 15.2.3 and 18.2.2.1
-                return (192/1000000);
+                return (192.0/1000000.0);
             }
             else //  WIFI_PREAMBLE_SHORT
             {
                 // IEEE Std 802.11-2007, section 18.2.2.2
-                return (96/1000000);
+                return (96.0/1000000.0);
             }
          default:
              opp_error("unsupported modulation class");
-         return 0;
+         return SIMTIME_ZERO;
     }
 }
 

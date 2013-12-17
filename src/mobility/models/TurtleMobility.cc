@@ -85,7 +85,8 @@ void TurtleMobility::resumeScript()
 {
     simtime_t now = simTime();
 
-    do {
+    while (nextChange == now)
+    {
         if (nextStatement != NULL)
         {
             executeStatement(nextStatement);
@@ -97,7 +98,7 @@ void TurtleMobility::resumeScript()
             stationary = true;
             targetPosition = lastPosition;
         }
-    } while (nextChange == now);
+    }
 }
 
 void TurtleMobility::executeStatement(cXMLElement *stmt)

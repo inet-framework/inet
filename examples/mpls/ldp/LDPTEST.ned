@@ -14,15 +14,19 @@
 
 package inet.examples.mpls.ldp;
 
-import ned.DatarateChannel;
-import inet.world.scenario.ScenarioManager;
-import inet.nodes.mpls.LDP_LSR;
+import inet.base.LifecycleController;
+import inet.base.UnimplementedModule;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.extras.FailureManager;
+import inet.nodes.mpls.LDP_LSR;
+import inet.world.scenario.ScenarioManager;
+import ned.DatarateChannel;
 
 
 network LDPTEST
 {
+    parameters:
+        **.networkLayer.configurator.networkConfiguratorModule = "";
+
     types:
         channel C5 extends DatarateChannel
         {
@@ -39,6 +43,7 @@ network LDPTEST
             datarate = 600kbps;
             delay = 15us;
         }
+
     submodules:
         LSR1: LDP_LSR {
             parameters:
@@ -95,7 +100,7 @@ network LDPTEST
             parameters:
                 @display("p=150,50");
         }
-        failureManager: FailureManager {
+        lifecycleController: LifecycleController {
             parameters:
                 @display("p=350,50");
         }

@@ -35,10 +35,10 @@
 #define LL_INFO 1
 #define LL_DEBUG 2
 
-#define EV_DEBUG EV << getFullPath() << " #DEBUG#    : "
-#define EV_INFO EV << getFullPath() << " #INFO#     : "
-#define EV_WARNING EV << getFullPath() << " #WARNING#  : "
-#define EV_ERROR EV << getFullPath() << " #ERROR#    : "
-#define EV_SUMMARY EV << getFullPath() << " #SUMMARY#    : "
+#ifdef OPP_LOG  /*TODO: OMNETPP_VERSION >= 0x500 */
+  #define EV_SUMMARY EV_INFO_C("summary")
+#else
+  #define EV_SUMMARY EV << "SUMMARY: "
+#endif
 
 #endif

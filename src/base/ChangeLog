@@ -1,3 +1,88 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-14  Tamas Borbely
+
+	NotifierConsts.h: added new multicast-related and other notification
+	constants that will be needed by the ANSA project:
+
+	IPv4 multicast: NF_IPv4_NEW_MULTICAST, NF_IPv4_NEW_MULTICAST_DENSE,
+	NF_IPv4_NEW_MULTICAST_SPARSE, NF_IPv4_NEW_IGMP_ADDED,
+	NF_IPv4_NEW_IGMP_REMOVED, NF_IPv4_DATA_ON_NONRPF, NF_IPv4_DATA_ON_RPF,
+	NF_IPv4_RPF_CHANGE, NF_IPv4_DATA_ON_RPF_PIMSM, NF_IPv4_MDATA_REGISTER,
+	NF_IPv4_NEW_IGMP_ADDED_PISM, NF_IPv4_NEW_IGMP_REMOVED_PIMSM
+
+	IPv6 multicast: IPv6 NF_IPv6_MCAST_JOIN, NF_IPv6_MCAST_LEAVE,
+	NF_IPv6_MCAST_REGISTERED, NF_IPv6_MCAST_UNREGISTERED
+
+	Other: CLNS NF_CLNS_ROUTE_ADDED, NF_CLNS_ROUTE_DELETED,
+	NF_CLNS_ROUTE_CHANGED, NF_ISIS_ADJ_CHANGED
+
+2013-05-23  Zoltan Bojthe
+
+	Coord: fixed info(): print "(x, y, z)" instead of the pointer
+
+2013-04-29  Andras Varga
+
+	Interface operations (InterfaceOperation) removed for now
+
+2013-04-27  Andras Varga
+
+	AbstractQueue: added cancelService()
+
+2013-04-27  Andras Varga
+
+	Added lifecycle infrastructure: ILifecycle, LifecycleController,
+	NodeStatus, etc.
+
+	Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
+	NodeShutdownOperation) is applied to the submodule tree of the  node
+	(host or router) by LifecycleController. Each module can decide how to
+	handle the operation and how to store the resulting state (up/down,etc).
+	Operations can be multi-stage, and don't need to complete immediately
+	(i.e. they can take nonzero simulation time and multiple events to
+	complete).
+
+	Network nodes now also have a status submodule (type NodeStatus) with
+	the sole purpose of storing the whole node's status (up/down) and
+	displaying it via icons.
+
+	- classes: ILifecycle, LifecycleOperation (NodeOperation, InterfaceOperation),
+	  LifecycleController, NodeStatus
+	- NodeStatus module to store the network node's status (up or down)
+	- added optional NodeStatus submodule to NodeBase
+	- added a test for the basic Lifecycle infrastructure
+
+2013-04-27  Andras Varga
+
+	ModuleAccess: isNode() renamed to isNetworkNode()
+
+2013-04-14  Andras Varga
+
+	queues: added pop() to IPassiveQueue. It is useful for flushing queues
+	in MACs when they go down. clear() is not good enough because we want
+	to use packets as drop signal value.
+
+2013-04-17  Andras Varga
+
+	Removed obsolete classes QueueWithQoS and EnqueueHook
+
+2013-04-09  Zoltan Bojthe
+
+	PassiveQueueBase: optimization: removed the msgId2TimeMap, use
+	msg->arrivalTime for calculating queueing time values instead
+
+2013-03-21  Levente Meszaros
+
+	ModuleAccess: findModuleUnderContainingNode() function
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-22  Rudolf Hornig
+
+	base: fixed bug #620. The module pointer returned by a ModuleAccess
+	class is now cached only if get() was used. For get(module) no caching
+	is done.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -22,7 +107,7 @@
 
 2012-02-14  Tamas Borbely
 
-	Added "multicast route changed/added/deleted" notification constants 
+	Added "multicast route changed/added/deleted" notification constants
 	to NotifierConsts.h
 
 2012-02-24  ------ inet-1.99.3 released ------

@@ -43,6 +43,7 @@ class INET_API DSDV_2 : public cSimpleModule
 {
   private:
     cMessage *event;
+    cPar *broadcastDelay;
     struct forwardHello
     {
         cMessage *event;

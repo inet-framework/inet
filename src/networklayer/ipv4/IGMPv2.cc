@@ -409,16 +409,16 @@ void IGMPv2::receiveChangeNotification(int category, const cPolymorphic *details
 
     InterfaceEntry *ie;
     int interfaceId;
-    IPv4MulticastGroupInfo *info;
+    const IPv4MulticastGroupInfo *info;
     switch (category)
     {
         case NF_INTERFACE_CREATED:
-            ie = check_and_cast<InterfaceEntry*>(details);
+            ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
             if (ie->isMulticast())
                 configureInterface(ie);
             break;
         case NF_INTERFACE_DELETED:
-            ie = check_and_cast<InterfaceEntry*>(details);
+            ie = const_cast<InterfaceEntry *>(check_and_cast<const InterfaceEntry*>(details));
             if (ie->isMulticast())
             {
                 interfaceId = ie->getInterfaceId();
@@ -427,11 +427,11 @@ void IGMPv2::receiveChangeNotification(int category, const cPolymorphic *details
             }
             break;
         case NF_IPv4_MCAST_JOIN:
-            info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
             multicastGroupJoined(info->ie, info->groupAddress);
             break;
         case NF_IPv4_MCAST_LEAVE:
-            info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+            info = check_and_cast<const IPv4MulticastGroupInfo*>(details);
             multicastGroupLeft(info->ie, info->groupAddress);
             break;
     }

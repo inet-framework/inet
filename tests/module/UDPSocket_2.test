@@ -51,3 +51,9 @@ cmdenv-module-messages = true
 
 %contains-regex: stdout
 <!> Error in module \(UDP\) SimpleTestNetwork.client.udp .* bind: socket is already bound
+%#--------------------------------------------------------------------------------------------------------------
+%# %not-contains: stdout
+%# undisposed object:
+%# %not-contains: stdout
+%# -- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

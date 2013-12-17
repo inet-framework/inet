@@ -15,17 +15,22 @@
 #define __INET_TCPECHOAPP_H
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
+#include "NodeStatus.h"
+#include "TCPSocket.h"
 
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
-class INET_API TCPEchoApp : public cSimpleModule
+class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
 {
   protected:
     simtime_t delay;
     double echoFactor;
+
+    TCPSocket socket;
+    NodeStatus *nodeStatus;
 
     long bytesRcvd;
     long bytesSent;
@@ -33,11 +38,18 @@ class INET_API TCPEchoApp : public cSimpleModule
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
 
-  protected:
-    virtual void sendDown(cMessage *msg);
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    virtual void initialize();
+    virtual bool isNodeUp();
+    virtual void sendDown(cMessage *msg);
+    virtual void startListening();
+    virtual void stopListening();
+
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };

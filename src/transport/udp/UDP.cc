@@ -32,6 +32,8 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
+#include "RoutingTable.h"
+#include "RoutingTableAccess.h"
 #endif
 
 #ifdef WITH_IPv6
@@ -42,6 +44,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
@@ -87,6 +91,7 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_) {
     sockId = sockId_;
     appGateIndex = appGateIndex_;
     onlyLocalPortIsSet = false; // for now
+    reuseAddr = false;
     localPort = -1;
     remotePort = -1;
     isBroadcast = false;
@@ -97,39 +102,57 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_) {
 }
 
 //--------
+UDP::UDP()
+{
+    isOperational = false;
+    icmp = NULL;
+    icmpv6 = NULL;
+}
 
 UDP::~UDP()
 {
-    for (SocketsByIdMap::iterator i=socketsByIdMap.begin(); i!=socketsByIdMap.end(); ++i)
-        delete i->second;
+    clearAllSockets();
 }
 
-void UDP::initialize()
+void UDP::initialize(int stage)
 {
-    WATCH_PTRMAP(socketsByIdMap);
-    WATCH_MAP(socketsByPortMap);
+    if (stage == 0)
+    {
+        WATCH_PTRMAP(socketsByIdMap);
+        WATCH_MAP(socketsByPortMap);
 
-    lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
-    icmp = NULL;
-    icmpv6 = NULL;
+        lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+        icmp = NULL;
+        icmpv6 = NULL;
 
-    numSent = 0;
-    numPassedUp = 0;
-    numDroppedWrongPort = 0;
-    numDroppedBadChecksum = 0;
-    WATCH(numSent);
-    WATCH(numPassedUp);
-    WATCH(numDroppedWrongPort);
-    WATCH(numDroppedBadChecksum);
-    rcvdPkSignal = registerSignal("rcvdPk");
-    sentPkSignal = registerSignal("sentPk");
-    passedUpPkSignal = registerSignal("passedUpPk");
-    droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
-    droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
+        numSent = 0;
+        numPassedUp = 0;
+        numDroppedWrongPort = 0;
+        numDroppedBadChecksum = 0;
+        WATCH(numSent);
+        WATCH(numPassedUp);
+        WATCH(numDroppedWrongPort);
+        WATCH(numDroppedBadChecksum);
+        rcvdPkSignal = registerSignal("rcvdPk");
+        sentPkSignal = registerSignal("sentPk");
+        passedUpPkSignal = registerSignal("passedUpPk");
+        droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
+        droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
+
+        isOperational = false;
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 void UDP::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+        throw cRuntimeError("Message '%s' received when UDP is OFF", msg->getName());
+
     // received from IP layer
     if (msg->arrivedOn("ipIn") || msg->arrivedOn("ipv6In"))
     {
@@ -195,6 +218,8 @@ void UDP::processCommandFromApp(cMessage *msg)
                 setMulticastOutputInterface(sd, ((UDPSetMulticastInterfaceCommand*)ctrl)->getInterfaceId());
             else if (dynamic_cast<UDPSetMulticastLoopCommand*>(ctrl))
                 setMulticastLoop(sd, ((UDPSetMulticastLoopCommand*)ctrl)->getLoop());
+            else if (dynamic_cast<UDPSetReuseAddressCommand*>(ctrl))
+                setReuseAddress(sd, ((UDPSetReuseAddressCommand*)ctrl)->getReuseAddress());
             else if (dynamic_cast<UDPJoinMulticastGroupsCommand*>(ctrl))
             {
                 UDPJoinMulticastGroupsCommand *cmd = (UDPJoinMulticastGroupsCommand*)ctrl;
@@ -283,7 +308,7 @@ void UDP::processUDPPacket(UDPPacket *udpPacket)
         ttl = ctrl4->getTimeToLive();
         tos = ctrl4->getTypeOfService();
         isMulticast = ctrl4->getDestAddr().isMulticast();
-        isBroadcast = ctrl4->getDestAddr() == IPv4Address::ALLONES_ADDRESS;  // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
+        isBroadcast = ctrl4->getDestAddr().isLimitedBroadcastAddress();  // note: we cannot recognize other broadcast addresses (where the host part is all-ones), because here we don't know the netmask
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl)!=NULL)
     {
@@ -398,7 +423,7 @@ void UDP::processICMPError(cPacket *pk)
        << remoteAddr << ":" << remotePort << "\n";
 
     // identify socket and report error to it
-    SockDesc *sd = findSocketByLocalAddress(localAddr, localPort);
+    SockDesc *sd = findSocketForUnicastPacket(localAddr, localPort, remoteAddr, remotePort);
     if (!sd)
     {
         EV << "No socket on that local port, ignoring ICMP error\n";
@@ -420,31 +445,23 @@ void UDP::processUndeliverablePacket(UDPPacket *udpPacket, cObject *ctrl)
     {
 #ifdef WITH_IPv4
         IPv4ControlInfo *ctrl4 = (IPv4ControlInfo *)ctrl;
-
-        if (!ctrl4->getDestAddr().isMulticast())
-        {
-            if (!icmp)
-                icmp = ICMPAccess().get();
-            icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
-        }
-        else
+        if (!icmp)
+            icmp = ICMPAccess().get();
+        icmp->sendErrorMessage(udpPacket, ctrl4, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PORT_UNREACHABLE);
+#else
+        delete udpPacket;
 #endif
-            delete udpPacket;
     }
     else if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL)
     {
 #ifdef WITH_IPv6
         IPv6ControlInfo *ctrl6 = (IPv6ControlInfo *)ctrl;
-
-        if (!ctrl6->getDestAddr().isMulticast())
-        {
-            if (!icmpv6)
-                icmpv6 = ICMPv6Access().get();
-            icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
-        }
-        else
+        if (!icmpv6)
+            icmpv6 = ICMPv6Access().get();
+        icmpv6->sendErrorMessage(udpPacket, ctrl6, ICMPv6_DESTINATION_UNREACHABLE, PORT_UNREACHABLE);
+#else
+        delete udpPacket;
 #endif
-            delete udpPacket;
     }
     else if (ctrl == NULL)
     {
@@ -466,15 +483,17 @@ void UDP::bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int loca
     if (localPort<-1 || localPort>65535) // -1: ephemeral port
         error("bind: invalid local port number %d", localPort);
 
-    // do not allow two apps to bind to the same address/port combination
-    SockDesc *existing = findSocketByLocalAddress(localAddr, localPort);
-    if (existing != NULL)
+    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
+    SockDesc *sd = it != socketsByIdMap.end() ? it->second : NULL;
+
+    // to allow two sockets to bind to the same address/port combination
+    // both of them must have reuseAddr flag set
+    SockDesc *existing = findFirstSocketByLocalAddress(localAddr, localPort);
+    if (existing != NULL && (!sd || !sd->reuseAddr || !existing->reuseAddr))
         error("bind: local address/port %s:%u already taken", localAddr.str().c_str(), localPort);
 
-    SocketsByIdMap::iterator it = socketsByIdMap.find(sockId);
-    if (it != socketsByIdMap.end())
+    if (sd)
     {
-        SockDesc *sd = it->second;
         if (sd->isBound)
             error("bind: socket is already bound (sockId=%d)", sockId);
 
@@ -489,7 +508,7 @@ void UDP::bind(int sockId, int gateIndex, const IPvXAddress& localAddr, int loca
     }
     else
     {
-        SockDesc *sd = createSocket(sockId, gateIndex, localAddr, localPort);
+        sd = createSocket(sockId, gateIndex, localAddr, localPort);
         sd->isBound = true;
     }
 }
@@ -550,6 +569,20 @@ void UDP::close(int sockId)
     delete sd;
 }
 
+void UDP::clearAllSockets()
+{
+    EV << "Clear all sockets\n";
+
+    for (SocketsByPortMap::iterator it = socketsByPortMap.begin(); it != socketsByPortMap.end(); ++it)
+    {
+        it->second.clear();
+    }
+    socketsByPortMap.clear();
+    for (SocketsByIdMap::iterator it = socketsByIdMap.begin(); it != socketsByIdMap.end(); ++it)
+        delete it->second;
+    socketsByIdMap.clear();
+}
+
 ushort UDP::getEphemeralPort()
 {
     // start at the last allocated port number + 1, and search for an unused one
@@ -570,7 +603,7 @@ ushort UDP::getEphemeralPort()
     return lastEphemeralPort;
 }
 
-UDP::SockDesc *UDP::findSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort)
+UDP::SockDesc *UDP::findFirstSocketByLocalAddress(const IPvXAddress& localAddr, ushort localPort)
 {
     SocketsByPortMap::iterator it = socketsByPortMap.find(localPort);
     if (it == socketsByPortMap.end())
@@ -592,18 +625,24 @@ UDP::SockDesc *UDP::findSocketForUnicastPacket(const IPvXAddress& localAddr, ush
     if (it == socketsByPortMap.end())
         return NULL;
 
+    // select the socket bound to ANY_ADDR only if there is no socket bound to localAddr
     SockDescList& list = it->second;
-    for (SockDescList::iterator it = list.begin(); it != list.end(); ++it)
+    SockDesc *socketBoundToAnyAddress = NULL;
+    for (SockDescList::reverse_iterator it = list.rbegin(); it != list.rend(); ++it)
     {
         SockDesc *sd = *it;
         if (sd->onlyLocalPortIsSet || (
                 (sd->remotePort == -1 || sd->remotePort == remotePort) &&
                 (sd->localAddr.isUnspecified() || sd->localAddr == localAddr) &&
-                (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr)
-        ))
-            return sd;
+                (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr) ))
+        {
+            if (sd->localAddr.isUnspecified())
+                socketBoundToAnyAddress = sd;
+            else
+                return sd;
+        }
     }
-    return NULL;
+    return socketBoundToAnyAddress;
 }
 
 std::vector<UDP::SockDesc*> UDP::findSocketsForMcastBcastPacket(const IPvXAddress& localAddr, ushort localPort, const IPvXAddress& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast)
@@ -780,6 +819,11 @@ void UDP::setMulticastLoop(SockDesc *sd, bool loop)
     sd->multicastLoop = loop;
 }
 
+void UDP::setReuseAddress(SockDesc *sd, bool reuseAddr)
+{
+    sd->reuseAddr = reuseAddr;
+}
+
 void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& multicastAddresses, const std::vector<int> interfaceIds)
 {
     int multicastAddressesLen = multicastAddresses.size();
@@ -830,5 +874,43 @@ void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<IPvXAddress>& mul
     for (unsigned int i = 0; i < multicastAddresses.size(); i++)
         sd->multicastAddrs.erase(multicastAddresses[i]);
     // note: we cannot remove the address from the interface, because someone else may still use it
+}
+
+bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = true;
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
+            clearAllSockets();
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = false;
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            clearAllSockets();
+            icmp = NULL;
+            icmpv6 = NULL;
+            isOperational = false;
+        }
+    }
+    else
+    {
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    }
+
+    return true;
 }
 

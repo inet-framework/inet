@@ -20,6 +20,7 @@ package inet.nodes.inet;
 
 import inet.networklayer.arp.ARP;
 import inet.networklayer.common.IRouterAlertHandler;
+import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IIGMP;
@@ -63,6 +64,9 @@ module NetworkLayer
 
 
     submodules:
+        configurator: IPv4NodeConfigurator {
+            @display("p=39,158");
+        }
         ip: IPv4 {
             parameters:
                 protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers

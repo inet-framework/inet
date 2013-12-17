@@ -23,10 +23,10 @@ Define_Module(EtherHub);
 
 simsignal_t EtherHub::pkSignal = SIMSIGNAL_NULL;
 
-static cEnvir& operator<<(cEnvir& out, cMessage *msg)
+inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
 {
-    out.printf("(%s)%s", msg->getClassName(), msg->getFullName());
-    return out;
+    os << "(" << msg->getClassName() << ")" << msg->getFullName();
+    return os;
 }
 
 void EtherHub::initialize()

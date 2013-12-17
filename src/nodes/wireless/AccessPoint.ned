@@ -15,12 +15,13 @@
 
 package inet.nodes.wireless;
 
-import inet.mobility.IMobility;
-import inet.linklayer.IWirelessNic;
-import inet.linklayer.IMACRelayUnit;
-import inet.linklayer.IEtherMAC;
 import inet.base.NotificationBoard;
+import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.IWiredNic;
+import inet.linklayer.IWirelessNic;
+import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.status.NodeStatus;
 
 
 //
@@ -47,14 +48,27 @@ module AccessPoint
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
         string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
         int numRadios = default(1);               // the number of radios in the access point
-        bool withInterfaceTable = default(false);    // module has interfaceTable if enabled
+        bool hasStatus = default(false);
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
+        eth[*].encapType = "EtherEncapDummy";
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
-        interfaceTable: InterfaceTable if withInterfaceTable {
-            @display("p=59,121");
+        status: NodeStatus if hasStatus {
+            @display("p=51,43");
+        }
+
+        interfaceTable: InterfaceTable {
+            @display("p=51,121;is=s");
+        }
+        notificationBoard: NotificationBoard {
+            parameters:
+                @display("p=128,27;is=s");
+        }
+        mobility: <mobilityType> like IMobility {
+            parameters:
+                @display("p=208,43");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:
@@ -62,22 +76,12 @@ module AccessPoint
         }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=89,225;q=queue");
+                @display("p=89,225,row;q=queue");
         }
-        eth[sizeof(ethg)]: <default("EtherMACFullDuplex")> like IEtherMAC {
+        eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                promiscuous = true;
-                txQueueLimit = 1000; // increase if needed
-                queueModule = "";
+                mac.promiscuous = true;
                 @display("p=208,225,row;q=txQueue");
-        }
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=59,43");
-        }
-        mobility: <mobilityType> like IMobility {
-            parameters:
-                @display("p=169,43");
         }
     connections allowunconnected:
         // connections to network outside
@@ -85,13 +89,13 @@ module AccessPoint
         // because broadcasts must be handled differently for wireless IFs by the relayUnit
         for i=0..numRadios-1 {
             radioIn[i] --> wlan[i].radioIn;
-            wlan[i].upperLayerOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
-            wlan[i].upperLayerIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
+            wlan[i].upperLayerOut --> relayUnit.ifIn++ if sizeof(ethg)+numRadios>1;
+            wlan[i].upperLayerIn <-- relayUnit.ifOut++ if sizeof(ethg)+numRadios>1;
         }
         // ethernet must be connected only AFTER wireless ports
         for i=0..sizeof(ethg)-1 {
             eth[i].phys <--> ethg[i];
-            eth[i].upperLayerIn <-- relayUnit.lowerLayerOut++ if sizeof(ethg)+numRadios>1;
-            eth[i].upperLayerOut --> relayUnit.lowerLayerIn++ if sizeof(ethg)+numRadios>1;
+            eth[i].upperLayerIn <-- relayUnit.ifOut++ if sizeof(ethg)+numRadios>1;
+            eth[i].upperLayerOut --> relayUnit.ifIn++ if sizeof(ethg)+numRadios>1;
         }
 }

@@ -71,6 +71,8 @@ RREP *NS_CLASS rrep_create(u_int8_t flags,
     rrep->dest_seqno = htonl(dest_seqno);
     rrep->orig_addr = orig_addr.s_addr;
     rrep->lifetime = htonl(life);
+    rrep->a = 0;
+    rrep->r = 0;
 
     if (flags & RREP_REPAIR)
         rrep->r = 1;
@@ -145,7 +147,7 @@ AODV_ext *NS_CLASS rrep_add_ext(RREP * rrep, int type, unsigned int offset,
 }
 
 void NS_CLASS rrep_send(RREP * rrep, rt_table_t * rev_rt,
-                        rt_table_t * fwd_rt, int size)
+                        rt_table_t * fwd_rt, int size, double delay)
 {
     u_int8_t rrep_flags = 0;
     struct in_addr dest;
@@ -201,9 +203,12 @@ void NS_CLASS rrep_send(RREP * rrep, rt_table_t * rev_rt,
     totalRrepSend++;
 #endif
     rrep->ttl=MAXTTL;
-    aodv_socket_send((AODV_msg *) rrep, rev_rt->next_hop, size, 1,
-                     &DEV_IFINDEX(rev_rt->ifindex));
-
+    if (delay > 0)
+        aodv_socket_send((AODV_msg *) rrep, rev_rt->next_hop, size, 1,
+                             &DEV_IFINDEX(rev_rt->ifindex),delay);
+    else
+        aodv_socket_send((AODV_msg *) rrep, rev_rt->next_hop, size, 1,
+                                 &DEV_IFINDEX(rev_rt->ifindex));
     /* Update precursor lists */
     if (fwd_rt)
     {
@@ -347,6 +352,10 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
         return;
     if (addressIsForUs(rrep_orig.s_addr))
         DEBUG(LOG_DEBUG, 0, "rrep for us");
+
+    EV << "RREP received, Src Address :" << convertAddressToString(ip_src.s_addr) << "  RREP origin :" <<
+            convertAddressToString(rrep_orig.s_addr) << "  RREP dest :" << convertAddressToString(rrep_dest.s_addr) << "\n";
+
 #endif
 
     DEBUG(LOG_DEBUG, 0, "from %s about %s->%s",
@@ -400,6 +409,10 @@ void NS_CLASS rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
 
     /* ---------- CHECK IF WE SHOULD MAKE A FORWARD ROUTE ------------ */
 
+#ifdef OMNETPP
+    actualizeTablesWithCollaborative(rrep_dest.s_addr);
+    actualizeTablesWithCollaborative(rrep_orig.s_addr);
+#endif
     fwd_rt = rt_table_find(rrep_dest);
     rev_rt = rt_table_find(rrep_orig);
 

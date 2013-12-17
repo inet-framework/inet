@@ -395,7 +395,7 @@ void DSRUU::initialize(int stage)
         }
         interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
         is_init = true;
-        ev << "Dsr active" << "\n";
+        EV << "Dsr active" << "\n";
     }
 
     return;
@@ -595,9 +595,19 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
     if (category == NF_LINK_BREAK)
     {
         Enter_Method("Dsr Link Break");
-        Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
-        if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
-            dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
+        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject *>(details));
+        if (frame)
+        {
+            if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
+                dgram = check_and_cast<IPv4Datagram *>(frame->getEncapsulatedPacket());
+            else
+                return;
+
+            if (!get_confval(UseNetworkLayerAck))
+            {
+                packetFailed(dgram);
+            }
+        }
         else
             return;
 
@@ -614,7 +624,7 @@ void DSRUU::receiveChangeNotification(int category, const cObject *details)
 
             if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(details)))
             {
-                Ieee80211DataFrame *frame = check_and_cast<Ieee80211DataFrame *>(details);
+                const Ieee80211DataFrame *frame = check_and_cast<const Ieee80211DataFrame *>(details);
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
                 {
 
@@ -646,7 +656,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
     if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
     {
         // This shouldn't really happen ?
-        ev << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
+        EV << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
         return;
     }
 
@@ -675,7 +685,13 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
         {
             dsr_rerr_send(dp, nxt_hop);
             dp->nxt_hop = nxt_hop;
-            maint_buf_salvage(dp);
+            if (maint_buf_salvage(dp) < 0)
+            {
+                if (dp->payload)
+                    drop(dp->payload, -1);
+                dp->payload = NULL;
+                dsr_pkt_free(dp);
+            }
         }
         /* Salvage the other packets still in the interface queue with the same
          * next hop */
@@ -1045,15 +1061,19 @@ bool DSRUU::proccesICMP(cMessage *msg)
         delete msg;
         return true;
     }
-    if (pk->getControlInfo())
-        delete pk->removeControlInfo();
+
     IPv4Datagram *newdgram = new IPv4Datagram();
     bogusPacket->setTransportProtocol(bogusPacket->getEncapProtocol());
     IPv4Address dst(this->my_addr().s_addr);
     newdgram->setDestAddress(dst);
-    newdgram->encapsulate(bogusPacket);
+    ICMPMessage * icmpMsg = new ICMPMessage();
+    icmpMsg->setType(pk->getType());
+    icmpMsg->setCode(pk->getCode());
+    icmpMsg->encapsulate(bogusPacket->dup());
+    newdgram->encapsulate(icmpMsg);
     newdgram->setTransportProtocol(IP_PROT_ICMP);
     send(newdgram,"to_ip");
+    delete msg;
     return true;
  }
 

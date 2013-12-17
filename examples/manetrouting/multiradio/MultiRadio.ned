@@ -35,7 +35,7 @@ network MultiRadio
         channelControl: ChannelControl {
             @display("p=83,15");
         }
-        networkConfigurator: IPv4NetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=253,15");
         }
         mobileHost[numHosts]: AdhocHost {

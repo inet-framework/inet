@@ -29,6 +29,7 @@ module Host extends WirelessHost
 {
     parameters:
         @display("i=device/cellphone");
+        networkLayer.configurator.networkConfiguratorModule = "";
 
     submodules:
         ac_wlan: HostAutoConfigurator {

@@ -1,0 +1,76 @@
+%description:
+Testing SCTP Packet Drop Reporting
+Flow Control is simulated. If the advertised receiver window drops to zero packet drop 
+reports should be sent.
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=SCTPFeatureTest
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 1452
+**.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
+**.sctp_client.sctpApp[0].stopTime = truncnormal(60s,1s)
+**.sctp_client.sctpApp[0].numRequestsPerSession = 100000
+**.sctp_client.sctpApp[0].queueSize = 100
+**.sctp_client.sctpApp[0].outboundStreams = 1
+**.sctp_client.sctp.swsLimit=3000
+
+
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[0].localAddress = "10.1.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 10000
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 0
+**.sctp_server.sctpApp[*].outboundStreams = 1
+**.sctp_server.sctpApp[0].messagesToPush = 1
+**.sctp_server.sctpApp[0].readingInterval = 1000ms
+**.sctp_server.sctp.swsLimit=3000
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.packetDrop = true
+**.sctp.RTXMethod = 2
+
+# NIC configuration
+#**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.mtu = 1500 B
+
+#**.vector-recording = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Drops Because New TSN Greater Than Highest TSN"[ \t]*[1-9][0-9]*
+%contains-regex: results/General-0.sca
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Number of PacketDrop Reports"[ \t]*[1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------

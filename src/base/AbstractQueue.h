@@ -65,7 +65,7 @@ class INET_API AbstractQueue : public cSimpleModule
     /**
      * Called when a message arrives at the module when the queue is
      * empty. The message doesn't need to be enqueued in this case,
-     * it can start service immmediately. This method may:
+     * it can start service immediately. This method may:
      *  -# simply return the the same pointer (usual behaviour), or
      *  -# discard the message and return NULL pointer (the effect being
      *   this message being ignored)
@@ -90,7 +90,16 @@ class INET_API AbstractQueue : public cSimpleModule
      * Most straightforward implementation: <tt>send(msg,"out");</tt>
      */
     virtual void endService(cPacket *msg) = 0;
+
+    /**
+     * If a message is under service, aborts its service and returns the
+     * message. Returns NULL if no message is being serviced. The caller
+     * is free to delete the message, reinsert it into the queue, or handle
+     * it otherwise.
+     */
+    virtual cPacket *cancelService();
     //@}
+
 };
 
 #endif

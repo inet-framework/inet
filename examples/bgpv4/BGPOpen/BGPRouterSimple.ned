@@ -36,7 +36,6 @@ module BGPRouterSimple
         @node();
         @labels(node,ethernet-node);
         @display("i=abstract/router");
-        string routingFile;
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
     gates:
         inout pppg[] @labels(PPPFrame-conn);
@@ -53,7 +52,6 @@ module BGPRouterSimple
             parameters:
                 IPForward = true;
                 routerId = "auto";
-                routingFile = routingFile;
                 @display("p=52,172;i=block/table2_s");
         }
         bgp: BGPRouting {

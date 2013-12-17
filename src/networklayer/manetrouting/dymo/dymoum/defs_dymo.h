@@ -65,7 +65,7 @@
 #endif  /* IFNAMSIZ */
 
 /* Maximum number of interfaces per node */
-#define DYMO_MAX_NR_INTERFACES 4
+#define DYMO_MAX_NR_INTERFACES 10
 #ifndef OMNETPP
 /* Returns a dev_info struct given its corresponding iface index */
 #define DEV_IFINDEX(ifindex) (this_host.devs[ifindex2devindex(ifindex)])

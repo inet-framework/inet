@@ -25,6 +25,7 @@
 #include "NotificationBoard.h"
 #include "Ieee80211Frame_m.h"
 #include "Ieee80211MgmtFrames_m.h"
+#include "ILifecycle.h"
 
 
 /**
@@ -34,12 +35,13 @@
  *
  * @author Andras Varga
  */
-class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
+class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle, public INotifiable
 {
   protected:
     // configuration
     int frameCapacity;
     MACAddress myAddress;
+    bool isOperational;     // for lifecycle
 
     // state
     cQueue dataQueue; // queue for data frames
@@ -87,9 +89,6 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     /** Utility method to dispose of an unhandled frame */
     virtual void dropManagementFrame(Ieee80211ManagementFrame *frame);
 
-    /** Utility method to decapsulate a data frame (encapsulation depends on adhoc/STA/AP) */
-    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
-
     /** Utility method: sends the packet to the upper layer */
     virtual void sendUp(cMessage *msg);
 
@@ -109,6 +108,16 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public INotifiable
     virtual void handleBeaconFrame(Ieee80211BeaconFrame *frame) = 0;
     virtual void handleProbeRequestFrame(Ieee80211ProbeRequestFrame *frame) = 0;
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame) = 0;
+    //@}
+
+    /** lifecycle support */
+    //@{
+  protected:
+    virtual void start();
+    virtual void stop();
+
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     //@}
 };
 

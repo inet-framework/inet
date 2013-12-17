@@ -23,6 +23,7 @@
 #include "Ieee80211MgmtBase.h"
 #include "NotificationBoard.h"
 #include "Ieee80211Primitives_m.h"
+#include "IInterfaceTable.h"
 
 
 /**
@@ -84,6 +85,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
     };
 
   protected:
+    IInterfaceTable *interfaceTable;
     NotificationBoard *nb;
 
     // number of channels in ChannelControl -- used if we're told to scan "all" channels
@@ -118,6 +120,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase
 
     /** Utility function for handleUpperMessage() */
     virtual Ieee80211DataFrame *encapsulate(cPacket *msg);
+
+    /** Utility method to decapsulate a data frame */
+    virtual cPacket *decapsulate(Ieee80211DataFrame *frame);
 
     /** Utility function: sends authentication request */
     virtual void startAuthentication(APInfo *ap, simtime_t timeout);

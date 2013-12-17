@@ -1,0 +1,76 @@
+%description:
+
+Tests IPv4NetworkConfigurator for a mixed wired and wireless LAN.
+
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.ethernet.EtherSwitch;
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.Router;
+import inet.nodes.inet.StandardHost;
+import inet.nodes.inet.WirelessHost;
+import inet.nodes.wireless.AccessPoint;
+import inet.world.radio.ChannelControl;
+
+network Test
+{
+    parameters:
+        int numHosts;
+    submodules:
+        configurator: IPv4NetworkConfigurator {
+            parameters:
+                dumpAddresses = true;
+        }
+        channelControl: ChannelControl;
+        server: StandardHost;
+        router: Router;
+        switch: EtherSwitch;
+        accessPoint: AccessPoint;
+        mobile[numHosts]: WirelessHost;
+        client[numHosts]: StandardHost;
+    connections:
+        server.ethg++ <--> Eth10M <--> router.ethg++;
+        router.ethg++ <--> Eth10M <--> switch.ethg++;
+        switch.ethg++ <--> Eth10M <--> accessPoint.ethg++;
+        for i=0..numHosts-1 {
+            client[i].ethg++ <--> Eth10M <--> switch.ethg++;
+        }
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+cmdenv-express-mode = false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+sim-time-limit = 1s
+*.numHosts = 3
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 1000m
+**.constraintAreaMaxY = 1000m
+**.constraintAreaMaxZ = 0m
+
+%contains-regex: stdout
+Link 0
+    server / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-01 IPv4:\{inet_addr:10.0.0.1/30.*\}
+    router / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-02 IPv4:\{inet_addr:10.0.0.2/30.*\}
+Link 1
+    router / eth1  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-03 IPv4:\{inet_addr:10.0.0.17/28.*\}
+    mobile\[0\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0B IPv4:\{inet_addr:10.0.0.18/28.*\}
+    mobile\[1\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0C IPv4:\{inet_addr:10.0.0.19/28.*\}
+    mobile\[2\] / wlan0  on:nwLayer.ifOut\[\d+\]  MTU:2304 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0D IPv4:\{inet_addr:10.0.0.20/28.*\}
+    client\[0\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0E IPv4:\{inet_addr:10.0.0.21/28.*\}
+    client\[1\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-0F IPv4:\{inet_addr:10.0.0.22/28.*\}
+    client\[2\] / eth0  on:nwLayer.ifOut\[\d+\]  MTU:1500 BROADCAST MULTICAST  macAddr:0A-AA-00-00-00-10 IPv4:\{inet_addr:10.0.0.23/28.*\}
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

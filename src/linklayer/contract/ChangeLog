@@ -1,3 +1,28 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-14  Tamas Borbely
+
+	new EtherType constants: ETHERTYPE_TRILL, ETHERTYPE_L2_ISIS
+
+2013-02-01  Andras Varga
+
+	Ieee802Ctrl.inputPort renamed to interfaceId
+
+2013-02-01  Andras Varga
+
+	MACAddress: added makeMulticastAddress()
+
+2013-01-30  Zoltan Bojthe
+
+	MACAddress: fixed compiler warning for 32bit ubuntu systems.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-10-30  Zoltan Bojthe
+
+	MACAddress: made the constructor explicit so we will not see
+	unexpected implicit conversions in future
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

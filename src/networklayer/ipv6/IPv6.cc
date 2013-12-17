@@ -39,35 +39,49 @@
 #include "IPv6ExtensionHeaders.h"
 #include "IPv6InterfaceData.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
 
 
 Define_Module(IPv6);
 
-void IPv6::initialize()
+void IPv6::initialize(int stage)
 {
-    QueueBase::initialize();
+    if (stage == 0)
+    {
+        QueueBase::initialize();
 
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTable6Access().get();
-    nd = IPv6NeighbourDiscoveryAccess().get();
-    icmp = ICMPv6Access().get();
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTable6Access().get();
+        nd = IPv6NeighbourDiscoveryAccess().get();
+        icmp = ICMPv6Access().get();
 
-    tunneling = IPv6TunnelingAccess().get();
+        tunneling = IPv6TunnelingAccess().get();
 
-    mapping.parseProtocolMapping(par("protocolMapping"));
+        mapping.parseProtocolMapping(par("protocolMapping"));
 
-    curFragmentId = 0;
-    lastCheckTime = 0;
-    fragbuf.init(icmp);
+        curFragmentId = 0;
+        lastCheckTime = SIMTIME_ZERO;
+        fragbuf.init(icmp);
 
-    numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
+        numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(numMulticast);
-    WATCH(numLocalDeliver);
-    WATCH(numDropped);
-    WATCH(numUnroutable);
-    WATCH(numForwarded);
+        WATCH(numMulticast);
+        WATCH(numLocalDeliver);
+        WATCH(numDropped);
+        WATCH(numUnroutable);
+        WATCH(numForwarded);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void IPv6::updateDisplayString()
@@ -123,8 +137,55 @@ void IPv6::endService(cPacket *msg)
     else
     {
         // datagram from network or from ND: localDeliver and/or route
-        IPv6Datagram *dgram = check_and_cast<IPv6Datagram *>(msg);
-        handleDatagramFromNetwork(dgram);
+        IPv6Datagram *datagram = check_and_cast<IPv6Datagram *>(msg);
+        bool fromHL = false;
+        if (datagram->getArrivalGate()->isName("ndIn"))
+        {
+            cMsgPar& p = msg->par("IPv6-fromHL");
+            fromHL = p.boolValue();
+            delete msg->getParList().remove(&p);
+        }
+
+        // Do not handle header biterrors, because
+        // 1. IPv6 header does not contain checksum for the header fields, each field is
+        //    validated when they are processed.
+        // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
+        ASSERT(!datagram->hasBitError());
+
+        if (!rt->isLocalAddress(datagram->getDestAddress()))
+        {
+            // handle router alert options, if set
+            cGate *rout = gate("routerAlertOut");
+            // only check if we have a handler and this datagram wasn't returned from it already
+            if (rout && rout->isConnected() && !(datagram->arrivedOn("routerAlertReturn")))
+            {
+                for (int i = datagram->getExtensionHeaderArraySize() - 1; i >= 0; --i)
+                {
+                    // check whether the router alert extension header is set
+                    IPv6ExtensionHeaderPtr extHdr = datagram->getExtensionHeader(i);
+                    if (extHdr->getExtensionType() == IP_PROT_IPv6EXT_HOP) {
+                        // check whether the router alert option is set
+                        IPv6HopByHopOptionsHeader *optHdr = check_and_cast<IPv6HopByHopOptionsHeader *>(extHdr);
+                        for (int hi = optHdr->getOptionsArraySize() - 1 ; hi >= 0; --hi) {
+                            if (optHdr->getOptions(hi)->getOptionType() == 5) { // FIXME implement symbolic constant
+                                // we have router alert set -> hand it over to the router alert handler
+                                send(datagram, rout);
+                                return;  // TODO break out here without using return?
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // remove control info
+        delete datagram->removeControlInfo();
+
+        // routepacket
+        if (!datagram->getDestAddress().isMulticast())
+            routePacket(datagram, NULL, fromHL);
+        else
+            routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram), fromHL);
     }
 
     if (ev.isGUI())
@@ -135,50 +196,6 @@ InterfaceEntry *IPv6::getSourceInterfaceFrom(cPacket *msg)
 {
     cGate *g = msg->getArrivalGate();
     return g ? ift->getInterfaceByNetworkLayerGateIndex(g->getIndex()) : NULL;
-}
-
-void IPv6::handleDatagramFromNetwork(IPv6Datagram *datagram)
-{
-    // Do not handle header biterrors, because
-    // 1. IPv6 header does not contain checksum for the header fields, each field is
-    //    validated when they are processed.
-    // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
-    ASSERT(!datagram->hasBitError());
-
-    if (!rt->isLocalAddress(datagram->getDestAddress()))
-    {
-        // handle router alert options, if set
-        cGate *rout = gate("routerAlertOut");
-        // only check if we have a handler and this datagram wasn't returned from it already
-        if (rout && rout->isConnected() && !(datagram->arrivedOn("routerAlertReturn")))
-        {
-            for (int i = datagram->getExtensionHeaderArraySize() - 1; i >= 0; --i)
-            {
-                // check whether the router alert extension header is set
-                IPv6ExtensionHeaderPtr extHdr = datagram->getExtensionHeader(i);
-                if (extHdr->getExtensionType() == IP_PROT_IPv6EXT_HOP) {
-                    // check whether the router alert option is set
-                    IPv6HopByHopOptionsHeader *optHdr = check_and_cast<IPv6HopByHopOptionsHeader *>(extHdr);
-                    for (int hi = optHdr->getOptionsArraySize() - 1 ; hi >= 0; --hi) {
-                        if (optHdr->getOptions(hi)->getOptionType() == 5) { // FIXME implement symbolic constant
-                            // we have router alert set -> hand it over to the router alert handler
-                            send(datagram, rout);
-                            return;  // TODO break out here without using return?
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // remove control info
-    delete datagram->removeControlInfo();
-
-    // routepacket
-    if (!datagram->getDestAddress().isMulticast())
-        routePacket(datagram, NULL, false);
-    else
-        routeMulticastPacket(datagram, NULL, getSourceInterfaceFrom(datagram), false);
 }
 
 void IPv6::handleMessageFromHL(cPacket *msg)
@@ -207,10 +224,29 @@ void IPv6::handleMessageFromHL(cPacket *msg)
     }
 #endif /* WITH_xMIPv6 */
 
+    IPv6Address destAddress = datagram->getDestAddress();
+
+    // check for local delivery
+    if (!destAddress.isMulticast() && rt->isLocalAddress(destAddress))
+    {
+        EV << "local delivery\n";
+        if (datagram->getSrcAddress().isUnspecified())
+            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
+
+        if (destIE && !destIE->isLoopback())
+        {
+            EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
+            destIE = NULL;
+        }
+        if (!destIE)
+            destIE = ift->getFirstLoopbackInterface();
+        ASSERT(destIE);
+    }
+
     // route packet
     if (destIE != NULL)
         fragmentAndSend(datagram, destIE, MACAddress::BROADCAST_ADDRESS, true); // FIXME what MAC address to use?
-    else if (!datagram->getDestAddress().isMulticast())
+    else if (!destAddress.isMulticast())
         routePacket(datagram, destIE, true);
     else
         routeMulticastPacket(datagram, destIE, NULL, true);
@@ -221,15 +257,14 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     // TBD add option handling code here
     IPv6Address destAddress = datagram->getDestAddress();
 
-    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": ";
+    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddress << ": \n";
 
     // local delivery of unicast packets
     if (rt->isLocalAddress(destAddress))
     {
+        if (fromHL)
+            error("model error: local unicast packet arrived from HL, but handleMessageFromHL() not detected it");
         EV << "local delivery\n";
-
-        if (datagram->getSrcAddress().isUnspecified())
-            datagram->setSrcAddress(destAddress); // allows two apps on the same host to communicate
 
         numLocalDeliver++;
         localDeliver(datagram);
@@ -305,7 +340,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
     }
 
     if (interfaceId == -1)
-        if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram) )
+        if ( !determineOutputInterface(destAddress, nextHop, interfaceId, datagram, fromHL) )
             // no interface found; sent to ND or to ICMP for error processing
             //opp_error("No interface found!");//return;
             return; // don't raise error if sent to ND or ICMP!
@@ -338,6 +373,7 @@ void IPv6::routePacket(IPv6Datagram *datagram, InterfaceEntry *destIE, bool from
         if (!ie->isPointToPoint())
         {
             EV << "no link-layer address for next hop yet, passing datagram to Neighbour Discovery module\n";
+            datagram->addPar("IPv6-fromHL") = fromHL;
             send(datagram, "ndOut");
             return;
         }
@@ -779,7 +815,7 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, InterfaceEntry *ie, cons
 }
 
 bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop,
-                                    int& interfaceId, IPv6Datagram* datagram)
+                                    int& interfaceId, IPv6Datagram* datagram, bool fromHL)
 {
     // try destination cache
     //IPv6Address nextHop = rt->lookupDestCache(destAddress, interfaceId);
@@ -802,6 +838,7 @@ bool IPv6::determineOutputInterface(const IPv6Address& destAddress, IPv6Address&
             else // host
             {
                 EV << "no match in routing table, passing datagram to Neighbour Discovery module for default router selection\n";
+                datagram->addPar("IPv6-fromHL") = fromHL;
                 send(datagram, "ndOut");
             }
             return false;
@@ -880,4 +917,9 @@ bool IPv6::processExtensionHeaders(IPv6Datagram* datagram)
     return true;
 }
 #endif /* WITH_xMIPv6 */
+
+bool IPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
+}
 

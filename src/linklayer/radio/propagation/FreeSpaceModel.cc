@@ -81,4 +81,24 @@ double FreeSpaceModel::freeSpace(double Gt, double Gr, double L, double Pt, doub
   return pr;
 }
 
+double FreeSpaceModel::calculateDistance(double pSend, double pRec, double carrierFrequency)
+{
+  /** @brief
+     * Friis free space equation:
+     *
+     *       Pt * Gt * Gr * (lambda^2)
+     *   P = --------------------------
+     *       (4 * pi)^2 * d^alpha * L
+     */
 
+  if (pSend == pRec)
+    return 0.0;
+
+  double lambda = SPEED_OF_LIGHT / carrierFrequency;
+ /** @return returns a power value */
+  // Antennengewinn eines lambda/2-Dipols ist etwa 2,15 dBi
+  // Pt is in milli watt
+
+  double aux  = (pSend * lambda * lambda * Gt * Gr / (16.0 *M_PI * M_PI * pRec * L));
+  return pow(aux, 1.0 / pathLossAlpha);
+}

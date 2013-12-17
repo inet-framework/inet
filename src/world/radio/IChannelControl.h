@@ -79,6 +79,9 @@ class INET_API IChannelControl
 
     /** Enable the reception in the reference module */
     virtual void enableReception(RadioRef r) = 0;
+
+    /** Returns propagation speed of the signal in meter/sec */
+    virtual double getPropagationSpeed() = 0;
 };
 
 #endif

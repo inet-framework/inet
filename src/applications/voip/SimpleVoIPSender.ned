@@ -54,8 +54,8 @@ simple SimpleVoIPSender like IUDPApp
         volatile double talkspurtDuration @unit(s) = default(weibull(1.423s, 0.824s));
         volatile double silenceDuration @unit(s) = default(weibull(0.899s, 1.089s));
         double packetizationInterval @unit(s) = default(20ms);   // interval between sending voice packets
-        double startTime @unit(s) = default(0);   // time of start sending
-        double stopTime @unit(s) = default(0);  // time of end of sending, 0 means forever
+        double startTime @unit(s) = default(0s);   // time of start sending
+        double stopTime @unit(s) = default(-1s);  // time of end of sending, -1 means forever
 
         @display("i=block/source");
     gates:

@@ -18,6 +18,8 @@
 #include "INETDefs.h"
 
 #include "IPvXAddress.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 class PingPayload;
 
@@ -30,11 +32,15 @@ class PingPayload;
  *
  * See NED file for detailed description of operation.
  */
-class INET_API PingTestApp : public cSimpleModule
+class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 {
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 4; }
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -76,5 +82,4 @@ class INET_API PingTestApp : public cSimpleModule
     long outOfOrderArrivalCount;
     long numPongs;
 };
-
 

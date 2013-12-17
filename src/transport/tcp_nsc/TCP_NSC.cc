@@ -46,7 +46,12 @@
 #include "TCP_NSC_VirtualDataQueues.h"
 #include "TCP_NSC_ByteStreamQueues.h"
 
+#include "LifecycleOperation.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 #include <sim_errno.h>
+
 
 Define_Module(TCP_NSC);
 
@@ -66,8 +71,8 @@ bool TCP_NSC::logverboseS;
 #ifdef tcpEV
 #undef tcpEV
 #endif
-// macro for normal ev<< logging (note: deliberately no parens in macro def)
-#define tcpEV ((ev.isDisabled()) || (TCP_NSC::testingS)) ? ev : ev
+// macro for normal EV<< logging (note: deliberately no parens in macro def)
+#define tcpEV TCP_NSC::testingS ? EV : EV
 
 struct nsc_iphdr
 {
@@ -206,10 +211,12 @@ IPvXAddress const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 }
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
-void TCP_NSC::initialize()
+void TCP_NSC::initialize(int stage)
 {
-    tcpEV << this << ": initialize\n";
+    tcpEV << this << ": initialize stage " << stage << endl;
 
+  if (stage == 0)
+  {
     const char *q;
     q = par("sendQueueClass");
 
@@ -226,6 +233,14 @@ void TCP_NSC::initialize()
     cModule *netw = simulation.getSystemModule();
     testingS = netw->hasPar("testing") && netw->par("testing").boolValue();
     logverboseS = !testingS && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
+  }
+  else if (stage == 1)
+  {
+    bool isOperational;
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    if (!isOperational)
+        throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
     const char* stackName = this->par(stackNameParamNameS).stringValue();
 
@@ -236,6 +251,7 @@ void TCP_NSC::initialize()
     pStackM->add_default_gateway(localInnerGwS.str().c_str());
 
     isAliveM = true;
+  }
 }
 
 TCP_NSC::~TCP_NSC()
@@ -1129,5 +1145,13 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
     send(msgP, "appOut", connP.appGateIndexM);
+}
+
+bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 

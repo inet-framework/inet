@@ -1,0 +1,13 @@
+ifconfig:
+
+# ethernet card (modelled by point-to-point link) 0 to router
+name: ppp0  inet_addr: 10.1.3.1   Mask: 255.255.255.0 MTU: 1500   Metric: 1  POINTTOPOINT MULTICAST
+
+ifconfigend.
+
+route:
+
+default:        10.1.3.2         0.0.0.0   G   0   ppp0
+
+routeend.
+

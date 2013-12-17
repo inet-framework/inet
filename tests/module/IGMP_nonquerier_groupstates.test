@@ -85,3 +85,9 @@ t=200\..* nqrouter/eth0/225.0.0.2: NON_QUERIER NO_MEMBERS_PRESENT NON_MEMBER -->
 t=20.\..* nqrouter/eth0/225.0.0.2: NON_QUERIER MEMBERS_PRESENT NON_MEMBER --> report received <> --> NON_QUERIER MEMBERS_PRESENT NON_MEMBER
 t=40.\..* nqrouter/eth0/225.0.0.2: MEMBERS_PRESENT --> timer expired <> --> NO_MEMBERS_PRESENT
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

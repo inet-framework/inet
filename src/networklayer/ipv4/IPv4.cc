@@ -28,63 +28,75 @@
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
 #include "IRoutingTable.h"
+#include "Ieee802Ctrl_m.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
+#include "NotificationBoard.h"
 
 
 Define_Module(IPv4);
 
 
-void IPv4::initialize()
+void IPv4::initialize(int stage)
 {
-    QueueBase::initialize();
+    if (stage == 0)
+    {
+        QueueBase::initialize();
 
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTableAccess().get();
+        nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
 
-    queueOutGate = gate("queueOut");
+        queueOutGate = gate("queueOut");
 
-    defaultTimeToLive = par("timeToLive");
-    defaultMCTimeToLive = par("multicastTimeToLive");
-    fragmentTimeoutTime = par("fragmentTimeout");
-    forceBroadcast = par("forceBroadcast");
-    mapping.parseProtocolMapping(par("protocolMapping"));
+        defaultTimeToLive = par("timeToLive");
+        defaultMCTimeToLive = par("multicastTimeToLive");
+        fragmentTimeoutTime = par("fragmentTimeout");
+        forceBroadcast = par("forceBroadcast");
+        mapping.parseProtocolMapping(par("protocolMapping"));
 
-    curFragmentId = 0;
-    lastCheckTime = 0;
-    fragbuf.init(icmpAccess.get());
+        curFragmentId = 0;
+        lastCheckTime = 0;
+        fragbuf.init(icmpAccess.get());
 
-    numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
+        numMulticast = numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
-    WATCH(numMulticast);
-    WATCH(numLocalDeliver);
-    WATCH(numDropped);
-    WATCH(numUnroutable);
-    WATCH(numForwarded);
+        WATCH(numMulticast);
+        WATCH(numLocalDeliver);
+        WATCH(numDropped);
+        WATCH(numUnroutable);
+        WATCH(numForwarded);
 
-    // by default no MANET routing
-    manetRouting = false;
+        // by default no MANET routing
+        manetRouting = false;
 
 #ifdef WITH_MANET
-    // test for the presence of MANET routing
-    // check if there is a protocol -> gate mapping
-    int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
-    if (gateSize("transportOut")-1<gateindex)
-        return;
+        // test for the presence of MANET routing
+        // check if there is a protocol -> gate mapping
+        int gateindex = mapping.getOutputGateForProtocol(IP_PROT_MANET);
+        if (gateSize("transportOut")-1<gateindex)
+            return;
 
-    // check if that gate is connected at all
-    cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
-    if (manetgate==NULL)
-        return;
+        // check if that gate is connected at all
+        cGate *manetgate = gate("transportOut", gateindex)->getPathEndGate();
+        if (manetgate==NULL)
+            return;
 
-    cModule *destmod = manetgate->getOwnerModule();
-    if (destmod==NULL)
-        return;
+        cModule *destmod = manetgate->getOwnerModule();
+        if (destmod==NULL)
+            return;
 
-    // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
-    // this prevents performance loss with other protocols that use pro active routing and do not need
-    // assistance from the IPv4 component
-    cProperties *props = destmod->getProperties();
-    manetRouting = props && props->getAsBool("reactive");
+        // manet routing will be turned on ONLY for routing protocols which has the @reactive property set
+        // this prevents performance loss with other protocols that use pro active routing and do not need
+        // assistance from the IPv4 component
+        cProperties *props = destmod->getProperties();
+        manetRouting = props && props->getAsBool("reactive");
 #endif
+    }
+    else if (stage == 1)
+    {
+        isUp = isNodeUp();
+    }
 }
 
 void IPv4::updateDisplayString()
@@ -100,6 +112,11 @@ void IPv4::updateDisplayString()
 
 void IPv4::endService(cPacket *msg)
 {
+    if (!isUp) {
+        EV << "IPv4 is down -- discarding message\n";
+        delete msg;
+        return;
+    }
     if (msg->getArrivalGate()->isName("transportIn"))
     {
         handleMessageFromHL( msg );
@@ -144,7 +161,7 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         if (dblrand() <= relativeHeaderLength)
         {
             EV << "bit error found, sending ICMP_PARAMETER_PROBLEM\n";
-            icmpAccess.get()->sendErrorMessage(datagram, ICMP_PARAMETER_PROBLEM, 0);
+            icmpAccess.get()->sendErrorMessage(datagram, fromIE->getInterfaceId(), ICMP_PARAMETER_PROBLEM, 0);
             return;
         }
     }
@@ -187,13 +204,18 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
         if (fromIE->ipv4Data()->isMemberOfMulticastGroup(destAddr) ||
                 (rt->isMulticastForwardingEnabled() && datagram->getTransportProtocol() == IP_PROT_IGMP))
             reassembleAndDeliver(datagram->dup());
+        else
+            EV << "Skip local delivery of multicast datagram (input interface not in multicast group)\n";
 
         // don't forward if IP forwarding is off, or if dest address is link-scope
         if (!rt->isIPForwardingEnabled() || destAddr.isLinkLocalMulticast())
+        {
+            EV << "Skip forwarding of multicast datagram (packet is link-local or forwarding disabled)\n";
             delete datagram;
+        }
         else if (datagram->getTimeToLive() == 0)
         {
-            EV << "TTL reached 0, dropping datagram.\n";
+            EV << "Skip forwarding of multicast datagram (TTL reached 0)\n";
             delete datagram;
         }
         else
@@ -358,12 +380,15 @@ void IPv4::handleMessageFromHL(cPacket *msg)
         if (rt->isLocalAddress(destAddr))
         {
             EV << "local delivery\n";
-            if (destIE)
+            if (destIE && !destIE->isLoopback())
+            {
                 EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
-
-            destIE = ift->getFirstLoopbackInterface();
+                destIE = NULL;
+            }
+            if (!destIE)
+                destIE = ift->getFirstLoopbackInterface();
             ASSERT(destIE);
-            fragmentAndSend(datagram, destIE, destAddr);
+            routeUnicastPacket(datagram, destIE, destAddr);
         }
         else if (destAddr.isLimitedBroadcastAddress() || rt->isLocalBroadcastAddress(destAddr))
             routeLocalBroadcastPacket(datagram, destIE);
@@ -454,7 +479,7 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, InterfaceEntry *destIE, IP
 #endif
                 EV << "unroutable, sending ICMP_DESTINATION_UNREACHABLE\n";
                 numUnroutable++;
-                icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, 0);
+                icmpAccess.get()->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE, 0);
 #ifdef WITH_MANET
             }
 #endif
@@ -501,29 +526,45 @@ InterfaceEntry *IPv4::getShortestPathInterfaceToSource(IPv4Datagram *datagram)
 void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE)
 {
     ASSERT(fromIE);
-    const IPv4Address &origin = datagram->getSrcAddress();
+    const IPv4Address &srcAddr = datagram->getSrcAddress();
     const IPv4Address &destAddr = datagram->getDestAddress();
     ASSERT(destAddr.isMulticast());
+    ASSERT(!destAddr.isLinkLocalMulticast());
+
+    if (!nb)
+        throw cRuntimeError("If multicast forwarding is enabled, then the node must contain a NotificationBoard.");
 
     EV << "Forwarding multicast datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
     numMulticast++;
 
-    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(origin, destAddr);
+    const IPv4MulticastRoute *route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
     if (!route)
     {
-        EV << "No route, packet dropped.\n";
-        numUnroutable++;
-        delete datagram;
+        EV << "Multicast route does not exist, try to add.\n";
+        nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST, datagram);
+
+        // read new record
+        route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
+
+        if (!route)
+        {
+            EV << "No route, packet dropped.\n";
+            numUnroutable++;
+            delete datagram;
+            return;
+        }
     }
-    else if (route->getParent() && fromIE != route->getParent())
+
+    if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
     {
-        EV << "Did not arrive on parent interface, packet dropped.\n";
+        EV << "Did not arrive on input interface, packet dropped.\n";
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
         delete datagram;
     }
     // backward compatible: no parent means shortest path interface to source (RPB routing)
-    else if (!route->getParent() && fromIE != getShortestPathInterfaceToSource(datagram))
+    else if (!route->getInInterface() && fromIE != getShortestPathInterfaceToSource(datagram))
     {
         EV << "Did not arrive on shortest path, packet dropped.\n";
         numDropped++;
@@ -531,18 +572,20 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
     }
     else
     {
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
+
         numForwarded++;
         // copy original datagram for multiple destinations
-        const IPv4MulticastRoute::ChildInterfaceVector &children = route->getChildren();
-        for (unsigned int i=0; i<children.size(); i++)
+        for (unsigned int i=0; i<route->getNumOutInterfaces(); i++)
         {
-            InterfaceEntry *destIE = children[i]->getInterface();
-            if (destIE != fromIE)
+            IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+            InterfaceEntry *destIE = outInterface->getInterface();
+            if (destIE != fromIE && outInterface->isEnabled())
             {
                 int ttlThreshold = destIE->ipv4Data()->getMulticastTtlThreshold();
                 if (datagram->getTimeToLive() <= ttlThreshold)
                     EV << "Not forwarding to " << destIE->getName() << " (ttl treshold reached)\n";
-                else if (children[i]->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
+                else if (outInterface->isLeaf() && !destIE->ipv4Data()->hasMulticastListener(destAddr))
                     EV << "Not forwarding to " << destIE->getName() << " (no listeners)\n";
                 else
                 {
@@ -551,6 +594,9 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, InterfaceEntry *fromIE
                 }
             }
         }
+
+        nb->fireChangeNotification(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
+
         // only copies sent, delete original datagram
         delete datagram;
     }
@@ -561,7 +607,7 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
     EV << "Local delivery\n";
 
     if (datagram->getSrcAddress().isUnspecified())
-        EV << "Received datagram '%s' without source address filled in" << datagram->getName() << "\n";
+        EV << "Received datagram '" << datagram->getName() << "' without source address filled in\n";
 
     // reassemble the packet (if fragmented)
     if (datagram->getFragmentOffset()!=0 || datagram->getMoreFragments())
@@ -622,8 +668,9 @@ void IPv4::reassembleAndDeliver(IPv4Datagram *datagram)
         }
         else
         {
-            EV << "L3 Protocol not connected. discarding packet" << endl;
-            icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
+            EV_WARN << "Transport protocol not connected, discarding packet" << endl;
+            int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
+            icmpAccess.get()->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
         }
     }
 }
@@ -667,15 +714,15 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     {
         // drop datagram, destruction responsibility in ICMP
         EV << "datagram TTL reached zero, sending ICMP_TIME_EXCEEDED\n";
-        icmpAccess.get()->sendErrorMessage(datagram, ICMP_TIME_EXCEEDED, 0);
+        icmpAccess.get()->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_TIME_EXCEEDED, 0);
         numDropped++;
         return;
     }
 
     int mtu = ie->getMTU();
 
-    // check if datagram does not require fragmentation
-    if (datagram->getByteLength() <= mtu)
+    // send datagram straight out if it doesn't require fragmentation (note: mtu==0 means infinite mtu)
+    if (mtu == 0 || datagram->getByteLength() <= mtu)
     {
         sendDatagramToOutput(datagram, ie, nextHopAddr);
         return;
@@ -685,16 +732,9 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     if (datagram->getDontFragment())
     {
         EV << "datagram larger than MTU and don't fragment bit set, sending ICMP_DESTINATION_UNREACHABLE\n";
-        icmpAccess.get()->sendErrorMessage(datagram, ICMP_DESTINATION_UNREACHABLE,
+        icmpAccess.get()->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE,
                                                      ICMP_FRAGMENTATION_ERROR_CODE);
         numDropped++;
-        return;
-    }
-
-    // optimization: do not fragment and reassemble on the loopback interface
-    if (ie->isLoopback())
-    {
-        sendDatagramToOutput(datagram, ie, nextHopAddr);
         return;
     }
 
@@ -703,8 +743,10 @@ void IPv4::fragmentAndSend(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Addre
     int payloadLength = datagram->getByteLength() - headerLength;
     int fragmentLength = ((mtu - headerLength) / 8) * 8; // payload only (without header)
     int offsetBase = datagram->getFragmentOffset();
+    if (fragmentLength <= 0)
+        throw cRuntimeError("Cannot fragment datagram: MTU=%d too small for header size (%d bytes)", mtu, headerLength); // exception and not ICMP because this is likely a simulation configuration error, not something one wants to simulate
 
-    int noOfFragments = (payloadLength + fragmentLength - 1)/ fragmentLength;
+    int noOfFragments = (payloadLength + fragmentLength - 1) / fragmentLength;
     EV << "Breaking datagram into " << noOfFragments << " fragments\n";
 
     // create and send fragments
@@ -793,13 +835,6 @@ IPv4Datagram *IPv4::createIPv4Datagram(const char *name)
 
 void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
-    if (ie->isLoopback())
-    {
-        // no interface module for loopback, forward packet internally
-        // FIXME shouldn't be arrival(datagram) ?
-        handlePacketFromNetwork(datagram, ie);
-    }
-    else
     {
         // send out datagram to ARP, with control info attached
         delete datagram->removeControlInfo();
@@ -849,3 +884,44 @@ void IPv4::sendToManet(cPacket *packet)
 }
 #endif
 
+bool IPv4::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    return true;
+}
+
+void IPv4::start()
+{
+    ASSERT(queue.isEmpty());
+    isUp = true;
+}
+
+void IPv4::stop()
+{
+    isUp = false;
+    flush();
+}
+
+void IPv4::flush()
+{
+    delete cancelService();
+    queue.clear();
+}
+
+bool IPv4::isNodeUp()
+{
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}

@@ -24,9 +24,11 @@
 
 #include "IPv6Address.h"
 #include "NotificationBoard.h"
+#include "ILifecycle.h"
 
 class IInterfaceTable;
 class InterfaceEntry;
+class RoutingTable6;
 
 /**
  * Represents a route in the route table. Routes with src=FROM_RA represent
@@ -44,7 +46,38 @@ class INET_API IPv6Route : public cObject
         ROUTING_PROT,   ///< route is managed by a routing protocol (OSPF,BGP,etc)
     };
 
+    /** Cisco like administrative distances (includes IPv4 protocols)*/
+    enum RouteAdminDist
+    {
+        dDirectlyConnected = 0,
+        dStatic = 1,
+        dEIGRPSummary = 5,
+        dBGPExternal = 20,
+        dEIGRPInternal = 90,
+        dIGRP = 100,
+        dOSPF = 110,
+        dISIS = 115,
+        dRIP = 120,
+        dEGP = 140,
+        dODR = 160,
+        dEIGRPExternal = 170,
+        dBGPInternal = 200,
+        dDHCPlearned = 254,
+        dUnknown = 255
+    };
+
+    enum ChangeCodes // field codes for changed()
+    {
+        F_NEXTHOP,
+        F_IFACE,
+        F_METRIC,
+        F_EXPIRYTIME,
+        F_ADMINDIST,
+        F_LAST,
+    };
+
   protected:
+    RoutingTable6 *_rt;     ///< the routing table in which this route is inserted, or NULL
     IPv6Address _destPrefix;
     short _length;
     RouteSrc _src;
@@ -52,6 +85,9 @@ class INET_API IPv6Route : public cObject
     IPv6Address _nextHop;  // unspecified means "direct"
     simtime_t _expiryTime; // if route is an advertised prefix: prefix lifetime
     int _metric;
+    unsigned int  _adminDist;
+
+    void changed(int fieldCode);
 
   public:
     /**
@@ -59,22 +95,29 @@ class INET_API IPv6Route : public cObject
      * to the constructor and cannot be changed afterwards.
      */
     IPv6Route(IPv6Address destPrefix, int length, RouteSrc src) {
+        _rt = NULL;
         _destPrefix = destPrefix;
         _length = length;
         _src = src;
         _interfaceID = -1;
         _expiryTime = 0;
         _metric = 0;
+        _adminDist = dUnknown;
     }
+
+    /** To be called by the routing table when this route is added or removed from it */
+    virtual void setRoutingTable(RoutingTable6 *rt) { _rt = rt; }
+    RoutingTable6 *getRoutingTable() const {return _rt;}
 
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
     static const char *routeSrcName(RouteSrc src);
 
-    void setInterfaceId(int interfaceId)  {_interfaceID = interfaceId;}
-    void setNextHop(const IPv6Address& nextHop)  {_nextHop = nextHop;}
-    void setExpiryTime(simtime_t expiryTime)  {_expiryTime = expiryTime;}
-    void setMetric(int metric)  {_metric = metric;}
+    void setInterfaceId(int interfaceId)  { if (interfaceId != _interfaceID) { _interfaceID = interfaceId; changed(F_IFACE);} }
+    void setNextHop(const IPv6Address& nextHop)  {if (nextHop != _nextHop) { _nextHop = nextHop; changed(F_NEXTHOP);} }
+    void setExpiryTime(simtime_t expiryTime)  { if (expiryTime != _expiryTime) { _expiryTime = expiryTime; changed(F_EXPIRYTIME);} }
+    void setMetric(int metric)  { if (metric != _metric) { _metric = metric; changed(F_METRIC);} }
+    void setAdminDist(unsigned int adminDist)  { if (adminDist != _adminDist) { _adminDist = adminDist; changed(F_ADMINDIST);} }
 
     const IPv6Address& getDestPrefix() const {return _destPrefix;}
     int getPrefixLength() const  {return _length;}
@@ -83,6 +126,7 @@ class INET_API IPv6Route : public cObject
     const IPv6Address& getNextHop() const  {return _nextHop;}
     simtime_t getExpiryTime() const  {return _expiryTime;}
     int getMetric() const  {return _metric;}
+    unsigned int getAdminDist() const  { return _adminDist; }
 };
 
 /**
@@ -100,13 +144,14 @@ class INET_API IPv6Route : public cObject
  * be read and modified during simulation, typically by routing protocol
  * implementations.
  */
-class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
+class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable, public ILifecycle
 {
   protected:
     IInterfaceTable *ift; // cached pointer
     NotificationBoard *nb; // cached pointer
 
     bool isrouter;
+    bool multicastForward;  //If node is forwarding multicast info
 
 #ifdef WITH_xMIPv6
     bool ishome_agent; //added by Zarrar Yousaf @ CNI, UniDortmund on 20.02.07
@@ -133,6 +178,9 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     RouteList routeList;
 
   protected:
+    // creates a new empty route, factory method overriden in subclasses that use custom routes
+    virtual IPv6Route *createNewRoute(IPv6Address destPrefix, int prefixLength, IPv6Route::RouteSrc src);
+
     // internal: routes of different type can only be added via well-defined functions
     virtual void addRoute(IPv6Route *route);
     // helper for addRoute()
@@ -188,6 +236,15 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * IP forwarding on/off
      */
     virtual bool isRouter() const {return isrouter;}
+
+    virtual bool isMulticastForwardingEnabled() { return multicastForward; }
+
+    /**
+     * To be called from route objects whenever a field changes. Used for
+     * maintaining internal data structures and firing "routing table changed"
+     * notifications.
+     */
+    virtual void routeChanged(IPv6Route *entry, int fieldCode);
 
 #ifdef WITH_xMIPv6
     /**
@@ -249,6 +306,7 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
     //@}
 
     /** @name Managing the destination cache */
+    //@{
     /**
      * Add or update a destination cache entry.
      */
@@ -266,6 +324,12 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      * go though router selection again.
      */
     virtual void purgeDestCacheEntriesToNeighbour(const IPv6Address& nextHopAddr, int interfaceId);
+
+    /**
+     * Removes all destination cache entries for the specified interface
+     */
+    void purgeDestCacheForInterfaceID(int interfaceId);
+
     //@}
 
     /** @name Managing prefixes and the route table */
@@ -365,11 +429,6 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      */
     void removePrefixes(int interfaceID);
 
-    /*
-     * Removes all destination cache entries for the specified interface
-     */
-    void purgeDestCacheForInterfaceID(int interfaceId);
-
     /**
      * Can be used to check whether this node supports MIPv6 or not
      * (MN, MR, HA or CN).
@@ -388,6 +447,11 @@ class INET_API RoutingTable6 : public cSimpleModule, protected INotifiable
      */
     bool isOnLinkAddress(const IPv6Address& address); // update 11.9.07 - CB
 #endif /* WITH_xMIPv6 */
+
+    /**
+     * ILifecycle method
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

@@ -1,0 +1,69 @@
+%description:
+Testing SCTP: Use of several streams using the fair bandwidth scheduler
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=SCTPFeatureTest
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.sctp_client.numSctpApps = 1
+**.sctp_client.sctpType="SCTP"
+**.sctp_client.sctpApp[0].typename = "SCTPClient"
+**.sctp_client.sctpApp[0].localAddress = "10.1.1.1"
+**.sctp_client.sctpApp[0].connectAddress = "10.1.3.1"
+**.sctp_client.sctpApp[0].primaryPath = "10.1.3.1"
+**.sctp_client.sctpApp[0].connectPort = 6666
+**.sctp_client.sctpApp[0].requestLength= 1452
+**.sctp_client.sctpApp[0].startTime = truncnormal(1s,0.2s)
+**.sctp_client.sctpApp[0].stopTime = truncnormal(60s,2s)
+**.sctp_client.sctpApp[0].numRequestsPerSession = 100000000
+**.sctp_client.sctpApp[0].queueSize = 100
+**.sctpApp[0].outboundStreams = 4
+**.sctpApp[0].inboundStreams = 4
+
+**.sctp_server.numSctpApps = 1
+**.sctp_server.sctpType="SCTP"
+**.sctp_server.sctpApp[0].typename = "SCTPServer"
+**.sctp_server.sctpApp[0].localAddress = "10.1.3.1"
+**.sctp_server.sctpApp[0].localPort = 6666
+**.sctp_server.sctpApp[*].queueSize = 0 #Size of sendQueue before App is notified to send new data
+**.sctp_server.sctpApp[*].numPacketsToSendPerClient = 0
+**.sctp_server.sctpApp[*].numPacketsToReceivePerClient = 0
+
+# sctp settings
+**.sctp.sctpAlgorithmClass = "SCTPAlg"
+**.sctp.ssModule=4 # 0=ROUND_ROBIN 1=ROUND_ROBIN_PACKET 2=RANDOM_SCHEDULE 3=RANDOM_SCHEDULE_PACKET
+#4=FAIR_BANDWITH 5=FAIR_BANDWITH_PACKET 6=PRIORITY 7=FCFS 8=PATH_MANUAL 9=PATH_MAP_TO_PATH       = 9
+
+# NIC configuration
+#**.ppp[*].queueType = "DropTailQueue" # in routers
+#**.ppp[*].queue.frameCapacity = 100  # in routers
+#**.ppp[*].ppp.mtu = 1500 B
+
+#**.vector-recording = false
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Bytes received on stream 0 of assoc 3"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Bytes received on stream 1 of assoc 3"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Bytes received on stream 2 of assoc 3"[ \t]*[1-9][0-9]*
+scalar SCTPFeatureTest.sctp_server.sctp[ \t]*"Bytes received on stream 3 of assoc 3"[ \t]*[1-9][0-9]*
+%#--------------------------------------------------------------------------------------------------------------

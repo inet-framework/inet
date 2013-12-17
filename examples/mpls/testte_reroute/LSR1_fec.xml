@@ -2,17 +2,13 @@
 <fectable>
 	<fecentry>
 		<id>1</id>
-
-		<destination>10.2.1.1</destination>
-
+		<destination>host3</destination>
 		<tunnel_id>1</tunnel_id>
 		<lspid>100</lspid>
 	</fecentry>
 	<fecentry>
 		<id>2</id>
-
-		<destination>10.2.2.1</destination>
-
+		<destination>host4</destination>
 		<tunnel_id>2</tunnel_id>
 		<lspid>200</lspid>
 	</fecentry>

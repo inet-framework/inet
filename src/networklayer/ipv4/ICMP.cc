@@ -25,6 +25,9 @@
 #include "IPv4Datagram.h"
 #include "IPv4ControlInfo.h"
 #include "PingPayload_m.h"
+#include "IPv4InterfaceData.h"
+#include "InterfaceTableAccess.h"
+#include "RoutingTableAccess.h"
 
 Define_Module(ICMP);
 
@@ -49,17 +52,27 @@ void ICMP::handleMessage(cMessage *msg)
 }
 
 
-void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, ICMPType type, ICMPCode code)
+void ICMP::sendErrorMessage(IPv4Datagram *origDatagram, int inputInterfaceId, ICMPType type, ICMPCode code)
 {
     Enter_Method("sendErrorMessage(datagram, type=%d, code=%d)", type, code);
 
     // get ownership
     take(origDatagram);
 
-    // don't send ICMP error messages for multicast messages
-    if (origDatagram->getDestAddress().isMulticast())
+    // don't send ICMP error messages in response to broadcast or multicast messages
+    IPv4Address origDestAddr = origDatagram->getDestAddress();
+    if (origDestAddr.isMulticast() || origDestAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origDestAddr, inputInterfaceId))
     {
-        EV << "won't send ICMP error messages for multicast message " << origDatagram << endl;
+        EV << "won't send ICMP error messages for broadcast/multicast message " << origDatagram << endl;
+        delete origDatagram;
+        return;
+    }
+
+    // don't send ICMP error messages response to unspecified, broadcast or multicast addresses
+    IPv4Address origSrcAddr = origDatagram->getSrcAddress();
+    if (origSrcAddr.isUnspecified() || origSrcAddr.isMulticast() || origSrcAddr.isLimitedBroadcastAddress() || possiblyLocalBroadcast(origSrcAddr, inputInterfaceId))
+    {
+        EV << "won't send ICMP error messages to broadcast/multicast address, message " << origDatagram << endl;
         delete origDatagram;
         return;
     }
@@ -126,10 +139,39 @@ void ICMP::sendErrorMessage(cPacket *transportPacket, IPv4ControlInfo *ctrl, ICM
     Enter_Method("sendErrorMessage(transportPacket, ctrl, type=%d, code=%d)", type, code);
 
     IPv4Datagram *datagram = ctrl->removeOrigDatagram();
+    int inputInterfaceId = ctrl->getInterfaceId();
     take(transportPacket);
     take(datagram);
     datagram->encapsulate(transportPacket);
-    sendErrorMessage(datagram, type, code);
+    sendErrorMessage(datagram, inputInterfaceId, type, code);
+}
+
+bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
+{
+    if ((addr.getInt()&1) == 0)
+        return false;
+
+    IRoutingTable *rt = RoutingTableAccess().get();
+    if (rt->isLocalBroadcastAddress(addr))
+        return true;
+
+    // if the input interface is unconfigured, we won't recognize network-directed broadcasts because we don't what network we are on
+    IInterfaceTable *ift = InterfaceTableAccess().get();
+    if (interfaceId != -1)
+    {
+        InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
+        bool interfaceUnconfigured = (ie->ipv4Data() == NULL) || ie->ipv4Data()->getIPAddress().isUnspecified();
+        return interfaceUnconfigured;
+    }
+    else
+    {
+        // if all interfaces are configured, we are OK
+        bool allInterfacesConfigured = true;
+        for (int i = 0; i < (int)ift->getNumInterfaces(); i++)
+            if ((ift->getInterface(i)->ipv4Data() == NULL) || ift->getInterface(i)->ipv4Data()->getIPAddress().isUnspecified())
+                allInterfacesConfigured = false;
+        return !allInterfacesConfigured;
+    }
 }
 
 void ICMP::processICMPMessage(ICMPMessage *icmpmsg)

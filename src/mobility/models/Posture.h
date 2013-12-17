@@ -46,6 +46,7 @@
 
 #include <string.h>
 
+#include "INETDefs.h"
 #include "Coord.h"
 
 
@@ -57,7 +58,7 @@
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class Posture {
+class INET_API Posture {
   protected:
     /** @brief Number of nodes existing in the WBAN */
     unsigned int numNodes;

@@ -22,22 +22,37 @@
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
-
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
 
 Define_Module(IPvXTrafSink);
 
 
 simsignal_t IPvXTrafSink::rcvdPkSignal = SIMSIGNAL_NULL;
 
-void IPvXTrafSink::initialize()
+void IPvXTrafSink::initialize(int stage)
 {
-    numReceived = 0;
-    WATCH(numReceived);
-    rcvdPkSignal = registerSignal("rcvdPk");
+    if (stage == 0)
+    {
+        numReceived = 0;
+        WATCH(numReceived);
+        rcvdPkSignal = registerSignal("rcvdPk");
+    }
+    else if (stage == 1)
+    {
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+    }
 }
 
 void IPvXTrafSink::handleMessage(cMessage *msg)
 {
+    if (!isOperational)
+    {
+        EV << "Module is down, received " << msg->getName() << " message dropped\n";
+        delete msg;
+        return;
+    }
     processPacket(check_and_cast<cPacket *>(msg));
 
     if (ev.isGUI())
@@ -46,6 +61,16 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
         sprintf(buf, "rcvd: %d pks", numReceived);
         getDisplayString().setTagArg("t", 0, buf);
     }
+}
+
+bool IPvXTrafSink::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) isOperational = true;
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) isOperational = false;
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) isOperational = false;
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
 }
 
 void IPvXTrafSink::printPacket(cPacket *msg)
@@ -68,11 +93,11 @@ void IPvXTrafSink::printPacket(cPacket *msg)
         protocol = ctrl->getProtocol();
     }
 
-    ev  << msg << endl;
-    ev  << "Payload length: " << msg->getByteLength() << " bytes" << endl;
+    EV << msg << endl;
+    EV << "Payload length: " << msg->getByteLength() << " bytes" << endl;
 
     if (protocol != -1)
-        ev  << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
+        EV << "src: " << src << "  dest: " << dest << "  protocol=" << protocol << "\n";
 }
 
 void IPvXTrafSink::processPacket(cPacket *msg)

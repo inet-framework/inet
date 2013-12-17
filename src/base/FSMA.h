@@ -53,7 +53,7 @@
     bool ___exit = false;
     int ___c = 0;
     cFSM ___fsm = fsm;
-    while (!___exit && (___c++ < FSM_MAXT || opp_error(eINFLOOP, ___fsm->getStateName()))
+    while (!___exit && (___c++ < FSM_MAXT || opp_error(E_INFLOOP, ___fsm->getStateName()))
     {
         if (condition_seen = false, ___exit = true, ___fsm->getState() == X)
         {
@@ -103,10 +103,10 @@
     int ___c = 0;                                                      \
     cFSM *___fsm = &fsm;                                               \
     EV << "processing event in state machine " << (fsm).getName() << endl;  \
-    while (!___exit && (___c++ < FSM_MAXT || (opp_error(eINFLOOP, (fsm).getStateName()), 0)))
+    while (!___exit && (___c++ < FSM_MAXT || (opp_error(E_INFLOOP, (fsm).getStateName()), 0)))
 
 #define FSMA_Print(exiting)                                            \
-    (ev << "FSM " << ___fsm->getName()                                    \
+    (EV << "FSM " << ___fsm->getName()                                    \
         << ((exiting) ? ": leaving state  " : ": entering state ")     \
         << ___fsm->getStateName() << endl)
 
@@ -140,6 +140,10 @@
             error("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code");   \
         action;                                                                         \
     }
+
+#if OMNETPP_VERSION < 0x500
+#define E_INFLOOP eINFLOOP
+#endif
 
 #endif
 

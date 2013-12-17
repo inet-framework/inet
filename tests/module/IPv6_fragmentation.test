@@ -18,7 +18,7 @@ cmdenv-express-mode=false
 # udp apps
 **.cli[*].numUdpApps = 1
 **.cli[*].udpApp[*].typename = "UDPBasicApp"
-**.cli[*].udpApp[0].destAddresses = "aaaa:2:1::8aa:ff:fe00:8" # "srv" does not work
+**.cli[*].udpApp[0].destAddresses = "aaaa:2:2::8aa:ff:fe00:8" # "srv" does not work
 **.cli[*].udpApp[0].destPort = 1000
 **.cli[*].udpApp[0].messageLength = 5000B
 
@@ -39,3 +39,9 @@ cmdenv-express-mode=false
 This fragment completes the datagram.
 %contains: stdout
 Received packet: (cPacket)UDPBasicAppData-0 (5000 bytes)
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

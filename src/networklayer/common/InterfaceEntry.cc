@@ -55,7 +55,8 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
     mtu = 0;
 
-    down = false;
+    state = UP;
+    carrier = true;
     broadcast = false;
     multicast = false;
     pointToPoint = false;
@@ -64,9 +65,14 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
 
     ipv4data = NULL;
     ipv6data = NULL;
-    protocol3data = NULL;
-    protocol4data = NULL;
+    isisdata = NULL;
+    trilldata = NULL;
     estimateCostProcessArray.clear();
+}
+
+InterfaceEntry::~InterfaceEntry()
+{
+    resetInterface();
 }
 
 std::string InterfaceEntry::info() const
@@ -78,7 +84,7 @@ std::string InterfaceEntry::info() const
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "  MTU:" << getMTU();
-    if (isDown()) out << " DOWN";
+    if (!isUp()) out << " DOWN";
     if (isBroadcast()) out << " BROADCAST";
     if (isMulticast()) out << " MULTICAST";
     if (isPointToPoint()) out << " POINTTOPOINT";
@@ -89,14 +95,18 @@ std::string InterfaceEntry::info() const
     else
         out << getMacAddress();
 
+#ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ((cObject*)ipv4data)->info(); // Khmm...
+        out << " " << ipv4data->info();
+#endif
+#ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ((cObject*)ipv6data)->info(); // Khmm...
-    if (protocol3data)
-        out << " " << protocol3data->info();
-    if (protocol4data)
-        out << " " << protocol4data->info();
+        out << " " << ipv6data->info();
+#endif
+    if (isisdata)
+        out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
+    if (trilldata)
+        out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
     return out.str();
 }
 
@@ -109,7 +119,7 @@ std::string InterfaceEntry::detailedInfo() const
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "MTU: " << getMTU() << " \t";
-    if (isDown()) out << "DOWN ";
+    if (!isUp()) out << "DOWN ";
     if (isBroadcast()) out << "BROADCAST ";
     if (isMulticast()) out << "MULTICAST ";
     if (isPointToPoint()) out << "POINTTOPOINT ";
@@ -121,14 +131,18 @@ std::string InterfaceEntry::detailedInfo() const
     else
         out << getMacAddress();
     out << "\n";
+#ifdef WITH_IPv4
     if (ipv4data)
-        out << " " << ((cObject*)ipv4data)->info() << "\n"; // Khmm...
+        out << " " << ipv4data->info() << "\n";
+#endif
+#ifdef WITH_IPv6
     if (ipv6data)
-        out << " " << ((cObject*)ipv6data)->info() << "\n"; // Khmm...
-    if (protocol3data)
-        out << " " << protocol3data->info() << "\n";
-    if (protocol4data)
-        out << " " << protocol4data->info() << "\n";
+        out << " " << ipv6data->info() << "\n";
+#endif
+    if (isisdata)
+        out << " " << ((InterfaceProtocolData *)isisdata)->info() << "\n"; // Khmm...
+    if (trilldata)
+        out << " " << ((InterfaceProtocolData *)trilldata)->info() << "\n"; // Khmm...
 
     return out.str();
 }
@@ -143,9 +157,37 @@ void InterfaceEntry::changed(int category)
         ownerp->interfaceChanged(this, category);
 }
 
+void InterfaceEntry::resetInterface()
+{
+#ifdef WITH_IPv4
+    if (ipv4data && ipv4data->ownerp == this)
+        delete ipv4data;
+    ipv4data = NULL;
+#else
+    if (ipv4data)
+        throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
+#endif
+#ifdef WITH_IPv6
+    if (ipv6data && ipv6data->ownerp == this)
+        delete ipv6data;
+    ipv6data = NULL;
+#else
+    if (ipv6data)
+        throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
+#endif
+    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
+        delete (InterfaceProtocolData *)isisdata;
+    isisdata = NULL;
+    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
+        delete (InterfaceProtocolData *)trilldata;
+    trilldata = NULL;
+}
+
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 {
 #ifdef WITH_IPv4
+    if (ipv4data && ipv4data->ownerp == this)
+        delete ipv4data;
     ipv4data = p;
     p->ownerp = this;
     configChanged();
@@ -157,12 +199,32 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
 void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
 {
 #ifdef WITH_IPv6
+    if (ipv6data && ipv6data->ownerp == this)
+        delete ipv6data;
     ipv6data = p;
     p->ownerp = this;
     configChanged();
 #else
-    throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv6 support");
+    throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
 #endif
+}
+
+void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
+{
+    if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)trilldata; // Khmm...
+    trilldata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
+}
+
+void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
+{
+    if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)isisdata; // Khmm...
+    isisdata = p;
+    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    configChanged();
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
@@ -187,3 +249,4 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
     }
     return NULL;
 }
+

@@ -84,17 +84,18 @@ simple Ieee80211Mac
         string opMode @enum("b","g","a","p") = default("g");
         string wifiPreambleMode @enum("LONG","SHORT") = default("LONG"); // preamble mode; see IEEE 2007, 19.3.2
 
-        double basicBitrate @unit("bps") = default(2e6bps);
-        int mtu @unit("B") = default(1500B);
+        double basicBitrate @unit("bps") = default(1e6bps); // used for broadcast frames
+        double controlBitrate @unit("bps") = default(1e6bps); // used for control frames
+
+        int mtu @unit("B") = default(2304B);
         double slotTime @unit("s") = default(9us);
         int rtsThresholdBytes @unit("B") = default(2346B); // longer messages will be sent using RTS/CTS
         int retryLimit = default(-1); // maximum number of retries per message, -1 means default
         int cwMinData = default(-1); // contention window for normal data frames, -1 means default
         int cwMaxData = default(-1); // contention window for normal data frames, -1 means default
         int cwMinMulticast = default(-1); // contention window for broadcast messages, -1 means default
-        bool fixFSM = default(true);
 
-        double phyHeaderLength = default(-1); // if -1, the MAC will compute it in function of the modulation type
+        double phyHeaderLength @unit("s") = default(-1s); // when <0, the MAC will compute it in function of the modulation type
         bool forceBitRate = default(false); // if true, the MAC will force the bitrate to the physical layer
         int autoBitrate @enum(0,1,2) = default(0); // 0 = constant bit rate (autobitrate algorithm disabled), 1 = ARF Rate, 2 = AARF Rate
         // parameters used by the autobitrate
@@ -113,6 +114,16 @@ simple Ieee80211Mac
         double throughputTimePeriod @unit("s") = default(0); // period of time used by throughput measurement statistic
         bool multiMac = default(false); // allows multiples mac interfaces in the same link layer
         @display("i=block/layer");
+
+        @signal[packetSentToLower](type=IdealWirelessFrame);
+        @signal[packetReceivedFromLower](type=IdealWirelessFrame);
+        @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
+        @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
+
+        @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
+        @statistic[rcvdPkFromLL](title="packets received from lower layer"; source=packetReceivedFromLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
 
     gates:
         input upperLayerIn @labels(Ieee80211Frame);

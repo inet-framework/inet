@@ -1,3 +1,33 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-23  Zoltan Bojthe
+
+	ManetroutingBase:
+	- updated documentation
+	- Removed:
+	    - unused ManetTimer and BatmanTimer class
+	    - unused static variables
+	    - isIpLocalAddress(), uses isLocalAddress()
+	    - convertAddressToString()
+		- removed getXPos(), getYPos() functions, you should use
+	      getPosition() instead.
+
+	- redesigned coordinate and speed storage and access
+	  replaced double x,y with a Coord.  getDirection() returns the
+	  speed vector (in Coord)
+	- getters returns UNSPECIFIED_ADDRESS if addrType==UNDEFINED
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

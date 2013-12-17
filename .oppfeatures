@@ -180,6 +180,7 @@
         nedPackages = "
                        inet.applications.rtpapp
                        inet.transport.rtp
+                       inet.nodes.rtp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RTP"
@@ -480,7 +481,7 @@
     <feature
         id="traci"
         name="TraCI"
-        description = "Integraion modules for TraCI"
+        description = "Integration modules for TraCI, see http://veins.car2x.org"
         initiallyEnabled = "true"
         requires = "IPv4 mobility"
         labels = ""
@@ -537,11 +538,29 @@
         linkerFlags = ""
         />
     <feature
+        id="idealwireless"
+        name="Ideal Wireless Communication"
+        description = "Provides a simple (dummy) wireless interface that consists
+        	of a unit disk radio and no real MAC protocol. It offers simplicity
+        	for scenarios where Layer 1 and 2 effects can be completely ignored.
+        	Parts: IdealWirelessNic (IdealWirelessMac plus IdealRadio), and
+        	IdealChannelModel."
+        initiallyEnabled = "true"
+        requires = "mobility radio"
+        labels = "nic wireless"
+        nedPackages = "
+                       inet.linklayer.idealwireless
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="wireless_examples"
         name="wireless examples"
         description = "wireless examples"
         initiallyEnabled = "true"
-        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211"
+        requires = "TCP_INET UDP IPv4 Ethernet Ieee80211 idealwireless"
         labels = "nic wireless"
         nedPackages = "
                        inet.examples.adhoc

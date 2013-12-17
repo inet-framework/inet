@@ -219,6 +219,7 @@ void RREP::copy(const RREP& m)
     lifetime = m.lifetime;
     cost = m.cost;
     hopfix = m.hopfix;
+    totalHops = m.totalHops;
 }
 
 std::string RREP::detailedInfo() const

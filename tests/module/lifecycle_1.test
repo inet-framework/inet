@@ -1,0 +1,77 @@
+%description:
+
+Test shutdown and startup operations on StandardHost.
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+record-eventlog = true
+
+**.hasStatus = true
+**.scenarioManager.script = xmldoc("scenario.xml")
+*.host.hasTcp = true
+*.host.hasUdp = true
+*.host.hasSctp = true
+*.host.eth[0].csmacdSupport = true
+*.host.eth[1].csmacdSupport = false
+*.host.networkLayer.configurator.networkConfiguratorModule = ""
+%file: test.ned
+
+import inet.nodes.inet.StandardHost;
+import inet.base.LifecycleController;
+import inet.status.NodeStatus;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        host: StandardHost
+        {
+            gates:
+                ethg[2];
+                pppg[2];
+        }
+    connections:
+        host.ethg[0] <--> {datarate=10Mbps; delay=10us;} <--> host.ethg[1];
+        host.pppg[0] <--> {datarate=10Mbps; delay=10us;} <--> host.pppg[1];
+}
+
+%file: scenario.xml
+
+<scenario>
+    <at t="1.0">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
+    <at t="2.0">
+        <tell module="lifecycleController" target="host" operation="NodeStartOperation"/>
+    </at>
+    <at t="2.5">
+        <tell module="lifecycleController" target="host" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+
+Test.host shutting down
+.*
+Test.host shut down
+.*
+Test.host starting up
+.*
+Test.host started
+.*
+Test.host shutting down
+.*
+Test.host shut down
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

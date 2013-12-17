@@ -1,3 +1,21 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-05  Zoltan Bojthe
+
+	battery: moved timeout pointer from BasicBattery to InetSimpleBattery;
+	BasicBattery became an abstract class
+
+2013-05-15  Alfonso Ariza - takeover from INETMANET
+
+	fix/cosmetics: correctly initialize and cancel/delete the self timers.
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -33,4 +51,3 @@
 
 	Battery models moved from src/battery/ into src/battery/models;
 	IBattery created in src/battery/
-

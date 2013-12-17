@@ -74,10 +74,16 @@ void TCPGenericCliAppBase::connect()
     EV << "issuing OPEN command\n";
     setStatusString("connecting");
 
-    socket.connect(IPvXAddressResolver().resolve(connectAddress), connectPort);
+    IPvXAddress destination;
+    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        socket.connect(destination, connectPort);
 
-    numSessions++;
-    emit(connectSignal, 1L);
+        numSessions++;
+        emit(connectSignal, 1L);
+    }
 }
 
 void TCPGenericCliAppBase::close()

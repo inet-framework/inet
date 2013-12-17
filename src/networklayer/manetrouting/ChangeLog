@@ -1,13 +1,14 @@
-2012-11-19  Zoltan Bojthe 
+2013-08-22  ------ inet-2.2.0 released ------
 
-	Batman:
-	- Fixed several memory leaks
-	- Fixed routing table corruption and possible crash when multiple 
-	  radios were used in a single host
-	- Added HNA support. Nodes can advertise external networks,
-	  so traffic towards those networks can be routed correctly.
-	  Use the announcedNetworks parameter to specufy multiple connected
-	  external networks.
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-23  Zoltan Bojthe
+
+	ManetRouting:
+	  - uses now ManetNetworkAddress instead of Uint128
+	  - removed iterator typedefs of the AddressGroup
+	  - merged sendToIp() code into a common base function
+	    sendToIpOnIface()
 
 2012-08-07  ------ inet-2.0.0 released ------
 

@@ -35,9 +35,6 @@
 class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 {
   protected:
-    typedef std::map<long, simtime_t> MsgId2TimeMap;
-    MsgId2TimeMap msgId2TimeMap;
-
     std::list<IPassiveQueueListener*> listeners;
 
     // state
@@ -98,6 +95,11 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      * Clear all queued packets and stored requests.
      */
     virtual void clear();
+
+    /**
+     * Return a packet from the queue directly.
+     */
+    virtual cMessage *pop();
 
     /**
      * Implementation of IPassiveQueue::addListener().

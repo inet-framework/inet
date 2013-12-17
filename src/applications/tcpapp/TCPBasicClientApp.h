@@ -17,17 +17,20 @@
 #include "INETDefs.h"
 
 #include "TCPGenericCliAppBase.h"
-
+#include "NodeStatus.h"
+#include "ILifecycle.h"
 
 /**
  * An example request-reply based client application.
  */
-class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
+class INET_API TCPBasicClientApp : public TCPGenericCliAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg;
+    NodeStatus *nodeStatus;
     bool earlySend;  // if true, don't wait with sendRequest() until established()
     int numRequestsToSend; // requests to send in this session
+    simtime_t startTime;
     simtime_t stopTime;
 
     /** Utility: sends a request to the server */
@@ -40,6 +43,7 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
   public:
     TCPBasicClientApp();
     virtual ~TCPBasicClientApp();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
     /** Redefined . */
@@ -59,6 +63,8 @@ class INET_API TCPBasicClientApp : public TCPGenericCliAppBase
 
     /** Redefined to reconnect after a delay. */
     virtual void socketFailure(int connId, void *yourPtr, int code);
+
+    virtual bool isNodeUp();
 };
 
 #endif

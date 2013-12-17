@@ -66,7 +66,8 @@ void FlatNetworkConfigurator6::setDisplayString(int numIPNodes, int numNonIPNode
 
 bool FlatNetworkConfigurator6::isIPNode(cTopology::Node *node)
 {
-    return IPvXAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
+    return IPvXAddressResolver().findRoutingTable6Of(node->getModule()) != NULL
+            && IPvXAddressResolver().findInterfaceTableOf(node->getModule()) != NULL;
 }
 
 void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
@@ -120,7 +121,7 @@ void FlatNetworkConfigurator6::configureAdvPrefixes(cTopology& topo)
 
             // add a link-local address (tentative) if it doesn't have one
             if (ie->ipv6Data()->getLinkLocalAddress().isUnspecified())
-                ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, 0, 0);
+                ie->ipv6Data()->assignAddress(IPv6Address::formLinkLocalAddress(ie->getInterfaceToken()), true, SIMTIME_ZERO, SIMTIME_ZERO);
         }
     }
 }
@@ -155,7 +156,7 @@ void FlatNetworkConfigurator6::addOwnAdvPrefixRoutes(cTopology& topo)
                 if (ie->ipv6Data()->getAdvPrefix(y).prefix.isGlobal())
                     rt->addOrUpdateOwnAdvPrefix(ie->ipv6Data()->getAdvPrefix(y).prefix,
                                                 ie->ipv6Data()->getAdvPrefix(y).prefixLength,
-                                                ie->getInterfaceId(), 0);
+                                                ie->getInterfaceId(), SIMTIME_ZERO);
         }
     }
 }

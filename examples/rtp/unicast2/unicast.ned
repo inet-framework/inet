@@ -1,6 +1,6 @@
 package inet.examples.rtp.unicast2;
 
-import inet.transport.rtp.RTPHost;
+import inet.nodes.rtp.RTPHost;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 

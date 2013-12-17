@@ -1,0 +1,97 @@
+%description:
+
+Test for basic TCP application lifecycle handling.
+
+Sequence of operations:
+ - at 0 client initializes to down
+ - at 0 server initializes to up
+ - at 1 client executes startup operation
+ - at 2 server executes shutdown operation
+ - simulation stops at 3
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+cmdenv-express-mode = false
+sim-time-limit = 3s
+record-eventlog = true
+
+**.hasStatus = true
+**.client.status.initialStatus = "down"
+**.server.status.initialStatus = "up"
+**.scenarioManager.script = xmldoc("scenario.xml")
+
+**.arp.retryCount = 0
+**.arp.retryTimeout = 100ms
+
+# tcp apps
+**.numTcpApps = 1
+**.client.tcpApp[0].typename = "TCPBasicClientApp"
+**.client.tcpApp[0].startTime = 0s
+**.client.tcpApp[0].localPort = -1
+**.client.tcpApp[0].connectAddress = "server"
+**.client.tcpApp[0].connectPort = 1000
+**.client.tcpApp[0].numRequestsPerSession = 1000
+**.client.tcpApp[0].requestLength = 100B
+**.client.tcpApp[0].idleInterval = 1000000s
+**.client.tcpApp[0].thinkTime = 100ms
+
+**.server.tcpApp[0].typename = "TCPEchoApp"
+**.server.tcpApp[0].localPort = 1000
+
+**.tcpApp[0].dataTransferMode = "bytecount"
+
+%file: test.ned
+
+import inet.nodes.ethernet.Eth10M;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.base.LifecycleController;
+import inet.world.scenario.ScenarioManager;
+
+network Test
+{
+    submodules:
+        scenarioManager: ScenarioManager;
+        lifecycleController: LifecycleController;
+        configurator: IPv4NetworkConfigurator;
+        client: StandardHost;
+        server: StandardHost;
+    connections:
+        client.ethg++ <--> Eth10M <--> server.ethg++;
+}
+
+%file: scenario.xml
+ 
+<scenario>
+    <at t="1">
+        <tell module="lifecycleController" target="client" operation="NodeStartOperation"/>
+    </at>
+    <at t="2">
+        <tell module="lifecycleController" target="server" operation="NodeShutdownOperation"/>
+    </at>
+</scenario>
+
+%contains-regex: stdout
+
+.*
+Test.client starting up
+.*
+Test.client started
+.*
+Test.server shutting down
+.*
+Test.server shut down
+.*
+Test.client.tcpApp\[0\]: received 1000 bytes in 10 packets
+.*
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

@@ -3,8 +3,8 @@
 	<fecentry>
 		<id>1</id>
 
-		<destination>10.2.1.1</destination>
-		<source>10.0.1.1</source>
+		<destination>host3</destination>
+		<source>host1</source>
 
 		<tunnel_id>1</tunnel_id>
 		<lspid>100</lspid>
@@ -12,8 +12,8 @@
 	<fecentry>
 		<id>2</id>
 
-		<destination>10.2.1.1</destination>
-		<source>10.0.2.1</source>
+		<destination>host3</destination>
+		<source>host2</source>
 
 		<tunnel_id>2</tunnel_id>
 		<lspid>200</lspid>
@@ -21,8 +21,8 @@
 	<fecentry>
 		<id>3</id>
 
-		<destination>10.2.1.1</destination>
-		<source>10.0.3.1</source>
+		<destination>host3</destination>
+		<source>host5</source>
 
 		<tunnel_id>3</tunnel_id>
 		<lspid>300</lspid>

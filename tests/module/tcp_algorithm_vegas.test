@@ -1,0 +1,88 @@
+%description:
+Test tcp algorithms with PER
+
+%#################################################################################################################
+
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+
+#[Cmdenv]
+cmdenv-event-banners=false
+cmdenv-express-mode=true
+
+#[Parameters]
+*.testing=true
+
+###################################################################
+
+network = ClientServer
+total-stack = 7MiB
+#**.server.numPcapRecorders = 1
+#**.server.pcapRecorder[0].pcapFile = "results/server.pcap"
+#**.client.numPcapRecorders = 1
+#**.client.pcapRecorder[0].pcapFile = "results/client.pcap"
+
+
+
+description = "inet_TCP <---> inet_TCP with algorithms"
+*.server*.tcpType = "TCP"
+*.client*.tcpType = "TCP"
+**.tcp.tcpAlgorithmClass = "TCPVegas"  # ${"DumbTCP", "TCPNewReno", "TCPReno", "TCPTahoe", "TCPVegas", "TCPWestwood"}
+*.per = 0.01 * ${0, 0.1, 0.2, 0.5, 1, 2, 5}
+
+
+
+## tcp apps
+**.numTcpApps = 1
+**.client.tcpApp[*].typename = "TCPSessionApp"
+**.client.tcpApp[0].active = true
+**.client.tcpApp[0].localPort = -1
+**.client.tcpApp[0].connectAddress = "server"
+**.client.tcpApp[0].connectPort = 1000
+**.client.tcpApp[0].tOpen = 0.2s
+**.client.tcpApp[0].tSend = 0.4s
+**.client.tcpApp[0].sendBytes = 1000000B
+**.client.tcpApp[0].sendScript = ""
+**.client.tcpApp[0].tClose = 25s
+
+**.server.tcpApp[*].typename="TCPSinkApp"
+**.server*.tcpApp[0].localPort = 1000
+
+# NIC configuration
+**.ppp[*].queueType = "DropTailQueue"
+**.ppp[*].queue.frameCapacity = 10
+
+*.configurator.config=xml("<config><interface hosts='*' address='192.168.1.x' netmask='255.255.255.0'/></config>")
+
+
+%#################################################################################################################
+
+%contains: results/General-0.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-1.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-2.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-3.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-4.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-5.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%contains: results/General-6.sca
+scalar ClientServer.server.tcpApp[0] 	rcvdPk:sum(packetBytes) 	1000000
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

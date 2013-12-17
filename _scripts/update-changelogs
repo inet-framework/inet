@@ -9,11 +9,11 @@ import string
 import subprocess
 
 # configuration
-since = '2012-02-23'
+since = '2013-04-28'
 entriesToIgnore = [
-"""2012-01-27  Zoltan Bojthe
+"""2013-04-27  Andras Varga
 
-	replaced #include <omnetpp.h> with #include "INETDefs.h"
+	tmp - started to fill in ChangeLogs
 
 """,
 ]

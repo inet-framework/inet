@@ -41,7 +41,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual ~EtherMAC();
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
     virtual void initializeFlags();
     virtual void initializeStatistics();
     virtual void handleMessage(cMessage *msg);
@@ -96,6 +96,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void processFrameFromUpperLayer(EtherFrame *msg);
     virtual void processMsgFromNetwork(EtherTraffic *msg);
     virtual void scheduleEndIFGPeriod();
+    virtual void fillIFGIfInBurst();
     virtual void scheduleEndTxPeriod(EtherFrame *);
     virtual void scheduleEndRxPeriod(EtherTraffic *);
     virtual void scheduleEndPausePeriod(int pauseUnits);

@@ -54,9 +54,12 @@ MACRelayUnitNP::~MACRelayUnitNP()
     delete [] endProcEvents;
 }
 
-void MACRelayUnitNP::initialize()
+void MACRelayUnitNP::initialize(int stage)
 {
-    MACRelayUnitBase::initialize();
+    MACRelayUnitBase::initialize(stage);
+
+    if (stage != 0)
+        return;
 
     bufferLevel.setName("buffer level");
     queue.setName("queue");
@@ -99,11 +102,19 @@ void MACRelayUnitNP::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
     {
+        if(!isOperational)
+        {
+            EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
+            delete msg;
+            return;
+        }
         // Frame received from MAC unit
         handleIncomingFrame(check_and_cast<EtherFrame *>(msg));
     }
     else
     {
+        if(!isOperational)
+            throw cRuntimeError("model error: self message arrived when module status is DOWN");
         // Self message signal used to indicate a frame has finished processing
         processFrame(msg);
     }
@@ -190,5 +201,26 @@ void MACRelayUnitNP::finish()
 {
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("dropped frames", numDroppedFrames);
+}
+
+void MACRelayUnitNP::start()
+{
+    MACRelayUnitBase::start();
+}
+
+void MACRelayUnitNP::stop()
+{
+    for (int i=0; i<numCPUs; i++)
+    {
+        cMessage *endProcEvent = endProcEvents[i];
+        EtherFrame *etherFrame = (EtherFrame *)endProcEvent->getContextPointer();
+        if (etherFrame)
+        {
+            endProcEvent->setContextPointer(NULL);
+            delete etherFrame;
+        }
+        cancelEvent(endProcEvent);
+    }
+    MACRelayUnitBase::stop();
 }
 

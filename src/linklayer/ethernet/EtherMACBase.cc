@@ -24,6 +24,7 @@
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
 #include "NotificationBoard.h"
+#include "NodeOperations.h"
 #include "opp_utils.h"
 
 
@@ -144,7 +145,6 @@ EtherMACBase::EtherMACBase()
     physInGate = NULL;
     physOutGate = NULL;
     upperLayerInGate = NULL;
-    interfaceEntry = NULL;
     curTxFrame = NULL;
     endTxMsg = endIFGMsg = endPauseMsg = NULL;
 }
@@ -158,43 +158,47 @@ EtherMACBase::~EtherMACBase()
     cancelAndDelete(endPauseMsg);
 }
 
-void EtherMACBase::initialize()
+void EtherMACBase::initialize(int stage)
 {
-    physInGate = gate("phys$i");
-    physOutGate = gate("phys$o");
-    upperLayerInGate = gate("upperLayerIn");
-    transmissionChannel = NULL;
-    interfaceEntry = NULL;
-    curTxFrame = NULL;
+    MACBase::initialize(stage);
 
-    initializeFlags();
+    if (stage == 0)
+    {
+        physInGate = gate("phys$i");
+        physOutGate = gate("phys$o");
+        upperLayerInGate = gate("upperLayerIn");
+        transmissionChannel = NULL;
+        curTxFrame = NULL;
 
-    initializeMACAddress();
-    initializeQueueModule();
-    initializeStatistics();
+        initializeFlags();
 
-    registerInterface(); // needs MAC address
+        initializeMACAddress();
+        initializeQueueModule();
+        initializeStatistics();
 
-    readChannelParameters(true);
+        registerInterface(); // needs MAC address
 
-    lastTxFinishTime = -1.0; // not equals with current simtime.
+        readChannelParameters(true);
 
-    // initialize self messages
-    endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
-    endIFGMsg = new cMessage("EndIFG", ENDIFG);
-    endPauseMsg = new cMessage("EndPause", ENDPAUSE);
+        lastTxFinishTime = -1.0; // not equals with current simtime.
 
-    // initialize states
-    transmitState = TX_IDLE_STATE;
-    receiveState = RX_IDLE_STATE;
-    WATCH(transmitState);
-    WATCH(receiveState);
+        // initialize self messages
+        endTxMsg = new cMessage("EndTransmission", ENDTRANSMISSION);
+        endIFGMsg = new cMessage("EndIFG", ENDIFG);
+        endPauseMsg = new cMessage("EndPause", ENDPAUSE);
 
-    // initialize pause
-    pauseUnitsRequested = 0;
-    WATCH(pauseUnitsRequested);
+        // initialize states
+        transmitState = TX_IDLE_STATE;
+        receiveState = RX_IDLE_STATE;
+        WATCH(transmitState);
+        WATCH(receiveState);
 
-    subscribe(POST_MODEL_CHANGE, this);
+        // initialize pause
+        pauseUnitsRequested = 0;
+        WATCH(pauseUnitsRequested);
+
+        subscribe(POST_MODEL_CHANGE, this);
+    }
 }
 
 void EtherMACBase::initializeQueueModule()
@@ -304,12 +308,12 @@ void EtherMACBase::initializeStatistics()
     packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 }
 
-void EtherMACBase::registerInterface()
+InterfaceEntry *EtherMACBase::createInterfaceEntry()
 {
-    interfaceEntry = new InterfaceEntry(this);
+    InterfaceEntry *interfaceEntry = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    interfaceEntry->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    interfaceEntry->setName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);
@@ -325,11 +329,35 @@ void EtherMACBase::registerInterface()
     interfaceEntry->setMulticast(true);
     interfaceEntry->setBroadcast(true);
 
-    // add
-    IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+    return interfaceEntry;
+}
 
-    if (ift)
-        ift->addInterface(interfaceEntry);
+bool EtherMACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
+            initializeFlags();
+            initializeMACAddress();
+            initializeQueueModule();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
+            connected = false;
+            processConnectDisconnect();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
+            connected = false;
+            processConnectDisconnect();
+        }
+    }
+    return MACBase::handleOperationStage(operation, stage, doneCallback);
 }
 
 void EtherMACBase::receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj)
@@ -397,6 +425,34 @@ void EtherMACBase::processConnectDisconnect()
         transmitState = TX_IDLE_STATE;
         receiveState = RX_IDLE_STATE;
     }
+}
+
+void EtherMACBase::flushQueue()
+{
+    // code would look slightly nicer with a pop() function that returns NULL if empty
+    if (txQueue.innerQueue) {
+        while (!txQueue.innerQueue->empty()) {
+            cMessage *msg = (cMessage *)txQueue.innerQueue->pop();
+            emit(dropPkFromHLIfaceDownSignal, msg);
+            delete msg;
+        }
+    }
+    else {
+        while (!txQueue.extQueue->isEmpty()) {
+            cMessage *msg = txQueue.extQueue->pop();
+            emit(dropPkFromHLIfaceDownSignal, msg);
+            delete msg;
+        }
+        txQueue.extQueue->clear(); // clear request count
+    }
+}
+
+void EtherMACBase::clearQueue()
+{
+    if (txQueue.innerQueue)
+        txQueue.innerQueue->clear();
+    else
+        txQueue.extQueue->clear(); // clear request count
 }
 
 void EtherMACBase::refreshConnection()
@@ -488,8 +544,10 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
         dataratesDiffer = false;
         if (!outTrChannel)
             transmissionChannel = NULL;
-        interfaceEntry->setDown(true);
-        interfaceEntry->setDatarate(0);
+        if (interfaceEntry) {
+            interfaceEntry->setCarrier(false);
+            interfaceEntry->setDatarate(0);
+        }
     }
     else
     {
@@ -512,8 +570,10 @@ void EtherMACBase::readChannelParameters(bool errorWhenAsymmetric)
             if (txRate == etherDescrs[i].txrate)
             {
                 curEtherDescr = &(etherDescrs[i]);
-                interfaceEntry->setDown(false);
-                interfaceEntry->setDatarate(txRate);
+                if (interfaceEntry) {
+                    interfaceEntry->setCarrier(true);
+                    interfaceEntry->setDatarate(txRate);
+                }
                 return;
             }
         }

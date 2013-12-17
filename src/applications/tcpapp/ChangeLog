@@ -1,3 +1,45 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-04  Zoltan Bojthe
+
+	- stopTime checks changed: send packet when simTime() <= stopTime
+      (some apps tested "simTime() < stopTime", another apps tested "simTime()<= stopTime")
+
+2013-05-02  Zoltan Bojthe
+
+	- Added NodeStatus::DOWN checks for initialize()
+	- lifecycle: Enter_Method_Silent() was missed in some
+	  handleOperationStage() function
+
+2013-04-25  Levente Meszaros
+
+	- Added ILifecycle to the rest of applications.
+      (All application must either support lifecycle operations properly or
+	   throw an error when executing any lifecycle operations.)
+
+2013-04-23  Levente Meszaros
+
+	Adapted TCPEcho and TCPBasicClient applications to lifecycle operations.
+
+2013-04-22  Levente Meszaros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
+2013-02-15  Rudolf Hornig
+
+	TCPSessionApp: fixed signal name and removed non-exisiting signal def.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-16  Zoltan Bojthe
+
+	TCPBasicClientApp: bugfix for #611: simulation generated an ASSERT if
+	numRequestsPerSession parameter value larger than 1.
+
+2012-10-31  Zoltan Bojthe
+
+	tcpapp: minor fixes
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

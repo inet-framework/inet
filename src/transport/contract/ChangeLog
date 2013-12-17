@@ -1,3 +1,72 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-25  Tamas Borbely
+
+	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
+	option in Linux)
+
+	If ReuseAddress is set to true on two sockets, then they can bind to the
+	same local address/port.
+
+	E.g. the following works:
+
+	      UDPSocket s1, s1;
+	     ...
+	     s1.setReuseAddress(true);
+	     s1.bind(7777);
+	     s2.setReuseAddress(true);
+	     s2.bind(IPv4Address("10.0.0.1"), 7777);
+
+	s2 will receive packets whose destination address is 10.0.0.1, s1 will
+	receive all other packets
+
+2013-07-17  Irene Ruengeler
+
+	sctp: Added 8 new strategies for stream scheduling
+	- new SCTP_C_SET_STREAM_PRIO code in SctpCommandCode
+	- new SCTPSocket::setStreamPriority(stream, priority) method
+
+2013-07-17  Irene Ruengeler
+
+	sctp: Implemented SCTP Stream Reset (RFC 6525)
+	- new SCTP_C_STREAM_RESET code in SctpCommandCode
+	- new SCTP_I_SEND_STREAMS_RESETTED, SCTP_I_RCV_STREAMS_RESETTED,
+	  SCTP_I_RESET_REQUEST_FAILED code in SctpStatusInd
+	- SCTPSocket's listen, connect, conectx now have a streamReset parameter
+
+2013-07-10  Irene Ruengeler
+
+	sctp: Implemented Add-IP feature for SCTP (RFC 5061)
+	- new SCTP_C_SEND_ASCONF code in SctpCommandCode
+	- new SCTP_I_ADDRESS_ADDED code in SctpStatusInd
+
+2013-07-03  Irene Ruengeler
+
+	sctp: implementation of Partial Reliability SCTP (RFC 3758)
+	- new SctpStatusInd: SCTP_I_ABANDONED
+	- two new SCTPSocket::send methods to support Partial Reliability related parameters
+	- SCTPSocket::connect and SCTPSocket::connectx has an additional
+	  Partial Reliability related parameter
+	- SCTPSocket's CallbackInterface has a new method: msgAbandonedArrived(int assocId)
+
+2013-07-02  Irene Ruengeler
+
+	sctp: NR_SACK feature - added SCTPSendQueueAbated command
+
+2013-04-03  Irene Ruengeler
+
+	sctp: refactoring - getNewConnId() was renamed to getNewAssocId()
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-09  Zoltan Bojthe
+
+	Improved error reporting when socket is not (yet) connected.
+
+2012-11-08  Zoltan Bojthe
+
+	TCPSocket: fix for incorrectly set closed state.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

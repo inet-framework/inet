@@ -28,7 +28,6 @@
 
 Define_Module(InetSimpleBattery);
 
-
 void InetSimpleBattery::initialize(int stage)
 {
 
@@ -93,8 +92,6 @@ void InetSimpleBattery::initialize(int stage)
     }
 }
 
-
-
 int InetSimpleBattery::registerDevice(cObject *id, int numAccts)
 {
     for (unsigned int i = 0; i<deviceEntryVector.size(); i++)
@@ -134,29 +131,21 @@ void InetSimpleBattery::registerWirelessDevice(int id, double mUsageRadioIdle, d
     }
 
     DeviceEntry *device = new DeviceEntry();
-    device->numAccts = 4;
-    device->accts = new double[4];
-    device->times = new simtime_t[4];
+    const int N = 5;  // number of radio states  TODO symbolic name!!!
+    device->numAccts = N;
+    device->accts = new double[N];
+    device->times = new simtime_t[N];
 
-    if (RadioState::IDLE>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::RECV>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::TRANSMIT>=4)
-        error("Battery and RadioState problem");
-    if (RadioState::SLEEP>=4)
-        error("Battery and RadioState problem");
+    ASSERT(RadioState::IDLE<N && RadioState::RECV<N && RadioState::TRANSMIT<N && RadioState::SLEEP<N && RadioState::OFF<N);
     device->radioUsageCurrent[RadioState::IDLE] = mUsageRadioIdle;
     device->radioUsageCurrent[RadioState::RECV] = mUsageRadioRecv;
     device->radioUsageCurrent[RadioState::TRANSMIT] = mUsageRadioSend;
     device->radioUsageCurrent[RadioState::SLEEP] = mUsageRadioSleep;
+    device->radioUsageCurrent[RadioState::OFF] = 0;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < N; i++)
     {
         device->accts[i] = 0.0;
-    }
-    for (int i = 0; i < 4; i++)
-    {
         device->times[i] = 0.0;
     }
 
@@ -199,8 +188,6 @@ void InetSimpleBattery::handleMessage(cMessage *msg)
     }
 }
 
-
-
 void InetSimpleBattery::finish()
 {
     // do a final update of battery capacity
@@ -215,7 +202,7 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* 
     //EV << "[Battery]: receiveChangeNotification" << endl;
     if (aCategory == NF_RADIOSTATE_CHANGED)
     {
-        RadioState *rs = check_and_cast <RadioState *>(aDetails);
+        const RadioState *rs = check_and_cast<const RadioState *>(aDetails);
 
         DeviceEntryMap::iterator it = deviceEntryMap.find(rs->getRadioId());
         if (it==deviceEntryMap.end())
@@ -238,8 +225,6 @@ void InetSimpleBattery::receiveChangeNotification(int aCategory, const cObject* 
     }
 }
 
-
-
 void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 {
     if (amount.getType() == DrawAmount::CURRENT)
@@ -260,7 +245,6 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
         deviceEntryVector[deviceID]->draw = current;
         deviceEntryVector[deviceID]->currentActivity = activity;
     }
-
     else if (amount.getType() == DrawAmount::ENERGY)
     {
         double energy = amount.getValue();
@@ -289,7 +273,6 @@ void InetSimpleBattery::draw(int deviceID, DrawAmount& amount, int activity)
 /**
  *  Function to update the display string with the remaining energy
  */
-
 InetSimpleBattery::~InetSimpleBattery()
 {
     while (!deviceEntryMap.empty())
@@ -305,8 +288,10 @@ InetSimpleBattery::~InetSimpleBattery()
     }
     if (mCurrEnergy)
         delete mCurrEnergy;
-}
 
+    cancelAndDelete(publish);
+    cancelAndDelete(timeout);
+}
 
 void InetSimpleBattery::deductAndCheck()
 {
@@ -370,7 +355,6 @@ void InetSimpleBattery::deductAndCheck()
         display_string->setTagArg("i", 1, "#ff0000");
         endSimulation();
     }
-
     // battery is not depleted, continue
     else
     {

@@ -50,10 +50,8 @@ class ManetRoutingBase;
 
 
 typedef std::set<ManetAddress> AddressGroup;
-
-/**
- * Base class for Manet Routing
- */
+typedef std::set<ManetAddress>::iterator AddressGroupIterator;
+typedef std::set<ManetAddress>::const_iterator AddressGroupConstIterator;
 class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, protected cListener
 {
   private:
@@ -64,7 +62,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     class ProtocolRoutingData
     {
         public:
-            RouteMap *routesVector;
+            RouteMap* routesVector;
             bool isProactive;
     };
 
@@ -86,11 +84,11 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     Coord curSpeed;
     simtime_t posTimer;
     bool   regPosition;
-    bool   usetManetLabelRouting;
+    bool   useManetLabelRouting;
     bool   isRegistered;
     void *commonPtr;
     bool sendToICMP;
-    ManetRoutingBase *colaborativeProtocol;
+    ManetRoutingBase *collaborativeProtocol;
 
     ARP *arp;
 
@@ -249,6 +247,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual int getNumInterfaces() const {return inet_ift->getNumInterfaces();}
 
     /// Check if the address is local
+
+    virtual bool isIpLocalAddress(const IPv4Address& dest) const;
     virtual bool isLocalAddress(const ManetAddress& dest) const;
 
     /// Check if the address is multicast
@@ -286,24 +286,22 @@ class INET_API ManetRoutingBase : public cSimpleModule, public INotifiable, prot
     virtual void getApList(const MACAddress &,std::vector<MACAddress>&);
     virtual void getApListIp(const IPv4Address &,std::vector<IPv4Address>&);
     virtual void getListRelatedAp(const ManetAddress &, std::vector<ManetAddress>&);
+    virtual void setRouteInternalStorege(const ManetAddress &, const ManetAddress &, const bool &);
 
   public:
-    virtual void setColaborativeProtocol(cObject *p) {colaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
-    virtual ManetRoutingBase *getColaborativeProtocol() const {return colaborativeProtocol;}
-
+    std::string convertAddressToString(const ManetAddress&);
+    virtual void setCollaborativeProtocol(cObject *p) {collaborativeProtocol = dynamic_cast<ManetRoutingBase*>(p);}
+    virtual ManetRoutingBase * getCollaborativeProtocol() const {return collaborativeProtocol;}
     virtual void setStaticNode(bool v) {staticNode=v;}
     virtual bool isStaticNode() {return staticNode;}
-
-    // Routing information access
-
-    /// enable/disable internal store (a.k.a. routesVector) usage
-    virtual void setInternalStore(bool i);      //FIXME rename
-
-    /// returns true if internal store (a.k.a. routesVector) usage is enabled
-    virtual bool getInternalStore() const { return createInternalStore;}      //FIXME rename
-
-    /// get nextHop from internal store (from routesVector)
-    virtual ManetAddress getNextHopInternal(const ManetAddress &dest);      //FIXME rename?
+// Routing information access
+    virtual void setInternalStore(bool i);
+    virtual ManetAddress getNextHopInternal(const ManetAddress &dest);
+    virtual bool getInternalStore() const { return createInternalStore;}
+    // it should return 0 if not route, if complete route number of hops and, if only next hop
+    // it should return -1
+    // if the protocol has implemented supportGetRoute()
+    virtual bool supportGetRoute () = 0;
 
     /**
      * Get list of hops for routing to dest destination

@@ -23,6 +23,7 @@
 #include "RadioState.h"
 #include "ChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
+#include "InterfaceTableAccess.h"
 
 //TBD supportedRates!
 //TBD use command msg kinds?
@@ -96,6 +97,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
         assocTimeoutMsg = NULL;
 
         nb = NotificationBoardAccess().get();
+        interfaceTable = InterfaceTableAccess().get();
 
         WATCH(isScanning);
         WATCH(isAssociated);
@@ -232,6 +234,22 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     return frame;
 }
 
+cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
+{
+    cPacket *payload = frame->decapsulate();
+
+    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+    ctrl->setSrc(frame->getAddress3());
+    ctrl->setDest(frame->getReceiverAddress());
+    Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
+    if (frameWithSNAP)
+        ctrl->setEtherType(frameWithSNAP->getEtherType());
+    payload->setControlInfo(ctrl);
+
+    delete frame;
+    return payload;
+}
+
 Ieee80211MgmtSTA::APInfo *Ieee80211MgmtSTA::lookupAP(const MACAddress& address)
 {
     for (AccessPointList::iterator it=apList.begin(); it!=apList.end(); ++it)
@@ -263,7 +281,9 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 void Ieee80211MgmtSTA::beaconLost()
 {
     EV << "Missed a few consecutive beacons -- AP is considered lost\n";
-    nb->fireChangeNotification(NF_L2_BEACON_LOST, NULL);  //XXX use InterfaceEntry as detail, etc...
+    // KLUDGE: TODO: there should be a better way to do this
+    InterfaceEntry *ie = interfaceTable->getInterfaceByInterfaceModule(getParentModule()->getSubmodule("mac"));
+    nb->fireChangeNotification(NF_L2_BEACON_LOST, ie);
 }
 
 void Ieee80211MgmtSTA::sendManagementFrame(Ieee80211ManagementFrame *frame, const MACAddress& address)
@@ -336,7 +356,7 @@ void Ieee80211MgmtSTA::receiveChangeNotification(int category, const cObject *de
     // Note that we are only subscribed during scanning!
     if (category==NF_RADIOSTATE_CHANGED)
     {
-        RadioState::State radioState = check_and_cast<RadioState *>(details)->getState();
+        const RadioState::State radioState = check_and_cast<const RadioState *>(details)->getState();
         if (radioState==RadioState::RECV)
         {
             EV << "busy radio channel detected during scanning\n";
@@ -747,7 +767,9 @@ void Ieee80211MgmtSTA::handleAssociationResponseFrame(Ieee80211AssociationRespon
         isAssociated = true;
         (APInfo&)assocAP = (*ap);
 
-        nb->fireChangeNotification(NF_L2_ASSOCIATED, NULL); //XXX detail: InterfaceEntry?
+        // KLUDGE: TODO: there should be a better way to do this
+        InterfaceEntry *ie = interfaceTable->getInterfaceByInterfaceModule(getParentModule()->getSubmodule("mac"));
+        nb->fireChangeNotification(NF_L2_ASSOCIATED, ie);
 
         assocAP.beaconTimeoutMsg = new cMessage("beaconTimeout", MK_BEACON_TIMEOUT);
         scheduleAt(simTime()+MAX_BEACONS_MISSED*assocAP.beaconInterval, assocAP.beaconTimeoutMsg);

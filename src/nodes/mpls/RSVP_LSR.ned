@@ -11,17 +11,19 @@
 //
 package inet.nodes.mpls;
 
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ted.TED;
-import inet.networklayer.ted.LinkStateRouting;
-import inet.networklayer.rsvp_te.SimpleClassifier;
-import inet.networklayer.rsvp_te.RSVP;
-import inet.networklayer.mpls.MPLS;
-import inet.networklayer.mpls.LIBTable;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWiredNic;
 import inet.base.NotificationBoard;
+import inet.linklayer.IWiredNic;
+import inet.linklayer.loopback.LoopbackInterface;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.RoutingTable;
+import inet.networklayer.mpls.LIBTable;
+import inet.networklayer.mpls.MPLS;
+import inet.networklayer.rsvp_te.RSVP;
+import inet.networklayer.rsvp_te.SimpleClassifier;
+import inet.networklayer.ted.LinkStateRouting;
+import inet.networklayer.ted.TED;
+import inet.nodes.inet.NetworkLayer;
+import inet.status.NodeStatus;
 
 
 //
@@ -31,27 +33,36 @@ import inet.base.NotificationBoard;
 // itself. RSVP uses transport protocols to route packets. ~TED is used
 // to calculate shortest paths.
 //
-module RSVP_LSR extends RSVP_ROUTER_BASE
+module RSVP_LSR
 {
     parameters:
         @node();
         @labels(node,mpls-node);
         @display("i=abstract/router");
+        bool hasStatus = default(false);
+        string peers;
+        string routerId = default("auto");
+        string routingFile = default("");
+    gates:
+        inout pppg[] @labels(PPPFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=58,50");
+        }
         notificationBoard: NotificationBoard {
             parameters:
-                @display("p=74,57");
+                @display("p=58,106;is=s");
         }
         routingTable: RoutingTable {
             parameters:
                 IPForward = true;
                 routerId = routerId;
                 routingFile = routingFile;
-                @display("p=68,138");
+                @display("p=58,174;is=s");
         }
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=68,208");
+                @display("p=58,242;is=s");
         }
         ted: TED {
             parameters:
@@ -75,26 +86,29 @@ module RSVP_LSR extends RSVP_ROUTER_BASE
             parameters:
                 @display("p=192,195");
             gates:
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
-                @display("p=88,329,row,90;q=l2queue");
+                @display("p=132,345,row,90;q=l2queue");
         }
         mpls: MPLS {
             parameters:
                 classifier = "classifier";
                 @display("p=192,270");
             gates:
-                netwIn[sizeof(pppg)];
-                netwOut[sizeof(pppg)];
-                ifIn[sizeof(pppg)];
-                ifOut[sizeof(pppg)];
+                netwIn[sizeof(pppg)+1];
+                netwOut[sizeof(pppg)+1];
+                ifIn[sizeof(pppg)+1];
+                ifOut[sizeof(pppg)+1];
         }
         libTable: LIBTable {
             parameters:
                 @display("p=312,268");
+        }
+        lo0: LoopbackInterface {
+            @display("p=50,345");
         }
     connections allowunconnected:
         linkStateRouting.ipOut --> networkLayer.ospfIn;
@@ -103,14 +117,17 @@ module RSVP_LSR extends RSVP_ROUTER_BASE
         rsvp.ipOut --> networkLayer.rsvpIn;
         rsvp.ipIn <-- networkLayer.rsvpOut;
 
+        lo0.upperLayerOut --> networkLayer.ifIn[0];
+        networkLayer.ifOut[0] --> lo0.upperLayerIn;
+
         for i=0..sizeof(pppg)-1 {
             pppg[i] <--> ppp[i].phys;
 
-            ppp[i].upperLayerOut --> mpls.ifIn[i];
-            ppp[i].upperLayerIn <-- mpls.ifOut[i];
+            ppp[i].upperLayerOut --> mpls.ifIn[i+1];
+            ppp[i].upperLayerIn <-- mpls.ifOut[i+1];
 
-            mpls.netwOut[i] --> networkLayer.ifIn[i];
-            mpls.netwIn[i] <-- networkLayer.ifOut[i];
+            mpls.netwOut[i+1] --> networkLayer.ifIn[i+1];
+            mpls.netwIn[i+1] <-- networkLayer.ifOut[i+1];
         }
 }
 

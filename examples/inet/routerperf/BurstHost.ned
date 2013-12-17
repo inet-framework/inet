@@ -18,71 +18,28 @@
 
 package inet.examples.inet.routerperf;
 
-import inet.nodes.inet.NetworkLayer;
-import inet.networklayer.ipv4.RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.linklayer.IWiredNic;
-import inet.base.NotificationBoard;
 import inet.applications.generic.IIPvXTrafficGenerator;
+import inet.nodes.inet.NodeBase;
 
 
 //
 // Definition of an IP node with a transport generator that connects
 // to IP directly, without TCP or UDP.
 //
-module BurstHost
+module BurstHost extends NodeBase
 {
     parameters:
         @node();
-        @labels(node);
         @display("i=device/pc3");
         string trafGenType;
-        bool IPForward = default(false);
-        string routingFile = default("");
-    gates:
-        inout pppg[] @labels(PPPFrame-conn);
     submodules:
-        notificationBoard: NotificationBoard {
-            parameters:
-                @display("p=83,66");
-        }
-        interfaceTable: InterfaceTable {
-            parameters:
-                @display("p=83,136");
-        }
-        routingTable: RoutingTable {
-            parameters:
-                IPForward = IPForward;
-                routerId = "";
-                routingFile = routingFile;
-                @display("p=83,206");
-        }
         trafGen: <trafGenType> like IIPvXTrafficGenerator {
             parameters:
-                @display("p=198,86");
-        }
-        networkLayer: NetworkLayer {
-            parameters:
-                @display("p=198,173;q=queue");
-            gates:
-                ifIn[1];
-                ifOut[1];
-        }
-        ppp[1]: <default("PPPInterface")> like IWiredNic {
-            parameters:
-                @display("p=198,262,row,90;q=txQueue");
+                @display("p=329,81");
         }
     connections allowunconnected:
         // transport connections
         networkLayer.udpOut --> trafGen.ipIn;
         networkLayer.udpIn <-- trafGen.ipOut;
-
-        // connections to network outside
-        for i=0..0 {
-            pppg[i] <--> ppp[i].phys;
-            ppp[i].upperLayerOut --> networkLayer.ifIn[i];
-            ppp[i].upperLayerIn <-- networkLayer.ifOut[i];
-        }
-
 }
 

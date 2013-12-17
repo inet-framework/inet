@@ -117,6 +117,9 @@ class INET_API TCPReceiveQueue : public cObject
      * Returns right edge of enqueued region.
      */
     virtual uint32 getRE(uint32 toSeqNum) = 0;
+
+    /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
+    virtual uint32 getFirstSeqNo() = 0;
 };
 
 #endif

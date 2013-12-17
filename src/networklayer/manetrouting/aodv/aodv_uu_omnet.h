@@ -65,11 +65,11 @@
 /* Needed by some network-related datatypes */
 #include "ManetRoutingBase.h"
 #include "aodv-uu/list.h"
-#include "aodv_msg_struct.h"
+
 #include "ICMPAccess.h"
 #include "Ieee80211Frame_m.h"
 
-
+#include "aodv_msg_struct.h"
 /* Forward declaration needed to be able to reference the class */
 class AODVUU;
 
@@ -147,16 +147,19 @@ class AODVUU : public ManetRoutingBase
     AODVUU() {isRoot = false; is_init = false; log_file_fd_init = false; sendMessageEvent = new cMessage();/*&messageEvent;*/}
     ~AODVUU();
 
+    void actualizeTablesWithCollaborative(const ManetAddress &);
+
     void packetFailed(IPv4Datagram *p);
     void packetFailedMac(Ieee80211DataFrame *);
 
     // Routing information access
+    virtual bool supportGetRoute() {return false;}
     virtual uint32_t getRoute(const ManetAddress &,std::vector<ManetAddress> &);
     virtual bool getNextHop(const ManetAddress &,ManetAddress &add,int &iface,double &);
     virtual bool isProactive();
     virtual void setRefreshRoute(const ManetAddress &destination, const ManetAddress & nextHop,bool isReverse);
-    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const int &ifaceIndex,const int &hops,const ManetAddress &mask=ManetAddress::ZERO);
-    virtual bool setRoute(const ManetAddress & destination,const ManetAddress &nextHop,const char *ifaceName,const int &hops,const ManetAddress &mask=ManetAddress::ZERO);
+    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const int &ifaceIndex,const int &hops, const ManetAddress &mask=ManetAddress::ZERO);
+    virtual bool setRoute(const ManetAddress & destination, const ManetAddress &nextHop, const char *ifaceName,const int &hops, const ManetAddress &mask=ManetAddress::ZERO);
 
   protected:
     bool is_init;
@@ -181,6 +184,7 @@ class AODVUU : public ManetRoutingBase
 
     void recvAODVUUPacket(cMessage * p);
     void processPacket(IPv4Datagram *,unsigned int);
+    void processMacPacket(cPacket * p, const ManetAddress &dest, const ManetAddress &src, int ifindex);
 
     int initialized;
     int  node_id;

@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
-// Copyright (C) 2010 Thomas Dreibholz
+// Copyright (C) 2010-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -43,39 +43,42 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
     sctpEV3 << "Trying to reassemble message..." << endl;
 
     /* test if we have all fragments down to the first */
-    while (orderedQ->getChunk(begintsn) && !(orderedQ->getChunk(begintsn))->bbit)
+    while (queue->getChunk(begintsn) && !(queue->getChunk(begintsn))->bbit)
         begintsn--;
 
-    if (orderedQ->getChunk(begintsn))
+    if (queue->getChunk(begintsn))
     {
         endtsn = begintsn;
 
         /* test if we have all fragments up to the end */
-        while (orderedQ->getChunk(endtsn) && !(orderedQ->getChunk(endtsn))->ebit)
+        while (queue->getChunk(endtsn) && !(queue->getChunk(endtsn))->ebit)
             endtsn++;
 
-        if (orderedQ->getChunk(endtsn))
+        if (queue->getChunk(endtsn))
         {
             sctpEV3 << "All fragments found, now reassembling..." << endl;
 
-            SCTPDataVariables *firstVar = orderedQ->getChunk(begintsn), *processVar;
+            SCTPDataVariables *firstVar = queue->getChunk(begintsn), *processVar;
             SCTPSimpleMessage* firstSimple = check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
 
             sctpEV3 << "First fragment has " << firstVar->len / 8 << " bytes." << endl;
 
             while (++begintsn <= endtsn)
             {
-                processVar = orderedQ->getAndExtractChunk(begintsn);
+                processVar = queue->getAndExtractChunk(begintsn);
                 SCTPSimpleMessage* processSimple = check_and_cast<SCTPSimpleMessage*>(processVar->userData);
 
                 sctpEV3 << "Adding fragment with " << processVar->len / 8 << " bytes." << endl;
 
-                firstSimple->setDataArraySize(firstSimple->getDataArraySize() + processSimple->getDataArraySize());
-                firstSimple->setDataLen(firstSimple->getDataLen() + processSimple->getDataLen());
-                firstSimple->setByteLength(firstSimple->getByteLength() + processSimple->getByteLength());
-                /* copy data */
-                for (uint32 i = 0; i < (processVar->len / 8); i++)
-                    firstSimple->setData(i + (firstVar->len / 8), processSimple->getData(i));
+                if ((firstSimple->getDataArraySize() > 0) && (processSimple->getDataArraySize() > 0))
+                {
+                    firstSimple->setDataArraySize(firstSimple->getDataArraySize() + processSimple->getDataArraySize());
+                    firstSimple->setDataLen(firstSimple->getDataLen() + processSimple->getDataLen());
+                    firstSimple->setByteLength(firstSimple->getByteLength() + processSimple->getByteLength());
+                    /* copy data */
+                    for (uint32 i = 0; i < (processVar->len / 8); i++)
+                        firstSimple->setData(i + (firstVar->len / 8), processSimple->getData(i));
+                }
 
                 firstVar->len += processVar->len;
 
@@ -98,8 +101,9 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
     uint32 delivery = 0;      //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
 
     SCTPDataVariables* chunk;
-    //sctpEV3 << "Enqueueing NEW data chunk (TSN="<<dchunk->tsn<<") for Stream ID "<<dchunk->sid<<"\n";
-    /* append to the respective queue */
+    /* Enqueueing NEW data chunk. Append it to the respective queue */
+    
+    // ====== Unordered delivery =============================================
     if (!dchunk->ordered)
     {
         if (dchunk->bbit && dchunk->ebit)
@@ -126,9 +130,11 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
             }
         }
     }
+
+    // ====== Ordered delivery ===============================================
     else if (dchunk->ordered)
     {
-        /* put message into streams ->reassembyQ */
+        /* put message into orderedQ */
         if (orderedQ->checkAndInsertChunk(dchunk->tsn, dchunk))
             delivery = 1;
 

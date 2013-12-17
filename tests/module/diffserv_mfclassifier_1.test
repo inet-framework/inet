@@ -46,7 +46,7 @@ void TestApp::initialize()
     ipv4Datagram = new IPv4Datagram("ipv4-1");
     ipv4Datagram->setSrcAddress(IPv4Address("192.168.1.1"));    
     send(ipv4Datagram, "out");
-    
+
     ipv6Datagram = new IPv6Datagram("ipv6-2");
     ipv6Datagram->setSrcAddress(IPv6Address("fe80::1122:3344:5566"));
     send(ipv6Datagram, "out");
@@ -54,17 +54,17 @@ void TestApp::initialize()
     ipv4Datagram = new IPv4Datagram("ipv4-3");
     ipv4Datagram->setDestAddress(IPv4Address("192.168.1.1"));    
     send(ipv4Datagram, "out");
-    
+
     ipv6Datagram = new IPv6Datagram("ipv6-4");
     ipv6Datagram->setDestAddress(IPv6Address("fe80::1122:3344:5566"));
     send(ipv6Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-5");
     udpPacket = new UDPPacket();
     udpPacket->setSourcePort(1000);
     ipv4Datagram->encapsulate(udpPacket);
     send(ipv4Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-6");
     udpPacket = new UDPPacket();
     udpPacket->setDestinationPort(1000);
@@ -82,23 +82,23 @@ void TestApp::initialize()
     ipv6Datagram = new IPv6Datagram("ipv6-9");
     ipv6Datagram->setTrafficClass(0x2e);
     send(ipv6Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-10");
     ipv4Datagram->setSrcAddress(IPv4Address("192.168.2.1"));    
     send(ipv4Datagram, "out");
-    
+
     ipv6Datagram = new IPv6Datagram("ipv6-11");
     ipv6Datagram->setSrcAddress(IPv6Address("fe80::1"));
     send(ipv6Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-12");
     ipv4Datagram->setDestAddress(IPv4Address("192.168.2.1"));    
     send(ipv4Datagram, "out");
-    
+
     ipv6Datagram = new IPv6Datagram("ipv6-13");
     ipv6Datagram->setDestAddress(IPv6Address("fe80::1"));
     send(ipv6Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-14");
     udpPacket = new UDPPacket();
     udpPacket->setSourcePort(2100);
@@ -110,7 +110,7 @@ void TestApp::initialize()
     udpPacket->setSourcePort(2200);
     ipv6Datagram->encapsulate(udpPacket);
     send(ipv6Datagram, "out");
-    
+
     ipv4Datagram = new IPv4Datagram("ipv4-16");
     udpPacket = new UDPPacket();
     udpPacket->setDestinationPort(2300);
@@ -169,7 +169,7 @@ network TestNetwork
   <filter gate="5" destPort="1000"/>
   <filter gate="6" protocol="17"/>
   <filter gate="7" tos="0x2e" tosMask="0x3f"/>
-  
+
   <filter gate="8" srcAddress="192.168.0.0" srcPrefixLength="16"/>
   <filter gate="9" srcAddress="fe80::" srcPrefixLength="10"/>
   <filter gate="10" destAddress="192.168.0.0" destPrefixLength="16"/>
@@ -204,3 +204,9 @@ ipv6-15: in[12]
 ipv4-16: in[13]
 ipv6-17: in[13]
 ipv4-18: defaultIn[0]
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

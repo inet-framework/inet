@@ -1,3 +1,105 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-25  Tamas Borbely
+
+	Rename and extend parent/child interface data in IPv4MulticastRoute
+
+	- the new names are more common (in/out)
+	- subclasses of IPv4MulticastRoute can extend InInterface and OutInterface
+
+	Note: this is not backward compatible change
+
+2013-04-12  Zoltan Bojthe
+
+	FlatNetworkConfigurator, FlatNetworkConfigurator6: changed isIPNode
+	detection (node must have both RoutingTable and InterfaceTable)
+
+2013-05-15  Levente Meszaros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup to also try
+	IPv4NetworkConfigurator.
+
+	Fixes when the node is down and interface is not configured yet.
+
+2013-05-15  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed the way multicast groups are joined
+
+2013-05-10  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed to compute all network configuration
+	only internally and apply them only upon explicit request.
+
+	IMPORTANT: from now on, this module does NOT assign addresses or add
+	routes directly, just stores them in its internal data structures.
+	Network nodes are supposed to contain an instance of IPv4NodeConfigurator
+	(normally part of the network layer compound module) that actually
+	configures the node's interface table and routing table based on the
+	information stored in the global network configurator module.
+
+2013-05-14  Levente Meszaros
+
+	IPv4NetworkConfigurator: Fixed issue when static routes are re-added to
+	the routing table
+
+2013-05-14  Levente Meszaros
+
+	IPv4NodeConfigurator: implemented and added to IPv4NetworkLayer.
+
+	This module has one instance per network node, and it acts like a bridge
+	between the node and the network's global configurator module,
+	IPv4NetworkConfigurator.
+
+	IPv4NetworkConfigurator only computes and remembers configuration data
+	(assigned IP addresses, static routes, etc), but does configure the nodes'
+	routing tables and interfaces accordingly. The actual configuration is
+	is carried out by this module, at network initialization time and also when
+	the node restarts (i.e. after a shutdown or a crash.)
+
+	This module is needed because of failure/restart scenarios:
+	IPv4NetworkConfigurator would not be able to configure the node after
+	a restart, because being a global module, it doesn't know about node
+	lifecycle events.
+
+2013-04-24  Andras Varga
+
+	IPv4NetworkConfigurator: workaround crash when a node is down; added
+	plan to resolve it (Levy)
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
+2013-03-14  Levente Meszaros
+
+	Fixed IPv4NetworkConfigurator bug sometimes not being able to assign
+	addresses. Changed to assign the most constrained addresses first.
+
+2013-03-21  Levente Meszaros
+
+	IPv4NetworkConfigurator: Changed to support mixed wired and wireless
+	LANs for autoconfiguration.
+
+2013-03-21  Levente Meszaros
+
+	IPv4NetworkConfigurator: Added dumpLinks parameter.
+
+2013-04-03  Levente Meszaros
+
+	IPv4NetworkConfigurator: Replaced call to AddressResolver with member
+	variable access.
+
+2013-02-22  Andras Varga
+
+	IPv4NetworkConfigurator: added @groups to <interface>
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-09-13  Zoltan Bojthe
+
+	HostAutoConfigurator:
+	Added check for detecting too small netmask parameter value
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

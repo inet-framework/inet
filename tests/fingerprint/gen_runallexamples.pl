@@ -59,7 +59,7 @@ foreach $fname (@inifiles)
 
 ###    next if ($txt =~ /\bfingerprint\s*=/); #skip fingerprint tests
 
-    @configs = ($txt =~ /^\s*(\[Config \w+\].*)$/mg);
+    @configs = ($txt =~ /^\s*(\[Config [a-zA-Z_0-9-]+\].*)$/mg);
 
 #    print "-1- ",$#configs," ---------------->file=$fname, configs={",join(',',@configs),"}\n";
 
@@ -69,7 +69,7 @@ foreach $fname (@inifiles)
 
     foreach $conf (@configs)
     {
-        ($cfg,$comm) = ($conf =~ /^\[Config (\w+)\]\s*(\#.*)?$/g);
+        ($cfg,$comm) = ($conf =~ /^\[Config ([a-zA-Z_0-9-]+)\]\s*(\#.*)?$/g);
         ($dir,$fnameonly) = ($fname =~ /(.*)[\/\\](.*)/);
 
         $run = "/".$dir.'/'.",";
@@ -78,7 +78,7 @@ foreach $fname (@inifiles)
         $run .= (' 'x(83-length $run)).' ';
         $run .= '---100s'.",";
         $run .= (' 'x(100-length $run)).' ';
-        $run .= '0'; # intentionally no "-r 0" -- test should do all runs if fits into the time limit...
+        $run .= '0000-0000';
 
         $x = "$run";
 

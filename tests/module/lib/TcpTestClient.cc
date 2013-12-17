@@ -104,6 +104,7 @@ std::string TcpTestClient::makeMsgName()
 void TcpTestClient::initialize()
 {
     rcvdBytes = 0;
+    rcvdPackets = 0;
 
     // parameters
     simtime_t tOpen = par("tOpen");

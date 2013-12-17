@@ -79,6 +79,9 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     STAList staList; ///< list of STAs
     cMessage *beaconTimer;
 
+  public:
+    Ieee80211MgmtAP() :  nb(NULL), beaconTimer(NULL) {}
+    virtual ~Ieee80211MgmtAP();
   protected:
     virtual int numInitStages() const {return 2;}
     virtual void initialize(int);
@@ -122,6 +125,13 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     void sendAssocNotification(const MACAddress &addr);
 
     void sendDisAssocNotification(const MACAddress &addr);
+
+    /** lifecycle support */
+    //@{
+  protected:
+    virtual void start();
+    virtual void stop();
+    //@}
 };
 
 #endif

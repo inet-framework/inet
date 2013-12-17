@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2009 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -85,6 +85,13 @@ class INET_API SCTPQueue : public cObject
 
     SCTPDataVariables* dequeueChunkBySSN(const uint16 ssn);
 
+    uint32 getSizeOfFirstChunk(const IPvXAddress& remoteAddress);
+
+    uint16 getFirstSsnInQueue(const uint16 sid);
+
+    void findEarliestOutstandingTSNsForPath(const IPvXAddress& remoteAddress,
+                                            uint32&            earliestOutstandingTSN,
+                                            uint32&            rtxEarliestOutstandingTSN) const;
 
   public:
      typedef std::map<uint32, SCTPDataVariables*> PayloadQueue;

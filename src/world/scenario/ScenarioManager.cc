@@ -72,9 +72,9 @@ void ScenarioManager::processCommand(cXMLElement *node)
         processSetChannelAttrCommand(node);
     // else if (!strcmp(tag,"create-module"))
     //    processCreateModuleCommand(node);
-     else if (!strcmp(tag, "connect"))
+    else if (!strcmp(tag, "connect"))
         processConnectCommand(node);
-     else if (!strcmp(tag, "disconnect"))
+    else if (!strcmp(tag, "disconnect"))
         processDisconnectCommand(node);
     else
         processModuleSpecificCommand(node);
@@ -143,7 +143,7 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
     // see if it supports the IScriptable interface
     IScriptable *scriptable = dynamic_cast<IScriptable *>(mod);
     if (!scriptable)
-        error("<%s> not understood: it is not a built-in command of %s, and module class %s "
+        error("<%s> not understood: it is not a built-in command of %s, and module class %s "  //TODO be more specific
               "is not scriptable (does not subclass from IScriptable) at %s",
               node->getTagName(), getClassName(), mod->getClassName(), node->getSourceLocation());
 

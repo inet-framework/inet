@@ -828,6 +828,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
         tcpEV << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
         state->snd_nxt = state->snd_max;
         sendFin();
+        tcpAlgorithm->segmentRetransmitted(state->snd_nxt, state->snd_nxt+1);
         state->snd_max = ++state->snd_nxt;
 
         if (unackedVector)
@@ -838,6 +839,7 @@ void TCPConnection::retransmitOneSegment(bool called_at_rto)
         ASSERT(bytes != 0);
 
         sendSegment(bytes);
+        tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 
         if (!called_at_rto)
         {
@@ -865,6 +867,21 @@ void TCPConnection::retransmitData()
     state->snd_nxt = state->snd_una;
 
     uint32 bytesToSend = state->snd_max - state->snd_nxt;
+
+    // FIN (without user data) needs to be resent
+    if (bytesToSend == 0 && state->send_fin && state->snd_fin_seq == sendQueue->getBufferEndSeq())
+    {
+        state->snd_max = sendQueue->getBufferEndSeq();
+        tcpEV << "No outstanding DATA, resending FIN, advancing snd_nxt over the FIN\n";
+        state->snd_nxt = state->snd_max;
+        sendFin();
+        state->snd_max = ++state->snd_nxt;
+
+        if (unackedVector)
+            unackedVector->record(state->snd_max - state->snd_una);
+        return;
+    }
+
     ASSERT(bytesToSend != 0);
 
     // TBD - avoid to send more than allowed - check cwnd and rwnd before retransmitting data!
@@ -881,6 +898,7 @@ void TCPConnection::retransmitData()
 
         bytesToSend -= state->sentBytes;
     }
+    tcpAlgorithm->segmentRetransmitted(state->snd_una, state->snd_nxt);
 }
 
 void TCPConnection::readHeaderOptions(TCPSegment *tcpseg)
@@ -1135,7 +1153,8 @@ TCPSegment TCPConnection::writeHeaderOptions(TCPSegment *tcpseg)
             option.setValuesArraySize(1);
 
             // Update WS variables
-            ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
+            //ulong scaled_rcv_wnd = receiveQueue->getAmountOfFreeBytes(state->maxRcvBuffer);
+            ulong scaled_rcv_wnd = receiveQueue->getFirstSeqNo() + state->maxRcvBuffer - state->rcv_nxt;
             state->rcv_wnd_scale = 0;
 
             while (scaled_rcv_wnd > TCP_MAX_WIN && state->rcv_wnd_scale < 14) // RFC 1323, page 11: "the shift count must be limited to 14"

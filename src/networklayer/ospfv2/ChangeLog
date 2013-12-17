@@ -1,10 +1,26 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-24  Andras Varga
+
+	OSPFRouting: added lifecyle operations support
+
+2013-04-22  Andras Varga
+
+	OSPFRouting: eliminated pointless timer class
+
+2013-04-18  Andras Varga
+
+	OSPFRouting: configuration reader factored out
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
 
 2012-06-15  Zoltan Bojthe
 
-	- changed the signature of OSPF::insertExternalRoute() 
+	- changed the signature of OSPF::insertExternalRoute()
 	- a single IPv4AddressRange can be added to an Area only once
 	- OSPF IPv4AddressRange changes:
 	    added some functions and operators, removed IPv4AddressRange_Less class
@@ -12,7 +28,7 @@
 	- remove IPv4Address_Less, maps can use operator the '<' operator of the IPv4Address
 	- Area::info() fixes
 	- show "0.0.0.0" instead "<unspec>"
-	- the router interfaces will join the OSPF multicast groups automatically 
+	- the router interfaces will join the OSPF multicast groups automatically
 	- eliminate IPv4Address <--> int conversions, use IPv4Address member
 	    functions for conversions, if needed
 	- use IPv4Address type instead of unsigned long for LinkStateID, RouterID, AreaID
@@ -40,8 +56,8 @@
 	    converted ospf xml files to new the format in examples
 	    (you must convert router@id to router@name by hand).
 	- add @toward attribute to XML for easier interface specification
-	    old: interfaces were specified by their name (e.g. ifName="eth0"). 
-	    new: interfaces can be specified by their name (e.g. ifName="eth0"), 
+	    old: interfaces were specified by their name (e.g. ifName="eth0").
+	    new: interfaces can be specified by their name (e.g. ifName="eth0"),
 	    or by the name of a module connected to the interface (e.g. towards="Area3.N9")
 	- fixed OSPF.xsd schema
 

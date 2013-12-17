@@ -30,7 +30,7 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base
 {
   public:
     IPv4Datagram(const char *name = NULL, int kind = 0) : IPv4Datagram_Base(name, kind) {}
-    IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other.getName()) {operator=(other);}
+    IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other) {}
     IPv4Datagram& operator=(const IPv4Datagram& other) {IPv4Datagram_Base::operator=(other); return *this;}
 
     virtual IPv4Datagram *dup() const {return new IPv4Datagram(*this);}

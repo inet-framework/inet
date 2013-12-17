@@ -1,11 +1,44 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-02  Zoltan Bojthe
+
+	- Added NodeStatus::DOWN checks for initialize()
+	- lifecycle: Enter_Method_Silent() was missed in some
+	  handleOperationStage() function
+
+2013-04-25  Levente Meszaros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-22  Levente Meszaros
+
+	Changed stopTime to use -1 to run the application forever.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-09-18  Zoltan Bojthe
+
+	- voiptool/voipstream: removed unnecessary "enum" in front of
+	  "SampleFormat"
+	- voiptool/voipstream: rename in README
+	- voiptool/voipstream: receiver: fingerprint: added info about decoded
+	  packets
+	- voiptool/voipstream: receiver: delay/playOutDelay renamed to
+	  playoutDelay
+
 2012-09-13  Zoltan Bojthe
 
-    Renamed feature to VoIPStream.
-    Renamed classes, modules, messages, files:
-      - VoIPPacket to VoIPStreamPacket
-      - VoIPSourceApp to VoIPStreamSender
-      - VoIPSinkApp to VoIPStreamReceiver
-      - example folders and modules
+	voiptool/voipstream: renamed files/folders to VoIPStream
+
+	Renamed feature to VoIPStream. Renamed classes, modules, messages,
+	files:
+	 - VoIPPacket to VoIPStreamPacket
+	 - VoIPSourceApp to VoIPStreamSender
+	 - VoIPSinkApp to VoIPStreamReceiver
+	 - example folders and modules
 
 2012-08-07  ------ inet-2.0.0 released ------
 

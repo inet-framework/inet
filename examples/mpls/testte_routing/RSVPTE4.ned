@@ -14,10 +14,11 @@
 
 package inet.examples.mpls.testte_routing;
 
-import inet.world.scenario.ScenarioManager;
-import inet.nodes.mpls.RSVP_LSR;
+import inet.base.LifecycleController;
+import inet.base.UnimplementedModule;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.extras.FailureManager;
+import inet.nodes.mpls.RSVP_LSR;
+import inet.world.scenario.ScenarioManager;
 
 
 //
@@ -27,6 +28,9 @@ import inet.networklayer.extras.FailureManager;
 //
 network RSVPTE4
 {
+    parameters:
+        **.networkLayer.configurator.networkConfiguratorModule = "";
+
     submodules:
         LSR1: RSVP_LSR {
             parameters:
@@ -101,7 +105,7 @@ network RSVPTE4
             parameters:
                 @display("p=150,50");
         }
-        failureManager: FailureManager {
+        lifecycleController: LifecycleController {
             parameters:
                 @display("p=500,50");
         }

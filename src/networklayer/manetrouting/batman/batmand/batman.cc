@@ -756,7 +756,6 @@ int8_t batman(void)
 void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
 {
     OrigNode *orig_neigh_node, *orig_node;
-    IPv4Address srcAddr(neigh.getIPv4());
     simtime_t curr_time;
     HnaElement *hna_recv_buff;
     //char orig_str[ADDR_STR_LEN], neigh_str[ADDR_STR_LEN], ifaddr_str[ADDR_STR_LEN], prev_sender_str[ADDR_STR_LEN];
@@ -820,13 +819,13 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
             }
 
             if (is_my_addr) {
-                debug_output(4) << "Drop packet: received my own broadcast sender:" << srcAddr << endl;
+                debug_output(4) << "Drop packet: received my own broadcast sender:" << convertAddressToString(neigh) << endl;
                 delete bat_packet;
                 break;  // the condition same as on the entire udp packet
             }
 
             if (is_broadcast) {
-                debug_output(4) << "Drop packet: ignoring all packets with broadcast source IP (sender: " << srcAddr << ")\n";
+                debug_output(4) << "Drop packet: ignoring all packets with broadcast source IP (sender: " << convertAddressToString(neigh) << ")\n";
                 delete bat_packet;
                 break;  // the condition same as on the entire udp packet
             }
@@ -867,7 +866,7 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
             }
 
             if (is_my_oldorig) {
-                EV << "Drop packet: ignoring all rebroadcast echos (sender: " << srcAddr << ")\n";
+                EV << "Drop packet: ignoring all rebroadcast echos (sender: " << convertAddressToString(neigh) << ")\n";
                 delete bat_packet;
                 continue;
             }

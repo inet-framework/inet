@@ -19,7 +19,7 @@
 #define __INET_NETANIMTRACEWRITER_H
 
 #include <fstream>
-#include <INETDefs.h>
+#include "INETDefs.h"
 
 
 

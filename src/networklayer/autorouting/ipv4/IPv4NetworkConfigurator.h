@@ -21,31 +21,28 @@
 #ifndef __INET_IPV4CONFIGURATOR_H
 #define __INET_IPV4CONFIGURATOR_H
 
+#include <algorithm>
 #include <omnetpp.h>
 #include "INETDefs.h"
 #include "Topology.h"
 #include "IInterfaceTable.h"
 #include "IRoutingTable.h"
 #include "IPv4Address.h"
+#include "IPvXAddressResolver.h"
+#include "IPv4InterfaceData.h"
+#include "PatternMatcher.h"
 
-namespace inet { class PatternMatcher; }
-
-// compile time macros to disable or enable logging
-#define EV_ENABLED EV
-#define EV_DISABLED true?ev:ev
-
-// compile time log levels
-#define EV_DEBUG EV_DISABLED
-#define EV_INFO EV_ENABLED
 
 /**
- * This module configures IPv4 addresses and routing tables for a network.
+ * This module provides the global static configuration for the IPv4RoutingTable and
+ * the IPv4 network interfaces of all nodes in the network.
  *
  * For more info please see the NED file.
  */
-class INET_API IPv4NetworkConfigurator : public cSimpleModule
+// TODO: remove topology arguments from functions or perhaps move those functions into topology or leave it as it is?
+class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddressResolver
 {
-    public:
+    protected:
         class LinkInfo;
         class InterfaceInfo;
 
@@ -58,6 +55,8 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
                 IInterfaceTable *interfaceTable;
                 IRoutingTable *routingTable;
                 std::vector<InterfaceInfo *> interfaceInfos;
+                std::vector<IPv4Route *> staticRoutes;
+                std::vector<IPv4MulticastRoute *> staticMulticastRoutes;
 
             public:
                 Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
@@ -83,22 +82,20 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
                 Node *node;
                 LinkInfo *linkInfo;
                 InterfaceEntry *interfaceEntry;
+                int mtu;
+                double metric;
                 bool configure;              // false means the IP address of the interface will not be modified
                 uint32 address;              // the bits
-                uint32 addressSpecifiedBits; // 1 means the bit is specifiedc, 0 means the bit is unspecified
+                uint32 addressSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
                 uint32 netmask;              // the bits
-                uint32 netmaskSpecifiedBits; // 1 means the bit is specifiedc, 0 means the bit is unspecified
+                uint32 netmaskSpecifiedBits; // 1 means the bit is specified, 0 means the bit is unspecified
+                std::vector<IPv4Address> multicastGroups;
 
-                InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) {
-                    this->node = node;
-                    this->linkInfo = linkInfo;
-                    this->interfaceEntry = interfaceEntry;
-                    configure = false;
-                    address = 0;
-                    addressSpecifiedBits = 0;
-                    netmask = 0;
-                    netmaskSpecifiedBits = 0;
-                }
+            public:
+                InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+
+                IPv4Address getAddress() const { ASSERT(addressSpecifiedBits == 0xFFFFFFFF); return IPv4Address(address); }
+                IPv4Address getNetmask() const { ASSERT(netmaskSpecifiedBits == 0xFFFFFFFF); return IPv4Address(netmask); }
                 virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
         };
 
@@ -108,11 +105,11 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
          */
         class LinkInfo : public cObject {
             public:
-                bool isWireless;
                 std::vector<InterfaceInfo *> interfaceInfos; // interfaces on that LAN or point-to-point link
                 InterfaceInfo* gatewayInterfaceInfo; // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
-                LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = NULL; }
+            public:
+                LinkInfo() { gatewayInterfaceInfo = NULL; }
                 ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
         };
 
@@ -143,6 +140,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
                 uint32 netmask;     // originally copied from the IPv4Route
                 std::vector<RouteInfo *> originalRouteInfos; // routes that are routed by this one from the unoptimized original routing table, we keep track of this to be able to skip merge candidates with less computation
 
+            public:
                 RouteInfo(int color, uint32 destination, uint32 netmask) { this->color = color; this->enabled = true; this->destination = destination; this->netmask = netmask; }
         };
 
@@ -153,78 +151,119 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
             public:
                 std::vector<RouteInfo *> routeInfos; // list of routes in the routing table
 
-                int addRouteInfo(RouteInfo *routeInfo) {
-                    std::vector<RouteInfo *>::iterator it = upper_bound(routeInfos.begin(), routeInfos.end(), routeInfo, routeInfoLessThan);
-                    int index = it - routeInfos.begin();
-                    routeInfos.insert(it, routeInfo);
-                    return index;
-                }
+            public:
+                int addRouteInfo(RouteInfo *routeInfo);
                 void removeRouteInfo(const RouteInfo *routeInfo) { routeInfos.erase(std::find(routeInfos.begin(), routeInfos.end(), routeInfo)); }
                 RouteInfo *findBestMatchingRouteInfo(const uint32 destination) const { return findBestMatchingRouteInfo(destination, 0, routeInfos.size()); }
-                RouteInfo *findBestMatchingRouteInfo(const uint32 destination, int begin, int end) const {
-                    for (int index = begin; index < end; index++) {
-                        RouteInfo *routeInfo = routeInfos.at(index);
-                        if (routeInfo->enabled && !((destination ^ routeInfo->destination) & routeInfo->netmask))
-                            return const_cast<RouteInfo *>(routeInfo);
-                    }
-                    return NULL;
-                }
+                RouteInfo *findBestMatchingRouteInfo(const uint32 destination, int begin, int end) const;
                 static bool routeInfoLessThan(const RouteInfo *a, const RouteInfo *b) { return a->netmask != b->netmask ? a->netmask > b->netmask : a->destination < b->destination; }
         };
 
         class Matcher
         {
-            private:
+            protected:
                 bool matchesany;
                 std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
+
             public:
                 Matcher(const char *pattern);
                 ~Matcher();
+
                 bool matches(const char *s);
                 bool matchesAny() { return matchesany; }
         };
 
         class InterfaceMatcher
         {
-            private:
+            protected:
                 bool matchesany;
                 std::vector<inet::PatternMatcher*> nameMatchers;
                 std::vector<inet::PatternMatcher*> towardsMatchers;
+
             public:
                 InterfaceMatcher(const char *pattern);
                 ~InterfaceMatcher();
+
                 bool matches(InterfaceInfo *interfaceInfo);
                 bool matchesAny() { return matchesany; }
         };
 
     protected:
-        // cached parameter values; all other state is local to initialize()
+        // parameters
+        bool assignAddressesParameter;
+        bool assignDisjunctSubnetAddressesParameter;
+        bool addStaticRoutesParameter;
         bool addSubnetRoutesParameter;
         bool addDefaultRoutesParameter;
         bool optimizeRoutesParameter;
-        bool assignDisjunctSubnetAddressesParameter;
+        cXMLElement *configuration;
+
+        // internal state
+        IPv4Topology topology;
+
+    public:
+        /**
+         * Computes the IPv4 network configuration for all nodes in the network.
+         * The result of the computation is only stored in the network configurator.
+         *
+         */
+        virtual void computeConfiguration();
+
+        /**
+         * Configures all interfaces in the network based on the current network configuration.
+         */
+        virtual void configureAllInterfaces();
+
+        /**
+         * Configures the provided interface based on the current network configuration.
+         */
+        virtual void configureInterface(InterfaceEntry *interfaceEntry);
+
+        /**
+         * Configures all routing tables in the network based on the current network configuration.
+         */
+        virtual void configureAllRoutingTables();
+
+        /**
+         * Configures the provided routing table based on the current network configuration.
+         */
+        virtual void configureRoutingTable(IRoutingTable *routingTable);
 
     protected:
-        virtual int numInitStages() const  { return 3; }
+        virtual int numInitStages() const  { return 4; }
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
         virtual void initialize(int stage);
 
         /**
          * Extracts network topology by walking through the module hierarchy.
          * Creates vertices from modules having @node property.
-         * Creates edges from connections between network interfaces.
+         * Creates edges from connections (wired and wireless) between network interfaces.
          */
         virtual void extractTopology(IPv4Topology& topology);
 
-        // configuration file processing
-        virtual void readAddressConfiguration(cXMLElement *root, IPv4Topology& topology);
-        virtual void addMulticastGroups(cXMLElement *root, IPv4Topology& topology);
-        virtual void addManualRoutes(cXMLElement *root, IPv4Topology& topology);
-        virtual void addManualMulticastRoutes(cXMLElement *root, IPv4Topology& topology);
+        /**
+         * Reads interface elements from the configuration file and stores result.
+         */
+        virtual void readInterfaceConfiguration(IPv4Topology& topology);
 
         /**
-         * Assigns IP addresses to InterfaceEntries based on InterfaceInfo parameters.
-         * See the NED file for details.
+         * Reads multicast-group elements from the configuration file and stores the result
+         */
+        virtual void readMulticastGroupConfiguration(IPv4Topology& topology);
+
+        /**
+         * Reads route elements from configuration file and stores the result
+         */
+        virtual void readManualRouteConfiguration(IPv4Topology& topology);
+
+        /**
+         * Reads multicast-route elements from configuration file and stores the result.
+         */
+        virtual void readManualMulticastRouteConfiguration(IPv4Topology& topology);
+
+        /**
+         * Assigns the addresses for all interfaces based on the parameters given
+         * in the configuration file. See the NED file for details.
          */
         virtual void assignAddresses(IPv4Topology& topology);
 
@@ -244,17 +283,27 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
          */
         virtual void optimizeRoutes(std::vector<IPv4Route *> &routes);
 
+        void ensureConfigurationComputed(IPv4Topology& topology);
+        void configureInterface(InterfaceInfo *interfaceInfo);
+        void configureRoutingTable(Node *node);
+
+        /**
+         * Prints the current network configuration to the module output.
+         */
+        virtual void dumpConfiguration();
         virtual void dumpTopology(IPv4Topology& topology);
+        virtual void dumpLinks(IPv4Topology& topology);
         virtual void dumpAddresses(IPv4Topology& topology);
         virtual void dumpRoutes(IPv4Topology& topology);
         virtual void dumpConfig(IPv4Topology& topology);
 
         // helper functions
-        virtual void extractWiredTopology(IPv4Topology& topology);
-        virtual void extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-        virtual void extractWirelessTopology(IPv4Topology& topology);
+        virtual void extractWiredNeighbors(IPv4Topology& topology, Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+        virtual void extractWirelessNeighbors(IPv4Topology& topology, const char *wirelessId, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+        virtual void extractDeviceNeighbors(IPv4Topology& topology, Node *node, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited);
         virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
         virtual double getChannelWeight(cChannel *transmissionChannel);
+        virtual bool isBridgeNode(Node *node);
         virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
         virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
         virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
@@ -269,6 +318,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
 
         // helpers for address assignment
+        static bool compareInterfaceInfos(InterfaceInfo *i, InterfaceInfo *j);
         void collectCompatibleInterfaces(const std::vector<InterfaceInfo *>& interfaces, /*in*/
                 std::vector<InterfaceInfo *>& compatibleInterfaces, /*out, and the rest too*/
                 uint32& mergedAddress, uint32& mergedAddressSpecifiedBits, uint32& mergedAddressIncompatibleBits,
@@ -289,6 +339,24 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule
         bool tryToMergeTwoRoutes(RoutingTableInfo& routingTableInfo, int i, int j, RouteInfo *routeInfoI, RouteInfo *routeInfoJ);
         bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
+    public:
+        // TODO: find a better way to reuse and override IPvXAddressResolver functionality
+        bool getInterfaceIPv4Address(IPvXAddress &ret, InterfaceEntry *ie, bool netmask)
+        {
+            // TODO: replace linear search
+            for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
+                LinkInfo *linkInfo = topology.linkInfos[i];
+                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
+                    InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
+                    if (interfaceInfo->interfaceEntry == ie) {
+                        if (interfaceInfo->configure)
+                            ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
+                        return interfaceInfo->configure;
+                    }
+                }
+            }
+            return false;
+        }
 };
 
 #endif

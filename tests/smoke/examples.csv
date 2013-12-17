@@ -1,5 +1,7 @@
 # workingdir,                        args
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0
+/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0
+# /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
@@ -10,8 +12,9 @@
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0
-/examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0
+/examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Apps -r 0     # __interactive__
 # /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp1 -r 0     # __interactive__
 /examples/diffserv/onedomain/,       -f omnetpp.ini -c Exp11 -r 0
@@ -65,12 +68,17 @@
 /examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0
 /examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted -r 0
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-bad -r 0
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c scripted-cross -r 0
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c random -r 0
 /examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted -r 0
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-bad -r 0
+/examples/httptools/socket/pairsocket/, -f omnetpp.ini -c scripted-cross -r 0
 /examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0
-/examples/inet/ber/,                 -f omnetpp.ini -c General -r 0
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0
+/examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet__inet -r 0
 /examples/inet/bulktransfer/,        -f omnetpp.ini -c inet_inet_2a -r 0
@@ -96,8 +104,7 @@
 /examples/inet/nclients/,            -f filetransfer.ini -c General -r 0
 /examples/inet/nclients/,            -f fingerprints.ini -c General -r 0
 /examples/inet/nclients/,            -f fingerprints2.ini -c General -r 0
-/examples/inet/nclients/,            -f nclients2.ini -c General -r 0
-/examples/inet/nclients/,            -f nclients2.ini -c General -r 1
+/examples/inet/nclients/,            -f nclients2.ini -c General -r 0-1
 /examples/inet/nclients/,            -f omnetpp-ping.ini -c General -r 0
 /examples/inet/nclients/,            -f omnetpp.ini -c inet__inet -r 0
 /examples/inet/nclients/,            -f omnetpp.ini -c lwip__lwip -r 0
@@ -106,6 +113,14 @@
 /examples/inet/nclients/,            -f video.ini -c General -r 0
 /examples/inet/pcaprecorder/,        -f omnetpp.ini -c General -r 0
 /examples/inet/routerperf/,          -f omnetpp.ini -c General -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c Ping -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Basic_Echo -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_Burst_Sink -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c UDP_VideoStream -r 0
+# /examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_common -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_externalQueue -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMACFullDuplex_internalQueue -r 0
 /examples/inet/tcp_eth_reconnect/,   -f omnetpp.ini -c with_EtherMAC_externalQueue_fullduplex -r 0
@@ -129,6 +144,12 @@
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__msg -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c lwip__lwip__stream -r 0
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet__lwip -r 0
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-reno -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-newreno -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-tahoe -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-vegas -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-westwood -r 0-6
+/examples/inet/tcpclientserver/,     -f omnetpp.ini -c inet-dumb -r 0-6
 /examples/inet/tcpsack/,             -f omnetpp.ini -c One -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Two -r 0
 /examples/inet/tcpsack/,             -f omnetpp.ini -c Three -r 0
@@ -179,6 +200,10 @@
 /examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0
 /examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c SingleRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c MultiRadio -r 0
+/examples/manetrouting/manetMultiradio/, -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0
@@ -245,25 +270,32 @@
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backbone -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandonestub -r 0
 /examples/ospfv2/areatests/,         -f omnetpp.ini -c backboneandtwostubs -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-A -r 0
+/examples/ospfv2/areatests/,         -f omnetpp.ini -c mininet-B -r 0
 /examples/ospfv2/backbone/,          -f omnetpp.ini -c General -r 0
-/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c stable -r 0
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c static -r 0
 /examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic1 -r 0
+/examples/ospfv2/dynamictest/,       -f omnetpp.ini -c dynamic2 -r 0
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c General -r 0
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0
+#/examples/traci/,                    -f omnetpp.ini -c accident -r 0
+#/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0
 /examples/voip/,                     -f omnetpp.ini -c GoodChannel -r 0
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0
 /examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g726 -r 0
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g711_aLaw -r 0
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c g711_muLaw -r 0
-/examples/voipstream/VoIPStreamTest/,    -f omnetpp.ini -c pcm_s16le -r 0
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0
+/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0
 /examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0

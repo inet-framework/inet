@@ -553,6 +553,9 @@ class INET_API TCPConnection
     /** Utility: update receiver queue related variables and statistics - called before setting rcv_wnd */
     virtual void updateRcvQueueVars();
 
+    /** Utility: returns true when receive queue has enough space for store the tcpseg */
+    virtual bool hasEnoughSpaceForSegmentInReceiveQueue(TCPSegment *tcpseg);
+
     /** Utility: update receive window (rcv_wnd), and calculate scaled value if window scaling enabled.
      *  Returns the (scaled) receive window size.
      */

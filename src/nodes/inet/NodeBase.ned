@@ -18,12 +18,15 @@
 package inet.nodes.inet;
 
 import inet.base.NotificationBoard;
+import inet.battery.IBattery;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
+import inet.linklayer.loopback.LoopbackInterface;
 import inet.mobility.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv4.RoutingTable;
+import inet.status.NodeStatus;
 import inet.util.PcapRecorder;
 
 
@@ -42,6 +45,7 @@ module NodeBase
         @display("bgb=,448");
         @node;
         @labels(node,ethernet-node,wireless-node);
+        bool hasStatus = default(false);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
         int numPcapRecorders = default(0); // no of PcapRecorders.
@@ -49,14 +53,24 @@ module NodeBase
         string routingFile = default("");
         bool IPForward = default(true);
         bool forwardMulticast = default(false);
+        string batteryType = default("");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        status: NodeStatus if hasStatus {
+            @display("p=50,50");
+        }
+
         notificationBoard: NotificationBoard {
             parameters:
                 @display("p=53,155;is=s");
+        }
+
+        battery: <batteryType> like IBattery if batteryType != "" {
+            parameters:
+                @display("p=53,77;i=block/plug;is=s");
         }
 
         // optional mobility module. Required only if wireless cards are present
@@ -89,13 +103,16 @@ module NodeBase
             @display("p=53,338,r,10");
         }
 
+        lo0: LoopbackInterface {
+            @display("p=78,406");
+        }
         wlan[numRadios]: <default("Ieee80211Nic")> like IWirelessNic {
             parameters:
-                @display("p=132,406,row,60;q=queue");
+                @display("p=216,406,row,60;q=queue");
         }
         eth[sizeof(ethg)]: <default("EthernetInterface")> like IWiredNic {
             parameters:
-                @display("p=329,406,row,60;q=txQueue");
+                @display("p=368,406,row,60;q=txQueue");
         }
         ppp[sizeof(pppg)]: <default("PPPInterface")> like IWiredNic {
             parameters:
@@ -103,25 +120,28 @@ module NodeBase
         }
         ext[numExtInterfaces]: <default("ExtInterface")> like IExternalNic {
             parameters:
-                @display("p=45,406,row,10;q=txQueue;i=block/ifcard");
+                @display("p=149,406,row,10;q=txQueue;i=block/ifcard");
         }
 
     connections allowunconnected:
         // connections to network outside
+        networkLayer.ifOut++ --> lo0.upperLayerIn;
+        lo0.upperLayerOut --> networkLayer.ifIn++;
+
         for i=0..sizeof(radioIn)-1 {
-            radioIn[i] --> wlan[i].radioIn;
+            radioIn[i] --> { @display("m=s"); } --> wlan[i].radioIn;
             wlan[i].upperLayerOut --> networkLayer.ifIn++;
             wlan[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(ethg)-1 {
-            ethg[i] <--> eth[i].phys;
+            ethg[i] <--> { @display("m=s"); } <--> eth[i].phys;
             eth[i].upperLayerOut --> networkLayer.ifIn++;
             eth[i].upperLayerIn <-- networkLayer.ifOut++;
         }
 
         for i=0..sizeof(pppg)-1 {
-            pppg[i] <--> ppp[i].phys;
+            pppg[i] <--> { @display("m=s"); } <--> ppp[i].phys;
             ppp[i].upperLayerOut --> networkLayer.ifIn++;
             ppp[i].upperLayerIn <-- networkLayer.ifOut++;
         }

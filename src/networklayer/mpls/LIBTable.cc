@@ -34,7 +34,7 @@ void LIBTable::initialize(int stage)
 
         // read configuration
 
-        readTableFromXML(par("conf").xmlValue());
+        readTableFromXML(par("config").xmlValue());
 
         WATCH_VECTOR(lib);
     }

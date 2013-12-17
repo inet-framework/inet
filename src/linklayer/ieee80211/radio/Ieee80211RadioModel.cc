@@ -229,7 +229,6 @@ double Ieee80211RadioModel::getTestFrameError(double snirMin, double bitrate)
 
 bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitrate)
 {
-    double berHeader, berMPDU;
     ModulationType modeBody;
     ModulationType modeHeader;
 
@@ -269,7 +268,7 @@ bool Ieee80211RadioModel::isPacketOK(double snirMin, int lengthMPDU, double bitr
     else
         MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, lengthMPDU);
 
-    EV << "berHeader: " << berHeader << " berMPDU: " <<berMPDU <<" lengthMPDU: "<<lengthMPDU<<" PER: "<<1-MpduNoError<<endl;
+    EV << "lengthMPDU: " << lengthMPDU << " PER: " << 1-MpduNoError << endl;
     if (MpduNoError>=1 && headerNoError>=1)
         return true;
     double rand = dblrand();

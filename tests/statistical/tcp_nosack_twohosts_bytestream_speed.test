@@ -9,7 +9,7 @@ Testing TCP communication speed
 
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 channel C extends DatarateChannel
@@ -76,7 +76,7 @@ network TcpSpeedTest
             parameters:
                 srvTcpType = "TCP_lwIP";
         }
-        configurator: FlatNetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=70,40");
         }
 }

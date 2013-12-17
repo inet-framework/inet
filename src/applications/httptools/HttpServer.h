@@ -58,7 +58,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         /** @name cSimpleModule redefinitions */
         //@{
         /** Initialization of the component and startup of browse event scheduling */
-        virtual void initialize();
+        virtual void initialize(int stage);
 
         /** Report final statistics */
         virtual void finish();

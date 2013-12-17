@@ -1,3 +1,33 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	manet: synced with INETMANET (20130503)
+
+	olsr, dymo, dsr, dsdv, batman, aodv, olsr, dsdv: synced with INETMANET
+	manetbase: introduced GlobalWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector; added/fixed parameter units
+
+2013-03-25  Andras Varga
+
+	aodv-uu: compile fix for MSVC
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-19  Zoltan Bojthe
+
+	- AODV's hand-written descriptors were replaced with generated ones
+	  [with A.Varga]
+	- aodv_msg_struct.h: added getter methods expected by the generated
+	  descriptors removed hand-written aodv_msg_struct_descriptor.cc
+	- now using std::max instead of a macro in aodv-uu
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

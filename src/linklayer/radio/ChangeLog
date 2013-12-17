@@ -1,3 +1,42 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-06-18  Zoltan Bojthe
+
+	- Throws now an error when operation unsupported
+	- Bugfix: segfault when Radio module started at DOWN
+
+2013-05-03  Alfonso Ariza Quintana
+
+	fixes from INETMANET:
+	- Free space model distance calculation added
+	- Include receptionThreshold like liminum signal to change the radio
+	  module to RECV state
+	- Draw coverge for free space and two ray in funtion of the selected
+	  model
+
+2013-04-27  Levente Meszaros
+
+	MPLS,etc: removed obsolete ways of shutdown/restart: FailureManager,
+	PowerControl, LDP_FAILED/RSVP_FAILED
+
+	Temporarily breaks affected simulations (until RSVP and other support
+	ILifecycle).
+
+2013-03-07  Zoltan Bojthe
+
+	fixes for setRadioState(): signal and notification sending fixes,
+	optimisation
+
+2013-03-08  Zoltan Bojthe
+
+	Added IdealRadio and IdealAirFrame. See IdealWirelessNic for details.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-08-27  Zoltan Bojthe
+
+	Bugfix for radio ModulationType: modulationClass member was uninitialized.
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -8,7 +47,7 @@
 
 2012-02-11  Rudolf Hornig
 
-	Takeover from INETMANET @ fff5dfd 
+	Takeover from INETMANET @ fff5dfd
 
 	Added support for configurable noise generators. It can be configured with
 	the noiseGenerator parameter of the Radio.

@@ -37,6 +37,7 @@
 #include "OLSR_state.h"
 #include "OLSR_rtable.h"
 #include "OLSR_repositories.h"
+#include "opp_utils.h"
 
 #include <map>
 #include <vector>
@@ -74,7 +75,7 @@
 #define CURRENT_TIME_T  SIMTIME_DBL(simTime())
 #endif
 
-#define debug  ev.printf
+#define debug  EV << OPP_Global::stringf
 
 
 
@@ -95,15 +96,15 @@
 #define OLSR_C      0.0625
 
 
-    /********** Holding times **********/
+	/********** Holding times **********/
 
-    /// Neighbor holding time.
+	/// Neighbor holding time.
 #define OLSR_NEIGHB_HOLD_TIME   3*OLSR_REFRESH_INTERVAL
-    /// Top holding time.
+	/// Top holding time.
 #define OLSR_TOP_HOLD_TIME  3*OLSR_TC_INTERVAL
-    /// Dup holding time.
+	/// Dup holding time.
 #define OLSR_DUP_HOLD_TIME  30
-    /// MID holding time.
+	/// MID holding time.
 #define OLSR_MID_HOLD_TIME  3*OLSR_MID_INTERVAL
 
 /********** Link types **********/
@@ -401,11 +402,11 @@ class OLSR : public ManetRoutingBase
     uint16_t    ansn_;
 
     /// HELLO messages' emission interval.
-    int     hello_ival_;
+    SimTime     hello_ival_;
     /// TC messages' emission interval.
-    int     tc_ival_;
+    SimTime     tc_ival_;
     /// MID messages' emission interval.
-    int     mid_ival_;
+    SimTime     mid_ival_;
     /// Willingness for forwarding packets on behalf of other nodes.
     int     willingness_;
     /// Determines if layer 2 notifications are enabled or not.
@@ -451,9 +452,9 @@ class OLSR : public ManetRoutingBase
 
     inline nsaddr_t&    ra_addr()   { return ra_addr_;}
 
-    inline int&     hello_ival()    { return hello_ival_;}
-    inline int&     tc_ival()   { return tc_ival_;}
-    inline int&     mid_ival()  { return mid_ival_;}
+    inline SimTime&     hello_ival()    { return hello_ival_;}
+    inline SimTime&     tc_ival()   { return tc_ival_;}
+    inline SimTime&     mid_ival()  { return mid_ival_;}
     inline int&     willingness()   { return willingness_;}
     inline int&     use_mac()   { return use_mac_;}
 
@@ -540,6 +541,7 @@ class OLSR : public ManetRoutingBase
     static int      node_id(const nsaddr_t&);
 
     // Routing information access
+    virtual bool supportGetRoute() {return true;}
     virtual uint32_t getRoute(const ManetAddress &, std::vector<ManetAddress> &);
     virtual bool getNextHop(const ManetAddress &, ManetAddress &add, int &iface, double &);
     virtual bool isProactive();

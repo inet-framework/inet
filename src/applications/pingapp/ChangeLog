@@ -1,3 +1,66 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-30  Zoltan Bojthe
+
+	PingApp: throw error only if node is down and receives a self message. Other
+	incoming messages are dropped silently.
+
+2013-07-04  Zoltan Bojthe
+
+	- stopTime checks changed: send packet when simTime() <= stopTime
+	(some apps tested "simTime() < stopTime", another apps tested "simTime()
+	<= stopTime")
+
+	- optimizations for the case where stopTime == -1
+
+2013-05-09  Zoltan Bojthe
+
+	Fixed "count" parameter in PingApp: -1 now means forever. Added test cases
+	for all combinations of node startup/shutdown and ping app start/stop
+	sequences.
+
+2013-05-02  Zoltan Bojthe
+
+	- lifecycle: Enter_Method_Silent() was missing in some
+	  handleOperationStage() function
+
+	- Added NodeStatus::DOWN checks for initialize()
+
+2013-04-27  Levente Meszaros
+
+	Initial lifecycle support
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-18  Levente Meszaros
+
+	- Changed stopTime to use -1 to run the application forever.
+	- PingApp: send pings only between start and stop, and when the node is
+	  up.
+	- Added test cases for all combinations of node startup/shutdown and ping
+	app start/stop sequences.
+
+2013-04-12  Zoltan Bojthe
+
+	PingApp: various changes
+
+	- added display string
+	- added constructor/destructor for init/deinit pointers
+	- timer deleted only in destructor
+	- starttime/stoptime usage: start at latest of startTime and uptime if
+	  earlier than stopTime
+
+2013-03-25  Zoltan Bojthe
+
+	PingApp, PingTestApp: removed init stages
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-09-18  Zoltan Bojthe
+
+	pingapp: show destination address at finish()
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-08-01  Rudolf Hornig
@@ -9,7 +72,7 @@
 	when we receive the response.
 
 2012-06-25  ------ inet-1.99.5 released ------
-	
+
 2012-03-20  ------ inet-1.99.4 released ------
 
 2012-03-04  Zoltan Bojthe

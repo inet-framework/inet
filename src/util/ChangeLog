@@ -1,3 +1,71 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-17  Rudolf Hornig
+
+	SCTPSerializer: support for SCTP Stream Reset (RFC 6525) (patch submitted
+	by Irene Ruengeler).
+
+2013-07-11  Rudolf Hornig
+
+	SCTPSerializer: support for SCTP Authentication (RFC 4895) (patch
+	submitted by Irene Ruengeler).
+
+2013-07-10  Rudolf Hornig
+
+	SCTPSerializer: support for Add-IP feature for SCTP (RFC 5061)
+	(patch submitted by Irene Ruengeler).
+
+2013-07-03  Rudolf Hornig
+
+	SCTPSerializer: support for Partial Reliability SCTP (RFC 3758)
+	(patch submitted by Irene Ruengeler)
+
+2013-07-02  Rudolf Hornig
+
+	SCTPSerializer: support for NR_SACK (patch submitted by Irene Ruengeler)
+
+2012-12-27  Andras Varga
+
+	FWMath.h: TraCIMobility didn't compile with MSVC
+
+2013-02-20  Andras Varga
+
+	const fixes (in OMNeT++ 5.0, check_and_cast<> no longer silently
+	discards const modifier)
+
+2013-02-22  Andras Varga
+
+	XMLUtils: getParameterIPAddressValue() to use IPvXAddressResolver
+
+2013-01-30  ------ inet-2.1.0 released ------
+
+2012-11-15  Zoltan Bojthe
+
+	PacketDump:
+	- Fix for TCP header options
+	- Dump TCP header options in verbose mode only.
+
+2012-10-30  Zoltan Bojthe
+
+	- Removed conversion operators from Uint128
+	- Added 'explicit' for Uint128 constructor by char string uses explicit
+	conversions in manetrouting code
+
+2012-10-25  Tamas Borbely
+
+	headerserializers: compile fix for Visual C++ 10.0 and later
+	they finally have <stdint.h>
+
+2012-10-18  Rudolf Hornig
+
+	Pcap now records by default on ALL interfaces (including external IFs).
+	Added Enter_Method for better error reporting if a packet cannot be
+	serialized.
+
+2012-09-19  Zoltan Bojthe
+
+	Added an icon  to PcapRecorder
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

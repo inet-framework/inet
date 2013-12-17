@@ -36,11 +36,16 @@ simple SCTPPeer like ISCTPApp
         bool ordered = default(true);
         int outboundStreams = default(1);
         int queueSize = default(0);
+        int prMethod = default(0);  //0=NONE, 1=PR_TTL, 2=PR_RTX, 3=PR_PRIO, 4=PR_STRRST
+        double prValue = default(0); //for PR-SCTP
+        bool streamReset = default(false);
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to
         double startTime @unit(s) = default(1s); // time first session begins
         int numRequestsPerSession = default(1);  // number of requests sent per session
         int numPacketsToReceive = default(0);
+        string streamPriorities = default("");
+
         @display("i=block/app");
         @signal[sentPk](type=SCTPSimpleMessage);
         @signal[rcvdPk](type=cPacket);

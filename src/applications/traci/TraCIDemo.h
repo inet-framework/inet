@@ -23,19 +23,26 @@
 
 #include <omnetpp.h>
 #include "UDPSocket.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 #include "mobility/models/TraCIMobility.h"
 
 /**
  * Small IVC Demo
  */
-class TraCIDemo : public cSimpleModule, protected cListener {
+class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
+{
     public:
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
+    protected:
         virtual int numInitStages() const {
             return std::max(4, cSimpleModule::numInitStages());
         }
-        virtual void initialize(int);
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 
     protected:

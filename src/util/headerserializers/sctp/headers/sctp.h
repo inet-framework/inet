@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2008 Irene Ruengeler
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,9 +19,13 @@
 #ifndef OPPSIM_NETINET_SCTP_H_
 #define OPPSIM_NETINET_SCTP_H_
 
-//#include "platdep/intxtypes.h"
-//cd gesamter #define und struct Block neu:
+#ifdef _MSC_VER
+#define __PACKED__
+#else
+#define __PACKED__  __attribute__((packed))
+#endif
 
+#define I_BIT         0x08
 #define UNORDERED_BIT 0x04
 #define BEGIN_BIT     0x02
 #define END_BIT       0x01
@@ -32,7 +37,7 @@
 
 
 #define CRC32C(c,d) (c=(c>>8)^crc_c[(c^(d))&0xFF])
-static unsigned int crc_c[256] =
+static uint32_t crc_c[256] =
 {
 0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
 0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
@@ -102,123 +107,207 @@ static unsigned int crc_c[256] =
 
 
 struct common_header {
-    unsigned short source_port;
-    unsigned short destination_port;
-    unsigned int  verification_tag;
-    unsigned int  checksum;
-};
+    uint16_t source_port;
+    uint16_t destination_port;
+    uint32_t verification_tag;
+    uint32_t checksum;
+} __PACKED__;
+
 
 struct chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+} __PACKED__;
+
 
 struct data_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned int  tsn;
-    unsigned short sid;
-    unsigned short ssn;
-    unsigned int  ppi;
-    unsigned char  user_data[0];
-};
+    uint8_t type;
+    uint8_t flags;
+    uint16_t length;
+    uint32_t tsn;
+    uint16_t sid;
+    uint16_t ssn;
+    uint32_t ppi;
+    uint8_t user_data[0];
+} __PACKED__;
+
 
 struct init_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned int  initiate_tag;
-    unsigned int  a_rwnd;
-    unsigned short mos;
-    unsigned short mis;
-    unsigned int  initial_tsn;
-    unsigned char  parameter[0];
-};
+    uint8_t type;
+    uint8_t flags;
+    uint16_t length;
+    uint32_t initiate_tag;
+    uint32_t a_rwnd;
+    uint16_t mos;
+    uint16_t mis;
+    uint32_t initial_tsn;
+    uint8_t parameter[0];
+} __PACKED__;
+
 
 struct init_ack_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned int  initiate_tag;
-    unsigned int  a_rwnd;
-    unsigned short mos;
-    unsigned short mis;
-    unsigned int  initial_tsn;
-    unsigned char  parameter[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t initiate_tag;
+    uint32_t a_rwnd;
+    uint16_t mos;
+    uint16_t mis;
+    uint32_t initial_tsn;
+    uint8_t  parameter[0];
+} __PACKED__;
+
 
 struct sack_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned int  cum_tsn_ack;
-    unsigned int  a_rwnd;
-    unsigned short nr_of_gaps;
-    unsigned short nr_of_dups;
-    unsigned char  tsns[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t cum_tsn_ack;
+    uint32_t a_rwnd;
+    uint16_t nr_of_gaps;
+    uint16_t nr_of_dups;
+    uint8_t tsns[0];
+} __PACKED__;
+
+
+struct nr_sack_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t cum_tsn_ack;
+    uint32_t a_rwnd;
+    uint16_t nr_of_gaps;
+    uint16_t nr_of_nr_gaps;
+    uint16_t nr_of_dups;
+    uint16_t reserved;
+    uint8_t tsns[0];
+} __PACKED__;
+
 
 struct heartbeat_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned char heartbeat_info[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint8_t  heartbeat_info[0];
+} __PACKED__;
+
 
 struct heartbeat_ack_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned char heartbeat_info[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint8_t  heartbeat_info[0];
+} __PACKED__;
+
 
 struct abort_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned char  error_causes[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint8_t  error_causes[0];
+} __PACKED__;
+
 
 struct shutdown_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned int  cumulative_tsn_ack;
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t cumulative_tsn_ack;
+} __PACKED__;
+
 
 struct shutdown_ack_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+} __PACKED__;
+
 
 struct shutdown_complete_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+} __PACKED__;
+
 
 struct cookie_echo_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned char  state_cookie[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint8_t state_cookie[0];
+} __PACKED__;
+
 
 struct cookie_ack_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+} __PACKED__;
+
 
 struct error_chunk {
-    unsigned char  type;
-    unsigned char  flags;
-    unsigned short length;
-    unsigned char  error_causes[0];
-};
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint8_t  error_causes[0];
+} __PACKED__;
+
+
+struct forward_tsn_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t cum_tsn;
+    uint8_t  stream_info[0];
+} __PACKED__;
+
+
+struct asconf_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t serial;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
+struct asconf_ack_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t serial;
+    uint8_t parameters[0];
+} __PACKED__;
+
+struct auth_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint16_t shared_key;
+    uint16_t hmac_identifier;
+    uint8_t  hmac[0];
+} __PACKED__;
+
+
+struct stream_reset_chunk {
+    uint8_t type;
+    uint8_t flags;
+    uint16_t length;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
+struct pktdrop_chunk {
+    uint8_t  type;
+    uint8_t  flags;
+    uint16_t length;
+    uint32_t max_rwnd;
+    uint32_t queued_data;
+    uint16_t trunc_length;
+    uint16_t reserved;
+    uint8_t  dropped_data[0];
+} __PACKED__;
 
 
 // variable length parameters in INIT chunk:
@@ -228,88 +317,172 @@ struct error_chunk {
 #define INIT_SUPPORTED_ADDRESS 12
 
 struct init_ipv4_address_parameter {
-    unsigned short type;
-    unsigned short length;
-    unsigned int address;
-};
+    uint16_t type;
+    uint16_t length;
+    uint32_t address;
+} __PACKED__;
+
 
 struct init_ipv6_address_parameter {
-    unsigned short type;
-    unsigned short length;
-    unsigned int address[4];
-};
+    uint16_t type;
+    uint16_t length;
+    uint32_t address[4];
+} __PACKED__;
+
 
 struct init_cookie_parameter {
-    unsigned short type;
-    unsigned short length;
-    unsigned int creationTime;
-    unsigned int localTag;
-    unsigned int peerTag;
-    unsigned char localTieTag[32];
-    unsigned char peerTieTag[32];
-    //unsigned char cookie[0];
-};
+    uint16_t type;
+    uint16_t length;
+    uint32_t creationTime;
+    uint32_t localTag;
+    uint32_t peerTag;
+    uint8_t localTieTag[32];
+    uint8_t peerTieTag[32];
+} __PACKED__;
+
 
 struct cookie_parameter {
-    unsigned int creationTime;
-    unsigned int localTag;
-    unsigned int peerTag;
-    unsigned char localTieTag[32];
-    unsigned char peerTieTag[32];
-    //unsigned char cookie[0];
-};
+    uint32_t creationTime;
+    uint32_t localTag;
+    uint32_t peerTag;
+    uint8_t localTieTag[32];
+    uint8_t peerTieTag[32];
+} __PACKED__;
 
-struct tlv {
-    unsigned short type;
-    unsigned short length;
-    unsigned char value[0];
-};
+
+struct add_ip_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t correlation_id;
+    uint8_t parameters[0];
+} __PACKED__;
+
+
+struct hmac_algo {
+    uint16_t type;
+    uint16_t length;
+    uint16_t ident[0];
+} __PACKED__;
+
+
+struct supported_extensions_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint8_t chunk_type[0];
+} __PACKED__;
+
+
+struct forward_tsn_supported_parameter {
+    uint16_t type;
+    uint16_t length;
+} __PACKED__;
 
 
 struct supported_address_types_parameter {
-    unsigned short type;
-    unsigned short length;
-    unsigned short address_type;
-};
+    uint16_t type;
+    uint16_t length;
+    uint16_t address_type;
+} __PACKED__;
+
+
+struct random_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint8_t random[];
+} __PACKED__;
+
+
+struct tlv {
+    uint16_t type;
+    uint16_t length;
+    uint8_t value[0];
+} __PACKED__;
 
 
 // Heartbeat info TLV:
 struct heartbeat_info {
-    unsigned short type;
-    unsigned short length;
+    uint16_t type;
+    uint16_t length;
     union {
-      unsigned char info[];
-      struct {
-        unsigned int addr;
-        unsigned int time;
-      } addr_and_time;
+        uint8_t info[];
+        struct {
+            uint32_t addr;
+            uint32_t time;
+        } addr_and_time;
     } heartbeat_info_union;
-};
+} __PACKED__;
+
 
 #define HBI_INFO(hbi) ((hbi)->heartbeat_info_union.info)
 #define HBI_ADDR(hbi) ((hbi)->heartbeat_info_union.addr_and_time.addr)
 #define HBI_TIME(hbi) ((hbi)->heartbeat_info_union.addr_and_time.time)
 
 struct error_cause {
-    unsigned short cause_code;
-    unsigned short length;
-    unsigned char info[0];
-};
+    uint16_t cause_code;
+    uint16_t length;
+    uint8_t info[0];
+} __PACKED__;
+
 
 // SACK GAP:
 struct sack_gap {
-    unsigned short start;
-    unsigned short stop;
-};
+    uint16_t start;
+    uint16_t stop;
+} __PACKED__;
+
 
 // SACK DUP TSN:
 struct sack_duptsn {
-    unsigned int tsn;
-};
+    uint32_t tsn;
+} __PACKED__;
+
+
+// Forward_TSN streams
+struct forward_tsn_streams {
+    uint16_t sid;
+    uint16_t ssn;
+} __PACKED__;
+
+
+// Parameters for Stream Reset
+struct outgoing_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+    uint32_t srResSn; // Stream Reset Response Sequence Number
+    uint32_t lastTsn; // Senders last assigned TSN
+    uint16_t streamNumbers[0];
+} __PACKED__;
+
+
+struct incoming_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+    uint16_t streamNumbers[0];
+} __PACKED__;
+
+
+struct ssn_tsn_reset_request_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srReqSn; // Stream Reset Request Sequence Number
+} __PACKED__;
+
+
+struct stream_reset_response_parameter {
+    uint16_t type;
+    uint16_t length;
+    uint32_t srResSn; // Stream Reset Response Sequence Number
+    uint32_t result;
+    uint32_t sendersNextTsn;
+    uint32_t receiversNextTsn;
+} __PACKED__;
 
 
 struct data_vector {
-unsigned char  data[0];
-};
+    uint8_t data[0];
+} __PACKED__;
+
 
 #endif

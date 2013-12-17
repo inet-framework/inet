@@ -23,7 +23,8 @@
 
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl_m.h"
-
+#include "NodeOperations.h"
+#include "ModuleAccess.h"
 
 Define_Module(EtherAppCli);
 
@@ -32,8 +33,13 @@ simsignal_t EtherAppCli::rcvdPkSignal = SIMSIGNAL_NULL;
 
 EtherAppCli::EtherAppCli()
 {
+    reqLength = NULL;
+    respLength = NULL;
+    sendInterval = NULL;
     timerMsg = NULL;
+    nodeStatus = NULL;
 }
+
 EtherAppCli::~EtherAppCli()
 {
     cancelAndDelete(timerMsg);
@@ -49,8 +55,8 @@ void EtherAppCli::initialize(int stage)
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
 
-        localSAP = ETHERAPP_CLI_SAP;
-        remoteSAP = ETHERAPP_SRV_SAP;
+        localSAP = par("localSAP");
+        remoteSAP = par("remoteSAP");
 
         seqNum = 0;
         WATCH(seqNum);
@@ -62,24 +68,95 @@ void EtherAppCli::initialize(int stage)
         WATCH(packetsSent);
         WATCH(packetsReceived);
 
-        destMACAddress = resolveDestMACAddress();
-
-        // if no dest address given, nothing to do
-        if (destMACAddress.isUnspecified())
-            return;
-
-        bool registerSAP = par("registerSAP");
-        if (registerSAP)
-            registerDSAP(localSAP);
-
-        simtime_t startTime = par("startTime");
+        startTime = par("startTime");
         stopTime = par("stopTime");
-        if (stopTime != 0 && stopTime <= startTime)
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
 
-        timerMsg = new cMessage("generateNextPacket");
-        scheduleAt(startTime, timerMsg);
+        if (isGenerator())
+            timerMsg = new cMessage("generateNextPacket");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+        if (isNodeUp() && isGenerator())
+            scheduleNextPacket(true);
     }
+}
+
+void EtherAppCli::handleMessage(cMessage *msg)
+{
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
+    if (msg->isSelfMessage())
+    {
+        if (msg->getKind() == START)
+        {
+            bool registerSAP = par("registerSAP");
+            if (registerSAP)
+                registerDSAP(localSAP);
+
+            destMACAddress = resolveDestMACAddress();
+            // if no dest address given, nothing to do
+            if (destMACAddress.isUnspecified())
+                return;
+        }
+        sendPacket();
+        scheduleNextPacket(false);
+    }
+    else
+        receivePacket(check_and_cast<cPacket*>(msg));
+}
+
+bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isGenerator())
+            scheduleNextPacket(true);
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            cancelNextPacket();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelNextPacket();
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
+bool EtherAppCli::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool EtherAppCli::isGenerator()
+{
+    return par("destAddress").stringValue()[0];
+}
+
+void EtherAppCli::scheduleNextPacket(bool start)
+{
+    simtime_t cur = simTime();
+    simtime_t next;
+    if (start)
+    {
+        next = cur <= startTime ? startTime : cur;
+        timerMsg->setKind(START);
+    }
+    else
+    {
+        next = cur + sendInterval->doubleValue();
+        timerMsg->setKind(NEXT);
+    }
+    if (stopTime < SIMTIME_ZERO || next < stopTime)
+        scheduleAt(next, timerMsg);
+}
+
+void EtherAppCli::cancelNextPacket()
+{
+    if (timerMsg)
+        cancelEvent(timerMsg);
 }
 
 MACAddress EtherAppCli::resolveDestMACAddress()
@@ -103,21 +180,6 @@ MACAddress EtherAppCli::resolveDestMACAddress()
         }
     }
     return destMACAddress;
-}
-
-void EtherAppCli::handleMessage(cMessage *msg)
-{
-    if (msg->isSelfMessage())
-    {
-        sendPacket();
-        simtime_t d = simTime() + sendInterval->doubleValue();
-        if (stopTime == 0 || d < stopTime)
-            scheduleAt(d, msg);
-    }
-    else
-    {
-        receivePacket(check_and_cast<cPacket*>(msg));
-    }
 }
 
 void EtherAppCli::registerDSAP(int dsap)

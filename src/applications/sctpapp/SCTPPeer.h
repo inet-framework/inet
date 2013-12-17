@@ -19,16 +19,17 @@
 #define __SCTPPEER_H_
 
 #include "INETDefs.h"
-
 #include "SCTPAssociation.h"
 #include "SCTPSocket.h"
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 class SCTPConnectInfo;
 
 /**
  * Implements the SCTPPeer simple module. See the NED file for more info.
  */
-class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface
+class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
         int32 notifications;
@@ -55,6 +56,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         int32 echoedBytesSent;
         int32 lastStream;
         int32 numPacketsToReceive;
+        int32 chunksAbandoned;
 
         // statistics
         typedef std::map<int32,long> RcvdPacketsPerAssoc;
@@ -96,8 +98,12 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         SCTPPeer();
         ~SCTPPeer();
 
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
     protected:
-        void initialize();
+        void initialize(int stage);
+        virtual int numInitStages() const { return 2; }
         void handleMessage(cMessage *msg);
         void finish();
         void handleTimer(cMessage *msg);
@@ -131,6 +137,8 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void sendQueueRequest();
         void shutdownReceivedArrived(int32 connId);
         void sendqueueFullArrived(int32 connId);
+        void msgAbandonedArrived(int32 assocId);
+        void sendStreamResetNotification();
 
         void setStatusString(const char *s);
         void addressAddedArrived(int32 assocId, IPvXAddress remoteAddr);

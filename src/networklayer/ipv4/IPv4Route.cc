@@ -34,9 +34,18 @@ std::string IPv4Route::info() const
     out << "gw:"; if (gateway.isUnspecified()) out << "*  "; else out << gateway << "  ";
     out << "mask:"; if (netmask.isUnspecified()) out << "*  "; else out << netmask << "  ";
     out << "metric:" << metric << " ";
-    out << "if:"; if (!interfacePtr) out << "*  "; else out << interfacePtr->getName() << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")  ";
+    if (interfacePtr)
+    {
+        out << "if:" << interfacePtr->getName();
+        if (interfacePtr->ipv4Data())
+            out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
+    }
+    else
+    {
+        out << "if:*";
+    }
+    out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
-
 
     switch (source)
     {
@@ -77,9 +86,10 @@ void IPv4Route::changed(int fieldCode)
 
 IPv4MulticastRoute::~IPv4MulticastRoute()
 {
-    for (ChildInterfaceVector::iterator it = children.begin(); it != children.end(); ++it)
+    delete inInterface;
+    for (OutInterfaceVector::iterator it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
         delete *it;
-    children.clear();
+    outInterfaces.clear();
 }
 
 std::string IPv4MulticastRoute::info() const
@@ -90,13 +100,13 @@ std::string IPv4MulticastRoute::info() const
     out << "mask:"; if (originNetmask.isUnspecified()) out << "*  "; else out << originNetmask << "  ";
     out << "group:"; if (group.isUnspecified()) out << "*  "; else out << group << "  ";
     out << "metric:" << metric << " ";
-    out << "parent:"; if (!parent) out << "*  "; else out << parent->getName() << "  ";
-    out << "children:";
-    for (unsigned int i = 0; i < children.size(); ++i)
+    out << "in:"; if (!inInterface) out << "*  "; else out << inInterface->getInterface()->getName() << "  ";
+    out << "out:";
+    for (unsigned int i = 0; i < outInterfaces.size(); ++i)
     {
         if (i > 0)
             out << ",";
-        out << children[i]->getInterface()->getName();
+        out << outInterfaces[i]->getInterface()->getName();
     }
 
     switch (source)
@@ -115,50 +125,71 @@ std::string IPv4MulticastRoute::detailedInfo() const
     return info();
 }
 
-
-
-bool IPv4MulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
+void IPv4MulticastRoute::setInInterface(InInterface *_inInterface)
 {
-    ChildInterfaceVector::iterator it;
-    for (it = children.begin(); it != children.end(); ++it)
-    {
-        if ((*it)->getInterface() == ie)
-            break;
-    }
-
-    if (it != children.end())
-    {
-        if ((*it)->isLeaf() != isLeaf)
-        {
-            delete *it;
-            *it = new ChildInterface(ie, isLeaf);
-            changed(F_CHILDREN);
-            return true;
-        }
-        else
-            return false;
-    }
-    else
-    {
-        children.push_back(new ChildInterface(ie, isLeaf));
-        changed(F_CHILDREN);
-        return true;
+    if (inInterface != _inInterface) {
+        delete inInterface;
+        inInterface = _inInterface;
+        changed(F_IN);
     }
 }
 
-bool IPv4MulticastRoute::removeChild(InterfaceEntry *ie)
+void IPv4MulticastRoute::clearOutInterfaces()
 {
-    for (ChildInterfaceVector::iterator it = children.begin(); it != children.end(); ++it)
+    if (!outInterfaces.empty())
+    {
+        for (OutInterfaceVector::iterator it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
+            delete *it;
+        outInterfaces.clear();
+        changed(F_OUT);
+    }
+}
+
+void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
+{
+    ASSERT(outInterface);
+
+    OutInterfaceVector::iterator it;
+    for (it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
+    {
+        if ((*it)->getInterface() == outInterface->getInterface())
+            break;
+    }
+
+    if (it != outInterfaces.end())
+    {
+        delete *it;
+        *it = outInterface;
+        changed(F_OUT);
+    }
+    else
+    {
+        outInterfaces.push_back(outInterface);
+        changed(F_OUT);
+    }
+}
+
+bool IPv4MulticastRoute::removeOutInterface(InterfaceEntry *ie)
+{
+    for (OutInterfaceVector::iterator it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
     {
         if ((*it)->getInterface() == ie)
         {
             delete *it;
-            children.erase(it);
-            changed(F_CHILDREN);
+            outInterfaces.erase(it);
+            changed(F_OUT);
             return true;
         }
     }
     return false;
+}
+
+void IPv4MulticastRoute::removeOutInterface(unsigned int i)
+{
+    OutInterface *outInterface = outInterfaces.at(i);
+    delete outInterface;
+    outInterfaces.erase(outInterfaces.begin()+i);
+    changed(F_OUT);
 }
 
 void IPv4MulticastRoute::changed(int fieldCode)

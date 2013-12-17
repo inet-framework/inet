@@ -18,6 +18,8 @@
 
 #include "VoIPStreamSender.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "UDPControlInfo_m.h"
 
 Define_Module(VoIPStreamSender);
@@ -54,61 +56,69 @@ void VoIPStreamSender::Buffer::clear(int framesize)
 
 void VoIPStreamSender::initialize(int stage)
 {
-    if (stage != 3)  //wait until stage 3 - The Address resolver does not work before that!
-        return;
+    if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+    else if (stage == 3)  //wait until stage 3 - The Address resolver does not work before that!
+    {
+        // say HELLO to the world
+        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
-    // say HELLO to the world
-    ev << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
+        // Hack for create results folder
+        recordScalar("hackForCreateResultsFolder", 0);
 
-    // Hack for create results folder
-    recordScalar("hackForCreateResultsFolder", 0);
+        pReSampleCtx = NULL;
+        localPort = par("localPort");
+        destPort = par("destPort");
+        destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
 
-    pReSampleCtx = NULL;
-    localPort = par("localPort");
-    destPort = par("destPort");
-    destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
-    socket.setOutputGate(gate("udpOut"));
-    socket.bind(localPort);
+        voipHeaderSize = par("voipHeaderSize");
+        voipSilenceThreshold = par("voipSilenceThreshold");
+        sampleRate = par("sampleRate");
+        codec = par("codec").stringValue();
+        compressedBitRate = par("compressedBitRate");
+        packetTimeLength = par("packetTimeLength");
 
-    voipHeaderSize = par("voipHeaderSize");
-    voipSilenceThreshold = par("voipSilenceThreshold");
-    sampleRate = par("sampleRate");
-    codec = par("codec").stringValue();
-    compressedBitRate = par("compressedBitRate");
-    packetTimeLength = par("packetTimeLength");
+        soundFile = par("soundFile").stringValue();
+        repeatCount = par("repeatCount");
+        traceFileName = par("traceFileName").stringValue();
+        simtime_t startTime = par("startTime");
 
-    soundFile = par("soundFile").stringValue();
-    repeatCount = par("repeatCount");
-    traceFileName = par("traceFileName").stringValue();
-    simtime_t startTime = par("startTime");
+        samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
+        if (samplesPerPacket & 1)
+            samplesPerPacket++;
+        EV << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
+        packetTimeLength = ((double)samplesPerPacket) / sampleRate;
+        EV << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
-    samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
-    if (samplesPerPacket & 1)
-        samplesPerPacket++;
-    ev << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
-    packetTimeLength = ((double)samplesPerPacket) / sampleRate;
-    ev << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
+        sampleBuffer.clear(0);
 
-    sampleBuffer.clear(0);
+        // initialize avcodec library
+        av_register_all();
+        avcodec_register_all();
 
-    // initialize avcodec library
-    av_register_all();
-    avcodec_register_all();
+        av_init_packet(&packet);
 
-    av_init_packet(&packet);
+        openSoundFile(soundFile);
 
-    openSoundFile(soundFile);
+        timer = new cMessage("sendVoIP");
+        scheduleAt(startTime, timer);
 
-    timer = new cMessage("sendVoIP");
-    scheduleAt(startTime, timer);
+        voipSilencePacketSize = voipHeaderSize;
 
-    voipSilencePacketSize = voipHeaderSize;
+        // initialize the sequence number
+        pktID = 1;
 
-    // initialize the sequence number
-    pktID = 1;
-
-    // statistics:
-    sentPkSignal = registerSignal("sentPk");
+        // statistics:
+        sentPkSignal = registerSignal("sentPk");
+    }
 }
 
 void VoIPStreamSender::handleMessage(cMessage *msg)

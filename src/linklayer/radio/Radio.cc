@@ -25,6 +25,8 @@
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "BasicBattery.h"
+#include "NodeStatus.h"
+#include "NodeOperations.h"
 
 
 #define MK_TRANSMISSION_OVER  1
@@ -45,8 +47,8 @@ Radio::Radio() : rs(this->getId())
     obstacles = NULL;
     radioModel = NULL;
     receptionModel = NULL;
-    transceiverConnect = true;
-    receiverConnect = true;
+    transceiverConnected = true;
+    receiverConnected = true;
     updateString = NULL;
     noiseGenerator = NULL;
 }
@@ -55,7 +57,7 @@ void Radio::initialize(int stage)
 {
     ChannelAccess::initialize(stage);
 
-    EV << "Initializing AbstractRadio, stage=" << stage << endl;
+    EV << "Initializing Radio, stage=" << stage << endl;
 
     if (stage == 0)
     {
@@ -119,9 +121,32 @@ void Radio::initialize(int stage)
         std::string propModel = getChannelControlPar("propagationModel").stdstringValue();
         if (propModel == "")
             propModel = "FreeSpaceModel";
+        doubleRayCoverage = false;
+        if (propModel == "TwoRayGroundModel")
+            doubleRayCoverage = true;
 
         receptionModel = (IReceptionModel *) createOne(propModel.c_str());
         receptionModel->initializeFrom(this);
+
+        // adjust the sensitivity in function of maxDistance and reception model
+        if (par("maxDistance").doubleValue() > 0)
+        {
+            if (sensitivityList.size() == 1 && sensitivityList.begin()->second == sensitivity)
+            {
+                sensitivity = receptionModel->calculateReceivedPower(transmitterPower, carrierFrequency, par("maxDistance").doubleValue());
+                sensitivityList[0] = sensitivity;
+            }
+        }
+
+        receptionThreshold = sensitivity;
+        if (par("setReceptionThreshold").boolValue())
+        {
+            receptionThreshold = FWMath::dBm2mW(par("receptionThreshold").doubleValue());
+            if (par("maxDistantReceptionThreshold").doubleValue() > 0)
+            {
+                receptionThreshold = receptionModel->calculateReceivedPower(transmitterPower, carrierFrequency, par("maxDistantReceptionThreshold").doubleValue());
+            }
+        }
 
         // radio model to handle frame length and reception success calculation (modulation, error correction etc.)
         std::string rModel = par("radioModel").stdstringValue();
@@ -150,21 +175,40 @@ void Radio::initialize(int stage)
     else if (stage == 1)
     {
         registerBattery();
-        // tell initial values to MAC; must be done in stage 1, because they
-        // subscribe in stage 0
-        nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
-        nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+        {
+            // tell initial values to MAC; must be done in stage 1, because they
+            // subscribe in stage 0
+            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+        }
     }
     else if (stage == 2)
     {
-        // tell initial channel number to ChannelControl; should be done in
-        // stage==2 or later, because base class initializes myRadioRef in that stage
-        cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+        {
+            // tell initial channel number to ChannelControl; should be done in
+            // stage==2 or later, because base class initializes myRadioRef in that stage
+            cc->setRadioChannel(myRadioRef, rs.getChannelNumber());
 
-        // statistics
-        emit(bitrateSignal, rs.getBitrate());
-        emit(radioStateSignal, rs.getState());
-        emit(channelNumberSignal, rs.getChannelNumber());
+            // statistics
+            emit(bitrateSignal, rs.getBitrate());
+            emit(radioStateSignal, rs.getState());
+            emit(channelNumberSignal, rs.getChannelNumber());
+        }
+        else
+        {
+            setRadioState(RadioState::OFF);
+            // tell initial values to MAC; must be done in stage 1, because they
+            // subscribe in stage 0
+            nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+            nb->fireChangeNotification(NF_RADIO_CHANNEL_CHANGED, &rs);
+        }
 
         // draw the interference distance
         this->updateDisplayString();
@@ -189,6 +233,25 @@ Radio::~Radio()
         delete it->first;
 }
 
+bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::IDLE);  //FIXME only if the interface is up, too; also: connectReceiver(), etc.
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_PHYSICAL_LAYER)
+            setRadioState(RadioState::OFF);
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
+            setRadioState(RadioState::OFF);
+    }
+    else
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    return true;
+}
 
 bool Radio::processAirFrame(AirFrame *airframe)
 {
@@ -212,6 +275,16 @@ bool Radio::processAirFrame(AirFrame *airframe)
  */
 void Radio::handleMessage(cMessage *msg)
 {
+    if (rs.getState()==RadioState::SLEEP || rs.getState()==RadioState::OFF)
+    {
+        if (msg->getArrivalGateId() == upperLayerIn || msg->isSelfMessage())  //XXX can we ensure we don't receive pk from upper in OFF state?? (race condition)
+            throw cRuntimeError("Radio is turned off");
+        else {
+            EV << "Radio is turned off, dropping packet\n";
+            delete msg;
+            return;
+        }
+    }
     // handle commands
     if (updateString && updateString==msg)
     {
@@ -230,16 +303,8 @@ void Radio::handleMessage(cMessage *msg)
 
     if (msg->getArrivalGateId() == upperLayerIn)
     {
-        if (this->isEnabled())
-        {
-            AirFrame *airframe = encapsulatePacket(PK(msg));
-            handleUpperMsg(airframe);
-        }
-        else
-        {
-            EV << "Radio disabled. ignoring frame" << endl;
-            delete msg;
-        }
+        AirFrame *airframe = encapsulatePacket(PK(msg));
+        handleUpperMsg(airframe);
     }
     else if (msg->isSelfMessage())
     {
@@ -247,7 +312,7 @@ void Radio::handleMessage(cMessage *msg)
     }
     else if (processAirFrame(check_and_cast<AirFrame*>(msg)))
     {
-        if (this->isEnabled() && receiverConnect)
+        if (receiverConnected)
         {
         // must be an AirFrame
             AirFrame *airframe = (AirFrame *) msg;
@@ -334,7 +399,7 @@ void Radio::sendUp(AirFrame *airframe)
 
 void Radio::sendDown(AirFrame *airframe)
 {
-    if (transceiverConnect)
+    if (transceiverConnected)
         sendToChannel(airframe);
     else
         delete airframe;
@@ -457,7 +522,7 @@ void Radio::handleCommand(int msgkind, cObject *ctrl)
 
 void Radio::handleSelfMsg(cMessage *msg)
 {
-    EV<<"AbstractRadio::handleSelfMsg"<<msg->getKind()<<endl;
+    EV<<"Radio::handleSelfMsg"<<msg->getKind()<<endl;
     if (msg->getKind()==MK_RECEPTION_COMPLETE)
     {
         EV << "frame is completely received now\n";
@@ -517,7 +582,7 @@ void Radio::handleSelfMsg(cMessage *msg)
     {
         error("Internal error: unknown self-message `%s'", msg->getName());
     }
-    EV<<"AbstractRadio::handleSelfMsg END"<<endl;
+    EV<<"Radio::handleSelfMsg END"<<endl;
 }
 
 
@@ -610,7 +675,7 @@ void Radio::handleLowerMsgStart(AirFrame* airframe)
 
         // update the RadioState if the noiseLevel exceeded the threshold
         // and the radio is currently not in receive or in send mode
-        if (BASE_NOISE_LEVEL >= sensitivity && rs.getState() == RadioState::IDLE)
+        if (BASE_NOISE_LEVEL >= receptionThreshold && rs.getState() == RadioState::IDLE)
         {
             EV << "setting radio state to RECV\n";
             setRadioState(RadioState::RECV);
@@ -641,10 +706,14 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
 
         // delete the pointer to indicate that no message is currently
         // being received and clear the list
+
+        double snirMin = snrInfo.sList.begin()->snr;
+        for (SnrList::const_iterator iter = snrInfo.sList.begin(); iter != snrInfo.sList.end(); iter++)
+            if (iter->snr < snirMin)
+                snirMin = iter->snr;
         snrInfo.ptr = NULL;
         snrInfo.sList.clear();
-
-        airframe->setSnr(10*log10(recvBuff[airframe]/ (BASE_NOISE_LEVEL))); //ahmed
+        airframe->setSnr(10*log10(snirMin)); //ahmed
         airframe->setLossRate(lossRate);
         // delete the frame from the recvBuff
         recvBuff.erase(airframe);
@@ -698,7 +767,7 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
     // change to idle if noiseLevel smaller than threshold and state was
     // not idle before
     // do not change state if currently sending or receiving a message!!!
-    if (BASE_NOISE_LEVEL < sensitivity && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
+    if (BASE_NOISE_LEVEL < receptionThreshold && rs.getState() == RadioState::RECV && snrInfo.ptr == NULL)
     {
         // publish the new RadioState:
         EV << "new RadioState is IDLE\n";
@@ -828,30 +897,20 @@ void Radio::setRadioState(RadioState::State newState)
     if (rs.getState() != newState)
     {
         emit(radioStateSignal, newState);
-        if (rs.getState() != newState)
+        if (newState == RadioState::SLEEP || newState == RadioState::OFF)
         {
-            emit(radioStateSignal, newState);
-            if (newState == RadioState::SLEEP)
-            {
-                disconnectTransceiver();
-                disconnectReceiver();
-            }
-            else if (rs.getState() == RadioState::SLEEP)
-            {
-                connectTransceiver();
-                connectReceiver(); // the connection change the state
-                if (rs.getState() == newState)
-                {
-                    rs.setState(newState);
-                    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
-                    return;
-                }
-            }
+            disconnectTransceiver();
+            disconnectReceiver();
         }
-    }
+        else if (rs.getState() == RadioState::SLEEP || rs.getState() == RadioState::OFF)
+        {
+            connectTransceiver();
+            connectReceiver(); // the connection change the state
+        }
 
-    rs.setState(newState);
-    nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+        rs.setState(newState);
+        nb->fireChangeNotification(NF_RADIOSTATE_CHANGED, &rs);
+    }
 }
 /*
 void Radio::updateSensitivity(double rate)
@@ -905,6 +964,8 @@ void Radio::updateSensitivity(double rate)
         sensitivity = it->second;
     else
         sensitivity = sensitivityList[0.0];
+    if (!par("setReceptionThreshold").boolValue())
+        receptionThreshold = sensitivity;
     EV<<"bitrate = "<<rate<<endl;
     EV <<" sensitivity after updateSensitivity: "<<sensitivity<<endl;
 }
@@ -947,25 +1008,16 @@ void Radio::updateDisplayString() {
         d.setTagArg("r1", 2, "gray");
         d.removeTag("r2");
         d.insertTag("r2");
-        d.setTagArg("r2", 0, (long) calcDistFreeSpace());
+        if (doubleRayCoverage)
+            d.setTagArg("r2", 0, (long) calcDistDoubleRay());
+        else
+            d.setTagArg("r2", 0, (long) calcDistFreeSpace());
         d.setTagArg("r2", 2, "blue");
     }
     if (updateString==NULL && updateStringInterval>0)
         updateString = new cMessage("refresh timer");
     if (updateStringInterval>0)
         scheduleAt(simTime()+updateStringInterval, updateString);
-
-
-}
-
-void Radio::enablingInitialization() {
-    this->connectReceiver();
-    this->connectTransceiver();
-}
-
-void Radio::disablingInitialization() {
-    this->disconnectReceiver();
-    this->disconnectTransceiver();
 }
 
 double Radio::calcDistFreeSpace()
@@ -985,12 +1037,25 @@ double Radio::calcDistFreeSpace()
     return interfDistance;
 }
 
+
+
+double Radio::calcDistDoubleRay()
+{
+    //the carrier frequency used
+    //minimum power level to be able to physically receive a signal
+    double minReceivePower = sensitivity;
+
+    double interfDistance = pow(transmitterPower/minReceivePower, 1.0 / 4);
+
+    return interfDistance;
+}
+
 void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     ChannelAccess::receiveSignal(source,signalID, obj);
     if (signalID == changeLevelNoise)
     {
-        if (BASE_NOISE_LEVEL<sensitivity)
+        if (BASE_NOISE_LEVEL < receptionThreshold)
         {
             if (rs.getState()==RadioState::RECV && snrInfo.ptr==NULL)
                 setRadioState(RadioState::IDLE);
@@ -1005,7 +1070,7 @@ void Radio::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 
 void Radio::disconnectReceiver()
 {
-    receiverConnect = false;
+    receiverConnected = false;
     cc->disableReception(this->myRadioRef);
     if (rs.getState() == RadioState::TRANSMIT)
         error("changing channel while transmitting is not allowed");
@@ -1027,7 +1092,7 @@ void Radio::disconnectReceiver()
 
 void Radio::connectReceiver()
 {
-    receiverConnect = true;
+    receiverConnected = true;
     cc->enableReception(this->myRadioRef);
 
     if (rs.getState()!=RadioState::IDLE)
@@ -1114,11 +1179,11 @@ void Radio::getSensitivityList(cXMLElement* xmlConfig)
             it != parameters.end(); it++)
         {
             const char* bitRate = (*it)->getAttribute("BitRate");
-            const char* sensitivity = (*it)->getAttribute("Sensitivity");
+            const char* sensitivityStr = (*it)->getAttribute("Sensitivity");
             double rate = atof(bitRate);
             if (rate == 0)
                 error("invalid bit rate");
-            double sens = atof(sensitivity);
+            double sens = atof(sensitivityStr);
             sensitivityList[rate] = FWMath::dBm2mW(sens);
 
         }
@@ -1126,13 +1191,13 @@ void Radio::getSensitivityList(cXMLElement* xmlConfig)
         for(cXMLElementList::const_iterator it = parameters.begin();
             it != parameters.end(); it++)
         {
-            const char* sensitivity = (*it)->getAttribute("Sensitivity");
-            double sens = atof(sensitivity);
+            const char* sensitivityStr = (*it)->getAttribute("Sensitivity");
+            double sens = atof(sensitivityStr);
             sensitivityList[0.0] = FWMath::dBm2mW(sens);
         }
 
-        SensitivityList::iterator it = sensitivityList.find(0.0);
-        if (it == sensitivityList.end())
+        SensitivityList::iterator sensitivityIt = sensitivityList.find(0.0);
+        if (sensitivityIt == sensitivityList.end())
         {
             sensitivityList[0] = FWMath::dBm2mW(par("sensitivity").doubleValue());
         }

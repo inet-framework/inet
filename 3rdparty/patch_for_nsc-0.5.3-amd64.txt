@@ -1,0 +1,15 @@
+--- a/nsc-0.5.3/linux-2.6.26/nsc/sim_support.cpp	2010-08-12 22:38:44.000000000 +0200
++++ b/nsc-0.5.3/linux-2.6.26/nsc/sim_support.cpp	2011-02-18 16:13:01.198735996 +0100
+@@ -428,9 +428,9 @@
+     {
+         // net/core/wmem_default = 106496
+         // net/core/wmem_max = 131071
+-        size_t oldval, oldlen = sizeof(oldval);
+-        size_t newval = size, newlen = sizeof(newval);
+-        size_t oldval3[3], newval3[3];
++        int oldval; size_t oldlen = sizeof(oldval);
++        int newval = size; size_t newlen = sizeof(newval);
++        int oldval3[3], newval3[3];
+         int err;
+ 
+         newval = size;

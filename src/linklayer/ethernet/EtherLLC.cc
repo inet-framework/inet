@@ -20,7 +20,8 @@
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
-
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
 
 Define_Module(EtherLLC);
 
@@ -31,29 +32,47 @@ simsignal_t EtherLLC::passedUpPkSignal = SIMSIGNAL_NULL;
 simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = SIMSIGNAL_NULL;
 simsignal_t EtherLLC::pauseSentSignal = SIMSIGNAL_NULL;
 
-void EtherLLC::initialize()
+void EtherLLC::initialize(int stage)
 {
-    seqNum = 0;
-    WATCH(seqNum);
+    if (stage == 0)
+    {
+        seqNum = 0;
+        WATCH(seqNum);
 
-    dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
+        dsapsRegistered = totalFromHigherLayer = totalFromMAC = totalPassedUp = droppedUnknownDSAP = 0;
 
-    dsapSignal = registerSignal("dsap");
-    encapPkSignal = registerSignal("encapPk");
-    decapPkSignal = registerSignal("decapPk");
-    passedUpPkSignal = registerSignal("passedUpPk");
-    droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
-    pauseSentSignal = registerSignal("pauseSent");
+        dsapSignal = registerSignal("dsap");
+        encapPkSignal = registerSignal("encapPk");
+        decapPkSignal = registerSignal("decapPk");
+        passedUpPkSignal = registerSignal("passedUpPk");
+        droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
+        pauseSentSignal = registerSignal("pauseSent");
 
-    WATCH(dsapsRegistered);
-    WATCH(totalFromHigherLayer);
-    WATCH(totalFromMAC);
-    WATCH(totalPassedUp);
-    WATCH(droppedUnknownDSAP);
+        WATCH(dsapsRegistered);
+        WATCH(totalFromHigherLayer);
+        WATCH(totalFromMAC);
+        WATCH(totalPassedUp);
+        WATCH(droppedUnknownDSAP);
+    }
+    else if (stage == 1)
+    {
+        // lifecycle
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isUp = !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+        if (isUp)
+            start();
+    }
 }
 
 void EtherLLC::handleMessage(cMessage *msg)
 {
+    if (!isUp)
+    {
+        EV << "EtherLLC is down -- discarding message\n";
+        delete msg;
+        return;
+    }
+
     if (msg->arrivedOn("lowerLayerIn"))
     {
         // frame received from lower layer
@@ -190,10 +209,8 @@ void EtherLLC::processFrameFromMAC(EtherFrameWithLLC *frame)
 
 int EtherLLC::findPortForSAP(int dsap)
 {
-    // here we actually do two lookups, but what the hell...
-    if (dsapToPort.find(dsap) == dsapToPort.end())
-        return -1;
-    return dsapToPort[dsap];
+    DsapToPortMap::iterator it = dsapToPort.find(dsap);
+    return (it == dsapToPort.end()) ? -1 : it->second;
 }
 
 void EtherLLC::handleRegisterSAP(cMessage *msg)
@@ -260,3 +277,36 @@ void EtherLLC::handleSendPause(cMessage *msg)
 
     delete msg;
 }
+
+bool EtherLLC::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            stop();
+    }
+    return true;
+}
+
+void EtherLLC::start()
+{
+    dsapToPort.clear();
+    dsapsRegistered = dsapToPort.size();
+    isUp = true;
+}
+
+void EtherLLC::stop()
+{
+    dsapToPort.clear();
+    dsapsRegistered = dsapToPort.size();
+    isUp = false;
+}
+

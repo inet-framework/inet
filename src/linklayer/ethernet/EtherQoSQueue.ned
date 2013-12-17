@@ -31,7 +31,7 @@ import inet.linklayer.queue.PriorityScheduler;
 module EtherQoSQueue like IOutputQueue
 {
     parameters:
-        string dataQueueType = default("DropTailQueue");  // class that inherits from IOutputQueue (~DropTailQueue, ~DropTailQoSQueue, ~REDQueue)
+        string dataQueueType = default("DropTailQueue");  // class that inherits from IOutputQueue (~DropTailQueue, ~EtherQoSQueue, ~DiffservQueue etc.)
         @display("i=block/queue");
     gates:
         input in;

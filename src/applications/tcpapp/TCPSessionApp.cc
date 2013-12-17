@@ -17,6 +17,8 @@
 #include "ByteArrayMessage.h"
 #include "GenericAppMsg_m.h"
 #include "IPvXAddressResolver.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 
 Define_Module(TCPSessionApp);
@@ -153,6 +155,14 @@ cPacket* TCPSessionApp::genDataMsg(long sendBytes)
 
 void TCPSessionApp::activity()
 {
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
+
     packetsRcvd = indicationsRcvd = 0;
     bytesRcvd = bytesSent = 0;
     WATCH(packetsRcvd);

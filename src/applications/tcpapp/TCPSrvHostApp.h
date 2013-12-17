@@ -15,10 +15,10 @@
 #define __INET_TCPSRVHOSTAPP_H
 
 #include "INETDefs.h"
-
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 //forward declaration:
 class TCPServerThreadBase;
@@ -28,14 +28,15 @@ class TCPServerThreadBase;
  * is a sSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPSrvHostApp : public cSimpleModule
+class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
 {
   protected:
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
@@ -43,6 +44,9 @@ class INET_API TCPSrvHostApp : public cSimpleModule
 
   public:
     virtual void removeThread(TCPServerThreadBase *thread);
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 /**

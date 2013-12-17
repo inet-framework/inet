@@ -19,6 +19,8 @@
 
 #include "IPvXTrafGen.h"
 
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -28,38 +30,140 @@
 
 Define_Module(IPvXTrafGen);
 
-int IPvXTrafGen::counter;
 simsignal_t IPvXTrafGen::sentPkSignal = SIMSIGNAL_NULL;
+
+IPvXTrafGen::IPvXTrafGen()
+{
+    timer = NULL;
+    nodeStatus = NULL;
+    packetLengthPar = NULL;
+    sendIntervalPar = NULL;
+}
+
+IPvXTrafGen::~IPvXTrafGen()
+{
+    cancelAndDelete(timer);
+}
 
 void IPvXTrafGen::initialize(int stage)
 {
+    IPvXTrafSink::initialize(stage);
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage != 3)
         return;
 
-    IPvXTrafSink::initialize();
     sentPkSignal = registerSignal("sentPk");
 
     protocol = par("protocol");
     numPackets = par("numPackets");
-    simtime_t startTime = par("startTime");
+    startTime = par("startTime");
     stopTime = par("stopTime");
-    if (stopTime != 0 && stopTime <= startTime)
+    if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
         error("Invalid startTime/stopTime parameters");
 
     packetLengthPar = &par("packetLength");
-
-    counter = 0;
+    sendIntervalPar = &par("sendInterval");
 
     numSent = 0;
     WATCH(numSent);
 
-    if (numPackets > 0)
+    timer = new cMessage("sendTimer");
+    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+
+    if (isNodeUp() && isEnabled())
+        scheduleNextPacket(-1);
+}
+
+void IPvXTrafGen::handleMessage(cMessage *msg)
+{
+    if (!isNodeUp())
+        throw cRuntimeError("Application is not running");
+    if (msg == timer)
     {
-        cMessage *timer = new cMessage("sendTimer");
-        scheduleAt(startTime, timer);
+        if (msg->getKind() == START)
+        {
+            destAddresses.clear();
+            const char *destAddrs = par("destAddresses");
+            cStringTokenizer tokenizer(destAddrs);
+            const char *token;
+            while ((token = tokenizer.nextToken()) != NULL)
+            {
+                IPvXAddress result;
+                IPvXAddressResolver().tryResolve(token, result);
+                if (result.isUnspecified())
+                    EV << "cannot resolve destination address: " << token << endl;
+                else
+                    destAddresses.push_back(result);
+            }
+        }
+        if (!destAddresses.empty())
+        {
+            sendPacket();
+            if (isEnabled())
+                scheduleNextPacket(simTime());
+        }
     }
+    else
+        processPacket(PK(msg));
+
+    if (ev.isGUI())
+    {
+        char buf[40];
+        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
+        getDisplayString().setTagArg("t", 0, buf);
+    }
+}
+
+bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER && isEnabled())
+            scheduleNextPacket(-1);
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            cancelNextPacket();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            cancelNextPacket();
+    }
+    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}
+
+void IPvXTrafGen::scheduleNextPacket(simtime_t previous)
+{
+    simtime_t next;
+    if (previous == -1)
+    {
+        next = simTime() <= startTime ? startTime : simTime();
+        timer->setKind(START);
+    }
+    else
+    {
+        next = previous + sendIntervalPar->doubleValue();
+        timer->setKind(NEXT);
+    }
+    if (stopTime < SIMTIME_ZERO || next < stopTime)
+        scheduleAt(next, timer);
+}
+
+void IPvXTrafGen::cancelNextPacket()
+{
+    cancelEvent(timer);
+}
+
+bool IPvXTrafGen::isNodeUp()
+{
+    return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
+}
+
+bool IPvXTrafGen::isEnabled()
+{
+    return (numPackets == -1 || numSent < numPackets);
 }
 
 IPvXAddress IPvXTrafGen::chooseDestAddr()
@@ -71,23 +175,7 @@ IPvXAddress IPvXTrafGen::chooseDestAddr()
 void IPvXTrafGen::sendPacket()
 {
     char msgName[32];
-    sprintf(msgName, "appData-%d", counter++);
-
-    // lazy initialization of the destination addresses
-    if (destAddresses.size() == 0)
-    {
-        const char *destAddrs = par("destAddresses");
-        cStringTokenizer tokenizer(destAddrs);
-        const char *token;
-        while ((token = tokenizer.nextToken()) != NULL)
-            destAddresses.push_back(IPvXAddressResolver().resolve(token));
-    }
-
-    if (destAddresses.size() == 0)
-    {
-        EV << "IPvXTrafGen: Destination address array is empty. Cannot send any data.\n";
-        return;
-    }
+    sprintf(msgName, "appData-%d", numSent);
 
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(packetLengthPar->longValue());
@@ -132,31 +220,3 @@ void IPvXTrafGen::sendPacket()
     send(payload, gate);
     numSent++;
 }
-
-void IPvXTrafGen::handleMessage(cMessage *msg)
-{
-    if (msg->isSelfMessage())
-    {
-        // send, then reschedule next sending
-        sendPacket();
-
-        simtime_t d = simTime() + par("sendInterval").doubleValue();
-        if ((!numPackets || numSent<numPackets) && (stopTime == 0 || stopTime > d))
-            scheduleAt(d, msg);
-        else
-            delete msg;
-    }
-    else
-    {
-        // process incoming packet
-        processPacket(PK(msg));
-    }
-
-    if (ev.isGUI())
-    {
-        char buf[40];
-        sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
-        getDisplayString().setTagArg("t", 0, buf);
-    }
-}
-

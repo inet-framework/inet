@@ -44,6 +44,7 @@ const IPv4Address IPv4Address::ALL_ROUTERS_MCAST("224.0.0.2");
 const IPv4Address IPv4Address::ALL_DVMRP_ROUTERS_MCAST("224.0.0.4");
 const IPv4Address IPv4Address::ALL_OSPF_ROUTERS_MCAST("224.0.0.5");
 const IPv4Address IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST("224.0.0.6");
+const IPv4Address IPv4Address::ALL_IGMPV3_ROUTERS_MCAST("224.0.0.22");
 
 const IPv4Address IPv4Address::LL_MANET_ROUTERS("224.0.0.109");
 
@@ -267,7 +268,7 @@ bool IPv4Address::isWellFormed(const char *text)
 }
 
 
-IPv4Address IPv4Address::getBroadcastAddress(IPv4Address netmask)
+IPv4Address IPv4Address::makeBroadcastAddress(IPv4Address netmask) const
 {
    IPv4Address br(getInt() | ~(netmask.getInt()));
    return br;

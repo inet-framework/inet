@@ -1,3 +1,27 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-03  Zoltan Bojthe
+
+	applications: optimizations in case of stopTime == -1
+
+2013-06-13  Zoltan Bojthe
+
+	- IPvXTrafGen: removed static member 'counter', changed the message name
+	  creation for sent messages
+	- IPvXTrafGen: fixed packet sending. Send only if destAddresses are not empty.
+	- read destaddresses at start of session instead initialize(3)
+	- call IPvXTrafSink::initialize(stage) in all stages
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks to initialize()
+
+2013-04-16  Levente Meszaros
+
+	App: IPvXTrafGen now supports Lifecycle operations.
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

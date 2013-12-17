@@ -84,6 +84,7 @@
 
 #ifdef OMNETPP
 using std::max;
+#define maxMacro(A,B) ( (A) > (B) ? (A):(B))
 #else
 #define max(A,B) ( (A) > (B) ? (A):(B))
 #endif   /* OMNETPP */

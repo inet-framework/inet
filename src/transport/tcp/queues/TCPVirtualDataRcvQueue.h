@@ -126,6 +126,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 
     /** Method inherited from TCPReceiveQueue */
     virtual uint32 getRE(uint32 toSeqNum);
+
+    virtual uint32 getFirstSeqNo();
 };
 
 #endif

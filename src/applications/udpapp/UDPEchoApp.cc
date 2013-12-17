@@ -26,30 +26,23 @@ simsignal_t UDPEchoApp::pkSignal = SIMSIGNAL_NULL;
 
 void UDPEchoApp::initialize(int stage)
 {
+    AppBase::initialize(stage);
     if (stage == 0)
     {
-        // set up UDP socket
-        socket.setOutputGate(gate("udpOut"));
-        int localPort = par("localPort");
-        socket.bind(localPort);
-
         // init statistics
         pkSignal = registerSignal("pk");
         numEchoed = 0;
         WATCH(numEchoed);
-
-        if (ev.isGUI())
-            updateDisplay();
     }
     else if (stage == 3)
     {
-        socket.joinLocalMulticastGroups();
+        if (ev.isGUI())
+            updateDisplay();
     }
 }
 
-void UDPEchoApp::handleMessage(cMessage *msg)
+void UDPEchoApp::handleMessageWhenUp(cMessage *msg)
 {
-
     if (msg->getKind() == UDP_I_ERROR)
     {
         // ICMP error report -- discard it
@@ -76,7 +69,7 @@ void UDPEchoApp::handleMessage(cMessage *msg)
     }
     else
     {
-        error("Message received with unexpected message kind = %d", msg->getKind());
+        throw cRuntimeError("Message received with unexpected message kind = %d", msg->getKind());
     }
 }
 
@@ -89,5 +82,26 @@ void UDPEchoApp::updateDisplay()
 
 void UDPEchoApp::finish()
 {
+    AppBase::finish();
+}
+
+bool UDPEchoApp::startApp(IDoneCallback *doneCallback)
+{
+    socket.setOutputGate(gate("udpOut"));
+    int localPort = par("localPort");
+    socket.bind(localPort);
+    socket.joinLocalMulticastGroups();
+    return true;
+}
+
+bool UDPEchoApp::stopApp(IDoneCallback *doneCallback)
+{
+    //TODO if(socket.isOpened()) socket.close();
+    return true;
+}
+
+bool UDPEchoApp::crashApp(IDoneCallback *doneCallback)
+{
+    return true;
 }
 

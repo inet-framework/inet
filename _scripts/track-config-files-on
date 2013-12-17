@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Execute this script if you want to make changes to the IDE configuration files 
+# (e.g. .cproject)  and you would like to see these changes picked up by GIT 
+# on the next commit. (if you have turned off the checking previously)
+#
+
+cd `dirname $0`/.. || { echo --- error changing to the inet root directory ---; exit 1;}
+git update-index --no-assume-unchanged .cproject .nedfolders .oppbuildspec .project

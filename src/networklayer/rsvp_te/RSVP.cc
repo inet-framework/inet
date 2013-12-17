@@ -24,6 +24,9 @@
 #include "InterfaceTableAccess.h"
 #include "LIBTableAccess.h"
 #include "NotifierConsts.h"
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -70,7 +73,11 @@ void RSVP::initialize(int stage)
         retryInterval = 1.0;
 
         // setup hello
-        setupHello();
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+            setupHello();
 
         // process traffic configuration
         readTrafficFromXML(par("traffic").xmlValue());
@@ -382,6 +389,25 @@ void RSVP::startHello(IPv4Address peer, simtime_t delay)
     h->ack = false;
 
     scheduleAt(simTime() + delay, h->timer);
+}
+
+void RSVP::removeHello(HelloState_t* h)
+{
+    cancelEvent(h->timeout);
+    cancelEvent(h->timer);
+
+    delete h->timeout;
+    delete h->timer;
+
+    for (HelloVector::iterator it = HelloList.begin(); it != HelloList.end(); it++)
+    {
+        if (it->peer != h->peer)
+            continue;
+
+        HelloList.erase(it);
+        return;
+    }
+    ASSERT(false);
 }
 
 void RSVP::sendPathNotify(int handler, const SessionObj_t& session, const SenderTemplateObj_t& sender, int status, simtime_t delay)
@@ -2213,3 +2239,30 @@ void RSVP::print(RSVPResvMsg *r)
     }
 }
 
+void RSVP::clear()
+{
+    while (!PSBList.empty())
+        removePSB(&PSBList.front());
+    while (!RSBList.empty())
+        removeRSB(&RSBList.front());
+    while (!HelloList.empty())
+        removeHello(&HelloList.front());
+}
+
+bool RSVP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+            setupHello();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+            clear();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+            clear();
+    }
+    return true;
+}

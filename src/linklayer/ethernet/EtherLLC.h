@@ -20,6 +20,10 @@
 
 #include "INETDefs.h"
 
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
+#include "NodeStatus.h"
+
 // Forward declarations:
 class EtherFrameWithLLC;
 
@@ -27,11 +31,15 @@ class EtherFrameWithLLC;
 /**
  * Implements the LLC sub-layer of the Datalink Layer in Ethernet networks
  */
-class INET_API EtherLLC : public cSimpleModule
+class INET_API EtherLLC : public cSimpleModule, public ILifecycle
 {
   protected:
     int seqNum;
-    std::map<int,int> dsapToPort;  // DSAP registration table
+    typedef std::map<int,int> DsapToPortMap;  // DSAP registration table
+    DsapToPortMap dsapToPort;  // DSAP registration table
+
+    // lifecycle
+    bool isUp;
 
     // statistics
     long dsapsRegistered;       // number DSAPs (higher layers) registered
@@ -47,7 +55,8 @@ class INET_API EtherLLC : public cSimpleModule
     static simsignal_t pauseSentSignal;
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
 
     virtual void processPacketFromHigherLayer(cPacket *msg);
@@ -57,8 +66,14 @@ class INET_API EtherLLC : public cSimpleModule
     virtual void handleSendPause(cMessage *msg);
     virtual int findPortForSAP(int sap);
 
+    virtual void start();
+    virtual void stop();
+
     // utility function
     virtual void updateDisplayString();
+
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

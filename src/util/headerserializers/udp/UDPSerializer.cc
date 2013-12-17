@@ -29,6 +29,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "UDPSerializer.h"
 
+#include "ByteArrayMessage.h"
 #include "TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
@@ -60,8 +61,9 @@ void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPac
     dest->setSourcePort(ntohs(udphdr->uh_sport));
     dest->setDestinationPort(ntohs(udphdr->uh_dport));
     dest->setByteLength(8);
-    cPacket *encapPacket = new cPacket("Payload-from-wire");
-    encapPacket->setByteLength(ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
+    ByteArrayMessage *encapPacket = new ByteArrayMessage("Payload-from-wire");
+    encapPacket->setDataFromBuffer(buf + sizeof(struct udphdr), ntohs(udphdr->uh_ulen) - sizeof(struct udphdr));
+    encapPacket->setName((const char *)buf + sizeof(struct udphdr));
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }

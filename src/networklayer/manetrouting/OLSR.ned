@@ -39,30 +39,23 @@ simple OLSR extends BaseRouting like IManetRouting
     parameters:
         @class(OLSR);
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)
-        int Hello_ival = default(2); // (s) HELLO messages' emission interval. (section 6.2)
-        int Tc_ival = default(5); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
-        int Mid_ival = default(5); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
+        double Hello_ival @unit(s) = default(2s); // (s) HELLO messages' emission interval. (section 6.2)
+        double Tc_ival @unit(s) = default(5s); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
+        double Mid_ival @unit(s) = default(5s); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
         int use_mac = default(0); // Determines if layer 2 notifications are enabled or not (chapter 13)
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface (EXPERIMENTAL)
         bool reduceFuncionality = default(false);
-        // OLSR timers
-        double OLSR_HELLO_INTERVAL @unit("s")=default(2s);
 
-    /// TC messages emission interval.
-        double OLSR_TC_INTERVAL @unit("s")=default(5s);
-
-    /// MID messages emission interval.
-        double OLSR_MID_INTERVAL @unit("s")=default(5s);//   OLSR_TC_INTERVAL
-
-    ///
-    /// \brief Period at which a node must cite every link and every neighbor.
-    ///
-    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-    ///
-        double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
-        bool PublicRoutingTables = default(false);
-
-        bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages
+	///
+	/// \brief Period at which a node must cite every link and every neighbor.
+	///
+	/// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+	///
+	    double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+	    bool PublicRoutingTables = default(false);
+	    
+	    bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages
+	    bool DelOnlyRtEntriesInrtable_ = default(false); // delete only ip entries that are in the interal routing table 
 
     gates:
         input from_ip;

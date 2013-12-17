@@ -51,16 +51,16 @@ OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
 {
     state = new OSPF::InterfaceStateDown;
     previousState = NULL;
-    helloTimer = new OSPFTimer();
-    helloTimer->setTimerKind(INTERFACE_HELLO_TIMER);
+    helloTimer = new cMessage();
+    helloTimer->setKind(INTERFACE_HELLO_TIMER);
     helloTimer->setContextPointer(this);
     helloTimer->setName("OSPF::Interface::InterfaceHelloTimer");
-    waitTimer = new OSPFTimer();
-    waitTimer->setTimerKind(INTERFACE_WAIT_TIMER);
+    waitTimer = new cMessage();
+    waitTimer->setKind(INTERFACE_WAIT_TIMER);
     waitTimer->setContextPointer(this);
     waitTimer->setName("OSPF::Interface::InterfaceWaitTimer");
-    acknowledgementTimer = new OSPFTimer();
-    acknowledgementTimer->setTimerKind(INTERFACE_ACKNOWLEDGEMENT_TIMER);
+    acknowledgementTimer = new cMessage();
+    acknowledgementTimer->setKind(INTERFACE_ACKNOWLEDGEMENT_TIMER);
     acknowledgementTimer->setContextPointer(this);
     acknowledgementTimer->setName("OSPF::Interface::InterfaceAcknowledgementTimer");
     memset(authenticationKey.bytes, 0, 8 * sizeof(char));

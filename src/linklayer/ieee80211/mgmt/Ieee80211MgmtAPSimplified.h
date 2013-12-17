@@ -23,7 +23,6 @@
 #include "Ieee80211MgmtAPBase.h"
 #include "NotificationBoard.h"
 
-class EtherFrame;
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for

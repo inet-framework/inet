@@ -47,3 +47,9 @@ cli_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 %contains: stdout
 [1.204] tcpdump finished, A:5 B:5 segments
 
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

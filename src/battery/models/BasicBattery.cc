@@ -21,8 +21,6 @@
 #include "BasicBattery.h"
 
 
-Define_Module( BasicBattery );
-
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
 //============================= LIFECYCLE ===================================
@@ -48,15 +46,4 @@ void BasicBattery::finish()
 /**
  * Dispatches self-messages to handleSelfMsg()
  */
-
-
-
-void BasicBattery::receiveChangeNotification(
-    int aCategory,
-    const cObject* aDetails)
-{
-    ev << "this text should not appear. error in BasicBattery.cc" << endl;
-}
-
-
 

@@ -15,13 +15,14 @@
 #define __INET_TCPSINKAPP_H
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
  */
-class INET_API TCPSinkApp : public cSimpleModule
+class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
 {
   protected:
     long bytesRcvd;
@@ -29,8 +30,13 @@ class INET_API TCPSinkApp : public cSimpleModule
     //statistics:
     static simsignal_t rcvdPkSignal;
 
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };

@@ -106,12 +106,13 @@ simple UDPBasicBurst like IUDPApp
     parameters:
         string destAddresses; // space-separated list of destination IP addresses, can be empty;
                               // see module description for possibilities
+        bool excludeLocalDestAddresses = default(true);     // excluding local addresses from destAddresses
         string chooseDestAddrMode @enum("once","perBurst","perSend"); // when to change the destination address
         int destAddrRNG = default(0); // random generator ID for selecting a destination address
         int localPort = default(-1);  // local UDP port number (-1: use ephemeral port)
         int destPort; // remote UDP port number
         double startTime @unit(s) = default(1s); // application start time (start of the first burst)
-        double stopTime @unit(s) = default(-1s); // application stop time (no packets are sent after this time); a negative or zero value means no limit
+        double stopTime @unit(s) = default(-1s); // application stop time (no packets are sent after this time); a negative or -1 means no limit
         volatile int messageLength @unit(B); // length of messages to generate, in bytes
         volatile double burstDuration @unit(s); // burst duration time (zero not allowed)
         volatile double sleepDuration @unit(s); // time between bursts (zero allowed)

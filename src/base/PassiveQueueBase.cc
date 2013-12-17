@@ -42,8 +42,6 @@ void PassiveQueueBase::initialize()
     dequeuePkSignal = registerSignal("dequeuePk");
     dropPkByQueueSignal = registerSignal("dropPkByQueue");
     queueingTimeSignal = registerSignal("queueingTime");
-
-    msgId2TimeMap.clear();
 }
 
 void PassiveQueueBase::handleMessage(cMessage *msg)
@@ -62,7 +60,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
     }
     else
     {
-        msgId2TimeMap[msg->getId()] = simTime();
+        msg->setArrivalTime(simTime());
         cMessage *droppedMsg = enqueue(msg);
         if (msg != droppedMsg)
             emit(enqueuePkSignal, msg);
@@ -71,7 +69,6 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
         {
             numQueueDropped++;
             emit(dropPkByQueueSignal, droppedMsg);
-            msgId2TimeMap.erase(droppedMsg->getId());
             delete droppedMsg;
         }
         else
@@ -98,8 +95,7 @@ void PassiveQueueBase::requestPacket()
     else
     {
         emit(dequeuePkSignal, msg);
-        emit(queueingTimeSignal, simTime() - msgId2TimeMap[msg->getId()]);
-        msgId2TimeMap.erase(msg->getId());
+        emit(queueingTimeSignal, simTime() - msg->getArrivalTime());
         sendOut(msg);
     }
 }
@@ -114,9 +110,13 @@ void PassiveQueueBase::clear()
     packetRequested = 0;
 }
 
+cMessage *PassiveQueueBase::pop()
+{
+    return dequeue();
+}
+
 void PassiveQueueBase::finish()
 {
-    msgId2TimeMap.clear();
 }
 
 void PassiveQueueBase::addListener(IPassiveQueueListener *listener)

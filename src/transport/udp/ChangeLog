@@ -1,3 +1,32 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-07-25  Tamas Borbely
+
+	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
+	option in Linux). If ReuseAddress is set to true on two sockets,
+	then they can bind to the same local address/port.
+
+	E.g. the following works:
+
+	     UDPSocket s1, s2;
+	     s1.setReuseAddress(true);
+	     s1.bind(7777);
+	     s2.setReuseAddress(true);
+	     s2.bind(IPv4Address("10.0.0.1"), 7777);
+
+	s2 will receive packets whose destination address is 10.0.0.1, s1 will
+	receive all other packets
+
+2013-05-15  Alfonso Ariza - takeover from INETMANET
+
+	UDP: Send ICMP destination unreachable messages only to unicast addresses.
+
+2013-04-24  Zoltan Bojthe
+
+	UDP: implemented lifecycle operations support
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------

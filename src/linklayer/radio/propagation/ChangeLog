@@ -1,3 +1,11 @@
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-05-03  Alfonso Ariza Quintana
+
+	radio: free space model distance calculation added
+
+2013-01-30  ------ inet-2.1.0 released ------
+
 2012-08-07  ------ inet-2.0.0 released ------
 
 2012-06-25  ------ inet-1.99.5 released ------
@@ -66,4 +74,3 @@
 2011-03-31  Rudolf Hornig
 
 	Migrated the propagation models from INETMANET.
-

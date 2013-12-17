@@ -1,6 +1,6 @@
 //
 // Copyright (C) 2005-2010 Irene Ruengeler
-// Copyright (C) 2009-2010 Thomas Dreibholz
+// Copyright (C) 2009-2012 Thomas Dreibholz
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -49,6 +49,7 @@ simple SCTP like ISCTP
         //#====== Heartbeats ==================================================
         bool enableHeartbeats = default(true);
         double hbInterval @unit(s) = default(30s);
+        bool sendHeartbeatsOnActivePaths = default(false);
 
         //#====== Nagle Algorithm =============================================
         bool nagleEnabled = default(true);
@@ -58,11 +59,49 @@ simple SCTP like ISCTP
         bool fastRecoverySupported = default(true);
         string sctpAlgorithmClass = default("SCTPAlg");
         int ccModule = default(0);           // RFC4960=0
+        bool osbWithHeader = default(false);
+        int RTXMethod = default(0);        // 0=Once after 3 Sacks; 1=once per RTT; 2=Switch off Fast Retransmit; 3=Always after 3 Sacks
 
+        //#====== Other Parameters ============================================
         int ssModule = default(0);           // ROUND_ROBIN=0
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
+        int bytesToAddPerRcvdChunk = default(0);        // for flowcontrol
+        int bytesToAddPerPeerChunk = default(0);        // for flowcontrol
+        bool tellArwnd = default(false);    // for flowcontrol
+        int messageAcceptLimit = default(0);        // for flowcontrol
+        double fairStart @unit(s) = default(0s);
+        double fairStop @unit(s) = default(0s);
+        string streamsToPaths = default("");
+        int startEndToEndDelay = default(0);
+        int stopEndToEndDelay = default(10);
+        double throughputInterval = default(1);
+
+        //#====== Chunk Authentication ========================================
+        bool auth = default(false);
+        string chunks = default("");
+        bool padding = default(false);
+
+        //#====== Add-IP ======================================================
+        bool addIP = default(false);
+        double addTime @unit(s) = default(0s);
+        string addAddress = default("");
+        string addIpType = default("0");      // SET_PRIMARY_ADDRESS=49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+
+        //#====== Packet Drop =================================================
+        bool packetDrop = default(false);
+
+        //#====== SACK Now ====================================================
+        bool sackNow = default(false);
+
+        //#====== SACK Sequence Numbers =======================================
+        bool checkSackSeqNumber = default(false);
+
+        //#====== NR-SACK =====================================================
+        bool nrSack = default(false);
+        bool disableReneging = default(false);
+
         @display("i=block/wheelbarrow");
 
     gates:

@@ -41,7 +41,10 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
 #include "IPv6InterfaceData.h"
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 #include "RoutingTable6Access.h"
+
 #ifdef WITH_xMIPv6
 #include "MobilityHeader_m.h" // for HA Option header
 #include "xMIPv6Access.h"
@@ -58,15 +61,26 @@ IPv6Tunneling::IPv6Tunneling()
     rt = NULL;
 }
 
-void IPv6Tunneling::initialize()
+void IPv6Tunneling::initialize(int stage)
 {
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTable6Access().get();
+    if (stage == 0)
+    {
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTable6Access().get();
 
-    vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
-    noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host
+        vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
+        noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host
 
-    WATCH_MAP(tunnels);
+        WATCH_MAP(tunnels);
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void IPv6Tunneling::handleMessage(cMessage* msg)
@@ -85,6 +99,11 @@ void IPv6Tunneling::handleMessage(cMessage* msg)
     }
     else
         opp_error("IPv6Tunneling: Unknown gate: %s!", msg->getArrivalGate()->getFullName());
+}
+
+bool IPv6Tunneling::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    throw cRuntimeError("Lifecycle operation support not implemented");
 }
 
 IPv6Tunneling::Tunnel::Tunnel(const IPv6Address& _entry, const IPv6Address& _exit, const IPv6Address& _destTrigger)

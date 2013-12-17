@@ -14,21 +14,35 @@
 
 #include "TCPSrvHostApp.h"
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
 
 Define_Module(TCPSrvHostApp);
 
 
-void TCPSrvHostApp::initialize()
+void TCPSrvHostApp::initialize(int stage)
 {
-    cSimpleModule::initialize();
+    cSimpleModule::initialize(stage);
 
-    const char *localAddress = par("localAddress");
-    int localPort = par("localPort");
+    if (stage == 0)
+    {
+        //TODO should use IPvXAddressResolver in stage 3
+        const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
 
-    serverSocket.setOutputGate(gate("tcpOut"));
-    serverSocket.readDataTransferModePar(*this);
-    serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
-    serverSocket.listen();
+        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.readDataTransferModePar(*this);
+        serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        serverSocket.listen();
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+    }
 }
 
 void TCPSrvHostApp::updateDisplay()

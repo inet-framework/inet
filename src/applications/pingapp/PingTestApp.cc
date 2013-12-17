@@ -34,6 +34,9 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+#include "ModuleAccess.h"
+#include "NodeStatus.h"
+
 using std::cout;
 
 Define_Module(PingTestApp);
@@ -49,49 +52,54 @@ void PingTestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // because of IPvXAddressResolver, we need to wait until interfaces are registered,
-    // address auto-assignment takes place etc.
-    if (stage != 3)
-        return;
-
-    // read params
-    // (defer reading srcAddr/destAddr to when ping starts, maybe
-    // addresses will be assigned later by some protocol)
-    packetSize = par("packetSize");
-    sendIntervalp = & par("sendInterval");
-    hopLimit = par("hopLimit");
-    count = par("count");
-    startTime = par("startTime").doubleValue();
-    stopTime = par("stopTime").doubleValue();
-    if (stopTime != 0 && stopTime <= startTime)
-        error("Invalid startTime/stopTime parameters");
-    printPing = par("printPing").boolValue();
-    continuous = par("continuous").boolValue();
-
-    // state
-    sendSeqNo = expectedReplySeqNo = 0;
-    WATCH(sendSeqNo);
-    WATCH(expectedReplySeqNo);
-
-    // statistics
-    rttStat.setName("pingRTT");
-    rttSignal = registerSignal("rtt");
-    numLostSignal = registerSignal("numLost");
-    outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
-    pingTxSeqSignal = registerSignal("pingTxSeq");
-    pingRxSeqSignal = registerSignal("pingRxSeq");
-
-    lossCount = outOfOrderArrivalCount = numPongs = 0;
-    WATCH(lossCount);
-    WATCH(outOfOrderArrivalCount);
-    WATCH(numPongs);
-
-    if (strcmp(par("destAddresses").stringValue(), ""))
+    if (stage == 0)
     {
-        srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
-        // schedule first ping (use empty destAddr to disable)
-        cMessage *msg = new cMessage("sendPing");
-        scheduleAt(startTime, msg);
+        // read params
+        // (defer reading srcAddr/destAddr to when ping starts, maybe
+        // addresses will be assigned later by some protocol)
+        packetSize = par("packetSize");
+        sendIntervalp = & par("sendInterval");
+        hopLimit = par("hopLimit");
+        count = par("count");
+        startTime = par("startTime").doubleValue();
+        stopTime = par("stopTime").doubleValue();
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
+        printPing = par("printPing").boolValue();
+        continuous = par("continuous").boolValue();
+
+        // state
+        sendSeqNo = expectedReplySeqNo = 0;
+        WATCH(sendSeqNo);
+        WATCH(expectedReplySeqNo);
+
+        // statistics
+        rttStat.setName("pingRTT");
+        rttSignal = registerSignal("rtt");
+        numLostSignal = registerSignal("numLost");
+        outOfOrderArrivalsSignal = registerSignal("outOfOrderArrivals");
+        pingTxSeqSignal = registerSignal("pingTxSeq");
+        pingRxSeqSignal = registerSignal("pingRxSeq");
+
+        lossCount = outOfOrderArrivalCount = numPongs = 0;
+        WATCH(lossCount);
+        WATCH(outOfOrderArrivalCount);
+        WATCH(numPongs);
+
+        if (strcmp(par("destAddresses").stringValue(), ""))
+        {
+            // schedule first ping (use empty destAddr to disable)
+            cMessage *msg = new cMessage("sendPing");
+            scheduleAt(startTime, msg);
+        }
+    }
+    else if (stage == 1)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
 }
 
@@ -101,6 +109,7 @@ void PingTestApp::handleMessage(cMessage *msg)
     {
         if (sendSeqNo == 0)
         {
+            srcAddr = IPvXAddressResolver().resolve(par("srcAddr"));
             const char *destAddrs = par("destAddresses");
             if (!strcmp(destAddrs, "*"))
             {
@@ -214,7 +223,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
     if (sendSeqNo % count == 0)
         nextPing += par("sleepDuration").doubleValue();
 
-    if (stopTime == 0 || nextPing < stopTime)
+    if (stopTime < SIMTIME_ZERO || nextPing < stopTime)
         scheduleAt(nextPing, timer);
     else
         delete timer;

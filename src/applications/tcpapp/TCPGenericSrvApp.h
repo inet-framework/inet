@@ -15,7 +15,8 @@
 #define __INET_TCPGENERICSRVAPP_H
 
 #include "INETDefs.h"
-
+#include "ILifecycle.h"
+#include "LifecycleOperation.h"
 
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
@@ -23,7 +24,7 @@
  *
  * @see GenericAppMsg, TCPGenericCliAppBase
  */
-class INET_API TCPGenericSrvApp : public cSimpleModule
+class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
 {
   protected:
     simtime_t delay;
@@ -38,12 +39,17 @@ class INET_API TCPGenericSrvApp : public cSimpleModule
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
 
+  public:
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
   protected:
     virtual void sendBack(cMessage *msg);
     virtual void sendOrSchedule(cMessage *msg, simtime_t delay);
 
   protected:
-    virtual void initialize();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return 2; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };
