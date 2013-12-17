@@ -26,6 +26,7 @@ unsigned int MACAddress::autoAddressCtr;
 const MACAddress MACAddress::UNSPECIFIED_ADDRESS;
 const MACAddress MACAddress::BROADCAST_ADDRESS("ff:ff:ff:ff:ff:ff");
 const MACAddress MACAddress::MULTICAST_PAUSE_ADDRESS("01:80:C2:00:00:01");
+const MACAddress MACAddress::STP_MULTICAST_ADDRESS("01:80:C2:00:00:00");
 
 
 unsigned char MACAddress::getAddressByte(unsigned int k) const

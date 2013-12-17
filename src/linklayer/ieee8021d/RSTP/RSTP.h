@@ -16,6 +16,8 @@
 #include "Delivery_m.h"
 #include "Cache1Q.h"
 #include "PortFilt.h"
+#include "MACAddressTable.h"
+#include "PortFiltRSTP.h"
 
 
 enum PortStateT
@@ -87,7 +89,7 @@ public:
 	int PortPriority;		//Priority for that port.
 	simtime_t TCWhile;		//This port will send TC=true until this time has been overtaken.
 
-	PortFilt * portfilt;
+	PortFiltRSTP * portfilt;
 
 	PortStatus();
 	virtual ~PortStatus(){}
@@ -123,7 +125,7 @@ class RSTP: public cSimpleModule
 	simtime_t TCWhileTime; /// TCN activation time
 	bool autoEdge;	/// Automatic edge ports detection
 
-	Cache1Q * sw;  /// Needed for flushing.
+	MACAddressTable * sw;  /// Needed for flushing.
 
 
 	/*Static data. Bridge data. */

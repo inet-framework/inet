@@ -50,6 +50,9 @@ class INET_API MACAddress
     /** The special multicast PAUSE MAC address, 01:80:C2:00:00:01 */
     static const MACAddress MULTICAST_PAUSE_ADDRESS;
 
+    /** The spanning tree protocol bridge's multicast address, 01:80:C2:00:00:00 */
+    static const MACAddress STP_MULTICAST_ADDRESS;
+
     /**
      * Default constructor initializes address bytes to zero.
      */

@@ -52,7 +52,7 @@ class Cache1Q: public cSimpleModule
          * @brief Register a new MAC at RelayTable.
          * @return True if refreshed. False if it is new.
          */
-        virtual bool registerMAC(vid BVid, MACAddress MAC, int Gate);
+        virtual bool registerMAC(vid Vid, MACAddress MAC, int Gate);
 
         /**
          *  @brief Clears Gate cache

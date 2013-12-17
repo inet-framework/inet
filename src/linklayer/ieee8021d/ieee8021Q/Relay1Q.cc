@@ -135,7 +135,7 @@ void Relay1Q::handleIncomingFrame(Delivery *frame)
  */
 void Relay1Q::handleIncomingFrame(BPDUieee8021D *frame)
 {
-	if((frame->getDest()==address)||(frame->getDest()==MACAddress("01-80-C2-00-00-00")))
+	if((frame->getDest()==address)||(frame->getDest()==MACAddress::STP_MULTICAST_ADDRESS))
 	{
 		Delivery * frame2= new Delivery();
 		frame2->setArrivalPort(frame->getArrivalGate()->getIndex());

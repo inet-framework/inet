@@ -19,6 +19,9 @@
 #include "MACRelayUnitBase.h"
 #include "Relay1QAccess.h"
 #include "XMLUtils.h"
+#include "RelayRSTP.h"
+#include "RelayRSTPAccess.h"
+#include "MACAddressTableAccess.h"
 
 
 Define_Module (RSTP);
@@ -49,13 +52,14 @@ void RSTP::initialize(int stage)
 	}
 	if(stage==1) // "auto" MAC addresses assignment takes place in stage 0.
 	{
-		sw=Cache1QAccess().get(); //cache pointer
+		sw=MACAddressTableAccess().get(); //cache pointer
 		//Gets the relay pointer.
-		admac=AdmacrelayAccess().getIfExists();
-		if(admac==NULL)
-		{
-			admac=Relay1QAccess().getIfExists();
-		}
+		admac=RelayRSTPAccess().getIfExists();
+//		admac=AdmacrelayAccess().getIfExists();
+//		if(admac==NULL)
+//		{
+//			admac=Relay1QAccess().getIfExists();
+//		}
 		if(admac==NULL)
 			error("Relay module not found");
 
@@ -341,7 +345,7 @@ void RSTP::handleHelloTime(cMessage * msg)
 								sw->flush(j);
 							}
 						}
-						sw->cpCache(i,candidato); //Copy cache from old to new root.
+						sw->copyTable(i,candidato); //Copy cache from old to new root.
 					}
 					else
 					{//Alternate not found. Selects a new Root.
@@ -520,7 +524,7 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 								Puertos[arrival].PortRole=ROOT;
 								Puertos[arrival].PortState=FORWARDING;
 								Puertos[arrival].LostBPDU=0;
-								sw->cpCache(r,arrival); //Copy cache from old to new root.
+								sw->copyTable(r,arrival); //Copy cache from old to new root.
 
 								//The change does not deserve flooding
 							}
@@ -574,7 +578,7 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 							Puertos[arrival].PortState=FORWARDING;
 							Puertos[r].PortRole=ALTERNATE_PORT; //Temporary. Just one port can be root at contest time.
 							Puertos[arrival].LostBPDU=0;
-							sw->cpCache(r,arrival); //Copy cache from old to new root.
+							sw->copyTable(r,arrival); //Copy cache from old to new root.
 							Flood=true;
 							caso3=contestRstpVector(Puertos[r].PortRstpVector, Puertos[r].PortCost);
 							if(caso3>=0)
@@ -637,7 +641,7 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 						{
 							Puertos[arrival].PortRole=DESIGNATED;
 							Puertos[arrival].PortState=DISCARDING;
-							sw->cpCache(arrival,alternative);  //Copy cache from old to new root.
+							sw->copyTable(arrival,alternative);  //Copy cache from old to new root.
 							//Flushing other ports
 							//TCN over all ports. Alternative was alternate.
 							for(unsigned int j=0;j<Puertos.size();j++)
@@ -722,7 +726,7 @@ void RSTP::handleIncomingFrame(Delivery *frame2)
 										sw->flush(j);
 									}
 								}
-								sw->cpCache(arrival,alternative); //Copy cache from old to new root.
+								sw->copyTable(arrival,alternative); //Copy cache from old to new root.
 							}
 						}
 						Puertos[arrival].updatePortVector(frame,arrival);
@@ -1027,26 +1031,36 @@ void RSTP::initPorts()
 		Puertos[j].Flushed++;
 		sw->flush(j);
 
-		if(dynamic_cast<Admacrelay *>(admac)!=NULL)
-		{
-			cGate * gate=admac->gate("GatesOut",j);
-			if(gate!=NULL)
-			{
-				gate=gate->getNextGate();
-				if(gate!=NULL)
-						Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
-			}
-		}
-		else if(dynamic_cast<Relay1Q *>(admac)!=NULL)
-		{
-			cGate * gate=admac->gate("GatesOut",j);
-			if(gate!=NULL)
-			{
-				gate=gate->getNextGate();
-				if(gate!=NULL)
-					Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
-			}
-		}
+//		if(dynamic_cast<Admacrelay *>(admac)!=NULL)
+//		{
+//			cGate * gate=admac->gate("GatesOut",j);
+//			if(gate!=NULL)
+//			{
+//				gate=gate->getNextGate();
+//				if(gate!=NULL)
+//						Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
+//			}
+//		}
+//		else if(dynamic_cast<Relay1Q *>(admac)!=NULL)
+//		{
+//			cGate * gate=admac->gate("GatesOut",j);
+//			if(gate!=NULL)
+//			{
+//				gate=gate->getNextGate();
+//				if(gate!=NULL)
+//					Puertos[j].portfilt=check_and_cast<PortFilt *>(gate->getOwner());
+//			}
+//		}
+//		else if(dynamic_cast<RelayRSTP *>(admac)!=NULL)
+//      {
+            cGate * gate=admac->gate("GatesOut",j);
+            if(gate!=NULL)
+            {
+                gate=gate->getNextGate();
+                if(gate!=NULL)
+                    Puertos[j].portfilt=check_and_cast<PortFiltRSTP *>(gate->getOwner());
+            }
+//      }
 	}
 }
 
