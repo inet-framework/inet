@@ -330,7 +330,7 @@ void RSTP::processBPDU(BPDU *frame, unsigned int arrivalPortNum)
     //second: vs root BPDU--------------------------------->case1
     //third:  vs BPDU that would be sent from this Bridge.->case2
     Ieee8021DInterfaceData * arrivalPort = getPortInterfaceData(arrivalPortNum);
-    bool flood;
+    bool flood = false;
     if (compareInterfacedata(arrivalPortNum, frame, arrivalPort->getLinkCost()) > 0 //better root
             && frame->getRootAddress().compareTo(bridgeAddress) != 0) // root will not participate in a loop with its own address
         flood = processBetterSource(frame, arrivalPortNum);
