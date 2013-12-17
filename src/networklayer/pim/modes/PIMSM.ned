@@ -25,6 +25,10 @@ simple PIMSM
     	@display("i=block/network2");
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
+
+        volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
+        double helloPeriod @unit(s) = 30s;
+
         string RP = default("");
         string sptThreshold = default("infinity");
     gates:

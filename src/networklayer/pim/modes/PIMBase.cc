@@ -30,8 +30,6 @@
 
 using namespace std;
 
-#define HT 30.0                                     /**< Hello Timer = 30s. */
-
 const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 PIMBase::~PIMBase()
@@ -55,6 +53,8 @@ void PIMBase::initialize(int stage)
             throw cRuntimeError("PIMBase: containing node not found.");
 
         hostname = host->getName();
+
+        helloPeriod = par("helloPeriod");
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
@@ -80,7 +80,7 @@ void PIMBase::initialize(int stage)
             EV_INFO << "PIM is enabled on device " << hostname << endl;
 
             helloTimer = new cMessage("PIM Hello", HelloTimer);
-            scheduleAt(simTime() + uniform(0,5), helloTimer);
+            scheduleAt(simTime() + par("triggeredHelloDelay").doubleValue(), helloTimer);
         }
     }
 }
@@ -89,7 +89,7 @@ void PIMBase::processHelloTimer(cMessage *timer)
 {
     ASSERT(timer == helloTimer);
     sendHelloPackets();
-    scheduleAt(simTime() + HT, helloTimer);
+    scheduleAt(simTime() + helloPeriod, helloTimer);
 }
 
 void PIMBase::sendHelloPackets()

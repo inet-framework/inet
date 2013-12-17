@@ -44,6 +44,9 @@ class PIMBase : public cSimpleModule
 
         const char *                hostname;
 
+        // parameters
+        double helloPeriod;
+
         PIMInterface::PIMMode mode;
         cMessage *helloTimer;
 
