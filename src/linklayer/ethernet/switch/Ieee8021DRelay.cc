@@ -31,6 +31,10 @@ void Ieee8021DRelay::initialize(int stage)
 
     if (stage == 0)
     {
+        // statistics
+        numDispatchedBDPUFrames = numDispatchedNonBPDUFrames = numDeliveredBDPUsToSTP = 0;
+        numReceivedBPDUsFromSTP = numReceivedNetworkFrames = numDroppedFrames = 0;
+
         // number of ports
         portCount = gate("ifOut", 0)->size();
         if (gate("ifIn", 0)->size() != portCount)
@@ -57,6 +61,11 @@ void Ieee8021DRelay::initialize(int stage)
         isStpAware = gate("stpIn")->isConnected(); // if the stpIn is not connected then the switch is STP/RSTP unaware
 
         WATCH(bridgeAddress);
+        WATCH(numReceivedNetworkFrames);
+        WATCH(numDroppedFrames);
+        WATCH(numReceivedBPDUsFromSTP);
+        WATCH(numDeliveredBDPUsToSTP);
+        WATCH(numDispatchedNonBPDUFrames);
     }
 }
 
@@ -74,6 +83,7 @@ void Ieee8021DRelay::handleMessage(cMessage * msg)
         // messages from STP process
         if (strcmp(msg->getArrivalGate()->getName(), "stpIn") == 0)
         {
+            numReceivedBPDUsFromSTP++;
             EV_INFO << "Received " << msg << " from STP/RSTP module." << endl;
             BPDU * bpdu = check_and_cast<BPDU* >(msg);
             dispatchBPDU(bpdu);
@@ -81,6 +91,7 @@ void Ieee8021DRelay::handleMessage(cMessage * msg)
         // messages from network
         else if (strcmp(msg->getArrivalGate()->getName(), "ifIn") == 0)
         {
+            numReceivedNetworkFrames++;
             EV_INFO << "Received " << msg << " from network." << endl;
             EtherFrame * frame = check_and_cast<EtherFrame*>(msg);
             handleAndDispatchFrame(frame);
@@ -118,6 +129,7 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     else if (isStpAware && !arrivalPortData->isForwarding())
     {
         EV_INFO << "The arrival port is not forwarding! Discarding it!" << endl;
+        numDroppedFrames++;
         delete frame;
     }
     else if (frame->getDest().isBroadcast()) // broadcast address
@@ -144,12 +156,14 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
                 else
                 {
                     EV_INFO << "Output port " << outGate << " is not forwarding. Discarding!" << endl;
+                    numDroppedFrames++;
                     delete frame;
                 }
             }
             else
             {
                 EV_DETAIL << "Output port is same as input port, " << frame->getFullName() << " destination = " << frame->getDest() << ", discarding frame " << frame << endl;
+                numDroppedFrames++;
                 delete frame;
             }
         }
@@ -165,6 +179,7 @@ void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
 
+    numDispatchedNonBPDUFrames++;
     send(frame, "ifOut", portNum);
     return;
 }
@@ -202,7 +217,7 @@ void Ieee8021DRelay::dispatchBPDU(BPDU * bpdu)
         frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);
 
     EV_INFO << "Sending BPDU frame " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
-
+    numDispatchedBDPUFrames++;
     send(frame, "ifOut", portNum);
 }
 
@@ -220,6 +235,7 @@ void Ieee8021DRelay::deliverBPDU(EtherFrame * frame)
     delete frame; // we have the BPDU packet, so delete the frame
 
     EV_INFO << "Sending BPDU frame " << bpdu << " to the STP/RSTP module" << endl;
+    numDeliveredBDPUsToSTP++;
     send(bpdu, "stpOut");
 }
 
@@ -264,7 +280,7 @@ InterfaceEntry * Ieee8021DRelay::chooseInterface()
 {
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since relays work on EtherSwitches.
-    //       NOTE that, we doesn't check if the returning interface is an Ethernet interface!
+    //       NOTE that, we don't check if the returning interface is an Ethernet interface!
     IInterfaceTable * ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
 
     for (int i = 0; i < ift->getNumInterfaces(); i++)
@@ -276,6 +292,17 @@ InterfaceEntry * Ieee8021DRelay::chooseInterface()
 
     return NULL;
 }
+
+void Ieee8021DRelay::finish()
+{
+    recordScalar("number of received BPDUs from STP module", numReceivedBPDUsFromSTP);
+    recordScalar("number of received frames from network (including BPDUs)",numReceivedNetworkFrames);
+    recordScalar("number of dropped frames (including BPDUs)", numDroppedFrames);
+    recordScalar("number of delivered BPDUs to the STP module",numDeliveredBDPUsToSTP);
+    recordScalar("number of dispatched BPDU frames to the network",numDispatchedBDPUFrames);
+    recordScalar("number of dispatched non-BDPU frames to the network",numDispatchedNonBPDUFrames);
+}
+
 
 bool Ieee8021DRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {

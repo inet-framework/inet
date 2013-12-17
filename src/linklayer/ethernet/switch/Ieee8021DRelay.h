@@ -44,6 +44,14 @@ class Ieee8021DRelay : public cSimpleModule, public ILifecycle
         bool isStpAware;
         unsigned int portCount; // number of ports in the switch
 
+        // statistics: see finish() for details.
+        int numReceivedNetworkFrames;
+        int numDroppedFrames;
+        int numReceivedBPDUsFromSTP;
+        int numDeliveredBDPUsToSTP;
+        int numDispatchedNonBPDUFrames;
+        int numDispatchedBDPUFrames;
+
         virtual void initialize(int stage);
         virtual int numInitStages() const { return 2; }
         virtual void handleMessage(cMessage * msg);
@@ -87,6 +95,7 @@ class Ieee8021DRelay : public cSimpleModule, public ILifecycle
          * Returns the first non-loopback interface.
          */
         virtual InterfaceEntry * chooseInterface();
+        virtual void finish();
 };
 
 #endif
