@@ -46,6 +46,42 @@ class PIMDM : public PIMBase, protected cListener
             TimerContext(IPv4Address source, IPv4Address group) : source(source), group(group), interfaceId(-1) {}
             TimerContext(IPv4Address source, IPv4Address group, int interfaceId) : source(source), group(group), interfaceId(interfaceId) {}
         };
+
+        // per (S,G) state
+
+        struct UpstreamInterface : public PIMMulticastRoute::PIMInInterface
+        {
+            enum State { FORWARDING, PRUNED, ACK_PENDING };
+
+            State state;
+            cMessage* graftRetryTimer;
+            cMessage* sourceActiveTimer;
+            cMessage* stateRefreshTimer;
+            // TODO missing overrideTimer, pruneLimitTimer
+
+            UpstreamInterface(InterfaceEntry *ie, IPv4Address neighbor)
+                : PIMInInterface(ie, neighbor), state(FORWARDING),
+                  graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL) {}
+            int getInterfaceId() const { return ie->getInterfaceId(); }
+        };
+
+        struct DownstreamInterface : public PIMMulticastRoute::PIMOutInterface
+        {
+            // prune state
+            cMessage *pruneTimer;
+            // TODO prunePendingTimer
+
+            // assert winner state
+            // TODO assertState, assertTimer, winnerAddress, winnerMetric
+
+            DownstreamInterface(InterfaceEntry *ie)
+                : PIMOutInterface(ie) {}
+            DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
+                    PIMMulticastRoute::AssertState assert)
+                : PIMOutInterface(ie, forwarding, mode, assert), pruneTimer(pruneTimer) {}
+        };
+
+
     private:
         // parameters
         double pruneInterval;
@@ -96,6 +132,11 @@ class PIMDM : public PIMBase, protected cListener
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
 	    void cancelAndDeleteTimer(cMessage *timer);
         bool deleteMulticastRoute(PIMMulticastRoute *route);
+
+        // routing table access
+        PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
+        std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
+        std::vector<PIMMulticastRoute*> getRoutesForSource(IPv4Address source);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

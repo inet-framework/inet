@@ -62,11 +62,6 @@ class PIMBase : public cSimpleModule
         void sendHelloPacket(PIMInterface *pimInterface);
         void processHelloTimer(cMessage *timer);
         void processHelloPacket(PIMHello *pkt);
-
-        // routing table access
-        PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
-        std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
-        std::vector<PIMMulticastRoute*> getRoutesForSource(IPv4Address source);
 };
 
 

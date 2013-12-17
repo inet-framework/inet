@@ -22,9 +22,7 @@
 Register_Abstract_Class(PIMMulticastRoute);
 
 PIMMulticastRoute::PIMMulticastRoute(IPv4Address origin, IPv4Address group)
-    : IPv4MulticastRoute(), RP(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
-      graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL), keepAliveTimer(NULL),
-      registerStopTimer(NULL), expiryTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL),
+    : IPv4MulticastRoute(), flags(0),
       sequencenumber(0)
 {
     setMulticastGroup(group);
@@ -38,8 +36,6 @@ std::string PIMMulticastRoute::info() const
     std::stringstream out;
     out << "(" << (getOrigin().isUnspecified() ? "*" : getOrigin().str()) << ", " << getMulticastGroup()
         << "), ";
-    if (getOrigin().isUnspecified() && !getRP().isUnspecified())
-        out << "RP is " << getRP() << ", ";
     out << "flags: ";
     if (isFlagSet(D)) out << "D";
     if (isFlagSet(S)) out << "S";
@@ -59,7 +55,7 @@ std::string PIMMulticastRoute::info() const
     for (unsigned int k = 0; k < getNumOutInterfaces(); k++)
     {
         PIMMulticastRoute::PIMOutInterface *outInterface = getPIMOutInterface(k);
-        if ((outInterface->mode == PIMInterface::SparseMode && outInterface->shRegTun)
+        if ((outInterface->mode == PIMInterface::SparseMode/* XXX && outInterface->shRegTun*/)
                 || outInterface->mode ==PIMInterface::DenseMode)
         {
             out << outInterface->getInterface()->getName() << ", "

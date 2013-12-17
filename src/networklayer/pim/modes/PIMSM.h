@@ -73,6 +73,61 @@ enum JPMsgType
 class PIMSM : public PIMBase, protected cListener
 {
     private:
+        /**  Register machine States. */
+        enum RegisterState
+        {
+            NoInfoRS = 0,
+            Join = 1,
+            Prune = 2,
+            JoinPending = 3
+        };
+
+        struct DownstreamInterface : public PIMMulticastRoute::PIMOutInterface
+        {
+            PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
+            RegisterState           regState;           /**< Register state. */
+            bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
+
+            DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMet *expiryTimer)
+                : PIMOutInterface(ie, forwarding, PIMInterface::SparseMode, PIMMulticastRoute::NoInfo),
+                  expiryTimer(expiryTimer), regState(NoInfoRS), shRegTun(true) {}
+
+            DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding,
+                    PIMet *expiryTimer, PIMMulticastRoute::AssertState assert, RegisterState regState, bool show)
+                : PIMOutInterface(ie, forwarding, PIMInterface::SparseMode, assert),
+                  expiryTimer(expiryTimer), regState(regState), shRegTun(show) {}
+        };
+
+        class PIMSMMulticastRoute : public PIMMulticastRoute
+        {
+            private:
+                IPv4Address                 RP;                     /**< Randevous point */
+                PIMkat *keepAliveTimer;
+                PIMrst *registerStopTimer;
+                PIMet *expiryTimer;
+                PIMjt *joinTimer;
+                PIMppt *prunePendingTimer;
+            public:
+                PIMSMMulticastRoute(IPv4Address origin, IPv4Address group)
+                    : PIMMulticastRoute(origin, group), RP(IPv4Address::UNSPECIFIED_ADDRESS),
+                      keepAliveTimer(NULL), registerStopTimer(NULL), expiryTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL) {}
+                virtual std::string info() const;
+
+                void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
+                IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
+
+                void setKeepAliveTimer (PIMkat *kat)   {this->keepAliveTimer = kat;}
+                void setRegisterStopTimer (PIMrst *rst)   {this->registerStopTimer = rst;}
+                void setExpiryTimer  (PIMet *et)     {this->expiryTimer = et;}
+                void setJoinTimer  (PIMjt *jt)     {this->joinTimer = jt;}
+                void setPrunePendingTimer  (PIMppt *ppt)  {this->prunePendingTimer = ppt;}
+                PIMkat*     getKeepAliveTimer() const {return keepAliveTimer;}
+                PIMrst*     getRegisterStopTimer() const {return registerStopTimer;}
+                PIMet*      getExpiryTimer()  const {return expiryTimer;}
+                PIMjt*      getJoinTimer()  const {return joinTimer;}
+                PIMppt*     getPrunePendingTimer()  const {return prunePendingTimer;}
+        };
+
         IPv4Address RPAddress;
         std::string SPTthreshold;
 
@@ -92,8 +147,8 @@ class PIMSM : public PIMBase, protected cListener
         void processPrunePendingTimer(PIMppt *timer);
 
 
-        void restartExpiryTimer(PIMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
-        void dataOnRpf(PIMMulticastRoute *route);
+        void restartExpiryTimer(PIMSMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
+        void dataOnRpf(PIMSMMulticastRoute *route);
 
         // set timers
         PIMkat* createKeepAliveTimer(IPv4Address source, IPv4Address group);
@@ -121,7 +176,11 @@ class PIMSM : public PIMBase, protected cListener
         void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
 
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
-        bool deleteMulticastRoute(PIMMulticastRoute *route);
+        bool deleteMulticastRoute(PIMSMMulticastRoute *route);
+
+        // routing table access
+        PIMSMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
+        std::vector<PIMSMMulticastRoute*> getRouteFor(IPv4Address group);
 
     public:
         PIMSM() : PIMBase(PIMInterface::SparseMode) {}

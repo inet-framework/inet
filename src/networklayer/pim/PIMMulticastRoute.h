@@ -60,15 +60,6 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
             Loser = 2
         };
 
-        /**  Register machine States. */
-        enum RegisterState
-        {
-            NoInfoRS = 0,
-            Join = 1,
-            Prune = 2,
-            JoinPending = 3
-        };
-
         /**
          * @brief Structure of incoming interface.
          * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
@@ -90,36 +81,19 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         {
             InterfaceState          forwarding;         /**< Forward or Pruned */
             PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
-            cMessage                *pruneTimer;        /**< Pointer to PIM Prune Timer*/
-            PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
             AssertState             assert;             /**< Assert state. */
-            RegisterState           regState;           /**< Register state. */
-            bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             PIMOutInterface(InterfaceEntry *ie)
                 : OutInterface(ie, false) {}
-            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
-                    PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
-                : OutInterface(ie, false), forwarding(forwarding), mode(mode), pruneTimer(pruneTimer),
-                  expiryTimer(expiryTimer), assert(assert), regState(regState), shRegTun(show) {}
+            PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, AssertState assert)
+                : OutInterface(ie, false), forwarding(forwarding), mode(mode), assert(assert) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            virtual bool isEnabled() { return forwarding != Pruned; }
+            virtual bool isEnabled() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
         };
 
     private:
-        IPv4Address                 RP;                     /**< Randevous point */
         int                         flags;                  /**< Route flags */
-        // PIMDM timers
-        cMessage* graftRetryTimer;
-        cMessage* sourceActiveTimer;
-        cMessage* stateRefreshTimer;
-        // PIMSM timers
-        PIMkat                      *keepAliveTimer;
-        PIMrst                      *registerStopTimer;
-        PIMet                       *expiryTimer;
-        PIMjt                       *joinTimer;
-        PIMppt                      *prunePendingTimer;
 
         //Originated from destination.Ensures loop freeness.
         unsigned int sequencenumber;
@@ -131,33 +105,9 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         virtual ~PIMMulticastRoute() {}
         virtual std::string info() const;
 
-        void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
-
-        void setGraftRetryTimer (cMessage *grt)   {this->graftRetryTimer = grt;}
-        void setSourceActiveTimer (cMessage *sat)   {this->sourceActiveTimer = sat;}
-        void setStateRefreshTimer (cMessage *srt)   {this->stateRefreshTimer = srt;}
-
-        void setKeepAliveTimer (PIMkat *kat)   {this->keepAliveTimer = kat;}
-        void setRegisterStopTimer (PIMrst *rst)   {this->registerStopTimer = rst;}
-        void setExpiryTimer  (PIMet *et)     {this->expiryTimer = et;}
-        void setJoinTimer  (PIMjt *jt)     {this->joinTimer = jt;}
-        void setPrunePendingTimer  (PIMppt *ppt)  {this->prunePendingTimer = ppt;}
-
         bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
         void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
         void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
-
-        IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
-
-        cMessage*   getGraftRetryTimer() const {return graftRetryTimer;}
-        cMessage*   getSourceActiveTimer() const {return sourceActiveTimer;}
-        cMessage*   getStateRefreshTimer() const {return stateRefreshTimer;}
-
-        PIMkat*     getKeepAliveTimer() const {return keepAliveTimer;}
-        PIMrst*     getRegisterStopTimer() const {return registerStopTimer;}
-        PIMet*      getExpiryTimer()  const {return expiryTimer;}
-        PIMjt*      getJoinTimer()  const {return joinTimer;}
-        PIMppt*     getPrunePendingTimer()  const {return prunePendingTimer;}
 
         // get incoming interface
         PIMInInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<PIMInInterface*>(getInInterface()) : NULL; }
