@@ -76,10 +76,10 @@ class PIMSM : public PIMBase, protected cListener
         /**  Register machine States. */
         enum RegisterState
         {
-            NoInfoRS = 0,
-            Join = 1,
-            Prune = 2,
-            JoinPending = 3
+            RS_NO_INFO = 0,
+            RS_JOIN = 1,
+            RS_PRUNE = 2,
+            RS_JOIN_PENDING = 3
         };
 
         struct DownstreamInterface : public PIMMulticastRoute::PIMOutInterface
@@ -89,8 +89,8 @@ class PIMSM : public PIMBase, protected cListener
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMet *expiryTimer)
-                : PIMOutInterface(ie, forwarding, PIMInterface::SparseMode, PIMMulticastRoute::NoInfo),
-                  expiryTimer(expiryTimer), regState(NoInfoRS), shRegTun(true) {}
+                : PIMOutInterface(ie, forwarding, PIMInterface::SparseMode, PIMMulticastRoute::AS_NO_INFO),
+                  expiryTimer(expiryTimer), regState(RS_NO_INFO), shRegTun(true) {}
 
             DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding,
                     PIMet *expiryTimer, PIMMulticastRoute::AssertState assert, RegisterState regState, bool show)

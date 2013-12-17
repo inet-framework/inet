@@ -1229,10 +1229,10 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
     if (routeSG)
     {
         DownstreamInterface *outInterface = dynamic_cast<DownstreamInterface*>(routeSG->findOutInterfaceByInterfaceId(intToRP->getInterfaceId()));
-        if (outInterface && outInterface->regState == Join)
+        if (outInterface && outInterface->regState == RS_JOIN)
         {
             EV << "Register tunnel is connect - has to be disconnect" << endl;
-            outInterface->regState = Prune;
+            outInterface->regState = RS_PRUNE;
         }
         else
             EV << "Register tunnel is disconnect" << endl;
@@ -1393,7 +1393,7 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
 
     // Check if is register tunnel connected
     DownstreamInterface *outInterface = dynamic_cast<DownstreamInterface*>(routeSG->findOutInterfaceByInterfaceId(intToRP->getInterfaceId()));
-    if (outInterface && outInterface->regState == Join)
+    if (outInterface && outInterface->regState == RS_JOIN)
     {
         // create PIM Register datagram
         PIMRegister *msg = new PIMRegister();
@@ -1418,7 +1418,7 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
         msg->setControlInfo(ctrl);
         send(msg, "ipOut");
     }
-    else if (outInterface && outInterface->regState == Prune)
+    else if (outInterface && outInterface->regState == RS_PRUNE)
         EV << "PIM-SM:sendPIMRegister - register tunnel is disconnect." << endl;
 }
 
@@ -1567,8 +1567,8 @@ void PIMSM::newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr)
         newRoute->addOutInterface(new DownstreamInterface(newInIntG,
                                     PIMMulticastRoute::Pruned,
                                     NULL,
-                                    PIMMulticastRoute::NoInfo,
-                                    Join,false));      // create new outgoing interface to RP
+                                    PIMMulticastRoute::AS_NO_INFO,
+                                    RS_JOIN,false));      // create new outgoing interface to RP
         newRoute->setRP(this->getRPAddress());
         //newRoute->setRegisterTunnel(false);                   //we need to set register state to output interface, but output interface has to be null for now
 
@@ -1834,7 +1834,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
             if (route->isFlagSet(PIMMulticastRoute::F) && route->isFlagSet(PIMMulticastRoute::P))
             {
                 DownstreamInterface *outInterface = dynamic_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intToRP->getInterfaceId()));
-                if (outInterface && outInterface->regState == Join)
+                if (outInterface && outInterface->regState == RS_JOIN)
                     sendPIMRegister(datagram);
             }
         }

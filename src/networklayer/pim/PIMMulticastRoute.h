@@ -55,9 +55,9 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         /** Assert States of each outgoing interface. */
         enum AssertState
         {
-            NoInfo = 0,
-            Winner = 1,
-            Loser = 2
+            AS_NO_INFO = 0,
+            AS_WINNER = 1,
+            AS_LOSER = 2
         };
 
         /**
@@ -93,7 +93,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
         };
 
     private:
-        int                         flags;                  /**< Route flags */
+        int flags;
 
         //Originated from destination.Ensures loop freeness.
         unsigned int sequencenumber;

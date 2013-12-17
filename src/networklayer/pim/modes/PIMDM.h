@@ -51,7 +51,7 @@ class PIMDM : public PIMBase, protected cListener
 
         struct UpstreamInterface : public PIMMulticastRoute::PIMInInterface
         {
-            enum State { FORWARDING, PRUNED, ACK_PENDING };
+            enum State { FORWARDING, PRUNED, ACK_PENDING }; // XXX not yet used
 
             State state;
             cMessage* graftRetryTimer;
