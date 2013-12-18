@@ -17,7 +17,7 @@
 #include "FWMath.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "BMacLayer.h"
 
 Define_Module(BMacLayer)

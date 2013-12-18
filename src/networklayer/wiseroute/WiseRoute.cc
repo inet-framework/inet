@@ -34,7 +34,7 @@
 #include "AddressResolver.h"
 #include "FindModule.h"
 #include "ModuleAccess.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 #include "InterfaceTableAccess.h"
 

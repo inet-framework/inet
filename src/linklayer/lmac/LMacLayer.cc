@@ -14,7 +14,7 @@
 #include "FWMath.h"
 #include "LMacFrame_m.h"
 #include "InterfaceEntry.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "FindModule.h"
 
 Define_Module( LMacLayer )

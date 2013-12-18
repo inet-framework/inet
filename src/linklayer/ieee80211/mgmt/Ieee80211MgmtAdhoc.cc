@@ -17,8 +17,8 @@
 
 
 #include "Ieee80211MgmtAdhoc.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 Define_Module(Ieee80211MgmtAdhoc);
 

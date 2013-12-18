@@ -19,7 +19,7 @@
 #include "Ieee80211MgmtAP.h"
 
 #include "Ieee80211Frame_m.h"
-#include "Ieee802Ctrl.h"
+#include "Ieee802Ctrl_m.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame_m.h"

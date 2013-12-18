@@ -20,8 +20,8 @@
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 Define_Module(GlobalARP);
 

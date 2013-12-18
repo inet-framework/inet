@@ -39,8 +39,8 @@
 #include "IPv4Address.h"
 #include "Address.h"
 #include "ControlManetRouting_m.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "aodv_uu_omnet.h"
 
 const int UDP_HEADER_BYTES = 8;

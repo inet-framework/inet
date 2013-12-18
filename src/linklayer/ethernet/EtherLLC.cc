@@ -19,8 +19,8 @@
 
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 

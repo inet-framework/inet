@@ -23,7 +23,7 @@
 #include "Flood.h"
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 
 using std::endl;

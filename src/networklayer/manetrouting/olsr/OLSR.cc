@@ -43,8 +43,8 @@
 
 #include "OLSRpkt_m.h"
 #include "OLSR.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8

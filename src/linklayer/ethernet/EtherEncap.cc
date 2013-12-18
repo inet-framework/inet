@@ -20,8 +20,8 @@
 #include "EtherEncap.h"
 #include "EtherFrame_m.h"
 #include "IInterfaceTable.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 Define_Module(EtherEncap);
 

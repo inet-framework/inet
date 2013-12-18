@@ -22,8 +22,8 @@
 
 #include "aodv_uu_omnet.h"
 #include "IPv4Datagram.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 #define GARBAGE_COLLECT
 

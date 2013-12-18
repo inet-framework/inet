@@ -16,8 +16,8 @@
 //
 
 #include "Ieee80211MgmtAPBase.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include <string.h>
 
 #ifdef WITH_ETHERNET

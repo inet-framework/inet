@@ -18,8 +18,8 @@
 #endif
 #else
 #include "dsr-uu-omnetpp.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #endif
 
 #include "debug_dsr.h"

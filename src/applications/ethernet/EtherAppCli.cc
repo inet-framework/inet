@@ -22,8 +22,8 @@
 #include "EtherAppCli.h"
 
 #include "EtherApp_m.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 

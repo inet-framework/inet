@@ -72,8 +72,6 @@ enum EtherType
 //
 class Ieee802Ctrl
 {
-    @customize(true);
-
     int etherType enum (EtherType);   // used with ~EthernetIIFrame
     int ssap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)
     int dsap;        // used with IEEE 802 LLC (see ~EtherFrameWithLLC)

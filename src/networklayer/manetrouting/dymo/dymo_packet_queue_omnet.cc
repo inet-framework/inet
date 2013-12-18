@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 #include "dymo_um_omnet.h"
-#include "Ieee802Ctrl.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "Ieee802Ctrl_m.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 
 //#define GARBAGE_COLLECT
 #ifndef DYMO_USE_STL

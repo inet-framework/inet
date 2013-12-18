@@ -35,7 +35,7 @@
 #include "BaseConnectionManager.h"
 #include "InterfaceEntry.h"
 #include "FindModule.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "CSMAFrame_m.h"
 
 Define_Module(CSMA);

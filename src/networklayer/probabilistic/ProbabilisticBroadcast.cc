@@ -8,7 +8,7 @@
 
 #include <cassert>
 
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 #include "IAddressType.h"
 #include "MACAddress.h"

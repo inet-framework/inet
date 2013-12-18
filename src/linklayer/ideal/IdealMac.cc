@@ -24,7 +24,7 @@
 
 #include "IdealRadio.h"
 #include "IdealMacFrame_m.h"
-#include "SimpleLinkLayerControlInfo.h"
+#include "SimpleLinkLayerControlInfo_m.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
