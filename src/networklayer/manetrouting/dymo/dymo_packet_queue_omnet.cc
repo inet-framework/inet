@@ -22,6 +22,7 @@
 
 #include "dymo_um_omnet.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 //#define GARBAGE_COLLECT
 #ifndef DYMO_USE_STL
@@ -208,14 +209,13 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     // now Ip layer decremented again
                     if (isInMacLayer())
                     {
-                        Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                        Ieee802Ctrl *ctrl = qp->p->ensureTag<Ieee802Ctrl>();
                         ManetAddress nextHop;
                         int iface;
                         double cost;
                         getNextHop(dest_addr.s_addr, nextHop, iface, cost);
                         ctrl->setDest(MACAddress(nextHop.getLo()));
                         //TODO ctrl->setEtherType(...);
-                        qp->p->setControlInfo(ctrl);
                     }
                     sendDelayed(qp->p, delay, "to_ip");
                     delay += ARP_DELAY;
@@ -440,14 +440,13 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                             // now Ip layer decremented again
                             if (isInMacLayer())
                             {
-                                Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                                SimpleLinkLayerControlInfo *ctrl = qp->p->ensureTag<SimpleLinkLayerControlInfo>();
                                 ManetAddress nextHop;
                                 int iface;
                                 double cost;
                                 getNextHop(dest_addr.s_addr, nextHop, iface, cost);
                                 ctrl->setDest(nextHop.getMAC());
                                 //TODO ctrl->setEtherType(...);
-                                qp->p->setControlInfo(ctrl);
                             }
                             sendDelayed(qp->p, delay, "to_ip");
                             delay += ARP_DELAY;

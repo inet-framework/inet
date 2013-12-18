@@ -61,10 +61,9 @@ void ProbabilisticBroadcast::handleLowerPacket(cPacket* msg)
 {
 	MACAddress macSrcAddr;
 	ProbabilisticBroadcastDatagram* m = check_and_cast<ProbabilisticBroadcastDatagram*>(msg);
-	IMACProtocolControlInfo* cInfo = check_and_cast<IMACProtocolControlInfo *>(m->removeControlInfo());
+	SimpleLinkLayerControlInfo* cInfo = m->getTag<SimpleLinkLayerControlInfo>();
 	m->setNbHops(m->getNbHops()+1);
-	macSrcAddr = cInfo->getSourceAddress();
-	delete cInfo;
+	macSrcAddr = cInfo->getSrc();
 	++nbDataPacketsReceived;
 	nbHops = nbHops + m->getNbHops();
     oneHopLatencies.record(SIMTIME_DBL(simTime() - m->getTimestamp()));
@@ -290,9 +289,8 @@ cPacket* ProbabilisticBroadcast::encapsMsg(cPacket* msg)
 	pkt->setId(getNextID());
     pkt->setTransportProtocol(networkControlInfo->getTransportProtocol());
 
+    pkt->encapsulate(msg);
 	setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
-	//encapsulate the application packet
-	pkt->encapsulate(msg);
 
 	// clean-up
 	delete controlInfo;
@@ -351,8 +349,7 @@ cPacket* ProbabilisticBroadcast::decapsMsg(ProbabilisticBroadcastDatagram* msg)
  */
 cObject* ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
+    SimpleLinkLayerControlInfo *cCtrlInfo = pMsg->ensureTag<SimpleLinkLayerControlInfo>();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

@@ -18,13 +18,9 @@
 #ifndef __INET_IMACPROTOCOL_H_
 #define __INET_IMACPROTOCOL_H_
 
-#include "IMACProtocolControlInfo.h"
-
 class INET_API IMACProtocol {
   public:
     virtual ~IMACProtocol() { }
-
-//    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
 
 #endif

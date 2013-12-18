@@ -285,10 +285,9 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
     EV << "sendDown: nHop=L3BROADCAST -> message has to be broadcasted"
        << " -> set destMac=L2BROADCAST" << endl;
 
+    pkt->encapsulate(appPkt);
     setDownControlInfo(pkt, MACAddress::BROADCAST_ADDRESS);
 
-    //encapsulate the application packet
-    pkt->encapsulate(appPkt);
     EV <<" pkt encapsulated\n";
     return pkt;
 }
@@ -298,8 +297,7 @@ FloodDatagram * Flood::encapsMsg(cPacket *appPkt) {
  */
 cObject* Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
+    SimpleLinkLayerControlInfo *cCtrlInfo = pMsg->ensureTag<SimpleLinkLayerControlInfo>();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

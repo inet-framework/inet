@@ -22,6 +22,7 @@
 #include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
@@ -234,10 +235,10 @@ Ieee80211DataFrame *Ieee80211MgmtSTA::encapsulate(cPacket *msg)
     frame->setReceiverAddress(assocAP.address);
 
     // destination address is in address3
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setAddress3(ctrl->getDest());
+    Ieee802Ctrl *ctrl = msg->getTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = msg->getTag<SimpleLinkLayerControlInfo>();
+    frame->setAddress3(cInfo->getDest());
     frame->setEtherType(ctrl->getEtherType());
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -247,13 +248,13 @@ cPacket *Ieee80211MgmtSTA::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getAddress3());
-    ctrl->setDest(frame->getReceiverAddress());
+    Ieee802Ctrl *ctrl = payload->ensureTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = payload->ensureTag<SimpleLinkLayerControlInfo>();
+    cInfo->setSrc(frame->getAddress3());
+    cInfo->setDest(frame->getReceiverAddress());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

@@ -19,14 +19,13 @@
 #define __INET_SIMPLELINKLAYERCONTROLINFO_H_
 
 #include "INETDefs.h"
-#include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo_m.h"
 
 /**
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base, public IMACProtocolControlInfo
+class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Base
 {
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}
@@ -34,13 +33,6 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
     SimpleLinkLayerControlInfo& operator=(const SimpleLinkLayerControlInfo& other) {SimpleLinkLayerControlInfo_Base::operator=(other); return *this;}
 
     virtual SimpleLinkLayerControlInfo *dup() const {return new SimpleLinkLayerControlInfo(*this);}
-
-    virtual MACAddress getSourceAddress() const { return getSrc(); }
-    virtual void setSourceAddress(const MACAddress & address) { setSrc(address); }
-    virtual MACAddress getDestinationAddress() const { return getDest(); }
-    virtual void setDestinationAddress(const MACAddress & address) { setDest(address); };
-    virtual int getInterfaceId() const { return SimpleLinkLayerControlInfo_Base::getInterfaceId(); }
-    virtual void setInterfaceId(int interfaceId) { SimpleLinkLayerControlInfo_Base::setInterfaceId(interfaceId); }
 };
 
 #endif

@@ -28,6 +28,7 @@
 #include "IPSocket.h"
 #include "IPv4Address.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "Ieee80211Frame_m.h"
 #include "ICMPMessage_m.h"
 
@@ -628,7 +629,7 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                     EV << "####################################################\n";
                     EV << "Dsr protocol received promiscuous packet from " << paux->getSrcAddress() << "\n";
                     EV << "#####################################################\n";
-                    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                    SimpleLinkLayerControlInfo *ctrl = paux->ensureTag<SimpleLinkLayerControlInfo>();
                     ctrl->setSrc(frame->getTransmitterAddress());
                     ctrl->setDest(frame->getReceiverAddress());
                   //  p->setControlInfo(ctrl);

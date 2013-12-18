@@ -21,6 +21,7 @@
 #include "InterfaceTableAccess.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 Define_Module(GlobalARP);
 
@@ -114,10 +115,10 @@ MACAddress GlobalARP::mapMulticastAddress(Address addr)
 void GlobalARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
 {
     // add control info with MAC address
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(macAddress);
+    Ieee802Ctrl *controlInfo = msg->ensureTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = msg->ensureTag<SimpleLinkLayerControlInfo>();
+    cInfo->setDest(macAddress);
     controlInfo->setEtherType(etherType);
-    msg->setControlInfo(controlInfo);
 
     // send out
     send(msg, nicOutBaseGateId + ie->getNetworkLayerGateIndex());

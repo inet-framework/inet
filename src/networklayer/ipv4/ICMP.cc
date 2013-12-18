@@ -186,6 +186,7 @@ void ICMP::processEchoRequest(ICMPMessage *request)
 {
     // turn request into a reply
     ICMPMessage *reply = request;
+    reply->clearTags();
     reply->setName((std::string(request->getName())+"-reply").c_str());
     reply->setType(ICMP_ECHO_REPLY);
 

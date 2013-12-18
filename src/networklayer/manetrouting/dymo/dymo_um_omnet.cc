@@ -34,6 +34,7 @@
 #include "ICMPAccess.h"
 #include "NotifierConsts.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "Ieee80211Frame_m.h"
 #include "IPv4InterfaceData.h"
 
@@ -441,7 +442,7 @@ void DYMOUM::handleMessage(cMessage *msg)
             }
             else
             {
-                Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl*>(dymoMsg->getControlInfo());
+                SimpleLinkLayerControlInfo *controlInfo = udpPacket->getTag<SimpleLinkLayerControlInfo>();
                 src_addr.s_addr = ManetAddress(controlInfo->getSrc());
                 EV << "rec packet from " << controlInfo->getSrc() <<endl;
             }
@@ -620,14 +621,11 @@ void DYMOUM::getMacAddress(IPv4Datagram *dgram)
     if (dgram)
     {
         MACAddress macAddressConv;
-        cObject * ctrl = dgram->removeControlInfo();
-
-        if (ctrl!=NULL)
+        SimpleLinkLayerControlInfo *ctrlmac = dgram->getTag<SimpleLinkLayerControlInfo>();
+        if (ctrlmac)
         {
-            Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
             macAddressConv = ctrlmac->getSrc();
             // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
-            delete ctrl;
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it==macToIpAdress->end())
             {
@@ -664,13 +662,13 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
 
         if (dymoRe && dymoRe->a)
         {
-            Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
+            SimpleLinkLayerControlInfo *ctrl = msg->getTag<SimpleLinkLayerControlInfo>();
             src.s_addr = ManetAddress(ctrl->getSrc());
             dst.s_addr = ManetAddress(ctrl->getDest());
         }
         else
         {
-            Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
+            SimpleLinkLayerControlInfo *ctrl = msg->getTag<SimpleLinkLayerControlInfo>();
             src.s_addr = ManetAddress(ctrl->getSrc());
             dst.s_addr = ManetAddress(ctrl->getDest());
             if (ctrl)
@@ -756,23 +754,16 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
             case 2:
                 // if (entry && entry->rt_is_used)
                 // mac_address macAddressConv;
-                cObject * ctrl;
-                ctrl = p->removeControlInfo();
-                if (ctrl!=NULL)
                 {
-                    Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-                    if (ctrlmac)
+                    SimpleLinkLayerControlInfo *ctrlmac = p->getTag<SimpleLinkLayerControlInfo>();
+                    MACAddress macAddressConv = ctrlmac->getSrc(); /* destination eth addr */
+                    // ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
+                    // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
+                    MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
+                    if (it!=macToIpAdress->end())
                     {
-                        MACAddress macAddressConv = ctrlmac->getSrc(); /* destination eth addr */
-                        // ctrlmac->getSrc().getAddressBytes(macAddressConv.address);  /* destination eth addr */
-                        // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
-                        delete ctrl;
-                        MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
-                        if (it!=macToIpAdress->end())
-                        {
-                            addr.s_addr = ManetAddress(IPv4Address((*it).second));
-                            rerr_send(dest_addr, 1, entry, addr);
-                        }
+                        addr.s_addr = ManetAddress(IPv4Address((*it).second));
+                        rerr_send(dest_addr, 1, entry, addr);
                     }
                 }
                 delete p;
@@ -875,10 +866,9 @@ void DYMOUM::processMacPacket(cPacket * p, const ManetAddress &dest, const Manet
             delete p->removeControlInfo();
         if (isInMacLayer())
         {
-            Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+            SimpleLinkLayerControlInfo *ctrl = p->ensureTag<SimpleLinkLayerControlInfo>();
             ctrl->setDest(entry->rt_nxthop_addr.s_addr.getMAC());
             //TODO ctrl->setEtherType(...);
-            p->setControlInfo(ctrl);
         }
 
         send(p, "to_ip");

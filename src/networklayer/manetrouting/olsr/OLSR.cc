@@ -44,6 +44,7 @@
 #include "OLSRpkt_m.h"
 #include "OLSR.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
@@ -599,9 +600,8 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
                 delete msg;
                 return NULL;
             }
-            Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+            SimpleLinkLayerControlInfo* ctrl = msg->getTag<SimpleLinkLayerControlInfo>();
             src_addr = ManetAddress(ctrl->getSrc());
-            delete ctrl;
             return dynamic_cast<OLSR_pkt  *>(msg);
         }
 

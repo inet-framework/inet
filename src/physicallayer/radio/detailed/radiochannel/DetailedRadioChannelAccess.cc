@@ -79,18 +79,22 @@ void DetailedRadioChannelAccess::sendToChannel(cPacket *msg)
 
                 int radioStart = i->second->getId();
                 int radioEnd = radioStart + i->second->size();
-                for (int g = radioStart; g != radioEnd; ++g)
-                    sendDirect(static_cast<cPacket*>(msg->dup()),
-                               delay, msg->getDuration(), i->second->getOwnerModule(), g);
+                for (int g = radioStart; g != radioEnd; ++g) {
+                    cPacket *dup = msg->dup();
+                    dup->clearTags();
+                    sendDirect(dup, delay, msg->getDuration(), i->second->getOwnerModule(), g);
+                }
             }
             //calculate delay (Propagation) to this receiving nic
 			delay = calculatePropagationDelay(i->first);
 
             int radioStart = i->second->getId();
             int radioEnd = radioStart + i->second->size();
-            for (int g = radioStart; g != --radioEnd; ++g)
-                sendDirect(static_cast<cPacket*>(msg->dup()),
-                           delay, msg->getDuration(), i->second->getOwnerModule(), g);
+            for (int g = radioStart; g != --radioEnd; ++g) {
+                cPacket *dup = msg->dup();
+                dup->clearTags();
+                sendDirect(dup, delay, msg->getDuration(), i->second->getOwnerModule(), g);
+            }
 
             sendDirect(msg, delay, msg->getDuration(), i->second->getOwnerModule(), radioEnd);
         }
@@ -107,9 +111,9 @@ void DetailedRadioChannelAccess::sendToChannel(cPacket *msg)
             for(; i != --gateList.end(); ++i){
             	//calculate delay (Propagation) to this receiving nic
 				delay = calculatePropagationDelay(i->first);
-
-                sendDelayed( static_cast<cPacket*>(msg->dup()),
-                             delay, i->second );
+                cPacket *dup = msg->dup();
+                dup->clearTags();
+                sendDelayed(dup, delay, i->second);
             }
             //calculate delay (Propagation) to this receiving nic
 			delay = calculatePropagationDelay(i->first);

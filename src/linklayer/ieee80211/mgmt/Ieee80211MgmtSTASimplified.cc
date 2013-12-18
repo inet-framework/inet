@@ -18,6 +18,7 @@
 
 #include "Ieee80211MgmtSTASimplified.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 
 Define_Module(Ieee80211MgmtSTASimplified);
@@ -67,11 +68,11 @@ Ieee80211DataFrame *Ieee80211MgmtSTASimplified::encapsulate(cPacket *msg)
     frame->setReceiverAddress(accessPointAddress);
 
     // destination address is in address3
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    ASSERT(!ctrl->getDest().isUnspecified());
-    frame->setAddress3(ctrl->getDest());
+    SimpleLinkLayerControlInfo *cInfo = msg->getTag<SimpleLinkLayerControlInfo>();
+    Ieee802Ctrl *ctrl = msg->getTag<Ieee802Ctrl>();
+    ASSERT(!cInfo->getDest().isUnspecified());
+    frame->setAddress3(cInfo->getDest());
     frame->setEtherType(ctrl->getEtherType());
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -81,13 +82,13 @@ cPacket *Ieee80211MgmtSTASimplified::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getAddress3());
-    ctrl->setDest(frame->getReceiverAddress());
+    Ieee802Ctrl *ctrl = payload->ensureTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = payload->ensureTag<SimpleLinkLayerControlInfo>();
+    cInfo->setSrc(frame->getAddress3());
+    cInfo->setDest(frame->getReceiverAddress());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

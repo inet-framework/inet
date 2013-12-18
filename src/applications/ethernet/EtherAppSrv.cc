@@ -22,6 +22,7 @@
 
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -81,8 +82,9 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     packetsReceived++;
     emit(rcvdPkSignal, req);
 
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
-    MACAddress srcAddr = ctrl->getSrc();
+    SimpleLinkLayerControlInfo *cInfo = req->getTag<SimpleLinkLayerControlInfo>();
+    Ieee802Ctrl *ctrl = req->getTag<Ieee802Ctrl>();
+    MACAddress srcAddr = cInfo->getSrc();
     int srcSap = ctrl->getSsap();
     long requestId = req->getRequestId();
     long replyBytes = req->getResponseBytes();
@@ -90,7 +92,6 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     strcpy(msgname, msg->getName());
 
     delete msg;
-    delete ctrl;
 
     // send back packets asked by EtherAppCli side
     int k = 0;
@@ -117,11 +118,11 @@ void EtherAppSrv::handleMessage(cMessage *msg)
 
 void EtherAppSrv::sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap)
 {
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
+    Ieee802Ctrl *etherctrl = datapacket->ensureTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = datapacket->ensureTag<SimpleLinkLayerControlInfo>();
     etherctrl->setSsap(localSAP);
     etherctrl->setDsap(destSap);
-    etherctrl->setDest(destAddr);
-    datapacket->setControlInfo(etherctrl);
+    cInfo->setDest(destAddr);
     emit(sentPkSignal, datapacket);
     send(datapacket, "out");
     packetsSent++;
@@ -131,10 +132,9 @@ void EtherAppSrv::registerDSAP(int dsap)
 {
     EV << getFullPath() << " registering DSAP " << dsap << "\n";
 
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setDsap(dsap);
     cMessage *msg = new cMessage("register_DSAP", IEEE802CTRL_REGISTER_DSAP);
-    msg->setControlInfo(etherctrl);
+    Ieee802Ctrl *etherctrl = msg->ensureTag<Ieee802Ctrl>();
+    etherctrl->setDsap(dsap);
 
     send(msg, "out");
 }

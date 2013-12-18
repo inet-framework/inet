@@ -66,7 +66,8 @@ void NetworkProtocolBase::sendDown(cMessage* message, int interfaceId)
             if (interfaceEntry && !interfaceEntry->isLoopback())
             {
                 cMessage* duplicate = message->dup();
-                duplicate->setControlInfo(message->getControlInfo()->dup());
+                if (message->getControlInfo())
+                    duplicate->setControlInfo(message->getControlInfo()->dup());
                 send(duplicate, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
             }
         }

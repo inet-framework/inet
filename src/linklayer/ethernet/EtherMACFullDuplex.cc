@@ -120,6 +120,7 @@ void EtherMACFullDuplex::startFrameTransmission()
 
     // send
     EV << "Starting transmission of " << frame << endl;
+    frame->clearTags();
     send(frame, physOutGate);
 
     scheduleAt(transmissionChannel->getTransmissionFinishTime(), endTxMsg);

@@ -7,6 +7,7 @@
 #include "AddressResolver.h"
 #include "UDPPacket_m.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 Define_Module(Batman);
 
@@ -293,11 +294,10 @@ void Batman::handleMessage(cMessage *msg)
     }
     else
     {
-        Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+        SimpleLinkLayerControlInfo *ctrl = msg->getTag<SimpleLinkLayerControlInfo>();
         MACAddress srcAddr = ctrl->getSrc();
         neigh = ManetAddress(srcAddr);
         if_incoming = if_list[0];
-        delete ctrl;
     }
 
 

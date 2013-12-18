@@ -20,6 +20,7 @@
 #include "ARP.h"
 
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
@@ -275,6 +276,7 @@ void ARP::processOutboundPacket(cMessage *msg)
     EV << "Packet " << msg << " arrived from IPv4\n";
 
     // get next hop address from control info in packet
+    msg->clearTags();
     IPv4RoutingDecision *ctrl = check_and_cast<IPv4RoutingDecision*>(msg->removeControlInfo());
     IPv4Address nextHopAddr = ctrl->getNextHopAddr();
     InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
@@ -358,11 +360,11 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
 void ARP::sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
 {
     // add control info with MAC address
-    Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-    controlInfo->setDest(macAddress);
+    SimpleLinkLayerControlInfo *cInfo = msg->ensureTag<SimpleLinkLayerControlInfo>();
+    cInfo->setDest(macAddress);
+    cInfo->setInterfaceId(ie->getInterfaceId());
+    Ieee802Ctrl *controlInfo = msg->ensureTag<Ieee802Ctrl>();
     controlInfo->setEtherType(etherType);
-    controlInfo->setInterfaceId(ie->getInterfaceId());
-    msg->setControlInfo(controlInfo);
 
     // send out
     send(msg, netwOutGate);
@@ -458,9 +460,8 @@ void ARP::processARPPacket(ARPPacket *arp)
     dumpARPPacket(arp);
 
     // extract input port
-    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(arp->removeControlInfo());
+    SimpleLinkLayerControlInfo* ctrl = arp->getTag<SimpleLinkLayerControlInfo>();
     InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
-    delete ctrl;
 
     //
     // Recipe a'la RFC 826:
@@ -555,6 +556,7 @@ void ARP::processARPPacket(ARPPacket *arp)
                 arp->setSrcIPAddress(origDestAddress);
                 arp->setSrcMACAddress(myMACAddress);
                 arp->setOpcode(ARP_REPLY);
+                arp->clearTags();
                 delete arp->removeControlInfo();
                 sendPacketToNIC(arp, ie, srcMACAddress, ETHERTYPE_ARP);
                 numRepliesSent++;

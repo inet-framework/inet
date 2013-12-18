@@ -62,6 +62,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
 {
     // turn request into a reply
     EchoPacket *reply = request;
+    reply->clearTags();
     reply->setName((std::string(request->getName()) + "-reply").c_str());
     reply->setType(ECHO_PROTOCOL_REPLY);
     // swap src and dest

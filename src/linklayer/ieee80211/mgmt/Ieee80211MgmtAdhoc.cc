@@ -18,7 +18,7 @@
 
 #include "Ieee80211MgmtAdhoc.h"
 #include "Ieee802Ctrl.h"
-
+#include "SimpleLinkLayerControlInfo.h"
 
 Define_Module(Ieee80211MgmtAdhoc);
 
@@ -49,10 +49,10 @@ Ieee80211DataFrame *Ieee80211MgmtAdhoc::encapsulate(cPacket *msg)
     Ieee80211DataFrameWithSNAP *frame = new Ieee80211DataFrameWithSNAP(msg->getName());
 
     // copy receiver address from the control info (sender address will be set in MAC)
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-    frame->setReceiverAddress(ctrl->getDest());
+    Ieee802Ctrl *ctrl = msg->getTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = msg->getTag<SimpleLinkLayerControlInfo>();
+    frame->setReceiverAddress(cInfo->getDest());
     frame->setEtherType(ctrl->getEtherType());
-    delete ctrl;
 
     frame->encapsulate(msg);
     return frame;
@@ -62,13 +62,13 @@ cPacket *Ieee80211MgmtAdhoc::decapsulate(Ieee80211DataFrame *frame)
 {
     cPacket *payload = frame->decapsulate();
 
-    Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-    ctrl->setSrc(frame->getTransmitterAddress());
-    ctrl->setDest(frame->getReceiverAddress());
+    Ieee802Ctrl *ctrl = payload->ensureTag<Ieee802Ctrl>();
+    SimpleLinkLayerControlInfo *cInfo = payload->ensureTag<SimpleLinkLayerControlInfo>();
+    cInfo->setSrc(frame->getTransmitterAddress());
+    cInfo->setDest(frame->getReceiverAddress());
     Ieee80211DataFrameWithSNAP *frameWithSNAP = dynamic_cast<Ieee80211DataFrameWithSNAP *>(frame);
     if (frameWithSNAP)
         ctrl->setEtherType(frameWithSNAP->getEtherType());
-    payload->setControlInfo(ctrl);
 
     delete frame;
     return payload;

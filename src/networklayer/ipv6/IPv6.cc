@@ -30,6 +30,7 @@
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "ICMPv6Message_m.h"
 
 #include "IPv6TunnelingAccess.h"
@@ -821,10 +822,10 @@ void IPv6::sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *de
     // if link layer uses MAC addresses (basically, not PPP), add control info
     if (!macAddr.isUnspecified())
     {
-        Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
-        controlInfo->setDest(macAddr);
+        SimpleLinkLayerControlInfo *ctrl = datagram->ensureTag<SimpleLinkLayerControlInfo>();
+        Ieee802Ctrl *controlInfo = datagram->ensureTag<Ieee802Ctrl>();
+        ctrl->setDest(macAddr);
         controlInfo->setEtherType(ETHERTYPE_IPv6);
-        datagram->setControlInfo(controlInfo);
     }
 
     // send datagram to link layer

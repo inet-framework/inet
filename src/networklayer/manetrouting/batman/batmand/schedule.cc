@@ -178,6 +178,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         forw_node_new->send_time = send_time;
     } else {
         // It's necessary decapsulate and recapsulate the packets
+        forw_node_aggregate->pack_buff->clearTags();
         appendPacket(forw_node_aggregate->pack_buff, bat_packet);
         forw_node_aggregate->num_packets++;
 

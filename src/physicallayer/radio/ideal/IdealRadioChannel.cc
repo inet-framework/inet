@@ -116,7 +116,9 @@ void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *rad
             // Over 300m, dt=1us=10 bit times @ 10Mbps
             simtime_t delay = sqrt(sqrdist) / SPEED_OF_LIGHT;
             cGate *gate = const_cast<cGate *>(r->radio->getRadioGate()->getPathStartGate());
-            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), gate);
+            IdealRadioFrame *dup = radioFrame->dup();
+            dup->clearTags();
+            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(dup, delay, radioFrame->getDuration(), gate);
         }
     }
     delete radioFrame;

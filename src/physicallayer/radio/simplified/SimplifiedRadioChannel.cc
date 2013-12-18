@@ -301,7 +301,9 @@ void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFra
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps
             simtime_t delay = srcRadio->pos.distance(r->pos) / SPEED_OF_LIGHT;
-            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), r->radioInGate);
+            SimplifiedRadioFrame *dup = radioFrame->dup();
+            dup->clearTags();
+            check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(dup, delay, radioFrame->getDuration(), r->radioInGate);
         }
         else
             EV << "skipping radio listening on a different channel\n";

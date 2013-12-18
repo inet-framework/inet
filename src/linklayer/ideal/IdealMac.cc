@@ -24,7 +24,7 @@
 
 #include "IdealRadio.h"
 #include "IdealMacFrame_m.h"
-#include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
@@ -207,13 +207,12 @@ void IdealMac::handleLowerPacket(cPacket *msg)
 
 IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
 {
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+    SimpleLinkLayerControlInfo *ctrl = msg->getTag<SimpleLinkLayerControlInfo>();
     IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
     frame->setSrc(ctrl->getSrc());
     frame->setDest(ctrl->getDest());
     frame->encapsulate(msg);
-    delete ctrl;
     return frame;
 }
 
@@ -245,11 +244,9 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
 {
     // decapsulate and attach control info
     cPacket *packet = frame->decapsulate();
-    Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
-    etherctrl->setSrc(frame->getSrc());
-    etherctrl->setDest(frame->getDest());
-    packet->setControlInfo(etherctrl);
-
+    SimpleLinkLayerControlInfo *ctrl = packet->ensureTag<SimpleLinkLayerControlInfo>();
+    ctrl->setSrc(frame->getSrc());
+    ctrl->setDest(frame->getDest());
     delete frame;
     return packet;
 }

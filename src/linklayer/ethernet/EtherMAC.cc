@@ -526,6 +526,7 @@ void EtherMAC::startFrameTransmission()
         updateConnectionColor(TRANSMITTING_STATE);
 
     currentSendPkTreeID = frame->getTreeId();
+    frame->clearTags();
     send(frame, physOutGate);
 
     // check for collisions (there might be an ongoing reception which we don't know about, see below)

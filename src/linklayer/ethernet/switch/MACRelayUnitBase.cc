@@ -111,6 +111,7 @@ void MACRelayUnitBase::initialize(int stage)
 
 void MACRelayUnitBase::handleAndDispatchFrame(EtherFrame *frame, int inputport)
 {
+    frame->clearTags();
     // update address table
     updateTableWithAddress(frame->getSrc(), inputport);
 

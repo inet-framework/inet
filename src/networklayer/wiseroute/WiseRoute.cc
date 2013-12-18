@@ -130,7 +130,7 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 	const Address& finalDestAddr  = netwMsg->getFinalDestAddr();
 	const Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
 	const Address& srcAddr        = netwMsg->getSrcAddr();
-	IMACProtocolControlInfo* ctrlInfo = check_and_cast<IMACProtocolControlInfo*>(netwMsg->getControlInfo());
+	SimpleLinkLayerControlInfo* ctrlInfo = netwMsg->getTag<SimpleLinkLayerControlInfo>();
 	// KLUDGE: TODO: get rssi and ber
 	EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
 	double rssi = 1; // TODO: ctrlInfo->getRSSI();
@@ -264,8 +264,8 @@ void WiseRoute::handleUpperPacket(cPacket* msg)
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalARP module.");
 	}
+    pkt->encapsulate(static_cast<cPacket*>(msg));
 	setDownControlInfo(pkt, nextHopMacAddr);
-	pkt->encapsulate(static_cast<cPacket*>(msg));
 	sendDown(pkt);
 	nbDataPacketsSent++;
 }
@@ -378,8 +378,7 @@ WiseRoute::tFloodTable::key_type WiseRoute::getRoute(const tFloodTable::key_type
  */
 cObject* WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr)
 {
-    SimpleLinkLayerControlInfo * const cCtrlInfo = new SimpleLinkLayerControlInfo();
+    SimpleLinkLayerControlInfo *cCtrlInfo = pMsg->ensureTag<SimpleLinkLayerControlInfo>();
     cCtrlInfo->setDest(pDestAddr);
-    pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

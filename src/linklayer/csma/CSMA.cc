@@ -34,7 +34,6 @@
 #include "BasePhyLayer.h"
 #include "BaseConnectionManager.h"
 #include "InterfaceEntry.h"
-#include "IMACProtocolControlInfo.h"
 #include "FindModule.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "CSMAFrame_m.h"
@@ -210,11 +209,10 @@ void CSMA::handleUpperPacket(cPacket *msg) {
 	//MacPkt*macPkt = encapsMsg(msg);
 	CSMAFrame* macPkt = new CSMAFrame(msg->getName());
 	macPkt->setBitLength(headerLength);
-	IMACProtocolControlInfo *const cInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
-	EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getDestinationAddress() << endl;
-	MACAddress dest = cInfo->getDestinationAddress();
+	SimpleLinkLayerControlInfo *cInfo = msg->getTag<SimpleLinkLayerControlInfo>();
+	EV_DETAIL << "CSMA received a message from upper layer, name is " << msg->getName() <<", CInfo removed, mac addr="<< cInfo->getDest() << endl;
+	MACAddress dest = cInfo->getDest();
 	macPkt->setDestAddr(dest);
-	delete cInfo;
 	macPkt->setSrcAddr(address);
 
 	if(useMACAcks) {
@@ -883,8 +881,7 @@ cPacket *CSMA::decapsMsg(CSMAFrame* macPkt) {
  */
 cObject* CSMA::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
 {
-    SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
+    SimpleLinkLayerControlInfo *cCtrlInfo = pMsg->ensureTag<SimpleLinkLayerControlInfo>();
     cCtrlInfo->setSrc(pSrcAddr);
-    pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }

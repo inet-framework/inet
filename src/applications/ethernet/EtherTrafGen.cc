@@ -22,6 +22,7 @@
 #include "EtherTrafGen.h"
 
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
@@ -189,10 +190,10 @@ void EtherTrafGen::sendBurstPackets()
         long len = packetLength->longValue();
         datapacket->setByteLength(len);
 
-        Ieee802Ctrl *etherctrl = new Ieee802Ctrl();
+        Ieee802Ctrl *etherctrl = datapacket->ensureTag<Ieee802Ctrl>();
+        SimpleLinkLayerControlInfo *cInfo = datapacket->ensureTag<SimpleLinkLayerControlInfo>();
         etherctrl->setEtherType(etherType);
-        etherctrl->setDest(destMACAddress);
-        datapacket->setControlInfo(etherctrl);
+        cInfo->setDest(destMACAddress);
 
         emit(sentPkSignal, datapacket);
         send(datapacket, "out");

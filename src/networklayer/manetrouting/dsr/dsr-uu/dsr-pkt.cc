@@ -19,6 +19,7 @@
 #else
 #include "dsr-uu-omnetpp.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 #endif
 
 #include "debug_dsr.h"
@@ -256,13 +257,12 @@ dsr_pkt * dsr_pkt_alloc(cPacket  * p)
         IPv4Datagram *dgram = dynamic_cast <IPv4Datagram *> (p);
         dp->encapsulate_protocol=0;
         dp->mac.raw = dp->mac_data;
-        cObject * ctrl = dgram->removeControlInfo();
-        if (ctrl!=NULL)
+
+        SimpleLinkLayerControlInfo *ctrlmac = dgram->getTag<SimpleLinkLayerControlInfo>();
+        if (ctrlmac)
         {
-            Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
             ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
             ctrlmac->getSrc().getAddressBytes(dp->mac.ethh->h_source);   /* destination eth addr */
-            delete ctrl;
         }
 
         // IPv4Address dest = dgram->getDestAddress();
@@ -389,7 +389,7 @@ dsr_pkt * dsr_pkt_alloc2(cPacket  * p, cObject *ctrl)
 
         if (ctrl!=NULL)
         {
-            Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
+            SimpleLinkLayerControlInfo *ctrlmac = p->getTag<SimpleLinkLayerControlInfo>();
             ctrlmac->getDest().getAddressBytes(dp->mac.ethh->h_dest);    /* destination eth addr */
             ctrlmac->getSrc().getAddressBytes(dp->mac.ethh->h_source);   /* destination eth addr */
             delete ctrl;

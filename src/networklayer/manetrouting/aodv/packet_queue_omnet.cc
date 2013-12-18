@@ -23,6 +23,7 @@
 #include "aodv_uu_omnet.h"
 #include "IPv4Datagram.h"
 #include "Ieee802Ctrl.h"
+#include "SimpleLinkLayerControlInfo.h"
 
 #define GARBAGE_COLLECT
 
@@ -427,14 +428,13 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                         // now Ip layer decremented again
                         if (isInMacLayer())
                         {
-                            Ieee802Ctrl *ctrl = new Ieee802Ctrl();
+                            SimpleLinkLayerControlInfo *ctrl = qp->p->ensureTag<SimpleLinkLayerControlInfo>();
                             ManetAddress nextHop;
                             int iface;
                             double cost;
                             getNextHop(dest_addr.s_addr, nextHop, iface, cost);
                             ctrl->setDest(nextHop.getMAC());
                             //TODO ctrl->setEtherType(...);
-                            qp->p->setControlInfo(ctrl);
                         }
                         /* Apparently, the link layer implementation can't handle
                          * a burst of packets. So to keep ARP happy, buffered
