@@ -23,6 +23,8 @@ Define_Module(Ieee8021DRelay);
 
 Ieee8021DRelay::Ieee8021DRelay()
 {
+    ifTable = NULL;
+    macTable = NULL;
     ie = NULL;
 }
 
@@ -37,7 +39,7 @@ void Ieee8021DRelay::initialize(int stage)
 
         // number of ports
         portCount = gate("ifOut", 0)->size();
-        if (gate("ifIn", 0)->size() != portCount)
+        if (gate("ifIn", 0)->size() != (int)portCount)
             error("the sizes of the ifIn[] and ifOut[] gate vectors must be the same");
     }
     else if (stage == 1)
@@ -174,7 +176,7 @@ void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
     EV_INFO << "Sending frame " << frame << " on output port " << portNum << "." << endl;
 
-    if (portNum >= portCount || portNum < 0)
+    if (portNum >= portCount)
         throw cRuntimeError("Output port %d doesn't exist!",portNum);
 
     EV_INFO << "Sending " << frame << " with destination = " << frame->getDest() << ", port = " << portNum << endl;
