@@ -27,6 +27,6 @@ simple MACAddressTable like IMACAddressTable
 {
     parameters:
         @display("i=block/table2");
-        double agingTime @unit("s") = default(30s);
+        double agingTime @unit("s") = default(120s);
         string addressTableFile = default("");
 }

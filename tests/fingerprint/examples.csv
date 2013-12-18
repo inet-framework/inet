@@ -6,16 +6,16 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            fdca-b320
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
-/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           3fc6-7fc2
-/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           208c-eeb8
-/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           9609-f636
+/examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           dba3-c768
+/examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           240b-eb73
+/examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0,                1000s,           652f-9cc6
 /examples/bgpv4/BGPOpen/,            -f omnetpp.ini -c config1 -r 0,                62s,             929a-284e
 /examples/bgpv4/BGPUpdate/,          -f omnetpp.ini -c config1 -r 0,                30s,             15fa-d633
 /examples/bgpv4/BGPandOSPF/,         -f omnetpp.ini -c config1 -r 0,                1000s,           af86-60b2
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           92b6-a340
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           df57-ee09
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            e0e9-245b
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            63f8-42fa
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            adf4-8c0d
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             c683-3d38
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             a0b9-c0de
