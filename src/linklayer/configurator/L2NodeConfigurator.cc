@@ -19,7 +19,6 @@
 //#include "RoutingTableAccess.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
-#include "opp_utils.h"   // for OPP_Global::getModuleByPath()
 
 Define_Module(L2NodeConfigurator);
 
@@ -41,11 +40,7 @@ void L2NodeConfigurator::initialize(int stage)
         if (!networkConfiguratorPath[0])
             networkConfigurator = NULL;
         else {
-#if OMNETPP_VERSION < 0x0403
-            cModule * module = OPP_Global::getModuleByPath(this, networkConfiguratorPath);  // compatibility
-#else
             cModule * module = getModuleByPath(networkConfiguratorPath);
-#endif
             if (!module)
                 throw cRuntimeError("Configurator module '%s' not found (check the 'l2ConfiguratorModule' parameter)", networkConfiguratorPath);
             networkConfigurator = check_and_cast<L2NetworkConfigurator *>(module);
