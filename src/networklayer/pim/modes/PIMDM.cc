@@ -26,159 +26,99 @@ using namespace std;
 typedef IPv4MulticastRoute::OutInterface OutInterface;
 typedef PIMMulticastRoute::PIMOutInterface PIMOutInterface;
 
-/**
- * SEND PIM JOIN PRUNE
- *
- * The method is used to create PIMJoinPrune Packet and send it to next hop router.
- *
- * @param nextHop IP Address of receiver.
- * @param src IP address of multicast source.
- * @param grp IP address of multicast group.
- * @param intId ID of outgoing interface.
- * @see PIMJoinPrune()
- */
-void PIMDM::sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
+void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
 {
-	EV << "pimDM::sendPimJoinPrune" << endl;
-	EV << "UpstreamNeighborAddress: " << nextHop << ", Source: " << src << ", Group: " << grp << ", IntId: " << intId << endl;
+	EV_INFO << "Sending Prune(source = " << src << ", group = " << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-	PIMJoinPrune *msg = new PIMJoinPrune();
-	msg->setName("PIMJoinPrune");
-	msg->setUpstreamNeighborAddress(nextHop);
-	msg->setHoldTime(pruneInterval);
-	msg->setMulticastGroupsArraySize(1);
-
-	//FIXME change to add also join groups
-	// we do not need it at this time
+	PIMJoinPrune *packet = new PIMJoinPrune("PIMJoinPrune");
+	packet->setUpstreamNeighborAddress(nextHop);
+	packet->setHoldTime(pruneInterval);
 
 	// set multicast groups
-	MulticastGroup *group = new MulticastGroup();
-    EncodedAddress address;
-	group->setGroupAddress(grp);
-	group->setJoinedSourceAddressArraySize(0);
-	group->setPrunedSourceAddressArraySize(1);
+    packet->setMulticastGroupsArraySize(1);
+	MulticastGroup &group = packet->getMulticastGroups(0);
+	group.setGroupAddress(grp);
+	group.setPrunedSourceAddressArraySize(1);
+    EncodedAddress &address = group.getPrunedSourceAddress(0);
 	address.IPaddress = src;
-	group->setPrunedSourceAddress(0, address);
-	msg->setMulticastGroups(0, *group);
 
-	// set IP Control info
-	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-	ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
-	ctrl->setProtocol(IP_PROT_PIM);
-	ctrl->setTimeToLive(1);
-	ctrl->setInterfaceId(intId);
-	msg->setControlInfo(ctrl);
-	send(msg, "ipOut");
+	sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, intId);
 }
 
-/**
- * SEND PIM GRAFT ACK
- *
- * The method is used to create PIMGraftAck packet and send it to next hop router.
- * PIMGraftAck pkt is copy of received PIMGraft pkt. Only type and IP control info
- * has to be changed.
- *
- * @param msg Pointer to PIMGraft packet.
- * @see PIMGraftAck()
+/*
+ * PIM Graft messages use the same format as Join/Prune messages, except
+ * that the Type field is set to 6.  The source address MUST be in the
+ * Join section of the message.  The Hold Time field SHOULD be zero and
+ * SHOULD be ignored when a Graft is received.
  */
-void PIMDM::sendPimGraftAck(PIMGraftAck *msg)
+void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
 {
-	msg->setName("PIMGraftAck");
-	msg->setType(GraftAck);
+    EV_INFO << "Sending Graft(source = " << src << ", group = " << grp << ") message to neighbor '" << nextHop << "' on interface '" << intId << "'\n";
 
-	// set IP Control info
-	IPv4ControlInfo *oldCtrl = check_and_cast<IPv4ControlInfo*>(msg->removeControlInfo());
-	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-	ctrl->setDestAddr(oldCtrl->getSrcAddr());
-	ctrl->setSrcAddr(oldCtrl->getDestAddr());
-	ctrl->setProtocol(103);
-	ctrl->setTimeToLive(1);
-	ctrl->setInterfaceId(oldCtrl->getInterfaceId());
-	delete oldCtrl;
-	msg->setControlInfo(ctrl);
-	send(msg, "ipOut");
-}
-
-/**
- * SEND PIM GRAFT
- *
- * The method is used to create PIMGraft packet and send it to next hop router.
- * Only  JoinedSource part of message is used, because Graft pkt is sent when
- * router wants to join to multicast tree again.
- *
- * @param nextHop IP Address of receiver.
- * @param src IP address of multicast source.
- * @param grp IP address of multicast group.
- * @param intId ID of outgoing interface.
- * @see PIMGraft()
- */
-void PIMDM::sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
-{
-	EV << "pimDM::sendPimGraft" << endl;
-	EV << "UpstreamNeighborAddress: " << nextHop << ", Source: " << src << ", Group: " << grp << ", IntId: " << intId << endl;
-
-	PIMGraft *msg = new PIMGraft();
-	msg->setName("PIMGraft");
+	PIMGraft *msg = new PIMGraft("PIMGraft");
 	msg->setHoldTime(0);
 	msg->setUpstreamNeighborAddress(nextHop);
-	msg->setMulticastGroupsArraySize(1);
 
-	// set multicast groups
-	MulticastGroup *group = new MulticastGroup();
-	EncodedAddress address;
-	group->setGroupAddress(grp);
-	group->setJoinedSourceAddressArraySize(1);
-	group->setPrunedSourceAddressArraySize(0);
+    msg->setMulticastGroupsArraySize(1);
+	MulticastGroup &group = msg->getMulticastGroups(0);
+	group.setGroupAddress(grp);
+	group.setJoinedSourceAddressArraySize(1);
+    EncodedAddress &address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
-	group->setJoinedSourceAddress(0, address);
-	msg->setMulticastGroups(0, *group);
 
-	// set IP Control info
-	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-	ctrl->setDestAddr(nextHop);
-	//ctrl->setProtocol(IP_PROT_PIM);
-	ctrl->setProtocol(103);
-	ctrl->setTimeToLive(1);
-	ctrl->setInterfaceId(intId);
-	msg->setControlInfo(ctrl);
-	send(msg, "ipOut");
+	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, nextHop, intId);
 }
 
-/**
- * SEND PIM STATE REFRESH
- *
- * The method is used to create PIMStateRefresh packet and send it to next hop router.
- * By using the message we do not need to flood the network every 3 minutes.
- *
- * @param originator IP Address of source router.
- * @param src IP address of multicast source.
- * @param grp IP address of multicast group.
- * @param intId ID of outgoing interface.
- * @param P Indicator of pruned outgoing interface. If interface is pruned it is set to 1, otherwise to 0.
- * @see PIMStateRefresh()
+/*
+ * PIM Graft Ack messages are identical in format to the received Graft
+ * message, except that the Type field is set to 7.  The Upstream
+ * Neighbor Address field SHOULD be set to the sender of the Graft
+ * message and SHOULD be ignored upon receipt.
  */
-void PIMDM::sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P)
+void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
 {
-	EV << "pimDM::sendPimStateRefresh" << endl;
+    EV_INFO << "Sending GraftAck message.\n";
 
-	PIMStateRefresh *msg = new PIMStateRefresh();
-	msg->setName("PIMStateRefresh");
+    IPv4ControlInfo *oldCtrl = check_and_cast<IPv4ControlInfo*>(graftPacket->removeControlInfo());
+    IPv4Address destAddr = oldCtrl->getSrcAddr();
+    IPv4Address srcAddr = oldCtrl->getDestAddr();
+    int outInterfaceId = oldCtrl->getInterfaceId();
+    delete oldCtrl;
+
+    PIMGraftAck *msg = new PIMGraftAck();
+    *((PIMGraft*)msg) = *graftPacket;
+    msg->setName("PIMGraftAck");
+    msg->setType(GraftAck);
+
+    sendToIP(msg, srcAddr, destAddr, outInterfaceId);
+}
+
+void PIMDM::sendStateRefreshPacket(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P)
+{
+    EV_INFO << "Sending StateRefresh(source = " << src << ", group = " << grp << ") message on interface '" << intId << "'\n";
+
+	PIMStateRefresh *msg = new PIMStateRefresh("PIMStateRefresh");
 	msg->setGroupAddress(grp);
 	msg->setSourceAddress(src);
 	msg->setOriginatorAddress(originator);
 	msg->setInterval(stateRefreshInterval);
 	msg->setP(P);
 
-	// set IP Control info
-	IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-	ctrl->setDestAddr(grp);
-	//ctrl->setProtocol(IP_PROT_PIM);
-	ctrl->setProtocol(103);
-	ctrl->setTimeToLive(1);
-	ctrl->setInterfaceId(intId);
-	msg->setControlInfo(ctrl);
-	send(msg, "ipOut");
+	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, grp, intId);
 }
+
+void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
+{
+    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
+    ctrl->setSrcAddr(srcAddr);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setProtocol(IP_PROT_PIM);
+    ctrl->setTimeToLive(1);
+    ctrl->setInterfaceId(outInterfaceId);
+    packet->setControlInfo(ctrl);
+    send(packet, "ipOut");
+}
+
 
 /**
  * CREATE PRUNE TIMER
@@ -263,6 +203,11 @@ cMessage *PIMDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
 	return timer;
 }
 
+void PIMDM::restartTimer(cMessage *timer, double interval)
+{
+    cancelEvent(timer);
+    scheduleAt(simTime() + interval, timer);
+}
 
 /**
  * PROCESS GRAFT PACKET
@@ -282,14 +227,12 @@ cMessage *PIMDM::createStateRefreshTimer(IPv4Address source, IPv4Address group)
  * @see PIMgrt()
  * @see processJoinPruneGraftPacket()
  */
-void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Address sender, int intId)
+void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId)
 {
-	EV << "pimDM::processGraftPacket" << endl;
+	EV_DEBUG << "Processing Graft, source=" << source << ", group=" << group << ", sender=" << sender << "incoming if=" << intId << endl;
 
 	PIMMulticastRoute *route = getRouteFor(group, source);
 	UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-
-	bool forward = false;
 
 	// check if message come to non-RPF interface
 	if (upstream->getInterfaceId() == intId)
@@ -299,66 +242,36 @@ void PIMDM::processGraftPacket(IPv4Address source, IPv4Address group, IPv4Addres
 	}
 
 	// find outgoing interface to neighbor
-	for (unsigned int l = 0; l < route->getNumOutInterfaces(); l++)
-	{
-	    DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->getPIMOutInterface(l));
-		if(outInt->getInterfaceId() == intId)
-		{
-			forward = true;
-			if (outInt->forwarding == PIMMulticastRoute::Pruned)
-			{
-				EV << "Interface " << outInt->getInterfaceId() << " transit to forwarding state (Graft)." << endl;
-				outInt->forwarding = PIMMulticastRoute::Forward;
+    DownstreamInterface *downstream = dynamic_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
+    if (downstream)
+    {
+        if (downstream->forwarding == PIMMulticastRoute::Pruned)
+        {
+            EV << "Interface " << downstream->getInterfaceId() << " transit to forwarding state (Graft)." << endl;
+            downstream->forwarding = PIMMulticastRoute::Forward;
 
-				//cancel Prune Timer
-				cMessage* timer = outInt->pruneTimer;
-				if (timer)
-				{
-                    cancelEvent(timer);
-                    delete static_cast<TimerContext*>(timer->getContextPointer());
-                    delete timer;
-                    outInt->pruneTimer = NULL;
-				}
-			}
-		}
-	}
+            //cancel Prune Timer
+            if (downstream->pruneTimer)
+            {
+                cancelAndDeleteTimer(downstream->pruneTimer);
+                downstream->pruneTimer = NULL;
+            }
+        }
+    }
 
 	// if all route was pruned, remove prune flag
 	// if upstrem is not source, send Graft message
-	if (route->isFlagSet(PIMMulticastRoute::P) && forward && !upstream->graftRetryTimer)
+	if (route->isFlagSet(PIMMulticastRoute::P) && downstream && !upstream->graftRetryTimer)
 	{
 		if (!route->isFlagSet(PIMMulticastRoute::A))
 		{
 			EV << "Route is not pruned any more, send Graft to upstream" << endl;
 			UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-			sendPimGraft(inInterface->nextHop, source, group, inInterface->getInterfaceId());
+			sendGraftPacket(inInterface->nextHop, source, group, inInterface->getInterfaceId());
 			upstream->graftRetryTimer = createGraftRetryTimer(source, group);
 		}
 		else
 			route->clearFlag(PIMMulticastRoute::P);
-	}
-}
-
-/**
- * PROCESS GRAFT ACK PACKET
- *
- * The method is used to process PIMGraftAck packet. Packet means that the router was successfully joined
- * to multicast tree. Route is now in forwarding state and Graft Retry timer was canceled.
- *
- * @param route Pointer to multicast route which GraftAck belongs to.
- * @see processJoinPruneGraftPacket()
- * @see PIMgrt()
- */
-void PIMDM::processGraftAckPacket(PIMMulticastRoute *route)
-{
-    UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-	if (upstream->graftRetryTimer)
-	{
-		cancelEvent(upstream->graftRetryTimer);
-		delete static_cast<TimerContext*>(upstream->graftRetryTimer->getContextPointer());
-		delete upstream->graftRetryTimer;
-		upstream->graftRetryTimer = NULL;
-		route->clearFlag(PIMMulticastRoute::P);
 	}
 }
 
@@ -377,145 +290,163 @@ void PIMDM::processGraftAckPacket(PIMMulticastRoute *route)
  * @see sendPimJoinPrune()
  * @see PIMpt()
  */
-void PIMDM::processPrunePacket(PIMMulticastRoute *route, int intId, int holdTime)
+void PIMDM::processPrune(PIMMulticastRoute *route, int intId, int holdTime)
 {
-	EV << "pimDM::processPrunePacket" << endl;
-	bool change = false;
+	EV_INFO << "Processing Prune " << endl;
 
 	// we find correct outgoing interface
     DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
-	if (outInt)
-	{
-		// if interface was already pruned, restart Prune Timer
-		if (outInt->forwarding == PIMMulticastRoute::Pruned)
-		{
-			EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
-			cMessage *timer = outInt->pruneTimer;
-			cancelEvent(timer);
-			scheduleAt(simTime() + holdTime, timer);
-		}
-		// if interface is forwarding, transit its state to pruned and set Prune timer
-		else
-		{
-			EV << "Outgoing interfaces is forwarding now -> change to Pruned." << endl;
-			outInt->forwarding = PIMMulticastRoute::Pruned;
-			cMessage *timer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, holdTime);
-			outInt->pruneTimer = timer;
-			change = true;
-		}
-	}
+    if (!outInt)
+        return;
 
-	// if there is no forwarding outgoing int, transit route to pruned state
-	if (route->isOilistNull() && change)
-	{
-		EV << "Route is not forwarding any more, send Prune to upstream." << endl;
-		route->setFlags(PIMMulticastRoute::P);
+    // if interface was already pruned, restart Prune Timer
+    if (outInt->forwarding == PIMMulticastRoute::Pruned)
+    {
+        EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
+        restartTimer(outInt->pruneTimer, holdTime);
+    }
+    // if interface is forwarding, transit its state to pruned and set Prune timer
+    else
+    {
+        EV << "Outgoing interfaces is forwarding now -> change to Pruned." << endl;
+        outInt->forwarding = PIMMulticastRoute::Pruned;
+        outInt->pruneTimer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, holdTime);
 
-		// if GRT is running now, do not send Prune msg
-	    UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-		if (route->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
-		{
-			cancelEvent(upstream->graftRetryTimer);
-			delete upstream->graftRetryTimer;
-			upstream->graftRetryTimer = NULL;
-		}
-		else if (!route->isFlagSet(PIMMulticastRoute::A))
-		{
-		    UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-			sendPimJoinPrune(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
-		}
-	}
+        // if there is no forwarding outgoing int, transit route to pruned state
+        if (route->isOilistNull())
+        {
+            EV << "Route is not forwarding any more, send Prune to upstream." << endl;
+            route->setFlags(PIMMulticastRoute::P);
+
+            // if GRT is running now, do not send Prune msg
+            UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
+            if (route->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
+            {
+                cancelAndDeleteTimer(upstream->graftRetryTimer);
+                upstream->graftRetryTimer = NULL;
+            }
+            else if (!route->isFlagSet(PIMMulticastRoute::A))
+            {
+                UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
+                sendPrunePacket(upstream->nextHop, route->getOrigin(), route->getMulticastGroup(), upstream->getInterfaceId());
+            }
+        }
+    }
 }
 
-
-/**
- * PROCESS JOIN PRUNE GRAFT PACKET
- *
- * The method is used to process PIM JoinePrune, PIMGraft, and PIMGraftAck packet. All these packets have
- * the same structure. If packet is for this router the method goes through all multicast groups in message.
- * There could be list of joined and pruned sources for each multicast group. Joine Prune message can contains
- * both. Graft and Graft Ack can contain only join list. According to type of packet, appropriate method is
- * called to process info.
- *
- * @param pkt Pointer to packet.
- * @param type Type of packet.
- * @see processGraftPacket()
- * @see processGraftAckPacket()
- * @see processPrunePacket()
- * @see sendPimGraftAck()
- */
-void PIMDM::processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type)
+void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
 {
-	EV << "pimDM::processJoinePruneGraftPacket" << endl;
+    EV_INFO << "Received JoinPrune packet.\n";
 
-	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-	IPv4Address sender = ctrl->getSrcAddr();
-	InterfaceEntry * nt = rt->getInterfaceForDestAddr(sender);
-	vector<PIMNeighbor*> neighbors = pimNbt->getNeighborsOnInterface(nt->getInterfaceId());
-	IPv4Address addr = nt->ipv4Data()->getIPAddress();
+    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+    IPv4Address sender = ctrlInfo->getSrcAddr();
+    InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(sender);
 
-	// does packet belong to this router?
-	if (pkt->getUpstreamNeighborAddress() != nt->ipv4Data()->getIPAddress() && type != GraftAck)
-	{
-		delete pkt;
-		return;
-	}
+    // does packet belong to this router?
+    if (!rpfInterface || pkt->getUpstreamNeighborAddress() != rpfInterface->ipv4Data()->getIPAddress())
+    {
+        delete pkt;
+        return;
+    }
 
-	// go through list of multicast groups
-	for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
-	{
-		MulticastGroup group = pkt->getMulticastGroups(i);
-		IPv4Address groupAddr = group.getGroupAddress();
+    int numRpfNeighbors = pimNbt->getNumNeighborsOnInterface(rpfInterface->getInterfaceId());
 
-		// go through list of joined sources
-		//EV << "JoinedSourceAddressArraySize: " << group.getJoinedSourceAddressArraySize() << endl;
-		for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
-		{
-			IPv4Address source = (group.getJoinedSourceAddress(j)).IPaddress;
-			PIMMulticastRoute *route = getRouteFor(groupAddr, source);
+    // go through list of multicast groups
+    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    {
+        MulticastGroup group = pkt->getMulticastGroups(i);
+        IPv4Address groupAddr = group.getGroupAddress();
 
-			if (type == JoinPrune)
-			{
-				//FIXME join action
-				// only if there is more than one PIM neighbor on one interface
-				// interface change to forwarding state
-				// cancel Prune Timer
-				// send Graft to upstream
-			}
-			else if (type == Graft)
-				processGraftPacket(source, groupAddr, sender, nt->getInterfaceId());
-			else if (type == GraftAck)
-				processGraftAckPacket(route);
-		}
+        // go through list of joined sources
+        for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
+        {
+            //FIXME join action
+            // only if there is more than one PIM neighbor on one interface
+            // interface change to forwarding state
+            // cancel Prune Timer
+            // send Graft to upstream
+        }
 
-		// go through list of pruned sources (only for PIM Join Prune msg)
-		if (type == JoinPrune)
-		{
-			//EV << "JoinedPrunedAddressArraySize: " << group.getPrunedSourceAddressArraySize() << endl;
-			for(unsigned int k = 0; k < group.getPrunedSourceAddressArraySize(); k++)
-			{
-				IPv4Address source = (group.getPrunedSourceAddress(k)).IPaddress;
-				PIMMulticastRoute *route = getRouteFor(groupAddr, source);
+        // go through list of pruned sources
+        for(unsigned int k = 0; k < group.getPrunedSourceAddressArraySize(); k++)
+        {
+            EncodedAddress &source = group.getPrunedSourceAddress(k);
+            PIMMulticastRoute *route = getRouteFor(groupAddr, source.IPaddress);
 
-				if (source != route->getOrigin())
-					continue;
+            // if there could be more than one PIM neighbor on interface
+            if (numRpfNeighbors > 1)
+            {
+                ; //FIXME set PPT timer
+            }
+            // if there is only one PIM neighbor on interface
+            else
+                processPrune(route, rpfInterface->getInterfaceId(), pkt->getHoldTime());
+        }
+    }
 
-				// if there could be more than one PIM neighbor on interface
-				if (neighbors.size() > 1)
-				{
-					; //FIXME set PPT timer
-				}
-				// if there is only one PIM neighbor on interface
-				else
-					processPrunePacket(route, nt->getInterfaceId(), pkt->getHoldTime());
-			}
-		}
-	}
-
-	// Send GraftAck for this Graft message
-	if (type == Graft)
-		sendPimGraftAck(check_and_cast<PIMGraftAck*>(pkt));
+    delete pkt;
 }
+
+void PIMDM::processGraftPacket(PIMGraft *pkt)
+{
+    EV_INFO << "Received Graft packet.\n";
+
+    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+    IPv4Address sender = ctrl->getSrcAddr();
+    InterfaceEntry * rpfInterface = rt->getInterfaceForDestAddr(sender);
+
+    // does packet belong to this router?
+    if (pkt->getUpstreamNeighborAddress() != rpfInterface->ipv4Data()->getIPAddress())
+    {
+        delete pkt;
+        return;
+    }
+
+    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    {
+        MulticastGroup &group = pkt->getMulticastGroups(i);
+        IPv4Address groupAddr = group.getGroupAddress();
+
+        for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
+        {
+            EncodedAddress &source = group.getJoinedSourceAddress(j);
+            processGraft(source.IPaddress, groupAddr, sender, rpfInterface->getInterfaceId());
+        }
+    }
+
+    // Send GraftAck for this Graft message
+    sendGraftAckPacket(pkt);
+
+    delete pkt;
+}
+
+void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
+{
+    EV_INFO << "Received GraftAck packet.\n";
+
+    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    {
+        MulticastGroup &group = pkt->getMulticastGroups(i);
+        IPv4Address groupAddr = group.getGroupAddress();
+
+        for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
+        {
+            EncodedAddress &source = group.getJoinedSourceAddress(j);
+            PIMMulticastRoute *route = getRouteFor(groupAddr, source.IPaddress);
+
+            UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
+            if (upstream->graftRetryTimer)
+            {
+                cancelAndDeleteTimer(upstream->graftRetryTimer);
+                upstream->graftRetryTimer = NULL;
+                route->clearFlag(PIMMulticastRoute::P);
+            }
+        }
+    }
+
+    delete pkt;
+}
+
 
 /**
  * PROCESS STATE REFRESH PACKET
@@ -562,7 +493,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 		if (!inInterface->graftRetryTimer)
 		{
 		    UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-			sendPimJoinPrune(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
+			sendPrunePacket(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
 		}
 		else
 		{
@@ -590,27 +521,28 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 			// P = false
 			pruneIndicator = false;
 		}
-		sendPimStateRefresh(pkt->getOriginatorAddress(), pkt->getSourceAddress(), pkt->getGroupAddress(), outInt->getInterfaceId(), pruneIndicator);
+		sendStateRefreshPacket(pkt->getOriginatorAddress(), pkt->getSourceAddress(), pkt->getGroupAddress(), outInt->getInterfaceId(), pruneIndicator);
 	}
 	delete pkt;
 }
 
+void PIMDM::processAssertPacket(PIMAssert *pkt)
+{
+    EV_INFO << "Received Assert packet.\n";
 
-/**
- * PROCESS PRUNE TIMER
- *
+    ASSERT(false); // not yet implemented
+
+    delete pkt;
+}
+
+/*
  * The method is used to process PIM Prune timer. It is (S,G,I) timer. When Prune timer expires, it
  * means that outgoing interface transits back to forwarding state. If the router is pruned from
  * multicast tree, join again.
- *
- * @param timer Pointer to Prune timer.
- * @see PIMpt()
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
  */
 void PIMDM::processPruneTimer(cMessage *timer)
 {
-	EV << "pimDM::processPruneTimer" << endl;
+	EV_INFO << "PruneTimer expired.\n";
 
 	TimerContext *context = static_cast<TimerContext*>(timer->getContextPointer());
 	IPv4Address source = context->source;
@@ -619,21 +551,18 @@ void PIMDM::processPruneTimer(cMessage *timer)
 
 	// find correct (S,G) route which timer belongs to
 	PIMMulticastRoute *route = getRouteFor(group, source);
-	if (route == NULL)
-	{
-	    delete context;
-		delete timer;
-		return;
-	}
+	ASSERT(route);
 
 	// state of interface is changed to forwarding
-    DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
-	if (outInt)
+    DownstreamInterface *downstream = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
+	if (downstream)
 	{
+	    ASSERT(timer == downstream->pruneTimer);
+
 	    delete context;
 		delete timer;
-		outInt->pruneTimer = NULL;
-		outInt->forwarding = PIMMulticastRoute::Forward;
+		downstream->pruneTimer = NULL;
+		downstream->forwarding = PIMMulticastRoute::Forward;
 		route->clearFlag(PIMMulticastRoute::P);
 
 		// if the router is pruned from multicast tree, join again
@@ -652,96 +581,53 @@ void PIMDM::processPruneTimer(cMessage *timer)
 	}
 }
 
-/**
- * PROCESS GRAFT RETRY TIMER
- *
- * The method is used to process PIM Graft Retry Timer. It is (S,G) timer. When Graft Retry timer expires,
- * it means that the router did'n get GraftAck message from upstream router. The router has to send Prune
- * packet again.
- *
- * @param timer Pointer to Graft Retry timer.
- * @see PIMgrt()
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
- */
 void PIMDM::processGraftRetryTimer(cMessage *timer)
 {
+    EV_INFO << "GraftRetryTimer expired.\n";
+
+    // send Graft message to upstream router
     TimerContext *context = static_cast<TimerContext*>(timer->getContextPointer());
 	PIMMulticastRoute *route = getRouteFor(context->group, context->source);
-	UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-	sendPimGraft(inInterface->nextHop, context->source, context->group, inInterface->getInterfaceId());
-	timer = createGraftRetryTimer(context->source, context->group); // XXX memory leak
+	UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
+	sendGraftPacket(upstream->nextHop, context->source, context->group, upstream->getInterfaceId());
+    scheduleAt(simTime() + graftRetryInterval, timer);
 }
 
-/**
- * PROCESS GRAFT RETRY TIMER
- *
- * The method is used to process PIM Source Active Timer. It is (S,G) timer. When Source Active Timer expires,
- * route is removed from multicast routing table.
- *
- * @param timer Pointer to Source Active Timer.
- * @see PIMsat()
- */
 void PIMDM::processSourceActiveTimer(cMessage * timer)
 {
-	EV << "pimDM::processSourceActiveTimer: route will be deleted" << endl;
+    EV_INFO << "SourceActiveTimer expired.\n";
+
+    // delete the route, because there are no more packets
 	TimerContext *context = static_cast<TimerContext*>(timer->getContextPointer());
 	PIMMulticastRoute *route = getRouteFor(context->group, context->source);
-	deleteMulticastRoute(route);
+	rt->deleteMulticastRoute(route);
 }
 
-/**
- * PROCESS STATE REFRESH TIMER
- *
- * The method is used to process PIM State Refresh Timer. It is (S,G) timer and it is used only on router
- * whoch is connected directly to the source of multicast. When State Refresh Timer expires, the State Refresh
- * messages are sent to all outgoing interfaces. Prune indicator in each msg is set according to state of the
- * outgoing interface. State Refresh Timer is then reset.
- *
- * @param timer Pointer to Source Active Timer.
- * @see PIMsrt()
- * @see sendPimStateRefresh()
- * @see createStateRefreshTimer()
+/*
+ * State Refresh Timer is used only on router which is connected directly to the source of multicast.
+ * When State Refresh Timer expires, State Refresh messages are sent on all downstream interfaces.
  */
 void PIMDM::processStateRefreshTimer(cMessage *timer)
 {
-	EV << "pimDM::processStateRefreshTimer" << endl;
+	EV_INFO << "StateRefreshTimer expired, sending StateRefresh packets on downstream interfaces.\n";
+
 	TimerContext *context = static_cast<TimerContext*>(timer->getContextPointer());
 	PIMMulticastRoute *route = getRouteFor(context->group, context->source);
-	bool pruneIndicator;
 
 	for (unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
 	{
-	    DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->getPIMOutInterface(i));
-		if (outInt->forwarding == PIMMulticastRoute::Pruned)
-		{
-			// P = true
-			pruneIndicator = true;
-			// reset PT
-			cancelEvent(outInt->pruneTimer);
-			scheduleAt(simTime() + pruneInterval, outInt->pruneTimer);
-		}
-		else if (outInt->forwarding == PIMMulticastRoute::Forward)
-		{
-			pruneIndicator = false;
-		}
-		int intId = outInt->getInterfaceId();
-		sendPimStateRefresh(ift->getInterfaceById(intId)->ipv4Data()->getIPAddress(), context->source, context->group, intId, pruneIndicator);
+	    DownstreamInterface *downstream = check_and_cast<DownstreamInterface*>(route->getPIMOutInterface(i));
+	    bool isPruned = downstream->forwarding == PIMMulticastRoute::Pruned;
+	    if (isPruned)
+			restartTimer(downstream->pruneTimer, pruneInterval);
+
+	    IPv4Address originator = downstream->getInterface()->ipv4Data()->getIPAddress();
+		sendStateRefreshPacket(originator, context->source, context->group, downstream->getInterfaceId(), isPruned);
 	}
+
     scheduleAt(simTime() + stateRefreshInterval, timer);
 }
 
-/**
- * PROCESS PIM TIMER
- *
- * The method is used to process PIM timers. According to type of PIM timer, the timer is sent to
- * appropriate method.
- *
- * @param timer Pointer to PIM timer.
- * @see PIMTimer()
- * @see processPruneTimer()
- * @see processGraftRetryTimer()
- */
 void PIMDM::processPIMTimer(cMessage *timer)
 {
 	EV << "pimDM::processPIMTimer: ";
@@ -786,47 +672,30 @@ void PIMDM::processPIMTimer(cMessage *timer)
 	}
 }
 
-/**
- * PROCESS PIM PACKET
- *
- * The method is used to process PIM packets. According to type of PIM packet, the packet is sent to
- * appropriate method.
- *
- * @param pkt Pointer to PIM packet.
- * @see PIMPacket()
- * @see processJoinPruneGraftPacket()
- */
-void PIMDM::processPIMPkt(PIMPacket *pkt)
+void PIMDM::processPIMPacket(PIMPacket *pkt)
 {
-	EV << "pimDM::processPIMPkt: ";
-
 	switch(pkt->getType())
 	{
 	    case Hello:
 	        processHelloPacket(check_and_cast<PIMHello*>(pkt));
 	        break;
 		case JoinPrune:
-			EV << "JoinPrune" << endl;
-			processJoinPruneGraftPacket(check_and_cast<PIMJoinPrune *> (pkt), (PIMPacketType) pkt->getType());
+			processJoinPrunePacket(check_and_cast<PIMJoinPrune*>(pkt));
 			break;
 		case Assert:
-			EV << "Assert" << endl;
-			// FIXME for future use
+			processAssertPacket(check_and_cast<PIMAssert*>(pkt));
 			break;
 		case Graft:
-			EV << "Graft" << endl;
-			processJoinPruneGraftPacket(check_and_cast<PIMJoinPrune *> (pkt), (PIMPacketType) pkt->getType());
+			processGraftPacket(check_and_cast<PIMGraft*>(pkt));
 			break;
 		case GraftAck:
-			EV << "GraftAck" << endl;
-			processJoinPruneGraftPacket(check_and_cast<PIMJoinPrune *> (pkt), (PIMPacketType) pkt->getType());
+			processGraftAckPacket(check_and_cast<PIMGraftAck*>(pkt));
 			break;
 		case StateRefresh:
-			EV << "StateRefresh" << endl;
 			processStateRefreshPacket(check_and_cast<PIMStateRefresh *> (pkt));
 			break;
 		default:
-			EV << "BAD TYPE, DROPPED" << endl;
+			EV_WARN << "Dropping packet " << pkt->getName() << ".\n";
 			delete pkt;
 			break;
 	}
@@ -859,22 +728,13 @@ void PIMDM::handleMessage(cMessage *msg)
    {
 	   EV << "PIMDM::handleMessage: PIM-DM packet" << endl;
 	   PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
-	   processPIMPkt(pkt);
+	   processPIMPacket(pkt);
    }
    // wrong message, mistake
    else
 	   EV << "PIMDM::handleMessage: Wrong message" << endl;
 }
 
-/**
- * INITIALIZE
- *
- * The method initializes PIM-DM module. It get access to all needed tables and other objects.
- * It subscribes to important notifications. If there is no PIM interface, all module can be
- * disabled.
- *
- * @param stage Stage of initialization.
- */
 void PIMDM::initialize(int stage)
 {
     PIMBase::initialize(stage);
@@ -882,56 +742,31 @@ void PIMDM::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         pruneInterval = par("pruneInterval");
+        pruneLimitInterval = par("pruneLimitInterval");
         graftRetryInterval = par("graftRetryInterval");
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
-        // is PIM enabled?
-        if (pimIft->getNumInterfaces() == 0)
+        // subscribe for notifications
+        cModule *host = findContainingNode(this);
+        if (host != NULL)
         {
-            EV << "PIM is NOT enabled on device " << endl;
-        }
-        else
-        {
-            // subscribe for notifications
-            cModule *host = findContainingNode(this);
-            if (host != NULL)
-            {
-                host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-                host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-                host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-                host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-                host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-                //host->subscribe(NF_IPv4_RPF_CHANGE, this);
-                host->subscribe(NF_ROUTE_ADDED, this);
-                host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-            }
+            host->subscribe(NF_IPv4_NEW_MULTICAST, this);
+            host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
+            host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+            host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
+            host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+            //host->subscribe(NF_IPv4_RPF_CHANGE, this);
+            host->subscribe(NF_ROUTE_ADDED, this);
+            host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
         }
 	}
 }
 
-/**
- * RECEIVE CHANGE NOTIFICATION
- *
- * The method from class Notification Board is used to catch its events.
- *
- * @param category Category of notification.
- * @param details Additional information for notification.
- * @see newMulticast()
- * @see newMulticastAddr()
- */
 void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
 {
-	// ignore notifications during initialize
-	if (simulation.getContextType()==CTX_INITIALIZE)
-		return;
-
-	// PIM needs addition info for each notification
-	if (details == NULL)
-		return;
-
 	Enter_Method_Silent();
     printNotificationBanner(signalID, details);
 	IPv4Datagram *datagram;
@@ -944,7 +779,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         datagram = check_and_cast<IPv4Datagram*>(details);
         IPv4Address srcAddr = datagram->getSrcAddress();
         IPv4Address destAddr = datagram->getDestAddress();
-        newMulticast(srcAddr, destAddr);
+        unroutableMulticastPacketArrived(srcAddr, destAddr);
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED)
@@ -953,7 +788,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            newMulticastAddr(pimInterface, info->groupAddress);
+            multicastReceiverAdded(pimInterface, info->groupAddress);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
     else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
@@ -962,7 +797,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            oldMulticastAddr(pimInterface, info->groupAddress);
+            multicastReceiverRemoved(pimInterface, info->groupAddress);
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF)
@@ -970,7 +805,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         EV << "pimDM::receiveChangeNotification - Data appears on non-RPF interface." << endl;
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
-        dataOnNonRpf(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceId():-1);
+        multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceId():-1);
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF)
@@ -979,16 +814,32 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            dataOnRpf(datagram);
+            multicastPacketArrivedOnRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface ? pimInterface->getInterfaceId():-1);
     }
     // RPF interface has changed
     else if (signalID == NF_ROUTE_ADDED)
     {
         EV << "pimDM::receiveChangeNotification - RPF interface has changed." << endl;
         IPv4Route *entry = check_and_cast<IPv4Route*>(details);
-        vector<PIMMulticastRoute*> routes = getRoutesForSource(entry->getDestination());
-        for (unsigned int i = 0; i < routes.size(); i++)
-            rpfIntChange(routes[i]);
+        IPv4Address routeSource = entry->getDestination();
+        IPv4Address routeNetmask = entry->getNetmask();
+
+        int numRoutes = rt->getNumMulticastRoutes();
+        for (int i = 0; i < numRoutes; i++)
+        {
+            // find multicast routes whose source are on the destination of the new unicast route
+            PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+            if (route && IPv4Address::maskedAddrAreEqual(route->getOrigin(), routeSource, routeNetmask))
+            {
+                IPv4Address source = route->getOrigin();
+                InterfaceEntry *newRpfInterface = rt->getInterfaceForDestAddr(source);
+                UpstreamInterface *oldRpfInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
+
+                // is there any change?
+                if (newRpfInterface != oldRpfInterface->getInterface())
+                    rpfInterfaceHasChanged(route, newRpfInterface);
+            }
+        }
     }
 }
 
@@ -1005,28 +856,24 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
  * @see sendPimGraft()
  * @see createGraftRetryTimer()
  */
-void PIMDM::rpfIntChange(PIMMulticastRoute *route)
+void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpf)
 {
 	IPv4Address source = route->getOrigin();
 	IPv4Address group = route->getMulticastGroup();
-	InterfaceEntry *newRpf = rt->getInterfaceForDestAddr(source);
 	int rpfId = newRpf->getInterfaceId();
 	UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
 
-	// is there any change?
-	if (rpfId == inInterface->getInterfaceId())
-		return;
 	EV << "New RPF int for group " << group << " source " << source << " is " << rpfId << endl;
 
 	// set new RPF
 	InterfaceEntry *oldRpfInt = route->getInInterface() ? route->getInInterface()->getInterface() : NULL;
-	UpstreamInterface *newInInterface = new UpstreamInterface(newRpf, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
+	UpstreamInterface *newInInterface = new UpstreamInterface(this, newRpf, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
 	route->setInInterface(newInInterface);
 
 	// route was not pruned, join to the multicast tree again
 	if (!route->isFlagSet(PIMMulticastRoute::P))
 	{
-		sendPimGraft(newInInterface->nextHop, source, group, rpfId);
+		sendGraftPacket(newInInterface->nextHop, source, group, rpfId);
 		inInterface->graftRetryTimer = createGraftRetryTimer(source, group);
 	}
 
@@ -1050,7 +897,7 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	// old RPF should be now outgoing interface if it is not down
 	if (oldRpfInt && oldRpfInt->isUp())
 	{
-	    DownstreamInterface *newOutInt = new DownstreamInterface(oldRpfInt);
+	    DownstreamInterface *newOutInt = new DownstreamInterface(this, oldRpfInt);
 		newOutInt->pruneTimer = NULL;
 		newOutInt->forwarding = PIMMulticastRoute::Forward;
 		newOutInt->mode = PIMInterface::DenseMode;
@@ -1058,27 +905,31 @@ void PIMDM::rpfIntChange(PIMMulticastRoute *route)
 	}
 }
 
-
-/**
- * DATA ON RPF INTERFACE
- *
- * The method process notification about data which appears on RPF interface. It means that source
- * is still active. The resault is resetting of Source Active Timer.
- *
- * @param newRoute Pointer to new entry in the multicast routing table.
- * @see PIMsat()
- */
-void PIMDM::dataOnRpf(IPv4Datagram *datagram)
+void PIMDM::multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address source, int interfaceId)
 {
-    PIMMulticastRoute *route = getRouteFor(datagram->getDestAddress(), datagram->getSrcAddress());
+    PIMMulticastRoute *route = getRouteFor(group, source);
     UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-	cancelEvent(upstream->sourceActiveTimer);
-	scheduleAt(simTime() + sourceActiveInterval, upstream->sourceActiveTimer);
+	restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
 
     if (route->getNumOutInterfaces() == 0 || route->isFlagSet(PIMMulticastRoute::P))
     {
         EV << "Route does not have any outgoing interface or it is pruned." << endl;
-        dataOnPruned(datagram->getDestAddress(), datagram->getSrcAddress());
+
+        EV << "pimDM::dataOnPruned" << endl;
+        if (route->isFlagSet(PIMMulticastRoute::A))
+            return;
+
+        // if GRT is running now, do not send Prune msg
+        if (route->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
+        {
+            cancelAndDeleteTimer(upstream->graftRetryTimer);
+            upstream->graftRetryTimer = NULL;
+        }
+        // otherwise send Prune msg to upstream router
+        else
+        {
+            sendPrunePacket(upstream->nextHop, source, group, upstream->getInterfaceId());
+        }
     }
 }
 
@@ -1095,7 +946,7 @@ void PIMDM::dataOnRpf(IPv4Datagram *datagram)
  * @see sendPimJoinPrune()
  * @see createPruneTimer()
  */
-void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
+void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int intId)
 {
 	EV << "pimDM::dataOnNonRpf, intID: " << intId << endl;
 
@@ -1110,15 +961,14 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
 		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(intId))[0]->getAddress();
-		sendPimJoinPrune(nextHop, source, group, intId);
+		sendPrunePacket(nextHop, source, group, intId);
 
 		// the incoming interface has to change its state to Pruned
 		DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
 		if (outInt && outInt->forwarding == PIMMulticastRoute::Forward)
 		{
 			outInt->forwarding = PIMMulticastRoute::Pruned;
-			cMessage* timer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, pruneInterval);
-			outInt->pruneTimer = timer;
+			outInt->pruneTimer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, pruneInterval);
 
 			// if there is no outgoing interface, Prune msg has to be sent on upstream
 			if (route->isOilistNull())
@@ -1128,46 +978,13 @@ void PIMDM::dataOnNonRpf(IPv4Address group, IPv4Address source, int intId)
 				if (!route->isFlagSet(PIMMulticastRoute::A))
 				{
 				    UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-					sendPimJoinPrune(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
+					sendPrunePacket(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
 				}
 			}
 		}
 	}
 
 	//FIXME in case of LAN
-}
-
-/**
- * DATA ON PRUNED
- *
- * The method has to solve the problem when multicast data appears on RPF interface and
- * route is pruned. In this case, new PIM JoinPrune has to be sent to upstream.
- *
- * @param group Multicast group IP address.
- * @param source Source IP address.
- * @see sendPimJoinPrune()
- */
-void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
-{
-	EV << "pimDM::dataOnPruned" << endl;
-	PIMMulticastRoute *route = getRouteFor(group, source);
-    if (route->isFlagSet(PIMMulticastRoute::A))
-        return;
-
-    // if GRT is running now, do not send Prune msg
-    UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-	if (route->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
-	{
-		cancelEvent(upstream->graftRetryTimer);
-		delete upstream->graftRetryTimer;
-		upstream->graftRetryTimer = NULL;
-	}
-	// otherwise send Prune msg to upstream router
-	else
-	{
-	    UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getPIMInInterface());
-		sendPimJoinPrune(inInterface->nextHop, source, group, inInterface->getInterfaceId());
-	}
 }
 
 /**
@@ -1181,7 +998,7 @@ void PIMDM::dataOnPruned(IPv4Address group, IPv4Address source)
  * @param members Structure containing old multicast IP addresses.
  * @see sendPimJoinPrune()
  */
-void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
+void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr)
 {
 	EV << "pimDM::oldMulticastAddr" << endl;
 	bool connected = false;
@@ -1227,16 +1044,15 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
             UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
             if (route->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
             {
-                cancelEvent(upstream->graftRetryTimer);
-                delete upstream->graftRetryTimer;
+                cancelAndDeleteTimer(upstream->graftRetryTimer);
                 upstream->graftRetryTimer = NULL;
-                sendPimJoinPrune(upstream->nextHop, route->getOrigin(), route->getMulticastGroup(), upstream->getInterfaceId());
+                sendPrunePacket(upstream->nextHop, route->getOrigin(), route->getMulticastGroup(), upstream->getInterfaceId());
             }
 
             // if the source is not directly connected, sent Prune msg
             if (!route->isFlagSet(PIMMulticastRoute::A) && !route->isFlagSet(PIMMulticastRoute::P))
             {
-                sendPimJoinPrune(upstream->nextHop, route->getOrigin(), route->getMulticastGroup(), upstream->getInterfaceId());
+                sendPrunePacket(upstream->nextHop, route->getOrigin(), route->getMulticastGroup(), upstream->getInterfaceId());
             }
 
             route->setFlags(PIMMulticastRoute::P);
@@ -1257,7 +1073,7 @@ void PIMDM::oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
+void PIMDM::multicastReceiverAdded(PIMInterface *pimInt, IPv4Address newAddr)
 {
 	EV << "pimDM::newMulticastAddr" << endl;
 	bool forward = false;
@@ -1295,7 +1111,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
         if (k == route->getNumOutInterfaces())
         {
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
-            DownstreamInterface *newInt = new DownstreamInterface(pimInt->getInterfacePtr());
+            DownstreamInterface *newInt = new DownstreamInterface(this, pimInt->getInterfacePtr());
             newInt->mode = PIMInterface::DenseMode;
             newInt->forwarding = PIMMulticastRoute::Forward;
             newInt->pruneTimer = NULL;
@@ -1313,7 +1129,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
             if (!route->isFlagSet(PIMMulticastRoute::A))
             {
                 UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-                sendPimGraft(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
+                sendGraftPacket(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
                 inInterface->graftRetryTimer = createGraftRetryTimer(route->getOrigin(), route->getMulticastGroup());
             }
             else
@@ -1334,7 +1150,7 @@ void PIMDM::newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr)
  * @see createGraftRetryTimer()
  * @see addRemoveAddr
  */
-void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
+void PIMDM::unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr)
 {
     ASSERT(!srcAddr.isUnspecified());
     ASSERT(destAddr.isMulticast());
@@ -1361,7 +1177,7 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
     PIMMulticastRoute *newRoute = new PIMMulticastRoute(srcAddr, destAddr);
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
-    UpstreamInterface *upstream = new UpstreamInterface(rpfInterface->getInterfacePtr(), rpfNeighbor);
+    UpstreamInterface *upstream = new UpstreamInterface(this, rpfInterface->getInterfacePtr(), rpfNeighbor);
     newRoute->setInInterface(upstream);
     if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
         newRoute->setFlags(PIMMulticastRoute::A);
@@ -1381,7 +1197,7 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 			continue;
 
 		// create new outgoing interface
-		DownstreamInterface *newOutInt = new DownstreamInterface(pimIntTemp->getInterfacePtr());
+		DownstreamInterface *newOutInt = new DownstreamInterface(this, pimIntTemp->getInterfacePtr());
 		newOutInt->pruneTimer = NULL;
 
 		switch (pimIntTemp->getMode())
@@ -1432,8 +1248,13 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 
 	// add new route record to multicast routing table
 	rt->addMulticastRoute(newRoute);
-	EV << "PimSplitter::newMulticast: New route was added to the multicast routing table." << endl;
+
+	EV_DETAIL << "New route was added to the multicast routing table.\n";
 }
+
+//----------------------------------------------------------------------------
+//           Helpers
+//----------------------------------------------------------------------------
 
 PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
 {
@@ -1455,27 +1276,6 @@ void PIMDM::cancelAndDeleteTimer(cMessage *timer)
         delete static_cast<TimerContext*>(timer->getContextPointer());
         delete timer;
     }
-}
-
-bool PIMDM::deleteMulticastRoute(PIMMulticastRoute *route)
-{
-    IPv4MulticastRoute *routeFound = rt->removeMulticastRoute(route);
-    if (routeFound == route)
-    {
-        UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
-        cancelAndDeleteTimer(upstream->stateRefreshTimer);
-        cancelAndDeleteTimer(upstream->graftRetryTimer);
-        cancelAndDeleteTimer(upstream->sourceActiveTimer);
-        for (unsigned int j = 0;j < route->getNumOutInterfaces(); j++)
-        {
-            DownstreamInterface *downstream = check_and_cast<DownstreamInterface*>(route->getPIMOutInterface(j));
-            cancelAndDeleteTimer(downstream->pruneTimer);
-        }
-
-        delete route;
-        return true;
-    }
-    return false;
 }
 
 PIMMulticastRoute *PIMDM::getRouteFor(IPv4Address group, IPv4Address source)
@@ -1503,17 +1303,15 @@ vector<PIMMulticastRoute*> PIMDM::getRouteFor(IPv4Address group)
     return routes;
 }
 
-vector<PIMMulticastRoute*> PIMDM::getRoutesForSource(IPv4Address source)
+PIMDM::UpstreamInterface::~UpstreamInterface()
 {
-    vector<PIMMulticastRoute*> routes;
-    int numRoutes = rt->getNumMulticastRoutes();
-    for (int i = 0; i < numRoutes; i++)
-    {
-        //FIXME works only for classfull adresses (function getNetwork) !!!!
-        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
-        if (route && route->getOrigin().getNetwork().getInt() == source.getInt())
-            routes.push_back(route);
-    }
-    return routes;
+    owner->cancelAndDeleteTimer(stateRefreshTimer);
+    owner->cancelAndDeleteTimer(graftRetryTimer);
+    owner->cancelAndDeleteTimer(sourceActiveTimer);
+    owner->cancelAndDeleteTimer(overrideTimer);
 }
 
+PIMDM::DownstreamInterface::~DownstreamInterface()
+{
+    owner->cancelAndDeleteTimer(pruneTimer);
+}

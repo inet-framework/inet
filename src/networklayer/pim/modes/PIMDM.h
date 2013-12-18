@@ -53,20 +53,31 @@ class PIMDM : public PIMBase, protected cListener
         {
             enum State { FORWARDING, PRUNED, ACK_PENDING }; // XXX not yet used
 
+            PIMDM *owner;
             State state;
             cMessage* graftRetryTimer;
-            cMessage* sourceActiveTimer;
+            cMessage* sourceActiveTimer; // route will be deleted when this timer expires
             cMessage* stateRefreshTimer;
-            // TODO missing overrideTimer, pruneLimitTimer
+            cMessage* overrideTimer; // XXX not used
+            simtime_t lastPruneSentTime; // for rate limiting prune messages, 0 if no prune was sent
 
-            UpstreamInterface(InterfaceEntry *ie, IPv4Address neighbor)
-                : PIMInInterface(ie, neighbor), state(FORWARDING),
-                  graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL) {}
+            UpstreamInterface(PIMDM *owner, InterfaceEntry *ie, IPv4Address neighbor)
+                : PIMInInterface(ie, neighbor), owner(owner), state(FORWARDING),
+                  graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL),
+                  overrideTimer(NULL), lastPruneSentTime(0.0) {}
+            virtual ~UpstreamInterface();
             int getInterfaceId() const { return ie->getInterfaceId(); }
+
+            void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
+            bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->pruneLimitInterval; }
         };
 
         struct DownstreamInterface : public PIMMulticastRoute::PIMOutInterface
         {
+            enum State { NO_INFO, PRUNE_PENDING, PRUNED }; // XXX not yet used
+
+            PIMDM *owner;
+            State state;
             // prune state
             cMessage *pruneTimer;
             // TODO prunePendingTimer
@@ -74,17 +85,18 @@ class PIMDM : public PIMBase, protected cListener
             // assert winner state
             // TODO assertState, assertTimer, winnerAddress, winnerMetric
 
-            DownstreamInterface(InterfaceEntry *ie)
-                : PIMOutInterface(ie) {}
-            DownstreamInterface(InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
+            DownstreamInterface(PIMDM *owner, InterfaceEntry *ie)
+                : PIMOutInterface(ie), owner(owner), pruneTimer(NULL) {}
+            DownstreamInterface(PIMDM *owner, InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
                     PIMMulticastRoute::AssertState assert)
-                : PIMOutInterface(ie, forwarding, mode, assert), pruneTimer(pruneTimer) {}
+                : PIMOutInterface(ie, forwarding, mode, assert), owner(owner), pruneTimer(pruneTimer) {}
+            ~DownstreamInterface();
         };
-
 
     private:
         // parameters
         double pruneInterval;
+        double pruneLimitInterval;
         double graftRetryInterval;
         double sourceActiveInterval;
         double stateRefreshInterval;
@@ -92,15 +104,14 @@ class PIMDM : public PIMBase, protected cListener
         PIMDM() : PIMBase(PIMInterface::DenseMode) {}
 
 	private:
-	    // process events
+	    // process signals
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-	    void newMulticast(IPv4Address srcAddress, IPv4Address destAddress);
-	    void newMulticastAddr(PIMInterface *pimInt, IPv4Address newAddr);
-	    void oldMulticastAddr(PIMInterface *pimInt, IPv4Address oldAddr);
-	    void dataOnPruned(IPv4Address destAddr, IPv4Address srcAddr);
-	    void dataOnNonRpf(IPv4Address group, IPv4Address source, int intId);
-	    void dataOnRpf(IPv4Datagram *datagram);
-	    void rpfIntChange(PIMMulticastRoute *route);
+	    void unroutableMulticastPacketArrived(IPv4Address srcAddress, IPv4Address destAddress);
+        void multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
+        void multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
+	    void multicastReceiverAdded(PIMInterface *pimInt, IPv4Address newAddr);
+	    void multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr);
+	    void rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpfInterface);
 
 	    // process timers
 	    void processPIMTimer(cMessage *timer);
@@ -109,34 +120,36 @@ class PIMDM : public PIMBase, protected cListener
 	    void processSourceActiveTimer(cMessage *timer);
 	    void processStateRefreshTimer(cMessage *timer);
 
-	    // create timers
+	    // create/schedule timers
 	    cMessage *createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime);
 	    cMessage *createGraftRetryTimer(IPv4Address source, IPv4Address group);
 	    cMessage *createSourceActiveTimer(IPv4Address source, IPv4Address group);
 	    cMessage *createStateRefreshTimer(IPv4Address source, IPv4Address group);
+	    void restartTimer(cMessage *timer, double interval);
 
 	    // process PIM packets
-	    void processPIMPkt(PIMPacket *pkt);
-	    void processJoinPruneGraftPacket(PIMJoinPrune *pkt, PIMPacketType type);
-	    void processPrunePacket(PIMMulticastRoute *route, int intId, int holdTime);
-	    void processGraftPacket(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
-	    void processGraftAckPacket(PIMMulticastRoute *route);
+	    void processPIMPacket(PIMPacket *pkt);
+        void processJoinPrunePacket(PIMJoinPrune *pkt);
+        void processGraftPacket(PIMGraft *pkt);
+        void processGraftAckPacket(PIMGraftAck *pkt);
 	    void processStateRefreshPacket(PIMStateRefresh *pkt);
+	    void processAssertPacket(PIMAssert *pkt);
 
-	    //create PIM packets
-	    void sendPimJoinPrune(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
-	    void sendPimGraft(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
-	    void sendPimGraftAck(PIMGraftAck *msg);
-	    void sendPimStateRefresh(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
+        void processPrune(PIMMulticastRoute *route, int intId, int holdTime);
+        void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
 
+	    // create and send PIM packets
+	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
+	    void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
+	    void sendGraftAckPacket(PIMGraft *msg);
+	    void sendStateRefreshPacket(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
+	    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
+
+	    // helpers
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
 	    void cancelAndDeleteTimer(cMessage *timer);
-        bool deleteMulticastRoute(PIMMulticastRoute *route);
-
-        // routing table access
         PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
-        std::vector<PIMMulticastRoute*> getRoutesForSource(IPv4Address source);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
