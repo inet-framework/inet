@@ -24,8 +24,8 @@
 
 #include <omnetpp.h>
 
-#if OMNETPP_VERSION < 0x0402
-#  error At least OMNeT++/OMNEST version 4.2 required
+#if OMNETPP_VERSION < 0x0403
+#  error At least OMNeT++/OMNEST version 4.3 required
 #endif
 
 #if defined(INET_EXPORT)
