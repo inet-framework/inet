@@ -58,9 +58,6 @@ moduleinterface IMACRelayUnit
 simple MACRelayUnit_None like IMACRelayUnit
 {
     parameters:
-        string addressTableFile = default("");  // see ~IMACRelayUnit
-        int addressTableSize = default(100); // see ~IMACRelayUnit
-        double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit
         @display("i=old/x_noentry");
         @class("UnimplementedModule");
     gates:
