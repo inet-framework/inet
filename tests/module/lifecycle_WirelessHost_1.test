@@ -35,13 +35,13 @@ import inet.base.LifecycleController;
 import inet.nodes.inet.AdhocHost;
 import inet.nodes.inet.WirelessHost;
 import inet.status.NodeStatus;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.world.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
-        channelControl: ChannelControl;
+        radioChannel: SimplifiedRadioChannel;
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
         host: AdhocHost;
