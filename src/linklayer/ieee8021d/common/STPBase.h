@@ -32,8 +32,8 @@ class STPBase : public cSimpleModule, public ILifecycle, public INotifiable
 {
 protected:
     bool visualize;                  // if true it visualize the spanning tree
-    unsigned int numPorts;           // number of ports
     bool isOperational;              // for lifecycle
+    unsigned int numPorts;           // number of ports
 
     unsigned int bridgePriority;     // bridge's priority
     MACAddress bridgeAddress;        // bridge's MAC address
