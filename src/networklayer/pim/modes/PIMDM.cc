@@ -844,78 +844,105 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
 }
 
 /**
- * RPF INTERFACE CHANGE
- *
- * The method process notification about interface change. Multicast routing table will be
- * changed if RPF interface has changed. New RPF interface is set to route and is removed
- * from outgoing interfaces. On the other hand, old RPF interface is added to outgoing
- * interfaces. If route was not pruned, the router has to join to the multicast tree again
- * (by different path).
- *
- * @param newRoute Pointer to new entry in the multicast routing table.
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
+ * The method process notification about new multicast data stream. It goes through all PIM
+ * interfaces and tests them if they can be added to the list of outgoing interfaces. If there
+ * is no interface on the list at the end, the router will prune from the multicast tree.
  */
-void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpf)
+void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
 {
-	IPv4Address source = route->getOrigin();
-	IPv4Address group = route->getMulticastGroup();
-	int rpfId = newRpf->getInterfaceId();
-	UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
+    ASSERT(!source.isUnspecified());
+    ASSERT(group.isMulticast());
 
-	EV << "New RPF int for group " << group << " source " << source << " is " << rpfId << endl;
+    EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
 
-	// set new RPF
-	InterfaceEntry *oldRpfInt = route->getInInterface() ? route->getInInterface()->getInterface() : NULL;
-	UpstreamInterface *newInInterface = new UpstreamInterface(this, newRpf, pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress());
-	route->setInInterface(newInInterface);
+    IPv4Route *routeToSrc = rt->findBestMatchingRoute(source);
+    if (!routeToSrc || !routeToSrc->getInterface())
+    {
+        EV << "ERROR: PIMDM::newMulticast(): cannot find RPF interface, routing information is missing.";
+        return;
+    }
 
-	// route was not pruned, join to the multicast tree again
-	if (!route->isFlagSet(PIMMulticastRoute::P))
-	{
-		sendGraftPacket(newInInterface->nextHop, source, group, rpfId);
-		inInterface->graftRetryTimer = createGraftRetryTimer(source, group);
-	}
+    PIMInterface *rpfInterface = pimIft->getInterfaceById(routeToSrc->getInterface()->getInterfaceId());
+    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::DenseMode)
+        return;
 
-	// find rpf int in outgoing imterfaces and delete it
-	for(unsigned int i = 0; i < route->getNumOutInterfaces(); i++)
-	{
-	    DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->getPIMOutInterface(i));
-		if (outInt->getInterfaceId() == rpfId)
-		{
-			if (outInt->pruneTimer != NULL)
-			{
-				cancelEvent(outInt->pruneTimer);
-				delete outInt->pruneTimer;
-				outInt->pruneTimer = NULL;
-			}
-			route->removeOutInterface(i);
-			break;
-		}
-	}
+    // gateway is unspecified for directly connected destinations
+    IPv4Address rpfNeighbor = routeToSrc->getGateway().isUnspecified() ? source : routeToSrc->getGateway();
 
-	// old RPF should be now outgoing interface if it is not down
-	if (oldRpfInt && oldRpfInt->isUp())
-	{
-	    DownstreamInterface *newOutInt = new DownstreamInterface(this, oldRpfInt);
-		newOutInt->pruneTimer = NULL;
-		newOutInt->forwarding = PIMMulticastRoute::Forward;
-		newOutInt->mode = PIMInterface::DenseMode;
-		route->addOutInterface(newOutInt);
-	}
+    // create new multicast route
+    PIMMulticastRoute *newRoute = new PIMMulticastRoute(source, group);
+    newRoute->setSourceType(IMulticastRoute::PIM_DM);
+    newRoute->setSource(this);
+    UpstreamInterface *upstream = new UpstreamInterface(this, rpfInterface->getInterfacePtr(), rpfNeighbor);
+    newRoute->setInInterface(upstream);
+
+    if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
+        newRoute->setFlags(PIMMulticastRoute::A);
+
+
+    bool allDownstreamInterfacesArePruned = true;
+
+    // insert all PIM interfaces except rpf int
+    for (int i = 0; i < pimIft->getNumInterfaces(); i++)
+    {
+        PIMInterface *pimInterface = pimIft->getInterface(i);
+
+        //check if PIM-DM interface and it is not RPF interface
+        if (pimInterface == rpfInterface || pimInterface->getMode() != PIMInterface::DenseMode) // XXX original code added downstream if data for PIM-SM interfaces too
+            continue;
+
+        bool hasPIMNeighbors = pimNbt->getNumNeighborsOnInterface(pimInterface->getInterfaceId()) > 0;
+        bool hasConnectedReceivers = pimInterface->getInterfacePtr()->ipv4Data()->hasMulticastListener(newRoute->getMulticastGroup());
+
+        // if there are neighbors on interface, we will forward
+        if(hasPIMNeighbors || hasConnectedReceivers)
+        {
+            // create new outgoing interface
+            DownstreamInterface *newOutInt = new DownstreamInterface(this, pimInterface->getInterfacePtr());
+            newRoute->addOutInterface(newOutInt);
+            allDownstreamInterfacesArePruned = false;
+        }
+
+        if (hasConnectedReceivers)
+            newRoute->setFlags(PIMMulticastRoute::C);
+    }
+
+    // directly connected to source, set State Refresh Timer
+    if (newRoute->isFlagSet(PIMMulticastRoute::A) && rpfInterface->getSR())
+    {
+        upstream->stateRefreshTimer = createStateRefreshTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
+    }
+
+    // XXX sourceActiveTimer should be created only in routers directly connected to the source
+    // set Source Active Timer (liveness of route)
+    upstream->sourceActiveTimer = createSourceActiveTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
+
+    // if there is no outgoing interface, prune from multicast tree
+    if (allDownstreamInterfacesArePruned)
+    {
+        EV_DETAIL << "There is no outgoing interface for multicast, will send Prune message to upstream.\n";
+        newRoute->setFlags(PIMMulticastRoute::P);
+
+        // Prune message is sent from the forwarding hook (NF_IPv4_DATA_ON_RPF), see multicastPacketArrivedOnRpfInterface()
+    }
+
+    rt->addMulticastRoute(newRoute);
+    EV_DETAIL << "New route was added to the multicast routing table.\n";
 }
 
 void PIMDM::multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address source, int interfaceId)
 {
+    EV_DETAIL << "Multicast datagram arrived: source=" << source << ", group=" << group << ".\n";
+
     PIMMulticastRoute *route = getRouteFor(group, source);
+    ASSERT(route);
     UpstreamInterface *upstream = check_and_cast<UpstreamInterface*>(route->getInInterface());
 	restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
 
     if (route->getNumOutInterfaces() == 0 || route->isFlagSet(PIMMulticastRoute::P))
     {
-        EV << "Route does not have any outgoing interface or it is pruned." << endl;
+        EV << "Route does not have any outgoing interface or it is pruned.\n";
 
-        EV << "pimDM::dataOnPruned" << endl;
         if (route->isFlagSet(PIMMulticastRoute::A))
             return;
 
@@ -934,41 +961,31 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address 
 }
 
 /**
- * DATA ON NON-RPF INTERFACE
- *
  * The method has to solve the problem when multicast data appears on non-RPF interface. It can
  * happen when there is loop in the network. In this case, router has to prune from the neighbor,
  * so it sends Prune message.
- *
- * @param group Multicast group IP address.
- * @param source Source IP address.
- * @param intID Identificator of incoming interface.
- * @see sendPimJoinPrune()
- * @see createPruneTimer()
  */
-void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int intId)
+void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int interfaceId)
 {
-	EV << "pimDM::dataOnNonRpf, intID: " << intId << endl;
+	EV_DETAIL << "Received multicast datagram (source="<< source << ", group=" << group <<") on non-RPF interface: " << interfaceId << ".\n";
 
-	// load route from mroute
 	PIMMulticastRoute *route = getRouteFor(group, source);
-	if (route == NULL)
-		return;
+	ASSERT(route);
 
 	// in case of p2p link, send prune
 	// FIXME There should be better indicator of P2P link
-	if (pimNbt->getNumNeighborsOnInterface(intId) == 1)
+	if (pimNbt->getNumNeighborsOnInterface(interfaceId) == 1)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
-		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(intId))[0]->getAddress();
-		sendPrunePacket(nextHop, source, group, intId);
+		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(interfaceId))[0]->getAddress();
+		sendPrunePacket(nextHop, source, group, interfaceId);
 
 		// the incoming interface has to change its state to Pruned
-		DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(intId));
+		DownstreamInterface *outInt = check_and_cast<DownstreamInterface*>(route->findOutInterfaceByInterfaceId(interfaceId));
 		if (outInt && outInt->forwarding == PIMMulticastRoute::Forward)
 		{
 			outInt->forwarding = PIMMulticastRoute::Pruned;
-			outInt->pruneTimer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), intId, pruneInterval);
+			outInt->pruneTimer = createPruneTimer(route->getOrigin(), route->getMulticastGroup(), interfaceId, pruneInterval);
 
 			// if there is no outgoing interface, Prune msg has to be sent on upstream
 			if (route->isOilistNull())
@@ -987,49 +1004,116 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 	//FIXME in case of LAN
 }
 
+/*
+ * The method process notification about new multicast groups aasigned to interface. For each
+ * new address it tries to find route. If there is route, it finds interface in list of outgoing
+ * interfaces. If the interface is not in the list it will be added. if the router was pruned
+ * from multicast tree, join again.
+ */
+void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group)
+{
+    EV_DETAIL << "Multicast receiver added for group " << group << ".\n";
+
+    bool forward = false;
+
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++)
+    {
+        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+
+        // check group
+        if (route && route->getMulticastGroup() != group)
+            continue;
+
+        // check on RPF interface
+        UpstreamInterface *rpfInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
+        if (rpfInterface->getInterface() == pimInterface->getInterfacePtr())
+            continue;
+
+        // is interface in list of outgoing interfaces?
+        bool downstreamInterfaceFound = false;
+        for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++)
+        {
+            PIMOutInterface *downstream = route->getPIMOutInterface(k);
+            if (downstream->getInterfaceId() == pimInterface->getInterfaceId())
+            {
+                EV << "Interface is already on list of outgoing interfaces" << endl;
+                if (downstream->forwarding == PIMMulticastRoute::Pruned)
+                    downstream->forwarding = PIMMulticastRoute::Forward;
+                forward = true;
+                downstreamInterfaceFound = true;
+                break;
+            }
+        }
+
+        if (!downstreamInterfaceFound)
+        {
+            // create new downstream data
+            EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
+            route->addOutInterface(new DownstreamInterface(this, pimInterface->getInterfacePtr()));
+            forward = true;
+        }
+
+        route->setFlags(PIMMulticastRoute::C);
+
+        // route was pruned, has to be added to multicast tree
+        if (route->isFlagSet(PIMMulticastRoute::P) && forward)
+        {
+            EV << "Route is not pruned any more, send Graft to upstream" << endl;
+
+            // if source is not directly connected, send Graft to upstream
+            if (!route->isFlagSet(PIMMulticastRoute::A))
+            {
+                UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
+                sendGraftPacket(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
+                inInterface->graftRetryTimer = createGraftRetryTimer(route->getOrigin(), route->getMulticastGroup());
+            }
+            else
+                route->clearFlag(PIMMulticastRoute::P);
+        }
+    }
+
+}
+
 /**
- * OLD MULTICAST ADDRESS
- *
  * The method process notification about multicast groups removed from interface. For each
  * old address it tries to find route. If there is route, it finds interface in list of outgoing
  * interfaces. If the interface is in the list it will be removed. If the router was not pruned
  * and there is no outgoing interface, the router will prune from the multicast tree.
- *
- * @param members Structure containing old multicast IP addresses.
- * @see sendPimJoinPrune()
  */
-void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr)
+void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
 {
-	EV << "pimDM::oldMulticastAddr" << endl;
-	bool connected = false;
+    EV_DETAIL << "No more receiver for group " << group << ".\n";
 
-	// go through all old multicast addresses assigned to interface
-    EV << "Removed multicast address: " << oldAddr << endl;
-    vector<PIMMulticastRoute*> routes = getRouteFor(oldAddr);
+    bool connected = false;
 
-    // go through all multicast routes
-    for (unsigned int j = 0; j < routes.size(); j++)
+    // delete pimInt from outgoing interfaces of multicast routes for group
+    int numRoutes = rt->getNumMulticastRoutes();
+    for (int i = 0; i < numRoutes; i++)
     {
-        PIMMulticastRoute *route = routes[j];
-        unsigned int k;
+        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
 
-        // is interface in list of outgoing interfaces?
-        for (k = 0; k < route->getNumOutInterfaces();)
+        // check group
+        if (route && route->getMulticastGroup() != group)
+            continue;
+
+        // remove pimInt from the list of outgoing interfaces
+        PIMOutInterface * downstream = route->findOutInterfaceByInterfaceId(pimInt->getInterfaceId());
+        if (downstream)
+        {
+            // EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+            route->removeOutInterface(downstream->getInterface()); // will delete downstream, XXX method should be named deleteOutInterface()
+        }
+
+        for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++)
         {
             PIMOutInterface *outInt = route->getPIMOutInterface(k);
-            if (outInt->getInterfaceId() == pimInt->getInterfaceId())
+            if(outInt->forwarding == PIMMulticastRoute::Forward &&
+               pimNbt->getNumNeighborsOnInterface(outInt->getInterfaceId()) == 0)
             {
-                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                route->removeOutInterface(k);
+                connected = true;
+                break;
             }
-            else if(outInt->forwarding == PIMMulticastRoute::Forward)
-            {
-                if ((pimNbt->getNeighborsOnInterface(outInt->getInterfaceId())).size() == 0)
-                    connected = true;
-                k++;
-            }
-            else
-                k++;
         }
 
         // if there is no directly connected member of group
@@ -1061,195 +1145,47 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr)
 }
 
 /**
- * NEW MULTICAST ADDRESS
- *
- * The method process notification about new multicast groups aasigned to interface. For each
- * new address it tries to find route. If there is route, it finds interface in list of outgoing
- * interfaces. If the interface is not in the list it will be added. if the router was pruned
- * from multicast tree, join again.
- *
- * @param members Structure containing new multicast IP addresses.
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
- * @see addRemoveAddr
+ * The method process notification about interface change. Multicast routing table will be
+ * changed if RPF interface has changed. New RPF interface is set to route and is removed
+ * from outgoing interfaces. On the other hand, old RPF interface is added to outgoing
+ * interfaces. If route was not pruned, the router has to join to the multicast tree again
+ * (by different path).
  */
-void PIMDM::multicastReceiverAdded(PIMInterface *pimInt, IPv4Address newAddr)
+void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpf)
 {
-	EV << "pimDM::newMulticastAddr" << endl;
-	bool forward = false;
+    IPv4Address source = route->getOrigin();
+    IPv4Address group = route->getMulticastGroup();
+    int rpfId = newRpf->getInterfaceId();
+    UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
 
-    EV << "New multicast address: " << newAddr << endl;
-    vector<PIMMulticastRoute*> routes = getRouteFor(newAddr);
+    EV_DETAIL << "New RPF interface for group=" << group << " source=" << source << " is " << newRpf->getName() << endl;
 
-    // go through all multicast routes
-    for (unsigned int j = 0; j < routes.size(); j++)
+    // delete old upstream interface data
+    UpstreamInterface *oldUpstreamInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
+    InterfaceEntry *oldRpfInterface = oldUpstreamInterface ? oldUpstreamInterface->getInterface() : NULL;
+    delete oldUpstreamInterface;
+
+    // set new upstream interface data
+    IPv4Address newRpfNeighbor = pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress(); // XXX what happens if no neighbors?
+    UpstreamInterface *newInInterface = new UpstreamInterface(this, newRpf, newRpfNeighbor);
+    route->setInInterface(newInInterface);
+
+    // delete rpf interface from the downstream interfaces
+    route->removeOutInterface(newRpf); // will delete downstream data, XXX method should be called deleteOutInterface()
+
+    // route was not pruned, join to the multicast tree again
+    if (!route->isFlagSet(PIMMulticastRoute::P))
     {
-        PIMMulticastRoute *route = routes[j];
-        //PIMMulticastRoute::AnsaOutInterfaceVector outInt = route->getOutInt();
-        unsigned int k;
-
-        // check on RPF interface
-        UpstreamInterface *rpfInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-        if (rpfInterface->getInterface() == pimInt->getInterfacePtr())
-            continue;
-
-        // is interface in list of outgoing interfaces?
-        for (k = 0; k < route->getNumOutInterfaces(); k++)
-        {
-            PIMOutInterface *outInt = route->getPIMOutInterface(k);
-            if (outInt->getInterfaceId() == pimInt->getInterfaceId())
-            {
-                EV << "Interface is already on list of outgoing interfaces" << endl;
-                if (outInt->forwarding == PIMMulticastRoute::Pruned)
-                    outInt->forwarding = PIMMulticastRoute::Forward;
-                forward = true;
-                break;
-            }
-        }
-
-        // interface is not in list of outgoing interfaces
-        if (k == route->getNumOutInterfaces())
-        {
-            EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
-            DownstreamInterface *newInt = new DownstreamInterface(this, pimInt->getInterfacePtr());
-            newInt->mode = PIMInterface::DenseMode;
-            newInt->forwarding = PIMMulticastRoute::Forward;
-            newInt->pruneTimer = NULL;
-            route->addOutInterface(newInt);
-            forward = true;
-        }
-        route->setFlags(PIMMulticastRoute::C);
-
-        // route was pruned, has to be added to multicast tree
-        if (route->isFlagSet(PIMMulticastRoute::P) && forward)
-        {
-            EV << "Route is not pruned any more, send Graft to upstream" << endl;
-
-            // if source is not directly connected, send Graft to upstream
-            if (!route->isFlagSet(PIMMulticastRoute::A))
-            {
-                UpstreamInterface *inInterface = check_and_cast<UpstreamInterface*>(route->getInInterface());
-                sendGraftPacket(inInterface->nextHop, route->getOrigin(), route->getMulticastGroup(), inInterface->getInterfaceId());
-                inInterface->graftRetryTimer = createGraftRetryTimer(route->getOrigin(), route->getMulticastGroup());
-            }
-            else
-                route->clearFlag(PIMMulticastRoute::P);
-        }
+        sendGraftPacket(newInInterface->nextHop, source, group, rpfId);
+        inInterface->graftRetryTimer = createGraftRetryTimer(source, group);
     }
-}
 
-/**
- * NEW MULTICAST
- *
- * The method process notification about new multicast data stream. It goes through all PIM
- * interfaces and tests them if they can be added to the list of outgoing interfaces. If there
- * is no interface on the list at the end, the router will prune from the multicast tree.
- *
- * @param newRoute Pointer to new entry in the multicast routing table.
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
- * @see addRemoveAddr
- */
-void PIMDM::unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr)
-{
-    ASSERT(!srcAddr.isUnspecified());
-    ASSERT(destAddr.isMulticast());
-
-    EV << "pimDM::newMulticast" << endl;
-
-	IPv4Route *routeToSrc = rt->findBestMatchingRoute(srcAddr);
-	if (!routeToSrc || !routeToSrc->getInterface())
-	{
-        EV << "ERROR: PIMDM::newMulticast(): cannot find RPF interface, routing information is missing.";
-        return;
-	}
-
-    PIMInterface *rpfInterface = pimIft->getInterfaceById(routeToSrc->getInterface()->getInterfaceId());
-    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::DenseMode)
-        return;
-
-    EV << "PIMDM::newMulticast - group: " << destAddr << ", source: " << srcAddr << endl;
-
-    // gateway is unspecified for directly connected destinations
-    IPv4Address rpfNeighbor = routeToSrc->getGateway().isUnspecified() ? srcAddr : routeToSrc->getGateway();
-
-    // create new multicast route
-    PIMMulticastRoute *newRoute = new PIMMulticastRoute(srcAddr, destAddr);
-    newRoute->setSourceType(IMulticastRoute::PIM_DM);
-    newRoute->setSource(this);
-    UpstreamInterface *upstream = new UpstreamInterface(this, rpfInterface->getInterfacePtr(), rpfNeighbor);
-    newRoute->setInInterface(upstream);
-    if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
-        newRoute->setFlags(PIMMulticastRoute::A);
-
-
-	// only outgoing interfaces are missing
-	bool pruned = true;
-
-	// insert all PIM interfaces except rpf int
-	for (int i = 0; i < pimIft->getNumInterfaces(); i++)
-	{
-		PIMInterface *pimIntTemp = pimIft->getInterface(i);
-		int intId = pimIntTemp->getInterfaceId();
-
-		//check if PIM interface is not RPF interface
-		if (pimIntTemp == rpfInterface)
-			continue;
-
-		// create new outgoing interface
-		DownstreamInterface *newOutInt = new DownstreamInterface(this, pimIntTemp->getInterfacePtr());
-		newOutInt->pruneTimer = NULL;
-
-		switch (pimIntTemp->getMode())
-		{
-			case PIMInterface::DenseMode:
-				newOutInt->mode = PIMInterface::DenseMode;
-				break;
-			case PIMInterface::SparseMode:
-				newOutInt->mode = PIMInterface::SparseMode;
-				break;
-		}
-
-		// if there are neighbors on interface, we will forward
-		if((pimNbt->getNeighborsOnInterface(intId)).size() > 0)
-		{
-			newOutInt->forwarding = PIMMulticastRoute::Forward;
-			pruned = false;
-			newRoute->addOutInterface(newOutInt);
-		}
-		// if there is member of group, we will forward
-		else if (pimIntTemp->getInterfacePtr()->ipv4Data()->hasMulticastListener(newRoute->getMulticastGroup()))
-		{
-			newOutInt->forwarding = PIMMulticastRoute::Forward;
-			pruned = false;
-			newRoute->setFlags(PIMMulticastRoute::C);
-			newRoute->addOutInterface(newOutInt);
-		}
-		// in any other case interface is not involved
-	}
-
-	// directly connected to source, set State Refresh Timer
-	if (newRoute->isFlagSet(PIMMulticastRoute::A) && rpfInterface->getSR())
-	{
-	    upstream->stateRefreshTimer = createStateRefreshTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
-	}
-
-	// set Source Active Timer (liveness of route)
-	upstream->sourceActiveTimer = createSourceActiveTimer(newRoute->getOrigin(), newRoute->getMulticastGroup());
-
-	// if there is no outgoing interface, prune from multicast tree
-	if (pruned)
-	{
-		EV << "pimDM::newMulticast: There is no outgoing interface for multicast, send Prune msg to upstream" << endl;
-		newRoute->setFlags(PIMMulticastRoute::P);
-
-		// Prune message is sent from the forwarding hook (NF_IPv4_DATA_ON_RPF), see dataOnRpf()
-	}
-
-	// add new route record to multicast routing table
-	rt->addMulticastRoute(newRoute);
-
-	EV_DETAIL << "New route was added to the multicast routing table.\n";
+    // old RPF interface should be now a downstream interface if it is not down
+    if (oldRpfInterface && oldRpfInterface->isUp())
+    {
+        DownstreamInterface *newDownstreamInterface = new DownstreamInterface(this, oldRpfInterface);
+        route->addOutInterface(newDownstreamInterface);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1288,19 +1224,6 @@ PIMMulticastRoute *PIMDM::getRouteFor(IPv4Address group, IPv4Address source)
             return route;
     }
     return NULL;
-}
-
-vector<PIMMulticastRoute*> PIMDM::getRouteFor(IPv4Address group)
-{
-    vector<PIMMulticastRoute*> routes;
-    int numRoutes = rt->getNumMulticastRoutes();
-    for (int i = 0; i < numRoutes; i++)
-    {
-        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
-        if (route && route->getMulticastGroup() == group)
-            routes.push_back(route);
-    }
-    return routes;
 }
 
 PIMDM::UpstreamInterface::~UpstreamInterface()

@@ -86,10 +86,7 @@ class PIMDM : public PIMBase, protected cListener
             // TODO assertState, assertTimer, winnerAddress, winnerMetric
 
             DownstreamInterface(PIMDM *owner, InterfaceEntry *ie)
-                : PIMOutInterface(ie), owner(owner), pruneTimer(NULL) {}
-            DownstreamInterface(PIMDM *owner, InterfaceEntry *ie, PIMMulticastRoute::InterfaceState forwarding, PIMInterface::PIMMode mode, cMessage *pruneTimer,
-                    PIMMulticastRoute::AssertState assert)
-                : PIMOutInterface(ie, forwarding, mode, assert), owner(owner), pruneTimer(pruneTimer) {}
+                : PIMOutInterface(ie, PIMInterface::DenseMode), owner(owner), pruneTimer(NULL) {}
             ~DownstreamInterface();
         };
 
@@ -149,7 +146,6 @@ class PIMDM : public PIMBase, protected cListener
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
 	    void cancelAndDeleteTimer(cMessage *timer);
         PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
-        std::vector<PIMMulticastRoute*> getRouteFor(IPv4Address group);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

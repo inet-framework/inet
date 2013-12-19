@@ -38,7 +38,7 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
             NO_FLAG = 0,
             D       = 0x01,              /**< Dense */
             S       = 0x02,              /**< Sparse */
-            C       = 0x04,              /**< Connected */
+            C       = 0x04,              /**< Connected */ // XXX Are there any connected downstream receivers?
             P       = 0x08,              /**< Pruned */
             A       = 0x10,              /**< Source is directly connected */
             F       = 0x20,              /**< Register flag*/
@@ -83,8 +83,8 @@ class INET_API PIMMulticastRoute : public IPv4MulticastRoute
             PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
             AssertState             assert;             /**< Assert state. */
 
-            PIMOutInterface(InterfaceEntry *ie)
-                : OutInterface(ie, false) {}
+            PIMOutInterface(InterfaceEntry *ie, PIMInterface::PIMMode mode)
+                : OutInterface(ie, false), forwarding(Forward), mode(mode), assert(AS_NO_INFO) {}
             PIMOutInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMInterface::PIMMode mode, AssertState assert)
                 : OutInterface(ie, false), forwarding(forwarding), mode(mode), assert(assert) {}
 
