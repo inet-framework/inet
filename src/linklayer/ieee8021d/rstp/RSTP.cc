@@ -103,6 +103,8 @@ void RSTP::handleMessage(cMessage *msg)
     // it can receive BPDU or self messages
     if (!isOperational)
     {
+        if (msg->isSelfMessage())
+            throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
         EV << "Message '" << msg << "' arrived when module status is down, dropped\n";
         delete msg;
         return;
