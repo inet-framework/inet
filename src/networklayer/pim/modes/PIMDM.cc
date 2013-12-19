@@ -1014,8 +1014,6 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
 {
     EV_DETAIL << "Multicast receiver added for group " << group << ".\n";
 
-    bool forward = false;
-
     int numRoutes = rt->getNumMulticastRoutes();
     for (int i = 0; i < numRoutes; i++)
     {
@@ -1031,33 +1029,24 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
             continue;
 
         // is interface in list of outgoing interfaces?
-        bool downstreamInterfaceFound = false;
-        for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++)
+        PIMOutInterface *downstream = route->findOutInterfaceByInterfaceId(pimInterface->getInterfaceId());
+        if (downstream)
         {
-            PIMOutInterface *downstream = route->getPIMOutInterface(k);
-            if (downstream->getInterfaceId() == pimInterface->getInterfaceId())
-            {
-                EV << "Interface is already on list of outgoing interfaces" << endl;
-                if (downstream->forwarding == PIMMulticastRoute::Pruned)
-                    downstream->forwarding = PIMMulticastRoute::Forward;
-                forward = true;
-                downstreamInterfaceFound = true;
-                break;
-            }
+            EV << "Interface is already on list of outgoing interfaces" << endl;
+            if (downstream->forwarding == PIMMulticastRoute::Pruned)
+                downstream->forwarding = PIMMulticastRoute::Forward;
         }
-
-        if (!downstreamInterfaceFound)
+        else
         {
             // create new downstream data
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
             route->addOutInterface(new DownstreamInterface(this, pimInterface->getInterfacePtr()));
-            forward = true;
         }
 
         route->setFlags(PIMMulticastRoute::C);
 
         // route was pruned, has to be added to multicast tree
-        if (route->isFlagSet(PIMMulticastRoute::P) && forward)
+        if (route->isFlagSet(PIMMulticastRoute::P))
         {
             EV << "Route is not pruned any more, send Graft to upstream" << endl;
 
