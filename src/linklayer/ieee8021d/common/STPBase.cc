@@ -27,6 +27,7 @@ static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
 STPBase::STPBase()
 {
+    switchModule = NULL;
     nb = NULL;
     macTable = NULL;
     ifTable = NULL;
@@ -47,7 +48,9 @@ void STPBase::initialize(int stage)
         nb = NotificationBoardAccess().getIfExists();
         macTable = check_and_cast<IMACAddressTable *>(getModuleByPath(par("macTablePath")));
         ifTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTablePath")));
-        cModule *switchModule = findContainingNode(this);
+        switchModule = findContainingNode(this);
+        if (!switchModule)
+            throw cRuntimeError("Containing @node module not found");
         numPorts = switchModule->gate("ethg$o", 0)->getVectorSize();
     }
 
@@ -56,7 +59,7 @@ void STPBase::initialize(int stage)
         if (nb)
             nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
 
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(switchModule->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
         if (isOperational)
@@ -88,7 +91,6 @@ void STPBase::stop()
     // colors all connected link gray
     for (unsigned int i = 0; i < numPorts; i++)
         colorLink(i, false);
-    cModule *switchModule = findContainingNode(this);
     switchModule->getDisplayString().setTagArg("i", 1, "");
     ie = NULL;
 }
@@ -97,7 +99,6 @@ void STPBase::colorLink(unsigned int i, bool forwarding)
 {
     if (ev.isGUI() && visualize)
     {
-        cModule *switchModule = findContainingNode(this);
         cGate *inGate = switchModule->gate("ethg$i", i);
         cGate *outGate = switchModule->gate("ethg$o", i);
         cGate *outGateNext = outGate ? outGate->getNextGate() : NULL;
@@ -136,7 +137,6 @@ void STPBase::updateDisplay()
 {
     if (ev.isGUI() && visualize)
     {
-        cModule *switchModule = findContainingNode(this);
         for (unsigned int i = 0; i < numPorts; i++)
         {
             Ieee8021DInterfaceData *port = getPortInterfaceData(i);
@@ -173,7 +173,6 @@ Ieee8021DInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
 
 InterfaceEntry * STPBase::getPortInterfaceEntry(unsigned int portNum)
 {
-    cModule *switchModule = findContainingNode(this);
     cGate *gate = switchModule->gate("ethg$o", portNum);
     if (!gate)
         error("gate is NULL");

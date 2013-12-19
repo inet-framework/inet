@@ -42,6 +42,7 @@ protected:
     simtime_t helloTime;
     simtime_t forwardDelay;
 
+    cModule *switchModule;
     NotificationBoard *nb;
     IMACAddressTable * macTable;
     IInterfaceTable * ifTable;
