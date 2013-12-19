@@ -27,6 +27,9 @@ static const char *ROOT_SWITCH_COLOR = "#a5ffff";
 
 STPBase::STPBase()
 {
+    nb = NULL;
+    macTable = NULL;
+    ifTable = NULL;
     ie = NULL;
 }
 
