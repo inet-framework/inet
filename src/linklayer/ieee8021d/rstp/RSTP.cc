@@ -27,8 +27,8 @@ Define_Module(RSTP);
 
 RSTP::RSTP()
 {
-    helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
-    upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
+    helloTimer = NULL;
+    upgradeTimer = NULL;
 }
 
 RSTP::~RSTP()
@@ -46,6 +46,8 @@ void RSTP::initialize(int stage)
         autoEdge = par("autoEdge");
         tcWhileTime = par("tcWhileTime");
         migrateTime = par("migrateTime");
+        helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
+        upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
     }
 
     if (stage == 2) // "auto" MAC addresses assignment takes place in stage 0
