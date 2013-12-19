@@ -22,6 +22,7 @@
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
 #include "InterfaceEntry.h"
+#include "Tags_m.h"
 
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
@@ -341,6 +342,7 @@ void EtherMACFullDuplex::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
+    frame->ensureTag<SignalTag>();
     send(frame, "upperLayerOut");
 }
 

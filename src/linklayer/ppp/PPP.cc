@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "Tags_m.h"
 #include "PPP.h"
 
 #include "opp_utils.h"
@@ -345,6 +346,7 @@ void PPP::handleMessage(cMessage *msg)
             cPacket *payload = decapsulate(pppFrame);
             numRcvdOK++;
             emit(packetSentToUpperSignal, payload);
+            payload->ensureTag<SignalTag>();
             send(payload, "netwOut");
         }
     }

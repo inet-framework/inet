@@ -34,6 +34,7 @@
 #include "AddressResolver.h"
 #include "FindModule.h"
 #include "ModuleAccess.h"
+#include "Tags_m.h"
 #include "SimpleLinkLayerControlInfo_m.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 #include "InterfaceTableAccess.h"
@@ -130,11 +131,9 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 	const Address& finalDestAddr  = netwMsg->getFinalDestAddr();
 	const Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
 	const Address& srcAddr        = netwMsg->getSrcAddr();
-	SimpleLinkLayerControlInfo* ctrlInfo = netwMsg->getTag<SimpleLinkLayerControlInfo>();
-	// KLUDGE: TODO: get rssi and ber
-	EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
-	double rssi = 1; // TODO: ctrlInfo->getRSSI();
-	double ber = 0; // TODO: ctrlInfo->getBitErrorRate();
+	SignalTag* signalTag = netwMsg->getTag<SignalTag>();
+	double rssi = signalTag->getRssi();
+	double ber = signalTag->getBer();
 	// Check whether the message is a flood and if it has to be forwarded.
 	floodTypes floodType = updateFloodTable(netwMsg->getIsFlood(), initialSrcAddr, finalDestAddr,
 										    netwMsg->getSeqNum());

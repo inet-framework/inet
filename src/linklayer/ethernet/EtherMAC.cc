@@ -20,12 +20,12 @@
 #include <string.h>
 
 #include "EtherMAC.h"
-
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
 #include "Ieee802Ctrl_m.h"
 #include "IPassiveQueue.h"
 #include "InterfaceEntry.h"
+#include "Tags_m.h"
 
 // TODO: there is some code that is pretty much the same as the one found in EtherMACFullDuplex.cc (e.g. EtherMAC::beginSendFrames)
 // TODO: refactor using a statemachine that is present in a single function
@@ -851,6 +851,7 @@ void EtherMAC::processReceivedDataFrame(EtherFrame *frame)
     numFramesPassedToHL++;
     emit(packetSentToUpperSignal, frame);
     // pass up to upper layer
+    frame->ensureTag<SignalTag>();
     send(frame, "upperLayerOut");
 }
 
