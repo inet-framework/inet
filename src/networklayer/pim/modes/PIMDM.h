@@ -37,23 +37,14 @@
 class PIMDM : public PIMBase, protected cListener
 {
     private:
-        struct TimerContext
-        {
-            IPv4Address source;
-            IPv4Address group;
-            int interfaceId;
-
-            TimerContext(IPv4Address source, IPv4Address group) : source(source), group(group), interfaceId(-1) {}
-            TimerContext(IPv4Address source, IPv4Address group, int interfaceId) : source(source), group(group), interfaceId(interfaceId) {}
-        };
-
         // per (S,G) state
+        struct SourceGroupState;
 
         struct UpstreamInterface
         {
             enum State { FORWARDING, PRUNED, ACK_PENDING }; // XXX not yet used
 
-            PIMDM *owner;
+            SourceGroupState *owner;
             InterfaceEntry *ie;
             IPv4Address nextHop;
             State state;
@@ -63,7 +54,7 @@ class PIMDM : public PIMBase, protected cListener
             cMessage* overrideTimer; // XXX not used
             simtime_t lastPruneSentTime; // for rate limiting prune messages, 0 if no prune was sent
 
-            UpstreamInterface(PIMDM *owner, InterfaceEntry *ie, IPv4Address neighbor)
+            UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor)
                 : owner(owner), ie(ie), nextHop(neighbor), state(FORWARDING),
                   graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL),
                   overrideTimer(NULL), lastPruneSentTime(0.0)
@@ -71,15 +62,18 @@ class PIMDM : public PIMBase, protected cListener
             virtual ~UpstreamInterface();
             int getInterfaceId() const { return ie->getInterfaceId(); }
 
+            void startGraftRetryTimer();
+            void startSourceActiveTimer();
+            void startStateRefreshTimer();
             void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
-            bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->pruneLimitInterval; }
+            bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->owner->pruneLimitInterval; }
         };
 
         struct DownstreamInterface
         {
             enum State { NO_INFO, PRUNE_PENDING, PRUNED }; // XXX not yet used
 
-            PIMDM *owner;
+            SourceGroupState *owner;
             InterfaceEntry *ie;
             PIMMulticastRoute::InterfaceState forwarding;         /**< Forward or Pruned */
             PIMMulticastRoute::AssertState assert;             /**< Assert state. */
@@ -92,10 +86,11 @@ class PIMDM : public PIMBase, protected cListener
             // assert winner state
             // TODO assertState, assertTimer, winnerAddress, winnerMetric
 
-            DownstreamInterface(PIMDM *owner, InterfaceEntry *ie)
+            DownstreamInterface(SourceGroupState *owner, InterfaceEntry *ie)
                 : owner(owner), ie(ie), forwarding(PIMMulticastRoute::Forward), assert(PIMMulticastRoute::AS_NO_INFO), state(NO_INFO), pruneTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             ~DownstreamInterface();
+            void startPruneTimer(int holdTime);
         };
 
         struct SourceAndGroup
@@ -111,19 +106,20 @@ class PIMDM : public PIMBase, protected cListener
 
         struct SourceGroupState
         {
+            PIMDM *owner;
             IPv4Address source;
             IPv4Address group;
             int flags;
             UpstreamInterface *upstreamInterface;
             std::vector<DownstreamInterface*> downstreamInterfaces;
 
-            SourceGroupState() : flags(0), upstreamInterface(NULL) {}
+            SourceGroupState() : owner(NULL), flags(0), upstreamInterface(NULL) {}
             ~SourceGroupState();
             bool isFlagSet(PIMMulticastRoute::Flag flag) const { return (flags & flag) != 0; }
             void setFlags(int flags)   { this->flags |= flags; }
             void clearFlag(PIMMulticastRoute::Flag flag)  { flags &= (~flag); }
             DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
-            void addDownstreamInterface(DownstreamInterface *downstream) { downstreamInterfaces.push_back(downstream); }
+            DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
             void removeDownstreamInterface(int interfaceId);
             bool isOilistNull();
         };
@@ -181,13 +177,6 @@ class PIMDM : public PIMBase, protected cListener
 	    void processSourceActiveTimer(cMessage *timer);
 	    void processStateRefreshTimer(cMessage *timer);
 
-	    // create/schedule timers
-	    cMessage *createPruneTimer(IPv4Address source, IPv4Address group, int intId, int holdTime);
-	    cMessage *createGraftRetryTimer(IPv4Address source, IPv4Address group);
-	    cMessage *createSourceActiveTimer(IPv4Address source, IPv4Address group);
-	    cMessage *createStateRefreshTimer(IPv4Address source, IPv4Address group);
-	    void restartTimer(cMessage *timer, double interval);
-
 	    // process PIM packets
 	    void processPIMPacket(PIMPacket *pkt);
         void processJoinPrunePacket(PIMJoinPrune *pkt);
@@ -207,8 +196,8 @@ class PIMDM : public PIMBase, protected cListener
 	    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
 
 	    // helpers
+        void restartTimer(cMessage *timer, double interval);
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
-	    void cancelAndDeleteTimer(cMessage *timer);
         PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         SourceGroupState *getSourceGroupState(IPv4Address source, IPv4Address group);
         void deleteSourceGroupState(IPv4Address source, IPv4Address group);
