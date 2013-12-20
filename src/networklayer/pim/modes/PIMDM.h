@@ -42,22 +42,31 @@ class PIMDM : public PIMBase, protected cListener
 
         struct UpstreamInterface
         {
-            enum State { FORWARDING, PRUNED, ACK_PENDING }; // XXX not yet used
+            enum GraftPruneState
+            {
+                FORWARDING, // oiflist != NULL
+                PRUNED,     // olist is empty
+                ACK_PENDING // waiting for a Graft Ack
+            };
 
             SourceGroupState *owner;
             InterfaceEntry *ie;
             IPv4Address nextHop;
-            State state;
+
+            // graft prune state
+            GraftPruneState graftPruneState;
             cMessage* graftRetryTimer;
-            cMessage* sourceActiveTimer; // route will be deleted when this timer expires
-            cMessage* stateRefreshTimer;
             cMessage* overrideTimer; // XXX not used
             simtime_t lastPruneSentTime; // for rate limiting prune messages, 0 if no prune was sent
 
+            // originator state
+            cMessage* sourceActiveTimer; // route will be deleted when this timer expires
+            cMessage* stateRefreshTimer;
+
             UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor)
-                : owner(owner), ie(ie), nextHop(neighbor), state(FORWARDING),
-                  graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL),
-                  overrideTimer(NULL), lastPruneSentTime(0.0)
+                : owner(owner), ie(ie), nextHop(neighbor),
+                  graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
+                  sourceActiveTimer(NULL), stateRefreshTimer(NULL)
                 { ASSERT(owner); ASSERT(ie); }
             virtual ~UpstreamInterface();
             int getInterfaceId() const { return ie->getInterfaceId(); }
@@ -71,26 +80,39 @@ class PIMDM : public PIMBase, protected cListener
 
         struct DownstreamInterface
         {
-            enum State { NO_INFO, PRUNE_PENDING, PRUNED }; // XXX not yet used
+            enum PruneState
+            {
+                NO_INFO,       // no prune info, neither pruneTimer or prunePendingTimer is running
+                PRUNE_PENDING, // received a prune from a downstream neighbor, waiting for an override
+                PRUNED         // received a prune from a downstream neighbor and it was not overridden
+            };
+
+            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
 
             SourceGroupState *owner;
             InterfaceEntry *ie;
-            PIMMulticastRoute::InterfaceState forwarding;         /**< Forward or Pruned */
-            PIMMulticastRoute::AssertState assert;             /**< Assert state. */
 
-            State state;
             // prune state
+            PruneState pruneState;
             cMessage *pruneTimer;
-            // TODO prunePendingTimer
+            cMessage *prunePendingTimer;
 
-            // assert winner state
-            // TODO assertState, assertTimer, winnerAddress, winnerMetric
+            // assert winner state XXX not used
+            AssertState assertState;
+            cMessage *assertTimer;
+            IPv4Address winnerAddress;
+            // TODO winnerMetric
 
             DownstreamInterface(SourceGroupState *owner, InterfaceEntry *ie)
-                : owner(owner), ie(ie), forwarding(PIMMulticastRoute::Forward), assert(PIMMulticastRoute::AS_NO_INFO), state(NO_INFO), pruneTimer(NULL)
+                : owner(owner), ie(ie),
+                  pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL),
+                  assertState(NO_ASSERT_INFO), assertTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             ~DownstreamInterface();
-            void startPruneTimer(int holdTime);
+            void startPruneTimer(double holdTime);
+            void stopPruneTimer();
+            void startPrunePendingTimer(double overrideInterval);
+            void stopPrunePendingTimer();
         };
 
         struct SourceAndGroup
@@ -143,13 +165,14 @@ class PIMDM : public PIMBase, protected cListener
                 //   (not upstream interface) AND
                 // forwarding rule:
                 //   (upstream is not Pruned)
-                virtual bool isEnabled() { return downstream->forwarding != PIMMulticastRoute::Pruned; }
+                virtual bool isEnabled() { return downstream->pruneState != DownstreamInterface::PRUNED; }
         };
 
     private:
         // parameters
         double pruneInterval;
         double pruneLimitInterval;
+        double overrideInterval;
         double graftRetryInterval;
         double sourceActiveInterval;
         double stateRefreshInterval;
@@ -173,6 +196,7 @@ class PIMDM : public PIMBase, protected cListener
 	    // process timers
 	    void processPIMTimer(cMessage *timer);
 	    void processPruneTimer(cMessage *timer);
+	    void processPrunePendingTimer(cMessage *timer);
 	    void processGraftRetryTimer(cMessage *timer);
 	    void processSourceActiveTimer(cMessage *timer);
 	    void processStateRefreshTimer(cMessage *timer);
@@ -185,7 +209,8 @@ class PIMDM : public PIMBase, protected cListener
 	    void processStateRefreshPacket(PIMStateRefresh *pkt);
 	    void processAssertPacket(PIMAssert *pkt);
 
-        void processPrune(SourceGroupState *sgState, int intId, int holdTime);
+        void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors);
+        void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
 
 	    // create and send PIM packets

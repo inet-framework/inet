@@ -123,130 +123,136 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
 }
 
 /**
- * PROCESS GRAFT PACKET
- *
  * The method is used to process PIMGraft packet. Packet means that downstream router wants to join to
  * multicast tree, so the packet cannot come to RPF interface. Router finds correct outgoig interface
  * towards downstream router. Change its state to forward if it was not before and cancel Prune Timer.
  * If route was in pruned state, router will send also Graft message to join multicast tree.
- *
- * @param source IP address of multicast source.
- * @param group IP address of multicast group.
- * @param sender IP Address of Graft packet sender.
- * @param intId ID of Graft packet incoming interface.
- * @see sendPimGraft()
- * @see createGraftRetryTimer()
- * @see PIMGraft()
- * @see PIMgrt()
- * @see processJoinPruneGraftPacket()
  */
-void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId)
+void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int incomingInterfaceId)
 {
-	EV_DEBUG << "Processing Graft, source=" << source << ", group=" << group << ", sender=" << sender << "incoming if=" << intId << endl;
+	EV_DEBUG << "Processing Graft, source=" << source << ", group=" << group << ", sender=" << sender << "incoming if=" << incomingInterfaceId << endl;
 
 	SourceGroupState *sgState = getSourceGroupState(source, group);
 
 	UpstreamInterface *upstream = sgState->upstreamInterface;
 
 	// check if message come to non-RPF interface
-	if (upstream->ie->getInterfaceId() == intId)
+	if (upstream->ie->getInterfaceId() == incomingInterfaceId)
 	{
 		EV << "ERROR: Graft message came to RPF interface." << endl;
 		return;
 	}
 
-	// find outgoing interface to neighbor
-    DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(intId);
-    if (downstream)
-    {
-        if (downstream->forwarding == PIMMulticastRoute::Pruned)
-        {
-            EV << "Interface " << downstream->ie->getInterfaceId() << " transit to forwarding state (Graft)." << endl;
-            downstream->forwarding = PIMMulticastRoute::Forward;
+    DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(incomingInterfaceId);
+    if (!downstream)
+        return;
 
-            //cancel Prune Timer
-            if (downstream->pruneTimer)
-            {
-                cancelAndDelete(downstream->pruneTimer);
-                downstream->pruneTimer = NULL;
-            }
-        }
+    // downstream state machine
+    // Note: GraftAck is sent in processGraftPacket()
+    switch (downstream->pruneState)
+    {
+        case DownstreamInterface::NO_INFO:
+            // do nothing
+            break;
+        case DownstreamInterface::PRUNE_PENDING:
+            downstream->stopPrunePendingTimer();
+            downstream->pruneState = DownstreamInterface::NO_INFO;
+            break;
+        case DownstreamInterface::PRUNED:
+            EV << "Interface " << downstream->ie->getInterfaceId() << " transit to forwarding state (Graft)." << endl;
+            downstream->stopPruneTimer();
+            downstream->pruneState = DownstreamInterface::NO_INFO;
+            break;
     }
 
-	// if all route was pruned, remove prune flag
-	// if upstrem is not source, send Graft message
-	if (sgState->isFlagSet(PIMMulticastRoute::P) && downstream && !upstream->graftRetryTimer)
-	{
-		if (!sgState->isFlagSet(PIMMulticastRoute::A))
-		{
-			EV << "Route is not pruned any more, send Graft to upstream" << endl;
-			UpstreamInterface *inInterface = sgState->upstreamInterface;
-			sendGraftPacket(inInterface->nextHop, source, group, inInterface->getInterfaceId());
-			inInterface->startGraftRetryTimer();
-		}
-		else
-		    sgState->clearFlag(PIMMulticastRoute::P);
-	}
+    // if all route was pruned, remove prune flag
+    // if upstrem is not source, send Graft message
+    if (sgState->isFlagSet(PIMMulticastRoute::P) && !upstream->graftRetryTimer)
+    {
+        if (!sgState->isFlagSet(PIMMulticastRoute::A))
+        {
+            EV << "Route is not pruned any more, send Graft to upstream" << endl;
+            UpstreamInterface *inInterface = sgState->upstreamInterface;
+            sendGraftPacket(inInterface->nextHop, source, group, inInterface->getInterfaceId());
+            inInterface->startGraftRetryTimer();
+        }
+        else
+            sgState->clearFlag(PIMMulticastRoute::P);
+    }
 }
 
 /**
- * PROCESS PRUNE PACKET
- *
  * The method process PIM Prune packet. First the method has to find correct outgoing interface
  * where PIM Prune packet came to. The method also checks if there is still any forwarding outgoing
  * interface. Forwarding interfaces, where Prune packet come to, goes to prune state. If all outgoing
  * interfaces are pruned, the router will prune from multicast tree.
- *
- * @param route Pointer to multicast route which GraftAck belongs to.
- * @param intId
- * @see processJoinPruneGraftPacket()
- * @see createPruneTimer()
- * @see sendPimJoinPrune()
- * @see PIMpt()
  */
-void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime)
+void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors)
 {
 	EV_INFO << "Processing Prune " << endl;
 
 	// we find correct outgoing interface
-    DownstreamInterface *outInt = sgState->findDownstreamInterfaceByInterfaceId(intId);
-    if (!outInt)
+    DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(intId);
+    if (!downstream)
         return;
 
-    // if interface was already pruned, restart Prune Timer
-    if (outInt->forwarding == PIMMulticastRoute::Pruned)
+    // Downstream state machine
+    switch (downstream->pruneState)
     {
-        EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
-        restartTimer(outInt->pruneTimer, holdTime);
-    }
-    // if interface is forwarding, transit its state to pruned and set Prune timer
-    else
-    {
-        EV << "Outgoing interfaces is forwarding now -> change to Pruned." << endl;
-        outInt->forwarding = PIMMulticastRoute::Pruned;
-        outInt->startPruneTimer(holdTime);
+        case DownstreamInterface::PRUNED:
+            EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
+            restartTimer(downstream->pruneTimer, holdTime);
+            break;
+        case DownstreamInterface::PRUNE_PENDING:
+            // do nothing
+            break;
+        case DownstreamInterface::NO_INFO:
 
-        // if there is no forwarding outgoing int, transit route to pruned state
-        if (sgState->isOilistNull())
-        {
-            EV << "Route is not forwarding any more, send Prune to upstream." << endl;
-            sgState->setFlags(PIMMulticastRoute::P);
+            // if there could be more than one PIM neighbor on interface
+            if (numRpfNeighbors > 1)
+            {
+                //FIXME set PPT timer
+            }
+            // if there is only one PIM neighbor on interface
+            else
+            {
+                EV << "Outgoing interfaces is forwarding now -> change to Pruned." << endl;
+                downstream->pruneState = DownstreamInterface::PRUNED;
+                downstream->startPruneTimer(holdTime);
 
-            // if GRT is running now, do not send Prune msg
-            UpstreamInterface *upstream = sgState->upstreamInterface;
-            if (sgState->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
-            {
-                cancelAndDelete(upstream->graftRetryTimer);
-                upstream->graftRetryTimer = NULL;
+                // if there is no forwarding outgoing int, transit route to pruned state
+                if (sgState->isOilistNull())
+                {
+                    EV << "Route is not forwarding any more, send Prune to upstream." << endl;
+                    sgState->setFlags(PIMMulticastRoute::P);
+
+                    // if GRT is running now, do not send Prune msg
+                    UpstreamInterface *upstream = sgState->upstreamInterface;
+                    if (sgState->isFlagSet(PIMMulticastRoute::P) && upstream->graftRetryTimer)
+                    {
+                        cancelAndDelete(upstream->graftRetryTimer);
+                        upstream->graftRetryTimer = NULL;
+                    }
+                    else if (!sgState->isFlagSet(PIMMulticastRoute::A))
+                    {
+                        UpstreamInterface *upstream = sgState->upstreamInterface;
+                        sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+                    }
+                }
             }
-            else if (!sgState->isFlagSet(PIMMulticastRoute::A))
-            {
-                UpstreamInterface *upstream = sgState->upstreamInterface;
-                sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
-            }
-        }
+            break;
     }
 }
+
+void PIMDM::processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors)
+{
+    //FIXME join action
+    // only if there is more than one PIM neighbor on one interface
+    // interface change to forwarding state
+    // cancel Prune Timer
+    // send Graft to upstream
+}
+
 
 void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
 {
@@ -265,7 +271,6 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
 
     int numRpfNeighbors = pimNbt->getNumNeighborsOnInterface(rpfInterface->getInterfaceId());
 
-    // go through list of multicast groups
     for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
     {
         MulticastGroup group = pkt->getMulticastGroups(i);
@@ -274,27 +279,17 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
         // go through list of joined sources
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
         {
-            //FIXME join action
-            // only if there is more than one PIM neighbor on one interface
-            // interface change to forwarding state
-            // cancel Prune Timer
-            // send Graft to upstream
+            EncodedAddress &source = group.getJoinedSourceAddress(j);
+            SourceGroupState *sgState = getSourceGroupState(source.IPaddress, groupAddr);
+            processJoin(sgState, rpfInterface->getInterfaceId(), numRpfNeighbors);
         }
 
         // go through list of pruned sources
-        for(unsigned int k = 0; k < group.getPrunedSourceAddressArraySize(); k++)
+        for(unsigned int j = 0; j < group.getPrunedSourceAddressArraySize(); j++)
         {
-            EncodedAddress &source = group.getPrunedSourceAddress(k);
+            EncodedAddress &source = group.getPrunedSourceAddress(j);
             SourceGroupState *sgState = getSourceGroupState(source.IPaddress, groupAddr);
-
-            // if there could be more than one PIM neighbor on interface
-            if (numRpfNeighbors > 1)
-            {
-                ; //FIXME set PPT timer
-            }
-            // if there is only one PIM neighbor on interface
-            else
-                processPrune(sgState, rpfInterface->getInterfaceId(), pkt->getHoldTime());
+            processPrune(sgState, rpfInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors);
         }
     }
 
@@ -363,18 +358,12 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
 
 
 /**
- * PROCESS STATE REFRESH PACKET
- *
  * The method is used to process PIMStateRefresh packet. The method checks if there is route in mroute
  * and that packet has came to RPF interface. Then it goes through all outgoing interfaces. If the
  * interface is pruned, it resets Prune Timer. For each interface State Refresh message is copied and
  * correct prune indicator is set according to state of outgoing interface (pruned/forwarding).
  *
  * State Refresh message is used to stop flooding of network each 3 minutes.
- *
- * @param pkt Pointer to packet.
- * @see sendPimJoinPrune()
- * @see sendPimStateRefresh()
  */
 void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 {
@@ -422,15 +411,14 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 	for (unsigned int i = 0; i < sgState->downstreamInterfaces.size(); i++)
 	{
 	    DownstreamInterface *outInt = sgState->downstreamInterfaces[i];
-		if (outInt->forwarding == PIMMulticastRoute::Pruned)
+		if (outInt->pruneState == DownstreamInterface::PRUNED)
 		{
 			// P = true
 			pruneIndicator = true;
 			// reset PT
-			cancelEvent(outInt->pruneTimer);
-			scheduleAt(simTime() + pruneInterval, outInt->pruneTimer);
+			restartTimer(outInt->pruneTimer, pruneInterval);
 		}
-		else if (outInt->forwarding == PIMMulticastRoute::Forward)
+		else if (outInt->pruneState == DownstreamInterface::NO_INFO)
 		{
 			// P = false
 			pruneIndicator = false;
@@ -466,9 +454,8 @@ void PIMDM::processPruneTimer(cMessage *timer)
 	IPv4Address group = sgState->group;
 
 	// state of interface is changed to forwarding
-    delete timer;
-    downstream->pruneTimer = NULL;
-    downstream->forwarding = PIMMulticastRoute::Forward;
+    downstream->stopPruneTimer();
+    downstream->pruneState = DownstreamInterface::NO_INFO;
     sgState->clearFlag(PIMMulticastRoute::P);
 
     // if the router is pruned from multicast tree, join again
@@ -484,6 +471,27 @@ void PIMDM::processPruneTimer(cMessage *timer)
         else
             sgState->removeFlag(P);
     }*/
+}
+
+// See RFC 3973 4.4.2.2
+void PIMDM::processPrunePendingTimer(cMessage *timer)
+{
+    DownstreamInterface *downstream = static_cast<DownstreamInterface*>(timer->getContextPointer());
+    ASSERT(timer == downstream->pruneTimer);
+    ASSERT(downstream->pruneState == DownstreamInterface::PRUNE_PENDING);
+
+    SourceGroupState *sgState = downstream->owner;
+    IPv4Address source = sgState->source;
+    IPv4Address group = sgState->group;
+
+    EV_INFO << "PrunePendingTimer of (source=" << source << ", group=" << group << ") has expired.\n";
+
+    // go to pruned state
+    downstream->pruneState = DownstreamInterface::PRUNED;
+    double holdTime = pruneInterval - overrideInterval; // XXX should be received HoldTime - computed override interval;
+    downstream->startPruneTimer(holdTime);
+
+    // TODO optionally send PruneEcho
 }
 
 void PIMDM::processGraftRetryTimer(cMessage *timer)
@@ -525,7 +533,7 @@ void PIMDM::processStateRefreshTimer(cMessage *timer)
 	for (unsigned int i = 0; i < sgState->downstreamInterfaces.size(); i++)
 	{
 	    DownstreamInterface *downstream = sgState->downstreamInterfaces[i];
-	    bool isPruned = downstream->forwarding == PIMMulticastRoute::Pruned;
+	    bool isPruned = downstream->pruneState == DownstreamInterface::PRUNED;
 	    if (isPruned)
 			restartTimer(downstream->pruneTimer, pruneInterval);
 
@@ -554,6 +562,7 @@ void PIMDM::processPIMTimer(cMessage *timer)
 			break;
 		case PrunePendingTimer:
 			EV << "PrunePendingTimer" << endl;
+			processPrunePendingTimer(timer);
 			break;
 		case GraftRetryTimer:
 			EV << "GraftRetryTimer" << endl;
@@ -651,6 +660,7 @@ void PIMDM::initialize(int stage)
     {
         pruneInterval = par("pruneInterval");
         pruneLimitInterval = par("pruneLimitInterval");
+        overrideInterval = par("overrideInterval");
         graftRetryInterval = par("graftRetryInterval");
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
@@ -899,9 +909,9 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 
 		// the incoming interface has to change its state to Pruned
 		DownstreamInterface *outInt = sgState->findDownstreamInterfaceByInterfaceId(interfaceId);
-		if (outInt && outInt->forwarding == PIMMulticastRoute::Forward)
+		if (outInt && outInt->pruneState == DownstreamInterface::NO_INFO)
 		{
-			outInt->forwarding = PIMMulticastRoute::Pruned;
+			outInt->pruneState = DownstreamInterface::PRUNED;
 			outInt->startPruneTimer(pruneInterval);
 
 			// if there is no outgoing interface, Prune msg has to be sent on upstream
@@ -953,8 +963,8 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
         if (downstream)
         {
             EV << "Interface is already on list of outgoing interfaces" << endl;
-            if (downstream->forwarding == PIMMulticastRoute::Pruned)
-                downstream->forwarding = PIMMulticastRoute::Forward;
+            if (downstream->pruneState == DownstreamInterface::PRUNED)
+                downstream->pruneState = DownstreamInterface::NO_INFO;
         }
         else
         {
@@ -1019,7 +1029,7 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
         for (unsigned int k = 0; k < sgState->downstreamInterfaces.size(); k++)
         {
             DownstreamInterface *outInt = sgState->downstreamInterfaces[k];
-            if(outInt->forwarding == PIMMulticastRoute::Forward &&
+            if(outInt->pruneState == DownstreamInterface::NO_INFO &&
                pimNbt->getNumNeighborsOnInterface(outInt->ie->getInterfaceId()) == 0)
             {
                 connected = true;
@@ -1201,20 +1211,11 @@ PIMDM::DownstreamInterface::~DownstreamInterface()
 }
 
 /**
- * CREATE PRUNE TIMER
- *
  * The method is used to create PIMPrune timer. The timer is set when outgoing interface
  * goes to pruned state. After expiration (usually 3min) interface goes back to forwarding
  * state. It is set to (S,G,I).
- *
- * @param source IP address of multicast source.
- * @param group IP address of multicast group.
- * @param intId ID of outgoing interface.
- * @param holdTime Time of expiration (usually 3min).
- * @return Pointer to new Prune Timer.
- * @see PIMpt()
  */
-void PIMDM::DownstreamInterface::startPruneTimer(int holdTime)
+void PIMDM::DownstreamInterface::startPruneTimer(double holdTime)
 {
     cMessage *timer = new cMessage("PimPruneTimer", PruneTimer);
     timer->setContextPointer(this);
@@ -1222,6 +1223,35 @@ void PIMDM::DownstreamInterface::startPruneTimer(int holdTime)
     pruneTimer = timer;
 }
 
+void PIMDM::DownstreamInterface::stopPruneTimer()
+{
+    if (pruneTimer)
+    {
+        if (pruneTimer->isScheduled())
+            owner->owner->cancelEvent(pruneTimer);
+        delete pruneTimer;
+        pruneTimer = NULL;
+    }
+}
+
+void PIMDM::DownstreamInterface::startPrunePendingTimer(double overrideInterval)
+{
+    cMessage *timer = new cMessage("PimPrunePendingTimer", PrunePendingTimer);
+    timer->setContextPointer(this);
+    owner->owner->scheduleAt(simTime() + overrideInterval, timer);
+    prunePendingTimer = timer;
+}
+
+void PIMDM::DownstreamInterface::stopPrunePendingTimer()
+{
+    if (prunePendingTimer)
+    {
+        if (prunePendingTimer->isScheduled())
+            owner->owner->cancelEvent(prunePendingTimer);
+        delete prunePendingTimer;
+        prunePendingTimer = NULL;
+    }
+}
 
 PIMDM::SourceGroupState::~SourceGroupState()
 {
@@ -1263,7 +1293,7 @@ bool PIMDM::SourceGroupState::isOilistNull()
 {
     for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
     {
-        if (downstreamInterfaces[i]->forwarding == PIMMulticastRoute::Forward)
+        if (downstreamInterfaces[i]->pruneState != DownstreamInterface::PRUNED)
             return false;
     }
     return true;
