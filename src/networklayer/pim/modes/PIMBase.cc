@@ -79,7 +79,7 @@ void PIMBase::initialize(int stage)
         {
             EV_INFO << "PIM is enabled on device " << hostname << endl;
 
-            helloTimer = new cMessage("PIM Hello", HelloTimer);
+            helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
             scheduleAt(simTime() + par("triggeredHelloDelay").doubleValue(), helloTimer);
         }
     }
