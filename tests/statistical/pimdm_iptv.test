@@ -1,0 +1,23 @@
+%description:
+Testing the number of received multicast datagrams in examples/pim/iptv/ simulation.
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%extraargs: -c PIM_DM
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples
+sim-time-limit = 35s
+
+**.configurator.config = xmldoc("../../../../examples/pim/iptv/networkConfig.xml")
+**.ospf.ospfConfig = xmldoc("../../../../examples/pim/iptv/ASConfig.xml")
+
+include ../../../../examples/pim/iptv/omnetpp.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/PIM_DM-0.sca
+scalar Network.server.udpApp\[0\]\s+sentPk:count\s+250
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/PIM_DM-0.sca
+scalar Network.client.udpApp\[0\]\s+rcvdPk:count\s+124

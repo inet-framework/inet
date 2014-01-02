@@ -1,0 +1,23 @@
+%description:
+Testing the number of received multicast datagrams in examples/pim/dm/ simulation.
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples
+sim-time-limit = 500s
+**.configurator.config = xmldoc("../../../../examples/pim/dm/networkConfig.xml")
+
+include ../../../../examples/pim/dm/omnetpp.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar pimDMFinal.Source1.udpApp\[0\]\s+sentPk:count\s+20
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar pimDMFinal.Source2.udpApp\[0\]\s+sentPk:count\s+10
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: results/General-0.sca
+scalar pimDMFinal.Host2.udpApp\[0\]\s+rcvdPk:count\s+20
