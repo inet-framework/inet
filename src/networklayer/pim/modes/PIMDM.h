@@ -97,8 +97,8 @@ class PIMDM : public PIMBase, protected cListener
 
             // prune state
             PruneState pruneState;
-            cMessage *pruneTimer;
-            cMessage *prunePendingTimer;
+            cMessage *pruneTimer; // scheduled when entering into PRUNED state, when expires the interface goes to NO_INFO (forwarding) state
+            cMessage *prunePendingTimer; // scheduled when a Prune is received, when expires the interface goes to PRUNED state
 
             // assert winner state XXX not used
             AssertState assertState;
@@ -168,6 +168,7 @@ class PIMDM : public PIMBase, protected cListener
         double pruneInterval;
         double pruneLimitInterval;
         double overrideInterval;
+        double propagationDelay;
         double graftRetryInterval;
         double sourceActiveInterval;
         double stateRefreshInterval;
@@ -205,8 +206,8 @@ class PIMDM : public PIMBase, protected cListener
 	    void processStateRefreshPacket(PIMStateRefresh *pkt);
 	    void processAssertPacket(PIMAssert *pkt);
 
-        void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors);
-        void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors);
+        void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
+        void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
 
         // process olist changes
