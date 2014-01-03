@@ -109,6 +109,7 @@ class PIMDM : public PIMBase, protected cListener
                   assertState(NO_ASSERT_INFO), assertTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             ~DownstreamInterface();
+            bool isInOlist() const;
             void startPruneTimer(double holdTime);
             void stopPruneTimer();
             void startPrunePendingTimer(double overrideInterval);
@@ -156,16 +157,7 @@ class PIMDM : public PIMBase, protected cListener
             public:
                 PIMDMOutInterface(InterfaceEntry *ie, DownstreamInterface *downstream)
                     : IMulticastRoute::OutInterface(ie), downstream(downstream) {}
-                // XXX condition should be:
-                // immediate_olist:
-                //   ((has PIM neighbor on this interface AND not Pruned) OR (has local receiver)) AND
-                //   (not assert looser) AND
-                //   (not boundary) AND
-                // olist:
-                //   (not upstream interface) AND
-                // forwarding rule:
-                //   (upstream is not Pruned)
-                virtual bool isEnabled() { return downstream->pruneState != DownstreamInterface::PRUNED; }
+                virtual bool isEnabled() { return downstream->isInOlist(); }
         };
 
     private:
@@ -212,6 +204,10 @@ class PIMDM : public PIMBase, protected cListener
         void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors);
         void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
+
+        // process olist changes
+        void processOlistEmptyEvent(SourceGroupState *sgState);
+        void processOlistNonEmptyEvent(SourceGroupState *sgState);
 
 	    // create and send PIM packets
 	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);

@@ -30,7 +30,7 @@ simple PIMDM
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s;
         double pruneInterval @unit(s) = 180s;
-        double pruneLimitInterval @unit(s) = 210s; // XXX not used
+        double pruneLimitInterval @unit(s) = 210s;
         double overrideInterval @unit(s) = 2.5s;
         double graftRetryInterval @unit(s) = 3s;
         double sourceActiveInterval @unit(s) = 210s; // Cisco has 180s, after that, route is flushed
