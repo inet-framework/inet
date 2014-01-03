@@ -72,9 +72,12 @@ class PIMDM : public PIMBase, protected cListener
             int getInterfaceId() const { return ie->getInterfaceId(); }
 
             void startGraftRetryTimer();
+            void startOverrideTimer();
             void startSourceActiveTimer();
             void startStateRefreshTimer();
             void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
+            void cancelOverrideTimer();
+            void stopPruneLimitTimer() { lastPruneSentTime = 0; }
             bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->owner->pruneLimitInterval; }
         };
 
@@ -190,6 +193,7 @@ class PIMDM : public PIMBase, protected cListener
 	    void processPruneTimer(cMessage *timer);
 	    void processPrunePendingTimer(cMessage *timer);
 	    void processGraftRetryTimer(cMessage *timer);
+	    void processOverrideTimer(cMessage *timer);
 	    void processSourceActiveTimer(cMessage *timer);
 	    void processStateRefreshTimer(cMessage *timer);
 
@@ -211,6 +215,7 @@ class PIMDM : public PIMBase, protected cListener
 
 	    // create and send PIM packets
 	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
+	    void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
 	    void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
 	    void sendGraftAckPacket(PIMGraft *msg);
 	    void sendStateRefreshPacket(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
