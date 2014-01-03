@@ -286,7 +286,7 @@
 /examples/pim/sm/,                   -f omnetpp.ini -c Scenario2 -r 0,              150s,            9fd6-ed5e
 /examples/pim/sm/,                   -f omnetpp.ini -c Scenario3 -r 0,              300s,            cc01-4cc1
 /examples/pim/sm/,                   -f omnetpp.ini -c Scenario4 -r 0,              100s,            4f64-4093
-/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            2f6f-e8e2
+/examples/pim/iptv/,                 -f omnetpp.ini -c PIM_DM -r 0,                  35s,            beb4-7535
 /examples/pim/iptv/,                 -f omnetpp.ini -c PIM_SM -r 0,                  35s,            1d21-4070
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            4496-fd0d

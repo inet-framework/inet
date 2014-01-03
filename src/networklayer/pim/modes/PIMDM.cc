@@ -373,9 +373,36 @@ void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address send
         processOlistNonEmptyEvent(sgState);
 }
 
+// The set of interfaces defined by the olist(S,G) macro becomes
+// null, indicating that traffic from S addressed to group G should
+// no longer be forwarded.
 void PIMDM::processOlistEmptyEvent(SourceGroupState *sgState)
 {
-    // TODO
+    UpstreamInterface *upstream = sgState->upstreamInterface;
+
+    // upstream state transitions
+
+    // olist(S,G) -> NULL AND S NOT directly connected?
+    if (!sgState->isFlagSet(PIMMulticastRoute::A))
+    {
+        if(upstream->graftPruneState == UpstreamInterface::FORWARDING || upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
+        {
+            // The Upstream(S,G) state machine MUST
+            // transition to the Pruned (P) state.  A Prune(S,G) MUST be
+            // multicast to the RPF_interface(S), with RPF'(S) named in the
+            // upstream neighbor field.  The GraftRetry Timer (GRT(S,G)) MUST be
+            // cancelled, and PLT(S,G) MUST be set to t_limit seconds.
+            sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+            upstream->startPruneLimitTimer();
+            if (upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
+            {
+                cancelAndDelete(upstream->graftRetryTimer);
+                upstream->graftRetryTimer = NULL;
+            }
+        }
+    }
+
+    upstream->graftPruneState = UpstreamInterface::PRUNED;
 }
 
 void PIMDM::processOlistNonEmptyEvent(SourceGroupState *sgState)
@@ -603,11 +630,18 @@ void PIMDM::processPrunePendingTimer(cMessage *timer)
 void PIMDM::processGraftRetryTimer(cMessage *timer)
 {
     EV_INFO << "GraftRetryTimer expired.\n";
-    // send Graft message to upstream router
     UpstreamInterface *upstream = static_cast<UpstreamInterface*>(timer->getContextPointer());
     ASSERT(upstream->graftPruneState = UpstreamInterface::ACK_PENDING);
+    ASSERT(timer == upstream->graftRetryTimer);
+
     IPv4Address source = upstream->owner->source;
     IPv4Address group = upstream->owner->group;
+
+    // The Upstream(S,G) state machine stays in the AckPending (AP)
+    // state.  Another Graft message for (S,G) SHOULD be unicast to
+    // RPF'(S) and the GraftRetry Timer (GRT(S,G)) reset to
+    // Graft_Retry_Period.  It is RECOMMENDED that the router retry a
+    // configured number of times before ceasing retries.
 	sendGraftPacket(upstream->nextHop, source, group, upstream->getInterfaceId());
     scheduleAt(simTime() + graftRetryInterval, timer);
 }
@@ -991,26 +1025,32 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address 
 	restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
 
 	// upstream state transition
-	// event: Data Packet arrives on RPF_Interface(S) AND olist(S,G) == NULL AND S is NOT directly connected
-    if (sgState->downstreamInterfaces.size() == 0 && !sgState->isFlagSet(PIMMulticastRoute::A))
+
+	// Data Packet arrives on RPF_Interface(S) AND olist(S,G) == NULL AND S is NOT directly connected ?
+    if (upstream->ie->getInterfaceId() == interfaceId && sgState->isOilistNull() && !sgState->isFlagSet(PIMMulticastRoute::A))
     {
         EV_DETAIL << "Route does not have any outgoing interface and source is not directly connected.\n";
 
         switch (upstream->graftPruneState)
         {
             case UpstreamInterface::FORWARDING:
-                upstream->graftPruneState = UpstreamInterface::PRUNED;
+                // The Upstream(S,G) state machine MUST transition to the Pruned (P)
+                // state, send a Prune(S,G) to RPF'(S), and set PLT(S,G) to t_limit seconds.
                 sendPrunePacket(upstream->nextHop, source, group, upstream->getInterfaceId());
                 upstream->startPruneLimitTimer();
+                upstream->graftPruneState = UpstreamInterface::PRUNED;
                 break;
             case UpstreamInterface::PRUNED:
+                // Either another router on the LAN desires traffic from S addressed
+                // to G or a previous Prune was lost.  To prevent generating a
+                // Prune(S,G) in response to every data packet, the PruneLimit Timer
+                // (PLT(S,G)) is used.  Once the PLT(S,G) expires, the router needs
+                // to send another prune in response to a data packet not received
+                // directly from the source.  A Prune(S,G) MUST be sent to RPF'(S),
+                // and the PLT(S,G) MUST be set to t_limit.
+                //
                 // if GRT is running now, do not send Prune msg
-                if (upstream->graftRetryTimer)
-                {
-                    cancelAndDelete(upstream->graftRetryTimer);
-                    upstream->graftRetryTimer = NULL;
-                }
-                else if (!upstream->isPruneLimitTimerRunning())
+                if (!upstream->isPruneLimitTimerRunning())
                 {
                     sendPrunePacket(upstream->nextHop, source, group, upstream->getInterfaceId());
                     upstream->startPruneLimitTimer();
@@ -1210,6 +1250,7 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
  * interfaces. If route was not pruned, the router has to join to the multicast tree again
  * (by different path).
  */
+// XXX Assert state causes RPF'(S) to change
 void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpf)
 {
     IPv4Address source = route->getOrigin();
@@ -1230,7 +1271,7 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
 
     // set new upstream interface data
     IPv4Address newRpfNeighbor = pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress(); // XXX what happens if no neighbors?
-    sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor);
+    UpstreamInterface *upstream = sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor);
     route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
@@ -1244,12 +1285,41 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
         route->addOutInterface(new PIMDMOutInterface(oldRpfInterface, downstream));
     }
 
-    // route was not pruned, join to the multicast tree again
-    if (!sgState->isOilistNull())
+    bool isOlistNull = sgState->isOilistNull();
+
+    // upstream state transitions
+
+    // RPF'(S) Changes AND olist(S,G) != NULL AND S is NOT directly connected?
+    if (!isOlistNull && !sgState->isFlagSet(PIMMulticastRoute::A))
     {
-        sendGraftPacket(sgState->upstreamInterface->nextHop, source, group, rpfId);
-        sgState->upstreamInterface->startGraftRetryTimer();
-        sgState->upstreamInterface->graftPruneState = UpstreamInterface::ACK_PENDING;
+        // The Upstream(S,G) state
+        // machine MUST transition to the AckPending (AP) state, unicast a
+        // Graft to the new RPF'(S), and set the GraftRetry Timer (GRT(S,G))
+        // to Graft_Retry_Period.
+
+        if (upstream->graftPruneState == UpstreamInterface::PRUNED)
+            upstream->stopPruneLimitTimer();
+
+        // route was not pruned, join to the multicast tree again
+        sendGraftPacket(upstream->nextHop, source, group, rpfId);
+        upstream->startGraftRetryTimer();
+        upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
+    }
+    // RPF'(S) Changes AND olist(S,G) == NULL
+    else if (isOlistNull)
+    {
+
+        if (upstream->graftPruneState == UpstreamInterface::PRUNED)
+        {
+            upstream->stopPruneLimitTimer();
+        }
+        else if (upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
+        {
+            cancelAndDelete(upstream->graftRetryTimer);
+            upstream->graftRetryTimer = NULL;
+        }
+
+        upstream->graftPruneState = UpstreamInterface::PRUNED;
     }
 }
 
