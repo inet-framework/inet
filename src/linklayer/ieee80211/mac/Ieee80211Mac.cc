@@ -819,11 +819,11 @@ void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long 
     Enter_Method_Silent();
     if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        IRadio::RadioChannelState radioState = (IRadio::RadioChannelState)value;
+        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
         handleWithFSM(mediumStateChange);
-        if (previousRadioState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && radioState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        previousRadioState = radioState;
+        radioChannelState = newRadioChannelState;
     }
 }
 

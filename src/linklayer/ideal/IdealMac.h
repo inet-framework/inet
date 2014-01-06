@@ -46,7 +46,7 @@ class INET_API IdealMac : public MACProtocolBase
     MACAddress address;     // MAC address
 
     IRadio *radio;
-    IRadio::RadioChannelState previousRadioState;
+    IRadio::RadioChannelState radioChannelState;
     IPassiveQueue *queueModule;
 
     int outStandingRequests;

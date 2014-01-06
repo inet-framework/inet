@@ -74,7 +74,7 @@ void IdealMac::initialize(int stage)
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-        previousRadioState = IRadio::RADIO_CHANNEL_STATE_UNKNOWN;
+        radioChannelState = IRadio::RADIO_CHANNEL_STATE_UNKNOWN;
 
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
@@ -139,15 +139,15 @@ void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long valu
     Enter_Method_Silent();
     if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        IRadio::RadioChannelState radioState = (IRadio::RadioChannelState)value;
-        if ((previousRadioState == IRadio::RADIO_CHANNEL_STATE_UNKNOWN ||
-             previousRadioState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) &&
-             radioState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
+        if ((radioChannelState == IRadio::RADIO_CHANNEL_STATE_UNKNOWN ||
+             radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) &&
+             newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
             getNextMsgFromHL();
         }
-        previousRadioState = radioState;
+        radioChannelState = newRadioChannelState;
     }
 }
 
