@@ -22,10 +22,7 @@
 #include "Coord.h"
 #include "IRadio.h"
 #include "RadioChannelBase.h"
-
-// Forward declarations
-class IdealRadioFrame;
-class IdealRadio;
+#include "IdealRadioFrame.h"
 
 /**
  * This class represent an ideal radio channel.
