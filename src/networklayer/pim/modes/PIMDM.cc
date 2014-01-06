@@ -577,39 +577,31 @@ void PIMDM::processAssertPacket(PIMAssert *pkt)
 }
 
 /*
- * The method is used to process PIM Prune timer. It is (S,G,I) timer. When Prune timer expires, it
- * means that outgoing interface transits back to forwarding state. If the router is pruned from
- * multicast tree, join again.
+ * The Prune Timer (PT(S,G,I)) expires, indicating that it is again
+ * time to flood data from S addressed to group G onto interface I.
+ * The Prune(S,G) Downstream state machine on interface I MUST
+ * transition to the NoInfo (NI) state.  The router MUST evaluate
+ * any possible transitions in the Upstream(S,G) state machine.
  */
 void PIMDM::processPruneTimer(cMessage *timer)
 {
-	EV_INFO << "PruneTimer expired.\n";
-
 	DownstreamInterface *downstream = static_cast<DownstreamInterface*>(timer->getContextPointer());
     ASSERT(timer == downstream->pruneTimer);
+    ASSERT(downstream->pruneState == DownstreamInterface::PRUNED);
 
     SourceGroupState *sgState = downstream->owner;
 	IPv4Address source = sgState->source;
 	IPv4Address group = sgState->group;
 
-	// state of interface is changed to forwarding
+    EV_INFO << "PruneTimer of source="<< source <<", group=" << group << " expired.\n";
+
+    // state of interface is changed to forwarding
     downstream->stopPruneTimer();
     downstream->pruneState = DownstreamInterface::NO_INFO;
-    sgState->upstreamInterface->graftPruneState = UpstreamInterface::FORWARDING;
 
-    // if the router is pruned from multicast tree, join again
-    /*if (sgState->isFlagSet(P) && (sgState->getGrt() == NULL))
-    {
-        if (!sgState->isFlagSet(A))
-        {
-            EV << "Pruned cesta prejde do forwardu, posli Graft" << endl;
-            sendPimGraft(sgState->getInIntNextHop(), source, group, sgState->getInIntId());
-            PIMgrt* timer = createGraftRetryTimer(source, group);
-            sgState->setGrt(timer);
-        }
-        else
-            sgState->removeFlag(P);
-    }*/
+    // upstream state change if olist become non NULL
+    if (!sgState->isOilistNull())
+        processOlistNonEmptyEvent(sgState);
 }
 
 // See RFC 3973 4.4.2.2
@@ -1224,12 +1216,12 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
         SourceGroupState *sgState = getSourceGroupState(route->getOrigin(), group);
 
         // remove pimInt from the list of outgoing interfaces
-        DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(pimInt->getInterfaceId());
+        DownstreamInterface *downstream = sgState->removeDownstreamInterface(pimInt->getInterfaceId());
         if (downstream)
         {
             // EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-            sgState->removeDownstreamInterface(downstream->ie->getInterfaceId());
             route->removeOutInterface(downstream->ie); // will delete downstream, XXX method should be named deleteOutInterface()
+            delete downstream;
         }
 
         bool connected = false;
@@ -1304,8 +1296,12 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
     route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
-    sgState->removeDownstreamInterface(newRpf->getInterfaceId());
-    route->removeOutInterface(newRpf); // will delete downstream data, XXX method should be called deleteOutInterface()
+    DownstreamInterface *oldDownstreamInterface = sgState->removeDownstreamInterface(newRpf->getInterfaceId());
+    if (oldDownstreamInterface)
+    {
+        route->removeOutInterface(newRpf); // will delete downstream data, XXX method should be called deleteOutInterface()
+        delete oldDownstreamInterface;
+    }
 
     // old RPF interface should be now a downstream interface if it is not down
     if (oldRpfInterface && oldRpfInterface->isUp())
@@ -1453,6 +1449,8 @@ void PIMDM::UpstreamInterface::startStateRefreshTimer()
 PIMDM::DownstreamInterface::~DownstreamInterface()
 {
     owner->owner->cancelAndDelete(pruneTimer);
+    owner->owner->cancelAndDelete(prunePendingTimer);
+    owner->owner->cancelAndDelete(assertTimer);
 }
 
 /**
@@ -1522,16 +1520,18 @@ PIMDM::DownstreamInterface *PIMDM::SourceGroupState::createDownstreamInterface(I
 }
 
 
-void PIMDM::SourceGroupState::removeDownstreamInterface(int interfaceId)
+PIMDM::DownstreamInterface *PIMDM::SourceGroupState::removeDownstreamInterface(int interfaceId)
 {
     for (std::vector<DownstreamInterface*>::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
     {
-        if ((*it)->ie->getInterfaceId() == interfaceId)
+        DownstreamInterface *downstream = *it;
+        if (downstream->ie->getInterfaceId() == interfaceId)
         {
             downstreamInterfaces.erase(it);
-            break;
+            return downstream;
         }
     }
+    return NULL;
 }
 
 //

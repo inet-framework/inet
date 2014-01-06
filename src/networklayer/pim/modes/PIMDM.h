@@ -146,7 +146,7 @@ class PIMDM : public PIMBase, protected cListener
             void clearFlag(PIMMulticastRoute::Flag flag)  { flags &= (~flag); }
             DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
             DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
-            void removeDownstreamInterface(int interfaceId);
+            DownstreamInterface *removeDownstreamInterface(int interfaceId);
             bool isOilistNull();
         };
 
