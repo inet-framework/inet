@@ -46,6 +46,7 @@ class INET_API IdealMac : public MACProtocolBase
     MACAddress address;     // MAC address
 
     IRadio *radio;
+    IRadio::RadioChannelState previousRadioState;
     IPassiveQueue *queueModule;
 
     int outStandingRequests;
@@ -79,7 +80,6 @@ class INET_API IdealMac : public MACProtocolBase
 
   public:
     IdealMac();
-    virtual ~IdealMac();
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

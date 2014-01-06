@@ -41,10 +41,6 @@ IdealMac::IdealMac()
     radio = NULL;
 }
 
-IdealMac::~IdealMac()
-{
-}
-
 void IdealMac::flushQueue()
 {
     ASSERT(queueModule);
@@ -78,6 +74,7 @@ void IdealMac::initialize(int stage)
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
+        previousRadioState = IRadio::RADIO_CHANNEL_STATE_UNKNOWN;
 
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
@@ -137,14 +134,20 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
     return e;
 }
 
-void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long x)
+void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
+    Enter_Method_Silent();
     if (signalID == IRadio::radioChannelStateChangedSignal)
     {
-        if ((IRadio::RadioChannelState)x != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) {
+        IRadio::RadioChannelState radioState = (IRadio::RadioChannelState)value;
+        if ((previousRadioState == IRadio::RADIO_CHANNEL_STATE_UNKNOWN ||
+             previousRadioState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) &&
+             radioState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        {
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
             getNextMsgFromHL();
         }
+        previousRadioState = radioState;
     }
 }
 
