@@ -118,18 +118,21 @@ void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
     sendToIP(msg, srcAddr, destAddr, outInterfaceId);
 }
 
-void PIMDM::sendStateRefreshPacket(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P)
+void PIMDM::sendStateRefreshPacket(IPv4Address originator, SourceGroupState *sgState, DownstreamInterface *downstream, unsigned short ttl)
 {
-    EV_INFO << "Sending StateRefresh(source = " << src << ", group = " << grp << ") message on interface '" << intId << "'\n";
+    EV_INFO << "Sending StateRefresh(source = " << sgState->source << ", group = " << sgState->group
+            << ") message on interface '" << downstream->ie->getName() << "'\n";
 
 	PIMStateRefresh *msg = new PIMStateRefresh("PIMStateRefresh");
-	msg->setGroupAddress(grp);
-	msg->setSourceAddress(src);
+	msg->setGroupAddress(sgState->group);
+	msg->setSourceAddress(sgState->source);
 	msg->setOriginatorAddress(originator);
 	msg->setInterval(stateRefreshInterval);
-	msg->setP(P);
+	msg->setTtl(ttl);
+	msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
+    // TODO set metric
 
-	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, grp, intId);
+	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
 }
 
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
@@ -505,10 +508,10 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 		return;
 	}
 
-	// check if State Refresh msg has came to RPF interface
+	// check if State Refresh msg has came from RPF neighbor
 	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	UpstreamInterface *upstream = sgState->upstreamInterface;
-	if (ctrl->getInterfaceId() != upstream->getInterfaceId())
+	if (ctrl->getInterfaceId() != upstream->getInterfaceId() || upstream->nextHop != ctrl->getSrcAddr())
 	{
 		delete pkt;
 		return;
@@ -552,17 +555,32 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 
 	}
 
+	//
+	// Forward StateRefresh message downstream
+	//
+
+	// TODO check StateRefreshRateLimit(S,G)
+
+	if (pkt->getTtl() == 0)
+	{
+	    delete pkt;
+	    return;
+	}
+
 	// go through all outgoing interfaces, reser Prune Timer and send out State Refresh msg
 	for (unsigned int i = 0; i < sgState->downstreamInterfaces.size(); i++)
 	{
 	    DownstreamInterface *downstream = sgState->downstreamInterfaces[i];
+	    // TODO check ttl threshold and boundary
+	    if (downstream->assertState == DownstreamInterface::I_LOST_ASSERT)
+	        continue;
+
 		if (downstream->pruneState == DownstreamInterface::PRUNED)
 		{
 			// reset PT
 			restartTimer(downstream->pruneTimer, pruneInterval);
 		}
-		sendStateRefreshPacket(pkt->getOriginatorAddress(), pkt->getSourceAddress(), pkt->getGroupAddress(),
-		        downstream->ie->getInterfaceId(), downstream->pruneState == DownstreamInterface::PRUNED);
+		sendStateRefreshPacket(pkt->getOriginatorAddress(), sgState, downstream, pkt->getTtl() - 1);
 	}
 	delete pkt;
 }
@@ -683,14 +701,26 @@ void PIMDM::processOverrideTimer(cMessage *timer)
     delete timer;
 }
 
+/*
+ * SAT(S,G) Expires
+       The router MUST cancel the SRT(S,G) timer and transition to the
+       NotOriginator (NO) state.
+ */
 void PIMDM::processSourceActiveTimer(cMessage * timer)
 {
     EV_INFO << "SourceActiveTimer expired.\n";
 
-    // delete the route, because there are no more packets
 	UpstreamInterface *upstream = static_cast<UpstreamInterface*>(timer->getContextPointer());
+	ASSERT(timer == upstream->sourceActiveTimer);
+	ASSERT(upstream->originatorState == UpstreamInterface::ORIGINATOR);
 	IPv4Address source = upstream->owner->source;
 	IPv4Address group = upstream->owner->group;
+
+	upstream->originatorState = UpstreamInterface::NOT_ORIGINATOR;
+	cancelAndDelete(upstream->stateRefreshTimer);
+	upstream->stateRefreshTimer = NULL;
+
+    // delete the route, because there are no more packets
 	deleteSourceGroupState(source, group);
 	PIMMulticastRoute *route = getRouteFor(group, source);
 	if (route)
@@ -699,23 +729,47 @@ void PIMDM::processSourceActiveTimer(cMessage * timer)
 
 /*
  * State Refresh Timer is used only on router which is connected directly to the source of multicast.
- * When State Refresh Timer expires, State Refresh messages are sent on all downstream interfaces.
+ *
+ * SRT(S,G) Expires
+ *      The router remains in the Originator (O) state and MUST reset
+ *      SRT(S,G) to StateRefreshInterval.  The router MUST also generate
+ *      State Refresh messages for transmission, as described in the
+ *      State Refresh Forwarding rules (Section 4.5.1), except for the
+ *      TTL.  If the TTL of data packets from S to G are being recorded,
+ *      then the TTL of each State Refresh message is set to the highest
+ *      recorded TTL.  Otherwise, the TTL is set to the configured State
+ *      Refresh TTL.  Let I denote the interface over which a State
+ *      Refresh message is being sent.  If the Prune(S,G) Downstream
+ *      state machine is in the Pruned (P) state, then the Prune-
+ *      Indicator bit MUST be set to 1 in the State Refresh message being
+ *      sent over I. Otherwise, the Prune-Indicator bit MUST be set to 0.
  */
 void PIMDM::processStateRefreshTimer(cMessage *timer)
 {
-	EV_INFO << "StateRefreshTimer expired, sending StateRefresh packets on downstream interfaces.\n";
+    UpstreamInterface *upstream = static_cast<UpstreamInterface*>(timer->getContextPointer());
+    ASSERT(timer == upstream->stateRefreshTimer);
+    ASSERT(upstream->originatorState == UpstreamInterface::ORIGINATOR);
 
-	UpstreamInterface *upstream = static_cast<UpstreamInterface*>(timer->getContextPointer());
-	SourceGroupState *sgState = upstream->owner;
+    SourceGroupState *sgState = upstream->owner;
+
+    EV_INFO << "StateRefreshTimer of source=" << sgState->source << " , group=" << sgState->group << " expired.\n";
+
+    EV_DETAIL << "Sending StateRefresh packets on downstream interfaces.\n";
 	for (unsigned int i = 0; i < sgState->downstreamInterfaces.size(); i++)
 	{
 	    DownstreamInterface *downstream = sgState->downstreamInterfaces[i];
+        // TODO check ttl threshold and boundary
+        if (downstream->assertState == DownstreamInterface::I_LOST_ASSERT)
+            continue;
+
+        // when sending StateRefresh in Pruned state, then restart PruneTimer
 	    bool isPruned = downstream->pruneState == DownstreamInterface::PRUNED;
 	    if (isPruned)
 			restartTimer(downstream->pruneTimer, pruneInterval);
 
+	    // Send StateRefresh message downstream
 	    IPv4Address originator = downstream->ie->ipv4Data()->getIPAddress();
-		sendStateRefreshPacket(originator, sgState->source, sgState->group, downstream->ie->getInterfaceId(), isPruned);
+		sendStateRefreshPacket(originator, sgState, downstream, upstream->maxTtlSeen);
 	}
 
     scheduleAt(simTime() + stateRefreshInterval, timer);
@@ -876,7 +930,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         datagram = check_and_cast<IPv4Datagram*>(details);
         IPv4Address srcAddr = datagram->getSrcAddress();
         IPv4Address destAddr = datagram->getDestAddress();
-        unroutableMulticastPacketArrived(srcAddr, destAddr);
+        unroutableMulticastPacketArrived(srcAddr, destAddr, datagram->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED)
@@ -911,7 +965,8 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastPacketArrivedOnRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface ? pimInterface->getInterfaceId():-1);
+            multicastPacketArrivedOnRpfInterface(pimInterface ? pimInterface->getInterfaceId():-1,
+                    datagram->getDestAddress(), datagram->getSrcAddress(), datagram->getTimeToLive());
     }
     // RPF interface has changed
     else if (signalID == NF_ROUTE_ADDED)
@@ -945,7 +1000,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
  * interfaces and tests them if they can be added to the list of outgoing interfaces. If there
  * is no interface on the list at the end, the router will prune from the multicast tree.
  */
-void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
+void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group, unsigned short ttl)
 {
     ASSERT(!source.isUnspecified());
     ASSERT(group.isMulticast());
@@ -972,9 +1027,16 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     sgState->group = group;
     sgState->upstreamInterface = new UpstreamInterface(sgState, rpfInterface->getInterfacePtr(), rpfNeighbor);
 
+    // if the source is directly connected, then go to the Originator state
     if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
+    {
         sgState->setFlags(PIMMulticastRoute::A);
-
+        sgState->upstreamInterface->originatorState = UpstreamInterface::ORIGINATOR;
+        if (rpfInterface->getSR())
+            sgState->upstreamInterface->startStateRefreshTimer();
+        sgState->upstreamInterface->startSourceActiveTimer();
+        sgState->upstreamInterface->maxTtlSeen = ttl;
+    }
 
     bool allDownstreamInterfacesArePruned = true;
 
@@ -1002,16 +1064,6 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
             sgState->setFlags(PIMMulticastRoute::C);
     }
 
-    // directly connected to source, set State Refresh Timer
-    if (sgState->isFlagSet(PIMMulticastRoute::A) && rpfInterface->getSR())
-    {
-        sgState->upstreamInterface->startStateRefreshTimer();
-    }
-
-    // XXX sourceActiveTimer should be created only in routers directly connected to the source
-    // set Source Active Timer (liveness of route)
-    sgState->upstreamInterface->startSourceActiveTimer();
-
     // if there is no outgoing interface, prune from multicast tree
     if (allDownstreamInterfacesArePruned)
     {
@@ -1036,14 +1088,40 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     EV_DETAIL << "New route was added to the multicast routing table.\n";
 }
 
-void PIMDM::multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address source, int interfaceId)
+void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl)
 {
     EV_DETAIL << "Multicast datagram arrived: source=" << source << ", group=" << group << ".\n";
 
     SourceGroupState *sgState = getSourceGroupState(source, group);
     ASSERT(sgState);
     UpstreamInterface *upstream = sgState->upstreamInterface;
-	restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
+
+    // RFC 3973 4.5.2.2
+    //
+    // Receive Data Packet from S addressed to G
+    //      The router remains in the Originator (O) state and MUST reset
+    //      SAT(S,G) to SourceLifetime.  The router SHOULD increase its
+    //      recorded TTL to match the TTL of the packet, if the packet's TTL
+    //      is larger than the previously recorded TTL.  A router MAY record
+    //      the TTL based on an implementation specific sampling policy to
+    //      avoid examining the TTL of every multicast packet it handles.
+
+    // Is source directly connected?
+    if (sgState->isFlagSet(PIMMulticastRoute::A))
+    {
+        // State Refresh Originator state machine event: Receive Data from S AND S directly connected
+        if (upstream->originatorState == UpstreamInterface::NOT_ORIGINATOR)
+        {
+            upstream->originatorState = UpstreamInterface::ORIGINATOR;
+            PIMInterface *pimInterface = pimIft->getInterfaceById(upstream->ie->getInterfaceId());
+            if (pimInterface && pimInterface->getSR())
+                upstream->startStateRefreshTimer();
+        }
+        restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
+
+        // record max TTL seen, it is used in StateRefresh messages
+        upstream->maxTtlSeen = std::max(upstream->maxTtlSeen, ttl);
+    }
 
 	// upstream state transition
 

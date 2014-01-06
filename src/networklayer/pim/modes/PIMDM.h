@@ -49,6 +49,8 @@ class PIMDM : public PIMBase, protected cListener
                 ACK_PENDING // waiting for a Graft Ack
             };
 
+            enum OriginatorState { NOT_ORIGINATOR, ORIGINATOR };
+
             SourceGroupState *owner;
             InterfaceEntry *ie;
             IPv4Address nextHop;
@@ -60,13 +62,15 @@ class PIMDM : public PIMBase, protected cListener
             simtime_t lastPruneSentTime; // for rate limiting prune messages, 0 if no prune was sent
 
             // originator state
+            OriginatorState originatorState;
             cMessage* sourceActiveTimer; // route will be deleted when this timer expires
             cMessage* stateRefreshTimer;
+            unsigned short maxTtlSeen;
 
             UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor)
                 : owner(owner), ie(ie), nextHop(neighbor),
                   graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
-                  sourceActiveTimer(NULL), stateRefreshTimer(NULL)
+                  originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
                 { ASSERT(owner); ASSERT(ie); }
             virtual ~UpstreamInterface();
             int getInterfaceId() const { return ie->getInterfaceId(); }
@@ -182,9 +186,9 @@ class PIMDM : public PIMBase, protected cListener
 	private:
 	    // process signals
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-	    void unroutableMulticastPacketArrived(IPv4Address srcAddress, IPv4Address destAddress);
+	    void unroutableMulticastPacketArrived(IPv4Address srcAddress, IPv4Address destAddress, unsigned short ttl);
         void multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
-        void multicastPacketArrivedOnRpfInterface(IPv4Address group, IPv4Address source, int interfaceId);
+        void multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl);
 	    void multicastReceiverAdded(PIMInterface *pimInt, IPv4Address newAddr);
 	    void multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr);
 	    void rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpfInterface);
@@ -219,7 +223,7 @@ class PIMDM : public PIMBase, protected cListener
 	    void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
 	    void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
 	    void sendGraftAckPacket(PIMGraft *msg);
-	    void sendStateRefreshPacket(IPv4Address originator, IPv4Address src, IPv4Address grp, int intId, bool P);
+	    void sendStateRefreshPacket(IPv4Address originator, SourceGroupState *sgState, DownstreamInterface *downstream, unsigned short ttl);
 	    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
 
 	    // helpers
