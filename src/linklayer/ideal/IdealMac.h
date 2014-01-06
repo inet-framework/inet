@@ -50,7 +50,6 @@ class INET_API IdealMac : public MACProtocolBase
     IPassiveQueue *queueModule;
 
     int outStandingRequests;
-    simtime_t lastTransmitStartTime;
 
   protected:
     /** implements MacBase functions */

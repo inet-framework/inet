@@ -65,7 +65,6 @@ void IdealMac::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         outStandingRequests = 0;
-        lastTransmitStartTime = -1.0;
 
         bitrate = par("bitrate").doubleValue();
         headerLength = par("headerLength").longValue();
@@ -165,7 +164,7 @@ void IdealMac::startTransmitting(cPacket *msg)
 void IdealMac::getNextMsgFromHL()
 {
     ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
-    if (outStandingRequests == 0 && lastTransmitStartTime < simTime())
+    if (outStandingRequests == 0)
     {
         queueModule->requestPacket();
         outStandingRequests++;
