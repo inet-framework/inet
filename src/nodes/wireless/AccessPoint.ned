@@ -47,7 +47,7 @@ module AccessPoint
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
-        string relayUnitType = default(haveClass("MACRelayUnit")?"MACRelayUnit":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnit, Ieee8021DRelay, etc)
+        string relayUnitType = default(firstAvailable("Ieee8021DRelay","MACRelayUnit","MACRelayUnit_None")); // type of the IMACRelayUnit (MACRelayUnit, Ieee8021DRelay, etc)
         string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
         int numRadios = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);

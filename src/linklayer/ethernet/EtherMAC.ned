@@ -152,8 +152,8 @@ simple EtherMAC like IEtherMAC
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~MACRelayUnit
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~MACRelayUnit
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 
