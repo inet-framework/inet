@@ -67,7 +67,7 @@ InterfaceEntry::InterfaceEntry(cModule* ifmod)
     ipv6data = NULL;
     isisdata = NULL;
     trilldata = NULL;
-    ieee8021dData = NULL;
+    ieee8021ddata = NULL;
     estimateCostProcessArray.clear();
 }
 
@@ -108,8 +108,8 @@ std::string InterfaceEntry::info() const
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
-    if (ieee8021dData)
-            out << " " << ((InterfaceProtocolData *)ieee8021dData)->info(); // Khmm...
+    if (ieee8021ddata)
+            out << " " << ((InterfaceProtocolData *)ieee8021ddata)->info(); // Khmm...
     return out.str();
 }
 
@@ -146,8 +146,8 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->detailedInfo() << "\n"; // Khmm...
-    if (ieee8021dData)
-        out << " " << ((InterfaceProtocolData *)ieee8021dData)->detailedInfo() << "\n"; // Khmm...
+    if (ieee8021ddata)
+        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->detailedInfo() << "\n"; // Khmm...
     return out.str();
 }
 std::string InterfaceEntry::getFullPath() const
@@ -185,9 +185,9 @@ void InterfaceEntry::resetInterface()
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this)
         delete (InterfaceProtocolData *)trilldata;
     trilldata = NULL;
-    if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this)
-        delete (InterfaceProtocolData *)ieee8021dData;
-    ieee8021dData = NULL;
+    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this)
+        delete (InterfaceProtocolData *)ieee8021ddata;
+    ieee8021ddata = NULL;
 }
 
 void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
@@ -234,11 +234,11 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
     configChanged();
 }
 
-void InterfaceEntry::setIEEE8021DInterfaceData(Ieee8021DInterfaceData *p)
+void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
 {
-    if (ieee8021dData && ((InterfaceProtocolData *)ieee8021dData)->ownerp == this) // Khmm...
-        delete (InterfaceProtocolData *)ieee8021dData; // Khmm...
-    ieee8021dData = p;
+    if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this) // Khmm...
+        delete (InterfaceProtocolData *)ieee8021ddata; // Khmm...
+    ieee8021ddata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
     configChanged();
 }

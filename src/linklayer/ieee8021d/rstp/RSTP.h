@@ -21,12 +21,12 @@
 #define __INET_RSTP_H
 
 #include "ILifecycle.h"
-#include "IEEE8021DBPDU_m.h"
+#include "Ieee8021dBPDU_m.h"
 #include "MACAddress.h"
 #include "EtherFrame.h"
 #include "MACAddressTable.h"
 #include "InterfaceTable.h"
-#include "Ieee8021DInterfaceData.h"
+#include "Ieee8021dInterfaceData.h"
 #include "STPBase.h"
 
 /**

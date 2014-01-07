@@ -139,10 +139,10 @@ void STPBase::updateDisplay()
     {
         for (unsigned int i = 0; i < numPorts; i++)
         {
-            Ieee8021DInterfaceData *port = getPortInterfaceData(i);
+            Ieee8021dInterfaceData *port = getPortInterfaceData(i);
 
             // color link
-            colorLink(i, port->getState() == Ieee8021DInterfaceData::FORWARDING);
+            colorLink(i, port->getState() == Ieee8021dInterfaceData::FORWARDING);
 
             // label ethernet interface with port status and role
             cModule * nicModule = switchModule->getSubmodule("eth", i);
@@ -162,11 +162,11 @@ void STPBase::updateDisplay()
     }
 }
 
-Ieee8021DInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
+Ieee8021dInterfaceData * STPBase::getPortInterfaceData(unsigned int portNum)
 {
-    Ieee8021DInterfaceData * portData = getPortInterfaceEntry(portNum)->ieee8021DData();
+    Ieee8021dInterfaceData * portData = getPortInterfaceEntry(portNum)->ieee8021dData();
     if (!portData)
-        error("IEEE8021DInterfaceData not found!");
+        error("Ieee8021dInterfaceData not found!");
 
     return portData;
 }
@@ -186,7 +186,7 @@ InterfaceEntry * STPBase::getPortInterfaceEntry(unsigned int portNum)
 int STPBase::getRootIndex()
 {
     for (unsigned int i = 0; i < numPorts; i++)
-        if (getPortInterfaceData(i)->getRole() == Ieee8021DInterfaceData::ROOT)
+        if (getPortInterfaceData(i)->getRole() == Ieee8021dInterfaceData::ROOT)
             return i;
     return -1;
 }

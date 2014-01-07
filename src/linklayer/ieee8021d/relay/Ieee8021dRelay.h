@@ -24,16 +24,16 @@
 #include "EtherFrame_m.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "IEEE8021DBPDU_m.h"
+#include "Ieee8021dBPDU_m.h"
 
 //
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 // See the NED definition for details.
 //
-class Ieee8021DRelay : public cSimpleModule, public ILifecycle
+class Ieee8021dRelay : public cSimpleModule, public ILifecycle
 {
     public:
-        Ieee8021DRelay();
+        Ieee8021dRelay();
 
     protected:
         MACAddress bridgeAddress;
@@ -89,7 +89,7 @@ class Ieee8021DRelay : public cSimpleModule, public ILifecycle
         /*
          * Gets port data from the InterfaceTable
          */
-        Ieee8021DInterfaceData * getPortInterfaceData(unsigned int portNum);
+        Ieee8021dInterfaceData * getPortInterfaceData(unsigned int portNum);
 
         /*
          * Returns the first non-loopback interface.

@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "INETDefs.h"
-#include "Ieee8021DInterfaceData.h"
+#include "Ieee8021dInterfaceData.h"
 #include "IInterfaceTable.h"
 #include "PatternMatcher.h"
 #include "Topology.h"
@@ -37,7 +37,7 @@ class L2NetworkConfigurator : public cSimpleModule
 {
   public:
     L2NetworkConfigurator() { rootNode = NULL; }
-    typedef Ieee8021DInterfaceData::PortInfo PortInfo;
+    typedef Ieee8021dInterfaceData::PortInfo PortInfo;
   protected:
     class InterfaceInfo;
 

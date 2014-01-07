@@ -30,11 +30,11 @@
 /**
  * Per-interface data needed by the STP and RSTP protocols.
  */
-class Ieee8021DInterfaceData : public InterfaceProtocolData
+class Ieee8021dInterfaceData : public InterfaceProtocolData
 {
     public:
 
-        Ieee8021DInterfaceData();
+        Ieee8021dInterfaceData();
         enum PortRole {ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT};
 
         enum PortState {DISCARDING, LEARNING, FORWARDING};
@@ -42,7 +42,7 @@ class Ieee8021DInterfaceData : public InterfaceProtocolData
         struct PortInfo
         {
                 /* The following values have same meaning in both STP and RSTP.
-                 * See IEEE8021DBDPU for more info.
+                 * See Ieee8021dBDPU for more info.
                  */
                 unsigned int priority;
                 unsigned int linkCost;

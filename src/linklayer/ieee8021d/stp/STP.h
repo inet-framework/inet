@@ -23,9 +23,9 @@
 
 #include "INETDefs.h"
 #include "MACAddress.h"
-#include "IEEE8021DBPDU_m.h"
+#include "Ieee8021dBPDU_m.h"
 #include "InterfaceTable.h"
-#include "Ieee8021DInterfaceData.h"
+#include "Ieee8021dInterfaceData.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "STPBase.h"
@@ -36,7 +36,7 @@
 class STP : public STPBase
 {
     public:
-        typedef Ieee8021DInterfaceData::PortInfo PortInfo;
+        typedef Ieee8021dInterfaceData::PortInfo PortInfo;
         enum BDPUType {CONFIG_BDPU = 0, TCN_BPDU = 1};
     protected:
         static const double tickInterval; // interval between two ticks
@@ -98,10 +98,10 @@ class STP : public STPBase
         void generateTCN();
 
         /*
-         * Comparison of all IDs in IEEE8021DInterfaceData::PortInfo structure
+         * Comparison of all IDs in Ieee8021dInterfaceData::PortInfo structure
          * Invokes: superiorID(), superiorPort()
          */
-        int comparePorts(Ieee8021DInterfaceData * portA, Ieee8021DInterfaceData * portB);
+        int comparePorts(Ieee8021dInterfaceData * portA, Ieee8021dInterfaceData * portB);
         int compareBridgeIDs(unsigned int, MACAddress, unsigned int, MACAddress);
         int comparePortIDs(unsigned int, unsigned int, unsigned int, unsigned int);
 
@@ -145,9 +145,9 @@ class STP : public STPBase
         void tryRoot();
 
     public:
-        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortRole r);
-        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortState s);
-        friend inline std::ostream& operator<<(std::ostream& os, Ieee8021DInterfaceData * p);
+        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortRole r);
+        friend inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortState s);
+        friend inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData * p);
         friend inline std::ostream& operator<<(std::ostream& os, STP i);
 
         // for lifecycle:
@@ -156,21 +156,21 @@ class STP : public STPBase
         virtual void stop();
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortRole r)
+inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortRole r)
 {
 
     switch (r)
     {
-        case Ieee8021DInterfaceData::NOTASSIGNED:
+        case Ieee8021dInterfaceData::NOTASSIGNED:
             os << "Unkn";
             break;
-        case Ieee8021DInterfaceData::ALTERNATE:
+        case Ieee8021dInterfaceData::ALTERNATE:
             os << "Altr";
             break;
-        case Ieee8021DInterfaceData::DESIGNATED:
+        case Ieee8021dInterfaceData::DESIGNATED:
             os << "Desg";
             break;
-        case Ieee8021DInterfaceData::ROOT:
+        case Ieee8021dInterfaceData::ROOT:
             os << "Root";
             break;
         default:
@@ -181,18 +181,18 @@ inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::PortState s)
+inline std::ostream& operator<<(std::ostream& os, const Ieee8021dInterfaceData::PortState s)
 {
 
     switch (s)
     {
-        case Ieee8021DInterfaceData::DISCARDING:
+        case Ieee8021dInterfaceData::DISCARDING:
             os << "DIS";
             break;
-        case Ieee8021DInterfaceData::LEARNING:
+        case Ieee8021dInterfaceData::LEARNING:
             os << "LRN";
             break;
-        case Ieee8021DInterfaceData::FORWARDING:
+        case Ieee8021dInterfaceData::FORWARDING:
             os << "FWD";
             break;
         default:
@@ -203,7 +203,7 @@ inline std::ostream& operator<<(std::ostream& os, const Ieee8021DInterfaceData::
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Ieee8021DInterfaceData * p)
+inline std::ostream& operator<<(std::ostream& os, Ieee8021dInterfaceData * p)
 {
     os << "[";
     if (p->isLearning())

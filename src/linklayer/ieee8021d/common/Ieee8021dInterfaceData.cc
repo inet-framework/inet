@@ -17,9 +17,9 @@
 // Author: Benjamin Martin Seregi
 //
 
-#include "Ieee8021DInterfaceData.h"
+#include "Ieee8021dInterfaceData.h"
 
-Ieee8021DInterfaceData::Ieee8021DInterfaceData()
+Ieee8021dInterfaceData::Ieee8021dInterfaceData()
 {
     // If there is no STP module then all ports
     // must be in forwarding state.
@@ -27,14 +27,14 @@ Ieee8021DInterfaceData::Ieee8021DInterfaceData()
     portData.state = FORWARDING;
 }
 
-std::string Ieee8021DInterfaceData::info() const
+std::string Ieee8021dInterfaceData::info() const
 {
     std::stringstream out;
     out << "role:" << getRoleName() << " state:" << getStateName();
     return out.str();
 }
 
-std::string Ieee8021DInterfaceData::detailedInfo() const
+std::string Ieee8021dInterfaceData::detailedInfo() const
 {
     std::stringstream out;
     out << "role:" << getRoleName() << "\tstate:" << getStateName() << "\n";
@@ -44,7 +44,7 @@ std::string Ieee8021DInterfaceData::detailedInfo() const
     return out.str();
 }
 
-const char *Ieee8021DInterfaceData::getRoleName(PortRole role)
+const char *Ieee8021dInterfaceData::getRoleName(PortRole role)
 {
     switch (role)
     {
@@ -58,7 +58,7 @@ const char *Ieee8021DInterfaceData::getRoleName(PortRole role)
     }
 }
 
-const char *Ieee8021DInterfaceData::getStateName(PortState state)
+const char *Ieee8021dInterfaceData::getStateName(PortState state)
 {
     switch (state)
     {

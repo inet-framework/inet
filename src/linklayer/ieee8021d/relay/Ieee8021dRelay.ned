@@ -31,7 +31,7 @@ import inet.linklayer.IMACRelayUnit;
 //
 // @see EtherFrame, MACAddressTable, STP, RSTP
 //
-simple Ieee8021DRelay like IMACRelayUnit
+simple Ieee8021dRelay like IMACRelayUnit
 {
     parameters:
         @display("i=block/broadcast;bgb=425,114");

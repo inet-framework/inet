@@ -15,20 +15,20 @@
 //
 // Author: Benjamin Martin Seregi
 
-#include "Ieee8021DRelay.h"
+#include "Ieee8021dRelay.h"
 #include "InterfaceEntry.h"
-#include "Ieee8021DInterfaceData.h"
+#include "Ieee8021dInterfaceData.h"
 
-Define_Module(Ieee8021DRelay);
+Define_Module(Ieee8021dRelay);
 
-Ieee8021DRelay::Ieee8021DRelay()
+Ieee8021dRelay::Ieee8021dRelay()
 {
     ifTable = NULL;
     macTable = NULL;
     ie = NULL;
 }
 
-void Ieee8021DRelay::initialize(int stage)
+void Ieee8021dRelay::initialize(int stage)
 {
 
     if (stage == 0)
@@ -71,7 +71,7 @@ void Ieee8021DRelay::initialize(int stage)
     }
 }
 
-void Ieee8021DRelay::handleMessage(cMessage * msg)
+void Ieee8021dRelay::handleMessage(cMessage * msg)
 {
     if (!isOperational)
     {
@@ -103,7 +103,7 @@ void Ieee8021DRelay::handleMessage(cMessage * msg)
         throw cRuntimeError("This module doesn't handle self-messages!");
 }
 
-void Ieee8021DRelay::broadcast(EtherFrame * frame)
+void Ieee8021dRelay::broadcast(EtherFrame * frame)
 {
     EV_DETAIL << "Broadcast frame " << frame << endl;
 
@@ -116,14 +116,14 @@ void Ieee8021DRelay::broadcast(EtherFrame * frame)
     delete frame;
 }
 
-void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
+void Ieee8021dRelay::handleAndDispatchFrame(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-    Ieee8021DInterfaceData * arrivalPortData = getPortInterfaceData(arrivalGate);
+    Ieee8021dInterfaceData * arrivalPortData = getPortInterfaceData(arrivalGate);
     learn(frame);
 
     // BPDU Handling
-    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021DInterfaceData::DISABLED)
+    if ((frame->getDest() == MACAddress::STP_MULTICAST_ADDRESS || frame->getDest() == bridgeAddress) && arrivalPortData->getRole() != Ieee8021dInterfaceData::DISABLED)
     {
         EV_DETAIL << "Deliver BPDU to the STP/RSTP module" << endl;
         deliverBPDU(frame); // deliver to the STP/RSTP module
@@ -151,7 +151,7 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
         {
             if (outGate != arrivalGate)
             {
-                Ieee8021DInterfaceData * outPortData = getPortInterfaceData(outGate);
+                Ieee8021dInterfaceData * outPortData = getPortInterfaceData(outGate);
 
                 if (!isStpAware || outPortData->isForwarding())
                     dispatch(frame, outGate);
@@ -172,7 +172,7 @@ void Ieee8021DRelay::handleAndDispatchFrame(EtherFrame * frame)
     }
 }
 
-void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
+void Ieee8021dRelay::dispatch(EtherFrame * frame, unsigned int portNum)
 {
     EV_INFO << "Sending frame " << frame << " on output port " << portNum << "." << endl;
 
@@ -186,16 +186,16 @@ void Ieee8021DRelay::dispatch(EtherFrame * frame, unsigned int portNum)
     return;
 }
 
-void Ieee8021DRelay::learn(EtherFrame * frame)
+void Ieee8021dRelay::learn(EtherFrame * frame)
 {
     int arrivalGate = frame->getArrivalGate()->getIndex();
-    Ieee8021DInterfaceData * port = getPortInterfaceData(arrivalGate);
+    Ieee8021dInterfaceData * port = getPortInterfaceData(arrivalGate);
 
     if (!isStpAware || port->isLearning())
         macTable->updateTableWithAddress(arrivalGate, frame->getSrc());
 }
 
-void Ieee8021DRelay::dispatchBPDU(BPDU * bpdu)
+void Ieee8021dRelay::dispatchBPDU(BPDU * bpdu)
 {
     Ieee802Ctrl * controlInfo = dynamic_cast<Ieee802Ctrl *>(bpdu->removeControlInfo());
     unsigned int portNum = controlInfo->getSwitchPort();
@@ -223,7 +223,7 @@ void Ieee8021DRelay::dispatchBPDU(BPDU * bpdu)
     send(frame, "ifOut", portNum);
 }
 
-void Ieee8021DRelay::deliverBPDU(EtherFrame * frame)
+void Ieee8021dRelay::deliverBPDU(EtherFrame * frame)
 {
     BPDU * bpdu = check_and_cast<BPDU *>(frame->decapsulate());
 
@@ -241,23 +241,23 @@ void Ieee8021DRelay::deliverBPDU(EtherFrame * frame)
     send(bpdu, "stpOut");
 }
 
-Ieee8021DInterfaceData * Ieee8021DRelay::getPortInterfaceData(unsigned int portNum)
+Ieee8021dInterfaceData * Ieee8021dRelay::getPortInterfaceData(unsigned int portNum)
 {
     if (isStpAware)
     {
         cGate * gate = this->getParentModule()->gate("ethg$o", portNum);
         InterfaceEntry * gateIfEntry = ifTable->getInterfaceByNodeOutputGateId(gate->getId());
-        Ieee8021DInterfaceData * portData = gateIfEntry->ieee8021DData();
+        Ieee8021dInterfaceData * portData = gateIfEntry->ieee8021dData();
 
         if (!portData)
-            throw cRuntimeError("IEEE8021DInterfaceData not found for port = %d",portNum);
+            throw cRuntimeError("Ieee8021dInterfaceData not found for port = %d",portNum);
 
         return portData;
     }
     return NULL;
 }
 
-void Ieee8021DRelay::start()
+void Ieee8021dRelay::start()
 {
     isOperational = true;
 
@@ -270,7 +270,7 @@ void Ieee8021DRelay::start()
     macTable->clearTable();
 }
 
-void Ieee8021DRelay::stop()
+void Ieee8021dRelay::stop()
 {
     isOperational = false;
 
@@ -278,7 +278,7 @@ void Ieee8021DRelay::stop()
     ie = NULL;
 }
 
-InterfaceEntry * Ieee8021DRelay::chooseInterface()
+InterfaceEntry * Ieee8021dRelay::chooseInterface()
 {
     // TODO: Currently, we assume that the first non-loopback interface is an Ethernet interface
     //       since relays work on EtherSwitches.
@@ -295,7 +295,7 @@ InterfaceEntry * Ieee8021DRelay::chooseInterface()
     return NULL;
 }
 
-void Ieee8021DRelay::finish()
+void Ieee8021dRelay::finish()
 {
     recordScalar("number of received BPDUs from STP module", numReceivedBPDUsFromSTP);
     recordScalar("number of received frames from network (including BPDUs)",numReceivedNetworkFrames);
@@ -306,7 +306,7 @@ void Ieee8021DRelay::finish()
 }
 
 
-bool Ieee8021DRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool Ieee8021dRelay::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
 
