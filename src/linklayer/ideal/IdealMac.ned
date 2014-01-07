@@ -44,6 +44,7 @@ simple IdealMac extends MACProtocolBase like ILinkLayer
         int mtu @unit("B") = default(4470B);
         int headerLength @unit("B");        // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
+        bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
 
         @class(IdealMac);
         @signal[dropPkNotForUs](type=IdealMacFrame);

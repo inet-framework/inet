@@ -69,6 +69,7 @@ void IdealMac::initialize(int stage)
         bitrate = par("bitrate").doubleValue();
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
+        fullDuplex = par("fullDuplex");
 
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
@@ -85,7 +86,7 @@ void IdealMac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         registerInterface();
     }
 }
@@ -143,7 +144,7 @@ void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long valu
              radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING) &&
              newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
         {
-            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+            radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             getNextMsgFromHL();
         }
         radioChannelState = newRadioChannelState;
@@ -157,7 +158,7 @@ void IdealMac::startTransmitting(cPacket *msg)
 
     // send
     EV << "Starting transmission of " << frame << endl;
-    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
 }
 

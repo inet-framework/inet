@@ -44,6 +44,7 @@ class INET_API IdealMac : public MACProtocolBase
     double bitrate;         // [bits per sec]
     bool promiscuous;       // promiscuous mode
     MACAddress address;     // MAC address
+    bool fullDuplex;
 
     IRadio *radio;
     IRadio::RadioChannelState radioChannelState;
