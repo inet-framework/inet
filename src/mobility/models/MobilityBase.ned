@@ -29,6 +29,7 @@ import inet.mobility.IMobility;
 simple MobilityBase like IMobility
 {
     parameters:
+        @signal[mobilityStateChanged](type=MobilityBase);
         @display("i=block/cogwheel");
         bool debug = default(false);
         double constraintAreaMinX @unit(m) = default(-1m/0); // min x position of the constraint area, unconstrained by default (negative infinity)

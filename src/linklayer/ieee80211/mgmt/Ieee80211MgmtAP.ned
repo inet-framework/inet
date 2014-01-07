@@ -49,11 +49,12 @@ simple Ieee80211MgmtAP like IIeee80211Mgmt
         string encapDecap = default("eth") @enum("true", "false", "eth");   // if "eth", frames sent up are converted to EthernetIIFrame
         //dataRate: numeric; XXX TBD
         @display("i=block/cogwheel");
-        @signal[enqueuePk](type=cMessage);
-        @signal[dequeuePk](type=cMessage);
-        @signal[dropPkByQueue](type=cMessage);
-        @signal[queueingTime](type=simtime_t; unit=s);
+        @signal[enqueuePk](type=cPacket);
+        @signal[dequeuePk](type=cPacket);
+        @signal[dropPkByQueue](type=cPacket);
+        @signal[queueingTime](type=simtime_t);
         @signal[dataQueueLen](type=long);  // number of stored packets
+        @signal[rcvdPk](type=cPacket);
         @statistic[dataQueueLen](title="data queue length"; record=max,timeavg,vector; interpolationmode=sample-hold);
         @statistic[dropPkByQueue](title="packets dropped by queue"; source=dropPkByQueue; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
     gates:
