@@ -29,9 +29,8 @@ import inet.physicallayer.radio.common.RadioBase;
 simple IdealRadio extends RadioBase
 {
     parameters:
-        double bitrate @unit("bps");            // transmission speed [bit/sec]
-        double transmissionRange @unit("m");    // max. distance from sender where reception is possible
-        bool drawCoverage = default(true);      // draw the coverage area in Tkenv
-
+        double bitrate @unit("bps");                         // transmission speed [bit/sec]
+        double transmissionRange @unit("m") = default(1m/0); // max. distance from sender where reception is possible
+        bool drawCoverage = default(true);                   // draw the coverage area in Tkenv
         @class(IdealRadio);
 }
