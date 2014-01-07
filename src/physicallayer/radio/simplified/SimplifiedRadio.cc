@@ -266,7 +266,7 @@ void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
         }
         else
         {
-            EV << "Radio disabled. ignoring radio frame" << endl;
+            EV << "Radio is not in receiver mode, dropping frame" << endl;
             delete msg;
         }
     }
