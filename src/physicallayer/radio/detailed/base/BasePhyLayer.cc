@@ -747,6 +747,8 @@ void BasePhyLayer::finishRadioSwitching()
 
 void BasePhyLayer::setRadioMode(RadioMode radioMode) {
     Enter_Method_Silent();
+    if (radioMode == IRadio::RADIO_MODE_TRANSCEIVER)
+        throw cRuntimeError("Transceiver radio mode is not supported");
     setRadioState(radioMode);
 }
 

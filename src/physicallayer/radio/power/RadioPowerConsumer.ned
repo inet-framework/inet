@@ -25,12 +25,15 @@ import inet.power.contract.IPowerConsumer;
 simple RadioPowerConsumer like IPowerConsumer
 {
     parameters:
-        double sleepModePowerConsumption @unit(mW) = default(0mW);
-        double receiverModeFreeChannelPowerConsumption @unit(mW) = default(0mW);
-        double receiverModeBusyChannelPowerConsumption @unit(mW) = default(0mW);
+        double sleepModePowerConsumption @unit(mW) = default(1mW);
+        double receiverModeFreeChannelPowerConsumption @unit(mW) = default(2mW);
+        double receiverModeBusyChannelPowerConsumption @unit(mW) = default(5mW);
         double receiverModeReceivingPowerConsumption @unit(mW) = default(10mW);
-        double transmitterModeIdlePowerConsumption @unit(mW) = default(0mW);
+        double transmitterModeIdlePowerConsumption @unit(mW) = default(2mW);
         double transmitterModeTransmittingPowerConsumption @unit(mW) = default(100mW);
-
+        double transceiverModeFreeChannelPowerConsumption @unit(mW) = default(4mW);
+        double transceiverModeBusyChannelPowerConsumption @unit(mW) = default(7mW);
+        double transceiverModeReceivingPowerConsumption @unit(mW) = default(12mW);
+        double transceiverModeTransmittingPowerConsumption @unit(mW) = default(110mW);
         @display("i=block/cogwheel_s");
 }

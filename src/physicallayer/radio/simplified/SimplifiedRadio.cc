@@ -785,6 +785,8 @@ void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
             connectReceiver();
         else if (newRadioMode == RADIO_MODE_TRANSMITTER)
             disconnectReceiver();
+        else if (newRadioMode == IRadio::RADIO_MODE_TRANSCEIVER)
+            throw cRuntimeError("Transceiver radio mode is not supported");
         else
             throw cRuntimeError("Unknown radio mode");
         EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";

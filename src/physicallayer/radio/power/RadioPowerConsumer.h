@@ -36,6 +36,10 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
     double receiverModeReceivingPowerConsumption;
     double transmitterModeIdlePowerConsumption;
     double transmitterModeTransmittingPowerConsumption;
+    double transceiverModeFreeChannelPowerConsumption;
+    double transceiverModeBusyChannelPowerConsumption;
+    double transceiverModeReceivingPowerConsumption;
+    double transceiverModeTransmittingPowerConsumption;
 
     // environment
     IRadio *radio;

@@ -29,6 +29,7 @@ Register_Enum(RadioMode,
                IRadio::RADIO_MODE_SLEEP,
                IRadio::RADIO_MODE_RECEIVER,
                IRadio::RADIO_MODE_TRANSMITTER,
+               IRadio::RADIO_MODE_TRANSCEIVER,
                IRadio::RADIO_MODE_SWITCHING));
 
 Register_Enum(RadioChannelState,

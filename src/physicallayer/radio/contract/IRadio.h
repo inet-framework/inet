@@ -60,7 +60,7 @@ class INET_API IRadio : IPhysicalLayer
         RADIO_MODE_SLEEP,       // reception or transmission isn't possible, power consumption is minimal, quick startup
         RADIO_MODE_RECEIVER,    // only reception is possible, low power consumption
         RADIO_MODE_TRANSMITTER, // only transmission is possible, high power consumption
-        // TODO: implement RADIO_MODE_TRANSCEIVER, // reception and transmission is possible simultaneously, high power consumption
+        RADIO_MODE_TRANSCEIVER, // reception and transmission is possible simultaneously, high power consumption
         RADIO_MODE_SWITCHING    // switching from one mode to another
     };
 

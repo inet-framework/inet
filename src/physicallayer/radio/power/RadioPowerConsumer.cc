@@ -28,6 +28,10 @@ RadioPowerConsumer::RadioPowerConsumer()
     receiverModeReceivingPowerConsumption = 0;
     transmitterModeIdlePowerConsumption = 0;
     transmitterModeTransmittingPowerConsumption = 0;
+    transceiverModeFreeChannelPowerConsumption = 0;
+    transceiverModeBusyChannelPowerConsumption = 0;
+    transceiverModeReceivingPowerConsumption = 0;
+    transceiverModeTransmittingPowerConsumption = 0;
 }
 
 void RadioPowerConsumer::initialize(int stage)
@@ -42,6 +46,10 @@ void RadioPowerConsumer::initialize(int stage)
         receiverModeReceivingPowerConsumption = par("receiverModeReceivingPowerConsumption");
         transmitterModeIdlePowerConsumption = par("transmitterModeIdlePowerConsumption");
         transmitterModeTransmittingPowerConsumption = par("transmitterModeTransmittingPowerConsumption");
+        transceiverModeFreeChannelPowerConsumption = par("transceiverModeFreeChannelPowerConsumption");
+        transceiverModeBusyChannelPowerConsumption = par("transceiverModeBusyChannelPowerConsumption");
+        transceiverModeReceivingPowerConsumption = par("transceiverModeReceivingPowerConsumption");
+        transceiverModeTransmittingPowerConsumption = par("transceiverModeTransmittingPowerConsumption");
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
@@ -86,6 +94,18 @@ double RadioPowerConsumer::getPowerConsumption()
             return transmitterModeIdlePowerConsumption;
         else if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
             return transmitterModeTransmittingPowerConsumption;
+        else
+            throw cRuntimeError("Unknown radio channel state");
+    }
+    else if (radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
+        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_FREE)
+            return transceiverModeFreeChannelPowerConsumption;
+        else if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_BUSY)
+            return transceiverModeBusyChannelPowerConsumption;
+        else if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_RECEIVING)
+            return transceiverModeReceivingPowerConsumption;
+        else if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+            return transceiverModeTransmittingPowerConsumption;
         else
             throw cRuntimeError("Unknown radio channel state");
     }
