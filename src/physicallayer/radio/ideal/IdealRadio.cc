@@ -96,21 +96,21 @@ void IdealRadio::handleMessageWhenUp(cMessage *message)
     {
         if (!message->isPacket())
             handleCommand(message);
-        else if (radioMode == RADIO_MODE_TRANSMITTER)
+        else if (radioMode == RADIO_MODE_TRANSMITTER || radioMode == RADIO_MODE_TRANSCEIVER)
             handleUpperFrame(check_and_cast<cPacket *>(message));
         else
         {
-            EV << "Radio is not in transmitter mode, dropping frame.\n";
+            EV << "Radio is not in transmitter or transceiver mode, dropping frame.\n";
             delete message;
         }
     }
     else if (message->getArrivalGate() == radioIn)
     {
-        if (radioMode == RADIO_MODE_RECEIVER)
+        if (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER)
             handleLowerFrame(check_and_cast<IdealRadioFrame*>(message));
         else
         {
-            EV << "Radio is not in receiver mode, dropping frame.\n";
+            EV << "Radio is not in receiver or transceiver mode, dropping frame.\n";
             delete message;
         }
     }

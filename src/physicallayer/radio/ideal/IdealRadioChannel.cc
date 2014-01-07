@@ -107,8 +107,6 @@ void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *rad
         RadioEntry *r = &*it;
         if (r == srcRadio)
             continue;   // skip sender radio
-        if (r->radio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER)
-            continue;   // skip disabled radio interfaces
         double sqrdist = srcRadio->radio->getMobility()->getCurrentPosition().sqrdist(r->radio->getMobility()->getCurrentPosition());
         if (sqrdist <= sqrTransmissionRange)
         {
