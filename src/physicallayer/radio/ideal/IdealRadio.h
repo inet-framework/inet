@@ -37,11 +37,13 @@ class INET_API IdealRadio : public IdealRadioChannelAccess
     cMessage *endTransmissionTimer;
     typedef std::list<cMessage *> EndReceptionTimers;
     EndReceptionTimers endReceptionTimers;
+    unsigned int interferenceCount;
     //@}
 
     /** Parameters */
     //@{
     double transmissionRange;           // [meter]
+    double interferenceRange;           // [meter]
     double bitrate;                     // [bps]
     bool drawCoverage;
     //@}
@@ -55,6 +57,8 @@ class INET_API IdealRadio : public IdealRadioChannelAccess
     virtual void setRadioChannel(int radioChannel);
 
     virtual int getTransmissionRange() const { return transmissionRange; }
+
+    virtual int getInterferenceRange() const { return interferenceRange; }
 
   protected:
     virtual void initialize(int stage);

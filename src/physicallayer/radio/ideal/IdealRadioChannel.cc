@@ -99,7 +99,8 @@ void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *rad
     // NOTE: no Enter_Method()! We pretend this method is part of ChannelAccess
     if (maxTransmissionRange < 0.0)    // invalid value
         recalculateMaxTransmissionRange();
-    double sqrTransmissionRange = radioFrame->getTransmissionRange()*radioFrame->getTransmissionRange();
+    double sqrTransmissionRange = radioFrame->getTransmissionRange() * radioFrame->getTransmissionRange();
+    double sqrInterferenceRange = radioFrame->getInterferenceRange() * radioFrame->getInterferenceRange();
 
     // loop through all radios
     for (RadioList::iterator it=radios.begin(); it !=radios.end(); ++it)
@@ -108,7 +109,7 @@ void IdealRadioChannel::sendToChannel(RadioEntry *srcRadio, IdealRadioFrame *rad
         if (r == srcRadio)
             continue;   // skip sender radio
         double sqrdist = srcRadio->radio->getMobility()->getCurrentPosition().sqrdist(r->radio->getMobility()->getCurrentPosition());
-        if (sqrdist <= sqrTransmissionRange)
+        if (sqrdist <= sqrTransmissionRange || sqrdist <= sqrInterferenceRange)
         {
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps

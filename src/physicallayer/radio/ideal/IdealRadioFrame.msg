@@ -33,4 +33,5 @@ packet IdealRadioFrame
     simtime_t transmissionDuration;     // Time it takes to transmit the packet, in seconds
     Coord transmissionStartPosition;    // position of sender when transmission starts
     double transmissionRange;           // max. distance from sender where reception is possible
+    double interferenceRange;           // max. distance from sender where interference is possible
 }

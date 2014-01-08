@@ -25,7 +25,9 @@ Define_Module(IdealRadio);
 IdealRadio::IdealRadio()
 {
     endTransmissionTimer = NULL;
+    interferenceCount = 0;
     transmissionRange = 0;
+    interferenceRange = 0;
     bitrate = 0;
     drawCoverage = false;
 }
@@ -39,10 +41,7 @@ IdealRadio::~IdealRadio()
 void IdealRadio::cancelAndDeleteEndReceptionTimers()
 {
     for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it!=endReceptionTimers.end(); ++it)
-    {
-        cMessage *endRxTimer = *it;
-        cancelAndDelete(endRxTimer);
-    }
+        cancelAndDelete(*it);
     endReceptionTimers.clear();
 }
 
@@ -53,8 +52,9 @@ void IdealRadio::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         endTransmissionTimer = new cMessage("endTransmission");
-        transmissionRange = par("transmissionRange").doubleValue();
-        bitrate = par("bitrate").doubleValue();
+        transmissionRange = par("transmissionRange");
+        interferenceRange = par("interferenceRange");
+        bitrate = par("bitrate");
         drawCoverage = par("drawCoverage");
     }
     else if (stage == INITSTAGE_LAST)
@@ -129,6 +129,7 @@ IdealRadioFrame *IdealRadio::encapsulatePacket(cPacket *frame)
     radioFrame->encapsulate(frame);
     radioFrame->setName(frame->getName());
     radioFrame->setTransmissionRange(transmissionRange);
+    radioFrame->setInterferenceRange(interferenceRange);
     radioFrame->setDuration(radioFrame->getBitLength() / bitrate);
     radioFrame->setTransmissionStartPosition(getMobility()->getCurrentPosition());
     return radioFrame;
@@ -183,9 +184,15 @@ void IdealRadio::handleSelfMessage(cMessage *message)
             {
                 endReceptionTimers.erase(it);
                 IdealRadioFrame *radioFrame = check_and_cast<IdealRadioFrame *>(message->removeControlInfo());
-                delete message;
-                sendUp(radioFrame);
+                bool isInterference = message->getKind();
+                if (isInterference) {
+                    interferenceCount--;
+                    delete radioFrame;
+                }
+                else
+                    sendUp(radioFrame);
                 updateRadioChannelState();
+                delete message;
                 return;
             }
         }
@@ -204,7 +211,11 @@ void IdealRadio::handleLowerFrame(IdealRadioFrame *radioFrame)
 {
     EV << "Reception of " << radioFrame << " started.\n";
 
-    cMessage *endReceptionTimer = new cMessage("endReception");
+    double sqrdist = mobility->getCurrentPosition().sqrdist(radioFrame->getTransmissionStartPosition());
+    double sqrTransmissionRange = radioFrame->getTransmissionRange() * radioFrame->getTransmissionRange();
+    bool isInterference = sqrdist <= sqrTransmissionRange ? false : true;
+    if (isInterference) interferenceCount++;
+    cMessage *endReceptionTimer = new cMessage("endReception", isInterference);
     endReceptionTimer->setControlInfo(radioFrame);
     endReceptionTimers.push_back(endReceptionTimer);
 
@@ -240,9 +251,9 @@ void IdealRadio::updateRadioChannelState()
         newRadioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
     else if (endTransmissionTimer->isScheduled())
         newRadioChannelState = RADIO_CHANNEL_STATE_TRANSMITTING;
-    else if (endReceptionTimers.size() > 0)
+    else if (interferenceCount < endReceptionTimers.size())
         newRadioChannelState = RADIO_CHANNEL_STATE_RECEIVING;
-    else if (false)
+    else if (endReceptionTimers.size() > 0)
         newRadioChannelState = RADIO_CHANNEL_STATE_BUSY;
     else
         newRadioChannelState = RADIO_CHANNEL_STATE_FREE;
