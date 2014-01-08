@@ -1,0 +1,108 @@
+%description:
+
+This is a test for DetailedRadio free channel state.
+The received signal is too weak to sense at all.
+Transmission and reception parameters must match with SimplifiedRadio.
+
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.WirelessHost;
+import inet.physicallayer.radio.detailed.radiochannel.DetailedRadioChannel;
+
+network Test
+{
+    submodules:
+        radioChannel: DetailedRadioChannel;
+        configurator: IPv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%file: generic.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <AnalogueModels>
+        <AnalogueModel type="SimplePathlossModel">
+            <parameter name="alpha" type="double" value="2.0"/>
+            <parameter name="carrierFrequency" type="double" value="2.4e+9"/>
+        </AnalogueModel>
+    </AnalogueModels>
+    <Decider type="SNRThresholdDecider">
+        <parameter name="snrThreshold" type="double" value="10"/>
+        <parameter name="busyThreshold" type="double" value="1.99526231497E-9"/>
+    </Decider>
+</root>
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 80us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.globalARP = true
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.host1.mobility.initialX = 200m
+*.host2.mobility.initialX = 800m
+
+# channel
+*.radioChannel.playgroundSizeX = 1000m
+*.radioChannel.playgroundSizeY = 1000m
+*.radioChannel.playgroundSizeZ = 0m
+*.radioChannel.carrierFrequency = 2.4e+9Hz
+*.radioChannel.pMax = 20.0mW
+*.radioChannel.sat = -110dBm
+*.radioChannel.alpha = 2
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].radioType = "DetailedRadio"
+*.host*.wlan[0].radio.usePropagationDelay = false
+*.host*.wlan[0].radio.thermalNoise = -100dBm
+*.host*.wlan[0].radio.analogueModels = xmldoc("generic.xml")
+*.host*.wlan[0].radio.decider = xmldoc("generic.xml")
+*.host*.wlan[0].radio.sensitivity = -100.0dBm
+*.host*.wlan[0].radio.txPower = 1.0mW
+*.host*.wlan[0].radio.maxTXPower = 20.0mW
+*.host*.wlan[0].radio.timeRXToTX    = 0s
+*.host*.wlan[0].radio.timeRXToSleep = 0s
+*.host*.wlan[0].radio.timeTXToRX    = 0s
+*.host*.wlan[0].radio.timeTXToSleep = 0s
+*.host*.wlan[0].radio.timeSleepToRX = 0s
+*.host*.wlan[0].radio.timeSleepToTX = 0s
+*.host*.wlan[0].radio.useThermalNoise = true
+*.host*.wlan[0].radio.nbRadioChannels = 15
+*.host*.wlan[0].radio.initialRadioChannel = 1
+
+# ping app
+*.host1.numPingApps = 1
+*.host1.pingApp[0].count = 1
+*.host1.pingApp[0].printPing = true
+*.host1.pingApp[0].destAddr = "host2"
+*.host1.pingApp[0].startTime = 0s
+
+%not-contains: results/General-0.elog
+- Changing radio channel state from FREE to BUSY.
+%not-contains: results/General-0.elog
+- Changing radio channel state from FREE to RECEIVING.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
