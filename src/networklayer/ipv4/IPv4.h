@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -18,8 +19,9 @@
 #ifndef __INET_IPv4_H
 #define __INET_IPv4_H
 
-#include <omnetpp.h>
 #include "INETDefs.h"
+
+#include "IARPCache.h"
 #include "INetworkProtocol.h"
 #include "INetfilter.h"
 #include "ICMPAccess.h"
@@ -36,7 +38,6 @@ class ARPPacket;
 class ICMPMessage;
 class IInterfaceTable;
 class IIPv4RoutingTable;
-class IARPCache;
 
 // ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
 const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
@@ -45,7 +46,7 @@ const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
 /**
  * Implements the IPv4 protocol.
  */
-class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol
+class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, public INetworkProtocol, public cListener
 {
   public:
     /**
@@ -63,13 +64,16 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
         IPv4Address nextHopAddr;
         const IHook::Type hookType;
     };
+    typedef std::map<IPv4Address, cPacketQueue> ARPCache;
 
   protected:
+    static simsignal_t completedARPResolutionSignal;
+    static simsignal_t failedARPResolutionSignal;
+
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IARPCache *arp;
     ICMPAccess icmpAccess;
-    cGate *arpDgramOutGate;
     cGate *arpInGate;
     cGate *arpOutGate;
     int transportInGateBaseId;
@@ -88,6 +92,9 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     IPv4FragBuf fragbuf;  // fragmentation reassembly buffer
     simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
     ProtocolMapping mapping; // where to send packets after decapsulation
+
+    // ARP related
+    ARPCache arpCache;  // map indexed with IPv4Address for outbound packets waiting for ARP resolution
 
     // statistics
     int numMulticast;
@@ -111,6 +118,12 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     // utility: show current statistics above the icon
     virtual void updateDisplayString();
+
+    // utility: processing requested ARP resolution completed
+    void arpResolutionCompleted(IARPCache::Notification *entry);
+
+    // utility: processing requested ARP resolution timed out
+    void arpResolutionTimedOut(IARPCache::Notification *entry);
 
     /**
      * Encapsulate packet coming from higher layers into IPv4Datagram, using
@@ -292,6 +305,9 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
      * ILifecycle method
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    /// cListener method
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
   protected:
     virtual bool isNodeUp();

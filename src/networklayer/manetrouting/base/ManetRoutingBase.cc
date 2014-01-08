@@ -821,7 +821,7 @@ void ManetRoutingBase::receiveSignal(cComponent *source, simsignal_t signalID, c
         {
             ManetAddress addr;
             if (!mac_layer_ && arp)
-                addr = ManetAddress(arp->getInverseAddressResolution(infoSta->getStaAddress()));
+                addr = ManetAddress(arp->getIPv4AddressFor(infoSta->getStaAddress()));
             else
                 addr = ManetAddress(infoSta->getStaAddress());
             // sanity check

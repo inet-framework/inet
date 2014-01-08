@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2004 Andras Varga
+ * Copyright (C) 2014 OpenSim Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -18,13 +19,14 @@
 #ifndef __INET_IARPCACHE_H
 #define __INET_IARPCACHE_H
 
-#include <map>
 
 #include "INETDefs.h"
 
-#include "MACAddress.h"
 #include "IPv4Address.h"
+#include "MACAddress.h"
+#include "ModuleAccess.h"
 
+class InterfaceEntry;
 
 /**
  * Represents an ARP cache.
@@ -32,16 +34,26 @@
 class INET_API IARPCache
 {
   public:
-    virtual MACAddress getDirectAddressResolution(const IPv4Address&) const = 0;  //TODO rename
-    virtual IPv4Address getInverseAddressResolution(const MACAddress&) const = 0;
+    class Notification : public cObject
+    {
+      public:
+        IPv4Address ipv4Address;
+        MACAddress macAddress;
+        const InterfaceEntry *ie;
+      public:
+        Notification(IPv4Address ipv4Address, MACAddress macAddress, const InterfaceEntry *ie)
+                : ipv4Address(ipv4Address), macAddress(macAddress), ie(ie) {}
+    };
+    virtual MACAddress getMACAddressFor(const IPv4Address&) const = 0;
+    virtual void startAddressResolution(const IPv4Address&, const InterfaceEntry *ie) = 0;
+    virtual IPv4Address getIPv4AddressFor(const MACAddress&) const = 0;
     virtual ~IARPCache() {}
 };
 
 class INET_API ARPCacheAccess : public ModuleAccess<IARPCache>
 {
   public:
-        ARPCacheAccess() : ModuleAccess<IARPCache>("arp") {}
+    ARPCacheAccess() : ModuleAccess<IARPCache>("arp") {}
 };
 
 #endif
-

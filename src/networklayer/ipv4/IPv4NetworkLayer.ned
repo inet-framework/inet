@@ -102,7 +102,6 @@ module IPv4NetworkLayer like INetworkLayer
 
         icmp.errorOut --> errorHandling.in;
 
-        ip.arpDgramOut --> arp.dgramIn;
         ip.arpOut --> arp.netwIn;
         ip.arpIn <-- arp.netwOut;
 

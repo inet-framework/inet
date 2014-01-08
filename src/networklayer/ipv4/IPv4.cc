@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -40,6 +41,8 @@ Define_Module(IPv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
+simsignal_t IPv4::completedARPResolutionSignal = registerSignal("completedARPResolution");
+simsignal_t IPv4::failedARPResolutionSignal = registerSignal("failedARPResolution");
 
 void IPv4::initialize(int stage)
 {
@@ -49,11 +52,11 @@ void IPv4::initialize(int stage)
 
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        arp = ARPCacheAccess().get();
 
-        arpDgramOutGate = gate("arpDgramOut");
         arpInGate = gate("arpIn");
         arpOutGate = gate("arpOut");
+        cModule *arpModule = arpOutGate->getPathEndGate()->getOwnerModule();
+        arp = check_and_cast<IARPCache *>(arpModule);
         transportInGateBaseId = gateBaseId("transportIn");
         queueOutGateBaseId = gateBaseId("queueOut");
 
@@ -73,11 +76,16 @@ void IPv4::initialize(int stage)
         hooks.clear();
         queuedDatagramsForHooks.clear();
 
+        arpCache.clear();
+        arpModule->subscribe(completedARPResolutionSignal, this);
+        arpModule->subscribe(failedARPResolutionSignal, this);
+
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
+        WATCH_MAP(arpCache);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -841,20 +849,53 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
                 }
             }
 
-            MACAddress nextHopMacAddr = resolveNextHopMacAddress(datagram, nextHopAddr, ie);
+            MACAddress nextHopMacAddr;  // unspecified
+                nextHopMacAddr = resolveNextHopMacAddress(datagram, nextHopAddr, ie);
 
-            if (nextHopMacAddr.isUnspecified()) {
-                IPv4RoutingDecision *routingDecision = new IPv4RoutingDecision();
-                routingDecision->setInterfaceId(ie->getInterfaceId());
-                routingDecision->setNextHopAddr(nextHopAddr);
-                datagram->setControlInfo(routingDecision);
-
-                send(datagram, arpDgramOutGate);  // send to ARP for resolution
+            if (nextHopMacAddr.isUnspecified())
+            {
+                arpCache[nextHopAddr].insert(datagram);
+                arp->startAddressResolution(nextHopAddr, ie);
             }
-            else {
+            else
+            {
+                ASSERT2(arpCache.find(nextHopAddr) == arpCache.end(), "IPv4-ARP error: nextHopAddr found in ARP table, but IPv4 queue for nextHopAddr not empty");
                 sendPacketToIeee802NIC(datagram, ie, nextHopMacAddr, ETHERTYPE_IPv4);
             }
         }
+    }
+}
+
+void IPv4::arpResolutionCompleted(IARPCache::Notification *entry)
+{
+    ARPCache::iterator it = arpCache.find(entry->ipv4Address);
+    if (it != arpCache.end())
+    {
+        cPacketQueue& pendingPackets = it->second;
+        EV << "ARP resolution completed for " << entry->ipv4Address << ". Sending " << pendingPackets.getLength()
+                << " waiting packets from the queue\n";
+
+        while (!pendingPackets.empty())
+        {
+            cPacket *msg = pendingPackets.pop();
+            EV << "Sending out queued packet " << msg << "\n";
+            sendPacketToIeee802NIC(msg, entry->ie, entry->macAddress, ETHERTYPE_IPv4);
+        }
+        arpCache.erase(it);
+    }
+}
+
+void IPv4::arpResolutionTimedOut(IARPCache::Notification *entry)
+{
+    ARPCache::iterator it = arpCache.find(entry->ipv4Address);
+    if (it != arpCache.end())
+    {
+        cPacketQueue& pendingPackets = it->second;
+        EV << "ARP timeout, max retry count for "
+                << entry->ipv4Address << " reached. Dropping " << pendingPackets.getLength()
+                << " waiting packets from the queue\n";
+        pendingPackets.clear();
+        arpCache.erase(it);
     }
 }
 
@@ -873,7 +914,7 @@ MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAd
         return macAddr;
     }
 
-    return arp->getDirectAddressResolution(nextHopAddr);
+    return arp->getMACAddressFor(nextHopAddr);
 }
 
 void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)
@@ -1042,6 +1083,7 @@ void IPv4::flush()
 {
     delete cancelService();
     queue.clear();
+    arpCache.clear();
 }
 
 bool IPv4::isNodeUp()
@@ -1087,5 +1129,21 @@ void IPv4::sendOnTransPortOutGateByProtocolId(cPacket *packet, int protocolId)
     int gateindex = mapping.getOutputGateForProtocol(protocolId);
     cGate* outGate = gate("transportOut", gateindex);
     send(packet, outGate);
+}
+
+void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    Enter_Method_Silent();
+
+    if (signalID == completedARPResolutionSignal)
+    {
+        IARPCache::Notification *entry = check_and_cast<IARPCache::Notification *>(obj);
+        arpResolutionCompleted(entry);
+    }
+    if (signalID == failedARPResolutionSignal)
+    {
+        IARPCache::Notification *entry = check_and_cast<IARPCache::Notification *>(obj);
+        arpResolutionTimedOut(entry);
+    }
 }
 

@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -46,14 +47,17 @@ simple ARP
         @display("i=block/layer");
         @signal[sentReq](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedResolution](type=long);
-        @signal[failedResolution](type=long);
+        @signal[initiatedARPResolution](type=IARPCache::Notification);
+        @signal[completedARPResolution](type=IARPCache::Notification);
+        @signal[failedARPResolution](type=IARPCache::Notification);
         @statistic[sentReq](title="ARP request sent";record=count,vector);
         @statistic[sentReply](title="ARP replies sent";record=count,vector);
-        @statistic[initiatedResolution](title="ARP initiated resolutions";record=count,vector);
-        @statistic[failedResolution](title="ARP failed resolutions";record=count,vector);
+        //@statistic[initiatedARPResolution](title="ARP initiated resolutions";record=count);
+        //@statistic[completedARPResolution](title="ARP completed resolutions";record=count);
+        //@statistic[failedARPResolution](title="ARP failed resolutions";record=count);
+        @statistic[initiatedResolution](title="ARP initiated resolutions";source=initiatedARPResolution;record=count);
+        @statistic[failedResolution](title="ARP failed resolutions";source=failedARPResolution;record=count);
     gates:
-        input dgramIn @labels(IPv4Datagram+IPv4RoutingDecision); // datagrams that need address resolution
         input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
 }
