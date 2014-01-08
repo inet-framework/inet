@@ -26,7 +26,6 @@
 #include "SnrList.h"
 #include "ObstacleControl.h"
 #include "INoiseGenerator.h"
-#include "ILifecycle.h"
 #include "NotifierConsts.h"
 
 /**
@@ -54,7 +53,7 @@
  *
  * @author Andras Varga, Levente Meszaros
  */
-class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess, public ILifecycle
+class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess
 {
   protected:
     typedef std::map<double,double> SensitivityList; // Sensitivity list

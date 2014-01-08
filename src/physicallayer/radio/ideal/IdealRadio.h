@@ -20,7 +20,6 @@
 
 #include "IdealRadioFrame.h"
 #include "IdealRadioChannelAccess.h"
-#include "ILifecycle.h"
 
 /**
  * This module implements a full-duplex, collision-free and interference-free ideal radio.
@@ -30,7 +29,7 @@
  * author: Zoltan Bojthe, Levente Meszaros
  */
 // TODO: add parameter for a very simple optional collision support (i.e. overlapping frames)
-class INET_API IdealRadio : public IdealRadioChannelAccess, public ILifecycle
+class INET_API IdealRadio : public IdealRadioChannelAccess
 {
   protected:
     /** Timers */
