@@ -47,10 +47,6 @@
 
 Define_Module(TCP);
 
-
-bool TCP::testing;
-bool TCP::logverbose;
-
 #define EPHEMERAL_PORTRANGE_START 1024
 #define EPHEMERAL_PORTRANGE_END   5000
 
@@ -76,6 +72,7 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize(int stage)
 {
+
     cSimpleModule::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
@@ -98,8 +95,6 @@ void TCP::initialize(int stage)
         recordStatistics = par("recordStats");
 
         cModule *netw = simulation.getSystemModule();
-        testing = netw->hasPar("testing") && netw->par("testing").boolValue();
-        logverbose = !testing && netw->hasPar("logverbose") && netw->par("logverbose").boolValue();
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
@@ -126,7 +121,7 @@ void TCP::handleMessage(cMessage *msg)
     {
         if (msg->isSelfMessage())
             throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
-        EV << "TCP is turned off, dropping '" << msg->getName() << "' message\n";
+        EV_ERROR << "TCP is turned off, dropping '" << msg->getName() << "' message\n";
         delete msg;
     }
     else if (msg->isSelfMessage())
@@ -147,7 +142,7 @@ void TCP::handleMessage(cMessage *msg)
 #endif
             )
         {
-            tcpEV << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
+            EV_DETAIL << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
             delete msg;
         }
         else
@@ -210,7 +205,7 @@ void TCP::handleMessage(cMessage *msg)
             key.connId = connId;
             tcpAppConnMap[key] = conn;
 
-            tcpEV << "TCP connection created for " << msg << "\n";
+            EV_INFO << "TCP connection created for " << msg << "\n";
         }
         bool ret = conn->processAppCommand(msg);
         if (!ret)
@@ -449,7 +444,7 @@ void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, Addre
 
 void TCP::removeConnection(TCPConnection *conn)
 {
-    tcpEV << "Deleting TCP connection\n";
+    EV_INFO << "Deleting TCP connection\n";
 
     AppConnKey key;
     key.appGateIndex = conn->appGateIndex;
@@ -475,7 +470,7 @@ void TCP::removeConnection(TCPConnection *conn)
 
 void TCP::finish()
 {
-    tcpEV << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
+    EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
 TCPSendQueue* TCP::createSendQueue(TCPDataTransferMode transferModeP)

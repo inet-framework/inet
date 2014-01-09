@@ -54,10 +54,10 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             if (localPort == -1)
             {
                 localPort = tcpMain->getEphemeralPort();
-                tcpEV << "Assigned ephemeral port " << localPort << "\n";
+                EV_DETAIL << "Assigned ephemeral port " << localPort << "\n";
             }
 
-            tcpEV << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
+            EV_DETAIL << "OPEN: " << localAddr << ":" << localPort << " --> " << remoteAddr << ":" << remotePort << "\n";
 
             tcpMain->addSockPair(this, localAddr, remoteAddr, localPort, remotePort);
 
@@ -96,7 +96,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
             if (localPort == -1)
                 throw cRuntimeError(tcpMain, "Error processing command OPEN_PASSIVE: local port must be specified");
 
-            tcpEV << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
+            EV_DETAIL << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
             tcpMain->addSockPair(this, localAddr, Address(), localPort, -1);
             break;
@@ -121,27 +121,27 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");
 
         case TCP_S_LISTEN:
-            tcpEV << "SEND command turns passive open into active open, sending initial SYN\n";
+            EV_DETAIL << "SEND command turns passive open into active open, sending initial SYN\n";
             state->active = true;
             selectInitialSeqNum();
             sendSyn();
             startSynRexmitTimer();
             scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
             sendQueue->enqueueAppData(PK(msg));  // queue up for later
-            tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
-            tcpEV << "Queueing up data for sending later.\n";
+            EV_DETAIL << "Queueing up data for sending later.\n";
             sendQueue->enqueueAppData(PK(msg)); // queue up for later
-            tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
+            EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_ESTABLISHED:
         case TCP_S_CLOSE_WAIT:
             sendQueue->enqueueAppData(PK(msg));
-            tcpEV << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
+            EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
                   << (state->snd_max-state->snd_una) << " bytes unacknowledged\n";
             tcpAlgorithm->sendCommandInvoked();
             break;
@@ -188,7 +188,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             //"
             if (state->snd_max == sendQueue->getBufferEndSeq())
             {
-                tcpEV << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
+                EV_DETAIL << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
                 tcpAlgorithm->restartRexmitTimer();
@@ -201,7 +201,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             }
             else
             {
-                tcpEV << "SEND of " << (sendQueue->getBufferEndSeq() - state->snd_max)
+                EV_DETAIL << "SEND of " << (sendQueue->getBufferEndSeq() - state->snd_max)
                       << " bytes pending, deferring sending of FIN\n";
                 event = TCP_E_IGNORE;
             }

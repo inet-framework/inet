@@ -48,13 +48,13 @@ std::string TCPSACKRexmitQueue::str() const
 
 void TCPSACKRexmitQueue::info() const
 {
-    tcpEV << str() << endl;
+    EV_DETAIL << str() << endl;
 
     uint j = 1;
 
     for (RexmitQueue::const_iterator i = rexmitQueue.begin(); i != rexmitQueue.end(); i++)
     {
-        tcpEV << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum
+        EV_DETAIL << j << ". region: [" << i->beginSeqNum << ".." << i->endSeqNum
               << ") \t sacked=" << i->sacked << "\t rexmitted=" << i->rexmitted
               << endl;
         j++;
@@ -92,7 +92,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
     bool found = false;
     Region region;
 
-    tcpEV << "rexmitQ: " << str() << " enqueueSentData [" << fromSeqNum << ".." << toSeqNum << ")\n";
+    EV_INFO << "rexmitQ: " << str() << " enqueueSentData [" << fromSeqNum << ".." << toSeqNum << ")\n";
 
     ASSERT(seqLess(fromSeqNum, toSeqNum));
 
@@ -156,7 +156,7 @@ void TCPSACKRexmitQueue::enqueueSentData(uint32 fromSeqNum, uint32 toSeqNum)
 
     if (!found)
     {
-        EV << "Not found enqueueSentData(" << fromSeqNum << ", " << toSeqNum << ")\nThe Queue is:\n";
+        EV_DEBUG << "Not found enqueueSentData(" << fromSeqNum << ", " << toSeqNum << ")\nThe Queue is:\n";
         info();
     }
 
@@ -187,7 +187,7 @@ bool TCPSACKRexmitQueue::checkQueue() const
 
     if (!f)
     {
-        EV << "Invalid Queue\nThe Queue is:\n";
+        EV_DEBUG << "Invalid Queue\nThe Queue is:\n";
         info();
     }
 
@@ -246,7 +246,7 @@ void TCPSACKRexmitQueue::setSackedBit(uint32 fromSeqNum, uint32 toSeqNum)
     }
 
     if (!found)
-        tcpEV << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
+        EV_DETAIL << "FAILED to set sacked bit for region: [" << fromSeqNum << ".." << toSeqNum << "). Not found in retransmission queue.\n";
 
     ASSERT(checkQueue());
 }

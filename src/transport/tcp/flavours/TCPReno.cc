@@ -78,7 +78,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
     if (cwndVector)
         cwndVector->record(state->snd_cwnd);
 
-    tcpEV << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
+    EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
           << ", ssthresh=" << state->ssthresh << "\n";
 
     state->afterRto = true;
@@ -95,7 +95,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
-        tcpEV << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
+        EV_INFO << "Fast Recovery: setting cwnd to ssthresh=" << state->ssthresh << "\n";
         state->snd_cwnd = state->ssthresh;
 
         if (cwndVector)
@@ -108,7 +108,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         //
         if (state->snd_cwnd < state->ssthresh)
         {
-            tcpEV << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
+            EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
             // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
             // by at most SMSS bytes for each ACK received that acknowledges new data."
@@ -128,7 +128,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             if (cwndVector)
                 cwndVector->record(state->snd_cwnd);
 
-            tcpEV << "cwnd=" << state->snd_cwnd << "\n";
+            EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
         }
         else
         {
@@ -151,7 +151,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
             // would require maintaining a bytes_acked variable here which we don't do
             //
 
-            tcpEV << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
+            EV_INFO << "cwnd > ssthresh: Congestion Avoidance: increasing cwnd linearly, to " << state->snd_cwnd << "\n";
         }
     }
 
@@ -168,7 +168,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         // phase."
         if (seqGE(state->snd_una, state->recoveryPoint))
         {
-            tcpEV << "Loss Recovery terminated.\n";
+            EV_INFO << "Loss Recovery terminated.\n";
             state->lossRecovery = false;
         }
         // RFC 3517, page 7: "(B) Upon receipt of an ACK that does not cover RecoveryPoint the
@@ -211,7 +211,7 @@ void TCPReno::receivedDuplicateAck()
 
     if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
     {
-        tcpEV << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
+        EV_INFO << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
 
         if (state->sack_enabled)
         {
@@ -239,7 +239,7 @@ void TCPReno::receivedDuplicateAck()
             {
                 state->recoveryPoint = state->snd_max; // HighData = snd_max
                 state->lossRecovery = true;
-                tcpEV << " recoveryPoint=" << state->recoveryPoint;
+                EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
             }
         }
         // RFC 2581, page 5:
@@ -257,7 +257,7 @@ void TCPReno::receivedDuplicateAck()
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
 
-        tcpEV << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
+        EV_DETAIL << " set cwnd=" << state->snd_cwnd << ", ssthresh=" << state->ssthresh << "\n";
 
         // Fast Retransmission: retransmit missing segment without waiting
         // for the REXMIT timer to expire
@@ -291,7 +291,7 @@ void TCPReno::receivedDuplicateAck()
                 // retransmissions, go-back-N transmission and further reduction of the
                 // congestion window."
                 // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
-                tcpEV << "Retransmission sent during recovery, restarting REXMIT timer.\n";
+                EV_INFO << "Retransmission sent during recovery, restarting REXMIT timer.\n";
                 restartRexmitTimer();
 
                 // RFC 3517, page 7: "(C) If cwnd - pipe >= 1 SMSS the sender SHOULD transmit one or more
@@ -312,7 +312,7 @@ void TCPReno::receivedDuplicateAck()
         // additional segment that has left the network
         //
         state->snd_cwnd += state->snd_mss;
-        tcpEV << "Reno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
+        EV_DETAIL << "Reno on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
 
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);

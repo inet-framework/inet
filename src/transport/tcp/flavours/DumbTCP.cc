@@ -51,7 +51,7 @@ void DumbTCP::established(bool active)
     if (active)
     {
         // finish connection setup with ACK (possibly piggybacked on data)
-        tcpEV << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
+        EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
 
         if (!conn->sendData(false, 65535))
             conn->sendAck();
@@ -80,7 +80,7 @@ void DumbTCP::sendCommandInvoked()
 
 void DumbTCP::receivedOutOfOrderSegment()
 {
-    tcpEV << "Out-of-order segment, sending immediate ACK\n";
+    EV_INFO << "Out-of-order segment, sending immediate ACK\n";
     conn->sendAck();
 }
 
@@ -88,7 +88,7 @@ void DumbTCP::receiveSeqChanged()
 {
     // new data received, ACK immediately (more sophisticated algs should
     // wait a little to see if piggybacking is possible)
-    tcpEV << "rcv_nxt changed to " << state->rcv_nxt << ", sending immediate ACK\n";
+    EV_INFO << "rcv_nxt changed to " << state->rcv_nxt << ", sending immediate ACK\n";
     conn->sendAck();
 }
 
@@ -101,12 +101,12 @@ void DumbTCP::receivedDataAck(uint32)
 
 void DumbTCP::receivedDuplicateAck()
 {
-    tcpEV << "Duplicate ACK #" << state->dupacks << "\n";
+    EV_INFO << "Duplicate ACK #" << state->dupacks << "\n";
 }
 
 void DumbTCP::receivedAckForDataNotYetSent(uint32 seq)
 {
-    tcpEV << "ACK acks something not yet sent, sending immediate ACK\n";
+    EV_INFO << "ACK acks something not yet sent, sending immediate ACK\n";
     conn->sendAck();
 }
 

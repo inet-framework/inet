@@ -34,18 +34,6 @@ class TCPSegment;
 class TCPSendQueue;
 class TCPReceiveQueue;
 
-// macro for normal EV<< logging (Note: deliberately no parens in macro def)
-#define tcpEV (ev.isDisabled()||TCP::testing)?EV:EV
-
-// macro for more verbose EV<< logging (Note: deliberately no parens in macro def)
-#define tcpEV2 (ev.isDisabled()||TCP::testing||!TCP::logverbose)?EV:EV
-
-// testingEV writes log that automated test cases can check (*.test files)
-#define testingEV (ev.isDisabled()||!TCP::testing)?EV:EV
-
-
-
-
 
 /**
  * Implements the TCP protocol. This section describes the internal

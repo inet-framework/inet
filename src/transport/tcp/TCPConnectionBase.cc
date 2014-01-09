@@ -292,7 +292,7 @@ TCPConnection::~TCPConnection()
 bool TCPConnection::processTimer(cMessage *msg)
 {
     printConnBrief();
-    tcpEV << msg->getName() << " timer expired\n";
+    EV_DETAIL << msg->getName() << " timer expired\n";
 
     // first do actions
     TCPEventCode event;
@@ -359,7 +359,7 @@ bool TCPConnection::processAppCommand(cMessage *msg)
     // first do actions
     TCPCommand *tcpCommand = (TCPCommand *)(msg->removeControlInfo());
     TCPEventCode event = preanalyseAppCommandEvent(msg->getKind());
-    tcpEV << "App command: " << eventName(event) << "\n";
+    EV_INFO << "App command: " << eventName(event) << "\n";
 
     switch (event)
     {
@@ -399,7 +399,7 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
 
     if (event == TCP_E_IGNORE)  // e.g. discarded segment
     {
-        tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (no FSM event)\n";
+        EV_DETAIL << "Staying in state: " << stateName(fsm.getState()) << " (no FSM event)\n";
         return true;
     }
 
@@ -545,15 +545,15 @@ bool TCPConnection::performStateTransition(const TCPEventCode& event)
 
     if (oldState != fsm.getState())
     {
-        tcpEV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (event was: " << eventName(event) << ")\n";
-        testingEV << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
+        EV_INFO << "Transition: " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (event was: " << eventName(event) << ")\n";
+        EV_DEBUG << tcpMain->getName() << ": " << stateName(oldState) << " --> " << stateName(fsm.getState()) << "  (on " << eventName(event) << ")\n";
 
         // cancel timers, etc.
         stateEntered(fsm.getState(), oldState, event);
     }
     else
     {
-        tcpEV << "Staying in state: " << stateName(fsm.getState()) << " (event was: " << eventName(event) << ")\n";
+        EV_DETAIL << "Staying in state: " << stateName(fsm.getState()) << " (event was: " << eventName(event) << ")\n";
     }
 
     return fsm.getState() != TCP_S_CLOSED;
