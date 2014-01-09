@@ -87,8 +87,8 @@ void DetailedRadioChannelAccess::sendToChannel(cPacket *msg)
 			delay = calculatePropagationDelay(i->first);
 
             int radioStart = i->second->getId();
-            int radioEnd = radioStart + i->second->size();
-            for (int g = radioStart; g != --radioEnd; ++g)
+            int radioEnd = radioStart + i->second->size() - 1;
+            for (int g = radioStart; g != radioEnd; ++g)
                 sendDirect(static_cast<cPacket*>(msg->dup()),
                            delay, msg->getDuration(), i->second->getOwnerModule(), g);
 
