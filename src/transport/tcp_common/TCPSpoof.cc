@@ -62,7 +62,7 @@ void TCPSpoof::sendSpoofPacket()
 
 void TCPSpoof::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
 {
-    EV << "Sending: ";
+    EV_INFO << "Sending: ";
     //printSegmentBrief(tcpseg);
 
     if (dest.getType() == Address::IPv4)
