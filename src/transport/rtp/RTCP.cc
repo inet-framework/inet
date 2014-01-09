@@ -256,7 +256,7 @@ void RTCP::chooseSSRC()
         ssrcConflict = findParticipantInfo(ssrc) != NULL;
     } while (ssrcConflict);
 
-    EV << "chooseSSRC" << ssrc;
+    EV_INFO << "chooseSSRC" << ssrc;
     _senderInfo->setSsrc(ssrc);
     _participantInfos.add(_senderInfo);
     _ssrcChosen = true;
@@ -380,7 +380,7 @@ void RTCP::processIncomingRTPPacket(RTPPacket *packet, IPv4Address address, int 
     }
     else
     {
-        EV << "Incoming packet address/port conflict, packet dropped.\n";
+        EV_INFO << "Incoming packet address/port conflict, packet dropped.\n";
         delete packet;
     }
 }

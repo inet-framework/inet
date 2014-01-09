@@ -38,7 +38,7 @@ void RTPAVProfilePayload32Sender::initialize()
 
 void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
 {
-    EV << "initializeSenderModule Enter"<<endl;
+    EV_TRACE << "initializeSenderModule Enter"<<endl;
     char line[100];
     char unit[100];
     char description[100];
@@ -69,12 +69,12 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
     // wait initial delay
     // cPacket *reminderMessage = new cMessage("next frame");
     // scheduleAt(simTime() + _initialDelay, reminderMessage);
-    EV << "initializeSenderModule Exit" << endl;
+    EV_TRACE << "initializeSenderModule Exit" << endl;
 }
 
 bool RTPAVProfilePayload32Sender::sendPacket()
 {
-    EV << "sendPacket() "<< endl;
+    EV_TRACE << "sendPacket() "<< endl;
     // read next frame line
     int bits;
     char unit[100];
@@ -165,5 +165,5 @@ bool RTPAVProfilePayload32Sender::sendPacket()
         std::cout <<"LastSequenceNumber "<< _sequenceNumber << endl;
         return false;
     }
-    EV << "sendPacket() Exit"<< endl;
+    EV_TRACE << "sendPacket() Exit"<< endl;
 }

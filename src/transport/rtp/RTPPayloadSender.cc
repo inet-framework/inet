@@ -117,7 +117,7 @@ void RTPPayloadSender::handleMessage(cMessage *msg)
 
 void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
 {
-    EV << "initializeSenderModule Enter" << endl;
+    EV_TRACE << "initializeSenderModule Enter" << endl;
     _mtu = rinpIn->getMTU();
     _ssrc = rinpIn->getSsrc();
     const char *fileName = rinpIn->getFileName();
@@ -127,7 +127,7 @@ void RTPPayloadSender::initializeSenderModule(RTPInnerPacket *rinpIn)
     rinpOut->setSenderModuleInitializedPkt(_ssrc, _payloadType, _clockRate, _timeStampBase, _sequenceNumberBase);
     send(rinpOut, "profileOut");
     _status = STOPPED;
-    EV << "initializeSenderModule Exit" << endl;
+    EV_TRACE << "initializeSenderModule Exit" << endl;
 }
 
 void RTPPayloadSender::openSourceFile(const char *fileName)
