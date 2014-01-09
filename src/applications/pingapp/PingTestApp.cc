@@ -134,7 +134,7 @@ void PingTestApp::handleMessage(cMessage *msg)
 
             i = i % destAddresses.size();
             destAddr = destAddresses[i];
-            EV << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
+            EV_INFO << "Starting up: dest=" << destAddr << "  src=" << srcAddr << "seqNo=" << sendSeqNo << endl;
             ASSERT(!destAddr.isUnspecified());
         }
 
@@ -197,7 +197,7 @@ std::vector<Address> PingTestApp::getAllAddresses()
 
 void PingTestApp::sendPing()
 {
-    EV << "Sending ping #" << sendSeqNo << "\n";
+    EV_INFO << "Sending ping #" << sendSeqNo << "\n";
 
     char name[32];
     sprintf(name, "ping%ld", sendSeqNo);
@@ -314,7 +314,7 @@ void PingTestApp::processPingResponse(PingPayload *msg)
 
 void PingTestApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 {
-    EV << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
+    EV_INFO << "Ping reply #" << seqNo << " arrived, rtt=" << rtt << "\n";
     emit(pingRxSeqSignal, seqNo);
 
     numPongs++;
@@ -333,7 +333,7 @@ void PingTestApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     }
     else if (seqNo > expectedReplySeqNo)
     {
-        EV << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
+        EV_INFO << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
 
         // jump in the sequence: count pings in gap as lost for now
         // (if they arrive later, we'll decrement back the loss counter)
@@ -347,7 +347,7 @@ void PingTestApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     else // seqNo < expectedReplySeqNo
     {
         // ping reply arrived too late: count as out-of-order arrival (not loss after all)
-        EV << "Arrived out of order (too late)\n";
+        EV_INFO << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
         lossCount--;
         emit(outOfOrderArrivalsSignal, outOfOrderArrivalCount);
@@ -360,7 +360,7 @@ void PingTestApp::finish()
     if (sendSeqNo == 0)
     {
         if (printPing)
-            EV << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
+            EV_DETAIL << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         return;
     }
 
