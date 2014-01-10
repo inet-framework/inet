@@ -550,7 +550,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // processing ongoing transmissions during a channel change
     if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && getRadioChannelState() != RADIO_CHANNEL_STATE_TRANSMITTING && snrInfo.ptr == NULL)
     {
-        EV << "receiving frame " << radioFrame->getName() << endl;
+        EV << "receiving frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << endl;
 
         // Put frame and related SnrList in receive buffer
         SnrList snrList;
@@ -564,7 +564,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // receive power is too low or another message is being sent or received
     else
     {
-        EV << "frame " << radioFrame->getName() << " is just noise\n";
+        EV << "frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << " is just noise\n";
         //add receive power to the noise level
         noiseLevel += rcvdPower;
 
