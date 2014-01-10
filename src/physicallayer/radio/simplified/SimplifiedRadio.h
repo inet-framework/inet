@@ -122,7 +122,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess
      */
     virtual void setBitrate(double bitrate);
 
-    virtual void updateRadioChannelState();
+    virtual void updateTransceiverState();
 
     /** @brief updates the sensitivity value if the bitrate varies */
     virtual void updateSensitivity(double bitrate);

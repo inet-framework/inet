@@ -494,7 +494,7 @@ public:
 	 */
 	virtual ChannelState getChannelState() const;
 
-	virtual void updateRadioChannelState();
+	virtual void updateTransceiverState();
 
 	/**
 	 * @brief Returns the length of the phy header in bits.

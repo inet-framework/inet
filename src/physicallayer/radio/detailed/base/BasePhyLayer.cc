@@ -374,7 +374,7 @@ void BasePhyLayer::handleAirFrame(DetailedRadioFrame* frame) {
 		opp_error( "Unknown AirFrame state: %s", frame->getState());
 		break;
 	}
-	updateRadioChannelState();
+	updateTransceiverState();
 }
 
 void BasePhyLayer::handleAirFrameStartReceive(DetailedRadioFrame* frame) {
@@ -581,7 +581,7 @@ void BasePhyLayer::handleSelfMessage(cMessage* msg) {
 	//transmission over
 	case TX_OVER:
 		assert(msg == txOverTimer);
-		updateRadioChannelState();
+		updateTransceiverState();
 		break;
 
 	//radio switch over
@@ -620,7 +620,7 @@ void BasePhyLayer::sendMacPktUp(cMessage* pkt) {
 
 void BasePhyLayer::sendMessageDown(DetailedRadioFrame* msg) {
 	sendToChannel(msg);
-	updateRadioChannelState();
+	updateTransceiverState();
 }
 
 void BasePhyLayer::sendSelfMessage(cMessage* msg, simtime_t_cref time) {
@@ -742,7 +742,7 @@ void BasePhyLayer::finishRadioSwitching()
 	    EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
 	radioMode = newRadioMode;
     emit(radioModeChangedSignal, radio->getCurrentState());
-    updateRadioChannelState();
+    updateTransceiverState();
 }
 
 void BasePhyLayer::setRadioMode(RadioMode radioMode) {
@@ -784,24 +784,39 @@ ChannelState BasePhyLayer::getChannelState() const {
 	return decider->getChannelState();
 }
 
-void BasePhyLayer::updateRadioChannelState() {
-    RadioChannelState newRadioChannelState;
+void BasePhyLayer::updateTransceiverState() {
+    // reception state
+    RadioReceptionState newRadioReceptionState;
     ChannelState channelState = decider->getChannelState();
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP)
-        newRadioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
-    else if (txOverTimer->isScheduled())
-        newRadioChannelState = RADIO_CHANNEL_STATE_TRANSMITTING;
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
+        newRadioReceptionState = RADIO_RECEPTION_STATE_UNDEFINED;
     else if (channelState.isReceiving())
-        newRadioChannelState = IRadio::RADIO_CHANNEL_STATE_RECEIVING;
+        newRadioReceptionState = RADIO_RECEPTION_STATE_RECEIVING;
+    else if (false) // NOTE: synchronization is not modeled in ideal radio
+        newRadioReceptionState = RADIO_RECEPTION_STATE_SYNCHRONIZING;
     else if (channelState.isBusy())
-        newRadioChannelState = RADIO_CHANNEL_STATE_BUSY;
+        newRadioReceptionState = RADIO_RECEPTION_STATE_BUSY;
     else
-        newRadioChannelState = RADIO_CHANNEL_STATE_FREE;
-    if (radioChannelState != newRadioChannelState)
+        newRadioReceptionState = RADIO_RECEPTION_STATE_IDLE;
+    if (radioReceptionState != newRadioReceptionState)
     {
-        EV << "Changing radio channel state from " << getRadioChannelStateName(radioChannelState) << " to " << getRadioChannelStateName(newRadioChannelState) << ".\n";
-        radioChannelState = newRadioChannelState;
-        emit(radioChannelStateChangedSignal, newRadioChannelState);
+        EV << "Changing radio reception state from " << getRadioReceptionStateName(radioReceptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
+        radioReceptionState = newRadioReceptionState;
+        emit(radioReceptionStateChangedSignal, newRadioReceptionState);
+    }
+    // transmission state
+    RadioTransmissionState newRadioTransmissionState;
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_UNDEFINED;
+    else if (txOverTimer->isScheduled())
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_TRANSMITTING;
+    else
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_IDLE;
+    if (radioTransmissionState != newRadioTransmissionState)
+    {
+        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(radioTransmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
+        radioTransmissionState = newRadioTransmissionState;
+        emit(radioTransmissionStateChangedSignal, newRadioTransmissionState);
     }
 }
 

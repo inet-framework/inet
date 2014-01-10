@@ -262,7 +262,7 @@ void SimplifiedRadio::handleMessageWhenUp(cMessage *msg)
             SimplifiedRadioFrame *radioFrame = (SimplifiedRadioFrame *) msg;
             handleLowerMsgStart(radioFrame);
             bufferMsg(radioFrame);
-            updateRadioChannelState();
+            updateTransceiverState();
         }
         else
         {
@@ -345,7 +345,7 @@ void SimplifiedRadio::sendUp(SimplifiedRadioFrame *radioFrame)
 
 void SimplifiedRadio::sendDown(SimplifiedRadioFrame *radioFrame)
 {
-    updateRadioChannelState();
+    updateTransceiverState();
     if (radioMode == IRadio::RADIO_MODE_TRANSMITTER)
         sendToChannel(radioFrame);
     else
@@ -377,7 +377,7 @@ SimplifiedRadioFrame *SimplifiedRadio::unbufferMsg(cMessage *msg)
  */
 void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
 {
-    if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
+    if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
         error("Trying to send a message while already transmitting -- MAC should "
               "take care this does not happen");
 
@@ -425,7 +425,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             // do it
             if (radioChannel == newChannel)
                 EV << "Right on that channel, nothing to do\n"; // fine, nothing to do
-            else if (getRadioChannelState()==RADIO_CHANNEL_STATE_TRANSMITTING)
+            else if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
             {
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newChannel = newChannel;
@@ -440,7 +440,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             // do it
             if (bitrate == newBitrate)
                 EV << "Right at that bitrate, nothing to do\n"; // fine, nothing to do
-            else if (getRadioChannelState()==RADIO_CHANNEL_STATE_TRANSMITTING)
+            else if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
             {
                 EV << "We're transmitting right now, remembering to change after it's completed\n";
                 this->newBitrate = newBitrate;
@@ -470,7 +470,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
     if (msg == endTransmissionTimer)
     {
         EV << "Transmission successfully completed.\n";
-        updateRadioChannelState();
+        updateTransceiverState();
         // switch channel if it needs be
         if (newChannel != -1)
         {
@@ -487,7 +487,7 @@ void SimplifiedRadio::handleSelfMsg(cMessage *msg)
             {
                 endReceptionTimers.erase(it);
                 handleLowerMsgEnd(unbufferMsg(msg));
-                updateRadioChannelState();
+                updateTransceiverState();
                 return;
             }
         }
@@ -548,7 +548,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     // arrived in time
     // NOTE: a message may have arrival time in the past here when we are
     // processing ongoing transmissions during a channel change
-    if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && getRadioChannelState() != RADIO_CHANNEL_STATE_TRANSMITTING && snrInfo.ptr == NULL)
+    if (radioFrame->getArrivalTime() == simTime() && rcvdPower >= sensitivity && radioTransmissionState != RADIO_TRANSMISSION_STATE_TRANSMITTING && snrInfo.ptr == NULL)
     {
         EV << "receiving frame " << radioFrame->getName() << " with rcvdPower " << rcvdPower << endl;
 
@@ -672,7 +672,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
     Enter_Method_Silent();
     if (channel == radioChannel)
         return;
-    if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
+    if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
         error("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
@@ -691,7 +691,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
 
     // reset the noiseLevel
     noiseLevel = thermalNoise;
-    updateRadioChannelState();
+    updateTransceiverState();
 
     // do channel switch
     EV << "Changing from channel " << radioChannel << " to " << channel << "\n";
@@ -749,7 +749,7 @@ void SimplifiedRadio::setRadioChannel(int channel)
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
-            updateRadioChannelState();
+            updateTransceiverState();
         }
         else
         {
@@ -764,7 +764,7 @@ void SimplifiedRadio::setBitrate(double bitrate)
         return;
     if (bitrate < 0)
         error("setBitrate(): bitrate cannot be negative (%g)", bitrate);
-    if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
+    if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
         error("changing the bitrate while transmitting is not allowed");
 
     EV << "Setting bitrate to " << (bitrate/1e6) << "Mbps\n";
@@ -798,29 +798,44 @@ void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
         EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
         radioMode = newRadioMode;
         emit(radioModeChangedSignal, newRadioMode);
-        updateRadioChannelState();
+        updateTransceiverState();
     }
     settingRadioModeKludge = false;
 }
 
-void SimplifiedRadio::updateRadioChannelState()
+void SimplifiedRadio::updateTransceiverState()
 {
-    RadioChannelState newRadioChannelState;
-    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP)
-        newRadioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
-    else if (endTransmissionTimer->isScheduled())
-        newRadioChannelState = RADIO_CHANNEL_STATE_TRANSMITTING;
+    // reception state
+    RadioReceptionState newRadioReceptionState;
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
+        newRadioReceptionState = RADIO_RECEPTION_STATE_UNDEFINED;
     else if (snrInfo.ptr != NULL && endReceptionTimers.size() > 0)
-        newRadioChannelState = RADIO_CHANNEL_STATE_RECEIVING;
-    else if (BASE_NOISE_LEVEL > receptionThreshold) // TODO: how?
-        newRadioChannelState = RADIO_CHANNEL_STATE_BUSY;
+        newRadioReceptionState = RADIO_RECEPTION_STATE_RECEIVING;
+    else if (false) // NOTE: synchronization is not modeled in ideal radio
+        newRadioReceptionState = RADIO_RECEPTION_STATE_SYNCHRONIZING;
+    else if (BASE_NOISE_LEVEL > receptionThreshold)
+        newRadioReceptionState = RADIO_RECEPTION_STATE_BUSY;
     else
-        newRadioChannelState = RADIO_CHANNEL_STATE_FREE;
-    if (radioChannelState != newRadioChannelState)
+        newRadioReceptionState = RADIO_RECEPTION_STATE_IDLE;
+    if (radioReceptionState != newRadioReceptionState)
     {
-        EV << "Changing radio channel state from " << getRadioChannelStateName(radioChannelState) << " to " << getRadioChannelStateName(newRadioChannelState) << ".\n";
-        radioChannelState = newRadioChannelState;
-        emit(radioChannelStateChangedSignal, newRadioChannelState);
+        EV << "Changing radio reception state from " << getRadioReceptionStateName(radioReceptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
+        radioReceptionState = newRadioReceptionState;
+        emit(radioReceptionStateChangedSignal, newRadioReceptionState);
+    }
+    // transmission state
+    RadioTransmissionState newRadioTransmissionState;
+    if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_UNDEFINED;
+    else if (endTransmissionTimer->isScheduled())
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_TRANSMITTING;
+    else
+        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_IDLE;
+    if (radioTransmissionState != newRadioTransmissionState)
+    {
+        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(radioTransmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
+        radioTransmissionState = newRadioTransmissionState;
+        emit(radioTransmissionStateChangedSignal, newRadioTransmissionState);
     }
 }
 
@@ -949,12 +964,12 @@ void SimplifiedRadio::receiveSignal(cComponent *source, simsignal_t signalID, cO
 {
     SimplifiedRadioChannelAccess::receiveSignal(source,signalID, obj);
     if (signalID == changeLevelNoise)
-        updateRadioChannelState();
+        updateTransceiverState();
 }
 
 void SimplifiedRadio::disconnectReceiver()
 {
-    if (getRadioChannelState() == RADIO_CHANNEL_STATE_TRANSMITTING)
+    if (radioTransmissionState == RADIO_TRANSMISSION_STATE_TRANSMITTING)
         error("changing channel while transmitting is not allowed");
 
    // Clear the recvBuff
@@ -1019,7 +1034,7 @@ void SimplifiedRadio::connectReceiver()
             frameDup->setArrivalTime(radioFrame->getTimestamp() + propagationDelay);
             handleLowerMsgStart(frameDup);
             bufferMsg(frameDup);
-            updateRadioChannelState();
+            updateTransceiverState();
         }
     }
 }

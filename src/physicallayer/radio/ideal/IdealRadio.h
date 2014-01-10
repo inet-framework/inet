@@ -81,7 +81,7 @@ class INET_API IdealRadio : public IdealRadioChannelAccess
 
     virtual void cancelAndDeleteEndReceptionTimers();
 
-    virtual void updateRadioChannelState();
+    virtual void updateTransceiverState();
 
     virtual void updateDisplayString();
 
