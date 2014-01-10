@@ -876,11 +876,11 @@ void PIMDM::processPrunePendingTimer(cMessage *timer)
     ASSERT(timer == downstream->prunePendingTimer);
     ASSERT(downstream->pruneState == DownstreamInterface::PRUNE_PENDING);
 
-    SourceGroupState *sgState = downstream->owner;
-    IPv4Address source = sgState->source;
-    IPv4Address group = sgState->group;
+    delete timer;
+    downstream->prunePendingTimer = NULL;
 
-    EV_INFO << "PrunePendingTimer of (source=" << source << ", group=" << group << ") has expired.\n";
+    SourceGroupState *sgState = downstream->owner;
+    EV_INFO << "PrunePendingTimer of (source=" << sgState->source << ", group=" << sgState->group << ") has expired.\n";
 
     //
     // go to pruned state
@@ -1870,6 +1870,7 @@ void PIMDM::DownstreamInterface::stopPruneTimer()
 
 void PIMDM::DownstreamInterface::startPrunePendingTimer(double overrideInterval)
 {
+    ASSERT(!prunePendingTimer);
     cMessage *timer = new cMessage("PimPrunePendingTimer", PrunePendingTimer);
     timer->setContextPointer(this);
     owner->owner->scheduleAt(simTime() + overrideInterval, timer);
