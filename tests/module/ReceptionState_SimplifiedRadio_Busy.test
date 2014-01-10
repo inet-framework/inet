@@ -1,7 +1,7 @@
 %description:
 
-This is a test for SimplifiedRadio free channel state.
-The received signal is too weak to sense at all.
+This is a test for SimplifiedRadio busy reception state.
+The received signal is strong enough to sense but too weak to receive.
 Transmission and reception parameters must match with DetailedRadio.
 
 %file: test.ned
@@ -44,7 +44,7 @@ ned-path = .;../../../../src
 
 # channel
 *.radioChannel.carrierFrequency = 2.4e+9Hz
-*.radioChannel.pMax = 20.0mW
+*.radioChannel.pMax = 100mW
 *.radioChannel.sat = -110dBm
 *.radioChannel.alpha = 2
 
@@ -54,7 +54,12 @@ ned-path = .;../../../../src
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
 *.host*.wlan[*].radioType = "GenericRadio"
-*.host*.wlan[*].radio.transmitterPower = 1mW
+*.host*.wlan[*].radio.thermalNoise = -110dBm
+*.host*.wlan[*].radio.sensitivity = -80dBm
+*.host*.wlan[*].radio.receptionThreshold = -90dBm
+*.host*.wlan[*].radio.setReceptionThreshold = true
+*.host*.wlan[*].radio.snirThreshold = 10dB
+*.host*.wlan[*].radio.transmitterPower = 10mW
 *.host*.wlan[*].radio.headerLengthBits = 100b
 *.host*.wlan[*].radio.bandwidth = 2MHz
 *.host*.wlan[*].radio.modulation = "BPSK"
@@ -66,10 +71,8 @@ ned-path = .;../../../../src
 *.host1.pingApp[0].destAddr = "host2"
 *.host1.pingApp[0].startTime = 0s
 
-%not-contains: results/General-0.elog
-- Changing radio channel state from FREE to BUSY.
-%not-contains: results/General-0.elog
-- Changing radio channel state from FREE to RECEIVING.
+%contains: results/General-0.elog
+ - Changing radio reception state from IDLE to BUSY.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

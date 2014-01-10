@@ -59,8 +59,8 @@ cmdenv-express-mode = false
 - reception of noise message over, removing recvdPower from noiseLevel....
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-frame ping0 is just noise
-Changing radio channel state from FREE to BUSY\.
+frame ping0 with rcvdPower .*? is just noise
+Changing radio reception state from IDLE to BUSY\.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
