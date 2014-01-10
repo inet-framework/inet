@@ -29,7 +29,7 @@ void TopState::init()
 //RFC 4271 - 8.2.2.  Finite State Machine - IdleState
 void Idle::ManualStart()
 {
-    EV << "Processing Idle::event1" << std::endl;
+    EV_INFO << "Processing Idle::event1" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In this state, BGP FSM refuses all incoming BGP connections for this peer.
     //No resources are allocated to the peer.  In response to a ManualStart event
@@ -50,7 +50,7 @@ void Idle::ManualStart()
 //RFC 4271 - 8.2.2.  Finite State Machine - ConnectState
 void Connect::ConnectRetryTimer_Expires()
 {
-    EV << "Processing Connect::ConnectRetryTimer_Expires" << std::endl;
+    EV_INFO << "Processing Connect::ConnectRetryTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to the ConnectRetryTimer_Expires event (Event 9), the local system:
     //- drops the TCP connection,
@@ -66,7 +66,7 @@ void Connect::ConnectRetryTimer_Expires()
 }
 void Connect::HoldTimer_Expires()
 {
-    EV << "Processing Connect::HoldTimer_Expires" << std::endl;
+    EV_INFO << "Processing Connect::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to any other events (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     //- if the ConnectRetryTimer is running, stops and resets the ConnectRetryTimer (sets to zero),
@@ -86,12 +86,12 @@ void Connect::HoldTimer_Expires()
 }
 void Connect::KeepaliveTimer_Expires()
 {
-    EV << "Processing Connect::KeepaliveTimer_Expires" << std::endl;
+    EV_INFO << "Processing Connect::KeepaliveTimer_Expires" << std::endl;
     Connect::HoldTimer_Expires();
 }
 void Connect::TcpConnectionConfirmed()
 {
-    EV << "Processing Connect::TcpConnectionConfirmed" << std::endl;
+    EV_INFO << "Processing Connect::TcpConnectionConfirmed" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the TCP connection succeeds (Event 16 or Event 17), the local
     //system checks the DelayOpen attribute prior to processing.
@@ -112,14 +112,14 @@ void Connect::TcpConnectionFails()
 }
 void Connect::KeepAliveMsgEvent()
 {
-    EV << "Processing Connect::KeepAliveMsgEvent" << std::endl;
+    EV_INFO << "Processing Connect::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv ++;
     Connect::HoldTimer_Expires();
 }
 void Connect::UpdateMsgEvent()
 {
-    EV << "Processing Connect::UpdateMsgEvent" << std::endl;
+    EV_INFO << "Processing Connect::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._updateMsgRcv ++;
     Connect::HoldTimer_Expires();
@@ -128,7 +128,7 @@ void Connect::UpdateMsgEvent()
 //RFC 4271 - 8.2.2.  Finite State Machine - ActiveState
 void Active::ConnectRetryTimer_Expires()
 {
-    EV << "Processing Active::ConnectRetryTimer_Expires" << std::endl;
+    EV_INFO << "Processing Active::ConnectRetryTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to a ConnectRetryTimer_Expires event (Event 9), the local system:
     //- restarts the ConnectRetryTimer (with initial value),
@@ -142,7 +142,7 @@ void Active::ConnectRetryTimer_Expires()
 }
 void Active::HoldTimer_Expires()
 {
-    EV << "Processing Active::HoldTimer_Expires" << std::endl;
+    EV_INFO << "Processing Active::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to any other event (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     //- sets the ConnectRetryTimer to zero,
@@ -157,12 +157,12 @@ void Active::HoldTimer_Expires()
 }
 void Active::KeepaliveTimer_Expires()
 {
-    EV << "Processing Active::KeepaliveTimer_Expires" << std::endl;
+    EV_TRACE << "Processing Active::KeepaliveTimer_Expires" << std::endl;
     Active::HoldTimer_Expires();
 }
 void Active::TcpConnectionConfirmed()
 {
-    EV << "Processing Active::TcpConnectionConfirmed" << std::endl;
+    EV_TRACE << "Processing Active::TcpConnectionConfirmed" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to the success of a TCP connection (Event 16 or Event
     //17), the local system :
@@ -181,21 +181,21 @@ void Active::TcpConnectionFails()
 }
 void Active::OpenMsgEvent()
 {
-    EV << "Processing Active::BGPOpen" << std::endl;
+    EV_TRACE << "Processing Active::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._openMsgRcv ++;
     Active::HoldTimer_Expires();
 }
 void Active::KeepAliveMsgEvent()
 {
-    EV << "Processing Active::KeepAliveMsgEvent" << std::endl;
+    EV_TRACE << "Processing Active::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv ++;
     Active::HoldTimer_Expires();
 }
 void Active::UpdateMsgEvent()
 {
-    EV << "Processing Active::UpdateMsgEvent" << std::endl;
+    EV_TRACE << "Processing Active::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._updateMsgRcv ++;
     Active::HoldTimer_Expires();
@@ -204,7 +204,7 @@ void Active::UpdateMsgEvent()
 //RFC 4271 - 8.2.2.  Finite State Machine - OpenSentState
 void OpenSent::ConnectRetryTimer_Expires()
 {
-    EV << "Processing OpenSent::ConnectRetryTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenSent::ConnectRetryTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to any other event (Events 9, 11-13, 20, 25-28), the local system:
     //TODO- sends the NOTIFICATION with the Error Code Finite State Machine Error,
@@ -221,7 +221,7 @@ void OpenSent::ConnectRetryTimer_Expires()
 }
 void OpenSent::HoldTimer_Expires()
 {
-    EV << "Processing OpenSent::HoldTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenSent::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the HoldTimer_Expires (Event 10), the local system:
     //- sets the ConnectRetryTimer to zero,
@@ -237,12 +237,12 @@ void OpenSent::HoldTimer_Expires()
 }
 void OpenSent::KeepaliveTimer_Expires()
 {
-    EV << "Processing OpenSent::KeepaliveTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenSent::KeepaliveTimer_Expires" << std::endl;
     OpenSent::ConnectRetryTimer_Expires();
 }
 void OpenSent::TcpConnectionFails()
 {
-    EV << "Processing OpenSent::BGPOpen" << std::endl;
+    EV_TRACE << "Processing OpenSent::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If a TcpConnectionFails event (Event 18) is received, the local system:
     //- closes the BGP connection,
@@ -256,7 +256,7 @@ void OpenSent::TcpConnectionFails()
 }
 void OpenSent::OpenMsgEvent()
 {
-    EV << "Processing OpenSent::BGPOpen" << std::endl;
+    EV_TRACE << "Processing OpenSent::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._openMsgRcv ++;
     //When an OPEN message is received, all fields are checked for correctness.
@@ -274,7 +274,7 @@ void OpenSent::OpenMsgEvent()
 }
 void OpenSent::KeepAliveMsgEvent()
 {
-    EV << "Processing OpenSent::KeepAliveMsgEvent" << std::endl;
+    EV_TRACE << "Processing OpenSent::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv ++;
     OpenSent::ConnectRetryTimer_Expires();
@@ -282,7 +282,7 @@ void OpenSent::KeepAliveMsgEvent()
 
 void OpenSent::UpdateMsgEvent()
 {
-    EV << "Processing OpenSent::UpdateMsgEvent" << std::endl;
+    EV_TRACE << "Processing OpenSent::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._updateMsgRcv ++;
     OpenSent::ConnectRetryTimer_Expires();
@@ -292,7 +292,7 @@ void OpenSent::UpdateMsgEvent()
 void OpenConfirm::ConnectRetryTimer_Expires()
 {
     std::cout << "OpenConfirm::ConnectRetryTimer_Expires" << std::endl;
-    EV << "Processing OpenConfirm::ConnectRetryTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::ConnectRetryTimer_Expires" << std::endl;
     //In response to any other event (Events 9, 12-13, 20, 27-28), the local system:
     BGPSession& session = TopState::box().getModule();
     //- sends a NOTIFICATION with a Cease,
@@ -309,7 +309,7 @@ void OpenConfirm::ConnectRetryTimer_Expires()
 void OpenConfirm::HoldTimer_Expires()
 {
     std::cout << "OpenConfirm::HoldTimer_Expires" << std::endl;
-    EV << "Processing OpenConfirm::HoldTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the HoldTimer_Expires event (Event 10) occurs before a KEEPALIVE message is received, the local system:
     //- sets the ConnectRetryTimer to zero,
@@ -325,7 +325,7 @@ void OpenConfirm::HoldTimer_Expires()
 void OpenConfirm::KeepaliveTimer_Expires()
 {
     std::cout << "OpenConfirm::KeepaliveTimer_Expires" << std::endl;
-    EV << "Processing OpenConfirm::KeepaliveTimer_Expires" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::KeepaliveTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the local system receives a KeepaliveTimer_Expires event (Event 11), the local system:
     //- sends a KEEPALIVE message,
@@ -341,7 +341,7 @@ void OpenConfirm::TcpConnectionFails()
 }
 void OpenConfirm::OpenMsgEvent()
 {
-    EV << "Processing OpenConfirm::BGPOpen - collision" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::BGPOpen - collision" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._openMsgRcv ++;
     //If the local system receives a valid OPEN message (BGPOpen (Event 19)),
@@ -353,7 +353,7 @@ void OpenConfirm::OpenMsgEvent()
 void OpenConfirm::KeepAliveMsgEvent()
 {
     std::cout << "OpenConfirm::KeepAliveMsgEvent" << std::endl;
-    EV << "Processing OpenConfirm::KeepAliveMsgEvent" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv ++;
     //If the local system receives a KEEPALIVE message (KeepAliveMsg Event 26)), the local system:
@@ -365,7 +365,7 @@ void OpenConfirm::KeepAliveMsgEvent()
 void OpenConfirm::UpdateMsgEvent()
 {
     std::cout << "OpenConfirm::UpdateMsgEvent" << std::endl;
-    EV << "Processing OpenConfirm::UpdateMsgEvent" << std::endl;
+    EV_TRACE << "Processing OpenConfirm::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._updateMsgRcv ++;
     OpenConfirm::ConnectRetryTimer_Expires();
@@ -424,7 +424,7 @@ void Established::entry()
 }
 void Established::ConnectRetryTimer_Expires()
 {
-    EV << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
+    EV_TRACE << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to any other event (Events 9, 12-13, 20-22), the local system:
 //TODO- deletes all routes associated with this connection,
@@ -440,7 +440,7 @@ void Established::ConnectRetryTimer_Expires()
 }
 void Established::HoldTimer_Expires()
 {
-    EV << "Processing Established::HoldTimer_Expires" << std::endl;
+    EV_TRACE << "Processing Established::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the HoldTimer_Expires event occurs (Event 10), the local system:
     //- sets the ConnectRetryTimer to zero,
@@ -455,7 +455,7 @@ void Established::HoldTimer_Expires()
 }
 void Established::KeepaliveTimer_Expires()
 {
-    EV << "Processing Established::KeepaliveTimer_Expires" << std::endl;
+    EV_TRACE << "Processing Established::KeepaliveTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //If the KeepaliveTimer_Expires event occurs (Event 11), the local system:
     //- sends a KEEPALIVE message, and
@@ -468,17 +468,17 @@ void Established::KeepaliveTimer_Expires()
 }
 void Established::TcpConnectionFails()
 {
-    EV << "Processing Established::TcpConnectionFails" << std::endl;
+    EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
 }
 void Established::OpenMsgEvent()
 {
-    EV << "Processing Established::BGPOpen" << std::endl;
+    EV_TRACE << "Processing Established::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._openMsgRcv ++;
 }
 void Established::KeepAliveMsgEvent()
 {
-    EV << "Processing Established::KeepAliveMsgEvent" << std::endl;
+    EV_TRACE << "Processing Established::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._keepAliveMsgRcv ++;
     //If the local system receives a KEEPALIVE message (Event 26), the local system:
@@ -488,7 +488,7 @@ void Established::KeepAliveMsgEvent()
 }
 void Established::UpdateMsgEvent()
 {
-    EV << "Processing Established::UpdateMsgEvent" << std::endl;
+    EV_TRACE << "Processing Established::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
     session._updateMsgRcv ++;
     //If the local system receives an UPDATE message (Event 27), the local system:

@@ -83,19 +83,19 @@ void BGPRouting::handleTimer(cMessage *timer)
         switch (timer->getKind())
         {
             case BGP::START_EVENT_KIND:
-                EV << "Processing Start Event" << std::endl;
+                EV_INFO << "Processing Start Event" << std::endl;
                 pSession->getFSM()->ManualStart();
                 break;
             case BGP::CONNECT_RETRY_KIND:
-                EV << "Expiring Connect Retry Timer" << std::endl;
+                EV_INFO << "Expiring Connect Retry Timer" << std::endl;
                 pSession->getFSM()->ConnectRetryTimer_Expires();
                 break;
             case BGP::HOLD_TIME_KIND:
-                EV << "Expiring Hold Timer" << std::endl;
+                EV_INFO << "Expiring Hold Timer" << std::endl;
                 pSession->getFSM()->HoldTimer_Expires();
                 break;
             case BGP::KEEP_ALIVE_KIND:
-                EV << "Expiring Keep Alive timer" << std::endl;
+                EV_INFO << "Expiring Keep Alive timer" << std::endl;
                 pSession->getFSM()->KeepaliveTimer_Expires();
                 break;
             default :
@@ -252,19 +252,19 @@ void BGPRouting::socketFailure(int connId, void *yourPtr, int code)
 
 void BGPRouting::processMessage(const BGPOpenMessage& msg)
 {
-    EV << "Processing BGP OPEN message" << std::endl;
+    EV_INFO << "Processing BGP OPEN message" << std::endl;
     _BGPSessions[_currSessionId]->getFSM()->OpenMsgEvent();
 }
 
 void BGPRouting::processMessage(const BGPKeepAliveMessage& msg)
 {
-    EV << "Processing BGP Keep Alive message" << std::endl;
+    EV_INFO << "Processing BGP Keep Alive message" << std::endl;
     _BGPSessions[_currSessionId]->getFSM()->KeepAliveMsgEvent();
 }
 
 void BGPRouting::processMessage(const BGPUpdateMessage& msg)
 {
-    EV << "Processing BGP Update message" << std::endl;
+    EV_INFO << "Processing BGP Update message" << std::endl;
     _BGPSessions[_currSessionId]->getFSM()->UpdateMsgEvent();
 
     unsigned char               decisionProcessResult;
