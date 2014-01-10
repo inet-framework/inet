@@ -162,6 +162,8 @@ class PIMDM : public PIMBase, protected cListener
             bool isOilistNull();
         };
 
+        friend std::ostream &operator<<(std::ostream &out, const SourceGroupState *sgState);
+
         typedef std::map<SourceAndGroup, SourceGroupState> SGStateMap;
 
         // KLUDGE
