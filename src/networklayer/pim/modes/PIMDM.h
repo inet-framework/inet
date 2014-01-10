@@ -200,7 +200,7 @@ class PIMDM : public PIMBase, protected cListener
         void multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl);
 	    void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address newAddr);
 	    void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address oldAddr);
-	    void rpfInterfaceHasChanged(IPv4MulticastRoute *route, InterfaceEntry *newRpfInterface);
+	    void rpfInterfaceHasChanged(IPv4MulticastRoute *route, IPv4Route *routeToSource);
 
 	    // process timers
 	    void processPIMTimer(cMessage *timer);

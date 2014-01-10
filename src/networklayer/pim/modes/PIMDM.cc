@@ -1213,12 +1213,13 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
             if (route->getSource() == this && IPv4Address::maskedAddrAreEqual(route->getOrigin(), routeSource, routeNetmask))
             {
                 IPv4Address source = route->getOrigin();
-                InterfaceEntry *newRpfInterface = rt->getInterfaceForDestAddr(source);
+                IPv4Route *routeToSource = rt->findBestMatchingRoute(source);
+                InterfaceEntry *newRpfInterface = routeToSource->getInterface();
                 InterfaceEntry *oldRpfInterface = route->getInInterface()->getInterface();
 
                 // is there any change?
                 if (newRpfInterface != oldRpfInterface)
-                    rpfInterfaceHasChanged(route, newRpfInterface);
+                    rpfInterfaceHasChanged(route, routeToSource);
 
                 // TODO update metric
             }
@@ -1565,8 +1566,9 @@ void PIMDM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
  * (by different path).
  */
 // XXX Assert state causes RPF'(S) to change
-void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *route, InterfaceEntry *newRpf)
+void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *route, IPv4Route *routeToSource)
 {
+    InterfaceEntry *newRpf = routeToSource->getInterface();
     IPv4Address source = route->getOrigin();
     IPv4Address group = route->getMulticastGroup();
     int rpfId = newRpf->getInterfaceId();
@@ -1584,8 +1586,9 @@ void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *route, InterfaceEntry *ne
     route->setInInterface(NULL);
 
     // set new upstream interface data
+    bool isSourceDirectlyConnected = routeToSource->getSourceType() == IPv4Route::IFACENETMASK;
     IPv4Address newRpfNeighbor = pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress(); // XXX what happens if no neighbors?
-    UpstreamInterface *upstream = sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor, false/*XXX*/);
+    UpstreamInterface *upstream = sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor, isSourceDirectlyConnected);
     route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
