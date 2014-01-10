@@ -86,7 +86,7 @@ void OSPFRouting::handleMessageWhenDown(cMessage *msg)
 {
     if (msg->isSelfMessage())
         throw cRuntimeError("Model error: self msg '%s' received when protocol is down", msg->getName());
-    EV << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
+    EV_ERROR << "Protocol is turned off, dropping '" << msg->getName() << "' message\n";
     delete msg;
 }
 

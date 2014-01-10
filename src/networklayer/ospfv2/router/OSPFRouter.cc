@@ -314,7 +314,7 @@ void OSPF::Router::ageDatabase()
             lsa->getHeader().setLsAge(lsAge + 1);
             if ((lsAge + 1) % CHECK_AGE == 0) {
                 if (!lsa->validateLSChecksum()) {
-                    EV << "Invalid LS checksum. Memory error detected!\n";
+                    EV_ERROR << "Invalid LS checksum. Memory error detected!\n";
                 }
             }
             lsa->incrementInstallTime();
@@ -711,7 +711,7 @@ void OSPF::Router::rebuildRoutingTable()
     std::vector<OSPF::RoutingTableEntry*> newTable;
     unsigned long i;
 
-    EV << "Rebuilding routing table:\n";
+    EV_INFO << "Rebuilding routing table:\n";
 
     for (i = 0; i < areaCount; i++) {
         areas[i]->calculateShortestPathTree(newTable);
@@ -777,12 +777,12 @@ void OSPF::Router::rebuildRoutingTable()
         delete (oldTable[i]);
     }
 
-    EV << "Routing table was rebuilt.\n"
+    EV_INFO << "Routing table was rebuilt.\n"
        << "Results:\n";
 
     routeCount = routingTable.size();
     for (i = 0; i < routeCount; i++) {
-        EV << *routingTable[i]
+        EV_INFO << *routingTable[i]
            << "\n";
     }
 }
