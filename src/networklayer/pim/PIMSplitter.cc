@@ -57,7 +57,18 @@ void PIMSplitter::handleMessage(cMessage *msg)
 
     if (arrivalGate == ipIn)
     {
-        processPIMPacket(check_and_cast<PIMPacket *>(msg));
+        PIMPacket *pimPacket = dynamic_cast<PIMPacket*>(msg);
+        if (pimPacket)
+        {
+            processPIMPacket(pimPacket);
+        }
+        else if (dynamic_cast<ICMPMessage*>(msg))
+        {
+            EV_WARN << "Received ICMP error, ignoring.\n";
+            delete msg;
+        }
+        else
+            throw cRuntimeError("PIMSplitter: received unknown packet '%s (%s)' from the network layer.", msg->getName(), msg->getClassName());
     }
     else if (arrivalGate == pimSMIn || arrivalGate == pimDMIn)
     {
