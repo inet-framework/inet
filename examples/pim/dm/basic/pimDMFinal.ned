@@ -18,7 +18,7 @@
 // @author: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 // @brief Topology with PIM network
 
-package inet.examples.pim.dm;
+package inet.examples.pim.dm.basic;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.MulticastRouter;
