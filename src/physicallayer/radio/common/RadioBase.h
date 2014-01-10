@@ -33,6 +33,8 @@ class INET_API RadioBase : public PhysicalLayerBase, public IRadio
     /** Internal state */
     //@{
     RadioMode radioMode;
+    RadioReceptionState radioReceptionState;
+    RadioTransmissionState radioTransmissionState;
     RadioChannelState radioChannelState;
     int radioChannel;
     //@}
@@ -57,6 +59,10 @@ class INET_API RadioBase : public PhysicalLayerBase, public IRadio
     virtual const cGate *getRadioGate() const { return radioIn; }
 
     virtual RadioMode getRadioMode() const { return radioMode; }
+
+    virtual RadioReceptionState getRadioReceptionState() const { return radioReceptionState; }
+
+    virtual RadioTransmissionState getRadioTransmissionState() const { return radioTransmissionState; }
 
     virtual RadioChannelState getRadioChannelState() const { return radioChannelState; }
 

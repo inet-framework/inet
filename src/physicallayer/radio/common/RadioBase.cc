@@ -21,6 +21,8 @@
 RadioBase::RadioBase()
 {
     radioMode = RADIO_MODE_OFF;
+    radioReceptionState = RADIO_RECEPTION_STATE_UNDEFINED;
+    radioTransmissionState = RADIO_TRANSMISSION_STATE_UNDEFINED;
     radioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
     radioChannel = -1;
     mobility = NULL;
@@ -42,6 +44,8 @@ void RadioBase::initialize(int stage)
         radioIn = gate("radioIn");
         radioIn->setDeliverOnReceptionStart(true);
         WATCH(radioMode);
+        WATCH(radioReceptionState);
+        WATCH(radioTransmissionState);
         WATCH(radioChannelState);
         WATCH(radioChannel);
     }
