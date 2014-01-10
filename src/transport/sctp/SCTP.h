@@ -37,11 +37,6 @@
 class SCTPAssociation;
 class SCTPMessage;
 
-
-#define sctpEV3 (!SCTP::testing==true)?std::cerr:std::cerr
-
-
-
 /**
  * Implements the SCTP protocol. This section describes the internal
  * architecture of the SCTP model.
@@ -198,8 +193,6 @@ class INET_API SCTP : public cSimpleModule
         void updateDisplayString();
 
     public:
-        static bool testing;         // switches between sctpEV and testingEV
-        static bool logverbose;  // if !testing, turns on more verbose logging
         void printInfoAssocMap();
         void printVTagMap();
 

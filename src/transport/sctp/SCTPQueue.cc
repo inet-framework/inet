@@ -79,12 +79,12 @@ SCTPDataVariables* SCTPQueue::getAndExtractChunk(const uint32 tsn)
 
 void SCTPQueue::printQueue() const
 {
-    sctpEV3 << "Queue contents:\n";
+    EV_DEBUG << "Queue contents:\n";
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
           iterator != payloadQueue.end(); ++iterator) {
         const uint32                 key = iterator->first;
         const SCTPDataVariables* chunk = iterator->second;
-        sctpEV3 << key << ":\t"
+        EV_DEBUG << key << ":\t"
                   << "lastDestination="             << chunk->getLastDestination()
                   << " nextDestination="            << chunk->getNextDestination()
                   << " hasBeenAcked="               << chunk->hasBeenAcked
@@ -92,7 +92,7 @@ void SCTPQueue::printQueue() const
                   << " numberOfRetransmissions=" << chunk->numberOfRetransmissions
                   << endl;
     }
-    sctpEV3 << endl;
+    EV_DEBUG << endl;
 }
 
 SCTPDataVariables* SCTPQueue::getFirstChunk() const

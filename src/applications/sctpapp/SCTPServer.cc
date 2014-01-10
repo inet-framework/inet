@@ -36,7 +36,7 @@ Define_Module(SCTPServer);
 
 void SCTPServer::initialize(int stage)
 {
-    sctpEV3 << "initialize SCTP Server stage " << stage << endl;
+    EV_DEBUG << "initialize SCTP Server stage " << stage << endl;
 
     cSimpleModule::initialize(stage);
 
@@ -94,7 +94,7 @@ void SCTPServer::initialize(int stage)
             socket->bindx(addresses, port);
 
         socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue(), messagesToPush);
-        sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
+        EV_INFO << "SCTPServer::initialized listen port=" << port << "\n";
         cStringTokenizer tokenizer(par("streamPriorities").stringValue());
         for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++)
         {
@@ -309,7 +309,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                         }
                         else
                         {
-                            sctpEV3 << "no more packets to send, call shutdown for assoc " << assocId << "\n";
+                            EV_INFO << "no more packets to send, call shutdown for assoc " << assocId << "\n";
                             cPacket* cmsg = new cPacket("ShutdownRequest");
                             SCTPCommand* cmd = new SCTPCommand("Send5");
                             cmsg->setKind(SCTP_C_SHUTDOWN);
@@ -348,7 +348,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 }
                 else
                 {
-                    sctpEV3 << simulation.getSimTime() << " makeReceiveRequest\n";
+                    EV_INFO << simulation.getSimTime() << " makeReceiveRequest\n";
                     cmsg = makeReceiveRequest(PK(msg));
                     sendOrSchedule(cmsg);
                 }
@@ -359,7 +359,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             {
                 notificationsReceived--;
                 packetsRcvd++;
-                sctpEV3 << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
+                EV_INFO << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
                 id = ind->getAssocId();
                 ServerAssocStatMap::iterator j = serverAssocStatMap.find(id);
@@ -378,7 +378,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
                         EndToEndDelay::iterator m = endToEndDelay.find(id);
                         m->second->record(simulation.getSimTime()-smsg->getCreationTime());
-                        sctpEV3 << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
+                        EV_INFO << "server: Data received. Left packets to receive=" << j->second.rcvdPackets << "\n";
 
                         if (j->second.rcvdPackets == 0)
                         {
@@ -433,7 +433,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             {
                 SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
                 id = command->getAssocId();
-                sctpEV3 << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
+                EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
                 if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").longValue()==0)
                 {
@@ -477,7 +477,7 @@ void SCTPServer::handleTimer(cMessage *msg)
 {
     if (msg==delayTimer)
     {
-        sctpEV3 << simulation.getSimTime() << " delayTimer expired\n";
+        EV_INFO << simulation.getSimTime() << " delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
         scheduleAt(simulation.getSimTime()+par("readingInterval"), delayTimer);
         return;
@@ -517,7 +517,7 @@ void SCTPServer::handleTimer(cMessage *msg)
     }
     break;
     case SCTP_C_RECEIVE:
-        sctpEV3 << simulation.getSimTime() << " SCTPServer:SCTP_C_RECEIVE\n";
+        EV_INFO << simulation.getSimTime() << " SCTPServer:SCTP_C_RECEIVE\n";
         if (readInt || delayFirstRead > 0)
             schedule = false;
         else
@@ -525,7 +525,7 @@ void SCTPServer::handleTimer(cMessage *msg)
         sendOrSchedule(PK(msg));
         break;
     default:
-        sctpEV3 << "MsgKind =" << msg->getKind() << " unknown\n";
+        EV_INFO << "MsgKind =" << msg->getKind() << " unknown\n";
         break;
     }
 }
@@ -547,7 +547,7 @@ void SCTPServer::finish()
     }
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV_INFO << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
-    sctpEV3 << "Server finished\n";
+    EV_INFO << "Server finished\n";
 }
 
 SCTPServer::~SCTPServer()

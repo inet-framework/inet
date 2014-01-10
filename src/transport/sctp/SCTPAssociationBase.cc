@@ -406,7 +406,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     bytes.packet = false;
     bytes.bytesToSend = 0;
 
-    sctpEV3 << "SCTPAssociationBase::SCTPAssociation(): new assocId="
+    EV_INFO << "SCTPAssociationBase::SCTPAssociation(): new assocId="
               << assocId << endl;
 
     // ====== FSM ============================================================
@@ -575,7 +575,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
 
 SCTPAssociation::~SCTPAssociation()
 {
-    sctpEV3 << "Destructor SCTPAssociation " << assocId << endl;
+    EV_TRACE << "Destructor SCTPAssociation " << assocId << endl;
 
     delete T1_InitTimer;
     delete T2_ShutdownTimer;
@@ -632,7 +632,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 {
     SCTPPathVariables* path = NULL;
 
-    sctpEV3 << msg->getName() << " timer expired at "<<simulation.getSimTime()<<"\n";
+    EV_INFO << msg->getName() << " timer expired at "<<simulation.getSimTime()<<"\n";
 
     SCTPPathInfo* pinfo = check_and_cast<SCTPPathInfo*>(msg->getControlInfo());
     Address addr = pinfo->getRemoteAddress();
@@ -650,7 +650,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (msg==SackTimer)
     {
-    sctpEV3<<simulation.getSimTime()<<" delayed Sack: cTsnAck="<<state->gapList.getCumAckTSN()<<" highestTsnReceived="<<state->gapList.getHighestTSNReceived()<<" lastTsnReceived="<<state->lastTsnReceived<<" ackState="<<state->ackState<<" numGaps="<<state->gapList.getNumGaps(SCTPGapList::GT_Any)<<"\n";
+    EV_DETAIL<<simulation.getSimTime()<<" delayed Sack: cTsnAck="<<state->gapList.getCumAckTSN()<<" highestTsnReceived="<<state->gapList.getHighestTSNReceived()<<" lastTsnReceived="<<state->lastTsnReceived<<" ackState="<<state->ackState<<" numGaps="<<state->gapList.getNumGaps(SCTPGapList::GT_Any)<<"\n";
         sendSack();
     }
     else if (msg==T2_ShutdownTimer)
@@ -684,11 +684,12 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     }
     else if (strcmp(msg->getName(), "StartTesting")==0)
     {
-        if (sctpMain->testing == false)
-        {
-            sctpMain->testing = true;
-            sctpEV3<<"set testing to true\n";
-        }
+        //if (sctpMain->testing == false)
+        //{
+            //sctpMain->testing = true;
+            EV_DEBUG<<"set testing to true\n";
+        //}
+        // todo: testing was removed.
     }
     else if (path != NULL && msg == path->ResetTimer) {
         process_TIMEOUT_RESET(path);
@@ -749,7 +750,7 @@ bool SCTPAssociation::processSCTPMessage(SCTPMessage* sctpmsg,
 			}
 		}
 		if (!found) {
-			sctpEV3 << "destAddr " << msgDestAddr << " is not bound to host\n";
+			EV_INFO << "destAddr " << msgDestAddr << " is not bound to host\n";
 			return true;
 		}
 	}
@@ -777,7 +778,7 @@ SCTPEventCode SCTPAssociation::preanalyseAppCommandEvent(int32 commandCode)
     case SCTP_C_SEND_ASCONF:         return SCTP_E_SEND_ASCONF;   // Needed for multihomed NAT
     case SCTP_C_SET_STREAM_PRIO:     return SCTP_E_SET_STREAM_PRIO;
     default:
-        sctpEV3<<"commandCode="<<commandCode<<"\n";
+        EV_DETAIL<<"commandCode="<<commandCode<<"\n";
         throw cRuntimeError("Unknown message kind in app command");
     }
 }
@@ -790,7 +791,7 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
     SCTPCommand *sctpCommand = (SCTPCommand *)(msg->removeControlInfo());
     SCTPEventCode event = preanalyseAppCommandEvent(msg->getKind());
 
-    sctpEV3 << "App command: " << eventName(event) << "\n";
+    EV_INFO << "App command: " << eventName(event) << "\n";
 
     switch (event)
     {
@@ -827,10 +828,10 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
         case SCTP_E_QUEUE_MSGS_LIMIT: process_QUEUE_MSGS_LIMIT(sctpCommand); break;
 
         case SCTP_E_SHUTDOWN: /*sendShutdown*/
-            sctpEV3 << "SCTP_E_SHUTDOWN in state " << stateName(fsm->getState()) << "\n";
+            EV_INFO << "SCTP_E_SHUTDOWN in state " << stateName(fsm->getState()) << "\n";
 
             if (fsm->getState() == SCTP_S_SHUTDOWN_RECEIVED) {
-                sctpEV3 << "send shutdown ack\n";
+                EV_INFO << "send shutdown ack\n";
                 sendShutdownAck(remoteAddr);
             }
             break;
@@ -850,11 +851,11 @@ bool SCTPAssociation::processAppCommand(cPacket *msg)
 
 bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 {
-    sctpEV3<<"performStateTransition\n";
+    EV_TRACE<<"performStateTransition\n";
 
     if (event==SCTP_E_IGNORE)   // e.g. discarded segment
     {
-        EV << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
+        EV_DETAIL << "Staying in state: " << stateName(fsm->getState()) << " (no FSM event)\n";
         return true;
     }
 
@@ -971,9 +972,9 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     if (oldState!=fsm->getState())
     {
-        EV << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState())
+        EV_DETAIL << "Transition: " << stateName(oldState) << " --> " << stateName(fsm->getState())
            << "    (event was: " << eventName(event) << ")\n";
-        sctpEV3 << sctpMain->getName() << ": " << stateName(oldState) << " --> "
+        EV_DETAIL << sctpMain->getName() << ": " << stateName(oldState) << " --> "
                 << stateName(fsm->getState()) << "  (on " << eventName(event) << ")\n";
         stateEntered(fsm->getState());
     }
@@ -988,7 +989,7 @@ bool SCTPAssociation::performStateTransition(const SCTPEventCode& event)
 
     if (oldState != fsm->getState() && fsm->getState() == SCTP_S_CLOSED)
     {
-        sctpEV3 << "return false because oldState=" << oldState << " and new state is closed\n";
+        EV_DETAIL << "return false because oldState=" << oldState << " and new state is closed\n";
         return false;
     }
     else
@@ -1003,7 +1004,7 @@ void SCTPAssociation::stateEntered(int32 status)
             break;
         case SCTP_S_ESTABLISHED:
         {
-            sctpEV3 << "State ESTABLISHED entered" << endl;
+            EV_INFO << "State ESTABLISHED entered" << endl;
             stopTimer(T1_InitTimer);
 
             if (state->initChunk) {
@@ -1097,10 +1098,10 @@ void SCTPAssociation::stateEntered(int32 status)
             sendEstabIndicationToApp();
             if (sctpMain->hasPar("addIP")) {
                 const bool addIP = (bool)sctpMain->par("addIP");
-				sctpEV3 << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
+				EV_DETAIL << getFullPath() << ": addIP = " << addIP << " time = " << (double)sctpMain->par("addTime") << "\n";
 				if (addIP == true && (double)sctpMain->par("addTime")>0)
 				{
-					sctpEV3 << "startTimer addTime to expire at " << simulation.getSimTime()+(double)sctpMain->par("addTime") << "\n";
+				    EV_DETAIL << "startTimer addTime to expire at " << simulation.getSimTime()+(double)sctpMain->par("addTime") << "\n";
 
 					scheduleTimeout(StartAddIP, (double)sctpMain->par("addTime"));
 				}
@@ -1143,7 +1144,7 @@ void SCTPAssociation::stateEntered(int32 status)
 
         case SCTP_S_SHUTDOWN_RECEIVED:
         {
-            sctpEV3 << "Entered state SHUTDOWN_RECEIVED, osb=" << getOutstandingBytes()
+            EV_INFO << "Entered state SHUTDOWN_RECEIVED, osb=" << getOutstandingBytes()
                       << ", transQ=" << transmissionQ->getQueueSize()
                       << ", scount=" << qCounter.roomSumSendStreams << endl;
 
@@ -1171,7 +1172,7 @@ void SCTPAssociation::removePath()
                 break;
             }
         }
-        sctpEV3 << getFullPath() << " remove path " << path->remoteAddress << endl;
+        EV_INFO << getFullPath() << " remove path " << path->remoteAddress << endl;
         stopTimer(path->HeartbeatTimer);
         delete path->HeartbeatTimer;
         stopTimer(path->HeartbeatIntervalTimer);
