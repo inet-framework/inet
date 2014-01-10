@@ -76,18 +76,3 @@ class IPv4ControlInfo
     bool dontFragment;    // "don't fragment" bit
 }
 
-
-//
-// Control info attached to packets sent from ~IPv4 to ~ARP.
-//
-// Next hop address is used on a LAN to determine the MAC destination
-// address (and it may be used on other multicast networks for similar
-// addressing purpose).
-//
-class IPv4RoutingDecision
-{
-    int interfaceId = -1; // interface on which dgram should be sent (see ~InterfaceTable)
-    IPv4Address nextHopAddr;
-}
-
-
