@@ -527,49 +527,30 @@ MACAddress ARP::getMACAddressFor(const IPv4Address& addr) const
     if (globalARP)
     {
         it = globalArpCache.find(addr);
-        if (it!=globalArpCache.end())
+        if (it != globalArpCache.end())
             return it->second->macAddress;
     }
     else
     {
+        // address is in the cache, not pending resolution, and not expired yet
         it = arpCache.find(addr);
-        if (it == arpCache.end())
-        {
-            // no cache entry
-        }
-        else
-        {
-            if (it->second->pending)
-            {
-                // an ARP request is already pending for this address
-            }
-            else if (it->second->lastUpdate + cacheTimeout < simTime())
-            {
-                // cache entry expired
-            }
-            else
-                return it->second->macAddress;
-        }
+        if (it != arpCache.end() && !it->second->pending && it->second->lastUpdate + cacheTimeout >= simTime())
+            return it->second->macAddress;
     }
     return MACAddress::UNSPECIFIED_ADDRESS;
 }
 
 void ARP::startAddressResolution(const IPv4Address& addr, const InterfaceEntry *ie)
 {
-    Enter_Method_Silent();
-
-    ARPCache::const_iterator it;
+    Enter_Method("startAddressResolution(%s,%s)", addr.str().c_str(), ie->getName());
 
     if (globalARP)
     {
-        it = globalArpCache.find(addr);
-        if (it==globalArpCache.end())
-            throw cRuntimeError("Address not found in global ARP cache: %s", addr.str().c_str());
-        throw cRuntimeError("Address already found in global ARP cache: %s", addr.str().c_str());
+        throw cRuntimeError("globalARP does not support dynamic address resolution");
     }
     else
     {
-        it = arpCache.find(addr);
+        ARPCache::const_iterator it = arpCache.find(addr);
         if (it == arpCache.end())
         {
             // no cache entry: launch ARP request
@@ -586,75 +567,47 @@ void ARP::startAddressResolution(const IPv4Address& addr, const InterfaceEntry *
         {
             if (it->second->pending)
             {
-                // an ARP request is already pending for this address -- just queue up packet
-                EV << "ARP resolution for " << addr << " is pending\n";
+                // an ARP request is already pending for this address
+                EV << "ARP resolution for " << addr << " is already pending\n";
             }
             else if (it->second->lastUpdate + cacheTimeout < simTime())
             {
-                // ARP cache entry expired
+                // ARP cache entry expired, send new ARP request
                 EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
-                // cache entry stale, send new ARP request
                 ARPCacheEntry *entry = it->second;
                 entry->ie = ie; // routing table may have changed
                 initiateARPResolution(entry);
             }
             else
-                throw cRuntimeError("Address already found in ARP cache: %s", addr.str().c_str());
+                throw cRuntimeError("Address already in ARP cache: %s", addr.str().c_str());
         }
     }
 }
 
-IPv4Address ARP::getIPv4AddressFor(const MACAddress &add) const
+IPv4Address ARP::getIPv4AddressFor(const MACAddress& macAddr) const
 {
     Enter_Method_Silent();
 
-    if (add.isUnspecified())
+    if (macAddr.isUnspecified())
         return IPv4Address::UNSPECIFIED_ADDRESS;
 
     ARPCache::const_iterator it;
     if (globalARP)
     {
-        for (it = globalArpCache.begin(); it!=globalArpCache.end(); it++)
-            if (it->second->macAddress==add)
+        for (it = globalArpCache.begin(); it != globalArpCache.end(); it++)
+            if (it->second->macAddress == macAddr)
                 return it->first;
     }
     else
     {
         simtime_t now = simTime();
-        for (it = arpCache.begin(); it!=arpCache.end(); it++)
-            if (it->second->macAddress==add)
-            {
+        for (it = arpCache.begin(); it != arpCache.end(); it++)
+            if (it->second->macAddress == macAddr)
                 if (it->second->lastUpdate + cacheTimeout >= now)
                     return it->first;
-            }
     }
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
-
-void ARP::setChangeAddress(const IPv4Address &oldAddress)
-{
-    Enter_Method_Silent();
-    ARPCache::iterator it;
-
-    if (oldAddress.isUnspecified())
-        return;
-    if (globalARP)
-    {
-        it = globalArpCache.find(oldAddress);
-        if (it!=globalArpCache.end())
-        {
-            ARPCacheEntry *entry = it->second;
-            globalArpCache.erase(it);
-            entry->pending = false;
-            entry->timer = NULL;
-            entry->numRetries = 0;
-            IPv4Address nextHopAddr = entry->ie->ipv4Data()->getIPAddress();
-            ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(nextHopAddr, entry));
-            entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
-        }
-    }
-}
-
 
 void ARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {

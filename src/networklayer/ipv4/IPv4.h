@@ -64,7 +64,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
         IPv4Address nextHopAddr;
         const IHook::Type hookType;
     };
-    typedef std::map<IPv4Address, cPacketQueue> ARPCache;
+    typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
 
   protected:
     static simsignal_t completedARPResolutionSignal;
@@ -94,7 +94,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     ProtocolMapping mapping; // where to send packets after decapsulation
 
     // ARP related
-    ARPCache arpCache;  // map indexed with IPv4Address for outbound packets waiting for ARP resolution
+    PendingPackets pendingPackets;  // map indexed with IPv4Address for outbound packets waiting for ARP resolution
 
     // statistics
     int numMulticast;

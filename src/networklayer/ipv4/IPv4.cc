@@ -76,7 +76,7 @@ void IPv4::initialize(int stage)
         hooks.clear();
         queuedDatagramsForHooks.clear();
 
-        arpCache.clear();
+        pendingPackets.clear();
         arpModule->subscribe(completedARPResolutionSignal, this);
         arpModule->subscribe(failedARPResolutionSignal, this);
 
@@ -85,7 +85,7 @@ void IPv4::initialize(int stage)
         WATCH(numDropped);
         WATCH(numUnroutable);
         WATCH(numForwarded);
-        WATCH_MAP(arpCache);
+        WATCH_MAP(pendingPackets);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -854,12 +854,12 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
 
             if (nextHopMacAddr.isUnspecified())
             {
-                arpCache[nextHopAddr].insert(datagram);
+                pendingPackets[nextHopAddr].insert(datagram);
                 arp->startAddressResolution(nextHopAddr, ie);
             }
             else
             {
-                ASSERT2(arpCache.find(nextHopAddr) == arpCache.end(), "IPv4-ARP error: nextHopAddr found in ARP table, but IPv4 queue for nextHopAddr not empty");
+                ASSERT2(pendingPackets.find(nextHopAddr) == pendingPackets.end(), "IPv4-ARP error: nextHopAddr found in ARP table, but IPv4 queue for nextHopAddr not empty");
                 sendPacketToIeee802NIC(datagram, ie, nextHopMacAddr, ETHERTYPE_IPv4);
             }
         }
@@ -868,34 +868,32 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
 
 void IPv4::arpResolutionCompleted(IARPCache::Notification *entry)
 {
-    ARPCache::iterator it = arpCache.find(entry->ipv4Address);
-    if (it != arpCache.end())
+    PendingPackets::iterator it = pendingPackets.find(entry->ipv4Address);
+    if (it != pendingPackets.end())
     {
-        cPacketQueue& pendingPackets = it->second;
-        EV << "ARP resolution completed for " << entry->ipv4Address << ". Sending " << pendingPackets.getLength()
+        cPacketQueue& packetQueue = it->second;
+        EV << "ARP resolution completed for " << entry->ipv4Address << ". Sending " << packetQueue.getLength()
                 << " waiting packets from the queue\n";
 
-        while (!pendingPackets.empty())
+        while (!packetQueue.empty())
         {
-            cPacket *msg = pendingPackets.pop();
+            cPacket *msg = packetQueue.pop();
             EV << "Sending out queued packet " << msg << "\n";
             sendPacketToIeee802NIC(msg, entry->ie, entry->macAddress, ETHERTYPE_IPv4);
         }
-        arpCache.erase(it);
+        pendingPackets.erase(it);
     }
 }
 
 void IPv4::arpResolutionTimedOut(IARPCache::Notification *entry)
 {
-    ARPCache::iterator it = arpCache.find(entry->ipv4Address);
-    if (it != arpCache.end())
+    PendingPackets::iterator it = pendingPackets.find(entry->ipv4Address);
+    if (it != pendingPackets.end())
     {
-        cPacketQueue& pendingPackets = it->second;
-        EV << "ARP timeout, max retry count for "
-                << entry->ipv4Address << " reached. Dropping " << pendingPackets.getLength()
-                << " waiting packets from the queue\n";
-        pendingPackets.clear();
-        arpCache.erase(it);
+        cPacketQueue& packetQueue = it->second;
+        EV << "ARP resolution failed for " << entry->ipv4Address << ",  dropping " << packetQueue.getLength() << " packets\n";
+        packetQueue.clear();
+        pendingPackets.erase(it);
     }
 }
 
@@ -1083,7 +1081,7 @@ void IPv4::flush()
 {
     delete cancelService();
     queue.clear();
-    arpCache.clear();
+    pendingPackets.clear();
 }
 
 bool IPv4::isNodeUp()

@@ -99,20 +99,11 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     virtual ~ARP();
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-    /// IARPCache implementations  @{
-
-    /**
-     * starts an ARP request
-     */
-    virtual void startAddressResolution(const IPv4Address &addr, const InterfaceEntry *ie);
-
-    virtual IPv4Address getIPv4AddressFor(const MACAddress &addr) const;
-
-    virtual MACAddress getMACAddressFor(const IPv4Address &addr) const;
-
+    /// IARPCache implementation  @{
+    virtual void startAddressResolution(const IPv4Address& addr, const InterfaceEntry *ie);
+    virtual IPv4Address getIPv4AddressFor(const MACAddress& addr) const;
+    virtual MACAddress getMACAddressFor(const IPv4Address& addr) const;
     /// @}
-
-    void setChangeAddress(const IPv4Address &);
 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
