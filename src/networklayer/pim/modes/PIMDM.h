@@ -164,7 +164,7 @@ class PIMDM : public PIMBase, protected cListener
 
         typedef std::map<SourceAndGroup, SourceGroupState> SGStateMap;
 
-        // KLUDGE
+        // for updating the forwarding state of the route when the state of the downstream interface changes
         class PIMDMOutInterface : public IMulticastRoute::OutInterface
         {
             DownstreamInterface *downstream;
@@ -245,7 +245,6 @@ class PIMDM : public PIMBase, protected cListener
         IPv4MulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         SourceGroupState *getSourceGroupState(IPv4Address source, IPv4Address group);
         void deleteSourceGroupState(IPv4Address source, IPv4Address group);
-        void updateRouteOutInterface(DownstreamInterface *downstream);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

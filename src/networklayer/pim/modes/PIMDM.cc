@@ -1560,9 +1560,7 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
                 downstream->hasConnectedReceivers = false;
                 if (wasInOlist && !downstream->isInOlist())
                 {
-                    // update multicast route
-                    EV_DEBUG << "Removing interface '" << pimInt->getInterfacePtr()->getName() << "' from the outgoing interface list of route " << sgState << ".\n";
-                    updateRouteOutInterface(downstream);
+                    EV_DEBUG << "Removed interface '" << ie->getName() << "' from the outgoing interface list of route " << sgState << ".\n";
 
                     // fire upstream state machine event
                     if (sgState->isOilistNull())
@@ -1706,23 +1704,6 @@ PIMDM::SourceGroupState *PIMDM::getSourceGroupState(IPv4Address source, IPv4Addr
 void PIMDM::deleteSourceGroupState(IPv4Address source, IPv4Address group)
 {
     sgStates.erase(SourceAndGroup(source, group));
-}
-
-void PIMDM::updateRouteOutInterface(DownstreamInterface *downstream)
-{
-    IPv4MulticastRoute *route = getRouteFor(downstream->owner->group, downstream->owner->source);
-    ASSERT(route);
-
-    // remove out interface from route if downstream is not in olist
-    unsigned int numOutInterfaces = route->getNumOutInterfaces();
-    for (unsigned int i = 0; i < numOutInterfaces; i++)
-    {
-        IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
-        if (outInterface->getInterface() == downstream->ie)
-        {
-            outInterface->setEnabled(downstream->isInOlist());
-        }
-    }
 }
 
 PIMDM::Interface::~Interface()
