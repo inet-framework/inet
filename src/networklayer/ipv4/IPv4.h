@@ -22,16 +22,14 @@
 #include "INETDefs.h"
 
 #include "IARPCache.h"
-#include "INetworkProtocol.h"
-#include "INetfilter.h"
 #include "ICMPAccess.h"
+#include "ILifecycle.h"
+#include "INetfilter.h"
+#include "INetworkProtocol.h"
+#include "IPv4Datagram.h"
 #include "IPv4FragBuf.h"
 #include "ProtocolMap.h"
 #include "QueueBase.h"
-#include "IPv4Datagram.h"
-
-#include "IPv4Datagram.h"
-#include "ILifecycle.h"
 
 
 class ARPPacket;

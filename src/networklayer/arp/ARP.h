@@ -23,11 +23,11 @@
 
 #include "INETDefs.h"
 
+#include "IARPCache.h"
+#include "ILifecycle.h"
+#include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ModuleAccess.h"
-#include "IPv4Address.h"
-#include "ILifecycle.h"
-#include "IARPCache.h"
 
 // Forward declarations:
 class ARPPacket;
