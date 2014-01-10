@@ -22,10 +22,15 @@ package inet.networklayer.arp;
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
 // MAC addresses.
 //
-// Expects ~IPv4RoutingDecision control info objects to be attached to packets
-// coming from higher layers. ARP packets are represented by the ~ARPPacket
-// class. Datagrams to be sent and incoming ARP packets are expected to
-// on gate ipIn.
+// ARP packets are represented by the ~ARPPacket class.
+//
+// Communication Between ARP and IPv4 modules:
+// IPv4 module call the ARP::getMACAddressFor(ipv4Address) method for get the MACAddress
+// of next hop. If this method could not resolve an IPv4 address to MAC address, then IPv4
+// uses the ARP::startAddressResolution() method.
+// ARP emit a completedARPResolution signal, when added/modified an entry in ARP table.
+// ARP emit a failedARPResolution signal when an ARP request failed (ARP request sent
+// retryCount times and retryTimeout elapsed).
 //
 // ARP resolution is used over <i>broadcast</i> interfaces only,
 // that is, over interfaces that have the <tt>isBroadcast()</tt> flag set in
