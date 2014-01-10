@@ -1172,7 +1172,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastReceiverAdded(pimInterface, info->groupAddress);
+            multicastReceiverAdded(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // configuration of interface changed, it means some change from IGMP, address were removed.
     else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
@@ -1180,7 +1180,7 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
         pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
         if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
-            multicastReceiverRemoved(pimInterface, info->groupAddress);
+            multicastReceiverRemoved(pimInterface->getInterfacePtr(), info->groupAddress);
     }
     // data come to non-RPF interface
     else if (signalID == NF_IPv4_DATA_ON_NONRPF)
@@ -1474,7 +1474,7 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
  * interfaces. If the interface is not in the list it will be added. if the router was pruned
  * from multicast tree, join again.
  */
-void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group)
+void PIMDM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
 {
     EV_DETAIL << "Multicast receiver added for group " << group << ".\n";
 
@@ -1492,11 +1492,11 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
 
         // check on RPF interface
         UpstreamInterface *upstream = sgState->upstreamInterface;
-        if (upstream->ie == pimInterface->getInterfacePtr())
+        if (upstream->ie == ie)
             continue;
 
         // is interface in list of outgoing interfaces?
-        DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(pimInterface->getInterfaceId());
+        DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
         if (downstream)
         {
             EV << "Interface is already on list of outgoing interfaces" << endl;
@@ -1507,29 +1507,15 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
         {
             // create new downstream data
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
-            downstream = sgState->createDownstreamInterface(pimInterface->getInterfacePtr());
-            route->addOutInterface(new PIMDMOutInterface(pimInterface->getInterfacePtr(), downstream));
+            downstream = sgState->createDownstreamInterface(ie);
+            route->addOutInterface(new PIMDMOutInterface(ie, downstream));
         }
 
         downstream->hasConnectedReceivers = true;
 
-        // route was pruned, has to be added to multicast tree
-        if (upstream->graftPruneState == UpstreamInterface::PRUNED)
-        {
-            EV << "Route is not pruned any more, send Graft to upstream" << endl;
-
-            // if source is not directly connected, send Graft to upstream
-            if (!upstream->isSourceDirectlyConnected)
-            {
-                sendGraftPacket(upstream->rpfNeighbor(), sgState->source, group, upstream->getInterfaceId());
-                upstream->startGraftRetryTimer();
-                upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
-            }
-            else
-            {
-                sgState->upstreamInterface->graftPruneState = UpstreamInterface::FORWARDING;
-            }
-        }
+        // fire upstream state machine event
+        if (upstream->graftPruneState == UpstreamInterface::PRUNED && downstream->isInOlist())
+            processOlistNonEmptyEvent(sgState);
     }
 }
 
@@ -1539,9 +1525,9 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
  * interfaces. If the interface is in the list it will be removed. If the router was not pruned
  * and there is no outgoing interface, the router will prune from the multicast tree.
  */
-void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
+void PIMDM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
-    EV_DETAIL << "No more receiver for group " << group << " on interface '" << pimInt->getInterfacePtr()->getName() << "'.\n";
+    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
 
     // delete pimInt from outgoing interfaces of multicast routes for group
     int numRoutes = rt->getNumMulticastRoutes();
@@ -1553,7 +1539,7 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
             SourceGroupState *sgState = getSourceGroupState(route->getOrigin(), group);
 
             // remove pimInt from the list of outgoing interfaces
-            DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(pimInt->getInterfaceId());
+            DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
             if (downstream)
             {
                 bool wasInOlist = downstream->isInOlist();
