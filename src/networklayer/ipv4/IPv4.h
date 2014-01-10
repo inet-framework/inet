@@ -37,9 +37,6 @@ class ICMPMessage;
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
-// ICMP type 2, code 4: fragmentation needed, but don't-fragment bit set
-const int ICMP_FRAGMENTATION_ERROR_CODE = 4;
-
 
 /**
  * Implements the IPv4 protocol.
