@@ -198,9 +198,10 @@ simtime_t BaseDecider::processUnknownSignal(DetailedRadioFrame* frame)
 ChannelState BaseDecider::getChannelState() const {
 
 	simtime_t            now            = phy->getSimTime();
-	channel_sense_rssi_t pairRssiMaxEnd = calcChannelSenseRSSI(now, now);
+	// TODO: KLUDGE: MappingUtils::post should not be here, but otherwise we miss the beginning of the signal
+	channel_sense_rssi_t pairRssiMaxEnd = calcChannelSenseRSSI(MappingUtils::post(now), MappingUtils::post(now));
 
-	return ChannelState(!currentSignal.isProcessing() && (!bUseNewSense || pairRssiMaxEnd.second <= now), pairRssiMaxEnd.first);
+	return ChannelState(!currentSignal.isProcessing() && (!bUseNewSense || pairRssiMaxEnd.second <= now), false, pairRssiMaxEnd.first);
 }
 
 simtime_t BaseDecider::handleChannelSenseRequest(ChannelSenseRequest* request)

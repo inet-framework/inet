@@ -786,13 +786,14 @@ ChannelState BasePhyLayer::getChannelState() const {
 
 void BasePhyLayer::updateRadioChannelState() {
     RadioChannelState newRadioChannelState;
+    ChannelState channelState = decider->getChannelState();
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP)
         newRadioChannelState = RADIO_CHANNEL_STATE_UNKNOWN;
     else if (txOverTimer->isScheduled())
         newRadioChannelState = RADIO_CHANNEL_STATE_TRANSMITTING;
-    else if (!channelInfo.isChannelEmpty())
+    else if (channelState.isReceiving())
         newRadioChannelState = IRadio::RADIO_CHANNEL_STATE_RECEIVING;
-    else if (false) // TODO: how?
+    else if (channelState.isBusy())
         newRadioChannelState = RADIO_CHANNEL_STATE_BUSY;
     else
         newRadioChannelState = RADIO_CHANNEL_STATE_FREE;

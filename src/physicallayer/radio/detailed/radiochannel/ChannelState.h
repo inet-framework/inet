@@ -19,6 +19,9 @@ protected:
 	/** @brief defines if the channel is currently idle */
 	bool idle;
 
+    /** @brief defines if the channel is currently receiving */
+	bool receiving;
+
 	/** @brief the current RSSI value of the channel */
 	double rssi;
 public:
@@ -27,22 +30,26 @@ public:
 	 * @brief Creates and initializes a new ChannelState with the
 	 * passed state.
 	 *
-	 * isIdle - defines if the channel is currently idle
+	 * idle - defines if the channel is currently idle
 	 * rssi - the current RSSI value of the channel
 	 */
-	ChannelState(bool isIdle = false, double rssi = 0.0) :
-		idle(isIdle), rssi(rssi) {}
+	ChannelState(bool idle = false, bool receiving = false, double rssi = 0.0) :
+		idle(idle), receiving(receiving), rssi(rssi) {}
 
 	/**
 	 * @brief Returns true if the channel is considered idle, meaning
 	 * depends on the used decider.
 	 */
-	bool isIdle() const;
+	bool isIdle() const { return idle; }
+
+	bool isBusy() const { return !idle && !receiving; }
+
+	bool isReceiving() const { return receiving; }
 
 	/**
 	 * @brief Returns the current RSSI value of the channel.
 	 */
-	double getRSSI() const;
+	double getRSSI() const { return rssi; }
 
 	/**
 	 * @brief Output for this ChannelState.
