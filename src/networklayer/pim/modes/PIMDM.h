@@ -40,7 +40,27 @@ class PIMDM : public PIMBase, protected cListener
         // per (S,G) state
         struct SourceGroupState;
 
-        struct UpstreamInterface
+        struct Interface
+        {
+            SourceGroupState *owner;
+            InterfaceEntry *ie;
+
+            // assert winner state
+            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
+            AssertState assertState;
+            cMessage *assertTimer;
+            AssertMetric winnerMetric;
+            IPv4Address winnerAddress;
+
+            Interface(SourceGroupState *owner, InterfaceEntry *ie)
+                : owner(owner), ie(ie),
+                  assertState(NO_ASSERT_INFO), assertTimer(NULL)
+                { ASSERT(owner), ASSERT(ie);}
+            virtual ~Interface();
+            void startAssertTimer(double assertTime);
+        };
+
+        struct UpstreamInterface : public Interface
         {
             enum GraftPruneState
             {
@@ -51,29 +71,28 @@ class PIMDM : public PIMBase, protected cListener
 
             enum OriginatorState { NOT_ORIGINATOR, ORIGINATOR };
 
-            SourceGroupState *owner;
-            InterfaceEntry *ie;
-            IPv4Address nextHop;
+            IPv4Address nextHop; // rpf neighbor
 
             // graft prune state
             GraftPruneState graftPruneState;
-            cMessage* graftRetryTimer;
-            cMessage* overrideTimer; // XXX not used
+            cMessage* graftRetryTimer;   // scheduled in ACK_PENDING state for sending the next Graft message
+            cMessage* overrideTimer;     // when expires we are overriding a prune
             simtime_t lastPruneSentTime; // for rate limiting prune messages, 0 if no prune was sent
 
             // originator state
             OriginatorState originatorState;
-            cMessage* sourceActiveTimer; // route will be deleted when this timer expires
-            cMessage* stateRefreshTimer;
+            cMessage* sourceActiveTimer; // when expires we are going back to NOT_ORIGINATOR state
+            cMessage* stateRefreshTimer; // scheduled in ORIGINATOR state for sending the next StateRefresh message
             unsigned short maxTtlSeen;
 
             UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor)
-                : owner(owner), ie(ie), nextHop(neighbor),
+                : Interface(owner, ie), nextHop(neighbor),
                   graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
                   originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
                 { ASSERT(owner); ASSERT(ie); }
             virtual ~UpstreamInterface();
             int getInterfaceId() const { return ie->getInterfaceId(); }
+            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerAddress : nextHop; }
 
             void startGraftRetryTimer();
             void startOverrideTimer();
@@ -85,7 +104,7 @@ class PIMDM : public PIMBase, protected cListener
             bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->owner->pruneLimitInterval; }
         };
 
-        struct DownstreamInterface
+        struct DownstreamInterface : public Interface
         {
             enum PruneState
             {
@@ -94,26 +113,14 @@ class PIMDM : public PIMBase, protected cListener
                 PRUNED         // received a prune from a downstream neighbor and it was not overridden
             };
 
-            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
-
-            SourceGroupState *owner;
-            InterfaceEntry *ie;
-
             // prune state
             PruneState pruneState;
             cMessage *pruneTimer; // scheduled when entering into PRUNED state, when expires the interface goes to NO_INFO (forwarding) state
             cMessage *prunePendingTimer; // scheduled when a Prune is received, when expires the interface goes to PRUNED state
 
-            // assert winner state XXX not used
-            AssertState assertState;
-            cMessage *assertTimer;
-            IPv4Address winnerAddress;
-            // TODO winnerMetric
-
             DownstreamInterface(SourceGroupState *owner, InterfaceEntry *ie)
-                : owner(owner), ie(ie),
-                  pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL),
-                  assertState(NO_ASSERT_INFO), assertTimer(NULL)
+                : Interface(owner, ie),
+                  pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             ~DownstreamInterface();
             bool isInOlist() const;
@@ -139,6 +146,7 @@ class PIMDM : public PIMBase, protected cListener
             PIMDM *owner;
             IPv4Address source;
             IPv4Address group;
+            AssertMetric metric;           // metric of the unicast route to the source
             int flags;
             UpstreamInterface *upstreamInterface;
             std::vector<DownstreamInterface*> downstreamInterfaces;
@@ -176,6 +184,7 @@ class PIMDM : public PIMBase, protected cListener
         double graftRetryInterval;
         double sourceActiveInterval;
         double stateRefreshInterval;
+        double assertTime;
 
         // state
         SGStateMap sgStates;
@@ -201,6 +210,7 @@ class PIMDM : public PIMBase, protected cListener
 	    void processOverrideTimer(cMessage *timer);
 	    void processSourceActiveTimer(cMessage *timer);
 	    void processStateRefreshTimer(cMessage *timer);
+	    void processAssertTimer(cMessage *timer);
 
 	    // process PIM packets
 	    void processPIMPacket(PIMPacket *pkt);
@@ -213,21 +223,24 @@ class PIMDM : public PIMBase, protected cListener
         void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
+        void processAssert(Interface *downstream, AssertMetric receivedMetric, IPv4Address senderAddress, int stateRefreshInterval);
 
         // process olist changes
         void processOlistEmptyEvent(SourceGroupState *sgState);
         void processOlistNonEmptyEvent(SourceGroupState *sgState);
 
 	    // create and send PIM packets
-	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
+	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId);
 	    void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
 	    void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
 	    void sendGraftAckPacket(PIMGraft *msg);
 	    void sendStateRefreshPacket(IPv4Address originator, SourceGroupState *sgState, DownstreamInterface *downstream, unsigned short ttl);
-	    void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
+	    void sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie);
+        void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
 
 	    // helpers
         void restartTimer(cMessage *timer, double interval);
+        void cancelAndDeleteTimer(cMessage *&timer);
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
         PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         SourceGroupState *getSourceGroupState(IPv4Address source, IPv4Address group);

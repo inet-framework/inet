@@ -32,6 +32,8 @@ using namespace std;
 
 const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
+const PIMBase::AssertMetric PIMBase::AssertMetric::INFINITE;
+
 PIMBase::~PIMBase()
 {
     cancelAndDelete(helloTimer);

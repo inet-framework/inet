@@ -36,6 +36,7 @@ simple PIMDM
         double graftRetryInterval @unit(s) = 3s;
         double sourceActiveInterval @unit(s) = 210s; // Cisco has 180s, after that, route is flushed
         double stateRefreshInterval @unit(s) = 60s;
+        double assertTime @unit(s) = 180s;
 
     gates:
         input ipIn;

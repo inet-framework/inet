@@ -34,6 +34,23 @@
 class PIMBase : public cSimpleModule
 {
     protected:
+
+        struct AssertMetric
+        {
+            int preference;
+            int metric;
+
+            static const AssertMetric INFINITE;
+
+            AssertMetric() : preference(-1), metric(0) {}
+            AssertMetric(int preference, int metric) : preference(preference), metric(metric) { ASSERT(preference >= 0); }
+            bool isInfinite() const { return preference == -1; }
+            bool operator==(const AssertMetric& other) const { return preference == other.preference && metric == other.metric; }
+            bool operator!=(const AssertMetric& other) const { return preference != other.preference || metric != other.metric; }
+            bool operator<(const AssertMetric& other) const { return !isInfinite() && (other.isInfinite() || preference < other.preference ||
+                                                                        (preference == other.preference && metric < other.metric)); }
+        };
+
         static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
     protected:

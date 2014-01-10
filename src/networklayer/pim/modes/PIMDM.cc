@@ -26,7 +26,7 @@ using namespace std;
 typedef IPv4MulticastRoute::OutInterface OutInterface;
 typedef PIMMulticastRoute::PIMOutInterface PIMOutInterface;
 
-void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId)
+void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId)
 {
     ASSERT(!src.isUnspecified());
     ASSERT(grp.isMulticast());
@@ -35,7 +35,7 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 
 	PIMJoinPrune *packet = new PIMJoinPrune("PIMPrune");
 	packet->setUpstreamNeighborAddress(nextHop);
-	packet->setHoldTime(pruneInterval);
+	packet->setHoldTime(holdTime);
 
 	// set multicast groups
     packet->setMulticastGroupsArraySize(1);
@@ -135,6 +135,20 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, SourceGroupState *sgS
 	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
 }
 
+void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie)
+{
+    EV_INFO << "Sending Assert(source = " << source << ", group = " << group << ") message on interface '" << ie->getName() << "'\n";
+
+    PIMAssert *pkt = new PIMAssert("PIMAssert");
+    pkt->setGroupAddress(group);
+    pkt->setSourceAddress(source);
+    pkt->setR(false);
+    pkt->setMetricPreference(metric.preference);
+    pkt->setMetric(metric.metric);
+
+    sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId());
+}
+
 void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId)
 {
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
@@ -227,6 +241,7 @@ void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime, int
         return;
 
     // Downstream state machine
+
     // A Prune(S,G) is received on interface I with the upstream
     // neighbor field set to the router's address on I.
     switch (downstream->pruneState)
@@ -257,6 +272,20 @@ void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime, int
             downstream->startPrunePendingTimer(prunePendingInterval);
             downstream->pruneState = DownstreamInterface::PRUNE_PENDING;
             break;
+    }
+
+    //
+    // Assert state machine; event: Receive Prune(S,G)
+    //
+    if (downstream->assertState == DownstreamInterface::I_LOST_ASSERT)
+    {
+        // Receive Prune(S,G)
+        //     A Prune(S,G) message was received on
+        //     interface I with its upstream neighbor address set to the
+        //     router's address on I.  The router MUST send an Assert(S,G) on
+        //     the receiving interface I to initiate an Assert negotiation.  The
+        //     Assert state machine remains in the Assert Loser(L) state.
+        sendAssertPacket(sgState->source, sgState->group, sgState->metric, downstream->ie);
     }
 }
 
@@ -298,6 +327,19 @@ void PIMDM::processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbor
 
     if (upstream->graftPruneState == UpstreamInterface::PRUNED && !sgState->isOilistNull())
         processOlistNonEmptyEvent(sgState); // will send Graft upstream
+
+    //
+    // Assert State Machine; event: Receive Join(S,G)
+    //
+    if (downstream->assertState == DownstreamInterface::I_LOST_ASSERT)
+    {
+        // A Join(S,G) message was received on
+        // interface I with its upstream neighbor address set to the
+        // router's address on I.  The router MUST send an Assert(S,G) on
+        // the receiving interface I to initiate an Assert negotiation.  The
+        // Assert state machine remains in the Assert Loser(L) state.
+        sendAssertPacket(sgState->source, sgState->group, sgState->metric, downstream->ie);
+    }
 }
 
 void PIMDM::processGraftPacket(PIMGraft *pkt)
@@ -380,6 +422,20 @@ void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address send
 
     if (olistChanged)
         processOlistNonEmptyEvent(sgState);
+
+    //
+    // Assert State Machine; event: Receive Graft(S,G)
+    //
+    if (downstream->assertState == DownstreamInterface::I_LOST_ASSERT)
+    {
+        // A Graft(S,G) message was received on
+        // interface I with its upstream neighbor address set to the
+        // router's address on I.  The router MUST send an Assert(S,G) on
+        // the receiving interface I to initiate an Assert negotiation. The
+        // Assert state machine remains in the Assert Loser(L) state.
+        // The router MUST respond with a GraftAck(S,G).
+        sendAssertPacket(sgState->source, sgState->group, sgState->metric, downstream->ie);
+    }
 }
 
 // The set of interfaces defined by the olist(S,G) macro becomes
@@ -401,7 +457,7 @@ void PIMDM::processOlistEmptyEvent(SourceGroupState *sgState)
             // multicast to the RPF_interface(S), with RPF'(S) named in the
             // upstream neighbor field.  The GraftRetry Timer (GRT(S,G)) MUST be
             // cancelled, and PLT(S,G) MUST be set to t_limit seconds.
-            sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+            sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
             upstream->startPruneLimitTimer();
             if (upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
             {
@@ -434,7 +490,7 @@ void PIMDM::processOlistNonEmptyEvent(SourceGroupState *sgState)
         if (!sgState->isFlagSet(PIMMulticastRoute::A))
         {
             EV << "Route is not pruned any more, send Graft to upstream" << endl;
-            sendGraftPacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+            sendGraftPacket(upstream->rpfNeighbor(), sgState->source, sgState->group, upstream->getInterfaceId());
             upstream->stopPruneLimitTimer();
             upstream->startGraftRetryTimer();
             upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
@@ -509,9 +565,9 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 	}
 
 	// check if State Refresh msg has came from RPF neighbor
-	IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+	IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
 	UpstreamInterface *upstream = sgState->upstreamInterface;
-	if (ctrl->getInterfaceId() != upstream->getInterfaceId() || upstream->nextHop != ctrl->getSrcAddr())
+	if (ctrlInfo->getInterfaceId() != upstream->getInterfaceId() || upstream->rpfNeighbor() != ctrlInfo->getSrcAddr())
 	{
 		delete pkt;
 		return;
@@ -532,7 +588,7 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
             {
                 if (!upstream->isPruneLimitTimerRunning())
                 {
-                    sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+                    sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
                     upstream->startPruneLimitTimer();
                 }
             }
@@ -581,17 +637,191 @@ void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 			restartTimer(downstream->pruneTimer, pruneInterval);
 		}
 		sendStateRefreshPacket(pkt->getOriginatorAddress(), sgState, downstream, pkt->getTtl() - 1);
+
+		//
+		// Assert State Machine; event: Send State Refresh
+		//
+		if (downstream->assertState == DownstreamInterface::I_WON_ASSERT)
+		{
+		    // The router is sending a State Refresh(S,G) message on interface I.
+		    // The router MUST set the Assert Timer (AT(S,G,I)) to three
+		    // times the State Refresh Interval contained in the State Refresh(S,G) message.
+		    restartTimer(downstream->assertTimer, 3 * stateRefreshInterval);
+		}
 	}
+
+	//
+	// Assert State Machine; event: Receive State Refresh
+	//
+	AssertMetric receivedMetric(pkt->getMetricPreference(), pkt->getMetric());
+	processAssert(upstream, receivedMetric, ctrlInfo->getSrcAddr(), pkt->getInterval());
+
 	delete pkt;
 }
 
 void PIMDM::processAssertPacket(PIMAssert *pkt)
 {
-    EV_INFO << "Received Assert packet.\n";
+    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+    int incomingInterfaceId = ctrlInfo->getInterfaceId();
+    IPv4Address source = pkt->getSourceAddress();
+    IPv4Address group = pkt->getGroupAddress();
+    AssertMetric receivedMetric = AssertMetric(pkt->getMetricPreference(), pkt->getMetric());
+    SourceGroupState *sgState = getSourceGroupState(source, group);
+    ASSERT(sgState); // XXX create S,G state?
+    Interface *incomingInterface = sgState->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                       static_cast<Interface*>(sgState->upstreamInterface) :
+                                       static_cast<Interface*>(sgState->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
 
-    ASSERT(false); // not yet implemented
+    EV_INFO << "Received Assert(source=" << source << ", group=" << group
+            << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
+
+    processAssert(incomingInterface, receivedMetric, ctrlInfo->getSrcAddr(), 0);
 
     delete pkt;
+}
+
+/*
+ * This method called when we received the assert metrics of a neighbor, either in an Assert or in a StateRefresh message.
+ */
+void PIMDM::processAssert(Interface *incomingInterface, AssertMetric receivedMetric, IPv4Address senderAddress, int stateRefreshInterval)
+{
+    SourceGroupState *sgState = incomingInterface->owner;
+    UpstreamInterface *upstream = sgState->upstreamInterface;
+
+    //
+    // Assert State Machine
+    //
+    AssertMetric currentMetric = incomingInterface->assertState == Interface::NO_ASSERT_INFO ? sgState->metric : incomingInterface->winnerMetric;
+    IPv4Address currentWinner = incomingInterface->assertState == Interface::NO_ASSERT_INFO ? incomingInterface->ie->ipv4Data()->getIPAddress() : incomingInterface->winnerAddress;
+    bool isEqual = receivedMetric == currentMetric && senderAddress == currentWinner;
+    bool isBetter = receivedMetric < currentMetric || (receivedMetric == currentMetric && senderAddress > currentWinner); // highest IP wins in case of tie
+    bool couldAssert = incomingInterface != upstream;
+
+    // event: Received Preferred Assert
+    if (isBetter || isEqual)
+    {
+        if (incomingInterface->assertState == Interface::NO_ASSERT_INFO)
+        {
+            // The received Assert or State Refresh has a better metric than
+            // this router's, and therefore the Assert state machine MUST
+            // transition to the "I am Assert Loser" state and store the Assert
+            // Winner's address and metric.  If the metric was received in an
+            // Assert, the router MUST set the Assert Timer (AT(S,G,I)) to
+            // Assert_Time.  If the metric was received in a State Refresh, the
+            // router MUST set the Assert Timer (AT(S,G,I)) to three times the
+            // received State Refresh Interval.  If CouldAssert(S,G,I) == TRUE,
+            // the router MUST also multicast a Prune(S,G) to the Assert winner
+            // with a Prune Hold Time equal to the Assert Timer and evaluate any
+            // changes in its Upstream(S,G) state machine.
+            ASSERT(isBetter);
+            EV_DEBUG << "Received better metrics, going to I_LOST_ASSERT state.\n";
+            incomingInterface->assertState = Interface::I_LOST_ASSERT;
+            incomingInterface->winnerMetric = receivedMetric;
+            incomingInterface->winnerAddress = senderAddress;
+            double assertTime = stateRefreshInterval > 0 ? 3 * stateRefreshInterval : this->assertTime;
+            incomingInterface->startAssertTimer(assertTime);
+            if (couldAssert)
+                sendPrunePacket(incomingInterface->winnerAddress, sgState->source, sgState->group, assertTime, incomingInterface->ie->getInterfaceId());
+
+            // upstream state machine
+            if (upstream->graftPruneState != UpstreamInterface::PRUNED && sgState->isOilistNull())
+                processOlistEmptyEvent(sgState);
+        }
+        else if (incomingInterface->assertState == Interface::I_WON_ASSERT)
+        {
+            // An (S,G) Assert is received that has a better
+            // metric than this router's metric for S on interface I. The
+            // Assert state machine MUST transition to "I am Assert Loser" state
+            // and store the new Assert Winner's address and metric. The router MUST set the Assert
+            // Timer (AT(S,G,I)) to Assert_Time. The router MUST also
+            // multicast a Prune(S,G) to the Assert winner, with a Prune Hold
+            // Time equal to the Assert Timer, and evaluate any changes in its
+            // Upstream(S,G) state machine.
+            ASSERT(isBetter);
+            EV_DEBUG << "Received better metrics, going to I_LOST_ASSERT state.\n";
+            incomingInterface->assertState = DownstreamInterface::I_LOST_ASSERT;
+            incomingInterface->winnerMetric = receivedMetric;
+            incomingInterface->winnerAddress = senderAddress;
+            restartTimer(incomingInterface->assertTimer, assertTime);
+            sendPrunePacket(incomingInterface->winnerAddress, sgState->source, sgState->group, assertTime, incomingInterface->ie->getInterfaceId());
+
+            // upstream state machine
+            if (upstream->graftPruneState != UpstreamInterface::PRUNED && sgState->isOilistNull())
+                processOlistEmptyEvent(sgState);
+        }
+        else if (incomingInterface->assertState == Interface::I_LOST_ASSERT)
+        {
+            // An Assert is received that has a metric better
+            // than or equal to that of the current Assert winner.  The Assert
+            // state machine remains in Loser (L) state.  If the metric was
+            // received in an Assert, the router MUST set the Assert Timer
+            // (AT(S,G,I)) to Assert_Time.  The router MUST set the Assert Timer (AT(S,G,I))
+            // to three times the received State Refresh Interval.  If the
+            // metric is better than the current Assert Winner, the router MUST
+            // store the address and metric of the new Assert Winner, and if
+            // CouldAssert(S,G,I) == TRUE, the router MUST multicast a
+            // Prune(S,G) to the new Assert winner.
+            EV_DEBUG << "Received better metrics, stay in I_LOST_ASSERT state.\n";
+            restartTimer(incomingInterface->assertTimer, stateRefreshInterval > 0 ? 3 * stateRefreshInterval : assertTime);
+            if (isBetter)
+            {
+                incomingInterface->winnerAddress = senderAddress;
+                incomingInterface->winnerMetric = receivedMetric;
+                if (couldAssert)
+                    sendPrunePacket(incomingInterface->winnerAddress, sgState->source, sgState->group, assertTime, incomingInterface->ie->getInterfaceId());
+            }
+        }
+    }
+    // event: Receive Inferior Assert from Assert Winner
+    else if (senderAddress == incomingInterface->winnerAddress)
+    {
+        if (incomingInterface->assertState == Interface::I_LOST_ASSERT)
+        {
+            // An Assert is received from the current Assert
+            // winner that is worse than this router's metric for S (typically,
+            // the winner's metric became worse).  The Assert state machine MUST
+            // transition to NoInfo (NI) state and cancel AT(S,G,I).  The router
+            // MUST delete the previous Assert Winner's address and metric and
+            // evaluate any possible transitions to its Upstream(S,G) state
+            // machine.  Usually this router will eventually re-assert and win
+            // when data packets from S have started flowing again.
+            EV_DEBUG << "Assert winner lost best route, going to NO_ASSERT_INFO state.\n";
+            incomingInterface->assertState = DownstreamInterface::NO_ASSERT_INFO;
+            cancelAndDeleteTimer(incomingInterface->assertTimer);
+            incomingInterface->winnerAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+            incomingInterface->winnerMetric = AssertMetric::INFINITE;
+            // upstream state machine
+            if (upstream->graftPruneState == UpstreamInterface::PRUNED && !sgState->isOilistNull())
+                processOlistNonEmptyEvent(sgState);
+        }
+    }
+    // event: Receive Inferior Assert from non-Assert Winner AND CouldAssert==TRUE
+    else if (couldAssert)
+    {
+        if (incomingInterface->assertState == Interface::NO_ASSERT_INFO)
+        {
+            // An Assert or State Refresh is received for (S,G) that is inferior
+            // to our own assert metric on interface I. The Assert state machine
+            // MUST transition to the "I am Assert Winner" state, send an
+            // Assert(S,G) to interface I, store its own address and metric as
+            // the Assert Winner, and set the Assert Timer (AT(S,G,I)) to
+            // Assert_Time.
+            EV_DEBUG << "Received inferior assert metrics, going to I_WON_ASSERT state.\n";
+            incomingInterface->assertState = DownstreamInterface::I_WON_ASSERT;
+            sendAssertPacket(sgState->source, sgState->group, sgState->metric, incomingInterface->ie);
+            incomingInterface->startAssertTimer(assertTime);
+        }
+        else if (incomingInterface->assertState == DownstreamInterface::I_WON_ASSERT)
+        {
+            // An (S,G) Assert is received containing a metric for S that is
+            // worse than this router's metric for S.  Whoever sent the Assert
+            // is in error.  The router MUST send an Assert(S,G) to interface I
+            // and reset the Assert Timer (AT(S,G,I)) to Assert_Time.
+            EV_DEBUG << "Received inferior assert metrics, stay in I_WON_ASSERT state.\n";
+            sendAssertPacket(sgState->source, sgState->group, sgState->metric, incomingInterface->ie);
+            restartTimer(incomingInterface->assertTimer, assertTime);
+        }
+    }
 }
 
 /*
@@ -680,7 +910,7 @@ void PIMDM::processGraftRetryTimer(cMessage *timer)
     // RPF'(S) and the GraftRetry Timer (GRT(S,G)) reset to
     // Graft_Retry_Period.  It is RECOMMENDED that the router retry a
     // configured number of times before ceasing retries.
-	sendGraftPacket(upstream->nextHop, source, group, upstream->getInterfaceId());
+	sendGraftPacket(upstream->rpfNeighbor(), source, group, upstream->getInterfaceId());
     scheduleAt(simTime() + graftRetryInterval, timer);
 }
 
@@ -695,7 +925,7 @@ void PIMDM::processOverrideTimer(cMessage *timer)
     IPv4Address group = upstream->owner->group;
 
     // send a Join(S,G) to RPF'(S)
-    sendJoinPacket(upstream->nextHop, source, group, upstream->getInterfaceId());
+    sendJoinPacket(upstream->rpfNeighbor(), source, group, upstream->getInterfaceId());
 
     upstream->overrideTimer = NULL;
     delete timer;
@@ -775,6 +1005,44 @@ void PIMDM::processStateRefreshTimer(cMessage *timer)
     scheduleAt(simTime() + stateRefreshInterval, timer);
 }
 
+void PIMDM::processAssertTimer(cMessage *timer)
+{
+    Interface *interfaceData = static_cast<Interface*>(timer->getContextPointer());
+    ASSERT(timer == interfaceData->assertTimer);
+    ASSERT(interfaceData->assertState != DownstreamInterface::NO_ASSERT_INFO);
+
+    SourceGroupState *sgState = interfaceData->owner;
+    UpstreamInterface *upstream = sgState->upstreamInterface;
+    EV_DETAIL << "AssertTimer(source=" << sgState->source << ", group=" << sgState->owner << ", interface="
+              << interfaceData->ie->getName() << ") has expired.\n";
+
+    //
+    // Assert State Machine; event: AT(S,G,I) expires
+    //
+
+    // The Assert state machine MUST transition to NoInfo (NI) state.
+    // The router MUST delete the Assert Winner's address and metric.
+    // If CouldAssert == TRUE, the router MUST evaluate any possible
+    // transitions to its Upstream(S,G) state machine.
+    EV_DEBUG << "Going into NO_ASSERT_INFO state.\n";
+    interfaceData->assertState = DownstreamInterface::NO_ASSERT_INFO;
+    interfaceData->winnerMetric = AssertMetric::INFINITE;
+    interfaceData->winnerAddress = IPv4Address::UNSPECIFIED_ADDRESS;
+    interfaceData->assertTimer = NULL;
+
+    // upstream state machine transition
+    if (interfaceData != upstream)
+    {
+        bool isOlistNull = sgState->isOilistNull();
+        if (upstream->graftPruneState == UpstreamInterface::PRUNED && !isOlistNull)
+            processOlistNonEmptyEvent(sgState);
+        else if (upstream->graftPruneState != UpstreamInterface::PRUNED && isOlistNull)
+            processOlistEmptyEvent(sgState);
+    }
+
+    delete timer;
+}
+
 void PIMDM::processPIMTimer(cMessage *timer)
 {
 	EV << "pimDM::processPIMTimer: ";
@@ -786,6 +1054,7 @@ void PIMDM::processPIMTimer(cMessage *timer)
            break;
 		case AssertTimer:
 			EV << "AssertTimer" << endl;
+			processAssertTimer(timer);
 			break;
 		case PruneTimer:
 			EV << "PruneTimer" << endl;
@@ -897,6 +1166,7 @@ void PIMDM::initialize(int stage)
         graftRetryInterval = par("graftRetryInterval");
         sourceActiveInterval = par("sourceActiveInterval");
         stateRefreshInterval = par("stateRefreshInterval");
+        assertTime = par("assertTime");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
 	{
@@ -990,6 +1260,8 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
                 // is there any change?
                 if (newRpfInterface != oldRpfInterface)
                     rpfInterfaceHasChanged(route, newRpfInterface);
+
+                // TODO update metric
             }
         }
     }
@@ -1025,6 +1297,7 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     sgState->owner = this;
     sgState->source = source;
     sgState->group = group;
+    sgState->metric = AssertMetric(routeToSrc->getAdminDist(), routeToSrc->getMetric());
     sgState->upstreamInterface = new UpstreamInterface(sgState, rpfInterface->getInterfacePtr(), rpfNeighbor);
 
     // if the source is directly connected, then go to the Originator state
@@ -1135,7 +1408,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
             case UpstreamInterface::FORWARDING:
                 // The Upstream(S,G) state machine MUST transition to the Pruned (P)
                 // state, send a Prune(S,G) to RPF'(S), and set PLT(S,G) to t_limit seconds.
-                sendPrunePacket(upstream->nextHop, source, group, upstream->getInterfaceId());
+                sendPrunePacket(upstream->rpfNeighbor(), source, group, pruneInterval, upstream->getInterfaceId());
                 upstream->startPruneLimitTimer();
                 upstream->graftPruneState = UpstreamInterface::PRUNED;
                 break;
@@ -1151,7 +1424,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
                 // if GRT is running now, do not send Prune msg
                 if (!upstream->isPruneLimitTimerRunning())
                 {
-                    sendPrunePacket(upstream->nextHop, source, group, upstream->getInterfaceId());
+                    sendPrunePacket(upstream->rpfNeighbor(), source, group, pruneInterval, upstream->getInterfaceId());
                     upstream->startPruneLimitTimer();
                 }
                 break;
@@ -1173,36 +1446,66 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 	SourceGroupState *sgState = getSourceGroupState(source, group);
 	ASSERT(sgState);
 
-	// in case of p2p link, send prune
+	UpstreamInterface *upstream = sgState->upstreamInterface;
+    DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(interfaceId);
+    if (!downstream)
+        return;
+
+    // in case of p2p link, send prune
 	// FIXME There should be better indicator of P2P link
 	if (pimNbt->getNumNeighborsOnInterface(interfaceId) == 1)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
 		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(interfaceId))[0]->getAddress();
-		sendPrunePacket(nextHop, source, group, interfaceId);
+		sendPrunePacket(nextHop, source, group, pruneInterval, interfaceId);
 
 		// the incoming interface has to change its state to Pruned
-		DownstreamInterface *outInt = sgState->findDownstreamInterfaceByInterfaceId(interfaceId);
-		if (outInt && outInt->pruneState == DownstreamInterface::NO_INFO)
+		if (downstream->pruneState == DownstreamInterface::NO_INFO)
 		{
-			outInt->pruneState = DownstreamInterface::PRUNED;
-			outInt->startPruneTimer(pruneInterval);
+			downstream->pruneState = DownstreamInterface::PRUNED;
+			downstream->startPruneTimer(pruneInterval);
 
 			// if there is no outgoing interface, Prune msg has to be sent on upstream
 			if (sgState->isOilistNull())
 			{
 				EV << "Route is not forwarding any more, send Prune to upstream" << endl;
-				sgState->upstreamInterface->graftPruneState = UpstreamInterface::PRUNED;
+				upstream->graftPruneState = UpstreamInterface::PRUNED;
 				if (!sgState->isFlagSet(PIMMulticastRoute::A))
 				{
-				    UpstreamInterface *inInterface = sgState->upstreamInterface;
-					sendPrunePacket(inInterface->nextHop, source, group, inInterface->getInterfaceId());
+					sendPrunePacket(upstream->rpfNeighbor(), source, group, pruneInterval, upstream->getInterfaceId());
 				}
 			}
 		}
+		return;
 	}
 
-	//FIXME in case of LAN
+    //
+	// Assert State Machine; event: An (S,G) data packet arrives on downstream interface I
+	//
+	if (downstream->assertState == DownstreamInterface::NO_ASSERT_INFO)
+	{
+	    // An (S,G) data packet arrived on a downstream interface.  It is
+	    // optimistically assumed that this router will be the Assert winner
+	    // for this (S,G).  The Assert state machine MUST transition to the
+	    // "I am Assert Winner" state, send an Assert(S,G) to interface I,
+	    // store its own address and metric as the Assert Winner, and set
+	    // the Assert_Timer (AT(S,G,I) to Assert_Time, thereby initiating
+	    // the Assert negotiation for (S,G).
+	    downstream->assertState = DownstreamInterface::I_WON_ASSERT;
+	    downstream->winnerMetric = sgState->metric;
+	    downstream->winnerAddress = downstream->ie->ipv4Data()->getIPAddress();
+        sendAssertPacket(source, group, sgState->metric, downstream->ie);
+        downstream->startAssertTimer(assertTime);
+	}
+	else if (downstream->assertState == DownstreamInterface::I_WON_ASSERT)
+	{
+	    // An (S,G) data packet arrived on a downstream interface.  The
+	    // Assert state machine remains in the "I am Assert Winner" state.
+	    // The router MUST send an Assert(S,G) to interface I and set the
+	    // Assert Timer (AT(S,G,I) to Assert_Time.
+	    sendAssertPacket(source, group, sgState->metric, downstream->ie);
+	    restartTimer(downstream->assertTimer, assertTime);
+	}
 }
 
 /*
@@ -1259,7 +1562,7 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
             if (!sgState->isFlagSet(PIMMulticastRoute::A))
             {
                 UpstreamInterface *upstream = sgState->upstreamInterface;
-                sendGraftPacket(upstream->nextHop, sgState->source, group, upstream->getInterfaceId());
+                sendGraftPacket(upstream->rpfNeighbor(), sgState->source, group, upstream->getInterfaceId());
                 upstream->startGraftRetryTimer();
                 upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
             }
@@ -1328,13 +1631,13 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
             {
                 cancelAndDelete(upstream->graftRetryTimer);
                 upstream->graftRetryTimer = NULL;
-                sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+                sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
             }
 
             // if the source is not directly connected, sent Prune msg
             if (!sgState->isFlagSet(PIMMulticastRoute::A) && upstream->graftPruneState != UpstreamInterface::PRUNED)
             {
-                sendPrunePacket(upstream->nextHop, sgState->source, sgState->group, upstream->getInterfaceId());
+                sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
             }
 
             upstream->graftPruneState = UpstreamInterface::PRUNED;
@@ -1404,7 +1707,7 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
             upstream->stopPruneLimitTimer();
 
         // route was not pruned, join to the multicast tree again
-        sendGraftPacket(upstream->nextHop, source, group, rpfId);
+        sendGraftPacket(upstream->rpfNeighbor(), source, group, rpfId);
         upstream->startGraftRetryTimer();
         upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
     }
@@ -1434,6 +1737,12 @@ void PIMDM::restartTimer(cMessage *timer, double interval)
 {
     cancelEvent(timer);
     scheduleAt(simTime() + interval, timer);
+}
+
+void PIMDM::cancelAndDeleteTimer(cMessage *&timer)
+{
+    cancelAndDelete(timer);
+    timer = NULL;
 }
 
 PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
@@ -1469,6 +1778,11 @@ PIMDM::SourceGroupState *PIMDM::getSourceGroupState(IPv4Address source, IPv4Addr
 void PIMDM::deleteSourceGroupState(IPv4Address source, IPv4Address group)
 {
     sgStates.erase(SourceAndGroup(source, group));
+}
+
+PIMDM::Interface::~Interface()
+{
+    owner->owner->cancelAndDelete(assertTimer);
 }
 
 PIMDM::UpstreamInterface::~UpstreamInterface()
@@ -1528,7 +1842,6 @@ PIMDM::DownstreamInterface::~DownstreamInterface()
 {
     owner->owner->cancelAndDelete(pruneTimer);
     owner->owner->cancelAndDelete(prunePendingTimer);
-    owner->owner->cancelAndDelete(assertTimer);
 }
 
 /**
@@ -1572,6 +1885,15 @@ void PIMDM::DownstreamInterface::stopPrunePendingTimer()
         delete prunePendingTimer;
         prunePendingTimer = NULL;
     }
+}
+
+void PIMDM::Interface::startAssertTimer(double assertTime)
+{
+    ASSERT(assertTimer == NULL);
+    cMessage *timer = new cMessage("PimAssertTimer", AssertTimer);
+    timer->setContextPointer(this);
+    owner->owner->scheduleAt(simTime() + assertTime, timer);
+    assertTimer = timer;
 }
 
 PIMDM::SourceGroupState::~SourceGroupState()
@@ -1626,10 +1948,20 @@ PIMDM::DownstreamInterface *PIMDM::SourceGroupState::removeDownstreamInterface(i
 //
 // lost_assert(S,G) = {all interfaces I such that lost_assert(S,G,I) == TRUE}
 //
+// bool lost_assert(S,G,I) {
+//   if ( RPF_interface(S) == I ) {
+//     return FALSE
+//   } else {
+//     return (AssertWinner(S,G,I) != me  AND
+//            (AssertWinnerMetric(S,G,I) is better than
+//             spt_assert_metric(S,G,I)))
+//   }
+// }
+//
 // boundary(G) = {all interfaces I with an administratively scoped boundary for group G}
 bool PIMDM::DownstreamInterface::isInOlist() const
 {
-    return pruneState != PRUNED;
+    return pruneState != PRUNED && assertState != I_LOST_ASSERT;
 //    bool hasNeighbors = owner->owner->pimNbt->getNumNeighborsOnInterface(ie->getInterfaceId()) > 0;
 //    return ((hasNeighbors && pruneState != PRUNED) ||
 //            ie->ipv4Data()->hasMulticastListener(owner->group, owner->source))
