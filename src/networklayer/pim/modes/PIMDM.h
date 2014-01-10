@@ -72,6 +72,7 @@ class PIMDM : public PIMBase, protected cListener
             enum OriginatorState { NOT_ORIGINATOR, ORIGINATOR };
 
             IPv4Address nextHop; // rpf neighbor
+            bool isSourceDirectlyConnected;
 
             // graft prune state
             GraftPruneState graftPruneState;
@@ -85,8 +86,8 @@ class PIMDM : public PIMBase, protected cListener
             cMessage* stateRefreshTimer; // scheduled in ORIGINATOR state for sending the next StateRefresh message
             unsigned short maxTtlSeen;
 
-            UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor)
-                : Interface(owner, ie), nextHop(neighbor),
+            UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor, bool isSourceDirectlyConnected)
+                : Interface(owner, ie), nextHop(neighbor), isSourceDirectlyConnected(isSourceDirectlyConnected),
                   graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
                   originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
                 { ASSERT(owner); ASSERT(ie); }
@@ -99,7 +100,6 @@ class PIMDM : public PIMBase, protected cListener
             void startSourceActiveTimer();
             void startStateRefreshTimer();
             void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
-            void cancelOverrideTimer();
             void stopPruneLimitTimer() { lastPruneSentTime = 0; }
             bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->owner->pruneLimitInterval; }
         };
@@ -112,6 +112,8 @@ class PIMDM : public PIMBase, protected cListener
                 PRUNE_PENDING, // received a prune from a downstream neighbor, waiting for an override
                 PRUNED         // received a prune from a downstream neighbor and it was not overridden
             };
+
+            bool hasConnectedReceivers;
 
             // prune state
             PruneState pruneState;
@@ -147,15 +149,11 @@ class PIMDM : public PIMBase, protected cListener
             IPv4Address source;
             IPv4Address group;
             AssertMetric metric;           // metric of the unicast route to the source
-            int flags;
             UpstreamInterface *upstreamInterface;
             std::vector<DownstreamInterface*> downstreamInterfaces;
 
-            SourceGroupState() : owner(NULL), flags(0), upstreamInterface(NULL) {}
+            SourceGroupState() : owner(NULL), upstreamInterface(NULL) {}
             ~SourceGroupState();
-            bool isFlagSet(PIMMulticastRoute::Flag flag) const { return (flags & flag) != 0; }
-            void setFlags(int flags)   { this->flags |= flags; }
-            void clearFlag(PIMMulticastRoute::Flag flag)  { flags &= (~flag); }
             DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
             DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
             DownstreamInterface *removeDownstreamInterface(int interfaceId);
@@ -202,7 +200,7 @@ class PIMDM : public PIMBase, protected cListener
         void multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address group, IPv4Address source, unsigned short ttl);
 	    void multicastReceiverAdded(PIMInterface *pimInt, IPv4Address newAddr);
 	    void multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address oldAddr);
-	    void rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpfInterface);
+	    void rpfInterfaceHasChanged(IPv4MulticastRoute *route, InterfaceEntry *newRpfInterface);
 
 	    // process timers
 	    void processPIMTimer(cMessage *timer);
@@ -244,9 +242,10 @@ class PIMDM : public PIMBase, protected cListener
         void restartTimer(cMessage *timer, double interval);
         void cancelAndDeleteTimer(cMessage *&timer);
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
-        PIMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
+        IPv4MulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         SourceGroupState *getSourceGroupState(IPv4Address source, IPv4Address group);
         void deleteSourceGroupState(IPv4Address source, IPv4Address group);
+        void updateRouteOutInterface(DownstreamInterface *downstream);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

@@ -223,7 +223,7 @@ void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime, int
 
 	// See Prune(S,G) AND S is NOT directly connected ?
 	UpstreamInterface *upstream = sgState->upstreamInterface;
-	if (upstream->ie->getInterfaceId() == intId && !sgState->isFlagSet(PIMMulticastRoute::A))
+	if (upstream->ie->getInterfaceId() == intId && !upstream->isSourceDirectlyConnected)
 	{
 	    // This event is only relevant if RPF_interface(S) is a shared
 	    // medium.  This router sees another router on RPF_interface(S) send
@@ -248,38 +248,33 @@ void PIMDM::processPrune(SourceGroupState *sgState, int intId, int holdTime, int
     if (upstreamNeighborField != downstream->ie->ipv4Data()->getIPAddress())
         return;
 
-    // Downstream state machine
+    //
+    // Downstream Interface State Machine; event: Receive Prune(S,G)
+    //
 
     // A Prune(S,G) is received on interface I with the upstream
     // neighbor field set to the router's address on I.
-    switch (downstream->pruneState)
+    if (downstream->pruneState == DownstreamInterface::NO_INFO)
     {
-        case DownstreamInterface::PRUNED:
-
-            // The Prune(S,G)
-            // Downstream state machine on interface I remains in the Pruned (P)
-            // state.  The Prune Timer (PT(S,G,I)) SHOULD be reset to the
-            // holdtime contained in the Prune(S,G) message if it is greater
-            // than the current value.
-            EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
-            if (downstream->pruneTimer->getArrivalTime() < simTime() + holdTime)
-                restartTimer(downstream->pruneTimer, holdTime);
-            break;
-        case DownstreamInterface::PRUNE_PENDING:
-            // do nothing
-            break;
-        case DownstreamInterface::NO_INFO:
-            // The Prune(S,G)
-            // Downstream state machine on interface I MUST transition to the
-            // PrunePending (PP) state.  The PrunePending Timer (PPT(S,G,I))
-            // MUST be set to J/P_Override_Interval if the router has more than
-            // one neighbor on I.  If the router has only one neighbor on
-            // interface I, then it SHOULD set the PPT(S,G,I) to zero,
-            // effectively transitioning immediately to the Pruned (P) state.
-            double prunePendingInterval = numRpfNeighbors > 1 ? overrideInterval + propagationDelay : 0;
-            downstream->startPrunePendingTimer(prunePendingInterval);
-            downstream->pruneState = DownstreamInterface::PRUNE_PENDING;
-            break;
+        // The Prune(S,G) Downstream state machine on interface I MUST transition to the
+        // PrunePending (PP) state.  The PrunePending Timer (PPT(S,G,I))
+        // MUST be set to J/P_Override_Interval if the router has more than
+        // one neighbor on I.  If the router has only one neighbor on
+        // interface I, then it SHOULD set the PPT(S,G,I) to zero,
+        // effectively transitioning immediately to the Pruned (P) state.
+        double prunePendingInterval = numRpfNeighbors > 1 ? overrideInterval + propagationDelay : 0;
+        downstream->startPrunePendingTimer(prunePendingInterval);
+        downstream->pruneState = DownstreamInterface::PRUNE_PENDING;
+    }
+    else if (downstream->pruneState == DownstreamInterface::PRUNED)
+    {
+        // The Prune(S,G) Downstream state machine on interface I remains in the Pruned (P)
+        // state.  The Prune Timer (PT(S,G,I)) SHOULD be reset to the
+        // holdtime contained in the Prune(S,G) message if it is greater
+        // than the current value.
+        EV << "Outgoing interface is already pruned, restart Prune Timer." << endl;
+        if (downstream->pruneTimer->getArrivalTime() < simTime() + holdTime)
+            restartTimer(downstream->pruneTimer, holdTime);
     }
 
     //
@@ -317,7 +312,9 @@ void PIMDM::processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbor
         }
     }
 
-    // downstream transitions
+    //
+    // Downstream Interface State Machine
+    //
     DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(intId);
     if (!downstream)
         return;
@@ -408,7 +405,9 @@ void PIMDM::processGraft(IPv4Address source, IPv4Address group, IPv4Address send
     if (!downstream)
         return;
 
-    // downstream state machine
+    //
+    // Downstream Interface State Machine
+    //
     // Note: GraftAck is sent in processGraftPacket()
     bool olistChanged = false;
     switch (downstream->pruneState)
@@ -456,7 +455,7 @@ void PIMDM::processOlistEmptyEvent(SourceGroupState *sgState)
     // upstream state transitions
 
     // olist(S,G) -> NULL AND S NOT directly connected?
-    if (!sgState->isFlagSet(PIMMulticastRoute::A))
+    if (!upstream->isSourceDirectlyConnected)
     {
         if(upstream->graftPruneState == UpstreamInterface::FORWARDING || upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
         {
@@ -495,7 +494,7 @@ void PIMDM::processOlistNonEmptyEvent(SourceGroupState *sgState)
         // Graft message to RPF'(S).  The Graft Retry Timer (GRT(S,G)) MUST
         // be set to Graft_Retry_Period.
 
-        if (!sgState->isFlagSet(PIMMulticastRoute::A))
+        if (!upstream->isSourceDirectlyConnected)
         {
             EV << "Route is not pruned any more, send Graft to upstream" << endl;
             sendGraftPacket(upstream->rpfNeighbor(), sgState->source, sgState->group, upstream->getInterfaceId());
@@ -955,7 +954,7 @@ void PIMDM::processSourceActiveTimer(cMessage * timer)
 
     // delete the route, because there are no more packets
 	deleteSourceGroupState(sgState->source, sgState->group);
-	PIMMulticastRoute *route = getRouteFor(sgState->group, sgState->source);
+	IPv4MulticastRoute *route = getRouteFor(sgState->group, sgState->source);
 	if (route)
 	    rt->deleteMulticastRoute(route);
 }
@@ -1210,8 +1209,8 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         for (int i = 0; i < numRoutes; i++)
         {
             // find multicast routes whose source are on the destination of the new unicast route
-            PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
-            if (route && route->getSource() == this && IPv4Address::maskedAddrAreEqual(route->getOrigin(), routeSource, routeNetmask))
+            IPv4MulticastRoute *route = rt->getMulticastRoute(i);
+            if (route->getSource() == this && IPv4Address::maskedAddrAreEqual(route->getOrigin(), routeSource, routeNetmask))
             {
                 IPv4Address source = route->getOrigin();
                 InterfaceEntry *newRpfInterface = rt->getInterfaceForDestAddr(source);
@@ -1251,6 +1250,7 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         return;
 
     // gateway is unspecified for directly connected destinations
+    bool isSourceDirectlyConnected = routeToSrc->getSourceType() == IPv4Route::IFACENETMASK;
     IPv4Address rpfNeighbor = routeToSrc->getGateway().isUnspecified() ? source : routeToSrc->getGateway();
 
     SourceGroupState *sgState = &sgStates[SourceAndGroup(source, group)];
@@ -1258,12 +1258,11 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     sgState->source = source;
     sgState->group = group;
     sgState->metric = AssertMetric(routeToSrc->getAdminDist(), routeToSrc->getMetric());
-    sgState->upstreamInterface = new UpstreamInterface(sgState, rpfInterface->getInterfacePtr(), rpfNeighbor);
+    sgState->upstreamInterface = new UpstreamInterface(sgState, rpfInterface->getInterfacePtr(), rpfNeighbor, isSourceDirectlyConnected);
 
     // if the source is directly connected, then go to the Originator state
-    if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
+    if (isSourceDirectlyConnected)
     {
-        sgState->setFlags(PIMMulticastRoute::A);
         sgState->upstreamInterface->originatorState = UpstreamInterface::ORIGINATOR;
         if (rpfInterface->getSR())
             sgState->upstreamInterface->startStateRefreshTimer();
@@ -1289,12 +1288,10 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         if(hasPIMNeighbors || hasConnectedReceivers)
         {
             // create new outgoing interface
-            sgState->createDownstreamInterface(pimInterface->getInterfacePtr());
+            DownstreamInterface *downstream = sgState->createDownstreamInterface(pimInterface->getInterfacePtr());
+            downstream->hasConnectedReceivers = hasConnectedReceivers;
             allDownstreamInterfacesArePruned = false;
         }
-
-        if (hasConnectedReceivers)
-            sgState->setFlags(PIMMulticastRoute::C);
     }
 
     // if there is no outgoing interface, prune from multicast tree
@@ -1307,7 +1304,10 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     }
 
     // create new multicast route
-    PIMMulticastRoute *newRoute = new PIMMulticastRoute(source, group);
+    IPv4MulticastRoute *newRoute = new IPv4MulticastRoute();
+    newRoute->setOrigin(source);
+    newRoute->setOriginNetmask(IPv4Address::ALLONES_ADDRESS);
+    newRoute->setMulticastGroup(group);
     newRoute->setSourceType(IMulticastRoute::PIM_DM);
     newRoute->setSource(this);
     newRoute->setInInterface(new IMulticastRoute::InInterface(sgState->upstreamInterface->ie));
@@ -1340,7 +1340,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
     //      avoid examining the TTL of every multicast packet it handles.
 
     // Is source directly connected?
-    if (sgState->isFlagSet(PIMMulticastRoute::A))
+    if (upstream->isSourceDirectlyConnected)
     {
         // State Refresh Originator state machine event: Receive Data from S AND S directly connected
         if (upstream->originatorState == UpstreamInterface::NOT_ORIGINATOR)
@@ -1359,7 +1359,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
 	// upstream state transition
 
 	// Data Packet arrives on RPF_Interface(S) AND olist(S,G) == NULL AND S is NOT directly connected ?
-    if (upstream->ie->getInterfaceId() == interfaceId && sgState->isOilistNull() && !sgState->isFlagSet(PIMMulticastRoute::A))
+    if (upstream->ie->getInterfaceId() == interfaceId && sgState->isOilistNull() && !upstream->isSourceDirectlyConnected)
     {
         EV_DETAIL << "Route does not have any outgoing interface and source is not directly connected.\n";
 
@@ -1430,7 +1430,7 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 			{
 				EV << "Route is not forwarding any more, send Prune to upstream" << endl;
 				upstream->graftPruneState = UpstreamInterface::PRUNED;
-				if (!sgState->isFlagSet(PIMMulticastRoute::A))
+				if (!upstream->isSourceDirectlyConnected)
 				{
 					sendPrunePacket(upstream->rpfNeighbor(), source, group, pruneInterval, upstream->getInterfaceId());
 				}
@@ -1481,18 +1481,18 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
     int numRoutes = rt->getNumMulticastRoutes();
     for (int i = 0; i < numRoutes; i++)
     {
-        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
+        IPv4MulticastRoute *route = rt->getMulticastRoute(i);
 
         // check group
-        if (!route || route->getSource() != this || route->getMulticastGroup() != group)
+        if (route->getSource() != this || route->getMulticastGroup() != group)
             continue;
 
         SourceGroupState *sgState = getSourceGroupState(route->getOrigin(), group);
         ASSERT(sgState);
 
         // check on RPF interface
-        UpstreamInterface *rpfInterface = sgState->upstreamInterface;
-        if (rpfInterface->ie == pimInterface->getInterfacePtr())
+        UpstreamInterface *upstream = sgState->upstreamInterface;
+        if (upstream->ie == pimInterface->getInterfacePtr())
             continue;
 
         // is interface in list of outgoing interfaces?
@@ -1507,21 +1507,20 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
         {
             // create new downstream data
             EV << "Interface is not on list of outgoing interfaces yet, it will be added" << endl;
-            DownstreamInterface *downstream = sgState->createDownstreamInterface(pimInterface->getInterfacePtr());
+            downstream = sgState->createDownstreamInterface(pimInterface->getInterfacePtr());
             route->addOutInterface(new PIMDMOutInterface(pimInterface->getInterfacePtr(), downstream));
         }
 
-        sgState->setFlags(PIMMulticastRoute::C);
+        downstream->hasConnectedReceivers = true;
 
         // route was pruned, has to be added to multicast tree
-        if (rpfInterface->graftPruneState == UpstreamInterface::PRUNED)
+        if (upstream->graftPruneState == UpstreamInterface::PRUNED)
         {
             EV << "Route is not pruned any more, send Graft to upstream" << endl;
 
             // if source is not directly connected, send Graft to upstream
-            if (!sgState->isFlagSet(PIMMulticastRoute::A))
+            if (!upstream->isSourceDirectlyConnected)
             {
-                UpstreamInterface *upstream = sgState->upstreamInterface;
                 sendGraftPacket(upstream->rpfNeighbor(), sgState->source, group, upstream->getInterfaceId());
                 upstream->startGraftRetryTimer();
                 upstream->graftPruneState = UpstreamInterface::ACK_PENDING;
@@ -1542,65 +1541,34 @@ void PIMDM::multicastReceiverAdded(PIMInterface *pimInterface, IPv4Address group
  */
 void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
 {
-    EV_DETAIL << "No more receiver for group " << group << ".\n";
+    EV_DETAIL << "No more receiver for group " << group << " on interface '" << pimInt->getInterfacePtr()->getName() << "'.\n";
 
     // delete pimInt from outgoing interfaces of multicast routes for group
     int numRoutes = rt->getNumMulticastRoutes();
     for (int i = 0; i < numRoutes; i++)
     {
-        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
-
-        // check group
-        if (route && route->getMulticastGroup() != group)
-            continue;
-
-        SourceGroupState *sgState = getSourceGroupState(route->getOrigin(), group);
-
-        // remove pimInt from the list of outgoing interfaces
-        DownstreamInterface *downstream = sgState->removeDownstreamInterface(pimInt->getInterfaceId());
-        if (downstream)
+        IPv4MulticastRoute *route = rt->getMulticastRoute(i);
+        if (route->getSource() == this && route->getMulticastGroup() == group)
         {
-            // EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-            route->removeOutInterface(downstream->ie); // will delete downstream, XXX method should be named deleteOutInterface()
-            delete downstream;
-        }
+            SourceGroupState *sgState = getSourceGroupState(route->getOrigin(), group);
 
-        bool connected = false;
-        for (unsigned int k = 0; k < sgState->downstreamInterfaces.size(); k++)
-        {
-            DownstreamInterface *outInt = sgState->downstreamInterfaces[k];
-            if(outInt->pruneState == DownstreamInterface::NO_INFO &&
-               pimNbt->getNumNeighborsOnInterface(outInt->ie->getInterfaceId()) == 0)
+            // remove pimInt from the list of outgoing interfaces
+            DownstreamInterface *downstream = sgState->findDownstreamInterfaceByInterfaceId(pimInt->getInterfaceId());
+            if (downstream)
             {
-                connected = true;
-                break;
+                bool wasInOlist = downstream->isInOlist();
+                downstream->hasConnectedReceivers = false;
+                if (wasInOlist && !downstream->isInOlist())
+                {
+                    // update multicast route
+                    EV_DEBUG << "Removing interface '" << pimInt->getInterfacePtr()->getName() << "' from the outgoing interface list of route " << sgState << ".\n";
+                    updateRouteOutInterface(downstream);
+
+                    // fire upstream state machine event
+                    if (sgState->isOilistNull())
+                        processOlistEmptyEvent(sgState);
+                }
             }
-        }
-
-        // if there is no directly connected member of group
-        if (!connected)
-            sgState->clearFlag(PIMMulticastRoute::C);
-
-        // there is no receiver of multicast, prune the router from the multicast tree
-        if (sgState->isOilistNull())
-        {
-            EV << "Route is not forwarding any more, send Prune to upstream" << endl;
-            // if GRT is running now, do not send Prune msg
-            UpstreamInterface *upstream = sgState->upstreamInterface;
-            if (upstream->graftPruneState == UpstreamInterface::PRUNED && upstream->graftRetryTimer)
-            {
-                cancelAndDelete(upstream->graftRetryTimer);
-                upstream->graftRetryTimer = NULL;
-                sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
-            }
-
-            // if the source is not directly connected, sent Prune msg
-            if (!sgState->isFlagSet(PIMMulticastRoute::A) && upstream->graftPruneState != UpstreamInterface::PRUNED)
-            {
-                sendPrunePacket(upstream->rpfNeighbor(), sgState->source, sgState->group, pruneInterval, upstream->getInterfaceId());
-            }
-
-            upstream->graftPruneState = UpstreamInterface::PRUNED;
         }
     }
 }
@@ -1613,7 +1581,7 @@ void PIMDM::multicastReceiverRemoved(PIMInterface *pimInt, IPv4Address group)
  * (by different path).
  */
 // XXX Assert state causes RPF'(S) to change
-void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *newRpf)
+void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *route, InterfaceEntry *newRpf)
 {
     IPv4Address source = route->getOrigin();
     IPv4Address group = route->getMulticastGroup();
@@ -1633,7 +1601,7 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
 
     // set new upstream interface data
     IPv4Address newRpfNeighbor = pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress(); // XXX what happens if no neighbors?
-    UpstreamInterface *upstream = sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor);
+    UpstreamInterface *upstream = sgState->upstreamInterface = new UpstreamInterface(sgState, newRpf, newRpfNeighbor, false/*XXX*/);
     route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
     // delete rpf interface from the downstream interfaces
@@ -1656,7 +1624,7 @@ void PIMDM::rpfInterfaceHasChanged(PIMMulticastRoute *route, InterfaceEntry *new
     // upstream state transitions
 
     // RPF'(S) Changes AND olist(S,G) != NULL AND S is NOT directly connected?
-    if (!isOlistNull && !sgState->isFlagSet(PIMMulticastRoute::A))
+    if (!isOlistNull && !upstream->isSourceDirectlyConnected)
     {
         // The Upstream(S,G) state
         // machine MUST transition to the AckPending (AP) state, unicast a
@@ -1717,13 +1685,13 @@ PIMInterface *PIMDM::getIncomingInterface(IPv4Datagram *datagram)
     return NULL;
 }
 
-PIMMulticastRoute *PIMDM::getRouteFor(IPv4Address group, IPv4Address source)
+IPv4MulticastRoute *PIMDM::getRouteFor(IPv4Address group, IPv4Address source)
 {
     int numRoutes = rt->getNumMulticastRoutes();
     for (int i = 0; i < numRoutes; i++)
     {
-        PIMMulticastRoute *route = dynamic_cast<PIMMulticastRoute*>(rt->getMulticastRoute(i));
-        if (route && route->getMulticastGroup() == group && route->getOrigin() == source)
+        IPv4MulticastRoute *route = rt->getMulticastRoute(i);
+        if (route->getSource() == this && route->getMulticastGroup() == group && route->getOrigin() == source)
             return route;
     }
     return NULL;
@@ -1738,6 +1706,23 @@ PIMDM::SourceGroupState *PIMDM::getSourceGroupState(IPv4Address source, IPv4Addr
 void PIMDM::deleteSourceGroupState(IPv4Address source, IPv4Address group)
 {
     sgStates.erase(SourceAndGroup(source, group));
+}
+
+void PIMDM::updateRouteOutInterface(DownstreamInterface *downstream)
+{
+    IPv4MulticastRoute *route = getRouteFor(downstream->owner->group, downstream->owner->source);
+    ASSERT(route);
+
+    // remove out interface from route if downstream is not in olist
+    unsigned int numOutInterfaces = route->getNumOutInterfaces();
+    for (unsigned int i = 0; i < numOutInterfaces; i++)
+    {
+        IPv4MulticastRoute::OutInterface *outInterface = route->getOutInterface(i);
+        if (outInterface->getInterface() == downstream->ie)
+        {
+            outInterface->setEnabled(downstream->isInOlist());
+        }
+    }
 }
 
 PIMDM::Interface::~Interface()
@@ -1922,11 +1907,9 @@ PIMDM::DownstreamInterface *PIMDM::SourceGroupState::removeDownstreamInterface(i
 // boundary(G) = {all interfaces I with an administratively scoped boundary for group G}
 bool PIMDM::DownstreamInterface::isInOlist() const
 {
-    return pruneState != PRUNED && assertState != I_LOST_ASSERT;
-//    bool hasNeighbors = owner->owner->pimNbt->getNumNeighborsOnInterface(ie->getInterfaceId()) > 0;
-//    return ((hasNeighbors && pruneState != PRUNED) ||
-//            ie->ipv4Data()->hasMulticastListener(owner->group, owner->source))
-//           && assertState != I_LOST_ASSERT;
+    // TODO check boundary
+    bool hasNeighbors = owner->owner->pimNbt->getNumNeighborsOnInterface(ie->getInterfaceId()) > 0; // XXX optimize
+    return ((hasNeighbors && pruneState != PRUNED) || hasConnectedReceivers) && assertState != I_LOST_ASSERT;
 }
 
 bool PIMDM::SourceGroupState::isOilistNull()
