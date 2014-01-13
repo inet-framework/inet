@@ -35,7 +35,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public IRadio
     RadioMode radioMode;
     RadioReceptionState radioReceptionState;
     RadioTransmissionState radioTransmissionState;
-    RadioChannelState radioChannelState;
     int radioChannel;
     //@}
 
@@ -63,8 +62,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public IRadio
     virtual RadioReceptionState getRadioReceptionState() const { return radioReceptionState; }
 
     virtual RadioTransmissionState getRadioTransmissionState() const { return radioTransmissionState; }
-
-    virtual RadioChannelState getRadioChannelState() const { return radioChannelState; }
 
     virtual int getRadioChannel() const { return radioChannel; }
 

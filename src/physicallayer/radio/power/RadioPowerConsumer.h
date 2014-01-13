@@ -30,16 +30,15 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 {
   protected:
     // parameters
-    double sleepModePowerConsumption;
-    double receiverModeFreeChannelPowerConsumption;
-    double receiverModeBusyChannelPowerConsumption;
-    double receiverModeReceivingPowerConsumption;
-    double transmitterModeIdlePowerConsumption;
-    double transmitterModeTransmittingPowerConsumption;
-    double transceiverModeFreeChannelPowerConsumption;
-    double transceiverModeBusyChannelPowerConsumption;
-    double transceiverModeReceivingPowerConsumption;
-    double transceiverModeTransmittingPowerConsumption;
+    double offPowerConsumption;
+    double sleepPowerConsumption;
+    double switchingPowerConsumption;
+    double receiverIdlePowerConsumption;
+    double receiverBusyPowerConsumption;
+    double receiverSynchronizingPowerConsumption;
+    double receiverReceivingPowerConsumption;
+    double transmitterIdlePowerConsumption;
+    double transmitterTransmittingPowerConsumption;
 
     // environment
     IRadio *radio;

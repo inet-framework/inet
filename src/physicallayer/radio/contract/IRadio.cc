@@ -20,13 +20,11 @@
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
 simsignal_t IRadio::radioReceptionStateChangedSignal = cComponent::registerSignal("radioReceptionStateChanged");
 simsignal_t IRadio::radioTransmissionStateChangedSignal = cComponent::registerSignal("radioTransmissionStateChanged");
-simsignal_t IRadio::radioChannelStateChangedSignal = cComponent::registerSignal("radioChannelStateChanged");
 simsignal_t IRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
 cEnum *IRadio::radioModeEnum = NULL;
 cEnum *IRadio::radioReceptionStateEnum = NULL;
 cEnum *IRadio::radioTransmissionStateEnum = NULL;
-cEnum *IRadio::radioChannelStateEnum = NULL;
 
 Register_Enum(RadioMode,
               (IRadio::RADIO_MODE_OFF,
@@ -48,13 +46,6 @@ Register_Enum(RadioTransmissionState,
                IRadio::RADIO_TRANSMISSION_STATE_IDLE,
                IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING));
 
-Register_Enum(RadioChannelState,
-              (IRadio::RADIO_CHANNEL_STATE_FREE,
-               IRadio::RADIO_CHANNEL_STATE_BUSY,
-               IRadio::RADIO_CHANNEL_STATE_RECEIVING,
-               IRadio::RADIO_CHANNEL_STATE_TRANSMITTING,
-               IRadio::RADIO_CHANNEL_STATE_UNKNOWN));
-
 const char *IRadio::getRadioModeName(RadioMode radioMode)
 {
     if (!radioModeEnum)
@@ -74,11 +65,4 @@ const char *IRadio::getRadioTransmissionStateName(RadioTransmissionState radioTr
     if (!radioTransmissionStateEnum)
         radioTransmissionStateEnum = cEnum::get("RadioTransmissionState");
     return radioTransmissionStateEnum->getStringFor(radioTransmissionState) + 25;
-}
-
-const char *IRadio::getRadioChannelStateName(RadioChannelState radioChannelState)
-{
-    if (!radioChannelStateEnum)
-        radioChannelStateEnum = cEnum::get("RadioChannelState");
-    return radioChannelStateEnum->getStringFor(radioChannelState) + 20;
 }

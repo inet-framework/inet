@@ -52,7 +52,7 @@ void LMacLayer::initialize(int stage)
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::radioChannelStateChangedSignal, this);
+        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
         WATCH(macState);
@@ -623,10 +623,10 @@ void LMacLayer::handleLowerPacket(cPacket *msg)
  */
 void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == IRadio::radioChannelStateChangedSignal)
+    if (signalID == IRadio::radioTransmissionStateChangedSignal)
     {
-        IRadio::RadioChannelState newRadioChannelState = (IRadio::RadioChannelState)value;
-        if (radioChannelState == IRadio::RADIO_CHANNEL_STATE_TRANSMITTING && newRadioChannelState != IRadio::RADIO_CHANNEL_STATE_TRANSMITTING)
+        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
+        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
         {
             // if data is scheduled for transfer, don;t do anything.
             if (sendData->isScheduled())
@@ -643,7 +643,7 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
                     cancelEvent(timeout);
             }
         }
-        radioChannelState = newRadioChannelState;
+        radioTransmissionState = newRadioTransmissionState;
     }
 	else if (signalID == IRadio::radioModeChangedSignal)
     {

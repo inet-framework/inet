@@ -55,12 +55,6 @@ class INET_API IRadio : IPhysicalLayer
     static simsignal_t radioTransmissionStateChangedSignal;
 
     /**
-     * This signal is emitted every time the radio channel state changes.
-     * The signal value is the new radio channel state.
-     */
-    static simsignal_t radioChannelStateChangedSignal;
-
-    /**
      * This signal is emitted every time the radio channel changes.
      * The signal value is the new radio channel.
      */
@@ -175,49 +169,6 @@ class INET_API IRadio : IPhysicalLayer
     };
 
     /**
-     * This enumeration specifies the state of the radio channel at the radio.
-     */
-    enum RadioChannelState
-    {
-        /**
-         * The radio channel state is unknown, signal detection is not possible.
-         * e.g. the radio mode is off, sleep or transmitter.
-         */
-        RADIO_CHANNEL_STATE_UNKNOWN,
-
-        /**
-         * The radio channel is free to send, no signal is detected. (e.g. the
-         * RSSI is below the energy detection threshold)
-         */
-        RADIO_CHANNEL_STATE_FREE,
-
-        /**
-         * The radio channel is busy, a signal is detected but it is not strong
-         * enough to receive. (e.g. the RSSI is above the energy detection
-         * threshold but below the reception threshold)
-         */
-        RADIO_CHANNEL_STATE_BUSY,
-
-        /**
-         * The radio channel is busy, a signal strong enough to evaluate is detected,
-         * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
-         * above the reception threshold but the SNR is not yet evaluated)
-         */
-        RADIO_CHANNEL_STATE_SYNCRONIZING,
-
-        /**
-         * The radio channel is busy, a signal strong enough to receive is detected.
-         * (e.g. the SNR was above the reception threshold during synchronize)
-         */
-        RADIO_CHANNEL_STATE_RECEIVING,
-
-        /**
-         * The radio channel is busy, no signal detected due to ongoing transmission.
-         */
-        RADIO_CHANNEL_STATE_TRANSMITTING
-    };
-
-    /**
      * The enumeration registered for radio mode.
      */
     static cEnum *radioModeEnum;
@@ -231,11 +182,6 @@ class INET_API IRadio : IPhysicalLayer
      * The enumeration registered for radio transmission state.
      */
     static cEnum *radioTransmissionStateEnum;
-
-    /**
-     * The enumeration registered for radio channel state.
-     */
-    static cEnum *radioChannelStateEnum;
 
   public:
     virtual ~IRadio() { }
@@ -274,12 +220,6 @@ class INET_API IRadio : IPhysicalLayer
     virtual RadioTransmissionState getRadioTransmissionState() const = 0;
 
     /**
-     * Returns the current radio channel state. This is the same state as the one emitted
-     * with the last radioChannelStateChangedSignal
-     */
-    virtual RadioChannelState getRadioChannelState() const = 0;
-
-    /**
      * Returns the current radio channel. This is the same channel as the one emitted
      * with the last radioChannelChangedSignal.
      */
@@ -306,11 +246,6 @@ class INET_API IRadio : IPhysicalLayer
      * Returns the name of the provided radio transmission state.
      */
     static const char *getRadioTransmissionStateName(RadioTransmissionState radioTransmissionState);
-
-    /**
-     * Returns the name of the provided radio channel state.
-     */
-    static const char *getRadioChannelStateName(RadioChannelState radioChannelState);
 };
 
 #endif

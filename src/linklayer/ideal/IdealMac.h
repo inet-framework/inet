@@ -47,7 +47,7 @@ class INET_API IdealMac : public MACProtocolBase
     bool fullDuplex;
 
     IRadio *radio;
-    IRadio::RadioChannelState radioChannelState;
+    IRadio::RadioTransmissionState radioTransmissionState;
     IPassiveQueue *queueModule;
 
     int outStandingRequests;

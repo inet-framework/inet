@@ -114,7 +114,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 
     /** @brief The radio. */
     IRadio *radio;
-    IRadio::RadioChannelState radioChannelState;
+    IRadio::RadioTransmissionState radioTransmissionState;
 
     /** @name Different tracked statistics.*/
 	/*@{*/
