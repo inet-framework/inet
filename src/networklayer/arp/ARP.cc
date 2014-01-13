@@ -267,7 +267,8 @@ void ARP::initiateARPResolution(ARPCacheEntry *entry)
     IPv4Address nextHopAddr = entry->myIter->first;
     entry->pending = true;
     entry->numRetries = 0;
-    entry->lastUpdate = 0;
+    entry->lastUpdate = SIMTIME_ZERO;
+    entry->macAddress = MACAddress::UNSPECIFIED_ADDRESS;
     sendARPRequest(entry->ie, nextHopAddr);
 
     // start timer
@@ -564,16 +565,16 @@ void ARP::startAddressResolution(const IPv4Address& addr, const InterfaceEntry *
                 // an ARP request is already pending for this address
                 EV << "ARP resolution for " << addr << " is already pending\n";
             }
-            else if (it->second->lastUpdate + cacheTimeout < simTime())
+            else
             {
-                // ARP cache entry expired, send new ARP request
-                EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
+                if (it->second->lastUpdate + cacheTimeout < simTime())
+                    EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
+                else
+                    EV << "invalidate ARP cache entry for " << addr << ", starting new ARP resolution\n";
                 ARPCacheEntry *entry = it->second;
                 entry->ie = ie; // routing table may have changed
                 initiateARPResolution(entry);
             }
-            else
-                throw cRuntimeError("Address already in ARP cache: %s", addr.str().c_str());
         }
     }
 }
