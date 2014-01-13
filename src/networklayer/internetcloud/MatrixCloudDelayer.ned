@@ -30,11 +30,8 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 // delay, datarate or drop decision (all optional). Delay may be different for each 
 // packet, but the order of packet is preserved.
 //
-// Incoming packets must contain a parameter named "incomingInterfaceID" (usually 
-// added by ~InternetCloudTaggerChannel) and also an ~IPv4ControlInfo, ~IPv4RoutingDecision 
-// or ~IPv6ControlInfo containing the destination interface id. Using the interface IDs 
-// the module will look up the names of the connected nodes and use those names for 
-// matching against the rule database.
+// Using the interface IDs the module will look up the names of the connected nodes
+// and use those names for matching against the rule database.
 //
 // A possible xml configuration:
 // <pre>
@@ -61,7 +58,4 @@ simple MatrixCloudDelayer like ICloudDelayer
 {
     parameters:
         xml config;
-    gates:
-        input ipIn;
-        output ipOut;
 }

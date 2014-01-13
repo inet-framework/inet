@@ -130,6 +130,7 @@ MatrixCloudDelayer::~MatrixCloudDelayer()
 
 void MatrixCloudDelayer::initialize()
 {
+    CloudDelayerBase::initialize();
     host = findContainingNode(this);
     ift = InterfaceTableAccess().get(this);
     cXMLElement *configEntity = par("config").xmlValue();
