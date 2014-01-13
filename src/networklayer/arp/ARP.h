@@ -28,6 +28,7 @@
 #include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ModuleAccess.h"
+#include "NotificationBoard.h"
 
 // Forward declarations:
 class ARPPacket;
@@ -38,7 +39,7 @@ class IRoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public cListener
+class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public INotifiable
 {
   public:
     struct ARPCacheEntry;
@@ -105,8 +106,8 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     virtual MACAddress getMACAddressFor(const IPv4Address& addr) const;
     /// @}
 
-    // cListener
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    // INotifiable
+    virtual void receiveChangeNotification(int category, const cObject *details);
 
   protected:
     virtual void initialize(int stage);

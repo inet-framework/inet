@@ -33,6 +33,7 @@
 #include "IPv4InterfaceData.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
 
 Define_Module(IPv4);
 
@@ -51,6 +52,7 @@ void IPv4::initialize(int stage)
 
         ift = InterfaceTableAccess().get();
         rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
+        nb = NotificationBoardAccess().getIfExists(); // needed only for multicast forwarding
 
         arpInGate = gate("arpIn");
         arpOutGate = gate("arpOut");
@@ -527,7 +529,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     if (!route)
     {
         EV << "Multicast route does not exist, try to add.\n";
-        emit(NF_IPv4_NEW_MULTICAST, datagram);
+        nb->fireChangeNotification(NF_IPv4_NEW_MULTICAST, datagram);
 
         // read new record
         route = rt->findBestMatchingMulticastRoute(srcAddr, destAddr);
@@ -544,7 +546,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     if (route->getInInterface() && fromIE != route->getInInterface()->getInterface())
     {
         EV << "Did not arrive on input interface, packet dropped.\n";
-        emit(NF_IPv4_DATA_ON_NONRPF, datagram);
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_NONRPF, datagram);
         numDropped++;
         delete datagram;
     }
@@ -557,7 +559,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
     }
     else
     {
-        emit(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
+        nb->fireChangeNotification(NF_IPv4_DATA_ON_RPF, datagram); // forwarding hook
 
         numForwarded++;
         // copy original datagram for multiple destinations
@@ -580,7 +582,7 @@ void IPv4::forwardMulticastPacket(IPv4Datagram *datagram, const InterfaceEntry *
             }
         }
 
-        emit(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
+        nb->fireChangeNotification(NF_IPv4_MDATA_REGISTER, datagram); // postRouting hook
 
         // only copies sent, delete original datagram
         delete datagram;

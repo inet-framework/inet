@@ -35,7 +35,7 @@ class ARPPacket;
 class ICMPMessage;
 class IInterfaceTable;
 class IRoutingTable;
-
+class NotificationBoard;
 
 /**
  * Implements the IPv4 protocol.
@@ -66,6 +66,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     IRoutingTable *rt;
     IInterfaceTable *ift;
+    NotificationBoard *nb;
     IARPCache *arp;
     ICMPAccess icmpAccess;
     cGate *arpInGate;

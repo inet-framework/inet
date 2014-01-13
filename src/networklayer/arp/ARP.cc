@@ -132,9 +132,9 @@ void ARP::initialize(int stage)
             ASSERT(where->second == entry);
             entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         }
-        cModule *host = findContainingNode(this);
-        if (host != NULL)
-            host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
+        NotificationBoard *nb = NotificationBoardAccess().getIfExists();
+        if (nb != NULL)
+            nb->subscribe(this, NF_INTERFACE_IPv4CONFIG_CHANGED);
     }
 }
 
@@ -610,13 +610,14 @@ IPv4Address ARP::getIPv4AddressFor(const MACAddress& macAddr) const
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
 
-void ARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+
+void ARP::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
-    if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
+    if (category == NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
-        const InterfaceEntry *ie = check_and_cast<const InterfaceEntry *>(obj);
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(const_cast<cObject *>(details));
         // rebuild the arp cache
         if (ie->isLoopback())
             return;

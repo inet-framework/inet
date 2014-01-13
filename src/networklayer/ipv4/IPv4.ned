@@ -90,14 +90,11 @@ simple IPv4
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
+        string protocolMapping;
         double fragmentTimeout @unit("s") = default(60s);
         bool forceBroadcast = default(false);
         bool useProxyARP = default(true);
         @display("i=block/routing");
-        @signal[NF_IPv4_NEW_MULTICAST](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_NONRPF](type=IPv4Datagram);
-        @signal[NF_IPv4_DATA_ON_RPF](type=IPv4Datagram);
-        @signal[NF_IPv4_MDATA_REGISTER](type=IPv4Datagram);
     gates:
         input transportIn[] @labels(IPv4ControlInfo/down,TCPSegment,UDPPacket);
         output transportOut[] @labels(IPv4ControlInfo/up,TCPSegment,UDPPacket);

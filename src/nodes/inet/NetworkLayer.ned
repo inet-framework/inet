@@ -37,6 +37,8 @@ module NetworkLayer
         @display("i=block/fork");
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
+        ip.routingTableModule = default("^.^.routingTable");
+        arp.routingTableModule = default("^.^.routingTable");
     gates:
         input ifIn[] @labels(IPv4Datagram);
         input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
@@ -64,18 +66,18 @@ module NetworkLayer
         ip: IPv4 {
             parameters:
                 protocolMapping = "6:0,17:1,1:2,2:3,46:4,89:5,132:6,48:7,138:7"; // see: http://www.iana.org/assignments/protocol-numbers
+                useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=85,95;q=queue");
             gates:
                 transportIn[8];
                 transportOut[8];
                 queueIn[sizeof(ifIn)];
+                queueOut[sizeof(ifOut)];
         }
         arp: ARP {
             parameters:
-                proxyARP = proxyARP;
+                respondToProxyARP = proxyARP;
                 @display("p=202,142;q=pendingQueue");
-            gates:
-                nicOut[sizeof(ifOut)];
         }
         icmp: ICMP {
             parameters:
@@ -125,7 +127,8 @@ module NetworkLayer
 
         icmp.errorOut --> errorHandling.in;
 
-        ip.queueOut --> arp.ipIn;
+        ip.arpOut --> arp.netwIn;
+        arp.netwOut --> ip.arpIn;
 
         igmp.routerOut --> igmpOut;
         igmp.routerIn <-- igmpIn;
@@ -134,7 +137,7 @@ module NetworkLayer
             ifIn[i] --> { @display("m=s"); } --> ip.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
+            ip.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }
 

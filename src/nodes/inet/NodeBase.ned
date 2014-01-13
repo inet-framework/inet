@@ -82,6 +82,8 @@ module NodeBase
         // network layer
         networkLayer: NetworkLayer {
             parameters:
+                ip.routingTableModule = "^.^.routingTable";
+                arp.routingTableModule = "^.^.routingTable";
                 @display("p=329,287;q=queue");
         }
 
