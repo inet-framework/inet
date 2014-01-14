@@ -28,6 +28,7 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
+#include "PhyControlInfo_m.h"
 #include "opp_utils.h"
 
 
@@ -191,9 +192,9 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
-    if (frame->hasBitError())
+    if (frame->hasBitError() || frame->getKind() == BITERROR || frame->getKind() == COLLISION)
     {
-        EV << "Bit error in " << frame << ", discarding" << endl;
+        EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         delete frame;
         return;
     }
