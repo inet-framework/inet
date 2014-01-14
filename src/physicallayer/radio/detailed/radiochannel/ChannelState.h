@@ -7,7 +7,7 @@
 /**
  * @brief Provides information about the current state of the channel:
  *
- * idle/busy - is the physical currently receiving something?
+ * idle/receiving - is the physical currently receiving something?
  * RSSI - the currently received signal strength indicator.
  *
  * @ingroup decider
@@ -19,8 +19,8 @@ protected:
 	/** @brief defines if the channel is currently idle */
 	bool idle;
 
-    /** @brief defines if the channel is currently receiving */
-	bool receiving;
+    /** @brief defines if the channel is currently busy */
+	bool busy;
 
 	/** @brief the current RSSI value of the channel */
 	double rssi;
@@ -33,8 +33,8 @@ public:
 	 * idle - defines if the channel is currently idle
 	 * rssi - the current RSSI value of the channel
 	 */
-	ChannelState(bool idle = false, bool receiving = false, double rssi = 0.0) :
-		idle(idle), receiving(receiving), rssi(rssi) {}
+	ChannelState(bool idle = false, bool busy = false, double rssi = 0.0) :
+		idle(idle), busy(busy), rssi(rssi) {}
 
 	/**
 	 * @brief Returns true if the channel is considered idle, meaning
@@ -42,9 +42,9 @@ public:
 	 */
 	bool isIdle() const { return idle; }
 
-	bool isBusy() const { return !idle && !receiving; }
+	bool isBusy() const { return busy; }
 
-	bool isReceiving() const { return receiving; }
+	bool isReceiving() const { return !idle; }
 
 	/**
 	 * @brief Returns the current RSSI value of the channel.
@@ -54,14 +54,14 @@ public:
 	/**
 	 * @brief Output for this ChannelState.
 	 *
-	 * Of the form "[<idle/busy> with rssi of x]".
+	 * Of the form "[<idle/receiving> with rssi of x]".
 	 */
 	std::string info() const {
 		std::stringstream os;
 		if (idle) {
 			os << "[idle with rssi of ";
 		} else {
-			os << "[busy with rssi of ";
+			os << "[receiving with rssi of ";
 		}
 		os << rssi << "]";
 		return os.str();

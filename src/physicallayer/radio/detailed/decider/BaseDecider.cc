@@ -24,7 +24,7 @@
  * calculation time.
  * Maybe this should be done only in RX mode!?
  */
-static const bool bUseNewSense = true;
+static const bool bUseNewSense = false;
 
 std::size_t BaseDecider::tProcessingSignal::interferenceWith(const first_type& frame) {
     if (frame->getSignal().getReceptionEnd() > busyUntilTime) {
@@ -380,7 +380,7 @@ void BaseDecider::answerCSR(CSRInfo& requestInfo)
 
 	// put the sensing-result to the request and
 	// send it to the Mac-Layer as Control-message (via Interface)
-	requestInfo.getRequest()->setResult( ChannelState(!currentSignal.isProcessing() && (!bUseNewSense || pairRssiMaxEnd.second <= now), pairRssiMaxEnd.first) );
+	requestInfo.getRequest()->setResult( ChannelState(!currentSignal.isProcessing() && (!bUseNewSense || pairRssiMaxEnd.second <= now), false, pairRssiMaxEnd.first) );
 
     EV_DEBUG << "answerCSR: channel_sense_rssi_t(" << pairRssiMaxEnd.first << ", " << pairRssiMaxEnd.second << ")@[" << SIMTIME_STR(requestInfo.getSenseStart()) << ", " << SIMTIME_STR(now) << "] ChannelState(" << requestInfo.getRequest()->getResult().isIdle() << ", " << requestInfo.getRequest()->getResult().getRSSI() << ")" << std::endl;
 

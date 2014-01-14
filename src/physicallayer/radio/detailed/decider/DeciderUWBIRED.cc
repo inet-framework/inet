@@ -359,7 +359,7 @@ pair<double, double> DeciderUWBIRED::integrateWindow( int                       
 }
 
 ChannelState DeciderUWBIRED::getChannelState() const {
-	return ChannelState(true, 0);  // channel is always "sensed" free
+	return ChannelState(true, false, 0);  // channel is always "sensed" free
 }
 
 void DeciderUWBIRED::finish() {

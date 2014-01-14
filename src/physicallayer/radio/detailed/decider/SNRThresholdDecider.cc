@@ -72,25 +72,7 @@ bool SNRThresholdDecider::checkIfAboveThreshold(Mapping* map, simtime_t_cref sta
 ChannelState SNRThresholdDecider::getChannelState() const
 {
 	ChannelState csBase = BaseDecider::getChannelState();
-
-	bool receiving = false;
-	DetailedRadioFrame *frame = currentSignal.first;
-	if (frame) {
-        Mapping* snrMap = calculateSnrMapping(frame);
-        assert(snrMap);
-
-        const DetailedRadioSignal& signal = frame->getSignal();
-        snrMap->print(std::cout);
-
-        // NOTE: Since this decider does not consider the amount of time when the signal's SNR is
-        // below the threshold even the smallest (normally insignificant) drop causes this decider
-        // to reject reception of the signal.
-        // Since the default MiXiM-signal is still zero at its exact start and end, these points
-        // are ignored in the interval passed to the following method.
-        receiving = checkIfAboveThreshold(snrMap, MappingUtils::post(signal.getReceptionStart()), MappingUtils::pre(signal.getReceptionEnd()));
-	}
-
-	return ChannelState(/*csBase.isIdle() &&*/ isIdleRSSI(csBase.getRSSI()), receiving, csBase.getRSSI());
+	return ChannelState(csBase.isIdle(), !isIdleRSSI(csBase.getRSSI()), csBase.getRSSI());
 }
 
 void SNRThresholdDecider::answerCSR(CSRInfo& requestInfo)
