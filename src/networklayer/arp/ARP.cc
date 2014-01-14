@@ -83,8 +83,6 @@ void ARP::initialize(int stage)
         respondToProxyARP = par("respondToProxyARP");
         globalARP = par("globalARP");
 
-        pendingQueue.setName("pendingQueue");
-
         netwOutGate = gate("netwOut");
 
         // init statistics
@@ -223,7 +221,6 @@ bool ARP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 
 void ARP::start()
 {
-    ASSERT(pendingQueue.isEmpty());
     ASSERT(arpCache.empty());
     isUp = true;
 }
@@ -247,10 +244,7 @@ void ARP::flush()
         delete entry;
         arpCache.erase(i);
     }
-
-    pendingQueue.clear();
 }
-
 
 bool ARP::isNodeUp()
 {

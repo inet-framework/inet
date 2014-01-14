@@ -84,8 +84,6 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     static ARPCache globalArpCache;
     static int globalArpCacheRefCnt;
 
-    cQueue pendingQueue; // outbound packets waiting for ARP resolution
-
     cGate *netwOutGate;
 
     IInterfaceTable *ift;
