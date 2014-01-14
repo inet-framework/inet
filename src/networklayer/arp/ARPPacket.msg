@@ -55,7 +55,7 @@ enum ARPOpcode
 //
 packet ARPPacket
 {
-    int opcode enum(ARPOpcode);
+    int opcode @enum(ARPOpcode);
     MACAddress srcMACAddress;
     MACAddress destMACAddress;
     IPv4Address srcIPAddress;
