@@ -40,21 +40,6 @@ class DeciderResult;
  * @ingroup baseModules
  */
 class INET_API BaseDecider: public Decider {
-public:
-	/**
-	 * @brief The kinds of ControlMessages this Decider sends.
-	 *
-	 * Sub-classing decider should begin their own kind enumeration
-	 * at the value of "LAST_BASE_DECIDER_CONTROL_KIND".
-	 */
-	enum BaseDeciderControlKinds {
-		/** @brief The phy has recognized a bit error in the packet.*/
-		PACKET_DROPPED = 22100,
-		/** @brief Sub-classing decider should begin their own kinds at this
-		 * value.*/
-		LAST_BASE_DECIDER_CONTROL_KIND
-	};
-
 protected:
 
 	/** @brief The current state of processing for a signal*/

@@ -13,6 +13,7 @@
 #include "DetailedRadioFrame.h"
 #include "PhyToMacControlInfo.h"
 #include "FWMath.h"
+#include "PhyControlInfo_m.h"
 
 /** @brief Flag for channel sense (channel idle) handling.
  *
@@ -163,21 +164,14 @@ simtime_t BaseDecider::processSignalEnd(DetailedRadioFrame* frame) {
     }
 	else {
         EV_DEBUG << "AirFrame was not received correctly, sending it as control message to upper layer" << endl;
-        cPacket* pMacPacket = frame->decapsulate();
         if (currentSignal.getInterferenceCnt() > 0) {
             ++nbFramesWithInterferenceDropped;
         }
         else {
             ++nbFramesWithoutInterferenceDropped;
         }
-        if (pMacPacket) {
-            pMacPacket->setName("ERROR");
-            pMacPacket->setKind(PACKET_DROPPED);
-            if (pResult) {
-                PhyToMacControlInfo::setControlInfo(pMacPacket, pResult);
-            }
-            phy->sendControlMsgToMac(pMacPacket);
-        }
+        frame->getEncapsulatedPacket()->setKind(BITERROR);
+        phy->sendUp(frame, pResult);
     }
     currentSignal.finishProcessing();
 
