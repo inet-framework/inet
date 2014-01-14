@@ -27,6 +27,7 @@
 #include "UDPPacket.h"
 #include "ModuleAccess.h"
 #include "IPv4.h"
+#include "ControlManetRouting_m.h"
 
 Define_Module( DYMO );
 

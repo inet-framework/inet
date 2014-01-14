@@ -11,8 +11,6 @@
 #include "IPv4Datagram.h"
 #include "RoutingTable.h"
 #include "ICMPAccess.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4Datagram.h"
 #include "ProtocolMap.h"
 
 

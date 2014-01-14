@@ -128,7 +128,6 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
         /* Get hardware destination address */
         IPv4ControlInfo *controlInfo = check_and_cast<IPv4ControlInfo*>(p->getControlInfo());
         IPv4Address nextIp((uint32_t)dp->nxt_hop.s_addr);
-        controlInfo->setNextHopAddr(nextIp);
         p->setNextAddress(nextIp);
     }
     /*
@@ -317,6 +316,9 @@ void DSRUU::initialize(int stage)
         lc_timer.setOwer(this);
         ack_timer.setOwer(this);
         etx_timer.setOwer(this);
+
+        initHook(this);
+
         is_init = true;
     }
 
