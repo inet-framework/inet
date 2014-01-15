@@ -40,7 +40,7 @@ void FlatNetworkConfigurator6::initialize(int stage)
 
         // extract topology
         topo.extractByProperty("node");
-        EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
+        EV_DEBUG << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
         configureAdvPrefixes(topo);
 

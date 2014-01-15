@@ -65,7 +65,7 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
 {
     // extract topology
     topo.extractByProperty("node");
-    EV << "cTopology found " << topo.getNumNodes() << " nodes\n";
+    EV_DEBUG << "cTopology found " << topo.getNumNodes() << " nodes\n";
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
     nodeInfo.resize(topo.getNumNodes());
@@ -141,7 +141,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         if (numIntf!=1)
             continue; // only deal with nodes with one interface plus loopback
 
-        EV << "  " << node->getModule()->getFullName() << "=" << nodeInfo[i].address
+        EV_INFO << "  " << node->getModule()->getFullName() << "=" << nodeInfo[i].address
            << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
@@ -196,8 +196,8 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& _topo, NodeInfoVector
             if (!ie)
                 throw cRuntimeError("%s has no interface for output gate id %d", ift->getFullPath().c_str(), outputGateId);
 
-            EV << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
-            EV << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
+            EV_INFO << "  from " << atNode->getModule()->getFullName() << "=" << IPv4Address(atAddr);
+            EV_INFO << " towards " << destModName << "=" << IPv4Address(destAddr) << " interface " << ie->getName() << endl;
 
             // add route
             IIPv4RoutingTable *rt = nodeInfo[j].rt;
