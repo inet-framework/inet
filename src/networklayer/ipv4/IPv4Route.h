@@ -35,7 +35,7 @@ class INET_API IPv4Route : public cObject
 {
   public:
     /** Specifies where the route comes from */
-    enum RouteSource
+    enum SourceType
     {
         MANUAL,       ///< manually added static route
         IFACENETMASK, ///< comes from an interface's netmask
@@ -73,7 +73,7 @@ class INET_API IPv4Route : public cObject
     IPv4Address netmask;  ///< Route mask
     IPv4Address gateway;  ///< Next hop
     InterfaceEntry *interfacePtr; ///< interface
-    RouteSource source;   ///< manual, routing prot, etc.
+    SourceType sourceType;   ///< manual, routing prot, etc.
     unsigned int adminDist; ///< Cisco like administrative distance
     int metric;           ///< Metric ("cost" to reach the destination)
 
@@ -91,7 +91,7 @@ class INET_API IPv4Route : public cObject
     void changed(int fieldCode);
 
   public:
-    IPv4Route() : rt(NULL), interfacePtr(NULL), source(MANUAL), adminDist(dUnknown),
+    IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
                   metric(0) {}
     virtual ~IPv4Route() {}
     virtual std::string info() const;
@@ -112,7 +112,7 @@ class INET_API IPv4Route : public cObject
     virtual void setNetmask(IPv4Address _netmask)  { if (netmask != _netmask) {netmask = _netmask; changed(F_NETMASK);} }
     virtual void setGateway(IPv4Address _gateway)  { if (gateway != _gateway) {gateway = _gateway; changed(F_GATEWAY);} }
     virtual void setInterface(InterfaceEntry *_interfacePtr)  { if (interfacePtr != _interfacePtr) {interfacePtr = _interfacePtr; changed(F_IFACE);} }
-    virtual void setSource(RouteSource _source)  { if (source != _source) {source = _source; changed(F_SOURCE);} }
+    virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setAdminDist(unsigned int _adminDist)  { if (adminDist != _adminDist) { adminDist = _adminDist; changed(F_ADMINDIST);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }
 
@@ -132,7 +132,7 @@ class INET_API IPv4Route : public cObject
     const char *getInterfaceName() const;
 
     /** Source of route. MANUAL (read from file), from routing protocol, etc */
-    RouteSource getSource() const {return source;}
+    SourceType getSourceType() const {return sourceType;}
 
     /** Route source specific preference value */
     unsigned int getAdminDist() const  { return adminDist; }

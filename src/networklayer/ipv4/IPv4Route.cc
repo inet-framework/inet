@@ -47,7 +47,7 @@ std::string IPv4Route::info() const
     out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
 
-    switch (source)
+    switch (sourceType)
     {
         case MANUAL:       out << " MANUAL"; break;
         case IFACENETMASK: out << " IFACENETMASK"; break;
@@ -70,7 +70,7 @@ std::string IPv4Route::detailedInfo() const
 bool IPv4Route::equals(const IPv4Route& route) const
 {
     return rt == route.rt && dest == route.dest && netmask == route.netmask && gateway == route.gateway &&
-           interfacePtr == route.interfacePtr && source == route.source && metric == route.metric;
+           interfacePtr == route.interfacePtr && sourceType == route.sourceType && metric == route.metric;
 }
 
 const char *IPv4Route::getInterfaceName() const

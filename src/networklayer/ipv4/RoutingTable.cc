@@ -853,7 +853,7 @@ void RoutingTable::updateNetmaskRoutes()
     // first, delete all routes with src=IFACENETMASK
     for (unsigned int k=0; k<routes.size(); k++)
     {
-        if (routes[k]->getSource()==IPv4Route::IFACENETMASK)
+        if (routes[k]->getSourceType()==IPv4Route::IFACENETMASK)
         {
             std::vector<IPv4Route *>::iterator it = routes.begin()+(k--);  // '--' is necessary because indices shift down
             IPv4Route *route = *it;
@@ -873,7 +873,7 @@ void RoutingTable::updateNetmaskRoutes()
         if (ie->ipv4Data() && ie->ipv4Data()->getNetmask()!=IPv4Address::ALLONES_ADDRESS)
         {
             IPv4Route *route = createNewRoute();
-            route->setSource(IPv4Route::IFACENETMASK);
+            route->setSourceType(IPv4Route::IFACENETMASK);
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPv4Address());

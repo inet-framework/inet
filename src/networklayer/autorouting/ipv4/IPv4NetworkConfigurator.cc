@@ -207,7 +207,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         IPv4Route *original = node->staticRoutes[i];
         IPv4Route *clone = new IPv4Route();
         clone->setMetric(original->getMetric());
-        clone->setSource(original->getSource());
+        clone->setSourceType(original->getSourceType());
         clone->setDestination(original->getDestination());
         clone->setNetmask(original->getNetmask());
         clone->setGateway(original->getGateway());
@@ -1746,7 +1746,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
             route->setNetmask(sourceInterfaceInfo->getNetmask());
             route->setInterface(sourceInterfaceEntry);
-            route->setSource(IPv4Route::MANUAL);
+            route->setSourceType(IPv4Route::MANUAL);
             sourceNode->staticRoutes.push_back(route);
 
             // add a default route towards the only one gateway
@@ -1756,7 +1756,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
             route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
             route->setGateway(gateway);
             route->setInterface(sourceInterfaceEntry);
-            route->setSource(IPv4Route::MANUAL);
+            route->setSourceType(IPv4Route::MANUAL);
             sourceNode->staticRoutes.push_back(route);
 
             // skip building and optimizing the whole routing table
@@ -1818,7 +1818,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                             route->setInterface(sourceInterfaceEntry);
                             if (gatewayAddress != destinationAddress)
                                 route->setGateway(gatewayAddress);
-                            route->setSource(IPv4Route::MANUAL);
+                            route->setSourceType(IPv4Route::MANUAL);
                             if (containsRoute(sourceNode->staticRoutes, route))
                                 delete route;
                             else {
@@ -1843,7 +1843,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
  */
 bool IPv4NetworkConfigurator::routesHaveSameColor(IPv4Route *route1, IPv4Route *route2)
 {
-    return route1->getSource() == route2->getSource() && route1->getMetric() == route2->getMetric() &&
+    return route1->getSourceType() == route2->getSourceType() && route1->getMetric() == route2->getMetric() &&
            route1->getGateway() == route2->getGateway() && route1->getInterface() == route2->getInterface();
 }
 
@@ -2147,7 +2147,7 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
         optimizedRoute->setNetmask(IPv4Address(routeInfo->netmask));
         optimizedRoute->setInterface(routeColor->getInterface());
         optimizedRoute->setGateway(routeColor->getGateway());
-        optimizedRoute->setSource(routeColor->getSource());
+        optimizedRoute->setSourceType(routeColor->getSourceType());
         optimizedRoute->setMetric(routeColor->getMetric());
         optimizedRoutes.push_back(optimizedRoute);
         delete routeInfo;

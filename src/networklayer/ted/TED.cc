@@ -294,7 +294,7 @@ void TED::rebuildRoutingTable()
             entry->setGateway(V[nHop].node);
         }
         entry->setInterface(rt->getInterfaceByAddress(getInterfaceAddrByPeerAddress(V[nHop].node)));
-        entry->setSource(IPv4Route::OSPF);
+        entry->setSourceType(IPv4Route::OSPF);
 
         entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
         entry->setMetric(0);
@@ -313,7 +313,7 @@ void TED::rebuildRoutingTable()
         entry->setDestination(getPeerByLocalAddress(interfaceAddrs[i]));
         entry->setGateway(IPv4Address());
         entry->setInterface(rt->getInterfaceByAddress(interfaceAddrs[i]));
-        entry->setSource(IPv4Route::OSPF);
+        entry->setSourceType(IPv4Route::OSPF);
 
         entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
         entry->setMetric(0); // XXX FIXME what's that?

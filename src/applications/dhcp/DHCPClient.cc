@@ -378,7 +378,7 @@ void DHCPClient::bindLease()
         route->setNetmask(IPv4Address());
         route->setGateway(lease->gateway);
         route->setInterface(ie);
-        route->setSource(IPv4Route::MANUAL);
+        route->setSourceType(IPv4Route::MANUAL);
         irt->addRoute(route);
     }
 
