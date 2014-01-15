@@ -109,7 +109,7 @@ std::string IPv4MulticastRoute::info() const
         out << outInterfaces[i]->getInterface()->getName();
     }
 
-    switch (source)
+    switch (sourceType)
     {
         case MANUAL:       out << " MANUAL"; break;
         case DVMRP:        out << " DVRMP"; break;

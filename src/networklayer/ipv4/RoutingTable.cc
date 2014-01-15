@@ -874,6 +874,7 @@ void RoutingTable::updateNetmaskRoutes()
         {
             IPv4Route *route = createNewRoute();
             route->setSourceType(IPv4Route::IFACENETMASK);
+            route->setSource(ie);
             route->setDestination(ie->ipv4Data()->getIPAddress().doAnd(ie->ipv4Data()->getNetmask()));
             route->setNetmask(ie->ipv4Data()->getNetmask());
             route->setGateway(IPv4Address());

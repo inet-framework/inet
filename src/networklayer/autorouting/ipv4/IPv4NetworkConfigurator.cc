@@ -208,6 +208,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         IPv4Route *clone = new IPv4Route();
         clone->setMetric(original->getMetric());
         clone->setSourceType(original->getSourceType());
+        clone->setSource(original->getSource());
         clone->setDestination(original->getDestination());
         clone->setNetmask(original->getNetmask());
         clone->setGateway(original->getGateway());
@@ -218,6 +219,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         IPv4MulticastRoute *original = node->staticMulticastRoutes[i];
         IPv4MulticastRoute *clone = new IPv4MulticastRoute();
         clone->setMetric(original->getMetric());
+        clone->setSourceType(original->getSourceType());
         clone->setSource(original->getSource());
         clone->setOrigin(original->getOrigin());
         clone->setOriginNetmask(original->getOriginNetmask());
@@ -1465,6 +1467,7 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
 
                         // create and add route
                         IPv4Route *route = new IPv4Route();
+                        route->setSourceType(IPv4Route::MANUAL);
                         route->setDestination(destination);
                         route->setNetmask(netmask);
                         route->setGateway(gateway); // may be unspecified
@@ -1565,6 +1568,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                         {
                             // create and add route
                             IPv4MulticastRoute *route = new IPv4MulticastRoute();
+                            route->setSourceType(IPv4MulticastRoute::MANUAL);
                             route->setOrigin(source);
                             route->setOriginNetmask(netmask);
                             route->setMulticastGroup(groups[j]);
