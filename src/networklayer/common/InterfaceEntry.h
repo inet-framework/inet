@@ -191,6 +191,8 @@ class INET_API InterfaceEntry : public cNamedObject
     Ieee8021dInterfaceData *ieee8021dData() const {return ieee8021ddata;}
     //@}
 
+    virtual void joinMulticastGroup(const IPv4Address & address) const;
+
     /** @name Installing protocol-specific interface data */
     //@{
     virtual void setIPv4Data(IPv4InterfaceData *p);

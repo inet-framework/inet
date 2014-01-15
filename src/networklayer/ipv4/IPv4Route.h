@@ -45,6 +45,7 @@ class INET_API IPv4Route : public cObject
         ZEBRA,        ///< managed by the Quagga/Zebra based model
         MANET,        ///< managed by manet, search exact address
         MANET2,       ///< managed by manet, search approximate address
+        DYMO,         ///< managed by xDymo
     };
 
     /** Cisco like administrative distances */

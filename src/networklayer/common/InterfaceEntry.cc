@@ -266,3 +266,11 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
     return NULL;
 }
 
+void InterfaceEntry::joinMulticastGroup(const IPv4Address & address) const
+{
+#ifdef WITH_IPv4
+    if (ipv4data)
+        ipv4data->joinMulticastGroup(address);
+#endif
+}
+

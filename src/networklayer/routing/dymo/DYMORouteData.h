@@ -6,7 +6,7 @@
 #define __INET_DYMOROUTE_H_
 
 #include <omnetpp.h>
-#include "IRoute.h"
+#include "IPv4Route.h"
 #include "DYMOdefs.h"
 
 DYMO_NAMESPACE_BEGIN

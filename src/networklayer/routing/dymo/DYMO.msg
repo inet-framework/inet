@@ -17,11 +17,11 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "IPv4Address.h"
 #include "DYMOdefs.h"
 }}
 
-class noncobject Address;
+class noncobject IPv4Address;
 
 class noncobject DYMOSequenceNumber;
 
@@ -34,7 +34,7 @@ namespace DYMO;
 //
 
 class AddressBlock {
-    Address address;
+    IPv4Address address;
     int prefixLength;
     bool hasValidityTime;
     simtime_t validityTime;
@@ -51,7 +51,7 @@ class AddressBlock {
 //
 
 message RREQTimer {
-    Address target;
+    IPv4Address target;
 }
 
 message RREQWaitRREPTimer extends RREQTimer {
