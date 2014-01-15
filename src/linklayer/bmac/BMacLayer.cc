@@ -20,6 +20,7 @@
 #include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
+#include "PhyControlInfo_m.h"
 
 Define_Module(BMacLayer)
 
@@ -585,8 +586,14 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
  */
 void BMacLayer::handleLowerPacket(cPacket *msg)
 {
-	// simply pass the massage as self message, to be processed by the FSM.
-	handleSelfMessage(msg);
+    if (msg->getKind() == BITERROR || msg->getKind() == COLLISION) {
+        EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
+        delete msg;
+        return;
+    }
+    else
+        // simply pass the massage as self message, to be processed by the FSM.
+        handleSelfMessage(msg);
 }
 
 void BMacLayer::sendDataPacket()
