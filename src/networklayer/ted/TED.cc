@@ -133,7 +133,7 @@ void TED::initializeTED()
         // use g->getChannel()->par("delay").doubleValue() for shortest delay calculation
         entry.metric = ie->ipv4Data()->getMetric();
 
-        EV << "metric set to=" << entry.metric << endl;
+        EV_INFO << "metric set to=" << entry.metric << endl;
 
         entry.sourceId = routerId.getInt();
         entry.messageId = ++maxMessageId;
@@ -235,7 +235,7 @@ IPAddressVector TED::calculateShortestPath(IPAddressVector dest,
 
 void TED::rebuildRoutingTable()
 {
-    EV << "rebuilding routing table at " << routerId << endl;
+    EV_INFO << "rebuilding routing table at " << routerId << endl;
 
     std::vector<vertex_t> V = calculateShortestPaths(ted, 0.0, 7);
 
@@ -301,7 +301,7 @@ void TED::rebuildRoutingTable()
         entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
         entry->setMetric(0);
 
-        EV << "  inserting route: dest=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
+        EV_DETAIL << "  inserting route: dest=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << " nexthop=" << entry->getGateway() << "\n";
 
         rt->addRoute(entry);
     }
@@ -320,7 +320,7 @@ void TED::rebuildRoutingTable()
         entry->setNetmask(IPv4Address::ALLONES_ADDRESS);
         entry->setMetric(0); // XXX FIXME what's that?
 
-        EV << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
+        EV_DETAIL << "  inserting route: local=" << interfaceAddrs[i] << " peer=" << entry->getDestination() << " interface=" << entry->getInterfaceName() << "\n";
 
         rt->addRoute(entry);
     }
