@@ -52,12 +52,12 @@ void MPLS::handleMessage(cMessage * msg)
 {
     if (!strcmp(msg->getArrivalGate()->getName(), "ifIn"))
     {
-        EV << "Processing message from L2: " << msg << endl;
+        EV_INFO << "Processing message from L2: " << msg << endl;
         processPacketFromL2(msg);
     }
     else if (!strcmp(msg->getArrivalGate()->getName(), "netwIn"))
     {
-        EV << "Processing message from L3: " << msg << endl;
+        EV_INFO << "Processing message from L3: " << msg << endl;
         processPacketFromL3(msg);
     }
     else
@@ -105,7 +105,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
 
     if (!pct->lookupLabel(ipdatagram, outLabel, outInterface, color))
     {
-        EV << "no mapping exists for this packet" << endl;
+        EV_WARN << "no mapping exists for this packet" << endl;
         return false;
     }
 
@@ -117,7 +117,7 @@ bool MPLS::tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
     mplsPacket->encapsulate(ipdatagram);
     doStackOps(mplsPacket, outLabel);
 
-    EV << "forwarding packet to " << outInterface << endl;
+    EV_INFO << "forwarding packet to " << outInterface << endl;
 
     mplsPacket->addPar("color") = color;
 
@@ -142,7 +142,7 @@ void MPLS::labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram)
     // handling our outgoing IPv4 traffic that didn't match any FEC/LSP
     // do not use labelAndForwardIPv4Datagram for packets arriving to ingress!
 
-    EV << "FEC not resolved, doing regular L3 routing" << endl;
+    EV_INFO << "FEC not resolved, doing regular L3 routing" << endl;
 
     int gateIndex = ipdatagram->getArrivalGate()->getIndex();
 
@@ -153,7 +153,7 @@ void MPLS::doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel)
 {
     unsigned int n = outLabel.size();
 
-    EV << "doStackOps: " << outLabel << endl;
+    EV_INFO << "doStackOps: " << outLabel << endl;
 
     ASSERT(n >= 0);
 
@@ -216,13 +216,13 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     ASSERT(mplsPacket->hasLabel());
     int oldLabel = mplsPacket->getTopLabel();
 
-    EV << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
+    EV_INFO << "Received " << mplsPacket << " from L2, label=" << oldLabel << " inInterface=" << senderInterface << endl;
 
     if (oldLabel==-1)
     {
         // This is a IPv4 native packet (RSVP/TED traffic)
         // Decapsulate the message and pass up to L3
-        EV << ": decapsulating and sending up\n";
+        EV_INFO << ": decapsulating and sending up\n";
 
         IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
         delete mplsPacket;
@@ -237,7 +237,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     bool found = lt->resolveLabel(senderInterface, oldLabel, outLabel, outInterface, color);
     if (!found)
     {
-        EV << "discarding packet, incoming label not resolved" << endl;
+        EV_INFO << "discarding packet, incoming label not resolved" << endl;
 
         delete mplsPacket;
         return;
@@ -251,7 +251,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     {
         // forward labeled packet
 
-        EV << "forwarding packet to " << outInterface << endl;
+        EV_INFO << "forwarding packet to " << outInterface << endl;
 
         if (mplsPacket->hasPar("color"))
         {
@@ -270,7 +270,7 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
     {
         // last label popped, decapsulate and send out IPv4 datagram
 
-        EV << "decapsulating IPv4 datagram" << endl;
+        EV_INFO << "decapsulating IPv4 datagram" << endl;
 
         IPv4Datagram *nativeIP = check_and_cast<IPv4Datagram *>(mplsPacket->decapsulate());
         delete mplsPacket;
