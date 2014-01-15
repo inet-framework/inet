@@ -59,7 +59,7 @@ void BindingCache::handleMessage(cMessage *msg)
 void BindingCache::addOrUpdateBC(const IPv6Address& hoa, const IPv6Address& coa,
                                  const uint lifetime, const uint seq, bool homeReg)
 {
-    EV << "\n++++++++++++++++++++Binding Cache Being Updated in Routing Table6 ++++++++++++++\n";
+    EV_INFO << "\n++++++++++++++++++++Binding Cache Being Updated in Routing Table6 ++++++++++++++\n";
     bindingCache[hoa].careOfAddress = coa;
     bindingCache[hoa].bindingLifetime = lifetime;
     bindingCache[hoa].sequenceNumber = seq;

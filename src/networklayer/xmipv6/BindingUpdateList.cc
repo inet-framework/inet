@@ -125,7 +125,7 @@ void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Addres
         entry = createBULEntry(dest);
     }
 
-    EV << "\n++++++++++++++++++++Binding Update List Being Updated in Routing Table6 ++++++++++++++\n";
+    EV_INFO << "\n++++++++++++++++++++Binding Update List Being Updated in Routing Table6 ++++++++++++++\n";
 
     entry->homeAddress = hoa;
     entry->careOfAddress = coa;
@@ -176,7 +176,7 @@ void BindingUpdateList::initializeBUValues(BindingUpdateListEntry& entry)
 void BindingUpdateList::addOrUpdateBUL(const IPv6Address& dest, const IPv6Address& addr,
         const simtime_t sentTime, const int cookie, bool HoTI = false)
 {
-    EV << "\n++++++++++++++++++++Binding Update List for HoTI/CoTI Being Updated in Routing Table6 ++++++++++++++\n";
+    EV_INFO << "\n++++++++++++++++++++Binding Update List for HoTI/CoTI Being Updated in Routing Table6 ++++++++++++++\n";
     // search for entry
     BindingUpdateList::BindingUpdateListEntry* entry = lookup(dest);
 
@@ -243,7 +243,7 @@ int BindingUpdateList::generateBAuthData(const IPv6Address& dest, const IPv6Addr
 
     if (entry == NULL)
     {
-        EV << "Impossible to generate Binding Authorization Data as CN is not existing in BUL!\n";
+        EV_WARN << "Impossible to generate Binding Authorization Data as CN is not existing in BUL!\n";
         return 0;
     }
 

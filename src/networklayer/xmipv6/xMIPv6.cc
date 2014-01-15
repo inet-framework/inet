@@ -96,7 +96,7 @@ void xMIPv6::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        EV << "Initializing xMIPv6 module" << endl;
+        EV_TRACE << "Initializing xMIPv6 module" << endl;
 
         // statistic collection
         /*statVectorBUtoHA.setName("BU to HA");
@@ -152,36 +152,36 @@ void xMIPv6::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        EV << "Self message received!\n";
+        EV_DETAIL << "Self message received!\n";
 
         if (msg->getKind() == MK_SEND_PERIODIC_BU)
         {
-            EV << "Periodic BU Timeout Message Received\n";
+            EV_DETAIL << "Periodic BU Timeout Message Received\n";
             sendPeriodicBU(msg);
         }
         else if (msg->getKind() == MK_SEND_PERIODIC_BR)
         {
-            EV << "Periodic BRR Timeout Message Received\n";
+            EV_DETAIL << "Periodic BRR Timeout Message Received\n";
             sendPeriodicBRR(msg);
         }
         else if (msg->getKind() == MK_SEND_TEST_INIT) // 28.08.07 - CB
         {
-            EV << "HoTI/CoTI Timeout Message Received\n";
+            EV_DETAIL << "HoTI/CoTI Timeout Message Received\n";
             sendTestInit(msg);
         }
         else if (msg->getKind() == MK_BUL_EXPIRY) // 12.06.08 - CB
         {
-            EV << "BUL Expiry Timeout Message Received\n";
+            EV_DETAIL << "BUL Expiry Timeout Message Received\n";
             handleBULExpiry(msg);
         }
         else if (msg->getKind() == MK_BC_EXPIRY) // 12.06.08 - CB
         {
-            EV << "BUL Expiry Timeout Message Received\n";
+            EV_DETAIL << "BUL Expiry Timeout Message Received\n";
             handleBCExpiry(msg);
         }
         else if (msg->getKind() == MK_TOKEN_EXPIRY) // 11.07.08 - CB
         {
-            EV << "RR token expired" << endl;
+            EV_DETAIL << "RR token expired" << endl;
             handleTokenExpiry(msg);
         }
         else
@@ -191,7 +191,7 @@ void xMIPv6::handleMessage(cMessage *msg)
     // if its a MIPv6 related mobility message
     else if (dynamic_cast<MobilityHeader*>(msg))
     {
-        EV << " Received MIPv6 related message" << endl;
+        EV_INFO << " Received MIPv6 related message" << endl;
         IPv6ControlInfo *ctrlInfo = check_and_cast<IPv6ControlInfo*>(msg->removeControlInfo());
         MobilityHeader *mipv6Msg = (MobilityHeader*)(msg);
         processMobilityMessage(mipv6Msg, ctrlInfo);
@@ -215,18 +215,18 @@ void xMIPv6::handleMessage(cMessage *msg)
 
 void xMIPv6::processMobilityMessage(MobilityHeader* mipv6Msg, IPv6ControlInfo* ctrlInfo)
 {
-    EV << "Processing of MIPv6 related mobility message" << endl;
+    EV_INFO << "Processing of MIPv6 related mobility message" << endl;
 
     if (dynamic_cast<BindingUpdate*>(mipv6Msg))
     {
-        EV << "Message recognised as BINDING UPDATE (BU)" << endl;
+        EV_INFO << "Message recognised as BINDING UPDATE (BU)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBUMessage()>>>>>>>\n";
         BindingUpdate *bu = (BindingUpdate*)mipv6Msg;
         processBUMessage(bu, ctrlInfo);
     }
     else if (dynamic_cast<BindingAcknowledgement*>(mipv6Msg))
     {
-        EV << "Message recognised as BINDING ACKNOWLEDGEMENT (BA)" << endl;
+        EV_INFO << "Message recognised as BINDING ACKNOWLEDGEMENT (BA)" << endl;
         //EV << "\n<<<<<<<<Giving Control to processBAMessage()>>>>>>>\n";
         BindingAcknowledgement *ba = (BindingAcknowledgement*)mipv6Msg;
         processBAMessage(ba, ctrlInfo);
@@ -234,32 +234,32 @@ void xMIPv6::processMobilityMessage(MobilityHeader* mipv6Msg, IPv6ControlInfo* c
     // 28.08.07 - CB
     else if (dynamic_cast<HomeTestInit*>(mipv6Msg))
     {
-        EV << "Message recognised as HOME TEST INIT (HoTI)" << endl;
+        EV_INFO << "Message recognised as HOME TEST INIT (HoTI)" << endl;
         processHoTIMessage((HomeTestInit*)mipv6Msg, ctrlInfo);
     }
     else if (dynamic_cast<CareOfTestInit*>(mipv6Msg))
     {
-        EV << "Message recognised as CARE-OF TEST INIT (CoTI)" << endl;
+        EV_INFO << "Message recognised as CARE-OF TEST INIT (CoTI)" << endl;
         processCoTIMessage((CareOfTestInit*)mipv6Msg, ctrlInfo);
     }
     else if (dynamic_cast<HomeTest*>(mipv6Msg))
     {
-        EV << "Message recognised as HOME TEST (HoT)" << endl;
+        EV_INFO << "Message recognised as HOME TEST (HoT)" << endl;
         processHoTMessage((HomeTest*)mipv6Msg, ctrlInfo);
     }
     else if (dynamic_cast<CareOfTest*>(mipv6Msg))
     {
-        EV << "Message recognised as CARE-OF TEST (CoT)" << endl;
+        EV_INFO << "Message recognised as CARE-OF TEST (CoT)" << endl;
         processCoTMessage((CareOfTest*)mipv6Msg, ctrlInfo);
     }
     else if (dynamic_cast<BindingRefreshRequest*>(mipv6Msg))
     {
-        EV << "Message recognised as Binding Refresh Request" << endl;
+        EV_INFO << "Message recognised as Binding Refresh Request" << endl;
         processBRRMessage((BindingRefreshRequest*)mipv6Msg, ctrlInfo);
     }
     else
     {
-        EV << "Unrecognised mobility message... Dropping" << endl;
+        EV_WARN << "Unrecognised mobility message... Dropping" << endl;
         delete ctrlInfo;
         delete mipv6Msg;
     }
@@ -271,7 +271,7 @@ void xMIPv6::initiateMIPv6Protocol(InterfaceEntry *ie, const IPv6Address& CoA)
 
     if (!(ie->isLoopback()) && rt6->isMobileNode())
     {
-        EV << "Initiating Mobile IPv6 protocol..." << endl;
+        EV_INFO << "Initiating Mobile IPv6 protocol..." << endl;
 
         // The MN is supposed to send a BU to the HA after forming a CoA
         IPv6Address haDest = ie->ipv6Data()->getHomeAgentAddress(); // HA address for use in the BU for Home Registration
@@ -310,7 +310,7 @@ void xMIPv6::returningHome(const IPv6Address& CoA, InterfaceEntry* ie)
       the movement detection algorithm in use (Section 11.5.1), when the
       mobile node detects that its home subnet prefix is again on-link.*/
 
-    EV << "MIPv6 Returning home procedure..." << endl;
+    EV_INFO << "MIPv6 Returning home procedure..." << endl;
 
     // cancel timers, 14.9.07 - CB
 
@@ -398,7 +398,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie, const 
                            bool homeRegistration)
 {
     Enter_Method("createBUTimer()");
-    EV << "Creating BU timer at sim time: " << simTime() << " seconds." << endl;
+    EV_INFO << "Creating BU timer at sim time: " << simTime() << " seconds." << endl;
     cMessage *buTriggerMsg = new cMessage("sendPeriodicBU", MK_SEND_PERIODIC_BU);
 
     // update 13.9.07 - CB
@@ -443,7 +443,7 @@ void xMIPv6::createBUTimer(const IPv6Address& buDest, InterfaceEntry* ie, const 
 
 void xMIPv6::sendPeriodicBU(cMessage *msg)
 {
-    EV << "Sending periodic BU message at time: " << simTime() << " seconds." << endl;
+    EV_INFO << "Sending periodic BU message at time: " << simTime() << " seconds." << endl;
     BUTransmitIfEntry *buIfEntry = (BUTransmitIfEntry*)msg->getContextPointer(); //detaching the corresponding buIfEntry pointer
     //EV << "### lifetime of buIfEntry=" << buIfEntry->lifeTime << " and seq#= " << buIfEntry->buSequenceNumber << endl;
     InterfaceEntry* ie = buIfEntry->ifEntry; //copy the ie info
@@ -496,7 +496,7 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
     else*/
     if (!(buIfEntry->ackTimeout < ie->ipv6Data()->_getMaxBindAckTimeout()))
     {
-        EV << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl; //buIfEntry->nextBindAckTimeout << " ++++++\n";
+        EV_DETAIL << "Crossed maximum BINDACK timeout...resetting to predefined maximum." << endl; //buIfEntry->nextBindAckTimeout << " ++++++\n";
         //ev << "\n++++Present Sent Time: " << buIfEntry->presentSentTimeBU << " Present TimeOut: " << buIfEntry->ackTimeout << endl;
         //buIfEntry->nextScheduledTime = buIfEntry->presentSentTimeBU + buIfEntry->maxBindAckTimeout;
         buIfEntry->ackTimeout = ie->ipv6Data()->_getMaxBindAckTimeout();
@@ -505,14 +505,14 @@ void xMIPv6::sendPeriodicBU(cMessage *msg)
         //scheduleAt(buIfEntry->nextScheduledTime, msg);
     }
 
-    EV << "Present Sent Time: " << buIfEntry->presentSentTimeBU << ", Present TimeOut: " << buIfEntry->ackTimeout << endl;
-    EV << "Next Sent Time: " << buIfEntry->nextScheduledTime << endl; // << " Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
+    EV_DETAIL << "Present Sent Time: " << buIfEntry->presentSentTimeBU << ", Present TimeOut: " << buIfEntry->ackTimeout << endl;
+    EV_DETAIL << "Next Sent Time: " << buIfEntry->nextScheduledTime << endl; // << " Next TimeOut: " << buIfEntry->nextBindAckTimeout << endl;
     scheduleAt(buIfEntry->nextScheduledTime, msg);
 }
 
 void xMIPv6::createAndSendBUMessage(const IPv6Address& dest, InterfaceEntry* ie, const uint buSeq, const uint lifeTime, const int bindAuthData)
 {
-    EV << "Creating and sending Binding Update" << endl;
+    EV_INFO << "Creating and sending Binding Update" << endl;
     // TODO use the globalAddress(IPv6InterfaceData::CoA) in the address selection somewhere above (caller)
     IPv6Address CoA = ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA); // source address of MN
 
@@ -645,7 +645,7 @@ void xMIPv6::updateBUL(BindingUpdate* bu, const IPv6Address& dest, const IPv6Add
 
     if (buIfEntry == NULL)
     {
-        EV << "No scheduled BU entry available!\n";
+        EV_WARN << "No scheduled BU entry available!\n";
         return;
     }
 
@@ -678,7 +678,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
         const IPv6Address& srcAddr, int interfaceId, simtime_t sendTime) // overloaded for use at CN - CB
 {
 
-    EV << "Appending ControlInfo to mobility message\n";
+    EV_INFO << "Appending ControlInfo to mobility message\n";
     IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
     controlInfo->setProtocol(IP_PROT_IPv6EXT_MOB); // specifies the next header value for the Mobility Header (=135)
     controlInfo->setDestAddr(destAddr);
@@ -687,9 +687,9 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
     controlInfo->setInterfaceId(interfaceId);
     msg->setControlInfo(controlInfo);
 
-    EV << "ControlInfo appended successfully. Sending mobility message to IPv6 module\n";
+    EV_INFO << "ControlInfo appended successfully. Sending mobility message to IPv6 module\n";
 
-    EV << "controlInfo: DestAddr=" << controlInfo->getDestAddr()
+    EV_DETAIL << "controlInfo: DestAddr=" << controlInfo->getDestAddr()
        << "SrcAddr=" << controlInfo->getSrcAddr()
        << "InterfaceId=" << controlInfo->getInterfaceId() << endl;
 
@@ -738,7 +738,7 @@ void xMIPv6::sendMobilityMessageToIPv6Module(cMessage *msg, const IPv6Address& d
 
 void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
 {
-    EV << "Entered BU processing method" << endl;
+    EV_INFO << "Entered BU processing method" << endl;
 
     /*if ((!rt6->isMobileNode() && !rt6->isRouter() && !rt6->isHomeAgent()) ||
          (rt6->isRouter() && rt6->isHomeAgent() && !rt6->isMobileNode())
@@ -747,7 +747,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
     // BA is not sent when node is a mobile node and not a HA at the same time
     if (rt6->isMobileNode() && ! rt6->isHomeAgent())     // rewrote condition to make it more clear - CB
     {
-        EV << "Wrong Node: not HA or CN" << endl;
+        EV_WARN << "Wrong Node: not HA or CN" << endl;
 
         if (ev.isGUI())
             bubble("Wrong Node: not HA or CN");
@@ -797,7 +797,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
                 uint baSeqNumber = bu->getSequence(); //the sequence number from Rxed BU is copied into BA.
                 createAndSendBAMessage(destAddress, CoA, ctrlInfo, status,
                         bu->getBindingAuthorizationData(), baSeqNumber, buLifetime); // swapped src and dest, 4.9.07 - CB, update lifeTime 14.9.07 - CB
-                EV << "Error: Not HA for this MN. Responding with appropirate BA...\n";
+                EV_ERROR << "Not HA for this MN. Responding with appropirate BA...\n";
                 delete bu;
                 delete ctrlInfo;
                 return;
@@ -855,7 +855,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
                 cancelTimerIfEntry(HoA, interfaceID, KEY_BR);
             }
 
-            EV << "Deregistered binding\n";
+            EV_INFO << "Deregistered binding\n";
             bubble("Deregistered binding!");
         }
         else
@@ -969,7 +969,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
             }
             else // condition: ! bu->getAckFlag()
             {
-                EV << "BU Validated as OK: ACK FLAG NOT SET" << endl;
+                EV_INFO << "BU Validated as OK: ACK FLAG NOT SET" << endl;
                 bubble("!!!BU VALID --- ACK FLAG = False !!!");
             }
 
@@ -1012,7 +1012,7 @@ void xMIPv6::processBUMessage(BindingUpdate* bu, IPv6ControlInfo* ctrlInfo)
     }
     else
     {
-        EV << "BU Validation Failed: Dropping message" << endl;
+        EV_WARN << "BU Validation Failed: Dropping message" << endl;
         bubble("BU Validation Failed: Dropping Packet");
     }
 
@@ -1024,7 +1024,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
 {
     // Performs BU Validation according to RFC3775 Sec 9.5.1
 
-    EV << "\n<<<<<<<<<ROUTINE WHERE BU GETS VALIDATED>>>>>>>>>>>>>>><<\n";
+    EV_INFO << "\n<<<<<<<<<ROUTINE WHERE BU GETS VALIDATED>>>>>>>>>>>>>>><<\n";
 
     // ################################
     // modifed structure, 28.08.07 - CB
@@ -1039,16 +1039,16 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
     // restructured the following and removed "delete bu" - CB
     if (!(src.isGlobal() && src.isUnicast()))
     {
-        EV << "BU Validation Failed: SrcAdress is not unicast Global !" << endl;
-        EV << "Dropping unvalidated BU message" << endl;
+        EV_WARN << "BU Validation Failed: SrcAdress is not unicast Global !" << endl;
+        EV_WARN << "Dropping unvalidated BU message" << endl;
         bubble("!! BU Validation Failed !!");
         return false; //result = false;
     }
     if (! (homeAddress.isGlobal() && homeAddress.isUnicast()))
     {
-        EV << "BU Validation Failed: Home Adress of MN is not unicast Global !" << endl;
+        EV_WARN << "BU Validation Failed: Home Adress of MN is not unicast Global !" << endl;
         bubble("!! BU Validation Failed !!");
-        EV << "Dropping unvalidated BU message" << endl;
+        EV_WARN << "Dropping unvalidated BU message" << endl;
         return false; //result = false;
     }
     /*9.5.1
@@ -1059,10 +1059,10 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
      of the last received number and the preceding 32768 values, inclusive.*/
     else if (((bcSeqNumber % 65536) > seqNumber) || ((32768 + bcSeqNumber) % 65536 < seqNumber)) // update 10.9.07 - CB
     {
-        EV << "BU Validation Failed: Received Seq#: " << seqNumber << " is LESS THAN in BC: "
+        EV_WARN << "BU Validation Failed: Received Seq#: " << seqNumber << " is LESS THAN in BC: "
            << bcSeqNumber << endl;
         bubble("!! BU Validation Failed !!");
-        EV << "Dropping unvalidated BU message" << endl;
+        EV_WARN << "Dropping unvalidated BU message" << endl;
 
         /*9.5.1
           If the mobile node sends a sequence number which is not greater than
@@ -1089,7 +1089,7 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
                  a Binding Acknowledgement with status code 139 (registration type
                  change disallowed).  The home registration flag stored in the Binding
                  Cache entry MUST NOT be changed.*/
-            EV << "BU Validation Failed: home registration flag in binding cache has different value than in the binding update" << endl;
+            EV_WARN << "BU Validation Failed: home registration flag in binding cache has different value than in the binding update" << endl;
             createAndSendBAMessage(src, homeAddress, ctrlInfo, REGISTRATION_TYPE_CHANGE_DISALLOWED,
                     bu->getBindingAuthorizationData(), bcSeqNumber, 0);
 
@@ -1103,14 +1103,14 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
         // update 10.10.08 - CB
         if (bu->getLifetime() == 0) // deregistration BU
         {
-            EV << "homeToken=" << homeToken << ", careOfToken=" << careOfToken
+            EV_DETAIL << "homeToken=" << homeToken << ", careOfToken=" << careOfToken
                << " , bindAuthData=" << bindAuthData
                << ", BU data=" << bu->getBindingAuthorizationData() << endl;
 
             if ((bu->getBindingAuthorizationData() != bindAuthData)
                     && (bu->getBindingAuthorizationData() != homeToken)) // this is quick and dirty -> TODO
             {
-                EV << "BU Validation Failed: Binding Authorization Data invalid!" << endl;
+                EV_WARN << "BU Validation Failed: Binding Authorization Data invalid!" << endl;
                 return false;
             }
         }
@@ -1118,14 +1118,14 @@ bool xMIPv6::validateBUMessage(BindingUpdate *bu, IPv6ControlInfo *ctrlInfo)
         {
             if (bu->getBindingAuthorizationData() != bindAuthData)
             {
-                EV << "BU Validation Failed: Binding Authorization Data invalid!" << endl;
+                EV_WARN << "BU Validation Failed: Binding Authorization Data invalid!" << endl;
                 return false;
             }
         }
     }
 
     // If all the above tests are passed the Received BU is valid
-    EV << "BU validation passed" << endl;
+    EV_INFO << "BU validation passed" << endl;
 
     if (ev.isGUI())
         bubble("BU Validated");
@@ -1151,7 +1151,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
         IPv6ControlInfo* ctrlInfo, const BAStatus& baStatus, const uint baSeq,
         const int bindingAuthorizationData, const uint lifeTime, const simtime_t sendTime)
 {
-    EV << "Entered createAndSendBAMessage() method" << endl;
+    EV_TRACE << "Entered createAndSendBAMessage() method" << endl;
 
     InterfaceEntry *ie = ift -> getInterfaceById(ctrlInfo -> getInterfaceId()); // To find the interface on which the BU was received
 
@@ -1216,7 +1216,7 @@ void xMIPv6::createAndSendBAMessage(const IPv6Address& src, const IPv6Address& d
 
 void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlInfo)
 {
-    EV << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
+    EV_TRACE << "\n<<<<<<<<<This is where BA gets processed>>>>>>>>>\n";
     //bool retransmitBU = false; // update 11.6.08 - CB
     IPv6Address& baSource = ctrlInfo->getSrcAddr();
     InterfaceEntry *ie = ift->getInterfaceById(ctrlInfo->getInterfaceId()); //the interface on which the BAck was received
@@ -1225,7 +1225,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
     {
         if (!validateBAck(*ba, ctrlInfo))
         {
-            EV << "Discarding invalid BAck...\n";
+            EV_INFO << "Discarding invalid BAck...\n";
             delete ctrlInfo;
             delete ba;
 
@@ -1250,7 +1250,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
         if (ba->getStatus() < 128)
         {
             // update 21.9.07 - CB
-            EV << "Binding was accepted." << endl;
+            EV_INFO << "Binding was accepted." << endl;
 
             // As the BU is obviously valid, we can remove the transmission timer for BU
             cancelTimerIfEntry(baSource, ie->getInterfaceId(), KEY_BU); // 11.06.08 - CB
@@ -1363,7 +1363,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
 
                 /*EV << "l_ack=" << l_ack << ", l_update=" << l_update << ", l_remain=" << l_remain << ", x=" << x << endl;
                 EV << "entry->bindingLifetime=" << entry->bindingLifetime << " and entry->bindingExpiry=" << entry->bindingExpiry << endl;*/
-                EV << "Scheduling BULEntryExpiryTimer for " << scheduledTime << endl;
+                EV_DETAIL << "Scheduling BULEntryExpiryTimer for " << scheduledTime << endl;
                 createBULEntryExpiryTimer(entry, ie, scheduledTime);
 
                 // 11.06.08 - CB: rescheduling changed. Handled by BUL entry expiry.
@@ -1386,7 +1386,7 @@ void xMIPv6::processBAMessage(BindingAcknowledgement* ba, IPv6ControlInfo* ctrlI
              Updates SHOULD NOT be sent to this destination.*/
         else
         {
-            EV << "Binding was rejected.\n";
+            EV_INFO << "Binding was rejected.\n";
 
             /*11.7.1
               If the home agent rejects the value, it sends back a
@@ -1435,7 +1435,7 @@ bool xMIPv6::validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInf
     {
         if (ba.getBindingAuthorizationData() == UNDEFINED_BIND_AUTH_DATA)
         {
-            EV << "BA Validation Failed: Binding Authorization Data invalid !" << endl;
+            EV_WARN << "BA Validation Failed: Binding Authorization Data invalid !" << endl;
             return false;
         }
     }
@@ -1446,7 +1446,7 @@ bool xMIPv6::validateBAck(const BindingAcknowledgement& ba, const IPv6ControlInf
     // 24.9.07 - CB
     if (bul->getSequenceNumber(cnAddress) != ba.getSequenceNumber())
     {
-        EV << "BA Validation Failed: Sequence number from BA does not match the one from the BUL!!\n";
+        EV_WARN << "BA Validation Failed: Sequence number from BA does not match the one from the BUL!!\n";
         return false;
     }
 
@@ -1466,7 +1466,7 @@ void xMIPv6::triggerRouteOptimization(const IPv6Address& destAddress, const IPv6
 
     if (vIndex > ift->getNumInterfaces())
     {
-        EV << "Route Optimization for: " << destAddress << " already triggered";
+        EV_INFO << "Route Optimization for: " << destAddress << " already triggered";
 
         // we have to check whether our current CoA is different from the one saved in the BUL
         // (this would mean we have moved to a new access network on this interface)
@@ -1475,17 +1475,17 @@ void xMIPv6::triggerRouteOptimization(const IPv6Address& destAddress, const IPv6
         {
             // we have a new CoA compared to BUL entry -> redo RO
             initReturnRoutability(destAddress, ie);
-            EV << " ...moved to new network. Initializing RO.";
+            EV_INFO << " ...moved to new network. Initializing RO.";
         }
 
-        EV << endl;
+        EV_INFO << endl;
     }
     else
     {
         if ((!bul->isInBindingUpdateList(destAddress, HoA))
                 || (bul->getMobilityState(destAddress) == BindingUpdateList::RR))
         {
-            EV << "Initialise Route Optimization for: " << destAddress << "\n";
+            EV_INFO << "Initialise Route Optimization for: " << destAddress << "\n";
             initReturnRoutability(destAddress, ie);
 
             CNList::iterator CRiterator = find(cnList.begin(), cnList.end(), destAddress);
@@ -1497,7 +1497,7 @@ void xMIPv6::triggerRouteOptimization(const IPv6Address& destAddress, const IPv6
 
 void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry* ie)
 {
-    EV << "Initiating Return Routability...\n";
+    EV_TRACE << "Initiating Return Routability...\n";
     Enter_Method("initReturnRoutability()");
 
     // update 12.9.07 - CB
@@ -1529,7 +1529,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry* ie
         //if ((cnEntry->tokenH != UNDEFINED_TOKEN) && (cnEntry->sentHoTI + ie->ipv6()->_maxTokenLifeTime() > simTime()))
         if (bul->isHomeTokenAvailable(cnDest, ie))
         {
-            EV << "Valid home token available - sending HoTI later.\n";
+            EV_INFO << "Valid home token available - sending HoTI later.\n";
             sendHoTI = false;
         }
         //else
@@ -1538,7 +1538,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry* ie
         /*if ((cnEntry->tokenC != UNDEFINED_TOKEN) && (cnEntry->sentCoTI + ie->ipv6()->_maxTokenLifeTime() > simTime()))*/
         if (bul->isCareOfTokenAvailable(cnDest, ie))
         {
-            EV << "Valid care-of token available - sending CoTI later.\n" << endl;
+            EV_INFO << "Valid care-of token available - sending CoTI later.\n" << endl;
 
             // we already have a care-of token
             sendCoTI = false;
@@ -1575,7 +1575,7 @@ void xMIPv6::initReturnRoutability(const IPv6Address& cnDest, InterfaceEntry* ie
 void xMIPv6::createTestInitTimer(MobilityHeader* testInit, const IPv6Address& dest,
                                  InterfaceEntry* ie, simtime_t sendTime)
 {
-    EV << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << simTime()
+    EV_DETAIL << "\n++++++++++TEST INIT TIMER CREATED AT SIM TIME: " << simTime()
        << " seconds+++++++++++++++++ \n";
 
     cMessage *testInitTriggerMsg = new cMessage("sendTestInit", MK_SEND_TEST_INIT);
@@ -1701,7 +1701,7 @@ void xMIPv6::sendTestInit(cMessage* msg)
     msg->setContextPointer(tiIfEntry);
     scheduleAt(tiIfEntry->nextScheduledTime, msg);
 
-    EV << "Scheduled next HoTI/CoTI for time=" << tiIfEntry->nextScheduledTime
+    EV_INFO << "Scheduled next HoTI/CoTI for time=" << tiIfEntry->nextScheduledTime
        << " with timeout=" << tiIfEntry->ackTimeout << " for dest="
        << tiIfEntry->dest << endl;
 
@@ -1797,7 +1797,7 @@ void xMIPv6::resetBUIfEntry(const IPv6Address& dest, int interfaceID, simtime_t 
 
     scheduleAt(entry->nextScheduledTime, entry->timer);
 
-    EV << "Updated BUTransmitIfEntry and corresponding timer.\n";
+    EV_INFO << "Updated BUTransmitIfEntry and corresponding timer.\n";
 }
 
 void xMIPv6::createAndSendHoTIMessage(const IPv6Address& cnDest, InterfaceEntry* ie)
@@ -1834,7 +1834,7 @@ void xMIPv6::processHoTIMessage(HomeTestInit* HoTI, IPv6ControlInfo* ctrlInfo)
     // setting message size, 10.09.07 - CB
     HoT->setByteLength(SIZE_MOBILITY_HEADER + SIZE_HOT);
 
-    EV << "\n<<======HoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
+    EV_INFO << "\n<<======HoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     sendMobilityMessageToIPv6Module(HoT, ctrlInfo->getSrcAddr(), ctrlInfo->getDestAddr());
 
     // statistic collection
@@ -1856,7 +1856,7 @@ void xMIPv6::processCoTIMessage(CareOfTestInit* CoTI, IPv6ControlInfo* ctrlInfo)
     // setting message size, 10.09.07 - CB
     CoT->setByteLength(SIZE_MOBILITY_HEADER + SIZE_COT);
 
-    EV << "\n<<======CoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
+    EV_INFO << "\n<<======CoT MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     sendMobilityMessageToIPv6Module(CoT, ctrlInfo->getSrcAddr(), ctrlInfo->getDestAddr());
 
     // statistic collection
@@ -1869,10 +1869,10 @@ void xMIPv6::processCoTIMessage(CareOfTestInit* CoTI, IPv6ControlInfo* ctrlInfo)
 void xMIPv6::processHoTMessage(HomeTest* HoT, IPv6ControlInfo* ctrlInfo)
 {
     if (!validateHoTMessage(*HoT, ctrlInfo))
-        EV << "HoT validation not passed: dropping message" << endl;
+        EV_WARN << "HoT validation not passed: dropping message" << endl;
     else
     {
-        EV << "HoT validation passed: updating BUL" << endl;
+        EV_WARN << "HoT validation passed: updating BUL" << endl;
         IPv6Address& srcAddr = ctrlInfo->getSrcAddr();
         //IPv6Address& destAddr = ctrlInfo->destAddr();
         int interfaceID = ctrlInfo->getInterfaceId();
@@ -1920,7 +1920,7 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo* ctrl
     BindingUpdateList::BindingUpdateListEntry* bulEntry = bul->lookup(srcAddr);
     if (bulEntry == NULL)
     {
-        EV << "Invalid HoT: No entry in BUL" << endl;
+        EV_WARN << "Invalid HoT: No entry in BUL" << endl;
         return false; // no entry in BUL
     }
 
@@ -1940,7 +1940,7 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo* ctrl
     // interface the message was received on.
     if (!rt6->isHomeAddress(destAddr))
     {
-        EV << "Invalid HoT: Destination Address not HoA." << endl;
+        EV_WARN << "Invalid HoT: Destination Address not HoA." << endl;
         return false; // TODO check whether packet was received from HA tunnel
     }
 
@@ -1948,7 +1948,7 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo* ctrl
        in the Binding Update List. */
     if (bulEntry->cookieHoTI != (int)HoT.getHomeInitCookie())
     {
-        EV << "Invalid HoT: Cookie value different from the stored one." << endl;
+        EV_WARN << "Invalid HoT: Cookie value different from the stored one." << endl;
         return false;
     }
 
@@ -1959,10 +1959,10 @@ bool xMIPv6::validateHoTMessage(const HomeTest& HoT, const IPv6ControlInfo* ctrl
 void xMIPv6::processCoTMessage(CareOfTest* CoT, IPv6ControlInfo* ctrlInfo)
 {
     if (!validateCoTMessage(*CoT, ctrlInfo))
-        EV << "CoT validation not passed: dropping message" << endl;
+        EV_WARN << "CoT validation not passed: dropping message" << endl;
     else
     {
-        EV << "CoT validation passed: updating BUL" << endl;
+        EV_INFO << "CoT validation passed: updating BUL" << endl;
 
         IPv6Address& srcAddr = ctrlInfo->getSrcAddr();
         //IPv6Address& destAddr = ctrlInfo->destAddr();
@@ -2017,13 +2017,13 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo* ct
     BindingUpdateList::BindingUpdateListEntry* bulEntry = bul->lookup(srcAddr);
     if (bulEntry == NULL)
     {
-        EV << "Invalid CoT: No entry in BUL" << endl;
+        EV_WARN << "Invalid CoT: No entry in BUL" << endl;
         return false; // no entry in BUL
     }
 
     if (bulEntry->sentHoTI == 0 && bulEntry->sentCoTI == 0)
     {
-        EV << "Invalid CoT: No RR procedure initialized for this CN." << endl;
+        EV_WARN << "Invalid CoT: No RR procedure initialized for this CN." << endl;
         return false; // no RR procedure started for this entry
     }
 
@@ -2041,7 +2041,7 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo* ct
     InterfaceEntry *ie = ift->getInterfaceById(interfaceID);
     if (destAddr != ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA))
     {
-        EV << "Invalid CoT: CoA not valid anymore." << endl;
+        EV_WARN << "Invalid CoT: CoA not valid anymore." << endl;
         return false;
     }
 
@@ -2049,7 +2049,7 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo* ct
        stored in the Binding Update List. */
     if (bulEntry->cookieCoTI != (int)CoT.getCareOfInitCookie())
     {
-        EV << "Invalid CoT: Cookie value different from the stored one." << endl;
+        EV_WARN << "Invalid CoT: Cookie value different from the stored one." << endl;
         return false;
     }
 
@@ -2059,7 +2059,7 @@ bool xMIPv6::validateCoTMessage(const CareOfTest& CoT, const IPv6ControlInfo* ct
 
 bool xMIPv6::checkForBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, InterfaceEntry *ie)
 {
-    EV << "Checking whether a new BU has to be sent to CN." << endl;
+    EV_INFO << "Checking whether a new BU has to be sent to CN." << endl;
 
     if (bulEntry.state == BindingUpdateList::DEREGISTER)
     {
@@ -2129,7 +2129,7 @@ void xMIPv6::sendBUtoCN(BindingUpdateList::BindingUpdateListEntry& bulEntry, Int
       Upon successfully completing the return routability procedure, and
       after receiving a successful Binding Acknowledgement from the Home
       Agent, a Binding Update MAY be sent to the correspondent node.*/
-    EV << "Sending BU to CN" << endl;
+    EV_INFO << "Sending BU to CN" << endl;
 
     /*
     // 10.07.08 - CB
@@ -2174,7 +2174,7 @@ void xMIPv6::processType2RH(IPv6Datagram* datagram, IPv6RoutingHeader* rh)
     /*The segments left field in the routing header is 1 on the wire.*/
     if (rh->getSegmentsLeft() != 1)
     {
-        EV << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
+        EV_WARN << "Invalid RH2 - segments left field must be 1. Dropping packet." << endl;
         delete datagram;
         return;
     }
@@ -2199,14 +2199,14 @@ void xMIPv6::processType2RH(IPv6Datagram* datagram, IPv6RoutingHeader* rh)
         /*If any of these checks fail, the node MUST
           silently discard the packet.*/
         //delete datagram; // update 12.09.07 - CB
-        EV << "Invalid RH2 - not a HoA. Dropping packet." << endl;
+        EV_WARN << "Invalid RH2 - not a HoA. Dropping packet." << endl;
     }
 
     delete rh;
 
     if (validRH2)
     {
-        EV << "Valid RH2 - copied address from RH2 to datagram" << endl;
+        EV_INFO << "Valid RH2 - copied address from RH2 to datagram" << endl;
         send(datagram, "toIPv6");
     }
     else // update 12.09.07 - CB
@@ -2219,7 +2219,7 @@ bool xMIPv6::validateType2RH(const IPv6Datagram& datagram, const IPv6RoutingHead
 
     if (rh.getAddressArraySize() != 1)
     {
-        EV << "Invalid RH2 header: no HoA provided!" << endl;
+        EV_WARN << "Invalid RH2 header: no HoA provided!" << endl;
         return false;
     }
 
@@ -2230,7 +2230,7 @@ bool xMIPv6::validateType2RH(const IPv6Datagram& datagram, const IPv6RoutingHead
        node's home address, MUST be a unicast routable address. */
     if (!HoA.isUnicast())
     {
-        EV << "Invalid RH2 header: address in RH2 is not a unicast routable address!" << endl;
+        EV_WARN << "Invalid RH2 header: address in RH2 is not a unicast routable address!" << endl;
         return false;
     }
 
@@ -2238,7 +2238,7 @@ bool xMIPv6::validateType2RH(const IPv6Datagram& datagram, const IPv6RoutingHead
        scope of the care-of address, the mobile node MUST discard the packet */
     if (HoA.getScope() < CoA.getScope())
     {
-        EV << "Invalid RH2 header: scope of Address in RH2 is smaller than the source address of the datagram!" << endl;
+        EV_WARN << "Invalid RH2 header: scope of Address in RH2 is smaller than the source address of the datagram!" << endl;
         return false;
     }
 
@@ -2268,7 +2268,7 @@ void xMIPv6::processHoAOpt(IPv6Datagram* datagram, HomeAddressOption* hoaOpt)
     }
     else
     {
-        EV << "Invalid RH2 destination - no entry in binding cache. Dropping packet." << endl;
+        EV_WARN << "Invalid RH2 destination - no entry in binding cache. Dropping packet." << endl;
 
         /*If the packet is dropped due the above tests, the correspondent node
           MUST send the Binding Error message as described in Section 9.3.3.
@@ -2285,7 +2285,7 @@ void xMIPv6::processHoAOpt(IPv6Datagram* datagram, HomeAddressOption* hoaOpt)
 
     if (validHoAOpt)
     {
-        EV << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
+        EV_INFO << "Valid HoA Option - copied address from HoA Option to datagram" << endl;
         send(datagram, "toIPv6");
     }
     else
@@ -2294,7 +2294,7 @@ void xMIPv6::processHoAOpt(IPv6Datagram* datagram, HomeAddressOption* hoaOpt)
 
 void xMIPv6::createAndSendBEMessage(const IPv6Address& dest, const BEStatus& beStatus) // update 12.09.07 - CB
 {
-    EV << "\n<<<<<<<<< Entered createAndSendBEMessage() Function>>>>>>>\n";
+    EV_TRACE << "\n<<<<<<<<< Entered createAndSendBEMessage() Function>>>>>>>\n";
 
     BindingError *be = new BindingError("BError");
     be->setMobilityHeaderType(BINDING_ERROR);
@@ -2329,7 +2329,7 @@ bool xMIPv6::cancelTimerIfEntry(const IPv6Address& dest, int interfaceID, int ms
 
     delete entry; // free memory
 
-    EV << "Deleted TimerIfEntry and corresponding timer.\n";
+    EV_DEBUG << "Deleted TimerIfEntry and corresponding timer.\n";
 
     return true;
 }
@@ -2516,7 +2516,7 @@ void xMIPv6::removeCoAEntries()
     for (InterfaceCoAList::iterator it = interfaceCoAList.begin(); it != interfaceCoAList.end(); ++it)
     {
         //if (it->first == ie->interfaceId())
-        EV << "Cancelling timers for ifID=" << it->first << " and CoA=" << it->second << endl;
+        EV_DEBUG << "Cancelling timers for ifID=" << it->first << " and CoA=" << it->second << endl;
         cancelEntries(it->first, it->second);
     }
 
@@ -2570,13 +2570,13 @@ void xMIPv6::createBRRTimer(const IPv6Address& brDest, InterfaceEntry* ie, const
 
     // Scheduling a message which will trigger a BRR towards brIfEntry->dest
     scheduleAt(simTime()+scheduledTime, brTriggerMsg);
-    EV << "\n++++++++++BRR TIMER CREATED FOR SIM TIME: " << simTime() + scheduledTime
+    EV_DETAIL << "\n++++++++++BRR TIMER CREATED FOR SIM TIME: " << simTime() + scheduledTime
        << " seconds+++++++++++++++++ \n";
 }
 
 void xMIPv6::sendPeriodicBRR(cMessage *msg)
 {
-    EV << "\n<<====== Periodic BRR MESSAGE at time: " << simTime() << " seconds =====>>\n";
+    EV_INFO << "\n<<====== Periodic BRR MESSAGE at time: " << simTime() << " seconds =====>>\n";
     BRTransmitIfEntry *brIfEntry = (BRTransmitIfEntry*) msg->getContextPointer(); //detaching the corresponding brIfEntry pointer
     InterfaceEntry *ie = brIfEntry->ifEntry;
     IPv6Address& brDest = brIfEntry->dest;
@@ -2604,7 +2604,7 @@ void xMIPv6::sendPeriodicBRR(cMessage *msg)
 
 void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry* ie)
 {
-    EV << "\n<<======THIS IS THE ROUTINE FOR CREATING AND SENDING BRR MESSAGE =====>>\n";
+    EV_TRACE << "\n<<======THIS IS THE ROUTINE FOR CREATING AND SENDING BRR MESSAGE =====>>\n";
     BindingRefreshRequest* brr = new BindingRefreshRequest("Binding Refresh Request");
 
     /*6.1.2
@@ -2615,7 +2615,7 @@ void xMIPv6::createAndSendBRRMessage(const IPv6Address& dest, InterfaceEntry* ie
 
     brr->setByteLength(SIZE_MOBILITY_HEADER + SIZE_BRR);
 
-    EV << "\n<<======BRR MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
+    EV_INFO << "\n<<======BRR MESSAGE FORMED; APPENDING CONTROL INFO=====>>\n";
     IPv6Address CoA = ie->ipv6Data()->getGlobalAddress(IPv6InterfaceData::CoA);
     ASSERT(!CoA.isUnspecified());
     sendMobilityMessageToIPv6Module(brr, dest, CoA, ie->getInterfaceId());
@@ -2634,7 +2634,7 @@ void xMIPv6::processBRRMessage(BindingRefreshRequest* brr, IPv6ControlInfo* ctrl
 
     if (!bul->isInBindingUpdateList(cnAddress, HoA))
     {
-        EV << "BRR not accepted - no binding for this CN. Dropping message." << endl;
+        EV_WARN << "BRR not accepted - no binding for this CN. Dropping message." << endl;
     }
     else
     {
@@ -2672,7 +2672,7 @@ void xMIPv6::createBULEntryExpiryTimer(BindingUpdateList::BindingUpdateListEntry
     /*BULExpiryIfEntry* bulExpIfEntry = createBULEntryExpiryTimer(key, HA, HoA, CoA, ie);*/
 
     scheduleAt(scheduledTime, bulExpiryMsg);
-    EV << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
+    EV_INFO << "Scheduled BUL expiry (" << entry->bindingExpiry << "s) for time " << scheduledTime << "s" << endl;
     // WAS SCHEDULED FOR EXPIRY, NOT 2 SECONDS BEFORE!?!?!?
 }
 
@@ -2710,7 +2710,7 @@ void xMIPv6::handleBULExpiry(cMessage* msg)
     // 2. Entry expired -> remove
     if (simTime() < entry->bindingExpiry)
     {
-        EV << "BUL entry about to expire - creating new BU timer..." << endl;
+        EV_INFO << "BUL entry about to expire - creating new BU timer..." << endl;
         // we have to store the pointer to the InterfaceIdentifier as the BUL expiry timer
         // will be canceled/deleted by createBUTimer(...)
         InterfaceEntry* ie = bulExpIfEntry->ifEntry;
@@ -2727,7 +2727,7 @@ void xMIPv6::handleBULExpiry(cMessage* msg)
         }
 
         // we reschedule the expiration timer for expiry time
-        EV << "Resetting expiry timer... " << endl;
+        EV_DETAIL << "Resetting expiry timer... " << endl;
         createBULEntryExpiryTimer(entry, ie, entry->bindingExpiry);
 
         // ...and that's it.
@@ -2736,7 +2736,7 @@ void xMIPv6::handleBULExpiry(cMessage* msg)
     }
     else
     {
-        EV << "BUL entry has expired - removing entry and associated structures..." << endl;
+        EV_INFO << "BUL entry has expired - removing entry and associated structures..." << endl;
 
         // TODO group everything from below in a purgeMobilityState() method
 
@@ -2775,7 +2775,7 @@ void xMIPv6::createBCEntryExpiryTimer(IPv6Address& HoA, InterfaceEntry* ie, simt
     bcExpiryMsg->setContextPointer(bcExpIfEntry); // information in the bulExpIfEntry is required for handler when message fires
 
     scheduleAt(scheduledTime, bcExpiryMsg);
-    EV << "Scheduled BC expiry for time " << scheduledTime << "s" << endl;
+    EV_INFO << "Scheduled BC expiry for time " << scheduledTime << "s" << endl;
 }
 
 void xMIPv6::handleBCExpiry(cMessage* msg)
@@ -2788,7 +2788,7 @@ void xMIPv6::handleBCExpiry(cMessage* msg)
       after the expiration of this lifetime.*/
     /*9.5.2
       Any Binding Cache entry MUST be deleted after the expiration of its lifetime.*/
-    EV << "BC entry has expired - removing entry and associated structures..." << endl;
+    EV_INFO << "BC entry has expired - removing entry and associated structures..." << endl;
 
     BCExpiryIfEntry* bcExpIfEntry = (BCExpiryIfEntry*) msg->getContextPointer(); //detaching the corresponding bulExpIfEntry pointer
     ASSERT(bcExpIfEntry != NULL);
@@ -2825,7 +2825,7 @@ void xMIPv6::createTokenEntryExpiryTimer(IPv6Address& cnAddr, InterfaceEntry* ie
     tokenExpiryMsg->setContextPointer(tokenExpIfEntry);
 
     scheduleAt(scheduledTime, tokenExpiryMsg);
-    EV << "Scheduled token expiry for time " << scheduledTime << "s" << endl;
+    EV_INFO << "Scheduled token expiry for time " << scheduledTime << "s" << endl;
 }
 
 void xMIPv6::handleTokenExpiry(cMessage* msg)
@@ -2835,18 +2835,18 @@ void xMIPv6::handleTokenExpiry(cMessage* msg)
 
     if (tokenExpIfEntry->tokenType == KEY_CTOKEN_EXP)
     {
-        EV << "Care-of keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";
+        EV_INFO << "Care-of keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";
         bul->resetCareOfToken(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry->ipv6Data()->getMNHomeAddress());
     }
     else if (tokenExpIfEntry->tokenType == KEY_HTOKEN_EXP)
     {
-        EV << "Home keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";
+        EV_INFO << "Home keygen token for CN=" << tokenExpIfEntry->cnAddr << " expired";
         bul->resetHomeToken(tokenExpIfEntry->cnAddr, tokenExpIfEntry->ifEntry->ipv6Data()->getMNHomeAddress());
     }
     else
         throw cRuntimeError("Unkown value for tokenType!");
 
-    EV << "...removed token from BUL." << endl;
+    EV_INFO << "...removed token from BUL." << endl;
 
     if (bul->getMobilityState(tokenExpIfEntry->cnAddr) == BindingUpdateList::RR_COMPLETE)
         bul->setMobilityState(tokenExpIfEntry->cnAddr, BindingUpdateList::RR);
