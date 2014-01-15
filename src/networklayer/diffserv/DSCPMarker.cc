@@ -78,7 +78,7 @@ void DSCPMarker::handleMessage(cMessage *msg)
 
 bool DSCPMarker::markPacket(cPacket *packet, int dscp)
 {
-    EV << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
+    EV_DETAIL << "Marking packet with dscp=" << dscpToString(dscp) << "\n";
 
     for ( ; packet; packet = packet->getEncapsulatedPacket())
     {
