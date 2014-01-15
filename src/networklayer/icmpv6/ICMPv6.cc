@@ -57,7 +57,7 @@ void ICMPv6::handleMessage(cMessage *msg)
     // process arriving ICMP message
     if (msg->getArrivalGate()->isName("ipv6In"))
     {
-        EV << "Processing ICMPv6 message.\n";
+        EV_INFO << "Processing ICMPv6 message.\n";
         processICMPv6Message(check_and_cast<ICMPv6Message *>(msg));
         return;
     }
@@ -75,32 +75,32 @@ void ICMPv6::processICMPv6Message(ICMPv6Message *icmpv6msg)
     ASSERT(dynamic_cast<ICMPv6Message *>(icmpv6msg));
     if (dynamic_cast<ICMPv6DestUnreachableMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Destination Unreachable Message Received." << endl;
+        EV_INFO << "ICMPv6 Destination Unreachable Message Received." << endl;
         errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6PacketTooBigMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Packet Too Big Message Received." << endl;
+        EV_INFO << "ICMPv6 Packet Too Big Message Received." << endl;
         errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6TimeExceededMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Time Exceeded Message Received." << endl;
+        EV_INFO << "ICMPv6 Time Exceeded Message Received." << endl;
         errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6ParamProblemMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Parameter Problem Message Received." << endl;
+        EV_INFO << "ICMPv6 Parameter Problem Message Received." << endl;
         errorOut(icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6EchoRequestMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Echo Request Message Received." << endl;
+        EV_INFO << "ICMPv6 Echo Request Message Received." << endl;
         processEchoRequest((ICMPv6EchoRequestMsg *)icmpv6msg);
     }
     else if (dynamic_cast<ICMPv6EchoReplyMsg *>(icmpv6msg))
     {
-        EV << "ICMPv6 Echo Reply Message Received." << endl;
+        EV_INFO << "ICMPv6 Echo Reply Message Received." << endl;
         processEchoReply((ICMPv6EchoReplyMsg *)icmpv6msg);
     }
     else
@@ -172,7 +172,7 @@ void ICMPv6::processEchoReply(ICMPv6EchoReplyMsg *reply)
         send(payload, "pingOut", i->second);
     else
     {
-        EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
+        EV_WARN << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
         delete payload;
     }
 }
@@ -223,7 +223,7 @@ void ICMPv6::sendErrorMessage(IPv6Datagram *origDatagram, ICMPv6Type type, int c
         errorMsg->setByteLength(IPv6_MIN_MTU - IPv6_HEADER_BYTES);
 
     // debugging information
-    EV << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
+    EV_DEBUG << "sending ICMP error: (" << errorMsg->getClassName() << ")" << errorMsg->getName()
        << " type=" << type << " code=" << code << endl;
 
     // if srcAddr is not filled in, we're still in the src node, so we just
@@ -312,7 +312,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
     // don't send ICMP error messages for multicast messages
     if (origDatagram->getDestAddress().isMulticast())
     {
-        EV << "won't send ICMP error messages for multicast message " << origDatagram << endl;
+        EV_INFO << "won't send ICMP error messages for multicast message " << origDatagram << endl;
         delete origDatagram;
         return false;
     }
@@ -323,7 +323,7 @@ bool ICMPv6::validateDatagramPromptingError(IPv6Datagram *origDatagram)
         ICMPv6Message *recICMPMsg = check_and_cast<ICMPv6Message *>(origDatagram->getEncapsulatedPacket());
         if (recICMPMsg->getType()<128)
         {
-            EV << "ICMP error received -- do not reply to it" << endl;
+            EV_INFO << "ICMP error received -- do not reply to it" << endl;
             delete origDatagram;
             return false;
         }
