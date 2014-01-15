@@ -85,8 +85,8 @@ module Car
         udp.appOut++ --> app.udp$i;
         udp.appIn++ <-- app.udp$o;
 
-        udp.ipOut --> networkLayer.udpIn;
-        udp.ipIn <-- networkLayer.udpOut;
+        udp.ipOut --> networkLayer.transportIn++;
+        udp.ipIn <-- networkLayer.transportOut++;
 
         wlan.upperLayerOut --> networkLayer.ifIn[0];
         wlan.upperLayerIn <-- networkLayer.ifOut[0];

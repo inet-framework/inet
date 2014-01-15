@@ -23,6 +23,7 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceEntry.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -143,6 +144,11 @@ void UDP::initialize(int stage)
     }
     else if (stage == 1)
     {
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_UDP);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(IP_PROT_UDP);
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }

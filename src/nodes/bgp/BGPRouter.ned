@@ -42,7 +42,7 @@ module BGPRouter extends OSPFRouter
         bgp.tcpOut --> tcp.appIn++;
         bgp.tcpIn <-- tcp.appOut++;
 
-        tcp.ipOut --> networkLayer.tcpIn;
-        tcp.ipIn <-- networkLayer.tcpOut;
+        tcp.ipOut --> networkLayer.transportIn++;
+        tcp.ipIn <-- networkLayer.transportOut++;
 }
 

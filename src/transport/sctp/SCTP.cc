@@ -20,6 +20,7 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -94,7 +95,6 @@ void SCTP::initialize()
     nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
     cModule *netw = simulation.getSystemModule();
-
     testing = netw->hasPar("testing") && netw->par("testing").boolValue();
     if (testing) {
     }
@@ -109,6 +109,12 @@ void SCTP::initialize()
     numPacketsReceived = 0;
     numPacketsDropped = 0;
     sizeAssocMap = 0;
+
+    IPSocket socket(gate("to_ip"));
+    socket.registerProtocol(IP_PROT_SCTP);
+    socket.setOutputGate(gate("to_ipv6"));
+    socket.registerProtocol(IP_PROT_SCTP);
+
     if ((bool)par("udpEncapsEnabled"))
         bindPortForUDP();
 }

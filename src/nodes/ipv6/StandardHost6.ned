@@ -81,23 +81,23 @@ module StandardHost6 extends NodeBase6
             tcpApp[i].tcpIn <-- tcp.appOut++;
         }
 
-        tcp.ipv6Out --> networkLayer.tcpIn if hasTcp;
-        tcp.ipv6In <-- networkLayer.tcpOut if hasTcp;
+        tcp.ipv6Out --> networkLayer.transportIn++ if hasTcp;
+        tcp.ipv6In <-- networkLayer.transportOut++ if hasTcp;
 
         for i=0..numUdpApps-1 {
             udpApp[i].udpOut --> udp.appIn++;
             udpApp[i].udpIn <-- udp.appOut++;
         }
 
-        udp.ipv6Out --> networkLayer.udpIn if hasUdp;
-        udp.ipv6In <-- networkLayer.udpOut if hasUdp;
+        udp.ipv6Out --> networkLayer.transportIn++ if hasUdp;
+        udp.ipv6In <-- networkLayer.transportOut++ if hasUdp;
 
         for i=0..numSctpApps-1 {
             sctpApp[i].sctpOut --> sctp.from_appl++;
             sctp.to_appl++ --> sctpApp[i].sctpIn;
         }
-        sctp.to_ipv6 --> networkLayer.sctpIn if hasSctp;
-        networkLayer.sctpOut --> sctp.from_ipv6 if hasSctp;
+        sctp.to_ipv6 --> networkLayer.transportIn++ if hasSctp;
+        networkLayer.transportOut++ --> sctp.from_ipv6 if hasSctp;
 
         for i=0..numPingApps-1 {
             networkLayer.pingOut++ --> pingApp[i].pingv6In;

@@ -27,6 +27,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "IPSocket.h"
 
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
@@ -81,6 +82,9 @@ void RSVP::initialize(int stage)
 
         // process traffic configuration
         readTrafficFromXML(par("traffic").xmlValue());
+
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_RSVP);
     }
 }
 

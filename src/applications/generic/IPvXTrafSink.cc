@@ -20,6 +20,7 @@
 #include "IPvXTrafGen.h"
 
 #include "IPvXAddressResolver.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "ModuleAccess.h"
@@ -40,6 +41,12 @@ void IPvXTrafSink::initialize(int stage)
     }
     else if (stage == 1)
     {
+        int protocol = par("protocol");
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(protocol);
+        ipSocket.setOutputGate(gate("ipv6Out"));
+        ipSocket.registerProtocol(protocol);
+
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }

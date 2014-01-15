@@ -26,6 +26,7 @@ package inet.applications.generic;
 simple IPvXTrafSink like IIPvXTrafficGenerator
 {
     parameters:
+        int protocol; // value for ~IPv4ControlInfo / ~IPv6ControlInfo protocol field
         @display("i=block/sink");
         @signal[rcvdPk](type=cPacket);
         @statistic[rcvdPk](title="packets received"; source=rcvdPk; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

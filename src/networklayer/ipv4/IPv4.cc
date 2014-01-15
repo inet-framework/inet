@@ -28,6 +28,7 @@
 #include "Ieee802Ctrl_m.h"
 #include "IRoutingTable.h"
 #include "InterfaceTableAccess.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
@@ -66,7 +67,6 @@ void IPv4::initialize(int stage)
         fragmentTimeoutTime = par("fragmentTimeout");
         forceBroadcast = par("forceBroadcast");
         useProxyARP = par("useProxyARP");
-        mapping.parseProtocolMapping(par("protocolMapping"));
 
         curFragmentId = 0;
         lastCheckTime = 0;
@@ -108,7 +108,12 @@ void IPv4::updateDisplayString()
 
 void IPv4::handleMessage(cMessage *msg)
 {
-    if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
+    if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
+        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
+        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        delete msg;
+    }
+    else if (!msg->isSelfMessage() && msg->getArrivalGate()->isName("arpIn"))
         endService(PK(msg));
     else
         QueueBase::handleMessage(msg);
@@ -644,7 +649,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
     }
     else
     {
-        int gateindex = mapping.getOutputGateForProtocol(protocol);
+        int gateindex = mapping.findOutputGateForProtocol(protocol);
         // check if the transportOut port are connected, otherwise discard the packet
         if (gateindex >= 0)
         {

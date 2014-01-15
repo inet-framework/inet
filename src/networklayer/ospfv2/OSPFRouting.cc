@@ -28,6 +28,7 @@
 #include "RoutingTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "IPSocket.h"
 
 
 Define_Module(OSPFRouting);
@@ -44,13 +45,15 @@ OSPFRouting::~OSPFRouting()
     delete ospfRouter;
 }
 
-
 void OSPFRouting::initialize(int stage)
 {
     // we have to wait for stage 2 until interfaces are registered (stage 0)
     // and routerId is assigned (stage 3)
     if (stage == 4)
     {
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_OSPF);
+
         isUp = isNodeUp();
         if (isUp)
             createOspfRouter();

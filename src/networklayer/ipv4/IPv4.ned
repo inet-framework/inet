@@ -90,7 +90,6 @@ simple IPv4
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);
-        string protocolMapping;
         double fragmentTimeout @unit("s") = default(60s);
         bool forceBroadcast = default(false);
         bool useProxyARP = default(true);

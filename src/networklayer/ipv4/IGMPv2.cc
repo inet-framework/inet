@@ -17,6 +17,7 @@
 //
 
 #include "IGMPv2.h"
+#include "IPSocket.h"
 #include "RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
@@ -392,6 +393,9 @@ void IGMPv2::initialize(int stage)
                 configureInterface(ie);
         }
         nb->subscribe(this, NF_INTERFACE_CREATED);
+
+        IPSocket ipSocket(gate("ipOut"));
+        ipSocket.registerProtocol(IP_PROT_IGMP);
     }
 }
 

@@ -24,6 +24,8 @@
 
 //#include <iostream>
 #include "dsr-uu-omnetpp.h"
+
+#include "IPSocket.h"
 #include "IPv4Address.h"
 #include "Ieee802Ctrl_m.h"
 #include "Ieee80211Frame_m.h"
@@ -202,7 +204,6 @@ void DSRUU::initialize(int stage)
     //current_time =simTime();
     if (!is_init)
     {
-
         for (int i = 0; i < CONFVAL_MAX; i++)
         {
             /* Override the default values in the ns-default.tcl file */
@@ -322,9 +323,12 @@ void DSRUU::initialize(int stage)
         is_init = true;
     }
 
-
     if (stage==4)
     {
+        IPSocket ipSocket(gate("to_ip"));
+        ipSocket.registerProtocol(IP_PROT_MANET);
+        ipSocket.registerProtocol(IP_PROT_DSR);
+
         /* Search the 80211 interface */
         inet_rt = RoutingTableAccess().get();
         inet_ift = InterfaceTableAccess().get();

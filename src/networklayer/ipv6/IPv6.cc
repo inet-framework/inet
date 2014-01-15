@@ -21,6 +21,8 @@
 
 #include "IPv6.h"
 
+#include "IPSocket.h"
+
 #include "InterfaceTableAccess.h"
 #include "RoutingTable6Access.h"
 #include "ICMPv6Access.h"
@@ -60,8 +62,6 @@ void IPv6::initialize(int stage)
 
         tunneling = IPv6TunnelingAccess().get();
 
-        mapping.parseProtocolMapping(par("protocolMapping"));
-
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;
         fragbuf.init(icmp);
@@ -93,6 +93,18 @@ void IPv6::updateDisplayString()
     if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
     if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
     getDisplayString().setTagArg("t", 0, buf);
+}
+
+void IPv6::handleMessage(cMessage *msg)
+{
+    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    {
+        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->removeControlInfo());
+        mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
+        delete msg;
+    }
+    else
+        QueueBase::handleMessage(msg);
 }
 
 void IPv6::endService(cPacket *msg)

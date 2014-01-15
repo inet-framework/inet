@@ -15,6 +15,7 @@
 
 #include "DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
 #include "DSDV_2.h"
+#include "IPSocket.h"
 
 #define NOforwardHello
 Define_Module(DSDV_2);
@@ -27,6 +28,10 @@ void DSDV_2::initialize(int stage)
         sequencenumber = 0;
         ift = NULL;
         rt = NULL;
+
+        IPSocket socket(gate("to_ip"));
+        socket.registerProtocol(IP_PROT_MANET);
+
         ift = InterfaceTableAccess().get();
         /* Search the 80211 interface */
         int  num_80211 = 0;

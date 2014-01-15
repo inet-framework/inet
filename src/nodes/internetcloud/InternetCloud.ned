@@ -74,7 +74,6 @@ module InternetCloud
                         timeToLive = 32;
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
-                        protocolMapping = "1:0,138:0";
                         useProxyARP = true; 
                         routingTableModule = "^.^.routingTable";
                         @display("p=85,95;q=queue");

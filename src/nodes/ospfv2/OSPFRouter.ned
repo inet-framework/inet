@@ -38,7 +38,7 @@ module OSPFRouter extends Router
                 @display("p=465,287,row");
         }
     connections allowunconnected:
-        ospf.ipOut --> networkLayer.ospfIn;
-        ospf.ipIn <-- networkLayer.ospfOut;
+        ospf.ipOut --> networkLayer.transportIn++;
+        ospf.ipIn <-- networkLayer.transportOut++;
 }
 

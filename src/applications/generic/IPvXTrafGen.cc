@@ -22,6 +22,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "IPvXAddressResolver.h"
+#include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 
@@ -65,6 +66,11 @@ void IPvXTrafGen::initialize(int stage)
 
     numSent = 0;
     WATCH(numSent);
+
+    IPSocket ipSocket(gate("ipOut"));
+    ipSocket.registerProtocol(protocol);
+    ipSocket.setOutputGate(gate("ipv6Out"));
+    ipSocket.registerProtocol(protocol);
 
     timer = new cMessage("sendTimer");
     nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
