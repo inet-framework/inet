@@ -15,7 +15,7 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           aa87-5db4
 
 /examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           b818-3ce6
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             26e6-9480
+/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             6cd6-932e
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             a234-b0f4
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             2827-b25f
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             f7db-fb60
@@ -316,7 +316,7 @@
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            479c-cd0c
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             2775-b4ad
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             6389-b5e4
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             e3d9-fbcc
 

@@ -774,8 +774,14 @@ void SimplifiedRadio::setBitrate(double bitrate)
     //XXX fire some notification?
 }
 
+// KLUDGE: remove this
+static bool settingRadioModeKludge = false;
+
 void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
 {
+    if (settingRadioModeKludge)
+        return;
+    settingRadioModeKludge = true;
     Enter_Method_Silent();
     if (radioMode != newRadioMode)
     {
@@ -794,6 +800,7 @@ void SimplifiedRadio::setRadioMode(RadioMode newRadioMode)
         emit(radioModeChangedSignal, newRadioMode);
         updateRadioChannelState();
     }
+    settingRadioModeKludge = false;
 }
 
 void SimplifiedRadio::updateRadioChannelState()
