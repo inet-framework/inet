@@ -112,7 +112,7 @@ void GenericNetworkProtocol::handleMessageFromHL(cPacket *msg)
     // if no interface exists, do not send datagram
     if (interfaceTable->getNumInterfaces() == 0)
     {
-        EV << "No interfaces exist, dropping packet\n";
+        EV_INFO << "No interfaces exist, dropping packet\n";
         delete msg;
         return;
     }
@@ -134,12 +134,12 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
 
     Address destAddr = datagram->getDestinationAddress();
 
-    EV << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
+    EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
     if (routingTable->isLocalAddress(destAddr))
     {
-        EV << "local delivery\n";
+        EV_INFO << "local delivery\n";
         if (datagram->getSourceAddress().isUnspecified())
             datagram->setSourceAddress(destAddr); // allows two apps on the same host to communicate
         numLocalDeliver++;
@@ -154,7 +154,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     // if datagram arrived from input gate and Generic_FORWARD is off, delete datagram
     if (!fromHL && !routingTable->isForwardingEnabled())
     {
-        EV << "forwarding off, dropping packet\n";
+        EV_INFO << "forwarding off, dropping packet\n";
         numDropped++;
         delete datagram;
         return;
@@ -165,7 +165,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     Address nextHop;
     if (destIE && !requestedNextHop.isUnspecified())
     {
-        EV << "using manually specified output interface " << destIE->getName() << "\n";
+        EV_DETAIL << "using manually specified output interface " << destIE->getName() << "\n";
         nextHop = requestedNextHop;
     }
     else
@@ -177,7 +177,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
         // throw packet away and continue
         if (re==NULL)
         {
-            EV << "unroutable, discarding packet\n";
+            EV_INFO << "unroutable, discarding packet\n";
             numUnroutable++;
             delete datagram;
             return;
@@ -193,7 +193,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
         datagram->setSourceAddress(destIE->getGenericNetworkProtocolData()->getAddress());
 
     // default: send datagram to fragmentation
-    EV << "output interface is " << destIE->getName() << ", next-hop address: " << nextHop << "\n";
+    EV_INFO << "output interface is " << destIE->getName() << ", next-hop address: " << nextHop << "\n";
     numForwarded++;
 
     sendDatagramToOutput(datagram, destIE, nextHop);
@@ -425,7 +425,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
 
     // hop counter check
     if (datagram->getHopLimit() <= 0) {
-        EV << "datagram hopLimit reached zero, discarding\n";
+        EV_INFO << "datagram hopLimit reached zero, discarding\n";
         delete datagram;  //TODO stats counter???
         return;
     }

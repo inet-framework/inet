@@ -87,7 +87,7 @@ void EchoProtocol::processEchoReply(EchoPacket *reply)
         send(payload, "pingOut", i->second);
     else
     {
-        EV << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
+        EV_INFO << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
         delete payload;
     }
 }
