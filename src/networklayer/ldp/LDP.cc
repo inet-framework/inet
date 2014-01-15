@@ -150,7 +150,7 @@ void LDP::initialize(int stage)
         }
 
         // start listening for incoming TCP conns
-        EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
+        EV_INFO << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
         serverSocket.bind(LDP_PORT);
@@ -170,12 +170,12 @@ void LDP::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("LDP is not running");
-    EV << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
+    EV_INFO << "Received: (" << msg->getClassName() << ")" << msg->getName() << "\n";
     if (msg==sendHelloMsg)
     {
         // every LDP capable router periodically sends HELLO messages to the
         // "all routers in the sub-network" multicast address
-        EV << "Multicasting LDP Hello to neighboring routers\n";
+        EV_INFO << "Multicasting LDP Hello to neighboring routers\n";
         sendHelloTo(IPv4Address::ALL_ROUTERS_MCAST);
 
         // schedule next hello
@@ -183,7 +183,7 @@ void LDP::handleMessage(cMessage *msg)
     }
     else if (msg->isSelfMessage())
     {
-        EV << "Timer " << msg->getName() << " expired\n";
+        EV_INFO << "Timer " << msg->getName() << " expired\n";
         if (!strcmp(msg->getName(), "HelloTimeout"))
         {
             processHelloTimeout(msg);
@@ -282,7 +282,7 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
             LabelOpVector outLabel = LIBTable::popLabel();
             uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
 
-            EV << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
+            EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                     " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
             uit++;
         }
@@ -292,14 +292,14 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
             LabelOpVector outLabel = LIBTable::swapLabel(dit->label);
             uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
 
-            EV << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
+            EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                     " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
             uit++;
         }
         else
         {
             // no mapping from DS, withdraw mapping US
-            EV << "sending withdraw message upstream" << endl;
+            EV_INFO << "sending withdraw message upstream" << endl;
             sendMapping(LABEL_WITHDRAW, uit->peer, uit->label, oldItem.addr, oldItem.length);
 
             // remove from US mappings
@@ -310,14 +310,14 @@ void LDP::updateFecListEntry(LDP::fec_t oldItem)
     if (!ER && dit == fecDown.end())
     {
         // and ask DS for mapping
-        EV << "sending request message downstream" << endl;
+        EV_INFO << "sending request message downstream" << endl;
         sendMappingRequest(oldItem.nextHop, oldItem.addr, oldItem.length);
     }
 }
 
 void LDP::rebuildFecList()
 {
-    EV << "make list of recognized FECs" << endl;
+    EV_INFO << "make list of recognized FECs" << endl;
 
     FecVector oldList = fecList;
     fecList.clear();
@@ -336,7 +336,7 @@ void LDP::rebuildFecList()
         IPv4Address nextHop = (re->getGateway().isUnspecified()) ? re->getDestination() : re->getGateway();
         ASSERT(!nextHop.isUnspecified());
 
-        EV << "nextHop <-- " << nextHop << endl;
+        EV_INFO << "nextHop <-- " << nextHop << endl;
 
         FecVector::iterator it = findFecEntry(oldList, re->getDestination(), re->getNetmask().getNetmaskLength());
 
@@ -398,12 +398,12 @@ void LDP::rebuildFecList()
 
     if (oldList.size() > 0)
     {
-        EV << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
+        EV_INFO << "there are " << oldList.size() << " deprecated FECs, removing them" << endl;
 
         FecVector::iterator it;
         for (it = oldList.begin(); it != oldList.end(); it++)
         {
-            EV << "removing FEC= " << *it << endl;
+            EV_DETAIL << "removing FEC= " << *it << endl;
 
             FecBindVector::iterator dit;
             for (dit = fecDown.begin(); dit != fecDown.end(); dit++)
@@ -411,7 +411,7 @@ void LDP::rebuildFecList()
                 if (dit->fecid != it->fecid)
                     continue;
 
-                EV << "sending release label=" << dit->label << " downstream to " << dit->peer << endl;
+                EV_DETAIL << "sending release label=" << dit->label << " downstream to " << dit->peer << endl;
 
                 sendMapping(LABEL_RELEASE, dit->peer, dit->label, it->addr, it->length);
             }
@@ -422,11 +422,11 @@ void LDP::rebuildFecList()
                 if (uit->fecid != it->fecid)
                     continue;
 
-                EV << "sending withdraw label=" << uit->label << " upstream to " << uit->peer << endl;
+                EV_DETAIL << "sending withdraw label=" << uit->label << " upstream to " << uit->peer << endl;
 
                 sendMapping(LABEL_WITHDRAW, uit->peer, uit->label, it->addr, it->length);
 
-                EV << "removing entry inLabel=" << uit->label << " from LIB" << endl;
+                EV_DETAIL << "removing entry inLabel=" << uit->label << " from LIB" << endl;
 
                 lt->removeLibEntry(uit->label);
             }
@@ -487,7 +487,7 @@ void LDP::processHelloTimeout(cMessage *msg)
 
     IPv4Address peerIP = myPeers[i].peerIP;
 
-    EV << "peer=" << peerIP << " is gone, removing adjacency" << endl;
+    EV_INFO << "peer=" << peerIP << " is gone, removing adjacency" << endl;
 
     ASSERT(!myPeers[i].timeout->isScheduled());
     delete myPeers[i].timeout;
@@ -496,7 +496,7 @@ void LDP::processHelloTimeout(cMessage *msg)
     delete myPeers[i].socket;
     myPeers.erase(myPeers.begin() + i);
 
-    EV << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
+    EV_INFO << "removing (stale) bindings from fecDown for peer=" << peerIP << endl;
 
     FecBindVector::iterator dit;
     for (dit = fecDown.begin(); dit != fecDown.end();)
@@ -507,7 +507,7 @@ void LDP::processHelloTimeout(cMessage *msg)
             continue;
         }
 
-        EV << "label=" << dit->label << endl;
+        EV_DETAIL << "label=" << dit->label << endl;
 
         // send release message just in case (?)
         // what happens if peer is not really down and
@@ -517,7 +517,7 @@ void LDP::processHelloTimeout(cMessage *msg)
         dit = fecDown.erase(dit);
     }
 
-    EV << "removing bindings from sent to peer=" << peerIP << " from fecUp" << endl;
+    EV_INFO << "removing bindings from sent to peer=" << peerIP << " from fecUp" << endl;
 
     FecBindVector::iterator uit;
     for (uit = fecUp.begin(); uit != fecUp.end();)
@@ -528,7 +528,7 @@ void LDP::processHelloTimeout(cMessage *msg)
             continue;
         }
 
-        EV << "label=" << uit->label << endl;
+        EV_DETAIL << "label=" << uit->label << endl;
 
         // send withdraw message just in case (?)
         // see comment above...
@@ -536,7 +536,7 @@ void LDP::processHelloTimeout(cMessage *msg)
         uit = fecUp.erase(uit);
     }
 
-    EV << "updating fecList" << endl;
+    EV_INFO << "updating fecList" << endl;
 
     updateFecList(peerIP);
 
@@ -556,12 +556,12 @@ void LDP::processLDPHello(LDPHello *msg)
     int interfaceId = controlInfo->getInterfaceId();
     delete msg;
 
-    EV << "Received LDP Hello from " << peerAddr << ", ";
+    EV_INFO << "Received LDP Hello from " << peerAddr << ", ";
 
     if (peerAddr.isUnspecified() || peerAddr==rt->getRouterId())
     {
         // must be ourselves (we're also in the all-routers multicast group), ignore
-        EV << "that's myself, ignore\n";
+        EV_INFO << "that's myself, ignore\n";
         return;
     }
 
@@ -578,7 +578,7 @@ void LDP::processLDPHello(LDPHello *msg)
     int i = findPeer(peerAddr);
     if (i!=-1)
     {
-        EV << "already in my peer table, rescheduling timeout" << endl;
+        EV_DETAIL << "already in my peer table, rescheduling timeout" << endl;
         ASSERT(myPeers[i].timeout);
         cancelEvent(myPeers[i].timeout);
         scheduleAt(simTime() + holdTime, myPeers[i].timeout);
@@ -596,14 +596,14 @@ void LDP::processLDPHello(LDPHello *msg)
     myPeers.push_back(info);
     int peerIndex = myPeers.size()-1;
 
-    EV << "added to peer table\n";
-    EV << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
+    EV_INFO << "added to peer table\n";
+    EV_INFO << "We'll be " << (info.activeRole ? "ACTIVE" : "PASSIVE") << " in this session\n";
 
     // introduce ourselves with a Hello, then connect if we're in ACTIVE role
     sendHelloTo(peerAddr);
     if (info.activeRole)
     {
-        EV << "Establishing session with it\n";
+        EV_INFO << "Establishing session with it\n";
         openTCPConnectionToPeer(peerIndex);
     }
 }
@@ -659,7 +659,7 @@ void LDP::processMessageFromTCP(cMessage *msg)
 void LDP::socketEstablished(int, void *yourPtr)
 {
     peer_info& peer = myPeers[(long)yourPtr];
-    EV << "TCP connection established with peer " << peer.peerIP << "\n";
+    EV_INFO << "TCP connection established with peer " << peer.peerIP << "\n";
 
     // we must update all entries with nextHop == peerIP
     updateFecList(peer.peerIP);
@@ -670,7 +670,7 @@ void LDP::socketEstablished(int, void *yourPtr)
 void LDP::socketDataArrived(int, void *yourPtr, cPacket *msg, bool)
 {
     peer_info& peer = myPeers[(long)yourPtr];
-    EV << "Message arrived over TCP from peer " << peer.peerIP << "\n";
+    EV_INFO << "Message arrived over TCP from peer " << peer.peerIP << "\n";
 
     delete msg->removeControlInfo();
     processLDPPacketFromTCP(check_and_cast<LDPPacket *>(msg));
@@ -679,7 +679,7 @@ void LDP::socketDataArrived(int, void *yourPtr, cPacket *msg, bool)
 void LDP::socketPeerClosed(int, void *yourPtr)
 {
     peer_info& peer = myPeers[(long)yourPtr];
-    EV << "Peer " << peer.peerIP << " closed TCP connection\n";
+    EV_INFO << "Peer " << peer.peerIP << " closed TCP connection\n";
 
     ASSERT(false);
 
@@ -696,7 +696,7 @@ void LDP::socketPeerClosed(int, void *yourPtr)
 void LDP::socketClosed(int, void *yourPtr)
 {
     peer_info& peer = myPeers[(long)yourPtr];
-    EV << "TCP connection to peer " << peer.peerIP << " closed\n";
+    EV_INFO << "TCP connection to peer " << peer.peerIP << " closed\n";
 
     ASSERT(false);
 
@@ -706,7 +706,7 @@ void LDP::socketClosed(int, void *yourPtr)
 void LDP::socketFailure(int, void *yourPtr, int code)
 {
     peer_info& peer = myPeers[(long)yourPtr];
-    EV << "TCP connection to peer " << peer.peerIP << " broken\n";
+    EV_INFO << "TCP connection to peer " << peer.peerIP << " broken\n";
 
     ASSERT(false);
 
@@ -940,19 +940,19 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
     if (packet->isSelfMessage())
     {
         // re-scheduled by ourselves
-        EV << "notification retry for peer=" << srcAddr << " fec=" << fec << " status=" << status << endl;
+        EV_INFO << "notification retry for peer=" << srcAddr << " fec=" << fec << " status=" << status << endl;
     }
     else
     {
         // received via network
-        EV << "notification received from=" << srcAddr << " fec=" << fec << " status=" << status << endl;
+        EV_INFO << "notification received from=" << srcAddr << " fec=" << fec << " status=" << status << endl;
     }
 
     switch (status)
     {
         case NO_ROUTE:
         {
-            EV << "route does not exit on that peer" << endl;
+            EV_INFO << "route does not exit on that peer" << endl;
 
             FecVector::iterator it = findFecEntry(fecList, fec.addr, fec.length);
             if (it != fecList.end())
@@ -961,23 +961,23 @@ void LDP::processNOTIFICATION(LDPNotify *packet)
                 {
                     if (!packet->isSelfMessage())
                     {
-                        EV << "we are still interesed in this mapping, we will retry later" << endl;
+                        EV_DETAIL << "we are still interesed in this mapping, we will retry later" << endl;
 
                         scheduleAt(simTime() + 1.0 /* XXX FIXME */, packet);
                         return;
                     }
                     else
                     {
-                        EV << "reissuing request" << endl;
+                        EV_DETAIL << "reissuing request" << endl;
 
                         sendMappingRequest(srcAddr, fec.addr, fec.length);
                     }
                 }
                 else
-                    EV << "and we still recognize this FEC, but we use different next hop, forget it" << endl;
+                    EV_DETAIL << "and we still recognize this FEC, but we use different next hop, forget it" << endl;
             }
             else
-                EV << "and we do not recognize this any longer, forget it" << endl;
+                EV_DETAIL << "and we do not recognize this any longer, forget it" << endl;
 
             break;
         }
@@ -995,12 +995,12 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     FEC_TLV fec = packet->getFec();
     IPv4Address srcAddr = packet->getSenderAddress();
 
-    EV << "Label Request from LSR " << srcAddr << " for FEC " << fec << endl;
+    EV_INFO << "Label Request from LSR " << srcAddr << " for FEC " << fec << endl;
 
     FecVector::iterator it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end())
     {
-        EV << "FEC not recognized, sending back No route message" << endl;
+        EV_DETAIL << "FEC not recognized, sending back No route message" << endl;
 
         sendNotify(NO_ROUTE, srcAddr, fec.addr, fec.length);
 
@@ -1048,7 +1048,7 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
 
         uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, 0);
 
-        EV << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
+        EV_DETAIL << "installed (egress) LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                 " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
 
         // We are egress, let our upstream peer know
@@ -1063,7 +1063,7 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
         LabelOpVector outLabel = LIBTable::swapLabel(dit->label);
         uit->label = lt->installLibEntry(uit->label, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
 
-        EV << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
+        EV_DETAIL << "installed LIB entry inLabel=" << uit->label << " inInterface=" << inInterface <<
                 " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
 
         // We already have a mapping for this FEC, let our upstream peer know
@@ -1075,7 +1075,7 @@ void LDP::processLABEL_REQUEST(LDPLabelRequest *packet)
     {
         // no mapping from DS, mark as pending
 
-        EV << "no mapping for this FEC from the downstream router, marking as pending" << endl;
+        EV_DETAIL << "no mapping for this FEC from the downstream router, marking as pending" << endl;
 
         pending_req_t newItem;
         newItem.fecid = it->fecid;
@@ -1092,7 +1092,7 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
 
-    EV << "Mapping release received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
+    EV_INFO << "Mapping release received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
     ASSERT(label > 0);
 
@@ -1101,7 +1101,7 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
     FecVector::iterator it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end())
     {
-        EV << "FEC no longer recognized here, ignoring" << endl;
+        EV_INFO << "FEC no longer recognized here, ignoring" << endl;
         delete packet;
         return;
     }
@@ -1112,15 +1112,15 @@ void LDP::processLABEL_RELEASE(LDPLabelMapping *packet)
         // this is ok and may happen; e.g. we removed the mapping because downstream
         // neighbour withdrew its mapping. we sent withdraw upstream as well and
         // this is upstream's response
-        EV << "mapping not found among sent mappings, ignoring" << endl;
+        EV_INFO << "mapping not found among sent mappings, ignoring" << endl;
         delete packet;
         return;
     }
 
-    EV << "removing from LIB table label=" << uit->label << endl;
+    EV_DETAIL << "removing from LIB table label=" << uit->label << endl;
     lt->removeLibEntry(uit->label);
 
-    EV << "removing label from list of sent mappings" << endl;
+    EV_DETAIL << "removing label from list of sent mappings" << endl;
     fecUp.erase(uit);
 
     delete packet;
@@ -1132,7 +1132,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
 
-    EV << "Mapping withdraw received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
+    EV_INFO << "Mapping withdraw received for label=" << label << " fec=" << fec << " from " << fromIP << endl;
 
     ASSERT(label > 0);
 
@@ -1141,7 +1141,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
     FecVector::iterator it = findFecEntry(fecList, fec.addr, fec.length);
     if (it == fecList.end())
     {
-        EV << "matching FEC not found, ignoring withdraw message" << endl;
+        EV_INFO << "matching FEC not found, ignoring withdraw message" << endl;
         delete packet;
         return;
     }
@@ -1150,7 +1150,7 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
 
     if (dit == fecDown.end() || label != dit->label)
     {
-        EV << "matching mapping not found, ignoring withdraw message" << endl;
+        EV_INFO << "matching mapping not found, ignoring withdraw message" << endl;
         delete packet;
         return;
     }
@@ -1158,10 +1158,10 @@ void LDP::processLABEL_WITHDRAW(LDPLabelMapping *packet)
     ASSERT(dit != fecDown.end());
     ASSERT(label == dit->label);
 
-    EV << "removing label from list of received mappings" << endl;
+    EV_INFO << "removing label from list of received mappings" << endl;
     fecDown.erase(dit);
 
-    EV << "sending back relase message" << endl;
+    EV_INFO << "sending back relase message" << endl;
     packet->setType(LABEL_RELEASE);
 
     // send msg to peer over TCP
@@ -1176,7 +1176,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
     int label = packet->getLabel();
     IPv4Address fromIP = packet->getSenderAddress();
 
-    EV << "Label mapping label=" << label << " received for fec=" << fec << " from " << fromIP << endl;
+    EV_INFO << "Label mapping label=" << label << " received for fec=" << fec << " from " << fromIP << endl;
 
     ASSERT(label > 0);
 
@@ -1205,7 +1205,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
             continue;
         }
 
-        EV << "there's pending request for this FEC from " << pit->peer << ", sending mapping" << endl;
+        EV_DETAIL << "there's pending request for this FEC from " << pit->peer << ", sending mapping" << endl;
 
         std::string inInterface = findInterfaceFromPeerAddr(pit->peer);
         std::string outInterface = findInterfaceFromPeerAddr(fromIP);
@@ -1217,7 +1217,7 @@ void LDP::processLABEL_MAPPING(LDPLabelMapping *packet)
         newItem.label = lt->installLibEntry(-1, inInterface, outLabel, outInterface, LDP_USER_TRAFFIC);
         fecUp.push_back(newItem);
 
-        EV << "installed LIB entry inLabel=" << newItem.label << " inInterface=" << inInterface <<
+        EV_DETAIL << "installed LIB entry inLabel=" << newItem.label << " inInterface=" << inInterface <<
                 " outLabel=" << outLabel << " outInterface=" << outInterface << endl;
 
         sendMapping(LABEL_MAPPING, pit->peer, newItem.label, it->addr, it->length);
@@ -1284,7 +1284,7 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
         if (!destAddr.prefixMatches(it->addr, it->length))
             continue;
 
-        EV << "FEC matched: " << *it << endl;
+        EV_DETAIL << "FEC matched: " << *it << endl;
 
         FecBindVector::iterator dit = findFecEntry(fecDown, it->fecid, it->nextHop);
         if (dit != fecDown.end())
@@ -1292,12 +1292,12 @@ bool LDP::lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::st
             outLabel = LIBTable::pushLabel(dit->label);
             outInterface = findInterfaceFromPeerAddr(it->nextHop);
             color = LDP_USER_TRAFFIC;
-            EV << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterface << endl;
+            EV_DETAIL << "mapping found, outLabel=" << outLabel << ", outInterface=" << outInterface << endl;
             return true;
         }
         else
         {
-            EV << "no mapping for this FEC exists" << endl;
+            EV_DETAIL << "no mapping for this FEC exists" << endl;
             return false;
         }
     }
@@ -1311,7 +1311,7 @@ void LDP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 
     ASSERT(signalID==NF_ROUTE_ADDED || signalID==NF_ROUTE_DELETED);
 
-    EV << "routing table changed, rebuild list of known FEC" << endl;
+    EV_INFO << "routing table changed, rebuild list of known FEC" << endl;
 
     rebuildFecList();
 }
