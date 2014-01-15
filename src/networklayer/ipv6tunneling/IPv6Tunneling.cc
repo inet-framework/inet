@@ -124,14 +124,14 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
     if ((tunnelType == NORMAL || tunnelType == SPLIT || tunnelType == NON_SPLIT) // check does not work for T2RH or HoA_Opt. Why?
          && rt->isLocalAddress(entry) && rt->isLocalAddress(exit))
     {
-        EV << "Cannot create tunnel with local endpoints (prevents loopback tunneling)" << endl;
+        EV_INFO << "Cannot create tunnel with local endpoints (prevents loopback tunneling)" << endl;
         return 0;
     }
 
     int search = findTunnel(entry, exit, destTrigger);
     if (search != 0)
     {
-        EV << "Tunnel with entry = " << entry << ", exit = " << exit << " and trigger = "
+        EV_INFO << "Tunnel with entry = " << entry << ", exit = " << exit << " and trigger = "
            << destTrigger << " already exists!" << endl;
         return search;
     }
@@ -174,7 +174,7 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
         // TODO perform path MTU on link (interface resolved via exit address)
         tunnels[vIfIndexTop].tunnelMTU = IPv6_MIN_MTU - 40;
 
-        EV << "Tunneling: Created tunnel with entry=" << entry << ", exit=" << exit
+        EV_INFO << "Tunneling: Created tunnel with entry=" << entry << ", exit=" << exit
            << " and trigger=" << destTrigger << endl;
     }
     else if (tunnelType == T2RH || tunnelType == HA_OPT)
@@ -182,10 +182,10 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
         tunnels[vIfIndexTop].tunnelType = tunnelType;
 
         if (tunnelType == T2RH)
-            EV << "Tunneling: Created RH2 path with entry=" << entry << ", exit=" << exit
+            EV_INFO << "Tunneling: Created RH2 path with entry=" << entry << ", exit=" << exit
                << " and trigger=" << destTrigger << endl;
         else
-            EV << "Tunneling: Created HA option path with entry=" << entry << ", exit=" << exit
+            EV_INFO << "Tunneling: Created HA option path with entry=" << entry << ", exit=" << exit
                << " and trigger=" << destTrigger << endl;
     }
     else
@@ -214,7 +214,7 @@ int IPv6Tunneling::findTunnel(const IPv6Address& src, const IPv6Address& dest,
 bool IPv6Tunneling::destroyTunnel(const IPv6Address& src, const IPv6Address& dest,
                                   const IPv6Address& destTrigger)
 {
-    EV << "Destroy tunnel entry =" << src << ", exit = " << dest
+    EV_INFO << "Destroy tunnel entry =" << src << ", exit = " << dest
        << ", destTrigger = " << destTrigger << "\n";
 
     // search for tunnel with given entry and exit point as well as trigger
@@ -222,7 +222,7 @@ bool IPv6Tunneling::destroyTunnel(const IPv6Address& src, const IPv6Address& des
 
     if (vIfIndex == 0)
     {
-        EV << "Tunnel not found\n";
+        EV_WARN << "Tunnel not found\n";
         return false;
     }
 
@@ -332,7 +332,7 @@ void IPv6Tunneling::destroyTunnelFromTrigger(const IPv6Address& trigger)
 int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress)
 {
     //Enter_Method("Looking up Tunnels (%s)", destAddress.str().c_str());
-    EV << "Looking up tunnels...";
+    EV_INFO << "Looking up tunnels...";
 
     // first we look for tunnels with destAddress as trigger
     int vIfIndex = lookupTunnels(destAddress);
@@ -344,7 +344,7 @@ int IPv6Tunneling::getVIfIndexForDest(const IPv6Address& destAddress)
         vIfIndex = doPrefixMatch(destAddress);
     }
 
-    EV << "found vIf=" << vIfIndex << endl;
+    EV_DETAIL << "found vIf=" << vIfIndex << endl;
 
     return vIfIndex;
 }
@@ -465,7 +465,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
             // append T2RH to routing headers
             controlInfo->addExtensionHeader(t2RH);
 
-            EV << "Added Type 2 Routing Header." << endl;
+            EV_INFO << "Added Type 2 Routing Header." << endl;
         }
         else // HA_OPT
         {
@@ -479,7 +479,7 @@ void IPv6Tunneling::encapsulateDatagram(IPv6Datagram* dgram)
             // append HA option to routing headers
             controlInfo->addExtensionHeader(haOpt);
 
-            EV << "Added Home Address Option header." << endl;
+            EV_INFO << "Added Home Address Option header." << endl;
         }
 
         // new src is tunnel entry (either CoA or CN)
@@ -531,7 +531,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
           current location of the real mobile node and be able to defeat
           ingress filtering. This check is not necessary if the reverse-
           tunneled packet is protected by ESP in tunnel mode.*/
-        EV << "Dropping packet: source address of tunnel IP header different from tunnel exit points!" << endl;
+        EV_INFO << "Dropping packet: source address of tunnel IP header different from tunnel exit points!" << endl;
         delete controlInfo;
         delete dgram;
         return;
@@ -553,7 +553,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
     if (rt->isMobileNode() && (controlInfo->getSrcAddr() == ie->ipv6Data()->getHomeAgentAddress())
             && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {
-        EV << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;
+        EV_INFO << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;
         xMIPv6* mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
         if(mipv6)
             mipv6->triggerRouteOptimization(dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);

@@ -416,7 +416,7 @@ void IPv6RoutingTable::configureTunnelFromXML(cXMLElement* cfg)
         cXMLElement *triggerNode = triggerList[0];
         trigger.set( getRequiredAttr(triggerNode, "destination") );
 
-        EV << "New tunnel: " << "entry=" << entry << ",exit=" << exit << ",trigger=" << trigger << endl;
+        EV_INFO << "New tunnel: " << "entry=" << entry << ",exit=" << exit << ",trigger=" << trigger << endl;
         tunneling->createTunnel(IPv6Tunneling::NORMAL, entry, exit, trigger);
     }
 }
@@ -510,7 +510,7 @@ const IPv6Route *IPv6RoutingTable::doLongestPrefixMatch(const IPv6Address& dest)
             {
                 if ( (*it)->getSourceType()==IRoute::ROUTER_ADVERTISEMENT )
                 {
-                    EV << "Expired prefix detected!!" << endl;
+                    EV_INFO << "Expired prefix detected!!" << endl;
                     it = internalDeleteRoute(it); // TODO update display string
                 }
             }
@@ -852,7 +852,7 @@ void IPv6RoutingTable::deleteDefaultRoutes(int interfaceID)
 {
     ASSERT(interfaceID >= 0);
 
-    EV << "/// Removing default route for interface=" << interfaceID << endl;
+    EV_INFO << "/// Removing default route for interface=" << interfaceID << endl;
 
     for (RouteList::iterator it=routeList.begin(); it!=routeList.end(); )
     {
@@ -870,7 +870,7 @@ void IPv6RoutingTable::deleteDefaultRoutes(int interfaceID)
 // Added by CB
 void IPv6RoutingTable::deleteAllRoutes()
 {
-    EV << "/// Removing all routes from rt6 " << endl;
+    EV_INFO << "/// Removing all routes from rt6 " << endl;
 
     for (unsigned int i=0; i<routeList.size(); i++)
     {
