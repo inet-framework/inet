@@ -31,7 +31,7 @@ class INET_API RadioUWBIR: public MiximRadio {
 
 public:
 
-	// KLUDGE: TODO: eliminate this enum by adding a separate state variable
+	// KLUDGE: TODO: eliminate this enum by using the synchronizing reception state
 	enum UWBIRRadioMode {
 		/* receiving state*/
 		 RADIO_MODE_SYNC = IRadio::RADIO_MODE_SWITCHING + 1,

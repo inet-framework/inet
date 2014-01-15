@@ -992,7 +992,7 @@ void SimplifiedRadio::connectReceiver()
     EV << "RadioGate :" << radioGate->getFullPath() << " " << radioGate->getFullName() << endl;
 
     // pick up ongoing transmissions on the new channel
-    EV << "Picking up ongoing transmissions on new channel:\n";
+    EV << "Picking up ongoing transmissions on current channel:\n";
     ISimplifiedRadioChannel::TransmissionList tlAux = cc->getOngoingTransmissions(radioChannel);
     for (ISimplifiedRadioChannel::TransmissionList::const_iterator it = tlAux.begin(); it != tlAux.end(); ++it)
     {
