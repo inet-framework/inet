@@ -88,14 +88,14 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram
     if (isDrop)
     {
         //TODO emit?
-        EV << "Message " << msg->info() << " dropped in cloud.\n";
+        EV_INFO << "Message " << msg->info() << " dropped in cloud.\n";
         return INetfilter::IHook::DROP;
     }
 
     if (propDelay > SIMTIME_ZERO)
     {
         //TODO emit?
-        EV << "Message " << msg->info() << " delayed with " << propDelay*1000.0 << "ms in cloud.\n";
+        EV_INFO << "Message " << msg->info() << " delayed with " << propDelay*1000.0 << "ms in cloud.\n";
         take(msg);
         scheduleAt(simTime() + propDelay, msg);
         return INetfilter::IHook::QUEUE;
