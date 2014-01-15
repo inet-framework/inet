@@ -195,13 +195,13 @@ void Batman::hna_local_task_exec(void)
             if ((hna_task->addr == hna_local_entry->addr) && (hna_task->netmask == hna_local_entry->netmask)) {
                 found = true;
                 if (hna_task->route_action == ROUTE_DEL) {
-                    debug_output(3) << "Deleting HNA from announce network list: " << hna_task->addr << "/" << hna_task->netmask << endl;
+                    EV_INFO << "Deleting HNA from announce network list: " << hna_task->addr << "/" << hna_task->netmask << endl;
 
                     hna_local_update_routes(hna_local_entry, ROUTE_DEL);
                     hna_list.erase(hna_list.begin()+hna_pos);
                     --hna_pos;
                 } else {
-                    debug_output(3) << "Can't add HNA - already announcing network: " << hna_task->addr << "/" << hna_task->netmask << endl;
+                    EV_INFO << "Can't add HNA - already announcing network: " << hna_task->addr << "/" << hna_task->netmask << endl;
                 }
                 break;
             }
@@ -209,7 +209,7 @@ void Batman::hna_local_task_exec(void)
 
         if (!found) {
             if (hna_task->route_action == ROUTE_ADD) {
-                debug_output(3) << "Adding HNA to announce network list: " << hna_task->addr << "/" << hna_task->netmask << endl;
+                EV_INFO << "Adding HNA to announce network list: " << hna_task->addr << "/" << hna_task->netmask << endl;
 
                 /* add node */
                 HnaLocalEntry hna_local_entry;
@@ -220,7 +220,7 @@ void Batman::hna_local_task_exec(void)
                 hna_local_update_routes(&hna_local_entry, ROUTE_ADD);
                 hna_list.push_back(hna_local_entry);
             } else {
-                debug_output(3) << "Can't delete HNA - network is not announced: " << hna_task->addr << "/" << hna_task->netmask << endl;
+                EV_INFO << "Can't delete HNA - network is not announced: " << hna_task->addr << "/" << hna_task->netmask << endl;
             }
         }
 
@@ -433,7 +433,7 @@ void Batman::hna_global_add(OrigNode *orig_node, HnaElement *new_hna, int16_t ne
     /* add new routes */
     num_elements = new_hna_len / SIZE_Hna_element;
 
-    debug_output(4) << "HNA information received (" << num_elements << " HNA network" << (num_elements > 1 ? "s": "") << "):\n";
+    EV_INFO << "HNA information received (" << num_elements << " HNA network" << (num_elements > 1 ? "s": "") << "):\n";
 
     for (i = 0; i < num_elements; i++) {
         e = &new_hna[i];
@@ -441,9 +441,9 @@ void Batman::hna_global_add(OrigNode *orig_node, HnaElement *new_hna, int16_t ne
         //addr_to_string(e->addr, hna_str, sizeof(hna_str));
 
         if ((e->netmask > 0) && (e->netmask < 33))
-            debug_output(4) << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << "\n";
+            EV_DETAIL << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << "\n";
         else
-            debug_output(4) << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << " -> ignoring (invalid netmask) \n";
+            EV_DETAIL << "hna: " << e->addr << "/" << (unsigned int)(e->netmask) << " -> ignoring (invalid netmask) \n";
 
         if ((e->netmask > 0) && (e->netmask <= 32))
             _hna_global_add(orig_node, e);

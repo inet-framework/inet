@@ -88,7 +88,7 @@ void NS_CLASS hello_stop()
     DEBUG(LOG_DEBUG, 0,
           "No active forwarding routes - stopped sending HELLOs!");
 #ifdef OMNETPP
-    EV << "No active forwarding routes - stopped sending HELLOs!";
+    EV_INFO << "No active forwarding routes - stopped sending HELLOs!";
 #endif
     timer_remove(&hello_timer);
 }
@@ -139,7 +139,7 @@ void NS_CLASS hello_send(void *arg)
             DEBUG(LOG_DEBUG, 0, "sending Hello to 255.255.255.255");
 #endif
 #ifdef OMNETPP
-            EV << "sending Hello to 255.255.255.255";
+            EV_INFO << "sending Hello to 255.255.255.255";
 #endif
             rrep = rrep_create(flags, 0, 0, DEV_NR(i).ipaddr,
                                this_host.seqno,
@@ -311,7 +311,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
                       hello_interval);
 #endif
 #ifdef OMNETPP
-                EV << "Hello extension interval = "<< hello_interval;
+                EV_DETAIL << "Hello extension interval = "<< hello_interval;
 #endif
 
             }
@@ -325,7 +325,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
             DEBUG(LOG_INFO, 0, "RREP_HELLO_NEIGHBOR_SET_EXT");
 #endif
 #ifdef OMNETPP
-            EV << "RREP_HELLO_NEIGHBOR_SET_EXT";
+            EV_DEBUG << "RREP_HELLO_NEIGHBOR_SET_EXT";
 #endif
 
             for (i = 0; i < ext->length; i = i + 4)
@@ -355,7 +355,7 @@ void NS_CLASS hello_process(RREP * hello, int rreplen, unsigned int ifindex)
           ip_to_str(hello_dest), hello_seqno);
 #endif
 #ifdef OMNETPP
-    EV << "rcvd HELLO from " << ip_to_str(hello_dest) << " seqno = hello_seqno";
+    EV_INFO << "rcvd HELLO from " << ip_to_str(hello_dest) << " seqno = hello_seqno";
 #endif
 
     /* This neighbor should only be valid after receiving 3

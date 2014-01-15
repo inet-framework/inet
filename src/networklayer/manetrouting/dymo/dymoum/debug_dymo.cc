@@ -79,7 +79,7 @@ void NS_CLASS dlog(int pri, int errnum, const char *func, const char *format, ..
 #ifndef OMNETPP
     debug("node %s: %s: %s\n", ip2str(ra_addr_), func, msg);
 #else
-    EV << "node "<< nodeName << " function " << func << "   " << msg << "\n";
+    EV_DEBUG << "node "<< nodeName << " function " << func << "   " << msg << "\n";
 #endif
 #endif
 }

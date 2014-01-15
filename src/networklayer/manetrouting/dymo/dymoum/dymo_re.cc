@@ -237,7 +237,7 @@ void NS_CLASS re_process(RE *re,struct in_addr ip_src, u_int32_t ifindex)
                 seqnum          = block->re_node_seqnum;
                 rb_state = re_info_type(block, entry, is_rreq);
                 if (rb_state==RB_FRESH || rb_state==RB_PROACTIVE)
-                    EV <<"Error <\n";
+                    EV_ERROR <<"Error <\n";
             }
         }
 #endif
@@ -802,7 +802,7 @@ void NS_CLASS re_intermediate_rrep (struct in_addr src_addr,struct in_addr dest_
 {
     /** create a new RREP and send it to given destination **/
 #ifdef OMNETPP
-    EV << "sending a reply to OrigNode " <<  src_addr.s_addr << endl;
+    EV_INFO << "sending a reply to OrigNode " <<  src_addr.s_addr << endl;
 #endif
     rtable_entry_t *rev_rt  = rtable_find(src_addr);
 

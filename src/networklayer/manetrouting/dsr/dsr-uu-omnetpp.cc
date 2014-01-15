@@ -399,7 +399,7 @@ void DSRUU::initialize(int stage)
             }
         }
         interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
-        EV << "Dsr active" << "\n";
+        EV_INFO << "Dsr active" << "\n";
     }
 
     return;
@@ -537,7 +537,7 @@ void DSRUU::handleMessage(cMessage* msg)
         if (control->getOptionCode() == MANET_ROUTE_NOROUTE)
         {
             cMessage *msg_aux = control->decapsulate();
-            EV << "Dsr rec msg " << msg_aux->getName() << "\n";
+            EV_INFO << "Dsr rec msg " << msg_aux->getName() << "\n";
             delete msg;
             msg = msg_aux;
         }
@@ -628,9 +628,9 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
 
                    // DSRPkt *p = check_and_cast <DSRPkt *> (paux->dup());
                    // take(p);
-                    EV << "####################################################\n";
-                    EV << "Dsr protocol received promiscuous packet from " << paux->getSrcAddress() << "\n";
-                    EV << "#####################################################\n";
+                    EV_INFO << "####################################################\n";
+                    EV_INFO << "Dsr protocol received promiscuous packet from " << paux->getSrcAddress() << "\n";
+                    EV_INFO << "#####################################################\n";
                     Ieee802Ctrl *ctrl = new Ieee802Ctrl();
                     ctrl->setSrc(frame->getTransmitterAddress());
                     ctrl->setDest(frame->getReceiverAddress());
@@ -652,7 +652,7 @@ void DSRUU::packetFailed(IPv4Datagram *ipDgram)
     if (ipDgram->getTransportProtocol()!=IP_PROT_DSR)
     {
         // This shouldn't really happen ?
-        EV << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
+        EV_INFO << "Data packet from "<< ipDgram->getSrcAddress() <<"without DSR header!n";
         return;
     }
 

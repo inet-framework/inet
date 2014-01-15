@@ -479,9 +479,9 @@ void OLSR::initialize(int stage)
 
 
         if (par("reduceFuncionality"))
-            EV << "reduceFuncionality true" << endl;
+            EV_TRACE << "reduceFuncionality true" << endl;
         else
-            EV << "reduceFuncionality false" << endl;
+            EV_TRACE << "reduceFuncionality false" << endl;
 
         pkt_seq_ = OLSR_MAX_SEQ_NUM;
         msg_seq_ = OLSR_MAX_SEQ_NUM;
@@ -1261,7 +1261,7 @@ OLSR::mpr_computation()
         {
             state_.insert_mpr_addr(max->nb_main_addr());
             CoverTwoHopNeighbors(max->nb_main_addr(), N2);
-            EV << N2.size () << " 2-hop neighbors left to cover! \n";
+            EV_DETAIL << N2.size () << " 2-hop neighbors left to cover! \n";
         }
     }
 }
@@ -1889,7 +1889,7 @@ OLSR::send_hello()
                 }
                 if (!ok)
                 {
-                    EV << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
+                    EV_INFO << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
                     continue;
                 }
             }
@@ -2245,7 +2245,7 @@ OLSR::mac_failed(IPv4Datagram* p)
 
     nsaddr_t dest_addr = ManetAddress(p->getDestAddress());
 
-    EV <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
+    EV_WARN <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
     if (dest_addr == ManetAddress(IPv4Address(IP_BROADCAST)))

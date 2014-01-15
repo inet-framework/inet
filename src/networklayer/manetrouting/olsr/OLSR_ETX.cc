@@ -1843,7 +1843,7 @@ OLSR_ETX::send_hello()
                 }
                 if (!ok)
                 {
-                    EV << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
+                    EV_INFO << "I don't know the neighbor " << get_main_addr(link_tuple->nb_iface_addr()) << "!!! \n";
                     continue;
                 }
             }

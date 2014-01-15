@@ -80,7 +80,7 @@ void DYMO_DataQueue::queuePacket(const IPv4Datagram* datagram)
 {
     IPv4Address destAddr = datagram->getDestAddress();
 
-    EV << "Queueing data packet to " << destAddr << endl;
+    EV_INFO << "Queueing data packet to " << destAddr << endl;
     dataQueue.push_back(DYMO_QueuedData(const_cast<IPv4Datagram *> (datagram), destAddr));
     dataQueueByteSize += datagram->getByteLength();
 
@@ -92,7 +92,7 @@ void DYMO_DataQueue::queuePacket(const IPv4Datagram* datagram)
         dataQueueByteSize -= qd.datagram->getByteLength();
         IPv4Address destAddr = qd.destAddr;
         delete qd.datagram;
-        EV << "Forced dropping of data packet to " << destAddr << endl;
+        EV_INFO << "Forced dropping of data packet to " << destAddr << endl;
         //  ipLayer->reinjectDatagram(qd.datagram, IPv4::Hook::DROP);
     }
 }
@@ -110,7 +110,7 @@ void DYMO_DataQueue::reinjectDatagramsTo(IPv4Address destAddr, int prefix, Resul
             DYMO_QueuedData qd = *iter;
             if (qd.destAddr.prefixMatches(destAddr, prefix))
             {
-                EV << "Dequeueing data packet to " << qd.destAddr << endl;
+                EV_INFO << "Dequeueing data packet to " << qd.destAddr << endl;
                 dataQueueByteSize -= qd.datagram->getByteLength();
                 dataQueue.erase(iter);
                 if (verdict==ACCEPT)

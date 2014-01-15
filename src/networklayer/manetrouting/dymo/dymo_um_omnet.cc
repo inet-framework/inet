@@ -218,7 +218,7 @@ void DYMOUM::initialize(int stage)
         costStatic = par("costStatic").longValue();
         costMobile = par("costMobile").longValue();
         useHover = par("useHover");
-        EV << "Dymo active" << "\n";
+        EV_INFO << "Dymo active" << "\n";
 
     }
 }
@@ -393,7 +393,7 @@ void DYMOUM::handleMessage(cMessage *msg)
             else
             {
                 ipDgram = (IPv4Datagram*) control->decapsulate();
-                EV << "Dymo rec datagram  " << ipDgram->getName() << " with dest=" << ipDgram->getDestAddress().str() << "\n";
+                EV_INFO << "Dymo rec datagram  " << ipDgram->getName() << " with dest=" << ipDgram->getDestAddress().str() << "\n";
                 processPacket(ipDgram, NS_IFINDEX);  /// Always use ns interface
             }
         }
@@ -442,7 +442,7 @@ void DYMOUM::handleMessage(cMessage *msg)
             {
                 Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl*>(dymoMsg->getControlInfo());
                 src_addr.s_addr = ManetAddress(controlInfo->getSrc());
-                EV << "rec packet from " << controlInfo->getSrc() <<endl;
+                EV_INFO << "rec packet from " << controlInfo->getSrc() <<endl;
             }
         }
         else
@@ -1285,7 +1285,7 @@ void DYMOUM::packetFailed(IPv4Datagram *dgram)
         scheduleNextEvent();
         return;
     }
-    EV << "LINK FAILURE for dest=" << dgram->getDestAddress();
+    EV_WARN << "LINK FAILURE for dest=" << dgram->getDestAddress();
     rt = rtable_find(dest_addr);
     if (rt)
     {

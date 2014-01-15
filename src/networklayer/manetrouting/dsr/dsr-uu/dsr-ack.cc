@@ -355,7 +355,7 @@ dsr_ack_req_opt_add(struct dsr_pkt *dp, unsigned short id)
     DEBUG("Added ACK REQ option id=%u\n", id, ntohs(dp->dh.opth->p_len));
 end:
     if (buf+DSR_ACK_REQ_HDR_LEN>dp->dh.tail)
-        EV << "DSR memory lack \n";
+        EV_WARN << "DSR memory lack \n";
 
     return dsr_ack_req_opt_create(buf, DSR_ACK_REQ_HDR_LEN, id);
 }
@@ -425,7 +425,7 @@ int NSCLASS dsr_ack_req_opt_recv(struct dsr_pkt *dp, struct dsr_ack_req_opt *ack
         return DSR_PKT_ERROR;
 
     if ((char*)ack_req_opt+DSR_ACK_REQ_HDR_LEN>dp->dh.tail)
-        EV << "DSR memory lack \n";
+        EV_WARN << "DSR memory lack \n";
 
     dp->ack_req_opt = ack_req_opt;
 

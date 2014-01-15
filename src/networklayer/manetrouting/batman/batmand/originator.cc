@@ -87,7 +87,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const ManetAddre
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
     uint8_t max_bcast_own = 0, max_tq = 0;
 
-    debug_output(4) << "update_originator(): Searching and updating originator entry of received packet,  \n";
+    EV_INFO << "update_originator(): Searching and updating originator entry of received packet,  \n";
 
     for (unsigned int list_pos = 0; list_pos < orig_node->neigh_list.size(); list_pos++) {
         tmp_neigh_node = orig_node->neigh_list[list_pos];
@@ -112,7 +112,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const ManetAddre
     if (neigh_node == NULL) {
         neigh_node = new NeighNode(orig_node, get_orig_node(neigh), neigh, if_incoming, num_words, global_win_size);
     } else {
-        debug_output(4) << "Updating existing last-hop neighbour of originator\n";
+        EV_INFO << "Updating existing last-hop neighbour of originator\n";
     }
 
     neigh_node->last_valid = curr_time;
@@ -164,7 +164,7 @@ void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const ManetAddre
 
                 /* if this gateway had not a gateway failure within the last 30 seconds */
                 if ((gw_node != NULL) && (curr_time > (gw_node->last_failure + 30.000))) {
-                    debug_output(3) << "Gateway client - restart gateway selection: better gateway found (tq curr: " << curr_gateway->orig_node->router->tq_avg << ", tq new: " << orig_node->router->tq_avg << ") \n";
+                    EV_INFO << "Gateway client - restart gateway selection: better gateway found (tq curr: " << curr_gateway->orig_node->router->tq_avg << ", tq new: " << orig_node->router->tq_avg << ") \n";
 
                     del_default_route();
                 }
@@ -188,7 +188,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
 
         if (curr_time > (orig_node->last_valid + (2 * purge_timeout))) {
             //addr_to_string(orig_node->orig, orig_str, ADDR_STR_LEN);
-            debug_output(4) << "Originator timeout: originator " << orig_node->orig << ", last_valid " << orig_node->last_valid << " \n";
+            EV_DETAIL << "Originator timeout: originator " << orig_node->orig << ", last_valid " << orig_node->last_valid << " \n";
 
             if (it != origMap.begin()) {
                 OrigMap::iterator itAux = it;
@@ -216,7 +216,7 @@ void Batman::purge_orig(const simtime_t &curr_time)
 
                 if (gw_node->orig_node == orig_node) {
                     //addr_to_string(gw_node->orig_node->orig, orig_str, ADDR_STR_LEN);
-                    debug_output(3) << "Removing gateway " << orig_node->orig << " from gateway list \n";
+                    EV_DETAIL << "Removing gateway " << orig_node->orig << " from gateway list \n";
 
                     gw_node->deleted = getTime();
                     gw_purged = 1;

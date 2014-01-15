@@ -449,7 +449,7 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAdd
         else
             srcadd = hostAddress.getIPv4();
 
-        EV << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
+        EV_INFO << "Sending app packet " << msg->getName() << " over IPv4." << " from " <<
         srcadd.str() << " to " << add.str() << "\n";
         IPv4ControlInfo *ipControlInfo = new IPv4ControlInfo();
         ipControlInfo->setDestAddr(add);
@@ -490,7 +490,7 @@ void ManetRoutingBase::sendToIpOnIface(cPacket *msg, int srcPort, const ManetAdd
     else if (destAddr.getType() == ManetAddress::IPv6_ADDRESS)
     {
         // send to IPv6
-        EV << "Sending app packet " << msg->getName() << " over IPv6.\n";
+        EV_INFO << "Sending app packet " << msg->getName() << " over IPv6.\n";
         IPv6ControlInfo *ipControlInfo = new IPv6ControlInfo();
         // ipControlInfo->setProtocol(IP_PROT_UDP);
         ipControlInfo->setProtocol(IP_PROT_MANET);
@@ -1143,14 +1143,14 @@ void ManetRoutingBase::sendICMP(cPacket *pkt)
     // don't send ICMP error messages for multicast messages
     if (datagram->getDestAddress().isMulticast())
     {
-        EV << "won't send ICMP error messages for multicast message " << datagram << endl;
+        EV_INFO << "won't send ICMP error messages for multicast message " << datagram << endl;
         delete pkt;
         return;
     }
     // check source address
     if (datagram->getSrcAddress().isUnspecified() && par("setICMPSourceAddress"))
         datagram->setSrcAddress(inet_ift->getInterface(0)->ipv4Data()->getIPAddress());
-    EV << "issuing ICMP Destination Unreachable for packets waiting in queue for failed route discovery.\n";
+    EV_DETAIL << "issuing ICMP Destination Unreachable for packets waiting in queue for failed route discovery.\n";
     icmpModule->sendErrorMessage(datagram, -1 /*TODO*/, ICMP_DESTINATION_UNREACHABLE, 0);
 }
 // The address group allows to implement the anycast. Any address in the group is valid for the route

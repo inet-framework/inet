@@ -30,7 +30,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     ForwNode *forw_node_new = NULL;
     OrigNode *orig_node;
 
-    debug_output(4) << "schedule_own_packet(): " << batman_if->dev << "\n";
+    EV_DEBUG << "schedule_own_packet(): " << batman_if->dev << "\n";
 
     forw_node_new = new ForwNode();
 
@@ -40,7 +40,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     forw_node_new->num_packets = 0;
     forw_node_new->direct_link_flags = 0;
 
-    EV << "Send own packet in "<< forw_node_new->send_time << endl;
+    EV_INFO << "Send own packet in "<< forw_node_new->send_time << endl;
 
 
     /* non-primary interfaces do not send hna information */
@@ -81,7 +81,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     {
         orig_node = it->second;
 
-        debug_output(4) << "count own bcast (schedule_own_packet): old = " << orig_node->bcast_own_sum[batman_if->if_num] << ", ";
+        EV_DETAIL << "count own bcast (schedule_own_packet): old = " << orig_node->bcast_own_sum[batman_if->if_num] << ", ";
         std::vector<TYPE_OF_WORD>vectorAux;
         for (unsigned int i=0; i<num_words; i++) {
             vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
@@ -92,7 +92,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
             orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
         }
         vectorAux.clear();
-        debug_output(4) << "new = " << orig_node->bcast_own_sum[batman_if->if_num] << "\n";
+        EV_DETAIL << "new = " << orig_node->bcast_own_sum[batman_if->if_num] << "\n";
     }
 }
 
@@ -105,10 +105,10 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
     uint8_t tq_avg = 0;
     simtime_t send_time;
 
-    debug_output(4) << "schedule_forward_packet():  \n";
+    EV_DEBUG << "schedule_forward_packet():  \n";
 
     if (in->getTtl() <= 1) {
-        EV << "ttl exceeded \n";
+        EV_WARN << "ttl exceeded \n";
         return;
     }
 
@@ -226,7 +226,7 @@ void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, cons
         else
             forw_list.push_back(forw_node_new);
     }
-    EV << "Fordward packet " << bat_packet << "at :" << forw_node_new->send_time << endl;
+    EV_INFO << "Fordward packet " << bat_packet << "at :" << forw_node_new->send_time << endl;
 }
 
 
@@ -253,7 +253,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
         directlink = (bat_packet->getFlags() & DIRECTLINK ? 1 : 0);
 
         if (forw_node->if_incoming == NULL) {
-            debug_output(0) << "Error - can't forward packet: incoming iface not specified \n";
+            EV_ERROR << "Error - can't forward packet: incoming iface not specified \n";
             delete forw_node->pack_buff;
             delete forw_node;
             continue;
@@ -263,7 +263,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
         /* non-primary interfaces are only broadcasted on their interface */
         if (((directlink) && (bat_packet->getTtl() == 1)) ||
             ((forw_node->own) && (forw_node->if_incoming->if_num > 0))) {
-            debug_output(4) << (forw_node->own ? "Sending own" : "Forwarding") << " packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TTL " << bat_packet->getTtl() << ") on interface " << forw_node->if_incoming->dev << "\n";
+            EV_DEBUG << (forw_node->own ? "Sending own" : "Forwarding") << " packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TTL " << bat_packet->getTtl() << ") on interface " << forw_node->if_incoming->dev << "\n";
 
             if (send_udp_packet(forw_node->pack_buff->dup(), forw_node->pack_buff_len, forw_node->if_incoming->broad, BATMAN_PORT, forw_node->if_incoming) < 0)
                     deactivate_interface(forw_node->if_incoming);
@@ -294,7 +294,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
                 if ((batman_if->wifi_if) && (!forw_node->own) && (forw_node->if_incoming == batman_if))
                     bat_packetAux->setTq((bat_packetAux->getTq() * (TQ_MAX_VALUE - (2 * hop_penalty))) / (TQ_MAX_VALUE));
 
-                debug_output(4) << (curr_packet_num > 0 ? "Forwarding" : (forw_node->own ? "Sending own" : "Forwarding")) << " " << (curr_packet_num > 0 ? "aggregated " : "") << "packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TQ " << bat_packet->getTq() << ", TTL " << bat_packet->getTtl() << ", IDF " << (bat_packet->getFlags() & DIRECTLINK ? "on" : "off") << ") on interface " << batman_if->dev << "\n";
+                EV_DETAIL << (curr_packet_num > 0 ? "Forwarding" : (forw_node->own ? "Sending own" : "Forwarding")) << " " << (curr_packet_num > 0 ? "aggregated " : "") << "packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TQ " << bat_packet->getTq() << ", TTL " << bat_packet->getTtl() << ", IDF " << (bat_packet->getFlags() & DIRECTLINK ? "on" : "off") << ") on interface " << batman_if->dev << "\n";
 
                 bat_packetAux = const_cast<BatmanPacket *> (dynamic_cast<BatmanPacket *>(bat_packetAux->getEncapsulatedPacket()));
             }
