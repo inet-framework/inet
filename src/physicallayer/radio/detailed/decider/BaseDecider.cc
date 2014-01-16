@@ -192,8 +192,7 @@ simtime_t BaseDecider::processUnknownSignal(DetailedRadioFrame* frame)
 ChannelState BaseDecider::getChannelState() const {
 
 	simtime_t            now            = phy->getSimTime();
-	// TODO: KLUDGE: MappingUtils::post should not be here, but otherwise we miss the beginning of the signal
-	channel_sense_rssi_t pairRssiMaxEnd = calcChannelSenseRSSI(MappingUtils::post(now), MappingUtils::post(now));
+	channel_sense_rssi_t pairRssiMaxEnd = calcChannelSenseRSSI(now, now);
 
 	return ChannelState(!currentSignal.isProcessing() && (!bUseNewSense || pairRssiMaxEnd.second <= now), false, pairRssiMaxEnd.first);
 }
@@ -367,7 +366,10 @@ BaseDecider::channel_sense_rssi_t BaseDecider::calcChannelSenseRSSI(simtime_t_cr
     rssi_mapping_t pairMapMaxEnd = calculateRSSIMapping(start, end);
 
 	// the sensed RSSI-value is the maximum value between (and including) the interval-borders
-	Mapping::argument_value_t rssi = MappingUtils::findMax(*pairMapMaxEnd.first, Argument(start), Argument(end), Argument::MappedZero /* the value if no maximum will be found */);
+    // NOTE: we need to extend the range when looking for the maximum value to make sure the borders
+    // are also included when there's a jump in the RSSI-value due to a signal starting or ending
+    // at the border this happens with linear interpolation
+	Mapping::argument_value_t rssi = MappingUtils::findMax(*pairMapMaxEnd.first, Argument(start == 0 ? start : MappingUtils::pre(start)), Argument(MappingUtils::post(end)), Argument::MappedZero /* the value if no maximum will be found */);
 
 	delete pairMapMaxEnd.first;
 	return std::make_pair(rssi, pairMapMaxEnd.second);
