@@ -23,7 +23,6 @@
 #include "Coord.h"
 #include "ILifecycle.h"
 #include "IMobility.h"
-#include "IAddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NodeStatus.h"
@@ -56,7 +55,6 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         cModule * host;
         NodeStatus * nodeStatus;
         IMobility * mobility;
-        IAddressType * addressType;
         IInterfaceTable * interfaceTable;
         IRoutingTable * routingTable; // TODO: delete when necessary functions are moved to interface table
         INetfilter * networkProtocol;
@@ -73,7 +71,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
 
     protected:
         // module interface
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual int numInitStages() const { return 6; }
         void initialize(int stage);
         void handleMessage(cMessage * message);
 
@@ -100,7 +98,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         void processBeacon(GPSRBeacon * beacon);
 
         // handling packets
-        GPSRPacket * createPacket(Address destination, cPacket * content);
+        GPSRPacket * createPacket(IPvXAddress destination, cPacket * content);
         int computePacketBitLength(GPSRPacket * packet);
 
         // configuration
@@ -109,39 +107,39 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
 
         // position
         Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
-        Coord getDestinationPosition(const Address & address);
-        Coord getNeighborPosition(const Address & address);
+        Coord getDestinationPosition(const IPvXAddress & address);
+        Coord getNeighborPosition(const IPvXAddress & address);
 
         // angle
         double getVectorAngle(Coord vector);
-        double getDestinationAngle(const Address & address);
-        double getNeighborAngle(const Address & address);
+        double getDestinationAngle(const IPvXAddress & address);
+        double getNeighborAngle(const IPvXAddress & address);
 
         // address
         std::string getHostName();
-        Address getSelfAddress();
-        Address getSenderNeighborAddress(INetworkDatagram * datagram);
+        IPvXAddress getSelfAddress();
+        IPvXAddress getSenderNeighborAddress(IPv4Datagram * datagram);
 
         // neighbor
         simtime_t getNextNeighborExpiration();
         void purgeNeighbors();
-        std::vector<Address> getPlanarNeighbors();
-        Address getNextPlanarNeighborCounterClockwise(Address & startNeighborAddress, double startNeighborAngle);
+        std::vector<IPvXAddress> getPlanarNeighbors();
+        IPvXAddress getNextPlanarNeighborCounterClockwise(IPvXAddress & startNeighborAddress, double startNeighborAngle);
 
         // next hop
-        Address findNextHop(INetworkDatagram * datagram, const Address & destination);
-        Address findGreedyRoutingNextHop(INetworkDatagram * datagram, const Address & destination);
-        Address findPerimeterRoutingNextHop(INetworkDatagram * datagram, const Address & destination);
+        IPvXAddress findNextHop(IPv4Datagram * datagram, const IPvXAddress & destination);
+        IPvXAddress findGreedyRoutingNextHop(IPv4Datagram * datagram, const IPvXAddress & destination);
+        IPvXAddress findPerimeterRoutingNextHop(IPv4Datagram * datagram, const IPvXAddress & destination);
 
         // routing
-        Result routeDatagram(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
+        Result routeDatagram(IPv4Datagram * datagram, const InterfaceEntry *& outputInterfaceEntry, IPv4Address & nextHop);
 
         // netfilter
-        virtual Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
-        virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop) { return ACCEPT; }
-        virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop) { return ACCEPT; }
-        virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry);
-        virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
+        virtual Result datagramPreRoutingHook(IPv4Datagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, IPv4Address & nextHop);
+        virtual Result datagramForwardHook(IPv4Datagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, IPv4Address & nextHop) { return ACCEPT; }
+        virtual Result datagramPostRoutingHook(IPv4Datagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, IPv4Address & nextHop) { return ACCEPT; }
+        virtual Result datagramLocalInHook(IPv4Datagram * datagram, const InterfaceEntry * inputInterfaceEntry);
+        virtual Result datagramLocalOutHook(IPv4Datagram * datagram, const InterfaceEntry *& outputInterfaceEntry, IPv4Address & nextHop);
 
         // lifecycle
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);

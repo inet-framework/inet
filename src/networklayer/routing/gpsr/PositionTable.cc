@@ -20,19 +20,19 @@
 
 static double const NaN = 0.0 / 0.0;
 
-std::vector<Address> PositionTable::getAddresses() const {
-    std::vector<Address> addresses;
+std::vector<IPvXAddress> PositionTable::getAddresses() const {
+    std::vector<IPvXAddress> addresses;
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
         addresses.push_back(it->first);
     return addresses;
 }
 
-bool PositionTable::hasPosition(const Address & address) const {
+bool PositionTable::hasPosition(const IPvXAddress & address) const {
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     return it != addressToPositionMap.end();
 }
 
-Coord PositionTable::getPosition(const Address & address) const {
+Coord PositionTable::getPosition(const IPvXAddress & address) const {
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     if (it == addressToPositionMap.end())
         return Coord(NaN, NaN, NaN);
@@ -40,12 +40,12 @@ Coord PositionTable::getPosition(const Address & address) const {
         return it->second.second;
 }
 
-void PositionTable::setPosition(const Address & address, const Coord & coord) {
+void PositionTable::setPosition(const IPvXAddress & address, const Coord & coord) {
     ASSERT(!address.isUnspecified());
     addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
 }
 
-void PositionTable::removePosition(const Address & address) {
+void PositionTable::removePosition(const IPvXAddress & address) {
     AddressToPositionMap::iterator it = addressToPositionMap.find(address);
     addressToPositionMap.erase(it);
 }

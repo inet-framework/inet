@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 #include "INETDefs.h"
-#include "Address.h"
+#include "IPvXAddress.h"
 #include "Coord.h"
 
 /**
@@ -31,19 +31,19 @@
 class INET_API PositionTable {
     private:
         typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
-        typedef std::map<Address, AddressToPositionMapValue> AddressToPositionMap;
+        typedef std::map<IPvXAddress, AddressToPositionMapValue> AddressToPositionMap;
         AddressToPositionMap addressToPositionMap;
 
     public:
         PositionTable() { }
 
-        std::vector<Address> getAddresses() const;
+        std::vector<IPvXAddress> getAddresses() const;
 
-        bool hasPosition(const Address & address) const;
-        Coord getPosition(const Address & address) const;
-        void setPosition(const Address & address, const Coord & coord);
+        bool hasPosition(const IPvXAddress & address) const;
+        Coord getPosition(const IPvXAddress & address) const;
+        void setPosition(const IPvXAddress & address, const Coord & coord);
 
-        void removePosition(const Address & address);
+        void removePosition(const IPvXAddress & address);
         void removeOldPositions(simtime_t timestamp);
 
         void clear();

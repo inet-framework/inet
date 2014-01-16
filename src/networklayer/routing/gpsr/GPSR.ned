@@ -18,8 +18,6 @@
 
 package inet.networklayer.routing.gpsr;
 
-import inet.networklayer.multi.NetworkDatagramMultiplexer;
-
 //
 // This module interface is used by GPSR implementations. 
 //
@@ -59,50 +57,4 @@ simple GPSR like IGPSR
     gates:
         input ipIn;
         output ipOut;
-}
-
-//
-// This module provides GPSR routing for multiple network protocols simultaneously.
-//
-module MultiGPSR like IGPSR
-{
-    parameters:
-        @display("i=block/table");
-        bool enableIPv4 = default(true);
-        bool enableIPv6 = default(true);
-        bool enableGeneric = default(true);
-        ipv4.routingTableModule = default("^.^.routingTable.ipv4");
-        ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
-        ipv6.routingTableModule = default("^.^.routingTable.ipv6");
-        ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
-        generic.routingTableModule = default("^.^.routingTable.generic");
-        generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
-
-    gates:
-        input ipIn;
-        output ipOut;
-
-    submodules:
-        ipv4: GPSR if enableIPv4 {
-            @display("p=100,100");
-        }
-        ipv6: GPSR if enableIPv6 {
-            @display("p=200,100");
-        }
-        generic: GPSR if enableGeneric {
-            @display("p=300,100");
-        }
-        multiplexer: NetworkDatagramMultiplexer {
-            @display("p=200,200");
-        }
-
-    connections allowunconnected:
-        multiplexer.upperOut --> ipOut;
-        ipIn --> multiplexer.upperIn;
-        multiplexer.lowerOut++ --> ipv4.ipIn if enableIPv4;
-        ipv4.ipOut --> multiplexer.lowerIn++ if enableIPv4;
-        multiplexer.lowerOut++ --> ipv6.ipIn if enableIPv6;
-        ipv6.ipOut --> multiplexer.lowerIn++ if enableIPv6;
-        multiplexer.lowerOut++ --> generic.ipIn if enableGeneric;
-        generic.ipOut --> multiplexer.lowerIn++ if enableGeneric;
 }
