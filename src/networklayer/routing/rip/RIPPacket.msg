@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject Address;
+class noncobject IPvXAddress;
 
 cplusplus {{
-#include "Address.h"
+#include "IPvXAddress.h"
 
 const int RIP_HEADER_SIZE = 4;
 const int RIP_RTE_SIZE = 20;
@@ -50,9 +50,9 @@ struct RIPEntry
 {
     unsigned short addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
-    Address address;                // destination address
+    IPvXAddress address;                // destination address
     int prefixLength;               // prefix length of the destination
-    Address nextHop;                // next hop address; may be unspecified if the packet is received from the next hop
+    IPvXAddress nextHop;                // next hop address; may be unspecified if the packet is received from the next hop
     unsigned int metric;            // metric of the route (1-15) or infinity (16) if no route to the destination
 }
 

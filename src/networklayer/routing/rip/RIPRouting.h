@@ -19,7 +19,7 @@
 #define __INET_RIPROUTING_H_
 
 #include "INETDefs.h"
-#include "IRoute.h"
+#include "IPv4Route.h"
 #include "IRoutingTable.h"
 #include "IInterfaceTable.h"
 #include "ILifecycle.h"
@@ -39,41 +39,41 @@ struct RIPRoute : public cObject
 
     private:
     RouteType type;        // the type of the route
-    IRoute *route;         // the route in the host routing table that is associated with this route, may be NULL if deleted
-    Address dest;          // destination of the route
+    IPv4Route *route;         // the route in the host routing table that is associated with this route, may be NULL if deleted
+    IPvXAddress dest;          // destination of the route
     int prefixLength;      // prefix length of the destination
-    Address nextHop;       // next hop of the route
+    IPvXAddress nextHop;       // next hop of the route
     InterfaceEntry *ie;    // outgoing interface of the route
-    Address from;          // only for RTE routes
+    IPvXAddress from;          // only for RTE routes
     int metric;            // the metric of this route, or infinite (16) if invalid
     uint16 tag;            // route tag, only for REDISTRIBUTE routes
     bool changed;          // true if the route has changed since the update
     simtime_t lastUpdateTime; // time of the last change, only for RTE routes
 
     public:
-    RIPRoute(IRoute *route, RouteType type, int metric, uint16 tag);
+    RIPRoute(IPv4Route *route, RouteType type, int metric, uint16 tag);
     virtual std::string info() const;
 
     RouteType getType() const { return type; }
-    IRoute *getRoute() const { return route; }
-    Address getDestination() const { return dest; }
+    IPv4Route *getRoute() const { return route; }
+    IPvXAddress getDestination() const { return dest; }
     int getPrefixLength() const { return prefixLength; }
-    Address getNextHop() const { return nextHop; }
+    IPvXAddress getNextHop() const { return nextHop; }
     InterfaceEntry *getInterface() const { return ie; }
-    Address getFrom() const { return from; }
+    IPvXAddress getFrom() const { return from; }
     int getMetric() const { return metric; }
     uint16 getRouteTag() const { return tag; }
     bool isChanged() const { return changed; }
     simtime_t getLastUpdateTime() const { return lastUpdateTime; }
     void setType(RouteType type) { this->type = type; }
-    void setRoute(IRoute *route) { this->route = route; }
-    void setDestination(const Address &dest) { this->dest = dest; }
+    void setRoute(IPv4Route *route) { this->route = route; }
+    void setDestination(const IPvXAddress &dest) { this->dest = dest; }
     void setPrefixLength(int prefixLength) { this->prefixLength = prefixLength; }
-    void setNextHop(const Address &nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setNextHop(nextHop); }
+    void setNextHop(const IPvXAddress &nextHop) { this->nextHop = nextHop; if (route && type == RIP_ROUTE_RTE) route->setGateway(nextHop.get4()); }
     void setInterface(InterfaceEntry *ie) { this->ie = ie; if(route && type == RIP_ROUTE_RTE) route->setInterface(ie); }
     void setMetric(int metric) { this->metric = metric; if (route && type == RIP_ROUTE_RTE) route->setMetric(metric); }
     void setRouteTag(uint16 routeTag) { this->tag = routeTag; }
-    void setFrom(const Address &from) { this->from = from; }
+    void setFrom(const IPvXAddress &from) { this->from = from; }
     void setChanged(bool changed) { this->changed = changed; }
     void setLastUpdateTime(simtime_t time) { lastUpdateTime = time; }
 };
@@ -139,7 +139,6 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     cModule *host;                  // the host module that owns this module
     IInterfaceTable *ift;           // interface table of the host
     IRoutingTable *rt;              // routing table from which routes are imported and to which learned routes are added
-    IAddressType *addressType;      // address type of the routing table
     // state
     InterfaceVector ripInterfaces;  // interfaces on which RIP is used
     RouteVector ripRoutes;          // all advertised routes (imported or learned)
@@ -168,22 +167,22 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     ~RIPRouting();
   private:
     RIPInterfaceEntry *findInterfaceById(int interfaceId);
-    RIPRoute *findRoute(const Address &destAddress, int prefixLength);
-    RIPRoute *findRoute(const Address &destination, int prefixLength, RIPRoute::RouteType type);
-    RIPRoute *findRoute(const IRoute *route);
+    RIPRoute *findRoute(const IPvXAddress &destAddress, int prefixLength);
+    RIPRoute *findRoute(const IPvXAddress &destination, int prefixLength, RIPRoute::RouteType type);
+    RIPRoute *findRoute(const IPv4Route *route);
     RIPRoute *findRoute(const InterfaceEntry *ie, RIPRoute::RouteType type);
     void addInterface(const InterfaceEntry *ie, cXMLElement *config);
     void deleteInterface(const InterfaceEntry *ie);
     void invalidateRoutes(const InterfaceEntry *ie);
-    IRoute *addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric);
-    void deleteRoute(IRoute *route);
-    bool isLoopbackInterfaceRoute(const IRoute *route);
-    bool isLocalInterfaceRoute(const IRoute *route);
-    bool isDefaultRoute(const IRoute *route) { return route->getPrefixLength() == 0; }
+    IPv4Route *addRoute(const IPvXAddress &dest, int prefixLength, const InterfaceEntry *ie, const IPvXAddress &nextHop, int metric);
+    void deleteRoute(IPv4Route *route);
+    bool isLoopbackInterfaceRoute(const IPv4Route *route);
+    bool isLocalInterfaceRoute(const IPv4Route *route);
+    bool isDefaultRoute(const IPv4Route *route) { return route->getNetmask() == IPv4Address::UNSPECIFIED_ADDRESS; }
     std::string getHostName() {return host->getFullName(); }
     int getInterfaceMetric(InterfaceEntry *ie);
   protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const { return 5; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
@@ -194,24 +193,24 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
 
     virtual void configureInterfaces(cXMLElement *config);
     virtual void configureInitialRoutes();
-    virtual RIPRoute* importRoute(IRoute *route, RIPRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
+    virtual RIPRoute* importRoute(IPv4Route *route, RIPRoute::RouteType type, int metric = 1, uint16 routeTag = 0);
     virtual void sendRIPRequest(const RIPInterfaceEntry &ripInterface);
 
     virtual void processRequest(RIPPacket *packet);
     virtual void processUpdate(bool triggered);
-    virtual void sendRoutes(const Address &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly);
+    virtual void sendRoutes(const IPvXAddress &address, int port, const RIPInterfaceEntry &ripInterface, bool changedOnly);
 
     virtual void processResponse(RIPPacket *packet);
     virtual bool isValidResponse(RIPPacket *packet);
-    virtual void addRoute(const Address &dest, int prefixLength, const InterfaceEntry *ie, const Address &nextHop, int metric, uint16 routeTag, const Address &from);
-    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const Address &nextHop, int metric, uint16 routeTag, const Address &from);
+    virtual void addRoute(const IPvXAddress &dest, int prefixLength, const InterfaceEntry *ie, const IPvXAddress &nextHop, int metric, uint16 routeTag, const IPvXAddress &from);
+    virtual void updateRoute(RIPRoute *route, const InterfaceEntry *ie, const IPvXAddress &nextHop, int metric, uint16 routeTag, const IPvXAddress &from);
 
     virtual void triggerUpdate();
     virtual RIPRoute *checkRouteIsExpired(RIPRoute *route);
     virtual void invalidateRoute(RIPRoute *route);
     virtual void purgeRoute(RIPRoute *route);
 
-    virtual void sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface);
+    virtual void sendPacket(RIPPacket *packet, const IPvXAddress &destAddr, int destPort, const InterfaceEntry *destInterface);
 };
 
 #endif

@@ -111,6 +111,7 @@ class INET_API IPv4Address
     static const IPv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;  ///< 224.0.0.6 All OSPF Designated Routers
     static const IPv4Address ALL_IGMPV3_ROUTERS_MCAST;  ///< 224.0.0.22 All IGMPv3 routers
     static const IPv4Address LL_MANET_ROUTERS;  ///< 224.0.0.109 Manet all designated routers
+    static const IPv4Address ALL_RIP_ROUTERS_MCAST;
     //@}
 
     /** name Constructors, destructor */
@@ -223,6 +224,11 @@ class INET_API IPv4Address
      * 224.0.0.0 thru 239.255.255.255, that is, it's a class D address.
      */
     bool isMulticast() const {return (addr & 0xF0000000)==0xE0000000;}
+
+    /**
+     * Returns true if this address is unicast address.
+     */
+    bool isUnicast() const { return !isMulticast() && !isLimitedBroadcastAddress(); }
 
     /**
      * Returns true if this address is in the range 224.0.0.0 to 224.0.0.255.

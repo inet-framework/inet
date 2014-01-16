@@ -17,7 +17,7 @@
 
 #include <set>
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "IPvXAddressResolver.h"
 #include "InterfaceEntry.h"
 #include "PatternMatcher.h"
 #include "ModuleAccess.h"
@@ -120,7 +120,7 @@ int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
 
 static bool hasInterfaceTable(cModule *module)
 {
-    return AddressResolver().findInterfaceTableOf(module);
+    return IPvXAddressResolver().findInterfaceTableOf(module);
 }
 
 static cGate *findRemoteGate(cGate *startGate)
