@@ -69,7 +69,7 @@ public:
 	virtual ChannelState getChannelState() const {
 		(const_cast<TestDecider*>(this))->state = !state;
 		(const_cast<TestDecider*>(this))->rssi += 1.0;
-		return ChannelState(state, rssi);
+		return ChannelState(state, false, rssi);
 	}
 
 	virtual simtime_t handleChannelSenseRequest(ChannelSenseRequest* request) {
