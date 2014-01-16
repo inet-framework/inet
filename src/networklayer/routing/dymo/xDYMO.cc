@@ -105,6 +105,7 @@ void xDYMO::initialize(int stage)
                 int pLength = atoi(slash + 1);
                 if (pLength < 0 || pLength > prefixLength)
                     throw cRuntimeError("invalid prefix length in 'clientAddresses' parameter: '%s/%s'", clientAddress, slash);
+                prefixLength = pLength;
             }
             clientAddressAndPrefixLengthPairs.push_back(std::pair<IPv4Address, int>(address.get4(), prefixLength));
         }
