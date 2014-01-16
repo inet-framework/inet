@@ -874,6 +874,8 @@ void DeciderTest::sendControlMsgToMac(cMessage* msg)
 
 	assertEqual("ChannelSense results isIdle state match expected results isIdle state.",
 				expChannelState.isIdle(), state.isIdle());
+    assertEqual("ChannelSense results isBusy state match expected results isBusy state.",
+                expChannelState.isBusy(), state.isBusy());
 	assertEqual("ChannelSense results RSSI value match expected results RSSI value.",
 				expChannelState.getRSSI(), state.getRSSI());
 
@@ -990,7 +992,7 @@ void DeciderTest::executeSNRNewTestCase()
 			fillAirFramesOnChannel();
 			cs = decider->getChannelState();
 
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t3_noisy, cs.getRSSI());
 
 			EV << log("-short output-----------------------------------------------") << endl;
@@ -1002,7 +1004,7 @@ void DeciderTest::executeSNRNewTestCase()
 			fillAirFramesOnChannel();
 			cs = decider->getChannelState();
 
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t4_noisy, cs.getRSSI());
 
 			EV << log("-short output-----------------------------------------------") << endl;
@@ -1014,7 +1016,7 @@ void DeciderTest::executeSNRNewTestCase()
 			fillAirFramesOnChannel();
 			cs = decider->getChannelState();
 
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t5_noisy, cs.getRSSI());
 
 			EV << log("-short output-----------------------------------------------") << endl;
@@ -1065,7 +1067,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// by now we are not yet receiving something
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t3_receiving_before, cs.getRSSI());
 
 			// trying to receive an AirFrame whose signal (TXpower) is too weak
@@ -1092,7 +1094,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// now we have started to receive an AirFrame
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t3_receiving_after, cs.getRSSI());
 
 
@@ -1106,7 +1108,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// now we have started to receive an AirFrame
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t4_receiving, cs.getRSSI());
 
 
@@ -1120,7 +1122,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// now we have started to receive an AirFrame
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t5_receiving_before, cs.getRSSI());
 
 			//hand over the AirFrame again, end-time is reached
@@ -1135,7 +1137,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// now receive of the AirFrame is over
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+3+4 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t5_receiving_after, cs.getRSSI());
 
 			// SNRThresholdDecider should be able to handle the next AirFrame
@@ -1156,7 +1158,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			// now we are not receiving an AirFrame
 			cs = decider->getChannelState();
-			assertFalse("This decider considers the combined RX-Power of AirFrame1+2+4 as busy.", cs.isIdle());
+			assertTrue("This decider considers the combined RX-Power of AirFrame1+2+4 as busy.", cs.isBusy());
 			assertEqual("RSSI-value is the value for 'testTime'", res_t6_receiving, cs.getRSSI());
 
 			// set the pointer to the processed AirFrame before SNRThresholdDecider will finally process it
@@ -1264,7 +1266,7 @@ void DeciderTest::executeSNRNewTestCase()
 						testTime + 0.2, nextHandoverTime);
 			testTime = nextHandoverTime;
 
-			setExpectedCSRAnswer(true, 0.0);
+			setExpectedCSRAnswer(true, false, 0.0);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1285,7 +1287,7 @@ void DeciderTest::executeSNRNewTestCase()
 						testTime + 0.2, nextHandoverTime);
 			testTime = nextHandoverTime;
 
-			setExpectedCSRAnswer(true, TXpower1);
+			setExpectedCSRAnswer(true, false, TXpower1);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1306,7 +1308,7 @@ void DeciderTest::executeSNRNewTestCase()
 			updateSimTime(nextHandoverTime);
 
 
-			setExpectedCSRAnswer(false, TXpower1 + TXpower2 + TXpower3);
+			setExpectedCSRAnswer(false, true, TXpower1 + TXpower2 + TXpower3);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1327,7 +1329,7 @@ void DeciderTest::executeSNRNewTestCase()
 			updateSimTime(nextHandoverTime);
 
 
-			setExpectedCSRAnswer(false, TXpower1 + TXpower2 + TXpower3);
+			setExpectedCSRAnswer(false, true, TXpower1 + TXpower2 + TXpower3);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1347,7 +1349,7 @@ void DeciderTest::executeSNRNewTestCase()
 						testTime + 1.0, nextHandoverTime);
 			testTime = nextHandoverTime;
 
-			setExpectedCSRAnswer(true, TXpower2);
+			setExpectedCSRAnswer(true, false, TXpower2);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1374,7 +1376,7 @@ void DeciderTest::executeSNRNewTestCase()
 			updateSimTime(t4);
 
 
-			setExpectedCSRAnswer(false, TXpower1 + TXpower2 + TXpower3);
+			setExpectedCSRAnswer(false, true, TXpower1 + TXpower2 + TXpower3);
 			nextHandoverTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertTrue("NextHandoverTime express that sense request has been finally processed.",
 					   nextHandoverTime < 0);
@@ -1395,7 +1397,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			double senseLength = 6;
 			testChannelSense = createCSR(senseLength, UNTIL_IDLE);
-			setExpectedCSRAnswer(true, tmpAF1Power);
+			setExpectedCSRAnswer(true, false, tmpAF1Power);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertEqual("UNTIL_IDLE request on idle channel should be answered immediately.",
 						-1.0, SIMTIME_DBL(handleTime));
@@ -1415,7 +1417,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(t3);
 
-			setExpectedCSRAnswer(false, TXpower3 + tmpAF1Power);
+			setExpectedCSRAnswer(false, true, TXpower3 + tmpAF1Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->processSignal(TestAF3);
 			assertFalse("UNTIL_BUSY request should have been answered because of AF3.", expectCSRAnswer);
@@ -1441,7 +1443,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(testTime + senseLength);
 
-			setExpectedCSRAnswer(true, tmpAF1Power);
+			setExpectedCSRAnswer(true, false, tmpAF1Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_BUSY request should have been answered because of time out.", expectCSRAnswer);
@@ -1461,7 +1463,7 @@ void DeciderTest::executeSNRNewTestCase()
 			simtime_t senseLength = 2;
 			testChannelSense = createCSR(senseLength, UNTIL_BUSY);
 
-			setExpectedCSRAnswer(false, tmpAF1Power + tmpAF2Power);
+			setExpectedCSRAnswer(true, true, tmpAF1Power + tmpAF2Power);
 			assert(expectCSRAnswer);
 			simtime_t handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_BUSY request should have been answered because of already busy channel.", expectCSRAnswer);
@@ -1480,7 +1482,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(handleTime);
 
-			setExpectedCSRAnswer(false, tmpAF1Power + tmpAF2Power);
+			setExpectedCSRAnswer(true, true, tmpAF1Power + tmpAF2Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assert(handleTime < 0);
@@ -1499,7 +1501,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(handleTime);
 
-			setExpectedCSRAnswer(true, tmpAF2Power);
+			setExpectedCSRAnswer(true, false, tmpAF2Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assert(handleTime < 0);
@@ -1532,7 +1534,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(expRescheduleTime);
 
-			setExpectedCSRAnswer(true, tmpAF2Power);
+			setExpectedCSRAnswer(true, false, tmpAF2Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assert(handleTime < 0);
@@ -1566,7 +1568,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(answerCSRTime);
 
-			setExpectedCSRAnswer(true, tmpAF2Power + tmpAF3Power);
+			setExpectedCSRAnswer(true, false, tmpAF2Power + tmpAF3Power);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assert(handleTime < 0);
@@ -1596,7 +1598,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(handleTime);
 
-			setExpectedCSRAnswer(true, tmpAF1Power2);
+			setExpectedCSRAnswer(true, false, tmpAF1Power2);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_IDLE request should have been answered because of idle payload.", expectCSRAnswer);
@@ -1633,7 +1635,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(expRescheduleTime);
 
-			setExpectedCSRAnswer(true, tmpAF1Power2 + tmpAF23Power1 + tmpAF23Power2);
+			setExpectedCSRAnswer(true, false, tmpAF1Power2 + tmpAF23Power1 + tmpAF23Power2);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_IDLE request should have been answered because of idle channel.",
@@ -1661,7 +1663,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(handleTime);
 
-			setExpectedCSRAnswer(false, tmpAF1Power2);
+			setExpectedCSRAnswer(true, true, tmpAF1Power2);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_BUSY request should have been answered because of busy payload.", expectCSRAnswer);
@@ -1694,7 +1696,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(expRescheduleTime);
 
-			setExpectedCSRAnswer(false, tmpAF1Power1 + tmpAF2Power2);
+			setExpectedCSRAnswer(true, true, tmpAF1Power1 + tmpAF2Power2);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assert(handleTime < 0);

@@ -242,6 +242,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request on idle channel should be answered immediately.
 Passed: UNTIL_BUSY request on idle channel can't be answered yet.
@@ -251,6 +252,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_BUSY request should have been answered because of AF3.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -266,6 +268,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_BUSY request should have been answered because of time out.
 Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
@@ -277,6 +280,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_BUSY request should have been answered because of already busy channel.
 Passed: UNTIL_IDLE request can't be answered because of busy channel.
@@ -286,6 +290,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request was answered because of time out.
 Passed: UNTIL_IDLE request can't be answered because of busy channel.
@@ -295,6 +300,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request was answered because of idle channel.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -314,6 +320,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request was answered because of idle channel.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -329,6 +336,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request was answered because of idle channel.
 Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
@@ -344,6 +352,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request should have been answered because of idle payload.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -363,6 +372,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_IDLE request should have been answered because of idle channel.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -375,6 +385,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_BUSY request should have been answered because of busy payload.
 Signal for TestAirFrame5 created with header/payload power: 32/16
@@ -394,6 +405,7 @@ Signal for TestAirFrame5 created with header/payload power: 32/16
 Passed: Control message send to mac by the Decider should be a ChannelSenseRequest
 Passed: This ChannelSenseRequest answer has been expected.
 Passed: ChannelSense results isIdle state match expected results isIdle state.
+Passed: ChannelSense results isBusy state match expected results isBusy state.
 Passed: ChannelSense results RSSI value match expected results RSSI value.
 Passed: UNTIL_BUSY request was answered because of busy payload.
 

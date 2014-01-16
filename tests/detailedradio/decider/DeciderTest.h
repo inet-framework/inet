@@ -477,9 +477,9 @@ protected:
 
 	void freeAirFramePool();
 
-	void setExpectedCSRAnswer(bool expIsIdle, double expRSSI) {
+	void setExpectedCSRAnswer(bool expIsIdle, bool expIsBusy, double expRSSI) {
 		expectCSRAnswer = true;
-		expChannelState = ChannelState(expIsIdle, expRSSI);
+		expChannelState = ChannelState(expIsIdle, expIsBusy, expRSSI);
 	}
 
 	void setExpectedReschedule(simtime_t_cref newTime) {
