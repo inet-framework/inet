@@ -1,6 +1,8 @@
 //
 // Copyright (C) 2005 Andras Varga
 //
+// Based on the video streaming app of the similar name by Johnny Lai.
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
@@ -13,11 +15,6 @@
 //
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
-//
-
-
-//
-// based on the video streaming app of the similar name by Johnny Lai
 //
 
 #ifndef __INET_UDPVIDEOSTREAMCLI_H

@@ -1,16 +1,5 @@
-// ***************************************************************************
 //
-// HttpTools Project
-//
-// This file is a part of the HttpTools project. The project was created at
-// Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
-// Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable
-// Web server component.
-//
-// Maintainer: Kristjan V. Jonsson LDSS kristjanvj04@ru.is
-//
-// ***************************************************************************
+// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -25,7 +14,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
-// ***************************************************************************
 
 #include <algorithm>
 #include <ctype.h>
