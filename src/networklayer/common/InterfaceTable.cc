@@ -246,12 +246,12 @@ void InterfaceTable::invalidateTmpInterfaceList()
     tmpInterfaceList = NULL;
 }
 
-void InterfaceTable::interfaceChanged(InterfaceEntry *entry, int category)
+void InterfaceTable::interfaceChanged(int category, const InterfaceEntryChangeDetails *details)
 {
-    nb->fireChangeNotification(category, entry);
+    nb->fireChangeNotification(category, details);
 
     if (ev.isGUI() && par("displayAddresses").boolValue())
-        updateLinkDisplayString(entry);
+        updateLinkDisplayString(details->getInterfaceEntry());
 }
 
 void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)

@@ -111,8 +111,10 @@ void RoutingTableRecorder::receiveChangeNotification(NotificationBoard *nb, int 
     cModule *host = nb->getParentModule();
     if (category==NF_IPv4_ROUTE_ADDED || category==NF_IPv4_ROUTE_DELETED || category==NF_IPv4_ROUTE_CHANGED)
         recordRouteChange(host, check_and_cast<const IPv4Route *>(details), category);
-    else
+    else if (category==NF_INTERFACE_CREATED || category==NF_INTERFACE_DELETED)
         recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(details), category);
+    else if (category==NF_INTERFACE_CONFIG_CHANGED || category==NF_INTERFACE_IPv4CONFIG_CHANGED)
+        recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(details)->getInterfaceEntry(), category);
 }
 
 void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceEntry *ie, int category)

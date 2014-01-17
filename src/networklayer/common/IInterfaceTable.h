@@ -37,7 +37,7 @@ class INET_API IInterfaceTable
 
   protected:
     // called from InterfaceEntry
-    virtual void interfaceChanged(InterfaceEntry *entry, int category) = 0;
+    virtual void interfaceChanged(int category, const InterfaceEntryChangeDetails *details) = 0;
 
   public:
     virtual ~IInterfaceTable() {}

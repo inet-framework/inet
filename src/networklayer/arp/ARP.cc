@@ -611,7 +611,8 @@ void ARP::receiveChangeNotification(int category, const cObject *details)
     // host associated. Link is up. Change the state to init.
     if (category == NF_INTERFACE_IPv4CONFIG_CHANGED)
     {
-        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(const_cast<cObject *>(details));
+        const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(details);
+        InterfaceEntry *ie = iecd->getInterfaceEntry();
         // rebuild the arp cache
         if (ie->isLoopback())
             return;

@@ -36,11 +36,11 @@
 #endif
 
 
-void InterfaceProtocolData::changed(int category)
+void InterfaceProtocolData::changed(int category, int fieldId)
 {
     // notify the containing InterfaceEntry that something changed
     if (ownerp)
-        ownerp->changed(category);
+        ownerp->changed(category, fieldId);
 }
 
 
@@ -155,10 +155,13 @@ std::string InterfaceEntry::getFullPath() const
     return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
 }
 
-void InterfaceEntry::changed(int category)
+void InterfaceEntry::changed(int category, int fieldId)
 {
     if (ownerp)
-        ownerp->interfaceChanged(this, category);
+    {
+        InterfaceEntryChangeDetails details(this, fieldId);
+        ownerp->interfaceChanged(category, &details);
+    }
 }
 
 void InterfaceEntry::resetInterface()
@@ -197,7 +200,7 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
         delete ipv4data;
     ipv4data = p;
     p->ownerp = this;
-    configChanged();
+    configChanged(F_IPV4_DATA);
 #else
     throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
 #endif
@@ -210,7 +213,7 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
         delete ipv6data;
     ipv6data = p;
     p->ownerp = this;
-    configChanged();
+    configChanged(F_IPV6_DATA);
 #else
     throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
 #endif
@@ -222,7 +225,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
         delete (InterfaceProtocolData *)trilldata; // Khmm...
     trilldata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(F_TRILL_DATA);
 }
 
 void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
@@ -231,7 +234,7 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(F_ISIS_DATA);
 }
 
 void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
@@ -240,7 +243,7 @@ void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
         delete (InterfaceProtocolData *)ieee8021ddata; // Khmm...
     ieee8021ddata = p;
     ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
-    configChanged();
+    configChanged(F_IEEE8021D_DATA);
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
