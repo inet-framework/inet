@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2005 Jan Ringoš, www.ringos.cz
+ * Copyright (c) 2005 Jan Ringoï¿½, www.ringos.cz
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the author be held liable for any damages arising from the
@@ -25,6 +25,14 @@
 const Int128 Int128::INT128_MAX(UINT64_MAX, INT64_MAX);
 const Int128 Int128::INT128_MIN(0, INT64_MIN);
 
+
+#ifdef __ANDROID__
+// long double is the same as double on Android
+inline long double fmodl(long double a1, long double a2)
+{
+    return fmod(a1, a2);
+}
+#endif
 
 const char *Int128::toString(uint32_t radix) const
 {
