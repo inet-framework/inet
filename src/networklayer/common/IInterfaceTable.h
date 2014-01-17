@@ -20,6 +20,7 @@
 
 #include "INETDefs.h"
 
+#include "IPvXAddress.h"
 #include "InterfaceEntry.h"  // not strictly required, but clients will need it anyway
 
 
@@ -51,6 +52,22 @@ class INET_API IInterfaceTable
      * Returns the host or router this interface table lives in.
      */
     virtual cModule *getHostModule() = 0;
+
+    /**
+     * Checks if the address is a local one, i.e. one of the host's.
+     */
+    virtual bool isLocalAddress(const IPvXAddress& address) const = 0;
+
+    /**
+     * Checks if the address is on the network of one of the interfaces,
+     * but not local.
+     */
+    virtual bool isNeighborAddress(const IPvXAddress& address) const = 0;
+
+    /**
+     * Returns an interface given by its address. Returns NULL if not found.
+     */
+    virtual InterfaceEntry *findInterfaceByAddress(const IPvXAddress& address) const = 0;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used
@@ -89,6 +106,11 @@ class INET_API IInterfaceTable
      * interface (This allows detecting stale IDs without raising an error.)
      */
     virtual InterfaceEntry *getInterfaceById(int id) = 0;
+
+    /**
+     * Returns the biggest interface Id.
+     */
+    virtual int getBiggestInterfaceId() = 0;
 
     /**
      * Returns an interface given by its getNodeOutputGateId().
