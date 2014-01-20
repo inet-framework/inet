@@ -115,9 +115,10 @@ void BreakpointPathlossModel::filterSignal(DetailedRadioFrame* frame, const Coor
 	attenuation = 1/attenuation;
 	EV_DEBUG << "attenuation is: " << attenuation << endl;
 
-	if (cLogLevel::globalRuntimeLoglevel <= LOGLEVEL_DEBUG) {
+	// KLUDGE: TODO: use signals
+	//if (cLogLevel::globalRuntimeLoglevel <= LOGLEVEL_DEBUG) {
 	  pathlosses.record(10*log10(attenuation)); // in dB
-	}
+	//}
 
 	//const DimensionSet& domain = DimensionSet::timeDomain;
 	Argument arg;	// default constructor initializes with a single dimension, time, and value 0 (offset from signal start)
