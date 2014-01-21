@@ -1598,7 +1598,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(handleTime);
 
-			setExpectedCSRAnswer(true, false, tmpAF1Power2);
+			setExpectedCSRAnswer(true, true, tmpAF1Power1);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_IDLE request should have been answered because of idle payload.", expectCSRAnswer);
@@ -1635,7 +1635,7 @@ void DeciderTest::executeSNRNewTestCase()
 
 			updateSimTime(expRescheduleTime);
 
-			setExpectedCSRAnswer(true, false, tmpAF1Power2 + tmpAF23Power1 + tmpAF23Power2);
+			setExpectedCSRAnswer(true, true, tmpAF1Power2 + tmpAF23Power1 + tmpAF23Power1);
 			assert(expectCSRAnswer);
 			handleTime = decider->handleChannelSenseRequest(testChannelSense);
 			assertFalse("UNTIL_IDLE request should have been answered because of idle channel.",
