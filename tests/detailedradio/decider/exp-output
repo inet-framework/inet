@@ -1,14 +1,14 @@
 OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
-Version: 4.3rc1, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+Version: 5.0, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
 See the license for distribution terms and warranty disclaimer
 Setting up Cmdenv...
 Loading NED files from ../../../src:  295
-Loading NED files from ..:  8
+Loading NED files from ..:  19
 Embedded web server started on port 8000
 
 Preparing for running configuration General, run #0...
 Scenario: $repetition=0
-Assigned runID=General-0-20131210-15:48:58-20361
+Assigned runID=General-0-20140121-10:56:52-3759
 Setting up network `DeciderTest'...
 Signal for TestAirFrame1 created with header/payload power: 1/0
 [ Test] - Creating TestAirFrame 1 done.
@@ -156,6 +156,8 @@ Passed: RSSI-value is the value for 'testTime'
 [SNRThresholdDeciderNew Test] - Handing over TestAirFrame 3 again, transmission has finished
 Passed: Decider demands ChannelInfo for the duration of the AirFrame
 Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: DeciderResult is: 'correct'
+Passed: BaseDecider has returned the pointer to currently processed AirFrame
 Passed: TestAirFrame 3 has been finally processed
 Passed: Decider demands ChannelInfo for one single timepoint
 Passed: Decider demands ChannelInfo for current test-timepoint
@@ -174,6 +176,8 @@ Passed: This decider considers the combined RX-Power of AirFrame1+2+4 as busy.
 Passed: RSSI-value is the value for 'testTime'
 Passed: Decider demands ChannelInfo for the duration of the AirFrame
 Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: DeciderResult is: 'correct'
+Passed: BaseDecider has returned the pointer to currently processed AirFrame
 Passed: TestAirFrame 4 has been finally processed
 [SNRThresholdDeciderNew Test] - -DONE-------------------------------------------
 Passed: [TestBaseDecider] - Member 'myIndex' has been initialized properly by passed value.
@@ -187,6 +191,7 @@ Signal for TestAirFrame5 created with header/payload power: 10/10
 Passed: NextHandoverTime is t5.
 Passed: Decider demands ChannelInfo for the duration of the AirFrame
 Passed: Decider demands ChannelInfo for current test-timepoint (end of AirFrame)
+Passed: DeciderResult is: 'correct'
 Passed: BaseDecider decided correctly to send up the packet
 Passed: BaseDecider has returned the pointer to currently processed AirFrame
 Passed: TestAirFrame 5 has been finally processed

@@ -469,6 +469,8 @@ void DeciderTest::fillAirFramesOnChannel()
  */
 DetailedRadioFrame * DeciderTest::createTestAirFrame(int i)
 {
+    Enter_Method_Silent();
+
 	// parameters needed
 	simtime_t signalStart = -1;
 	simtime_t signalDuration = -1;
@@ -569,6 +571,7 @@ DetailedRadioFrame * DeciderTest::createTestAirFrame(int i)
 	frame->setDuration(s->getDuration());
 	// copy the signal into the AirFrame
 	frame->setSignal(*s);
+	frame->encapsulate(new cPacket());
 
 	// pointer and Signal not needed anymore
 	delete s;
@@ -886,7 +889,7 @@ void DeciderTest::sendControlMsgToMac(cMessage* msg)
 /**
  * SPECIAL TESTING IMPLEMENTATION: PLEASE REFER TO HEADER-FILE!
  */
-void DeciderTest::sendUp(DetailedRadioFrame * packet, DeciderResult* /*result*/)
+void DeciderTest::sendUp(DetailedRadioFrame * packet, DeciderResult* result)
 {
 
 	// signal that method has been called
@@ -894,12 +897,12 @@ void DeciderTest::sendUp(DetailedRadioFrame * packet, DeciderResult* /*result*/)
 
 	switch (currentTestCase) {
 		case TEST_GET_CHANNELSTATE_RECEIVING:
-			// TODO check what the result should be in this test case
-			// assertTrue("DeciderResult is: 'correct'", result.isSignalCorrect());
+			assertFalse("DeciderResult is: 'correct'", result->isSignalCorrect());
 			assertTrue("BaseDecider has returned the pointer to currently processed AirFrame", (packet==processedAF));
 			break;
 
 		case TEST_SNR_THRESHOLD_ACCEPT:
+            assertTrue("DeciderResult is: 'correct'", result->isSignalCorrect());
 			assertTrue("BaseDecider decided correctly to send up the packet", true);
 			assertTrue("BaseDecider has returned the pointer to currently processed AirFrame", (packet==processedAF));
 			break;
@@ -1244,7 +1247,7 @@ void DeciderTest::executeSNRNewTestCase()
 								(nextHandoverTime < 0));
 			processedAF = 0;
 
-			assertFalse("sendUp() has not been called.", sendUpCalled);
+			assertTrue("sendUp() has not been called.", sendUpCalled);
 
 			break;
 
