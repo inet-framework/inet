@@ -146,9 +146,8 @@ class PIMSM : public PIMBase, protected cListener
                 virtual bool isEnabled() { return downstream->isEnabled(); }
         };
 
-        class PIMSMMulticastRoute
+        struct PIMSMMulticastRoute
         {
-            public:
                 /** Route flags. Added to each route. */
                 enum Flag
                 {
@@ -162,8 +161,6 @@ class PIMSM : public PIMBase, protected cListener
                     T       = 0x40               /**< SPT bit*/
                 };
 
-
-            private:
                 IPv4Address origin;
                 IPv4Address group;
                 int flags;
@@ -171,7 +168,7 @@ class PIMSM : public PIMBase, protected cListener
                 //Originated from destination.Ensures loop freeness.
                 unsigned int sequencenumber;
                 //Time of routing table entry creation
-                simtime_t installtime;
+                simtime_t installtime; // XXX not used
 
                 IPv4Address                 RP;                     /**< Randevous point */
                 PIMkat *keepAliveTimer;
@@ -187,48 +184,19 @@ class PIMSM : public PIMBase, protected cListener
                 PIMSMMulticastRoute(IPv4Address origin, IPv4Address group);
                 virtual std::string info() const;
 
-                IPv4Address getOrigin() const { return origin; }
-                IPv4Address getMulticastGroup() const { return group; }
-
-                void setInInterface(UpstreamInterface *_inInterface);
                 void clearOutInterfaces();
                 void addOutInterface(DownstreamInterface *outInterface);
                 void removeOutInterface(unsigned int i);
-                UpstreamInterface *getInInterface() const {return inInterface;}
                 unsigned int getNumOutInterfaces() const {return outInterfaces.size();}
                 DownstreamInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
-
-                void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
-                IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
-
-                void setKeepAliveTimer (PIMkat *kat)   {this->keepAliveTimer = kat;}
-                void setRegisterStopTimer (PIMrst *rst)   {this->registerStopTimer = rst;}
-                void setExpiryTimer  (PIMet *et)     {this->expiryTimer = et;}
-                void setJoinTimer  (PIMjt *jt)     {this->joinTimer = jt;}
-                void setPrunePendingTimer  (PIMppt *ppt)  {this->prunePendingTimer = ppt;}
-                PIMkat*     getKeepAliveTimer() const {return keepAliveTimer;}
-                PIMrst*     getRegisterStopTimer() const {return registerStopTimer;}
-                PIMet*      getExpiryTimer()  const {return expiryTimer;}
-                PIMjt*      getJoinTimer()  const {return joinTimer;}
-                PIMppt*     getPrunePendingTimer()  const {return prunePendingTimer;}
 
                 bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
                 void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
                 static std::string flagsToString(int flags);
 
-                // get incoming interface
-                UpstreamInterface *getPIMInInterface() const { return inInterface; }
-
-                // get outgoing interface
-                DownstreamInterface *getPIMOutInterface(unsigned int k) const { return getOutInterface(k); }
                 DownstreamInterface *findOutInterfaceByInterfaceId(int interfaceId);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
-
-                simtime_t getInstallTime() const {return installtime;}
-                void setInstallTime(simtime_t time) {installtime = time;}
-                void setSequencenumber(int i){sequencenumber =i;}
-                unsigned int getSequencenumber() const {return sequencenumber;}
         };
 
         struct SourceAndGroup
