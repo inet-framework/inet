@@ -22,6 +22,7 @@
 #include "InterfaceTableAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
 #include "NotifierConsts.h"
 #include "UDP.h"
 
@@ -283,9 +284,9 @@ void RIPRouting::sendRIPRequest(const RIPInterfaceEntry &ripInterface)
 /**
  * Listen on interface/route changes and update private data structures.
  */
-void RIPRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void RIPRouting::receiveChangeNotification(int signalID, const cObject *obj)
 {
-    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%s)", notificationCategoryName(signalID));
+    Enter_Method_Silent("RIPRouting::receiveChangeNotification(%i)", signalID);
 
     IPv4Route *route;
     const InterfaceEntry *ie;
@@ -451,12 +452,13 @@ void RIPRouting::startRIPRouting()
     configureInitialRoutes();
 
     // subscribe to notifications
-    host->subscribe(NF_INTERFACE_CREATED, this);
-    host->subscribe(NF_INTERFACE_DELETED, this);
-    host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-    host->subscribe(NF_IPv4_ROUTE_DELETED, this);
-    host->subscribe(NF_IPv4_ROUTE_ADDED, this);
-    host->subscribe(NF_IPv4_ROUTE_CHANGED, this);
+    NotificationBoard *nb = NotificationBoardAccess().get();
+    nb->subscribe(this, NF_INTERFACE_CREATED);
+    nb->subscribe(this, NF_INTERFACE_DELETED);
+    nb->subscribe(this, NF_INTERFACE_STATE_CHANGED);
+    nb->subscribe(this, NF_IPv4_ROUTE_DELETED);
+    nb->subscribe(this, NF_IPv4_ROUTE_ADDED);
+    nb->subscribe(this, NF_IPv4_ROUTE_CHANGED);
 
     // configure socket
     socket.setMulticastLoop(false);
@@ -483,12 +485,13 @@ void RIPRouting::stopRIPRouting()
         socket.close();
 
         // unsubscribe to notifications
-        host->unsubscribe(NF_INTERFACE_CREATED, this);
-        host->unsubscribe(NF_INTERFACE_DELETED, this);
-        host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
-        host->unsubscribe(NF_IPv4_ROUTE_DELETED, this);
-        host->unsubscribe(NF_IPv4_ROUTE_ADDED, this);
-        host->unsubscribe(NF_IPv4_ROUTE_CHANGED, this);
+        NotificationBoard *nb = NotificationBoardAccess().get();
+        nb->unsubscribe(this, NF_INTERFACE_CREATED);
+        nb->unsubscribe(this, NF_INTERFACE_DELETED);
+        nb->unsubscribe(this, NF_INTERFACE_STATE_CHANGED);
+        nb->unsubscribe(this, NF_IPv4_ROUTE_DELETED);
+        nb->unsubscribe(this, NF_IPv4_ROUTE_ADDED);
+        nb->unsubscribe(this, NF_IPv4_ROUTE_CHANGED);
     }
 
     // cancel timers
