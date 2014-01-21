@@ -608,10 +608,7 @@ void BasePhyLayer::handleSelfMessage(cMessage* msg) {
 //--Send messages------------------------------
 
 void BasePhyLayer::sendControlMessageUp(cMessage* msg) {
-	// KLUDGE: TODO: refactor, it was send(msg, upperControlOut);
-    // KLUDGE: TODO: seems to be unused
-    EV_ERROR << "Dropping control msg\n";
-    delete msg;
+    send(msg, upperLayerOut);
 }
 
 void BasePhyLayer::sendMacPktUp(cMessage* pkt) {
