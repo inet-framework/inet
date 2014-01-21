@@ -342,7 +342,7 @@ Passed: [phy3] - Expected "Scheduled AirFrame to end at phy."
 Passed: [decider3] - Expected "Scheduled AirFrame to end."
 Passed: [mac3] - Expected "MacPkt at mac layer.": kind = 12121
 Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
-Passed: [mac0] - Expected "RadioChannelStateChanged signal from phy": id = 138, t = 4.5s
+Passed: [mac0] - Expected "RadioTransmissionStateChanged signal from phy": id = 139, t = 4.5s
 Passed: [phy1] - Expected "End receive of AirFrame": kind = 22003
 Passed: [phy2] - Expected "End receive of AirFrame": kind = 22003
 Passed: [phy3] - Expected "End receive of AirFrame": kind = 22003
@@ -452,7 +452,7 @@ Passed: [3.1] - Host2 ends ChannelSense and asks ChannelInfo for AirFrames durin
 Passed: [phy1] - Expected "ChannelSense at phy layer.": kind = 22002
 Passed: [decider1] - Expected "ChannelSense at decider.": kind = 22002
 Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
-Passed: [mac0] - Expected "RadioChannelStateChanged signal from phy": id = 138, t = 4.5s
+Passed: [mac0] - Expected "RadioTransmissionStateChanged signal from phy": id = 139, t = 4.5s
 Passed: [phy1] - Expected "[4.] - Host2 completes reception of AirFrame A": kind = 22003
 Passed: [phy1] - Expected "Scheduled sense request at phy.": kind = 22002
 Passed: [decider1] - Expected "Scheduled sense request.": kind = 22002
@@ -671,7 +671,7 @@ Passed: [phy1] - Expected "Packet 2 at phy of A2": kind = 22003
 Passed: [phy3] - Expected "[1.6] - Packet 2 arrives at phy of A1, A2 and B2.": kind = 22003
 Passed: [decider3] - Expected "[1.7] - Packet 2 arrives only at decider B2.": kind = 22003
 Passed: [phy0] - Expected "Transmission over message at phy": kind = 22000
-Passed: [mac0] - Expected "RadioChannelStateChanged signal from phy": id = 138, t = 8.5s
+Passed: [mac0] - Expected "RadioTransmissionStateChanged signal from phy": id = 139, t = 8.5s
 Passed: [phy1] - Expected "Scheduled AirFrame to end at phy."
 Passed: [decider1] - Expected "Scheduled AirFrame to end."
 Passed: [decider1] - Expected "End of Packet 1 at decider of A2": kind = 22003
@@ -680,7 +680,7 @@ Passed: [mac1] - Expected "MacPkt at mac layer.": kind = 12121
 Passed: [phy2] - Expected "End of Packet 1 at phy of B1": kind = 22003
 Passed: [phy3] - Expected "End of Packet 1 at phy of B2": kind = 22003
 Passed: [phy2] - Expected "Transmission over message at phy": kind = 22000
-Passed: [mac2] - Expected "RadioChannelStateChanged signal from phy": id = 138, t = 12.5s
+Passed: [mac2] - Expected "RadioTransmissionStateChanged signal from phy": id = 139, t = 12.5s
 Passed: [phy0] - Expected "End of Packet 1 at phy of A1": kind = 22003
 Passed: [phy1] - Expected "End of Packet 1 at phy of A2": kind = 22003
 Passed: [phy3] - Expected "Scheduled AirFrame to end at phy."
