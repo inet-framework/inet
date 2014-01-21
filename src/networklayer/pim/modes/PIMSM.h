@@ -101,17 +101,19 @@ class PIMSM : public PIMBase, protected cListener
          * @brief Structure of incoming interface.
          * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
          */
-        struct UpstreamInterface : public IMulticastRoute::InInterface
+        struct UpstreamInterface
         {
+            InterfaceEntry *ie;
             IPv4Address nextHop;            /**< RF neighbor */
 
             UpstreamInterface(InterfaceEntry *ie, IPv4Address nextHop)
-                : InInterface(ie), nextHop(nextHop) {}
+                : ie(ie), nextHop(nextHop) { ASSERT(ie); }
             int getInterfaceId() const { return ie->getInterfaceId(); }
         };
 
-        struct DownstreamInterface : public IMulticastRoute::OutInterface
+        struct DownstreamInterface
         {
+            InterfaceEntry          *ie;
             InterfaceState          forwarding;         /**< Forward or Pruned */
             PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
             AssertState             assert;             /**< Assert state. */
@@ -121,19 +123,30 @@ class PIMSM : public PIMBase, protected cListener
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             DownstreamInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMet *expiryTimer)
-                : OutInterface(ie, false), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
+                : ie(ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
                   expiryTimer(expiryTimer), regState(RS_NO_INFO), shRegTun(true) {}
 
             DownstreamInterface(InterfaceEntry *ie, InterfaceState forwarding,
                     PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
-                : OutInterface(ie, false), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(assert),
+                : ie(ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(assert),
                   expiryTimer(expiryTimer), regState(regState), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             virtual bool isEnabled() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
         };
 
-        class PIMSMMulticastRoute : public IPv4MulticastRoute
+        typedef std::vector<DownstreamInterface*> DownstreamInterfaceVector;
+
+        class PIMSMOutInterface : public IMulticastRoute::OutInterface
+        {
+            DownstreamInterface *downstream;
+            public:
+                PIMSMOutInterface(DownstreamInterface *downstream)
+                    : OutInterface(downstream->ie), downstream(downstream) {}
+                virtual bool isEnabled() { return downstream->isEnabled(); }
+        };
+
+        class PIMSMMulticastRoute
         {
             public:
                 /** Route flags. Added to each route. */
@@ -151,6 +164,8 @@ class PIMSM : public PIMBase, protected cListener
 
 
             private:
+                IPv4Address origin;
+                IPv4Address group;
                 int flags;
 
                 //Originated from destination.Ensures loop freeness.
@@ -164,9 +179,24 @@ class PIMSM : public PIMBase, protected cListener
                 PIMet *expiryTimer;
                 PIMjt *joinTimer;
                 PIMppt *prunePendingTimer;
+
+                UpstreamInterface *inInterface;      ///< In interface (upstream)
+                DownstreamInterfaceVector outInterfaces; ///< Out interfaces (downstream)
+
             public:
                 PIMSMMulticastRoute(IPv4Address origin, IPv4Address group);
                 virtual std::string info() const;
+
+                IPv4Address getOrigin() const { return origin; }
+                IPv4Address getMulticastGroup() const { return group; }
+
+                void setInInterface(UpstreamInterface *_inInterface);
+                void clearOutInterfaces();
+                void addOutInterface(DownstreamInterface *outInterface);
+                void removeOutInterface(unsigned int i);
+                UpstreamInterface *getInInterface() const {return inInterface;}
+                unsigned int getNumOutInterfaces() const {return outInterfaces.size();}
+                DownstreamInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
 
                 void setRP(IPv4Address RP)  {this->RP = RP;}                        /**< Set RP IP address */
                 IPv4Address   getRP() const {return RP;}                            /**< Get RP IP address */
@@ -188,10 +218,10 @@ class PIMSM : public PIMBase, protected cListener
                 static std::string flagsToString(int flags);
 
                 // get incoming interface
-                UpstreamInterface *getPIMInInterface() const { return getInInterface() ? check_and_cast<UpstreamInterface*>(getInInterface()) : NULL; }
+                UpstreamInterface *getPIMInInterface() const { return inInterface; }
 
                 // get outgoing interface
-                DownstreamInterface *getPIMOutInterface(unsigned int k) const { return getOutInterface(k) ? check_and_cast<DownstreamInterface*>(getOutInterface(k)) : NULL; }
+                DownstreamInterface *getPIMOutInterface(unsigned int k) const { return getOutInterface(k); }
                 DownstreamInterface *findOutInterfaceByInterfaceId(int interfaceId);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
 
@@ -201,8 +231,23 @@ class PIMSM : public PIMBase, protected cListener
                 unsigned int getSequencenumber() const {return sequencenumber;}
         };
 
+        struct SourceAndGroup
+        {
+            IPv4Address source;
+            IPv4Address group;
+
+            SourceAndGroup(IPv4Address source, IPv4Address group) : source(source), group(group) { ASSERT(group.isMulticast()); }
+            bool operator==(const SourceAndGroup &other) const { return source == other.source && group == other.group; }
+            bool operator!=(const SourceAndGroup &other) const { return source != other.source || group != other.group; }
+            bool operator<(const SourceAndGroup &other) const { return source < other.source || (source == other.source && group < other.group); }
+        };
+
+        typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
+
+
         IPv4Address RPAddress;
         std::string SPTthreshold;
+        SGStateMap routes;
 
     private:
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
@@ -254,6 +299,13 @@ class PIMSM : public PIMBase, protected cListener
         // routing table access
         PIMSMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
         std::vector<PIMSMMulticastRoute*> getRouteFor(IPv4Address group);
+        void addGRoute(PIMSMMulticastRoute *route);
+        void addSGRoute(PIMSMMulticastRoute *route);
+        bool removeRoute(PIMSMMulticastRoute *route);
+        PIMSMMulticastRoute *findGRoute(IPv4Address group);
+        PIMSMMulticastRoute *findSGRoute(IPv4Address source, IPv4Address group);
+        IPv4MulticastRoute *createMulticastRoute(PIMSMMulticastRoute *route);
+        IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
 
     public:
         PIMSM() : PIMBase(PIMInterface::SparseMode) {}
