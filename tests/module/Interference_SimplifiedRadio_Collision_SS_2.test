@@ -3,7 +3,8 @@
 This is a test for SimplifiedRadio interference handling.
 The first signal is stronger than the reception threshold.
 The second signal is stronger than the reception threshold.
-The second signal is strong enough to cause bit errors.
+The second signal is much stronger than the first signal.
+The radio cannot switch to receiving the second signal.
 No signals are expected to be received.
 
 %file: test.ned
@@ -66,8 +67,8 @@ ned-path = .;../../../../src
 *.host*.wlan[*].radio.headerLengthBits = 100b
 *.host*.wlan[*].radio.bandwidth = 2MHz
 *.host*.wlan[*].radio.modulation = "BPSK"
-*.hostSender1.wlan[*].radio.transmitterPower = 100mW
-*.hostSender2.wlan[*].radio.transmitterPower = 100mW
+*.hostSender1.wlan[*].radio.transmitterPower = 10mW
+*.hostSender2.wlan[*].radio.transmitterPower = 1000mW
 
 # ping app
 *.hostSender*.numPingApps = 1
