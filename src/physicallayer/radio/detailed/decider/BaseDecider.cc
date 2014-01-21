@@ -365,10 +365,11 @@ simtime_t BaseDecider::canAnswerCSR(const CSRInfo& requestInfo) const
 BaseDecider::channel_sense_rssi_t BaseDecider::calcChannelSenseRSSI(simtime_t_cref start, simtime_t_cref end) const {
     rssi_mapping_t pairMapMaxEnd = calculateRSSIMapping(start, end);
 
-	// the sensed RSSI-value is the maximum value between (and including) the interval-borders
-    // NOTE: we need to extend the range when looking for the maximum value to make sure the borders
-    // are also included when there's a jump in the RSSI-value due to a signal starting or ending
-    // at the border this happens with linear interpolation
+	// The sensed RSSI-value is the maximum value between (and including) the interval-borders
+    // KLUDGE: We need to extend the range when looking for the maximum value to make sure the borders
+    // are also included when there's a jump in the RSSI-value due to a signal starting or ending at
+    // the border. We can safely use pre and post because the mapping does not actually contain any
+    // value at the extended range.
 	Mapping::argument_value_t rssi = MappingUtils::findMax(*pairMapMaxEnd.first, Argument(start == 0 ? start : MappingUtils::pre(start)), Argument(MappingUtils::post(end)), Argument::MappedZero /* the value if no maximum will be found */);
 
 	delete pairMapMaxEnd.first;
