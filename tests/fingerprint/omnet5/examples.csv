@@ -1,6 +1,6 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            e905-da5c
-/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            335a-7250
+/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            6efc-694f
 #/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,          0000-0000    # interactive config, needed a *.numHosts parameter
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           c82a-9d90
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            09ff-91db
@@ -15,7 +15,7 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           0267-2752
 
 /examples/dhcp/eth/,                 -f omnetpp.ini -c General -r 0,                5000s,           2c8d-20af
-/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             1374-adc0
+/examples/dhcp/wlan/,                -f omnetpp.ini -c General -r 0,                20s,             c77b-c470
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             6ac9-2ae1
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp21 -r 0,                  10s,             20e2-0179
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp31 -r 0,                  10s,             debd-f6dd
@@ -316,7 +316,7 @@
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            d7c8-7d35
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             c59a-7c74
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             49f5-dc9b
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             6088-d536
 
@@ -335,7 +335,7 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithSimplifiedRadio -r 0,     100s,             85b2-05ad
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithDetailedRadio -r 0,       100s,             db16-8b86
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithUWBIRRadio -r 0,          100s,             88da-b0e6
-/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,              100s,             0878-2873
+/examples/wireless/nic/,             -f omnetpp.ini -c BMacWithIdealRadio -r 0,              100s,             85cd-4423
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithSimplifiedRadio -r 0,         100s,             9662-5499
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithDetailedRadio -r 0,           100s,             88a3-853b
 /examples/wireless/nic/,             -f omnetpp.ini -c BMacWithUWBIRRadio -r 0,              100s,             e0b9-fe82
