@@ -199,17 +199,6 @@ class PIMSM : public PIMBase, protected cListener
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
         };
 
-        struct SourceAndGroup
-        {
-            IPv4Address source;
-            IPv4Address group;
-
-            SourceAndGroup(IPv4Address source, IPv4Address group) : source(source), group(group) { ASSERT(group.isMulticast()); }
-            bool operator==(const SourceAndGroup &other) const { return source == other.source && group == other.group; }
-            bool operator!=(const SourceAndGroup &other) const { return source != other.source || group != other.group; }
-            bool operator<(const SourceAndGroup &other) const { return source < other.source || (source == other.source && group < other.group); }
-        };
-
         typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
 
 

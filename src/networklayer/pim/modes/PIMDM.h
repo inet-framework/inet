@@ -132,17 +132,6 @@ class PIMDM : public PIMBase, protected cListener
             void stopPrunePendingTimer();
         };
 
-        struct SourceAndGroup
-        {
-            IPv4Address source;
-            IPv4Address group;
-
-            SourceAndGroup(IPv4Address source, IPv4Address group) : source(source), group(group) {}
-            bool operator==(const SourceAndGroup &other) const { return source == other.source && group == other.group; }
-            bool operator!=(const SourceAndGroup &other) const { return source != other.source || group != other.group; }
-            bool operator<(const SourceAndGroup &other) const { return source < other.source || (source == other.source && group < other.group); }
-        };
-
         struct SourceGroupState
         {
             PIMDM *owner;

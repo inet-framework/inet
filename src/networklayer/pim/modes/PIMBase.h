@@ -49,6 +49,17 @@ class PIMBase : public cSimpleModule
                                                                         (preference == other.preference && metric < other.metric)); }
         };
 
+        struct SourceAndGroup
+        {
+            IPv4Address source;
+            IPv4Address group;
+
+            SourceAndGroup(IPv4Address source, IPv4Address group) : source(source), group(group) {}
+            bool operator==(const SourceAndGroup &other) const { return source == other.source && group == other.group; }
+            bool operator!=(const SourceAndGroup &other) const { return source != other.source || group != other.group; }
+            bool operator<(const SourceAndGroup &other) const { return source < other.source || (source == other.source && group < other.group); }
+        };
+
         static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
     protected:
