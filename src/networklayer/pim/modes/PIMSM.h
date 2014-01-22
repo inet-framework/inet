@@ -161,6 +161,7 @@ class PIMSM : public PIMBase, protected cListener
                     T       = 0x40               /**< SPT bit*/
                 };
 
+                PIMSM *owner;
                 IPv4Address origin;
                 IPv4Address group;
                 int flags;
@@ -181,7 +182,8 @@ class PIMSM : public PIMBase, protected cListener
                 DownstreamInterfaceVector outInterfaces; ///< Out interfaces (downstream)
 
             public:
-                PIMSMMulticastRoute(IPv4Address origin, IPv4Address group);
+                PIMSMMulticastRoute(PIMSM *owner, IPv4Address origin, IPv4Address group);
+                ~PIMSMMulticastRoute();
                 virtual std::string info() const;
 
                 void clearOutInterfaces();
@@ -266,6 +268,7 @@ class PIMSM : public PIMBase, protected cListener
 
     public:
         PIMSM() : PIMBase(PIMInterface::SparseMode) {}
+        ~PIMSM();
         //PIM-SM clear implementation
         void setRPAddress(std::string address);
         void setSPTthreshold(std::string address);
