@@ -336,7 +336,7 @@ void PIMSM::setRPAddress(std::string address)
     if (address != "")
     {
         std::string RP (address);
-        RPAddress = IPv4Address(RP.c_str());
+        rpAddr = IPv4Address(RP.c_str());
     }
     else
         EV << "PIMSM::setRPAddress: empty RP address" << endl;
@@ -353,7 +353,7 @@ void PIMSM::setRPAddress(std::string address)
 void PIMSM::setSPTthreshold(std::string threshold)
 {
     if (threshold != "")
-        SPTthreshold.append(threshold);
+        sptThreshold.append(threshold);
     else
         EV << "PIMSM::setSPTthreshold: bad SPTthreshold" << endl;
 }
@@ -405,30 +405,6 @@ bool PIMSM::IamDR (IPv4Address sourceAddr)
     }
     EV << "I AM NOT DR " << endl;
     return false;
-}
-
-/**
- * SET CTRL FOR MESSAGE
- *
- * The method is used to set up ctrl attributes.
- *
- * @param destAddr destination IP address.
- * @param source destination IP address.
- * @param protocol number in integer.
- * @param interfaceId in integer.
- * @return TTL time to live.
- */
-IPv4ControlInfo *PIMSM::setCtrlForMessage (IPv4Address destAddr,IPv4Address srcAddr,int protocol, int interfaceId, int TTL)
-{
-
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setDestAddr(destAddr);
-    ctrl->setSrcAddr(srcAddr);
-    ctrl->setProtocol(protocol);
-    ctrl->setInterfaceId(interfaceId);
-    ctrl->setTimeToLive(TTL);
-
-    return ctrl;
 }
 
 /**
@@ -925,7 +901,7 @@ void PIMSM::processSGJoin(PIMJoinPrune *pkt, IPv4Address multOrigin, IPv4Address
         routePointer = newRouteG;
         if (!(newRouteG = getRouteFor(multGroup, IPv4Address::UNSPECIFIED_ADDRESS)))        // create (*,G) route between RP and source DR
         {
-            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
+            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->rpAddr);
             PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());
 
             newRouteG = routePointer;
@@ -1105,7 +1081,7 @@ void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedA
         if (!(newRouteG = getRouteFor(multGroup, IPv4Address::UNSPECIFIED_ADDRESS)))                                // check if (*,G) exist
         {
             newRouteG = routePointer;
-            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);                                       // incoming interface
+            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->rpAddr);                                       // incoming interface
             PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());                            // RPF neighbor
             InterfaceEntry *outIntf = JoinIncomingInt;                                      // outgoing interface
 
@@ -1387,12 +1363,9 @@ void PIMSM::sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr,
         group->setPrunedSourceAddress(0,encodedAddr);
     }
     msg->setMulticastGroups(0, *group);
-    // set IP Control info
+
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(joinPruneIPaddr);
-    IPv4ControlInfo *ctrl = setCtrlForMessage(ALL_PIM_ROUTERS_MCAST,interfaceToRP->ipv4Data()->getIPAddress(),
-                                                        IP_PROT_PIM,interfaceToRP->getInterfaceId(),1);
-    msg->setControlInfo(ctrl);
-    send(msg, "ipOut");
+    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
 }
 
 /**
@@ -1415,10 +1388,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
     //if (getRouteFor(multDest,multSource))
     if (getRouteFor(multGroup,IPv4Address::UNSPECIFIED_ADDRESS))
     {
-        // create PIM Register NULL datagram
         PIMRegister *msg = new PIMRegister();
-
-        // set fields for PIM Register packet
         msg->setName("PIMRegister(Null)");
         msg->setType(Register);
         msg->setN(true);
@@ -1431,12 +1401,8 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         datagram->setTransportProtocol(IP_PROT_PIM);
         msg->encapsulate(datagram);
 
-        // set IP Control info
-        InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(RPAddress);
-        IPv4ControlInfo *ctrl = setCtrlForMessage(RPAddress,interfaceToRP->ipv4Data()->getIPAddress(),
-                                                            IP_PROT_PIM,interfaceToRP->getInterfaceId(),MAX_TTL);
-        msg->setControlInfo(ctrl);
-        send(msg, "ipOut");
+        InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(rpAddr);
+        sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, rpAddr, interfaceToRP->getInterfaceId(), MAX_TTL);
     }
 }
 
@@ -1481,10 +1447,7 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
     DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(intToRP->getInterfaceId());
     if (downstream && downstream->regState == RS_JOIN)
     {
-        // create PIM Register datagram
         PIMRegister *msg = new PIMRegister();
-
-        // set fields for PIM Register packet
         msg->setName("PIMRegister");
         msg->setType(Register);
         msg->setN(false);
@@ -1494,15 +1457,7 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
         delete datagramCopy->removeControlInfo();
         msg->encapsulate(datagramCopy);
 
-        // set IP Control info
-        //InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(RPAddress);
-        //IPv4ControlInfo *ctrl = setCtrlForMessage(RPAddress,interfaceToRP->ipv4Data()->getIPAddress(),
-        //                                            IP_PROT_PIM,interfaceToRP->getInterfaceId(),MAX_TTL);
-
-        IPv4ControlInfo *ctrl = setCtrlForMessage(this->getRPAddress(),intToRP->ipv4Data()->getIPAddress(),
-                                                    IP_PROT_PIM,intToRP->getInterfaceId(),MAX_TTL);
-        msg->setControlInfo(ctrl);
-        send(msg, "ipOut");
+        sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, getRPAddress(), intToRP->getInterfaceId(), MAX_TTL);
     }
     else if (downstream && downstream->regState == RS_PRUNE)
         EV << "PIM-SM:sendPIMRegister - register tunnel is disconnect." << endl;
@@ -1556,16 +1511,21 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
 
     // set IP packet
     InterfaceEntry *interfaceToDR = rt->getInterfaceForDestAddr(dest);
-    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
-    ctrl->setDestAddr(dest);
-    ctrl->setSrcAddr(source);
-    ctrl->setProtocol(IP_PROT_PIM);
-    ctrl->setInterfaceId(interfaceToDR->getInterfaceId());
-    ctrl->setTimeToLive(255);
-    msg->setControlInfo(ctrl);
-
-    send(msg, "ipOut");
+    sendToIP(msg, source, dest, interfaceToDR->getInterfaceId(), MAX_TTL);
 }
+
+void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId, short ttl)
+{
+    IPv4ControlInfo *ctrl = new IPv4ControlInfo();
+    ctrl->setSrcAddr(srcAddr);
+    ctrl->setDestAddr(destAddr);
+    ctrl->setProtocol(IP_PROT_PIM);
+    ctrl->setTimeToLive(ttl);
+    ctrl->setInterfaceId(outInterfaceId);
+    packet->setControlInfo(ctrl);
+    send(packet, "ipOut");
+}
+
 
 /**
  * FORWARD MULTICAST DATA
@@ -1735,7 +1695,7 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
     PIMSMMulticastRoute *routePointer;
 
     int interfaceId = pimInterface->getInterfaceId();
-    InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->RPAddress);
+    InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->rpAddr);
     PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());
 
     // XXX neighborToRP can be NULL!

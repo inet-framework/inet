@@ -146,6 +146,7 @@ class PIMSM : public PIMBase, protected cListener
                 virtual bool isEnabled() { return downstream->isEnabled(); }
         };
 
+        // Holds (*,G), (S,G) or (S,G,rpt) state
         struct PIMSMMulticastRoute
         {
                 /** Route flags. Added to each route. */
@@ -202,8 +203,8 @@ class PIMSM : public PIMBase, protected cListener
         typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
 
 
-        IPv4Address RPAddress;
-        std::string SPTthreshold;
+        IPv4Address rpAddr;
+        std::string sptThreshold;
         SGStateMap routes;
 
     private:
@@ -238,6 +239,7 @@ class PIMSM : public PIMBase, protected cListener
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg JoinPrune, JPMsgType JPtype);
         void sendPIMJoinTowardSource(multDataInfo *info);
+        void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
         void forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info);
 
         // process PIM messages
@@ -270,11 +272,10 @@ class PIMSM : public PIMBase, protected cListener
         //PIM-SM clear implementation
         void setRPAddress(std::string address);
         void setSPTthreshold(std::string address);
-        IPv4Address getRPAddress () {return RPAddress;}
-        std::string getSPTthreshold () {return SPTthreshold;}
+        IPv4Address getRPAddress () {return rpAddr;}
+        std::string getSPTthreshold () {return sptThreshold;}
         virtual bool IamRP (IPv4Address RPaddress);
         bool IamDR (IPv4Address sourceAddr);
-        IPv4ControlInfo *setCtrlForMessage (IPv4Address destAddr,IPv4Address srcAddr,int protocol, int interfaceId, int TTL);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
