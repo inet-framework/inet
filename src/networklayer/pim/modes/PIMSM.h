@@ -238,7 +238,6 @@ class PIMSM : public PIMBase, protected cListener
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg JoinPrune, JPMsgType JPtype);
-        void sendPIMJoinTowardSource(multDataInfo *info);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
         void forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info);
 

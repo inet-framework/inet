@@ -1222,8 +1222,13 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                         forwardMulticastData(encapData->dup(), info);
                     }
                 }
-                sendPIMJoinTowardSource(info);                                                              // send Join(S,G) to establish SPT between RP and registering DR
-                IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());         // send register-stop packet
+                // send Join(S,G) toward source to establish SPT between RP and registering DR
+                PIMSMMulticastRoute *routeSG = getRouteFor(multGroup, multOrigin);
+                UpstreamInterface *rpfInterface = routeSG->upstreamInterface;
+                sendPIMJoinPrune(multGroup,multOrigin, rpfInterface->nextHop, JoinMsg, SG);
+
+                // send register-stop packet
+                IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
                 sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
             }
         }
@@ -1461,26 +1466,6 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram)
     }
     else if (downstream && downstream->regState == RS_PRUNE)
         EV << "PIM-SM:sendPIMRegister - register tunnel is disconnect." << endl;
-}
-
-/**
- * SEND PIM JOIN TOWARD SOURCE
- *
- * The method is used for send triggered Join toward source of multicast
- * in the processRegisterPacket() method.
- *
- * @param multGroup Pointer to controll info.
- * @see setCtrlForMessage()
- * @see setKat()
- * @see getRouteFor()
- */
-void PIMSM::sendPIMJoinTowardSource(multDataInfo *info)
-{
-    EV << "pimSM::sendPIMJoinTowardSource" << endl;
-
-    PIMSMMulticastRoute *routeSG = getRouteFor(info->group,info->origin);
-    UpstreamInterface *rpfInterface = routeSG->upstreamInterface;
-    sendPIMJoinPrune(info->group,info->origin, rpfInterface->nextHop,JoinMsg,SG);
 }
 
 /**
