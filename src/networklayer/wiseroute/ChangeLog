@@ -1,0 +1,4 @@
+2014-01-22  Levente Meszaros
+
+	Ported the network protocol from MiXiM and adapted to the network protocol contract.
+

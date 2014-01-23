@@ -1,0 +1,15 @@
+2014-01-22  Levente Meszaros
+
+	Ported the physical layer from MiXiM as a new radio model with the following notable changes:
+	Adapted to implement the new radio contract.
+	Renamed a number of classes to have a naming convention similar to the other radios.
+	Renamed to DetailedRadio, DetailedRadioChannel, DetailedRadioChannelAccess, DetailedRadioFrame, etc.
+	Adapted to use the radio mode and reception/transmission states from the contract.
+	Added code that emits signals when the radio mode or reception/transmission states change.
+	Changed logging to use the new omnetpp logging API and deleted all debug and coreDebug parameters.
+	Deleted power consumption code because that is shared among different radios and it's implemented as a separate module.
+	Deleted the global WorldUtility module to avoid forcing another global module on the user.
+	Moved the radio signal creation from the MAC protocols to the radio modules.
+	Deleted input/output control gates because in INET communication between layers use one connection, there's no real separate degree of freedom.
+	Changed to send up collisions/bit errors as normal packets with special kinds as expected by MAC protocols.
+	Changed ChannelState to be able to express idle, busy and receiving channel states.

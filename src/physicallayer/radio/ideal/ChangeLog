@@ -1,0 +1,8 @@
+2014-01-22  Levente Meszaros
+
+	Moved ideal radio implementation from linklayer.
+	Adapted ideal radio to the new radio contract.
+	Renamed classes to IdealRadio, IdealRadioChannel, IdealRadioChannelAccess, IdealRadioFrame, etc.
+	Adapted to use the radio mode and reception/transmission states from the contract.
+	Added code that emits signals when the radio mode or reception/transmission states change.
+	Extended ideal radio with interference range parameter.

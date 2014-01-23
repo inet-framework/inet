@@ -1,0 +1,3 @@
+2014-01-22  Levente Meszaros
+
+	Ported the MAC protocol from MiXiM and adapted to the MAC protocol contract.

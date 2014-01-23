@@ -1,3 +1,7 @@
+2014-01-22  Levente Meszaros
+
+	Moved queue modules from linklayer because they are independent of it.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-14  Andras Varga

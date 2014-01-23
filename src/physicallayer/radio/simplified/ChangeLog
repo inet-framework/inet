@@ -1,3 +1,13 @@
+2014-01-22  Levente Meszaros
+
+	Moved the radio implementation from linklayer.
+	Adapted simplified radio to the new radio contract.
+	Renamed classes to SimplifiedRadio, SimplifiedRadioChannel, SimplifiedRadioChannelAccess, SimplifiedRadioFrame, etc.
+	Adapted to use the radio mode and reception/transmission states from the contract.
+	Added code that emits signals when the radio mode or reception/transmission states change.
+	Deleted power consumption code because that is shared among different radios and it's implemented as a separate module.
+	Delete enableReception/disableReception functions because they relied on incorrect assumptions.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-18  Zoltan Bojthe
