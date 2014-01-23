@@ -21,7 +21,6 @@
 
 #include <omnetpp.h>
 #include "PIMPacket_m.h"
-#include "PIMTimer_m.h"
 
 #include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
@@ -43,13 +42,6 @@
 #define MAX_TTL 255                     /**< Maximum TTL */
 #define NO_INT_TIMER -1
 #define CISCO_SPEC_SIM 1                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
-
-enum JPMsgType
-{
-    G = 1,
-    SG = 2,
-    SGrpt = 3
-};
 
 /**
  * @brief Class implements PIM-SM (sparse mode).
@@ -81,39 +73,55 @@ class PIMSM : public PIMBase, protected cListener
             AS_LOSER = 2
         };
 
+        struct PIMSMMulticastRoute;
+
+        struct Interface
+        {
+            PIMSMMulticastRoute *owner;
+            InterfaceEntry *ie;
+            cMessage *expiryTimer;
+
+            Interface(PIMSMMulticastRoute *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL)
+            {
+                ASSERT(owner);
+                ASSERT(ie);
+            }
+            virtual ~Interface()
+            {
+                owner->owner->cancelAndDelete(expiryTimer); expiryTimer = NULL;
+            }
+            void startExpiryTimer(double holdTime);
+        };
+
         /**
          * @brief Structure of incoming interface.
          * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
          */
-        struct UpstreamInterface
+        struct UpstreamInterface : public Interface
         {
-            InterfaceEntry *ie;
             IPv4Address nextHop;            /**< RF neighbor */
 
-            UpstreamInterface(InterfaceEntry *ie, IPv4Address nextHop)
-                : ie(ie), nextHop(nextHop) { ASSERT(ie); }
+            UpstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, IPv4Address nextHop)
+                : Interface(owner, ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
         };
 
-        struct DownstreamInterface
+        struct DownstreamInterface : public Interface
         {
-            InterfaceEntry          *ie;
             InterfaceState          forwarding;         /**< Forward or Pruned */
             PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
             AssertState             assert;             /**< Assert state. */
 
-            PIMet                   *expiryTimer;       /**< Pointer to PIM Expiry Timer*/
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
-            DownstreamInterface(InterfaceEntry *ie, InterfaceState forwarding, PIMet *expiryTimer)
-                : ie(ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
-                  expiryTimer(expiryTimer), regState(RS_NO_INFO), shRegTun(true) {}
+            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding)
+                : Interface(owner, ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
+                  regState(RS_NO_INFO), shRegTun(true) {}
 
-            DownstreamInterface(InterfaceEntry *ie, InterfaceState forwarding,
-                    PIMet *expiryTimer, AssertState assert, RegisterState regState, bool show)
-                : ie(ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(assert),
-                  expiryTimer(expiryTimer), regState(regState), shRegTun(show) {}
+            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding, RegisterState regState, bool show)
+                : Interface(owner, ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
+                  regState(regState), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             virtual bool isEnabled() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
@@ -128,6 +136,13 @@ class PIMSM : public PIMBase, protected cListener
                 PIMSMOutInterface(DownstreamInterface *downstream)
                     : OutInterface(downstream->ie), downstream(downstream) {}
                 virtual bool isEnabled() { return downstream->isEnabled(); }
+        };
+
+        enum JPMsgType
+        {
+            G,
+            SG,
+            SGrpt
         };
 
         // Holds (*,G), (S,G) or (S,G,rpt) state
@@ -157,11 +172,10 @@ class PIMSM : public PIMBase, protected cListener
                 //Time of routing table entry creation
                 simtime_t installtime; // XXX not used
 
-                PIMkat *keepAliveTimer;
-                PIMrst *registerStopTimer;
-                PIMet *expiryTimer;
-                PIMjt *joinTimer;
-                PIMppt *prunePendingTimer;
+                cMessage *keepAliveTimer;
+                cMessage *registerStopTimer;
+                cMessage *joinTimer;
+                cMessage *prunePendingTimer;
 
                 UpstreamInterface *upstreamInterface;      // may be NULL at RP and at DR
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
@@ -182,6 +196,11 @@ class PIMSM : public PIMBase, protected cListener
 
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
+
+                void startKeepAliveTimer();
+                void startRegisterStopTimer();
+                void startJoinTimer();
+                void startPrunePendingTimer();
         };
 
         typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
@@ -200,22 +219,15 @@ class PIMSM : public PIMBase, protected cListener
 
         // process timers
         void processPIMTimer(cMessage *timer);
-        void processKeepAliveTimer(PIMkat *timer);
-        void processRegisterStopTimer(PIMrst *timer);
-        void processExpiryTimer(PIMet *timer);
-        void processJoinTimer(PIMjt *timer);
-        void processPrunePendingTimer(PIMppt *timer);
+        void processKeepAliveTimer(cMessage *timer);
+        void processRegisterStopTimer(cMessage *timer);
+        void processExpiryTimer(cMessage *timer);
+        void processJoinTimer(cMessage *timer);
+        void processPrunePendingTimer(cMessage *timer);
 
 
         void restartExpiryTimer(PIMSMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
         void dataOnRpf(PIMSMMulticastRoute *route);
-
-        // set timers
-        PIMkat* createKeepAliveTimer(IPv4Address source, IPv4Address group);
-        PIMrst* createRegisterStopTimer(IPv4Address source, IPv4Address group);
-        PIMet*  createExpiryTimer(int intID, int holdtime, IPv4Address group, IPv4Address source, int StateType);
-        PIMjt*  createJoinTimer(IPv4Address group, IPv4Address JPaddr, IPv4Address upstreamNbr, int JoinType);
-        PIMppt* createPrunePendingTimer(IPv4Address group, IPv4Address JPaddr, IPv4Address upstreamNbr, JPMsgType JPtype);
 
         // pim messages
         void sendPIMRegister(IPv4Datagram *datagram);
@@ -236,8 +248,11 @@ class PIMSM : public PIMBase, protected cListener
         void processSGJoin(PIMJoinPrune *pkt,IPv4Address multOrigin, IPv4Address multGroup);
         void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
 
+        // helpers
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
         bool deleteMulticastRoute(PIMSMMulticastRoute *route);
+        void cancelAndDeleteTimer(cMessage *&timer);
+        void restartTimer(cMessage *timer, double interval);
 
         // routing table access
         PIMSMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);

@@ -22,7 +22,6 @@
 #include "INETDefs.h"
 #include "ModuleAccess.h"
 #include "InterfaceEntry.h"
-#include "PIMTimer_m.h"
 
 /**
  * Class holding information about a neighboring PIM router.
@@ -60,10 +59,17 @@ class INET_API PIMNeighbor: public cObject
  */
 class INET_API PIMNeighborTable: public cSimpleModule
 {
+    public:
+        enum TimerKind
+        {
+           NeighborLivenessTimer = 1
+        };
+
 	protected:
         typedef std::vector<PIMNeighbor*> PIMNeighborVector;
 
         // contains at most one neighbor with a given (ie,address)
+        // XXX group by interfaceId
 		PIMNeighborVector	neighbors;
 
 	public:

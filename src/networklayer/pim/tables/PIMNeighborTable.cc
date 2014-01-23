@@ -28,7 +28,7 @@ PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
 {
     ASSERT(ie);
 
-    livenessTimer = new cMessage("NeighborLivenessTimer", NeighborLivenessTimer);
+    livenessTimer = new cMessage("NeighborLivenessTimer", PIMNeighborTable::NeighborLivenessTimer);
     livenessTimer->setContextPointer(this);
 }
 

@@ -60,6 +60,31 @@ class PIMBase : public cSimpleModule
             bool operator<(const SourceAndGroup &other) const { return source < other.source || (source == other.source && group < other.group); }
         };
 
+        enum PIMTimerKind
+        {
+            // global timers
+           HelloTimer = 1,
+           TriggeredHelloDelay,
+
+           // timers for each interface and each source-group pair (S,G,I)
+           AssertTimer,
+           PruneTimer,
+           PrunePendingTimer,
+
+           // timers for each source-group pair (S,G)
+           GraftRetryTimer,
+           UpstreamOverrideTimer,
+           PruneLimitTimer,
+           SourceActiveTimer,
+           StateRefreshTimer,
+
+           //PIM-SM specific timers
+           KeepAliveTimer,
+           RegisterStopTimer,
+           ExpiryTimer,
+           JoinTimer,
+        };
+
         static const IPv4Address ALL_PIM_ROUTERS_MCAST;
 
     protected:

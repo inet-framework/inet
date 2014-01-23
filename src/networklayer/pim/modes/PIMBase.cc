@@ -25,7 +25,6 @@
 #include "InterfaceTable.h"
 #include "IPv4Address.h"
 #include "IPv4RoutingTableAccess.h"
-#include "PIMTimer_m.h"
 #include "PIMBase.h"
 
 using namespace std;

@@ -21,7 +21,6 @@
 
 #include <omnetpp.h>
 #include "PIMPacket_m.h"
-#include "PIMTimer_m.h"
 #include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
 #include "PIMNeighborTable.h"
