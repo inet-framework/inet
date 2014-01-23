@@ -220,6 +220,18 @@ package inet.networklayer.autorouting.ipv4;
 //      IP addresses that will be added to the multicast groups of the interface.
 //      See also the <multicast-group> element.
 //
+//    - @add-static-route
+//      Optional bool parameter (default=true).
+//      Add static route to the routing table.
+//
+//    - @add-default-route
+//      Optional bool parameter (default=true).
+//      Add default route to the routing table if the node has only one non-loopback interface.
+//
+//    - @add-subnet-route
+//      Optional bool parameter (default=true).
+//      Add subnet route to the routing table.
+//
 //  - <wireless>
 //
 //    - @id (optional)
