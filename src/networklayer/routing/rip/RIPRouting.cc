@@ -1204,7 +1204,7 @@ void RIPRouting::deleteRoute(IPv4Route *route)
 
 bool RIPRouting::isLoopbackInterfaceRoute(const IPv4Route *route)
 {
-    InterfaceEntry *ie = dynamic_cast<InterfaceEntry*>(route->getSource());
+    InterfaceEntry *ie = route->getInterface();
     return ie && ie->isLoopback();
 }
 
