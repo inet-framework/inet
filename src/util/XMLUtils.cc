@@ -153,3 +153,17 @@ const char *getRequiredAttribute(const cXMLElement& node, const char *attr)
     return s;
 }
 
+bool getAttributeBoolValue(const cXMLElement *node, const char *attrName, bool defVal)
+{
+    const char *attrStr = node->getAttribute(attrName);
+    if (attrStr && *attrStr)
+        return parseBool(attrStr);
+    return defVal;
+}
+
+bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
+{
+    const char *attrStr = getRequiredAttribute(*node, attrName);
+    return parseBool(attrStr);
+}
+
