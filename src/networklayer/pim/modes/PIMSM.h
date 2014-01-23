@@ -164,6 +164,7 @@ class PIMSM : public PIMBase, protected cListener
                 PIMSM *owner;
                 IPv4Address origin;
                 IPv4Address group;
+                IPv4Address rpAddr;                     /**< Randevous point */
                 int flags;
 
                 //Originated from destination.Ensures loop freeness.
@@ -171,33 +172,30 @@ class PIMSM : public PIMBase, protected cListener
                 //Time of routing table entry creation
                 simtime_t installtime; // XXX not used
 
-                IPv4Address                 RP;                     /**< Randevous point */
                 PIMkat *keepAliveTimer;
                 PIMrst *registerStopTimer;
                 PIMet *expiryTimer;
                 PIMjt *joinTimer;
                 PIMppt *prunePendingTimer;
 
-                UpstreamInterface *inInterface;      ///< In interface (upstream)
-                DownstreamInterfaceVector outInterfaces; ///< Out interfaces (downstream)
+                UpstreamInterface *upstreamInterface;      // may be NULL at RP and at DR
+                DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
             public:
                 PIMSMMulticastRoute(PIMSM *owner, IPv4Address origin, IPv4Address group);
                 ~PIMSMMulticastRoute();
                 virtual std::string info() const;
 
-                void clearOutInterfaces();
-                void addOutInterface(DownstreamInterface *outInterface);
-                void removeOutInterface(unsigned int i);
-                unsigned int getNumOutInterfaces() const {return outInterfaces.size();}
-                DownstreamInterface *getOutInterface(unsigned int k) const {return outInterfaces.at(k); }
+                void clearDownstreamInterfaces();
+                void addDownstreamInterface(DownstreamInterface *outInterface);
+                void removeDownstreamInterface(unsigned int i);
 
                 bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
                 void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
                 static std::string flagsToString(int flags);
 
-                DownstreamInterface *findOutInterfaceByInterfaceId(int interfaceId);
+                DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
         };
 
