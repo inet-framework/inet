@@ -506,9 +506,9 @@ void PIMSM::processExpiryTimer(PIMet *timer)
             route->clearFlag(PIMSMMulticastRoute::C);
             route->setFlags(PIMSMMulticastRoute::P);
             if (msgType == G && !IamRP(this->getRPAddress()))
-                sendPIMJoinPrune(multGroup, this->getRPAddress(), RPFneighbor->getAddress(), PruneMsg, G);
+                sendPIMPrune(multGroup, this->getRPAddress(), RPFneighbor->getAddress(), G);
             else if (msgType == SG)
-                sendPIMJoinPrune(multGroup, JPaddr ,RPFneighbor->getAddress(), PruneMsg, SG);
+                sendPIMPrune(multGroup, JPaddr ,RPFneighbor->getAddress(), SG);
             if (route->joinTimer)             // any interface in olist -> cancel and delete JT
             {
                 cancelEvent(route->joinTimer);
@@ -565,13 +565,13 @@ void PIMSM::processJoinTimer(PIMjt *timer)
     {
         route = getRouteFor(timer->getGroup(), timer->getJoinPruneAddr());
         if (route && !route->isOilistNull())
-            sendPIMJoinPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),JoinMsg,SG);
+            sendPIMJoin(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),SG);
     }
     else if (timer->getJoinType() == G)
     {
         route = getRouteFor(timer->getGroup(), IPv4Address::UNSPECIFIED_ADDRESS);
         if (route && !route->isOilistNull())
-            sendPIMJoinPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),JoinMsg,G);
+            sendPIMJoin(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),G);
     }
     else
         throw cRuntimeError("pimSM::processJoinTimer - Bad Join type!");
@@ -602,9 +602,9 @@ void PIMSM::processPrunePendingTimer(PIMppt *timer)
     EV << "pimSM::processPrunePendingTimer:" << endl;
 
     if (!IamRP(this->getRPAddress()) && timer->getJoinPruneType() == G)
-        sendPIMJoinPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),PruneMsg,G);
+        sendPIMPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),G);
     if (timer->getJoinPruneType() == SG)
-        sendPIMJoinPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),PruneMsg,SG);
+        sendPIMPrune(timer->getGroup(),timer->getJoinPruneAddr(),timer->getUpstreamNbr(),SG);
 
     PIMSMMulticastRoute *route = getRouteFor(timer->getGroup(), IPv4Address::UNSPECIFIED_ADDRESS);
     if (route->prunePendingTimer)
@@ -800,7 +800,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
             if (!IamDR(routeSG->origin))
             {
 #if CISCO_SPEC_SIM == 1
-                sendPIMJoinPrune(multGroup,encodedAddr.IPaddress,RPFnbr->getAddress(),PruneMsg,SG);
+                sendPIMPrune(multGroup,encodedAddr.IPaddress,RPFnbr->getAddress(),SG);
 #else
                 PIMppt* timerPpt = createPrunePendingTimer(multGroup, encodedAddr.IPaddress, RPFnbr->getAddress(), SG);
                 routeSG->setPrunePendingTimer(timerPpt);
@@ -852,7 +852,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
                 if (!IamRP(this->getRPAddress()) && (multOrigin == IPv4Address::UNSPECIFIED_ADDRESS))
                 {
 #if CISCO_SPEC_SIM == 1
-                    sendPIMJoinPrune(multGroup,this->getRPAddress(),RPFnbr->getAddress(),PruneMsg,G);      // only for non-RP routers in RPT
+                    sendPIMPrune(multGroup,this->getRPAddress(),RPFnbr->getAddress(),G);      // only for non-RP routers in RPT
 #else
                     PIMppt* timerPpt = createPrunePendingTimer(multGroup, this->getRPAddress(), RPFnbr->getAddress(),G);
                     route->setPrunePendingTimer(timerPpt);
@@ -861,7 +861,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
                 else if (IamRP(this->getRPAddress()) && (multOrigin != IPv4Address::UNSPECIFIED_ADDRESS))
                 {
 #if CISCO_SPEC_SIM == 1
-                    sendPIMJoinPrune(multGroup,multOrigin,RPFnbr->getAddress(),PruneMsg,SG);               // send from RP only if (S,G) is available
+                    sendPIMPrune(multGroup,multOrigin,RPFnbr->getAddress(),SG);               // send from RP only if (S,G) is available
 #else
                     PIMppt* timerPpt = createPrunePendingTimer(multGroup, multOrigin, RPFnbr->getAddress(), SG);
                     route->setPrunePendingTimer(timerPpt);
@@ -940,7 +940,7 @@ void PIMSM::processSGJoin(PIMJoinPrune *pkt, IPv4Address multOrigin, IPv4Address
             rt->addMulticastRoute(createMulticastRoute(newRouteSG));
 
             if (!IamDR(multOrigin))
-                sendPIMJoinPrune(multGroup,multOrigin,neighborToSrcDR->getAddress(),JoinMsg,SG);       // triggered join except DR
+                sendPIMJoin(multGroup,multOrigin,neighborToSrcDR->getAddress(),SG);       // triggered join except DR
         }
     }
     else
@@ -1011,7 +1011,7 @@ void PIMSM::processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packet
                     routePointer->addDownstreamInterface(downstream);
                     IPv4MulticastRoute *ipv4Route = findIPv4Route(routePointer->origin, routePointer->group);
                     ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
-                    sendPIMJoinPrune(multGroup, multOrigin, inInterface->nextHop, JoinMsg,SG);
+                    sendPIMJoin(multGroup, multOrigin, inInterface->nextHop, SG);
                 }
                 routePointer->sequencenumber = 1;
             }
@@ -1106,7 +1106,7 @@ void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedA
                 rt->addMulticastRoute(createMulticastRoute(newRouteG));
 
                 if (!IamRP(this->getRPAddress()))
-                    sendPIMJoinPrune(multGroup,this->getRPAddress(),neighborToRP->getAddress(),JoinMsg,G);                         // triggered Join (*,G)
+                    sendPIMJoin(multGroup,this->getRPAddress(),neighborToRP->getAddress(),G);                         // triggered Join (*,G)
             }
         }
         else            // (*,G) route exist
@@ -1217,7 +1217,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                 // send Join(S,G) toward source to establish SPT between RP and registering DR
                 PIMSMMulticastRoute *routeSG = getRouteFor(multGroup, multOrigin);
                 UpstreamInterface *rpfInterface = routeSG->upstreamInterface;
-                sendPIMJoinPrune(multGroup,multOrigin, rpfInterface->nextHop, JoinMsg, SG);
+                sendPIMJoin(multGroup,multOrigin, rpfInterface->nextHop, SG);
 
                 // send register-stop packet
                 IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
@@ -1298,70 +1298,51 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
     }
 }
 
-/**
- * SEND PIM JOIN PRUNE
- *
- * The method is used for creating and sending PIM Join/Prune messages.
- *
- * @param multGroup Address of multicast group for which Join/Prune message is created.
- * @param joinPruneIPaddr Address for Join or prune.
- * @param upstreamNbr IP address of upstream neighbor.
- * @param msgType Type of message - Join or Prune message.
- * @param JPType Type of Join/Prune message - G, SG.
- * @see encodedAddr()
- * @see setCtrlForMessage()
- * @see getRouteFor()
- */
-void PIMSM::sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg msgType, JPMsgType JPtype)
+void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype)
 {
-    // create PIM Register datagram
-    PIMJoinPrune *msg = new PIMJoinPrune();
-    MulticastGroup *group = new MulticastGroup();
-    EncodedAddress encodedAddr;
+    EV_INFO << "Sending Join(S=" << source << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
-    // set PIM packet
+    PIMJoinPrune *msg = new PIMJoinPrune();
     msg->setType(JoinPrune);
-    msg->setUpstreamNeighborAddress(upstreamNbr);
+    msg->setName("PIMJoin");
+    msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(HOLDTIME);
 
-    encodedAddr.IPaddress = joinPruneIPaddr;
-    if (JPtype == G)
-    {
-        EV << "pimSM::sendPIMJoinPrune, assembling (*,G) ";
-        encodedAddr.S = true;
-        encodedAddr.W = true;
-        encodedAddr.R = true;
-    }
-    if (JPtype == SG)
-    {
-        EV << "pimSM::sendPIMJoinPrune, assembling (S,G) ";
-        encodedAddr.S = true;
-        encodedAddr.W = false;
-        encodedAddr.R = false;
-    }
+    msg->setMulticastGroupsArraySize(1);
+    MulticastGroup &multGroup = msg->getMulticastGroups(0);
+    multGroup.setGroupAddress(group);
+    multGroup.setJoinedSourceAddressArraySize(1);
+    EncodedAddress &encodedAddr = multGroup.getJoinedSourceAddress(0);
+    encodedAddr.IPaddress = source;
+    encodedAddr.S = true;
+    encodedAddr.W = (JPtype == G);
+    encodedAddr.R = (JPtype == G);
+
+    InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
+    sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
+}
+
+void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype)
+{
+    EV_INFO << "Sending Prune(S=" << source << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
+
+    PIMJoinPrune *msg = new PIMJoinPrune();
+    msg->setType(JoinPrune);
+    msg->setName("PIMPrune");
+    msg->setUpstreamNeighborAddress(upstreamNeighbor);
+    msg->setHoldTime(HOLDTIME);
 
     msg->setMulticastGroupsArraySize(1);
-    group->setGroupAddress(multGroup);
-    if (msgType == JoinMsg)
-    {
-        EV << "Join" << endl;
-        msg->setName("PIMJoin/Prune(Join)");
-        group->setJoinedSourceAddressArraySize(1);
-        group->setPrunedSourceAddressArraySize(0);
-        group->setJoinedSourceAddress(0,encodedAddr);
-    }
-    if (msgType == PruneMsg)
-    {
-        EV << "Prune" << endl;
-        msg->setName("PIMJoin/Prune(Prune)");
-        group->setJoinedSourceAddressArraySize(0);
-        group->setPrunedSourceAddressArraySize(1);
-        EncodedAddress PruneAddress;
-        group->setPrunedSourceAddress(0,encodedAddr);
-    }
-    msg->setMulticastGroups(0, *group);
+    MulticastGroup &multGroup = msg->getMulticastGroups(0);
+    multGroup.setGroupAddress(group);
+    multGroup.setPrunedSourceAddressArraySize(1);
+    EncodedAddress &encodedAddr = multGroup.getPrunedSourceAddress(0);
+    encodedAddr.IPaddress = source;
+    encodedAddr.S = true;
+    encodedAddr.W = (JPtype == G);
+    encodedAddr.R = (JPtype == G);
 
-    InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(joinPruneIPaddr);
+    InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
     sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
 }
 
@@ -1653,7 +1634,7 @@ void PIMSM::removeMulticastReceiver(PIMInterface *pimInt, IPv4Address multicastG
         if (route->isOilistNull())
         {
             route->setFlags(PIMSMMulticastRoute::P);
-            sendPIMJoinPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),PruneMsg,G);
+            sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
             if (route->joinTimer)
             {
                 cancelEvent(route->joinTimer);
@@ -1704,7 +1685,7 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
 
         // oilist != NULL -> send Join(*,G) to 224.0.0.13
         if (!newRouteG->isOilistNull())
-            sendPIMJoinPrune(multicastGroup,this->getRPAddress(),neighborToRP->getAddress(),JoinMsg,G);
+            sendPIMJoin(multicastGroup,this->getRPAddress(),neighborToRP->getAddress(),G);
     }
     else                                                                                                        // add new outgoing interface to existing (*,G) route
     {

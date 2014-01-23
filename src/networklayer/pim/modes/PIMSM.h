@@ -44,20 +44,12 @@
 #define NO_INT_TIMER -1
 #define CISCO_SPEC_SIM 1                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
 
-
-enum joinPruneMsg
-{
-    JoinMsg = 0,
-    PruneMsg = 1
-};
-
 enum JPMsgType
 {
     G = 1,
     SG = 2,
     SGrpt = 3
 };
-
 
 /**
  * @brief Class implements PIM-SM (sparse mode).
@@ -155,7 +147,7 @@ class PIMSM : public PIMBase, protected cListener
                 };
 
                 PIMSM *owner;
-                IPv4Address origin;
+                IPv4Address origin; // <unspec> in (*,G) routes
                 IPv4Address group;
                 IPv4Address rpAddr;                     /**< Randevous point */
                 int flags;
@@ -229,7 +221,8 @@ class PIMSM : public PIMBase, protected cListener
         void sendPIMRegister(IPv4Datagram *datagram);
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
-        void sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg JoinPrune, JPMsgType JPtype);
+        void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype);
+        void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
         void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
 
