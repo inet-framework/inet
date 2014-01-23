@@ -1164,7 +1164,6 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
     IPv4Address multGroup = encapData->getDestAddress();
     PIMSMMulticastRoute *newRouteG = new PIMSMMulticastRoute(this, IPv4Address::UNSPECIFIED_ADDRESS,multGroup);
     PIMSMMulticastRoute *newRoute = new PIMSMMulticastRoute(this, multOrigin,multGroup);
-    multDataInfo *info = new multDataInfo;
 
     if (!pkt->getN())                                                                                       //It is Null Register ?
     {
@@ -1211,16 +1210,9 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
             {
                 for (unsigned i=0; i < newRouteG->downstreamInterfaces.size(); i++)
                 {
-                    DownstreamInterface *outInterface = newRouteG->downstreamInterfaces[i];
-                    if (outInterface->forwarding == Forward)                           // for active outgoing interface forward encapsulated data
-                    {                                                                                       // simulate multicast data
-                        info->group = multGroup;
-                        info->origin = multOrigin;
-                        info->interface_id = outInterface->getInterfaceId();
-                        InterfaceEntry *entry = ift->getInterfaceById(outInterface->getInterfaceId());
-                        info->srcAddr = entry->ipv4Data()->getIPAddress();
-                        forwardMulticastData(encapData->dup(), info);
-                    }
+                    DownstreamInterface *downstream = newRouteG->downstreamInterfaces[i];
+                    if (downstream->forwarding == Forward)                           // for active outgoing interface forward encapsulated data
+                        forwardMulticastData(encapData->dup(), downstream->getInterfaceId());
                 }
                 // send Join(S,G) toward source to establish SPT between RP and registering DR
                 PIMSMMulticastRoute *routeSG = getRouteFor(multGroup, multOrigin);
@@ -1522,7 +1514,7 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
  * @param info Pointer to structure, which keep all information for creating and sending message.
  * @see MultData()
  */
-void PIMSM::forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info)
+void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
 {
     EV << "pimSM::forwardMulticastData" << endl;
 
@@ -1534,8 +1526,8 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info)
     // set control info
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     ctrl->setDestAddr(datagram->getDestAddress());
-    // XXX ctrl->setSrcAddr(datagram->getSrcAddress());
-    ctrl->setInterfaceId(info->interface_id);
+    // XXX ctrl->setSrcAddr(datagram->getSrcAddress()); // FIXME IP won't accept if the source is non-local
+    ctrl->setInterfaceId(outInterfaceId);
     ctrl->setTimeToLive(MAX_TTL-2);                     //one minus for source DR router and one for RP router // XXX specification???
     ctrl->setProtocol(datagram->getTransportProtocol());
     data->setControlInfo(ctrl);

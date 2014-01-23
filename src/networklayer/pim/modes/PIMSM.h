@@ -45,14 +45,6 @@
 #define CISCO_SPEC_SIM 1                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
 
 
-struct multDataInfo
-{
-    IPv4Address origin;
-    IPv4Address group;
-    unsigned interface_id;
-    IPv4Address srcAddr;
-};
-
 enum joinPruneMsg
 {
     JoinMsg = 0,
@@ -239,7 +231,7 @@ class PIMSM : public PIMBase, protected cListener
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoinPrune(IPv4Address multGroup, IPv4Address joinPruneIPaddr, IPv4Address upstreamNbr, joinPruneMsg JoinPrune, JPMsgType JPtype);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
-        void forwardMulticastData(IPv4Datagram *datagram, multDataInfo *info);
+        void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
 
         // process PIM messages
         void processPIMPkt(PIMPacket *pkt);
