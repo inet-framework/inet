@@ -34,6 +34,7 @@ class INET_API IAddressType
 
         virtual int getMaxPrefixLength() const = 0;
         virtual Address getUnspecifiedAddress() const = 0;
+        virtual Address getBroadcastAddress() const = 0;
         virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
         virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const = 0; // TODO: move, where?

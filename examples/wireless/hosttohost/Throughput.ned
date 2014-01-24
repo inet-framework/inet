@@ -16,17 +16,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.examples.wireless.hosttohost;
 
-import inet.world.radio.ChannelControl;
-import inet.nodes.wireless.AccessPoint;
-import inet.mobility.models.StationaryMobility;
-import inet.mobility.models.CircleMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.base.Sink;
 import inet.applications.ethernet.EtherAppCli;
-
+import inet.base.Sink;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.single.CircleMobility;
+import inet.mobility.static.StationaryMobility;
+import inet.nodes.wireless.AccessPoint;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 module ThroughputClient
 {
@@ -102,7 +100,7 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=61,46");
         }

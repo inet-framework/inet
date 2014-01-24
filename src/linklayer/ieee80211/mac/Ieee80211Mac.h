@@ -26,13 +26,13 @@
 //#define FSM_DEBUG
 
 #include "WifiMode.h"
-#include "WirelessMacBase.h"
+#include "MACProtocolBase.h"
 #include "IPassiveQueue.h"
 #include "Ieee80211Frame_m.h"
 #include "Ieee80211Consts.h"
-#include "RadioState.h"
 #include "FSMA.h"
 #include "IQoSClassifier.h"
+#include "IRadio.h"
 
 /**
  * IEEE 802.11g with e Media Access Control Layer.
@@ -56,7 +56,7 @@
  *
  * @ingroup macLayer
  */
-class INET_API Ieee80211Mac : public WirelessMacBase
+class INET_API Ieee80211Mac : public MACProtocolBase
 {
     typedef std::list<Ieee80211DataOrMgmtFrame*> Ieee80211DataOrMgmtFrameList;
     /**
@@ -92,6 +92,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     bool useModulationParameters;
     bool prioritizeMulticast;
   protected:
+    IRadio::RadioTransmissionState radioTransmissionState;
     /**
      * @name Configuration parameters
      * These are filled in during the initialization phase and not supposed to change afterwards.
@@ -334,12 +335,7 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     /** XXX Remember for which AC we wait for ACK. */
     //int ACKcurrentAC;
 
-    /** Physical radio (medium) state copied from physical layer */
-    RadioState::State radioState;
-    // Use to distinguish the radio module that send the event
-    int radioModule;
-
-    int getRadioModuleId() {return radioModule;}
+    IRadio *radio;
 
     Ieee80211DataOrMgmtFrame *fr;
 
@@ -415,7 +411,6 @@ class INET_API Ieee80211Mac : public WirelessMacBase
     // simtime_t maxjitter[4];
     // cOutVector jitter[4];
     // cOutVector macDelay[4];
-    cOutVector radioStateVector;
     // cOutVector throughput[4];
     //@}
 
@@ -451,19 +446,19 @@ class INET_API Ieee80211Mac : public WirelessMacBase
      */
     //@{
     /** @brief Called by the signal handler whenever a change occurs we're interested in */
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
 
     /** @brief Handle commands (msg kind+control info) coming from upper layers */
-    virtual void handleCommand(cMessage *msg);
+    virtual void handleUpperCommand(cMessage *msg);
 
     /** @brief Handle timer self messages */
-    virtual void handleSelfMsg(cMessage *msg);
+    virtual void handleSelfMessage(cMessage *msg);
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperMsg(cPacket *msg);
+    virtual void handleUpperPacket(cPacket *msg);
 
     /** @brief Handle messages from lower (physical) layer */
-    virtual void handleLowerMsg(cPacket *msg);
+    virtual void handleLowerPacket(cPacket *msg);
 
     /** @brief Handle all kinds of messages and notifications with the state machine */
     virtual void handleWithFSM(cMessage *msg);

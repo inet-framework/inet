@@ -1,0 +1,4 @@
+2014-01-22  Levente Meszaros
+
+	Added a new purely virtual contract that defines the interface of physical layers and more specifically radios.
+	Added a new RadioPowerConsumer module that can be used with all radios.

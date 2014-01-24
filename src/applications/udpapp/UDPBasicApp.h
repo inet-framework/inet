@@ -24,14 +24,14 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 
 /**
  * UDP application. See NED for more info.
  */
-class INET_API UDPBasicApp : public AppBase
+class INET_API UDPBasicApp : public ApplicationBase
 {
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
@@ -70,10 +70,9 @@ class INET_API UDPBasicApp : public AppBase
     virtual void processSend();
     virtual void processStop();
 
-    //AppBase:
-    bool startApp(IDoneCallback *doneCallback);
-    bool stopApp(IDoneCallback *doneCallback);
-    bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 };
 
 #endif

@@ -29,7 +29,7 @@
 
 #include "IPv6ControlInfo.h"
 #include "IPv6NDMessage_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "ICMPv6Message_m.h"
 
 #include "IPv6TunnelingAccess.h"
@@ -100,8 +100,8 @@ void IPv6::updateDisplayString()
 
 void IPv6::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->removeControlInfo());
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg)) {
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }

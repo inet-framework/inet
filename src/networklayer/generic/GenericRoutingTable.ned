@@ -16,8 +16,7 @@
 
 package inet.networklayer.generic;
 
-import inet.networklayer.contract.IRoutingTable;
-
+import inet.networklayer.common.IRoutingTable;
 
 //
 // This module stores generic routes used by the generic network protocol.

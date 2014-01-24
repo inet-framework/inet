@@ -25,7 +25,7 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 /**
@@ -34,7 +34,7 @@
  * Basic video stream application. Clients connect to server and get a stream of
  * video back.
  */
-class INET_API UDPVideoStreamCli : public AppBase
+class INET_API UDPVideoStreamCli : public ApplicationBase
 {
   protected:
     UDPSocket socket;
@@ -60,10 +60,9 @@ class INET_API UDPVideoStreamCli : public AppBase
     virtual void requestStream();
     virtual void receiveStream(cPacket *msg);
 
-    //AppBase:
-    virtual bool startApp(IDoneCallback *doneCallback);
-    virtual bool stopApp(IDoneCallback *doneCallback);
-    virtual bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 };
 
 #endif

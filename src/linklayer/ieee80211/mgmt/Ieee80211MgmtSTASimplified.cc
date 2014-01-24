@@ -17,7 +17,7 @@
 
 
 #include "Ieee80211MgmtSTASimplified.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 
 Define_Module(Ieee80211MgmtSTASimplified);

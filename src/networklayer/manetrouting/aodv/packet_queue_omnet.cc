@@ -22,6 +22,7 @@
 
 #include "aodv_uu_omnet.h"
 #include "IPv4Datagram.h"
+#include "Ieee802Ctrl.h"
 
 #define GARBAGE_COLLECT
 

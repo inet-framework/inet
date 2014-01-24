@@ -42,7 +42,7 @@ UDPBasicApp::~UDPBasicApp()
 
 void UDPBasicApp::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -65,7 +65,7 @@ void UDPBasicApp::finish()
 {
     recordScalar("packets sent", numSent);
     recordScalar("packets received", numReceived);
-    AppBase::finish();
+    ApplicationBase::finish();
 }
 
 void UDPBasicApp::setSocketOptions()
@@ -225,7 +225,7 @@ void UDPBasicApp::processPacket(cPacket *pk)
     numReceived++;
 }
 
-bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
+bool UDPBasicApp::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
     if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
@@ -236,7 +236,7 @@ bool UDPBasicApp::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
+bool UDPBasicApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     if (selfMsg)
         cancelEvent(selfMsg);
@@ -244,10 +244,9 @@ bool UDPBasicApp::stopApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPBasicApp::crashApp(IDoneCallback *doneCallback)
+void UDPBasicApp::handleNodeCrash()
 {
     if (selfMsg)
         cancelEvent(selfMsg);
-    return true;
 }
 

@@ -23,7 +23,7 @@
 
 package inet.examples.mobileipv6;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.nodes.xmipv6.WirelessHost6;
 import inet.nodes.xmipv6.HomeAgent6;
 import inet.nodes.xmipv6.CorrespondentNode6;
@@ -59,7 +59,7 @@ network mIPv6Network
             parameters:
                 @display("p=763,53");
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 numChannels = 5;
                 @display("p=753,123");

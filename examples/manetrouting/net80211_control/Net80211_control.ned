@@ -20,7 +20,7 @@ package inet.examples.manetrouting.net80211_control;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 
 network Net80211_control
@@ -37,7 +37,7 @@ network Net80211_control
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }

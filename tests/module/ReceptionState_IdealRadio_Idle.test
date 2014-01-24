@@ -1,0 +1,68 @@
+%description:
+
+This is a test for IdealRadio idle reception state.
+The received signal is too weak to sense at all.
+
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.WirelessHost;
+import inet.physicallayer.radio.ideal.IdealRadioChannel;
+
+network Test
+{
+    submodules:
+        radioChannel: IdealRadioChannel;
+        configurator: IPv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 400us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.globalARP = true
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.host1.mobility.initialX = 100m
+*.host2.mobility.initialX = 900m
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radio.transmissionRange = 200m
+*.host*.wlan[*].radio.interferenceRange = 500m
+
+# ping app
+*.host1.numPingApps = 1
+*.host1.pingApp[0].count = 1
+*.host1.pingApp[0].printPing = true
+*.host1.pingApp[0].destAddr = "host2"
+*.host1.pingApp[0].startTime = 0s
+
+%not-contains: results/General-0.elog
+ - Changing radio reception state from IDLE to BUSY.
+%not-contains: results/General-0.elog
+ - Changing radio reception state from IDLE to RECEIVING.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

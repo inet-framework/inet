@@ -18,7 +18,7 @@
 
 #include "Ieee80211MgmtBase.h"
 
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"

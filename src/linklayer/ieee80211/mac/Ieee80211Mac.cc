@@ -18,11 +18,10 @@
 //
 
 #include "Ieee80211Mac.h"
-#include "RadioState.h"
+#include "IRadio.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "PhyControlInfo_m.h"
-#include "AirFrame_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
@@ -44,14 +43,6 @@ Register_Enum(Ieee80211Mac,
                Ieee80211Mac::WAITCTS,
                Ieee80211Mac::WAITSIFS,
                Ieee80211Mac::RECEIVE));
-
-// don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(RadioState,
-              (RadioState::IDLE,
-               RadioState::RECV,
-               RadioState::TRANSMIT,
-               RadioState::SLEEP,
-               RadioState::OFF));
 
 /****************************************************************
  * Construction functions.
@@ -107,7 +98,7 @@ void Ieee80211Mac::initialize(int stage)
 {
     EV_DEBUG << "Initializing stage " << stage << endl;
 
-    WirelessMacBase::initialize(stage);
+    MACProtocolBase::initialize(stage);
 
     //TODO: revise it: it's too big; should revise stages, too!!!
     if (stage == INITSTAGE_LOCAL)
@@ -285,9 +276,6 @@ void Ieee80211Mac::initialize(int stage)
         endReserve = new cMessage("Reserve");
         mediumStateChange = new cMessage("MediumStateChange");
 
-        // subscribe for the information of the carrier sense
-        hostModule->subscribe(NF_RADIOSTATE_CHANGED, this);
-
         // obtain pointer to external queue
         initializeQueueModule();  //FIXME STAGE: this should be in L2 initialization!!!!
 
@@ -296,7 +284,6 @@ void Ieee80211Mac::initialize(int stage)
         mode = DCF;
         sequenceNumber = 0;
 
-        radioState = RadioState::IDLE;
         currentAC = 0;
         oldcurrentAC = 0;
         lastReceiveFailed = false;
@@ -342,8 +329,6 @@ void Ieee80211Mac::initialize(int stage)
 
         stateVector.setName("State");
         stateVector.setEnum("Ieee80211Mac");
-        radioStateVector.setName("RadioState");
-        radioStateVector.setEnum("RadioState");
         for (int i=0; i<numCategories(); i++)
         {
             EdcaOutVector outVectors;
@@ -370,10 +355,16 @@ void Ieee80211Mac::initialize(int stage)
         // initialize watches
         validRecMode = false;
         initWatches();
-        radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule()->getId();
+
+        cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::radioReceptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         // interface
         if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
@@ -384,7 +375,6 @@ void Ieee80211Mac::initWatches()
 {
 // initialize watches
      WATCH(fsm);
-     WATCH(radioState);
      for (int i=0; i<numCategories(); i++)
          WATCH(edcCAF[i].retryCounter);
      for (int i=0; i<numCategories(); i++)
@@ -533,7 +523,7 @@ void Ieee80211Mac::initializeQueueModule()
 /****************************************************************
  * Message handling functions.
  */
-void Ieee80211Mac::handleSelfMsg(cMessage *msg)
+void Ieee80211Mac::handleSelfMessage(cMessage *msg)
 {
     if (msg==throughputTimer)
     {
@@ -593,7 +583,7 @@ void Ieee80211Mac::handleSelfMsg(cMessage *msg)
 }
 
 
-void Ieee80211Mac::handleUpperMsg(cPacket *msg)
+void Ieee80211Mac::handleUpperPacket(cPacket *msg)
 {
     if (queueModule && numCategories()>1 && (int)transmissionQueueSize() < maxQueueSize)
     {
@@ -605,7 +595,7 @@ void Ieee80211Mac::handleUpperMsg(cPacket *msg)
     // check if it's a command from the mgmt layer
     if (msg->getBitLength()==0 && msg->getKind()!=0)
     {
-        handleCommand(msg);
+        handleUpperCommand(msg);
         return;
     }
 
@@ -694,7 +684,7 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
     return true;
 }
 
-void Ieee80211Mac::handleCommand(cMessage *msg)
+void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 {
     if (msg->getKind()==PHY_C_CONFIGURERADIO)
     {
@@ -736,7 +726,7 @@ void Ieee80211Mac::handleCommand(cMessage *msg)
     }
 }
 
-void Ieee80211Mac::handleLowerMsg(cPacket *msg)
+void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 {
     EV<<"->Enter handleLowerMsg...\n";
     EV << "received message from lower layer: " << msg << endl;
@@ -826,30 +816,18 @@ void Ieee80211Mac::handleLowerMsg(cPacket *msg)
     EV<<"Leave handleLowerMsg...\n";
 }
 
-void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    WirelessMacBase::receiveSignal(source, signalID, obj);
-
-    printNotificationBanner(signalID, obj);
-
-    if (signalID == NF_RADIOSTATE_CHANGED)
-    {
-        const RadioState * rstate = check_and_cast<const RadioState *>(obj);
-        if (rstate->getRadioId()!=getRadioModuleId())
-            return;
-
-        RadioState::State newRadioState = rstate->getState();
-
-
-
-        // FIXME: double recording, because there's no sample hold in the gui
-        radioStateVector.record(radioState);
-        radioStateVector.record(newRadioState);
-
-        radioState = newRadioState;
-
+    if (signalID == IRadio::radioReceptionStateChangedSignal)
         handleWithFSM(mediumStateChange);
+    else if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    {
+        handleWithFSM(mediumStateChange);
+        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
+        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        radioTransmissionState = newRadioTransmissionState;
     }
 }
 
@@ -860,7 +838,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 {
     removeOldTuplesFromDuplicateMap();
     // skip those cases where there's nothing to do, so the switch looks simpler
-    if (isUpperMsg(msg) && fsm.getState() != IDLE)
+    if (isUpperMessage(msg) && fsm.getState() != IDLE)
     {
         if (fsm.getState() == WAITAIFS && endDIFS->isScheduled())
         {
@@ -891,7 +869,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
     stateVector.record(fsm.getState());
 
     bool receptionError = false;
-    if (frame && isLowerMsg(frame))
+    if (frame && isLowerMessage(frame))
     {
         lastReceiveFailed = (msgKind == COLLISION || msgKind == BITERROR);
         receptionError = (msgKind == COLLISION || msgKind == BITERROR);
@@ -908,8 +886,8 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             if (fixFSM)
             {
             FSMA_Event_Transition(Data-Ready,
-                                  // isUpperMsg(msg),
-                                  isUpperMsg(msg) && backoffPeriod[currentAC] > 0,
+                                  // isUpperMessage(msg),
+                                  isUpperMessage(msg) && backoffPeriod[currentAC] > 0,
                                   DEFER,
                 //ASSERT(isInvalidBackoffPeriod() || backoffPeriod == 0);
                 //invalidateBackoffPeriod();
@@ -927,7 +905,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             }
             */
             FSMA_Event_Transition(Data-Ready,
-                                  isUpperMsg(msg),
+                                  isUpperMessage(msg),
                                   DEFER,
                                   ASSERT(isInvalidBackoffPeriod() || backoffPeriod() == SIMTIME_ZERO);
                                   invalidateBackoffPeriod();
@@ -937,7 +915,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      DEFER,
                                     );
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
                                  );
         }
@@ -953,7 +931,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      WAITAIFS,
                                      ;);
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
                                   ;);
         }
@@ -1046,7 +1024,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      );
             // radio state changes before we actually get the message, so this must be here
             FSMA_Event_Transition(Receive,
-                                  isLowerMsg(msg),
+                                  isLowerMessage(msg),
                                   RECEIVE,
                                   cancelAIFSPeriod();
                                   ;);
@@ -1138,7 +1116,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Enter(scheduleDataTimeoutPeriod(getCurrentTransmission()));
 #ifndef DISABLEERRORACK
             FSMA_Event_Transition(Reception-ACK-failed,
-                                  isLowerMsg(msg) && receptionError && retryCounter(oldcurrentAC) == transmissionLimit - 1,
+                                  isLowerMessage(msg) && receptionError && retryCounter(oldcurrentAC) == transmissionLimit - 1,
                                   IDLE,
                                   currentAC=oldcurrentAC;
                                   cancelTimeoutPeriod();
@@ -1147,7 +1125,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                  );
             FSMA_Event_Transition(Reception-ACK-error,
-                                  isLowerMsg(msg) && receptionError,
+                                  isLowerMessage(msg) && receptionError,
                                   DEFER,
                                   currentAC=oldcurrentAC;
                                   cancelTimeoutPeriod();
@@ -1157,7 +1135,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                  );
 #endif
             FSMA_Event_Transition(Receive-ACK-TXOP-Empty,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK && txop && transmissionQueue(oldcurrentAC)->size() == 1,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK && txop && transmissionQueue(oldcurrentAC)->size() == 1,
                                   DEFER,
                                   currentAC = oldcurrentAC;
                                   if (retryCounter() == 0) numSentWithoutRetry()++;
@@ -1179,7 +1157,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                   );
             FSMA_Event_Transition(Receive-ACK-TXOP,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK && txop,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK && txop,
                                   WAITSIFS,
                                   currentAC = oldcurrentAC;
                                   if (retryCounter() == 0) numSentWithoutRetry()++;
@@ -1201,7 +1179,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   );
 /*
             FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK,
                                   IDLE,
                                   currentAC=oldcurrentAC;
                                   if (retryCounter[currentAC] == 0) numSentWithoutRetry[currentAC]++;
@@ -1222,7 +1200,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
              */
              /*Ieee 802.11 2007 9.9.1.2 EDCA TXOPs*/
              FSMA_Event_Transition(Receive-ACK,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_ACK,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_ACK,
                                   DEFER,
                                   currentAC = oldcurrentAC;
                                   if (retryCounter() == 0)
@@ -1259,7 +1237,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                  );
             FSMA_Event_Transition(Interrupted-ACK-Failure,
-                                  isLowerMsg(msg) && retryCounter(oldcurrentAC) == transmissionLimit - 1,
+                                  isLowerMessage(msg) && retryCounter(oldcurrentAC) == transmissionLimit - 1,
                                   RECEIVE,
                                   currentAC=oldcurrentAC;
                                   cancelTimeoutPeriod();
@@ -1268,7 +1246,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   if (endTXOP->isScheduled()) cancelEvent(endTXOP);
                                  );
             FSMA_Event_Transition(Retry-Interrupted-ACK,
-                                 isLowerMsg(msg),
+                                 isLowerMessage(msg),
                                  RECEIVE,
                                  currentAC=oldcurrentAC;
                                  cancelTimeoutPeriod();
@@ -1309,14 +1287,14 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
             FSMA_Enter(scheduleCTSTimeoutPeriod());
 #ifndef DISABLEERRORACK
             FSMA_Event_Transition(Reception-CTS-Failed,
-                                   isLowerMsg(msg) && receptionError && retryCounter(oldcurrentAC) == transmissionLimit - 1,
+                                   isLowerMessage(msg) && receptionError && retryCounter(oldcurrentAC) == transmissionLimit - 1,
                                    IDLE,
                                    cancelTimeoutPeriod();
                                    currentAC = oldcurrentAC;
                                    giveUpCurrentTransmission();
                                   );
             FSMA_Event_Transition(Reception-CTS-error,
-                                   isLowerMsg(msg) && receptionError,
+                                   isLowerMessage(msg) && receptionError,
                                    DEFER,
                                    cancelTimeoutPeriod();
                                    currentAC = oldcurrentAC;
@@ -1324,7 +1302,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                   );
 #endif
             FSMA_Event_Transition(Receive-CTS,
-                                  isLowerMsg(msg) && isForUs(frame) && frameType == ST_CTS,
+                                  isLowerMessage(msg) && isForUs(frame) && frameType == ST_CTS,
                                   WAITSIFS,
                                   cancelTimeoutPeriod();
                                  );
@@ -1373,43 +1351,43 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMsg(msg) && (msgKind == COLLISION || msgKind == BITERROR),
+                                     isLowerMessage(msg) && (msgKind == COLLISION || msgKind == BITERROR),
                                      IDLE,
                                      EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                                      numCollision++;
                                      finishReception();
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Multicast,
-                                     isLowerMsg(msg) && isMulticast(frame) && !isSentByUs(frame) && isDataOrMgmtFrame(frame),
+                                     isLowerMessage(msg) && isMulticast(frame) && !isSentByUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
                                      sendUp(frame);
                                      numReceivedMulticast++;
                                      finishReception();
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Data,
-                                     isLowerMsg(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
+                                     isLowerMessage(msg) && isForUs(frame) && isDataOrMgmtFrame(frame),
                                      WAITSIFS,
                                      sendUp(frame);
                                      numReceived++;
                                     );
             FSMA_No_Event_Transition(Immediate-Receive-RTS,
-                                     isLowerMsg(msg) && isForUs(frame) && frameType == ST_RTS,
+                                     isLowerMessage(msg) && isForUs(frame) && frameType == ST_RTS,
                                      WAITSIFS,
                                     );
             FSMA_No_Event_Transition(Immediate-Receive-Other-backtobackoff,
-                                     isLowerMsg(msg) && isBackoffPending(), //(backoff[0] || backoff[1] || backoff[2] || backoff[3]),
+                                     isLowerMessage(msg) && isBackoffPending(), //(backoff[0] || backoff[1] || backoff[2] || backoff[3]),
                                      DEFER,
                                     );
 
             FSMA_No_Event_Transition(Immediate-Promiscuous-Data,
-                                     isLowerMsg(msg) && !isForUs(frame) && isDataOrMgmtFrame(frame),
+                                     isLowerMessage(msg) && !isForUs(frame) && isDataOrMgmtFrame(frame),
                                      IDLE,
                                      promiscousFrame(frame);
                                      finishReception();
                                      numReceivedOther++;
                                      );
             FSMA_No_Event_Transition(Immediate-Receive-Other,
-                                     isLowerMsg(msg),
+                                     isLowerMessage(msg),
                                      IDLE,
                                      finishReception();
                                      numReceivedOther++;
@@ -1719,7 +1697,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
             reserve = std::max(reserve, oldReserve);
             cancelEvent(endReserve);
         }
-        else if (radioState == RadioState::IDLE)
+        else if (radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE)
         {
             // NAV: the channel just became virtually busy according to the spec
             scheduleAt(simTime(), mediumStateChange);
@@ -1799,6 +1777,7 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     numAckSend++;
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
@@ -1844,12 +1823,14 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
         scheduleAt(simTime() + time, endTXOP);
     }
     EV << "sending Data frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBitrateFrame(frameToSend))));
 }
 
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending RTS frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
 }
 
@@ -1858,6 +1839,7 @@ void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     EV << "sending Multicast frame\n";
     if (frameToSend->getControlInfo())
         delete frameToSend->removeControlInfo();
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBasicBitrate(frameToSend))));
 }
 
@@ -1872,6 +1854,7 @@ void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV << "sending CTS frame\n";
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
 }
 
@@ -2080,12 +2063,12 @@ void Ieee80211Mac::resetStateVariables()
 
 bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
 {
-    return msg == mediumStateChange || (msg == endReserve && radioState == RadioState::IDLE);
+    return msg == mediumStateChange || (msg == endReserve && radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE);
 }
 
 bool Ieee80211Mac::isMediumFree()
 {
-    return radioState == RadioState::IDLE && !endReserve->isScheduled();
+    return !endReserve->isScheduled() && radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE;
 }
 
 bool Ieee80211Mac::isMulticast(Ieee80211Frame *frame)
@@ -2214,7 +2197,10 @@ void Ieee80211Mac::logState()
     EV << "\n# retryCounter 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)
         EV << " " << edcCAF[i].retryCounter;
-    EV << ", radioState = " << radioState << ", nav = " << nav <<  ", txop is "<< txop << "\n";
+    EV << ", radioMode = " << radio->getRadioMode()
+       << ", radioReceptionState = " << radio->getRadioReceptionState()
+       << ", radioTransmissionState = " << radio->getRadioTransmissionState()
+       << ", nav = " << nav <<  ", txop is "<< txop << "\n";
     EV << "#queue size 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)
         EV << " " << transmissionQueue(i)->size();
@@ -2743,7 +2729,7 @@ void Ieee80211Mac::sendUp(cMessage *msg)
         if (msg->isPacket())
             emit(packetSentToUpperSignal, msg);
 
-        send(msg, upperLayerOut);
+        send(msg, upperLayerOutGateId);
     }
 }
 

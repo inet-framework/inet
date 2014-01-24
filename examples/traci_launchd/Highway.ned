@@ -20,13 +20,13 @@
 
 package inet.examples.traci_launchd;
 
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.world.traci.TraCIScenarioManagerLaunchd;
 
 module Highway
 {
     submodules:
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=256,128");
         }

@@ -391,7 +391,7 @@ void xDYMO::sendDYMOPacket(DYMOPacket * packet, const InterfaceEntry * interface
     INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
     // 5.4. AODVv2 Packet Header Fields and Information Elements
     // In addition, IP Protocol Number 138 has been reserved for MANET protocols [RFC5498].
-    networkProtocolControlInfo->setProtocol(IP_PROT_MANET);
+    networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
     // The IPv4 TTL (IPv6 Hop Limit) field for all packets containing AODVv2 messages is set to 255.
     networkProtocolControlInfo->setHopLimit(255);
     networkProtocolControlInfo->setDestinationAddress(nextHop);

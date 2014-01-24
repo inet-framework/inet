@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 
+#include "INetworkProtocol.h"
 #include "QueueBase.h"
 #include "InterfaceTableAccess.h"
 #include "INetfilter.h"
@@ -36,7 +37,9 @@
  * interface to allow routing protocols to kick in. It doesn't provide datagram fragmentation
  * and reassembling.
  */
-class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter
+// TODO: rename this and its friends to something that is more specific
+// TODO: that expresses to some extent how this network protocol works
+class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, public INetworkProtocol
 {
   protected:
     /**

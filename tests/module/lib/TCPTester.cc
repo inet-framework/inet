@@ -18,6 +18,7 @@
 
 
 #include "TCPTester.h"
+#include "NetworkProtocolCommand_m.h"
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 
@@ -128,7 +129,7 @@ void TCPScriptableTester::parseScript(const char *script)
 
 void TCPScriptableTester::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
     {
         delete msg;
         return;
@@ -224,7 +225,7 @@ void TCPRandomTester::initialize()
 
 void TCPRandomTester::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
     {
         delete msg;
         return;

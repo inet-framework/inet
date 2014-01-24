@@ -16,14 +16,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 package inet.examples.wireless.throughput;
 
-import inet.world.radio.ChannelControl;
-import inet.mobility.models.StationaryMobility;
-import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.applications.ethernet.EtherAppCli;
-
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.static.StationaryMobility;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 module ThroughputClient
 {
@@ -67,7 +65,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             parameters:
                 @display("p=61,46");
         }

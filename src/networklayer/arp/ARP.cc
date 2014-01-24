@@ -19,7 +19,7 @@
 
 #include "ARP.h"
 
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
@@ -458,7 +458,7 @@ void ARP::processARPPacket(ARPPacket *arp)
     dumpARPPacket(arp);
 
     // extract input port
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(arp->removeControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(arp->removeControlInfo());
     InterfaceEntry *ie = ift->getInterfaceById(ctrl->getInterfaceId());
     delete ctrl;
 

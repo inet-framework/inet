@@ -6,7 +6,7 @@
 #include "IPv4InterfaceData.h"
 #include "AddressResolver.h"
 #include "UDPPacket_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 Define_Module(Batman);
 

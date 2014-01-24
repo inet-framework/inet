@@ -51,7 +51,7 @@
 // (~NotificationBoard), perform autoconfiguration of a network
 // (~FlatNetworkConfigurator), move a mobile node around (for example
 // ~ConstSpeedMobility), and perform housekeeping associated with radio channels
-// in wireless simulations (~ChannelControl).
+// in wireless simulations (~IRadioChannel).
 //
 // Protocol headers and packet formats are described in message definition
 // files (msg files), which are translated into C++ classes by OMNeT++'s
@@ -114,7 +114,7 @@
 // - ~ScenarioManager makes simulations scriptable. Modules can be made to support
 //   scripting by implementing the <code>IScriptable</code> C++ interface.
 //
-// - ~ChannelControl is required for wireless simulations. It keeps track of which
+// - ~IRadioChannel is required for wireless simulations. It keeps track of which
 //   nodes are within interference distance of other nodes.
 //
 // <h3>Communication between protocol layers</h3>

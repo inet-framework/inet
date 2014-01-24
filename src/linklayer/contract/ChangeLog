@@ -1,3 +1,8 @@
+2014-01-22  Levente Meszaros
+
+	Moved classes shared by implementations from ./contract to ./common
+	Added a new purely virtual contract that defines the interface of MAC protocols.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Tamas Borbely

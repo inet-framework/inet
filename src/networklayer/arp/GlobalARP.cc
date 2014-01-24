@@ -20,10 +20,19 @@
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 Define_Module(GlobalARP);
 
+MACAddress GlobalARP::resolveMACAddress(Address& address)
+{
+    if (address.isUnicast())
+        return mapUnicastAddress(address);
+    else if (address.isMulticast())
+        return mapMulticastAddress(address);
+    else if (address.isBroadcast())
+        return MACAddress::BROADCAST_ADDRESS;
+}
 
 void GlobalARP::initialize(int stage)
 {

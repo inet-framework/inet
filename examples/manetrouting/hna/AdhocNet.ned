@@ -22,7 +22,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.AdhocHost;
 import inet.nodes.inet.StandardHost;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.util.ThruputMeteringChannel;
 
 network AdhocNet
@@ -40,7 +40,7 @@ network AdhocNet
         }
 
     submodules:
-        channelControl: ChannelControl {
+        radioChannel: SimplifiedRadioChannel {
             @display("p=83,15");
         }
 

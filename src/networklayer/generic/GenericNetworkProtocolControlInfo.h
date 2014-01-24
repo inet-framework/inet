@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __GenericNetworkProtocolControlInfo_H
-#define __GenericNetworkProtocolControlInfo_H
-
-#include "INETDefs.h"
+#ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H_
+#define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H_
 
 #include "Address.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
@@ -35,8 +33,8 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) {if (this==&other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this;}
     virtual GenericNetworkProtocolControlInfo *dup() const {return new GenericNetworkProtocolControlInfo(*this);}
 
-    virtual short getProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
-    virtual void setProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
+    virtual short getTransportProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
+    virtual void setTransportProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
     virtual void setSourceAddress(const Address & address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
     virtual Address getDestinationAddress() const { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
@@ -48,4 +46,3 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
 };
 
 #endif
-

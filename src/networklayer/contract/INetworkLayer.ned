@@ -18,17 +18,37 @@
 package inet.networklayer.contract;
 
 //
-// This module interface provides an abstraction for different network layers.
+// This module interface provides an abstraction for the upper interface of
+// different network layers.
 //
-moduleinterface INetworkLayer
+moduleinterface INetworkLayerUpper
 {
     parameters:
         @display("i=block/fork");
     gates:
-        input transportIn[] @labels(IPv4ControlInfo/down);
-        output transportOut[] @labels(IPv4ControlInfo/up);
+        input transportIn[] @labels(ITransportPacket/down);
+        output transportOut[] @labels(ITransportPacket/up);
         input pingIn[]@labels(PingPayload/down);
         output pingOut[] @labels(PingPayload/up);
-        input ifIn[] @labels(INetworkDatagram);
-        output ifOut[] @labels(INetworkDatagram);
+}
+
+//
+// This module interface provides an abstraction for the lower interface of
+// different network layers.
+//
+moduleinterface INetworkLayerLower
+{
+    parameters:
+        @display("i=block/fork");
+    gates:
+        input ifIn[] @labels(INetworkDatagram/up);
+        output ifOut[] @labels(INetworkDatagram/down);
+}
+
+//
+// This module interface provides an abstraction for the upper and lower
+// interfaces of different network layers.
+//
+moduleinterface INetworkLayer extends INetworkLayerUpper, INetworkLayerLower
+{
 }

@@ -33,11 +33,6 @@ extern simsignal_t    // admin
     NF_NODE_FAILURE,
     NF_NODE_RECOVERY,
 
-    // - layer 1 (physical)
-    NF_RADIOSTATE_CHANGED,
-    NF_RADIO_CHANNEL_CHANGED,
-    NF_RADIO_CHANGE_NOISE,
-
     // - layer 2 (data-link)
     //XXX generalize constants (remove "PP"?) - could be used by 80211 and ethernet as well
     // they generally carry TxNotifDetails as "details" to identify the interface and the frame
@@ -121,15 +116,11 @@ extern simsignal_t    // admin
     // - layer 7 - OverSim
     NF_OVERLAY_TRANSPORTADDRESS_CHANGED,  // OverSim
     NF_OVERLAY_NODE_GRACEFUL_LEAVE,       // OverSim
-    NF_OVERLAY_NODE_LEAVE,                // OverSim
+    NF_OVERLAY_NODE_LEAVE;                // OverSim
 
 
     // - layer 7 (application)
     //...
-    // - battery
-    NF_BATTERY_CHANGED,
-    NF_BATTERY_CPUTIME_CONSUMED
-;
 
 /**
  * Utility function

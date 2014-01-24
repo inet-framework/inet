@@ -28,12 +28,11 @@
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
 #include "IIPv4RoutingTable.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "IPSocket.h"
 #include "IARPCache.h"
-#include "Ieee802Ctrl_m.h"
 
 Define_Module(IPv4);
 
@@ -99,8 +98,8 @@ void IPv4::updateDisplayString()
 
 void IPv4::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL) {
-        IPRegisterProtocolCommand * command = check_and_cast<IPRegisterProtocolCommand *>(msg->getControlInfo());
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg)) {
+        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }
@@ -247,7 +246,7 @@ void IPv4::preroutingFinish(IPv4Datagram *datagram, const InterfaceEntry *fromIE
 void IPv4::handleIncomingARPPacket(ARPPacket *packet, const InterfaceEntry *fromIE)
 {
     // give it to the ARP module
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(packet->getControlInfo());
     ctrl->setInterfaceId(fromIE->getInterfaceId());
     send(packet, arpOutGate);
 }
@@ -314,7 +313,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
 void IPv4::handlePacketFromARP(cPacket *packet)
 {
     // send out packet on the appropriate interface
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(packet->getControlInfo());
+    IMACProtocolControlInfo* ctrl = check_and_cast<IMACProtocolControlInfo*>(packet->getControlInfo());
     InterfaceEntry *destIE = ift->getInterfaceById(ctrl->getInterfaceId());
     sendPacketToNIC(packet, destIE);
 }

@@ -6,12 +6,12 @@ Carrier sense test for Ieee80211 out of range concurrent and delayed mutual tran
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.world.radio.ChannelControl;
+import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 
 network Test
 {
     submodules:
-        channelControl: ChannelControl;
+        radioChannel: SimplifiedRadioChannel;
         configurator: IPv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
@@ -59,11 +59,8 @@ cmdenv-express-mode = false
 - reception of noise message over, removing recvdPower from noiseLevel....
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-\*\* Event #\d+  T=[0-9\.]+  [0-9\.]+% completed   Test\.host2\.wlan\[0\]\.radio \(Ieee80211Radio, id=\d+\)
-bitrate = \d+\.\d*e[+-]\d+
- sensitivity after updateSensitivity: \d+\.\d*e[+-]\d+
-frame ping0 is just noise
-setting radio state to RECV
+frame ping0 with rcvdPower .*? is just noise
+Changing radio reception state from IDLE to BUSY\.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

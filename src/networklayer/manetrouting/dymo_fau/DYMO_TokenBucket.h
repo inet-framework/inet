@@ -26,7 +26,7 @@
 #include "InterfaceTableAccess.h"
 #include "IIPv4RoutingTable.h"
 #include "IPv4RoutingTableAccess.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
 

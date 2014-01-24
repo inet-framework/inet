@@ -16,6 +16,7 @@ src/Makefile.vc
 *.pcap
 *.sca
 *.vec
+.buildlog*
 # ignore binary files
 out/
 *.so

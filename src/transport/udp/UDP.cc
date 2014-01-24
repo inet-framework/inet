@@ -788,7 +788,7 @@ void UDP::sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, con
         EV << "Sending app packet " << appData->getName() << endl;
         IAddressType * addressType = destAddr.getAddressType();
         INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
-        ipControlInfo->setProtocol(IP_PROT_UDP);
+        ipControlInfo->setTransportProtocol(IP_PROT_UDP);
         ipControlInfo->setSourceAddress(srcAddr);
         ipControlInfo->setDestinationAddress(destAddr);
         ipControlInfo->setInterfaceId(interfaceId);

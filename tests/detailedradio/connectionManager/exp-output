@@ -1,0 +1,314 @@
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 5.0, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  19
+Embedded web server started on port 8000
+
+Preparing for running configuration Test1, run #0...
+Scenario: $repetition=0
+Assigned runID=Test1-0-20131216-12:31:48-15153
+Setting up network `ConnectionManagerTestNet'...
+Initializing...
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 5   present: 5   in FES: 5
+** Event #177   T=4.1   Elapsed: 0.001s (0m 00s)  8% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 180   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #177, t=4.1.
+
+
+Calling finish() at end of Run #0...
+Passed: Test Node 0: Broadcast should be answered by at least one node.
+Passed: Test Node 1: Should have received at least one broadcast.
+Passed: Test Node 2: Should have received at least one broadcast.
+Passed: Test Node 3: Should have received no broadcast.
+Passed: Test Node 4: Should have received at least one broadcast.
+Passed: Test Node 5: Should have received at least one broadcast.
+Passed: Test Node 6: Should have received no broadcast.
+Passed: Test Node 7: Should have received at least one broadcast.
+Passed: Test Node 8: Should have received at least one broadcast.
+Passed: Test Node 9: Should have received no broadcast.
+Passed: Test Node 10: Should have received at least one broadcast.
+Passed: Test Node 11: Should have received at least one broadcast.
+Passed: Test Node 12: Should have received no broadcast.
+Passed: Test Node 13: Should have received at least one broadcast.
+Passed: Test Node 14: Should have received no broadcast.
+Passed: Test Node 15: Should have received no broadcast.
+Passed: Test Node 16: Should have received at least one broadcast.
+Passed: Test Node 17: Should have received at least one broadcast.
+Passed: Test Node 18: Should have received no broadcast.
+Passed: Test Node 19: Should have received at least one broadcast.
+Passed: Test Node 20: Should have received at least one broadcast.
+Passed: Test Node 21: Should have received no broadcast.
+Passed: Test Node 22: Should have received at least one broadcast.
+Passed: Test Node 23: Should have received at least one broadcast.
+Passed: Test Node 24: Should have received no broadcast.
+Passed: Test Node 25: Broadcast should not be answered by any node.
+Passed: Test Node 26: Should have received no broadcast.
+Passed: Test Node 27: Broadcast should not be answered by any node.
+Passed: Test Node 28: Should have received no broadcast.
+Passed: Test Node 29: Broadcast should not be answered by any node.
+Passed: Test Node 30: Should have received no broadcast.
+Passed: Test Node 31: Broadcast should not be answered by any node.
+Passed: Test Node 32: Should have received no broadcast.
+
+End.
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 5.0, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  19
+Embedded web server started on port 8000
+
+Preparing for running configuration Test2, run #0...
+Scenario: $repetition=0
+Assigned runID=Test2-0-20131216-12:31:49-15155
+Setting up network `ConnectionManagerTestNet'...
+Initializing...
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 5   present: 5   in FES: 5
+** Event #185   T=1   Elapsed: 0.002s (0m 00s)  2% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 184   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #185, t=1.
+
+
+Calling finish() at end of Run #0...
+Passed: Test Node 0: Broadcast should be answered by at least one node.
+Passed: Test Node 1: Should have received at least one broadcast.
+Passed: Test Node 2: Should have received at least one broadcast.
+Passed: Test Node 3: Should have received no broadcast.
+Passed: Test Node 4: Should have received at least one broadcast.
+Passed: Test Node 5: Should have received at least one broadcast.
+Passed: Test Node 6: Should have received no broadcast.
+Passed: Test Node 7: Should have received at least one broadcast.
+Passed: Test Node 8: Should have received at least one broadcast.
+Passed: Test Node 9: Should have received no broadcast.
+Passed: Test Node 10: Should have received at least one broadcast.
+Passed: Test Node 11: Should have received at least one broadcast.
+Passed: Test Node 12: Should have received no broadcast.
+Passed: Test Node 13: Should have received at least one broadcast.
+Passed: Test Node 14: Should have received no broadcast.
+Passed: Test Node 15: Should have received no broadcast.
+Passed: Test Node 16: Should have received at least one broadcast.
+Passed: Test Node 17: Should have received at least one broadcast.
+Passed: Test Node 18: Should have received no broadcast.
+Passed: Test Node 19: Should have received at least one broadcast.
+Passed: Test Node 20: Should have received at least one broadcast.
+Passed: Test Node 21: Should have received no broadcast.
+Passed: Test Node 22: Should have received at least one broadcast.
+Passed: Test Node 23: Should have received at least one broadcast.
+Passed: Test Node 24: Should have received no broadcast.
+Passed: Test Node 25: Broadcast should be answered by at least one node.
+Passed: Test Node 26: Should have received at least one broadcast.
+Passed: Test Node 27: Broadcast should be answered by at least one node.
+Passed: Test Node 28: Should have received at least one broadcast.
+Passed: Test Node 29: Broadcast should be answered by at least one node.
+Passed: Test Node 30: Should have received at least one broadcast.
+Passed: Test Node 31: Broadcast should be answered by at least one node.
+Passed: Test Node 32: Should have received at least one broadcast.
+
+End.
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 5.0, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  19
+Embedded web server started on port 8000
+
+Preparing for running configuration Test3, run #0...
+Scenario: $repetition=0
+Assigned runID=Test3-0-20131216-12:31:49-15157
+Setting up network `ConnectionManagerTestNet'...
+Initializing...
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 7   present: 7   in FES: 7
+** Event #518   T=7.6   Elapsed: 0.004s (0m 00s)  15% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 523   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #518, t=7.6.
+
+
+Calling finish() at end of Run #0...
+Passed: Test Node 0: Broadcast should be answered by at least one node.
+Passed: Test Node 1: Should have received at least one broadcast.
+Passed: Test Node 2: Should have received at least one broadcast.
+Passed: Test Node 3: Should have received at least one broadcast.
+Passed: Test Node 4: Should have received at least one broadcast.
+Passed: Test Node 5: Should have received at least one broadcast.
+Passed: Test Node 6: Should have received at least one broadcast.
+Passed: Test Node 7: Should have received at least one broadcast.
+Passed: Test Node 8: Should have received at least one broadcast.
+Passed: Test Node 9: Should have received at least one broadcast.
+Passed: Test Node 10: Should have received at least one broadcast.
+Passed: Test Node 11: Should have received at least one broadcast.
+Passed: Test Node 12: Should have received at least one broadcast.
+Passed: Test Node 13: Should have received at least one broadcast.
+Passed: Test Node 14: Should have received at least one broadcast.
+Passed: Test Node 15: Should have received at least one broadcast.
+Passed: Test Node 16: Should have received at least one broadcast.
+Passed: Test Node 17: Should have received at least one broadcast.
+Passed: Test Node 18: Should have received at least one broadcast.
+Passed: Test Node 19: Should have received at least one broadcast.
+Passed: Test Node 20: Should have received at least one broadcast.
+Passed: Test Node 21: Should have received at least one broadcast.
+Passed: Test Node 22: Should have received at least one broadcast.
+Passed: Test Node 23: Should have received at least one broadcast.
+Passed: Test Node 24: Should have received at least one broadcast.
+Passed: Test Node 25: Should have received at least one broadcast.
+Passed: Test Node 26: Should have received at least one broadcast.
+Passed: Test Node 27: Should have received at least one broadcast.
+Passed: Test Node 28: Should have received at least one broadcast.
+Passed: Test Node 29: Should have received at least one broadcast.
+Passed: Test Node 30: Should have received at least one broadcast.
+Passed: Test Node 31: Should have received at least one broadcast.
+Passed: Test Node 32: Should have received at least one broadcast.
+Passed: Test Node 33: Should have received no broadcast.
+Passed: Test Node 34: Should have received no broadcast.
+Passed: Test Node 35: Should have received no broadcast.
+Passed: Test Node 36: Should have received no broadcast.
+Passed: Test Node 37: Should have received no broadcast.
+Passed: Test Node 38: Should have received no broadcast.
+Passed: Test Node 39: Should have received no broadcast.
+Passed: Test Node 40: Should have received no broadcast.
+Passed: Test Node 41: Should have received no broadcast.
+Passed: Test Node 42: Should have received no broadcast.
+Passed: Test Node 43: Should have received no broadcast.
+Passed: Test Node 44: Should have received no broadcast.
+Passed: Test Node 45: Should have received no broadcast.
+Passed: Test Node 46: Should have received no broadcast.
+Passed: Test Node 47: Should have received no broadcast.
+Passed: Test Node 48: Should have received no broadcast.
+Passed: Test Node 49: Should have received no broadcast.
+Passed: Test Node 50: Should have received no broadcast.
+Passed: Test Node 51: Should have received no broadcast.
+Passed: Test Node 52: Should have received no broadcast.
+Passed: Test Node 53: Should have received no broadcast.
+Passed: Test Node 54: Should have received no broadcast.
+Passed: Test Node 55: Should have received no broadcast.
+Passed: Test Node 56: Broadcast should not be answered by any node.
+Passed: Test Node 57: Should have received no broadcast.
+Passed: Test Node 58: Broadcast should not be answered by any node.
+Passed: Test Node 59: Should have received no broadcast.
+Passed: Test Node 60: Broadcast should not be answered by any node.
+Passed: Test Node 61: Should have received no broadcast.
+Passed: Test Node 62: Broadcast should not be answered by any node.
+Passed: Test Node 63: Should have received no broadcast.
+Passed: Test Node 64: Broadcast should not be answered by any node.
+Passed: Test Node 65: Should have received no broadcast.
+Passed: Test Node 66: Broadcast should not be answered by any node.
+Passed: Test Node 67: Should have received no broadcast.
+
+End.
+OMNeT++ Discrete Event Simulation  (C) 1992-2013 Andras Varga, OpenSim Ltd.
+Version: 5.0, build: internal, edition: Academic Public License -- NOT FOR COMMERCIAL USE
+See the license for distribution terms and warranty disclaimer
+Setting up Cmdenv...
+Loading NED files from ../../../src:  295
+Loading NED files from ..:  19
+Embedded web server started on port 8000
+
+Preparing for running configuration Test4, run #0...
+Scenario: $repetition=0
+Assigned runID=Test4-0-20131216-12:31:49-15159
+Setting up network `ConnectionManagerTestNet'...
+Initializing...
+
+Running simulation...
+** Event #1   T=0   Elapsed: 0.000s (0m 00s)  0% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 7   present: 7   in FES: 7
+** Event #530   T=1   Elapsed: 0.005s (0m 00s)  2% completed
+     Speed:     ev/sec=0   simsec/sec=0   ev/simsec=0
+     Messages:  created: 529   present: 0   in FES: 0
+
+<!> No more events -- simulation ended at event #530, t=1.
+
+
+Calling finish() at end of Run #0...
+Passed: Test Node 0: Broadcast should be answered by at least one node.
+Passed: Test Node 1: Should have received at least one broadcast.
+Passed: Test Node 2: Should have received at least one broadcast.
+Passed: Test Node 3: Should have received at least one broadcast.
+Passed: Test Node 4: Should have received at least one broadcast.
+Passed: Test Node 5: Should have received at least one broadcast.
+Passed: Test Node 6: Should have received at least one broadcast.
+Passed: Test Node 7: Should have received at least one broadcast.
+Passed: Test Node 8: Should have received at least one broadcast.
+Passed: Test Node 9: Should have received at least one broadcast.
+Passed: Test Node 10: Should have received at least one broadcast.
+Passed: Test Node 11: Should have received at least one broadcast.
+Passed: Test Node 12: Should have received at least one broadcast.
+Passed: Test Node 13: Should have received at least one broadcast.
+Passed: Test Node 14: Should have received at least one broadcast.
+Passed: Test Node 15: Should have received at least one broadcast.
+Passed: Test Node 16: Should have received at least one broadcast.
+Passed: Test Node 17: Should have received at least one broadcast.
+Passed: Test Node 18: Should have received at least one broadcast.
+Passed: Test Node 19: Should have received at least one broadcast.
+Passed: Test Node 20: Should have received at least one broadcast.
+Passed: Test Node 21: Should have received at least one broadcast.
+Passed: Test Node 22: Should have received at least one broadcast.
+Passed: Test Node 23: Should have received at least one broadcast.
+Passed: Test Node 24: Should have received at least one broadcast.
+Passed: Test Node 25: Should have received at least one broadcast.
+Passed: Test Node 26: Should have received at least one broadcast.
+Passed: Test Node 27: Should have received at least one broadcast.
+Passed: Test Node 28: Should have received at least one broadcast.
+Passed: Test Node 29: Should have received at least one broadcast.
+Passed: Test Node 30: Should have received at least one broadcast.
+Passed: Test Node 31: Should have received at least one broadcast.
+Passed: Test Node 32: Should have received at least one broadcast.
+Passed: Test Node 33: Should have received no broadcast.
+Passed: Test Node 34: Should have received no broadcast.
+Passed: Test Node 35: Should have received no broadcast.
+Passed: Test Node 36: Should have received no broadcast.
+Passed: Test Node 37: Should have received no broadcast.
+Passed: Test Node 38: Should have received no broadcast.
+Passed: Test Node 39: Should have received no broadcast.
+Passed: Test Node 40: Should have received no broadcast.
+Passed: Test Node 41: Should have received no broadcast.
+Passed: Test Node 42: Should have received no broadcast.
+Passed: Test Node 43: Should have received no broadcast.
+Passed: Test Node 44: Should have received no broadcast.
+Passed: Test Node 45: Should have received no broadcast.
+Passed: Test Node 46: Should have received no broadcast.
+Passed: Test Node 47: Should have received no broadcast.
+Passed: Test Node 48: Should have received no broadcast.
+Passed: Test Node 49: Should have received no broadcast.
+Passed: Test Node 50: Should have received no broadcast.
+Passed: Test Node 51: Should have received no broadcast.
+Passed: Test Node 52: Should have received no broadcast.
+Passed: Test Node 53: Should have received no broadcast.
+Passed: Test Node 54: Should have received no broadcast.
+Passed: Test Node 55: Should have received no broadcast.
+Passed: Test Node 56: Broadcast should be answered by at least one node.
+Passed: Test Node 57: Should have received at least one broadcast.
+Passed: Test Node 58: Broadcast should be answered by at least one node.
+Passed: Test Node 59: Should have received at least one broadcast.
+Passed: Test Node 60: Broadcast should be answered by at least one node.
+Passed: Test Node 61: Should have received at least one broadcast.
+Passed: Test Node 62: Broadcast should be answered by at least one node.
+Passed: Test Node 63: Should have received at least one broadcast.
+Passed: Test Node 64: Broadcast should be answered by at least one node.
+Passed: Test Node 65: Should have received at least one broadcast.
+Passed: Test Node 66: Broadcast should be answered by at least one node.
+Passed: Test Node 67: Should have received at least one broadcast.
+
+End.

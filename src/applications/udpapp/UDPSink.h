@@ -22,14 +22,14 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 
 /**
  * Consumes and prints packets received from the UDP module. See NED for more info.
  */
-class INET_API UDPSink : public AppBase
+class INET_API UDPSink : public ApplicationBase
 {
   protected:
     UDPSocket socket;
@@ -45,10 +45,9 @@ class INET_API UDPSink : public AppBase
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();
 
-    //AppBase:
-    virtual bool startApp(IDoneCallback *doneCallback);
-    virtual bool stopApp(IDoneCallback *doneCallback);
-    virtual bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 };
 
 #endif

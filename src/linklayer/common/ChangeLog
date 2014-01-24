@@ -1,0 +1,4 @@
+2014-01-22  Levente Meszaros
+
+	Moved classes shared by implementations from contract to common.
+	Added MACProtocolBase.

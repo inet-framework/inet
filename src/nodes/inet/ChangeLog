@@ -1,3 +1,8 @@
+2014-01-22  Levente Meszaros
+
+	Renamed batteryType parameter to powerSourceType in NodeBase.
+	Renamed battery submodule to powerSource in NodeBase.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-05  Zoltan Bojthe

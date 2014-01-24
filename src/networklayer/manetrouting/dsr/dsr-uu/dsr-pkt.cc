@@ -18,7 +18,7 @@
 #endif
 #else
 #include "dsr-uu-omnetpp.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #endif
 
 #include "debug_dsr.h"

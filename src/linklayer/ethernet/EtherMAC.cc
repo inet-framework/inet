@@ -23,7 +23,7 @@
 
 #include "EtherFrame_m.h"
 #include "Ethernet.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "IPassiveQueue.h"
 #include "InterfaceEntry.h"
 

@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 #include "INetfilter.h"
-
+#include "INetworkProtocol.h"
 #include "QueueBase.h"
 #include "IPv6RoutingTable.h"
 #include "ICMPv6.h"
@@ -38,7 +38,7 @@ class ICMPv6Message;
 /**
  * IPv6 implementation.
  */
-class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter
+class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, public INetworkProtocol
 {
   public:
     /**

@@ -28,7 +28,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "IPv6ControlInfo.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "IPv4RoutingTableAccess.h"
 #include "InterfaceTableAccess.h"
 #include "IARPCache.h"

@@ -120,6 +120,8 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
         for (int i = 0; i < (int)idToInterface.size(); i++) {
             InterfaceEntry *ie = idToInterface[i];
             if (ie) {
+                if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
+                    return ie;
                 switch (addrType) {
 #ifdef WITH_IPv4
                     case Address::IPv4:
@@ -140,9 +142,13 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
                             return ie;
                         break;
 
-                    case Address::MODULEPATH:
                     case Address::MODULEID:
-                        if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
+                        if (ie->getModuleIdAddress() == address.toModuleId())
+                            return ie;
+                        break;
+
+                    case Address::MODULEPATH:
+                        if (ie->getModulePathAddress() == address.toModulePath())
                             return ie;
                         break;
 

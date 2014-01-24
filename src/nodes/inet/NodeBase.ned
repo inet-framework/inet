@@ -17,15 +17,15 @@
 
 package inet.nodes.inet;
 
-import inet.battery.IBattery;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.loopback.LoopbackInterface;
-import inet.mobility.IMobility;
+import inet.mobility.contract.IMobility;
+import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.contract.IRoutingTable;
+import inet.power.contract.IPowerSource;
 import inet.status.NodeStatus;
 import inet.util.PcapRecorder;
 
@@ -54,7 +54,7 @@ module NodeBase
         string routingTableType = default("IPv4RoutingTable");
         bool IPForward = default(true);               // TODO should we remove these parameters from the routingTable
         bool forwardMulticast = default(false);
-        string batteryType = default("");
+        string powerSourceType = default("");
         routingTable.IPForward = IPForward;
         routingTable.forwardMulticast = forwardMulticast; //      and use the parameters of the node in the C++ code?
     gates:
@@ -66,7 +66,7 @@ module NodeBase
             @display("p=50,50");
         }
 
-        battery: <batteryType> like IBattery if batteryType != "" {
+        powerSource: <powerSourceType> like IPowerSource if powerSourceType != "" {
             parameters:
                 @display("p=53,77;i=block/plug;is=s");
         }
@@ -84,7 +84,7 @@ module NodeBase
         }
 
 		// routing table
-        routingTable: <routingTableType> like IRoutingTable {
+        routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
                 @display("p=53,225;is=s");
         }

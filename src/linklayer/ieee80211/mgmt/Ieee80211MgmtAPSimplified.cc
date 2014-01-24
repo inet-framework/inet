@@ -17,7 +17,7 @@
 
 
 #include "Ieee80211MgmtAPSimplified.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame_m.h"

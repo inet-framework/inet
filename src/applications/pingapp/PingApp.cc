@@ -107,7 +107,8 @@ void PingApp::handleMessage(cMessage *msg)
     if (msg == timer)
     {
         sendPingRequest();
-        scheduleNextPingRequest(simTime());
+        if (isEnabled())
+            scheduleNextPingRequest(simTime());
     }
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));
@@ -223,7 +224,7 @@ void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& 
     controlInfo->setDestinationAddress(destAddr);
     controlInfo->setHopLimit(hopLimit);
     // TODO: remove
-    controlInfo->setProtocol(1); // IP_PROT_ICMP);
+    controlInfo->setTransportProtocol(1); // IP_PROT_ICMP);
     msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
     send(msg, "pingOut");
 }

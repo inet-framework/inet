@@ -21,7 +21,7 @@
 #include "EtherAppSrv.h"
 
 #include "EtherApp_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"

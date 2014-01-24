@@ -15,17 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
+#include "IRadioChannel.h"
 #include "Ieee80211MgmtSTA.h"
-
-#include "Ieee802Ctrl_m.h"
+#include "IRadioChannel.h"
 #include "InterfaceEntry.h"
 #include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
+#include "Ieee802Ctrl.h"
 #include "NotifierConsts.h"
 #include "PhyControlInfo_m.h"
-#include "RadioState.h"
-#include "ChannelAccess.h"
 #include "Radio80211aControlInfo_m.h"
 #include "InterfaceTableAccess.h"
 #include "opp_utils.h"
@@ -114,9 +112,8 @@ void Ieee80211MgmtSTA::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        // determine numChannels (needed when we're told to scan "all" channels)
-        IChannelControl *cc = ChannelAccess::getChannelControl();
-        numChannels = cc->getNumChannels();
+        IRadioChannel *radioChannel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
+        numChannels = radioChannel->getNumChannels();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
@@ -359,22 +356,28 @@ void Ieee80211MgmtSTA::startAssociation(APInfo *ap, simtime_t timeout)
     scheduleAt(simTime()+timeout, assocTimeoutMsg);
 }
 
+void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+{
+    Enter_Method_Silent();
+    // Note that we are only subscribed during scanning!
+    if (signalID == IRadio::radioReceptionStateChangedSignal)
+    {
+        IRadio::RadioReceptionState newRadioReceptionState = (IRadio::RadioReceptionState)value;
+        if (newRadioReceptionState != IRadio::RADIO_RECEPTION_STATE_UNDEFINED && newRadioReceptionState != IRadio::RADIO_RECEPTION_STATE_IDLE)
+        {
+            EV << "busy radio channel detected during scanning\n";
+            scanning.busyChannelDetected = true;
+        }
+    }
+}
+
 void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
     printNotificationBanner(signalID, obj);
 
     // Note that we are only subscribed during scanning!
-    if (signalID==NF_RADIOSTATE_CHANGED)
-    {
-        const RadioState::State radioState = check_and_cast<const RadioState *>(obj)->getState();
-        if (radioState==RadioState::RECV)
-        {
-            EV << "busy radio channel detected during scanning\n";
-            scanning.busyChannelDetected = true;
-        }
-    }
-    else if (signalID==NF_LINK_FULL_PROMISCUOUS)
+    if (signalID==NF_LINK_FULL_PROMISCUOUS)
     {
         Ieee80211DataOrMgmtFrame *frame = dynamic_cast<Ieee80211DataOrMgmtFrame*>(obj);
         if (!frame || frame->getControlInfo()==NULL)
@@ -431,7 +434,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     if (scanning.activeScan)
-        host->subscribe(NF_RADIOSTATE_CHANGED, this);
+        host->subscribe(IRadio::radioReceptionStateChangedSignal, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -444,7 +447,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
-            host->unsubscribe(NF_RADIOSTATE_CHANGED, this);
+            host->unsubscribe(IRadio::radioReceptionStateChangedSignal, this);
         isScanning = false;
         return true; // we're done
     }

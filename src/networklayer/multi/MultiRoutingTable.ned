@@ -17,7 +17,7 @@
 
 package inet.networklayer.multi;
 
-import inet.networklayer.contract.IRoutingTable;
+import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.generic.GenericRoutingTable;
 import inet.networklayer.ipv4.IPv4RoutingTable;
 import inet.networklayer.ipv6.IPv6RoutingTable;

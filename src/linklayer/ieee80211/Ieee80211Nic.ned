@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.linklayer.ieee80211;
 
 import inet.base.IHook;
@@ -23,8 +22,7 @@ import inet.linklayer.IWirelessNic;
 import inet.linklayer.ieee80211.mac.Ieee80211Mac;
 import inet.linklayer.ieee80211.mgmt.IIeee80211Mgmt;
 import inet.linklayer.ieee80211.mgmt.Ieee80211AgentSTA;
-import inet.linklayer.ieee80211.radio.Ieee80211Radio;
-
+import inet.physicallayer.radio.contract.IRadio;
 
 //
 // This NIC implements an 802.11 network interface card.
@@ -38,16 +36,19 @@ module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
+        string radioType = default("SimplifiedIeee80211Radio");
         string opMode @enum("b","g","a","p") = default("g");
         double bitrate @unit("bps") = default(opMode == "b" ? 11Mbps : opMode == "p" ? 27Mbps : 54Mbps);
         int numOutputHooks = default(0);
         int numInputHooks = default(0);
         bool _agentNeeded = (mgmtType == "Ieee80211MgmtSTA");   // internal par. do not use, shows if optional agent module is needed
+        **.opMode = opMode;
+        **.bitrate = bitrate;
         @display("i=block/ifcard;bgb=336,357");
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers
-        input radioIn @labels(AirFrame); // to receive AirFrames
+        input radioIn @labels(IRadioFrame); // to receive radio frames
     submodules:
         outputHook[numOutputHooks]: <default("Nop")> like IHook if numOutputHooks>0 {
             @display("p=218,70");
@@ -66,15 +67,11 @@ module Ieee80211Nic like IWirelessNic
         }
         mac: Ieee80211Mac {
             parameters:
-                opMode = opMode;
-                bitrate = bitrate;
                 queueModule = "mgmt";
                 @display("p=157,217");
         }
-        radio: Ieee80211Radio {
+        radio: <radioType> like IRadio {
             parameters:
-                phyOpMode = opMode;
-                bitrate = bitrate;
                 @display("p=157,302");
         }
     connections:

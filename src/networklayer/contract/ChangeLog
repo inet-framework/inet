@@ -1,3 +1,9 @@
+2014-01-22  Levente Meszaros
+
+	Added a new purely virtual contract that defines the interface of network protocols.
+	Moved classes shared by implementations from contract to common.
+	Moved the IPv4 and IPv6 contracts into separate directories.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Tamas Borbely

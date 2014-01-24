@@ -33,7 +33,9 @@ void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
             // sending down commands
             for (int i = 0; i < 3; i++) {
                 cMessage * duplicate = message->dup();
-                duplicate->setControlInfo(message->getControlInfo()->dup());
+                cObject * controlInfo = message->getControlInfo();
+                if (controlInfo)
+                    duplicate->setControlInfo(controlInfo->dup());
                 send(duplicate, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + i);
             }
             delete message;
