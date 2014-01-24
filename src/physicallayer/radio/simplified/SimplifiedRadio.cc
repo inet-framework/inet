@@ -978,6 +978,9 @@ void SimplifiedRadio::disconnectReceiver()
     // clear snr info
     snrInfo.ptr = NULL;
     snrInfo.sList.clear();
+
+    // reset the noiseLevel
+    noiseLevel = thermalNoise;
 }
 
 void SimplifiedRadio::connectReceiver()
