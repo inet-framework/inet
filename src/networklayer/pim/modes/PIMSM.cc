@@ -49,10 +49,21 @@ PIMSM::DownstreamInterface *PIMSM::PIMSMMulticastRoute::findDownstreamInterfaceB
     for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
     {
         DownstreamInterface *downstream = downstreamInterfaces[i];
-        if (downstream && downstream->getInterfaceId() == interfaceId)
+        if (downstream->getInterfaceId() == interfaceId)
             return downstream;
     }
     return NULL;
+}
+
+int PIMSM::PIMSMMulticastRoute::findDownstreamInterface(InterfaceEntry *ie)
+{
+    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
+    {
+        DownstreamInterface *downstream = downstreamInterfaces[i];
+        if (downstream->ie == ie)
+            return i;
+    }
+    return -1;
 }
 
 bool PIMSM::PIMSMMulticastRoute::isOilistNull()
@@ -350,52 +361,37 @@ void PIMSM::processExpiryTimer(cMessage *timer)
 
     Interface *interface = static_cast<Interface*>(timer->getContextPointer());
     PIMSMMulticastRoute *route = interface->owner;
-    int msgType = route->origin.isUnspecified() ? G : SG;
-    IPv4Address multGroup = route->group;
-    IPv4Address JPaddr = msgType == G ? route->rpAddr : route->origin;
-
-    UpstreamInterface *rpfInterface = route->upstreamInterface;
-    PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(rpfInterface->getInterfaceId());
+    int type = route->origin.isUnspecified() ? G : SG;
 
     if (interface != route->upstreamInterface)
     {
-        IPv4MulticastRoute *ipv4Route = findIPv4Route(route->origin, route->group);
-        for(unsigned i=0; i<route->downstreamInterfaces.size();i++)
-        {
-            DownstreamInterface *downstream = route->downstreamInterfaces[i];
-            if (downstream == interface)
-            {
-                ipv4Route->removeOutInterface(i);
-                route->removeDownstreamInterface(i); // FIXME missing i-- or break
-            }
-        }
+        int i = route->findDownstreamInterface(interface->ie);
+        if (i >= 0 && route->downstreamInterfaces[i] == interface)
+            route->removeDownstreamInterface(i);
 
-        //if (route->downstreamInterfaces.size() == 0)
         if (route->isOilistNull())
         {
             route->clearFlag(PIMSMMulticastRoute::C);
             route->setFlags(PIMSMMulticastRoute::P);
-            if (msgType == G && !IamRP(this->getRPAddress()))
-                sendPIMPrune(multGroup, this->getRPAddress(), RPFneighbor->getAddress(), G);
-            else if (msgType == SG)
-                sendPIMPrune(multGroup, JPaddr ,RPFneighbor->getAddress(), SG);
+            PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
+            if (type == G && !IamRP(route->rpAddr))
+                sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
+            else if (type == SG)
+                sendPIMPrune(route->group, route->origin, RPFneighbor->getAddress(), SG);
 
             cancelAndDeleteTimer(route->joinTimer);
         }
     }
     if (route->upstreamInterface->expiryTimer && interface == route->upstreamInterface)
     {
-        IPv4MulticastRoute *ipv4Route = findIPv4Route(route->origin, route->group);
-        for(unsigned i=0; i<route->downstreamInterfaces.size();i++)
+        for(unsigned i=0; i<route->downstreamInterfaces.size();)
         {
-            DownstreamInterface *downstream = route->downstreamInterfaces[i];
-            if (downstream->expiryTimer)
-            {
-                ipv4Route->removeOutInterface(i);
-                route->removeDownstreamInterface(i); // FIXME missing i--
-            }
+            if (route->downstreamInterfaces[i]->expiryTimer)
+                route->removeDownstreamInterface(i);
+            else
+                i++;
         }
-        if (IamRP(this->getRPAddress()) && msgType == G)
+        if (IamRP(this->getRPAddress()) && type == G)
         {
             EV << "ET for (*,G) route on RP expires - go to stopped" << endl;
             cancelAndDeleteTimer(route->upstreamInterface->expiryTimer);
@@ -556,57 +552,18 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
     EV <<  "pimSM::processPrunePacket: ";
 
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-    int outIntToDel = ctrl->getInterfaceId();
+    InterfaceEntry *outIntToDel = ift->getInterfaceById(ctrl->getInterfaceId());
 
     if (!encodedAddr.R && !encodedAddr.W && encodedAddr.S)                                              // (S,G) Prune
     {
         EV << "(S,G) Prune processing" << endl;
 
         PIMSMMulticastRoute *routeSG = getRouteFor(multGroup,encodedAddr.IPaddress);
-
-// NOTES from btomi:
-//
-// The following loop was like this before:
-//
-//        PIMSMMulticastRoute::InterfaceVector outIntSG = routeSG->getOutInt();
-//
-//        for (unsigned k = 0; k < outIntSG.size(); k++)
-//        {
-//            if (outIntSG[k].intId == outIntToDel)
-//            {
-//                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-//                if (outIntSG[k].expiryTimer)
-//                {
-//                    cancelEvent(outIntSG[k].expiryTimer);
-//                    delete (outIntSG[k].expiryTimer);
-//                }
-//                outIntSG.erase(outIntSG.begin() + k);
-//
-//                InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->getRPAddress());
-//                routeSG->addOutIntFull(newInIntG,newInIntG->getInterfaceId(),
-//                                        Pruned,
-//                                        PIMMulticastRoute::Sparsemode,
-//                                        NULL,
-//                                        NULL,
-//                                        NoInfo,
-//                                        Join,false); // create "virtual" outgoing interface to RP
-//                //routeSG->setRegisterTunnel(false); //we need to set register state to output interface, but output interface has to be null for now
-//                break;
-//            }
-//        }
-//        routeSG->setOutInt(outIntSG);
-//
-// The route->addOutIntFull(...) had no effect, because the list of outgoing interfaces is overwritten by the routeSG->setOutInt(...) statement after the loop.
-// To keep the original behaviour (and fingerprints), I temporarily commented out the routeSG->addOutIntFull(...) call below.
-        IPv4MulticastRoute *ipv4Route = findIPv4Route(routeSG->origin, routeSG->group);
-        for (unsigned k = 0; k < routeSG->downstreamInterfaces.size(); k++)
+        int i = routeSG->findDownstreamInterface(outIntToDel);
+        if (i >= 0)
         {
-            DownstreamInterface *outIntSG = routeSG->downstreamInterfaces[k];
-            if (outIntSG->getInterfaceId() == outIntToDel)
-            {
-                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                ipv4Route->removeOutInterface(k);
-                routeSG->removeDownstreamInterface(k);
+            EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+            routeSG->removeDownstreamInterface(i);
 //                InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->getRPAddress());
 //                routeSG->addOutIntFull(newInIntG,newInIntG->getInterfaceId(),
 //                                        Pruned,
@@ -615,9 +572,7 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
 //                                        NULL,
 //                                        NoInfo,
 //                                        Join,false);      // create "virtual" outgoing interface to RP
-                //routeSG->setRegisterTunnel(false);                   //we need to set register state to output interface, but output interface has to be null for now
-                break;
-            }
+            //routeSG->setRegisterTunnel(false);                   //we need to set register state to output interface, but output interface has to be null for now
         }
 
         if (routeSG->isOilistNull())
@@ -645,17 +600,11 @@ void PIMSM::processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, Encoded
             PIMSMMulticastRoute *route = routes[j];
             IPv4Address multOrigin = route->origin;
 
-            IPv4MulticastRoute *ipv4Route = findIPv4Route(route->origin, route->group);
-            for (unsigned k = 0; k < route->downstreamInterfaces.size(); k++)
+            int k = route->findDownstreamInterface(outIntToDel);
+            if (k >= 0)
             {
-                DownstreamInterface *downstream = route->downstreamInterfaces[k];
-                if (downstream->getInterfaceId() == outIntToDel)
-                {
-                    EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                    ipv4Route->removeOutInterface(k);
-                    route->removeDownstreamInterface(k);
-                    break;
-                }
+                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+                route->removeDownstreamInterface(k);
             }
 
             // there is no receiver of multicast, prune the router from the multicast tree
@@ -1408,27 +1357,22 @@ void PIMSM::removeMulticastReceiver(PIMInterface *pimInt, IPv4Address multicastG
     for (unsigned int j = 0; j < routes.size(); j++)
     {
         PIMSMMulticastRoute *route = routes[j];
-        UpstreamInterface *rpfInterface = route->upstreamInterface;
-        PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(rpfInterface->getInterfaceId());
-        unsigned int k;
 
         // is interface in list of outgoing interfaces?
-        IPv4MulticastRoute *ipv4Route = findIPv4Route(route->origin, route->group);
-        for (k = 0; k < route->downstreamInterfaces.size(); k++)
+        int k = route->findDownstreamInterface(pimInt->getInterfacePtr());
+        if (k >= 0)
         {
-            DownstreamInterface *downstream = route->downstreamInterfaces[k];
-            if (downstream->getInterfaceId() == pimInt->getInterfaceId())
-            {
-                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                ipv4Route->removeOutInterface(k);
-                route->removeDownstreamInterface(k); // FIXME missing k-- or break
-            }
+            EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+            route->removeDownstreamInterface(k); // FIXME missing k-- or break
         }
+
         route->clearFlag(PIMSMMulticastRoute::C);
+
         // there is no receiver of multicast, prune the router from the multicast tree
         if (route->isOilistNull())
         {
             route->setFlags(PIMSMMulticastRoute::P);
+            PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
             sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
             cancelAndDeleteTimer(route->joinTimer);
         }
@@ -1811,9 +1755,14 @@ void PIMSM::PIMSMMulticastRoute::addDownstreamInterface(DownstreamInterface *out
 
 void PIMSM::PIMSMMulticastRoute::removeDownstreamInterface(unsigned int i)
 {
-    DownstreamInterface *outInterface = downstreamInterfaces.at(i);
-    delete outInterface;
+    // remove corresponding out interface from the IPv4 route,
+    // because it refers to the downstream interface to be deleted
+    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(origin, group);
+    ipv4Route->removeOutInterface(i);
+
+    DownstreamInterface *outInterface = downstreamInterfaces[i];
     downstreamInterfaces.erase(downstreamInterfaces.begin()+i);
+    delete outInterface;
 }
 
 void PIMSM::Interface::startExpiryTimer(double holdTime)

@@ -170,6 +170,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
 
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
+                int findDownstreamInterface(InterfaceEntry *ie);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
 
                 void startKeepAliveTimer();
