@@ -34,7 +34,7 @@ enum IGMPType
 
 packet IGMPMessage
 {
-    int type enum(IGMPType);
+    int type @enum(IGMPType);
     int maxRespTime;
     IPv4Address groupAddress;
 }

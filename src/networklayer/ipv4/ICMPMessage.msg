@@ -80,6 +80,6 @@ enum ICMPDestinationUnreachableCodes
 // TODO: add originator id and sequence number and create an ICMPControlInfo
 packet ICMPMessage
 {
-    int type enum(ICMPType);
+    int type @enum(ICMPType);
     int code;
 }

@@ -154,7 +154,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 {
     bodyLength = 6; // add 2+len bytes for challenge text if present
     unsigned short sequenceNumber;
-    int statusCode enum(Ieee80211StatusCode);
+    int statusCode @enum(Ieee80211StatusCode);
     bool isLast; // not part of the standard; see above
 }
 
@@ -164,7 +164,7 @@ class Ieee80211AuthenticationFrameBody extends Ieee80211FrameBody
 class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 {
     bodyLength = 2;
-    int reasonCode enum(Ieee80211ReasonCode);
+    int reasonCode @enum(Ieee80211ReasonCode);
 }
 
 //
@@ -173,7 +173,7 @@ class Ieee80211DeauthenticationFrameBody extends Ieee80211FrameBody
 class Ieee80211DisassociationFrameBody extends Ieee80211FrameBody
 {
     bodyLength = 2;
-    int reasonCode enum(Ieee80211ReasonCode);
+    int reasonCode @enum(Ieee80211ReasonCode);
 }
 
 //
@@ -211,7 +211,7 @@ class Ieee80211ReassociationRequestFrameBody extends Ieee80211AssociationRequest
 class Ieee80211AssociationResponseFrameBody extends Ieee80211FrameBody
 {
     bodyLength = 26; // assuming a 8-character SSID and 4 supported datarates
-    int statusCode enum(Ieee80211StatusCode);
+    int statusCode @enum(Ieee80211StatusCode);
     short aid;
     Ieee80211SupportedRatesElement supportedRates;
 }
@@ -249,7 +249,7 @@ class Ieee80211ActionFrameBody extends Ieee80211FrameBody
 
 class Ieee80211ActionHWMPFrameBody extends Ieee80211ActionFrameBody
 {
-     int id enum(Ieee80211HWMPCode);
+     int id @enum(Ieee80211HWMPCode);
      //unsigned char length;
      unsigned char flags = 0;
      unsigned char hopsCount = 0;

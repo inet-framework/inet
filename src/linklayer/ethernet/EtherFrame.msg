@@ -88,7 +88,7 @@ packet EtherFrame extends EtherTraffic
 //
 packet EthernetIIFrame extends EtherFrame
 {
-    int etherType enum (EtherType);
+    int etherType @enum(EtherType);
 }
 
 

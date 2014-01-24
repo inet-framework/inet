@@ -101,7 +101,7 @@ enum ICMPv6_PARAMETER_PROB
 //
 packet ICMPv6Message
 {
-    int type enum(ICMPv6Type);
+    int type @enum(ICMPv6Type);
         //int code; //TODO: this should be specific to different ICMP types.
 }
 
@@ -111,7 +111,7 @@ packet ICMPv6Message
 //
 packet ICMPv6DestUnreachableMsg extends ICMPv6Message
 {
-    int code enum(ICMPv6DEST_UN);
+    int code @enum(ICMPv6DEST_UN);
 }
 
 packet ICMPv6PacketTooBigMsg extends ICMPv6Message
@@ -122,12 +122,12 @@ packet ICMPv6PacketTooBigMsg extends ICMPv6Message
 
 packet ICMPv6TimeExceededMsg extends ICMPv6Message
 {
-    int code enum(ICMPv6_TIME_EX);
+    int code @enum(ICMPv6_TIME_EX);
 }
 
 packet ICMPv6ParamProblemMsg extends ICMPv6Message
 {
-    int code enum(ICMPv6_PARAMETER_PROB);
+    int code @enum(ICMPv6_PARAMETER_PROB);
 }
 
 //
