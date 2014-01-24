@@ -66,19 +66,6 @@ bool PIMSM::PIMSMMulticastRoute::isOilistNull()
     return true;
 }
 
-std::string PIMSM::PIMSMMulticastRoute::flagsToString(int flags)
-{
-    std::string str;
-    if (flags & D) str += "D";
-    if (flags & S) str += "S";
-    if (flags & C) str += "C";
-    if (flags & P) str += "P";
-    if (flags & A) str += "A";
-    if (flags & F) str += "F";
-    if (flags & T) str += "T";
-    return str;
-}
-
 PIMSM::~PIMSM()
 {
     for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
@@ -1714,40 +1701,6 @@ std::vector<PIMSM::PIMSMMulticastRoute*> PIMSM::getRouteFor(IPv4Address group)
             result.push_back(route);
     }
     return result;
-}
-
-// Format is same as format on Cisco routers.
-std::string PIMSM::PIMSMMulticastRoute::info() const
-{
-    std::stringstream out;
-    out << "(" << (origin.isUnspecified() ? "*" : origin.str()) << ", " << group
-        << "), ";
-    if (origin.isUnspecified() && !rpAddr.isUnspecified())
-        out << "RP is " << rpAddr << ", ";
-    out << "flags: " << flagsToString(flags) << endl;
-
-    out << "Incoming interface: " << (upstreamInterface ? upstreamInterface->ie->getName() : "Null") << ", "
-        << "RPF neighbor " << (upstreamInterface->nextHop.isUnspecified() ? "0.0.0.0" : upstreamInterface->nextHop.str()) << endl;
-
-    out << "Outgoing interface list:" << endl;
-    for (unsigned int k = 0; k < downstreamInterfaces.size(); k++)
-    {
-        DownstreamInterface *downstream = downstreamInterfaces[k];
-        if (downstream->shRegTun)
-        {
-            out << downstream->ie->getName() << ", "
-                << (downstream->forwarding == Forward ? "Forward/" : "Pruned/")
-                << (downstream->mode == PIMInterface::DenseMode ? "Dense" : "Sparse")
-                << endl;
-        }
-        else
-            out << "Null" << endl;
-    }
-
-    if (downstreamInterfaces.size() == 0)
-        out << "Null" << endl;
-
-    return out.str();
 }
 
 void PIMSM::addGRoute(PIMSMMulticastRoute *route)

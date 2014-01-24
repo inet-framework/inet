@@ -169,7 +169,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
             public:
                 PIMSMMulticastRoute(PIMSM *owner, IPv4Address origin, IPv4Address group);
                 ~PIMSMMulticastRoute();
-                virtual std::string info() const;
 
                 void clearDownstreamInterfaces();
                 void addDownstreamInterface(DownstreamInterface *outInterface);
@@ -178,7 +177,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
                 void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
-                static std::string flagsToString(int flags);
 
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
