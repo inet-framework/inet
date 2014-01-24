@@ -284,7 +284,8 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
     sctpmsg->setChecksumOk(true);
     sctpEV3<<"SendToIP: localPort="<<localPort<<" remotePort="<<remotePort<<" dest="<<dest<<"\n";
     const SCTPChunk* chunk = (const SCTPChunk*)(sctpmsg->peekFirstChunk());
-    if (chunk->getChunkType() == ABORT) {
+    uint8 chunkType = chunk->getChunkType();
+    if (chunkType == ABORT) {
         const SCTPAbortChunk* abortChunk = check_and_cast<const SCTPAbortChunk *>(chunk);
         if (abortChunk->getT_Bit() == 1) {
             sctpmsg->setTag(peerVTag);
@@ -319,12 +320,12 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             sctpMain->send(sctpmsg, "to_ip");
         }
 
-        if (chunk->getChunkType() == HEARTBEAT) {
+        if (chunkType == HEARTBEAT) {
             SCTPPathVariables* path = getPath(dest);
             path->numberOfHeartbeatsSent++;
             path->vectorPathHb->record(path->numberOfHeartbeatsSent);
         }
-        else if (chunk->getChunkType() == HEARTBEAT_ACK) {
+        else if (chunkType == HEARTBEAT_ACK) {
             SCTPPathVariables* path = getPath(dest);
             path->numberOfHeartbeatAcksSent++;
             path->vectorPathHbAck->record(path->numberOfHeartbeatAcksSent);

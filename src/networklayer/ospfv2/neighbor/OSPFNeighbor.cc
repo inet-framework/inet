@@ -231,16 +231,17 @@ void OSPF::Neighbor::sendDatabaseDescriptionPacket(bool init)
 
     OSPF::MessageHandler* messageHandler = parentInterface->getArea()->getRouter()->getMessageHandler();
     int ttl = (parentInterface->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+
+    if (lastTransmittedDDPacket != NULL)
+        delete lastTransmittedDDPacket;
+    lastTransmittedDDPacket = ddPacket->dup();
+
     if (parentInterface->getType() == OSPF::Interface::POINTTOPOINT) {
         messageHandler->sendPacket(ddPacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, parentInterface->getIfIndex(), ttl);
     } else {
         messageHandler->sendPacket(ddPacket, neighborIPAddress, parentInterface->getIfIndex(), ttl);
     }
 
-    if (lastTransmittedDDPacket != NULL) {
-        delete lastTransmittedDDPacket;
-    }
-    lastTransmittedDDPacket = new OSPFDatabaseDescriptionPacket(*ddPacket);
 }
 
 bool OSPF::Neighbor::retransmitDatabaseDescriptionPacket()

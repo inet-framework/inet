@@ -57,10 +57,10 @@ void OrdinalBasedDuplicator::handleMessage(cMessage *msg)
         {
             EV << "DuplicatesGenerator: Duplicating packet number " << numPackets << " " << msg << endl;
             cMessage *dupmsg = msg->dup();
-            send(dupmsg, "out");
-            numDuplicated++;
             emit(duplPkSignal, dupmsg);
             emit(sentPkSignal, dupmsg);
+            send(dupmsg, "out");
+            numDuplicated++;
             duplicatesVector.erase(duplicatesVector.begin());
             if (duplicatesVector.size()==0)
             {

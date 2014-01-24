@@ -211,9 +211,9 @@ void PingTestApp::sendPing()
     // store the sending time in a circular buffer so we can compute RTT when the packet returns
     sendTimeHistory[sendSeqNo % PINGTEST_HISTORY_SIZE] = simTime();
 
-    sendToICMP(msg, destAddr, srcAddr, hopLimit);
     emit(pingTxSeqSignal, sendSeqNo);
     sendSeqNo++;
+    sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
 void PingTestApp::scheduleNextPing(cMessage *timer)
