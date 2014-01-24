@@ -79,9 +79,9 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
             configureNode();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
-        /*nothing to do*/;
+    { /*nothing to do*/; }
     else if (dynamic_cast<NodeCrashOperation *>(operation))
-        /*nothing to do*/;
+    { /*nothing to do*/; }
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;

@@ -62,7 +62,7 @@ void BGPSession::setTimers(simtime_t* delayTab)
     {
         _StartEventTime = delayTab[3];
     }
-    else if (delayTab[3] != NULL)   //FIXME delaytab[3] is not a pointer, should not compare with NULL
+    else if (delayTab[3] != SIMTIME_ZERO)   //FIXME delaytab[3] is not a pointer, should not compare with NULL
     {
         _StartEventTime = delayTab[3];
         _ptrStartEvent = new cMessage("BGP Start", BGP::START_EVENT_KIND);
