@@ -426,10 +426,10 @@ std::vector<Address> GPSR::getPlanarNeighbors()
     return planarNeighbors;
 }
 
-Address GPSR::getNextPlanarNeighborCounterClockwise(Address & startNeighborAddress, double startNeighborAngle)
+Address GPSR::getNextPlanarNeighborCounterClockwise(const Address& startNeighborAddress, double startNeighborAngle)
 {
     GPSR_EV << "Finding next planar neighbor (counter clockwise): startAddress = " << startNeighborAddress << ", startAngle = " << startNeighborAngle << endl;
-    Address & bestNeighborAddress = startNeighborAddress;
+    Address bestNeighborAddress = startNeighborAddress;
     double bestNeighborAngleDifference = 2 * PI;
     std::vector<Address> neighborAddresses = getPlanarNeighbors();
     for (std::vector<Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {

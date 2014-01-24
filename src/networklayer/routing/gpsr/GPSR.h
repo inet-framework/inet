@@ -126,7 +126,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         simtime_t getNextNeighborExpiration();
         void purgeNeighbors();
         std::vector<Address> getPlanarNeighbors();
-        Address getNextPlanarNeighborCounterClockwise(Address & startNeighborAddress, double startNeighborAngle);
+        Address getNextPlanarNeighborCounterClockwise(const Address & startNeighborAddress, double startNeighborAngle);
 
         // next hop
         Address findNextHop(INetworkDatagram * datagram, const Address & destination);
