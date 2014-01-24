@@ -18,7 +18,9 @@
 
 package inet.networklayer.pim.modes;
 
-// Simple module pimSM which is connected to pimSplitter module. 
+//
+// TODO
+//
 simple PIMSM
 {
     parameters:
@@ -28,6 +30,13 @@ simple PIMSM
 
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s;
+        double joinPrunePeriod @unit(s) = default(60s); // period between Join/Prune messages (called t_periodic in the RFC)
+        double defaultOverrideInterval @unit(s) = 2.5s;
+        double defaultPropagationDelay @unit(s) = 0.5s;
+        double keepAlivePeriod @unit(s) = 210s;
+        double rpKeepAlivePeriod @unit(s) = 3 * registerSuppressionTime + registerProbeTime;
+        double registerSuppressionTime @unit(s) = 60s;
+        double registerProbeTime @unit(s) = 5s;
 
         string RP = default("");
         string sptThreshold = default("infinity");

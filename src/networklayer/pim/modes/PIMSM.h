@@ -32,15 +32,8 @@
 #include "PIMBase.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
-#define KAT2 210.0                      /**< Keep alive timer, if RPT is connect */
-#define RST 60.0                        /**< Register-stop Timer*/
-#define JT 60.0                         /**< Join Timer */
-#define REGISTER_PROBE_TIME 5.0         /**< Register Probe Time */
-#define HOLDTIME 210.0                  /**< Holdtime for Expiry Timer */
 #define HOLDTIME_HOST 180.0             /**< Holdtime for interface ET connected to host */
-#define PPT 3.0                         /**< value for Prune-Pending Timer*/
 #define MAX_TTL 255                     /**< Maximum TTL */
-#define NO_INT_TIMER -1
 #define CISCO_SPEC_SIM 0                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
 
 /**
@@ -205,9 +198,18 @@ class PIMSM : public PIMBase, protected cListener
 
         typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
 
-
+        // parameters
         IPv4Address rpAddr;
         std::string sptThreshold;
+        double joinPrunePeriod;
+        double defaultOverrideInterval;
+        double defaultPropagationDelay;
+        double keepAlivePeriod;
+        double rpKeepAlivePeriod;
+        double registerSuppressionTime;
+        double registerProbeTime;
+
+        // state
         SGStateMap routes;
 
     private:
@@ -247,6 +249,12 @@ class PIMSM : public PIMBase, protected cListener
         void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processSGJoin(PIMJoinPrune *pkt,IPv4Address multOrigin, IPv4Address multGroup);
         void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
+
+        // computed intervals
+        double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
+        double effectivePropagationDelay() { return defaultPropagationDelay; }
+        double effectiveOverrideInterval() { return defaultOverrideInterval; }
+        double joinPruneOverrideInterval() { return effectivePropagationDelay() + effectiveOverrideInterval(); }
 
         // helpers
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
