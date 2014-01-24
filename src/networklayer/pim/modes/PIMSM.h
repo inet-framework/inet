@@ -95,22 +95,17 @@ class INET_API PIMSM : public PIMBase, protected cListener
         struct DownstreamInterface : public Interface
         {
             InterfaceState          forwarding;         /**< Forward or Pruned */
-            PIMInterface::PIMMode   mode;               /**< Dense, Sparse, ... */
             AssertState             assert;             /**< Assert state. */
 
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
-            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding)
-                : Interface(owner, ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
-                  regState(RS_NO_INFO), shRegTun(true) {}
-
-            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding, RegisterState regState, bool show)
-                : Interface(owner, ie), forwarding(forwarding), mode(PIMInterface::SparseMode), assert(AS_NO_INFO),
-                  regState(regState), shRegTun(show) {}
+            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding,
+                                RegisterState regState = RS_NO_INFO, bool show = true)
+                : Interface(owner, ie), forwarding(forwarding), assert(AS_NO_INFO), regState(regState), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            virtual bool isEnabled() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
+            bool isInOlist() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
         };
 
         typedef std::vector<DownstreamInterface*> DownstreamInterfaceVector;
@@ -121,7 +116,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
             public:
                 PIMSMOutInterface(DownstreamInterface *downstream)
                     : OutInterface(downstream->ie), downstream(downstream) {}
-                virtual bool isEnabled() { return downstream->isEnabled(); }
+                virtual bool isEnabled() { return downstream->isInOlist(); }
         };
 
         enum JPMsgType
@@ -134,17 +129,13 @@ class INET_API PIMSM : public PIMBase, protected cListener
         // Holds (*,G), (S,G) or (S,G,rpt) state
         struct PIMSMMulticastRoute
         {
-                /** Route flags. Added to each route. */
                 enum Flag
                 {
                     NO_FLAG = 0,
-                    D       = 0x01,              /**< Dense */
-                    S       = 0x02,              /**< Sparse */
-                    C       = 0x04,              /**< Connected */ // XXX Are there any connected downstream receivers?
-                    P       = 0x08,              /**< Pruned */
-                    A       = 0x10,              /**< Source is directly connected */
-                    F       = 0x20,              /**< Register flag*/
-                    T       = 0x40               /**< SPT bit*/
+                    C       = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
+                    P       = 0x02,              /**< Pruned */
+                    F       = 0x04,              /**< Register flag*/
+                    T       = 0x08               /**< SPT bit*/
                 };
 
                 PIMSM *owner;

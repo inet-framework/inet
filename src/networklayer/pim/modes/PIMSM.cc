@@ -723,7 +723,7 @@ void PIMSM::processSGJoin(PIMJoinPrune *pkt, IPv4Address multOrigin, IPv4Address
             newRouteG = routePointer;
             newRouteG->rpAddr = this->getRPAddress();
             newRouteG->startKeepAliveTimer();
-            newRouteG->setFlags(PIMSMMulticastRoute::S | PIMSMMulticastRoute::P);
+            newRouteG->setFlags(PIMSMMulticastRoute::P);
             newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, newInIntG, neighborToRP->getAddress());
             addGRoute(newRouteG);
             rt->addMulticastRoute(createMulticastRoute(newRouteG));
@@ -902,7 +902,6 @@ void PIMSM::processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedA
             if (JoinIncomingInt->getInterfaceId() != newInIntG->getInterfaceId())
             {
                 newRouteG->rpAddr = this->getRPAddress();
-                newRouteG->setFlags(PIMSMMulticastRoute::S);
 
                 if (!IamRP(this->getRPAddress()))
                 {
@@ -987,7 +986,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         {
             newRouteG = routePointer;
             newRouteG->rpAddr = this->getRPAddress();
-            newRouteG->setFlags(PIMSMMulticastRoute::S | PIMSMMulticastRoute::P);                           // create and set (*,G) KAT timer, add to routing table
+            newRouteG->setFlags(PIMSMMulticastRoute::P);                                                // create and set (*,G) KAT timer, add to routing table
             newRouteG->startKeepAliveTimer();
             addGRoute(newRouteG);
             rt->addMulticastRoute(createMulticastRoute(newRouteG));
@@ -1369,7 +1368,7 @@ void PIMSM::newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr)
         PIMNeighbor *RPFnbr = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());                            // RPF neighbor
         newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, newInIntG, RPFnbr->getAddress());
         newRouteG->rpAddr = this->getRPAddress();
-        newRouteG->setFlags(PIMSMMulticastRoute::S | PIMSMMulticastRoute::P | PIMSMMulticastRoute::F);
+        newRouteG->setFlags(PIMSMMulticastRoute::P | PIMSMMulticastRoute::F);
 
         //Create (S,G) state - set flags and Register state, other is set by  PimSplitter
         newRoute->setFlags(PIMSMMulticastRoute::P | PIMSMMulticastRoute::F | PIMSMMulticastRoute::T);
@@ -1456,7 +1455,7 @@ void PIMSM::newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multica
         newRouteG = routePointer;
         // set source, mult. group, etc...
         newRouteG->rpAddr = this->getRPAddress();
-        newRouteG->setFlags(PIMSMMulticastRoute::S | PIMSMMulticastRoute::C);
+        newRouteG->setFlags(PIMSMMulticastRoute::C);
 
         // set incoming interface
         newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, newInIntG, neighborToRP->getAddress());
