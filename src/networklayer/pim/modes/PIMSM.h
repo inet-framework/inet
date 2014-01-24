@@ -41,7 +41,7 @@
 #define PPT 3.0                         /**< value for Prune-Pending Timer*/
 #define MAX_TTL 255                     /**< Maximum TTL */
 #define NO_INT_TIMER -1
-#define CISCO_SPEC_SIM 1                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
+#define CISCO_SPEC_SIM 0                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
 
 /**
  * @brief Class implements PIM-SM (sparse mode).
