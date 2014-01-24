@@ -196,10 +196,13 @@ class INET_API PIMSM : public PIMBase, protected cListener
         SGStateMap routes;
 
     private:
+        // process signals
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        void newMulticastRegisterDR(IPv4Address srcAddr, IPv4Address destAddr);
-        void newMulticastReceiver(PIMInterface *pimInterface, IPv4Address multicastGroup);
-        void removeMulticastReceiver(PIMInterface *pimInterface, IPv4Address multicastGroup);
+        void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
+        void multicastPacketArrivedOnRpfInterface(PIMSMMulticastRoute *route);
+        void multicastPacketForwarded(IPv4Datagram *datagram);
+        void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
+        void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
 
 
         // process timers
@@ -212,10 +215,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
 
         void restartExpiryTimer(PIMSMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
-        void dataOnRpf(PIMSMMulticastRoute *route);
 
         // pim messages
-        void sendPIMRegister(IPv4Datagram *datagram);
+        void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype);
