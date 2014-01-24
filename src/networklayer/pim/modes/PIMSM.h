@@ -19,15 +19,8 @@
 #ifndef __INET_PIMSM_H
 #define __INET_PIMSM_H
 
-#include <omnetpp.h>
-#include "PIMPacket_m.h"
+#include "INETDefs.h"
 
-#include "InterfaceTableAccess.h"
-#include "NotifierConsts.h"
-#include "PIMNeighborTable.h"
-#include "PIMInterfaceTable.h"
-#include "IPv4ControlInfo.h"
-#include "IPv4InterfaceData.h"
 #include "IPv4Route.h"
 #include "PIMBase.h"
 
@@ -39,7 +32,7 @@
 /**
  * @brief Class implements PIM-SM (sparse mode).
  */
-class PIMSM : public PIMBase, protected cListener
+class INET_API PIMSM : public PIMBase, protected cListener
 {
     private:
         /**  Register machine States. */

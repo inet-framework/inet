@@ -19,6 +19,8 @@
 #ifndef __INET_PIMBASE_H
 #define __INET_PIMBASE_H
 
+#include "INETDefs.h"
+
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
 #include "PIMNeighborTable.h"
@@ -29,7 +31,7 @@
 /**
  * TODO
  */
-class PIMBase : public cSimpleModule
+class INET_API PIMBase : public cSimpleModule
 {
     protected:
 

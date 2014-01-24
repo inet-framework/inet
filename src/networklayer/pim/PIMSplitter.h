@@ -19,6 +19,8 @@
 #ifndef __INET_PIMSPLITTER_H
 #define __INET_PIMSPLITTER_H
 
+#include "INETDefs.h"
+
 #include "IInterfaceTable.h"
 #include "PIMInterfaceTable.h"
 #include "PIMPacket_m.h"
@@ -30,7 +32,7 @@
  * Packets received from the PIM modules are simply forwarded to the
  * network layer.
  */
-class PIMSplitter : public cSimpleModule
+class INET_API PIMSplitter : public cSimpleModule
 {
 	private:
 	    IInterfaceTable *ift;

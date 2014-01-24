@@ -19,7 +19,8 @@
 #ifndef __INET_PIMDM_H
 #define __INET_PIMDM_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
+
 #include "PIMPacket_m.h"
 #include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
@@ -33,7 +34,7 @@
 /**
  * @brief Class implements PIM-DM (dense mode).
  */
-class PIMDM : public PIMBase, protected cListener
+class INET_API PIMDM : public PIMBase, protected cListener
 {
     private:
         // per (S,G) state

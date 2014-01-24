@@ -16,8 +16,11 @@
 //
 // Authors: Tomas Prochazka (mailto:xproch21@stud.fit.vutbr.cz), Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "PIMSM.h"
+#include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
+#include "IPv4InterfaceData.h"
+#include "NotifierConsts.h"
+#include "PIMSM.h"
 
 Define_Module(PIMSM);
 
