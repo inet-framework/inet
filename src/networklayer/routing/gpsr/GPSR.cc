@@ -40,6 +40,7 @@ PositionTable GPSR::globalPositionTable;
 
 GPSR::GPSR()
 {
+    interfaces = NULL;
     host = NULL;
     nodeStatus = NULL;
     mobility = NULL;
@@ -272,7 +273,7 @@ int GPSR::computePacketBitLength(GPSRPacket * packet)
 // configuration
 //
 
-bool GPSR::isNodeUp()
+bool GPSR::isNodeUp() const
 {
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
@@ -313,13 +314,13 @@ Coord GPSR::intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coor
         return Coord(NaN, NaN, NaN);
 }
 
-Coord GPSR::getDestinationPosition(const Address & address)
+Coord GPSR::getDestinationPosition(const Address & address) const
 {
     // KLUDGE: implement position registry protocol
     return globalPositionTable.getPosition(address);
 }
 
-Coord GPSR::getNeighborPosition(const Address & address)
+Coord GPSR::getNeighborPosition(const Address & address) const
 {
     return neighborPositionTable.getPosition(address);
 }
@@ -350,17 +351,17 @@ double GPSR::getNeighborAngle(const Address & address)
 // address
 //
 
-std::string GPSR::getHostName()
+std::string GPSR::getHostName() const
 {
     return host->getFullName();
 }
 
-Address GPSR::getSelfAddress()
+Address GPSR::getSelfAddress() const
 {
     return routingTable->getRouterIdAsGeneric();
 }
 
-Address GPSR::getSenderNeighborAddress(INetworkDatagram * datagram)
+Address GPSR::getSenderNeighborAddress(INetworkDatagram * datagram) const
 {
     GPSRPacket * packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     return packet->getSenderAddress();

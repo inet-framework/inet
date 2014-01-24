@@ -104,23 +104,23 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         int computePacketBitLength(GPSRPacket * packet);
 
         // configuration
-        bool isNodeUp();
+        bool isNodeUp() const;
         void configureInterfaces();
 
         // position
-        Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
-        Coord getDestinationPosition(const Address & address);
-        Coord getNeighborPosition(const Address & address);
+        static Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
+        Coord getDestinationPosition(const Address & address) const;
+        Coord getNeighborPosition(const Address & address) const;
 
         // angle
-        double getVectorAngle(Coord vector);
+        static double getVectorAngle(Coord vector);
         double getDestinationAngle(const Address & address);
         double getNeighborAngle(const Address & address);
 
         // address
-        std::string getHostName();
-        Address getSelfAddress();
-        Address getSenderNeighborAddress(INetworkDatagram * datagram);
+        std::string getHostName() const;
+        Address getSelfAddress() const;
+        Address getSenderNeighborAddress(INetworkDatagram * datagram) const;
 
         // neighbor
         simtime_t getNextNeighborExpiration();
