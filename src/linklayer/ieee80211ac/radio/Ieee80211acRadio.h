@@ -16,5 +16,19 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
+//
+// Ieee80211acRadio.h
+//
 
+#ifndef IEEE80211ACRADIO_H_
+#define IEEE80211ACRADIO_H_
+
+class Ieee80211acRadio {
+public:
+
+  Ieee80211acRadio();
+
+};
+
+#endif
 
