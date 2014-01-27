@@ -22,4 +22,61 @@
 
 #include "Ieee80211acRadio.h"
 
+#include "PhyControlInfo_m.h"
+#include "Radio80211aControlInfo_m.h"
+
+Define_Module(Ieee80211acRadio);
+
+Ieee80211acRadio::Ieee80211acRadio() : Radio() {
+}
+
+Ieee80211acRadio::~Ieee80211acRadio() {
+}
+
+void Ieee80211acRadio::initialize() {
+}
+
+void Ieee80211acRadio::finish() {
+  Radio::finish();
+}
+
+void Ieee80211acRadio::handleMessage(cMessage* msg) {
+}
+
+void Ieee80211acRadio::handleupperMsg(AirFrame* airframe) {
+}
+
+void Ieee80211acRadio::handleSelfMsg(cMessage* msg) {
+}
+
+void Ieee80211acRadio::handleCommand(int msgkind, cObject* ctrl) {
+}
+
+void Ieee80211acRadio::handleLowerMsgStart(AirFrame* airframe) {
+}
+
+void Ieee80211acRadio::handleLowerMsgEnd(AirFrame* airframe) {
+}
+
+void Ieee80211acRadio::bufferMsg(AirFrame* airframe) {
+  Radio::bufferMsg(airframe);
+}
+
+AirFrame* Ieee80211acRadio::unbufferMsg(cMessage* msg) {
+  return Radio::unbufferMsg(msg);
+}
+
+void Ieee80211acRadio::sendUp(AirFrame* airframe) {
+}
+
+void Ieee80211acRadio::sendDown(AirFrame* airframe) {
+}
+
+AirFrame* Ieee80211acRadio::encapsulatePacket(cPacket* pkt) {
+  return Radio::encapsulatePacket(pkt);
+}
+
+bool Ieee80211acRadio::processAirFrame(AirFrame* airframe) {
+  return Radio::processAirFrame(airframe);
+}
 

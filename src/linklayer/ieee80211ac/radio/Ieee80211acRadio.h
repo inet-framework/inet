@@ -23,12 +23,87 @@
 #ifndef IEEE80211ACRADIO_H_
 #define IEEE80211ACRADIO_H_
 
-class Ieee80211acRadio {
-public:
+#include "INETDefs.h"
+#include "AirFrame_m.h"
+#include "radio/Radio.h"
 
+/**
+ * Class for radio layer of IEEE 802.11ac protocol.
+ *
+ * @author Andrea Tino
+ */
+class INET_API Ieee80211acRadio : public Radio {
+public:
+  typedef double Decibel;
+  typedef double Frequency;
+  typedef double Ber;
+  typedef double Energy;
+  typedef double Power;
+  typedef double SNR;
+
+  /**
+   * @brief Transmitter status.
+   */
+  enum TxStatus {
+  };
+
+  /**
+   * @brief Receiver status.
+   */
+  enum RxStatus {
+  };
+
+protected:
+  typedef Radio::SensitivityList SensitivityList;
+
+public:
+  /**
+   * @brief Creates a new instance.
+   */
   Ieee80211acRadio();
 
-};
+  virtual ~Ieee80211acRadio();
+
+protected:
+  /**
+   * @brief OMNeT++ special function.
+   */
+  virtual void initialize();
+
+  /**
+   * @brief OMNeT++ special function.
+   */
+  virtual void finish();
+
+  /**
+   * @brief OMNeT++ special function.
+   */
+  virtual void handleMessage(cMessage* msg);
+
+protected:
+  virtual void handleupperMsg(AirFrame* airframe);
+
+  virtual void handleSelfMsg(cMessage* msg);
+
+  virtual void handleCommand(int msgkind, cObject* ctrl);
+
+  virtual void handleLowerMsgStart(AirFrame* airframe);
+
+  virtual void handleLowerMsgEnd(AirFrame* airframe);
+
+  virtual void bufferMsg(AirFrame* airframe);
+
+  virtual AirFrame* unbufferMsg(cMessage* msg);
+
+  virtual void sendUp(AirFrame* airframe);
+
+  virtual void sendDown(AirFrame* airframe);
+
+  virtual AirFrame* encapsulatePacket(cPacket* pkt);
+
+  virtual bool processAirFrame(AirFrame* airframe);
+
+}; /* Ieee80211acRadio */
 
 #endif
 
