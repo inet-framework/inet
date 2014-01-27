@@ -53,7 +53,6 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
 
         // state
         SCTPSocket socket;
-        SCTPAssociation* assoc;
         SCTPPathStatus sctpPathStatus;
         cMessage* timeMsg;
         cMessage* stopTimer;

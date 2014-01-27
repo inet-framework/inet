@@ -51,6 +51,7 @@ SCTPPeer::SCTPPeer()
 
 SCTPPeer::~SCTPPeer()
 {
+    cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
     for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); ++j)

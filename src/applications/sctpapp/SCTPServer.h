@@ -99,6 +99,7 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
 
     public:
        virtual ~SCTPServer();
+       SCTPServer();
 };
 #endif
 

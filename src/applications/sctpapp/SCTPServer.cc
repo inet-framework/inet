@@ -192,9 +192,9 @@ cPacket* SCTPServer::makeAbortNotification(SCTPCommand* msg)
 
 void SCTPServer::handleMessage(cMessage *msg)
 {
+    // TODO: there is another memory leak somewhere...
     int id;
     cPacket* cmsg;
-
     if (msg->isSelfMessage())
     {
         handleTimer(msg);
@@ -535,12 +535,6 @@ void SCTPServer::handleTimer(cMessage *msg)
 
 void SCTPServer::finish()
 {
-    delete timeoutMsg;
-    if (delayTimer->isScheduled())
-        cancelEvent(delayTimer);
-    delete delayTimer;
-    delete delayFirstReadTimer;
-
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     for (ServerAssocStatMap::iterator l=serverAssocStatMap.begin(); l!=serverAssocStatMap.end(); ++l)
@@ -576,5 +570,15 @@ void SCTPServer::finish()
 SCTPServer::~SCTPServer()
 {
     delete socket;
+    cancelAndDelete(timeoutMsg);
+    cancelAndDelete(delayTimer);
+    cancelAndDelete(delayFirstReadTimer);
 }
 
+SCTPServer::SCTPServer()
+{
+    timeoutMsg = NULL;
+    socket = NULL;
+    delayFirstReadTimer = NULL;
+    delayTimer = NULL;
+}
