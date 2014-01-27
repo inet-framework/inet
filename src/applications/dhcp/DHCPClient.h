@@ -35,16 +35,6 @@
 class INET_API DHCPClient : public cSimpleModule, public cListener, public ILifecycle
 {
     protected:
-        int serverPort;
-        int clientPort;
-        UDPSocket socket; // UDP socket for client-server communication
-        bool isOperational; // lifecycle
-        cMessage* timerT1; // time at which the client enters the RENEWING state
-        cMessage* timerT2; // time at which the client enters the REBINDING state
-        cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
-        cMessage* leaseTimer; // length of time the lease is valid
-        cMessage* startTimer; // self message to start DHCP initialization
-
         // DHCP timer types (RFC 2131 4.4.5)
         enum TimerType
         {
@@ -57,26 +47,45 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
             IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
         };
 
+        // parameters
+        int serverPort;
+        int clientPort;
+        UDPSocket socket; // UDP socket for client-server communication
         std::string hostName;
-        int numSent; // number of sent DHCP messages
-        int numReceived; // number of received DHCP messages
-        int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
-        unsigned int xid; // transaction id; to associate messages and responses between a client and a server
-        ClientState clientState; // current state
         simtime_t startTime; // application start time
-
         MACAddress macAddress; // client's MAC address
         cModule *host; // containing host module (@node)
         InterfaceEntry *ie; // interface to configure
         IIPv4RoutingTable *irt; // routing table to update
+
+        // state
+        cMessage* timerT1; // time at which the client enters the RENEWING state
+        cMessage* timerT2; // time at which the client enters the REBINDING state
+        cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
+        cMessage* leaseTimer; // length of time the lease is valid
+        cMessage* startTimer; // self message to start DHCP initialization
+        bool isOperational; // lifecycle
+        ClientState clientState; // current state
+        unsigned int xid; // transaction id; to associate messages and responses between a client and a server
         DHCPLease *lease; // leased IP information
         IPv4Route *route; // last added route
+
+        // statistics
+        int numSent; // number of sent DHCP messages
+        int numReceived; // number of received DHCP messages
+        int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
+
     protected:
-        // Simulation methods.
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage * msg);
+        virtual void scheduleTimerTO(TimerType type);
+        virtual void scheduleTimerT1();
+        virtual void scheduleTimerT2();
+        static const char *getStateName(ClientState state);
+        const char *getAndCheckMessageTypeName(DHCPMessageType type);
+        virtual void updateDisplayString();
 
         /*
          * Opens a UDP socket for client-server communication.
@@ -161,22 +170,19 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
          */
         virtual void handleDHCPACK(DHCPMessage * msg);
 
+        /*
+         * Selects the first non-loopback interface
+         */
         virtual InterfaceEntry *chooseInterface();
-        virtual void scheduleTimerTO(TimerType type);
-        virtual void scheduleTimerT1();
-        virtual void scheduleTimerT2();
-        static const char *getStateName(ClientState state);
-        const char *getAndCheckMessageTypeName(DHCPMessageType type);
-        virtual void updateDisplayString();
+
+        // Lifecycle methods
         virtual void startApp();
         virtual void stopApp();
-
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     public:
         DHCPClient();
         virtual ~DHCPClient();
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
-
