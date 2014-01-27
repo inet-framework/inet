@@ -59,15 +59,15 @@ class INET_API PIMSM : public PIMBase, protected cListener
             AS_LOSER = 2
         };
 
-        struct PIMSMMulticastRoute;
+        struct Route;
 
         struct Interface
         {
-            PIMSMMulticastRoute *owner;
+            Route *owner;
             InterfaceEntry *ie;
             cMessage *expiryTimer;
 
-            Interface(PIMSMMulticastRoute *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL)
+            Interface(Route *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL)
             {
                 ASSERT(owner);
                 ASSERT(ie);
@@ -87,7 +87,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         {
             IPv4Address nextHop;            /**< RF neighbor */
 
-            UpstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, IPv4Address nextHop)
+            UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address nextHop)
                 : Interface(owner, ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
         };
@@ -100,7 +100,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
-            DownstreamInterface(PIMSMMulticastRoute *owner, InterfaceEntry *ie, InterfaceState forwarding,
+            DownstreamInterface(Route *owner, InterfaceEntry *ie, InterfaceState forwarding,
                                 RegisterState regState = RS_NO_INFO, bool show = true)
                 : Interface(owner, ie), forwarding(forwarding), assert(AS_NO_INFO), regState(regState), shRegTun(show) {}
 
@@ -119,7 +119,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 virtual bool isEnabled() { return downstream->isInOlist(); }
         };
 
-        enum JPMsgType
+        enum RouteType
         {
             G,
             SG,
@@ -127,7 +127,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         };
 
         // Holds (*,G), (S,G) or (S,G,rpt) state
-        struct PIMSMMulticastRoute
+        struct Route
         {
                 enum Flag
                 {
@@ -158,8 +158,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
             public:
-                PIMSMMulticastRoute(PIMSM *owner, IPv4Address origin, IPv4Address group);
-                ~PIMSMMulticastRoute();
+                Route(PIMSM *owner, IPv4Address origin, IPv4Address group);
+                ~Route();
 
                 void clearDownstreamInterfaces();
                 void addDownstreamInterface(DownstreamInterface *outInterface);
@@ -179,7 +179,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 void startPrunePendingTimer();
         };
 
-        typedef std::map<SourceAndGroup, PIMSMMulticastRoute*> SGStateMap;
+        typedef std::map<SourceAndGroup, Route*> SGStateMap;
 
         // parameters
         IPv4Address rpAddr;
@@ -199,7 +199,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         // process signals
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
-        void multicastPacketArrivedOnRpfInterface(PIMSMMulticastRoute *route);
+        void multicastPacketArrivedOnRpfInterface(Route *route);
         void multicastPacketForwarded(IPv4Datagram *datagram);
         void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
         void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
@@ -214,14 +214,14 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processPrunePendingTimer(cMessage *timer);
 
 
-        void restartExpiryTimer(PIMSMMulticastRoute *route, InterfaceEntry *originIntf, int holdTime);
+        void restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime);
 
         // pim messages
         void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
-        void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype);
-        void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, JPMsgType JPtype);
+        void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
+        void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
         void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
 
@@ -234,6 +234,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processSGJoin(PIMJoinPrune *pkt,IPv4Address multOrigin, IPv4Address multGroup);
         void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
+        void processAssertPacket(PIMAssert *pkt);
 
         // computed intervals
         double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
@@ -243,19 +244,19 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // helpers
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
-        bool deleteMulticastRoute(PIMSMMulticastRoute *route);
+        bool deleteMulticastRoute(Route *route);
         void cancelAndDeleteTimer(cMessage *&timer);
         void restartTimer(cMessage *timer, double interval);
 
         // routing table access
-        PIMSMMulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
-        std::vector<PIMSMMulticastRoute*> getRouteFor(IPv4Address group);
-        void addGRoute(PIMSMMulticastRoute *route);
-        void addSGRoute(PIMSMMulticastRoute *route);
-        bool removeRoute(PIMSMMulticastRoute *route);
-        PIMSMMulticastRoute *findGRoute(IPv4Address group);
-        PIMSMMulticastRoute *findSGRoute(IPv4Address source, IPv4Address group);
-        IPv4MulticastRoute *createMulticastRoute(PIMSMMulticastRoute *route);
+        Route *getRouteFor(IPv4Address group, IPv4Address source);
+        std::vector<Route*> getRouteFor(IPv4Address group);
+        void addGRoute(Route *route);
+        void addSGRoute(Route *route);
+        bool removeRoute(Route *route);
+        Route *findGRoute(IPv4Address group);
+        Route *findSGRoute(IPv4Address source, IPv4Address group);
+        IPv4MulticastRoute *createMulticastRoute(Route *route);
         IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
 
     public:
