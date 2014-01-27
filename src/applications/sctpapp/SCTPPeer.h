@@ -133,16 +133,12 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
          */
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
-        void setPrimaryPath();
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int connId);
         void sendqueueFullArrived(int connId);
         void msgAbandonedArrived(int assocId);
-        void sendStreamResetNotification(); // todo: implementation?
-
         void setStatusString(const char *s);
-        void addressAddedArrived(int assocId, Address remoteAddr);
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }

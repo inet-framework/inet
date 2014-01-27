@@ -143,14 +143,11 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
         // TODO: need to be revised: naming conventions
-        void setAssociation(SCTPAssociation *_assoc) {assoc = _assoc;};
         void setPrimaryPath(const char* addr);
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int connId);
-        void sendqueueFullArrived(int connId);
         void sendqueueAbatedArrived(int connId, unsigned long int buffer);
-        void addressAddedArrived(int assocId, Address remoteAddr); //XXX this function has no implementation
         void msgAbandonedArrived(int assocId);
         void sendStreamResetNotification();
 

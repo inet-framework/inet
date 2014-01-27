@@ -646,12 +646,6 @@ void SCTPClient::msgAbandonedArrived(int assocId)
     chunksAbandoned++;
 }
 
-
-void SCTPClient::sendqueueFullArrived(int assocId)
-{
-    sendAllowed = false;
-}
-
 void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
 {
     bufferSize = buffer;
@@ -682,10 +676,6 @@ void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
             endSimulation();
         }
     }
-}
-
-void SCTPClient::addressAddedArrived(int assocId, Address remoteAddr)
-{
 }
 
 void SCTPClient::finish()
