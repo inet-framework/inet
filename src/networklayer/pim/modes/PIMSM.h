@@ -251,8 +251,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void restartTimer(cMessage *timer, double interval);
 
         // routing table access
-        Route *getRouteFor(IPv4Address group, IPv4Address source);
-        std::vector<Route*> getRouteFor(IPv4Address group);
         void addGRoute(Route *route);
         void addSGRoute(Route *route);
         bool removeRoute(Route *route);
