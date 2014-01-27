@@ -576,7 +576,7 @@ void SCTPClient::socketFailure(int32, void *, int32 code)
 
 void SCTPClient::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
 {
-    struct pathStatus ps;
+    struct PathStatus ps;
     SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
 
     if (i != sctpPathStatus.end())

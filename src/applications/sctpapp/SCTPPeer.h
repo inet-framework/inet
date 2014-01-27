@@ -32,76 +32,66 @@ class SCTPConnectInfo;
 class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
     protected:
-        int32 notifications;
-        int32 serverAssocId;
-        int32 clientAssocId;
-        SCTPSocket clientSocket;
+        struct PathStatus
+        {
+            bool active;
+            bool primaryPath;
+            IPv4Address pid;
+        };
+        typedef std::map<int32,long> RcvdPacketsPerAssoc;
+        typedef std::map<int32,long> SentPacketsPerAssoc;
+        typedef std::map<int32,long> RcvdBytesPerAssoc;
+        typedef std::map<int32,cOutVector*> BytesPerAssoc;
+        typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
+        typedef std::map<int32,cOutVector*> EndToEndDelay;
+        typedef std::map<Address,PathStatus> SCTPPathStatus;
+
+        // parameters
         double delay;
         bool echo;
-        bool schedule;
-        bool shutdownReceived;
         bool ordered;
-        bool sendAllowed;
-        long bytesSent;
-        int32 packetsSent;
-        int32 packetsRcvd;
-        int32 numSessions;
-        int32 numRequestsToSend; // requests to send in this session
+        bool schedule;
         int32 queueSize;
-        cMessage *timeoutMsg;
         int32 outboundStreams;
+
+        // state
+        SCTPPathStatus sctpPathStatus;
+        SCTPSocket clientSocket;
+        cMessage *timeoutMsg;
         cMessage *timeMsg;
         cMessage *connectTimer;
-        int32 bytesRcvd;
-        int32 echoedBytesSent;
+        bool shutdownReceived;
+        bool sendAllowed;
+        int32 serverAssocId;
+        int32 clientAssocId;
+        int32 numRequestsToSend; // requests to send in this session
         int32 lastStream;
         int32 numPacketsToReceive;
-        int32 chunksAbandoned;
+        int32 ssn;
 
         // statistics
-        typedef std::map<int32,long> RcvdPacketsPerAssoc;
         RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
-
-        typedef std::map<int32,long> SentPacketsPerAssoc;
         SentPacketsPerAssoc sentPacketsPerAssoc;
-
-        typedef std::map<int32,long> RcvdBytesPerAssoc;
         RcvdBytesPerAssoc rcvdBytesPerAssoc;
-
-        typedef std::map<int32,cOutVector*> BytesPerAssoc;
         BytesPerAssoc bytesPerAssoc;
-
-        typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
         HistEndToEndDelay histEndToEndDelay;
-
-        typedef std::map<int32,cOutVector*> EndToEndDelay;
         EndToEndDelay endToEndDelay;
-
-    protected:
-        void sendOrSchedule(cPacket *msg);
-        void sendRequest(bool last = true);
-        int32 ssn;
+        long bytesSent;
+        int32 echoedBytesSent;
+        int32 packetsSent;
+        int32 bytesRcvd;
+        int32 packetsRcvd;
+        int32 notificationsReceived;
+        int32 numSessions;
+        int32 chunksAbandoned;
         static simsignal_t sentPkSignal;
         static simsignal_t echoedPkSignal;
         static simsignal_t rcvdPkSignal;
 
-    public:
-        struct pathStatus {
-            bool active;
-            bool primaryPath;
-            IPv4Address  pid;
-        };
-        typedef std::map<Address,pathStatus> SCTPPathStatus;
-        SCTPPathStatus sctpPathStatus;
-
-    public:
-        SCTPPeer();
-        ~SCTPPeer();
-
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
-
     protected:
+        void sendOrSchedule(cPacket *msg);
+        void sendRequest(bool last = true);
+
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void handleMessage(cMessage *msg);
@@ -110,38 +100,56 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void generateAndSend(SCTPConnectInfo *connectInfo);
         void connect();
 
-        /** Does nothing but update statistics/status. Redefine to perform or schedule first sending. */
+        /*
+         * Does nothing but update statistics/status. Redefine to perform or schedule first sending.
+         */
         void socketEstablished(int32 connId, void *yourPtr);
 
-        /**
-        * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
-        * Beware: this funcion deletes the incoming message, which might not be what you want.
+        /*
+         * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
+         * Beware: this funcion deletes the incoming message, which might not be what you want.
         */
         void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
 
         void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
-        /** Since remote SCTP closed, invokes close(). Redefine if you want to do something else. */
+
+        /*
+         * Since remote SCTP closed, invokes close(). Redefine if you want to do something else.
+         */
         void socketPeerClosed(int32 connId, void *yourPtr);
 
-        /** Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection. */
+        /*
+         * Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection.
+         */
         void socketClosed(int32 connId, void *yourPtr);
 
-        /** Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay. */
+        /*
+         * Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay.
+         */
         void socketFailure(int32 connId, void *yourPtr, int32 code);
 
-        /** Redefine to handle incoming SCTPStatusInfo. */
+        /*
+         *  Redefine to handle incoming SCTPStatusInfo.
+         */
         void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
-        //@}
+
         void setPrimaryPath();
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int32 connId);
         void sendqueueFullArrived(int32 connId);
         void msgAbandonedArrived(int32 assocId);
-        void sendStreamResetNotification();
+        void sendStreamResetNotification(); // todo: implementation?
 
         void setStatusString(const char *s);
         void addressAddedArrived(int32 assocId, Address remoteAddr);
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    public:
+        SCTPPeer();
+        ~SCTPPeer();
 };
 
 #endif

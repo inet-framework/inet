@@ -76,7 +76,7 @@ void SCTPPeer::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
+        numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
@@ -336,7 +336,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
         case SCTP_I_DATA_NOTIFICATION:
         {
-            notifications++;
+            notificationsReceived++;
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             cPacket* cmsg = new cPacket("Notification");
             SCTPSendCommand *cmd = new SCTPSendCommand();
@@ -563,7 +563,7 @@ void SCTPPeer::socketFailure(int32, void *, int32 code)
 
 void SCTPPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
 {
-    struct pathStatus ps;
+    struct PathStatus ps;
     SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
 
     if (i!=sctpPathStatus.end())
@@ -783,7 +783,7 @@ void SCTPPeer::finish()
     }
 
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
 
     for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++)
     {

@@ -42,7 +42,7 @@ void SCTPServer::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        numSessions = packetsSent = packetsRcvd = bytesSent = notifications = 0;
+        numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
         WATCH(packetsRcvd);
@@ -323,7 +323,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             }
             case SCTP_I_DATA_NOTIFICATION:
             {
-                notifications++;
+                notificationsReceived++;
 
                 if (schedule==false)
                 {
@@ -357,7 +357,7 @@ void SCTPServer::handleMessage(cMessage *msg)
             }
             case SCTP_I_DATA:
             {
-                notifications--;
+                notificationsReceived--;
                 packetsRcvd++;
                 sctpEV3 << simulation.getSimTime() << " server: data arrived. " << packetsRcvd << " Packets received now\n";
                 SCTPRcvCommand *ind = check_and_cast<SCTPRcvCommand *>(msg->removeControlInfo());
@@ -555,7 +555,7 @@ void SCTPServer::finish()
         recordScalar("throughput", (l->second.rcvdBytes / l->second.lifeTime.dbl())*8);
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
 
     BytesPerAssoc::iterator j;
     while ((j = bytesPerAssoc.begin()) != bytesPerAssoc.end())
