@@ -44,13 +44,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
             RS_JOIN_PENDING = 3
         };
 
-        /** States of each outgoing interface. */
-        enum InterfaceState
-        {
-            Forward,
-            Pruned
-        };
-
         /** Assert States of each outgoing interface. */
         enum AssertState
         {
@@ -67,15 +60,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
             InterfaceEntry *ie;
             cMessage *expiryTimer;
 
-            Interface(Route *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL)
-            {
-                ASSERT(owner);
-                ASSERT(ie);
-            }
-            virtual ~Interface()
-            {
-                owner->owner->cancelAndDelete(expiryTimer); expiryTimer = NULL;
-            }
+            Interface(Route *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL) { ASSERT(owner); ASSERT(ie); }
+            virtual ~Interface() { owner->owner->cancelAndDelete(expiryTimer); }
             void startExpiryTimer(double holdTime);
         };
 
@@ -94,18 +80,21 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         struct DownstreamInterface : public Interface
         {
-            InterfaceState          forwarding;         /**< Forward or Pruned */
+            /** States of each outgoing interface. */
+            enum JoinPruneState { NO_INFO, JOIN, PRUNE_PENDING };
+
+            JoinPruneState          joinPruneState;
             AssertState             assert;             /**< Assert state. */
 
             RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
-            DownstreamInterface(Route *owner, InterfaceEntry *ie, InterfaceState forwarding,
+            DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState,
                                 RegisterState regState = RS_NO_INFO, bool show = true)
-                : Interface(owner, ie), forwarding(forwarding), assert(AS_NO_INFO), regState(regState), shRegTun(show) {}
+                : Interface(owner, ie), joinPruneState(joinPruneState), assert(AS_NO_INFO), regState(regState), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            bool isInOlist() { return forwarding != Pruned; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
+            bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
         };
 
         typedef std::vector<DownstreamInterface*> DownstreamInterfaceVector;
@@ -171,6 +160,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
 
+                DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie, int holdTime);
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 int findDownstreamInterface(InterfaceEntry *ie);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
@@ -228,15 +218,18 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
 
         // process PIM messages
-        void processPIMPkt(PIMPacket *pkt);
+        void processPIMPacket(PIMPacket *pkt);
         void processRegisterPacket(PIMRegister *pkt);
         void processRegisterStopPacket(PIMRegisterStop *pkt);
-        void processJoinPacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedAddress encodedAddr);
-        void processPrunePacket(PIMJoinPrune *pkt, IPv4Address multGroup, EncodedAddress encodedAddr);
         void processJoinPrunePacket(PIMJoinPrune *pkt);
-        void processSGJoin(PIMJoinPrune *pkt,IPv4Address multOrigin, IPv4Address multGroup);
-        void processJoinRouteGexistOnRP(IPv4Address multGroup, IPv4Address packetOrigin, int msgHoldtime);
         void processAssertPacket(PIMAssert *pkt);
+
+        void processJoinG(IPv4Address group, IPv4Address rp, IPv4Address target, int holdTime, InterfaceEntry *inInterface);
+        void processJoinSG(IPv4Address origin, IPv4Address group, int holdTime, InterfaceEntry *inInterface);
+        void processJoinSGrpt(IPv4Address origin, IPv4Address group, int holdTime, InterfaceEntry *inInterface);
+        void processPruneG(IPv4Address multGroup, InterfaceEntry *inInterface);
+        void processPruneSG(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
+        void processPruneSGrpt(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
 
         // computed intervals
         double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
@@ -256,7 +249,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
         bool removeRoute(Route *route);
         Route *findGRoute(IPv4Address group);
         Route *findSGRoute(IPv4Address source, IPv4Address group);
-        IPv4MulticastRoute *createMulticastRoute(Route *route);
+        Route *createRouteG(IPv4Address group, int flags);
+        Route *createRouteSG(IPv4Address source, IPv4Address group, int flags);
+        IPv4MulticastRoute *createIPv4Route(Route *route);
         IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
 
     public:
