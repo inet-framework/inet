@@ -72,7 +72,7 @@ void SCTPClient::initialize(int stage)
         numPacketsToReceive = 0;
         queueSize = par("queueSize");
         WATCH(numRequestsToSend);
-        recordScalar("ums", (uint32) par("requestLength"));
+        recordScalar("ums", (unsigned int) par("requestLength"));
 
         timeMsg = new cMessage("CliAppTimer");
         timeMsg->setKind(MSGKIND_CONNECT);
@@ -102,7 +102,7 @@ void SCTPClient::initialize(int stage)
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32 port = par("localPort");
+        int port = par("localPort");
 
         if (addresses.size() == 0)
             socket.bind(port);
@@ -147,7 +147,7 @@ void SCTPClient::handleMessage(cMessage *msg)
 void SCTPClient::connect()
 {
     const char *connectAddress = par("connectAddress");
-    int32 connectPort = par("connectPort");
+    int connectPort = par("connectPort");
     inStreams = par("inboundStreams");
     outStreams = par("outboundStreams");
     socket.setInboundStreams(inStreams);
@@ -156,7 +156,7 @@ void SCTPClient::connect()
     setStatusString("connecting");
     EV << "connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
-    socket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    socket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
 
     if (!streamReset)
         streamReset = false;
@@ -168,20 +168,20 @@ void SCTPClient::connect()
         scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
     }
 
-    for (uint16 i = 0; i < outStreams; i++)
+    for (unsigned short int i = 0; i < outStreams; i++)
     {
         streamRequestLengthMap[i] = par("requestLength");
         streamRequestRatioMap[i] = 1;
         streamRequestRatioSendMap[i] = 1;
     }
 
-    uint32 streamNum = 0;
+    unsigned int streamNum = 0;
     cStringTokenizer ratioTokenizer(par("streamRequestRatio").stringValue());
     while (ratioTokenizer.hasMoreTokens())
     {
         const char *token = ratioTokenizer.nextToken();
-        streamRequestRatioMap[streamNum] = (uint32) atoi(token);
-        streamRequestRatioSendMap[streamNum] = (uint32) atoi(token);
+        streamRequestRatioMap[streamNum] = (unsigned int) atoi(token);
+        streamRequestRatioSendMap[streamNum] = (unsigned int) atoi(token);
 
         streamNum++;
     }
@@ -202,9 +202,9 @@ void SCTPClient::setStatusString(const char *s)
         getDisplayString().setTagArg("t", 0, s);
 }
 
-void SCTPClient::socketEstablished(int32, void *, uint64 buffer )
+void SCTPClient::socketEstablished(int, void *, unsigned long int buffer )
 {
-    int32 count = 0;
+    int count = 0;
     EV << "SCTPClient: connected\n";
     setStatusString("connected");
     bufferSize = buffer;
@@ -306,7 +306,7 @@ void SCTPClient::sendQueueRequest()
 
 void SCTPClient::sendRequestArrived()
 {
-    int32 count = 0;
+    int count = 0;
 
     sctpEV3 << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
 
@@ -331,7 +331,7 @@ void SCTPClient::sendRequestArrived()
     }
 }
 
-void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
+void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     packetsRcvd++;
 
@@ -366,13 +366,13 @@ void SCTPClient::socketDataArrived(int32, void *, cPacket *msg, bool)
 
 void SCTPClient::sendRequest(bool last)
 {
-    uint32 i, sendBytes;
+    unsigned int i, sendBytes;
 
     sendBytes = par("requestLength");
 
     // find next stream
-    uint16 nextStream = 0;
-    for (uint16 i = 0; i < outStreams; i++)
+    unsigned short int nextStream = 0;
+    for (unsigned short int i = 0; i < outStreams; i++)
     {
         if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
             nextStream = i;
@@ -381,7 +381,7 @@ void SCTPClient::sendRequest(bool last)
     // no stream left, reset map
     if (nextStream == 0 && streamRequestRatioSendMap[nextStream] == 0)
     {
-        for (uint16 i = 0; i < outStreams; i++)
+        for (unsigned short int i = 0; i < outStreams; i++)
         {
             streamRequestRatioSendMap[i] = streamRequestRatioMap[i];
             if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
@@ -512,7 +512,7 @@ void SCTPClient::handleTimer(cMessage *msg)
     }
 }
 
-void SCTPClient::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *msg)
+void SCTPClient::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cPacket* cmsg = new cPacket("CMSG-DataArr");
@@ -526,7 +526,7 @@ void SCTPClient::socketDataNotificationArrived(int32 connId, void *ptr, cPacket 
     socket.sendNotification(cmsg);
 }
 
-void SCTPClient::shutdownReceivedArrived(int32 connId)
+void SCTPClient::shutdownReceivedArrived(int connId)
 {
     if (numRequestsToSend == 0)
     {
@@ -539,7 +539,7 @@ void SCTPClient::shutdownReceivedArrived(int32 connId)
     }
 }
 
-void SCTPClient::socketPeerClosed(int32, void *)
+void SCTPClient::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
     if (socket.getState() == SCTPSocket::PEER_CLOSED)
@@ -549,7 +549,7 @@ void SCTPClient::socketPeerClosed(int32, void *)
     }
 }
 
-void SCTPClient::socketClosed(int32, void *)
+void SCTPClient::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV << "connection closed\n";
@@ -563,7 +563,7 @@ void SCTPClient::socketClosed(int32, void *)
     }
 }
 
-void SCTPClient::socketFailure(int32, void *, int32 code)
+void SCTPClient::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -574,7 +574,7 @@ void SCTPClient::socketFailure(int32, void *, int32 code)
     scheduleAt(simulation.getSimTime()+(simtime_t)par("reconnectInterval"), timeMsg);
 }
 
-void SCTPClient::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
+void SCTPClient::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
 {
     struct PathStatus ps;
     SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
@@ -623,17 +623,17 @@ void SCTPClient::setPrimaryPath(const char* str)
 
 void SCTPClient::sendStreamResetNotification()
 {
-    uint32 type;
+    unsigned int type;
 
-    type = (uint32)par("streamResetType");
+    type = (unsigned int)par("streamResetType");
     if (type >= 6 && type <= 9)
     {
         cPacket* cmsg = new cPacket("CMSG-SR");
         SCTPResetInfo *rinfo = new SCTPResetInfo();
         rinfo->setAssocId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
-        type = (uint32)par("streamResetType");
-        rinfo->setRequestType((uint16)type);
+        type = (unsigned int)par("streamResetType");
+        rinfo->setRequestType((unsigned short int)type);
         cmsg->setKind(SCTP_C_STREAM_RESET);
         cmsg->setControlInfo(rinfo);
         socket.sendNotification(cmsg);
@@ -641,18 +641,18 @@ void SCTPClient::sendStreamResetNotification()
 }
 
 
-void SCTPClient::msgAbandonedArrived(int32 assocId)
+void SCTPClient::msgAbandonedArrived(int assocId)
 {
     chunksAbandoned++;
 }
 
 
-void SCTPClient::sendqueueFullArrived(int32 assocId)
+void SCTPClient::sendqueueFullArrived(int assocId)
 {
     sendAllowed = false;
 }
 
-void SCTPClient::sendqueueAbatedArrived(int32 assocId, uint64 buffer)
+void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
 {
     bufferSize = buffer;
     sendAllowed = true;
@@ -684,7 +684,7 @@ void SCTPClient::sendqueueAbatedArrived(int32 assocId, uint64 buffer)
     }
 }
 
-void SCTPClient::addressAddedArrived(int32 assocId, Address remoteAddr)
+void SCTPClient::addressAddedArrived(int assocId, Address remoteAddr)
 {
 }
 

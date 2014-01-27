@@ -168,7 +168,7 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
-    cmd->setPrMethod((int32)par("prMethod"));
+    cmd->setPrMethod((int)par("prMethod"));
     cmd->setLast(true);
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
@@ -189,7 +189,7 @@ void SCTPPeer::connect()
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    clientSocket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    clientSocket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
 
     if (!streamReset)
         streamReset = false;
@@ -200,12 +200,12 @@ void SCTPPeer::connect()
         sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
         scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
     }
-    uint32 streamNum = 0;
+    unsigned int streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
     while (tokenizer.hasMoreTokens())
     {
         const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, (uint32) atoi(token));
+        clientSocket.setStreamPriority(streamNum, (unsigned int) atoi(token));
 
         streamNum++;
     }
@@ -518,7 +518,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
     }
 }
 
-void SCTPPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *msg)
+void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
     cPacket* cmsg = new cPacket("CMSG");
@@ -533,7 +533,7 @@ void SCTPPeer::socketDataNotificationArrived(int32 connId, void *ptr, cPacket *m
 }
 
 
-void SCTPPeer::socketPeerClosed(int32, void *)
+void SCTPPeer::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
     if (clientSocket.getState()==SCTPSocket::PEER_CLOSED)
@@ -544,14 +544,14 @@ void SCTPPeer::socketPeerClosed(int32, void *)
     }
 }
 
-void SCTPPeer::socketClosed(int32, void *)
+void SCTPPeer::socketClosed(int, void *)
 {
     // *redefine* to start another session etc.
     EV << "connection closed\n";
     setStatusString("closed");
 }
 
-void SCTPPeer::socketFailure(int32, void *, int32 code)
+void SCTPPeer::socketFailure(int, void *, int code)
 {
     // subclasses may override this function, and add code try to reconnect after a delay.
     EV << "connection broken\n";
@@ -561,7 +561,7 @@ void SCTPPeer::socketFailure(int32, void *, int32 code)
     scheduleAt(simulation.getSimTime()+(simtime_t)par("reconnectInterval"), timeMsg);
 }
 
-void SCTPPeer::socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status)
+void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
 {
     struct PathStatus ps;
     SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
@@ -617,9 +617,9 @@ void SCTPPeer::sendRequest(bool last)
     bytesSent += numBytes;
 }
 
-void SCTPPeer::socketEstablished(int32, void *)
+void SCTPPeer::socketEstablished(int, void *)
 {
-    int32 count = 0;
+    int count = 0;
      // *redefine* to perform or schedule first sending
     EV << "SCTPClient: connected\n";
     setStatusString("connected");
@@ -695,7 +695,7 @@ void SCTPPeer::sendQueueRequest()
 
 void SCTPPeer::sendRequestArrived()
 {
-    int32 count = 0;
+    int count = 0;
 
     sctpEV3 << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
 
@@ -711,7 +711,7 @@ void SCTPPeer::sendRequestArrived()
     }
 }
 
-void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
+void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 {
     // *redefine* to perform or schedule next sending
     packetsRcvd++;
@@ -748,7 +748,7 @@ void SCTPPeer::socketDataArrived(int32, void *, cPacket *msg, bool)
     }
 }
 
-void SCTPPeer::shutdownReceivedArrived(int32 connId)
+void SCTPPeer::shutdownReceivedArrived(int connId)
 {
     if (numRequestsToSend==0)
     {
@@ -762,12 +762,12 @@ void SCTPPeer::shutdownReceivedArrived(int32 connId)
 }
 
 
-void SCTPPeer::msgAbandonedArrived(int32 assocId)
+void SCTPPeer::msgAbandonedArrived(int assocId)
 {
     chunksAbandoned++;
 }
 
-void SCTPPeer::sendqueueFullArrived(int32 assocId)
+void SCTPPeer::sendqueueFullArrived(int assocId)
 {
     sendAllowed = false;
 }

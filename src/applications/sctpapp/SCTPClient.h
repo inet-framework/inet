@@ -41,12 +41,12 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         typedef std::map<Address,PathStatus> SCTPPathStatus;
 
         // parameters: see the corresponding NED variables
-        std::map<uint32,uint32> streamRequestLengthMap;
-        std::map<uint32,uint32> streamRequestRatioMap;
-        std::map<uint32,uint32> streamRequestRatioSendMap;
-        int32 queueSize;
-        uint32 outStreams;
-        uint32 inStreams;
+        std::map<unsigned int,unsigned int> streamRequestLengthMap;
+        std::map<unsigned int,unsigned int> streamRequestRatioMap;
+        std::map<unsigned int,unsigned int> streamRequestRatioSendMap;
+        int queueSize;
+        unsigned int outStreams;
+        unsigned int inStreams;
         bool echo;
         bool ordered;
         bool finishEndsSimulation;
@@ -63,17 +63,17 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         bool sendAllowed;
 
         // statistics
-        uint64 packetsSent;
-        uint64 packetsRcvd;
-        uint64 bytesSent;
-        uint64 echoedBytesSent;
-        uint64 bytesRcvd;
-        uint64 numRequestsToSend; // requests to send in this session
-        uint64 numPacketsToReceive;
-        uint32 numBytes;
-        int32 numSessions;
-        int32 numBroken;
-        int32 chunksAbandoned;
+        unsigned long int packetsSent;
+        unsigned long int packetsRcvd;
+        unsigned long int bytesSent;
+        unsigned long int echoedBytesSent;
+        unsigned long int bytesRcvd;
+        unsigned long int numRequestsToSend; // requests to send in this session
+        unsigned long int numPacketsToReceive;
+        unsigned int numBytes;
+        int numSessions;
+        int numBroken;
+        int chunksAbandoned;
         static simsignal_t sentPkSignal;
         static simsignal_t rcvdPkSignal;
         static simsignal_t echoedPkSignal;
@@ -97,7 +97,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         /*
          * Sends a GenericAppMsg of the given length
          */
-        //virtual void sendPacket(int32 numBytes, bool serverClose=false);
+        //virtual void sendPacket(int numBytes, bool serverClose=false);
 
         /*
          * When running under GUI, it displays the given string next to the icon
@@ -112,46 +112,46 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         /*
          * Does nothing but update statistics/status. Redefine to perform or schedule first sending.
          */
-        void socketEstablished(int32 connId, void *yourPtr, uint64 buffer); // TODO: needs a better name
+        void socketEstablished(int connId, void *yourPtr, unsigned long int buffer); // TODO: needs a better name
 
         /*
          * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
          * Beware: this funcion deletes the incoming message, which might not be what you want.
          */
-        void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent); // TODO: needs a better name
+        void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent); // TODO: needs a better name
 
-        void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
+        void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
 
         /*
          * Since remote SCTP closed, invokes close(). Redefine if you want to do something else.
          */
-        void socketPeerClosed(int32 connId, void *yourPtr);
+        void socketPeerClosed(int connId, void *yourPtr);
 
         /*
          * Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection.
          */
-        void socketClosed(int32 connId, void *yourPtr);
+        void socketClosed(int connId, void *yourPtr);
 
         /*
          * Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay.
          */
-        void socketFailure(int32 connId, void *yourPtr, int32 code);
+        void socketFailure(int connId, void *yourPtr, int code);
 
         /*
          * Redefine to handle incoming SCTPStatusInfo.
          */
-        void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
+        void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
         // TODO: need to be revised: naming conventions
         void setAssociation(SCTPAssociation *_assoc) {assoc = _assoc;};
         void setPrimaryPath(const char* addr);
         void sendRequestArrived();
         void sendQueueRequest();
-        void shutdownReceivedArrived(int32 connId);
-        void sendqueueFullArrived(int32 connId);
-        void sendqueueAbatedArrived(int32 connId, uint64 buffer);
-        void addressAddedArrived(int32 assocId, Address remoteAddr); //XXX this function has no implementation
-        void msgAbandonedArrived(int32 assocId);
+        void shutdownReceivedArrived(int connId);
+        void sendqueueFullArrived(int connId);
+        void sendqueueAbatedArrived(int connId, unsigned long int buffer);
+        void addressAddedArrived(int assocId, Address remoteAddr); //XXX this function has no implementation
+        void msgAbandonedArrived(int assocId);
         void sendStreamResetNotification();
 
         /*

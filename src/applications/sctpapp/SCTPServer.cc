@@ -80,8 +80,8 @@ void SCTPServer::initialize(int stage)
     {
         const char *addressesString = par("localAddress");
         AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
-        int32 port = par("localPort");
-        int32 messagesToPush = par("messagesToPush");
+        int port = par("localPort");
+        int messagesToPush = par("messagesToPush");
 
         socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));
@@ -96,10 +96,10 @@ void SCTPServer::initialize(int stage)
         socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue(), messagesToPush);
         sctpEV3 << "SCTPServer::initialized listen port=" << port << "\n";
         cStringTokenizer tokenizer(par("streamPriorities").stringValue());
-        for (uint32 streamNum = 0; tokenizer.hasMoreTokens(); streamNum++)
+        for (unsigned int streamNum = 0; tokenizer.hasMoreTokens(); streamNum++)
         {
             const char *token = tokenizer.nextToken();
-            socket->setStreamPriority(streamNum, (uint32) atoi(token));
+            socket->setStreamPriority(streamNum, (unsigned int) atoi(token));
         }
 
         bool isOperational;
@@ -137,7 +137,7 @@ void SCTPServer::generateAndSend()
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
-    cmd->setPrMethod((int32)par("prMethod"));
+    cmd->setPrMethod((int)par("prMethod"));
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
     else
@@ -192,7 +192,7 @@ cPacket* SCTPServer::makeAbortNotification(SCTPCommand* msg)
 
 void SCTPServer::handleMessage(cMessage *msg)
 {
-    int32 id;
+    int id;
     cPacket* cmsg;
 
     if (msg->isSelfMessage())
@@ -372,7 +372,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 
                 if (!echo)
                 {
-                    if ((uint32)par("numPacketsToReceivePerClient")>0)
+                    if ((unsigned int)par("numPacketsToReceivePerClient")>0)
                     {
                         j->second.rcvdPackets--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
@@ -477,7 +477,7 @@ void SCTPServer::handleTimer(cMessage *msg)
 {
     cPacket* cmsg;
     SCTPCommand* cmd;
-    int32 id;
+    int id;
     double tempInterval;
 
     if (msg==delayTimer)

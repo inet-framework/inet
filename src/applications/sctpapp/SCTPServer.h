@@ -36,20 +36,20 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
             simtime_t start;
             simtime_t stop;
             simtime_t lifeTime;
-            uint64 rcvdBytes;
-            uint64 sentPackets;
-            uint64 rcvdPackets;
+            unsigned long int rcvdBytes;
+            unsigned long int sentPackets;
+            unsigned long int rcvdPackets;
             bool abortSent;
             bool peerClosed;
         };
-        typedef std::map<int32,ServerAssocStat> ServerAssocStatMap;
-        typedef std::map<int32,cOutVector*> BytesPerAssoc;
-        typedef std::map<int32,cOutVector*> EndToEndDelay;
+        typedef std::map<int,ServerAssocStat> ServerAssocStatMap;
+        typedef std::map<int,cOutVector*> BytesPerAssoc;
+        typedef std::map<int,cOutVector*> EndToEndDelay;
 
         // parameters
-        int32 inboundStreams;
-        int32 outboundStreams;
-        int32 queueSize;
+        int inboundStreams;
+        int outboundStreams;
+        int queueSize;
         double delay;
         double delayFirstRead;
         bool finishEndsSimulation;
@@ -61,8 +61,8 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
         cMessage *timeoutMsg;
         cMessage *delayTimer;
         cMessage *delayFirstReadTimer;
-        int32 lastStream;
-        int32 assocId;
+        int lastStream;
+        int assocId;
         bool readInt;
         bool schedule;
         bool firstData;
@@ -71,13 +71,13 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
         EndToEndDelay endToEndDelay;
 
         // statistics
-        int32 numSessions;
-        int32 count;
-        int32 notificationsReceived;
-        uint64 bytesSent;
-        uint64 packetsSent;
-        uint64 packetsRcvd;
-        uint64 numRequestsToSend; // requests to send in this session
+        int numSessions;
+        int count;
+        int notificationsReceived;
+        unsigned long int bytesSent;
+        unsigned long int packetsSent;
+        unsigned long int packetsRcvd;
+        unsigned long int numRequestsToSend; // requests to send in this session
         BytesPerAssoc bytesPerAssoc;
         ServerAssocStatMap serverAssocStatMap;
 
@@ -86,7 +86,7 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
         cPacket* makeAbortNotification(SCTPCommand* msg);
         cPacket* makeReceiveRequest(cPacket* msg);
         cPacket* makeDefaultReceive();
-        int32 ssn;
+        int ssn;
 
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }

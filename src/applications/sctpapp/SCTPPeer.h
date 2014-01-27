@@ -38,12 +38,12 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
             bool primaryPath;
             IPv4Address pid;
         };
-        typedef std::map<int32,long> RcvdPacketsPerAssoc;
-        typedef std::map<int32,long> SentPacketsPerAssoc;
-        typedef std::map<int32,long> RcvdBytesPerAssoc;
-        typedef std::map<int32,cOutVector*> BytesPerAssoc;
-        typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
-        typedef std::map<int32,cOutVector*> EndToEndDelay;
+        typedef std::map<int,long> RcvdPacketsPerAssoc;
+        typedef std::map<int,long> SentPacketsPerAssoc;
+        typedef std::map<int,long> RcvdBytesPerAssoc;
+        typedef std::map<int,cOutVector*> BytesPerAssoc;
+        typedef std::map<int,cDoubleHistogram*> HistEndToEndDelay;
+        typedef std::map<int,cOutVector*> EndToEndDelay;
         typedef std::map<Address,PathStatus> SCTPPathStatus;
 
         // parameters
@@ -51,8 +51,8 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         bool echo;
         bool ordered;
         bool schedule;
-        int32 queueSize;
-        int32 outboundStreams;
+        int queueSize;
+        int outboundStreams;
 
         // state
         SCTPPathStatus sctpPathStatus;
@@ -62,12 +62,12 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         cMessage *connectTimer;
         bool shutdownReceived;
         bool sendAllowed;
-        int32 serverAssocId;
-        int32 clientAssocId;
-        int32 numRequestsToSend; // requests to send in this session
-        int32 lastStream;
-        int32 numPacketsToReceive;
-        int32 ssn;
+        int serverAssocId;
+        int clientAssocId;
+        int numRequestsToSend; // requests to send in this session
+        int lastStream;
+        int numPacketsToReceive;
+        int ssn;
 
         // statistics
         RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
@@ -77,13 +77,13 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         HistEndToEndDelay histEndToEndDelay;
         EndToEndDelay endToEndDelay;
         long bytesSent;
-        int32 echoedBytesSent;
-        int32 packetsSent;
-        int32 bytesRcvd;
-        int32 packetsRcvd;
-        int32 notificationsReceived;
-        int32 numSessions;
-        int32 chunksAbandoned;
+        int echoedBytesSent;
+        int packetsSent;
+        int bytesRcvd;
+        int packetsRcvd;
+        int notificationsReceived;
+        int numSessions;
+        int chunksAbandoned;
         static simsignal_t sentPkSignal;
         static simsignal_t echoedPkSignal;
         static simsignal_t rcvdPkSignal;
@@ -103,46 +103,46 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         /*
          * Does nothing but update statistics/status. Redefine to perform or schedule first sending.
          */
-        void socketEstablished(int32 connId, void *yourPtr);
+        void socketEstablished(int connId, void *yourPtr);
 
         /*
          * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
          * Beware: this funcion deletes the incoming message, which might not be what you want.
         */
-        void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
+        void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
-        void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
+        void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
 
         /*
          * Since remote SCTP closed, invokes close(). Redefine if you want to do something else.
          */
-        void socketPeerClosed(int32 connId, void *yourPtr);
+        void socketPeerClosed(int connId, void *yourPtr);
 
         /*
          * Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection.
          */
-        void socketClosed(int32 connId, void *yourPtr);
+        void socketClosed(int connId, void *yourPtr);
 
         /*
          * Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay.
          */
-        void socketFailure(int32 connId, void *yourPtr, int32 code);
+        void socketFailure(int connId, void *yourPtr, int code);
 
         /*
          *  Redefine to handle incoming SCTPStatusInfo.
          */
-        void socketStatusArrived(int32 connId, void *yourPtr, SCTPStatusInfo *status);
+        void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
         void setPrimaryPath();
         void sendRequestArrived();
         void sendQueueRequest();
-        void shutdownReceivedArrived(int32 connId);
-        void sendqueueFullArrived(int32 connId);
-        void msgAbandonedArrived(int32 assocId);
+        void shutdownReceivedArrived(int connId);
+        void sendqueueFullArrived(int connId);
+        void msgAbandonedArrived(int assocId);
         void sendStreamResetNotification(); // todo: implementation?
 
         void setStatusString(const char *s);
-        void addressAddedArrived(int32 assocId, Address remoteAddr);
+        void addressAddedArrived(int assocId, Address remoteAddr);
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
