@@ -121,9 +121,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         enum RouteType
         {
-            G,
-            SG,
-            SGrpt
+            RP,    // (*,*,RP)
+            G,     // (*,G)
+            SG,    // (S,G)
+            SGrpt  // (S,G,rpt)
         };
 
         // Holds (*,G), (S,G) or (S,G,rpt) state
@@ -139,6 +140,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 };
 
                 PIMSM *owner;
+                RouteType type;
                 IPv4Address origin; // <unspec> in (*,G) routes
                 IPv4Address group;
                 IPv4Address rpAddr;                     /**< Randevous point */
@@ -158,7 +160,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
             public:
-                Route(PIMSM *owner, IPv4Address origin, IPv4Address group);
+                Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group);
                 ~Route();
 
                 void clearDownstreamInterfaces();
