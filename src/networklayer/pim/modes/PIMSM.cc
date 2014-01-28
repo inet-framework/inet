@@ -511,30 +511,25 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address target, 
     Route *routeG = findGRoute(group);
     if (!routeG)                                // check if (*,G) exist
     {
-        InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(this->rpAddr);
-        PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(rpfInterface->getInterfaceId());
-
+        InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(rp);
         if (inInterface != rpfInterface)
         {
             Route *newRouteG = createRouteG(group, Route::NO_FLAG);
 
-            if (!IamRP(rp))
-            {
-                newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, rpfInterface, neighborToRP->getAddress()); //  (*,G) route hasn't incoming interface at RP
+            if (!IamRP(newRouteG->rpAddr))
                 newRouteG->startJoinTimer();              // periodic Join (*,G)
-            }
 
             DownstreamInterface *downstream = new DownstreamInterface(newRouteG, inInterface, DownstreamInterface::JOIN);
             downstream->startExpiryTimer(holdTime);
             newRouteG->addDownstreamInterface(downstream);
 
-            if (newRouteG->upstreamInterface) // XXX should always have expiryTimer
-                newRouteG->upstreamInterface->startExpiryTimer(holdTime);
-
             addGRoute(newRouteG);
 
-            if (!IamRP(this->getRPAddress()))
-                sendPIMJoin(group,this->getRPAddress(),neighborToRP->getAddress(),G);                         // triggered Join (*,G)
+            if (newRouteG->upstreamInterface) // XXX should always have expiryTimer
+            {
+                newRouteG->upstreamInterface->startExpiryTimer(holdTime);
+                sendPIMJoin(group, newRouteG->rpAddr, newRouteG->upstreamInterface->rpfNeighbor(), G); // triggered Join (*,G)
+            }
         }
     }
     else            // (*,G) route exist
@@ -614,11 +609,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, int holdTime, I
         if (!routeG)        // create (*,G) route between RP and source DR
         {
             Route *newRouteG = createRouteG(group, Route::P);
-            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(this->rpAddr);
-            PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());
-
             newRouteG->startKeepAliveTimer();
-            newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, newInIntG, neighborToRP->getAddress());
             addGRoute(newRouteG);
         }
     }
@@ -626,30 +617,26 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, int holdTime, I
     Route *routeSG = findSGRoute(source, group);
     if (!routeSG)         // create (S,G) route between RP and source DR
     {
-        InterfaceEntry *newInIntSG = rt->getInterfaceForDestAddr(source);
-        PIMNeighbor *neighborToSrcDR = pimNbt->getFirstNeighborOnInterface(newInIntSG->getInterfaceId());
-
-        routeSG = createRouteSG(source, group, Route::NO_FLAG);
-        routeSG->startKeepAliveTimer();
-
-        // set outgoing and incoming interface and ET
-        InterfaceEntry *outInt = rt->getInterfaceForDestAddr(this->getRPAddress());
+        InterfaceEntry *ieTowardSource = rt->getInterfaceForDestAddr(source);
+        InterfaceEntry *ieTowardRP = rt->getInterfaceForDestAddr(this->getRPAddress());
 
         // RPF check
-        if (newInIntSG->getInterfaceId() != outInt->getInterfaceId())
+        if (ieTowardSource != ieTowardRP)
         {
-            routeSG->upstreamInterface = new UpstreamInterface(routeSG, newInIntSG, neighborToSrcDR->getAddress());
-            DownstreamInterface *downstream = new DownstreamInterface(routeSG, outInt, DownstreamInterface::JOIN);
+            routeSG = createRouteSG(source, group, Route::NO_FLAG);
+            routeSG->startKeepAliveTimer();
+
+            DownstreamInterface *downstream = new DownstreamInterface(routeSG, ieTowardRP, DownstreamInterface::JOIN);
             downstream->startExpiryTimer(holdTime);
             routeSG->addDownstreamInterface(downstream);
-
-            if (!IamDR(source))
-                routeSG->startJoinTimer();
 
             addSGRoute(routeSG);
 
             if (!IamDR(source))
-                sendPIMJoin(group, source, neighborToSrcDR->getAddress(), SG);       // triggered join except DR
+            {
+                routeSG->startJoinTimer();
+                sendPIMJoin(group, source, routeSG->upstreamInterface->rpfNeighbor(), SG);       // triggered join except DR
+            }
         }
     }
     else
@@ -675,7 +662,8 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, int holdTime, I
     }
 
     // restart ET for given interface - for (*,G) and also (S,G)
-    restartExpiryTimer(routeSG, inInterface, holdTime);
+    if (routeSG)
+        restartExpiryTimer(routeSG, inInterface, holdTime);
 }
 
 
@@ -784,10 +772,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
 
         if (!routeSG)
         {
-            InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(source);
-            PIMNeighbor *rpfNeighbor = pimNbt->getFirstNeighborOnInterface(rpfInterface->getInterfaceId());
             routeSG = createRouteSG(source, group, Route::P);
-            routeSG->upstreamInterface = new UpstreamInterface(routeSG, rpfInterface, rpfNeighbor->getAddress());
             routeSG->startKeepAliveTimer();
             addSGRoute(routeSG);
         }
@@ -825,7 +810,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                 }
 
                 // send Join(S,G) toward source to establish SPT between RP and registering DR
-                sendPIMJoin(group, source, routeSG->upstreamInterface->nextHop, SG);
+                sendPIMJoin(group, source, routeSG->upstreamInterface->rpfNeighbor(), SG);
 
                 // send register-stop packet
                 IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
@@ -1059,7 +1044,6 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         Route *newRouteSG = createRouteSG(source, group, Route::P | Route::F | Route::T);
         newRouteSG->startKeepAliveTimer();
         newRouteSG->registerState = Route::RS_JOIN;
-        newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, interfaceTowardSource, IPv4Address("0.0.0.0"));
         newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, false));      // create new outgoing interface to RP
 
         addSGRoute(newRouteSG);
@@ -1067,9 +1051,6 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         // create new (*,G) route
         Route *newRouteG = createRouteG(newRouteSG->group, Route::P | Route::F);
         newRouteG->startKeepAliveTimer();
-        PIMNeighbor *rpfNeighbor = pimNbt->getFirstNeighborOnInterface(interfaceTowardRP->getInterfaceId());
-        newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, interfaceTowardRP, rpfNeighbor->getAddress());
-
         addGRoute(newRouteG);
     }
 }
@@ -1115,12 +1096,8 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
         // create new (*,G) route
         Route *newRouteG = createRouteG(group, Route::C);
         newRouteG->startJoinTimer();
-
-        // set upstream interface
-        InterfaceEntry *ieTowardRP = rt->getInterfaceForDestAddr(this->getRPAddress());
-        PIMNeighbor *neighborTowardRP = pimNbt->getFirstNeighborOnInterface(ieTowardRP->getInterfaceId()); // XXX neighborTowardRP can be NULL!
-        newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, ieTowardRP, neighborTowardRP->getAddress());
-        newRouteG->upstreamInterface->startExpiryTimer(joinPruneHoldTime());
+        if (newRouteG->upstreamInterface)
+            newRouteG->upstreamInterface->startExpiryTimer(joinPruneHoldTime());
 
         // add downstream interface
         DownstreamInterface *downstream = new DownstreamInterface(newRouteG, ie, DownstreamInterface::JOIN);
@@ -1131,8 +1108,8 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
         addGRoute(newRouteG);
 
         // oilist != NULL -> send Join(*,G) to 224.0.0.13
-        if (!newRouteG->isOilistNull())
-            sendPIMJoin(group, newRouteG->rpAddr, neighborTowardRP->getAddress(), G);
+        if (newRouteG->upstreamInterface && !newRouteG->isOilistNull())
+            sendPIMJoin(group, newRouteG->rpAddr, newRouteG->upstreamInterface->rpfNeighbor(), G);
     }
     else                                                                                          // add new outgoing interface to existing (*,G) route
     {
@@ -1387,15 +1364,56 @@ PIMSM::Route *PIMSM::createRouteG(IPv4Address group, int flags)
     Route *newRouteG = new Route(this, G, IPv4Address::UNSPECIFIED_ADDRESS,group);
     newRouteG->setFlags(flags);
     newRouteG->rpAddr = rpAddr;
+
+    // set upstream interface toward RP and set metric
+    if (!IamRP(rpAddr))
+    {
+        IPv4Route *routeToRP = rt->findBestMatchingRoute(rpAddr);
+        if (routeToRP)
+        {
+            InterfaceEntry *ieTowardRP = routeToRP->getInterface();
+            IPv4Address rpfNeighbor = routeToRP->getGateway();
+            if (!pimNbt->findNeighbor(ieTowardRP->getInterfaceId(), rpfNeighbor))
+            {
+                PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(ieTowardRP->getInterfaceId());
+                if (neighbor)
+                    rpfNeighbor = neighbor->getAddress();
+            }
+            newRouteG->upstreamInterface = new UpstreamInterface(newRouteG, ieTowardRP, rpfNeighbor);
+            newRouteG->metric = AssertMetric(true, routeToRP->getAdminDist(), routeToRP->getMetric());
+        }
+    }
+
     return newRouteG;
 }
 
 PIMSM::Route *PIMSM::createRouteSG(IPv4Address source, IPv4Address group, int flags)
 {
-    Route *newRouteG = new Route(this, SG, source, group);
-    newRouteG->setFlags(flags);
-    newRouteG->rpAddr = rpAddr;
-    return newRouteG;
+    Route *newRouteSG = new Route(this, SG, source, group);
+    newRouteSG->setFlags(flags);
+    newRouteSG->rpAddr = rpAddr;
+
+    // set upstream interface toward source and set metric
+    IPv4Route *routeToSource = rt->findBestMatchingRoute(source);
+    if (routeToSource)
+    {
+        InterfaceEntry *ieTowardSource = routeToSource->getInterface();
+        IPv4Address rpfNeighbor;
+        if (!IamDR(source))
+        {
+            rpfNeighbor = routeToSource->getGateway();
+            if (!pimNbt->findNeighbor(ieTowardSource->getInterfaceId(), rpfNeighbor))
+            {
+                PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(ieTowardSource->getInterfaceId());
+                if (neighbor)
+                    rpfNeighbor = neighbor->getAddress();
+            }
+        }
+        newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, ieTowardSource, rpfNeighbor);
+        newRouteSG->metric = AssertMetric(false, routeToSource->getAdminDist(), routeToSource->getMetric());
+    }
+
+    return newRouteSG;
 }
 
 IPv4MulticastRoute *PIMSM::createIPv4Route(Route *route)
@@ -1504,6 +1522,12 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
     DownstreamInterface *outInterface = downstreamInterfaces[i];
     downstreamInterfaces.erase(downstreamInterfaces.begin()+i);
     delete outInterface;
+}
+
+PIMSM::Interface::~Interface()
+{
+    owner->owner->cancelAndDelete(expiryTimer);
+    owner->owner->cancelAndDelete(assertTimer);
 }
 
 void PIMSM::Interface::startExpiryTimer(double holdTime)

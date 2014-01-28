@@ -35,14 +35,6 @@
 class INET_API PIMSM : public PIMBase, protected cListener
 {
     private:
-        /** Assert States of each outgoing interface. */
-        enum AssertState
-        {
-            AS_NO_INFO = 0,
-            AS_WINNER = 1,
-            AS_LOSER = 2
-        };
-
         struct Route;
 
         struct Interface
@@ -51,8 +43,16 @@ class INET_API PIMSM : public PIMBase, protected cListener
             InterfaceEntry *ie;
             cMessage *expiryTimer;
 
-            Interface(Route *owner, InterfaceEntry *ie) : owner(owner), ie(ie), expiryTimer(NULL) { ASSERT(owner); ASSERT(ie); }
-            virtual ~Interface() { owner->owner->cancelAndDelete(expiryTimer); }
+            // Assert state
+            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
+            AssertState assertState;
+            cMessage *assertTimer;
+            AssertMetric winnerMetric;
+            IPv4Address winnerAddress;
+
+            Interface(Route *owner, InterfaceEntry *ie)
+                : owner(owner), ie(ie), expiryTimer(NULL), assertState(NO_ASSERT_INFO), assertTimer(NULL) { ASSERT(owner); ASSERT(ie); }
+            virtual ~Interface();
             void startExpiryTimer(double holdTime);
         };
 
@@ -62,11 +62,12 @@ class INET_API PIMSM : public PIMBase, protected cListener
          */
         struct UpstreamInterface : public Interface
         {
-            IPv4Address nextHop;            /**< RF neighbor */
+            IPv4Address nextHop; // RPF nexthop, <unspec> at the DR in (S,G) routes
 
             UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address nextHop)
                 : Interface(owner, ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
+            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerAddress : nextHop; }
         };
 
         struct DownstreamInterface : public Interface
@@ -75,12 +76,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
             enum JoinPruneState { NO_INFO, JOIN, PRUNE_PENDING };
 
             JoinPruneState          joinPruneState;
-            AssertState             assert;             /**< Assert state. */
 
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
-                : Interface(owner, ie), joinPruneState(joinPruneState), assert(AS_NO_INFO), shRegTun(show) {}
+                : Interface(owner, ie), joinPruneState(joinPruneState), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
@@ -132,6 +132,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 cMessage *keepAliveTimer;
                 cMessage *joinTimer;
                 cMessage *prunePendingTimer;
+
+                // our metric
+                AssertMetric metric;           // metric of the unicast route to the source (if type==SG) or RP (if type==G)
 
                 // Register state (only for (S,G) at the DR)
                 enum RegisterState { RS_NO_INFO, RS_JOIN, RS_PRUNE, RS_JOIN_PENDING };
