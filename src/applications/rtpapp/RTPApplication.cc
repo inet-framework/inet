@@ -24,7 +24,7 @@
 
 Define_Module(RTPApplication)
 
-void RTPApplication::RTPApplication()
+RTPApplication::RTPApplication()
 {
     fileName = NULL;
     commonName = NULL;
