@@ -547,25 +547,20 @@ void SCTPServer::finish()
     }
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
-
-    BytesPerAssoc::iterator j;
-    while ((j = bytesPerAssoc.begin()) != bytesPerAssoc.end())
-    {
-        delete j->second;
-        bytesPerAssoc.erase(j);
-    }
-    EndToEndDelay::iterator k;
-    while ((k = endToEndDelay.begin()) != endToEndDelay.end())
-    {
-        delete k->second;
-        endToEndDelay.erase(k);
-    }
-    serverAssocStatMap.clear();
     sctpEV3 << "Server finished\n";
 }
 
 SCTPServer::~SCTPServer()
 {
+    for (BytesPerAssoc::iterator i =  bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
+        delete i->second;
+
+    for (EndToEndDelay::iterator i =  endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
+        delete i->second;
+
+    bytesPerAssoc.clear();
+    endToEndDelay.clear();
+    serverAssocStatMap.clear();
     delete socket;
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(delayTimer);

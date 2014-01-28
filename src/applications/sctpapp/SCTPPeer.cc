@@ -773,31 +773,10 @@ void SCTPPeer::finish()
     EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
     for (RcvdBytesPerAssoc::iterator l=rcvdBytesPerAssoc.begin(); l!=rcvdBytesPerAssoc.end(); ++l)
-    {
         EV << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
-    }
 
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
-
-    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); j++)
-    {
-        delete j->second;
-        bytesPerAssoc.erase(j);
-    }
-    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); k++)
-    {
-        delete k->second;
-        endToEndDelay.erase(k);
-    }
-    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); l++)
-    {
-        delete l->second;
-        histEndToEndDelay.erase(l);
-    }
-    rcvdPacketsPerAssoc.clear();
-    sentPacketsPerAssoc.clear();
-    rcvdBytesPerAssoc.clear();
 
 }
 
