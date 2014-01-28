@@ -875,8 +875,7 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
 #if CISCO_SPEC_SIM == 1
             routeSG->startRegisterStopTimer(registerSuppressionTime);
 #else
-            // XXX routeSG->startRegisterStopTimer(uniform(0.5*registerSuppressionTime, 1.5*registerSuppressionTime) - registerProbeTime);
-            routeSG->startRegisterStopTimer(registerSuppressionTime - registerProbeTime);
+            routeSG->startRegisterStopTimer(uniform(0.5*registerSuppressionTime, 1.5*registerSuppressionTime) - registerProbeTime);
 #endif
         }
     }
