@@ -34,29 +34,29 @@ void RTPApplication::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         // the common name (CNAME) of this host
-        _commonName = par("commonName");
+        commonName = par("commonName");
 
         // which rtp profile is to be used (usually RTPAVProfile)
-        _profileName = par("profileName");
+        profileName = par("profileName");
 
         // bandwidth in bytes per second for this session
-        _bandwidth = par("bandwidth");
+        bandwidth = par("bandwidth");
 
         // port number which is to be used; to ports are actually used: one
         // for rtp and one for rtcp
-        _port = (int)par("portNumber").longValue();
+        port = (int)par("portNumber").longValue();
 
         // fileName of file to be transmitted
         // NULL or "" means this system acts only as a receiver
-        _fileName = par("fileName");
+        fileName = par("fileName");
 
         // payload type of file to transmit
-        _payloadType = par("payloadType");
+        payloadType = par("payloadType");
 
-        _sessionEnterDelay = par("sessionEnterDelay");
-        _transmissionStartDelay = par("transmissionStartDelay");
-        _transmissionStopDelay = par("transmissionStopDelay");
-        _sessionLeaveDelay = par("sessionLeaveDelay");
+        sessionEnterDelay = par("sessionEnterDelay");
+        transmissionStartDelay = par("transmissionStartDelay");
+        transmissionStopDelay = par("transmissionStopDelay");
+        sessionLeaveDelay = par("sessionLeaveDelay");
 
         ssrc = 0;
         isActiveSession = false;
@@ -70,18 +70,18 @@ void RTPApplication::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // the ip address to connect to (unicast or multicast)
-        _destinationAddress = AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
+        destinationAddress = AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
 
-        EV << "commonName" << _commonName << endl;
-        EV << "profileName" << _profileName << endl;
-        EV << "bandwidth" << _bandwidth << endl;
-        EV << "destinationAddress" << _destinationAddress << endl;
-        EV << "portNumber" << _port << endl;
-        EV << "fileName" << _fileName << endl;
-        EV << "payloadType" << _payloadType << endl;
+        EV << "commonName" << commonName << endl;
+        EV << "profileName" << profileName << endl;
+        EV << "bandwidth" << bandwidth << endl;
+        EV << "destinationAddress" << destinationAddress << endl;
+        EV << "portNumber" << port << endl;
+        EV << "fileName" << fileName << endl;
+        EV << "payloadType" << payloadType << endl;
 
         cMessage *selfMsg = new cMessage("enterSession", ENTER_SESSION);
-        scheduleAt(simTime() + _sessionEnterDelay, selfMsg);
+        scheduleAt(simTime() + sessionEnterDelay, selfMsg);
     }
 }
 
@@ -101,11 +101,11 @@ void RTPApplication::handleMessage(cMessage* msgIn)
             {
                 isActiveSession = true;
                 RTPCIEnterSession* ci = new RTPCIEnterSession();
-                ci->setCommonName(_commonName);
-                ci->setProfileName(_profileName);
-                ci->setBandwidth(_bandwidth);
-                ci->setDestinationAddress(_destinationAddress);
-                ci->setPort(_port);
+                ci->setCommonName(commonName);
+                ci->setProfileName(profileName);
+                ci->setBandwidth(bandwidth);
+                ci->setDestinationAddress(destinationAddress);
+                ci->setPort(port);
                 cMessage *msg = new RTPControlMsg("Enter Session");
                 msg->setControlInfo(ci);
                 send(msg, "rtpOut");
@@ -128,7 +128,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 send(msg, "rtpOut");
 
                 cMessage *selfMsg = new cMessage("stopTransmission", STOP_TRANSMISSION);
-                scheduleAt(simTime() + _transmissionStopDelay, selfMsg);
+                scheduleAt(simTime() + transmissionStopDelay, selfMsg);
             }
             break;
 
@@ -182,13 +182,13 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 {
                     EV << "Session Entered" << endl;
                     ssrc = (check_and_cast<RTPCISessionEntered *>(ci))->getSsrc();
-                    if (opp_strcmp(_fileName, ""))
+                    if (opp_strcmp(fileName, ""))
                     {
                         EV << "CreateSenderModule" << endl;
                         RTPCICreateSenderModule* ci = new RTPCICreateSenderModule();
                         ci->setSsrc(ssrc);
-                        ci->setPayloadType(_payloadType);
-                        ci->setFileName(_fileName);
+                        ci->setPayloadType(payloadType);
+                        ci->setFileName(fileName);
                         cMessage *msg = new RTPControlMsg("createSenderModule()");
                         msg->setControlInfo(ci);
                         send(msg, "rtpOut");
@@ -197,7 +197,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                     {
                         cMessage *selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
                         EV << "Receiver Module : leaveSession" << endl;
-                        scheduleAt(simTime() + _sessionLeaveDelay, selfMsg);
+                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
                     }
                 }
                 break;
@@ -206,7 +206,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 {
                     EV << "Sender Module Created" << endl;
                     cMessage *selfMsg = new cMessage("startTransmission", START_TRANSMISSION);
-                    scheduleAt(simTime() + _transmissionStartDelay, selfMsg);
+                    scheduleAt(simTime() + transmissionStartDelay, selfMsg);
                 }
                 break;
 
@@ -223,13 +223,13 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                     case RTP_SENDER_STATUS_FINISHED:
                         EV << "FINISHED" << endl;
                         selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
-                        scheduleAt(simTime() + _sessionLeaveDelay, selfMsg);
+                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
                         break;
 
                     case RTP_SENDER_STATUS_STOPPED:
                         EV << "STOPPED" << endl;
                         selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
-                        scheduleAt(simTime() + _sessionLeaveDelay, selfMsg);
+                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
                         break;
 
                     default:
