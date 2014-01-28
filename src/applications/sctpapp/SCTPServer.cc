@@ -50,11 +50,11 @@ void SCTPServer::initialize(int stage)
         WATCH(numRequestsToSend);
 
         // parameters
-        finishEndsSimulation = (bool)par("finishEndsSimulation");
+        finishEndsSimulation = par("finishEndsSimulation").boolValue();
 
         inboundStreams = par("inboundStreams");
         outboundStreams = par("outboundStreams");
-        ordered = (bool)par("ordered");
+        ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         lastStream = 0;
         //abort = NULL;
@@ -122,7 +122,7 @@ void SCTPServer::generateAndSend()
 {
     cPacket* cmsg = new cPacket("CMSG");
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
-    int numBytes = (int)par("requestLength");
+    int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
     for (int i=0; i<numBytes; i++)
         msg->setData(i, 's');
@@ -137,7 +137,7 @@ void SCTPServer::generateAndSend()
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
-    cmd->setPrMethod((int)par("prMethod"));
+    cmd->setPrMethod(par("prMethod"));
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
     else
@@ -209,7 +209,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 SCTPCommand *command = dynamic_cast<SCTPCommand *>(msg->removeControlInfo());
                 assocId = command->getAssocId();
                 serverAssocStatMap[assocId].peerClosed = true;
-                if ((long) par("numPacketsToReceivePerClient") == 0)
+                if (par("numPacketsToReceivePerClient").longValue() == 0)
                 {
                     if (serverAssocStatMap[assocId].abortSent==false)
                     {
@@ -219,7 +219,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 }
                 else
                 {
-                    if (serverAssocStatMap[assocId].rcvdPackets==(unsigned long) par("numPacketsToReceivePerClient")
+                    if (serverAssocStatMap[assocId].rcvdPackets == (unsigned int)par("numPacketsToReceivePerClient")
                             && serverAssocStatMap[assocId].abortSent == false)
                     {
                         sendOrSchedule(makeAbortNotification(command->dup()));
@@ -242,8 +242,8 @@ void SCTPServer::handleMessage(cMessage *msg)
                 assocId = connectInfo->getAssocId();
                 inboundStreams = connectInfo->getInboundStreams();
                 outboundStreams = connectInfo->getOutboundStreams();
-                serverAssocStatMap[assocId].rcvdPackets = (long) par("numPacketsToReceivePerClient");
-                serverAssocStatMap[assocId].sentPackets = (long) par("numPacketsToSendPerClient");
+                serverAssocStatMap[assocId].rcvdPackets = par("numPacketsToReceivePerClient");
+                serverAssocStatMap[assocId].sentPackets = par("numPacketsToSendPerClient");
                 serverAssocStatMap[assocId].rcvdBytes = 0;
                 serverAssocStatMap[assocId].start = 0;
                 serverAssocStatMap[assocId].stop = 0;
@@ -258,15 +258,15 @@ void SCTPServer::handleMessage(cMessage *msg)
 
                 delete connectInfo;
                 delete msg;
-                if ((long) par("numPacketsToSendPerClient") > 0)
+                if (par("numPacketsToSendPerClient").longValue() > 0)
                 {
                     ServerAssocStatMap::iterator i = serverAssocStatMap.find(assocId);
                     numRequestsToSend = i->second.sentPackets;
-                    if ((simtime_t)par("thinkTime") > 0)
+                    if (par("thinkTime").doubleValue() > 0)
                     {
                         generateAndSend();
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+                        scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second.sentPackets = numRequestsToSend;
                     }
@@ -299,13 +299,13 @@ void SCTPServer::handleMessage(cMessage *msg)
                             sendOrSchedule(cmsg);
                         }
                         ServerAssocStatMap::iterator j = serverAssocStatMap.find(assocId);
-                        if (j->second.rcvdPackets == 0 && (simtime_t)par("waitToClose") > 0)
+                        if (j->second.rcvdPackets == 0 && par("waitToClose").doubleValue() > 0)
                         {
                             char as[5];
                             sprintf(as, "%d", assocId);
                             cPacket* abortMsg = new cPacket(as);
                             abortMsg->setKind(SCTP_I_ABORT);
-                            scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), abortMsg);
+                            scheduleAt(simulation.getSimTime()+par("waitToClose"), abortMsg);
                         }
                         else
                         {
@@ -337,7 +337,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                     {
                         firstData = false;
                         cmsg = makeReceiveRequest(PK(msg));
-                        scheduleAt(simulation.getSimTime()+(simtime_t)par("readingInterval"), delayTimer);
+                        scheduleAt(simulation.getSimTime()+par("readingInterval"), delayTimer);
                         sendOrSchedule(cmsg);
                     }
                     else if (delayFirstRead==0 && readInt==false)
@@ -372,7 +372,7 @@ void SCTPServer::handleMessage(cMessage *msg)
 
                 if (!echo)
                 {
-                    if ((unsigned int)par("numPacketsToReceivePerClient")>0)
+                    if (par("numPacketsToReceivePerClient").longValue()>0)
                     {
                         j->second.rcvdPackets--;
                         SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
@@ -435,7 +435,7 @@ void SCTPServer::handleMessage(cMessage *msg)
                 id = command->getAssocId();
                 sctpEV3 << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
                 ServerAssocStatMap::iterator i = serverAssocStatMap.find(id);
-                if (i->second.sentPackets == 0 || (long) par("numPacketsToSendPerClient")==0)
+                if (i->second.sentPackets == 0 || par("numPacketsToSendPerClient").longValue()==0)
                 {
                     cPacket* cmsg = new cPacket("Request");
                     SCTPInfo* qinfo = new SCTPInfo("Info3");
@@ -484,7 +484,7 @@ void SCTPServer::handleTimer(cMessage *msg)
     {
         sctpEV3 << simulation.getSimTime() << " delayTimer expired\n";
         sendOrSchedule(makeDefaultReceive());
-        scheduleAt(simulation.getSimTime()+(double)par("readingInterval"), delayTimer);
+        scheduleAt(simulation.getSimTime()+par("readingInterval"), delayTimer);
         return;
     }
     else if (msg==delayFirstReadTimer)
@@ -493,7 +493,7 @@ void SCTPServer::handleTimer(cMessage *msg)
 
         if (readInt && !delayTimer->isScheduled())
         {
-            tempInterval = (double)par("readingInterval");
+            tempInterval = par("readingInterval");
             scheduleAt(simulation.getSimTime()+(simtime_t)tempInterval, delayTimer);
             scheduleAt(simulation.getSimTime()+(simtime_t)tempInterval, makeDefaultReceive());
         }
@@ -506,8 +506,8 @@ void SCTPServer::handleTimer(cMessage *msg)
         if (numRequestsToSend > 0)
         {
             generateAndSend();
-            if ((simtime_t)par("thinkTime") > 0)
-                scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+            if (par("thinkTime").doubleValue() > 0)
+                scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
             numRequestsToSend--;
         }
         break;

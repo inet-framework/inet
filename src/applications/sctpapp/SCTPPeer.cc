@@ -93,7 +93,7 @@ void SCTPPeer::initialize(int stage)
         echo = par("echo");
         delay = par("echoDelay");
         outboundStreams = par("outboundStreams");
-        ordered = (bool)par("ordered");
+        ordered = par("ordered").boolValue();
         queueSize = par("queueSize");
         lastStream = 0;
         timeoutMsg = new cMessage("SrvAppTimer");
@@ -111,7 +111,7 @@ void SCTPPeer::initialize(int stage)
             socket->bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
-        socket->listen(true, (bool)par("streamReset"), par("numPacketsToSendPerClient").longValue());
+        socket->listen(true, par("streamReset").boolValue(), par("numPacketsToSendPerClient").longValue());
         sctpEV3 << "SCTPPeer::initialized listen port=" << port << "\n";
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
@@ -120,7 +120,7 @@ void SCTPPeer::initialize(int stage)
         {
             connectTimer = new cMessage("ConnectTimer");
             connectTimer->setKind(MSGKIND_CONNECT);
-            scheduleAt((simtime_t)par("startTime"), connectTimer);
+            scheduleAt(par("startTime"), connectTimer);
         }
         schedule = false;
         shutdownReceived = false;
@@ -169,7 +169,7 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     lastStream = (lastStream+1)%outboundStreams;
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
-    cmd->setPrMethod((int)par("prMethod"));
+    cmd->setPrMethod(par("prMethod"));
     cmd->setLast(true);
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
@@ -199,7 +199,7 @@ void SCTPPeer::connect()
         cMessage* cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
         sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime()+(double)par("streamRequestTime"), cmsg);
+        scheduleAt(simulation.getSimTime()+par("streamRequestTime"), cmsg);
     }
     unsigned int streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
@@ -252,8 +252,8 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 serverAssocId = connectInfo->getAssocId();
                 id = serverAssocId;
                 outboundStreams = connectInfo->getOutboundStreams();
-                rcvdPacketsPerAssoc[serverAssocId] = (long) par("numPacketsToReceivePerClient");
-                sentPacketsPerAssoc[serverAssocId] = (long) par("numPacketsToSendPerClient");
+                rcvdPacketsPerAssoc[serverAssocId] = par("numPacketsToReceivePerClient");
+                sentPacketsPerAssoc[serverAssocId] = par("numPacketsToSendPerClient");
                 char text[50];
                 sprintf(text, "App: Received Bytes of assoc %d", serverAssocId);
                 bytesPerAssoc[serverAssocId] = new cOutVector(text);
@@ -270,11 +270,11 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 {
                     SentPacketsPerAssoc::iterator i = sentPacketsPerAssoc.find(serverAssocId);
                     numRequestsToSend = i->second;
-                    if ((simtime_t)par("thinkTime") > 0)
+                    if (par("thinkTime").doubleValue() > 0)
                     {
                         generateAndSend(connectInfo);
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+                        scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second = numRequestsToSend;
                     }
@@ -311,13 +311,13 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         sctpEV3 << "!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
 
                         RcvdPacketsPerAssoc::iterator j = rcvdPacketsPerAssoc.find(serverAssocId);
-                        if (j->second == 0 && (simtime_t)par("waitToClose")>0)
+                        if (j->second == 0 && par("waitToClose").doubleValue()>0)
                         {
                             char as[5];
                             sprintf(as, "%d", serverAssocId);
                             cMessage* abortMsg = new cMessage(as);
                             abortMsg->setKind(SCTP_I_ABORT);
-                            scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), abortMsg);
+                            scheduleAt(simulation.getSimTime()+par("waitToClose"), abortMsg);
                         }
                         else
                         {
@@ -351,7 +351,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
             delete msg;
             if (!cmsg->isScheduled() && schedule==false)
             {
-                scheduleAt(simulation.getSimTime()+(simtime_t)par("delayFirstRead"), cmsg);
+                scheduleAt(simulation.getSimTime()+par("delayFirstRead"), cmsg);
             }
             else if (schedule==true)
                 sendOrSchedule(cmsg);
@@ -494,8 +494,8 @@ void SCTPPeer::handleTimer(cMessage *msg)
             if (numRequestsToSend>0)
             {
                 generateAndSend(connectInfo);
-                if ((simtime_t)par("thinkTime") > 0)
-                    scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeoutMsg);
+                if (par("thinkTime").doubleValue() > 0)
+                    scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
@@ -559,7 +559,7 @@ void SCTPPeer::socketFailure(int, void *, int code)
     setStatusString("broken");
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simulation.getSimTime()+(simtime_t)par("reconnectInterval"), timeMsg);
+    scheduleAt(simulation.getSimTime()+par("reconnectInterval"), timeMsg);
 }
 
 void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
@@ -625,8 +625,8 @@ void SCTPPeer::socketEstablished(int, void *)
     EV << "SCTPClient: connected\n";
     setStatusString("connected");
     // determine number of requests in this session
-    numRequestsToSend = (long) par("numRequestsPerSession");
-    numPacketsToReceive = (long) par("numPacketsToReceive");
+    numRequestsToSend = par("numRequestsPerSession");
+    numPacketsToReceive = par("numPacketsToReceive");
 
     if (numRequestsToSend < 1)
         numRequestsToSend = 0;
@@ -634,7 +634,7 @@ void SCTPPeer::socketEstablished(int, void *)
     // perform first request (next one will be sent when reply arrives)
     if (numRequestsToSend > 0)
     {
-        if ((simtime_t)par("thinkTime") > 0)
+        if (par("thinkTime").doubleValue() > 0)
         {
             if (sendAllowed)
             {
@@ -643,7 +643,7 @@ void SCTPPeer::socketEstablished(int, void *)
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simulation.getSimTime()+(simtime_t)par("thinkTime"), timeMsg);
+            scheduleAt(simulation.getSimTime()+par("thinkTime"), timeMsg);
 
         }
         else
@@ -668,13 +668,13 @@ void SCTPPeer::socketEstablished(int, void *)
                 }
             }
 
-            if (numPacketsToReceive == 0 && (simtime_t)par("waitToClose") > 0)
+            if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0)
             {
                 timeMsg->setKind(MSGKIND_ABORT);
-                scheduleAt(simulation.getSimTime()+(simtime_t)par("waitToClose"), timeMsg);
+                scheduleAt(simulation.getSimTime()+par("waitToClose"), timeMsg);
             }
 
-            if (numRequestsToSend == 0 && (simtime_t)par("waitToClose") == 0)
+            if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0)
             {
                 sctpEV3 << "socketEstablished:no more packets to send, call shutdown\n";
                 clientSocket.shutdown();
@@ -738,7 +738,7 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
         clientSocket.send(cmsg, 0, 0, 1);
     }
 
-    if ((long)par("numPacketsToReceive")>0)
+    if (par("numPacketsToReceive").longValue()>0)
     {
         numPacketsToReceive--;
         if (numPacketsToReceive == 0)
