@@ -19,6 +19,7 @@ record-eventlog = true
 **.scenarioManager.script = xmldoc("scenario.xml")
 **.numUdpApps = 1
 **.client.udpApp[0].typename = "DHCPClient"
+**.client.udpApp[0].log-level = detail
 **.server.udpApp[0].typename = "DHCPServer"
 
 **.server.udpApp[0].subnetMask = "255.255.255.0"
@@ -73,19 +74,21 @@ network LifecycleTest
 
 %contains-regex: stdout
 .*
-LifecycleTest.server shutting down
+LifecycleTest.server shut down
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
 .*
 Sending DHCPDISCOVER.
 .*
-DETAIL: No DHCP offer received within timeout. Restarting.
+(DETAIL: )?No DHCP offer received within timeout. Restarting.
+.*
+LifecycleTest.server started
 .*
 Sending DHCPDISCOVER.
 .*
