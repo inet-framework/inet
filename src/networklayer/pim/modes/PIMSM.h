@@ -35,15 +35,6 @@
 class INET_API PIMSM : public PIMBase, protected cListener
 {
     private:
-        /**  Register machine States. */
-        enum RegisterState
-        {
-            RS_NO_INFO = 0,
-            RS_JOIN = 1,
-            RS_PRUNE = 2,
-            RS_JOIN_PENDING = 3
-        };
-
         /** Assert States of each outgoing interface. */
         enum AssertState
         {
@@ -86,12 +77,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
             JoinPruneState          joinPruneState;
             AssertState             assert;             /**< Assert state. */
 
-            RegisterState           regState;           /**< Register state. */
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
-            DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState,
-                                RegisterState regState = RS_NO_INFO, bool show = true)
-                : Interface(owner, ie), joinPruneState(joinPruneState), assert(AS_NO_INFO), regState(regState), shRegTun(show) {}
+            DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
+                : Interface(owner, ie), joinPruneState(joinPruneState), assert(AS_NO_INFO), shRegTun(show) {}
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
@@ -141,10 +130,15 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 simtime_t installtime; // XXX not used
 
                 cMessage *keepAliveTimer;
-                cMessage *registerStopTimer;
                 cMessage *joinTimer;
                 cMessage *prunePendingTimer;
 
+                // Register state (only for (S,G) at the DR)
+                enum RegisterState { RS_NO_INFO, RS_JOIN, RS_PRUNE, RS_JOIN_PENDING };
+                RegisterState registerState;
+                cMessage *registerStopTimer;
+
+                // interface specific state
                 UpstreamInterface *upstreamInterface;      // may be NULL at RP and at DR
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
@@ -166,7 +160,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
 
                 void startKeepAliveTimer();
-                void startRegisterStopTimer();
+                void startRegisterStopTimer(double interval);
                 void startJoinTimer();
                 void startPrunePendingTimer();
         };
@@ -262,7 +256,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void setSPTthreshold(std::string address);
         IPv4Address getRPAddress () {return rpAddr;}
         std::string getSPTthreshold () {return sptThreshold;}
-        virtual bool IamRP (IPv4Address RPaddress);
+        virtual bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
         bool IamDR (IPv4Address sourceAddr);
 
 	protected:

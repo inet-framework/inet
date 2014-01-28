@@ -28,7 +28,8 @@ typedef IPv4MulticastRoute::OutInterface OutInterface;
 
 PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
     : owner(owner), type(type), origin(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0), sequencenumber(0),
-      keepAliveTimer(NULL), registerStopTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL),
+      keepAliveTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL),
+      registerState(RS_NO_INFO), registerStopTimer(NULL),
       upstreamInterface(NULL)
 {
 }
@@ -225,62 +226,26 @@ void PIMSM::setSPTthreshold(std::string threshold)
 }
 
 /**
- * I AM RP
- *
- * The method is used to determine if router is Rendezvous Point.
- *
- * @param RPaddress IP address to test.
- */
-bool PIMSM::IamRP (IPv4Address RPaddress)
-{
-    InterfaceEntry *intf;
-
-    for (int i=0; i < ift->getNumInterfaces(); i++)
-    {
-        intf = ift->getInterface(i);
-        if (intf->ipv4Data()->getIPAddress() == RPaddress)
-            return true;
-    }
-    return false;
-}
-
-/**
- * I AM RP
- *
  * The method is used to determine if router is Designed Router for given IP address.
- *
- * @param sourceAddr IP address to test.
  */
-bool PIMSM::IamDR (IPv4Address sourceAddr)
+bool PIMSM::IamDR (IPv4Address source)
 {
-    InterfaceEntry *intf;
-    IPv4Address intfAddr;
-    IPv4Address intfMask;
-
     for (int i=0; i < ift->getNumInterfaces(); i++)
     {
-        intf = ift->getInterface(i);
-        intfAddr = intf->ipv4Data()->getIPAddress();
-        intfMask = intf->ipv4Data()->getNetmask();
+        InterfaceEntry *ie = ift->getInterface(i);
+        IPv4Address localAddr = ie->ipv4Data()->getIPAddress();
+        IPv4Address netmask = ie->ipv4Data()->getNetmask();
 
-        if (IPv4Address::maskedAddrAreEqual(intfAddr,sourceAddr,intfMask))
-        {
-            EV << "I AM DR for: " << intfAddr << endl;
+        if (IPv4Address::maskedAddrAreEqual(source, localAddr, netmask))
             return true;
-        }
     }
-    EV << "I AM NOT DR " << endl;
+
     return false;
 }
 
 /**
- * PROCESS KEEP ALIVE TIMER
- *
  * The method is used to process PIM Keep Alive Timer. It is (S,G) timer. When Keep Alive Timer expires,
  * route is removed from multicast routing table.
- *
- * @param timer Pointer to Keep Alive Timer.
- * @see PIMkat()
  */
 void PIMSM::processKeepAliveTimer(cMessage *timer)
 {
@@ -308,25 +273,29 @@ void PIMSM::processKeepAliveTimer(cMessage *timer)
 }
 
 /**
- * PROCESS REGISTER STOP TIMER
- *
  * The method is used to process PIM Register Stop Timer. RST is used to send
  * periodic Register-Null messages
- *
- * @param timer Pointer to Register Stop Timer.
- * @see PIMrst()
  */
 void PIMSM::processRegisterStopTimer(cMessage *timer)
 {
     EV << "pimSM::processRegisterStopTimer: " << endl;
-    Route *route = static_cast<Route*>(timer->getContextPointer());
-    ASSERT(timer == route->registerStopTimer);
-
-    sendPIMRegisterNull(route->origin, route->group);
-    //TODO set RST to probe time, if RST expires, add encapsulation tunnel
+    Route *routeSG = static_cast<Route*>(timer->getContextPointer());
+    ASSERT(timer == routeSG->registerStopTimer);
+    ASSERT(routeSG->type == SG);
 
     delete timer;
-    route->registerStopTimer = NULL;
+    routeSG->registerStopTimer = NULL;
+
+    if (routeSG->registerState == Route::RS_PRUNE)
+    {
+        routeSG->registerState = Route::RS_JOIN_PENDING;
+        sendPIMRegisterNull(routeSG->origin, routeSG->group);
+        routeSG->startRegisterStopTimer(registerProbeTime);
+    }
+    else if (routeSG->registerState == Route::RS_JOIN_PENDING)
+    {
+        routeSG->registerState = Route::RS_JOIN;
+    }
 }
 
 /**
@@ -785,109 +754,92 @@ void PIMSM::processPruneSGrpt(IPv4Address source, IPv4Address group, InterfaceEn
 }
 
 /**
- * PROCESS REGISTER PACKET
- *
- * The method is used for processing PIM Register message sended from source DR.
+ * The method is used for processing PIM Register message sent from source DR.
  * If PIM Register isn't Null and route doesn't exist, it is created and PIM Register-Stop
- * sended. If PIM Register is Null, Register-Stop is send.
- *
- * @param pkt Pointer to PIM Join/Prune packet.
- * @see sendPIMRegisterStop()
- * @see setKat()
- * @see getRouteFor()
+ * is sent. If PIM Register is Null, Register-Stop is sent.
  */
 void PIMSM::processRegisterPacket(PIMRegister *pkt)
 {
-    EV << "pimSM:processRegisterPacket" << endl;
+    EV_INFO << "Received Register packet.\n";
 
-    Route *routePointer;
     IPv4Datagram *encapData = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
-    IPv4Address multOrigin = encapData->getSrcAddress();
-    IPv4Address multGroup = encapData->getDestAddress();
-    Route *newRouteG = createRouteG(multGroup, Route::P);
-    Route *newRoute = createRouteSG(multOrigin, multGroup, Route::P);
+    IPv4Address source = encapData->getSrcAddress();
+    IPv4Address group = encapData->getDestAddress();
+    Route *routeG = findGRoute(group);
+    Route *routeSG = findSGRoute(source, group);
 
-    if (!pkt->getN())                                                                                       //It is Null Register ?
+    if (!pkt->getN()) // It is Null Register ?
     {
-        routePointer = newRouteG;
-        if (!(newRouteG = findGRoute(multGroup)))                    // check if exist (*,G)
+        if (!routeG)
         {
-            newRouteG = routePointer;
-            newRouteG->startKeepAliveTimer();
-            addGRoute(newRouteG);
+            routeG = createRouteG(group, Route::P);
+            routeG->startKeepAliveTimer();
+            addGRoute(routeG);
         }
-        routePointer = newRoute;                                                                            // check if exist (S,G)
-        if (!(newRoute = findSGRoute(multOrigin, multGroup)))
+        else if (routeG->keepAliveTimer)
         {
-            InterfaceEntry *newInIntG = rt->getInterfaceForDestAddr(multOrigin);
-            PIMNeighbor *pimIntfToDR = pimNbt->getFirstNeighborOnInterface(newInIntG->getInterfaceId());
-            newRoute = routePointer;
-            newRoute->upstreamInterface = new UpstreamInterface(newRoute, newInIntG, pimIntfToDR->getAddress());
-            newRoute->startKeepAliveTimer();   // create and set (S,G) KAT timer, add to routing table
-            addSGRoute(newRoute);
+            EV << " (*,G) KAT timer refresh" << endl;
+            restartTimer(routeG->keepAliveTimer, 2*KAT);
         }
-                                                                                                            // we have some active receivers
-        if (!newRouteG->isOilistNull())
+
+        if (!routeSG)
+        {
+            InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(source);
+            PIMNeighbor *rpfNeighbor = pimNbt->getFirstNeighborOnInterface(rpfInterface->getInterfaceId());
+            routeSG = createRouteSG(source, group, Route::P);
+            routeSG->upstreamInterface = new UpstreamInterface(routeSG, rpfInterface, rpfNeighbor->getAddress());
+            routeSG->startKeepAliveTimer();
+            addSGRoute(routeSG);
+        }
+        else if (routeSG->keepAliveTimer)
+        {
+            EV << " (S,G) KAT timer refresh" << endl;
+            restartTimer(routeSG->keepAliveTimer, KAT);
+        }
+
+        if (!routeG->isOilistNull()) // we have some active receivers
         {
             // copy out interfaces from newRouteG
-            IPv4MulticastRoute *ipv4Route = findIPv4Route(newRoute->origin, newRoute->group);
-            newRoute->clearDownstreamInterfaces();
+            IPv4MulticastRoute *ipv4Route = findIPv4Route(routeSG->origin, routeSG->group);
+            routeSG->clearDownstreamInterfaces();
             ipv4Route->clearOutInterfaces();
-            for (unsigned int i = 0; i < newRouteG->downstreamInterfaces.size(); i++)
+            for (unsigned int i = 0; i < routeG->downstreamInterfaces.size(); i++)
             {
-                DownstreamInterface *downstream = new DownstreamInterface(*(newRouteG->downstreamInterfaces[i])); // XXX
-                downstream->owner = newRoute;
+                DownstreamInterface *downstream = new DownstreamInterface(*(routeG->downstreamInterfaces[i])); // XXX
+                downstream->owner = routeSG;
                 downstream->expiryTimer = NULL;
                 downstream->startExpiryTimer(joinPruneHoldTime());
-                newRoute->addDownstreamInterface(downstream);
+                routeSG->addDownstreamInterface(downstream);
                 ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
             }
 
-            newRoute->clearFlag(Route::P);                                                                        // update flags for SG route
+            routeSG->clearFlag(Route::P);
 
-            if (!newRoute->isFlagSet(Route::T))                                                                    // only if isn't build SPT between RP and registering DR
+            if (!routeSG->isFlagSet(Route::T)) // only if isn't build SPT between RP and registering DR
             {
-                for (unsigned i=0; i < newRouteG->downstreamInterfaces.size(); i++)
+                for (unsigned i=0; i < routeG->downstreamInterfaces.size(); i++)
                 {
-                    DownstreamInterface *downstream = newRouteG->downstreamInterfaces[i];
-                    if (downstream->isInOlist())                           // for active outgoing interface forward encapsulated data
+                    DownstreamInterface *downstream = routeG->downstreamInterfaces[i];
+                    if (downstream->isInOlist())
                         forwardMulticastData(encapData->dup(), downstream->getInterfaceId());
                 }
+
                 // send Join(S,G) toward source to establish SPT between RP and registering DR
-                Route *routeSG = findSGRoute(multOrigin, multGroup);
-                UpstreamInterface *rpfInterface = routeSG->upstreamInterface;
-                sendPIMJoin(multGroup,multOrigin, rpfInterface->nextHop, SG);
+                sendPIMJoin(group, source, routeSG->upstreamInterface->nextHop, SG);
 
                 // send register-stop packet
-                IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-                sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
+                IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+                sendPIMRegisterStop(ctrlInfo->getDestAddr(), ctrlInfo->getSrcAddr(), group, source);
             }
         }
-        if (newRoute->keepAliveTimer)                                                                             // refresh KAT timers
-        {
-            EV << " (S,G) KAT timer refresh" << endl;
-            restartTimer(newRoute->keepAliveTimer, KAT);
-        }
-        if (newRouteG->keepAliveTimer)
-        {
-            EV << " (*,G) KAT timer refresh" << endl;
-            restartTimer(newRouteG->keepAliveTimer, 2*KAT);
-        }
-    }
-    else
-    {                                                                                                       //get routes for next step if register is register-null
-        newRoute =  findSGRoute(multOrigin, multGroup);
-        newRouteG = findGRoute(multGroup);
     }
 
-    //if (newRoute)
-    if (newRouteG)
+    if (routeG)
     {
-        //if ((newRoute->isFlagSet(P) && newRouteG->isFlagSet(P)) || pkt->getN())
-        if (newRouteG->isFlagSet(Route::P) || pkt->getN())
-        {                                                                                                       // send register-stop packet
-            IPv4ControlInfo *PIMctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-            sendPIMRegisterStop(PIMctrl->getDestAddr(),PIMctrl->getSrcAddr(),multGroup,multOrigin);
+        if (routeG->isFlagSet(Route::P) || pkt->getN())
+        {
+            IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+            sendPIMRegisterStop(ctrlInfo->getDestAddr(), ctrlInfo->getSrcAddr(), group, source);
         }
     }
 
@@ -896,37 +848,37 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
 }
 
 /**
- * PROCESS REGISTER STOP PACKET
- *
- * The method is used for processing PIM Register-Stop message sended from RP.
+ * The method is used for processing PIM Register-Stop message sent from RP.
  * If the message is received Register Tunnel between RP and source DR is set
  * from Join status revert to Prune status. Also Register Stop Timer is created
  * for periodic sending PIM Register Null messages.
- *
- * @param pkt Pointer to PIM Join/Prune packet.
- * @see sendPIMRegisterStop()
- * @see setKat()
- * @see getRouteFor()
  */
 void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
 {
-    EV << "pimSM:processRegisterStopPacket" << endl;
+    EV_INFO << "Received RegisterStop packet.\n";
 
-    InterfaceEntry *intToRP = rt->getInterfaceForDestAddr(this->getRPAddress());
+    // TODO support wildcard source address
     Route *routeSG = findSGRoute(pkt->getSourceAddress(), pkt->getGroupAddress());
     if (routeSG)
     {
-        // Set RST timer for S,G route
-        routeSG->startRegisterStopTimer();
-
-        DownstreamInterface *outInterface = routeSG->findDownstreamInterfaceByInterfaceId(intToRP->getInterfaceId());
-        if (outInterface && outInterface->regState == RS_JOIN)
+        if (routeSG->registerState == Route::RS_JOIN || routeSG->registerState == Route::RS_JOIN_PENDING)
         {
-            EV << "Register tunnel is connect - has to be disconnect" << endl;
-            outInterface->regState = RS_PRUNE;
+            routeSG->registerState = Route::RS_PRUNE;
+            cancelAndDeleteTimer(routeSG->registerStopTimer);
+
+            // The Register-Stop Timer is set to a random value chosen
+            // uniformly from the interval ( 0.5 * Register_Suppression_Time,
+            // 1.5 * Register_Suppression_Time) minus Register_Probe_Time.
+            // Subtracting off Register_Probe_Time is a bit unnecessary because
+            // it is really small compared to Register_Suppression_Time, but
+            // this was in the old spec and is kept for compatibility.
+#if CISCO_SPEC_SIM == 1
+            routeSG->startRegisterStopTimer(registerSuppressionTime);
+#else
+            // XXX routeSG->startRegisterStopTimer(uniform(0.5*registerSuppressionTime, 1.5*registerSuppressionTime) - registerProbeTime);
+            routeSG->startRegisterStopTimer(registerSuppressionTime - registerProbeTime);
+#endif
         }
-        else
-            EV << "Register tunnel is disconnect" << endl;
     }
 }
 
@@ -1107,8 +1059,9 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         // create new (S,G) route
         Route *newRouteSG = createRouteSG(source, group, Route::P | Route::F | Route::T);
         newRouteSG->startKeepAliveTimer();
+        newRouteSG->registerState = Route::RS_JOIN;
         newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, interfaceTowardSource, IPv4Address("0.0.0.0"));
-        newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, RS_JOIN,false));      // create new outgoing interface to RP
+        newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, false));      // create new outgoing interface to RP
 
         addSGRoute(newRouteSG);
 
@@ -1206,9 +1159,8 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
     // send Register message to RP
 
     InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
-    DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
 
-    if (downstream && downstream->regState == RS_JOIN)
+    if (routeSG->registerState == Route::RS_JOIN)
     {
         Route *routeG = findGRoute(group);
 
@@ -1572,23 +1524,11 @@ void PIMSM::Route::startKeepAliveTimer()
     owner->scheduleAt(simTime() + interval, keepAliveTimer);
 }
 
-void PIMSM::Route::startRegisterStopTimer()
+void PIMSM::Route::startRegisterStopTimer(double interval)
 {
     registerStopTimer = new cMessage("PIMRegisterStopTimer", RegisterStopTimer);
     registerStopTimer->setContextPointer(this);
-
-    // The Register-Stop Timer is set to a random value chosen
-    // uniformly from the interval ( 0.5 * Register_Suppression_Time,
-    // 1.5 * Register_Suppression_Time) minus Register_Probe_Time.
-    // Subtracting off Register_Probe_Time is a bit unnecessary because
-    // it is really small compared to Register_Suppression_Time, but
-    // this was in the old spec and is kept for compatibility.
-    // XXX randomize
-#if CISCO_SPEC_SIM == 1
-    owner->scheduleAt(simTime() + owner->registerSuppressionTime, registerStopTimer);
-#else
-    owner->scheduleAt(simTime() + owner->registerSuppressionTime - owner->registerProbeTime, registerStopTimer);
-#endif
+    owner->scheduleAt(simTime() + interval, registerStopTimer);
 }
 
 void PIMSM::Route::startJoinTimer()
