@@ -24,6 +24,12 @@
 
 Define_Module(RTPApplication)
 
+void RTPApplication::RTPApplication()
+{
+    fileName = NULL;
+    commonName = NULL;
+    profileName = NULL;
+}
 
 void RTPApplication::initialize(int stage)
 {

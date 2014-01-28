@@ -56,8 +56,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 
 
     public:
-        RTPApplication() : cSimpleModule() {}
-
+        RTPApplication();
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
