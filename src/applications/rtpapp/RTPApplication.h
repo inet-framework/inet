@@ -24,11 +24,6 @@
 class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 {
     protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage* msg);
-
-    protected:
         enum SelfMsgKind
         {
             ENTER_SESSION,
@@ -54,10 +49,14 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
         uint32 ssrc;
         bool isActiveSession;
 
+    protected:
+        virtual void initialize(int stage);
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual void handleMessage(cMessage* msg);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     public:
         RTPApplication();
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
