@@ -102,9 +102,8 @@ void SCTPServer::initialize(int stage)
             socket->setStreamPriority(streamNum, (unsigned int) atoi(token));
         }
 
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
@@ -124,6 +123,7 @@ void SCTPServer::generateAndSend()
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
+
     for (int i=0; i<numBytes; i++)
         msg->setData(i, 's');
 
@@ -138,10 +138,12 @@ void SCTPServer::generateAndSend()
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
     cmd->setPrMethod(par("prMethod"));
+
     if (queueSize>0 && numRequestsToSend > 0 && count < queueSize*2)
         cmd->setLast(false);
     else
         cmd->setLast(true);
+
     cmsg->setKind(SCTP_C_SEND);
     cmsg->setControlInfo(cmd);
     packetsSent++;
@@ -196,9 +198,7 @@ void SCTPServer::handleMessage(cMessage *msg)
     int id;
     cPacket* cmsg;
     if (msg->isSelfMessage())
-    {
         handleTimer(msg);
-    }
     else
     {
         switch (msg->getKind())
@@ -475,11 +475,6 @@ void SCTPServer::handleMessage(cMessage *msg)
 
 void SCTPServer::handleTimer(cMessage *msg)
 {
-    cPacket* cmsg;
-    SCTPCommand* cmd;
-    int id;
-    double tempInterval;
-
     if (msg==delayTimer)
     {
         sctpEV3 << simulation.getSimTime() << " delayTimer expired\n";
@@ -493,7 +488,7 @@ void SCTPServer::handleTimer(cMessage *msg)
 
         if (readInt && !delayTimer->isScheduled())
         {
-            tempInterval = par("readingInterval");
+            double tempInterval = par("readingInterval");
             scheduleAt(simulation.getSimTime()+(simtime_t)tempInterval, delayTimer);
             scheduleAt(simulation.getSimTime()+(simtime_t)tempInterval, makeDefaultReceive());
         }
@@ -512,13 +507,15 @@ void SCTPServer::handleTimer(cMessage *msg)
         }
         break;
     case SCTP_I_ABORT:
-        cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
-        cmd = new SCTPCommand("Send6");
-        id = atoi(msg->getName());
-              cmd->setAssocId(id);
+    {
+        cPacket* cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+        SCTPCommand* cmd = new SCTPCommand("Send6");
+        int id = atoi(msg->getName());
+        cmd->setAssocId(id);
         cmsg->setControlInfo(cmd);
         sendOrSchedule(cmsg);
-        break;
+    }
+    break;
     case SCTP_C_RECEIVE:
         sctpEV3 << simulation.getSimTime() << " SCTPServer:SCTP_C_RECEIVE\n";
         if (readInt || delayFirstRead > 0)

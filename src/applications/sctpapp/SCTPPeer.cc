@@ -54,16 +54,16 @@ SCTPPeer::~SCTPPeer()
     cancelAndDelete(timeMsg);
     cancelAndDelete(timeoutMsg);
     cancelAndDelete(connectTimer);
-    for (BytesPerAssoc::iterator j = bytesPerAssoc.begin(); j != bytesPerAssoc.end(); ++j)
-        delete j->second;
+    for (BytesPerAssoc::iterator i = bytesPerAssoc.begin(); i != bytesPerAssoc.end(); ++i)
+        delete i->second;
     bytesPerAssoc.clear();
 
-    for (EndToEndDelay::iterator k = endToEndDelay.begin(); k != endToEndDelay.end(); ++k)
-        delete k->second;
+    for (EndToEndDelay::iterator i = endToEndDelay.begin(); i != endToEndDelay.end(); ++i)
+        delete i->second;
     endToEndDelay.clear();
 
-    for (HistEndToEndDelay::iterator l = histEndToEndDelay.begin(); l != histEndToEndDelay.end(); ++l)
-        delete l->second;
+    for (HistEndToEndDelay::iterator i = histEndToEndDelay.begin(); i != histEndToEndDelay.end(); ++i)
+        delete i->second;
     histEndToEndDelay.clear();
 
     rcvdPacketsPerAssoc.clear();
@@ -126,9 +126,8 @@ void SCTPPeer::initialize(int stage)
         shutdownReceived = false;
         sendAllowed = true;
 
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
@@ -152,21 +151,23 @@ void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
     SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
+
     for (int i=0; i<numBytes; i++)
-    {
         msg->setData(i, 's');
-    }
+
     msg->setDataLen(numBytes);
     msg->setByteLength(numBytes);
     msg->setEncaps(false);
     cmsg->encapsulate(msg);
     SCTPSendCommand *cmd = new SCTPSendCommand();
     cmd->setAssocId(serverAssocId);
+
     if (ordered)
         cmd->setSendUnordered(COMPLETE_MESG_ORDERED);
     else
         cmd->setSendUnordered(COMPLETE_MESG_UNORDERED);
-    lastStream = (lastStream+1)%outboundStreams;
+
+    lastStream = (lastStream + 1) % outboundStreams;
     cmd->setSid(lastStream);
     cmd->setPrValue(par("prValue"));
     cmd->setPrMethod(par("prMethod"));
@@ -192,15 +193,14 @@ void SCTPPeer::connect()
     bool streamReset = par("streamReset");
     clientSocket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
 
-    if (!streamReset)
-        streamReset = false;
-    else if (streamReset == true)
+    if (streamReset)
     {
         cMessage* cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
         sctpEV3 << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
         scheduleAt(simulation.getSimTime()+par("streamRequestTime"), cmsg);
     }
+
     unsigned int streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
     while (tokenizer.hasMoreTokens())
@@ -217,9 +217,7 @@ void SCTPPeer::handleMessage(cMessage *msg)
     int id = -1;
 
     if (msg->isSelfMessage())
-    {
         handleTimer(msg);
-    }
 
     switch (msg->getKind())
     {
@@ -475,10 +473,6 @@ void SCTPPeer::handleMessage(cMessage *msg)
 
 void SCTPPeer::handleTimer(cMessage *msg)
 {
-    cPacket* cmsg;
-    SCTPCommand* cmd;
-    int id;
-
     sctpEV3 << "SCTPPeer::handleTimer\n";
 
     SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->getControlInfo());
@@ -501,14 +495,15 @@ void SCTPPeer::handleTimer(cMessage *msg)
             break;
 
         case SCTP_I_ABORT:
-            cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
-            cmd = new SCTPCommand();
-            id = atoi(msg->getName());
+        {
+            cPacket* cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+            SCTPCommand* cmd = new SCTPCommand();
+            int id = atoi(msg->getName());
             cmd->setAssocId(id);
             cmsg->setControlInfo(cmd);
             sendOrSchedule(cmsg);
-            break;
-
+        }
+        break;
         case SCTP_C_RECEIVE:
             schedule = true;
             sendOrSchedule(PK(msg));
@@ -582,7 +577,8 @@ void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *s
 
 void SCTPPeer::setStatusString(const char *s)
 {
-    if (ev.isGUI()) getDisplayString().setTagArg("t", 0, s);
+    if (ev.isGUI())
+        getDisplayString().setTagArg("t", 0, s);
 }
 
 void SCTPPeer::sendRequest(bool last)
@@ -601,9 +597,7 @@ void SCTPPeer::sendRequest(bool last)
     msg->setDataArraySize(numBytes);
 
     for (int i=0; i<numBytes; i++)
-    {
         msg->setData(i, 'a');
-    }
 
     msg->setDataLen(numBytes);
     msg->setEncaps(false);

@@ -93,9 +93,8 @@ void SCTPClient::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
@@ -158,9 +157,7 @@ void SCTPClient::connect()
     bool streamReset = par("streamReset");
     socket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, par("prMethod"), par("numRequestsPerSession"));
 
-    if (!streamReset)
-        streamReset = false;
-    else if (streamReset == true)
+    if (streamReset)
     {
         cMessage* cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
@@ -168,7 +165,7 @@ void SCTPClient::connect()
         scheduleAt(simulation.getSimTime()+par("streamRequestTime"), cmsg);
     }
 
-    for (unsigned short int i = 0; i < outStreams; i++)
+    for (unsigned int i = 0; i < outStreams; i++)
     {
         streamRequestLengthMap[i] = par("requestLength");
         streamRequestRatioMap[i] = 1;
@@ -180,8 +177,8 @@ void SCTPClient::connect()
     while (ratioTokenizer.hasMoreTokens())
     {
         const char *token = ratioTokenizer.nextToken();
-        streamRequestRatioMap[streamNum] = (unsigned int) atoi(token);
-        streamRequestRatioSendMap[streamNum] = (unsigned int) atoi(token);
+        streamRequestRatioMap[streamNum] = atoi(token);
+        streamRequestRatioSendMap[streamNum] = atoi(token);
 
         streamNum++;
     }
@@ -366,13 +363,9 @@ void SCTPClient::socketDataArrived(int, void *, cPacket *msg, bool)
 
 void SCTPClient::sendRequest(bool last)
 {
-    unsigned int i, sendBytes;
-
-    sendBytes = par("requestLength");
-
     // find next stream
-    unsigned short int nextStream = 0;
-    for (unsigned short int i = 0; i < outStreams; i++)
+    unsigned int nextStream = 0;
+    for (unsigned int i = 0; i < outStreams; i++)
     {
         if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
             nextStream = i;
@@ -381,7 +374,7 @@ void SCTPClient::sendRequest(bool last)
     // no stream left, reset map
     if (nextStream == 0 && streamRequestRatioSendMap[nextStream] == 0)
     {
-        for (unsigned short int i = 0; i < outStreams; i++)
+        for (unsigned int i = 0; i < outStreams; i++)
         {
             streamRequestRatioSendMap[i] = streamRequestRatioMap[i];
             if (streamRequestRatioSendMap[i] > streamRequestRatioSendMap[nextStream])
@@ -394,7 +387,7 @@ void SCTPClient::sendRequest(bool last)
         opp_error("Invalid setting of streamRequestRatio: only 0 weightings");
     }
 
-    sendBytes = streamRequestLengthMap[nextStream];
+    unsigned int sendBytes = streamRequestLengthMap[nextStream];
     streamRequestRatioSendMap[nextStream]--;
 
 
@@ -406,7 +399,7 @@ void SCTPClient::sendRequest(bool last)
 
     msg->setDataArraySize(sendBytes);
 
-    for (i=0; i < sendBytes; i++)
+    for (unsigned int i=0; i < sendBytes; i++)
         msg->setData(i, 'a');
 
     msg->setDataLen(sendBytes);
@@ -623,16 +616,13 @@ void SCTPClient::setPrimaryPath(const char* str)
 
 void SCTPClient::sendStreamResetNotification()
 {
-    unsigned int type;
-
-    type = par("streamResetType");
+    unsigned int type = par("streamResetType");
     if (type >= 6 && type <= 9)
     {
         cPacket* cmsg = new cPacket("CMSG-SR");
         SCTPResetInfo *rinfo = new SCTPResetInfo();
         rinfo->setAssocId(socket.getConnectionId());
         rinfo->setRemoteAddr(socket.getRemoteAddr());
-        type = par("streamResetType");
         rinfo->setRequestType((unsigned short int)type);
         cmsg->setKind(SCTP_C_STREAM_RESET);
         cmsg->setControlInfo(rinfo);
@@ -677,7 +667,6 @@ void SCTPClient::sendqueueAbatedArrived(int assocId, unsigned long int buffer)
         }
     }
 }
-
 void SCTPClient::finish()
 {
     EV << getFullPath() << ": opened " << numSessions << " sessions\n";
