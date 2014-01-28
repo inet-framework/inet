@@ -56,17 +56,12 @@ class INET_API HttpServerBase : public HttpNodeBase
             std::string body;
         };
 
-        /** The server name, e.g. www.example.com. */
-        std::string hostName;
-        /** The listening port of the server */
-        int port;
-
-        /** set to true if a scripted site definition is used */
-        bool scriptedMode;
-        /** A map of html pages, keyed by a resource URL. Used in scripted mode. */
-        std::map<std::string,HtmlPageData> htmlPages;
-        /** A map of resource, keyed by a resource URL. Used in scripted mode. */
-        std::map<std::string,unsigned int> resources;
+        std::string hostName; // the server name, e.g. www.example.com.
+        int port; // the listening port of the server
+        bool scriptedMode; // set to true if a scripted site definition is used
+        std::map<std::string,HtmlPageData> htmlPages; // A map of html pages, keyed by a resource URL. Used in scripted mode
+        std::map<std::string,unsigned int> resources; // a map of resource, keyed by a resource URL. Used in scripted mode
+        simtime_t activationTime; // the activation time of the server -- initial startup delay
 
         // Basic statistics
         long htmlDocsServed;
@@ -74,8 +69,6 @@ class INET_API HttpServerBase : public HttpNodeBase
         long textResourcesServed;
         long badRequests;
 
-        /** @name The random objects for content generation */
-        //@{
         rdObject *rdReplyDelay;             ///< The processing delay of the server.
         rdObject *rdHtmlPageSize;           ///< The HTML page size distribution for the site.
         rdObject *rdTextResourceSize;       ///< The text resource size distribution for the site.
@@ -83,52 +76,28 @@ class INET_API HttpServerBase : public HttpNodeBase
         rdObject *rdNumResources;           ///< Number of resources per HTML page.
         rdObject *rdTextImageResourceRatio; ///< The ratio of text resources to images referenced in HTML pages.
         rdObject *rdErrorMsgSize;           ///< The size of error messages.
-        //@}
 
-        /** The activation time of the server -- initial startup delay. */
-        simtime_t activationTime;
-
-    protected:
-        /** @name cSimpleModule redefinitions */
-        //@{
-        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-        /** Report final statistics */
         virtual void finish();
-
-        /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg) = 0;
-        //@}
+
+        void updateDisplay();
+        HttpReplyMessage* generateDocument(HttpRequestMessage *request, const char* resource, int size = 0);
+        HttpReplyMessage* generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
+        HttpReplyMessage* handleGetRequest(HttpRequestMessage *request, std::string resource);
+        HttpReplyMessage* generateErrorReply(HttpRequestMessage *request, int code);
+        virtual std::string generateBody();
+        cPacket* handleReceivedMessage(cMessage *msg);
+        void registerWithController();
+        void readSiteDefinition(std::string file);
+        std::string readHtmlBodyFile(std::string file, std::string path);
 
     public:
-        /** Return the name of the server */
+        /*
+         * Return the name of the server
+         */
         const std::string& getHostName() { return hostName; }
-
-    protected:
-        /** Update graphical appearance when running under a GUI */
-        void updateDisplay();
-
-        /** Generate a HTML document in response to a request. */
-        HttpReplyMessage* generateDocument(HttpRequestMessage *request, const char* resource, int size = 0);
-        /** Generate a resource message in response to a request. */
-        HttpReplyMessage* generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
-        /** Handle a received HTTP GET request */
-        HttpReplyMessage* handleGetRequest(HttpRequestMessage *request, std::string resource);
-        /** Generate a error reply in case of invalid resource requests. */
-        HttpReplyMessage* generateErrorReply(HttpRequestMessage *request, int code);
-        /** Create a random body according to the site content random distributions. */
-        virtual std::string generateBody();
-
-        /** Handle a received data message, e.g. check if the content requested exists. */
-        cPacket* handleReceivedMessage(cMessage *msg);
-        /** Register the server object with the controller. Called at initialization (simulation startup). */
-        void registerWithController();
-        /** Read a site definition from file if a scripted site definition is used. */
-        void readSiteDefinition(std::string file);
-        /** Read a html body from a file. Used by readSiteDefinition. */
-        std::string readHtmlBodyFile(std::string file, std::string path);
 };
 
 #endif

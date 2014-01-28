@@ -83,9 +83,9 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
         virtual void sendToICMP(cMessage *payload, const Address& destAddr, const Address& srcAddr, int hopLimit);
         virtual void processPingResponse(PingPayload *msg);
         virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
          PingApp();
          virtual ~PingApp();
-         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };

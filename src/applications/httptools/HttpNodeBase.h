@@ -53,63 +53,46 @@ enum LOG_FORMAT {lf_short, lf_long};
 class HttpNodeBase : public cSimpleModule, public ILifecycle
 {
     protected:
-        /** The link speed in bits per second. Only needed for direct message passing transmission delay calculations. */
-        unsigned long linkSpeed;
-
-        /** The http protocol. http/1.0: 10 ; http/1.1: 11 */
-        int httpProtocol;
-
-        /** The log file name for message generation events */
-        std::string logFileName;
-        /** Enable/disable of logging message generation events to file */
-        bool enableLogging;
-        /** The format used to log message events to the log file (if enabled) */
-        LOG_FORMAT outputFormat;
-        /** Enable/disable logging of message events to the console */
-        bool m_bDisplayMessage;
-        /** Enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set */
-        bool m_bDisplayResponseContent;
-
-    public:
-        HttpNodeBase();
-
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+        unsigned long linkSpeed; // the link speed in bits per second. Only needed for direct message passing transmission delay calculations
+        int httpProtocol; // the http protocol. http/1.0: 10 ; http/1.1: 11
+        std::string logFileName; // the log file name for message generation events
+        bool enableLogging; // enable/disable of logging message generation events to file
+        LOG_FORMAT outputFormat; // The format used to log message events to the log file (if enabled)
+        bool m_bDisplayMessage; // enable/disable logging of message events to the console
+        bool m_bDisplayResponseContent; // enable/disable of logging message contents (body) to the console. Only if m_bDisplayMessage is set
 
     protected:
-        /** @name Direct message passing utilities */
-        //@{
-        /**
+        /* Direct message passing utilities */
+
+        /*
          * Send a single message direct to the specified module.
          * Transmission delay is automatically calculated from the size of the message. In addition, a constant delay
          * a random delay object may be specified. Those delays add to the total used to submit the message to the
          * OMNeT++ direct message passing mechanism.
          */
         void sendDirectToModule(HttpNodeBase *receiver, cPacket *packet, simtime_t constdelay = 0.0, rdObject *rd = NULL);
-        /** Calculate the transmission delay for the packet */
-        double transmissionDelay(cPacket *packet);
-        //@}
 
-    protected:
-        /** @name Methods for logging and formatting messages */
-        //@{
-        /** Log a request message to file and optionally display in console */
+        /*
+         * Calculate the transmission delay for the packet
+         */
+        double transmissionDelay(cPacket *packet);
+
+        /*
+         * Methods for logging and formatting messages
+         */
         void logRequest(const HttpRequestMessage* httpRequest);
-        /** Log a response message to file and optionally display in console */
         void logResponse(const HttpReplyMessage* httpResponse);
-        /** Used by logRequest and logResponse to write the formatted message to file */
         void logEntry(std::string line);
-        /** Format a request message in compact semicolon-delimited format */
         std::string formatHttpRequestShort(const HttpRequestMessage* httpRequest);
-        /** Format a response message in compact semicolon-delimited format */
         std::string formatHttpResponseShort(const HttpReplyMessage* httpResponse);
-        /** Format a request message in a more human-readable format */
         std::string formatHttpRequestLong(const HttpRequestMessage* httpRequest);
-        /** Format a response message in a more human-readable format */
         std::string formatHttpResponseLong(const HttpReplyMessage* httpResponse);
-        //@}
+
+    public:
+        HttpNodeBase();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 #endif
-
-

@@ -26,9 +26,6 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     bool isOperational;
     simtime_t lastChange;
 
-  public:
-    OperationalBase();
-
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
@@ -48,6 +45,9 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     virtual bool isNodeShutdownStage(int stage) = 0;
 
     virtual void setOperational(bool isOperational);
+
+  public:
+    OperationalBase();
 };
 
 #endif

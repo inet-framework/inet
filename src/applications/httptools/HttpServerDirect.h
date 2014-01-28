@@ -36,19 +36,10 @@
 class INET_API HttpServerDirect : public HttpServerBase
 {
     protected:
-        /** @name cSimpleModule redefinitions */
-        //@{
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-
-        /** Report final statistics */
         virtual void finish();
-
-        /** Handle incoming messages. See the parent class for details. */
         virtual void handleMessage(cMessage *msg);
-        //@}
 };
 
 #endif

@@ -43,16 +43,13 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void startApp();
     virtual void stopApp();
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     virtual bool isNodeUp();
     void registerDSAP(int dsap);

@@ -48,10 +48,6 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
         VideoStreamData() { timer = NULL; clientPort = 0; videoSize = bytesLeft = 0; numPkSent = 0; }
     };
   protected:
-    /**
-     * Stores information on a video stream
-     */
-
     typedef std::map<long int, VideoStreamData> VideoStreamMap;
 
     // state

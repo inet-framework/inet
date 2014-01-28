@@ -52,12 +52,6 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
-  public:
-    IPvXTrafGen();
-    virtual ~IPvXTrafGen();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-  protected:
     virtual void scheduleNextPacket(simtime_t previous);
     virtual void cancelNextPacket();
     virtual bool isNodeUp();
@@ -75,7 +69,11 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
 
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
+  public:
+    IPvXTrafGen();
+    virtual ~IPvXTrafGen();
 };
 
 #endif

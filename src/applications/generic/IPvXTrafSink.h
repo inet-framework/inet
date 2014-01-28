@@ -40,13 +40,10 @@ class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
     virtual void printPacket(cPacket *msg);
     virtual void processPacket(cPacket *msg);
 
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

@@ -54,12 +54,6 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
-  public:
-    EtherTrafGen();
-    virtual ~EtherTrafGen();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
   protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -75,6 +69,12 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
 
     virtual void sendBurstPackets();
     virtual void receivePacket(cPacket *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+  public:
+    EtherTrafGen();
+    virtual ~EtherTrafGen();
+
 };
 
 #endif

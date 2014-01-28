@@ -35,36 +35,15 @@
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
     protected:
-        /** @name cSimpleModule redefinitions */
-        //@{
-        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-
-        /** Report final statistics */
         virtual void finish();
-
-        /** Handle incoming messages. See the parent class for details. */
         virtual void handleMessage(cMessage *msg);
-
-        /** Returns the number of initialization stages. Two required. */
         int numInitStages() const { return NUM_INIT_STAGES; }
-        //@}
 
-    protected:
-        /** @name Implementation of methods for sending requests to a server. See parent class for details. */
-        //@{
-        /** Sends a scripted browse event to a specific server */
         virtual void sendRequestToServer(BrowseEvent be);
-
-        /** Send a request to server. Uses the recipient stamped in the request. */
         virtual void sendRequestToServer(HttpRequestMessage *request);
-
-        /** Sends a generic request to a randomly chosen server */
         virtual void sendRequestToRandomServer();
-
-        /** Sends a number of queued messages to the specified server */
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
-        //@}
 };
 
 #endif

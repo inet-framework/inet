@@ -69,15 +69,12 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-  protected:
     virtual std::vector<Address> getAllAddresses();
     virtual void sendPing();
     virtual void scheduleNextPing(cMessage *timer);
     virtual void sendToICMP(cMessage *payload, const Address& destAddr, const Address& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
-
-  public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };

@@ -43,7 +43,7 @@
 class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackInterface
 {
     protected:
-        /**
+        /*
          * Data structure used to keep state for each opened socket.
          *
          * An instance of this struct is created for each opened socket and assigned to
@@ -52,58 +52,43 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         struct SockData
         {
-            HttpRequestQueue messageQueue; ///< Queue of pending messages.
-            TCPSocket *socket;             ///< A reference to the socket object.
-            int pending;                   ///< A counter for the number of outstanding replies.
+            HttpRequestQueue messageQueue; // Queue of pending messages.
+            TCPSocket *socket;             // A reference to the socket object.
+            int pending;                   // A counter for the number of outstanding replies.
         };
 
-    protected:
-        TCPSocketMap sockCollection;    ///< List of active sockets
-        unsigned long numBroken;        ///< Counter for the number of broken connections
-        unsigned long socketsOpened;    ///< Counter for opened sockets
+        TCPSocketMap sockCollection;    // List of active sockets
+        unsigned long numBroken;        // Counter for the number of broken connections
+        unsigned long socketsOpened;    // Counter for opened sockets
 
         SockData *pendingSocket;
 
-    public:
-        HttpBrowser();
-        virtual ~HttpBrowser();
-
-    protected:
-        /** @name cSimpleModule redefinitions */
-        //@{
-        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-
-        /** Report final statistics */
         virtual void finish();
-
-        /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg);
-
-        /** Returns the number of initialization stages. Two required. */
         int numInitStages() const { return NUM_INIT_STAGES; }
-        //@}
 
-    protected:
-        /** @name Implementations of pure virtual send methods */
-        //@{
-        /** Sends a scripted browse event to a specific server */
+        /*
+         * Sends a scripted browse event to a specific server
+         */
         virtual void sendRequestToServer(BrowseEvent be);
 
-        /** Send a request to server. Uses the recipient stamped in the request. */
+        /*
+         * Send a request to server. Uses the recipient stamped in the request.
+         */
         virtual void sendRequestToServer(HttpRequestMessage *request);
 
-        /** Sends a generic request to a randomly chosen server */
+        /*
+         * Sends a generic request to a randomly chosen server
+         */
         virtual void sendRequestToRandomServer();
 
-        /** Sends a number of queued messages to the specified server */
+        /*
+         *  Sends a number of queued messages to the specified server
+         */
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
-        //@}
 
-    protected:
-        /** @name TCPSocket::CallbackInterface callback methods */
-        //@{
-        /**
+        /*
          * Handler for socket established event.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
          * The pending messages for the socket are transmitted in the order queued. The socket remains
@@ -112,7 +97,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         virtual void socketEstablished(int connId, void *yourPtr);
 
-        /**
+        /*
          * Handler for socket data arrival.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
          * virtual method of the parent class. The counter for pending replies is decremented for each one handled.
@@ -120,36 +105,32 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
 
-        /**
+        /*
          * Handler for the socket closed by peer event.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
          */
         virtual void socketPeerClosed(int connId, void *yourPtr);
 
-        /**
+        /*
          * Socket closed handler.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
          */
         virtual void socketClosed(int connId, void *yourPtr);
 
-        /**
+        /*
          * Socket failure handler.
          * This method does nothing but reporting and statistics collection at this time.
          * @todo Implement reconnect if necessary. See the INET demos.
          */
         virtual void socketFailure(int connId, void *yourPtr, int code);
 
-        /**
+        /*
          * Socket status arrived handler.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
          */
         virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status);
-        //@}
 
-    protected:
-        /** @name Socket establishment and data submission */
-        //@{
-        /**
+        /*
          * Establishes a socket and queues a single message for transmission.
          * A new socket is created and added to the collection. The message is assigned to a data structure
          * stored as a myPtr with the socket. The message is transmitted once the socket is established, signaled
@@ -163,7 +144,10 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          * instance is used for all the queued messages.
          */
         void submitToSocket(const char* moduleName, int connectPort, HttpRequestQueue &queue);
-        //@}
+
+    public:
+        HttpBrowser();
+        virtual ~HttpBrowser();
 };
 
 #endif

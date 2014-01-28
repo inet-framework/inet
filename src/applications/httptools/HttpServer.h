@@ -41,54 +41,16 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         unsigned long socketsOpened;
 
     protected:
-        /** @name cSimpleModule redefinitions */
-        //@{
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-        /** Initialization of the component and startup of browse event scheduling */
         virtual void initialize(int stage);
-
-        /** Report final statistics */
         virtual void finish();
-
-        /** Handle incoming messages */
         virtual void handleMessage(cMessage *msg);
-        //@}
 
-    protected:
-        /** @name TCPSocket::CallbackInterface methods */
-        //@{
-        /**
-         * Handler for socket established events.
-         * Only used to update statistics.
-         */
         virtual void socketEstablished(int connId, void *yourPtr);
-
-        /**
-         * Handler for socket data arrived events.
-         * Dispatches the received message to the message handler in the base class and
-         * finishes by deleting the received message.
-         */
         virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-
-        /**
-         * Handler for socket closed by peer event.
-         * Does little apart from calling socket->close() to allow the TCPSocket object to close properly.
-         */
         virtual void socketPeerClosed(int connId, void *yourPtr);
-
-        /**
-         * Handler for socket closed event.
-         * Cleanup the resources for the closed socket.
-         */
         virtual void socketClosed(int connId, void *yourPtr);
-
-        /**
-         * Handler for socket failure event.
-         * Very basic handling -- displays warning and cleans up resources.
-         */
         virtual void socketFailure(int connId, void *yourPtr, int code);
-        //@}
 };
 
 #endif

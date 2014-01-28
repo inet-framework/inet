@@ -48,6 +48,4 @@ class INET_API HttpServerEvilB : public HttpServer
         virtual std::string generateBody();
 };
 
-#endif /* HttpServerEvilB */
-
-
+#endif
