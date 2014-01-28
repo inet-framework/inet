@@ -36,11 +36,14 @@ class INET_API UDPBasicApp : public ApplicationBase
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
 
-    UDPSocket socket;
-    int localPort, destPort;
+    // parameters
     std::vector<Address> destAddresses;
+    int localPort, destPort;
     simtime_t startTime;
     simtime_t stopTime;
+
+    // state
+    UDPSocket socket;
     cMessage *selfMsg;
 
     // statistics
@@ -50,21 +53,16 @@ class INET_API UDPBasicApp : public ApplicationBase
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessageWhenUp(cMessage *msg);
+    virtual void finish();
+
     // chooses random destination address
     virtual Address chooseDestAddr();
     virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();
-
-  public:
-    UDPBasicApp();
-    ~UDPBasicApp();
-
-  protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void initialize(int stage);
-    virtual void handleMessageWhenUp(cMessage *msg);
-    virtual void finish();
 
     virtual void processStart();
     virtual void processSend();
@@ -73,6 +71,10 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
+
+  public:
+    UDPBasicApp();
+    ~UDPBasicApp();
 };
 
 #endif

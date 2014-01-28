@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Andras Varga
+// Based on the video streaming app of the similar name by Johnny Lai.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,14 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-//
-// based on the video streaming app of the similar name by Johnny Lai
-//
-
 #ifndef __INET_UDPVIDEOSTREAMSVR_H
 #define __INET_UDPVIDEOSTREAMSVR_H
-
 
 #include <map>
 
@@ -42,26 +37,28 @@
 class INET_API UDPVideoStreamSvr : public ApplicationBase
 {
   public:
+    struct VideoStreamData
+    {
+        cMessage *timer;          // self timer msg
+        Address clientAddr;       // client address
+        int clientPort;           // client UDP port
+        long videoSize;           // total size of video
+        long bytesLeft;           // bytes left to transmit
+        long numPkSent;           // number of packets sent
+        VideoStreamData() { timer = NULL; clientPort = 0; videoSize = bytesLeft = 0; numPkSent = 0; }
+    };
+  protected:
     /**
      * Stores information on a video stream
      */
-    struct VideoStreamData
-    {
-        cMessage *timer;          ///< self timer msg
-        Address clientAddr;   ///< client address
-        int clientPort;           ///< client UDP port
-        long videoSize;           ///< total size of video
-        long bytesLeft;           ///< bytes left to transmit
-        long numPkSent;           ///< number of packets sent
-        VideoStreamData() { timer = NULL; clientPort = 0; videoSize = bytesLeft = 0; numPkSent = 0; }
-    };
 
-  protected:
     typedef std::map<long int, VideoStreamData> VideoStreamMap;
+
+    // state
     VideoStreamMap streams;
     UDPSocket socket;
 
-    // module parameters
+    // parameters
     int localPort;
     cPar *sendInterval;
     cPar *packetLen;
@@ -73,32 +70,23 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     static simsignal_t reqStreamBytesSignal;  // length of video streams served
     static simsignal_t sentPkSignal;
 
-  protected:
-    // process stream request from client
     virtual void processStreamRequest(cMessage *msg);
-
-    // send a packet of the given video stream
     virtual void sendStreamData(cMessage *timer);
 
-  public:
-    UDPVideoStreamSvr();
-    virtual ~UDPVideoStreamSvr();
-
-  protected:
-    ///@name Overridden cSimpleModule functions
-    //@{
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void finish();
     virtual void handleMessageWhenUp(cMessage* msg);
-    //@}
 
     virtual void clearStreams();
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
+
+  public:
+    UDPVideoStreamSvr();
+    virtual ~UDPVideoStreamSvr();
 };
 
 #endif
-

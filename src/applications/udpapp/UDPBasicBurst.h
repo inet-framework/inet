@@ -41,37 +41,18 @@ class INET_API UDPBasicBurst : public ApplicationBase
     {
         ONCE = 1, PER_BURST, PER_SEND
     };
-
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
-
-    UDPSocket socket;
-    int localPort, destPort;
-
-    ChooseDestAddrMode chooseDestAddrMode;
-    std::vector<Address> destAddresses;
-    Address destAddr;
-    int destAddrRNG;
-
     typedef std::map<int,int> SourceSequence;
-    SourceSequence sourceSequence;
+
+    // parameters
+    std::vector<Address> destAddresses;
+    ChooseDestAddrMode chooseDestAddrMode;
     simtime_t delayLimit;
-    cMessage *timerNext;
     simtime_t startTime;
     simtime_t stopTime;
-    simtime_t nextPkt;
-    simtime_t nextBurst;
-    simtime_t nextSleep;
-    bool activeBurst;
-    bool isSource;
-    bool haveSleepDuration;
-
-    static int counter; // counter for generating a global number for each packet
-
-    int numSent;
-    int numReceived;
-    int numDeleted;
-    int numDuplicated;
+    int localPort, destPort;
+    int destAddrRNG;
 
     // volatile parameters:
     cPar *messageLengthPar;
@@ -79,7 +60,26 @@ class INET_API UDPBasicBurst : public ApplicationBase
     cPar *sleepDurationPar;
     cPar *sendIntervalPar;
 
-    //statistics:
+    // state
+    UDPSocket socket;
+    Address destAddr;
+    SourceSequence sourceSequence;
+    cMessage *timerNext;
+    simtime_t nextPkt;
+    simtime_t nextBurst;
+    simtime_t nextSleep;
+    bool isSource;
+    bool activeBurst;
+    bool haveSleepDuration;
+
+    // statistics:
+    static int counter; // counter for generating a global number for each packet
+
+    int numSent;
+    int numReceived;
+    int numDeleted;
+    int numDuplicated;
+
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
     static simsignal_t outOfOrderPkSignal;

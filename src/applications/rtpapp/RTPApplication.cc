@@ -100,9 +100,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
         case ENTER_SESSION:
             EV << "enterSession" << endl;
             if (isActiveSession)
-            {
                 EV << "Session already entered\n";
-            }
             else
             {
                 isActiveSession = true;
@@ -141,9 +139,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
         case STOP_TRANSMISSION:
             EV << "stopTransmission" << endl;
             if (!isActiveSession)
-            {
                 EV << "Session already left\n";
-            }
             else
             {
                 RTPCISenderControl *ci = new RTPCISenderControl();
@@ -158,9 +154,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
         case LEAVE_SESSION:
             EV << "leaveSession" << endl;
             if (!isActiveSession)
-            {
                 EV << "Session already left\n";
-            }
             else
             {
                 RTPCILeaveSession* ci = new RTPCILeaveSession();
@@ -173,7 +167,6 @@ void RTPApplication::handleMessage(cMessage* msgIn)
         default:
             throw cRuntimeError("Invalid msgKind value %d in message '%s'",
                     msgIn->getKind(), msgIn->getName());
-            break;
         }
     }
     else if (isActiveSession)

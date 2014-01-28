@@ -1,5 +1,6 @@
 //
 // Copyright (C) 2005 Andras Varga
+// Based on the video streaming app of the similar name by Johnny Lai.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -14,12 +15,6 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
-
-//
-// based on the video streaming app of the similar name by Johnny Lai
-//
-
 
 #include "UDPVideoStreamSvr.h"
 
