@@ -37,18 +37,19 @@ class INET_API PIMBase : public cSimpleModule
 
         struct AssertMetric
         {
-            int preference;
+            short rptBit;
+            short preference;
             int metric;
 
             static const AssertMetric INFINITE;
 
-            AssertMetric() : preference(-1), metric(0) {}
-            AssertMetric(int preference, int metric) : preference(preference), metric(metric) { ASSERT(preference >= 0); }
+            AssertMetric() : rptBit(1), preference(-1), metric(0) {}
+            AssertMetric(int preference, int metric) : rptBit(0), preference(preference), metric(metric) { ASSERT(preference >= 0); }
+            AssertMetric(bool rptBit, int preference, int metric) : rptBit(rptBit?1:0), preference(preference), metric(metric) { ASSERT(preference >= 0); }
             bool isInfinite() const { return preference == -1; }
-            bool operator==(const AssertMetric& other) const { return preference == other.preference && metric == other.metric; }
-            bool operator!=(const AssertMetric& other) const { return preference != other.preference || metric != other.metric; }
-            bool operator<(const AssertMetric& other) const { return !isInfinite() && (other.isInfinite() || preference < other.preference ||
-                                                                        (preference == other.preference && metric < other.metric)); }
+            bool operator==(const AssertMetric& other) const { return rptBit == other.rptBit && preference == other.preference && metric == other.metric; }
+            bool operator!=(const AssertMetric& other) const { return rptBit != other.rptBit || preference != other.preference || metric != other.metric; }
+            bool operator<(const AssertMetric& other) const;
         };
 
         struct SourceAndGroup

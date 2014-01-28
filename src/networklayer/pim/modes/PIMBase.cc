@@ -33,6 +33,19 @@ const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 const PIMBase::AssertMetric PIMBase::AssertMetric::INFINITE;
 
+bool PIMBase::AssertMetric::operator<(const AssertMetric& other) const
+{
+    if (isInfinite())
+        return false;
+    if (other.isInfinite())
+        return true;
+    if (rptBit != other.rptBit)
+        return rptBit < other.rptBit;
+    if (preference != other.preference)
+        return preference < other.preference;
+    return metric < other.metric;
+}
+
 PIMBase::~PIMBase()
 {
     cancelAndDelete(helloTimer);
