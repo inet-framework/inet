@@ -89,50 +89,25 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         static simsignal_t rcvdPkSignal;
 
     protected:
-        void sendOrSchedule(cPacket *msg);
-        void sendRequest(bool last = true);
 
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void handleMessage(cMessage *msg);
         virtual void finish();
         void handleTimer(cMessage *msg);
-        void generateAndSend(SCTPConnectInfo *connectInfo);
+
         void connect();
-
-        /*
-         * Does nothing but update statistics/status. Redefine to perform or schedule first sending.
-         */
         void socketEstablished(int connId, void *yourPtr);
-
-        /*
-         * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
-         * Beware: this funcion deletes the incoming message, which might not be what you want.
-        */
         void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-
         void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
-
-        /*
-         * Since remote SCTP closed, invokes close(). Redefine if you want to do something else.
-         */
         void socketPeerClosed(int connId, void *yourPtr);
-
-        /*
-         * Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection.
-         */
         void socketClosed(int connId, void *yourPtr);
-
-        /*
-         * Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay.
-         */
         void socketFailure(int connId, void *yourPtr, int code);
-
-        /*
-         *  Redefine to handle incoming SCTPStatusInfo.
-         */
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
+        void sendRequest(bool last = true);
+        void sendOrSchedule(cPacket *msg);
+        void generateAndSend(SCTPConnectInfo *connectInfo);
         void sendRequestArrived();
         void sendQueueRequest();
         void shutdownReceivedArrived(int connId);

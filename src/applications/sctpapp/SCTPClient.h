@@ -83,65 +83,17 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void handleMessage(cMessage *msg);
         void finish();
 
-        /*
-         * Issues an active OPEN to the address/port given as module parameters
-         */
         void connect();
-
-        /*
-         * Issues CLOSE command
-         */
         void close();
-
-        /*
-         * Sends a GenericAppMsg of the given length
-         */
-        //virtual void sendPacket(int numBytes, bool serverClose=false);
-
-        /*
-         * When running under GUI, it displays the given string next to the icon
-         */
         void setStatusString(const char *s);
-
-        /*
-         * Invoked from handleMessage(). Should be redefined to handle self-messages.
-         */
         void handleTimer(cMessage *msg);
-
-        /*
-         * Does nothing but update statistics/status. Redefine to perform or schedule first sending.
-         */
         void socketEstablished(int connId, void *yourPtr, unsigned long int buffer); // TODO: needs a better name
-
-        /*
-         * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
-         * Beware: this funcion deletes the incoming message, which might not be what you want.
-         */
         void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent); // TODO: needs a better name
-
         void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
-
-        /*
-         * Since remote SCTP closed, invokes close(). Redefine if you want to do something else.
-         */
         void socketPeerClosed(int connId, void *yourPtr);
-
-        /*
-         * Does nothing but update statistics/status. Redefine if you want to do something else, such as opening a new connection.
-         */
         void socketClosed(int connId, void *yourPtr);
-
-        /*
-         * Does nothing but update statistics/status. Redefine if you want to try reconnecting after a delay.
-         */
         void socketFailure(int connId, void *yourPtr, int code);
-
-        /*
-         * Redefine to handle incoming SCTPStatusInfo.
-         */
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
-
-        // TODO: need to be revised: naming conventions
         void setPrimaryPath(const char* addr);
         void sendRequestArrived();
         void sendQueueRequest();
@@ -149,10 +101,6 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void sendqueueAbatedArrived(int connId, unsigned long int buffer);
         void msgAbandonedArrived(int assocId);
         void sendStreamResetNotification();
-
-        /*
-         *  Utility: sends a request to the server
-         */
         void sendRequest(bool last = true);
 
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

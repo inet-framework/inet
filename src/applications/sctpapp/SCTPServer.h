@@ -82,18 +82,18 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
         ServerAssocStatMap serverAssocStatMap;
 
     protected:
-        void sendOrSchedule(cPacket *msg);
-        cPacket* makeAbortNotification(SCTPCommand* msg);
-        cPacket* makeReceiveRequest(cPacket* msg);
-        cPacket* makeDefaultReceive();
-        int ssn;
-
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void handleMessage(cMessage *msg);
         virtual void finish();
         void handleTimer(cMessage *msg);
+        void sendOrSchedule(cPacket *msg);
+
+        cPacket* makeAbortNotification(SCTPCommand* msg);
+        cPacket* makeReceiveRequest(cPacket* msg);
+        cPacket* makeDefaultReceive();
         void generateAndSend();
+
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
         { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
