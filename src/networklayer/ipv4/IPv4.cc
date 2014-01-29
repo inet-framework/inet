@@ -25,7 +25,7 @@
 #include "ARPPacket_m.h"
 #include "IARPCache.h"
 #include "ICMPMessage_m.h"
-#include "Ieee802Ctrl_m.h"
+#include "Ieee802Ctrl.h"
 #include "IIPv4RoutingTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPSocket.h"
