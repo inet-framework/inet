@@ -33,6 +33,18 @@ const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 const PIMBase::AssertMetric PIMBase::AssertMetric::INFINITE;
 
+bool PIMBase::AssertMetric::operator==(const AssertMetric& other) const
+{
+    return rptBit == other.rptBit && preference == other.preference &&
+            metric == other.metric && address == other.address;
+}
+
+bool PIMBase::AssertMetric::operator!=(const AssertMetric& other) const
+{
+    return rptBit != other.rptBit || preference != other.preference ||
+            metric != other.metric || address != other.address;
+}
+
 bool PIMBase::AssertMetric::operator<(const AssertMetric& other) const
 {
     if (isInfinite())
@@ -43,7 +55,9 @@ bool PIMBase::AssertMetric::operator<(const AssertMetric& other) const
         return rptBit < other.rptBit;
     if (preference != other.preference)
         return preference < other.preference;
-    return metric < other.metric;
+    if (metric != other.metric)
+        return metric < other.metric;
+    return address > other.address;
 }
 
 PIMBase::~PIMBase()

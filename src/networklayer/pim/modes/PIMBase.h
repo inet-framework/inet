@@ -40,16 +40,20 @@ class INET_API PIMBase : public cSimpleModule
             short rptBit;
             short preference;
             int metric;
+            IPv4Address address;
 
             static const AssertMetric INFINITE;
 
             AssertMetric() : rptBit(1), preference(-1), metric(0) {}
             AssertMetric(int preference, int metric) : rptBit(0), preference(preference), metric(metric) { ASSERT(preference >= 0); }
-            AssertMetric(bool rptBit, int preference, int metric) : rptBit(rptBit?1:0), preference(preference), metric(metric) { ASSERT(preference >= 0); }
+            // AssertMetric(bool rptBit, int preference, int metric) : rptBit(rptBit?1:0), preference(preference), metric(metric) { ASSERT(preference >= 0); }
+            AssertMetric(bool rptBit, int preference, int metric, IPv4Address address = IPv4Address::UNSPECIFIED_ADDRESS)
+                : rptBit(rptBit?1:0), preference(preference), metric(metric), address(address) { ASSERT(preference >= 0); }
             bool isInfinite() const { return preference == -1; }
-            bool operator==(const AssertMetric& other) const { return rptBit == other.rptBit && preference == other.preference && metric == other.metric; }
-            bool operator!=(const AssertMetric& other) const { return rptBit != other.rptBit || preference != other.preference || metric != other.metric; }
+            bool operator==(const AssertMetric& other) const;
+            bool operator!=(const AssertMetric& other) const;
             bool operator<(const AssertMetric& other) const;
+            AssertMetric setAddress(IPv4Address address) const { return AssertMetric(rptBit, preference, metric, address); }
         };
 
         struct SourceAndGroup
