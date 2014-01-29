@@ -67,7 +67,12 @@ void RoutingTableRecorder::handleMessage(cMessage *)
 void RoutingTableRecorder::hookListeners()
 {
     // hook existing notification boards (we won't cover dynamically created hosts/routers, but oh well)
+
+#if OMNETPP_VERSION < 0x0500
     for (int id = 0; id < simulation.getLastModuleId(); id++)
+#else
+    for (int id = 0; id < simulation.getLastComponentId(); id++)
+#endif
     {
         NotificationBoard *nb = dynamic_cast<NotificationBoard *>(simulation.getModule(id));
         if (nb)
