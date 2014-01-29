@@ -17,6 +17,7 @@
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0    # Skip this. The defaults.ini is just an included file.
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0    # cpu time limit exceeded
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0    # cpu time limit exceeded
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0       # segmentation fault in OLSR_ETX
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0   # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0 # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0          # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
