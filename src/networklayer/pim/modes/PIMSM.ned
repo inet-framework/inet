@@ -37,6 +37,8 @@ simple PIMSM
         double rpKeepAlivePeriod @unit(s) = 3 * registerSuppressionTime + registerProbeTime;
         double registerSuppressionTime @unit(s) = 60s;
         double registerProbeTime @unit(s) = 5s;
+        double assertTime @unit(s) = 180s;
+        double assertOverrideInterval @unit(s) = 3s;
 
         string RP = default("");
         string sptThreshold = default("infinity");

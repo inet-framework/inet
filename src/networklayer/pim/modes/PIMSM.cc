@@ -125,6 +125,8 @@ void PIMSM::initialize(int stage)
         rpKeepAlivePeriod = par("rpKeepAlivePeriod");
         registerSuppressionTime = par("registerSuppressionTime");
         registerProbeTime = par("registerProbeTime");
+        assertTime = par("assertTime");
+        assertOverrideInterval = par("assertOverrideInterval");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -142,11 +144,11 @@ void PIMSM::initialize(int stage)
                 host->subscribe(NF_IPv4_NEW_MULTICAST, this);
                 host->subscribe(NF_IPv4_MDATA_REGISTER, this);
                 host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+                host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
                 host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
                 host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
             }
         }
-
     }
 }
 
@@ -407,19 +409,53 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
     delete timer;
 }
 
+void PIMSM::processAssertTimer(cMessage *timer)
+{
+    Interface *interfaceData = static_cast<Interface*>(timer->getContextPointer());
+    ASSERT(timer == interfaceData->assertTimer);
+    ASSERT(interfaceData->assertState != Interface::NO_ASSERT_INFO);
+
+    Route *route = interfaceData->owner;
+    if (route->type == SG || route->type == G)
+    {
+        //
+        // (S,G) Assert State Machine; event: AT(S,G,I) expires OR
+        // (*,G) Assert State Machine; event: AT(*,G,I) expires
+        //
+        EV_DETAIL << "AssertTimer(" << (route->type==G?"*":route->origin.str()) << ", "
+                  << route->group << ", " << interfaceData->ie->getName() << ") has expired.\n";
+
+        if (interfaceData->assertState == Interface::I_WON_ASSERT)
+        {
+            // The (S,G) or (*,G) Assert Timer expires.  As we're in the Winner state,
+            // we must still have (S,G) or (*,G) forwarding state that is actively
+            // being kept alive.  We resend the (S,G) or (*,G) Assert and restart the
+            // Assert Timer.  Note that the assert
+            // winner's Assert Timer is engineered to expire shortly before
+            // timers on assert losers; this prevents unnecessary thrashing
+            // of the forwarder and periodic flooding of duplicate packets.
+            sendPIMAssert(route->origin, route->group, route->metric, interfaceData->ie, route->type == G);
+            interfaceData->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (interfaceData->assertState == Interface::I_LOST_ASSERT)
+        {
+            // The (S,G) or (*,G) Assert Timer expires.  We transition to NoInfo
+            // state, deleting the (S,G) or (*,G) assert information.
+            EV_DEBUG << "Going into NO_ASSERT_INFO state.\n";
+            interfaceData->deleteAssertInfo(); // deleted timer
+            return;
+        }
+    }
+
+    delete timer;
+}
+
+
 /**
- * RESTART EXPIRY TIMER
- *
  * The method is used to restart ET. ET is used for outgoing interfaces
  * and whole route in router. After ET expires, outgoing interface is
  * removed or if there aren't any outgoing interface, route is removed
  * after ET expires.
- *
- * @param route Pointer to multicast route.
- * @param originIntf Pointer to origin interface to packet
- * @param holdTime time for ET
- * @see getEt
- * @see setEt
  */
 void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime)
 {
@@ -868,7 +904,268 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
 
 void PIMSM::processAssertPacket(PIMAssert *pkt)
 {
-    // TODO
+    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+    int incomingInterfaceId = ctrlInfo->getInterfaceId();
+    IPv4Address source = pkt->getSourceAddress();
+    IPv4Address group = pkt->getGroupAddress();
+    AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), ctrlInfo->getSrcAddr());
+
+    if (!source.isUnspecified())
+    {
+        Route *routeSG = findSGRoute(source, group);
+        ASSERT(routeSG); // XXX create S,G state?
+
+        Interface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                           static_cast<Interface*>(routeSG->upstreamInterface) :
+                                           static_cast<Interface*>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+
+        EV_INFO << "Received Assert(" << source << ", " << group
+                << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
+
+        Interface::AssertState stateBefore = incomingInterface->assertState;
+        processAssertSG(incomingInterface, receivedMetric);
+
+        if (stateBefore == Interface::NO_ASSERT_INFO && incomingInterface->assertState == Interface::NO_ASSERT_INFO)
+        {
+            Route *routeG = findGRoute(group);
+            incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                    static_cast<Interface*>(routeG->upstreamInterface) :
+                                    static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+            processAssertG(incomingInterface, receivedMetric);
+        }
+
+    }
+    else
+    {
+        Route *routeG = findGRoute(group);
+        Interface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                           static_cast<Interface*>(routeG->upstreamInterface) :
+                                           static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+        EV_INFO << "Received Assert(*, " << group << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
+        processAssertG(incomingInterface, receivedMetric);
+
+    }
+
+
+    delete pkt;
+}
+
+void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMetric)
+{
+    Route *routeSG = interface->owner;
+    AssertMetric myMetric = interface->couldAssert ? // XXX check routeG metric too
+                                routeSG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
+                                AssertMetric::INFINITE;
+
+    // A "preferred assert" is one with a better metric than the current winner.
+    bool isPreferredAssert = receivedMetric < interface->winnerMetric;
+
+    // An "acceptable assert" is one that has a better metric than my_assert_metric(S,G,I).
+    // An assert is never considered acceptable if its metric is infinite.
+    bool isAcceptableAssert = receivedMetric < myMetric;
+
+    // An "inferior assert" is one with a worse metric than my_assert_metric(S,G,I).
+    // An assert is never considered inferior if my_assert_metric(S,G,I) is infinite.
+    bool isInferiorAssert = myMetric < receivedMetric;
+
+    if (interface->assertState == Interface::NO_ASSERT_INFO)
+    {
+        if (isInferiorAssert && !receivedMetric.rptBit && interface->couldAssert)
+        {
+            // An assert is received for (S,G) with the RPT bit cleared that
+            // is inferior to our own assert metric.  The RPT bit cleared
+            // indicates that the sender of the assert had (S,G) forwarding
+            // state on this interface.  If the assert is inferior to our
+            // metric, then we must also have (S,G) forwarding state (i.e.,
+            // CouldAssert(S,G,I)==TRUE) as (S,G) asserts beat (*,G) asserts,
+            // and so we should be the assert winner.  We transition to the
+            // "I am Assert Winner" state and perform Actions A1 (below).
+            interface->assertState = Interface::I_WON_ASSERT;
+            interface->winnerMetric = myMetric;
+            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            interface->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (receivedMetric.rptBit && interface->couldAssert)
+        {
+            // An assert is received for (S,G) on I with the RPT bit set
+            // (it's a (*,G) assert).  CouldAssert(S,G,I) is TRUE only if we
+            // have (S,G) forwarding state on this interface, so we should be
+            // the assert winner.  We transition to the "I am Assert Winner"
+            // state and perform Actions A1 (below).
+            interface->assertState = Interface::I_WON_ASSERT;
+            interface->winnerMetric = myMetric;
+            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            interface->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (isAcceptableAssert && !receivedMetric.rptBit && interface->assertTrackingDesired)
+        {
+            // We're interested in (S,G) Asserts, either because I is a
+            // downstream interface for which we have (S,G) or (*,G)
+            // forwarding state, or because I is the upstream interface for S
+            // and we have (S,G) forwarding state.  The received assert has a
+            // better metric than our own, so we do not win the Assert.  We
+            // transition to "I am Assert Loser" and perform Actions A6
+            // (below).
+            interface->assertState = Interface::I_LOST_ASSERT;
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+            // TODO If (I is RPF_interface(S)) AND (UpstreamJPState(S,G) == true)
+            //      set SPTbit(S,G) to TRUE.
+        }
+    }
+    else if (interface->assertState == Interface::I_WON_ASSERT)
+    {
+        if (isInferiorAssert)
+        {
+            // We receive an (S,G) assert or (*,G) assert mentioning S that
+            // has a worse metric than our own.  Whoever sent the assert is
+            // in error, and so we resend an (S,G) Assert and restart the
+            // Assert Timer (Actions A3 below).
+            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            interface->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (isPreferredAssert)
+        {
+            // We receive an (S,G) assert that has a better metric than our
+            // own.  We transition to "I am Assert Loser" state and perform
+            // Actions A2 (below).  Note that this may affect the value of
+            // JoinDesired(S,G) and PruneDesired(S,G,rpt), which could cause
+            // transitions in the upstream (S,G) or (S,G,rpt) state machines.
+            interface->assertState = Interface::I_LOST_ASSERT;
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+    }
+    else if (interface->assertState == Interface::I_LOST_ASSERT)
+    {
+        if (isPreferredAssert)
+        {
+            // We receive an assert that is better than that of the current
+            // assert winner.  We stay in Loser state and perform Actions A2
+            // below.
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+        else if (isAcceptableAssert && !receivedMetric.rptBit && receivedMetric.address == interface->winnerMetric.address)
+        {
+            // We receive an assert from the current assert winner that is
+            // better than our own metric for this (S,G) (although the metric
+            // may be worse than the winner's previous metric).  We stay in
+            // Loser state and perform Actions A2 below.
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+        else if (isInferiorAssert /* or AssertCancel */ && receivedMetric.address == interface->winnerMetric.address)
+        {
+            // We receive an assert from the current assert winner that is
+            // worse than our own metric for this group (typically, because
+            // the winner's metric became worse or because it is an assert
+            // cancel).  We transition to NoInfo state, deleting the (S,G)
+            // assert information and allowing the normal PIM Join/Prune
+            // mechanisms to operate.  Usually, we will eventually re-assert
+            // and win when data packets from S have started flowing again.
+            interface->deleteAssertInfo();
+        }
+    }
+}
+
+void PIMSM::processAssertG(Interface *interface, const AssertMetric &receivedMetric)
+{
+    Route *routeG = interface->owner;
+    AssertMetric myMetric = interface->couldAssert ?
+                                routeG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
+                                AssertMetric::INFINITE;
+
+    // A "preferred assert" is one with a better metric than the current winner.
+    bool isPreferredAssert = receivedMetric < interface->winnerMetric;
+
+    // An "acceptable assert" is one that has a better metric than my_assert_metric(S,G,I).
+    // An assert is never considered acceptable if its metric is infinite.
+    bool isAcceptableAssert = receivedMetric < myMetric;
+
+    // An "inferior assert" is one with a worse metric than my_assert_metric(S,G,I).
+    // An assert is never considered inferior if my_assert_metric(S,G,I) is infinite.
+    bool isInferiorAssert = myMetric < receivedMetric;
+
+    if (interface->assertState == Interface::NO_ASSERT_INFO)
+    {
+        if (isInferiorAssert && receivedMetric.rptBit && interface->couldAssert)
+        {
+            // An Inferior (*,G) assert is received for G on Interface I.  If
+            // CouldAssert(*,G,I) is TRUE, then I is our downstream
+            // interface, and we have (*,G) forwarding state on this
+            // interface, so we should be the assert winner.  We transition
+            // to the "I am Assert Winner" state and perform Actions:
+            interface->assertState = Interface::I_WON_ASSERT;
+            sendPIMAssert(IPv4Address::UNSPECIFIED_ADDRESS, routeG->group, myMetric, interface->ie, true);
+            interface->startAssertTimer(assertTime - assertOverrideInterval);
+            interface->winnerMetric = myMetric;
+        }
+        else if (isAcceptableAssert && receivedMetric.rptBit && interface->assertTrackingDesired)
+        {
+            // We're interested in (*,G) Asserts, either because I is a
+            // downstream interface for which we have (*,G) forwarding state,
+            // or because I is the upstream interface for RP(G) and we have
+            // (*,G) forwarding state.  We get a (*,G) Assert that has a
+            // better metric than our own, so we do not win the Assert.  We
+            // transition to "I am Assert Loser" and perform Actions:
+            interface->assertState = Interface::I_LOST_ASSERT;
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+    }
+    else if (interface->assertState == Interface::I_WON_ASSERT)
+    {
+        if (isInferiorAssert)
+        {
+            // We receive a (*,G) assert that has a worse metric than our
+            // own.  Whoever sent the assert has lost, and so we resend a
+            // (*,G) Assert and restart the Assert Timer (Actions A3 below).
+            sendPIMAssert(IPv4Address::UNSPECIFIED_ADDRESS, routeG->group, myMetric, interface->ie, true);
+            interface->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (isPreferredAssert)
+        {
+            // We receive a (*,G) assert that has a better metric than our
+            // own.  We transition to "I am Assert Loser" state and perform
+            // Actions A2 (below).
+            interface->assertState = Interface::I_LOST_ASSERT;
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+    }
+    else if (interface->assertState == Interface::I_LOST_ASSERT)
+    {
+        if (isPreferredAssert && receivedMetric.rptBit)
+        {
+            // We receive a (*,G) assert that is better than that of the
+            // current assert winner.  We stay in Loser state and perform
+            // Actions A2 below.
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+        else if (isAcceptableAssert && receivedMetric.address == interface->winnerMetric.address && receivedMetric.rptBit)
+        {
+            // We receive a (*,G) assert from the current assert winner that
+            // is better than our own metric for this group (although the
+            // metric may be worse than the winner's previous metric).  We
+            // stay in Loser state and perform Actions A2 below.
+            //interface->winnerAddress = ...;
+            interface->winnerMetric = receivedMetric;
+            interface->startAssertTimer(assertTime);
+        }
+        else if (isInferiorAssert /*or AssertCancel*/ && receivedMetric.address == interface->winnerMetric.address)
+        {
+            // We receive an assert from the current assert winner that is
+            // worse than our own metric for this group (typically because
+            // the winner's metric became worse or is now an assert cancel).
+            // We transition to NoInfo state, delete this (*,G) assert state
+            // (Actions A5), and allow the normal PIM Join/Prune mechanisms
+            // to operate.  Usually, we will eventually re-assert and win
+            // when data packets for G have started flowing again.
+            interface->deleteAssertInfo();
+        }
+    }
 }
 
 
@@ -979,6 +1276,21 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     InterfaceEntry *interfaceToDR = rt->getInterfaceForDestAddr(dest);
     sendToIP(msg, source, dest, interfaceToDR->getInterfaceId(), MAX_TTL);
 }
+
+void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit)
+{
+    EV_INFO << "Sending Assert(S= " << source << ", G= " << group << ") message on interface '" << ie->getName() << "'\n";
+
+    PIMAssert *pkt = new PIMAssert("PIMAssert");
+    pkt->setGroupAddress(group);
+    pkt->setSourceAddress(source);
+    pkt->setR(rptBit);
+    pkt->setMetricPreference(metric.preference);
+    pkt->setMetric(metric.metric);
+
+    sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId(), 1);
+}
+
 
 void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAddr, int outInterfaceId, short ttl)
 {
@@ -1123,6 +1435,40 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
     }
 }
 
+void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId)
+{
+    if (route->type == G || route->type == SG)
+    {
+        //
+        // (S,G) Assert State Machine; event: An (S,G) data packet arrives on interface I
+        // OR
+        // (*,G) Assert State Machine; event: A data packet destined for G arrives on interface I
+        //
+        DownstreamInterface *downstream = route->findDownstreamInterfaceByInterfaceId(interfaceId);
+        if (downstream && downstream->couldAssert && downstream->assertState == Interface::NO_ASSERT_INFO)
+        {
+            // An (S,G) data packet arrived on an downstream interface that
+            // is in our (S,G) or (*,G) outgoing interface list.  We optimistically
+            // assume that we will be the assert winner for this (S,G) or (*,G), and
+            // so we transition to the "I am Assert Winner" state and perform
+            // Actions A1 (below), which will initiate the assert negotiation
+            // for (S,G) or (*,G).
+            downstream->assertState = Interface::I_WON_ASSERT;
+            downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
+            sendPIMAssert(route->origin, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
+            downstream->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (route->type == SG && (!downstream || downstream->assertState == Interface::NO_ASSERT_INFO))
+        {
+            // When in NO_ASSERT_INFO state before and after consideration of the received message,
+            // then call (*,G) assert processing.
+            Route *routeG = findGRoute(route->group);
+            if (routeG)
+                multicastPacketArrivedOnNonRpfInterface(routeG, interfaceId);
+        }
+    }
+}
+
 void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
 {
     IPv4Address source = datagram->getSrcAddress();
@@ -1196,6 +1542,9 @@ void PIMSM::processPIMTimer(cMessage *timer)
         case RegisterStopTimer:
             EV << "RegisterStopTimer" << endl;
             processRegisterStopTimer(timer);
+            break;
+        case AssertTimer:
+            processAssertTimer(timer);
             break;
         default:
             EV << "BAD TYPE, DROPPED" << endl;
@@ -1303,6 +1652,20 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
             route = findSGRoute(datagram->getSrcAddress(), datagram->getDestAddress());
             if (route)
                 multicastPacketArrivedOnRpfInterface(route);
+        }
+    }
+    else if (signalID == NF_IPv4_DATA_ON_NONRPF)
+    {
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
+        {
+            IPv4Address srcAddr = datagram->getSrcAddress();
+            IPv4Address destAddr = datagram->getDestAddress();
+            if ((route = findSGRoute(srcAddr, destAddr)) != NULL)
+                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
+            else if ((route = findGRoute(destAddr)) != NULL)
+                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
         }
     }
     else if (signalID == NF_IPv4_MDATA_REGISTER)
@@ -1524,6 +1887,14 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
     delete outInterface;
 }
 
+PIMSM::Interface::Interface(Route *owner, InterfaceEntry *ie)
+    : owner(owner), ie(ie), expiryTimer(NULL), assertState(NO_ASSERT_INFO), assertTimer(NULL),
+      couldAssert(false), assertTrackingDesired(false)
+{
+    ASSERT(owner);
+    ASSERT(ie);
+}
+
 PIMSM::Interface::~Interface()
 {
     owner->owner->cancelAndDelete(expiryTimer);
@@ -1535,6 +1906,21 @@ void PIMSM::Interface::startExpiryTimer(double holdTime)
     expiryTimer = new cMessage("PIMExpiryTimer", ExpiryTimer);
     expiryTimer->setContextPointer(this);
     owner->owner->scheduleAt(simTime() + holdTime, expiryTimer);
+}
+
+void PIMSM::Interface::startAssertTimer(double assertTime)
+{
+    ASSERT(assertTimer == NULL);
+    assertTimer = new cMessage("PIMAssertTimer", AssertTimer);
+    assertTimer->setContextPointer(this);
+    owner->owner->scheduleAt(simTime() + assertTime, assertTimer);
+}
+
+void PIMSM::Interface::deleteAssertInfo()
+{
+    assertState = Interface::NO_ASSERT_INFO;
+    winnerMetric = AssertMetric::INFINITE;
+    owner->owner->cancelAndDeleteTimer(assertTimer);
 }
 
 void PIMSM::Route::startKeepAliveTimer()

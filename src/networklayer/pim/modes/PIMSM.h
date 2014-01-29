@@ -48,12 +48,16 @@ class INET_API PIMSM : public PIMBase, protected cListener
             AssertState assertState;
             cMessage *assertTimer;
             AssertMetric winnerMetric;
-            IPv4Address winnerAddress;
 
-            Interface(Route *owner, InterfaceEntry *ie)
-                : owner(owner), ie(ie), expiryTimer(NULL), assertState(NO_ASSERT_INFO), assertTimer(NULL) { ASSERT(owner); ASSERT(ie); }
+            // Assert flags
+            bool couldAssert;
+            bool assertTrackingDesired;
+
+            Interface(Route *owner, InterfaceEntry *ie);
             virtual ~Interface();
             void startExpiryTimer(double holdTime);
+            void startAssertTimer(double assertTime);
+            void deleteAssertInfo();
         };
 
         /**
@@ -67,7 +71,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
             UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address nextHop)
                 : Interface(owner, ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerAddress : nextHop; }
+            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
         };
 
         struct DownstreamInterface : public Interface
@@ -180,6 +184,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         double rpKeepAlivePeriod;
         double registerSuppressionTime;
         double registerProbeTime;
+        double assertTime;
+        double assertOverrideInterval;
 
         // state
         SGStateMap routes;
@@ -189,10 +195,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
         void multicastPacketArrivedOnRpfInterface(Route *route);
+        void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
         void multicastPacketForwarded(IPv4Datagram *datagram);
         void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
         void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
-
 
         // process timers
         void processPIMTimer(cMessage *timer);
@@ -201,16 +207,15 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processExpiryTimer(cMessage *timer);
         void processJoinTimer(cMessage *timer);
         void processPrunePendingTimer(cMessage *timer);
+        void processAssertTimer(cMessage *timer);
 
-
-        void restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime);
-
-        // pim messages
+        // semd pim messages
         void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
         void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
         void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
+        void sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
         void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
 
@@ -227,6 +232,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processPruneG(IPv4Address multGroup, InterfaceEntry *inInterface);
         void processPruneSG(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
         void processPruneSGrpt(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
+        void processAssertSG(Interface *interface, const AssertMetric &receivedMetric);
+        void processAssertG(Interface *interface, const AssertMetric &receivedMetric);
 
         // computed intervals
         double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
@@ -239,6 +246,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         bool deleteMulticastRoute(Route *route);
         void cancelAndDeleteTimer(cMessage *&timer);
         void restartTimer(cMessage *timer, double interval);
+        void restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime);
+
 
         // routing table access
         void addGRoute(Route *route);
