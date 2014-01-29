@@ -156,7 +156,11 @@ std::vector<Address> PingTestApp::getAllAddresses()
 {
     std::vector<Address> result;
 
+#if OMNETPP_VERSION < 0x500
     for (int i=0; i<=simulation.getLastModuleId(); i++)
+#else
+    for (int i=0; i<=simulation.getLastComponentId(); i++)
+#endif
     {
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(simulation.getModule(i));
         if (ift)
