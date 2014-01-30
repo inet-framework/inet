@@ -31,6 +31,7 @@ Define_Module(TCPBasicClientApp);
 TCPBasicClientApp::TCPBasicClientApp()
 {
     timeoutMsg = NULL;
+    nodeStatus = NULL;
 }
 
 TCPBasicClientApp::~TCPBasicClientApp()

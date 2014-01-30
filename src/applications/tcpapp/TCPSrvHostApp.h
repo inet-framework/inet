@@ -76,7 +76,7 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
     // internal: called by TCPSrvHostApp after creating this module
     virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod = hostmodule; sock = socket;}
 
-    TCPServerThreadBase()  {sock = NULL;}
+    TCPServerThreadBase()  {sock = NULL; hostmod = NULL;}
     virtual ~TCPServerThreadBase() {}
 
     /*

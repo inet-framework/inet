@@ -34,6 +34,7 @@ Define_Module(TCPSessionApp);
 TCPSessionApp::TCPSessionApp()
 {
     timeoutMsg = NULL;
+    nodeStatus = NULL;
 }
 
 TCPSessionApp::~TCPSessionApp()

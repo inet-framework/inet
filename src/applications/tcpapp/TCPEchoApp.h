@@ -54,6 +54,9 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
     virtual void finish();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
+  public:
+    TCPEchoApp();
+
 };
 
 #endif
