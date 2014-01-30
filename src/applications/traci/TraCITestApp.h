@@ -22,41 +22,41 @@
 #include <set>
 #include <list>
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
-#include "mobility/single/TraCIMobility.h"
+#include "TraCIMobility.h"
 
 /**
  * FIXME
  */
 class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycle
 {
-    public:
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+    protected:
+        // parameter
+        int testNumber;
+
+        // state
+        TraCIMobility* traci;
+        std::set<std::string> visitedEdges; // set of edges this vehicle visited
+        bool hasStopped; // true if at some point in time this vehicle travelled at negligible speed
+        static simsignal_t mobilityStateChangedSignal;
 
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void finish();
 
-    protected:
-        // module parameters
-        int testNumber;
-
-        TraCIMobility* traci;
-        std::set<std::string> visitedEdges; /**< set of edges this vehicle visited */
-        bool hasStopped; /**< true if at some point in time this vehicle travelled at negligible speed */
-        static simsignal_t mobilityStateChangedSignal;
-
-    protected:
         void handleSelfMsg(cMessage* msg);
         void handleLowerMsg(cMessage* msg);
         virtual void handleMessage(cMessage* msg);
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
         void handlePositionUpdate();
+
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 #endif

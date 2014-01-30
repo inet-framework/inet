@@ -1,8 +1,6 @@
 //
 // Copyright (C) 2006-2011 Christoph Sommer <christoph.sommer@uibk.ac.at>
 //
-// Documentation for these modules is at http://veins.car2x.org/
-//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -21,41 +19,41 @@
 #ifndef TraCIDemo_H
 #define TraCIDemo_H
 
-#include <omnetpp.h>
+#include "INETDefs.h"
 #include "UDPSocket.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
-#include "mobility/single/TraCIMobility.h"
+#include "TraCIMobility.h"
 
 /**
  * Small IVC Demo
+ * Documentation for these modules is at http://veins.car2x.org/
  */
 class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 {
-    public:
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
-
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-
     protected:
+        // state
+        TraCIMobility* traci;
+        UDPSocket socket;
+        bool sentMessage;
+        static simsignal_t mobilityStateChangedSignal;
+
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-    protected:
-        TraCIMobility* traci;
-        bool sentMessage;
-        UDPSocket socket;
-        static simsignal_t mobilityStateChangedSignal;
-
-    protected:
         void setupLowerLayer();
         virtual void handleSelfMsg(cMessage* apMsg);
         virtual void handleLowerMsg(cMessage* apMsg);
 
         virtual void sendMessage();
         virtual void handlePositionUpdate();
+
+    public:
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
 };
 
 #endif
