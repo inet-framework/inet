@@ -67,7 +67,7 @@ void PingApp::initialize(int stage)
         stopTime = par("stopTime");
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             error("Invalid startTime/stopTime parameters");
-        printPing = (bool)par("printPing");
+        printPing = par("printPing").boolValue();
 
         // state
         pid = -1;
