@@ -34,11 +34,18 @@
 #include "NodeStatus.h"
 
 HttpBrowserBase::HttpBrowserBase()
-: HttpNodeBase()
 {
     m_bDisplayMessage = true;
     m_bDisplayResponseContent = true;
     eventTimer = NULL;
+    controller = NULL;
+
+    rdProcessingDelay = NULL;
+    rdActivityLength = NULL;
+    rdInterRequestInterval = NULL;
+    rdInterSessionInterval = NULL;
+    rdRequestSize = NULL;
+    rdReqInSession = NULL;
 
     htmlRequested = 0;
     htmlReceived = 0;
@@ -54,6 +61,13 @@ HttpBrowserBase::HttpBrowserBase()
 
 HttpBrowserBase::~HttpBrowserBase()
 {
+    delete rdProcessingDelay;
+    delete rdActivityLength;
+    delete rdInterRequestInterval;
+    delete rdInterSessionInterval;
+    delete rdRequestSize;
+    delete rdReqInSession;
+
     cancelAndDelete(eventTimer);
 }
 
@@ -606,10 +620,3 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
         scheduleAt(be.time, eventTimer);
     }
 }
-
-
-
-
-
-
-
