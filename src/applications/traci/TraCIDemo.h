@@ -53,6 +53,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 
     public:
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        TraCIDemo() { traci = NULL; }
 
 };
 
