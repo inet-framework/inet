@@ -84,11 +84,10 @@ void HttpBrowserBase::initialize(int stage)
             error("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
-        cXMLElement *element;
         rdObjectFactory rdFactory;
 
         // Activity period length -- the waking period
-        element = rootelement->getFirstChildWithTag("activityPeriod");
+        cXMLElement *element = rootelement->getFirstChildWithTag("activityPeriod");
         if (element==NULL)
         {
             rdActivityLength = NULL; // Disabled if this parameter is not defined in the file
@@ -152,7 +151,7 @@ void HttpBrowserBase::initialize(int stage)
 
         httpProtocol = par("httpProtocol");
 
-        logFileName = (const char*)par("logFile");
+        logFileName = par("logFile").stdstringValue();
         enableLogging = logFileName!="";
         outputFormat = lf_short;
 
@@ -177,13 +176,12 @@ void HttpBrowserBase::initialize(int stage)
     {
         EV_DEBUG << "Initializing base HTTP browser component -- phase 1\n";
 
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        std::string scriptFile = (const char*)par("scriptFile");
+        std::string scriptFile = par("scriptFile").stdstringValue();
         scriptedMode = !scriptFile.empty();
         if (scriptedMode)
         {
@@ -225,7 +223,6 @@ void HttpBrowserBase::finish()
 
 void HttpBrowserBase::handleSelfMessages(cMessage *msg)
 {
-    std::string serverUrl;
     switch (msg->getKind())
     {
         case MSGKIND_ACTIVITY_START:
@@ -367,20 +364,12 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
                     bubble("Received an unknown resource type");
                 break;
         }
-
         // Parse the html page body
         if ((HttpContentType)appmsg->contentType() == CT_HTML && strlen(appmsg->payload()) != 0)
         {
             EV_DEBUG << "Processing HTML document body:\n";
             cStringTokenizer lineTokenizer((const char*)appmsg->payload(), "\n");
             std::vector<std::string> lines = lineTokenizer.asVector();
-            int serial = 0;
-            std::string providerName = "";
-            std::string resourceName = "";
-            double delay = 0.0;
-            bool bad = false;
-            int refSize = 0;
-            HttpRequestQueue queue;
             std::map<std::string,HttpRequestQueue> requestQueues;
             for (std::vector<std::string>::iterator iter = lines.begin(); iter != lines.end(); iter++)
             {
@@ -393,21 +382,21 @@ void HttpBrowserBase::handleDataMessage(cMessage *msg)
                     continue;
                 }
                 // Get the resource name -- this is mandatory for all references
-                resourceName = fields[0];
+                std::string resourceName = fields[0];
 
-                providerName = senderWWW;
+                std::string providerName = senderWWW;
                 if (fields.size()>1)
                     providerName = fields[1];
 
-                delay = 0.0;
+                double delay = 0.0;
                 if (fields.size()>2)
                     delay = safeatof(fields[2].c_str());
 
-                bad = false;
+                bool bad = false;
                 if (fields.size()>3)
                     bad = safeatobool(fields[3].c_str());
 
-                refSize = 0;
+                int refSize = 0;
                 if (fields.size()>4)
                     refSize = safeatoi(fields[4].c_str());
 

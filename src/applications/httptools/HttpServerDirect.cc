@@ -63,6 +63,3 @@ void HttpServerDirect::handleMessage(cMessage *msg)
     }
     updateDisplay();
 }
-
-
-

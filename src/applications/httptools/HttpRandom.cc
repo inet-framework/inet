@@ -152,13 +152,12 @@ rdHistogram::rdHistogram(cXMLAttributeMap attributes)
 
 double rdHistogram::draw()
 {
-    int i;
-    int count = m_bins.size();
     rdHistogramBin bin;
     double val = uniform(0, 1);
     double cumsum = 0;
     int cumcount = 0;
-    for (i=0; i<count; i++)
+    int count = m_bins.size();
+    for (int i=0; i<count; i++)
     {
         // First select the bin
         bin = m_bins[i];
@@ -181,39 +180,32 @@ void rdHistogram::__parseBinString(std::string binstr)
     binstr = trimLeft(binstr, "[");
     binstr = trimRight(binstr, "]");
     cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
-    std::vector<std::string> res = tokenizer.asVector();
-    std::vector<std::string>::iterator i;
     std::string curtuple, countstr, sumstr;
-    int count;
-    double sum;
-    int pos;
-    rdHistogramBin bin;
-    for (i=res.begin(); i!=res.end(); i++)
+    std::vector<std::string> res = tokenizer.asVector();
+    for (std::vector<std::string>::iterator i=res.begin(); i!=res.end(); i++)
     {
         curtuple = (*i);
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
-        pos = curtuple.find(',');
+        int pos = curtuple.find(',');
         if (pos==-1)
             continue;  // Invalid tuple -- raise error here?
         countstr = curtuple.substr(0, pos);
         sumstr = curtuple.substr(pos+1, curtuple.size()-pos-1);
-        sum = safeatof(sumstr.c_str(), 0.0);
-        count = safeatoi(countstr.c_str(), 0);
-        bin.count = count;
-        bin.sum = sum;
+        rdHistogramBin bin;
+        bin.count = safeatoi(countstr.c_str(), 0);
+        bin.sum = safeatof(sumstr.c_str(), 0.0);
         m_bins.push_back(bin);
     }
 }
 
 void rdHistogram::__normalizeBins()
 {
-    unsigned int i;
     double sum = 0;
-    for (i=0; i<m_bins.size(); i++)
+    for (unsigned int i=0; i<m_bins.size(); i++)
         sum += m_bins[i].sum;
     if (sum!=0)
-        for (i=0; i<m_bins.size(); i++)
+        for (unsigned int i=0; i<m_bins.size(); i++)
             m_bins[i].sum = m_bins[i].sum/sum;
 }
 
@@ -283,7 +275,6 @@ double rdZipf::draw()
 {
     double sum_prob = 0;
     double z = uniform(0.0001, 0.9999);
-
     int i;
     for (i=1; i<=m_number; i++)
     {

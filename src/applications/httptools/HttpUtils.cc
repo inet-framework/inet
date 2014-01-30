@@ -250,5 +250,3 @@ bool fileExists(const char *file)
     return access(file, F_OK) == 0;
 #endif
 }
-
-

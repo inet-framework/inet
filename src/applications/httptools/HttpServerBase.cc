@@ -39,7 +39,7 @@ void HttpServerBase::initialize(int stage)
         EV_DEBUG << "Initializing HTTP server. Using WWW name " << hostName << endl;
         port = par("port");
 
-        logFileName = (const char*)par("logFile");
+        logFileName = par("logFile").stdstringValue();
         enableLogging = logFileName!="";
         outputFormat = lf_short;
 
@@ -52,11 +52,10 @@ void HttpServerBase::initialize(int stage)
         // Initialize the distribution objects for random browsing
         // @todo Skip initialization of random objects for scripted servers?
         cXMLAttributeMap attributes;
-        cXMLElement *element;
         rdObjectFactory rdFactory;
 
         // The reply delay
-        element = rootelement->getFirstChildWithTag("replyDelay");
+        cXMLElement *element = rootelement->getFirstChildWithTag("replyDelay");
         if (element==NULL)
             error("Reply delay parameter undefined in XML configuration");
         attributes = element->getAttributes();
@@ -140,9 +139,8 @@ void HttpServerBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
-        bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        bool isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
     }
@@ -527,15 +525,15 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
 {
     EV_DEBUG << "Reading HTML page definition file" << endl;
 
-    std::string filePath = path;
-    filePath += file;
-
+    std::string filePath = path + file;
     std::string line;
     std::string body = "";
     std::ifstream htmlfilestream;
     htmlfilestream.open(filePath.c_str());
+
     if (htmlfilestream.fail())
         error("Could not open page definition file '%s'", filePath.c_str());
+
     while (!std::getline(htmlfilestream, line).eof())
     {
         line = trim(line);

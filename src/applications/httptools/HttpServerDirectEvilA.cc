@@ -19,7 +19,6 @@
 
 Define_Module(HttpServerDirectEvilA);
 
-
 void HttpServerDirectEvilA::initialize(int stage)
 {
     HttpServerDirect::initialize(stage);
@@ -49,7 +48,3 @@ std::string HttpServerDirectEvilA::generateBody()
 
     return result;
 }
-
-
-
-
