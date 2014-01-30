@@ -34,45 +34,36 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
   private:
     UDPSocket socket;
 
-    // source
-    simtime_t talkspurtDuration;
+    // parameters
+    simtime_t stopTime;
+    simtime_t packetizationInterval;
+    int localPort, destPort;
+    int talkPacketSize;
+    Address destAddress;
+
+    // state
+    cMessage* selfSender;   // timer for sending packets
+    cMessage* selfSource;   // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
     simtime_t silenceDuration;
-    bool      isTalk;
-
-    // FIXME: be more specific with the name of this self message
-    cMessage* selfSource;   // timer for changing talkspurt/silence periods
-
+    simtime_t talkspurtDuration;
+    int packetID;
     int talkspurtID;
     int talkspurtNumPackets;
-    int packetID;
-    int talkPacketSize;
-    simtime_t packetizationInterval;
-
-    // ----------------------------
-    cMessage *selfSender;   // timer for sending packets
-
-    simtime_t timestamp;
-    int localPort;
-    int destPort;
-    Address destAddress;
-    simtime_t stopTime;
+    bool isTalk;
 
     void talkspurt(simtime_t dur);
     void selectPeriodTime();
     void sendVoIPPacket();
 
-  public:
-    virtual ~SimpleVoIPSender();
-    SimpleVoIPSender();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
-
-  protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+  public:
+    virtual ~SimpleVoIPSender();
+    SimpleVoIPSender();
 };
 
-#endif /* VOIPSENDER_H_ */
-
+#endif

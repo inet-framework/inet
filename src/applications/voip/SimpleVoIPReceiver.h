@@ -69,19 +69,19 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
         bool isActive() { return (status == ACTIVE); }
     };
 
-    UDPSocket socket;
-
-    int emodel_Ie;
-    int emodel_Bpl;
-    int emodel_A;
-    double emodel_Ro;
-
-    cMessage* selfTalkspurtFinished;
-
-    TalkspurtInfo currentTalkspurt;
+    // parameters
+    double emodelRo;
     unsigned int bufferSpace;
+    int emodelIe;
+    int emodelBpl;
+    int emodelA;
     simtime_t playoutDelay;
     simtime_t mosSpareTime; // spare time before calculating MOS (after calculated playout time of last packet)
+
+    // state
+    UDPSocket socket;
+    cMessage* selfTalkspurtFinished;
+    TalkspurtInfo currentTalkspurt;
 
     static simsignal_t packetLossRateSignal;
     static simsignal_t packetDelaySignal;
@@ -94,19 +94,19 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     void evaluateTalkspurt(bool finish);
     void startTalkspurt(SimpleVoIPPacket* packet);
 
-  public:
-    SimpleVoIPReceiver();
-    ~SimpleVoIPReceiver();
-
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
-
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     void initialize(int stage);
     void handleMessage(cMessage *msg);
     virtual void finish();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+  public:
+     SimpleVoIPReceiver();
+     ~SimpleVoIPReceiver();
 };
 
 
-#endif /* VOIPRECEIVER_H_ */
+#endif

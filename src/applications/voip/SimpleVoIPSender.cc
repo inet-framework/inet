@@ -23,7 +23,6 @@
 #include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
-
 Define_Module(SimpleVoIPSender);
 
 SimpleVoIPSender::SimpleVoIPSender()
@@ -54,7 +53,6 @@ void SimpleVoIPSender::initialize(int stage)
         talkspurtID = 0;
         talkspurtNumPackets = 0;
         packetID = 0;
-        timestamp = 0;
         talkPacketSize = par("talkPacketSize");
         packetizationInterval = par("packetizationInterval").doubleValue();
         selfSender = new cMessage("selfSender");
