@@ -34,7 +34,7 @@ class PingPayload;
 class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 {
   protected:
-    // configuration
+    // parameters: for more details, see the corresponding NED parameters' documentation
     Address destAddr;
     Address srcAddr;
     std::vector<Address> destAddresses;
@@ -48,7 +48,7 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     bool continuous;
 
     // state
-    long sendSeqNo;
+    long sendSeqNo; // to match the response with the request that caused the response
     long expectedReplySeqNo;
     simtime_t sendTimeHistory[PINGTEST_HISTORY_SIZE];
 
@@ -59,9 +59,9 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     static simsignal_t outOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
-    long lossCount;
-    long outOfOrderArrivalCount;
-    long numPongs;
+    long lossCount; // number of lost requests
+    long outOfOrderArrivalCount; // number of responses which arrived too late
+    long numPongs; // number of received Ping requests
 
   protected:
     virtual void initialize(int stage);
