@@ -27,7 +27,8 @@ HttpBrowser::HttpBrowser()
 
 HttpBrowser::~HttpBrowser()
 {
-    //
+    // @todo Delete socket data structures
+    sockCollection.deleteSockets();
 }
 
 void HttpBrowser::initialize(int stage)
@@ -47,9 +48,6 @@ void HttpBrowser::finish()
     // Record the sockets related statistics
     recordScalar("sock.opened", socketsOpened);
     recordScalar("sock.broken", numBroken);
-
-    // @todo Delete socket data structures
-    sockCollection.deleteSockets();
 }
 
 void HttpBrowser::handleMessage(cMessage *msg)
@@ -173,11 +171,10 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
     }
 
     // Send pending messages on the established socket.
-    cMessage *msg;
     EV_DEBUG << "Proceeding to send messages on socket " << connId << endl;
     while (!sockdata->messageQueue.empty())
     {
-        msg = sockdata->messageQueue.back();
+        cMessage *msg = sockdata->messageQueue.back();
         cPacket *pckt = check_and_cast<cPacket *>(msg);
         sockdata->messageQueue.pop_back();
         EV_DEBUG << "Submitting request " << msg->getName() << " to socket " << connId << ". size is " << pckt->getByteLength() << " bytes" << endl;
@@ -197,11 +194,11 @@ void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, boo
 
     SockData *sockdata = (SockData*)yourPtr;
     TCPSocket *socket = sockdata->socket;
-
     handleDataMessage(msg);
+
     if (--sockdata->pending==0)
     {
-        EV_DEBUG << "Received last expected reply on this socket. Issing a close" << endl;
+        EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;
         socket->close();
     }
     // Message deleted in handler - do not delete here!
@@ -284,7 +281,7 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
 
 void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRequestQueue &queue)
 {
-    // Dont do anything if the queue is empty.s
+    // Don't do anything if the queue is empty.
     if (queue.empty())
     {
         EV_INFO << "Submitting to socket. No data to send to " << moduleName << ". Skipping connection." << endl;

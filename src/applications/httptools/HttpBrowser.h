@@ -61,8 +61,6 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         unsigned long numBroken;        // Counter for the number of broken connections
         unsigned long socketsOpened;    // Counter for opened sockets
 
-        SockData *pendingSocket;
-
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage *msg);
