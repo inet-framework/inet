@@ -98,6 +98,8 @@ class INET_API HttpServerBase : public HttpNodeBase
          * Return the name of the server
          */
         const std::string& getHostName() { return hostName; }
+        HttpServerBase();
+        ~HttpServerBase();
 };
 
 #endif

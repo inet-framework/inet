@@ -20,6 +20,27 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+HttpServerBase::HttpServerBase()
+{
+    rdReplyDelay = NULL;
+    rdHtmlPageSize = NULL;
+    rdTextResourceSize = NULL;
+    rdImageResourceSize = NULL;
+    rdNumResources = NULL;
+    rdTextImageResourceRatio = NULL;
+    rdErrorMsgSize = NULL;
+}
+
+HttpServerBase::~HttpServerBase()
+{
+    delete rdReplyDelay;
+    delete rdHtmlPageSize;
+    delete rdTextResourceSize;
+    delete rdImageResourceSize;
+    delete rdNumResources;
+    delete rdTextImageResourceRatio;
+    delete rdErrorMsgSize;
+}
 
 void HttpServerBase::initialize(int stage)
 {
