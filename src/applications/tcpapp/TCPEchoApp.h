@@ -42,22 +42,18 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
     static simsignal_t rcvdPkSignal;
     static simsignal_t sentPkSignal;
 
-  public:
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
   protected:
     virtual bool isNodeUp();
     virtual void sendDown(cMessage *msg);
     virtual void startListening();
     virtual void stopListening();
 
-  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
 };
 
 #endif
-
-

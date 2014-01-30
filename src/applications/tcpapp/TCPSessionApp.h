@@ -51,10 +51,6 @@ class INET_API TCPSessionApp : public TCPAppBase
     cMessage *timeoutMsg;
     NodeStatus *nodeStatus;
 
-  public:
-    TCPSessionApp();
-    virtual ~TCPSessionApp();
-
   protected:
     virtual bool isNodeUp();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
@@ -71,7 +67,10 @@ class INET_API TCPSessionApp : public TCPAppBase
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
+
+  public:
+    TCPSessionApp();
+    virtual ~TCPSessionApp();
 };
 
 #endif
-

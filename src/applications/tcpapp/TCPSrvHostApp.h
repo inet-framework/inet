@@ -38,19 +38,18 @@ class INET_API TCPSrvHostApp : public cSimpleModule, public ILifecycle
     TCPSocket serverSocket;
     TCPSocketMap socketMap;
 
-  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
-
     virtual void updateDisplay();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
     virtual void removeThread(TCPServerThreadBase *thread);
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 /**
@@ -65,7 +64,6 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
     TCPSrvHostApp *hostmod;
     TCPSocket *sock; // ptr into socketMap managed by TCPSrvHostApp
 
-  protected:
     // internal: TCPSocket::CallbackInterface methods
     virtual void socketDataArrived(int, void *, cPacket *msg, bool urgent) {dataArrived(msg, urgent);}
     virtual void socketEstablished(int, void *)  {established();}
@@ -73,18 +71,22 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
     virtual void socketClosed(int, void *) {closed();}
     virtual void socketFailure(int, void *, int code) {failure(code);}
     virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) {statusArrived(status);}
+
   public:
     // internal: called by TCPSrvHostApp after creating this module
     virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod = hostmodule; sock = socket;}
 
-  public:
     TCPServerThreadBase()  {sock = NULL;}
     virtual ~TCPServerThreadBase() {}
 
-    /** Returns the socket object */
+    /*
+     * Returns the socket object
+     */
     virtual TCPSocket *getSocket() {return sock;}
 
-    /** Returns pointer to the host module */
+    /*
+     * Returns pointer to the host module
+     */
     virtual TCPSrvHostApp *getHostModule() {return hostmod;}
 
     /**
@@ -93,52 +95,50 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
      */
     virtual void scheduleAt(simtime_t t, cMessage *msg)  {msg->setContextPointer(this); hostmod->scheduleAt(t, msg);}
 
-    /** Cancel an event */
+    /*
+     *  Cancel an event
+     */
     virtual void cancelEvent(cMessage *msg)  {hostmod->cancelEvent(msg);}
 
-    /** @name Callback methods, called on different socket events. */
-    //@{
     /**
      * Called when connection is established. To be redefined.
      */
     virtual void established() = 0;
 
-    /**
+    /*
      * Called when a data packet arrives. To be redefined.
      */
     virtual void dataArrived(cMessage *msg, bool urgent) = 0;
 
-    /**
+    /*
      * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
      */
     virtual void timerExpired(cMessage *timer) = 0;
 
-    /**
+    /*
      * Called when the client closes the connection. By default it closes
      * our side too, but it can be redefined to do something different.
      */
     virtual void peerClosed() {getSocket()->close();}
 
-    /**
+    /*
      * Called when the connection closes (successful TCP teardown). By default
      * it deletes this thread, but it can be redefined to do something different.
      */
     virtual void closed() {hostmod->removeThread(this);}
 
-    /**
+    /*
      * Called when the connection breaks (TCP error). By default it deletes
      * this thread, but it can be redefined to do something different.
      */
     virtual void failure(int code) {hostmod->removeThread(this);}
 
-    /**
+    /*
      * Called when a status arrives in response to getSocket()->getStatus().
      * By default it deletes the status object, redefine it to add code
      * to examine the status.
      */
     virtual void statusArrived(TCPStatusInfo *status) {delete status;}
-    //@}
 };
 
 #endif
-

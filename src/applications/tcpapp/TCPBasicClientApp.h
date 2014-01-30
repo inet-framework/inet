@@ -37,41 +37,22 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     simtime_t startTime;
     simtime_t stopTime;
 
-    /** Utility: sends a request to the server */
     virtual void sendRequest();
-
-    /** Utility: cancel msgTimer and if d is smaller than stopTime, then schedule it to d,
-     * otherwise delete msgTimer */
     virtual void rescheduleOrDeleteTimer(simtime_t d, short int msgKind);
+
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleTimer(cMessage *msg);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual bool isNodeUp();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
     TCPBasicClientApp();
     virtual ~TCPBasicClientApp();
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-  protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-    /** Redefined . */
-    virtual void initialize(int stage);
-
-    /** Redefined. */
-    virtual void handleTimer(cMessage *msg);
-
-    /** Redefined. */
-    virtual void socketEstablished(int connId, void *yourPtr);
-
-    /** Redefined. */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-
-    /** Redefined to start another session after a delay. */
-    virtual void socketClosed(int connId, void *yourPtr);
-
-    /** Redefined to reconnect after a delay. */
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-
-    virtual bool isNodeUp();
 };
 
 #endif
-

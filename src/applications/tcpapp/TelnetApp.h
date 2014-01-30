@@ -33,38 +33,22 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     int numCharsToType; // characters the user will type for current line (command)
     simtime_t stopTime;
 
-  public:
-    TelnetApp();
-    virtual ~TelnetApp();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleTimer(cMessage *msg);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
+    virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
-  protected:
-    virtual int numInitStages() const { return NUM_INIT_STAGES; }
-
-    /** Redefined initialize(int stage). Number of stages used from TCPgenericCliAppBase. */
-    virtual void initialize(int stage);
-
-    /** Redefined. */
-    virtual void handleTimer(cMessage *msg);
-
-    /** Redefined. */
-    virtual void socketEstablished(int connId, void *yourPtr);
-
-    /** Redefined. */
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-
-    /** Redefined to start another session after a delay. */
-    virtual void socketClosed(int connId, void *yourPtr);
-
-    /** Redefined to reconnect after a delay. */
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-
-    /** Schedules msg only if t < stopTime */
-    virtual int checkedScheduleAt(simtime_t t, cMessage *msg);
-
-    /** Utility function to send a GenericAppMsg */
-    virtual void sendGenericAppMsg(int numBytes, int expectedReplyBytes);
+  public:
+    TelnetApp();
+    virtual ~TelnetApp();
 };
 
 #endif
