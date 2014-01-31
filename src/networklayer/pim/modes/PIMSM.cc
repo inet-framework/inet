@@ -910,42 +910,37 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
     IPv4Address group = pkt->getGroupAddress();
     AssertMetric receivedMetric = AssertMetric(pkt->getR(), pkt->getMetricPreference(), pkt->getMetric(), ctrlInfo->getSrcAddr());
 
-    if (!source.isUnspecified())
+    EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
+            << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getName() <<"'.\n";
+
+    if (!source.isUnspecified() && !receivedMetric.rptBit)
     {
         Route *routeSG = findSGRoute(source, group);
-        ASSERT(routeSG); // XXX create S,G state?
-
-        Interface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-                                           static_cast<Interface*>(routeSG->upstreamInterface) :
-                                           static_cast<Interface*>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
-
-        EV_INFO << "Received Assert(" << source << ", " << group
-                << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
-
-        Interface::AssertState stateBefore = incomingInterface->assertState;
-        processAssertSG(incomingInterface, receivedMetric);
-
-        if (stateBefore == Interface::NO_ASSERT_INFO && incomingInterface->assertState == Interface::NO_ASSERT_INFO)
+        if (routeSG)
         {
-            Route *routeG = findGRoute(group);
-            incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-                                    static_cast<Interface*>(routeG->upstreamInterface) :
-                                    static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
-            processAssertG(incomingInterface, receivedMetric);
+            Interface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                               static_cast<Interface*>(routeSG->upstreamInterface) :
+                                               static_cast<Interface*>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+
+            Interface::AssertState stateBefore = incomingInterface->assertState;
+            processAssertSG(incomingInterface, receivedMetric);
+
+            if (stateBefore != Interface::NO_ASSERT_INFO || incomingInterface->assertState != Interface::NO_ASSERT_INFO)
+            {
+                // processed by SG
+                delete pkt;
+                return;
+            }
         }
 
     }
-    else
-    {
-        Route *routeG = findGRoute(group);
-        Interface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-                                           static_cast<Interface*>(routeG->upstreamInterface) :
-                                           static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
-        EV_INFO << "Received Assert(*, " << group << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
-        processAssertG(incomingInterface, receivedMetric);
 
-    }
-
+    // process (*,G) asserts and (S,G) asserts for which there is no assert state in (S,G) routes
+    Route *routeG = findGRoute(group);
+    Interface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                       static_cast<Interface*>(routeG->upstreamInterface) :
+                                       static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+    processAssertG(incomingInterface, receivedMetric);
 
     delete pkt;
 }
