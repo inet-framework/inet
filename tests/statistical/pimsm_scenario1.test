@@ -15,9 +15,9 @@ output-scalar-file = test.sca
 **.scalar-recording = false
 **.vector-recording = false
 
-**.configurator.config = xmldoc("../../../../examples/pim/sm/networkConfig.xml")
+**.configurator.config = xmldoc("../../../../examples/pim/sm/basic/networkConfig.xml")
 
-include ../../../../examples/pim/sm/omnetpp.ini
+include ../../../../examples/pim/sm/basic/omnetpp.ini
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: test.sca
