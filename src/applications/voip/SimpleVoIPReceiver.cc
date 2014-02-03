@@ -74,10 +74,10 @@ void SimpleVoIPReceiver::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        emodelIe = par("emodel_Ie");
-        emodelBpl = par("emodel_Bpl");
-        emodelA = par("emodel_A");
-        emodelRo = par("emodel_Ro");
+        emodelIe = par("emodelIe");
+        emodelBpl = par("emodelBpl");
+        emodelA = par("emodelA");
+        emodelRo = par("emodelRo");
 
         bufferSpace = par("bufferSpace");
         playoutDelay = par("playoutDelay");

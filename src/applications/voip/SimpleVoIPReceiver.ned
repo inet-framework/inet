@@ -40,10 +40,10 @@ simple SimpleVoIPReceiver like IUDPApp
 {
     parameters:
         int localPort;
-        int emodel_Ie = default(5);        // Equipment impairment factor
-        int emodel_Bpl = default(10);      // Packet-loss robustness factor
-        int emodel_A = default(5);         // Advantage factor
-        double emodel_Ro = default(93.2);  // Basic signal-to-noise ratio
+        int emodelIe = default(5);        // Equipment impairment factor
+        int emodelBpl = default(10);      // Packet-loss robustness factor
+        int emodelA = default(5);         // Advantage factor
+        double emodelRo = default(93.2);  // Basic signal-to-noise ratio
 
         double playoutDelay @unit(s) = default(0);      // initial delay for beginning playout after receiving the first packet
         bool adaptivePlayoutDelay = default(false);      // if true, adjust playoutDelay after each talkspurt
