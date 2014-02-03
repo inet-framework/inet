@@ -1162,9 +1162,9 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     if (signalID == NF_IPv4_NEW_MULTICAST)
     {
         datagram = check_and_cast<IPv4Datagram*>(details);
-        IPv4Address srcAddr = datagram->getSrcAddress();
-        IPv4Address destAddr = datagram->getDestAddress();
-        unroutableMulticastPacketArrived(srcAddr, destAddr, datagram->getTimeToLive());
+        pimInterface = getIncomingInterface(datagram);
+        if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
+            unroutableMulticastPacketArrived(datagram->getSrcAddress(), datagram->getDestAddress(), datagram->getTimeToLive());
     }
     // configuration of interface changed, it means some change from IGMP, address were added.
     else if (signalID == NF_IPv4_MCAST_REGISTERED)
@@ -1187,7 +1187,8 @@ void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
     {
         datagram = check_and_cast<IPv4Datagram*>(details);
         pimInterface = getIncomingInterface(datagram);
-        multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceId():-1);
+        if (pimInterface && pimInterface->getMode() == PIMInterface::DenseMode)
+            multicastPacketArrivedOnNonRpfInterface(datagram->getDestAddress(), datagram->getSrcAddress(), pimInterface? pimInterface->getInterfaceId():-1);
     }
     // data come to RPF interface
     else if (signalID == NF_IPv4_DATA_ON_RPF)
