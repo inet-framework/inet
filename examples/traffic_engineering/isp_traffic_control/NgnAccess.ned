@@ -44,7 +44,7 @@ network NgnAccess
         double uni_rate @unit(bps) = default(100Mbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
-        double distribution_delay @unit(s) = default(150us);	// default delay of 300 us corresponds to 30 km fiber;
+        double distribution_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber  (60 km is the max. logical reach of GPON)
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
         double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
@@ -116,7 +116,7 @@ network NgnAccessWithDLThruputMeter
         double uni_rate @unit(bps) = default(100Mbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
-        double distribution_delay @unit(s) = default(150us);	// default delay of 300 us corresponds to 30 km fiber;
+        double distribution_delay @unit(s) = default(150us);	// default delay of 150 us corresponds to 30 km fiber (60 km is the max. logical reach of GPON)
         double backbone_rate @unit(bps) = default(100Gbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access
         double backbone_delay1 @unit(s) = default(2.0ms);	// together with backbone_delay2 (i.e. 4.7ms), it gives total RTT of 10 ms including delays in access
