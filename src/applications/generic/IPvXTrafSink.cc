@@ -28,9 +28,7 @@
 
 Define_Module(IPvXTrafSink);
 
-
 simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
-
 
 void IPvXTrafSink::initialize(int stage)
 {

@@ -36,19 +36,24 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
 {
   protected:
     enum Kinds {START=100, NEXT};
-    cMessage *timer;
-    int protocol;
-    int numPackets;
-    int numReceived;
-    bool isOperational;
+
+    // parameters: see the NED files for more info
     simtime_t startTime;
     simtime_t stopTime;
-    std::vector<Address> destAddresses;
     cPar *sendIntervalPar;
     cPar *packetLengthPar;
-    NodeStatus *nodeStatus;
+    int protocol;
+    std::vector<Address> destAddresses;
+    int numPackets;
 
+    // state
+    NodeStatus *nodeStatus;
+    cMessage *timer;
+    bool isOperational;
+
+    // statistic
     int numSent;
+    int numReceived;
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
@@ -57,7 +62,6 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     virtual bool isNodeUp();
     virtual bool isEnabled();
 
-    // chooses random destination address
     virtual Address chooseDestAddr();
     virtual void sendPacket();
 
