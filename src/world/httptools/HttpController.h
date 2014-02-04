@@ -39,7 +39,6 @@
 
 #include "INETDefs.h"
 
-#include "HttpLogdefs.h"
 #include "HttpUtils.h"
 #include "HttpRandom.h"
 #include "HttpEventMessages_m.h"

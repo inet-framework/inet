@@ -56,29 +56,8 @@ void VoIPStreamSender::Buffer::clear(int framesize)
 
 void VoIPStreamSender::initialize(int stage)
 {
-    if (stage == 1)
+    if (stage == 0)
     {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-    }
-    else if (stage == 3)  //wait until stage 3 - The Address resolver does not work before that!
-    {
-        // say HELLO to the world
-        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
-
-        // Hack for create results folder
-        recordScalar("hackForCreateResultsFolder", 0);
-
-        pReSampleCtx = NULL;
-        localPort = par("localPort");
-        destPort = par("destPort");
-        destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
-        socket.setOutputGate(gate("udpOut"));
-        socket.bind(localPort);
-
         voipHeaderSize = par("voipHeaderSize");
         voipSilenceThreshold = par("voipSilenceThreshold");
         sampleRate = par("sampleRate");
@@ -86,17 +65,40 @@ void VoIPStreamSender::initialize(int stage)
         compressedBitRate = par("compressedBitRate");
         packetTimeLength = par("packetTimeLength");
 
-        soundFile = par("soundFile").stringValue();
-        repeatCount = par("repeatCount");
-        traceFileName = par("traceFileName").stringValue();
-        simtime_t startTime = par("startTime");
-
         samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
         if (samplesPerPacket & 1)
             samplesPerPacket++;
         EV << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
         EV << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
+
+        soundFile = par("soundFile").stringValue();
+        repeatCount = par("repeatCount");
+        traceFileName = par("traceFileName").stringValue();
+
+        pReSampleCtx = NULL;
+        localPort = par("localPort");
+        destPort = par("destPort");
+    }
+    else if (stage == 3)
+    {
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (!isOperational)
+            throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        // say HELLO to the world
+        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
+
+        // Hack for create results folder
+        recordScalar("hackForCreateResultsFolder", 0);
+
+        destAddress = IPvXAddressResolver().resolve(par("destAddress").stringValue());
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
+
+        simtime_t startTime = par("startTime");
 
         sampleBuffer.clear(0);
 

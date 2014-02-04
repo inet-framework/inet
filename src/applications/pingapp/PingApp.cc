@@ -84,11 +84,11 @@ void PingApp::initialize(int stage)
 
         // references
         timer = new cMessage("sendPing");
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         // startup
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         if (isEnabled() && isNodeUp())
             startSendingPingRequests();
     }
@@ -106,7 +106,8 @@ void PingApp::handleMessage(cMessage *msg)
     if (msg == timer)
     {
         sendPingRequest();
-        scheduleNextPingRequest(simTime());
+        if (isEnabled())
+            scheduleNextPingRequest(simTime());
     }
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));

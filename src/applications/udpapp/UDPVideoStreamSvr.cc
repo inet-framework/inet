@@ -50,7 +50,8 @@ UDPVideoStreamSvr::~UDPVideoStreamSvr()
 
 void UDPVideoStreamSvr::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
+
     if (stage == 0)
     {
         sendInterval = &par("sendInterval");
@@ -159,7 +160,7 @@ void UDPVideoStreamSvr::clearStreams()
     streams.clear();
 }
 
-bool UDPVideoStreamSvr::startApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamSvr::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
@@ -167,16 +168,15 @@ bool UDPVideoStreamSvr::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPVideoStreamSvr::stopApp(IDoneCallback *doneCallback)
+bool UDPVideoStreamSvr::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     clearStreams();
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-bool UDPVideoStreamSvr::crashApp(IDoneCallback *doneCallback)
+void UDPVideoStreamSvr::handleNodeCrash()
 {
     clearStreams();
-    return true;
 }
 

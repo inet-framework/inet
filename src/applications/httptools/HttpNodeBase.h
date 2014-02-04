@@ -45,7 +45,6 @@
 #include "HttpMessages_m.h"
 #include "HttpRandom.h"
 #include "HttpUtils.h"
-#include "HttpLogdefs.h"
 
 #define HTTPT_REQUEST_MESSAGE           10000
 #define HTTPT_DELAYED_REQUEST_MESSAGE   10001
@@ -68,9 +67,6 @@ enum LOG_FORMAT {lf_short, lf_long};
 class HttpNodeBase : public cSimpleModule, public ILifecycle
 {
     protected:
-        /** Log level 2: Debug, 1: Info; 0: Errors and warnings only */
-        int ll;
-
         /** The link speed in bits per second. Only needed for direct message passing transmission delay calculations. */
         unsigned long linkSpeed;
 

@@ -95,7 +95,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         virtual void handleMessage(cMessage *msg);
 
         /** Returns the number of initialization stages. Two required. */
-//      int numInitStages() const {return 2;}
+        virtual int numInitStages() const { return 4; }
         //@}
 
     protected:

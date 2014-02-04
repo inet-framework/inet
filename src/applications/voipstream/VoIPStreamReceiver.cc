@@ -41,6 +41,8 @@ VoIPStreamReceiver::~VoIPStreamReceiver()
 
 void VoIPStreamReceiver::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         // Hack for create results folder
@@ -56,17 +58,17 @@ void VoIPStreamReceiver::initialize(int stage)
 
         // initialize avcodec library
         av_register_all();
-
-        socket.setOutputGate(gate("udpOut"));
-        socket.bind(localPort);
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        socket.setOutputGate(gate("udpOut"));
+        socket.bind(localPort);
     }
 }
 

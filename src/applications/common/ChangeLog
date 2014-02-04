@@ -1,0 +1,3 @@
+2014-01-22  Levente Meszaros
+
+	Renamed AppBase to ApplicationBase and moved to common.

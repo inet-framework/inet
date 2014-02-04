@@ -32,17 +32,18 @@
 
 Define_Module(HttpServerDirectEvilA);
 
+
 void HttpServerDirectEvilA::initialize(int stage)
 {
     HttpServerDirect::initialize(stage);
-    if (stage != 0)
-        return;
+    if (stage == 0)
+    {
+        badLow = par("minBadRequests");
+        badHigh = par("maxBadRequests");
 
-    badLow = par("minBadRequests");
-    badHigh = par("maxBadRequests");
-
-    EV_INFO << "Badguy " << hostName << " was initialized to launch an attack on www.good.com" << endl;
-    EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
+        EV_INFO << "Badguy " << hostName << " was initialized to launch an attack on www.good.com" << endl;
+        EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
+    }
 }
 
 std::string HttpServerDirectEvilA::generateBody()

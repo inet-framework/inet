@@ -21,13 +21,13 @@
 
 #include "INETDefs.h"
 
-#include "AppBase.h"
+#include "ApplicationBase.h"
 #include "UDPSocket.h"
 
 /**
  * UDP application. See NED for more info.
  */
-class UDPEchoApp : public AppBase
+class UDPEchoApp : public ApplicationBase
 {
   protected:
     UDPSocket socket;
@@ -35,16 +35,15 @@ class UDPEchoApp : public AppBase
     static simsignal_t pkSignal;
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();
     virtual void updateDisplay();
 
-    //AppBase:
-    bool startApp(IDoneCallback *doneCallback);
-    bool stopApp(IDoneCallback *doneCallback);
-    bool crashApp(IDoneCallback *doneCallback);
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
 };
 
 #endif

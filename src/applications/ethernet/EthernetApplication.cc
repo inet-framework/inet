@@ -23,7 +23,7 @@ void EthernetApplication::initialize(int stage)
 {
     // we can only initialize in the 2nd stage (stage==1), because
     // assignment of "auto" MAC addresses takes place in stage 0
-    if (stage == 1)
+    if (stage == 3)
     {
         reqLength = &par("reqLength");
         respLength = &par("respLength");

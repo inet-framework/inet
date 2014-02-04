@@ -88,7 +88,7 @@ void PingTestApp::initialize(int stage)
             scheduleAt(startTime, msg);
         }
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

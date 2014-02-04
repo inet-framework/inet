@@ -43,7 +43,7 @@ class INET_API EthernetApplication : public cSimpleModule
   protected:
 
     virtual void initialize(int stage);
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 4; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 

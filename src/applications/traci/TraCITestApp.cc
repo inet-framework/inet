@@ -21,7 +21,6 @@
 #include "applications/traci/TraCITestApp.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "NotificationBoard.h"
 #include <cmath>
 
 Define_Module(TraCITestApp);
@@ -31,8 +30,9 @@ simsignal_t TraCITestApp::mobilityStateChangedSignal = registerSignal("mobilityS
 void TraCITestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    if (stage == 0) {
-        debug = par("debug");
+
+    if (stage == 0)
+    {
         testNumber = par("testNumber");
 
         traci = TraCIMobilityAccess().get();
@@ -41,9 +41,9 @@ void TraCITestApp::initialize(int stage)
         visitedEdges.clear();
         hasStopped = false;
 
-        if (debug) std::cout << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
+        EV_DEBUG << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));

@@ -69,10 +69,10 @@ class INET_API DHCPClient : public cSimpleModule, public INotifiable, public ILi
 
         MACAddress macAddress; // client's MAC address
         NotificationBoard * nb; // notification board
-        InterfaceEntry * ie; // interface to configure
-        IRoutingTable * irt; // routing table to update
-        DHCPLease * lease; // leased IP information
-        IPv4Route * route; // last added route
+        InterfaceEntry *ie; // interface to configure
+        IRoutingTable *irt; // routing table to update
+        DHCPLease *lease; // leased IP information
+        IPv4Route *route; // last added route
     protected:
         // Simulation methods.
         virtual int numInitStages() const { return 4; }

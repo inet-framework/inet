@@ -45,8 +45,8 @@ HttpBrowser::~HttpBrowser()
 
 void HttpBrowser::initialize(int stage)
 {
+    EV_DEBUG << "Initializing HTTP browser component (sockets version), stage " << stage << endl;
     HttpBrowserBase::initialize(stage);
-    EV_DEBUG << "Initializing HTTP browser component (sockets version)\n";
 }
 
 void HttpBrowser::finish()
@@ -55,8 +55,8 @@ void HttpBrowser::finish()
     HttpBrowserBase::finish();
 
     // Report sockets related statistics.
-    EV_SUMMARY << "Sockets opened: " << socketsOpened << endl;
-    EV_SUMMARY << "Broken connections: " << numBroken << endl;
+    EV_INFO << "Sockets opened: " << socketsOpened << endl;
+    EV_INFO << "Broken connections: " << numBroken << endl;
     // Record the sockets related statistics
     recordScalar("sock.opened", socketsOpened);
     recordScalar("sock.broken", numBroken);

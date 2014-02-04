@@ -41,7 +41,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
          * Reads the OMNeT++ parameters.
          */
         virtual void initialize(int stage);
-        virtual int numInitStages() const {return 4;}
+        virtual int numInitStages() const { return 4; }
 
         /**
          * RTPApplication uses activity for message handling.

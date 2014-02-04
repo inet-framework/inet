@@ -56,10 +56,10 @@ class INET_API HttpServerEvilA : public HttpServer
         int badLow;
         int badHigh;
     protected:
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual std::string generateBody();
 };
 
 #endif /* HttpServerEvilA */
-
 

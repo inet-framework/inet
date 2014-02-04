@@ -39,14 +39,11 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     protected:
-        virtual int numInitStages() const {
-            return std::max(4, cSimpleModule::numInitStages());
-        }
+        virtual int numInitStages() const { return 4; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
 
     protected:
-        bool debug;
         TraCIMobility* traci;
         bool sentMessage;
         UDPSocket socket;

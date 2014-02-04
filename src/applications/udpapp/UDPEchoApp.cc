@@ -24,9 +24,11 @@ Define_Module(UDPEchoApp);
 
 simsignal_t UDPEchoApp::pkSignal = registerSignal("pk");
 
+
 void UDPEchoApp::initialize(int stage)
 {
-    AppBase::initialize(stage);
+    ApplicationBase::initialize(stage);
+
     if (stage == 0)
     {
         // init statistics
@@ -81,10 +83,10 @@ void UDPEchoApp::updateDisplay()
 
 void UDPEchoApp::finish()
 {
-    AppBase::finish();
+    ApplicationBase::finish();
 }
 
-bool UDPEchoApp::startApp(IDoneCallback *doneCallback)
+bool UDPEchoApp::handleNodeStart(IDoneCallback *doneCallback)
 {
     socket.setOutputGate(gate("udpOut"));
     int localPort = par("localPort");
@@ -93,14 +95,13 @@ bool UDPEchoApp::startApp(IDoneCallback *doneCallback)
     return true;
 }
 
-bool UDPEchoApp::stopApp(IDoneCallback *doneCallback)
+bool UDPEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
 {
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
-bool UDPEchoApp::crashApp(IDoneCallback *doneCallback)
+void UDPEchoApp::handleNodeCrash()
 {
-    return true;
 }
 

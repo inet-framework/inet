@@ -32,17 +32,19 @@
 
 Define_Module(HttpServerEvilA);
 
+
 void HttpServerEvilA::initialize(int stage)
 {
     HttpServer::initialize(stage);
-    if (stage != 0)
-        return;
 
-    badLow = par("minBadRequests");
-    badHigh = par("maxBadRequests");
+    if (stage == 0)
+    {
+        badLow = par("minBadRequests");
+        badHigh = par("maxBadRequests");
 
-    EV_INFO << "Badguy " << hostName << " was initialized to launch an attack on www.good.com" << endl;
-    EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
+        EV_INFO << "Badguy " << hostName << " was initialized to launch an attack on www.good.com" << endl;
+        EV_INFO << "Minimum " << badLow << " and maximum " << badHigh << " bad requests for each hit." << endl;
+    }
 }
 
 std::string HttpServerEvilA::generateBody()
@@ -61,7 +63,4 @@ std::string HttpServerEvilA::generateBody()
 
     return result;
 }
-
-
-
 

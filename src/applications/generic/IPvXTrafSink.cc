@@ -31,14 +31,17 @@ Define_Module(IPvXTrafSink);
 
 simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
 
+
 void IPvXTrafSink::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numReceived = 0;
         WATCH(numReceived);
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         int protocol = par("protocol");
         IPSocket ipSocket(gate("ipOut"));

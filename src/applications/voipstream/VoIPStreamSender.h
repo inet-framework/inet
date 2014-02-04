@@ -55,7 +55,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
 
   protected:
     virtual void initialize(int stage);
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 

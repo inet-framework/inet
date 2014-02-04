@@ -24,9 +24,11 @@ Define_Module(TCPEchoApp);
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPEchoApp::sentPkSignal = registerSignal("sentPk");
 
+
 void TCPEchoApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         delay = par("echoDelay");
@@ -41,7 +43,7 @@ void TCPEchoApp::initialize(int stage)
 
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         if (isNodeUp())
             startListening();

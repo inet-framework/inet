@@ -14,43 +14,40 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-// author: Zoltan Bojthe
-//
 
-#ifndef __INET_APPBASE_H
-#define __INET_APPBASE_H
-
-#include "INETDefs.h"
+#ifndef __INET_OPERATIONALBASE_H_
+#define __INET_OPERATIONALBASE_H_
 
 #include "ILifecycle.h"
-#include "NodeStatus.h"
 
-
-/**
- * UDP application. See NED for more info.
- */
-class INET_API AppBase : public cSimpleModule, public ILifecycle
+class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
     bool isOperational;
+    simtime_t lastChange;
 
   public:
-    AppBase();
-    virtual ~AppBase();
+    OperationalBase();
 
   protected:
+    virtual int numInitStages() const { return 1; }
     virtual void initialize(int stage);
-    virtual int numInitStages() const { return 4; }     //TODO STAGE_APPLAYER
     virtual void finish();
+
     virtual void handleMessage(cMessage *msg);
-    virtual void handleMessageWhenUp(cMessage *msg) = 0;
     virtual void handleMessageWhenDown(cMessage *msg);
+    virtual void handleMessageWhenUp(cMessage *msg) = 0;
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    virtual bool startApp(IDoneCallback *doneCallback) = 0;
-    virtual bool stopApp(IDoneCallback *doneCallback) = 0;
-    virtual bool crashApp(IDoneCallback *doneCallback) = 0;
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
+    virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+    virtual void handleNodeCrash();
+
+    virtual bool isInitializeStage(int stage) = 0;
+    virtual bool isNodeStartStage(int stage) = 0;
+    virtual bool isNodeShutdownStage(int stage) = 0;
+
+    virtual void setOperational(bool isOperational);
 };
 
-#endif  // __INET_APPBASE_H
-
+#endif

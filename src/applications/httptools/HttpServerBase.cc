@@ -33,12 +33,13 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+
 void HttpServerBase::initialize(int stage)
 {
+    HttpNodeBase::initialize(stage);
+
     if (stage == 0)
     {
-        ll = par("logLevel");
-
         EV_DEBUG << "Initializing server component\n";
 
         hostName = (const char*)par("hostName");
@@ -149,25 +150,25 @@ void HttpServerBase::initialize(int stage)
         WATCH(imgResourcesServed);
         WATCH(textResourcesServed);
         WATCH(badRequests);
-
-        updateDisplay();
     }
-    else if (stage == 1)
+    else if (stage == 3)
     {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
+
+        updateDisplay();
     }
 }
 
 void HttpServerBase::finish()
 {
-    EV_SUMMARY << "HTML documents served " << htmlDocsServed << "\n";
-    EV_SUMMARY << "Image resources served " << imgResourcesServed << "\n";
-    EV_SUMMARY << "Text resources served " << textResourcesServed << "\n";
-    EV_SUMMARY << "Bad requests " << badRequests << "\n";
+    EV_INFO << "HTML documents served " << htmlDocsServed << "\n";
+    EV_INFO << "Image resources served " << imgResourcesServed << "\n";
+    EV_INFO << "Text resources served " << textResourcesServed << "\n";
+    EV_INFO << "Bad requests " << badRequests << "\n";
 
     recordScalar("HTML.served", htmlDocsServed);
     recordScalar("images.served", imgResourcesServed);
@@ -419,10 +420,10 @@ std::string HttpServerBase::generateBody()
 void HttpServerBase::registerWithController()
 {
     // Find controller object and register
-    cModule * controller = simulation.getSystemModule()->getSubmodule("controller");
+    HttpController *controller = check_and_cast_nullable<HttpController *>(simulation.getSystemModule()->getSubmodule("controller"));
     if (controller == NULL)
         error("Controller module not found");
-    ((HttpController*)controller)->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
+    controller->registerServer(getParentModule()->getFullName(), hostName.c_str(), port, INSERT_END, activationTime);
 }
 
 void HttpServerBase::readSiteDefinition(std::string file)

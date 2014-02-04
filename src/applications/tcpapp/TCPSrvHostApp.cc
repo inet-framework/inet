@@ -14,6 +14,7 @@
 
 #include "TCPSrvHostApp.h"
 
+#include "IPvXAddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
@@ -24,19 +25,16 @@ void TCPSrvHostApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == 0)
+    if (stage == 3)
     {
-        //TODO should use IPvXAddressResolver in stage 3
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
-        serverSocket.bind(localAddress[0] ? IPvXAddress(localAddress) : IPvXAddress(), localPort);
+        serverSocket.bind(localAddress[0] ? IPvXAddressResolver().resolve(localAddress) : IPvXAddress(), localPort);
         serverSocket.listen();
-    }
-    else if (stage == 1)
-    {
+
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
