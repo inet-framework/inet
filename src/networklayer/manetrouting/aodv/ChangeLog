@@ -1,3 +1,11 @@
+2014-02-04  Benjamin Seregi
+
+	The AODV-UU implementation of AODV Routing Protocol has been removed
+	as it was hard to maintain and was obsolete.
+
+	The future version of this protocol will be independent from the
+	ManetRoutingBase and the INETMANET.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-03  Alfonso Ariza Quintana
