@@ -152,6 +152,32 @@ void IPv6::endService(cPacket *msg)
         // 2. The Ethernet or PPP frame is dropped by the link-layer if there is a transmission error.
         ASSERT(!datagram->hasBitError());
 
+        if (!rt->isLocalAddress(datagram->getDestAddress()))
+        {
+            // handle router alert options, if set
+            cGate *rout = gate("routerAlertOut");
+            // only check if we have a handler and this datagram wasn't returned from it already
+            if (rout && rout->isConnected() && !(datagram->arrivedOn("routerAlertReturn")))
+            {
+                for (int i = datagram->getExtensionHeaderArraySize() - 1; i >= 0; --i)
+                {
+                    // check whether the router alert extension header is set
+                    IPv6ExtensionHeaderPtr extHdr = datagram->getExtensionHeader(i);
+                    if (extHdr->getExtensionType() == IP_PROT_IPv6EXT_HOP) {
+                        // check whether the router alert option is set
+                        IPv6HopByHopOptionsHeader *optHdr = check_and_cast<IPv6HopByHopOptionsHeader *>(extHdr);
+                        for (int hi = optHdr->getOptionsArraySize() - 1 ; hi >= 0; --hi) {
+                            if (optHdr->getOptions(hi)->getOptionType() == 5) { // FIXME implement symbolic constant
+                                // we have router alert set -> hand it over to the router alert handler
+                                send(datagram, rout);
+                                return;  // TODO break out here without using return?
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
         // remove control info
         delete datagram->removeControlInfo();
 

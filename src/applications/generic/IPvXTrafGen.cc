@@ -24,6 +24,8 @@
 #include "IPvXAddressResolver.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "IPv6ExtensionHeaders.h"
+#include "IPv4Datagram.h"
 
 
 Define_Module(IPvXTrafGen);
@@ -187,6 +189,11 @@ void IPvXTrafGen::sendPacket()
         IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
         controlInfo->setDestAddr(destAddr.get4());
         controlInfo->setProtocol(protocol);
+        if (par("routerAlert").boolValue() == true)
+        {
+            controlInfo->setOptions(IPOPTION_ROUTER_ALERT);
+        }
+        controlInfo->setOptions(148);
         payload->setControlInfo(controlInfo);
         gate = "ipOut";
     }
@@ -196,6 +203,14 @@ void IPvXTrafGen::sendPacket()
         IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
         controlInfo->setDestAddr(destAddr.get6());
         controlInfo->setProtocol(protocol);
+        if (par("routerAlert").boolValue() == true)
+        {
+            // TODO how do we do this extension header handling elegantly?
+            IPv6HopByHopOptionsHeader *hdr = new IPv6HopByHopOptionsHeader();
+            hdr->setOptionsArraySize(1);
+            hdr->setOptions(0, new IPv6OptionRouterAlert());
+            controlInfo->addExtensionHeader(hdr);
+        }
         payload->setControlInfo(controlInfo);
         gate = "ipv6Out";
     }

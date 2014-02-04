@@ -19,6 +19,7 @@
 package inet.nodes.inet;
 
 import inet.networklayer.arp.ARP;
+import inet.networklayer.common.IRouterAlertHandler;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
@@ -37,6 +38,10 @@ module NetworkLayer
         @display("i=block/fork");
         bool proxyARP = default(true);
         string igmpType = default("IGMPv2");
+        // router alert handler type. Put here a string naming the type of router alert handler
+        // module that you want to use (if any). The network layer will then instantiate and
+        // connect the respective module automatically.
+        string routerAlertHandlerType = default("");
     gates:
         input ifIn[] @labels(IPv4Datagram);
         input tcpIn @labels(TCPSegment,IPv4ControlInfo/down);
@@ -56,6 +61,7 @@ module NetworkLayer
         output pingOut[];
         output manetOut;
         output igmpOut;
+
 
     submodules:
         configurator: IPv4NodeConfigurator {
@@ -89,7 +95,9 @@ module NetworkLayer
             parameters:
                 @display("p=239,63");
         }
-
+        routerAlertHandler: <routerAlertHandlerType> like IRouterAlertHandler if routerAlertHandlerType != "" {
+            @display("p=294,103");
+        }
     connections allowunconnected:
         // transport Layer
         ip.transportOut[0] --> { @display("m=n"); } --> tcpOut;
@@ -135,6 +143,11 @@ module NetworkLayer
         }
         for i=0..sizeof(ifOut)-1 {
             arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
+        }
+
+        if routerAlertHandlerType != "" {
+            ip.routerAlertOut --> routerAlertHandler.routerAlertIn;
+            routerAlertHandler.routerAlertReturn --> ip.routerAlertReturn;
         }
 }
 

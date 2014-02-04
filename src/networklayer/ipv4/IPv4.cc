@@ -181,6 +181,22 @@ void IPv4::handlePacketFromNetwork(IPv4Datagram *datagram, InterfaceEntry *fromI
 
     EV << "Received datagram `" << datagram->getName() << "' with dest=" << destAddr << "\n";
 
+    // handle router alert option field -> This ist handled only on intermediate routers and not on the endpoints
+    //  also the packet is not handled again if it returns from the router alert handler
+    if ((!datagram->getArrivalGate()->isName("routerAlertReturn")) && !(rt->isLocalAddress(destAddr)) && datagram->getOptionCode() == IPOPTION_ROUTER_ALERT)  // FIXME If the option code handling is changed to support multiple options, we have to change this here too
+    {
+        // send the datagram to the router alert gate
+        cGate *rout = gate("routerAlertOut");
+        if (rout != 0 && rout->isConnected()) {
+            send(datagram, rout);
+            // bail out of the handling. The packet has to be re-injected by the Option handler, when needed
+            return; // FIXME maybe implement without return?
+        }
+        else {
+            EV << "Router alert option set, but no handler connected. Ignoring.\n";
+        }
+    }
+
     if (fromIE->isLoopback())
     {
         reassembleAndDeliver(datagram);
@@ -809,7 +825,9 @@ IPv4Datagram *IPv4::encapsulate(cPacket *transportPacket, IPv4ControlInfo *contr
     datagram->setTimeToLive(ttl);
     datagram->setTransportProtocol(controlInfo->getProtocol());
 
-    // setting IPv4 options is currently not supported
+    if (controlInfo->getOptions() != 0) {
+        datagram->setOptionCode(controlInfo->getOptions()); // FIXME will only work so long as only one option header is supported
+    }
 
     return datagram;
 }

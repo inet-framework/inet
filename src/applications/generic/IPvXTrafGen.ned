@@ -41,6 +41,7 @@ simple IPvXTrafGen like IIPvXTrafficGenerator
         int protocol; // value for ~IPv4ControlInfo / ~IPv6ControlInfo protocol field
         volatile int packetLength @unit("B"); // packet length in bytes
         string destAddresses = default(""); // list of destination addresses, separated by spaces
+        bool routerAlert = default(false); // set the router alert header option
         @display("i=block/source");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
