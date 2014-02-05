@@ -18,10 +18,11 @@ library(reshape)
 ###
 ### directory settings
 ###
-ifelse (Sys.getenv("OS") == "Windows_NT",
-        .root.directory <- "E:/tools/omnetpp/inet-hnrl",
-        .root.directory <- "~/inet-hnrl")
-.base.directory <- paste(.root.directory, 'examples/ngoa/isp_traffic_shaping2', sep='/')
+## ifelse (Sys.getenv("OS") == "Windows_NT",
+##         .root.directory <- "E:/tools/omnetpp/inet-hnrl",
+##         .root.directory <- "~/inet-hnrl")
+.root.directory <- "~/inet-hnrl"
+.base.directory <- paste(.root.directory, 'examples/traffic_engineering/isp_traffic_shaping2', sep='/')
 .script.directory <- paste(.root.directory, 'etc/inet-hnrl', sep='/')
 ###
 ### source scripts

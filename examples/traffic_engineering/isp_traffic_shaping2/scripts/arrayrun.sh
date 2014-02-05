@@ -12,7 +12,7 @@ then
     exit
 fi
 
-#cd /users/kks/inet/examples/ngoa/ecr
+#cd /users/kks/inet/examples/traffic_engineering/ecr
 ulimit -s 65500
 ### For maximum performance
 #./run -u Cmdenv -f $1 -u Cmdenv -c $2 -r $RUN > /dev/null 2>&1
