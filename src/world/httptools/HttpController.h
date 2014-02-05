@@ -86,8 +86,6 @@ class HttpController : public cSimpleModule
         };
 
     protected:
-        int ll; ///< The log level
-
         std::map<std::string,WebServerEntry*> webSiteList;  ///< A list of registered web sites (server objects)
         std::vector<WebServerEntry*> pickList;   ///< The picklist used to select sites at random.
         std::list<WebServerEntry*> specialList;  ///< The special list -- contains sites with active popularity modification events.
@@ -114,7 +112,7 @@ class HttpController : public cSimpleModule
         virtual void handleMessage(cMessage *msg);
 
         /** Returns the number of initialization stages. Two required. */
-        int numInitStages() const {return 2;}
+        int numInitStages() const { return 2; }
         //@}
 
     public:

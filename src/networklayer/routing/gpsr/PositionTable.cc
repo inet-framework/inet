@@ -62,9 +62,9 @@ void PositionTable::clear() {
     addressToPositionMap.clear();
 }
 
-simtime_t PositionTable::getOldestPosition() {
+simtime_t PositionTable::getOldestPosition() const {
     simtime_t oldestPosition = SimTime::getMaxTime();
-    for (AddressToPositionMap::iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++) {
+    for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++) {
         const simtime_t & time = it->second.first;
         if (time < oldestPosition)
             oldestPosition = time;

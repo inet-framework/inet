@@ -74,7 +74,7 @@ void NS_CLASS initialize(int stage)
        after binding them! The desired default values should be set in
        ~ns/tcl/lib/ns-default.tcl instead.
      */
-    if (stage==4)
+    if (stage == 4)
     {
 #ifndef AODV_GLOBAL_STATISTISTIC
         iswrite = false;
@@ -115,9 +115,6 @@ void NS_CLASS initialize(int stage)
 
         if ((bool)par("rreq_gratuitous"))
             rreq_gratuitous = 1;
-
-        if ((bool)par("debug"))
-            debug = 1;
 
         useIndex = par("UseIndex");
         unidir_hack = (int) par("unidir_hack");
@@ -165,8 +162,6 @@ void NS_CLASS initialize(int stage)
             log_init();
             log_file_fd_init=true;
         }
-#else
-        debug = 0;
 #endif
         /* Set host parameters */
         memset(&this_host, 0, sizeof(struct host_info));

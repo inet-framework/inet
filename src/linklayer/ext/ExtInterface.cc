@@ -37,6 +37,7 @@
 
 Define_Module(ExtInterface);
 
+
 void ExtInterface::initialize(int stage)
 {
     MACBase::initialize(stage);
@@ -65,16 +66,16 @@ void ExtInterface::initialize(int stage)
         WATCH(numDropped);
 
         registerInterface();
-
+    }
+    else if (stage == 3)
+    {
         // if not connected, make it gray
         if (ev.isGUI() && !connected)
         {
             getDisplayString().setTagArg("i", 1, "#707070");
             getDisplayString().setTagArg("i", 2, "100");
         }
-    }
-    else if (stage == 3)
-    {
+
         // update display string when addresses have been autoconfigured etc.
         if (ev.isGUI())
             updateDisplayString();

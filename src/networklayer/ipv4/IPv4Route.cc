@@ -26,6 +26,14 @@
 #include "IRoutingTable.h"
 
 
+Register_Class(IPv4Route);
+Register_Class(IPv4MulticastRoute);
+
+
+IPv4Route::~IPv4Route()
+{
+}
+
 std::string IPv4Route::info() const
 {
     std::stringstream out;
@@ -162,7 +170,7 @@ void IPv4MulticastRoute::addOutInterface(OutInterface *outInterface)
     }
 }
 
-bool IPv4MulticastRoute::removeOutInterface(InterfaceEntry *ie)
+bool IPv4MulticastRoute::removeOutInterface(const InterfaceEntry *ie)
 {
     for (OutInterfaceVector::iterator it = outInterfaces.begin(); it != outInterfaces.end(); ++it)
     {

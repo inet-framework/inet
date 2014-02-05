@@ -30,6 +30,7 @@
 
 
 Define_Module(Ieee80211MgmtAP);
+Register_Class(Ieee80211MgmtAP::NotificationInfoSta);
 
 static std::ostream& operator<<(std::ostream& os, const Ieee80211MgmtAP::STAInfo& sta)
 {
@@ -46,7 +47,7 @@ void Ieee80211MgmtAP::initialize(int stage)
 {
     Ieee80211MgmtAPBase::initialize(stage);
 
-    if (stage==0)
+    if (stage == 0)
     {
         // read params and init vars
         ssid = par("ssid").stringValue();

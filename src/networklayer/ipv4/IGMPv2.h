@@ -31,6 +31,7 @@ class IInterfaceTable;
 class IRoutingTable;
 class NotificationBoard;
 
+
 class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
 {
   protected:
@@ -169,7 +170,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected INotifiable
     int numLeavesRecv;
 
   protected:
-    virtual int numInitStages() const  {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void receiveChangeNotification(int category, const cPolymorphic *details);

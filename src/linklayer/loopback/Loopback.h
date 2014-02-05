@@ -54,7 +54,7 @@ class INET_API Loopback : public MACBase
     virtual ~Loopback();
 
   protected:
-    virtual int numInitStages() const {return 4;}
+    virtual int numInitStages() const { return 4; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     virtual void updateDisplayString();

@@ -187,8 +187,6 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
         error("connection starting at gate '%s' has no attributes at %s", g->getFullPath().c_str(), node->getSourceLocation());
 
     // set the parameter to the given value
-    if (!chan->hasPar(attrAttr))
-        ; //FIXME remove this "if"
     cPar& param = chan->par(attrAttr);
     param.parse(valueAttr);
 }

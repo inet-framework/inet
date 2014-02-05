@@ -24,6 +24,7 @@
 #include <sstream>
 
 #include "InterfaceTable.h"
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
@@ -64,17 +65,19 @@ InterfaceTable::~InterfaceTable()
 
 void InterfaceTable::initialize(int stage)
 {
-    if (stage==0)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
     {
         // get a pointer to the host module
         host = getContainingNode(this);
+        WATCH_PTRVECTOR(idToInterface);
 
         // get a pointer to the NotificationBoard module
         nb = NotificationBoardAccess().get();
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
-        WATCH_PTRVECTOR(idToInterface);
         updateDisplayString();
     }
 }
@@ -339,6 +342,8 @@ void InterfaceTable::invalidateTmpInterfaceList()
 
 void InterfaceTable::interfaceChanged(int category, const InterfaceEntryChangeDetails *details)
 {
+    Enter_Method_Silent();
+
     nb->fireChangeNotification(category, details);
 
     if (ev.isGUI() && par("displayAddresses").boolValue())

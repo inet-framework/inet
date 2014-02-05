@@ -40,11 +40,11 @@
 class INET_API ObstacleControl : public cSimpleModule
 {
     public:
-        ~ObstacleControl();
-        void initialize(int stage);
-        int numInitStages() const { return 2; }
-        void finish();
-        void handleMessage(cMessage *msg);
+        virtual ~ObstacleControl();
+        virtual void initialize(int stage);
+        virtual int numInitStages() const { return 2; }
+        virtual void finish();
+        virtual void handleMessage(cMessage *msg);
         void handleSelfMsg(cMessage *msg);
 
         void addFromXml(cXMLElement* xml);
@@ -101,7 +101,6 @@ class INET_API ObstacleControl : public cSimpleModule
         typedef std::vector<ObstacleGridRow> Obstacles;
         typedef std::map<CacheKey, double> CacheEntries;
 
-        bool debug; /**< whether to emit debug messages */
         cXMLElement* obstaclesXml; /**< obstacles to add at startup */
 
         Obstacles obstacles;

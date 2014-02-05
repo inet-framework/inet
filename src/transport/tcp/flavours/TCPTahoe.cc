@@ -24,7 +24,7 @@ Register_Class(TCPTahoe);
 
 
 TCPTahoe::TCPTahoe() : TCPTahoeRenoFamily(),
-  state((TCPTahoeStateVariables *&)TCPAlgorithm::state)
+        state((TCPTahoeStateVariables *&)TCPAlgorithm::state)
 {
 }
 

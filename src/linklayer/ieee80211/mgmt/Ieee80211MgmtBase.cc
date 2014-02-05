@@ -33,7 +33,7 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 
 void Ieee80211MgmtBase::initialize(int stage)
 {
-    if (stage==0)
+    if (stage == 0)
     {
         PassiveQueueBase::initialize();
 
@@ -51,7 +51,7 @@ void Ieee80211MgmtBase::initialize(int stage)
         // configuration
         frameCapacity = par("frameCapacity");
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;

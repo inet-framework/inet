@@ -92,7 +92,6 @@ void PPP::initialize(int stage)
 
         // we're connected if other end of connection path is an input gate
         bool connected = physOutGate->getPathEndGate()->getType() == cGate::INPUT;
-
         // if we're connected, get the gate with transmission rate
         datarateChannel = connected ? physOutGate->getTransmissionChannel() : NULL;
 
@@ -101,21 +100,6 @@ void PPP::initialize(int stage)
 
         // prepare to fire notifications
         notifDetails.setInterfaceEntry(interfaceEntry);
-
-        // display string stuff
-        if (ev.isGUI())
-        {
-            if (connected)
-            {
-                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
-            }
-            else
-            {
-                // we are not connected: gray out our icon
-                getDisplayString().setTagArg("i", 1, "#707070");
-                getDisplayString().setTagArg("i", 2, "100");
-            }
-        }
 
         // request first frame to send
         if (queueModule && 0 == queueModule->getNumPendingRequests())
@@ -126,8 +110,22 @@ void PPP::initialize(int stage)
     }
 
     // update display string when addresses have been autoconfigured etc.
-    if (stage == 3)
+    else if (stage == 3)
     {
+        // display string stuff
+        if (ev.isGUI())
+        {
+            if (datarateChannel)    // not NULL if connected
+            {
+                oldConnColor = datarateChannel->getDisplayString().getTagArg("ls", 0);
+            }
+            else
+            {
+                // we are not connected: gray out our icon
+                getDisplayString().setTagArg("i", 1, "#707070");
+                getDisplayString().setTagArg("i", 2, "100");
+            }
+        }
         updateDisplayString();
     }
 }
@@ -160,8 +158,11 @@ InterfaceEntry *PPP::createInterfaceEntry()
     return e;
 }
 
-void PPP::receiveSignal(cComponent *src, simsignal_t id, cObject *obj)
+void PPP::receiveSignal(cComponent *src, simsignal_t signalID, cObject *obj)
 {
+    if (signalID != POST_MODEL_CHANGE)
+        return;
+
     if (dynamic_cast<cPostPathCreateNotification *>(obj))
     {
         cPostPathCreateNotification *gcobj = (cPostPathCreateNotification *)obj;

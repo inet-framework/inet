@@ -20,6 +20,7 @@
 
 #include "EtherFrame.h"
 #include "STP.h"
+#include "Ieee802Ctrl_m.h"
 #include "InterfaceEntry.h"
 
 Define_Module(STP);

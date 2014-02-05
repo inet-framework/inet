@@ -39,10 +39,15 @@ CloudDelayerBase::~CloudDelayerBase()
         ipv4Layer->unregisterHook(0, this);
 }
 
-void CloudDelayerBase::initialize()
+void CloudDelayerBase::initialize(int stage)
 {
-    ipv4Layer = check_and_cast<IPv4*>(getModuleByPath("^.ip"));
-    ipv4Layer->registerHook(0, this);
+    cSimpleModule::initialize(stage);
+
+    if (stage == 1)
+    {
+        ipv4Layer = check_and_cast<IPv4*>(getModuleByPath("^.ip"));
+        ipv4Layer->registerHook(0, this);
+    }
 }
 
 void CloudDelayerBase::finish()

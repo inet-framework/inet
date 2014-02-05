@@ -26,6 +26,7 @@
 class InterfaceEntry;
 class IRoutingTable;
 
+
 /**
  * IPv4 unicast route in IRoutingTable.
  *
@@ -96,7 +97,7 @@ class INET_API IPv4Route : public cObject
   public:
     IPv4Route() : rt(NULL), interfacePtr(NULL), sourceType(MANUAL), adminDist(dUnknown),
                   metric(0), source(NULL), protocolData(NULL) {}
-    virtual ~IPv4Route() {}
+    virtual ~IPv4Route();
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
@@ -261,7 +262,7 @@ class INET_API IPv4MulticastRoute : public cObject
     virtual void setInInterface(InInterface *_inInterface);
     virtual void clearOutInterfaces();
     virtual void addOutInterface(OutInterface *outInterface);
-    virtual bool removeOutInterface(InterfaceEntry *ie);
+    virtual bool removeOutInterface(const InterfaceEntry *ie);
     virtual void removeOutInterface(unsigned int i);
     virtual void setSourceType(SourceType _source)  { if (sourceType != _source) {sourceType = _source; changed(F_SOURCE);} }
     virtual void setMetric(int _metric)  { if (metric != _metric) {metric = _metric; changed(F_METRIC);} }

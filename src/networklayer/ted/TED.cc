@@ -33,6 +33,8 @@ Define_Module(TED);
 
 TED::TED()
 {
+    rt = NULL;
+    ift = NULL;
 }
 
 TED::~TED()
@@ -41,27 +43,29 @@ TED::~TED()
 
 void TED::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // we have to wait for stage 2 until interfaces get registered (stage 0)
     // and get their auto-assigned IPv4 addresses (stage 2); routerId gets
     // assigned in stage 3
-    if (stage!=4)
-        return;
+    if (stage == 4)
+    {
+        maxMessageId = 0;
 
-    rt = RoutingTableAccess().get();
-    ift = InterfaceTableAccess().get();
-    routerId = rt->getRouterId();
-    nb = NotificationBoardAccess().get();
+        WATCH_VECTOR(ted);
 
-    maxMessageId = 0;
-    ASSERT(!routerId.isUnspecified());
+        rt = RoutingTableAccess().get();
+        ift = InterfaceTableAccess().get();
+        routerId = rt->getRouterId();
+        nb = NotificationBoardAccess().get();
+        ASSERT(!routerId.isUnspecified());
 
-    bool isOperational;
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-    if (isOperational)
-        initializeTED();
-
-    WATCH_VECTOR(ted);
+        bool isOperational;
+        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
+        if (isOperational)
+            initializeTED();
+    }
 }
 
 void TED::initializeTED()
@@ -120,8 +124,10 @@ void TED::initializeTED()
         //
         TELinkStateInfo entry;
         entry.advrouter = routerId;
+        ASSERT(ie->ipv4Data());
         entry.local = ie->ipv4Data()->getIPAddress();
         entry.linkid = destRouterId;
+        ASSERT(destIe->ipv4Data());
         entry.remote = destIe->ipv4Data()->getIPAddress();
         entry.MaxBandwidth = linkBandwidth;
         for (int j = 0; j < 8; j++)

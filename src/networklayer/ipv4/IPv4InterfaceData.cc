@@ -25,6 +25,9 @@
 
 #include "IPv4InterfaceData.h"
 
+
+Register_Abstract_Class(IPv4MulticastGroupInfo);
+
 std::string IPv4InterfaceData::HostMulticastData::info()
 {
     std::stringstream out;

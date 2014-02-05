@@ -194,7 +194,6 @@ class DSRUU:public cSimpleModule, public INotifiable, public ManetNetfilterHook
     static int lifo_token;
 
   private:
-    bool is_init;
     struct in_addr myaddr_;
     MACAddress macaddr_;
     int interfaceId;
@@ -294,7 +293,7 @@ class DSRUU:public cSimpleModule, public INotifiable, public ManetNetfilterHook
     DSRUU();
     ~DSRUU();
 
-    int numInitStages() const  {return 5;}
+    int numInitStages() const { return 5; }
     void initialize(int stage);
 
     struct iphdr * dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,

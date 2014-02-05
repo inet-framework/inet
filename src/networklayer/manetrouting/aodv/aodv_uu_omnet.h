@@ -176,8 +176,8 @@ class AODVUU : public ManetRoutingBase
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    int numInitStages() const  {return 5;}
-    void initialize(int stage);
+    virtual int numInitStages() const { return 5; }
+    virtual void initialize(int stage);
 
 
     cMessage * sendMessageEvent;

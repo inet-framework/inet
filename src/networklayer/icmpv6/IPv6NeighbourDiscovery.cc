@@ -63,6 +63,8 @@ IPv6NeighbourDiscovery::~IPv6NeighbourDiscovery()
 
 void IPv6NeighbourDiscovery::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     // We have to wait until the 3rd stage (stage 2) with scheduling messages,
     // because interface registration and IPv6 configuration takes places
     // in the first two stages.
@@ -108,11 +110,12 @@ void IPv6NeighbourDiscovery::initialize(int stage)
                 createRATimer(ie);
             }
         }
+
         //This simulates random node bootup time. Link local address assignment
         //takes place during this time.
         cMessage *msg = new cMessage("assignLinkLocalAddr", MK_ASSIGN_LINKLOCAL_ADDRESS);
-        //We want routers to boot up faster!
 
+        //We want routers to boot up faster!
         if (rt6->isRouter())
             scheduleAt(simTime() + uniform(0, 0.3), msg); //Random Router bootup time
         else

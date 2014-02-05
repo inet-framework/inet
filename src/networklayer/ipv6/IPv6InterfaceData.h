@@ -111,7 +111,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     typedef std::vector<IPv6Address> IPv6AddressVector;
 
     // field ids for change notifications
-    enum {F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS};    //FIXME missed field IDs and missed notifications in setter functions
+    enum {F_IP_ADDRESS, F_MULTICAST_ADDRESSES, F_MULTICAST_LISTENERS};    //FIXME missed field IDs and missed notifications in setter functions
 
   protected:
     struct HostMulticastData
@@ -481,7 +481,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
      * in Router Advertisements. Zero expiry time means infinity.
      */
     virtual void updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
-                                     simtime_t expiryTime = 0, simtime_t prefExpiryTime = 0);
+                                     simtime_t expiryTime = SIMTIME_ZERO, simtime_t prefExpiryTime = SIMTIME_ZERO);
 
     /**
      * Returns the number of addresses the interface has.

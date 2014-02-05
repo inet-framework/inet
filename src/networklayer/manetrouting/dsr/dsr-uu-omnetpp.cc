@@ -70,8 +70,6 @@ struct iphdr *DSRUU::dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
     return iph;
 }
 
-
-
 void DSRUU::omnet_xmit(struct dsr_pkt *dp)
 {
     DSRPkt *p;
@@ -98,7 +96,6 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
         dsr_pkt_free(dp);
         return;
     }
-
 
     /* If TTL = 0, drop packet */
     if (p->getTimeToLive() <= 0)
@@ -150,7 +147,6 @@ void DSRUU::omnet_xmit(struct dsr_pkt *dp)
     dsr_pkt_free(dp);
 }
 
-
 void DSRUU::omnet_deliver(struct dsr_pkt *dp)
 {
     int dsr_opts_len = 0;
@@ -185,7 +181,6 @@ void DSRUU::omnet_deliver(struct dsr_pkt *dp)
     send(dgram, "to_ip");
 }
 
-
 void  DSRUUTimer::resched(double delay)
 {
     if (msgtimer.isScheduled())
@@ -201,8 +196,10 @@ void DSRUUTimer::cancel()
 
 void DSRUU::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     //current_time =simTime();
-    if (!is_init)
+    if (stage == 0)
     {
         for (int i = 0; i < CONFVAL_MAX; i++)
         {
@@ -317,13 +314,8 @@ void DSRUU::initialize(int stage)
         lc_timer.setOwer(this);
         ack_timer.setOwer(this);
         etx_timer.setOwer(this);
-
-        initHook(this);
-
-        is_init = true;
     }
-
-    if (stage==4)
+    else if (stage == 4)
     {
         IPSocket ipSocket(gate("to_ip"));
         ipSocket.registerProtocol(IP_PROT_MANET);
@@ -332,6 +324,8 @@ void DSRUU::initialize(int stage)
         /* Search the 80211 interface */
         inet_rt = RoutingTableAccess().get();
         inet_ift = InterfaceTableAccess().get();
+
+        initHook(this);
 
         int  num_80211 = 0;
         InterfaceEntry *   ie;
@@ -353,7 +347,6 @@ void DSRUU::initialize(int stage)
             interface80211ptr = i_face;
         else
             opp_error("DSR has found %i 80211 interfaces", num_80211);
-
 
         /* Initilize tables */
         lc_init();
@@ -379,6 +372,7 @@ void DSRUU::initialize(int stage)
         }
         myaddr_.s_addr = interface80211ptr->ipv4Data()->getIPAddress().getInt();
         macaddr_ = interface80211ptr->getMacAddress();
+
         nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_LINK_BREAK);
         if (get_confval(PromiscOperation))
@@ -400,7 +394,6 @@ void DSRUU::initialize(int stage)
             }
         }
         interface80211ptr->ipv4Data()->joinMulticastGroup(IPv4Address::LL_MANET_ROUTERS);
-        is_init = true;
         EV << "Dsr active" << "\n";
     }
 
@@ -416,7 +409,6 @@ void DSRUU::finish()
     grat_rrep_tbl_cleanup();
     send_buf_cleanup();
     maint_buf_cleanup();
-
 }
 
 DSRUU::DSRUU():cSimpleModule(), INotifiable()
@@ -429,7 +421,6 @@ DSRUU::DSRUU():cSimpleModule(), INotifiable()
     lc_timer_ptr = new DSRUUTimer(this);
     ack_timer_ptr = new DSRUUTimer(this);
     etx_timer_ptr = new DSRUUTimer(this);
-    is_init = false;
 }
 
 DSRUU::~DSRUU()
@@ -466,8 +457,8 @@ DSRUU::~DSRUU()
         pkt = DSRUU::lifoDsrPkt;
         lifo_token++;
     }
-
 }
+
 void DSRUU::handleTimer(cMessage* msg)
 {
     if (ack_timer.testAndExcute(msg))
@@ -525,13 +516,9 @@ void DSRUU::defaultProcess(cMessage *ipDgram)
     }
 }
 
-
 // Rutina HandleMessage ()
 void DSRUU::handleMessage(cMessage* msg)
 {
-    if (is_init==false)
-        opp_error("Dsr has not been initialized ");
-
     //current_time =simTime();
     if (msg->isSelfMessage())
     {// Timer msg
@@ -587,8 +574,6 @@ void DSRUU::handleMessage(cMessage* msg)
     defaultProcess(ipDgram);
     return;
 }
-
-
 
 void DSRUU::receiveChangeNotification(int category, const cObject *details)
 {
@@ -738,7 +723,6 @@ void DSRUU::linkFailed(IPv4Address ipAdd)
 
 }
 
-
 void DSRUU::tap(DSRPkt *p, cObject *ctrl)
 {
     struct dsr_pkt *dp;
@@ -775,8 +759,6 @@ void DSRUU::tap(DSRPkt *p, cObject *ctrl)
     return;
 }
 
-
-
 struct dsr_srt *DSRUU:: RouteFind(struct in_addr src, struct in_addr dst)
 {
     if (ConfVal(PathCache))
@@ -788,8 +770,6 @@ struct dsr_srt *DSRUU:: RouteFind(struct in_addr src, struct in_addr dst)
 
 int DSRUU::RouteAdd(struct dsr_srt *srt, unsigned long timeout, unsigned short flags)
 {
-
-
     if (ConfVal(PathCache))
     {
         ph_srt_add(srt, timeout, flags);
@@ -888,7 +868,6 @@ void DSRUU::EtxMsgProc(cMessage *m)
 
     IPv4Address myAddress((uint32_t)myaddr_.s_addr);
     IPv4Address srcAddress(msg->getSrcAddress());
-
 
     for (int i = 0; i<size; i++)
     {
@@ -1019,7 +998,6 @@ double DSRUU::PathCost(struct dsr_pkt *dp)
     return totalCost;
 }
 
-
 void DSRUU::AddCost(struct dsr_pkt *dp, struct dsr_srt *srt)
 {
     struct in_addr add;
@@ -1043,7 +1021,6 @@ void DSRUU::AddCost(struct dsr_pkt *dp, struct dsr_srt *srt)
     dp->costVector[srt->cost_size-1].address = IPv4Address((uint32_t)srt->dst.s_addr);
     dp->costVector[srt->cost_size-1].cost = srt->cost[srt->cost_size-1];
 }
-
 
 bool DSRUU::proccesICMP(cMessage *msg)
 {

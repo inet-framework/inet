@@ -27,20 +27,24 @@
 Define_Module(ObstacleControl);
 
 ObstacleControl::~ObstacleControl() {
-
 }
 
-void ObstacleControl::initialize(int stage) {
-    if (stage == 1) {
-        debug = par("debug");
+void ObstacleControl::initialize(int stage)
+{
+    cSimpleModule::initialize(stage);
 
+    if (stage == 0)
+    {
         obstacles.clear();
         cacheEntries.clear();
 
-        annotations = AnnotationManagerAccess().getIfExists();
-        if (annotations) annotationGroup = annotations->createGroup("obstacles");
-
         obstaclesXml = par("obstacles");
+    }
+    else if (stage == 1)
+    {
+        annotations = AnnotationManagerAccess().getIfExists();
+        if (annotations)
+            annotationGroup = annotations->createGroup("obstacles");
 
         addFromXml(obstaclesXml);
     }

@@ -25,7 +25,7 @@ Register_Class(TCPReno);
 
 
 TCPReno::TCPReno() : TCPTahoeRenoFamily(),
-  state((TCPRenoStateVariables *&)TCPAlgorithm::state)
+        state((TCPRenoStateVariables *&)TCPAlgorithm::state)
 {
 }
 

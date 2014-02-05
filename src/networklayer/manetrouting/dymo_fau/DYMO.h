@@ -81,9 +81,9 @@ class QueueElement : public cPacket
 class DYMO : public ManetRoutingBase
 {
   public:
-    int numInitStages() const  {return 5;}
-    void initialize(int);
-    void finish();
+    virtual int numInitStages() const { return 5; }
+    virtual void initialize(int);
+    virtual void finish();
 
     DYMO();
     ~DYMO();

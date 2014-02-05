@@ -202,7 +202,7 @@ class INET_API EtherMACBase : public MACBase, public cListener
   protected:
     //  initialization
     virtual void initialize(int stage);
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initializeFlags();
     virtual void initializeMACAddress();
     virtual void initializeQueueModule();

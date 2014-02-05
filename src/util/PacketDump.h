@@ -30,7 +30,7 @@ class IPv6Datagram;
 class SCTPMessage;
 class TCPSegment;
 class UDPPacket;
-
+class ARPPacket;
 
 /**
  * Utility class that provides tcpdump-like functionality. It prints
@@ -91,6 +91,8 @@ class INET_API PacketDump
          * direction of the packet.
          */
         void dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment = NULL);
+
+        void dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment = NULL);
 
         /**
          * Dumps info about the given IPv6 datagram. The l2r parameter denotes

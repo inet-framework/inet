@@ -16,8 +16,10 @@
 // Author: Benjamin Martin Seregi
 
 #include "Ieee8021dRelay.h"
+#include "Ieee802Ctrl_m.h"
 #include "InterfaceEntry.h"
 #include "Ieee8021dInterfaceData.h"
+#include "ModuleAccess.h"
 
 Define_Module(Ieee8021dRelay);
 

@@ -117,6 +117,8 @@ UDP::~UDP()
 
 void UDP::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         WATCH_PTRMAP(socketsByIdMap);

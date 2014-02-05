@@ -25,7 +25,6 @@ package inet.world.obstacles;
 simple ObstacleControl
 {
     parameters:
-        bool debug = default(false);  // emit debug messages?
         xml obstacles = default(xml("<obstacles/>")); // obstacles to add at startup
         @display("i=misc/town");
         @labels(node);

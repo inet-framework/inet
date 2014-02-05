@@ -21,6 +21,7 @@
 
 #include "EtherFrame.h"
 #include "IInterfaceTable.h"
+#include "Ieee802Ctrl_m.h"
 
 
 Define_Module(EtherEncap);

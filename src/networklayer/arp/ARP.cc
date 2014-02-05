@@ -604,7 +604,6 @@ IPv4Address ARP::getIPv4AddressFor(const MACAddress& macAddr) const
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
 
-
 void ARP::receiveChangeNotification(int category, const cObject *details)
 {
     Enter_Method_Silent();

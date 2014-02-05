@@ -102,60 +102,68 @@ LDP::~LDP()
 
 void LDP::initialize(int stage)
 {
-    if (stage != 3)
-        return; // wait for routing table to initialize first
+    cSimpleModule::initialize(stage);
 
-    holdTime = par("holdTime").doubleValue();
-    helloInterval = par("helloInterval").doubleValue();
+    //FIXME move bind() and listen() calls to a new startModule() function, and call it from initialize() and from handleOperationStage()
+    //FIXME register to InterfaceEntry changes, for detecting the interface add/delete, and detecting multicast config changes:
+    //      should be refresh the udpSockets vector when interface added/deleted, or isMulticast() value changed.
 
-    ift = InterfaceTableAccess().get();
-    rt = RoutingTableAccess().get();
-    lt = LIBTableAccess().get();
-    tedmod = TEDAccess().get();
-    nb = NotificationBoardAccess().get();
-
-    WATCH_VECTOR(myPeers);
-    WATCH_VECTOR(fecUp);
-    WATCH_VECTOR(fecDown);
-    WATCH_VECTOR(fecList);
-    WATCH_VECTOR(pending);
-
-    maxFecid = 0;
-
-    // schedule first hello
-    sendHelloMsg = new cMessage("LDPSendHello");
-    nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
-    if (isNodeUp())
-        scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
-
-    // bind UDP socket
-    udpSocket.setOutputGate(gate("udpOut"));
-    udpSocket.bind(LDP_PORT);
-    for (int i = 0; i < ift->getNumInterfaces(); ++i)
+    if (stage == 0)
     {
-        InterfaceEntry *ie = ift->getInterface(i);
-        if (ie->isMulticast())
-        {
-            udpSockets.push_back(UDPSocket());
-            udpSockets.back().setOutputGate(gate("udpOut"));
-            udpSockets.back().setMulticastLoop(false);
-            udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
-        }
+        holdTime = par("holdTime").doubleValue();
+        helloInterval = par("helloInterval").doubleValue();
+
+        ift = InterfaceTableAccess().get();
+        rt = RoutingTableAccess().get();
+        lt = LIBTableAccess().get();
+        tedmod = TEDAccess().get();
+        nb = NotificationBoardAccess().get();
+
+        WATCH_VECTOR(myPeers);
+        WATCH_VECTOR(fecUp);
+        WATCH_VECTOR(fecDown);
+        WATCH_VECTOR(fecList);
+        WATCH_VECTOR(pending);
+
+        maxFecid = 0;
     }
+    else if (stage == 3)
+    {
+        // schedule first hello
+        sendHelloMsg = new cMessage("LDPSendHello");
+        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        if (isNodeUp())
+            scheduleAt(simTime() + exponential(0.1), sendHelloMsg);
 
-    // start listening for incoming TCP conns
-    EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
-    serverSocket.setOutputGate(gate("tcpOut"));
-    serverSocket.readDataTransferModePar(*this);
-    serverSocket.bind(LDP_PORT);
-    serverSocket.listen();
+        // bind UDP socket
+        udpSocket.setOutputGate(gate("udpOut"));
+        udpSocket.bind(LDP_PORT);
+        for (int i = 0; i < ift->getNumInterfaces(); ++i)
+        {
+            InterfaceEntry *ie = ift->getInterface(i);
+            if (ie->isMulticast())
+            {
+                udpSockets.push_back(UDPSocket());
+                udpSockets.back().setOutputGate(gate("udpOut"));
+                udpSockets.back().setMulticastLoop(false);
+                udpSockets.back().setMulticastOutputInterface(ie->getInterfaceId());
+            }
+        }
 
-    // build list of recognized FECs
-    rebuildFecList();
+        // start listening for incoming TCP conns
+        EV << "Starting to listen on port " << LDP_PORT << " for incoming LDP sessions\n";
+        serverSocket.setOutputGate(gate("tcpOut"));
+        serverSocket.readDataTransferModePar(*this);
+        serverSocket.bind(LDP_PORT);
+        serverSocket.listen();
 
-    // listen for routing table modifications
-    nb->subscribe(this, NF_IPv4_ROUTE_ADDED);
-    nb->subscribe(this, NF_IPv4_ROUTE_DELETED);
+        // build list of recognized FECs
+        rebuildFecList();
+
+        // listen for routing table modifications
+        nb->subscribe(this, NF_IPv4_ROUTE_ADDED);
+        nb->subscribe(this, NF_IPv4_ROUTE_DELETED);
+    }
 }
 
 void LDP::handleMessage(cMessage *msg)

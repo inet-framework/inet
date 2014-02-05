@@ -46,12 +46,9 @@ BindingCache::~BindingCache()
 //         delete bindingUpdateList[i];
 }
 
-void BindingCache::initialize(int stage)
+void BindingCache::initialize()
 {
-    if (stage == 1)
-    {
-        WATCH_MAP(bindingCache); //added by Zarrar Yousaf
-    }
+    WATCH_MAP(bindingCache); //added by Zarrar Yousaf
 }
 
 void BindingCache::handleMessage(cMessage *msg)

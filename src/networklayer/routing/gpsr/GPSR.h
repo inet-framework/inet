@@ -102,13 +102,13 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         int computePacketBitLength(GPSRPacket * packet);
 
         // configuration
-        bool isNodeUp();
+        bool isNodeUp() const;
         void configureInterfaces();
 
         // position
         Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
-        Coord getDestinationPosition(const IPvXAddress & address);
-        Coord getNeighborPosition(const IPvXAddress & address);
+        Coord getDestinationPosition(const IPvXAddress & address) const;
+        Coord getNeighborPosition(const IPvXAddress & address) const;
 
         // angle
         double getVectorAngle(Coord vector);
@@ -116,15 +116,15 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         double getNeighborAngle(const IPvXAddress & address);
 
         // address
-        std::string getHostName();
-        IPvXAddress getSelfAddress();
-        IPvXAddress getSenderNeighborAddress(IPv4Datagram * datagram);
+        std::string getHostName() const;
+        IPvXAddress getSelfAddress() const;
+        IPvXAddress getSenderNeighborAddress(IPv4Datagram * datagram) const;
 
         // neighbor
         simtime_t getNextNeighborExpiration();
         void purgeNeighbors();
         std::vector<IPvXAddress> getPlanarNeighbors();
-        IPvXAddress getNextPlanarNeighborCounterClockwise(IPvXAddress & startNeighborAddress, double startNeighborAngle);
+        IPvXAddress getNextPlanarNeighborCounterClockwise(const IPvXAddress & startNeighborAddress, double startNeighborAngle);
 
         // next hop
         IPvXAddress findNextHop(IPv4Datagram * datagram, const IPvXAddress & destination);

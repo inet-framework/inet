@@ -65,7 +65,6 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
     typedef std::map<MACAddress,STAInfo, MAC_compare> STAList;
 
   protected:
-
     NotificationBoard *nb;
 
     // configuration
@@ -82,8 +81,9 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase
   public:
     Ieee80211MgmtAP() :  nb(NULL), beaconTimer(NULL) {}
     virtual ~Ieee80211MgmtAP();
+
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initialize(int);
 
     /** Implements abstract Ieee80211MgmtBase method */

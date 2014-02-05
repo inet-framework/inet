@@ -91,6 +91,8 @@ xMIPv6::~xMIPv6()
 
 void xMIPv6::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         EV << "Initializing xMIPv6 module" << endl;
@@ -110,9 +112,7 @@ void xMIPv6::initialize(int stage)
         statVectorCoTtoMN.setName("CoT to MN");
         statVectorHoTfromCN.setName("HoT from CN");
         statVectorCoTfromCN.setName("CoT from CN");*/
-    }
-    else if (stage == 1)
-    {
+
         tunneling = IPv6TunnelingAccess().get(); // access to tunneling module, 21.08.07 - CB
     }
     else if (stage == 2)
@@ -121,14 +121,13 @@ void xMIPv6::initialize(int stage)
         // set the MIPv6 flag as soon as possible for use
         // with other modules.
         rt6 = RoutingTable6Access().get();
-        ASSERT(rt6 != NULL);
         rt6->setMIPv6Support(true); // 4.9.07 - CB
 
         // moved init stuff from rt6 to here as this is actually
         // the right place for these parameters
         // 26.10.07 - CB
-        rt6->setIsHomeAgent(par("isHomeAgent"));
-        rt6->setIsMobileNode(par("isMobileNode"));
+        rt6->setIsHomeAgent(par("isHomeAgent").boolValue());
+        rt6->setIsMobileNode(par("isMobileNode").boolValue());
     }
     else if (stage == 3)
     {
@@ -152,7 +151,7 @@ void xMIPv6::initialize(int stage)
 
         WATCH_VECTOR(cnList);
         WATCH_MAP(interfaceCoAList);
-     }
+    }
 }
 
 void xMIPv6::handleMessage(cMessage *msg)

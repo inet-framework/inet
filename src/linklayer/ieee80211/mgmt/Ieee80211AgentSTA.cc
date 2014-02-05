@@ -20,7 +20,7 @@
 #include "Ieee80211Primitives_m.h"
 #include "NotifierConsts.h"
 #include "InterfaceTableAccess.h"
-
+#include "opp_utils.h"
 
 Define_Module(Ieee80211AgentSTA);
 
@@ -30,9 +30,12 @@ simsignal_t Ieee80211AgentSTA::sentRequestSignal = registerSignal("sentRequest")
 simsignal_t Ieee80211AgentSTA::acceptConfirmSignal = registerSignal("acceptConfirm");
 simsignal_t Ieee80211AgentSTA::dropConfirmSignal = registerSignal("dropConfirm");
 
+
 void Ieee80211AgentSTA::initialize(int stage)
 {
-    if (stage==0)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
     {
         // read parameters
         activeScan = par("activeScan");
@@ -49,21 +52,24 @@ void Ieee80211AgentSTA::initialize(int stage)
         nb = NotificationBoardAccess().get();
         nb->subscribe(this, NF_L2_BEACON_LOST);
 
-        InterfaceTable *ift = (InterfaceTable*)InterfaceTableAccess().getIfExists();
-        myIface = NULL;
-        if (!ift)
-        {
-            myIface = ift->getInterfaceByName(getParentModule()->getFullName());
-        }
-
         // JcM add: get the default ssid, if there is one.
         default_ssid = par("default_ssid").stringValue();
 
         // start up: send scan request
-        if (par("startingTime").doubleValue()>0)
-            scheduleAt(simTime()+par("startingTime").doubleValue(), new cMessage("startUp", MK_STARTUP));
-        else
-            scheduleAt(simTime()+uniform(0, maxChannelTime), new cMessage("startUp", MK_STARTUP));
+        simtime_t startingTime = par("startingTime").doubleValue();
+        if (startingTime <= SIMTIME_ZERO)
+            startingTime = uniform(SIMTIME_ZERO, maxChannelTime);
+        scheduleAt(simTime()+startingTime, new cMessage("startUp", MK_STARTUP));
+
+        myIface = NULL;
+    }
+    else if (stage == 1)
+    {
+        IInterfaceTable *ift = InterfaceTableAccess().getIfExists();
+        if (ift)
+        {
+            myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
+        }
     }
 }
 
@@ -314,7 +320,7 @@ void Ieee80211AgentSTA::processAssociateConfirm(Ieee80211Prim_AssociateConfirm *
         getParentModule()->getParentModule()->bubble("Associated with AP");
         if(prevAP.isUnspecified() || prevAP != resp->getAddress())
         {
-            nb->fireChangeNotification(NF_L2_ASSOCIATED_NEWAP, myIface); //XXX detail: InterfaceEntry?
+            nb->fireChangeNotification(NF_L2_ASSOCIATED_NEWAP, myIface);
             prevAP = resp->getAddress();
         }
         else
@@ -335,7 +341,7 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
     else
     {
         EV << "Reassociation successful\n";
-        nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface); //XXX detail: InterfaceEntry?
+        nb->fireChangeNotification(NF_L2_ASSOCIATED_OLDAP, myIface);
         emit(acceptConfirmSignal, PR_REASSOCIATE_CONFIRM);
         // we are happy!
     }

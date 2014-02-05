@@ -271,7 +271,7 @@ int GPSR::computePacketBitLength(GPSRPacket * packet)
 // configuration
 //
 
-bool GPSR::isNodeUp()
+bool GPSR::isNodeUp() const
 {
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
@@ -312,13 +312,13 @@ Coord GPSR::intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coor
         return Coord(NaN, NaN, NaN);
 }
 
-Coord GPSR::getDestinationPosition(const IPvXAddress & address)
+Coord GPSR::getDestinationPosition(const IPvXAddress & address) const
 {
     // KLUDGE: implement position registry protocol
     return globalPositionTable.getPosition(address);
 }
 
-Coord GPSR::getNeighborPosition(const IPvXAddress & address)
+Coord GPSR::getNeighborPosition(const IPvXAddress & address) const
 {
     return neighborPositionTable.getPosition(address);
 }
@@ -349,17 +349,17 @@ double GPSR::getNeighborAngle(const IPvXAddress & address)
 // address
 //
 
-std::string GPSR::getHostName()
+std::string GPSR::getHostName() const
 {
     return host->getFullName();
 }
 
-IPvXAddress GPSR::getSelfAddress()
+IPvXAddress GPSR::getSelfAddress() const
 {
     return routingTable->getRouterId();
 }
 
-IPvXAddress GPSR::getSenderNeighborAddress(IPv4Datagram * datagram)
+IPvXAddress GPSR::getSenderNeighborAddress(IPv4Datagram * datagram) const
 {
     GPSRPacket * packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     return packet->getSenderAddress().get4();
@@ -425,10 +425,10 @@ std::vector<IPvXAddress> GPSR::getPlanarNeighbors()
     return planarNeighbors;
 }
 
-IPvXAddress GPSR::getNextPlanarNeighborCounterClockwise(IPvXAddress & startNeighborAddress, double startNeighborAngle)
+IPvXAddress GPSR::getNextPlanarNeighborCounterClockwise(const IPvXAddress& startNeighborAddress, double startNeighborAngle)
 {
     GPSR_EV << "Finding next planar neighbor (counter clockwise): startAddress = " << startNeighborAddress << ", startAngle = " << startNeighborAngle << endl;
-    IPvXAddress & bestNeighborAddress = startNeighborAddress;
+    IPvXAddress bestNeighborAddress = startNeighborAddress;
     double bestNeighborAngleDifference = 2 * PI;
     std::vector<IPvXAddress> neighborAddresses = getPlanarNeighbors();
     for (std::vector<IPvXAddress>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {

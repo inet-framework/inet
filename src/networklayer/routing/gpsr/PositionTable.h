@@ -48,7 +48,7 @@ class INET_API PositionTable {
 
         void clear();
 
-        simtime_t getOldestPosition();
+        simtime_t getOldestPosition() const;
 };
 
 #endif

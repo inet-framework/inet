@@ -25,6 +25,9 @@
 #include "RoutingTable6Access.h"
 #endif /* WITH_xMIPv6 */
 
+
+Register_Abstract_Class(IPv6MulticastGroupInfo);
+
 //FIXME invoked changed() from state-changing methods, to trigger notification...
 
 std::string IPv6InterfaceData::HostMulticastData::info()
@@ -49,7 +52,6 @@ std::string IPv6InterfaceData::HostMulticastData::info()
 
 std::string IPv6InterfaceData::HostMulticastData::detailedInfo()
 {
-
     std::stringstream out;
     out << "Joined Groups:";
     for (int i = 0; i < (int)joinedMulticastGroups.size(); ++i)
@@ -191,9 +193,9 @@ std::string IPv6InterfaceData::info() const
         os << "R-Flag = " << (a.advRtrAddr ? "1 " : "0 ");
 #endif /* WITH_xMIPv6 */
 
-        if (a.advValidLifetime==0)
+        if (a.advValidLifetime == SIMTIME_ZERO)
            os  << "lifetime:inf";
-        else if (a.advValidLifetime>0)
+        else if (a.advValidLifetime > SIMTIME_ZERO)
            os  << "expires:" << a.advValidLifetime;
         else
            os  << "lifetime:+" << (-1 * a.advValidLifetime);
@@ -270,6 +272,7 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
 #endif /* WITH_xMIPv6 */
 
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 void IPv6InterfaceData::updateMatchingAddressExpiryTimes(const IPv6Address& prefix, int length,
@@ -369,6 +372,7 @@ void IPv6InterfaceData::removeAddress(const IPv6Address& address)
     ASSERT(k!=-1);
     addresses.erase(addresses.begin()+k);
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 }
 
 bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
@@ -388,7 +392,7 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
         return a.addrType == CoA; // HoA is better than CoA, 24.9.07 - CB
 #endif /* WITH_xMIPv6 */
 
-    return (a.expiryTime==0 && b.expiryTime!=0) || a.expiryTime>b.expiryTime;  // longer expiry time is better
+    return (a.expiryTime==SIMTIME_ZERO && b.expiryTime!=SIMTIME_ZERO) || a.expiryTime>b.expiryTime;  // longer expiry time is better
 }
 
 void IPv6InterfaceData::choosePreferredAddress()
@@ -407,8 +411,17 @@ void IPv6InterfaceData::choosePreferredAddress()
 
     // sort addresses by scope and expiry time, then pick the first one
     std::sort(addresses.begin(), addresses.end(), addrLess);
-    preferredAddr = addresses[0].address;
-    preferredAddrExpiryTime = addresses[0].expiryTime;
+    // choose first unicast address
+    for (int i = 0; i < (int)addresses.size(); ++i)
+    {
+        if (addresses[i].address.isUnicast())
+        {
+            preferredAddr = addresses[i].address;
+            preferredAddrExpiryTime = addresses[i].expiryTime;
+            return;
+        }
+    }
+    preferredAddr = IPv6Address::UNSPECIFIED_ADDRESS;
 }
 
 void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
@@ -607,6 +620,7 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
 
     // pick new address as we've removed the old one
     choosePreferredAddress();
+    changed1(F_IP_ADDRESS);
 
     return addr;
 }

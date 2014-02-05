@@ -51,9 +51,9 @@ protected:
 public:
     STPBase();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    virtual void receiveChangeNotification(int category, const cObject *details){};
+    virtual void receiveChangeNotification(int category, const cObject *details) {}
 protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
 
     virtual void start();

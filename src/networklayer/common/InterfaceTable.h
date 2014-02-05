@@ -104,7 +104,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual std::string getFullPath() const {return cSimpleModule::getFullPath();}
 
   protected:
-    virtual int numInitStages() const {return 2;}
+    virtual int numInitStages() const { return 2; }
     virtual void initialize(int stage);
 
     /**

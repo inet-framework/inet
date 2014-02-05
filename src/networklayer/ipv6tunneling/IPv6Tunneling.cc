@@ -63,6 +63,8 @@ IPv6Tunneling::IPv6Tunneling()
 
 void IPv6Tunneling::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         ift = InterfaceTableAccess().get();
@@ -134,8 +136,8 @@ int IPv6Tunneling::createTunnel(TunnelType tunnelType,
         return search;
     }
 
-    if (vIfIndexTop == (ift->getNumInterfaces() - 1))
-        opp_error("Error: Not more than %d tunnels supported!", INT_MAX - ift->getNumInterfaces());
+    if (vIfIndexTop <= (ift->getBiggestInterfaceId()))
+        opp_error("Error: Not more than %d tunnels supported!", INT_MAX - ift->getBiggestInterfaceId());
 
     if ((destTrigger == IPv6Address::UNSPECIFIED_ADDRESS) && (noOfNonSplitTunnels == 1))
         opp_error("Error: Not more than 1 non-split tunnel supported!");

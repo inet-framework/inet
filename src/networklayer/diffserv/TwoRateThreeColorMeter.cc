@@ -23,8 +23,11 @@ using namespace DiffservUtil;
 
 Define_Module(TwoRateThreeColorMeter);
 
+
 void TwoRateThreeColorMeter::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numRcvd = 0;
@@ -33,17 +36,17 @@ void TwoRateThreeColorMeter::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numYellow);
         WATCH(numRed);
+
+        PBS = 8 * (int)par("pbs");
+        CBS = 8 * (int)par("cbs");
+        colorAwareMode = par("colorAwareMode");
+        Tp = PBS;
+        Tc = CBS;
     }
     else if (stage == 2)
     {
         PIR = parseInformationRate(par("pir"), "pir", *this, 0);
-        PBS = 8 * (int)par("pbs");
         CIR = parseInformationRate(par("cir"), "cir", *this, 0);
-        CBS = 8 * (int)par("cbs");
-        colorAwareMode = par("colorAwareMode");
-
-        Tp = PBS;
-        Tc = CBS;
         lastUpdateTime = simTime();
     }
 }

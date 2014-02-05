@@ -57,5 +57,3 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base
 };
 
 #endif
-
-

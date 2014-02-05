@@ -36,12 +36,13 @@ Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENA
 // (INotifiable::receiveChangeNotification() doesn't have NotificationBoard* as arg).
 class RoutingTableRecorderListener : public INotifiable
 {
-private:
+  private:
     NotificationBoard *nb;
     RoutingTableRecorder *recorder;
-public:
-    RoutingTableRecorderListener(RoutingTableRecorder *recorder, NotificationBoard *nb) {this->recorder = recorder; this->nb = nb;}
-    virtual void receiveChangeNotification(int category, const cObject *details) {recorder->receiveChangeNotification(nb, category, details);}
+
+  public:
+    RoutingTableRecorderListener(RoutingTableRecorder *recorder, NotificationBoard *nb) :  nb(nb), recorder(recorder) {}
+    virtual void receiveChangeNotification(int category, const cObject *details) { recorder->receiveChangeNotification(nb, category, details); }
 };
 
 RoutingTableRecorder::RoutingTableRecorder()
@@ -55,8 +56,13 @@ RoutingTableRecorder::~RoutingTableRecorder()
 
 void RoutingTableRecorder::initialize(int stage)
 {
-    if (par("enabled").boolValue())
-        hookListeners();
+    cSimpleModule::initialize(stage);
+
+    if (stage == 0)
+    {
+        if (par("enabled").boolValue())
+            hookListeners();
+    }
 }
 
 void RoutingTableRecorder::handleMessage(cMessage *)

@@ -92,6 +92,13 @@ void SCTP::bindPortForUDP()
 
 void SCTP::initialize()
 {
+    this->auth = (bool)par("auth");
+    this->pktdrop = (bool)par("packetDrop");
+    this->sackNow = (bool)par("sackNow");
+    numPktDropReports = 0;
+    numPacketsReceived = 0;
+    numPacketsDropped = 0;
+    sizeAssocMap = 0;
     nextEphemeralPort = (uint16)(intrand(10000) + 30000);
 
     cModule *netw = simulation.getSystemModule();
@@ -102,21 +109,16 @@ void SCTP::initialize()
     {
         testTimeout = (simtime_t)netw->par("testTimeout");
     }
-    this->auth = (bool)par("auth");
-    this->pktdrop = (bool)par("packetDrop");
-    this->sackNow = (bool)par("sackNow");
-    numPktDropReports = 0;
-    numPacketsReceived = 0;
-    numPacketsDropped = 0;
-    sizeAssocMap = 0;
 
     IPSocket socket(gate("to_ip"));
     socket.registerProtocol(IP_PROT_SCTP);
     socket.setOutputGate(gate("to_ipv6"));
     socket.registerProtocol(IP_PROT_SCTP);
 
-    if ((bool)par("udpEncapsEnabled"))
+    if (par("udpEncapsEnabled").boolValue())
+    {
         bindPortForUDP();
+    }
 }
 
 

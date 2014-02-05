@@ -514,45 +514,45 @@ ModulationType WifiModulationType::getModulationType(char mode, double bitrate)
 simtime_t
 WifiModulationType::getPlcpHeaderDuration(ModulationType payloadMode, WifiPreamble preamble)
 {
-  switch (payloadMode.getModulationClass())
-  {
-      case MOD_CLASS_OFDM:
-      {
-          switch (payloadMode.getBandwidth()) {
-              case 20000000:
-              default:
-                  // IEEE Std 802.11-2007, section 17.3.3 and figure 17-4
-                  // also section 17.3.2.3, table 17-4
-                  // We return the duration of the SIGNAL field only, since the
-                  // SERVICE field (which strictly speaking belongs to the PLCP
-                  // header, see section 17.3.2 and figure 17-1) is sent using the
-                  // payload mode.
-                  return 4.0/1000000.0;
-              case 10000000:
-                  // IEEE Std 802.11-2007, section 17.3.2.3, table 17-4
-                  return 8/1000000.0;
-              case 5000000:
-                  // IEEE Std 802.11-2007, section 17.3.2.3, table 17-4
-                  return 16.0/1000000.0;
-          }
-          break;
-      }
-      case MOD_CLASS_ERP_OFDM:
-          return 16.0/1000000.0;
-      case MOD_CLASS_DSSS:
-          if (preamble == WIFI_PREAMBLE_SHORT)
-          {
-              // IEEE Std 802.11-2007, section 18.2.2.2 and figure 18-2
-              return 24.0/1000000.0;
-          }
-          else // WIFI_PREAMBLE_LONG
-          {
-              // IEEE Std 802.11-2007, sections 18.2.2.1 and figure 18-1
-              return 48.0/1000000.0;
-          }
-      default:
-          opp_error("unsupported modulation class");
-      return 0;
+    switch (payloadMode.getModulationClass())
+    {
+        case MOD_CLASS_OFDM:
+        {
+            switch (payloadMode.getBandwidth()) {
+                case 20000000:
+                default:
+                    // IEEE Std 802.11-2007, section 17.3.3 and figure 17-4
+                    // also section 17.3.2.3, table 17-4
+                    // We return the duration of the SIGNAL field only, since the
+                    // SERVICE field (which strictly speaking belongs to the PLCP
+                    // header, see section 17.3.2 and figure 17-1) is sent using the
+                    // payload mode.
+                    return 4.0/1000000.0;
+                case 10000000:
+                    // IEEE Std 802.11-2007, section 17.3.2.3, table 17-4
+                    return 8/1000000.0;
+                case 5000000:
+                    // IEEE Std 802.11-2007, section 17.3.2.3, table 17-4
+                    return 16.0/1000000.0;
+            }
+            break;
+        }
+        case MOD_CLASS_ERP_OFDM:
+            return 16.0/1000000.0;
+        case MOD_CLASS_DSSS:
+            if (preamble == WIFI_PREAMBLE_SHORT)
+            {
+                // IEEE Std 802.11-2007, section 18.2.2.2 and figure 18-2
+                return 24.0/1000000.0;
+            }
+            else // WIFI_PREAMBLE_LONG
+            {
+                // IEEE Std 802.11-2007, sections 18.2.2.1 and figure 18-1
+                return 48.0/1000000.0;
+            }
+        default:
+            opp_error("unsupported modulation class");
+            return 0;
     }
 }
 
@@ -708,10 +708,10 @@ WifiModulationType::getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble p
                 // IEEE Std 802.11-2007, section 18.2.2.2
                 return WifiModulationType::GetDsssRate2Mbps();
             }
-       default:
-           opp_error("unsupported modulation class");
-           return ModulationType();
-     }
+        default:
+            opp_error("unsupported modulation class");
+            return ModulationType();
+    }
 }
 
 
@@ -824,9 +824,9 @@ WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble
                 // IEEE Std 802.11-2007, section 18.2.2.2
                 return (96.0/1000000.0);
             }
-         default:
-             opp_error("unsupported modulation class");
-         return SIMTIME_ZERO;
+        default:
+            opp_error("unsupported modulation class");
+        return SIMTIME_ZERO;
     }
 }
 

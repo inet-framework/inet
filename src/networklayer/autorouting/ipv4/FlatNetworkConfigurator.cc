@@ -31,7 +31,9 @@ Define_Module(FlatNetworkConfigurator);
 
 void FlatNetworkConfigurator::initialize(int stage)
 {
-    if (stage==2)
+    cSimpleModule::initialize(stage);
+
+    if (stage == 2)
     {
         cTopology topo("topo");
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]

@@ -32,8 +32,11 @@ simsignal_t EtherLLC::passedUpPkSignal = registerSignal("passedUpPk");
 simsignal_t EtherLLC::droppedPkUnknownDSAPSignal = registerSignal("droppedPkUnknownDSAP");
 simsignal_t EtherLLC::pauseSentSignal = registerSignal("pauseSent");
 
+
 void EtherLLC::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         seqNum = 0;

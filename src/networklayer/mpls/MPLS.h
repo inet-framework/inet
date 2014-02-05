@@ -47,7 +47,7 @@ class INET_API MPLS : public cSimpleModule
 
     protected:
         virtual void initialize(int stage);
-        virtual int numInitStages() const  {return 5;}
+        virtual int numInitStages() const { return 5; }
         virtual void handleMessage(cMessage *msg);
 
     protected:

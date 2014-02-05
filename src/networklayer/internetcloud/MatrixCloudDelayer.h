@@ -85,8 +85,9 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     cModule *host;
 
   protected:
-    ~MatrixCloudDelayer();
-    virtual void initialize();
+    virtual ~MatrixCloudDelayer();
+    virtual int numInitStages() const { return 2; }
+    virtual void initialize(int stage);
 
     /**
      * returns isDrop and delay for this msg

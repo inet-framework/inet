@@ -35,6 +35,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+Register_Abstract_Class(InterfaceEntryChangeDetails);
+Register_Abstract_Class(InterfaceEntry);
 
 void InterfaceProtocolData::changed(int category, int fieldId)
 {
@@ -43,6 +45,17 @@ void InterfaceProtocolData::changed(int category, int fieldId)
         ownerp->changed(category, fieldId);
 }
 
+std::string InterfaceEntryChangeDetails::info() const
+{
+    return ie->info();
+}
+
+std::string InterfaceEntryChangeDetails::detailedInfo() const
+{
+    std::stringstream out;
+    out << ie->detailedInfo() << " changed field: " << field << "\n";
+    return out.str();
+}
 
 InterfaceEntry::InterfaceEntry(cModule* ifmod)
 {
@@ -269,7 +282,7 @@ MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
     return NULL;
 }
 
-void InterfaceEntry::joinMulticastGroup(const IPv4Address & address) const
+void InterfaceEntry::joinMulticastGroup(const IPv4Address& address) const
 {
 #ifdef WITH_IPv4
     if (ipv4data)

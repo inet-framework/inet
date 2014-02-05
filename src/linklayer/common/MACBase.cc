@@ -18,6 +18,7 @@
 //
 
 #include "MACBase.h"
+
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "InterfaceEntry.h"
@@ -30,6 +31,7 @@
 
 MACBase::MACBase()
 {
+    hostModule = NULL;
     nb = NULL;
     interfaceEntry = NULL;
     isOperational = false;
@@ -41,8 +43,11 @@ MACBase::~MACBase()
 
 void MACBase::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
+        hostModule = findContainingNode(this);
         nb = NotificationBoardAccess().getIfExists();
     }
     else if (stage == 1)
@@ -102,8 +107,7 @@ void MACBase::receiveChangeNotification(int category, const cObject *details)
 
 bool MACBase::isNodeUp()
 {
-    cModule *node = findContainingNode(this);
-    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
+    NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(hostModule->getSubmodule("status"));
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 

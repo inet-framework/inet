@@ -147,4 +147,3 @@ module LDP_LSR
             mpls.netwIn[i+1] <-- networkLayer.ifOut[i+1];
         }
 }
-

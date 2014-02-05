@@ -447,8 +447,7 @@ OLSR_MsgTimer::expire()
 
 ///
 ///
-void
-OLSR::initialize(int stage)
+void OLSR::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
 

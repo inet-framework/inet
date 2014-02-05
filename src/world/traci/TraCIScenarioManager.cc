@@ -34,8 +34,6 @@
 #endif
 #define MYSOCKET (*(SOCKET*)socketPtr)
 
-#define MYDEBUG EV
-
 #include "world/traci/TraCIScenarioManager.h"
 #include "world/traci/TraCIConstants.h"
 #include "mobility/models/TraCIMobility.h"
@@ -47,68 +45,69 @@ TraCIScenarioManager::~TraCIScenarioManager() {
     cancelAndDelete(executeOneTimestepTrigger);
 }
 
-void TraCIScenarioManager::initialize(int stage) {
+void TraCIScenarioManager::initialize(int stage)
+{
     cSimpleModule::initialize(stage);
-    if (stage != 1) {
-        return;
+
+    if (stage == 0)
+    {
+        connectAt = par("connectAt");
+        firstStepAt = par("firstStepAt");
+        updateInterval = par("updateInterval");
+        if (firstStepAt == -1)
+            firstStepAt = connectAt + updateInterval;
+        if (firstStepAt <= connectAt)
+            throw cRuntimeError("bad parameters: firstStepAt should be larger than connectAt");
+        moduleType = par("moduleType").stdstringValue();
+        moduleName = par("moduleName").stdstringValue();
+        moduleDisplayString = par("moduleDisplayString").stdstringValue();
+        penetrationRate = par("penetrationRate").doubleValue();
+        host = par("host").stdstringValue();
+        port = par("port");
+        autoShutdown = par("autoShutdown");
+        margin = par("margin");
+        std::string roiRoads_s = par("roiRoads");
+        std::string roiRects_s = par("roiRects");
+
+        // parse roiRoads
+        roiRoads.clear();
+        std::istringstream roiRoads_i(roiRoads_s);
+        std::string road;
+        while (std::getline(roiRoads_i, road, ' ')) {
+            roiRoads.push_back(road);
+        }
+
+        // parse roiRects
+        roiRects.clear();
+        std::istringstream roiRects_i(roiRects_s);
+        std::string rect;
+        while (std::getline(roiRects_i, rect, ' ')) {
+            std::istringstream rect_i(rect);
+            double x1; rect_i >> x1; ASSERT(rect_i);
+            char c1; rect_i >> c1; ASSERT(rect_i);
+            double y1; rect_i >> y1; ASSERT(rect_i);
+            char c2; rect_i >> c2; ASSERT(rect_i);
+            double x2; rect_i >> x2; ASSERT(rect_i);
+            char c3; rect_i >> c3; ASSERT(rect_i);
+            double y2; rect_i >> y2; ASSERT(rect_i);
+            roiRects.push_back(std::pair<TraCICoord, TraCICoord>(TraCICoord(x1, y1), TraCICoord(x2, y2)));
+        }
+
+        nextNodeVectorIndex = 0;
+        hosts.clear();
+        subscribedVehicles.clear();
+        activeVehicleCount = 0;
+        autoShutdownTriggered = false;
+
+        socketPtr = 0;
+
+        connectAndStartTrigger = new cMessage("connect");
+        scheduleAt(connectAt, connectAndStartTrigger);
+        executeOneTimestepTrigger = new cMessage("step");
+        scheduleAt(firstStepAt, executeOneTimestepTrigger);
+
+        EV_DEBUG << "initialized TraCIScenarioManager" << endl;
     }
-
-
-    debug = par("debug");
-    connectAt = par("connectAt");
-    firstStepAt = par("firstStepAt");
-    updateInterval = par("updateInterval");
-    if (firstStepAt == -1) firstStepAt = connectAt + updateInterval;
-    moduleType = par("moduleType").stdstringValue();
-    moduleName = par("moduleName").stdstringValue();
-    moduleDisplayString = par("moduleDisplayString").stdstringValue();
-    penetrationRate = par("penetrationRate").doubleValue();
-    host = par("host").stdstringValue();
-    port = par("port");
-    autoShutdown = par("autoShutdown");
-    margin = par("margin");
-    std::string roiRoads_s = par("roiRoads");
-    std::string roiRects_s = par("roiRects");
-
-    // parse roiRoads
-    roiRoads.clear();
-    std::istringstream roiRoads_i(roiRoads_s);
-    std::string road;
-    while (std::getline(roiRoads_i, road, ' ')) {
-        roiRoads.push_back(road);
-    }
-
-    // parse roiRects
-    roiRects.clear();
-    std::istringstream roiRects_i(roiRects_s);
-    std::string rect;
-    while (std::getline(roiRects_i, rect, ' ')) {
-        std::istringstream rect_i(rect);
-        double x1; rect_i >> x1; ASSERT(rect_i);
-        char c1; rect_i >> c1; ASSERT(rect_i);
-        double y1; rect_i >> y1; ASSERT(rect_i);
-        char c2; rect_i >> c2; ASSERT(rect_i);
-        double x2; rect_i >> x2; ASSERT(rect_i);
-        char c3; rect_i >> c3; ASSERT(rect_i);
-        double y2; rect_i >> y2; ASSERT(rect_i);
-        roiRects.push_back(std::pair<TraCICoord, TraCICoord>(TraCICoord(x1, y1), TraCICoord(x2, y2)));
-    }
-
-    nextNodeVectorIndex = 0;
-    hosts.clear();
-    subscribedVehicles.clear();
-    activeVehicleCount = 0;
-    autoShutdownTriggered = false;
-
-    socketPtr = 0;
-
-    ASSERT(firstStepAt > connectAt);
-    connectAndStartTrigger = new cMessage("connect");
-    scheduleAt(connectAt, connectAndStartTrigger);
-    executeOneTimestepTrigger = new cMessage("step");
-    scheduleAt(firstStepAt, executeOneTimestepTrigger);
-
-    MYDEBUG << "initialized TraCIScenarioManager" << endl;
 }
 
 std::string TraCIScenarioManager::receiveTraCIMessage() {
@@ -136,7 +135,7 @@ std::string TraCIScenarioManager::receiveTraCIMessage() {
     uint32_t bufLength = msgLength - sizeof(msgLength);
     char buf[bufLength];
     {
-        MYDEBUG << "Reading TraCI message of " << bufLength << " bytes" << endl;
+        EV_DEBUG << "Reading TraCI message of " << bufLength << " bytes" << endl;
         uint32_t bytesRead = 0;
         while (bytesRead < bufLength) {
             int receivedBytes = ::recv(MYSOCKET, reinterpret_cast<char*>(&buf) + bytesRead, bufLength - bytesRead, 0);
@@ -175,7 +174,7 @@ void TraCIScenarioManager::sendTraCIMessage(std::string buf) {
     }
 
     {
-        MYDEBUG << "Writing TraCI message of " << buf.length() << " bytes" << endl;
+        EV_DEBUG << "Writing TraCI message of " << buf.length() << " bytes" << endl;
         uint32_t bytesWritten = 0;
         while (bytesWritten < buf.length()) {
             size_t sentBytes = ::send(MYSOCKET, buf.c_str() + bytesWritten, buf.length() - bytesWritten, 0);
@@ -229,7 +228,7 @@ TraCIScenarioManager::TraCIBuffer TraCIScenarioManager::queryTraCIOptional(uint8
 }
 
 void TraCIScenarioManager::connect() {
-    MYDEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
+    EV_DEBUG << "TraCIScenarioManager connecting to TraCI server" << endl;
 
     if (initsocketlibonce() != 0) error("Could not init socketlib");
 
@@ -274,7 +273,7 @@ void TraCIScenarioManager::init_traci() {
         std::string serverVersion = version.second;
 
         if ((apiVersion == 2) || (apiVersion == 3)) {
-            MYDEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
+            EV_DEBUG << "TraCI server \"" << serverVersion << "\" reports API version " << apiVersion << endl;
         }
         else {
             error("TraCI server \"%s\" reports API version %d. This server is unsupported.", serverVersion.c_str(), apiVersion);
@@ -298,7 +297,7 @@ void TraCIScenarioManager::init_traci() {
 
         netbounds1 = TraCICoord(x1, y1);
         netbounds2 = TraCICoord(x2, y2);
-        MYDEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-(" << x2 << ", " << y2 << ")" << endl;
+        EV_DEBUG << "TraCI reports network boundaries (" << x1 << ", " << y1 << ")-(" << x2 << ", " << y2 << ")" << endl;
     }
 
     {
@@ -681,7 +680,7 @@ uint32_t TraCIScenarioManager::getCurrentTimeMs() {
 
 void TraCIScenarioManager::executeOneTimestep() {
 
-    MYDEBUG << "Triggering TraCI server simulation advance to t=" << simTime() <<endl;
+    EV_DEBUG << "Triggering TraCI server simulation advance to t=" << simTime() <<endl;
 
     uint32_t targetTime = getCurrentTimeMs();
 
@@ -689,7 +688,7 @@ void TraCIScenarioManager::executeOneTimestep() {
         TraCIBuffer buf = queryTraCI(CMD_SIMSTEP2, TraCIBuffer() << targetTime);
 
         uint32_t count; buf >> count;
-        MYDEBUG << "Getting " << count << " subscription results" << endl;
+        EV_DEBUG << "Getting " << count << " subscription results" << endl;
         for (uint32_t i = 0; i < count; ++i) {
             processSubcriptionResult(buf);
         }
@@ -930,7 +929,7 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
             uint8_t varType; buf >> varType;
             ASSERT(varType == TYPE_STRINGLIST);
             uint32_t count; buf >> count;
-            MYDEBUG << "TraCI reports " << count << " departed vehicles." << endl;
+            EV_DEBUG << "TraCI reports " << count << " departed vehicles." << endl;
             for (uint32_t i = 0; i < count; ++i) {
                 std::string idstring; buf >> idstring;
                 // adding modules is handled on the fly when entering/leaving the ROI
@@ -942,7 +941,7 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
             uint8_t varType; buf >> varType;
             ASSERT(varType == TYPE_STRINGLIST);
             uint32_t count; buf >> count;
-            MYDEBUG << "TraCI reports " << count << " arrived vehicles." << endl;
+            EV_DEBUG << "TraCI reports " << count << " arrived vehicles." << endl;
             for (uint32_t i = 0; i < count; ++i) {
                 std::string idstring; buf >> idstring;
 
@@ -968,7 +967,7 @@ void TraCIScenarioManager::processSimSubscription(std::string objectId, TraCIBuf
             uint8_t varType; buf >> varType;
             ASSERT(varType == TYPE_INTEGER);
             uint32_t serverTimestep; buf >> serverTimestep;
-            MYDEBUG << "TraCI reports current time step as " << serverTimestep << "ms." << endl;
+            EV_DEBUG << "TraCI reports current time step as " << serverTimestep << "ms." << endl;
             uint32_t omnetTimestep = getCurrentTimeMs();
             ASSERT(omnetTimestep == serverTimestep);
 
@@ -1004,7 +1003,7 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
             uint8_t varType; buf >> varType;
             ASSERT(varType == TYPE_STRINGLIST);
             uint32_t count; buf >> count;
-            MYDEBUG << "TraCI reports " << count << " active vehicles." << endl;
+            EV_DEBUG << "TraCI reports " << count << " active vehicles." << endl;
             ASSERT(count == activeVehicleCount);
             std::set<std::string> drivingVehicles;
             for (uint32_t i = 0; i < count; ++i) {
@@ -1077,11 +1076,11 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
     if (!inRoi) {
         if (mod) {
             deleteModule(objectId);
-            MYDEBUG << "Vehicle #" << objectId << " left region of interest" << endl;
+            EV_DEBUG << "Vehicle #" << objectId << " left region of interest" << endl;
         }
         else if(unEquippedHosts.find(objectId) != unEquippedHosts.end()) {
             unEquippedHosts.erase(objectId);
-            MYDEBUG << "Vehicle (unequipped) # " << objectId<< " left region of interest" << endl;
+            EV_DEBUG << "Vehicle (unequipped) # " << objectId<< " left region of interest" << endl;
         }
         return;
     }
@@ -1093,14 +1092,14 @@ void TraCIScenarioManager::processVehicleSubscription(std::string objectId, TraC
     if (!mod) {
         // no such module - need to create
         addModule(objectId, moduleType, moduleName, moduleDisplayString, p, edge, speed, angle);
-        MYDEBUG << "Added vehicle #" << objectId << endl;
+        EV_DEBUG << "Added vehicle #" << objectId << endl;
     } else {
         // module existed - update position
         for (cModule::SubmoduleIterator iter(mod); !iter.end(); iter++) {
             cModule* submod = iter();
             TraCIMobility* mm = dynamic_cast<TraCIMobility*>(submod);
             if (!mm) continue;
-            MYDEBUG << "module " << objectId << " moving to " << p.x << "," << p.y << endl;
+            EV_DEBUG << "module " << objectId << " moving to " << p.x << "," << p.y << endl;
             mm->nextPosition(p, edge, speed, angle);
         }
     }

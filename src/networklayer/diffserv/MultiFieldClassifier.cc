@@ -130,8 +130,11 @@ Define_Module(MultiFieldClassifier);
 
 simsignal_t MultiFieldClassifier::pkClassSignal = registerSignal("pkClass");
 
+
 void MultiFieldClassifier::initialize(int stage)
 {
+    cSimpleModule::initialize(stage);
+
     if (stage == 0)
     {
         numOutGates = gateSize("outs");

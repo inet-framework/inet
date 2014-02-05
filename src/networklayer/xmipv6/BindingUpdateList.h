@@ -115,8 +115,7 @@ class INET_API BindingUpdateList : public cSimpleModule
     virtual ~BindingUpdateList();
 
   protected:
-    virtual int numInitStages() const  {return 2;}
-    virtual void initialize(int stage);
+    virtual void initialize();
 
     /**
      * Raises an error.

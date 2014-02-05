@@ -32,13 +32,15 @@
 
 Define_Module(HttpController);
 
+
 void HttpController::initialize(int stage)
 {
-    EV_DEBUG << "Initializing stage " << stage << endl;
-    if (stage==0)
-    {
-        ll = par("logLevel");
+    cSimpleModule::initialize(stage);
 
+    EV_DEBUG << "Initializing stage " << stage << endl;
+
+    if (stage == 0)
+    {
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
         cXMLElement *rootelement = par("config").xmlValue();
@@ -61,7 +63,7 @@ void HttpController::initialize(int stage)
         pspecial = 0.0; // No special events by default
         totalLookups = 0;
     }
-    else if (stage==1)
+    else if (stage == 1)
     {
         // Two stages are required to finalize the initialization of the random object for the site selection
         // once the final number of web sites is known.

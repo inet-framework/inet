@@ -47,8 +47,8 @@ OSPFRouting::~OSPFRouting()
 
 void OSPFRouting::initialize(int stage)
 {
-    // we have to wait for stage 2 until interfaces are registered (stage 0)
-    // and routerId is assigned (stage 3)
+    cSimpleModule::initialize(stage);
+
     if (stage == 4)
     {
         IPSocket ipSocket(gate("ipOut"));
