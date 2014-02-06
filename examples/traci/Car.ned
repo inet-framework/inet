@@ -20,15 +20,16 @@
 
 package inet.examples.traci;
 
+import inet.applications.traci.TraCIDemo;
 import inet.base.NotificationBoard;
+import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.mobility.single.TraCIMobility;
 import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
 import inet.networklayer.common.InterfaceTable;
-import inet.applications.traci.TraCIDemo;
-import inet.mobility.models.TraCIMobility;
 import inet.networklayer.ipv4.RoutingTable;
-import inet.transport.udp.UDP;
 import inet.nodes.inet.NetworkLayer;
-import inet.linklayer.ieee80211.Ieee80211Nic;
+import inet.transport.udp.UDP;
+
 
 module Car
 {

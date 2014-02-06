@@ -27,7 +27,7 @@
 #include <omnetpp.h>
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
-#include "mobility/models/TraCIMobility.h"
+#include "mobility/single/TraCIMobility.h"
 
 /**
  * FIXME

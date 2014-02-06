@@ -36,7 +36,7 @@
 
 #include "world/traci/TraCIScenarioManager.h"
 #include "world/traci/TraCIConstants.h"
-#include "mobility/models/TraCIMobility.h"
+#include "mobility/single/TraCIMobility.h"
 
 Define_Module(TraCIScenarioManager);
 

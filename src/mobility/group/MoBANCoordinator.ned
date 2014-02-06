@@ -1,5 +1,5 @@
 //***************************************************************************
-//* file:        BaseMoBANNetwork.ned
+//* file:        MoBANCoordinator.ned
 //*
 //* author:      Majid Nabi <m.nabi@tue.nl>
 //*
@@ -19,7 +19,7 @@
 //*              in the top level directory
 //***************************************************************************
 //* part of:    MoBAN (Mobility Model for wireless Body Area Networks)
-//* description:     The base network for running simulation examples of using the MoBAN mobility model.
+//* description:     Coordinator module of the MoBAN mobility model
 //***************************************************************************
 //* Citation of the following publication is appreciated if you use MoBAN for
 //* a publication of your own.
@@ -40,29 +40,26 @@
 //*
 //**************************************************************************/
 
-package inet.examples.mobility;
+package inet.mobility.group;
 
-import inet.mobility.group.MoBANCoordinator;
+import inet.mobility.common.MovingMobilityBase;
 
-
+// This is the coordinator module of the MoBAN mobility model. It should be instantiated in the top level simulation network in MiXiM, once per WBAN.
+// The coordinator module is the main module that provides the group mobility and correlation between nodes in a WBAN.
+// In the initialization phase, it reads three user defined input files which are the postures specification file, a configuration file which includes all
+// required parameter for specific distributions, and the previously logged mobility pattern, if it is requested to use a logged pattern.
+// Note that all WBAN instances may use the same input files if they are exactly in the same situation.
 //
-// This network is exactly the same as baseNetwork existing among the examples of MiXiM, but the desired number of MoBAN coordinator modules have been added.
-// Some nodes of type BaseNode use MoBANLocal module as their mobility module. Then those nodes will be considered as WBAN nodes.
-// Those node have a parameter named "coordinatorIndex" that determines to which WBAN (coordinator) the node belongs.
-//
-network MoBANNetwork
+// After the initialization phase, the MoBAN coordinator decides about the posture and the position of the Logical center of the group (WBAN).
+// The absolute position of the reference point of each belonging node is calculated by adding the current position of the logical center
+// by the reference point of that node in the selected posture. The coordinator publish the position of the reference point as well as
+// the speed and the radius of the local movement of nodes.
+simple MoBANCoordinator extends MovingMobilityBase
 {
     parameters:
-        double numNodes; // total number of nodes in the network, either ordinary nodes or WBAN nodes
-        int numMoBAN; // total number of MoBAN coordinators (WBAN instances)
-        @display("bgb=1000,1000,white;bgp=0,0");
-    submodules:
-        node[numNodes]: MobileHost {
-            parameters:
-                @display("b=8,8,oval,red,,");
-        }
-        coordinator[numMoBAN]: MoBANCoordinator {
-            parameters:
-                @display("i=block/wheelbarrow");
-        }
+        xml postureSpecFile;        // The input file that includes the specification of all postures
+        xml configFile;             // The configuration file for setting probability vectors, distributions and correlations
+        bool useMobilityPattern;    // Set if the logged mobility pattern is used.
+        string mobilityPatternFile; // The input file for mobility pattern if it is going to be used.
+        @class(MoBANCoordinator);
 }

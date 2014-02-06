@@ -20,7 +20,7 @@ import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
 import inet.linklayer.ethernet.switch.IMACAddressTable;
-import inet.mobility.IMobility;
+import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
 
