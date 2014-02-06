@@ -241,7 +241,7 @@
 /examples/mobility/,                 -f omnetpp.ini -c MassMobility -r 0,           5000s,           f0e2-d924
 /examples/mobility/,                 -f omnetpp.ini -c MassMobilityWithScenario -r 0, 10000s,          0851-6730
 /examples/mobility/,                 -f omnetpp.ini -c MoBANMobility1 -r 0,         10000s,          2f1a-73a5
-/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          0892-1b08
+/examples/mobility/,                 -f omnetpp.ini -c MoBANMobility2 -r 0,         10000s,          b754-8711
 /examples/mobility/,                 -f omnetpp.ini -c RandomWPMobility -r 0,       5000s,           5ff2-5f4f
 /examples/mobility/,                 -f omnetpp.ini -c RectangleMobility -r 0,      10000s,          6fd8-97bc
 /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0,     0s,              0000         # (zero time simulated)
