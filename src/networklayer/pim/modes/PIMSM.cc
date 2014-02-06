@@ -534,6 +534,8 @@ void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
 
 void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address target, int holdTime, InterfaceEntry *inInterface)
 {
+    EV_DETAIL << "Processing Join(*," << group << ") received on interface '" << inInterface->getName() << "'.\n";
+
     // TODO RP check
 
     //
@@ -639,6 +641,8 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address target, 
  */
 void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, int holdTime, InterfaceEntry *inInterface)
 {
+    EV_DETAIL << "Processing Join(" << source << ", " << group <<") received on interface '" << inInterface->getName() << "'.'n";
+
     if (!IamDR(source))
     {
         Route *routeG = findGRoute(group);
@@ -1166,7 +1170,7 @@ void PIMSM::processAssertG(Interface *interface, const AssertMetric &receivedMet
 
 void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType routeType)
 {
-    EV_INFO << "Sending Join(S=" << source << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
+    EV_INFO << "Sending Join(S=" << (routeType==G?"*":source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
     PIMJoinPrune *msg = new PIMJoinPrune();
     msg->setType(JoinPrune);
@@ -1190,7 +1194,7 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
 
 void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType routeType)
 {
-    EV_INFO << "Sending Prune(S=" << source << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
+    EV_INFO << "Sending Prune(S=" << (routeType==G?"*":source.str()) << ", G=" << group << ") to neighbor " << upstreamNeighbor << ".\n";
 
     PIMJoinPrune *msg = new PIMJoinPrune();
     msg->setType(JoinPrune);
@@ -1944,6 +1948,7 @@ void PIMSM::Route::startJoinTimer()
 
 void PIMSM::Route::startPrunePendingTimer()
 {
+    ASSERT(!prunePendingTimer);
     prunePendingTimer = new cMessage("PIMPrunePendingTimer", PrunePendingTimer);
     prunePendingTimer->setContextPointer(this);
     owner->scheduleAt(simTime() + owner->joinPruneOverrideInterval(), prunePendingTimer);
