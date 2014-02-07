@@ -79,15 +79,20 @@ class INET_API PIMSM : public PIMBase, protected cListener
             /** States of each outgoing interface. */
             enum JoinPruneState { NO_INFO, JOIN, PRUNE_PENDING };
 
-            JoinPruneState          joinPruneState;
+            JoinPruneState joinPruneState;
+            cMessage *prunePendingTimer;
 
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
-                : Interface(owner, ie), joinPruneState(joinPruneState), shRegTun(show) {}
+                : Interface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL), shRegTun(show) {}
+            virtual ~DownstreamInterface();
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
+            bool isInImmediateOlist() const { return joinPruneState != NO_INFO && assertState != I_LOST_ASSERT; }
+            bool isInInheritedOlist() const;
+            void startPrunePendingTimer();
         };
 
         typedef std::vector<DownstreamInterface*> DownstreamInterfaceVector;
@@ -133,9 +138,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 //Time of routing table entry creation
                 simtime_t installtime; // XXX not used
 
-                cMessage *keepAliveTimer;
+                cMessage *keepAliveTimer;  // only for (S,G) routes
                 cMessage *joinTimer;
-                cMessage *prunePendingTimer;
 
                 // our metric
                 AssertMetric metric;           // metric of the unicast route to the source (if type==SG) or RP (if type==G)
@@ -161,15 +165,16 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
                 void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
 
-                DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie, int holdTime);
+                DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie);
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 int findDownstreamInterface(InterfaceEntry *ie);
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
+                bool isImmediateOlistNull();
+                bool isInheritedOlistNull();
 
                 void startKeepAliveTimer();
                 void startRegisterStopTimer(double interval);
                 void startJoinTimer();
-                void startPrunePendingTimer();
         };
 
         typedef std::map<SourceAndGroup, Route*> SGStateMap;
@@ -226,12 +231,12 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processAssertPacket(PIMAssert *pkt);
 
-        void processJoinG(IPv4Address group, IPv4Address rp, IPv4Address target, int holdTime, InterfaceEntry *inInterface);
-        void processJoinSG(IPv4Address origin, IPv4Address group, int holdTime, InterfaceEntry *inInterface);
-        void processJoinSGrpt(IPv4Address origin, IPv4Address group, int holdTime, InterfaceEntry *inInterface);
-        void processPruneG(IPv4Address multGroup, InterfaceEntry *inInterface);
-        void processPruneSG(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
-        void processPruneSGrpt(IPv4Address source, IPv4Address group, InterfaceEntry *inInterface);
+        void processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
+        void processJoinSG(IPv4Address origin, IPv4Address group, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
+        void processJoinSGrpt(IPv4Address origin, IPv4Address group, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
+        void processPruneG(IPv4Address multGroup, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
+        void processPruneSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
+        void processPruneSGrpt(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
         void processAssertSG(Interface *interface, const AssertMetric &receivedMetric);
         void processAssertG(Interface *interface, const AssertMetric &receivedMetric);
 
