@@ -30,7 +30,7 @@ PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Addres
     : owner(owner), type(type), origin(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0), sequencenumber(0),
       keepAliveTimer(NULL), joinTimer(NULL),
       registerState(RS_NO_INFO), registerStopTimer(NULL),
-      upstreamInterface(NULL)
+      upstreamInterface(NULL), joinDesired(false)
 {
 }
 
@@ -101,6 +101,20 @@ bool PIMSM::Route::isInheritedOlistNull()
         if (downstreamInterfaces[i]->isInInheritedOlist())
             return false;
     return true;
+}
+
+void PIMSM::Route::updateJoinDesired()
+{
+    bool oldValue = joinDesired;
+    if (type == RP)
+        joinDesired = !isImmediateOlistNull();
+    if (type == G)
+        joinDesired = !isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != NULL */;
+    else if (type == SG)
+        joinDesired = !isImmediateOlistNull() || (keepAliveTimer && isInheritedOlistNull());
+
+    if (joinDesired != oldValue)
+        owner->joinDesiredChanged(this);
 }
 
 PIMSM::~PIMSM()
@@ -182,13 +196,52 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
 {
     if (route->type == SG)                          // (S,G) route
     {
-        if (route->keepAliveTimer)
+        // set KeepAlive timer
+        if (/*DirectlyConnected(route->source) ||*/
+            (!route->isFlagSet(Route::P) && !route->isInheritedOlistNull()))
         {
-            restartTimer(route->keepAliveTimer, keepAlivePeriod);
-            EV << "PIMSM::dataOnRpf: restart (S,G) KAT" << endl;
-            if (!route->isFlagSet(Route::T))
-                route->setFlags(Route::T);
+            EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->origin << ", " << route->group << ") timer.\n";
+
+            if (!route->keepAliveTimer)
+                route->startKeepAliveTimer();
+            else
+                restartTimer(route->keepAliveTimer, keepAlivePeriod);
         }
+
+        // Update SPT bit
+
+        /* TODO
+             void
+             Update_SPTbit(S,G,iif) {
+               if ( iif == RPF_interface(S)
+                     AND JoinDesired(S,G) == TRUE
+                     AND ( DirectlyConnected(S) == TRUE
+                           OR RPF_interface(S) != RPF_interface(RP(G))
+                           OR inherited_olist(S,G,rpt) == NULL
+                           OR ( ( RPF'(S,G) == RPF'(*,G) ) AND
+                                ( RPF'(S,G) != NULL ) )
+                           OR ( I_Am_Assert_Loser(S,G,iif) ) {
+                  Set SPTbit(S,G) to TRUE
+               }
+             }
+         */
+         route->setFlags(Route::T);
+    }
+
+    // check switch from RP tree to the SPT
+    if (route->isFlagSet(Route::T))
+    {
+        /*
+             void
+             CheckSwitchToSpt(S,G) {
+               if ( ( pim_include(*,G) (-) pim_exclude(S,G)
+                      (+) pim_include(S,G) != NULL )
+                    AND SwitchToSptDesired(S,G) ) {
+                      # Note: Restarting the KAT will result in the SPT switch
+                      set KeepaliveTimer(S,G) to Keepalive_Period
+               }
+             }
+         */
     }
 
     //TODO SPT threshold at last hop router
@@ -585,11 +638,13 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
 
+    bool newRoute = false;
     Route *routeG = findGRoute(group);
     if (!routeG)
     {
         routeG = createRouteG(group, Route::P);
         addGRoute(routeG);
+        newRoute = true;
     }
 
     DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
@@ -632,50 +687,34 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
 
     // XXX Join(*,G) messages can affect (S,G,rpt) downstream state machines too
 
-    //
-    // Upstream (*,G) State Machine
-    //
+    // check upstream state transition
+    routeG->updateJoinDesired();
 
-    if (routeG->isFlagSet(Route::P))
+    if (!newRoute && !routeG->upstreamInterface) // I am RP
     {
-        bool joinDesired = !routeG->isImmediateOlistNull();
+        routeG->clearFlag(Route::F);
 
-        if (joinDesired)
+        for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
         {
-            // event: JoinDesired(*,G) -> TRUE
-            routeG->clearFlag(Route::P);
-            if (routeG->upstreamInterface)
+            Route *route = it->second;
+            if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
             {
-                sendPIMJoin(group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
-                routeG->startJoinTimer();
-            }
-            else // I am RP
-            {
-                routeG->clearFlag(Route::F);
-
-                for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
+                if (route->type == SG)
                 {
-                    Route *route = it->second;
-                    if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
-                    {
-                        if (route->type == SG)
-                        {
-                            // update flags
-                            route->clearFlag(Route::P);
-                            route->setFlags(Route::T);
-                            route->startJoinTimer();
+                    // update flags
+                    route->clearFlag(Route::P);
+                    route->setFlags(Route::T);
+                    route->startJoinTimer();
 
-                            if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
-                            {
-                                downstream = route->addNewDownstreamInterface(inInterface);
-                                downstream->joinPruneState = DownstreamInterface::JOIN;
-                                downstream->startExpiryTimer(holdTime);
-                                sendPIMJoin(group, route->origin, route->upstreamInterface->nextHop, SG);
-                            }
-                        }
-                        route->sequencenumber = 1;
+                    if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
+                    {
+                        downstream = route->addNewDownstreamInterface(inInterface);
+                        downstream->joinPruneState = DownstreamInterface::JOIN;
+                        downstream->startExpiryTimer(holdTime);
+                        sendPIMJoin(group, route->origin, route->upstreamInterface->nextHop, SG);
                     }
                 }
+                route->sequencenumber = 1;
             }
         }
     }
@@ -842,24 +881,8 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
         }
     }
 
-
-    //
-    // Upstream (S,G) State Machine
-    //
-    if (routeSG->isFlagSet(Route::P))
-    {
-        bool joinDesired = !routeSG->isImmediateOlistNull() ||
-                            (routeSG->keepAliveTimer && !routeSG->isInheritedOlistNull());
-        if (joinDesired)
-        {
-            routeSG->clearFlag(Route::P);
-            if (!IamDR(source))
-            {
-                sendPIMJoin(group, source, routeSG->upstreamInterface->rpfNeighbor(), SG);
-                routeSG->startJoinTimer();
-            }
-        }
-    }
+    // check upstream state transition
+    routeSG->updateJoinDesired();
 }
 
 
@@ -893,21 +916,9 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
         }
     }
 
-    //
-    // Upstream (*,G) State Machine
-    //
-
-    if (routeG && !routeG->isFlagSet(Route::P))
-    {
-        bool joinDesired = !routeG->isImmediateOlistNull();
-        if (!joinDesired)
-        {
-            routeG->setFlags(Route::P);
-            cancelAndDeleteTimer(routeG->joinTimer);
-            if (routeG->upstreamInterface)
-                sendPIMPrune(group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
-        }
-    }
+    // check upstream state transition
+    if (routeG)
+        routeG->updateJoinDesired();
 
 //    for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
 //    {
@@ -971,25 +982,9 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
     // Upstream (S,G) State Machine
     //
 
-    if (routeSG && !routeSG->isFlagSet(Route::P))
-    {
-        bool joinDesired = !routeSG->isImmediateOlistNull() ||
-                            (routeSG->keepAliveTimer && !routeSG->isInheritedOlistNull());
-        if (!joinDesired)
-        {
-            // event: JoinDesired(S,G) becomes FALSE
-
-            // The upstream (S,G) state machine transitions to NotJoined
-            // state.  Send Prune(S,G) to the appropriate upstream neighbor,
-            // which is RPF'(S,G).  Cancel the Join Timer (JT), and set
-            // SPTbit(S,G) to FALSE.
-            routeSG->setFlags(Route::P);
-            // TODO set SPTbit to false
-            cancelAndDeleteTimer(routeSG->joinTimer);
-            if (!IamDR(source))
-                sendPIMPrune(group, source, routeSG->upstreamInterface->rpfNeighbor(), SG);
-        }
-    }
+    // check upstream state transition
+    if (routeSG)
+        routeSG->updateJoinDesired();
 
 //    // upstream state machine
 //    if (routeSG && routeSG->isOilistNull() && !routeSG->isFlagSet(Route::P))
@@ -1719,6 +1714,75 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
     }
 }
 
+
+/*
+ * JoinDesired(*,G) -> FALSE/TRUE
+ * JoinDesired(S,G) -> FALSE/TRUE
+ */
+void PIMSM::joinDesiredChanged(Route *route)
+{
+    if (route->type == G)
+    {
+        Route *routeG = route;
+
+        if (routeG->isFlagSet(Route::P) && routeG->joinDesired)
+        {
+            //
+            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> TRUE
+            //
+            routeG->clearFlag(Route::P);
+            if (routeG->upstreamInterface)
+            {
+                sendPIMJoin(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
+                routeG->startJoinTimer();
+            }
+        }
+        else if (!routeG->isFlagSet(Route::P) && !routeG->joinDesired)
+        {
+            //
+            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> FALSE
+            //
+            routeG->setFlags(Route::P);
+            cancelAndDeleteTimer(routeG->joinTimer);
+            if (routeG->upstreamInterface)
+                sendPIMPrune(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
+        }
+    }
+    else if (route->type == SG)
+    {
+        Route *routeSG = route;
+
+        if (routeSG->isFlagSet(Route::P) && routeSG->joinDesired)
+        {
+            //
+            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
+            //
+            routeSG->clearFlag(Route::P);
+            if (!IamDR(routeSG->origin))
+            {
+                sendPIMJoin(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
+                routeSG->startJoinTimer();
+            }
+        }
+        else if (!routeSG->isFlagSet(Route::P) && !route->joinDesired)
+        {
+            //
+            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> FALSE
+            //
+
+            // The upstream (S,G) state machine transitions to NotJoined
+            // state.  Send Prune(S,G) to the appropriate upstream neighbor,
+            // which is RPF'(S,G).  Cancel the Join Timer (JT), and set
+            // SPTbit(S,G) to FALSE.
+            routeSG->setFlags(Route::P);
+            routeSG->clearFlag(Route::T);
+            cancelAndDeleteTimer(routeSG->joinTimer);
+            if (!IamDR(routeSG->origin))
+                sendPIMPrune(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
+        }
+    }
+
+}
 
 /**
  * PROCESS PIM TIMER

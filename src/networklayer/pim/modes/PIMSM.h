@@ -121,9 +121,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 {
                     NO_FLAG = 0,
                     C       = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
-                    P       = 0x02,              /**< Pruned */
+                    P       = 0x02,              /**< Pruned */          // UpstreamJPState
                     F       = 0x04,              /**< Register flag*/
-                    T       = 0x08               /**< SPT bit*/
+                    T       = 0x08               /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
                 };
 
                 PIMSM *owner;
@@ -153,6 +153,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 UpstreamInterface *upstreamInterface;      // may be NULL at RP and at DR
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
+                // computed values
+                bool joinDesired;
+
             public:
                 Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group);
                 ~Route();
@@ -168,9 +171,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie);
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 int findDownstreamInterface(InterfaceEntry *ie);
+
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
                 bool isImmediateOlistNull();
                 bool isInheritedOlistNull();
+                void updateJoinDesired();
 
                 void startKeepAliveTimer();
                 void startRegisterStopTimer(double interval);
@@ -214,7 +219,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processPrunePendingTimer(cMessage *timer);
         void processAssertTimer(cMessage *timer);
 
-        // semd pim messages
+        // send pim messages
         void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
         void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
         void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
@@ -245,6 +250,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
         double effectivePropagationDelay() { return defaultPropagationDelay; }
         double effectiveOverrideInterval() { return defaultOverrideInterval; }
         double joinPruneOverrideInterval() { return effectivePropagationDelay() + effectiveOverrideInterval(); }
+
+        // internal events
+        void joinDesiredChanged(Route *route);
 
         // helpers
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
