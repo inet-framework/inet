@@ -180,14 +180,9 @@ void PIMSM::initialize(int stage)
  */
 void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
 {
-    if (route->keepAliveTimer)
+    if (route->type == SG)                          // (S,G) route
     {
-        if (route->type == G)     // (*,G) route
-        {
-            restartTimer(route->keepAliveTimer, keepAlivePeriod + KAT); // XXX ??? shouldn't be any KAT(*,G) timer
-            EV << "PIMSM::dataOnRpf: restart (*,G) KAT" << endl;
-        }
-        else                                                            // (S,G) route
+        if (route->keepAliveTimer)
         {
             restartTimer(route->keepAliveTimer, keepAlivePeriod);
             EV << "PIMSM::dataOnRpf: restart (S,G) KAT" << endl;
@@ -268,21 +263,8 @@ void PIMSM::processKeepAliveTimer(cMessage *timer)
 {
     EV << "pimSM::processKeepAliveTimer: route will be deleted" << endl;
     Route *route = static_cast<Route*>(timer->getContextPointer());
+    ASSERT(route->type == SG);
     ASSERT(timer == route->keepAliveTimer);
-
-    for (unsigned i=0; i < route->downstreamInterfaces.size(); i++)
-    {
-        DownstreamInterface *downstream = route->downstreamInterfaces[i];
-        cancelAndDeleteTimer(downstream->expiryTimer);
-    }
-
-    // only for RP, when KAT for (S,G) expire, set KAT for (*,G)
-    if (IamRP(this->getRPAddress()) && route->origin != IPv4Address::UNSPECIFIED_ADDRESS)
-    {
-        Route *routeG = findGRoute(route->group);
-        if (routeG && !routeG->keepAliveTimer)
-            routeG->startKeepAliveTimer();
-    }
 
     delete timer;
     route->keepAliveTimer = NULL;
@@ -607,7 +589,6 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     if (!routeG)
     {
         routeG = createRouteG(group, Route::P);
-        routeG->startKeepAliveTimer(); // XXX
         addGRoute(routeG);
     }
 
@@ -671,7 +652,6 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
             else // I am RP
             {
                 routeG->clearFlag(Route::F);
-                cancelAndDeleteTimer(routeG->keepAliveTimer);
 
                 for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
                 {
@@ -804,7 +784,6 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
         if (!routeG)        // create (*,G) route between RP and source DR
         {
             Route *newRouteG = createRouteG(group, Route::P);
-            newRouteG->startKeepAliveTimer();
             addGRoute(newRouteG);
         }
     }
@@ -1054,13 +1033,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         if (!routeG)
         {
             routeG = createRouteG(group, Route::P);
-            routeG->startKeepAliveTimer();
             addGRoute(routeG);
-        }
-        else if (routeG->keepAliveTimer)
-        {
-            EV << " (*,G) KAT timer refresh" << endl;
-            restartTimer(routeG->keepAliveTimer, 2*KAT);
         }
 
         if (!routeSG)
@@ -1614,7 +1587,6 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
 
         // create new (*,G) route
         Route *newRouteG = createRouteG(newRouteSG->group, Route::P | Route::F);
-        newRouteG->startKeepAliveTimer();
         addGRoute(newRouteG);
     }
 }
@@ -1736,18 +1708,11 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
 
     if (routeSG->registerState == Route::RS_JOIN)
     {
-        Route *routeG = findGRoute(group);
-
-        // refresh KAT timers
+        // refresh KAT timer
         if (routeSG->keepAliveTimer)
         {
             EV << " (S,G) KAT timer refresh" << endl;
             restartTimer(routeSG->keepAliveTimer, KAT);
-        }
-        if (routeG->keepAliveTimer)
-        {
-            EV << " (*,G) KAT timer refresh" << endl;
-            restartTimer(routeG->keepAliveTimer, 2*KAT);
         }
 
         sendPIMRegister(datagram, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
@@ -2195,12 +2160,10 @@ void PIMSM::DownstreamInterface::startPrunePendingTimer()
 
 void PIMSM::Route::startKeepAliveTimer()
 {
+    ASSERT(this->type == SG);
     keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
     keepAliveTimer->setContextPointer(this);
-    double interval = group.isUnspecified() ?
-                        2 * KAT : // for (*,G)
-                        KAT;      // for (S,G)
-    owner->scheduleAt(simTime() + interval, keepAliveTimer);
+    owner->scheduleAt(simTime() + owner->keepAlivePeriod, keepAliveTimer);
 }
 
 void PIMSM::Route::startRegisterStopTimer(double interval)
