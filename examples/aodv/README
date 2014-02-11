@@ -1,0 +1,89 @@
+Ad hoc On-Demand Distance Vector (AODV) Routing Examples
+========================================================
+
+1. StaticIPv4
+-------------
+
+In this example, static means that there is no mobility, the
+hosts are uniformly distributed in a 600m X 600m square.
+
+As the simulations starts, host[0] continuously tries to send
+ping requests to host[1]. However, at the beginning of the
+simulation, host[0] and the other hosts in network do not have
+any routing information, so host[0] broadcasts a route request
+for host[1].
+
+While the RREQ propagates in network, host[0] is sending more and
+more ping requests destined to host[1]. The AODV can consult
+with the IP-layer via Netfilter hooks, and can buffer these pings
+until it gets an appropriate RREP with valid routing information
+for the requested destination. Then host[0] takes these delayed
+pings out from the buffer and sends to host[1] as it now has
+information to make routing decisions.
+
+In this scenario, host[0] and host[1] are not far from each other,
+so AODV builds routing tables up in a very short time. Actually, it
+finds the shortest path (host[0] -> host[16] -> host[1]) between the
+two hosts.
+
+As the path is constructed, the subsequent pings and their replies
+arrive without any problems. The constructed path will never be
+outdated since it is constantly used to forward data packets (pings),
+so in the rest of the simulation there won't be other route request.
+
+The simulation ends without any packet loss.
+
+2. IPv4SlowMobility, IPv4ModerateFastMobility, IPv4FastMobility
+---------------------------------------------------------------
+
+The only difference in these scenarios is the speed of hosts and
+the ACTIVE_ROUTE_TIMEOUT parameter. In these simulations, we use
+MassMobility model with speeds 2m/s, 8m/s, 15m/s and with 3s, 2s, 1s
+ACTIVE_ROUTE_TIMEOUTs, respectively. Of course, the communicating
+hosts (host[0], host[1]) are staying in fixed places.
+
+The communicating scheme is inherited from the previous scenario.
+
+Since the hosts are moving, link breaks and topology changes occur, so
+AODV may use RERR messages, originate new route requests to establish
+valid paths in the changed network topology and expunge old routing table
+records.
+
+The user may note that the packet loss rate is growing with the speed.
+However, we try to compensate this "speed handicap" with lower
+ACTIVE_ROUTE_TIMEOUTs.
+
+3. Dynamic
+----------
+
+The Dynamic simulation is similar to StaticIPv4. It comes without mobility,
+and with the same communicating scheme.
+
+First, it finds the same host[0] -> host[16] -> host[1] path. However,
+host[16] shuts down at 25s, thus AODV has to find a different path to
+host[1], which will be host[0] -> host[10] -> host[17] -> host[1]. This new
+path is longer then the previous one, but you can see in the animation that
+there is no shorter route in the changed topology.
+
+We have one packet loss in this example, when host[16] stopped, host[0] have
+already started to originate a new ping request with the next hop host[16].
+Therefore, this packet will never arrive.
+
+As a result of this sending, host[0] receives a link break signal, so it can
+invalidate routes and inform its neighbors by initiating Route Error process.
+
+At the next ping request, host[0] has just an invalidated route to host[1],
+so it starts over again the Route Request process for host[1] which finds
+the new route mentioned above.
+
+host[16] reboots at 40s, but it will have no effect on the current route, since
+the new path will never be outdated due to its constant usage.
+
+4. MoreDynamic
+--------------
+
+The communicating scheme is same as usual, that is, host[0] sends pings to host[1].
+AODV finds the shortest host[0] -> host[16] -> host[1] path. Then hosts 16, 19, 10,
+17, 4, 7, 14 shut down, visually, all neighbors, except host[6], of host[1] will be
+unreachable. Thus, AODV has to find a bypass and it does it by finding a new path:
+host[0] -> host[8] -> host[2] -> host[15] -> host[6] -> host[1].
