@@ -65,7 +65,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
         bool hasOngoingRouteDiscovery(const Address& destAddr);
-        void startRouteDiscovery(const Address& destAddr);
+        void startRouteDiscovery(const Address& destAddr, unsigned int timeToLive = 0);
 
         /* Netfilter */
         Result ensureRouteForDatagram(INetworkDatagram * datagram);
@@ -80,16 +80,16 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         Address getSelfIPAddress();
         void delayDatagram(INetworkDatagram * datagram);
-        void sendRREQ(AODVRREP * rrep, const Address& destAddr);
+        void sendRREQ(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void sendRERR();
         void sendRREP();
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isInactive, simtime_t lifeTime);
 
-        AODVRREQ * createRREQ(const Address& destAddr);
+        AODVRREQ * createRREQ(const Address& destAddr, unsigned int timeToLive);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route);
         AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route);
         void handleRREP(AODVRREP* rrep, const Address& nextHop);
-        void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr);
+        void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {}
     public:
         AODVRouting();

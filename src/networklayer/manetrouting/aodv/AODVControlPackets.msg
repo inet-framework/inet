@@ -88,5 +88,6 @@ class AODVRERR extends AODVControlPacket
 message WaitForRREP
 {
     Address destAddr;
-    int retryCount;
+    unsigned int lastTTL;
+    bool fromInvalidEntry;
 }

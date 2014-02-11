@@ -123,7 +123,15 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
             //delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr))
-                startRouteDiscovery(destAddr);
+            {
+                // When a new route to the same destination is required at a later time
+                // (e.g., upon route loss), the TTL in the RREQ IP header is initially
+                // set to the Hop Count plus TTL_INCREMENT.
+                if (!isValid)
+                    startRouteDiscovery(destAddr, route->getMetric() + TTL_INCREMENT);
+                else
+                    startRouteDiscovery(destAddr);
+            }
             else
                 EV_DETAIL << "Route discovery is in progress: originator " << getSelfIPAddress() << "target " << destAddr << endl;
 
@@ -157,7 +165,7 @@ bool AODVRouting::hasOngoingRouteDiscovery(const Address& destAddr)
     return waitForRREPTimers.find(destAddr) != waitForRREPTimers.end();
 }
 
-void AODVRouting::startRouteDiscovery(const Address& destAddr)
+void AODVRouting::startRouteDiscovery(const Address& destAddr, unsigned timeToLive)
 {
     EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << destAddr << endl;
     ASSERT(!hasOngoingRouteDiscovery(destAddr));
@@ -174,16 +182,9 @@ void AODVRouting::delayDatagram(INetworkDatagram* datagram)
 
 }
 
-void AODVRouting::sendRREQ(AODVRREP * rrep, const Address& destAddr)
+void AODVRouting::sendRREQ(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
 {
-    WaitForRREP * rrepTimeout = new WaitForRREP("RREP Timeout");
-    rrepTimeout->setRetryCount(1);
-
-    // Each time, the timeout for receiving a RREP is RING_TRAVERSAL_TIME.
-    scheduleAt(simTime() + RING_TRAVERSAL_TIME, rrepTimeout);
-
-    waitForRREPTimers[destAddr] = rrepTimeout;
-    sendAODVPacket(rrep,destAddr);
+    sendAODVPacket(rrep,destAddr,timeToLive);
 }
 
 void AODVRouting::sendRERR()
@@ -199,7 +200,7 @@ void AODVRouting::sendRREP()
 /*
  * RFC 3561: 6.3. Generating Route Requests
  */
-AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
+AODVRREQ * AODVRouting::createRREQ(const Address& destAddr, unsigned int timeToLive)
 {
     AODVRREQ *rreqPacket = new AODVRREQ("ADOV RREQ Control Packet");
     IRoute *lastKnownRoute = routingTable->findBestMatchingRoute(destAddr);
@@ -487,7 +488,7 @@ void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, uns
     routingData->setHasValidDestNum(hasValidDestNum);
 }
 
-void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destAddr)
+void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destAddr, unsigned int timeToLive)
 {
     // In an expanding ring search, the originating node initially uses a TTL =
     // TTL_START in the RREQ packet IP header and sets the timeout for
@@ -505,19 +506,59 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     if (packet->getPacketType() == RREQ)
     {
         std::map<Address, WaitForRREP *>::iterator rrepTimer = waitForRREPTimers.find(destAddr);
-        unsigned int retryCount = rrepTimer->second->getRetryCount();
-        if (rrepTimer != waitForRREPTimers.end() &&  TTL_START + retryCount * TTL_INCREMENT < TTL_THRESHOLD)
-        {
 
-        }
-        else if(waitForRREPTimers.find(destAddr) != waitForRREPTimers.end() && TTL_START + retryCount * TTL_INCREMENT >= TTL_THRESHOLD)
+        if (rrepTimer != waitForRREPTimers.end())
         {
-            networkProtocolControlInfo->setHopLimit(NET_DIAMETER);
+            WaitForRREP * rrepTimerMsg = rrepTimer->second;
+            unsigned int lastTTL = rrepTimerMsg->getLastTTL();
+
+            // The Hop Count stored in an invalid routing table entry indicates the
+            // last known hop count to that destination in the routing table.  When
+            // a new route to the same destination is required at a later time
+            // (e.g., upon route loss), the TTL in the RREQ IP header is initially
+            // set to the Hop Count plus TTL_INCREMENT.  Thereafter, following each
+            // timeout the TTL is incremented by TTL_INCREMENT until TTL =
+            // TTL_THRESHOLD is reached.  Beyond this TTL = NET_DIAMETER is used.
+            // Once TTL = NET_DIAMETER, the timeout for waiting for the RREP is set
+            // to NET_TRAVERSAL_TIME, as specified in section 6.3.
+
+            if (timeToLive != 0)
+            {
+                networkProtocolControlInfo->setHopLimit(timeToLive);
+                rrepTimerMsg->setLastTTL(timeToLive);
+                rrepTimerMsg->setFromInvalidEntry(true);
+                cancelEvent(rrepTimerMsg);
+            }
+            else if (lastTTL + TTL_INCREMENT < TTL_THRESHOLD)
+            {
+                ASSERT(!rrepTimerMsg->isScheduled());
+                networkProtocolControlInfo->setHopLimit(lastTTL + TTL_INCREMENT);
+                rrepTimerMsg->setLastTTL(lastTTL + TTL_INCREMENT);
+            }
+            else
+            {
+                ASSERT(!rrepTimerMsg->isScheduled());
+                networkProtocolControlInfo->setHopLimit(NET_DIAMETER);
+                rrepTimerMsg->setLastTTL(NET_DIAMETER);
+            }
+
+            if (rrepTimerMsg->getLastTTL() == NET_DIAMETER && rrepTimerMsg->getFromInvalidEntry())
+                scheduleAt(simTime() + NET_TRAVERSAL_TIME, rrepTimerMsg);
+            else
+                scheduleAt(simTime() + RING_TRAVERSAL_TIME, rrepTimerMsg);
         }
         else
         {
+            WaitForRREP * newRREPTimerMsg = new WaitForRREP();
+            waitForRREPTimers[destAddr] = newRREPTimerMsg;
             networkProtocolControlInfo->setHopLimit(TTL_START);
+            newRREPTimerMsg->setLastTTL(TTL_START);
+            newRREPTimerMsg->setFromInvalidEntry(false);
+            // Each time, the timeout for receiving a RREP is RING_TRAVERSAL_TIME.
+            scheduleAt(simTime() + RING_TRAVERSAL_TIME, newRREPTimerMsg);
+
         }
+
     }
 
     networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
