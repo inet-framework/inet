@@ -73,11 +73,12 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
     virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) {statusArrived(status);}
 
   public:
-    // internal: called by TCPSrvHostApp after creating this module
-    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod = hostmodule; sock = socket;}
 
     TCPServerThreadBase()  {sock = NULL; hostmod = NULL;}
     virtual ~TCPServerThreadBase() {}
+
+    // internal: called by TCPSrvHostApp after creating this module
+    virtual void init(TCPSrvHostApp *hostmodule, TCPSocket *socket) {hostmod = hostmodule; sock = socket;}
 
     /*
      * Returns the socket object

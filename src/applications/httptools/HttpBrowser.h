@@ -66,6 +66,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         virtual void handleMessage(cMessage *msg);
         int numInitStages() const { return NUM_INIT_STAGES; }
 
+    protected:
         /*
          * Sends a scripted browse event to a specific server
          */

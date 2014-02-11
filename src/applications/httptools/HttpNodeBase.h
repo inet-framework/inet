@@ -87,12 +87,11 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
         std::string formatHttpResponseShort(const HttpReplyMessage* httpResponse);
         std::string formatHttpRequestLong(const HttpRequestMessage* httpRequest);
         std::string formatHttpResponseLong(const HttpReplyMessage* httpResponse);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
     public:
         HttpNodeBase();
-
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
 #endif

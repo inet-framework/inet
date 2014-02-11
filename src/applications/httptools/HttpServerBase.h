@@ -77,6 +77,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         rdObject *rdTextImageResourceRatio; ///< The ratio of text resources to images referenced in HTML pages.
         rdObject *rdErrorMsgSize;           ///< The size of error messages.
 
+    protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void finish();
@@ -94,12 +95,13 @@ class INET_API HttpServerBase : public HttpNodeBase
         std::string readHtmlBodyFile(std::string file, std::string path);
 
     public:
+        HttpServerBase();
+        ~HttpServerBase();
+
         /*
          * Return the name of the server
          */
         const std::string& getHostName() { return hostName; }
-        HttpServerBase();
-        ~HttpServerBase();
 };
 
 #endif

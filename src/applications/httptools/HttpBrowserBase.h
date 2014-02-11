@@ -113,6 +113,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         long sessionCount;
         long connectionsCount;
 
+    protected:
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void finish();

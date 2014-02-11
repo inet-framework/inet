@@ -115,15 +115,15 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
 
         virtual void startApp();
         virtual void stopApp();
+        /*
+         * For lifecycle management.
+         */
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
     public:
         DHCPServer();
         virtual ~DHCPServer();
 
-        /*
-         * For lifecycle management.
-         */
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

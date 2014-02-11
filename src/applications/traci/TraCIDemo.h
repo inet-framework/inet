@@ -38,6 +38,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         bool sentMessage;
         static simsignal_t mobilityStateChangedSignal;
 
+    protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage* msg);
@@ -52,8 +53,8 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
         virtual void handlePositionUpdate();
 
     public:
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         TraCIDemo() { traci = NULL; }
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
 };
 

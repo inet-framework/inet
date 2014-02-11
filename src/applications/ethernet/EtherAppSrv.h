@@ -43,6 +43,7 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
+  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void startApp();

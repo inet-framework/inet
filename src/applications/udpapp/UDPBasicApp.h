@@ -53,6 +53,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     static simsignal_t sentPkSignal;
     static simsignal_t rcvdPkSignal;
 
+  protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
