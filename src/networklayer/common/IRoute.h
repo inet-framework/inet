@@ -48,6 +48,7 @@ class INET_API IRoute
             MANET,        ///< managed by manet, search exact address
             MANET2,       ///< managed by manet, search approximate address
             DYMO,         ///< managed by DYMO routing
+            AODV,         ///< managed by AODV routing
         };
 
         /** Field codes for NB_ROUTE_CHANGED notifications */
