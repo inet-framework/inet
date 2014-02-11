@@ -20,7 +20,7 @@ package inet.networklayer.arp;
 //
 // TODO
 //
-simple GlobalARP
+simple GenericARP
 {
     parameters:
         @display("i=block/layer_s");

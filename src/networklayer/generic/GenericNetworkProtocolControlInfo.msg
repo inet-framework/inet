@@ -43,7 +43,7 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 
 
 //
-// Control info attached to packets sent from ~GenericNetworkProtocol to ~GlobalARP.
+// Control info attached to packets sent from ~GenericNetworkProtocol to ~GenericARP.
 //
 // Next hop address is used on a LAN to determine the MAC destination
 // address (and it may be used on other multicast networks for similar

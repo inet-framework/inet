@@ -200,7 +200,7 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 				pCtrlInfo = netwMsg->removeControlInfo();
 				MACAddress nextHopMacAddr = arp->resolveMACAddress(nextHop);
 				if (nextHopMacAddr.isUnspecified())
-				    throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalARP module.");
+				    throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
 				setDownControlInfo(netwMsg, nextHopMacAddr);
 				netwMsg->setNbHops(netwMsg->getNbHops()+1);
 				sendDown(netwMsg);
@@ -261,7 +261,7 @@ void WiseRoute::handleUpperPacket(cPacket* msg)
 		nbPureUnicastSent++;
 		nextHopMacAddr = arp->resolveMACAddress(nextHopAddr);
         if (nextHopMacAddr.isUnspecified())
-            throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GlobalARP module.");
+            throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
 	}
 	setDownControlInfo(pkt, nextHopMacAddr);
 	pkt->encapsulate(static_cast<cPacket*>(msg));

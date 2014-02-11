@@ -17,7 +17,7 @@
 
 package inet.networklayer.wiseroute;
 
-import inet.networklayer.arp.GlobalARP;
+import inet.networklayer.arp.GenericARP;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 
@@ -40,7 +40,7 @@ module WiseRouteNetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
 
     submodules:
-        arp: GlobalARP {
+        arp: GenericARP {
             @display("p=50,50");
         }
         np: WiseRoute {

@@ -15,8 +15,8 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __INET_GLOBAL_ARP_H
-#define __INET_GLOBAL_ARP_H
+#ifndef __INET_GENERICARP_H
+#define __INET_GENERICARP_H
 
 #include "INETDefs.h"
 
@@ -35,15 +35,15 @@ class IInterfaceTable;
  * - uses global mapping (or table, or algorithm)
  * - not a protocol -- doesn't communicate
  */
-class INET_API GlobalARP : public cSimpleModule, public IARP
+class INET_API GenericARP : public cSimpleModule, public IARP
 {
   private:
     IInterfaceTable *ift;
     int nicOutBaseGateId;  // id of the nicOut[0] gate
 
   public:
-    GlobalARP() { }
-    virtual ~GlobalARP() { }
+    GenericARP() { }
+    virtual ~GenericARP() { }
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     virtual MACAddress resolveMACAddress(Address& address);
