@@ -87,6 +87,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void close();
         void setStatusString(const char *s);
         void handleTimer(cMessage *msg);
+
+        /* SCTPSocket::CallbackInterface callback methods */
         void socketEstablished(int connId, void *yourPtr, unsigned long int buffer); // TODO: needs a better name
         void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent); // TODO: needs a better name
         void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
@@ -94,6 +96,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         void socketClosed(int connId, void *yourPtr);
         void socketFailure(int connId, void *yourPtr, int code);
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
+
         void setPrimaryPath(const char* addr);
         void sendRequestArrived();
         void sendQueueRequest();

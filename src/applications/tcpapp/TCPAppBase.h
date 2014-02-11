@@ -50,10 +50,14 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
+
+    /* Utility functions */
     virtual void connect();
     virtual void close();
     virtual void sendPacket(cPacket *pkt);
     virtual void setStatusString(const char *s);
+
+    /* TCPSocket::CallbackInterface callback methods */
     virtual void handleTimer(cMessage *msg) = 0;
     virtual void socketEstablished(int connId, void *yourPtr);
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);

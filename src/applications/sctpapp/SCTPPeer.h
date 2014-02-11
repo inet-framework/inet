@@ -103,6 +103,8 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         void socketPeerClosed(int connId, void *yourPtr);
         void socketClosed(int connId, void *yourPtr);
         void socketFailure(int connId, void *yourPtr, int code);
+
+        /* Redefine to handle incoming SCTPStatusInfo */
         void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
         void sendRequest(bool last = true);

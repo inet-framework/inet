@@ -87,6 +87,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
 
+        // TCPSocket::CallbackInterface callback methods
         /*
          * Handler for socket established event.
          * Called by the socket->processMessage(msg) handler call in handleMessage.
@@ -129,6 +130,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
          */
         virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status);
 
+        // Socket establishment and data submission
         /*
          * Establishes a socket and queues a single message for transmission.
          * A new socket is created and added to the collection. The message is assigned to a data structure
