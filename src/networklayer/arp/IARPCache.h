@@ -22,8 +22,7 @@
 
 #include "INETDefs.h"
 
-#include "IPv4Address.h"
-#include "MACAddress.h"
+#include "Address.h"
 #include "ModuleAccess.h"
 
 class InterfaceEntry;
@@ -40,13 +39,18 @@ class INET_API IARPCache
     class Notification : public cObject
     {
       public:
-        IPv4Address ipv4Address;
+        Address l3Address;
         MACAddress macAddress;
         const InterfaceEntry *ie;
       public:
-        Notification(IPv4Address ipv4Address, MACAddress macAddress, const InterfaceEntry *ie)
-                : ipv4Address(ipv4Address), macAddress(macAddress), ie(ie) {}
+        Notification(Address l3Address, MACAddress macAddress, const InterfaceEntry *ie)
+                : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
     };
+
+    //signals:
+    static const simsignal_t initiatedARPResolutionSignal;
+    static const simsignal_t completedARPResolutionSignal;
+    static const simsignal_t failedARPResolutionSignal;
 
   public:
     virtual ~IARPCache() {}

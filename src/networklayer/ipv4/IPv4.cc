@@ -43,9 +43,6 @@ Define_Module(IPv4);
 // a multicast cimek eseten hianyoznak bizonyos NetFilter hook-ok
 // a local interface-k hasznalata eseten szinten hianyozhatnak bizonyos NetFilter hook-ok
 
-simsignal_t IPv4::completedARPResolutionSignal = registerSignal("completedARPResolution");
-simsignal_t IPv4::failedARPResolutionSignal = registerSignal("failedARPResolution");
-
 void IPv4::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
@@ -80,8 +77,8 @@ void IPv4::initialize(int stage)
 
         pendingPackets.clear();
         cModule *arpModule = check_and_cast<cModule *>(arp);
-        arpModule->subscribe(completedARPResolutionSignal, this);
-        arpModule->subscribe(failedARPResolutionSignal, this);
+        arpModule->subscribe(IARPCache::completedARPResolutionSignal, this);
+        arpModule->subscribe(IARPCache::failedARPResolutionSignal, this);
 
         WATCH(numMulticast);
         WATCH(numLocalDeliver);
@@ -871,11 +868,13 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
 
 void IPv4::arpResolutionCompleted(IARPCache::Notification *entry)
 {
-    PendingPackets::iterator it = pendingPackets.find(entry->ipv4Address);
+    if (entry->l3Address.getType() != Address::IPv4)
+        return;
+    PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end())
     {
         cPacketQueue& packetQueue = it->second;
-        EV << "ARP resolution completed for " << entry->ipv4Address << ". Sending " << packetQueue.getLength()
+        EV << "ARP resolution completed for " << entry->l3Address << ". Sending " << packetQueue.getLength()
                 << " waiting packets from the queue\n";
 
         while (!packetQueue.empty())
@@ -890,11 +889,13 @@ void IPv4::arpResolutionCompleted(IARPCache::Notification *entry)
 
 void IPv4::arpResolutionTimedOut(IARPCache::Notification *entry)
 {
-    PendingPackets::iterator it = pendingPackets.find(entry->ipv4Address);
+    if (entry->l3Address.getType() != Address::IPv4)
+        return;
+    PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end())
     {
         cPacketQueue& packetQueue = it->second;
-        EV << "ARP resolution failed for " << entry->ipv4Address << ",  dropping " << packetQueue.getLength() << " packets\n";
+        EV << "ARP resolution failed for " << entry->l3Address << ",  dropping " << packetQueue.getLength() << " packets\n";
         packetQueue.clear();
         pendingPackets.erase(it);
     }
@@ -1136,12 +1137,12 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
     Enter_Method_Silent();
 
-    if (signalID == completedARPResolutionSignal)
+    if (signalID == IARPCache::completedARPResolutionSignal)
     {
         IARPCache::Notification *entry = check_and_cast<IARPCache::Notification *>(obj);
         arpResolutionCompleted(entry);
     }
-    if (signalID == failedARPResolutionSignal)
+    if (signalID == IARPCache::failedARPResolutionSignal)
     {
         IARPCache::Notification *entry = check_and_cast<IARPCache::Notification *>(obj);
         arpResolutionTimedOut(entry);

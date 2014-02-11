@@ -76,9 +76,6 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
 
     static simsignal_t sentReqSignal;
     static simsignal_t sentReplySignal;
-    static simsignal_t initiatedARPResolutionSignal;
-    static simsignal_t completedARPResolutionSignal;
-    static simsignal_t failedARPResolutionSignal;
 
     ARPCache arpCache;
     static ARPCache globalArpCache;

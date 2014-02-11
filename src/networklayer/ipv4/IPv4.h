@@ -62,9 +62,6 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     typedef std::map<IPv4Address, cPacketQueue> PendingPackets;
 
   protected:
-    static simsignal_t completedARPResolutionSignal;
-    static simsignal_t failedARPResolutionSignal;
-
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     IARPCache *arp;

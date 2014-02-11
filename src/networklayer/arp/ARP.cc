@@ -33,9 +33,6 @@
 
 simsignal_t ARP::sentReqSignal = registerSignal("sentReq");
 simsignal_t ARP::sentReplySignal = registerSignal("sentReply");
-simsignal_t ARP::initiatedARPResolutionSignal = registerSignal("initiatedARPResolution");
-simsignal_t ARP::completedARPResolutionSignal = registerSignal("completedARPResolution");
-simsignal_t ARP::failedARPResolutionSignal = registerSignal("failedARPResolution");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {

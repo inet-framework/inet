@@ -18,3 +18,7 @@
 #include "IARPCache.h"
 
 Register_Abstract_Class(IARPCache::Notification);
+
+const simsignal_t IARPCache::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
+const simsignal_t IARPCache::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
+const simsignal_t IARPCache::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");
