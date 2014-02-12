@@ -38,7 +38,7 @@ class IIPv4RoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle, public cListener
+class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
 {
   public:
     struct ARPCacheEntry;
@@ -65,7 +65,6 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle, publi
     int retryCount;
     simtime_t cacheTimeout;
     bool respondToProxyARP;
-    bool globalARP;
 
     bool isUp;
 
@@ -78,14 +77,13 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle, publi
     static simsignal_t sentReplySignal;
 
     ARPCache arpCache;
-    static ARPCache globalArpCache;
-    static int globalArpCacheRefCnt;
 
     cGate *netwOutGate;
 
     IInterfaceTable *ift;
     IIPv4RoutingTable *rt;  // for answering ProxyARP requests
 
+  protected:
     // Maps an IP multicast address to an Ethernet multicast address.
     MACAddress mapMulticastAddress(IPv4Address addr);
 
@@ -98,9 +96,6 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle, publi
     virtual MACAddress resolveMACAddress(const Address& address, const InterfaceEntry *ie);
     virtual Address getL3AddressFor(const MACAddress& addr) const;
     /// @}
-
-    // cListener
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
   protected:
     virtual void initialize(int stage);
