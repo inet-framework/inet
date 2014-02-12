@@ -39,6 +39,27 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 {
     protected:
 
+        class RREQIdentifier
+        {
+            public:
+                Address originatorAddr;
+                unsigned int rreqID;
+                RREQIdentifier(Address originatorAddr, unsigned int rreqID) : originatorAddr(originatorAddr), rreqID(rreqID) {};
+                bool operator==(const RREQIdentifier& other) const
+                {
+                  return this->originatorAddr == other.originatorAddr && this->rreqID == other.rreqID;
+                }
+        };
+
+        class RREQIdentifierCompare
+        {
+            public:
+                bool operator() (const RREQIdentifier& lhs, const RREQIdentifier& rhs) const
+                {
+                    return lhs.rreqID < rhs.rreqID;
+                }
+        };
+
         // context
         IAddressType *addressType; // to support both IPv4 and v6 addresses.
 
@@ -56,8 +77,9 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         bool isOperational; // for lifecycle
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
         unsigned int sequenceNum; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
-        std::map<Address,WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
-
+        std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
+        std::map<RREQIdentifier, simtime_t,RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
+                                                              // an arbitrary RREQ in the network ) to arrival time
     protected:
 
         void handleMessage(cMessage *msg);
@@ -88,9 +110,10 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         AODVRREQ * createRREQ(const Address& destAddr, unsigned int timeToLive);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route);
         AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route);
-        void handleRREP(AODVRREP* rrep, const Address& nextHop);
+        void handleRREP(AODVRREP* rrep, const Address& sourceAddr);
+        void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr);
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
-        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {}
+        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {} // TODO
     public:
         AODVRouting();
         virtual ~AODVRouting();
