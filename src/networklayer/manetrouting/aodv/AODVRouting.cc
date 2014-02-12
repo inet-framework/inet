@@ -251,7 +251,7 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr, unsigned int timeToL
     return rreqPacket;
 }
 
-AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route)
+AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr)
 {
     AODVRREP *rrep = new AODVRREP("AODV RREP Control Packet");
 
@@ -285,8 +285,9 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route)
         // of the RREP.
         rrep->setHopCount(0);
 
-        // TODO: The destination node copies the value MY_ROUTE_TIMEOUT
+        // The destination node copies the value MY_ROUTE_TIMEOUT
         // into the Lifetime field of the RREP.
+        rrep->setLifeTime(MY_ROUTE_TIMEOUT);
 
     }
     else // intermediate node
@@ -303,8 +304,8 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route)
         // Address.
 
         // The intermediate node places its distance in hops from the
-        // destination (indicated by the hop count in the routing table) Count
-        // field in the RREP.
+        // destination (indicated by the hop count in the routing table)
+        // Hop Count field in the RREP.
 
         rrep->setHopCount(route->getMetric());
 
@@ -581,16 +582,6 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
 
 void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
 {
-    // TODO: If a node does not generate a RREP (following the processing rules in
-    // section 6.6), and if the incoming IP header has TTL larger than 1,
-    // the node updates and broadcasts the RREQ to address 255.255.255.255
-    // on each of its configured interfaces (see section 6.14).
-
-    // TODO !!
-    // Otherwise, if a node does generate a RREP, then the node discards the
-    // RREQ.
-
-
     // When a node receives a RREQ, it first creates or updates a route to
     // the previous hop without a valid sequence number (see section 6.2).
 
@@ -621,6 +612,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
         AODVRouteData * previousHopProtocolData = dynamic_cast<AODVRouteData *>(previousHopRoute->getProtocolData());
         updateRoutingTable(previousHopRoute,sourceAddr,1,false,0,previousHopProtocolData->isInactive(),simTime() + ACTIVE_ROUTE_TIMEOUT);
     }
+
     // then checks to determine whether it has received a RREQ with the same
     // Originator IP Address and RREQ ID within at least the last PATH_DISCOVERY_TIME.
     // If such a RREQ has been received, the node silently discards the newly received RREQ.
@@ -635,6 +627,41 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
 
     // update or create
     rreqsArrivalTime[rreqIdentifier] = simTime();
+
+    // Otherwise, if a node does generate a RREP, then the node discards the
+    // RREQ.
+
+    // A node generates a RREP if either:
+    //
+    // (i)       it is itself the destination, or
+    //
+    // (ii)      it has an active route to the destination, the destination
+    //           sequence number in the node's existing route table entry
+    //           for the destination is valid and greater than or equal to
+    //           the Destination Sequence Number of the RREQ (comparison
+    //           using signed 32-bit arithmetic), and the "destination only"
+    //           ('D') flag is NOT set.
+
+    IRoute * destRoute = routingTable->findBestMatchingRoute(rreq->getDestAddr());
+    AODVRouteData * destRouteData = NULL;
+    if (destRoute)
+        destRouteData = dynamic_cast<AODVRouteData *>(destRoute->getProtocolData());
+
+    // check (i) - (ii)
+    if (rreq->getDestAddr() == getSelfIPAddress() ||
+        (destRouteData && !destRouteData->isInactive() && destRouteData->hasValidDestNum() && destRouteData->getDestSeqNum() >= rreq->getDestSeqNum()))
+    {
+
+        // TODO: generate RREP
+        // Once created, the RREP is unicast to the next hop toward the
+        // originator of the RREQ, as indicated by the route table entry for
+        // that originator.  As the RREP is forwarded back towards the node
+        // which originated the RREQ message, the Hop Count field is incremented
+        // by one at each hop.  Thus, when the RREP reaches the originator, the
+        // Hop Count represents the distance, in hops, of the destination from
+        // the originator.
+        return; // discard RREQ
+    }
 
     // First, it first increments the hop count value in the RREQ by one, to
     // account for the new hop through the intermediate node.
@@ -719,6 +746,26 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
 
     }
 
+    // If a node does not generate a RREP (following the processing rules in
+    // section 6.6), and if the incoming IP header has TTL larger than 1,
+    // the node updates and broadcasts the RREQ to address 255.255.255.255
+    // on each of its configured interfaces (see section 6.14).  To update
+    // the RREQ, the TTL or hop limit field in the outgoing IP header is
+    // decreased by one, and the Hop Count field in the RREQ message is
+    // incremented by one, to account for the new hop through the
+    // intermediate node. (!) Lastly, the Destination Sequence number for the
+    // requested destination is set to the maximum of the corresponding
+    // value received in the RREQ message, and the destination sequence
+    // value currently maintained by the node for the requested destination.
+    // However, the forwarding node MUST NOT modify its maintained value for
+    // the destination sequence number, even if the value received in the
+    // incoming RREQ is larger than the value currently maintained by the
+    // forwarding node.
+
+    if (destRouteData && destRouteData->isInactive()) // (!)
+        rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
+
+    // now broadcast
 }
 
 AODVRouting::~AODVRouting()
