@@ -254,13 +254,14 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr, unsigned int timeToL
 AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr)
 {
     AODVRREP *rrep = new AODVRREP("AODV RREP Control Packet");
+    rrep->setPacketType(RREP);
 
     // When generating a RREP message, a node copies the Destination IP
     // Address and the Originator Sequence Number from the RREQ message into
     // the corresponding fields in the RREP message.
 
     rrep->setDestAddr(rreq->getDestAddr());
-    rrep->setDestSeqNum(rreq->getOriginatorSeqNum()); // FIXME
+    rrep->setOriginatorSeqNum(rreq->getOriginatorSeqNum());
 
     // Processing is slightly different, depending on whether the node is
     // itself the requested destination (see section 6.6.1), or instead
@@ -322,16 +323,17 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route, const Address
  */
 AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* route)
 {
-    AODVRREP *rrep = new AODVRREP("AODV Gratuitous RREP Control Packet");
+    AODVRREP *grrep = new AODVRREP("AODV Gratuitous RREP Control Packet");
     AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
 
-    rrep->setHopCount(route->getMetric());
-    rrep->setDestAddr(rreq->getOriginatorAddr());
-    rrep->setDestSeqNum(rreq->getOriginatorSeqNum());
-    rrep->setOriginatorAddr(rreq->getDestAddr());
-    rrep->setLifeTime(routeData->getLifeTime()); // XXX
+    grrep->setPacketType(GRREP);
+    grrep->setHopCount(route->getMetric());
+    grrep->setDestAddr(rreq->getOriginatorAddr());
+    grrep->setDestSeqNum(rreq->getOriginatorSeqNum());
+    grrep->setOriginatorAddr(rreq->getDestAddr());
+    grrep->setLifeTime(routeData->getLifeTime()); // XXX
 
-    return rrep;
+    return grrep;
 }
 
 /*
@@ -563,16 +565,18 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
         }
 
     }
+    else
+    {
+        ASSERT(timeToLive != 0); // for debugging
+        networkProtocolControlInfo->setHopLimit(timeToLive);
+    }
 
     networkProtocolControlInfo->setTransportProtocol(IP_PROT_MANET);
-
-
     networkProtocolControlInfo->setDestinationAddress(destAddr);
     networkProtocolControlInfo->setSourceAddress(getSelfIPAddress());
 
     UDPPacket * udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
-
     udpPacket->setSourcePort(AodvUDPPort);
     udpPacket->setDestinationPort(AodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
@@ -580,7 +584,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     send(udpPacket, "udpOut");
 }
 
-void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
+void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive)
 {
     // When a node receives a RREQ, it first creates or updates a route to
     // the previous hop without a valid sequence number (see section 6.2).
@@ -652,7 +656,9 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
         (destRouteData && !destRouteData->isInactive() && destRouteData->hasValidDestNum() && destRouteData->getDestSeqNum() >= rreq->getDestSeqNum()))
     {
 
-        // TODO: generate RREP
+        // create RREP
+        AODVRREP * rrep = createRREP(rreq, destRoute, sourceAddr);
+
         // Once created, the RREP is unicast to the next hop toward the
         // originator of the RREQ, as indicated by the route table entry for
         // that originator.  As the RREP is forwarded back towards the node
@@ -660,6 +666,10 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
         // by one at each hop.  Thus, when the RREP reaches the originator, the
         // Hop Count represents the distance, in hops, of the destination from
         // the originator.
+
+        // send to the originator
+        sendAODVPacket(rrep, sourceAddr, 0); // TODO: TIME TO LIVE???
+
         return; // discard RREQ
     }
 
@@ -765,7 +775,8 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr)
     if (destRouteData && destRouteData->isInactive()) // (!)
         rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
 
-    // now broadcast
+    if (timeToLive > 1)
+        sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive - 1); // TODO: multiple interfaces
 }
 
 AODVRouting::~AODVRouting()
