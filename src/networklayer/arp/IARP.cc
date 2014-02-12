@@ -15,10 +15,10 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "IARPCache.h"
+#include "IARP.h"
 
-Register_Abstract_Class(IARPCache::Notification);
+Register_Abstract_Class(IARP::Notification);
 
-const simsignal_t IARPCache::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
-const simsignal_t IARPCache::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
-const simsignal_t IARPCache::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");
+const simsignal_t IARP::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
+const simsignal_t IARP::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
+const simsignal_t IARP::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");

@@ -508,9 +508,11 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     emit(completedARPResolutionSignal, &signal);
 }
 
-MACAddress ARP::getMACAddressFor(const IPv4Address& addr) const
+MACAddress ARP::resolveMACAddress(const Address& address, const InterfaceEntry *ie)
 {
-    Enter_Method_Silent();
+    IPv4Address addr = address.toIPv4();
+
+    Enter_Method("startAddressResolution(%s,%s)", addr.str().c_str(), ie->getName());
 
     ARPCache::const_iterator it;
 
@@ -519,28 +521,11 @@ MACAddress ARP::getMACAddressFor(const IPv4Address& addr) const
         it = globalArpCache.find(addr);
         if (it != globalArpCache.end())
             return it->second->macAddress;
-    }
-    else
-    {
-        // address is in the cache, not pending resolution, and not expired yet
-        it = arpCache.find(addr);
-        if (it != arpCache.end() && !it->second->pending && it->second->lastUpdate + cacheTimeout >= simTime())
-            return it->second->macAddress;
-    }
-    return MACAddress::UNSPECIFIED_ADDRESS;
-}
-
-void ARP::startAddressResolution(const IPv4Address& addr, const InterfaceEntry *ie)
-{
-    Enter_Method("startAddressResolution(%s,%s)", addr.str().c_str(), ie->getName());
-
-    if (globalARP)
-    {
         throw cRuntimeError("globalARP does not support dynamic address resolution");
     }
     else
     {
-        ARPCache::const_iterator it = arpCache.find(addr);
+        it = arpCache.find(addr);
         if (it == arpCache.end())
         {
             // no cache entry: launch ARP request
@@ -565,16 +550,17 @@ void ARP::startAddressResolution(const IPv4Address& addr, const InterfaceEntry *
                 if (it->second->lastUpdate + cacheTimeout < simTime())
                     EV << "ARP cache entry for " << addr << " expired, starting new ARP resolution\n";
                 else
-                    EV << "invalidate ARP cache entry for " << addr << ", starting new ARP resolution\n";
+                    return it->second->macAddress;
                 ARPCacheEntry *entry = it->second;
                 entry->ie = ie; // routing table may have changed
                 initiateARPResolution(entry);
             }
         }
     }
+    return MACAddress::UNSPECIFIED_ADDRESS;
 }
 
-IPv4Address ARP::getIPv4AddressFor(const MACAddress& macAddr) const
+Address ARP::getL3AddressFor(const MACAddress& macAddr) const
 {
     Enter_Method_Silent();
 

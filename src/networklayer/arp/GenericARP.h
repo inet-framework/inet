@@ -29,7 +29,7 @@
 class IInterfaceTable;
 
 /**
- * TODO GlobalMACAddressCache
+ * TODO GenericMACAddressCache
  *
  * - translates L3 address to L2 addresses
  * - uses global mapping (or table, or algorithm)
@@ -46,7 +46,8 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     virtual ~GenericARP() { }
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-    virtual MACAddress resolveMACAddress(Address& address);
+    virtual MACAddress resolveMACAddress(const Address& address, const InterfaceEntry *ie);
+    virtual Address getL3AddressFor(const MACAddress&) const { throw cRuntimeError("getL3AddressFor() not implemented yet"); }
 
   protected:
     virtual void initialize(int stage);
@@ -57,4 +58,5 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 };
 
-#endif
+#endif  // __INET_GENERICARP_H
+

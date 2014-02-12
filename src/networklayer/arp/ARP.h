@@ -23,7 +23,7 @@
 
 #include "INETDefs.h"
 
-#include "IARPCache.h"
+#include "IARP.h"
 #include "ILifecycle.h"
 #include "IPv4Address.h"
 #include "MACAddress.h"
@@ -38,7 +38,7 @@ class IIPv4RoutingTable;
 /**
  * ARP implementation.
  */
-class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, public cListener
+class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle, public cListener
 {
   public:
     struct ARPCacheEntry;
@@ -94,10 +94,9 @@ class INET_API ARP : public cSimpleModule, public IARPCache, public ILifecycle, 
     virtual ~ARP();
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-    /// IARPCache implementation  @{
-    virtual void startAddressResolution(const IPv4Address& addr, const InterfaceEntry *ie);
-    virtual IPv4Address getIPv4AddressFor(const MACAddress& addr) const;
-    virtual MACAddress getMACAddressFor(const IPv4Address& addr) const;
+    /// IARP implementation  @{
+    virtual MACAddress resolveMACAddress(const Address& address, const InterfaceEntry *ie);
+    virtual Address getL3AddressFor(const MACAddress& addr) const;
     /// @}
 
     // cListener

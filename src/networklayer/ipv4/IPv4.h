@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "IARPCache.h"
+#include "IARP.h"
 #include "ICMP.h"
 #include "ILifecycle.h"
 #include "INetfilter.h"
@@ -64,7 +64,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
   protected:
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
-    IARPCache *arp;
+    IARP *arp;
     ICMP *icmp;
     cGate *arpInGate;
     cGate *arpOutGate;
@@ -112,10 +112,10 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void updateDisplayString();
 
     // utility: processing requested ARP resolution completed
-    void arpResolutionCompleted(IARPCache::Notification *entry);
+    void arpResolutionCompleted(IARP::Notification *entry);
 
     // utility: processing requested ARP resolution timed out
-    void arpResolutionTimedOut(IARPCache::Notification *entry);
+    void arpResolutionTimedOut(IARP::Notification *entry);
 
     /**
      * Encapsulate packet coming from higher layers into IPv4Datagram, using

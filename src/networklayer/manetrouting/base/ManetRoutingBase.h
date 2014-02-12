@@ -42,7 +42,7 @@
 
 class ManetRoutingBase;
 
-class IARPCache;
+class IARP;
 
 typedef std::set<ManetAddress> AddressGroup;
 typedef std::set<ManetAddress>::iterator AddressGroupIterator;
@@ -89,7 +89,7 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
     bool sendToICMP;
     ManetRoutingBase *collaborativeProtocol;
 
-    IARPCache *arp;
+    IARP *arp;
 
     typedef struct InterfaceIdentification
     {

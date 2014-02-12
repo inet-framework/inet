@@ -40,7 +40,7 @@ package inet.networklayer.arp;
 // these files don't contain the word <tt>BROADCAST</tt> e.g. for PPP
 // interfaces.
 //
-simple ARP
+simple ARP like IARP
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
@@ -53,9 +53,9 @@ simple ARP
         @display("i=block/layer");
         @signal[sentReq](type=long);
         @signal[sentReply](type=long);
-        @signal[initiatedARPResolution](type=IARPCache::Notification);
-        @signal[completedARPResolution](type=IARPCache::Notification);
-        @signal[failedARPResolution](type=IARPCache::Notification);
+        @signal[initiatedARPResolution](type=IARP::Notification);
+        @signal[completedARPResolution](type=IARP::Notification);
+        @signal[failedARPResolution](type=IARP::Notification);
         @statistic[sentReq](title="ARP request sent";record=count,vector);
         @statistic[sentReply](title="ARP replies sent";record=count,vector);
         @statistic[initiatedARPResolution](title="ARP initiated resolutions";record=count);
