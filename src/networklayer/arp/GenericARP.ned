@@ -26,10 +26,6 @@ simple GenericARP like IARP
         @display("i=block/layer_s");
         string interfaceTableModule;   // The path to the InterfaceTable module
     gates:
-        input ipIn @labels(IGenericDatagram);
-        output nicOut[] @labels(IGenericDatagram);
-
-        //FIXME
-        input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
-        output netwOut @labels(ARPPacket+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop
+        input netwIn @labels(IGenericDatagram); // incoming ARP requests and replies
+        output netwOut @labels(IGenericDatagram);  // outgoing ARP requests/replies, and datagrams with resolved next hop
 }

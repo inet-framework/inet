@@ -32,6 +32,7 @@ module GenericNetworkLayer like INetworkLayer
         string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.routingTableModule = default(absPath(routingTableModule));
+        *.arpModule = default(absPath(".arp"));
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(INetworkDatagram);
@@ -47,6 +48,7 @@ module GenericNetworkLayer like INetworkLayer
                 @display("p=85,95;q=queue");
             gates:
                 queueIn[sizeof(ifIn)];
+                queueOut[sizeof(ifOut)];
         }
         echo: EchoProtocol {
             parameters:
@@ -55,8 +57,6 @@ module GenericNetworkLayer like INetworkLayer
         arp: GenericARP {
             parameters:
                 @display("p=202,142;q=pendingQueue");
-            gates:
-                nicOut[sizeof(ifOut)];
         }
     connections allowunconnected:
         for i=0..sizeof(transportIn)-1 {
@@ -76,12 +76,13 @@ module GenericNetworkLayer like INetworkLayer
             echo.pingIn++ <-- { @display("m=n"); } <-- pingIn[i];
         }
 
-        gnp.queueOut --> arp.ipIn;
+        gnp.arpOut --> arp.netwIn;
+        gnp.arpIn <-- arp.netwOut;
 
         for i=0..sizeof(ifIn)-1 {
             ifIn[i] --> { @display("m=s"); } --> gnp.queueIn[i];
         }
         for i=0..sizeof(ifOut)-1 {
-            arp.nicOut[i] --> { @display("m=s"); } --> ifOut[i];
+            gnp.queueOut[i] --> { @display("m=s"); } --> ifOut[i];
         }
 }

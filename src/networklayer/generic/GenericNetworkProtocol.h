@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 
+#include "IARP.h"
 #include "INetworkProtocol.h"
 #include "QueueBase.h"
 #include "IInterfaceTable.h"
@@ -62,7 +63,8 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
 
     IInterfaceTable *interfaceTable;
     GenericRoutingTable *routingTable;
-    cGate *queueOutGate;
+    IARP *arp;
+    int queueOutBaseGateId;
 
     // config
     int defaultHopLimit;

@@ -28,12 +28,15 @@ simple GenericNetworkProtocol
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
+        string arpModule;
         double procDelay @unit("s") = default(0s);
         int hopLimit = default(32);
         @display("i=block/routing");
     gates:
         input transportIn[] @labels(GenericNetworkProtocolControlInfo/down,TCPSegment,UDPPacket);
         output transportOut[] @labels(GenericNetworkProtocolControlInfo/up,TCPSegment,UDPPacket);
+        input arpIn;
+        output arpOut;
         input queueIn[] @labels(GenericDatagram);
-        output queueOut @labels(GenericDatagram);
+        output queueOut[] @labels(GenericDatagram);
 }

@@ -16,14 +16,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "IPSocket.h"
 #include "GenericNetworkProtocol.h"
+
 #include "GenericDatagram.h"
 #include "GenericNetworkProtocolControlInfo.h"
+#include "GenericNetworkProtocolInterfaceData.h"
 #include "GenericRoute.h"
 #include "GenericRoutingTable.h"
-#include "GenericNetworkProtocolInterfaceData.h"
 #include "ModuleAccess.h"
+#include "Ieee802Ctrl.h"
+#include "IPSocket.h"
 
 Define_Module(GenericNetworkProtocol);
 
@@ -33,8 +35,9 @@ void GenericNetworkProtocol::initialize()
 
     interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     routingTable = getModuleFromPar<GenericRoutingTable>(par("routingTableModule"), this);
+    arp = getModuleFromPar<IARP>(par("arpModule"), this);
 
-    queueOutGate = gate("queueOut");
+    queueOutBaseGateId = gateSize("queueOut")==0 ? -1 : gate("queueOut", 0)->getId();
     defaultHopLimit = par("hopLimit");
     numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -427,13 +430,34 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         return;
     }
 
-    // send out datagram to ARP, with control info attached
-    GenericRoutingDecision *routingDecision = new GenericRoutingDecision();
-    routingDecision->setInterfaceId(ie->getInterfaceId());
-    routingDecision->setNextHop(nextHop);
-    datagram->setControlInfo(routingDecision);
+    if (!ie->isBroadcast())
+    {
+        EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
+        send(datagram, queueOutBaseGateId + ie->getNetworkLayerGateIndex());
+        return;
+    }
 
-    send(datagram, queueOutGate);
+    // determine what address to look up in ARP cache
+    if (nextHop.isUnspecified())
+        throw cRuntimeError("No next hop");
+
+    // send out datagram to NIC, with control info attached
+    MACAddress nextHopMAC = arp->resolveMACAddress(nextHop, ie);
+    if (nextHopMAC == MACAddress::UNSPECIFIED_ADDRESS)
+    {
+        throw cRuntimeError("ARP couldn't resolve the '%s' address", nextHop.str().c_str());
+    }
+    else
+    {
+        // add control info with MAC address
+        Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
+        controlInfo->setDest(nextHopMAC);
+        controlInfo->setEtherType(ETHERTYPE_IPv4); // TODO:
+        datagram->setControlInfo(controlInfo);
+
+        // send out
+        send(datagram, queueOutBaseGateId + ie->getNetworkLayerGateIndex());
+    }
 }
 
 void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * destIE, const Address & nextHop)
