@@ -16,6 +16,7 @@
 //
 
 #include "AODVRouting.h"
+#include "Ieee80211Frame_m.h"
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
 #include "AODVDefs.h"
@@ -788,6 +789,25 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
     routingTable->addRoute(newRoute);
 
     return newRoute;
+}
+
+void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj)
+{
+    Enter_Method("receiveChangeNotification");
+    if (signalID == NF_LINK_BREAK)
+    {
+        EV_DETAIL << "Received link break signal" << endl;
+        Ieee80211Frame* ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject*>(obj));
+        if (ieee80211Frame)
+        {
+            INetworkDatagram * datagram = dynamic_cast<INetworkDatagram *>(ieee80211Frame->getEncapsulatedPacket());
+            const Address& destination = datagram->getDestinationAddress();
+            if (destination.getAddressType() == addressType)
+            {
+                // send RERR
+            }
+        }
+    }
 }
 
 AODVRouting::~AODVRouting()

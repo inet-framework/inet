@@ -35,7 +35,7 @@
  * This class implements AODV routing protocol and Netfilter hooks
  * in the IP-layer with regard to this protocol.
  */
-class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook
+class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook, public cListener
 {
     protected:
 
@@ -115,6 +115,9 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {} // TODO
+
+        // notification
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     public:
         AODVRouting();
         virtual ~AODVRouting();
