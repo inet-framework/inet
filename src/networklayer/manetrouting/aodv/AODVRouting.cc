@@ -82,6 +82,7 @@ void AODVRouting::handleMessage(cMessage *msg)
                 handleRREP(check_and_cast<AODVRREP *>(ctrlPacket),sourceAddr);
                 break;
             case RERR:
+                handleRERR(check_and_cast<AODVRERR *>(ctrlPacket));
                 break;
             default:
                 throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacketType);
@@ -190,10 +191,6 @@ void AODVRouting::sendRREQ(AODVRREP * rreq, const Address& destAddr, unsigned in
     sendAODVPacket(rreq,destAddr,timeToLive);
 }
 
-void AODVRouting::sendRERR()
-{
-
-}
 
 void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
 {
@@ -810,14 +807,14 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
                 //           route in its routing table while transmitting data (and
                 //           route repair, if attempted, was unsuccessful), or
 
-                sendLinkBreakRERR(unreachableAddr);
+                handleLinkBreakSendRERR(unreachableAddr);
 
             }
         }
     }
 }
 
-void AODVRouting::sendLinkBreakRERR(const Address& unreachableAddr)
+void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
 {
     // For case (i), the node first makes a list of unreachable destinations
     // consisting of the unreachable neighbor and any additional
@@ -839,11 +836,23 @@ void AODVRouting::sendLinkBreakRERR(const Address& unreachableAddr)
     //    Before this time, the entry SHOULD NOT be deleted.
 
     std::vector<Address> unreachableNeighbors;
-    unreachableNeighbors.push_back(unreachableAddr);
+    std::vector<unsigned int> unreachableNeighborsDestSeqNum;
+
+    IRoute * unreachableRoute = routingTable->findBestMatchingRoute(unreachableAddr);
+    ASSERT(unreachableRoute != NULL);
+    AODVRouteData * unreachableRouteData = dynamic_cast<AODVRouteData *>(unreachableRoute->getProtocolData());
+    unreachableNeighbors.push_back(unreachableAddr); // Note that, in spite of this name, we include the unreachableAddr also for the easier implementation
+    unreachableNeighborsDestSeqNum.push_back(unreachableRouteData->getDestSeqNum());
+
+    // For case (i), the node first makes a list of unreachable destinations
+    // consisting of the unreachable neighbor and any additional destinations
+    // (or subnets, see section 7) in the local routing table
+    // that use the unreachable neighbor as the next hop.
 
     for (int i = 0; i < routingTable->getNumRoutes(); i++)
     {
         IRoute * route = routingTable->getRoute(i);
+
         if (route->getNextHopAsGeneric() == unreachableAddr)
         {
             AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
@@ -855,11 +864,53 @@ void AODVRouting::sendLinkBreakRERR(const Address& unreachableAddr)
 
             routeData->setIsActive(false);
             routeData->setLifeTime(simTime() + DELETE_PERIOD);
+
+            // Note that, there is a bijection between unreachableNeighbors and unreachableNeighborsDestSeqNum
             unreachableNeighbors.push_back(route->getDestinationAsGeneric());
+            unreachableNeighborsDestSeqNum.push_back(routeData->getDestSeqNum());
         }
     }
 
-    // TODO: send RERR to unreachableNeighbors
+    AODVRERR * rerr = createRERR(unreachableNeighbors,unreachableNeighborsDestSeqNum);
+
+    // The neighboring node(s) that should receive the RERR are all those
+    // that belong to a precursor list of at least one of the unreachable
+    // destination(s) in the newly created RERR.  In case there is only one
+    // unique neighbor that needs to receive the RERR, the RERR SHOULD be
+    // unicast toward that neighbor.  Otherwise the RERR is typically sent
+    // to the local broadcast address (Destination IP == 255.255.255.255,
+    // TTL == 1) with the unreachable destinations, and their corresponding
+    // destination sequence numbers, included in the packet.
+
+    // broadcast
+    sendAODVPacket(rerr,addressType->getBroadcastAddress(),1);
+}
+
+AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum)
+{
+    AODVRERR * rerr = new AODVRERR("AODV RERR Control Packet");
+    unsigned int destCount = unreachableNeighbors.size();
+
+    rerr->setPacketType(RERR);
+    rerr->setDestCount(destCount);
+    rerr->setUnreachableDestAddrsArraySize(destCount);
+    rerr->setUnreachableDestAddrsArraySize(destCount);
+
+    for (unsigned int i = 0; i < destCount; i++)
+    {
+        rerr->setUnreachableDestAddrs(i,unreachableNeighbors[i]);
+        rerr->setUnreachableSeqNum(i,unreachableNeighborsDestSeqNum[i]);
+    }
+
+    return rerr;
+}
+
+void AODVRouting::handleRERR(AODVRERR* rerr)
+{
+    // TODO: A node initiates processing for a RERR message in three situations:
+    // (iii)   if it receives a RERR from a neighbor for one or more
+    //         active routes.
+
 }
 
 AODVRouting::~AODVRouting()

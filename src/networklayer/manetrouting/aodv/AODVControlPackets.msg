@@ -78,10 +78,10 @@ class AODVRREP extends AODVControlPacket
 //
 class AODVRERR extends AODVControlPacket
 {
+    Address unreachableDestAddrs[];
+    unsigned int unreachableSeqNum[];
     bool noDeleteFlag;
     unsigned int destCount;
-    Address unreachableDestAddr;
-    unsigned int unreachableSeqNum;
 }
 
 //
