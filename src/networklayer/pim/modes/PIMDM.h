@@ -151,7 +151,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
         friend std::ostream &operator<<(std::ostream &out, const Route *route);
 
-        typedef std::map<SourceAndGroup, Route> RoutingTable;
+        typedef std::map<SourceAndGroup, Route*> RoutingTable;
 
         // for updating the forwarding state of the route when the state of the downstream interface changes
         class PIMDMOutInterface : public IMulticastRoute::OutInterface
@@ -180,6 +180,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
 	public:
         PIMDM() : PIMBase(PIMInterface::DenseMode) {}
+        virtual ~PIMDM() { clearRoutes(); }
 
 	private:
 	    // process signals
@@ -234,6 +235,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         IPv4MulticastRoute *findIPv4MulticastRoute(IPv4Address group, IPv4Address source);
         Route *findRoute(IPv4Address source, IPv4Address group);
         void deleteRoute(IPv4Address source, IPv4Address group);
+        void clearRoutes();
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}

@@ -1255,7 +1255,8 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
     bool isSourceDirectlyConnected = routeToSrc->getSourceType() == IPv4Route::IFACENETMASK;
     IPv4Address rpfNeighbor = routeToSrc->getGateway().isUnspecified() ? source : routeToSrc->getGateway();
 
-    Route *route = &routes[SourceAndGroup(source, group)];
+    Route *route = new Route();
+    routes[SourceAndGroup(source, group)] = route;
     route->owner = this;
     route->source = source;
     route->group = group;
@@ -1688,12 +1689,24 @@ IPv4MulticastRoute *PIMDM::findIPv4MulticastRoute(IPv4Address group, IPv4Address
 PIMDM::Route *PIMDM::findRoute(IPv4Address source, IPv4Address group)
 {
     RoutingTable::iterator it = routes.find(SourceAndGroup(source, group));
-    return it != routes.end() ? &(it->second) : NULL;
+    return it != routes.end() ? it->second : NULL;
 }
 
 void PIMDM::deleteRoute(IPv4Address source, IPv4Address group)
 {
-    routes.erase(SourceAndGroup(source, group));
+    RoutingTable::iterator it = routes.find(SourceAndGroup(source, group));
+    if (it != routes.end())
+    {
+        delete it->second;
+        routes.erase(it);
+    }
+}
+
+void PIMDM::clearRoutes()
+{
+    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+        delete it->second;
+    routes.clear();
 }
 
 PIMDM::Interface::~Interface()
