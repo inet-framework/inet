@@ -119,11 +119,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
         {
                 enum Flag
                 {
-                    NO_FLAG = 0,
-                    C       = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
-                    P       = 0x02,              /**< Pruned */          // UpstreamJPState
-                    F       = 0x04,              /**< Register flag*/
-                    T       = 0x08               /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+                    NO_FLAG      = 0x00,
+                    CONNECTED    = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
+                    PRUNED       = 0x02,              /**< Pruned */          // UpstreamJPState
+                    REGISTER     = 0x04,              /**< Register flag*/
+                    SPT_BIT      = 0x08               /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
                 };
 
                 PIMSM *owner;
@@ -132,6 +132,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 IPv4Address group;
                 IPv4Address rpAddr;                     /**< Randevous point */
                 int flags;
+
+                // related routes
+                Route *rpRoute;
+                Route *gRoute;
+                Route *sgrptRoute;
 
                 //Originated from destination.Ensures loop freeness.
                 unsigned int sequencenumber;

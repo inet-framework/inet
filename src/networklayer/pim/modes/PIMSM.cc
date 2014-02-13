@@ -27,9 +27,9 @@ Define_Module(PIMSM);
 typedef IPv4MulticastRoute::OutInterface OutInterface;
 
 PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
-    : owner(owner), type(type), origin(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0), sequencenumber(0),
-      keepAliveTimer(NULL), joinTimer(NULL),
-      registerState(RS_NO_INFO), registerStopTimer(NULL),
+    : owner(owner), type(type), origin(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
+      rpRoute(NULL), gRoute(NULL), sgrptRoute(NULL),
+      sequencenumber(0), keepAliveTimer(NULL), joinTimer(NULL), registerState(RS_NO_INFO), registerStopTimer(NULL),
       upstreamInterface(NULL), joinDesired(false)
 {
 }
@@ -198,7 +198,7 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
     {
         // set KeepAlive timer
         if (/*DirectlyConnected(route->source) ||*/
-            (!route->isFlagSet(Route::P) && !route->isInheritedOlistNull()))
+            (!route->isFlagSet(Route::PRUNED) && !route->isInheritedOlistNull()))
         {
             EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->origin << ", " << route->group << ") timer.\n";
 
@@ -225,11 +225,11 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
                }
              }
          */
-         route->setFlags(Route::T);
+         route->setFlags(Route::SPT_BIT);
     }
 
     // check switch from RP tree to the SPT
-    if (route->isFlagSet(Route::T))
+    if (route->isFlagSet(Route::SPT_BIT))
     {
         /*
              void
@@ -245,7 +245,7 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
     }
 
     //TODO SPT threshold at last hop router
-    if (route->isFlagSet(Route::C))
+    if (route->isFlagSet(Route::CONNECTED))
     {
         if (this->getSPTthreshold() != "infinity")
             EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
@@ -380,8 +380,8 @@ void PIMSM::processExpiryTimer(cMessage *timer)
         // upstream state machine
         if (route->isOilistNull())
         {
-            route->clearFlag(Route::C);
-            route->setFlags(Route::P);
+            route->clearFlag(Route::CONNECTED);
+            route->setFlags(Route::PRUNED);
             PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
             if (route->type == G && !IamRP(route->rpAddr))
                 sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
@@ -642,7 +642,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     Route *routeG = findGRoute(group);
     if (!routeG)
     {
-        routeG = createRouteG(group, Route::P);
+        routeG = createRouteG(group, Route::PRUNED);
         addGRoute(routeG);
         newRoute = true;
     }
@@ -692,7 +692,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
 
     if (!newRoute && !routeG->upstreamInterface) // I am RP
     {
-        routeG->clearFlag(Route::F);
+        routeG->clearFlag(Route::REGISTER);
 
         for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
         {
@@ -702,8 +702,8 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
                 if (route->type == SG)
                 {
                     // update flags
-                    route->clearFlag(Route::P);
-                    route->setFlags(Route::T);
+                    route->clearFlag(Route::PRUNED);
+                    route->setFlags(Route::SPT_BIT);
                     route->startJoinTimer();
 
                     if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
@@ -822,7 +822,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
         Route *routeG = findGRoute(group);
         if (!routeG)        // create (*,G) route between RP and source DR
         {
-            Route *newRouteG = createRouteG(group, Route::P);
+            Route *newRouteG = createRouteG(group, Route::PRUNED);
             addGRoute(newRouteG);
         }
     }
@@ -838,7 +838,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
     Route *routeSG = findSGRoute(source, group);
     if (!routeSG)         // create (S,G) route between RP and source DR
     {
-        routeSG = createRouteSG(source, group, Route::P);
+        routeSG = createRouteSG(source, group, Route::PRUNED);
         routeSG->startKeepAliveTimer();
         addSGRoute(routeSG);
     }
@@ -1027,13 +1027,13 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
     {
         if (!routeG)
         {
-            routeG = createRouteG(group, Route::P);
+            routeG = createRouteG(group, Route::PRUNED);
             addGRoute(routeG);
         }
 
         if (!routeSG)
         {
-            routeSG = createRouteSG(source, group, Route::P);
+            routeSG = createRouteSG(source, group, Route::PRUNED);
             routeSG->startKeepAliveTimer();
             addSGRoute(routeSG);
         }
@@ -1059,9 +1059,9 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
                 ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
             }
 
-            routeSG->clearFlag(Route::P);
+            routeSG->clearFlag(Route::PRUNED);
 
-            if (!routeSG->isFlagSet(Route::T)) // only if isn't build SPT between RP and registering DR
+            if (!routeSG->isFlagSet(Route::SPT_BIT)) // only if isn't build SPT between RP and registering DR
             {
                 for (unsigned i=0; i < routeG->downstreamInterfaces.size(); i++)
                 {
@@ -1082,7 +1082,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
 
     if (routeG)
     {
-        if (routeG->isFlagSet(Route::P) || pkt->getN())
+        if (routeG->isFlagSet(Route::PRUNED) || pkt->getN())
         {
             IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
             sendPIMRegisterStop(ctrlInfo->getDestAddr(), ctrlInfo->getSrcAddr(), group, source);
@@ -1573,7 +1573,7 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
 
         // create new (S,G) route
-        Route *newRouteSG = createRouteSG(source, group, Route::P | Route::F | Route::T);
+        Route *newRouteSG = createRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
         newRouteSG->startKeepAliveTimer();
         newRouteSG->registerState = Route::RS_JOIN;
         newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, false));      // create new outgoing interface to RP
@@ -1581,7 +1581,7 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         addSGRoute(newRouteSG);
 
         // create new (*,G) route
-        Route *newRouteG = createRouteG(newRouteSG->group, Route::P | Route::F);
+        Route *newRouteG = createRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
         addGRoute(newRouteG);
     }
 }
@@ -1604,12 +1604,12 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
             route->removeDownstreamInterface(k);
         }
 
-        route->clearFlag(Route::C);
+        route->clearFlag(Route::CONNECTED);
 
         // there is no receiver of multicast, prune the router from the multicast tree
         if (route->isOilistNull())
         {
-            route->setFlags(Route::P);
+            route->setFlags(Route::PRUNED);
             PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
             sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
             cancelAndDeleteTimer(route->joinTimer);
@@ -1625,7 +1625,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
     if (!routeG)
     {
         // create new (*,G) route
-        Route *newRouteG = createRouteG(group, Route::C);
+        Route *newRouteG = createRouteG(group, Route::CONNECTED);
         newRouteG->startJoinTimer();
         if (newRouteG->upstreamInterface)
             newRouteG->upstreamInterface->startExpiryTimer(joinPruneHoldTime());
@@ -1647,7 +1647,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
         DownstreamInterface *downstream = new DownstreamInterface(routeG, ie, DownstreamInterface::JOIN);
         // downstream->startExpiryTimer(joinPruneHoldTime());
         routeG->addDownstreamInterface(downstream);
-        routeG->setFlags(Route::C);
+        routeG->setFlags(Route::CONNECTED);
 
         IPv4MulticastRoute *ipv4Route = findIPv4Route(IPv4Address::UNSPECIFIED_ADDRESS, group);
         ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
@@ -1694,7 +1694,7 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
     IPv4Address group = datagram->getDestAddress();
 
     Route *routeSG = findSGRoute(source, group);
-    if (!routeSG || !routeSG->isFlagSet(Route::F) || !routeSG->isFlagSet(Route::P))
+    if (!routeSG || !routeSG->isFlagSet(Route::REGISTER) || !routeSG->isFlagSet(Route::PRUNED))
         return;
 
     // send Register message to RP
@@ -1725,24 +1725,24 @@ void PIMSM::joinDesiredChanged(Route *route)
     {
         Route *routeG = route;
 
-        if (routeG->isFlagSet(Route::P) && routeG->joinDesired)
+        if (routeG->isFlagSet(Route::PRUNED) && routeG->joinDesired)
         {
             //
             // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> TRUE
             //
-            routeG->clearFlag(Route::P);
+            routeG->clearFlag(Route::PRUNED);
             if (routeG->upstreamInterface)
             {
                 sendPIMJoin(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
                 routeG->startJoinTimer();
             }
         }
-        else if (!routeG->isFlagSet(Route::P) && !routeG->joinDesired)
+        else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired)
         {
             //
             // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> FALSE
             //
-            routeG->setFlags(Route::P);
+            routeG->setFlags(Route::PRUNED);
             cancelAndDeleteTimer(routeG->joinTimer);
             if (routeG->upstreamInterface)
                 sendPIMPrune(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
@@ -1752,19 +1752,19 @@ void PIMSM::joinDesiredChanged(Route *route)
     {
         Route *routeSG = route;
 
-        if (routeSG->isFlagSet(Route::P) && routeSG->joinDesired)
+        if (routeSG->isFlagSet(Route::PRUNED) && routeSG->joinDesired)
         {
             //
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
             //
-            routeSG->clearFlag(Route::P);
+            routeSG->clearFlag(Route::PRUNED);
             if (!IamDR(routeSG->origin))
             {
                 sendPIMJoin(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
                 routeSG->startJoinTimer();
             }
         }
-        else if (!routeSG->isFlagSet(Route::P) && !route->joinDesired)
+        else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired)
         {
             //
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> FALSE
@@ -1774,8 +1774,8 @@ void PIMSM::joinDesiredChanged(Route *route)
             // state.  Send Prune(S,G) to the appropriate upstream neighbor,
             // which is RPF'(S,G).  Cancel the Join Timer (JT), and set
             // SPTbit(S,G) to FALSE.
-            routeSG->setFlags(Route::P);
-            routeSG->clearFlag(Route::T);
+            routeSG->setFlags(Route::PRUNED);
+            routeSG->clearFlag(Route::SPT_BIT);
             cancelAndDeleteTimer(routeSG->joinTimer);
             if (!IamDR(routeSG->origin))
                 sendPIMPrune(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
