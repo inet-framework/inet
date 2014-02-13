@@ -302,11 +302,13 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route, const Address
         AODVRouteData *routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
         rrep->setDestSeqNum(routeData->getDestSeqNum());
 
-        // TODO: The intermediate node updates the forward route entry by placing the
+        // The intermediate node updates the forward route entry by placing the
         // last hop node (from which it received the RREQ, as indicated by the
         // source IP address field in the IP header) into the precursor list for
         // the forward route entry -- i.e., the entry for the Destination IP
         // Address.
+
+        routeData->addPrecursor(sourceAddr);
 
         // The intermediate node places its distance in hops from the
         // destination (indicated by the hop count in the routing table)

@@ -18,15 +18,18 @@
 #ifndef AODVROUTEDATA_H_
 #define AODVROUTEDATA_H_
 
+#include <vector>
+#include "Address.h"
 #include "INETDefs.h"
 
 class INET_API AODVRouteData : public cObject
 {
 
     protected:
+        std::vector<Address> precursorList;
         bool valid; // a false value indicates that the route has expired (lifeTime)
-                      // an invalid route cannot be used to forward data packets
-                      // but it can provide useful informations
+                    // an invalid route cannot be used to forward data packets
+                    // but it can provide useful informations
         bool active;
         bool repariable;
         bool beingRepaired;
@@ -56,6 +59,8 @@ class INET_API AODVRouteData : public cObject
         const simtime_t& getLastUsed() const { return lastUsed; }
         bool isActive() const { return active; }
         void setIsActive(bool active) { this->active = active; }
+        void addPrecursor(const Address& precursorAddr) { precursorList.push_back(precursorAddr); }
+        const std::vector<Address>& getPrecursorList() { return precursorList; }
 };
 
 #endif
