@@ -241,12 +241,14 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr, unsigned int timeToL
     // The Hop Count field is set to zero.
     rreqPacket->setHopCount(0);
 
-    // TODO:
     // Before broadcasting the RREQ, the originating node buffers the RREQ
     // ID and the Originator IP address (its own address) of the RREQ for
     // PATH_DISCOVERY_TIME.
     // In this way, when the node receives the packet again from its neighbors,
     // it will not reprocess and re-forward the packet.
+
+    RREQIdentifier rreqIdentifier(getSelfIPAddress(),rreqId);
+    rreqsArrivalTime[rreqIdentifier] = simTime();
 
     // TODO: G flag
 
