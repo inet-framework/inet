@@ -70,10 +70,12 @@ void AODVRouting::handleMessage(cMessage *msg)
         INetworkProtocolControlInfo * udpProtocolCtrlInfo = dynamic_cast<INetworkProtocolControlInfo *>(udpPacket->getControlInfo());
         ASSERT(udpProtocolCtrlInfo != NULL);
         Address sourceAddr = udpProtocolCtrlInfo->getSourceAddress();
+        unsigned int arrivalPacketTTL = udpProtocolCtrlInfo->getHopLimit();
 
         switch (ctrlPacketType)
         {
             case RREQ:
+                handleRREQ(check_and_cast<AODVRREQ *>(ctrlPacket),sourceAddr,arrivalPacketTTL);
                 break;
             case RREP:
                 handleRREP(check_and_cast<AODVRREP *>(ctrlPacket),sourceAddr);
@@ -344,8 +346,35 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     // When a node receives a RREP message, it searches (using longest-
     // prefix matching) for a route to the previous hop.
 
-    // TODO: If needed, a route is created for the previous hop,
+    // If needed, a route is created for the previous hop,
     // but without a valid sequence number (see section 6.2)
+
+    IRoute * previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
+
+    if (!previousHopRoute)
+    {
+        // create without valid sequence number
+        previousHopRoute = routingTable->createRoute();
+        AODVRouteData * previousHopProtocolData = new AODVRouteData();
+
+        previousHopProtocolData->setHasValidDestNum(false);
+        previousHopProtocolData->setIsActive(true);
+        previousHopProtocolData->setLifeTime(simTime() + ACTIVE_ROUTE_TIMEOUT);
+
+        previousHopRoute->setDestination(sourceAddr);
+        previousHopRoute->setSourceType(IRoute::AODV);
+        previousHopRoute->setSource(this);
+        previousHopRoute->setProtocolData(previousHopProtocolData);
+        previousHopRoute->setMetric(1);
+        previousHopRoute->setNextHop(sourceAddr);
+
+        routingTable->addRoute(previousHopRoute);
+    }
+    else
+    {
+        AODVRouteData * previousHopProtocolData = dynamic_cast<AODVRouteData *>(previousHopRoute->getProtocolData());
+        updateRoutingTable(previousHopRoute,sourceAddr,1,false,0,previousHopProtocolData->isActive(),simTime() + ACTIVE_ROUTE_TIMEOUT);
+    }
 
     // Next, the node then increments the hop count value in the RREP by one,
     // to account for the new hop through the intermediate node
