@@ -27,7 +27,7 @@ class INET_API AODVRouteData : public cObject
         bool valid; // a false value indicates that the route has expired (lifeTime)
                       // an invalid route cannot be used to forward data packets
                       // but it can provide useful informations
-        bool inactive;
+        bool active;
         bool repariable;
         bool beingRepaired;
         bool validDestNum;
@@ -54,8 +54,8 @@ class INET_API AODVRouteData : public cObject
         void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
         void setLastUsed(const simtime_t& lastUsed) { this->lastUsed = lastUsed; }
         const simtime_t& getLastUsed() const { return lastUsed; }
-        bool isInactive() const { return inactive; }
-        void setIsInactive(bool inactive) { this->inactive = inactive; }
+        bool isActive() const { return active; }
+        void setIsActive(bool active) { this->active = active; }
 };
 
 #endif

@@ -120,7 +120,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
             // valid route to the destination expires or is marked as invalid.
 
             EV_INFO << (isValid ? "Invalid" : "Missing") << " route for source " << sourceAddr << " with destination " << destAddr << endl;
-            //delayDatagram(datagram);
+            // TODO: delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr))
             {
@@ -403,7 +403,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         {
             // (iii) the sequence numbers are the same, but the route is
             //       marked as inactive, or
-            if (destSeqNum == routeData->getDestSeqNum() && routeData->isInactive())
+            if (destSeqNum == routeData->getDestSeqNum() && !routeData->isActive())
             {
                 updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, false, simTime() + lifeTime);
             }
@@ -461,7 +461,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         AODVRouteData * forwardProtocolData = new AODVRouteData();
 
         forwardProtocolData->setHasValidDestNum(true);
-        forwardProtocolData->setIsInactive(false);
+        forwardProtocolData->setIsActive(true);
         forwardProtocolData->setLifeTime(simTime() + lifeTime);
         forwardProtocolData->setDestSeqNum(destSeqNum);
 
@@ -478,7 +478,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     // TODO: precursor list
 }
 
-void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isInactive, simtime_t lifeTime)
+void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime)
 {
     EV_DETAIL << "Updating the Routing Table with ..." << endl;
     route->setNextHop(nextHop);
@@ -489,7 +489,7 @@ void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, uns
 
     routingData->setLifeTime(lifeTime);
     routingData->setDestSeqNum(destSeqNum);
-    routingData->setIsInactive(isInactive);
+    routingData->setIsActive(isActive);
     routingData->setHasValidDestNum(hasValidDestNum);
 }
 
@@ -599,7 +599,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         AODVRouteData * previousHopProtocolData = new AODVRouteData();
 
         previousHopProtocolData->setHasValidDestNum(false);
-        previousHopProtocolData->setIsInactive(false);
+        previousHopProtocolData->setIsActive(true);
         previousHopProtocolData->setLifeTime(simTime() + ACTIVE_ROUTE_TIMEOUT);
 
         previousHopRoute->setDestination(sourceAddr);
@@ -614,7 +614,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     else
     {
         AODVRouteData * previousHopProtocolData = dynamic_cast<AODVRouteData *>(previousHopRoute->getProtocolData());
-        updateRoutingTable(previousHopRoute,sourceAddr,1,false,0,previousHopProtocolData->isInactive(),simTime() + ACTIVE_ROUTE_TIMEOUT);
+        updateRoutingTable(previousHopRoute,sourceAddr,1,false,0,previousHopProtocolData->isActive(),simTime() + ACTIVE_ROUTE_TIMEOUT);
     }
 
     // then checks to determine whether it has received a RREQ with the same
@@ -653,7 +653,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
     // check (i) - (ii)
     if (rreq->getDestAddr() == getSelfIPAddress() ||
-        (destRouteData && !destRouteData->isInactive() && destRouteData->hasValidDestNum() && destRouteData->getDestSeqNum() >= rreq->getDestSeqNum()))
+        (destRouteData && destRouteData->isActive() && destRouteData->hasValidDestNum() && destRouteData->getDestSeqNum() >= rreq->getDestSeqNum()))
     {
 
         // create RREP
@@ -723,7 +723,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         AODVRouteData * forwardProtocolData = new AODVRouteData();
 
         forwardProtocolData->setHasValidDestNum(true);
-        forwardProtocolData->setIsInactive(false);
+        forwardProtocolData->setIsActive(true);
         forwardProtocolData->setLifeTime(newLifeTime);
         forwardProtocolData->setDestSeqNum(newDestSeqNum);
 
@@ -743,15 +743,15 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
         if (destSeqNum > reverseRouteData->getDestSeqNum())
         {
-            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isInactive(),newLifeTime);
+            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isActive(),newLifeTime);
         }
         else if(destSeqNum == reverseRouteData->getDestSeqNum() && hopCount + 1 < (unsigned int) reverseRoute->getMetric())
         {
-            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isInactive(),newLifeTime);
+            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isActive(),newLifeTime);
         }
         else if(!reverseRouteData->hasValidDestNum())
         {
-            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isInactive(),newLifeTime);
+            updateRoutingTable(reverseRoute,sourceAddr,hopCount,true,newDestSeqNum,reverseRouteData->isActive(),newLifeTime);
         }
 
     }
@@ -772,7 +772,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (destRouteData && destRouteData->isInactive()) // (!)
+    if (destRouteData && !destRouteData->isActive()) // (!)
         rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
 
     if (timeToLive > 1)
