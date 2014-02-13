@@ -38,11 +38,11 @@ class INET_API PIMDM : public PIMBase, protected cListener
 {
     private:
         // per (S,G) state
-        struct SourceGroupState;
+        struct Route;
 
         struct Interface
         {
-            SourceGroupState *owner;
+            Route *owner;
             InterfaceEntry *ie;
 
             // assert winner state
@@ -52,7 +52,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             AssertMetric winnerMetric;
             IPv4Address winnerAddress;
 
-            Interface(SourceGroupState *owner, InterfaceEntry *ie)
+            Interface(Route *owner, InterfaceEntry *ie)
                 : owner(owner), ie(ie),
                   assertState(NO_ASSERT_INFO), assertTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
@@ -86,7 +86,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             cMessage* stateRefreshTimer; // scheduled in ORIGINATOR state for sending the next StateRefresh message
             unsigned short maxTtlSeen;
 
-            UpstreamInterface(SourceGroupState *owner, InterfaceEntry *ie, IPv4Address neighbor, bool isSourceDirectlyConnected)
+            UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address neighbor, bool isSourceDirectlyConnected)
                 : Interface(owner, ie), nextHop(neighbor), isSourceDirectlyConnected(isSourceDirectlyConnected),
                   graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
                   originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
@@ -120,7 +120,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             cMessage *pruneTimer; // scheduled when entering into PRUNED state, when expires the interface goes to NO_INFO (forwarding) state
             cMessage *prunePendingTimer; // scheduled when a Prune is received, when expires the interface goes to PRUNED state
 
-            DownstreamInterface(SourceGroupState *owner, InterfaceEntry *ie)
+            DownstreamInterface(Route *owner, InterfaceEntry *ie)
                 : Interface(owner, ie),
                   pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
@@ -132,7 +132,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             void stopPrunePendingTimer();
         };
 
-        struct SourceGroupState
+        struct Route
         {
             PIMDM *owner;
             IPv4Address source;
@@ -141,17 +141,17 @@ class INET_API PIMDM : public PIMBase, protected cListener
             UpstreamInterface *upstreamInterface;
             std::vector<DownstreamInterface*> downstreamInterfaces;
 
-            SourceGroupState() : owner(NULL), upstreamInterface(NULL) {}
-            ~SourceGroupState();
+            Route() : owner(NULL), upstreamInterface(NULL) {}
+            ~Route();
             DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
             DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
             DownstreamInterface *removeDownstreamInterface(int interfaceId);
             bool isOilistNull();
         };
 
-        friend std::ostream &operator<<(std::ostream &out, const SourceGroupState *sgState);
+        friend std::ostream &operator<<(std::ostream &out, const Route *route);
 
-        typedef std::map<SourceAndGroup, SourceGroupState> SGStateMap;
+        typedef std::map<SourceAndGroup, Route> RoutingTable;
 
         // for updating the forwarding state of the route when the state of the downstream interface changes
         class PIMDMOutInterface : public IMulticastRoute::OutInterface
@@ -176,7 +176,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         double assertTime;
 
         // state
-        SGStateMap sgStates;
+        RoutingTable routes;
 
 	public:
         PIMDM() : PIMBase(PIMInterface::DenseMode) {}
@@ -209,21 +209,21 @@ class INET_API PIMDM : public PIMBase, protected cListener
 	    void processStateRefreshPacket(PIMStateRefresh *pkt);
 	    void processAssertPacket(PIMAssert *pkt);
 
-        void processPrune(SourceGroupState *sgState, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
-        void processJoin(SourceGroupState *sgState, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
+        void processPrune(Route *route, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
+        void processJoin(Route *route, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
         void processAssert(Interface *downstream, AssertMetric receivedMetric, IPv4Address senderAddress, int stateRefreshInterval);
 
         // process olist changes
-        void processOlistEmptyEvent(SourceGroupState *sgState);
-        void processOlistNonEmptyEvent(SourceGroupState *sgState);
+        void processOlistEmptyEvent(Route *route);
+        void processOlistNonEmptyEvent(Route *route);
 
 	    // create and send PIM packets
 	    void sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId);
 	    void sendJoinPacket(IPv4Address nextHop, IPv4Address source, IPv4Address group, int interfaceId);
 	    void sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int intId);
 	    void sendGraftAckPacket(PIMGraft *msg);
-	    void sendStateRefreshPacket(IPv4Address originator, SourceGroupState *sgState, DownstreamInterface *downstream, unsigned short ttl);
+	    void sendStateRefreshPacket(IPv4Address originator, Route *route, DownstreamInterface *downstream, unsigned short ttl);
 	    void sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie);
         void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId);
 
@@ -231,9 +231,9 @@ class INET_API PIMDM : public PIMBase, protected cListener
         void restartTimer(cMessage *timer, double interval);
         void cancelAndDeleteTimer(cMessage *&timer);
 	    PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
-        IPv4MulticastRoute *getRouteFor(IPv4Address group, IPv4Address source);
-        SourceGroupState *getSourceGroupState(IPv4Address source, IPv4Address group);
-        void deleteSourceGroupState(IPv4Address source, IPv4Address group);
+        IPv4MulticastRoute *findIPv4MulticastRoute(IPv4Address group, IPv4Address source);
+        Route *findRoute(IPv4Address source, IPv4Address group);
+        void deleteRoute(IPv4Address source, IPv4Address group);
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
