@@ -801,13 +801,65 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
         if (ieee80211Frame)
         {
             INetworkDatagram * datagram = dynamic_cast<INetworkDatagram *>(ieee80211Frame->getEncapsulatedPacket());
-            const Address& destination = datagram->getDestinationAddress();
-            if (destination.getAddressType() == addressType)
+            const Address& unreachableAddr = datagram->getDestinationAddress();
+            if (unreachableAddr.getAddressType() == addressType)
             {
-                // send RERR
+                // A node initiates processing for a RERR message in three situations:
+                //
+                //   (i)     if it detects a link break for the next hop of an active
+                //           route in its routing table while transmitting data (and
+                //           route repair, if attempted, was unsuccessful), or
+
+                sendLinkBreakRERR(unreachableAddr);
+
             }
         }
     }
+}
+
+void AODVRouting::sendLinkBreakRERR(const Address& unreachableAddr)
+{
+    // For case (i), the node first makes a list of unreachable destinations
+    // consisting of the unreachable neighbor and any additional
+    // destinations (or subnets, see section 7) in the local routing table
+    // that use the unreachable neighbor as the next hop.
+
+    // Just before transmitting the RERR, certain updates are made on the
+    // routing table that may affect the destination sequence numbers for
+    // the unreachable destinations.  For each one of these destinations,
+    // the corresponding routing table entry is updated as follows:
+    //
+    // 1. The destination sequence number of this routing entry, if it
+    //    exists and is valid, is incremented for cases (i) and (ii) above,
+    //    and copied from the incoming RERR in case (iii) above.
+    //
+    // 2. The entry is invalidated by marking the route entry as invalid
+    //
+    // 3. The Lifetime field is updated to current time plus DELETE_PERIOD.
+    //    Before this time, the entry SHOULD NOT be deleted.
+
+    std::vector<Address> unreachableNeighbors;
+    unreachableNeighbors.push_back(unreachableAddr);
+
+    for (int i = 0; i < routingTable->getNumRoutes(); i++)
+    {
+        IRoute * route = routingTable->getRoute(i);
+        if (route->getNextHopAsGeneric() == unreachableAddr)
+        {
+            AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
+
+            if (routeData->hasValidDestNum())
+                routeData->setDestSeqNum(routeData->getDestSeqNum() + 1);
+
+            EV_DETAIL << "Marking route to " << route->getDestinationAsGeneric() << " as inactive" << endl;
+
+            routeData->setIsActive(false);
+            routeData->setLifeTime(simTime() + DELETE_PERIOD);
+            unreachableNeighbors.push_back(route->getDestinationAsGeneric());
+        }
+    }
+
+    // TODO: send RERR to unreachableNeighbors
 }
 
 AODVRouting::~AODVRouting()

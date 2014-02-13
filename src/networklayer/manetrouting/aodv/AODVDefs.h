@@ -21,7 +21,7 @@
 #define ACTIVE_ROUTE_TIMEOUT     3000
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
-// #define DELETE_PERIOD
+#define DELETE_PERIOD            1 // FIXME: it is just a temporary value
 #define HELLO_INTERVAL           1000
 #define LOCAL_ADD_TTL            2
 #define MAX_REPAIR_TTL           0.3 * NET_DIAMETER
