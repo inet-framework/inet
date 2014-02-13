@@ -354,21 +354,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     if (!previousHopRoute)
     {
         // create without valid sequence number
-        previousHopRoute = routingTable->createRoute();
-        AODVRouteData * previousHopProtocolData = new AODVRouteData();
-
-        previousHopProtocolData->setHasValidDestNum(false);
-        previousHopProtocolData->setIsActive(true);
-        previousHopProtocolData->setLifeTime(simTime() + ACTIVE_ROUTE_TIMEOUT);
-
-        previousHopRoute->setDestination(sourceAddr);
-        previousHopRoute->setSourceType(IRoute::AODV);
-        previousHopRoute->setSource(this);
-        previousHopRoute->setProtocolData(previousHopProtocolData);
-        previousHopRoute->setMetric(1);
-        previousHopRoute->setNextHop(sourceAddr);
-
-        routingTable->addRoute(previousHopRoute);
+        createRoute(sourceAddr,sourceAddr,1,false,-1,true,simTime() + ACTIVE_ROUTE_TIMEOUT);
     }
     else
     {
@@ -486,22 +472,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     }
     else // create forward route for the destination: this path will be used by the originator to send data packets
     {
-        IRoute * forwardRoute = routingTable->createRoute();
-        AODVRouteData * forwardProtocolData = new AODVRouteData();
-
-        forwardProtocolData->setHasValidDestNum(true);
-        forwardProtocolData->setIsActive(true);
-        forwardProtocolData->setLifeTime(simTime() + lifeTime);
-        forwardProtocolData->setDestSeqNum(destSeqNum);
-
-        forwardRoute->setDestination(rrep->getDestAddr());
-        forwardRoute->setSourceType(IRoute::AODV);
-        forwardRoute->setSource(this);
-        forwardRoute->setProtocolData(forwardProtocolData);
-        forwardRoute->setMetric(newHopCount);
-        forwardRoute->setNextHop(sourceAddr); // "which is indicated by the source IP address field in the IP header"
-
-        routingTable->addRoute(forwardRoute);
+        createRoute(rrep->getDestAddr(),sourceAddr,newHopCount,true,destSeqNum,true,simTime() + lifeTime);
         // TODO:
     }
     // TODO: precursor list
@@ -624,21 +595,8 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     if (!previousHopRoute)
     {
         // create without valid sequence number
-        previousHopRoute = routingTable->createRoute();
-        AODVRouteData * previousHopProtocolData = new AODVRouteData();
 
-        previousHopProtocolData->setHasValidDestNum(false);
-        previousHopProtocolData->setIsActive(true);
-        previousHopProtocolData->setLifeTime(simTime() + ACTIVE_ROUTE_TIMEOUT);
-
-        previousHopRoute->setDestination(sourceAddr);
-        previousHopRoute->setSourceType(IRoute::AODV);
-        previousHopRoute->setSource(this);
-        previousHopRoute->setProtocolData(previousHopProtocolData);
-        previousHopRoute->setMetric(1);
-        previousHopRoute->setNextHop(sourceAddr);
-
-        routingTable->addRoute(previousHopRoute);
+        createRoute(sourceAddr,sourceAddr,1,false,-1,true,simTime() + ACTIVE_ROUTE_TIMEOUT);
     }
     else
     {
@@ -746,24 +704,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     {
         // This reverse route will be needed if the node receives a RREP back to the
         // node that originated the RREQ (identified by the Originator IP Address).
-
-        // TODO: factor this out
-        IRoute * forwardRoute = routingTable->createRoute();
-        AODVRouteData * forwardProtocolData = new AODVRouteData();
-
-        forwardProtocolData->setHasValidDestNum(true);
-        forwardProtocolData->setIsActive(true);
-        forwardProtocolData->setLifeTime(newLifeTime);
-        forwardProtocolData->setDestSeqNum(newDestSeqNum);
-
-        forwardRoute->setDestination(rreq->getOriginatorAddr());
-        forwardRoute->setSourceType(IRoute::AODV);
-        forwardRoute->setSource(this);
-        forwardRoute->setProtocolData(forwardProtocolData);
-        forwardRoute->setMetric(hopCount);
-        forwardRoute->setNextHop(sourceAddr); // "which is indicated by the source IP address field in the IP header"
-
-        routingTable->addRoute(forwardRoute);
+        createRoute(rreq->getOriginatorAddr(),sourceAddr,hopCount,true,newDestSeqNum,true,newLifeTime);
     }
     else
     {
@@ -806,6 +747,28 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
     if (timeToLive > 1)
         sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive - 1); // TODO: multiple interfaces
+}
+
+void AODVRouting::createRoute(const Address& destAddr, const Address& nextHop,
+        unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum,
+        bool isActive, simtime_t lifeTime)
+{
+    IRoute * newRoute = routingTable->createRoute();
+    AODVRouteData * newProtocolData = new AODVRouteData();
+
+    newProtocolData->setHasValidDestNum(hasValidDestNum);
+    newProtocolData->setIsActive(isActive);
+    newProtocolData->setLifeTime(lifeTime);
+    newProtocolData->setDestSeqNum(destSeqNum);
+
+    newRoute->setDestination(destAddr);
+    newRoute->setSourceType(IRoute::AODV);
+    newRoute->setSource(this);
+    newRoute->setProtocolData(newProtocolData);
+    newRoute->setMetric(hopCount);
+    newRoute->setNextHop(nextHop);
+
+    routingTable->addRoute(newRoute);
 }
 
 AODVRouting::~AODVRouting()

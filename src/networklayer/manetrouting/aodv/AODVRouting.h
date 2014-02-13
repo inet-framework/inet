@@ -105,7 +105,8 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void sendRREQ(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void sendRERR();
         void sendRREP();
-        void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isInactive, simtime_t lifeTime);
+        void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
+        void createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 
         AODVRREQ * createRREQ(const Address& destAddr, unsigned int timeToLive);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr);
