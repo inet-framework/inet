@@ -184,9 +184,9 @@ void AODVRouting::delayDatagram(INetworkDatagram* datagram)
 
 }
 
-void AODVRouting::sendRREQ(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
+void AODVRouting::sendRREQ(AODVRREP * rreq, const Address& destAddr, unsigned int timeToLive)
 {
-    sendAODVPacket(rrep,destAddr,timeToLive);
+    sendAODVPacket(rreq,destAddr,timeToLive);
 }
 
 void AODVRouting::sendRERR()
@@ -194,9 +194,15 @@ void AODVRouting::sendRERR()
 
 }
 
-void AODVRouting::sendRREP()
+void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
 {
+    // When any node transmits a RREP, the precursor list for the
+    // corresponding destination node is updated by adding to it
+    // the next hop node to which the RREP is forwarded.
 
+    IRoute * destNode = routingTable->findBestMatchingRoute(destAddr);
+    AODVRouteData * destRouteData = dynamic_cast<AODVRouteData *>(destNode->getProtocolData());
+    destRouteData->addPrecursor(destNode->getNextHopAsGeneric());
 }
 
 /*
@@ -375,13 +381,14 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     // already exist.
 
     IRoute * route = routingTable->findBestMatchingRoute(rrep->getDestAddr());
-    AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
+    AODVRouteData * routeData = NULL;
     simtime_t lifeTime = rrep->getLifeTime();
     unsigned int destSeqNum = rrep->getDestSeqNum();
 
     if (route) // already exists
     {
 
+        routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
         // Upon comparison, the existing entry is updated only in the following circumstances:
 
         // (i) the sequence number in the routing table is marked as
@@ -433,55 +440,61 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
                 updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, false, simTime() + lifeTime);
             }
         }
-
-        // If the current node is not the node indicated by the Originator IP
-        // Address in the RREP message AND a forward route has been created or
-        // updated as described above, the node consults its route table entry
-        // for the originating node to determine the next hop for the RREP
-        // packet, and then forwards the RREP towards the originator using the
-        // information in that route table entry.
-
-        if (getSelfIPAddress() != rrep->getOriginatorAddr())
-        {
-            // If a node forwards a RREP over a link that is likely to have errors or
-            // be unidirectional, the node SHOULD set the 'A' flag to require that the
-            // recipient of the RREP acknowledge receipt of the RREP by sending a RREP-ACK
-            // message back (see section 6.8).
-
-            IRoute * forwardRREPRoute = routingTable->findBestMatchingRoute(rrep->getOriginatorAddr());
-            if (forwardRREPRoute)
-            {
-
-                if (rrep->getAckRequiredFlag())
-                {
-                    // TODO: send RREP-ACK
-                    rrep->setAckRequiredFlag(false);
-                }
-
-                AODVRouteData * forwardRREPRouteData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
-
-                // Also, at each node the (reverse) route used to forward a
-                // RREP has its lifetime changed to be the maximum of (existing-
-                // lifetime, (current time + ACTIVE_ROUTE_TIMEOUT).
-
-                simtime_t existingLifeTime = forwardRREPRouteData->getLifeTime();
-                forwardRREPRouteData->setLifeTime(std::max(simTime() + ACTIVE_ROUTE_TIMEOUT, existingLifeTime));
-
-                // TODO: send
-            }
-            else
-                EV_ERROR << "Reverse route doesn't exist. Dropping the RREP message" << endl;
-
-        }
     }
     else // create forward route for the destination: this path will be used by the originator to send data packets
     {
-        createRoute(rrep->getDestAddr(),sourceAddr,newHopCount,true,destSeqNum,true,simTime() + lifeTime);
-        // TODO:
+        route = createRoute(rrep->getDestAddr(),sourceAddr,newHopCount,true,destSeqNum,true,simTime() + lifeTime);
+        routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
     }
-    // TODO: precursor list
-}
 
+    // If the current node is not the node indicated by the Originator IP
+    // Address in the RREP message AND a forward route has been created or
+    // updated as described above, the node consults its route table entry
+    // for the originating node to determine the next hop for the RREP
+    // packet, and then forwards the RREP towards the originator using the
+    // information in that route table entry.
+
+    if (getSelfIPAddress() != rrep->getOriginatorAddr())
+    {
+        // If a node forwards a RREP over a link that is likely to have errors or
+        // be unidirectional, the node SHOULD set the 'A' flag to require that the
+        // recipient of the RREP acknowledge receipt of the RREP by sending a RREP-ACK
+        // message back (see section 6.8).
+
+        IRoute * forwardRREPRoute = routingTable->findBestMatchingRoute(rrep->getOriginatorAddr());
+        if (forwardRREPRoute)
+        {
+
+            if (rrep->getAckRequiredFlag())
+            {
+                // TODO: send RREP-ACK
+                rrep->setAckRequiredFlag(false);
+            }
+
+            AODVRouteData * forwardRREPRouteData = dynamic_cast<AODVRouteData *>(forwardRREPRoute->getProtocolData());
+
+            // Also, at each node the (reverse) route used to forward a
+            // RREP has its lifetime changed to be the maximum of (existing-
+            // lifetime, (current time + ACTIVE_ROUTE_TIMEOUT).
+
+            simtime_t existingLifeTime = forwardRREPRouteData->getLifeTime();
+            forwardRREPRouteData->setLifeTime(std::max(simTime() + ACTIVE_ROUTE_TIMEOUT, existingLifeTime));
+
+
+            // Finally, the precursor list for the next hop towards the
+            // destination is updated to contain the next hop towards the
+            // source.
+
+            routeData->addPrecursor(forwardRREPRoute->getNextHopAsGeneric());
+
+            // TODO: send
+        }
+        else
+            EV_ERROR << "Reverse route doesn't exist. Dropping the RREP message" << endl;
+
+    }
+
+}
 void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime)
 {
     EV_DETAIL << "Updating the Routing Table with ..." << endl;
@@ -753,7 +766,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive - 1); // TODO: multiple interfaces
 }
 
-void AODVRouting::createRoute(const Address& destAddr, const Address& nextHop,
+IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHop,
         unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum,
         bool isActive, simtime_t lifeTime)
 {
@@ -773,6 +786,8 @@ void AODVRouting::createRoute(const Address& destAddr, const Address& nextHop,
     newRoute->setNextHop(nextHop);
 
     routingTable->addRoute(newRoute);
+
+    return newRoute;
 }
 
 AODVRouting::~AODVRouting()

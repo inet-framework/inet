@@ -102,11 +102,11 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         Address getSelfIPAddress();
         void delayDatagram(INetworkDatagram * datagram);
-        void sendRREQ(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
+        void sendRREQ(AODVRREP * rreq, const Address& destAddr, unsigned int timeToLive);
         void sendRERR();
-        void sendRREP();
+        void sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
-        void createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
+        IRoute * createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 
         AODVRREQ * createRREQ(const Address& destAddr, unsigned int timeToLive);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr);
