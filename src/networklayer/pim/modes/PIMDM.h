@@ -40,26 +40,6 @@ class INET_API PIMDM : public PIMBase, protected cListener
         // per (S,G) state
         struct Route;
 
-        struct Interface
-        {
-            Route *owner;
-            InterfaceEntry *ie;
-
-            // assert winner state
-            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
-            AssertState assertState;
-            cMessage *assertTimer;
-            AssertMetric winnerMetric;
-            IPv4Address winnerAddress;
-
-            Interface(Route *owner, InterfaceEntry *ie)
-                : owner(owner), ie(ie),
-                  assertState(NO_ASSERT_INFO), assertTimer(NULL)
-                { ASSERT(owner), ASSERT(ie);}
-            virtual ~Interface();
-            void startAssertTimer(double assertTime);
-        };
-
         struct UpstreamInterface : public Interface
         {
             enum GraftPruneState
@@ -92,8 +72,10 @@ class INET_API PIMDM : public PIMBase, protected cListener
                   originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
                 { ASSERT(owner); ASSERT(ie); }
             virtual ~UpstreamInterface();
+            Route *route() const { return check_and_cast<Route*>(owner); }
+            PIMDM *pimdm() const { return check_and_cast<PIMDM*>(owner->owner); }
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerAddress : nextHop; }
+            IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
 
             void startGraftRetryTimer();
             void startOverrideTimer();
@@ -101,7 +83,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
             void startStateRefreshTimer();
             void startPruneLimitTimer() { lastPruneSentTime = simTime(); }
             void stopPruneLimitTimer() { lastPruneSentTime = 0; }
-            bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + owner->owner->pruneLimitInterval; }
+            bool isPruneLimitTimerRunning() { return lastPruneSentTime > 0.0 && simTime() < lastPruneSentTime + pimdm()->pruneLimitInterval; }
         };
 
         struct DownstreamInterface : public Interface
@@ -125,6 +107,8 @@ class INET_API PIMDM : public PIMBase, protected cListener
                   pruneState(NO_INFO), pruneTimer(NULL), prunePendingTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             ~DownstreamInterface();
+            Route *route() const { return check_and_cast<Route*>(owner); }
+            PIMDM *pimdm() const { return check_and_cast<PIMDM*>(owner->owner); }
             bool isInOlist() const;
             void startPruneTimer(double holdTime);
             void stopPruneTimer();
@@ -132,17 +116,14 @@ class INET_API PIMDM : public PIMBase, protected cListener
             void stopPrunePendingTimer();
         };
 
-        struct Route
+        struct Route : public RouteEntry
         {
-            PIMDM *owner;
-            IPv4Address source;
-            IPv4Address group;
-            AssertMetric metric;           // metric of the unicast route to the source
             UpstreamInterface *upstreamInterface;
             std::vector<DownstreamInterface*> downstreamInterfaces;
 
-            Route() : owner(NULL), upstreamInterface(NULL) {}
-            ~Route();
+            Route(PIMDM *owner, IPv4Address source, IPv4Address group)
+                : RouteEntry(owner, source, group), upstreamInterface(NULL) {}
+            virtual ~Route();
             DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId) const;
             DownstreamInterface *createDownstreamInterface(InterfaceEntry *ie);
             DownstreamInterface *removeDownstreamInterface(int interfaceId);
@@ -213,7 +194,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
         void processPrune(Route *route, int intId, int holdTime, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processJoin(Route *route, int intId, int numRpfNeighbors, IPv4Address upstreamNeighborField);
         void processGraft(IPv4Address source, IPv4Address group, IPv4Address sender, int intId);
-        void processAssert(Interface *downstream, AssertMetric receivedMetric, IPv4Address senderAddress, int stateRefreshInterval);
+        void processAssert(Interface *downstream, AssertMetric receivedMetric, int stateRefreshInterval);
 
         // process olist changes
         void processOlistEmptyEvent(Route *route);

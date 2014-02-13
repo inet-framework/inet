@@ -27,10 +27,10 @@ Define_Module(PIMSM);
 typedef IPv4MulticastRoute::OutInterface OutInterface;
 
 PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
-    : owner(owner), type(type), source(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
+    : RouteEntry(owner, origin, group), type(type), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS),
       rpRoute(NULL), gRoute(NULL), sgrptRoute(NULL),
       sequencenumber(0), keepAliveTimer(NULL), joinTimer(NULL), registerState(RS_NO_INFO), registerStopTimer(NULL),
-      upstreamInterface(NULL), joinDesired(false)
+      upstreamInterface(NULL)
 {
 }
 
@@ -50,7 +50,7 @@ PIMSM::DownstreamInterface *PIMSM::Route::addNewDownstreamInterface(InterfaceEnt
     //downstream->startExpiryTimer(holdTime);
     addDownstreamInterface(downstream);
 
-    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(source, group);
+    IPv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
     ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
 
     return downstream;
@@ -105,16 +105,20 @@ bool PIMSM::Route::isInheritedOlistNull()
 
 void PIMSM::Route::updateJoinDesired()
 {
-    bool oldValue = joinDesired;
+    bool oldValue = joinDesired();
+    bool newValue = false;
     if (type == RP)
-        joinDesired = !isImmediateOlistNull();
+        newValue = !isImmediateOlistNull();
     if (type == G)
-        joinDesired = !isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != NULL */;
+        newValue = !isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != NULL */;
     else if (type == SG)
-        joinDesired = !isImmediateOlistNull() || (keepAliveTimer && isInheritedOlistNull());
+        newValue = !isImmediateOlistNull() || (keepAliveTimer && isInheritedOlistNull());
 
-    if (joinDesired != oldValue)
-        owner->joinDesiredChanged(this);
+    if (newValue != oldValue)
+    {
+        setFlag(JOIN_DESIRED, newValue);
+        pimsm()->joinDesiredChanged(this);
+    }
 }
 
 PIMSM::~PIMSM()
@@ -363,8 +367,8 @@ void PIMSM::processExpiryTimer(cMessage *timer)
 {
     EV << "pimSM::processExpiryTimer: " << endl;
 
-    Interface *interface = static_cast<Interface*>(timer->getContextPointer());
-    Route *route = interface->owner;
+    PimsmInterface *interface = static_cast<PimsmInterface*>(timer->getContextPointer());
+    Route *route = interface->route();
 
     if (interface != route->upstreamInterface)
     {
@@ -455,7 +459,7 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
     DownstreamInterface *downstream = static_cast<DownstreamInterface*>(timer->getContextPointer());
     ASSERT(timer == downstream->prunePendingTimer);
     ASSERT(downstream->joinPruneState == DownstreamInterface::PRUNE_PENDING);
-    Route *route = downstream->owner;
+    Route *route = downstream->route();
 
     if (route->type == G || route->type == SG)
     {
@@ -506,11 +510,11 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
 
 void PIMSM::processAssertTimer(cMessage *timer)
 {
-    Interface *interfaceData = static_cast<Interface*>(timer->getContextPointer());
+    PimsmInterface *interfaceData = static_cast<PimsmInterface*>(timer->getContextPointer());
     ASSERT(timer == interfaceData->assertTimer);
     ASSERT(interfaceData->assertState != Interface::NO_ASSERT_INFO);
 
-    Route *route = interfaceData->owner;
+    Route *route = interfaceData->route();
     if (route->type == SG || route->type == G)
     {
         //
@@ -1143,9 +1147,9 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
         Route *routeSG = findRouteSG(source, group);
         if (routeSG)
         {
-            Interface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-                                               static_cast<Interface*>(routeSG->upstreamInterface) :
-                                               static_cast<Interface*>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+            PimsmInterface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                               static_cast<PimsmInterface*>(routeSG->upstreamInterface) :
+                                               static_cast<PimsmInterface*>(routeSG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
 
             Interface::AssertState stateBefore = incomingInterface->assertState;
             processAssertSG(incomingInterface, receivedMetric);
@@ -1162,17 +1166,17 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 
     // process (*,G) asserts and (S,G) asserts for which there is no assert state in (S,G) routes
     Route *routeG = findRouteG(group);
-    Interface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
-                                       static_cast<Interface*>(routeG->upstreamInterface) :
-                                       static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
+    PimsmInterface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
+                                       static_cast<PimsmInterface*>(routeG->upstreamInterface) :
+                                       static_cast<PimsmInterface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
     processAssertG(incomingInterface, receivedMetric);
 
     delete pkt;
 }
 
-void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMetric)
+void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &receivedMetric)
 {
-    Route *routeSG = interface->owner;
+    Route *routeSG = interface->route();
     AssertMetric myMetric = interface->couldAssert ? // XXX check routeG metric too
                                 routeSG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
                                 AssertMetric::INFINITE;
@@ -1289,9 +1293,9 @@ void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMe
     }
 }
 
-void PIMSM::processAssertG(Interface *interface, const AssertMetric &receivedMetric)
+void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receivedMetric)
 {
-    Route *routeG = interface->owner;
+    Route *routeG = interface->route();
     AssertMetric myMetric = interface->couldAssert ?
                                 routeG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
                                 AssertMetric::INFINITE;
@@ -1725,7 +1729,7 @@ void PIMSM::joinDesiredChanged(Route *route)
     {
         Route *routeG = route;
 
-        if (routeG->isFlagSet(Route::PRUNED) && routeG->joinDesired)
+        if (routeG->isFlagSet(Route::PRUNED) && routeG->joinDesired())
         {
             //
             // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> TRUE
@@ -1737,7 +1741,7 @@ void PIMSM::joinDesiredChanged(Route *route)
                 routeG->startJoinTimer();
             }
         }
-        else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired)
+        else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired())
         {
             //
             // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> FALSE
@@ -1752,7 +1756,7 @@ void PIMSM::joinDesiredChanged(Route *route)
     {
         Route *routeSG = route;
 
-        if (routeSG->isFlagSet(Route::PRUNED) && routeSG->joinDesired)
+        if (routeSG->isFlagSet(Route::PRUNED) && routeSG->joinDesired())
         {
             //
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
@@ -1764,7 +1768,7 @@ void PIMSM::joinDesiredChanged(Route *route)
                 routeSG->startJoinTimer();
             }
         }
-        else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired)
+        else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired())
         {
             //
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> FALSE
@@ -2160,7 +2164,7 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
 {
     // remove corresponding out interface from the IPv4 route,
     // because it refers to the downstream interface to be deleted
-    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(source, group);
+    IPv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
     ipv4Route->removeOutInterface(i);
 
     DownstreamInterface *outInterface = downstreamInterfaces[i];
@@ -2168,40 +2172,22 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
     delete outInterface;
 }
 
-PIMSM::Interface::Interface(Route *owner, InterfaceEntry *ie)
-    : owner(owner), ie(ie), expiryTimer(NULL), assertState(NO_ASSERT_INFO), assertTimer(NULL),
-      couldAssert(false), assertTrackingDesired(false)
+PIMSM::PimsmInterface::PimsmInterface(Route *owner, InterfaceEntry *ie)
+    : Interface(owner, ie), expiryTimer(NULL), couldAssert(false), assertTrackingDesired(false)
 {
-    ASSERT(owner);
-    ASSERT(ie);
 }
 
-PIMSM::Interface::~Interface()
+PIMSM::PimsmInterface::~PimsmInterface()
 {
     owner->owner->cancelAndDelete(expiryTimer);
     owner->owner->cancelAndDelete(assertTimer);
 }
 
-void PIMSM::Interface::startExpiryTimer(double holdTime)
+void PIMSM::PimsmInterface::startExpiryTimer(double holdTime)
 {
     expiryTimer = new cMessage("PIMExpiryTimer", ExpiryTimer);
     expiryTimer->setContextPointer(this);
     owner->owner->scheduleAt(simTime() + holdTime, expiryTimer);
-}
-
-void PIMSM::Interface::startAssertTimer(double assertTime)
-{
-    ASSERT(assertTimer == NULL);
-    assertTimer = new cMessage("PIMAssertTimer", AssertTimer);
-    assertTimer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + assertTime, assertTimer);
-}
-
-void PIMSM::Interface::deleteAssertInfo()
-{
-    assertState = Interface::NO_ASSERT_INFO;
-    winnerMetric = AssertMetric::INFINITE;
-    owner->owner->cancelAndDeleteTimer(assertTimer);
 }
 
 PIMSM::DownstreamInterface::~DownstreamInterface()
@@ -2219,7 +2205,7 @@ void PIMSM::DownstreamInterface::startPrunePendingTimer()
     ASSERT(!prunePendingTimer);
     prunePendingTimer = new cMessage("PIMPrunePendingTimer", PrunePendingTimer);
     prunePendingTimer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + owner->owner->joinPruneOverrideInterval(), prunePendingTimer);
+    pimsm()->scheduleAt(simTime() + pimsm()->joinPruneOverrideInterval(), prunePendingTimer);
 }
 
 void PIMSM::Route::startKeepAliveTimer()
@@ -2227,7 +2213,7 @@ void PIMSM::Route::startKeepAliveTimer()
     ASSERT(this->type == SG);
     keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
     keepAliveTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + owner->keepAlivePeriod, keepAliveTimer);
+    pimsm()->scheduleAt(simTime() + pimsm()->keepAlivePeriod, keepAliveTimer);
 }
 
 void PIMSM::Route::startRegisterStopTimer(double interval)
@@ -2241,6 +2227,6 @@ void PIMSM::Route::startJoinTimer()
 {
     joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
     joinTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + owner->joinPrunePeriod, joinTimer);
+    pimsm()->scheduleAt(simTime() + pimsm()->joinPrunePeriod, joinTimer);
 }
 

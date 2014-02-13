@@ -37,44 +37,35 @@ class INET_API PIMSM : public PIMBase, protected cListener
     private:
         struct Route;
 
-        struct Interface
+        struct PimsmInterface : public Interface
         {
-            Route *owner;
-            InterfaceEntry *ie;
             cMessage *expiryTimer;
-
-            // Assert state
-            enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
-            AssertState assertState;
-            cMessage *assertTimer;
-            AssertMetric winnerMetric;
 
             // Assert flags
             bool couldAssert;
             bool assertTrackingDesired;
 
-            Interface(Route *owner, InterfaceEntry *ie);
-            virtual ~Interface();
+            PimsmInterface(Route *owner, InterfaceEntry *ie);
+            virtual ~PimsmInterface();
+            Route *route() const { return check_and_cast<Route*>(owner); }
             void startExpiryTimer(double holdTime);
-            void startAssertTimer(double assertTime);
-            void deleteAssertInfo();
         };
 
         /**
          * @brief Structure of incoming interface.
          * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
          */
-        struct UpstreamInterface : public Interface
+        struct UpstreamInterface : public PimsmInterface
         {
             IPv4Address nextHop; // RPF nexthop, <unspec> at the DR in (S,G) routes
 
             UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address nextHop)
-                : Interface(owner, ie), nextHop(nextHop) {}
+                : PimsmInterface(owner, ie), nextHop(nextHop) {}
             int getInterfaceId() const { return ie->getInterfaceId(); }
             IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
         };
 
-        struct DownstreamInterface : public Interface
+        struct DownstreamInterface : public PimsmInterface
         {
             /** States of each outgoing interface. */
             enum JoinPruneState { NO_INFO, JOIN, PRUNE_PENDING };
@@ -85,8 +76,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
             bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
 
             DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
-                : Interface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL), shRegTun(show) {}
+                : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL), shRegTun(show) {}
             virtual ~DownstreamInterface();
+            PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
@@ -115,23 +107,21 @@ class INET_API PIMSM : public PIMBase, protected cListener
         };
 
         // Holds (*,G), (S,G) or (S,G,rpt) state
-        struct Route
+        struct Route : public RouteEntry
         {
-                enum Flag
+                // flags
+                enum
                 {
                     NO_FLAG      = 0x00,
                     CONNECTED    = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
                     PRUNED       = 0x02,              /**< Pruned */          // UpstreamJPState
                     REGISTER     = 0x04,              /**< Register flag*/
-                    SPT_BIT      = 0x08               /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+                    SPT_BIT      = 0x08,              /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+                    JOIN_DESIRED = 0x10
                 };
 
-                PIMSM *owner;
                 RouteType type;
-                IPv4Address source; // <unspec> in (*,G) routes
-                IPv4Address group;
                 IPv4Address rpAddr;                     /**< Randevous point */
-                int flags;
 
                 // related routes
                 Route *rpRoute;
@@ -146,9 +136,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 cMessage *keepAliveTimer;  // only for (S,G) routes
                 cMessage *joinTimer;
 
-                // our metric
-                AssertMetric metric;           // metric of the unicast route to the source (if type==SG) or RP (if type==G)
-
                 // Register state (only for (S,G) at the DR)
                 enum RegisterState { RS_NO_INFO, RS_JOIN, RS_PRUNE, RS_JOIN_PENDING };
                 RegisterState registerState;
@@ -158,20 +145,14 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 UpstreamInterface *upstreamInterface;      // may be NULL at RP and at DR
                 DownstreamInterfaceVector downstreamInterfaces; ///< Out interfaces (downstream)
 
-                // computed values
-                bool joinDesired;
-
             public:
                 Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group);
-                ~Route();
+                virtual ~Route();
+                PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner); }
 
                 void clearDownstreamInterfaces();
                 void addDownstreamInterface(DownstreamInterface *outInterface);
                 void removeDownstreamInterface(unsigned int i);
-
-                bool isFlagSet(Flag flag) const { return (flags & flag) != 0; }     /**< Returns if flag is set to entry or not*/
-                void setFlags(int flags)   { this->flags |= flags; }                /**< Add flag to ineterface */
-                void clearFlag(Flag flag)  { flags &= (~flag); }                   /**< Remove flag from ineterface */
 
                 DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie);
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
@@ -180,6 +161,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
                 bool isImmediateOlistNull();
                 bool isInheritedOlistNull();
+                bool joinDesired() const { return isFlagSet(JOIN_DESIRED); }
                 void updateJoinDesired();
 
                 void startKeepAliveTimer();
@@ -247,8 +229,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processPruneG(IPv4Address multGroup, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
         void processPruneSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
         void processPruneSGrpt(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface);
-        void processAssertSG(Interface *interface, const AssertMetric &receivedMetric);
-        void processAssertG(Interface *interface, const AssertMetric &receivedMetric);
+        void processAssertSG(PimsmInterface *interface, const AssertMetric &receivedMetric);
+        void processAssertG(PimsmInterface *interface, const AssertMetric &receivedMetric);
 
         // computed intervals
         double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
