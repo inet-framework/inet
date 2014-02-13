@@ -128,7 +128,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
                 PIMSM *owner;
                 RouteType type;
-                IPv4Address origin; // <unspec> in (*,G) routes
+                IPv4Address source; // <unspec> in (*,G) routes
                 IPv4Address group;
                 IPv4Address rpAddr;                     /**< Randevous point */
                 int flags;
@@ -187,7 +187,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 void startJoinTimer();
         };
 
-        typedef std::map<SourceAndGroup, Route*> SGStateMap;
+        typedef std::map<SourceAndGroup, Route*> RoutingTable;
 
         // parameters
         IPv4Address rpAddr;
@@ -203,7 +203,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         double assertOverrideInterval;
 
         // state
-        SGStateMap routes;
+        RoutingTable routes;
 
     private:
         // process signals
@@ -268,11 +268,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
 
         // routing table access
-        void addGRoute(Route *route);
-        void addSGRoute(Route *route);
+        void addRouteG(Route *route);
+        void addRouteSG(Route *route);
         bool removeRoute(Route *route);
-        Route *findGRoute(IPv4Address group);
-        Route *findSGRoute(IPv4Address source, IPv4Address group);
+        Route *findRouteG(IPv4Address group);
+        Route *findRouteSG(IPv4Address source, IPv4Address group);
         Route *createRouteG(IPv4Address group, int flags);
         Route *createRouteSG(IPv4Address source, IPv4Address group, int flags);
         IPv4MulticastRoute *createIPv4Route(Route *route);

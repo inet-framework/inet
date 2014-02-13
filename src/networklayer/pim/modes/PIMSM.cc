@@ -27,7 +27,7 @@ Define_Module(PIMSM);
 typedef IPv4MulticastRoute::OutInterface OutInterface;
 
 PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
-    : owner(owner), type(type), origin(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
+    : owner(owner), type(type), source(origin), group(group), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
       rpRoute(NULL), gRoute(NULL), sgrptRoute(NULL),
       sequencenumber(0), keepAliveTimer(NULL), joinTimer(NULL), registerState(RS_NO_INFO), registerStopTimer(NULL),
       upstreamInterface(NULL), joinDesired(false)
@@ -50,7 +50,7 @@ PIMSM::DownstreamInterface *PIMSM::Route::addNewDownstreamInterface(InterfaceEnt
     //downstream->startExpiryTimer(holdTime);
     addDownstreamInterface(downstream);
 
-    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(origin, group);
+    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(source, group);
     ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
 
     return downstream;
@@ -119,7 +119,7 @@ void PIMSM::Route::updateJoinDesired()
 
 PIMSM::~PIMSM()
 {
-    for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
+    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
         delete it->second;
 }
 
@@ -200,7 +200,7 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
         if (/*DirectlyConnected(route->source) ||*/
             (!route->isFlagSet(Route::PRUNED) && !route->isInheritedOlistNull()))
         {
-            EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->origin << ", " << route->group << ") timer.\n";
+            EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->source << ", " << route->group << ") timer.\n";
 
             if (!route->keepAliveTimer)
                 route->startKeepAliveTimer();
@@ -341,7 +341,7 @@ void PIMSM::processRegisterStopTimer(cMessage *timer)
     if (routeSG->registerState == Route::RS_PRUNE)
     {
         routeSG->registerState = Route::RS_JOIN_PENDING;
-        sendPIMRegisterNull(routeSG->origin, routeSG->group);
+        sendPIMRegisterNull(routeSG->source, routeSG->group);
         routeSG->startRegisterStopTimer(registerProbeTime);
     }
     else if (routeSG->registerState == Route::RS_JOIN_PENDING)
@@ -386,7 +386,7 @@ void PIMSM::processExpiryTimer(cMessage *timer)
             if (route->type == G && !IamRP(route->rpAddr))
                 sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
             else if (route->type == SG)
-                sendPIMPrune(route->group, route->origin, RPFneighbor->getAddress(), SG);
+                sendPIMPrune(route->group, route->source, RPFneighbor->getAddress(), SG);
 
             cancelAndDeleteTimer(route->joinTimer);
         }
@@ -425,7 +425,7 @@ void PIMSM::processJoinTimer(cMessage *timer)
 
     Route *route = static_cast<Route*>(timer->getContextPointer());
     ASSERT(timer == route->joinTimer);
-    IPv4Address joinAddr = route->type == G ? route->rpAddr : route->origin;
+    IPv4Address joinAddr = route->type == G ? route->rpAddr : route->source;
 
     if (!route->isOilistNull())
     {
@@ -478,7 +478,7 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
             // reliability so that if a Prune that should have been
             // overridden by another router is lost locally on the LAN, then
             // the PruneEcho may be received and cause the override to happen.
-            IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->origin;
+            IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->source;
             IPv4Address upstreamNeighborField = downstream->ie->ipv4Data()->getIPAddress();
             sendPIMPrune(route->group, pruneAddr, upstreamNeighborField, route->type);
         }
@@ -517,7 +517,7 @@ void PIMSM::processAssertTimer(cMessage *timer)
         // (S,G) Assert State Machine; event: AT(S,G,I) expires OR
         // (*,G) Assert State Machine; event: AT(*,G,I) expires
         //
-        EV_DETAIL << "AssertTimer(" << (route->type==G?"*":route->origin.str()) << ", "
+        EV_DETAIL << "AssertTimer(" << (route->type==G?"*":route->source.str()) << ", "
                   << route->group << ", " << interfaceData->ie->getName() << ") has expired.\n";
 
         if (interfaceData->assertState == Interface::I_WON_ASSERT)
@@ -529,7 +529,7 @@ void PIMSM::processAssertTimer(cMessage *timer)
             // winner's Assert Timer is engineered to expire shortly before
             // timers on assert losers; this prevents unnecessary thrashing
             // of the forwarder and periodic flooding of duplicate packets.
-            sendPIMAssert(route->origin, route->group, route->metric, interfaceData->ie, route->type == G);
+            sendPIMAssert(route->source, route->group, route->metric, interfaceData->ie, route->type == G);
             interfaceData->startAssertTimer(assertTime - assertOverrideInterval);
         }
         else if (interfaceData->assertState == Interface::I_LOST_ASSERT)
@@ -568,7 +568,7 @@ void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int hol
             DownstreamInterface *downstream = route->downstreamInterfaces[i];
             if (downstream->expiryTimer && (downstream->getInterfaceId() == originIntf->getInterfaceId()))
             {
-                EV << /*timer->getStateType() << " , " <<*/ route->group << " , " << route->origin << ", int: " << downstream->ie->getName() << endl;
+                EV << /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getName() << endl;
                 restartTimer(downstream->expiryTimer, holdTime);
                 break;
             }
@@ -639,11 +639,11 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
         return;
 
     bool newRoute = false;
-    Route *routeG = findGRoute(group);
+    Route *routeG = findRouteG(group);
     if (!routeG)
     {
         routeG = createRouteG(group, Route::PRUNED);
-        addGRoute(routeG);
+        addRouteG(routeG);
         newRoute = true;
     }
 
@@ -694,7 +694,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     {
         routeG->clearFlag(Route::REGISTER);
 
-        for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
+        for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
         {
             Route *route = it->second;
             if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
@@ -711,7 +711,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
                         downstream = route->addNewDownstreamInterface(inInterface);
                         downstream->joinPruneState = DownstreamInterface::JOIN;
                         downstream->startExpiryTimer(holdTime);
-                        sendPIMJoin(group, route->origin, route->upstreamInterface->nextHop, SG);
+                        sendPIMJoin(group, route->source, route->upstreamInterface->nextHop, SG);
                     }
                 }
                 route->sequencenumber = 1;
@@ -819,11 +819,11 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
 
     if (!IamDR(source))
     {
-        Route *routeG = findGRoute(group);
+        Route *routeG = findRouteG(group);
         if (!routeG)        // create (*,G) route between RP and source DR
         {
             Route *newRouteG = createRouteG(group, Route::PRUNED);
-            addGRoute(newRouteG);
+            addRouteG(newRouteG);
         }
     }
 
@@ -835,12 +835,12 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
 
-    Route *routeSG = findSGRoute(source, group);
+    Route *routeSG = findRouteSG(source, group);
     if (!routeSG)         // create (S,G) route between RP and source DR
     {
         routeSG = createRouteSG(source, group, Route::PRUNED);
         routeSG->startKeepAliveTimer();
-        addSGRoute(routeSG);
+        addRouteSG(routeSG);
     }
 
     DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
@@ -905,7 +905,7 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
 
-    Route *routeG = findGRoute(group);
+    Route *routeG = findRouteG(group);
     if (routeG)
     {
         DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
@@ -967,7 +967,7 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
 
-    Route *routeSG = findSGRoute(source, group);
+    Route *routeSG = findRouteSG(source, group);
     if (routeSG)
     {
         DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
@@ -1020,22 +1020,22 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
     IPv4Datagram *encapData = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
     IPv4Address source = encapData->getSrcAddress();
     IPv4Address group = encapData->getDestAddress();
-    Route *routeG = findGRoute(group);
-    Route *routeSG = findSGRoute(source, group);
+    Route *routeG = findRouteG(group);
+    Route *routeSG = findRouteSG(source, group);
 
     if (!pkt->getN()) // It is Null Register ?
     {
         if (!routeG)
         {
             routeG = createRouteG(group, Route::PRUNED);
-            addGRoute(routeG);
+            addRouteG(routeG);
         }
 
         if (!routeSG)
         {
             routeSG = createRouteSG(source, group, Route::PRUNED);
             routeSG->startKeepAliveTimer();
-            addSGRoute(routeSG);
+            addRouteSG(routeSG);
         }
         else if (routeSG->keepAliveTimer)
         {
@@ -1046,7 +1046,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         if (!routeG->isOilistNull()) // we have some active receivers
         {
             // copy out interfaces from newRouteG
-            IPv4MulticastRoute *ipv4Route = findIPv4Route(routeSG->origin, routeSG->group);
+            IPv4MulticastRoute *ipv4Route = findIPv4Route(routeSG->source, routeSG->group);
             routeSG->clearDownstreamInterfaces();
             ipv4Route->clearOutInterfaces();
             for (unsigned int i = 0; i < routeG->downstreamInterfaces.size(); i++)
@@ -1104,7 +1104,7 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
     EV_INFO << "Received RegisterStop packet.\n";
 
     // TODO support wildcard source address
-    Route *routeSG = findSGRoute(pkt->getSourceAddress(), pkt->getGroupAddress());
+    Route *routeSG = findRouteSG(pkt->getSourceAddress(), pkt->getGroupAddress());
     if (routeSG)
     {
         if (routeSG->registerState == Route::RS_JOIN || routeSG->registerState == Route::RS_JOIN_PENDING)
@@ -1140,7 +1140,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 
     if (!source.isUnspecified() && !receivedMetric.rptBit)
     {
-        Route *routeSG = findSGRoute(source, group);
+        Route *routeSG = findRouteSG(source, group);
         if (routeSG)
         {
             Interface *incomingInterface = routeSG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
@@ -1161,7 +1161,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
     }
 
     // process (*,G) asserts and (S,G) asserts for which there is no assert state in (S,G) routes
-    Route *routeG = findGRoute(group);
+    Route *routeG = findRouteG(group);
     Interface *incomingInterface = routeG->upstreamInterface->getInterfaceId() == incomingInterfaceId ?
                                        static_cast<Interface*>(routeG->upstreamInterface) :
                                        static_cast<Interface*>(routeG->findDownstreamInterfaceByInterfaceId(incomingInterfaceId));
@@ -1202,7 +1202,7 @@ void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMe
             // "I am Assert Winner" state and perform Actions A1 (below).
             interface->assertState = Interface::I_WON_ASSERT;
             interface->winnerMetric = myMetric;
-            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
             interface->startAssertTimer(assertTime - assertOverrideInterval);
         }
         else if (receivedMetric.rptBit && interface->couldAssert)
@@ -1214,7 +1214,7 @@ void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMe
             // state and perform Actions A1 (below).
             interface->assertState = Interface::I_WON_ASSERT;
             interface->winnerMetric = myMetric;
-            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
             interface->startAssertTimer(assertTime - assertOverrideInterval);
         }
         else if (isAcceptableAssert && !receivedMetric.rptBit && interface->assertTrackingDesired)
@@ -1241,7 +1241,7 @@ void PIMSM::processAssertSG(Interface *interface, const AssertMetric &receivedMe
             // has a worse metric than our own.  Whoever sent the assert is
             // in error, and so we resend an (S,G) Assert and restart the
             // Assert Timer (Actions A3 below).
-            sendPIMAssert(routeSG->origin, routeSG->group, myMetric, interface->ie, false);
+            sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
             interface->startAssertTimer(assertTime - assertOverrideInterval);
         }
         else if (isPreferredAssert)
@@ -1443,7 +1443,7 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
 
     // only if (S,G exist)
     //if (getRouteFor(multDest,multSource))
-    if (findGRoute(multGroup))
+    if (findRouteG(multGroup))
     {
         PIMRegister *msg = new PIMRegister();
         msg->setName("PIMRegister(Null)");
@@ -1578,11 +1578,11 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         newRouteSG->registerState = Route::RS_JOIN;
         newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, false));      // create new outgoing interface to RP
 
-        addSGRoute(newRouteSG);
+        addRouteSG(newRouteSG);
 
         // create new (*,G) route
         Route *newRouteG = createRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
-        addGRoute(newRouteG);
+        addRouteG(newRouteG);
     }
 }
 
@@ -1590,7 +1590,7 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
     EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
 
-    for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
+    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
     {
         Route *route = it->second;
         if (route->group != group)
@@ -1621,7 +1621,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
 {
     EV_DETAIL << "Multicast receiver added for group " << group << " on interface '" << ie->getName() << "'.\n";
 
-    Route *routeG = findGRoute(group);
+    Route *routeG = findRouteG(group);
     if (!routeG)
     {
         // create new (*,G) route
@@ -1636,7 +1636,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
         newRouteG->addDownstreamInterface(downstream);
 
         // add route to tables
-        addGRoute(newRouteG);
+        addRouteG(newRouteG);
 
         // oilist != NULL -> send Join(*,G) to 224.0.0.13
         if (newRouteG->upstreamInterface && !newRouteG->isOilistNull())
@@ -1674,14 +1674,14 @@ void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
             // for (S,G) or (*,G).
             downstream->assertState = Interface::I_WON_ASSERT;
             downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
-            sendPIMAssert(route->origin, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
+            sendPIMAssert(route->source, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
             downstream->startAssertTimer(assertTime - assertOverrideInterval);
         }
         else if (route->type == SG && (!downstream || downstream->assertState == Interface::NO_ASSERT_INFO))
         {
             // When in NO_ASSERT_INFO state before and after consideration of the received message,
             // then call (*,G) assert processing.
-            Route *routeG = findGRoute(route->group);
+            Route *routeG = findRouteG(route->group);
             if (routeG)
                 multicastPacketArrivedOnNonRpfInterface(routeG, interfaceId);
         }
@@ -1693,7 +1693,7 @@ void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
     IPv4Address source = datagram->getSrcAddress();
     IPv4Address group = datagram->getDestAddress();
 
-    Route *routeSG = findSGRoute(source, group);
+    Route *routeSG = findRouteSG(source, group);
     if (!routeSG || !routeSG->isFlagSet(Route::REGISTER) || !routeSG->isFlagSet(Route::PRUNED))
         return;
 
@@ -1758,9 +1758,9 @@ void PIMSM::joinDesiredChanged(Route *route)
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
             //
             routeSG->clearFlag(Route::PRUNED);
-            if (!IamDR(routeSG->origin))
+            if (!IamDR(routeSG->source))
             {
-                sendPIMJoin(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
+                sendPIMJoin(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
                 routeSG->startJoinTimer();
             }
         }
@@ -1777,8 +1777,8 @@ void PIMSM::joinDesiredChanged(Route *route)
             routeSG->setFlags(Route::PRUNED);
             routeSG->clearFlag(Route::SPT_BIT);
             cancelAndDeleteTimer(routeSG->joinTimer);
-            if (!IamDR(routeSG->origin))
-                sendPIMPrune(routeSG->group, routeSG->origin, routeSG->upstreamInterface->rpfNeighbor(), SG);
+            if (!IamDR(routeSG->source))
+                sendPIMPrune(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
         }
     }
 
@@ -1927,10 +1927,10 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         PIMInterface *incomingInterface = getIncomingInterface(datagram);
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
         {
-            route = findGRoute(datagram->getDestAddress());
+            route = findRouteG(datagram->getDestAddress());
             if (route)
                 multicastPacketArrivedOnRpfInterface(route);
-            route = findSGRoute(datagram->getSrcAddress(), datagram->getDestAddress());
+            route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
             if (route)
                 multicastPacketArrivedOnRpfInterface(route);
         }
@@ -1943,9 +1943,9 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         {
             IPv4Address srcAddr = datagram->getSrcAddress();
             IPv4Address destAddr = datagram->getDestAddress();
-            if ((route = findSGRoute(srcAddr, destAddr)) != NULL)
+            if ((route = findRouteSG(srcAddr, destAddr)) != NULL)
                 multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
-            else if ((route = findGRoute(destAddr)) != NULL)
+            else if ((route = findRouteG(destAddr)) != NULL)
                 multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
         }
     }
@@ -1954,7 +1954,7 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         EV <<  "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
         datagram = check_and_cast<IPv4Datagram*>(details);
         PIMInterface *incomingInterface = getIncomingInterface(datagram);
-        route = findSGRoute(datagram->getSrcAddress(), datagram->getDestAddress());
+        route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
             multicastPacketForwarded(datagram);
     }
@@ -1977,7 +1977,7 @@ bool PIMSM::deleteMulticastRoute(Route *route)
     if (removeRoute(route))
     {
         // remove route from the routing table
-        IPv4MulticastRoute *ipv4Route = findIPv4Route(route->origin, route->group);
+        IPv4MulticastRoute *ipv4Route = findIPv4Route(route->source, route->group);
         if (ipv4Route)
             rt->deleteMulticastRoute(ipv4Route);
 
@@ -1987,7 +1987,7 @@ bool PIMSM::deleteMulticastRoute(Route *route)
     return false;
 }
 
-void PIMSM::addGRoute(Route *route)
+void PIMSM::addRouteG(Route *route)
 {
     SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, route->group);
     routes[sg] = route;
@@ -1995,9 +1995,9 @@ void PIMSM::addGRoute(Route *route)
     rt->addMulticastRoute(createIPv4Route(route));
 }
 
-void PIMSM::addSGRoute(Route *route)
+void PIMSM::addRouteSG(Route *route)
 {
-    SourceAndGroup sg(route->origin, route->group);
+    SourceAndGroup sg(route->source, route->group);
     routes[sg] = route;
 
     rt->addMulticastRoute(createIPv4Route(route));
@@ -2063,8 +2063,8 @@ PIMSM::Route *PIMSM::createRouteSG(IPv4Address source, IPv4Address group, int fl
 IPv4MulticastRoute *PIMSM::createIPv4Route(Route *route)
 {
     IPv4MulticastRoute *newRoute = new IPv4MulticastRoute();
-    newRoute->setOrigin(route->origin);
-    newRoute->setOriginNetmask(route->origin.isUnspecified() ? IPv4Address::UNSPECIFIED_ADDRESS : IPv4Address::ALLONES_ADDRESS);
+    newRoute->setOrigin(route->source);
+    newRoute->setOriginNetmask(route->source.isUnspecified() ? IPv4Address::UNSPECIFIED_ADDRESS : IPv4Address::ALLONES_ADDRESS);
     newRoute->setMulticastGroup(route->group);
     newRoute->setSourceType(IMulticastRoute::PIM_SM);
     newRoute->setSource(this);
@@ -2081,22 +2081,22 @@ IPv4MulticastRoute *PIMSM::createIPv4Route(Route *route)
 
 bool PIMSM::removeRoute(Route *route)
 {
-    SourceAndGroup sg(route->origin, route->group);
+    SourceAndGroup sg(route->source, route->group);
     return routes.erase(sg);
 }
 
-PIMSM::Route *PIMSM::findGRoute(IPv4Address group)
+PIMSM::Route *PIMSM::findRouteG(IPv4Address group)
 {
     SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, group);
-    SGStateMap::iterator it = routes.find(sg);
+    RoutingTable::iterator it = routes.find(sg);
     return it != routes.end() ? it->second : NULL;
 }
 
-PIMSM::Route *PIMSM::findSGRoute(IPv4Address source, IPv4Address group)
+PIMSM::Route *PIMSM::findRouteSG(IPv4Address source, IPv4Address group)
 {
     ASSERT(!source.isUnspecified());
     SourceAndGroup sg(source, group);
-    SGStateMap::iterator it = routes.find(sg);
+    RoutingTable::iterator it = routes.find(sg);
     return it != routes.end() ? it->second : NULL;
 }
 
@@ -2160,7 +2160,7 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
 {
     // remove corresponding out interface from the IPv4 route,
     // because it refers to the downstream interface to be deleted
-    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(origin, group);
+    IPv4MulticastRoute *ipv4Route = owner->findIPv4Route(source, group);
     ipv4Route->removeOutInterface(i);
 
     DownstreamInterface *outInterface = downstreamInterfaces[i];
