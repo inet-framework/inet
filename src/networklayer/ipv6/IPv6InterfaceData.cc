@@ -269,6 +269,8 @@ void IPv6InterfaceData::assignAddress(const IPv6Address& addr, bool tentative,
     // FIXME else a.addrType = ???;
 #endif /* WITH_xMIPv6 */
 
+    changed1();
+
     choosePreferredAddress();
 }
 
@@ -343,6 +345,7 @@ void IPv6InterfaceData::permanentlyAssign(const IPv6Address& addr)
     int k = findAddress(addr);
     ASSERT(k!=-1);
     addresses[k].tentative = false;
+    changed1();
     choosePreferredAddress();
 }
 
@@ -351,6 +354,7 @@ void IPv6InterfaceData::tentativelyAssign(int i)
 {
     ASSERT(i>=0 && i<(int)addresses.size());
     addresses[i].tentative = true;
+    changed1();
     choosePreferredAddress();
 }
 #endif /* WITH_xMIPv6 */
@@ -368,6 +372,7 @@ void IPv6InterfaceData::removeAddress(const IPv6Address& address)
     int k = findAddress(address);
     ASSERT(k!=-1);
     addresses.erase(addresses.begin()+k);
+    changed1();
     choosePreferredAddress();
 }
 
@@ -393,10 +398,14 @@ bool IPv6InterfaceData::addrLess(const AddressData& a, const AddressData& b)
 
 void IPv6InterfaceData::choosePreferredAddress()
 {
+    IPv6Address oldPreferredAddr = preferredAddr;
+
     // do we have addresses?
     if (addresses.size()==0)
     {
         preferredAddr = IPv6Address();
+        if (!oldPreferredAddr.isUnspecified())
+            changed1();
         return;
     }
 
@@ -409,11 +418,15 @@ void IPv6InterfaceData::choosePreferredAddress()
     std::sort(addresses.begin(), addresses.end(), addrLess);
     preferredAddr = addresses[0].address;
     preferredAddrExpiryTime = addresses[0].expiryTime;
+
+    if (preferredAddr != oldPreferredAddr)
+        changed1();
 }
 
 void IPv6InterfaceData::addAdvPrefix(const AdvPrefix& advPrefix)
 {
     rtrVars.advPrefixList.push_back(advPrefix);
+    changed1();
 }
 
 const IPv6InterfaceData::AdvPrefix& IPv6InterfaceData::getAdvPrefix(int i) const
@@ -428,12 +441,14 @@ void IPv6InterfaceData::setAdvPrefix(int i, const AdvPrefix& advPrefix)
     ASSERT(rtrVars.advPrefixList[i].prefix == advPrefix.prefix);
     ASSERT(rtrVars.advPrefixList[i].prefixLength == advPrefix.prefixLength);
     rtrVars.advPrefixList[i] = advPrefix;
+    changed1();
 }
 
 void IPv6InterfaceData::removeAdvPrefix(int i)
 {
     ASSERT(i>=0 && i<(int)rtrVars.advPrefixList.size());
     rtrVars.advPrefixList.erase(rtrVars.advPrefixList.begin()+i);
+    changed1();
 }
 
 simtime_t IPv6InterfaceData::generateReachableTime(double MIN_RANDOM_FACTOR,
@@ -605,6 +620,8 @@ IPv6Address IPv6InterfaceData::removeAddress(IPv6InterfaceData::AddressType type
         }
     }
 
+    changed1();
+
     // pick new address as we've removed the old one
     choosePreferredAddress();
 
@@ -624,6 +641,8 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
     homeInfo.HoA = hoa;
     homeInfo.homeAgentAddr = ha;
     homeInfo.prefix = prefix;
+
+    changed1();
 
     // check if we already have a HoA on this interface
     // if not, then we create one
