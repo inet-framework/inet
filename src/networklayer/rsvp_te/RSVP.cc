@@ -198,7 +198,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
     newSession.sobj.Tunnel_Id = getParameterIntValue(session, "tunnel_id");
     newSession.sobj.Extended_Tunnel_Id = routerId.getInt();
-    newSession.sobj.DestAddress = getParameterIPAddressValue(session, "endpoint");
+    newSession.sobj.DestAddress = getParameterIPv4AddressValue(session, "endpoint");
 
     std::vector<traffic_session_t>::iterator sit = findSession(newSession.sobj);
 
@@ -243,7 +243,7 @@ void RSVP::readTrafficSessionFromXML(const cXMLElement *session)
 
         traffic_path_t newPath;
 
-        newPath.sender.SrcAddress = getParameterIPAddressValue(path, "sender", routerId);
+        newPath.sender.SrcAddress = getParameterIPv4AddressValue(path, "sender", routerId);
         newPath.sender.Lsp_Id = lspid;
 
         // make sure path doesn't exist yet
@@ -1894,8 +1894,8 @@ void RSVP::delSession(const cXMLElement& node)
     SessionObj_t sobj;
 
     sobj.Tunnel_Id = getParameterIntValue(&node, "tunnel_id");
-    sobj.Extended_Tunnel_Id = getParameterIPAddressValue(&node, "extended_tunnel_id", routerId).getInt();
-    sobj.DestAddress = getParameterIPAddressValue(&node, "endpoint");
+    sobj.Extended_Tunnel_Id = getParameterIPv4AddressValue(&node, "extended_tunnel_id", routerId).getInt();
+    sobj.DestAddress = getParameterIPv4AddressValue(&node, "endpoint");
 
     std::vector<traffic_session_t>::iterator sit = findSession(sobj);
     ASSERT(sit != traffic.end());
