@@ -21,9 +21,6 @@ import inet.nodes.ipv6.Router6;
 import inet.nodes.ipv6.StandardHost6;
 
 
-//
-// TODO Auto-generated network
-//
 network ManualAddresses
 {
     @display("bgb=649,384");
