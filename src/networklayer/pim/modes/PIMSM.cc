@@ -123,7 +123,9 @@ void PIMSM::Route::updateJoinDesired()
 
 PIMSM::~PIMSM()
 {
-    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+    for (RoutingTable::iterator it = gRoutes.begin(); it != gRoutes.end(); ++it)
+        delete it->second;
+    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         delete it->second;
 }
 
@@ -698,25 +700,22 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     {
         routeG->clearFlag(Route::REGISTER);
 
-        for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+        for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         {
             Route *route = it->second;
             if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
             {
-                if (route->type == SG)
-                {
-                    // update flags
-                    route->clearFlag(Route::PRUNED);
-                    route->setFlags(Route::SPT_BIT);
-                    route->startJoinTimer();
+                // update flags
+                route->clearFlag(Route::PRUNED);
+                route->setFlags(Route::SPT_BIT);
+                route->startJoinTimer();
 
-                    if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
-                    {
-                        downstream = route->addNewDownstreamInterface(inInterface);
-                        downstream->joinPruneState = DownstreamInterface::JOIN;
-                        downstream->startExpiryTimer(holdTime);
-                        sendPIMJoin(group, route->source, route->upstreamInterface->nextHop, SG);
-                    }
+                if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
+                {
+                    downstream = route->addNewDownstreamInterface(inInterface);
+                    downstream->joinPruneState = DownstreamInterface::JOIN;
+                    downstream->startExpiryTimer(holdTime);
+                    sendPIMJoin(group, route->source, route->upstreamInterface->nextHop, SG);
                 }
                 route->sequencenumber = 1;
             }
@@ -1594,29 +1593,34 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
     EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
 
-    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+    RoutingTable *tables[] = { &gRoutes, &sgRoutes};
+    for (int i = 0; i < 2; ++i)
     {
-        Route *route = it->second;
-        if (route->group != group)
-            continue;
-
-        // is interface in list of outgoing interfaces?
-        int k = route->findDownstreamInterface(ie);
-        if (k >= 0)
+        for (RoutingTable::iterator it = tables[i]->begin(); it != tables[i]->end(); ++it)
         {
-            EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-            route->removeDownstreamInterface(k);
-        }
 
-        route->clearFlag(Route::CONNECTED);
+            Route *route = it->second;
+            if (route->group != group)
+                continue;
 
-        // there is no receiver of multicast, prune the router from the multicast tree
-        if (route->isOilistNull())
-        {
-            route->setFlags(Route::PRUNED);
-            PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
-            sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
-            cancelAndDeleteTimer(route->joinTimer);
+            // is interface in list of outgoing interfaces?
+            int k = route->findDownstreamInterface(ie);
+            if (k >= 0)
+            {
+                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
+                route->removeDownstreamInterface(k);
+            }
+
+            route->clearFlag(Route::CONNECTED);
+
+            // there is no receiver of multicast, prune the router from the multicast tree
+            if (route->isOilistNull())
+            {
+                route->setFlags(Route::PRUNED);
+                PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
+                sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
+                cancelAndDeleteTimer(route->joinTimer);
+            }
         }
     }
 }
@@ -1994,16 +1998,14 @@ bool PIMSM::deleteMulticastRoute(Route *route)
 void PIMSM::addRouteG(Route *route)
 {
     SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, route->group);
-    routes[sg] = route;
-
+    gRoutes[sg] = route;
     rt->addMulticastRoute(createIPv4Route(route));
 }
 
 void PIMSM::addRouteSG(Route *route)
 {
     SourceAndGroup sg(route->source, route->group);
-    routes[sg] = route;
-
+    sgRoutes[sg] = route;
     rt->addMulticastRoute(createIPv4Route(route));
 }
 
@@ -2086,22 +2088,25 @@ IPv4MulticastRoute *PIMSM::createIPv4Route(Route *route)
 bool PIMSM::removeRoute(Route *route)
 {
     SourceAndGroup sg(route->source, route->group);
-    return routes.erase(sg);
+    if (route->type == G)
+        return gRoutes.erase(sg);
+    else
+        return sgRoutes.erase(sg);
 }
 
 PIMSM::Route *PIMSM::findRouteG(IPv4Address group)
 {
     SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, group);
-    RoutingTable::iterator it = routes.find(sg);
-    return it != routes.end() ? it->second : NULL;
+    RoutingTable::iterator it = gRoutes.find(sg);
+    return it != gRoutes.end() ? it->second : NULL;
 }
 
 PIMSM::Route *PIMSM::findRouteSG(IPv4Address source, IPv4Address group)
 {
     ASSERT(!source.isUnspecified());
     SourceAndGroup sg(source, group);
-    RoutingTable::iterator it = routes.find(sg);
-    return it != routes.end() ? it->second : NULL;
+    RoutingTable::iterator it = sgRoutes.find(sg);
+    return it != sgRoutes.end() ? it->second : NULL;
 }
 
 IPv4MulticastRoute *PIMSM::findIPv4Route(IPv4Address source, IPv4Address group)

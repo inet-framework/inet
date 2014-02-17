@@ -185,7 +185,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         double assertOverrideInterval;
 
         // state
-        RoutingTable routes;
+        RoutingTable gRoutes;
+        RoutingTable sgRoutes;
 
     private:
         // process signals
