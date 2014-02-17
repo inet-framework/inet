@@ -84,7 +84,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
-            bool isInImmediateOlist() const { return joinPruneState != NO_INFO && assertState != I_LOST_ASSERT; }
+            bool isInImmediateOlist() const;
             bool isInInheritedOlist() const;
             void startPrunePendingTimer();
         };

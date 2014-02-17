@@ -130,7 +130,13 @@ std::ostream& operator<<(std::ostream &out, const PIMSM::Route &route)
     {
         if (i > 0)
             out << ", ";
-        out << route.downstreamInterfaces[i]->ie->getName();
+        out << route.downstreamInterfaces[i]->ie->getName() << " ";
+        switch (route.downstreamInterfaces[i]->joinPruneState)
+        {
+            case PIMSM::DownstreamInterface::NO_INFO: out << "(NI)"; break;
+            case PIMSM::DownstreamInterface::JOIN: out << "(J)"; break;
+            case PIMSM::DownstreamInterface::PRUNE_PENDING: out << "(PP)"; break;
+        }
     }
 
     return out;
@@ -1066,7 +1072,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
 
         if (!routeG->isOilistNull()) // we have some active receivers
         {
-            // copy out interfaces from newRouteG
+            // copy out interfaces from routeG
             IPv4MulticastRoute *ipv4Route = findIPv4Route(routeSG->source, routeSG->group);
             routeSG->clearDownstreamInterfaces();
             ipv4Route->clearOutInterfaces();
@@ -2074,6 +2080,16 @@ PIMSM::Route *PIMSM::createRouteG(IPv4Address group, int flags)
         }
     }
 
+    // set (*,G) route in (S,G) and (S,G,rpt) routes
+    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+    {
+        if (it->first.group == group)
+        {
+            Route *sgRoute = it->second;
+            sgRoute->gRoute = newRouteG;
+        }
+    }
+
     return newRouteG;
 }
 
@@ -2101,6 +2117,19 @@ PIMSM::Route *PIMSM::createRouteSG(IPv4Address source, IPv4Address group, int fl
         }
         newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, ieTowardSource, rpfNeighbor);
         newRouteSG->metric = AssertMetric(false, routeToSource->getAdminDist(), routeToSource->getMetric());
+    }
+
+    // set (*,G) route if exists
+    newRouteSG->gRoute = findRouteG(group);
+
+    // set (S,G,rpt) route if exists
+    Route *sgrptRoute = NULL; // TODO
+    newRouteSG->sgrptRoute = sgrptRoute;
+
+    // set (S,G) route in (S,G,rpt) route
+    if (sgrptRoute)
+    {
+//        sgrptRoute->sgRoute = newRouteSG;
     }
 
     return newRouteSG;
@@ -2240,9 +2269,87 @@ PIMSM::DownstreamInterface::~DownstreamInterface()
     owner->owner->cancelAndDelete(prunePendingTimer);
 }
 
+bool PIMSM::DownstreamInterface::isInImmediateOlist() const
+{
+    // immediate_olist(*,*,RP) = joins(*,*,RP)
+    // immediate_olist(*,G) = joins(*,G) (+) pim_include(*,G) (-) lost_assert(*,G)
+    // immediate_olist(S,G) = joins(S,G) (+) pim_include(S,G) (-) lost_assert(S,G)
+    // TODO pim_include(*,G)
+    return joinPruneState != NO_INFO && assertState != I_LOST_ASSERT;
+}
+
+
 bool PIMSM::DownstreamInterface::isInInheritedOlist() const
 {
-    return isInImmediateOlist(); /* XXX */
+    // inherited_olist(S,G,rpt) = ( joins(*,*,RP(G)) (+) joins(*,G) (-) prunes(S,G,rpt) )
+    //                            (+) ( pim_include(*,G) (-) pim_exclude(S,G))
+    //                            (-) ( lost_assert(*,G) (+) lost_assert(S,G,rpt) )
+    // inherited_olist(S,G) = inherited_olist(S,G,rpt) (+)
+    //                        joins(S,G) (+) pim_include(S,G) (-) lost_assert(S,G)
+    Route *route = check_and_cast<Route*>(owner);
+    int interfaceId = ie->getInterfaceId();
+    bool include = false;
+
+    switch (route->type)
+    {
+        case RP:
+            // joins(*,*,RP(G))
+            include |= joinPruneState != NO_INFO;
+            break;
+        case G: // inherited_olist(S,G,rpt) when there is not (S,G,rpt) state
+            // joins(*,*,RP(G))
+            if (route->rpRoute)
+            {
+                DownstreamInterface *downstream = route->rpRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include |= downstream && downstream->joinPruneState != NO_INFO;
+            }
+            include |= joinPruneState != NO_INFO;
+            // TODO (+) pim_include(*,G)
+            include &= assertState != I_LOST_ASSERT;
+            break;
+        case SGrpt:
+            // joins(*,*,RP(G)
+            if (route->rpRoute)
+            {
+                DownstreamInterface *downstream = route->rpRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include |= downstream && downstream->joinPruneState != NO_INFO;
+            }
+            // (+) joins(*,G)
+            if (route->gRoute)
+            {
+                DownstreamInterface *downstream = route->gRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include |= downstream && downstream->joinPruneState != NO_INFO;
+            }
+
+            // TODO (-) prunes(S,G,prt)
+            // TODO (+) ( pim_include(*,G) (-) pim_exclude(S,G))
+
+            // (-) lost_assert(*,G)
+            if (route->gRoute)
+            {
+                DownstreamInterface *downstream = route->gRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include &= !downstream || downstream->assertState != I_LOST_ASSERT;
+            }
+            // (-) lost_assert(S,G)
+            include &= assertState != I_LOST_ASSERT;
+            break;
+        case SG:
+            // inherited_olist(S,G,rpt)
+            if (route->sgrptRoute) {
+                DownstreamInterface *downstream = route->sgrptRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include |= downstream && downstream->isInInheritedOlist();
+            }
+            else if (route->gRoute) {
+                DownstreamInterface *downstream = route->gRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                include |= downstream && downstream->isInInheritedOlist();
+            }
+            // (+) joins(S,G)
+            include |= joinPruneState != NO_INFO;
+            // TODO (+) pim_include(S,G)
+            include &= assertState != I_LOST_ASSERT;
+            break;
+    }
+    return include;
 }
 
 void PIMSM::DownstreamInterface::startPrunePendingTimer()
