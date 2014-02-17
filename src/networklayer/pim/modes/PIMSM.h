@@ -36,6 +36,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
 {
     private:
         struct Route;
+        friend std::ostream& operator<<(std::ostream &out, const SourceAndGroup &sourceGroup);
+        friend std::ostream& operator<<(std::ostream &out, const Route &sourceGroup);
 
         struct PimsmInterface : public Interface
         {
@@ -162,7 +164,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isImmediateOlistNull();
                 bool isInheritedOlistNull();
                 bool joinDesired() const { return isFlagSet(JOIN_DESIRED); }
-                void updateJoinDesired();
 
                 void startKeepAliveTimer();
                 void startRegisterStopTimer(double interval);
@@ -241,6 +242,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // internal events
         void joinDesiredChanged(Route *route);
+
+        // update actions
+        void updateJoinDesired(Route *route);
 
         // helpers
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);

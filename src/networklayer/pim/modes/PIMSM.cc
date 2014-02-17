@@ -103,22 +103,37 @@ bool PIMSM::Route::isInheritedOlistNull()
     return true;
 }
 
-void PIMSM::Route::updateJoinDesired()
+std::ostream& operator<<(std::ostream &out, const PIMSM::SourceAndGroup &sourceGroup)
 {
-    bool oldValue = joinDesired();
-    bool newValue = false;
-    if (type == RP)
-        newValue = !isImmediateOlistNull();
-    if (type == G)
-        newValue = !isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != NULL */;
-    else if (type == SG)
-        newValue = !isImmediateOlistNull() || (keepAliveTimer && isInheritedOlistNull());
+    out << "(" << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
+        << (sourceGroup.group.isUnspecified() ? "*" : sourceGroup.group.str() )<< ")";
+    return out;
+}
 
-    if (newValue != oldValue)
+std::ostream& operator<<(std::ostream &out, const PIMSM::Route &route)
+{
+    out << "(" << (route.source.isUnspecified() ? "*" : route.source.str()) << ", "
+        << (route.group.isUnspecified() ? "*" : route.group.str()) << "), ";
+    out << "RP is " << route.rpAddr << ", ";
+
+    out << "Incoming interface: ";
+    if (route.upstreamInterface)
     {
-        setFlag(JOIN_DESIRED, newValue);
-        pimsm()->joinDesiredChanged(this);
+        out << route.upstreamInterface->ie->getName() << ", ";
+        out << "RPF neighbor: " << route.upstreamInterface->rpfNeighbor() << ", ";
     }
+    else
+        out << "NULL, ";
+
+    out << "Downstream interfaces: ";
+    for (unsigned int i = 0; i < route.downstreamInterfaces.size(); ++i)
+    {
+        if (i > 0)
+            out << ", ";
+        out << route.downstreamInterfaces[i]->ie->getName();
+    }
+
+    return out;
 }
 
 PIMSM::~PIMSM()
@@ -162,6 +177,9 @@ void PIMSM::initialize(int stage)
         registerProbeTime = par("registerProbeTime");
         assertTime = par("assertTime");
         assertOverrideInterval = par("assertOverrideInterval");
+
+        WATCH_PTRMAP(gRoutes);
+        WATCH_PTRMAP(sgRoutes);
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -694,7 +712,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     // XXX Join(*,G) messages can affect (S,G,rpt) downstream state machines too
 
     // check upstream state transition
-    routeG->updateJoinDesired();
+    updateJoinDesired(routeG);
 
     if (!newRoute && !routeG->upstreamInterface) // I am RP
     {
@@ -885,7 +903,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
     }
 
     // check upstream state transition
-    routeSG->updateJoinDesired();
+    updateJoinDesired(routeSG);
 }
 
 
@@ -921,7 +939,7 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
 
     // check upstream state transition
     if (routeG)
-        routeG->updateJoinDesired();
+        updateJoinDesired(routeG);
 
 //    for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
 //    {
@@ -987,7 +1005,7 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
 
     // check upstream state transition
     if (routeSG)
-        routeSG->updateJoinDesired();
+        updateJoinDesired(routeSG);
 
 //    // upstream state machine
 //    if (routeSG && routeSG->isOilistNull() && !routeSG->isFlagSet(Route::P))
@@ -1557,6 +1575,28 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     data->setControlInfo(ctrl);
     send(data, "ipOut");
 }
+
+//
+//
+//
+void PIMSM::updateJoinDesired(Route *route)
+{
+    bool oldValue = route->joinDesired();
+    bool newValue = false;
+    if (route->type == RP)
+        newValue = !route->isImmediateOlistNull();
+    if (route->type == G)
+        newValue = !route->isImmediateOlistNull() /* || JoinDesired(*,*,RP(G)) AND AssertWinner(*,G,RPF_interface(RP(G))) != NULL */;
+    else if (route->type == SG)
+        newValue = !route->isImmediateOlistNull() || (route->keepAliveTimer && !route->isInheritedOlistNull());
+
+    if (newValue != oldValue)
+    {
+        route->setFlag(Route::JOIN_DESIRED, newValue);
+        joinDesiredChanged(route);
+    }
+}
+
 
 void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
 {
