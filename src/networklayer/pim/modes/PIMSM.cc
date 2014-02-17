@@ -672,8 +672,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     Route *routeG = findRouteG(group);
     if (!routeG)
     {
-        routeG = createRouteG(group, Route::PRUNED);
-        addRouteG(routeG);
+        routeG = addNewRouteG(group, Route::PRUNED);
         newRoute = true;
     }
 
@@ -734,9 +733,9 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
                 route->setFlags(Route::SPT_BIT);
                 route->startJoinTimer();
 
-                if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
+                downstream = route->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
+                if (downstream->joinPruneState == DownstreamInterface::NO_INFO)
                 {
-                    downstream = route->addNewDownstreamInterface(inInterface);
                     downstream->joinPruneState = DownstreamInterface::JOIN;
                     downstream->startExpiryTimer(holdTime);
                     sendPIMJoin(group, route->source, route->upstreamInterface->nextHop, SG);
@@ -849,8 +848,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
         Route *routeG = findRouteG(group);
         if (!routeG)        // create (*,G) route between RP and source DR
         {
-            Route *newRouteG = createRouteG(group, Route::PRUNED);
-            addRouteG(newRouteG);
+            addNewRouteG(group, Route::PRUNED);
         }
     }
 
@@ -865,14 +863,13 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
     Route *routeSG = findRouteSG(source, group);
     if (!routeSG)         // create (S,G) route between RP and source DR
     {
-        routeSG = createRouteSG(source, group, Route::PRUNED);
+        routeSG = addNewRouteSG(source, group, Route::PRUNED);
         routeSG->startKeepAliveTimer();
-        addRouteSG(routeSG);
     }
 
     DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
-    if (!downstream && inInterface != routeSG->upstreamInterface->ie)
-        downstream = routeSG->addNewDownstreamInterface(inInterface);
+//    if (!downstream && inInterface != routeSG->upstreamInterface->ie)
+//        downstream = routeSG->addNewDownstreamInterface(inInterface);
 
     if (downstream)
     {
@@ -1054,15 +1051,13 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
     {
         if (!routeG)
         {
-            routeG = createRouteG(group, Route::PRUNED);
-            addRouteG(routeG);
+            routeG = addNewRouteG(group, Route::PRUNED);
         }
 
         if (!routeSG)
         {
-            routeSG = createRouteSG(source, group, Route::PRUNED);
+            routeSG = addNewRouteSG(source, group, Route::PRUNED);
             routeSG->startKeepAliveTimer();
-            addRouteSG(routeSG);
         }
         else if (routeSG->keepAliveTimer)
         {
@@ -1622,16 +1617,14 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
 
         // create new (S,G) route
-        Route *newRouteSG = createRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
+        Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
         newRouteSG->startKeepAliveTimer();
         newRouteSG->registerState = Route::RS_JOIN;
-        newRouteSG->addDownstreamInterface(new DownstreamInterface(newRouteSG, interfaceTowardRP, DownstreamInterface::NO_INFO, false));      // create new outgoing interface to RP
-
-        addRouteSG(newRouteSG);
+        DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
+        downstream->shRegTun = false;
 
         // create new (*,G) route
-        Route *newRouteG = createRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
-        addRouteG(newRouteG);
+        addNewRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
     }
 }
 
@@ -1679,18 +1672,15 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
     if (!routeG)
     {
         // create new (*,G) route
-        Route *newRouteG = createRouteG(group, Route::CONNECTED);
+        Route *newRouteG = addNewRouteG(group, Route::CONNECTED);
         newRouteG->startJoinTimer();
         if (newRouteG->upstreamInterface)
             newRouteG->upstreamInterface->startExpiryTimer(joinPruneHoldTime());
 
         // add downstream interface
-        DownstreamInterface *downstream = new DownstreamInterface(newRouteG, ie, DownstreamInterface::JOIN);
+        DownstreamInterface *downstream = newRouteG->addNewDownstreamInterface(ie);
+        downstream->joinPruneState = DownstreamInterface::JOIN;
         downstream->startExpiryTimer(HOLDTIME_HOST);
-        newRouteG->addDownstreamInterface(downstream);
-
-        // add route to tables
-        addRouteG(newRouteG);
 
         // oilist != NULL -> send Join(*,G) to 224.0.0.13
         if (newRouteG->upstreamInterface && !newRouteG->isOilistNull())
@@ -2041,21 +2031,7 @@ bool PIMSM::deleteMulticastRoute(Route *route)
     return false;
 }
 
-void PIMSM::addRouteG(Route *route)
-{
-    SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, route->group);
-    gRoutes[sg] = route;
-    rt->addMulticastRoute(createIPv4Route(route));
-}
-
-void PIMSM::addRouteSG(Route *route)
-{
-    SourceAndGroup sg(route->source, route->group);
-    sgRoutes[sg] = route;
-    rt->addMulticastRoute(createIPv4Route(route));
-}
-
-PIMSM::Route *PIMSM::createRouteG(IPv4Address group, int flags)
+PIMSM::Route *PIMSM::addNewRouteG(IPv4Address group, int flags)
 {
     Route *newRouteG = new Route(this, G, IPv4Address::UNSPECIFIED_ADDRESS,group);
     newRouteG->setFlags(flags);
@@ -2080,6 +2056,22 @@ PIMSM::Route *PIMSM::createRouteG(IPv4Address group, int flags)
         }
     }
 
+//    // add downstream interfaces
+//    for (int i = 0; i < pimIft->getNumInterfaces(); i++)
+//    {
+//        PIMInterface *pimInterface = pimIft->getInterface(i);
+//        if (pimInterface->getMode() == PIMInterface::SparseMode && pimInterface->getInterfacePtr() != newRouteSG->upstreamInterface->ie)
+//        {
+//            DownstreamInterface *downstream = new DownstreamInterface(newRouteSG, pimInterface->getInterfacePtr(), DownstreamInterface::NO_INFO);
+//            newRouteSG->addDownstreamInterface(downstream);
+//        }
+//    }
+//
+
+    SourceAndGroup sg(IPv4Address::UNSPECIFIED_ADDRESS, group);
+    gRoutes[sg] = newRouteG;
+    rt->addMulticastRoute(createIPv4Route(newRouteG));
+
     // set (*,G) route in (S,G) and (S,G,rpt) routes
     for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
     {
@@ -2093,7 +2085,7 @@ PIMSM::Route *PIMSM::createRouteG(IPv4Address group, int flags)
     return newRouteG;
 }
 
-PIMSM::Route *PIMSM::createRouteSG(IPv4Address source, IPv4Address group, int flags)
+PIMSM::Route *PIMSM::addNewRouteSG(IPv4Address source, IPv4Address group, int flags)
 {
     Route *newRouteSG = new Route(this, SG, source, group);
     newRouteSG->setFlags(flags);
@@ -2118,6 +2110,21 @@ PIMSM::Route *PIMSM::createRouteSG(IPv4Address source, IPv4Address group, int fl
         newRouteSG->upstreamInterface = new UpstreamInterface(newRouteSG, ieTowardSource, rpfNeighbor);
         newRouteSG->metric = AssertMetric(false, routeToSource->getAdminDist(), routeToSource->getMetric());
     }
+
+    // add downstream interfaces
+    for (int i = 0; i < pimIft->getNumInterfaces(); i++)
+    {
+        PIMInterface *pimInterface = pimIft->getInterface(i);
+        if (pimInterface->getMode() == PIMInterface::SparseMode && pimInterface->getInterfacePtr() != newRouteSG->upstreamInterface->ie)
+        {
+            DownstreamInterface *downstream = new DownstreamInterface(newRouteSG, pimInterface->getInterfacePtr(), DownstreamInterface::NO_INFO);
+            newRouteSG->addDownstreamInterface(downstream);
+        }
+    }
+
+    SourceAndGroup sg(source, group);
+    sgRoutes[sg] = newRouteSG;
+    rt->addMulticastRoute(createIPv4Route(newRouteSG));
 
     // set (*,G) route if exists
     newRouteSG->gRoute = findRouteG(group);

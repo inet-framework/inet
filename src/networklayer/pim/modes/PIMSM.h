@@ -255,13 +255,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
 
         // routing table access
-        void addRouteG(Route *route);
-        void addRouteSG(Route *route);
         bool removeRoute(Route *route);
         Route *findRouteG(IPv4Address group);
         Route *findRouteSG(IPv4Address source, IPv4Address group);
-        Route *createRouteG(IPv4Address group, int flags);
-        Route *createRouteSG(IPv4Address source, IPv4Address group, int flags);
+        Route *addNewRouteG(IPv4Address group, int flags);
+        Route *addNewRouteSG(IPv4Address source, IPv4Address group, int flags);
         IPv4MulticastRoute *createIPv4Route(Route *route);
         IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
 
