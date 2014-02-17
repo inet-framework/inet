@@ -97,11 +97,16 @@ std::string IPv4MulticastRoute::info() const
     out << "metric:" << metric << " ";
     out << "in:"; if (!inInterface) out << "*  "; else out << inInterface->getInterface()->getName() << "  ";
     out << "out:";
+    bool first = true;
     for (unsigned int i = 0; i < outInterfaces.size(); ++i)
     {
-        if (i > 0)
+        if (!first)
             out << ",";
-        out << outInterfaces[i]->getInterface()->getName();
+        if (outInterfaces[i]->isEnabled())
+        {
+            out << outInterfaces[i]->getInterface()->getName();
+            first = false;
+        }
     }
 
     out << " " << IMulticastRoute::sourceTypeName(sourceType);
