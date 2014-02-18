@@ -97,7 +97,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
             public:
                 PIMSMOutInterface(DownstreamInterface *downstream)
                     : OutInterface(downstream->ie), downstream(downstream) {}
-                virtual bool isEnabled() { return downstream->isInOlist(); }
+                virtual bool isEnabled() { return downstream->isInInheritedOlist(); }
         };
 
         enum RouteType
