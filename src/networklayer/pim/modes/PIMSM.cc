@@ -485,8 +485,6 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
     // Downstream per-interface (*,G) state machine; event = Receive Prune(*,G)
     //
 
-    // TODO check RP
-
     // check UpstreamNeighbor field
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
@@ -497,6 +495,12 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
         DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
         if (downstream && downstream->joinPruneState == DownstreamInterface::JOIN)
         {
+            // The (*,G) downstream state machine on interface I transitions
+            // to the Prune-Pending state.  The Prune-Pending Timer is
+            // started.  It is set to the J/P_Override_Interval(I) if the
+            // router has more than one neighbor on that interface;
+            // otherwise, it is set to zero, causing it to expire
+            // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
             downstream->startPrunePendingTimer();
         }
@@ -516,8 +520,6 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
     // Downstream per-interface (S,G) state machine; event = Receive Prune(S,G)
     //
 
-    // TODO check RP
-
     // check UpstreamNeighbor field
     if (upstreamNeighborField != inInterface->ipv4Data()->getIPAddress())
         return;
@@ -528,6 +530,12 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
         DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
         if (downstream && downstream->joinPruneState == DownstreamInterface::JOIN)
         {
+            // The (S,G) downstream state machine on interface I transitions
+            // to the Prune-Pending state.  The Prune-Pending Timer is
+            // started.  It is set to the J/P_Override_Interval(I) if the
+            // router has more than one neighbor on that interface;
+            // otherwise, it is set to zero, causing it to expire
+            // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
             downstream->startPrunePendingTimer();
         }
