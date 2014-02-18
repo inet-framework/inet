@@ -24,64 +24,6 @@
 
 Define_Module(PIMSM);
 
-typedef IPv4MulticastRoute::OutInterface OutInterface;
-
-PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
-    : RouteEntry(owner, origin, group), type(type), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS),
-      rpRoute(NULL), gRoute(NULL), sgrptRoute(NULL),
-      sequencenumber(0), keepAliveTimer(NULL), joinTimer(NULL), registerState(RS_NO_INFO), registerStopTimer(NULL),
-      upstreamInterface(NULL)
-{
-}
-
-PIMSM::Route::~Route()
-{
-    owner->cancelAndDelete(keepAliveTimer);
-    owner->cancelAndDelete(registerStopTimer);
-    owner->cancelAndDelete(joinTimer);
-    delete upstreamInterface;
-    for (DownstreamInterfaceVector::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
-        delete *it;
-}
-
-PIMSM::DownstreamInterface *PIMSM::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
-{
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
-    {
-        DownstreamInterface *downstream = downstreamInterfaces[i];
-        if (downstream->getInterfaceId() == interfaceId)
-            return downstream;
-    }
-    return NULL;
-}
-
-int PIMSM::Route::findDownstreamInterface(InterfaceEntry *ie)
-{
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
-    {
-        DownstreamInterface *downstream = downstreamInterfaces[i];
-        if (downstream->ie == ie)
-            return i;
-    }
-    return -1;
-}
-
-bool PIMSM::Route::isImmediateOlistNull()
-{
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
-        if (downstreamInterfaces[i]->isInImmediateOlist())
-            return false;
-    return true;
-}
-
-bool PIMSM::Route::isInheritedOlistNull()
-{
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
-        if (downstreamInterfaces[i]->isInInheritedOlist())
-            return false;
-    return true;
-}
-
 std::ostream& operator<<(std::ostream &out, const PIMSM::SourceAndGroup &sourceGroup)
 {
     out << "(" << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
@@ -129,30 +71,17 @@ PIMSM::~PIMSM()
         delete it->second;
 }
 
-void PIMSM::handleMessage(cMessage *msg)
-{
-	if (msg->isSelfMessage())
-	{
-	   processPIMTimer(msg);
-	}
-	else if (dynamic_cast<PIMPacket *>(msg))
-	{
-	   PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
-	   EV << "Version: " << pkt->getVersion() << ", type: " << pkt->getType() << endl;
-	   processPIMPacket(pkt);
-	}
-	else
-	   EV << "PIMSM::handleMessage: Wrong message" << endl;
-}
-
 void PIMSM::initialize(int stage)
 {
     PIMBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
-        setRPAddress(par("RP").stdstringValue());
-        setSPTthreshold(par("sptThreshold").stdstringValue());
+        const char *rp = par("RP");
+        if (rp && *rp)
+            rpAddr = IPv4Address(rp);
+        sptThreshold = par("sptThreshold").stdstringValue();
+
         joinPrunePeriod = par("joinPrunePeriod");
         defaultOverrideInterval = par("defaultOverrideInterval");
         defaultPropagationDelay = par("defaultPropagationDelay");
@@ -168,14 +97,24 @@ void PIMSM::initialize(int stage)
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        // is PIM enabled?
-        if (pimIft->getNumInterfaces() == 0)
+        // is PIMSM enabled?
+        bool hasPIMSMInterface = false;
+        for (int i = 0; i < pimIft->getNumInterfaces(); ++i)
         {
-            EV << "PIM is NOT enabled on device " << endl;
-            return;
+            if (pimIft->getInterface(i)->getMode() == PIMInterface::SparseMode)
+            {
+                hasPIMSMInterface = true;
+                break;
+            }
         }
-        else
+
+        if (hasPIMSMInterface)
         {
+            if (rpAddr.isUnspecified())
+                throw cRuntimeError("PIMSM: missing RP address parameter.");
+            if (sptThreshold.empty())
+                throw cRuntimeError("PIMSM: missing SPTthreshold parameter");
+
             // subscribe for notifications
             cModule *host = findContainingNode(this);
             if (host != NULL) {
@@ -187,401 +126,157 @@ void PIMSM::initialize(int stage)
                 host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
             }
         }
-    }
-}
-
-/**
- * DATA ON RPF INTERFACE
- *
- * The method process notification about data which appears on RPF interface. It means that source
- * is still active. The result is resetting of Keep Alive Timer. Also if first data packet arrive to
- * last hop router in RPT, switchover to SPT has to be considered.
- *
- * @param newRoute Pointer to new entry in the multicast routing table.
- * @see PIMkat()
- * @see getSPTthreshold()
- */
-void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
-{
-    if (route->type == SG)                          // (S,G) route
-    {
-        // set KeepAlive timer
-        if (/*DirectlyConnected(route->source) ||*/
-            (!route->isFlagSet(Route::PRUNED) && !route->isInheritedOlistNull()))
-        {
-            EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->source << ", " << route->group << ") timer.\n";
-
-            if (!route->keepAliveTimer)
-                route->startKeepAliveTimer();
-            else
-                restartTimer(route->keepAliveTimer, keepAlivePeriod);
-        }
-
-        // Update SPT bit
-
-        /* TODO
-             void
-             Update_SPTbit(S,G,iif) {
-               if ( iif == RPF_interface(S)
-                     AND JoinDesired(S,G) == TRUE
-                     AND ( DirectlyConnected(S) == TRUE
-                           OR RPF_interface(S) != RPF_interface(RP(G))
-                           OR inherited_olist(S,G,rpt) == NULL
-                           OR ( ( RPF'(S,G) == RPF'(*,G) ) AND
-                                ( RPF'(S,G) != NULL ) )
-                           OR ( I_Am_Assert_Loser(S,G,iif) ) {
-                  Set SPTbit(S,G) to TRUE
-               }
-             }
-         */
-         route->setFlags(Route::SPT_BIT);
-    }
-
-    // check switch from RP tree to the SPT
-    if (route->isFlagSet(Route::SPT_BIT))
-    {
-        /*
-             void
-             CheckSwitchToSpt(S,G) {
-               if ( ( pim_include(*,G) (-) pim_exclude(S,G)
-                      (+) pim_include(S,G) != NULL )
-                    AND SwitchToSptDesired(S,G) ) {
-                      # Note: Restarting the KAT will result in the SPT switch
-                      set KeepaliveTimer(S,G) to Keepalive_Period
-               }
-             }
-         */
-    }
-
-    //TODO SPT threshold at last hop router
-//    if (route->isFlagSet(Route::CONNECTED))
-//    {
-//        if (this->getSPTthreshold() != "infinity")
-//            EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
-//        else
-//            EV << "pimSM::dataOnRpf - SPT threshold set to infinity" << endl;
-//
-//    }
-}
-
-/**
- * SET RP ADDRESS
- *
- * The method is used to set RP address from configuration.
- *
- * @param address in string format.
- * @see getRPAddress()
- */
-void PIMSM::setRPAddress(std::string address)
-{
-    if (address != "")
-    {
-        std::string RP (address);
-        rpAddr = IPv4Address(RP.c_str());
-    }
-    else
-        EV << "PIMSM::setRPAddress: empty RP address" << endl;
-}
-
-/**
- * SET SPT threshold
- *
- * The method is used to set SPT threshold from configuration.
- *
- * @param threshold in string format.
- * @see getSPTAddress()
- */
-void PIMSM::setSPTthreshold(std::string threshold)
-{
-    if (threshold != "")
-        sptThreshold.append(threshold);
-    else
-        EV << "PIMSM::setSPTthreshold: bad SPTthreshold" << endl;
-}
-
-/**
- * The method is used to determine if router is Designed Router for given IP address.
- */
-bool PIMSM::IamDR (IPv4Address source)
-{
-    for (int i=0; i < ift->getNumInterfaces(); i++)
-    {
-        InterfaceEntry *ie = ift->getInterface(i);
-        IPv4Address localAddr = ie->ipv4Data()->getIPAddress();
-        IPv4Address netmask = ie->ipv4Data()->getNetmask();
-
-        if (IPv4Address::maskedAddrAreEqual(source, localAddr, netmask))
-            return true;
-    }
-
-    return false;
-}
-
-/**
- * The method is used to process PIM Keep Alive Timer. It is (S,G) timer. When Keep Alive Timer expires,
- * route is removed from multicast routing table.
- */
-void PIMSM::processKeepAliveTimer(cMessage *timer)
-{
-    EV << "pimSM::processKeepAliveTimer: route will be deleted" << endl;
-    Route *route = static_cast<Route*>(timer->getContextPointer());
-    ASSERT(route->type == SG);
-    ASSERT(timer == route->keepAliveTimer);
-
-    delete timer;
-    route->keepAliveTimer = NULL;
-    deleteMulticastRoute(route);
-}
-
-/**
- * The method is used to process PIM Register Stop Timer. RST is used to send
- * periodic Register-Null messages
- */
-void PIMSM::processRegisterStopTimer(cMessage *timer)
-{
-    EV << "pimSM::processRegisterStopTimer: " << endl;
-    Route *routeSG = static_cast<Route*>(timer->getContextPointer());
-    ASSERT(timer == routeSG->registerStopTimer);
-    ASSERT(routeSG->type == SG);
-
-    delete timer;
-    routeSG->registerStopTimer = NULL;
-
-    if (routeSG->registerState == Route::RS_PRUNE)
-    {
-        routeSG->registerState = Route::RS_JOIN_PENDING;
-        sendPIMRegisterNull(routeSG->source, routeSG->group);
-        routeSG->startRegisterStopTimer(registerProbeTime);
-    }
-    else if (routeSG->registerState == Route::RS_JOIN_PENDING)
-    {
-        routeSG->registerState = Route::RS_JOIN;
-    }
-}
-
-/**
- * PROCESS EXPIRY TIMER
- *
- * The method is used to process PIM Expiry Timer. It is timer for (S,G) and (*,G).
- * When Expiry timer expires,route is removed from multicast routing table.
- *
- * @param timer Pointer to Keep Alive Timer.
- * @see PIMet()
- */
-void PIMSM::processExpiryTimer(cMessage *timer)
-{
-    EV << "pimSM::processExpiryTimer: " << endl;
-
-    PimsmInterface *interface = static_cast<PimsmInterface*>(timer->getContextPointer());
-    Route *route = interface->route();
-
-    if (interface != route->upstreamInterface)
-    {
-        //
-        // Downstream Join/Prune State Machine; event: ET expires
-        //
-        DownstreamInterface *downstream = check_and_cast<DownstreamInterface*>(interface);
-        downstream->joinPruneState = DownstreamInterface::NO_INFO;
-        cancelAndDeleteTimer(downstream->prunePendingTimer);
-        downstream->expiryTimer = NULL;
-        delete timer;
-
-        // upstream state machine
-        if (route->isInheritedOlistNull())
-        {
-            route->setFlags(Route::PRUNED);
-            PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
-            if (route->type == G && !IamRP(route->rpAddr))
-                sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
-            else if (route->type == SG)
-                sendPIMPrune(route->group, route->source, RPFneighbor->getAddress(), SG);
-
-            cancelAndDeleteTimer(route->joinTimer);
-        }
-    }
-    if (route->upstreamInterface->expiryTimer && interface == route->upstreamInterface)
-    {
-        for(unsigned i=0; i<route->downstreamInterfaces.size();)
-        {
-            if (route->downstreamInterfaces[i]->expiryTimer)
-                route->removeDownstreamInterface(i);
-            else
-                i++;
-        }
-        if (IamRP(this->getRPAddress()) && route->type == G)
-        {
-            EV << "ET for (*,G) route on RP expires - go to stopped" << endl;
-            cancelAndDeleteTimer(route->upstreamInterface->expiryTimer);
-        }
         else
-            deleteMulticastRoute(route);
+            EV << "PIM is NOT enabled on device " << endl;
     }
 }
 
-/**
- * PROCESS JOIN TIMER
- *
- * The method is used to process PIM Join Timer. It is timer for (S,G) and (*,G).
- * When Join Timer expires, periodic Join message is sent to upstream neighbor.
- *
- * @param timer Pointer to Join Timer.
- * @see PIMjt()
- */
-void PIMSM::processJoinTimer(cMessage *timer)
+void PIMSM::handleMessage(cMessage *msg)
 {
-    EV << "pimSM::processJoinTimer:" << endl;
-
-    Route *route = static_cast<Route*>(timer->getContextPointer());
-    ASSERT(timer == route->joinTimer);
-    IPv4Address joinAddr = route->type == G ? route->rpAddr : route->source;
-
-    if (!route->isInheritedOlistNull())
-    {
-        sendPIMJoin(route->group, joinAddr, route->upstreamInterface->nextHop, route->type);
-        restartTimer(route->joinTimer, joinPrunePeriod);
-    }
-    else
-    {
-        delete timer;
-        route->joinTimer = NULL;
-    }
+	if (msg->isSelfMessage())
+	{
+	    switch(msg->getKind())
+	    {
+	        case HelloTimer:
+	            processHelloTimer(msg);
+	            break;
+	        case JoinTimer:
+	            processJoinTimer(msg);
+	            break;
+	        case PrunePendingTimer:
+	            processPrunePendingTimer(msg);
+	            break;
+	        case ExpiryTimer:
+	            processExpiryTimer(msg);
+	            break;
+	        case KeepAliveTimer:
+	            processKeepAliveTimer(msg);
+	            break;
+	        case RegisterStopTimer:
+	            processRegisterStopTimer(msg);
+	            break;
+	        case AssertTimer:
+	            processAssertTimer(msg);
+	            break;
+	        default:
+	            throw cRuntimeError("PIMSM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
+	    }
+	}
+	else if (dynamic_cast<PIMPacket *>(msg))
+	{
+	    PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
+	    switch(pkt->getType())
+	    {
+	        case Hello:
+	            processHelloPacket(check_and_cast<PIMHello*>(pkt));
+	            break;
+	        case JoinPrune:
+	            processJoinPrunePacket(check_and_cast<PIMJoinPrune *> (pkt));
+	            break;
+	        case Register:
+	            processRegisterPacket(check_and_cast<PIMRegister *> (pkt));
+	            break;
+	        case RegisterStop:
+	            processRegisterStopPacket(check_and_cast<PIMRegisterStop *> (pkt));
+	            break;
+	        case Assert:
+	            processAssertPacket(check_and_cast<PIMAssert*>(pkt));
+	            break;
+	        case Graft:
+	            EV_WARN << "Ignoring PIM-DM Graft packet.\n";
+	            delete pkt;
+	            break;
+	        case GraftAck:
+	            EV_WARN << "Ignoring PIM-DM GraftAck packet.\n";
+	            delete pkt;
+	            break;
+	        case StateRefresh:
+	            EV_WARN << "Ignoring PIM-DM StateRefresh packet.\n";
+	            delete pkt;
+	            break;
+	        case Bootstrap:
+	            delete pkt;
+	            break;
+	        case CandidateRPAdvertisement:
+	            delete pkt;
+	            break;
+	        default:
+	            throw cRuntimeError("PIMSM: received unknown PIM packet: %s (%s)", pkt->getName(), pkt->getClassName());
+	    }
+	}
+	else
+	   EV << "PIMSM::handleMessage: Wrong message" << endl;
 }
 
-/**
- * PROCESS PRUNE PENDING TIMER
- *
- * The method is used to process PIM Prune Pending Timer.
- * Prune Pending Timer is used for delaying of Prune message sending
- * (for possible overriding Join from another PIM neighbor)
- *
- * @param timer Pointer to Prune Pending Timer.
- * @see PIMppt()
- */
-void PIMSM::processPrunePendingTimer(cMessage *timer)
+void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
 {
-    EV << "pimSM::processPrunePendingTimer:" << endl;
-    DownstreamInterface *downstream = static_cast<DownstreamInterface*>(timer->getContextPointer());
-    ASSERT(timer == downstream->prunePendingTimer);
-    ASSERT(downstream->joinPruneState == DownstreamInterface::PRUNE_PENDING);
-    Route *route = downstream->route();
+    Enter_Method_Silent();
+    printNotificationBanner(signalID, details);
+    Route *route;
+    IPv4Datagram *datagram;
+    PIMInterface *pimInterface;
 
-    if (route->type == G || route->type == SG)
+    if (signalID == NF_IPv4_MCAST_REGISTERED)
     {
-        //
-        // Downstream (*,G)/(S,G) Join/Prune State Machine; event: PPT expires
-        //
-
-        // go to NO_INFO state
-        downstream->joinPruneState = DownstreamInterface::NO_INFO;
-        cancelAndDeleteTimer(downstream->expiryTimer);
-        downstream->prunePendingTimer = NULL;
-        delete timer;
-
-        // optionally send PruneEcho message
-        if (pimNbt->getNumNeighborsOnInterface(downstream->ie->getInterfaceId()) > 1)
+        EV <<  "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
+            multicastReceiverAdded(info->ie, info->groupAddress);
+    }
+    else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
+    {
+        EV <<  "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
+        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
+        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
+        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
+            multicastReceiverRemoved(info->ie, info->groupAddress);
+    }
+    else if (signalID == NF_IPv4_NEW_MULTICAST)
+    {
+        EV <<  "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        IPv4Address srcAddr = datagram->getSrcAddress();
+        IPv4Address destAddr = datagram->getDestAddress();
+        unroutableMulticastPacketArrived(srcAddr, destAddr);
+    }
+    else if (signalID == NF_IPv4_DATA_ON_RPF)
+    {
+        EV <<  "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
         {
-            // A PruneEcho is simply a Prune message sent by the
-            // upstream router on a LAN with its own address in the Upstream
-            // Neighbor Address field.  Its purpose is to add additional
-            // reliability so that if a Prune that should have been
-            // overridden by another router is lost locally on the LAN, then
-            // the PruneEcho may be received and cause the override to happen.
-            IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->source;
-            IPv4Address upstreamNeighborField = downstream->ie->ipv4Data()->getIPAddress();
-            sendPIMPrune(route->group, pruneAddr, upstreamNeighborField, route->type);
+            route = findRouteG(datagram->getDestAddress());
+            if (route)
+                multicastPacketArrivedOnRpfInterface(route);
+            route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
+            if (route)
+                multicastPacketArrivedOnRpfInterface(route);
         }
     }
-    else if (route->type == SGrpt)
+    else if (signalID == NF_IPv4_DATA_ON_NONRPF)
     {
-        //
-        // Downstream (S,G,rpt) Join/Prune State Machine; event: PPT expires
-        //
-
-        // go to PRUNE state
-        // TODO
-    }
-
-    // Now check upstream state transitions
-    updateJoinDesired(route);
-
-    // old code
-//    IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->origin;
-//    PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId()); // XXX why not nextHop?
-//
-//    if ((route->type == G && !IamRP(this->getRPAddress())) || route->type == SG)
-//        sendPIMPrune(route->group, pruneAddr, neighbor->getAddress(), route->type);
-
-}
-
-void PIMSM::processAssertTimer(cMessage *timer)
-{
-    PimsmInterface *interfaceData = static_cast<PimsmInterface*>(timer->getContextPointer());
-    ASSERT(timer == interfaceData->assertTimer);
-    ASSERT(interfaceData->assertState != Interface::NO_ASSERT_INFO);
-
-    Route *route = interfaceData->route();
-    if (route->type == SG || route->type == G)
-    {
-        //
-        // (S,G) Assert State Machine; event: AT(S,G,I) expires OR
-        // (*,G) Assert State Machine; event: AT(*,G,I) expires
-        //
-        EV_DETAIL << "AssertTimer(" << (route->type==G?"*":route->source.str()) << ", "
-                  << route->group << ", " << interfaceData->ie->getName() << ") has expired.\n";
-
-        if (interfaceData->assertState == Interface::I_WON_ASSERT)
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
         {
-            // The (S,G) or (*,G) Assert Timer expires.  As we're in the Winner state,
-            // we must still have (S,G) or (*,G) forwarding state that is actively
-            // being kept alive.  We resend the (S,G) or (*,G) Assert and restart the
-            // Assert Timer.  Note that the assert
-            // winner's Assert Timer is engineered to expire shortly before
-            // timers on assert losers; this prevents unnecessary thrashing
-            // of the forwarder and periodic flooding of duplicate packets.
-            sendPIMAssert(route->source, route->group, route->metric, interfaceData->ie, route->type == G);
-            interfaceData->startAssertTimer(assertTime - assertOverrideInterval);
-        }
-        else if (interfaceData->assertState == Interface::I_LOST_ASSERT)
-        {
-            // The (S,G) or (*,G) Assert Timer expires.  We transition to NoInfo
-            // state, deleting the (S,G) or (*,G) assert information.
-            EV_DEBUG << "Going into NO_ASSERT_INFO state.\n";
-            interfaceData->deleteAssertInfo(); // deleted timer
-            return;
+            IPv4Address srcAddr = datagram->getSrcAddress();
+            IPv4Address destAddr = datagram->getDestAddress();
+            if ((route = findRouteSG(srcAddr, destAddr)) != NULL)
+                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
+            else if ((route = findRouteG(destAddr)) != NULL)
+                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
         }
     }
-
-    delete timer;
-}
-
-
-/**
- * The method is used to restart ET. ET is used for outgoing interfaces
- * and whole route in router. After ET expires, outgoing interface is
- * removed or if there aren't any outgoing interface, route is removed
- * after ET expires.
- */
-void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime)
-{
-    EV << "pimSM::restartExpiryTimer: next ET @ " << simTime() + holdTime << " for type: ";
-
-    if (route)
+    else if (signalID == NF_IPv4_MDATA_REGISTER)
     {
-        // ET for route
-        if (route->upstreamInterface && route->upstreamInterface->expiryTimer)
-            restartTimer(route->upstreamInterface->expiryTimer, holdTime);
-
-        // ET for outgoing interfaces
-        for (unsigned i=0; i< route->downstreamInterfaces.size(); i++)
-        {   // if exist ET and for given interface
-            DownstreamInterface *downstream = route->downstreamInterfaces[i];
-            if (downstream->expiryTimer && (downstream->getInterfaceId() == originIntf->getInterfaceId()))
-            {
-                EV << /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getName() << endl;
-                restartTimer(downstream->expiryTimer, holdTime);
-                break;
-            }
-        }
+        EV <<  "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
+        datagram = check_and_cast<IPv4Datagram*>(details);
+        PIMInterface *incomingInterface = getIncomingInterface(datagram);
+        route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
+        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
+            multicastPacketForwarded(datagram);
     }
 }
 
@@ -1373,6 +1068,514 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
     }
 }
 
+//=============================================================================
+//                   Processing Timers
+//=============================================================================
+
+void PIMSM::processKeepAliveTimer(cMessage *timer)
+{
+    EV << "pimSM::processKeepAliveTimer: route will be deleted" << endl;
+    Route *route = static_cast<Route*>(timer->getContextPointer());
+    ASSERT(route->type == SG);
+    ASSERT(timer == route->keepAliveTimer);
+
+    delete timer;
+    route->keepAliveTimer = NULL;
+    deleteMulticastRoute(route);
+}
+
+void PIMSM::processRegisterStopTimer(cMessage *timer)
+{
+    EV << "pimSM::processRegisterStopTimer: " << endl;
+    Route *routeSG = static_cast<Route*>(timer->getContextPointer());
+    ASSERT(timer == routeSG->registerStopTimer);
+    ASSERT(routeSG->type == SG);
+
+    delete timer;
+    routeSG->registerStopTimer = NULL;
+
+    if (routeSG->registerState == Route::RS_PRUNE)
+    {
+        routeSG->registerState = Route::RS_JOIN_PENDING;
+        sendPIMRegisterNull(routeSG->source, routeSG->group);
+        routeSG->startRegisterStopTimer(registerProbeTime);
+    }
+    else if (routeSG->registerState == Route::RS_JOIN_PENDING)
+    {
+        routeSG->registerState = Route::RS_JOIN;
+    }
+}
+
+/**
+ * The method is used to process PIM Expiry Timer. It is timer for (S,G) and (*,G).
+ * When Expiry timer expires,route is removed from multicast routing table.
+ */
+void PIMSM::processExpiryTimer(cMessage *timer)
+{
+    EV << "pimSM::processExpiryTimer: " << endl;
+
+    PimsmInterface *interface = static_cast<PimsmInterface*>(timer->getContextPointer());
+    Route *route = interface->route();
+
+    if (interface != route->upstreamInterface)
+    {
+        //
+        // Downstream Join/Prune State Machine; event: ET expires
+        //
+        DownstreamInterface *downstream = check_and_cast<DownstreamInterface*>(interface);
+        downstream->joinPruneState = DownstreamInterface::NO_INFO;
+        cancelAndDeleteTimer(downstream->prunePendingTimer);
+        downstream->expiryTimer = NULL;
+        delete timer;
+
+        // upstream state machine
+        if (route->isInheritedOlistNull())
+        {
+            route->setFlags(Route::PRUNED);
+            PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
+            if (route->type == G && !IamRP(route->rpAddr))
+                sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
+            else if (route->type == SG)
+                sendPIMPrune(route->group, route->source, RPFneighbor->getAddress(), SG);
+
+            cancelAndDeleteTimer(route->joinTimer);
+        }
+    }
+    if (route->upstreamInterface->expiryTimer && interface == route->upstreamInterface)
+    {
+        for(unsigned i=0; i<route->downstreamInterfaces.size();)
+        {
+            if (route->downstreamInterfaces[i]->expiryTimer)
+                route->removeDownstreamInterface(i);
+            else
+                i++;
+        }
+        if (IamRP(rpAddr) && route->type == G)
+        {
+            EV << "ET for (*,G) route on RP expires - go to stopped" << endl;
+            cancelAndDeleteTimer(route->upstreamInterface->expiryTimer);
+        }
+        else
+            deleteMulticastRoute(route);
+    }
+}
+
+void PIMSM::processJoinTimer(cMessage *timer)
+{
+    EV << "pimSM::processJoinTimer:" << endl;
+
+    Route *route = static_cast<Route*>(timer->getContextPointer());
+    ASSERT(timer == route->joinTimer);
+    IPv4Address joinAddr = route->type == G ? route->rpAddr : route->source;
+
+    if (!route->isInheritedOlistNull())
+    {
+        sendPIMJoin(route->group, joinAddr, route->upstreamInterface->nextHop, route->type);
+        restartTimer(route->joinTimer, joinPrunePeriod);
+    }
+    else
+    {
+        delete timer;
+        route->joinTimer = NULL;
+    }
+}
+
+/**
+ * Prune Pending Timer is used for delaying of Prune message sending
+ * (for possible overriding Join from another PIM neighbor)
+ */
+void PIMSM::processPrunePendingTimer(cMessage *timer)
+{
+    EV << "pimSM::processPrunePendingTimer:" << endl;
+    DownstreamInterface *downstream = static_cast<DownstreamInterface*>(timer->getContextPointer());
+    ASSERT(timer == downstream->prunePendingTimer);
+    ASSERT(downstream->joinPruneState == DownstreamInterface::PRUNE_PENDING);
+    Route *route = downstream->route();
+
+    if (route->type == G || route->type == SG)
+    {
+        //
+        // Downstream (*,G)/(S,G) Join/Prune State Machine; event: PPT expires
+        //
+
+        // go to NO_INFO state
+        downstream->joinPruneState = DownstreamInterface::NO_INFO;
+        cancelAndDeleteTimer(downstream->expiryTimer);
+        downstream->prunePendingTimer = NULL;
+        delete timer;
+
+        // optionally send PruneEcho message
+        if (pimNbt->getNumNeighborsOnInterface(downstream->ie->getInterfaceId()) > 1)
+        {
+            // A PruneEcho is simply a Prune message sent by the
+            // upstream router on a LAN with its own address in the Upstream
+            // Neighbor Address field.  Its purpose is to add additional
+            // reliability so that if a Prune that should have been
+            // overridden by another router is lost locally on the LAN, then
+            // the PruneEcho may be received and cause the override to happen.
+            IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->source;
+            IPv4Address upstreamNeighborField = downstream->ie->ipv4Data()->getIPAddress();
+            sendPIMPrune(route->group, pruneAddr, upstreamNeighborField, route->type);
+        }
+    }
+    else if (route->type == SGrpt)
+    {
+        //
+        // Downstream (S,G,rpt) Join/Prune State Machine; event: PPT expires
+        //
+
+        // go to PRUNE state
+        // TODO
+    }
+
+    // Now check upstream state transitions
+    updateJoinDesired(route);
+
+    // old code
+//    IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->origin;
+//    PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId()); // XXX why not nextHop?
+//
+//    if ((route->type == G && !IamRP(this->getRPAddress())) || route->type == SG)
+//        sendPIMPrune(route->group, pruneAddr, neighbor->getAddress(), route->type);
+
+}
+
+void PIMSM::processAssertTimer(cMessage *timer)
+{
+    PimsmInterface *interfaceData = static_cast<PimsmInterface*>(timer->getContextPointer());
+    ASSERT(timer == interfaceData->assertTimer);
+    ASSERT(interfaceData->assertState != Interface::NO_ASSERT_INFO);
+
+    Route *route = interfaceData->route();
+    if (route->type == SG || route->type == G)
+    {
+        //
+        // (S,G) Assert State Machine; event: AT(S,G,I) expires OR
+        // (*,G) Assert State Machine; event: AT(*,G,I) expires
+        //
+        EV_DETAIL << "AssertTimer(" << (route->type==G?"*":route->source.str()) << ", "
+                  << route->group << ", " << interfaceData->ie->getName() << ") has expired.\n";
+
+        if (interfaceData->assertState == Interface::I_WON_ASSERT)
+        {
+            // The (S,G) or (*,G) Assert Timer expires.  As we're in the Winner state,
+            // we must still have (S,G) or (*,G) forwarding state that is actively
+            // being kept alive.  We resend the (S,G) or (*,G) Assert and restart the
+            // Assert Timer.  Note that the assert
+            // winner's Assert Timer is engineered to expire shortly before
+            // timers on assert losers; this prevents unnecessary thrashing
+            // of the forwarder and periodic flooding of duplicate packets.
+            sendPIMAssert(route->source, route->group, route->metric, interfaceData->ie, route->type == G);
+            interfaceData->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (interfaceData->assertState == Interface::I_LOST_ASSERT)
+        {
+            // The (S,G) or (*,G) Assert Timer expires.  We transition to NoInfo
+            // state, deleting the (S,G) or (*,G) assert information.
+            EV_DEBUG << "Going into NO_ASSERT_INFO state.\n";
+            interfaceData->deleteAssertInfo(); // deleted timer
+            return;
+        }
+    }
+
+    delete timer;
+}
+
+
+/**
+ * The method is used to restart ET. ET is used for outgoing interfaces
+ * and whole route in router. After ET expires, outgoing interface is
+ * removed or if there aren't any outgoing interface, route is removed
+ * after ET expires.
+ */
+void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime)
+{
+    EV << "pimSM::restartExpiryTimer: next ET @ " << simTime() + holdTime << " for type: ";
+
+    if (route)
+    {
+        // ET for route
+        if (route->upstreamInterface && route->upstreamInterface->expiryTimer)
+            restartTimer(route->upstreamInterface->expiryTimer, holdTime);
+
+        // ET for outgoing interfaces
+        for (unsigned i=0; i< route->downstreamInterfaces.size(); i++)
+        {   // if exist ET and for given interface
+            DownstreamInterface *downstream = route->downstreamInterfaces[i];
+            if (downstream->expiryTimer && (downstream->getInterfaceId() == originIntf->getInterfaceId()))
+            {
+                EV << /*timer->getStateType() << " , " <<*/ route->group << " , " << route->source << ", int: " << downstream->ie->getName() << endl;
+                restartTimer(downstream->expiryTimer, holdTime);
+                break;
+            }
+        }
+    }
+}
+
+//=============================================================================
+//                         Signal Handlers
+//=============================================================================
+
+void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
+{
+    InterfaceEntry *interfaceTowardSource = rt->getInterfaceForDestAddr(source);
+    if (!interfaceTowardSource)
+        return;
+
+    PIMInterface *rpfInterface = pimIft->getInterfaceById(interfaceTowardSource->getInterfaceId());
+    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::SparseMode)
+        return;
+
+    InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(rpAddr);
+
+    // RPF check and check if I am DR of the source
+    if ((interfaceTowardRP != interfaceTowardSource) && IamDR(source))
+    {
+        EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
+
+        // create new (S,G) route
+        Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
+        newRouteSG->startKeepAliveTimer();
+        newRouteSG->registerState = Route::RS_JOIN;
+        //DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
+        //downstream->shRegTun = false;
+
+        // create new (*,G) route
+        addNewRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
+    }
+}
+
+void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
+{
+    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
+
+    Route *routeG = findRouteG(group);
+    if (routeG)
+    {
+        DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+        downstream->setLocalReceiverInclude(false);
+        updateJoinDesired(routeG);
+    }
+}
+
+void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
+{
+    EV_DETAIL << "Multicast receiver added for group " << group << " on interface '" << ie->getName() << "'.\n";
+
+    Route *routeG = findRouteG(group);
+    if (!routeG)
+        routeG = addNewRouteG(group, Route::PRUNED);
+
+    DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+    downstream->setLocalReceiverInclude(true);
+
+    updateJoinDesired(routeG);
+}
+
+/**
+ * The method process notification about data which appears on RPF interface. It means that source
+ * is still active. The result is resetting of Keep Alive Timer. Also if first data packet arrive to
+ * last hop router in RPT, switchover to SPT has to be considered.
+ */
+void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
+{
+    if (route->type == SG)                          // (S,G) route
+    {
+        // set KeepAlive timer
+        if (/*DirectlyConnected(route->source) ||*/
+            (!route->isFlagSet(Route::PRUNED) && !route->isInheritedOlistNull()))
+        {
+            EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->source << ", " << route->group << ") timer.\n";
+
+            if (!route->keepAliveTimer)
+                route->startKeepAliveTimer();
+            else
+                restartTimer(route->keepAliveTimer, keepAlivePeriod);
+        }
+
+        // Update SPT bit
+
+        /* TODO
+             void
+             Update_SPTbit(S,G,iif) {
+               if ( iif == RPF_interface(S)
+                     AND JoinDesired(S,G) == TRUE
+                     AND ( DirectlyConnected(S) == TRUE
+                           OR RPF_interface(S) != RPF_interface(RP(G))
+                           OR inherited_olist(S,G,rpt) == NULL
+                           OR ( ( RPF'(S,G) == RPF'(*,G) ) AND
+                                ( RPF'(S,G) != NULL ) )
+                           OR ( I_Am_Assert_Loser(S,G,iif) ) {
+                  Set SPTbit(S,G) to TRUE
+               }
+             }
+         */
+         route->setFlags(Route::SPT_BIT);
+    }
+
+    // check switch from RP tree to the SPT
+    if (route->isFlagSet(Route::SPT_BIT))
+    {
+        /*
+             void
+             CheckSwitchToSpt(S,G) {
+               if ( ( pim_include(*,G) (-) pim_exclude(S,G)
+                      (+) pim_include(S,G) != NULL )
+                    AND SwitchToSptDesired(S,G) ) {
+                      # Note: Restarting the KAT will result in the SPT switch
+                      set KeepaliveTimer(S,G) to Keepalive_Period
+               }
+             }
+         */
+    }
+
+    //TODO SPT threshold at last hop router
+//    if (route->isFlagSet(Route::CONNECTED))
+//    {
+//        if (this->getSPTthreshold() != "infinity")
+//            EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
+//        else
+//            EV << "pimSM::dataOnRpf - SPT threshold set to infinity" << endl;
+//
+//    }
+}
+
+void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId)
+{
+    if (route->type == G || route->type == SG)
+    {
+        //
+        // (S,G) Assert State Machine; event: An (S,G) data packet arrives on interface I
+        // OR
+        // (*,G) Assert State Machine; event: A data packet destined for G arrives on interface I
+        //
+        DownstreamInterface *downstream = route->findDownstreamInterfaceByInterfaceId(interfaceId);
+        if (downstream && downstream->couldAssert() && downstream->assertState == Interface::NO_ASSERT_INFO)
+        {
+            // An (S,G) data packet arrived on an downstream interface that
+            // is in our (S,G) or (*,G) outgoing interface list.  We optimistically
+            // assume that we will be the assert winner for this (S,G) or (*,G), and
+            // so we transition to the "I am Assert Winner" state and perform
+            // Actions A1 (below), which will initiate the assert negotiation
+            // for (S,G) or (*,G).
+            downstream->assertState = Interface::I_WON_ASSERT;
+            downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
+            sendPIMAssert(route->source, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
+            downstream->startAssertTimer(assertTime - assertOverrideInterval);
+        }
+        else if (route->type == SG && (!downstream || downstream->assertState == Interface::NO_ASSERT_INFO))
+        {
+            // When in NO_ASSERT_INFO state before and after consideration of the received message,
+            // then call (*,G) assert processing.
+            Route *routeG = findRouteG(route->group);
+            if (routeG)
+                multicastPacketArrivedOnNonRpfInterface(routeG, interfaceId);
+        }
+    }
+}
+
+void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
+{
+    IPv4Address source = datagram->getSrcAddress();
+    IPv4Address group = datagram->getDestAddress();
+
+    Route *routeSG = findRouteSG(source, group);
+    if (!routeSG || !routeSG->isFlagSet(Route::REGISTER) || !routeSG->isFlagSet(Route::PRUNED))
+        return;
+
+    // send Register message to RP
+
+    InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
+
+    if (routeSG->registerState == Route::RS_JOIN)
+    {
+        // refresh KAT timer
+        if (routeSG->keepAliveTimer)
+        {
+            EV << " (S,G) KAT timer refresh" << endl;
+            restartTimer(routeSG->keepAliveTimer, KAT);
+        }
+
+        sendPIMRegister(datagram, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
+    }
+}
+
+//============================================================================
+//                       Internal events
+//============================================================================
+
+/*
+ * JoinDesired(*,G) -> FALSE/TRUE
+ * JoinDesired(S,G) -> FALSE/TRUE
+ */
+void PIMSM::joinDesiredChanged(Route *route)
+{
+    if (route->type == G)
+    {
+        Route *routeG = route;
+
+        if (routeG->isFlagSet(Route::PRUNED) && routeG->joinDesired())
+        {
+            //
+            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> TRUE
+            //
+            routeG->clearFlag(Route::PRUNED);
+            if (routeG->upstreamInterface)
+            {
+                sendPIMJoin(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
+                routeG->startJoinTimer();
+            }
+        }
+        else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired())
+        {
+            //
+            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> FALSE
+            //
+            routeG->setFlags(Route::PRUNED);
+            cancelAndDeleteTimer(routeG->joinTimer);
+            if (routeG->upstreamInterface)
+                sendPIMPrune(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
+        }
+    }
+    else if (route->type == SG)
+    {
+        Route *routeSG = route;
+
+        if (routeSG->isFlagSet(Route::PRUNED) && routeSG->joinDesired())
+        {
+            //
+            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
+            //
+            routeSG->clearFlag(Route::PRUNED);
+            if (!IamDR(routeSG->source))
+            {
+                sendPIMJoin(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
+                routeSG->startJoinTimer();
+            }
+        }
+        else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired())
+        {
+            //
+            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> FALSE
+            //
+
+            // The upstream (S,G) state machine transitions to NotJoined
+            // state.  Send Prune(S,G) to the appropriate upstream neighbor,
+            // which is RPF'(S,G).  Cancel the Join Timer (JT), and set
+            // SPTbit(S,G) to FALSE.
+            routeSG->setFlags(Route::PRUNED);
+            routeSG->clearFlag(Route::SPT_BIT);
+            cancelAndDeleteTimer(routeSG->joinTimer);
+            if (!IamDR(routeSG->source))
+                sendPIMPrune(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
+        }
+    }
+
+}
+
+//============================================================================
+//                      Sending PIM packets
+//============================================================================
 
 void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType routeType)
 {
@@ -1511,14 +1714,9 @@ void PIMSM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
 
 
 /**
- * FORWARD MULTICAST DATA
- *
  * The method is used as abstraction for encapsulation multicast data to Register packet.
  * The method create message MultData with multicast source address and multicast group address
  * and send the message from RP to RPT.
- *
- * @param info Pointer to structure, which keep all information for creating and sending message.
- * @see MultData()
  */
 void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
 {
@@ -1540,9 +1738,9 @@ void PIMSM::forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId)
     send(data, "ipOut");
 }
 
-//
-//
-//
+//============================================================================
+//                     Update Actions
+//============================================================================
 void PIMSM::updateJoinDesired(Route *route)
 {
     bool oldValue = route->joinDesired();
@@ -1574,367 +1772,23 @@ void PIMSM::updateJoinDesired(Route *route)
     }
 }
 
+//============================================================================
+//                                Helpers
+//============================================================================
 
-void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
+bool PIMSM::IamDR (IPv4Address source)
 {
-    InterfaceEntry *interfaceTowardSource = rt->getInterfaceForDestAddr(source);
-    if (!interfaceTowardSource)
-        return;
-
-    PIMInterface *rpfInterface = pimIft->getInterfaceById(interfaceTowardSource->getInterfaceId());
-    if (!rpfInterface || rpfInterface->getMode() != PIMInterface::SparseMode)
-        return;
-
-    InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(this->getRPAddress());
-
-    // RPF check and check if I am DR of the source
-    if ((interfaceTowardRP != interfaceTowardSource) && IamDR(source))
+    for (int i=0; i < ift->getNumInterfaces(); i++)
     {
-        EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
+        InterfaceEntry *ie = ift->getInterface(i);
+        IPv4Address localAddr = ie->ipv4Data()->getIPAddress();
+        IPv4Address netmask = ie->ipv4Data()->getNetmask();
 
-        // create new (S,G) route
-        Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
-        newRouteSG->startKeepAliveTimer();
-        newRouteSG->registerState = Route::RS_JOIN;
-        //DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
-        //downstream->shRegTun = false;
-
-        // create new (*,G) route
-        addNewRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
-    }
-}
-
-void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
-{
-    EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
-
-    Route *routeG = findRouteG(group);
-    if (routeG)
-    {
-        DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
-        downstream->setLocalReceiverInclude(false);
-        updateJoinDesired(routeG);
-    }
-}
-
-void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
-{
-    EV_DETAIL << "Multicast receiver added for group " << group << " on interface '" << ie->getName() << "'.\n";
-
-    Route *routeG = findRouteG(group);
-    if (!routeG)
-        routeG = addNewRouteG(group, Route::PRUNED);
-
-    DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
-    downstream->setLocalReceiverInclude(true);
-
-    updateJoinDesired(routeG);
-}
-
-void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId)
-{
-    if (route->type == G || route->type == SG)
-    {
-        //
-        // (S,G) Assert State Machine; event: An (S,G) data packet arrives on interface I
-        // OR
-        // (*,G) Assert State Machine; event: A data packet destined for G arrives on interface I
-        //
-        DownstreamInterface *downstream = route->findDownstreamInterfaceByInterfaceId(interfaceId);
-        if (downstream && downstream->couldAssert() && downstream->assertState == Interface::NO_ASSERT_INFO)
-        {
-            // An (S,G) data packet arrived on an downstream interface that
-            // is in our (S,G) or (*,G) outgoing interface list.  We optimistically
-            // assume that we will be the assert winner for this (S,G) or (*,G), and
-            // so we transition to the "I am Assert Winner" state and perform
-            // Actions A1 (below), which will initiate the assert negotiation
-            // for (S,G) or (*,G).
-            downstream->assertState = Interface::I_WON_ASSERT;
-            downstream->winnerMetric = route->metric.setAddress(downstream->ie->ipv4Data()->getIPAddress());
-            sendPIMAssert(route->source, route->group, downstream->winnerMetric, downstream->ie, route->type == G);
-            downstream->startAssertTimer(assertTime - assertOverrideInterval);
-        }
-        else if (route->type == SG && (!downstream || downstream->assertState == Interface::NO_ASSERT_INFO))
-        {
-            // When in NO_ASSERT_INFO state before and after consideration of the received message,
-            // then call (*,G) assert processing.
-            Route *routeG = findRouteG(route->group);
-            if (routeG)
-                multicastPacketArrivedOnNonRpfInterface(routeG, interfaceId);
-        }
-    }
-}
-
-void PIMSM::multicastPacketForwarded(IPv4Datagram *datagram)
-{
-    IPv4Address source = datagram->getSrcAddress();
-    IPv4Address group = datagram->getDestAddress();
-
-    Route *routeSG = findRouteSG(source, group);
-    if (!routeSG || !routeSG->isFlagSet(Route::REGISTER) || !routeSG->isFlagSet(Route::PRUNED))
-        return;
-
-    // send Register message to RP
-
-    InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(routeSG->rpAddr);
-
-    if (routeSG->registerState == Route::RS_JOIN)
-    {
-        // refresh KAT timer
-        if (routeSG->keepAliveTimer)
-        {
-            EV << " (S,G) KAT timer refresh" << endl;
-            restartTimer(routeSG->keepAliveTimer, KAT);
-        }
-
-        sendPIMRegister(datagram, routeSG->rpAddr, interfaceTowardRP->getInterfaceId());
-    }
-}
-
-
-/*
- * JoinDesired(*,G) -> FALSE/TRUE
- * JoinDesired(S,G) -> FALSE/TRUE
- */
-void PIMSM::joinDesiredChanged(Route *route)
-{
-    if (route->type == G)
-    {
-        Route *routeG = route;
-
-        if (routeG->isFlagSet(Route::PRUNED) && routeG->joinDesired())
-        {
-            //
-            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> TRUE
-            //
-            routeG->clearFlag(Route::PRUNED);
-            if (routeG->upstreamInterface)
-            {
-                sendPIMJoin(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
-                routeG->startJoinTimer();
-            }
-        }
-        else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired())
-        {
-            //
-            // Upstream (*,G) State Machine; event: JoinDesired(S,G) -> FALSE
-            //
-            routeG->setFlags(Route::PRUNED);
-            cancelAndDeleteTimer(routeG->joinTimer);
-            if (routeG->upstreamInterface)
-                sendPIMPrune(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
-        }
-    }
-    else if (route->type == SG)
-    {
-        Route *routeSG = route;
-
-        if (routeSG->isFlagSet(Route::PRUNED) && routeSG->joinDesired())
-        {
-            //
-            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
-            //
-            routeSG->clearFlag(Route::PRUNED);
-            if (!IamDR(routeSG->source))
-            {
-                sendPIMJoin(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
-                routeSG->startJoinTimer();
-            }
-        }
-        else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired())
-        {
-            //
-            // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> FALSE
-            //
-
-            // The upstream (S,G) state machine transitions to NotJoined
-            // state.  Send Prune(S,G) to the appropriate upstream neighbor,
-            // which is RPF'(S,G).  Cancel the Join Timer (JT), and set
-            // SPTbit(S,G) to FALSE.
-            routeSG->setFlags(Route::PRUNED);
-            routeSG->clearFlag(Route::SPT_BIT);
-            cancelAndDeleteTimer(routeSG->joinTimer);
-            if (!IamDR(routeSG->source))
-                sendPIMPrune(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
-        }
+        if (IPv4Address::maskedAddrAreEqual(source, localAddr, netmask))
+            return true;
     }
 
-}
-
-/**
- * PROCESS PIM TIMER
- *
- * The method is used to process PIM timers. According to type of PIM timer, the timer is sent to
- * appropriate method.
- *
- * @param timer Pointer to PIM timer.
- * @see PIMTimer()
- * @see processPruneTimer()
- * @see processGraftRetryTimer()
- */
-void PIMSM::processPIMTimer(cMessage *timer)
-{
-    EV << "pimSM::processPIMTimer: ";
-
-    switch(timer->getKind())
-    {
-        case HelloTimer:
-            processHelloTimer(timer);
-            break;
-        case JoinTimer:
-            EV << "JoinTimer" << endl;
-            processJoinTimer(timer);
-            break;
-        case PrunePendingTimer:
-            EV << "PrunePendingTimer" << endl;
-            processPrunePendingTimer(timer);
-            break;
-        case ExpiryTimer:
-            EV << "ExpiryTimer" << endl;
-            processExpiryTimer(timer);
-            break;
-        case KeepAliveTimer:
-            EV << "KeepAliveTimer" << endl;
-            processKeepAliveTimer(timer);
-            break;
-        case RegisterStopTimer:
-            EV << "RegisterStopTimer" << endl;
-            processRegisterStopTimer(timer);
-            break;
-        case AssertTimer:
-            processAssertTimer(timer);
-            break;
-        default:
-            EV << "BAD TYPE, DROPPED" << endl;
-            delete timer;
-            break;
-    }
-}
-
-/*
-    Bootstrap = 4,
-    CandidateRPAdvertisement = 8,
- */
-void PIMSM::processPIMPacket(PIMPacket *pkt)
-{
-    switch(pkt->getType())
-    {
-        case Hello:
-            processHelloPacket(check_and_cast<PIMHello*>(pkt));
-            break;
-        case JoinPrune:
-            processJoinPrunePacket(check_and_cast<PIMJoinPrune *> (pkt));
-            break;
-        case Register:
-            processRegisterPacket(check_and_cast<PIMRegister *> (pkt));
-            break;
-        case RegisterStop:
-            processRegisterStopPacket(check_and_cast<PIMRegisterStop *> (pkt));
-            break;
-        case Assert:
-            processAssertPacket(check_and_cast<PIMAssert*>(pkt));
-            break;
-        case Graft:
-            EV_WARN << "Ignoring PIM-DM Graft packet.\n";
-            delete pkt;
-            break;
-        case GraftAck:
-            EV_WARN << "Ignoring PIM-DM GraftAck packet.\n";
-            delete pkt;
-            break;
-        case StateRefresh:
-            EV_WARN << "Ignoring PIM-DM StateRefresh packet.\n";
-            delete pkt;
-            break;
-        default:
-            throw cRuntimeError("PIMSM: received unknown PIM packet: %s (%s)", pkt->getName(), pkt->getClassName());
-    }
-}
-
-/**
- * RECEIVE CHANGE NOTIFICATION
- *
- * The method from class Notification Board is used to catch its events.
- *
- * @param category Category of notification.
- * @param details Additional information for notification.
- * @see newMulticast()
- * @see newMulticastAddr()
- */
-void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
-{
-    // ignore notifications during initialize
-    if (simulation.getContextType()==CTX_INITIALIZE)
-        return;
-
-    Enter_Method_Silent();
-    printNotificationBanner(signalID, details);
-    Route *route;
-    IPv4Datagram *datagram;
-    PIMInterface *pimInterface;
-
-    if (signalID == NF_IPv4_MCAST_REGISTERED)
-    {
-        EV <<  "pimSM::receiveChangeNotification - NEW IGMP ADDED" << endl;
-        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
-        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
-        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
-            multicastReceiverAdded(info->ie, info->groupAddress);
-    }
-    else if (signalID == NF_IPv4_MCAST_UNREGISTERED)
-    {
-        EV <<  "pimSM::receiveChangeNotification - IGMP REMOVED" << endl;
-        IPv4MulticastGroupInfo *info = check_and_cast<IPv4MulticastGroupInfo*>(details);
-        pimInterface = pimIft->getInterfaceById(info->ie->getInterfaceId());
-        if (pimInterface && pimInterface->getMode() == PIMInterface::SparseMode)
-            multicastReceiverRemoved(info->ie, info->groupAddress);
-    }
-    else if (signalID == NF_IPv4_NEW_MULTICAST)
-    {
-        EV <<  "PimSM::receiveChangeNotification - NEW MULTICAST" << endl;
-        datagram = check_and_cast<IPv4Datagram*>(details);
-        IPv4Address srcAddr = datagram->getSrcAddress();
-        IPv4Address destAddr = datagram->getDestAddress();
-        unroutableMulticastPacketArrived(srcAddr, destAddr);
-    }
-    else if (signalID == NF_IPv4_DATA_ON_RPF)
-    {
-        EV <<  "pimSM::receiveChangeNotification - DATA ON RPF" << endl;
-        datagram = check_and_cast<IPv4Datagram*>(details);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
-        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
-        {
-            route = findRouteG(datagram->getDestAddress());
-            if (route)
-                multicastPacketArrivedOnRpfInterface(route);
-            route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
-            if (route)
-                multicastPacketArrivedOnRpfInterface(route);
-        }
-    }
-    else if (signalID == NF_IPv4_DATA_ON_NONRPF)
-    {
-        datagram = check_and_cast<IPv4Datagram*>(details);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
-        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
-        {
-            IPv4Address srcAddr = datagram->getSrcAddress();
-            IPv4Address destAddr = datagram->getDestAddress();
-            if ((route = findRouteSG(srcAddr, destAddr)) != NULL)
-                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
-            else if ((route = findRouteG(destAddr)) != NULL)
-                multicastPacketArrivedOnNonRpfInterface(route, incomingInterface->getInterfaceId());
-        }
-    }
-    else if (signalID == NF_IPv4_MDATA_REGISTER)
-    {
-        EV <<  "pimSM::receiveChangeNotification - REGISTER DATA" << endl;
-        datagram = check_and_cast<IPv4Datagram*>(details);
-        PIMInterface *incomingInterface = getIncomingInterface(datagram);
-        route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
-        if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
-            multicastPacketForwarded(datagram);
-    }
+    return false;
 }
 
 PIMInterface *PIMSM::getIncomingInterface(IPv4Datagram *datagram)
@@ -2143,6 +1997,84 @@ void PIMSM::restartTimer(cMessage *timer, double interval)
     scheduleAt(simTime() + interval, timer);
 }
 
+PIMSM::Route::Route(PIMSM *owner, RouteType type, IPv4Address origin, IPv4Address group)
+    : RouteEntry(owner, origin, group), type(type), rpAddr(IPv4Address::UNSPECIFIED_ADDRESS),
+      rpRoute(NULL), gRoute(NULL), sgrptRoute(NULL),
+      sequencenumber(0), keepAliveTimer(NULL), joinTimer(NULL), registerState(RS_NO_INFO), registerStopTimer(NULL),
+      upstreamInterface(NULL)
+{
+}
+
+PIMSM::Route::~Route()
+{
+    owner->cancelAndDelete(keepAliveTimer);
+    owner->cancelAndDelete(registerStopTimer);
+    owner->cancelAndDelete(joinTimer);
+    delete upstreamInterface;
+    for (DownstreamInterfaceVector::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
+        delete *it;
+}
+
+void PIMSM::Route::startKeepAliveTimer()
+{
+    ASSERT(this->type == SG);
+    keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
+    keepAliveTimer->setContextPointer(this);
+    pimsm()->scheduleAt(simTime() + pimsm()->keepAlivePeriod, keepAliveTimer);
+}
+
+void PIMSM::Route::startRegisterStopTimer(double interval)
+{
+    registerStopTimer = new cMessage("PIMRegisterStopTimer", RegisterStopTimer);
+    registerStopTimer->setContextPointer(this);
+    owner->scheduleAt(simTime() + interval, registerStopTimer);
+}
+
+void PIMSM::Route::startJoinTimer()
+{
+    joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
+    joinTimer->setContextPointer(this);
+    pimsm()->scheduleAt(simTime() + pimsm()->joinPrunePeriod, joinTimer);
+}
+
+PIMSM::DownstreamInterface *PIMSM::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
+{
+    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
+    {
+        DownstreamInterface *downstream = downstreamInterfaces[i];
+        if (downstream->getInterfaceId() == interfaceId)
+            return downstream;
+    }
+    return NULL;
+}
+
+int PIMSM::Route::findDownstreamInterface(InterfaceEntry *ie)
+{
+    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
+    {
+        DownstreamInterface *downstream = downstreamInterfaces[i];
+        if (downstream->ie == ie)
+            return i;
+    }
+    return -1;
+}
+
+bool PIMSM::Route::isImmediateOlistNull()
+{
+    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
+        if (downstreamInterfaces[i]->isInImmediateOlist())
+            return false;
+    return true;
+}
+
+bool PIMSM::Route::isInheritedOlistNull()
+{
+    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
+        if (downstreamInterfaces[i]->isInInheritedOlist())
+            return false;
+    return true;
+}
+
 void PIMSM::Route::addDownstreamInterface(DownstreamInterface *outInterface)
 {
     ASSERT(outInterface);
@@ -2301,26 +2233,3 @@ void PIMSM::DownstreamInterface::startPrunePendingTimer()
     prunePendingTimer->setContextPointer(this);
     pimsm()->scheduleAt(simTime() + pimsm()->joinPruneOverrideInterval(), prunePendingTimer);
 }
-
-void PIMSM::Route::startKeepAliveTimer()
-{
-    ASSERT(this->type == SG);
-    keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
-    keepAliveTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + pimsm()->keepAlivePeriod, keepAliveTimer);
-}
-
-void PIMSM::Route::startRegisterStopTimer(double interval)
-{
-    registerStopTimer = new cMessage("PIMRegisterStopTimer", RegisterStopTimer);
-    registerStopTimer->setContextPointer(this);
-    owner->scheduleAt(simTime() + interval, registerStopTimer);
-}
-
-void PIMSM::Route::startJoinTimer()
-{
-    joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
-    joinTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + pimsm()->joinPrunePeriod, joinTimer);
-}
-

@@ -201,40 +201,21 @@ class INET_API PIMSM : public PIMBase, protected cListener
         RoutingTable gRoutes;
         RoutingTable sgRoutes;
 
+    public:
+        PIMSM() : PIMBase(PIMInterface::SparseMode) {}
+        virtual ~PIMSM();
+
+    protected:
+        virtual int numInitStages() const  {return NUM_INIT_STAGES;}
+        virtual void initialize(int stage);
+        virtual void handleMessage(cMessage *msg);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
     private:
-        // process signals
-        void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
-        void multicastPacketArrivedOnRpfInterface(Route *route);
-        void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
-        void multicastPacketForwarded(IPv4Datagram *datagram);
-        void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
-        void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
-
-        // process timers
-        void processPIMTimer(cMessage *timer);
-        void processKeepAliveTimer(cMessage *timer);
-        void processRegisterStopTimer(cMessage *timer);
-        void processExpiryTimer(cMessage *timer);
-        void processJoinTimer(cMessage *timer);
-        void processPrunePendingTimer(cMessage *timer);
-        void processAssertTimer(cMessage *timer);
-
-        // send pim messages
-        void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
-        void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
-        void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
-        void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
-        void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
-        void sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit);
-        void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
-        void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
-
         // process PIM messages
-        void processPIMPacket(PIMPacket *pkt);
+        void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processRegisterPacket(PIMRegister *pkt);
         void processRegisterStopPacket(PIMRegisterStop *pkt);
-        void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processAssertPacket(PIMAssert *pkt);
 
         void processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface);
@@ -246,25 +227,52 @@ class INET_API PIMSM : public PIMBase, protected cListener
         void processAssertSG(PimsmInterface *interface, const AssertMetric &receivedMetric);
         void processAssertG(PimsmInterface *interface, const AssertMetric &receivedMetric);
 
+        // process timers
+        void processKeepAliveTimer(cMessage *timer);
+        void processRegisterStopTimer(cMessage *timer);
+        void processExpiryTimer(cMessage *timer);
+        void processJoinTimer(cMessage *timer);
+        void processPrunePendingTimer(cMessage *timer);
+        void processAssertTimer(cMessage *timer);
+
+        // process signals
+        void unroutableMulticastPacketArrived(IPv4Address srcAddr, IPv4Address destAddr);
+        void multicastPacketArrivedOnRpfInterface(Route *route);
+        void multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId);
+        void multicastPacketForwarded(IPv4Datagram *datagram);
+        void multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group);
+        void multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group);
+
+        // internal events
+        void joinDesiredChanged(Route *route);
+
+        // send pim messages
+        void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
+        void sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Address multGroup, IPv4Address multSource);
+        void sendPIMRegisterNull(IPv4Address multSource, IPv4Address multDest);
+        void sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
+        void sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upstreamNeighbor, RouteType JPtype);
+        void sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric metric, InterfaceEntry *ie, bool rptBit);
+        void sendToIP(PIMPacket *packet, IPv4Address source, IPv4Address dest, int outInterfaceId, short ttl);
+        void forwardMulticastData(IPv4Datagram *datagram, int outInterfaceId);
+
         // computed intervals
         double joinPruneHoldTime() { return 3.5 * joinPrunePeriod; } // Holdtime in Join/Prune messages
         double effectivePropagationDelay() { return defaultPropagationDelay; }
         double effectiveOverrideInterval() { return defaultOverrideInterval; }
         double joinPruneOverrideInterval() { return effectivePropagationDelay() + effectiveOverrideInterval(); }
 
-        // internal events
-        void joinDesiredChanged(Route *route);
-
         // update actions
         void updateJoinDesired(Route *route);
 
         // helpers
+        bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
+        bool IamDR (IPv4Address sourceAddr);
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
         bool deleteMulticastRoute(Route *route);
         void cancelAndDeleteTimer(cMessage *&timer);
         void restartTimer(cMessage *timer, double interval);
         void restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime);
-
 
         // routing table access
         bool removeRoute(Route *route);
@@ -274,22 +282,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
         Route *addNewRouteSG(IPv4Address source, IPv4Address group, int flags);
         IPv4MulticastRoute *createIPv4Route(Route *route);
         IPv4MulticastRoute *findIPv4Route(IPv4Address source, IPv4Address group);
-
-    public:
-        PIMSM() : PIMBase(PIMInterface::SparseMode) {}
-        ~PIMSM();
-        //PIM-SM clear implementation
-        void setRPAddress(std::string address);
-        void setSPTthreshold(std::string address);
-        IPv4Address getRPAddress () {return rpAddr;}
-        std::string getSPTthreshold () {return sptThreshold;}
-        virtual bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
-        bool IamDR (IPv4Address sourceAddr);
-
-	protected:
-		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
-		virtual void handleMessage(cMessage *msg);
-		virtual void initialize(int stage);
 };
 
 #endif
