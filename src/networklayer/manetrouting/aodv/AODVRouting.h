@@ -80,6 +80,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
         std::map<RREQIdentifier, simtime_t,RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
                                                               // an arbitrary RREQ in the network ) to arrival time
+        simtime_t rebootTime;
     protected:
 
         void handleMessage(cMessage *msg);
@@ -119,10 +120,12 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
         void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
-        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {} // TODO
+        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
         // notification
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+
+        void clearState();
     public:
         AODVRouting();
         virtual ~AODVRouting();

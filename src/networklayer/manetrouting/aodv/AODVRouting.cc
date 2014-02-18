@@ -20,6 +20,7 @@
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
 #include "AODVDefs.h"
+#include "NodeOperations.h"
 
 Define_Module(AODVRouting);
 
@@ -27,6 +28,7 @@ void AODVRouting::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        rebootTime = 0;
         rreqId = sequenceNum = 0;
         host = this->getParentModule();
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTablePath")));
@@ -188,6 +190,9 @@ void AODVRouting::delayDatagram(INetworkDatagram* datagram)
 
 void AODVRouting::sendRREQ(AODVRREP * rreq, const Address& destAddr, unsigned int timeToLive)
 {
+    // each node on reboot waits for DELETE_PERIOD before
+    // transmitting any route discovery messages.
+
     sendAODVPacket(rreq,destAddr,timeToLive);
 }
 
@@ -462,10 +467,9 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         IRoute * forwardRREPRoute = routingTable->findBestMatchingRoute(rrep->getOriginatorAddr());
         if (forwardRREPRoute)
         {
-
             if (rrep->getAckRequiredFlag())
             {
-                // TODO: send RREP-ACK
+                // TODO: send RREP-ACK: (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0)
                 rrep->setAckRequiredFlag(false);
             }
 
@@ -484,6 +488,8 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
             // source.
 
             routeData->addPrecursor(forwardRREPRoute->getNextHopAsGeneric());
+
+            // (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0)
 
             // TODO: send
         }
@@ -760,7 +766,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     if (destRouteData && !destRouteData->isActive()) // (!)
         rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
 
-    if (timeToLive > 1)
+    if (timeToLive > 1 && (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0))
         sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive - 1); // TODO: multiple interfaces
 }
 
@@ -951,13 +957,67 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
         }
     }
 
-    if (unreachableNeighbors.size() > 0)
+    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0))
     {
        AODVRERR * newRERR = createRERR(unreachableNeighbors,unreachableNeighborsDestSeqNum);
        sendAODVPacket(newRERR,addressType->getBroadcastAddress(),1);
     }
 }
-AODVRouting::~AODVRouting()
+
+
+bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage,
+        IDoneCallback* doneCallback)
 {
 
+    // TODO (localInHook??): If the node
+    // receives a data packet for some other destination, it SHOULD
+    // broadcast a RERR as described in subsection 6.11 and MUST reset the
+    // waiting timer to expire after current time plus DELETE_PERIOD.
+
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation))
+    {
+        if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER)
+        {
+            isOperational = true;
+            rebootTime = simTime();
+        }
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+    {
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+        {
+            isOperational = false;
+            clearState();
+        }
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+    {
+        if (stage == NodeCrashOperation::STAGE_CRASH)
+        {
+            isOperational = false;
+            clearState();
+        }
+    }
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+
+    return true;
+}
+
+void AODVRouting::clearState()
+{
+    rreqId = sequenceNum = 0;
+
+    for (std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
+        cancelAndDelete(it->second);
+
+    waitForRREPTimers.clear();
+    rreqsArrivalTime.clear();
+
+}
+
+AODVRouting::~AODVRouting()
+{
+    clearState();
 }
