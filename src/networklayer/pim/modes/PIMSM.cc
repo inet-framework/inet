@@ -428,7 +428,7 @@ void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address ups
     if (!routeSG)         // create (S,G) route between RP and source DR
     {
         routeSG = addNewRouteSG(source, group, Route::PRUNED);
-        routeSG->startKeepAliveTimer();
+        routeSG->startKeepAliveTimer(keepAlivePeriod);
     }
 
     DownstreamInterface *downstream = routeSG->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
@@ -502,7 +502,7 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            downstream->startPrunePendingTimer();
+            downstream->startPrunePendingTimer(joinPruneOverrideInterval());
         }
     }
 
@@ -537,7 +537,7 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            downstream->startPrunePendingTimer();
+            downstream->startPrunePendingTimer(joinPruneOverrideInterval());
         }
     }
 
@@ -576,7 +576,7 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
         if (!routeSG)
         {
             routeSG = addNewRouteSG(source, group, Route::PRUNED);
-            routeSG->startKeepAliveTimer();
+            routeSG->startKeepAliveTimer(keepAlivePeriod);
         }
         else if (routeSG->keepAliveTimer)
         {
@@ -1172,7 +1172,7 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
 
         // create new (S,G) route
         Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
-        newRouteSG->startKeepAliveTimer();
+        newRouteSG->startKeepAliveTimer(keepAlivePeriod);
         newRouteSG->registerState = Route::RS_JOIN;
         //DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
         //downstream->shRegTun = false;
@@ -1225,7 +1225,7 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
             EV_DETAIL << "Data arrived on RPF interface, restarting KAT(" << route->source << ", " << route->group << ") timer.\n";
 
             if (!route->keepAliveTimer)
-                route->startKeepAliveTimer();
+                route->startKeepAliveTimer(keepAlivePeriod);
             else
                 restartTimer(route->keepAliveTimer, keepAlivePeriod);
         }
@@ -1360,7 +1360,7 @@ void PIMSM::joinDesiredChanged(Route *route)
             if (routeG->upstreamInterface)
             {
                 sendPIMJoin(routeG->group, routeG->rpAddr, routeG->upstreamInterface->rpfNeighbor(), G);
-                routeG->startJoinTimer();
+                routeG->startJoinTimer(joinPrunePeriod);
             }
         }
         else if (!routeG->isFlagSet(Route::PRUNED) && !routeG->joinDesired())
@@ -1387,7 +1387,7 @@ void PIMSM::joinDesiredChanged(Route *route)
             if (!IamDR(routeSG->source))
             {
                 sendPIMJoin(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
-                routeSG->startJoinTimer();
+                routeSG->startJoinTimer(joinPrunePeriod);
             }
         }
         else if (!routeSG->isFlagSet(Route::PRUNED) && !route->joinDesired())
@@ -1889,12 +1889,12 @@ PIMSM::Route::~Route()
         delete *it;
 }
 
-void PIMSM::Route::startKeepAliveTimer()
+void PIMSM::Route::startKeepAliveTimer(double keepAlivePeriod)
 {
     ASSERT(this->type == SG);
     keepAliveTimer = new cMessage("PIMKeepAliveTimer", KeepAliveTimer);
     keepAliveTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + pimsm()->keepAlivePeriod, keepAliveTimer);
+    owner->scheduleAt(simTime() + keepAlivePeriod, keepAliveTimer);
 }
 
 void PIMSM::Route::startRegisterStopTimer(double interval)
@@ -1904,11 +1904,11 @@ void PIMSM::Route::startRegisterStopTimer(double interval)
     owner->scheduleAt(simTime() + interval, registerStopTimer);
 }
 
-void PIMSM::Route::startJoinTimer()
+void PIMSM::Route::startJoinTimer(double joinPrunePeriod)
 {
     joinTimer = new cMessage("PIMJoinTimer", JoinTimer);
     joinTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + pimsm()->joinPrunePeriod, joinTimer);
+    owner->scheduleAt(simTime() + joinPrunePeriod, joinTimer);
 }
 
 PIMSM::DownstreamInterface *PIMSM::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
@@ -1990,20 +1990,20 @@ PIMSM::PimsmInterface::PimsmInterface(Route *owner, InterfaceEntry *ie)
 
 PIMSM::PimsmInterface::~PimsmInterface()
 {
-    owner->owner->cancelAndDelete(expiryTimer);
-    owner->owner->cancelAndDelete(assertTimer);
+    pimsm()->cancelAndDelete(expiryTimer);
+    pimsm()->cancelAndDelete(assertTimer);
 }
 
 void PIMSM::PimsmInterface::startExpiryTimer(double holdTime)
 {
     expiryTimer = new cMessage("PIMExpiryTimer", ExpiryTimer);
     expiryTimer->setContextPointer(this);
-    owner->owner->scheduleAt(simTime() + holdTime, expiryTimer);
+    pimsm()->scheduleAt(simTime() + holdTime, expiryTimer);
 }
 
 PIMSM::DownstreamInterface::~DownstreamInterface()
 {
-    owner->owner->cancelAndDelete(prunePendingTimer);
+    pimsm()->cancelAndDelete(prunePendingTimer);
 }
 
 bool PIMSM::DownstreamInterface::isInImmediateOlist() const
@@ -2011,8 +2011,7 @@ bool PIMSM::DownstreamInterface::isInImmediateOlist() const
     // immediate_olist(*,*,RP) = joins(*,*,RP)
     // immediate_olist(*,G) = joins(*,G) (+) pim_include(*,G) (-) lost_assert(*,G)
     // immediate_olist(S,G) = joins(S,G) (+) pim_include(S,G) (-) lost_assert(S,G)
-    Route *route = check_and_cast<Route*>(owner);
-    switch (route->type)
+    switch (route()->type)
     {
         case RP: return joinPruneState != NO_INFO;
         case G:  return assertState != I_LOST_ASSERT && (joinPruneState != NO_INFO || pimInclude());
@@ -2030,7 +2029,7 @@ bool PIMSM::DownstreamInterface::isInInheritedOlist() const
     //                            (-) ( lost_assert(*,G) (+) lost_assert(S,G,rpt) )
     // inherited_olist(S,G) = inherited_olist(S,G,rpt) (+)
     //                        joins(S,G) (+) pim_include(S,G) (-) lost_assert(S,G)
-    Route *route = check_and_cast<Route*>(owner);
+    Route *route = this->route();
     int interfaceId = ie->getInterfaceId();
     bool include = false;
 
@@ -2100,10 +2099,10 @@ bool PIMSM::DownstreamInterface::isInInheritedOlist() const
     return include;
 }
 
-void PIMSM::DownstreamInterface::startPrunePendingTimer()
+void PIMSM::DownstreamInterface::startPrunePendingTimer(double joinPruneOverrideInterval)
 {
     ASSERT(!prunePendingTimer);
     prunePendingTimer = new cMessage("PIMPrunePendingTimer", PrunePendingTimer);
     prunePendingTimer->setContextPointer(this);
-    pimsm()->scheduleAt(simTime() + pimsm()->joinPruneOverrideInterval(), prunePendingTimer);
+    pimsm()->scheduleAt(simTime() + joinPruneOverrideInterval, prunePendingTimer);
 }

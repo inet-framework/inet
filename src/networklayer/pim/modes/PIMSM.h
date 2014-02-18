@@ -58,6 +58,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
             PimsmInterface(Route *owner, InterfaceEntry *ie);
             virtual ~PimsmInterface();
             Route *route() const { return check_and_cast<Route*>(owner); }
+            PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
             void startExpiryTimer(double holdTime);
             bool localReceiverInclude() const { return isFlagSet(RECEIVER_INCLUDE); }
             void setLocalReceiverInclude(bool value) { setFlag(RECEIVER_INCLUDE, value); }
@@ -95,12 +96,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
             DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
                 : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL) {}
             virtual ~DownstreamInterface();
-            PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
             bool isInImmediateOlist() const;
             bool isInInheritedOlist() const;
-            void startPrunePendingTimer();
+            void startPrunePendingTimer(double joinPruneOverrideInterval);
         };
 
         typedef std::vector<DownstreamInterface*> DownstreamInterfaceVector;
@@ -175,9 +175,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isInheritedOlistNull();
                 bool joinDesired() const { return isFlagSet(JOIN_DESIRED); }
 
-                void startKeepAliveTimer();
+                void startKeepAliveTimer(double keepAlivePeriod);
                 void startRegisterStopTimer(double interval);
-                void startJoinTimer();
+                void startJoinTimer(double joinPrunePeriod);
         };
 
         typedef std::map<SourceAndGroup, Route*> RoutingTable;
