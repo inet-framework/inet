@@ -41,7 +41,7 @@ class INET_API AODVRouteData : public cObject
     public:
 
         AODVRouteData() { destSeqNum = 0; }
-        virtual ~AODVRouteData();
+        virtual ~AODVRouteData() {}
 
         unsigned int getDestSeqNum() const { return destSeqNum; }
         void setDestSeqNum(unsigned int destSeqNum) { this->destSeqNum = destSeqNum; }

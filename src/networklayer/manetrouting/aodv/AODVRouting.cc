@@ -34,7 +34,6 @@ void AODVRouting::initialize(int stage)
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTablePath")));
         interfaceTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolPath")));
-        socket.setOutputGate(gate("udpOut"));
         AodvUDPPort = par("UDPPort");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
@@ -46,6 +45,7 @@ void AODVRouting::initialize(int stage)
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_MANET);
         networkProtocol->registerHook(0, this);
+        host->subscribe(NF_LINK_BREAK, this);
     }
 }
 
@@ -95,18 +95,19 @@ void AODVRouting::handleMessage(cMessage *msg)
 
 INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram * datagram)
 {
+    std::cout << "ensureRouteForDatagram" << endl;
     Enter_Method("datagramPreRoutingHook");
-    const Address& sourceAddr = datagram->getSourceAddress();
     const Address& destAddr = datagram->getDestinationAddress();
+    const Address& sourceAddr = datagram->getSourceAddress();
 
-    if (sourceAddr.isBroadcast() || routingTable->isLocalAddress(destAddr))
+    if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
         return ACCEPT;
     else
     {
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute* route = routingTable->findBestMatchingRoute(destAddr);
         AODVRouteData* routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
-        bool isValid = routeData->isValid();
+        bool isValid = routeData && routeData->isValid();
 
         if (route && !route->getNextHopAsGeneric().isUnspecified() && isValid)
         {
@@ -125,7 +126,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
             // the destination is previously unknown to the node, or if a previously
             // valid route to the destination expires or is marked as invalid.
 
-            EV_INFO << (isValid ? "Invalid" : "Missing") << " route for source " << sourceAddr << " with destination " << destAddr << endl;
+            EV_INFO << (isValid ? "Invalid" : "Missing") << " route for destination " << destAddr << endl;
             // TODO: delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr))
@@ -148,7 +149,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
 
 void AODVRouting::startAODVRouting()
 {
-    socket.bind(AodvUDPPort); // todo: multicast loop
+    //socket.bind(AodvUDPPort); // todo: multicast loop
 }
 
 void AODVRouting::stopAODVRouting()
@@ -173,9 +174,11 @@ bool AODVRouting::hasOngoingRouteDiscovery(const Address& destAddr)
 
 void AODVRouting::startRouteDiscovery(const Address& destAddr, unsigned timeToLive)
 {
+
     EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << destAddr << endl;
     ASSERT(!hasOngoingRouteDiscovery(destAddr));
-
+    AODVRREQ * rreq = createRREQ(destAddr,timeToLive);
+    sendRREQ(rreq,addressType->getBroadcastAddress(),timeToLive);
 }
 
 Address AODVRouting::getSelfIPAddress()
@@ -188,11 +191,8 @@ void AODVRouting::delayDatagram(INetworkDatagram* datagram)
 
 }
 
-void AODVRouting::sendRREQ(AODVRREP * rreq, const Address& destAddr, unsigned int timeToLive)
+void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned int timeToLive)
 {
-    // each node on reboot waits for DELETE_PERIOD before
-    // transmitting any route discovery messages.
-
     sendAODVPacket(rreq,destAddr,timeToLive);
 }
 
@@ -233,7 +233,12 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr, unsigned int timeToL
 
         AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(lastKnownRoute->getProtocolData());
         if (routeData && routeData->hasValidDestNum())
+        {
             rreqPacket->setDestSeqNum(routeData->getDestSeqNum());
+            rreqPacket->setUnknownSeqNumFlag(false);
+        }
+        else
+            rreqPacket->setUnknownSeqNumFlag(true);
     }
     else
         rreqPacket->setUnknownSeqNumFlag(true); // If no sequence number is known, the unknown sequence number flag MUST be set.
@@ -491,7 +496,8 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 
             // (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0)
 
-            // TODO: send
+            if (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0)
+                sendAODVPacket(rrep,forwardRREPRoute->getNextHopAsGeneric(), 100);
         }
         else
             EV_ERROR << "Reverse route doesn't exist. Dropping the RREP message" << endl;
@@ -526,7 +532,6 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     // again with the TTL incremented by TTL_INCREMENT.  This continues
     // until the TTL set in the RREQ reaches TTL_THRESHOLD, beyond which a
     // TTL = NET_DIAMETER is used for each attempt.
-
     INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
 
     if (packet->getPacketType() == RREQ)
@@ -575,8 +580,9 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
         }
         else
         {
+            AODVRREQ * rreq = check_and_cast<AODVRREQ *>(packet);
             WaitForRREP * newRREPTimerMsg = new WaitForRREP();
-            waitForRREPTimers[destAddr] = newRREPTimerMsg;
+            waitForRREPTimers[rreq->getDestAddr()] = newRREPTimerMsg;
             networkProtocolControlInfo->setHopLimit(TTL_START);
             newRREPTimerMsg->setLastTTL(TTL_START);
             newRREPTimerMsg->setFromInvalidEntry(false);
@@ -596,13 +602,16 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     networkProtocolControlInfo->setDestinationAddress(destAddr);
     networkProtocolControlInfo->setSourceAddress(getSelfIPAddress());
 
+    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0"); // FIXME
+    networkProtocolControlInfo->setInterfaceId(ifEntry->getInterfaceId());
+
     UDPPacket * udpPacket = new UDPPacket(packet->getName());
     udpPacket->encapsulate(packet);
     udpPacket->setSourcePort(AodvUDPPort);
     udpPacket->setDestinationPort(AodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
 
-    send(udpPacket, "udpOut");
+    send(udpPacket, "ipOut");
 }
 
 void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive)
@@ -676,7 +685,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         // the originator.
 
         // send to the originator
-        sendAODVPacket(rrep, sourceAddr, 0); // TODO: TIME TO LIVE???
+        sendAODVPacket(rrep, sourceAddr, 100); // TODO: TIME TO LIVE???
 
         return; // discard RREQ
     }

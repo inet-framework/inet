@@ -17,6 +17,9 @@
 
 package inet.networklayer.manetrouting.aodv;
 
+import inet.applications.IUDPApp;
+
+
 //
 // Ad hoc On-Demand Distance Vector Routing Protocol module.
 //
@@ -37,7 +40,7 @@ simple AODVRouting
         string networkProtocolPath = default("^.networkLayer.ip");
 
         int UDPPort = default(654);
-	gates:
-        input udpIn @labels(UDPControlInfo/up);
-        output udpOut @labels(UDPControlInfo/down);
+    gates:
+        input ipIn;
+        output ipOut;
 }
