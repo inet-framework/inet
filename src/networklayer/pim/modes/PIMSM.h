@@ -25,9 +25,7 @@
 #include "PIMBase.h"
 
 #define KAT 180.0                       /**< Keep alive timer, if RPT is disconnect */
-#define HOLDTIME_HOST 180.0             /**< Holdtime for interface ET connected to host */
 #define MAX_TTL 255                     /**< Maximum TTL */
-#define CISCO_SPEC_SIM 0                /**< Enable Cisco specific simulation; 1 = enable, 0 = disable */
 
 /**
  * @brief Class implements PIM-SM (sparse mode).

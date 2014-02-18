@@ -394,116 +394,7 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     if (!newRoute && !routeG->upstreamInterface) // I am RP
     {
         routeG->clearFlag(Route::REGISTER);
-
-//        for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
-//        {
-//            Route *route = it->second;
-//            if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
-//            {
-//                // update flags
-//                route->clearFlag(Route::PRUNED);
-//                route->setFlags(Route::SPT_BIT);
-//                route->startJoinTimer();
-//
-//                downstream = route->findDownstreamInterfaceByInterfaceId(inInterface->getInterfaceId());
-//                if (downstream->joinPruneState == DownstreamInterface::NO_INFO)
-//                {
-//                    downstream->joinPruneState = DownstreamInterface::JOIN;
-//                    downstream->startExpiryTimer(holdTime);
-//                    sendPIMJoin(group, route->source, route->upstreamInterface->nextHop, SG);
-//                }
-//                route->sequencenumber = 1;
-//            }
-//        }
     }
-
-
-
-//    if (!routeG)                                // check if (*,G) exist
-//    {
-//        InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(rp);
-//        if (inInterface != rpfInterface)
-//        {
-//            Route *newRouteG = createRouteG(group, Route::NO_FLAG);
-//
-//            if (!IamRP(newRouteG->rpAddr))
-//                newRouteG->startJoinTimer();              // periodic Join (*,G)
-//
-//            DownstreamInterface *downstream = new DownstreamInterface(newRouteG, inInterface, DownstreamInterface::JOIN);
-//            downstream->startExpiryTimer(holdTime);
-//            newRouteG->addDownstreamInterface(downstream);
-//
-//            addGRoute(newRouteG);
-//
-//            if (newRouteG->upstreamInterface) // XXX should always have expiryTimer
-//            {
-//                newRouteG->upstreamInterface->startExpiryTimer(holdTime);
-//                sendPIMJoin(group, newRouteG->rpAddr, newRouteG->upstreamInterface->rpfNeighbor(), G); // triggered Join (*,G)
-//            }
-//        }
-//    }
-//    else            // (*,G) route exist
-//    {
-//        //if (!routeG->isRpf(inInterface->getInterfaceId()))
-//        if (!routeG->upstreamInterface || routeG->upstreamInterface->ie != inInterface)
-//        {
-//            if (IamRP(rp)) // (*,G) route exists at RP
-//            {
-//                for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
-//                {
-//                    Route *route = it->second;
-//                    if (route->group == group && route->sequencenumber == 0)   // only check if route was installed
-//                    {
-//                        if (route->type == SG)
-//                        {
-//                            // update flags
-//                            route->clearFlag(Route::P);
-//                            route->setFlags(Route::T);
-//                            route->startJoinTimer();
-//
-//                            if (route->downstreamInterfaces.empty())          // Has route any outgoing interface?
-//                            {
-//                                route->addNewDownstreamInterface(inInterface, holdTime);
-//                                sendPIMJoin(group, route->origin, route->upstreamInterface->nextHop, SG);
-//                            }
-//                        }
-//                        else if (route->type == G)
-//                        {
-//                            route->clearFlag(Route::P);
-//                            route->clearFlag(Route::F);
-//                            cancelAndDeleteTimer(route->keepAliveTimer);
-//
-//                            if (route->findDownstreamInterface(inInterface) < 0)
-//                            {
-//                                route->addNewDownstreamInterface(inInterface, holdTime);
-//                                if (route->upstreamInterface) // XXX should always have expiryTimer
-//                                    route->upstreamInterface->startExpiryTimer(holdTime);
-//                            }
-//                        }
-//
-//                        route->sequencenumber = 1;
-//                    }
-//                }
-//            }
-//            else        // (*,G) route exist somewhere in RPT
-//            {
-//                if (routeG->findDownstreamInterface(inInterface) < 0)
-//                    routeG->addNewDownstreamInterface(inInterface, holdTime);
-//            }
-//
-//            // restart ET for given interface - for (*,G) and also (S,G)
-//            restartExpiryTimer(routeG, inInterface, holdTime);
-//            for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
-//            {
-//                Route *routeSG = it->second;
-//                if (routeSG->group == group && !routeSG->origin.isUnspecified())
-//                {
-//                    //restart ET for (S,G)
-//                    restartExpiryTimer(routeSG, inInterface, holdTime);
-//                }
-//            }
-//        }
-//    }
 }
 
 /**
@@ -613,37 +504,6 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
     // check upstream state transition
     if (routeG)
         updateJoinDesired(routeG);
-
-//    for (SGStateMap::iterator it = routes.begin(); it != routes.end(); ++it)
-//    {
-//        Route *route = it->second;
-//        if (route->group == group)
-//        {
-//            int k = route->findDownstreamInterface(inInterface);
-//            if (k >= 0)
-//            {
-//                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-//                route->removeDownstreamInterface(k);
-//            }
-//
-//            if (route->isOilistNull() && !route->isFlagSet(Route::P))
-//            {
-//                route->clearFlag(Route::C);
-//                route->setFlags(Route::P);
-//                cancelAndDeleteTimer(route->joinTimer);
-//                bool iAmRP = IamRP(route->rpAddr);
-//                if ((route->type == G && !iAmRP) || (route->type == SG && iAmRP))
-//                {
-//#if CISCO_SPEC_SIM == 1
-//                    PIMNeighbor *RPFnbr = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
-//                    sendPIMPrune(group, route->type == G ? route->rpAddr : route->origin, RPFnbr->getAddress(), route->type);
-//#else
-//                    // XXX route->startPrunePendingTimer();
-//#endif
-//                }
-//            }
-//        }
-//    }
 }
 
 void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface)
@@ -672,29 +532,9 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
         }
     }
 
-    //
-    // Upstream (S,G) State Machine
-    //
-
     // check upstream state transition
     if (routeSG)
         updateJoinDesired(routeSG);
-
-//    // upstream state machine
-//    if (routeSG && routeSG->isOilistNull() && !routeSG->isFlagSet(Route::P))
-//    {
-//        routeSG->setFlags(Route::P);
-//        cancelAndDeleteTimer(routeSG->joinTimer);
-//        if (!IamDR(source))
-//        {
-//#if CISCO_SPEC_SIM == 1
-//            PIMNeighbor *RPFnbr = pimNbt->getFirstNeighborOnInterface(routeSG->upstreamInterface->getInterfaceId());
-//            sendPIMPrune(group, source, RPFnbr->getAddress(), SG);
-//#else
-//            // XXX routeSG->startPrunePendingTimer();
-//#endif
-//        }
-//    }
 }
 
 void PIMSM::processPruneSGrpt(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface)
@@ -798,11 +638,7 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
             // Subtracting off Register_Probe_Time is a bit unnecessary because
             // it is really small compared to Register_Suppression_Time, but
             // this was in the old spec and is kept for compatibility.
-#if CISCO_SPEC_SIM == 1
-            routeSG->startRegisterStopTimer(registerSuppressionTime);
-#else
             routeSG->startRegisterStopTimer(uniform(0.5*registerSuppressionTime, 1.5*registerSuppressionTime) - registerProbeTime);
-#endif
         }
     }
 }
@@ -1230,14 +1066,6 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
 
     // Now check upstream state transitions
     updateJoinDesired(route);
-
-    // old code
-//    IPv4Address pruneAddr = route->type == G ? route->rpAddr : route->origin;
-//    PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId()); // XXX why not nextHop?
-//
-//    if ((route->type == G && !IamRP(this->getRPAddress())) || route->type == SG)
-//        sendPIMPrune(route->group, pruneAddr, neighbor->getAddress(), route->type);
-
 }
 
 void PIMSM::processAssertTimer(cMessage *timer)
