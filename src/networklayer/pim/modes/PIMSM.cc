@@ -502,7 +502,9 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            downstream->startPrunePendingTimer(joinPruneOverrideInterval());
+            double pruneOverrideInterval = pimNbt->getNumNeighborsOnInterface(inInterface->getInterfaceId()) > 1 ?
+                                                joinPruneOverrideInterval() : 0.0;
+            downstream->startPrunePendingTimer(pruneOverrideInterval);
         }
     }
 
@@ -514,7 +516,6 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
 void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, InterfaceEntry *inInterface)
 {
     EV_DETAIL << "Processing Prune(" << source << ", " << group <<") received on interface '" << inInterface->getName() << "'.'n";
-
 
     //
     // Downstream per-interface (S,G) state machine; event = Receive Prune(S,G)
@@ -537,7 +538,9 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            downstream->startPrunePendingTimer(joinPruneOverrideInterval());
+            double pruneOverrideInterval = pimNbt->getNumNeighborsOnInterface(inInterface->getInterfaceId()) > 1 ?
+                                                joinPruneOverrideInterval() : 0.0;
+            downstream->startPrunePendingTimer(pruneOverrideInterval);
         }
     }
 
