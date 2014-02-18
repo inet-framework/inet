@@ -79,14 +79,6 @@ int PIMSM::Route::findDownstreamInterface(InterfaceEntry *ie)
     return -1;
 }
 
-bool PIMSM::Route::isOilistNull()
-{
-    for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
-        if (downstreamInterfaces[i]->isInOlist())
-            return false;
-    return true;
-}
-
 bool PIMSM::Route::isImmediateOlistNull()
 {
     for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
@@ -408,7 +400,7 @@ void PIMSM::processExpiryTimer(cMessage *timer)
         delete timer;
 
         // upstream state machine
-        if (route->isOilistNull())
+        if (route->isInheritedOlistNull())
         {
             route->clearFlag(Route::CONNECTED);
             route->setFlags(Route::PRUNED);
@@ -1651,7 +1643,7 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
             route->clearFlag(Route::CONNECTED);
 
             // there is no receiver of multicast, prune the router from the multicast tree
-            if (route->isOilistNull())
+            if (route->isInheritedOlistNull())
             {
                 route->setFlags(Route::PRUNED);
                 PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
@@ -1681,7 +1673,7 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
         downstream->startExpiryTimer(HOLDTIME_HOST);
 
         // oilist != NULL -> send Join(*,G) to 224.0.0.13
-        if (newRouteG->upstreamInterface && !newRouteG->isOilistNull())
+        if (newRouteG->upstreamInterface && !newRouteG->isInheritedOlistNull())
             sendPIMJoin(group, newRouteG->rpAddr, newRouteG->upstreamInterface->rpfNeighbor(), G);
     }
     else

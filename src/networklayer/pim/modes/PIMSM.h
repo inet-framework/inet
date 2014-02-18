@@ -83,7 +83,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
             PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
 
             int getInterfaceId() const { return ie->getInterfaceId(); }
-            bool isInOlist() { return joinPruneState != NO_INFO; } // XXX should be: ((has neighbor and not pruned) or has listener) and not assert looser
             bool isInImmediateOlist() const;
             bool isInInheritedOlist() const;
             void startPrunePendingTimer();
@@ -160,7 +159,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 int findDownstreamInterface(InterfaceEntry *ie);
 
-                bool isOilistNull();                                                /**< Returns true if list of outgoing interfaces is empty, otherwise false*/
                 bool isImmediateOlistNull();
                 bool isInheritedOlistNull();
                 bool joinDesired() const { return isFlagSet(JOIN_DESIRED); }
