@@ -44,19 +44,6 @@ PIMSM::Route::~Route()
         delete *it;
 }
 
-PIMSM::DownstreamInterface *PIMSM::Route::addNewDownstreamInterface(InterfaceEntry *ie)
-{
-    DownstreamInterface *downstream = new DownstreamInterface(this, ie, DownstreamInterface::NO_INFO);
-    //downstream->startExpiryTimer(holdTime);
-    addDownstreamInterface(downstream);
-
-    IPv4MulticastRoute *ipv4Route = pimsm()->findIPv4Route(source, group);
-    ipv4Route->addOutInterface(new PIMSMOutInterface(downstream));
-
-    return downstream;
-}
-
-
 PIMSM::DownstreamInterface *PIMSM::Route::findDownstreamInterfaceByInterfaceId(int interfaceId)
 {
     for (unsigned int i = 0; i < downstreamInterfaces.size(); i++)
@@ -2194,16 +2181,6 @@ void PIMSM::restartTimer(cMessage *timer, double interval)
 {
     cancelEvent(timer);
     scheduleAt(simTime() + interval, timer);
-}
-
-void PIMSM::Route::clearDownstreamInterfaces()
-{
-    if (!downstreamInterfaces.empty())
-    {
-        for (DownstreamInterfaceVector::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
-            delete *it;
-        downstreamInterfaces.clear();
-    }
 }
 
 void PIMSM::Route::addDownstreamInterface(DownstreamInterface *outInterface)

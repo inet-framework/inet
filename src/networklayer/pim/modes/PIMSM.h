@@ -151,11 +151,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 virtual ~Route();
                 PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner); }
 
-                void clearDownstreamInterfaces();
                 void addDownstreamInterface(DownstreamInterface *outInterface);
                 void removeDownstreamInterface(unsigned int i);
 
-                DownstreamInterface *addNewDownstreamInterface(InterfaceEntry *ie);
                 DownstreamInterface *findDownstreamInterfaceByInterfaceId(int interfaceId);
                 int findDownstreamInterface(InterfaceEntry *ie);
 
