@@ -117,7 +117,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         void handleRREP(AODVRREP* rrep, const Address& sourceAddr);
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
-        void handleRERR(AODVRERR* rerr);
+        void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback) {} // TODO
 

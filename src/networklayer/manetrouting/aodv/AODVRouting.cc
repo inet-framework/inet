@@ -82,7 +82,7 @@ void AODVRouting::handleMessage(cMessage *msg)
                 handleRREP(check_and_cast<AODVRREP *>(ctrlPacket),sourceAddr);
                 break;
             case RERR:
-                handleRERR(check_and_cast<AODVRERR *>(ctrlPacket));
+                handleRERR(check_and_cast<AODVRERR *>(ctrlPacket),sourceAddr);
                 break;
             default:
                 throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacketType);
@@ -905,14 +905,58 @@ AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbo
     return rerr;
 }
 
-void AODVRouting::handleRERR(AODVRERR* rerr)
+void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 {
-    // TODO: A node initiates processing for a RERR message in three situations:
+    // A node initiates processing for a RERR message in three situations:
     // (iii)   if it receives a RERR from a neighbor for one or more
     //         active routes.
 
-}
+    unsigned int unreachableArraySize = rerr->getUnreachableDestAddrsArraySize();
+    std::vector<Address> unreachableNeighbors;
+    std::vector<unsigned int> unreachableNeighborsDestSeqNum;
 
+    for (int i = 0; i < routingTable->getNumRoutes(); i++)
+    {
+        IRoute * route = routingTable->getRoute(i);
+        AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route);
+
+        // For case (iii), the list should consist of those destinations in the RERR
+        // for which there exists a corresponding entry in the local routing
+        // table that has the transmitter of the received RERR as the next hop.
+
+        // The RERR should contain those destinations that are part of
+        // the created list of unreachable destinations and have a non-empty
+        // precursor list.
+
+        if (route->getNextHopAsGeneric() == sourceAddr && routeData->getPrecursorList().size() > 0)
+        {
+            for (unsigned int j = 0; j < unreachableArraySize; j++)
+            {
+                if (route->getDestinationAsGeneric() == rerr->getUnreachableDestAddrs(j))
+                {
+                    // 1. The destination sequence number of this routing entry, if it
+                    // exists and is valid, is incremented for cases (i) and (ii) above,
+                    // ! and copied from the incoming RERR in case (iii) above.
+
+                    routeData->setDestSeqNum(rerr->getUnreachableSeqNum(j));
+                    routeData->setIsActive(false); // it means invalid, see 3. AODV Terminology p.3. in RFC 3561
+                    routeData->setLifeTime(simTime() + DELETE_PERIOD);
+
+                    unreachableNeighbors.push_back(route->getDestinationAsGeneric());
+                    unreachableNeighborsDestSeqNum.push_back(routeData->getDestSeqNum());
+
+                    break;
+                }
+            }
+        }
+    }
+
+    if (unreachableNeighbors.size() > 0)
+    {
+       AODVRERR * newRERR = createRERR(unreachableNeighbors,unreachableNeighborsDestSeqNum);
+       sendAODVPacket(newRERR,addressType->getBroadcastAddress(),1);
+    }
+}
 AODVRouting::~AODVRouting()
 {
 
