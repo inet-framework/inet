@@ -268,6 +268,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
         bool IamDR (IPv4Address sourceAddr);
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
         bool deleteMulticastRoute(Route *route);
+        void clearRoutes();
         void cancelAndDeleteTimer(cMessage *&timer);
         void restartTimer(cMessage *timer, double interval);
         void restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int holdTime);

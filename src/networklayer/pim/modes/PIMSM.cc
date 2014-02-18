@@ -69,6 +69,7 @@ PIMSM::~PIMSM()
         delete it->second;
     for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         delete it->second;
+    // XXX rt contains references to the delete route entries
 }
 
 void PIMSM::initialize(int stage)
@@ -1635,15 +1636,52 @@ bool PIMSM::deleteMulticastRoute(Route *route)
 {
     if (removeRoute(route))
     {
-        // remove route from the routing table
+        // remove route from IPv4 routing table
         IPv4MulticastRoute *ipv4Route = findIPv4Route(route->source, route->group);
         if (ipv4Route)
             rt->deleteMulticastRoute(ipv4Route);
+
+        // unlink
+        if (route->type == G)
+        {
+            for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+                if (it->second->gRoute == route)
+                    it->second->gRoute = NULL;
+        }
 
         delete route;
         return true;
     }
     return false;
+}
+
+void PIMSM::clearRoutes()
+{
+    // delete IPv4 routes
+    bool changed = true;
+    while (changed)
+    {
+        changed = false;
+        for (int i = 0; i < rt->getNumMulticastRoutes(); i++)
+        {
+            IPv4MulticastRoute *ipv4Route = rt->getMulticastRoute(i);
+            if (ipv4Route->getSource() == this)
+            {
+                rt->deleteMulticastRoute(ipv4Route);
+                changed = true;
+                break;
+            }
+        }
+    }
+
+    // clear local tables
+    for (RoutingTable::iterator it = gRoutes.begin(); it != gRoutes.end(); ++it)
+        delete it->second;
+    gRoutes.clear();
+
+    for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
+        delete it->second;
+    sgRoutes.clear();
 }
 
 PIMSM::Route *PIMSM::addNewRouteG(IPv4Address group, int flags)
