@@ -254,14 +254,14 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
     }
 
     //TODO SPT threshold at last hop router
-    if (route->isFlagSet(Route::CONNECTED))
-    {
-        if (this->getSPTthreshold() != "infinity")
-            EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
-        else
-            EV << "pimSM::dataOnRpf - SPT threshold set to infinity" << endl;
-
-    }
+//    if (route->isFlagSet(Route::CONNECTED))
+//    {
+//        if (this->getSPTthreshold() != "infinity")
+//            EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
+//        else
+//            EV << "pimSM::dataOnRpf - SPT threshold set to infinity" << endl;
+//
+//    }
 }
 
 /**
@@ -389,7 +389,6 @@ void PIMSM::processExpiryTimer(cMessage *timer)
         // upstream state machine
         if (route->isInheritedOlistNull())
         {
-            route->clearFlag(Route::CONNECTED);
             route->setFlags(Route::PRUNED);
             PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
             if (route->type == G && !IamRP(route->rpAddr))
@@ -1159,7 +1158,7 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &receivedMetric)
 {
     Route *routeSG = interface->route();
-    AssertMetric myMetric = interface->couldAssert ? // XXX check routeG metric too
+    AssertMetric myMetric = interface->couldAssert() ? // XXX check routeG metric too
                                 routeSG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
                                 AssertMetric::INFINITE;
 
@@ -1176,7 +1175,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
 
     if (interface->assertState == Interface::NO_ASSERT_INFO)
     {
-        if (isInferiorAssert && !receivedMetric.rptBit && interface->couldAssert)
+        if (isInferiorAssert && !receivedMetric.rptBit && interface->couldAssert())
         {
             // An assert is received for (S,G) with the RPT bit cleared that
             // is inferior to our own assert metric.  The RPT bit cleared
@@ -1191,7 +1190,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
             interface->startAssertTimer(assertTime - assertOverrideInterval);
         }
-        else if (receivedMetric.rptBit && interface->couldAssert)
+        else if (receivedMetric.rptBit && interface->couldAssert())
         {
             // An assert is received for (S,G) on I with the RPT bit set
             // (it's a (*,G) assert).  CouldAssert(S,G,I) is TRUE only if we
@@ -1203,7 +1202,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
             interface->startAssertTimer(assertTime - assertOverrideInterval);
         }
-        else if (isAcceptableAssert && !receivedMetric.rptBit && interface->assertTrackingDesired)
+        else if (isAcceptableAssert && !receivedMetric.rptBit && interface->assertTrackingDesired())
         {
             // We're interested in (S,G) Asserts, either because I is a
             // downstream interface for which we have (S,G) or (*,G)
@@ -1278,7 +1277,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
 void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receivedMetric)
 {
     Route *routeG = interface->route();
-    AssertMetric myMetric = interface->couldAssert ?
+    AssertMetric myMetric = interface->couldAssert() ?
                                 routeG->metric.setAddress(interface->ie->ipv4Data()->getIPAddress()) :
                                 AssertMetric::INFINITE;
 
@@ -1295,7 +1294,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
 
     if (interface->assertState == Interface::NO_ASSERT_INFO)
     {
-        if (isInferiorAssert && receivedMetric.rptBit && interface->couldAssert)
+        if (isInferiorAssert && receivedMetric.rptBit && interface->couldAssert())
         {
             // An Inferior (*,G) assert is received for G on Interface I.  If
             // CouldAssert(*,G,I) is TRUE, then I is our downstream
@@ -1307,7 +1306,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
             interface->startAssertTimer(assertTime - assertOverrideInterval);
             interface->winnerMetric = myMetric;
         }
-        else if (isAcceptableAssert && receivedMetric.rptBit && interface->assertTrackingDesired)
+        else if (isAcceptableAssert && receivedMetric.rptBit && interface->assertTrackingDesired())
         {
             // We're interested in (*,G) Asserts, either because I is a
             // downstream interface for which we have (*,G) forwarding state,
@@ -1597,8 +1596,8 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
         newRouteSG->startKeepAliveTimer();
         newRouteSG->registerState = Route::RS_JOIN;
-        DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
-        downstream->shRegTun = false;
+        //DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
+        //downstream->shRegTun = false;
 
         // create new (*,G) route
         addNewRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
@@ -1609,35 +1608,12 @@ void PIMSM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
 {
     EV_DETAIL << "No more receiver for group " << group << " on interface '" << ie->getName() << "'.\n";
 
-    RoutingTable *tables[] = { &gRoutes, &sgRoutes};
-    for (int i = 0; i < 2; ++i)
+    Route *routeG = findRouteG(group);
+    if (routeG)
     {
-        for (RoutingTable::iterator it = tables[i]->begin(); it != tables[i]->end(); ++it)
-        {
-
-            Route *route = it->second;
-            if (route->group != group)
-                continue;
-
-            // is interface in list of outgoing interfaces?
-            int k = route->findDownstreamInterface(ie);
-            if (k >= 0)
-            {
-                EV << "Interface is present, removing it from the list of outgoing interfaces." << endl;
-                route->removeDownstreamInterface(k);
-            }
-
-            route->clearFlag(Route::CONNECTED);
-
-            // there is no receiver of multicast, prune the router from the multicast tree
-            if (route->isInheritedOlistNull())
-            {
-                route->setFlags(Route::PRUNED);
-                PIMNeighbor *neighborToRP = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
-                sendPIMPrune(route->group,this->getRPAddress(),neighborToRP->getAddress(),G);
-                cancelAndDeleteTimer(route->joinTimer);
-            }
-        }
+        DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+        downstream->setLocalReceiverInclude(false);
+        updateJoinDesired(routeG);
     }
 }
 
@@ -1647,28 +1623,12 @@ void PIMSM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
 
     Route *routeG = findRouteG(group);
     if (!routeG)
-    {
-        // create new (*,G) route
-        Route *newRouteG = addNewRouteG(group, Route::CONNECTED);
-        newRouteG->startJoinTimer();
-        if (newRouteG->upstreamInterface)
-            newRouteG->upstreamInterface->startExpiryTimer(joinPruneHoldTime());
+        routeG = addNewRouteG(group, Route::PRUNED);
 
-        // add downstream interface
-        DownstreamInterface *downstream = newRouteG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
-        downstream->joinPruneState = DownstreamInterface::JOIN;
-        downstream->startExpiryTimer(HOLDTIME_HOST);
+    DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
+    downstream->setLocalReceiverInclude(true);
 
-        // oilist != NULL -> send Join(*,G) to 224.0.0.13
-        if (newRouteG->upstreamInterface && !newRouteG->isInheritedOlistNull())
-            sendPIMJoin(group, newRouteG->rpAddr, newRouteG->upstreamInterface->rpfNeighbor(), G);
-    }
-    else
-    {
-        DownstreamInterface *downstream = routeG->findDownstreamInterfaceByInterfaceId(ie->getInterfaceId());
-        downstream->joinPruneState = DownstreamInterface::JOIN;
-        routeG->setFlags(Route::CONNECTED);
-    }
+    updateJoinDesired(routeG);
 }
 
 void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId)
@@ -1681,7 +1641,7 @@ void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceI
         // (*,G) Assert State Machine; event: A data packet destined for G arrives on interface I
         //
         DownstreamInterface *downstream = route->findDownstreamInterfaceByInterfaceId(interfaceId);
-        if (downstream && downstream->couldAssert && downstream->assertState == Interface::NO_ASSERT_INFO)
+        if (downstream && downstream->couldAssert() && downstream->assertState == Interface::NO_ASSERT_INFO)
         {
             // An (S,G) data packet arrived on an downstream interface that
             // is in our (S,G) or (*,G) outgoing interface list.  We optimistically
@@ -2218,7 +2178,7 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
 }
 
 PIMSM::PimsmInterface::PimsmInterface(Route *owner, InterfaceEntry *ie)
-    : Interface(owner, ie), expiryTimer(NULL), couldAssert(false), assertTrackingDesired(false)
+    : Interface(owner, ie), flags(0), expiryTimer(NULL)
 {
 }
 
@@ -2245,8 +2205,15 @@ bool PIMSM::DownstreamInterface::isInImmediateOlist() const
     // immediate_olist(*,*,RP) = joins(*,*,RP)
     // immediate_olist(*,G) = joins(*,G) (+) pim_include(*,G) (-) lost_assert(*,G)
     // immediate_olist(S,G) = joins(S,G) (+) pim_include(S,G) (-) lost_assert(S,G)
-    // TODO pim_include(*,G)
-    return joinPruneState != NO_INFO && assertState != I_LOST_ASSERT;
+    Route *route = check_and_cast<Route*>(owner);
+    switch (route->type)
+    {
+        case RP: return joinPruneState != NO_INFO;
+        case G:  return assertState != I_LOST_ASSERT && (joinPruneState != NO_INFO || pimInclude());
+        case SG: return assertState != I_LOST_ASSERT && (joinPruneState != NO_INFO || pimInclude());
+        case SGrpt: ASSERT(false); break;
+    }
+    return false;
 }
 
 
@@ -2275,7 +2242,7 @@ bool PIMSM::DownstreamInterface::isInInheritedOlist() const
                 include |= downstream && downstream->joinPruneState != NO_INFO;
             }
             include |= joinPruneState != NO_INFO;
-            // TODO (+) pim_include(*,G)
+            include |= pimInclude();
             include &= assertState != I_LOST_ASSERT;
             break;
         case SGrpt:
@@ -2293,14 +2260,16 @@ bool PIMSM::DownstreamInterface::isInInheritedOlist() const
             }
 
             // TODO (-) prunes(S,G,prt)
-            // TODO (+) ( pim_include(*,G) (-) pim_exclude(S,G))
 
-            // (-) lost_assert(*,G)
             if (route->gRoute)
             {
                 DownstreamInterface *downstream = route->gRoute->findDownstreamInterfaceByInterfaceId(interfaceId);
+                // (+) ( pim_include(*,G) (-) pim_exclude(S,G))
+                include |= (downstream && downstream->pimInclude()) && !pimExclude() ;
+                // (-) lost_assert(*,G)
                 include &= !downstream || downstream->assertState != I_LOST_ASSERT;
             }
+
             // (-) lost_assert(S,G)
             include &= assertState != I_LOST_ASSERT;
             break;
@@ -2316,7 +2285,9 @@ bool PIMSM::DownstreamInterface::isInInheritedOlist() const
             }
             // (+) joins(S,G)
             include |= joinPruneState != NO_INFO;
-            // TODO (+) pim_include(S,G)
+            // (+) pim_include(S,G)
+            include |= pimInclude();
+            // (-) lost_assert(S,G)
             include &= assertState != I_LOST_ASSERT;
             break;
     }

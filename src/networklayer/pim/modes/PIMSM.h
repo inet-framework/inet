@@ -41,16 +41,35 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         struct PimsmInterface : public Interface
         {
+            int flags;
             cMessage *expiryTimer;
 
-            // Assert flags
-            bool couldAssert;
-            bool assertTrackingDesired;
+            enum
+            {
+                RECEIVER_INCLUDE        = 1 << 0,
+                RECEIVER_EXCLUDE        = 1 << 1,
+                COULD_ASSERT            = 1 << 2,
+                ASSERT_TRACKING_DESIRED = 1 << 3
+            };
+
+            bool isFlagSet(int flag) const { return (flags & flag) != 0; }
+            void setFlags(int flags)   { this->flags |= flags; }
+            void clearFlag(int flag)  { flags &= (~flag); }
+            void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
 
             PimsmInterface(Route *owner, InterfaceEntry *ie);
             virtual ~PimsmInterface();
             Route *route() const { return check_and_cast<Route*>(owner); }
             void startExpiryTimer(double holdTime);
+            bool localReceiverInclude() const { return isFlagSet(RECEIVER_INCLUDE); }
+            void setLocalReceiverInclude(bool value) { setFlag(RECEIVER_INCLUDE, value); }
+            bool localReceiverExclude() const { return isFlagSet(RECEIVER_EXCLUDE); }
+            bool couldAssert() const { return isFlagSet(COULD_ASSERT); }
+            bool assertTrackingDesired() const { return isFlagSet(ASSERT_TRACKING_DESIRED); }
+            bool pimInclude() const { return localReceiverInclude() &&
+                                             ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);}
+            bool pimExclude() const { return localReceiverExclude() &&
+                                             ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);}
         };
 
         /**
@@ -75,10 +94,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
             JoinPruneState joinPruneState;
             cMessage *prunePendingTimer;
 
-            bool                    shRegTun;           /**< Show interface which is also register tunnel interface*/
-
             DownstreamInterface(Route *owner, InterfaceEntry *ie, JoinPruneState joinPruneState, bool show = true)
-                : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL), shRegTun(show) {}
+                : PimsmInterface(owner, ie), joinPruneState(joinPruneState), prunePendingTimer(NULL) {}
             virtual ~DownstreamInterface();
             PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
 
@@ -114,11 +131,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 enum
                 {
                     NO_FLAG      = 0x00,
-                    CONNECTED    = 0x01,              /**< Connected */ // XXX Are there any connected downstream receivers?
-                    PRUNED       = 0x02,              /**< Pruned */          // UpstreamJPState
-                    REGISTER     = 0x04,              /**< Register flag*/
-                    SPT_BIT      = 0x08,              /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
-                    JOIN_DESIRED = 0x10
+                    PRUNED       = 0x01,              /**< Pruned */          // UpstreamJPState
+                    REGISTER     = 0x02,              /**< Register flag*/
+                    SPT_BIT      = 0x04,              /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+                    JOIN_DESIRED = 0x08
                 };
 
                 RouteType type;
