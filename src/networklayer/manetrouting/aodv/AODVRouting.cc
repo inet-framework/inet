@@ -16,6 +16,7 @@
 //
 
 #include "AODVRouting.h"
+#include "IPv4Route.h"
 #include "Ieee80211Frame_m.h"
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
@@ -48,8 +49,6 @@ void AODVRouting::initialize(int stage)
         host->subscribe(NF_LINK_BREAK, this);
     }
 }
-
-
 
 void AODVRouting::handleMessage(cMessage *msg)
 {
@@ -140,7 +139,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
                     startRouteDiscovery(destAddr);
             }
             else
-                EV_DETAIL << "Route discovery is in progress: originator " << getSelfIPAddress() << "target " << destAddr << endl;
+                EV_DETAIL << "Route discovery is in progress: originator " << getSelfIPAddress() << " target " << destAddr << endl;
 
             return QUEUE;
         }
@@ -618,14 +617,14 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 {
     // When a node receives a RREQ, it first creates or updates a route to
     // the previous hop without a valid sequence number (see section 6.2).
-
+    EV_INFO << "Route Request arrived from originator " << rreq->getOriginatorAddr() << ", the previous hop was " << sourceAddr << endl;
+    std::cout << "Route Request arrived from originator " << rreq->getOriginatorAddr() << ", the previous hop was " << sourceAddr << endl;
     IRoute * previousHopRoute = routingTable->findBestMatchingRoute(sourceAddr);
     unsigned int destSeqNum = rreq->getDestSeqNum();
 
-    if (!previousHopRoute)
+    if (!previousHopRoute || previousHopRoute->getSource() != this)
     {
         // create without valid sequence number
-
         createRoute(sourceAddr,sourceAddr,1,false,-1,true,simTime() + ACTIVE_ROUTE_TIMEOUT);
     }
     else
@@ -774,7 +773,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
     if (destRouteData && !destRouteData->isActive()) // (!)
         rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
-
+    std::cout << timeToLive << endl;
     if (timeToLive > 1 && (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0))
         sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive - 1); // TODO: multiple interfaces
 }
@@ -791,13 +790,21 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
     newProtocolData->setLifeTime(lifeTime);
     newProtocolData->setDestSeqNum(destSeqNum);
 
+    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0"); // TODO:
+    if (ifEntry)
+        newRoute->setInterface(ifEntry);
+
     newRoute->setDestination(destAddr);
     newRoute->setSourceType(IRoute::AODV);
     newRoute->setSource(this);
     newRoute->setProtocolData(newProtocolData);
     newRoute->setMetric(hopCount);
     newRoute->setNextHop(nextHop);
+    newRoute->setPrefixLength(addressType->getMaxPrefixLength()); // TODO:
 
+    std::cout << newRoute << endl;
+    IPv4Route * ip4route = dynamic_cast<IPv4Route*>(newRoute);
+    std::cout << ip4route->info() << endl;
     routingTable->addRoute(newRoute);
 
     return newRoute;

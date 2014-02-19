@@ -33,6 +33,7 @@ const char *IRoute::sourceTypeName(SourceType sourceType)
         case MANET:                return "MANET";
         case MANET2:               return "MANET2";
         case DYMO:                 return "DYMO";
+        case AODV:                 return "AODV";
         default:                   return "???";
     }
 }
