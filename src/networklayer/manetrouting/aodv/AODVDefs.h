@@ -18,11 +18,11 @@
 #ifndef AODVDEFS_H_
 #define AODVDEFS_H_
 
-#define ACTIVE_ROUTE_TIMEOUT     3000
+#define ACTIVE_ROUTE_TIMEOUT     3
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
 #define DELETE_PERIOD            1 // FIXME: it is just a temporary value
-#define HELLO_INTERVAL           1000
+#define HELLO_INTERVAL           1
 #define LOCAL_ADD_TTL            2
 #define MAX_REPAIR_TTL           0.3 * NET_DIAMETER
 // #define MIN_REPAIR_TTL
@@ -30,7 +30,7 @@
 #define NET_DIAMETER             35
 #define NET_TRAVERSAL_TIME       2 * NODE_TRAVERSAL_TIME * NET_DIAMETER
 #define NEXT_HOP_WAIT            NODE_TRAVERSAL_TIME + 10
-#define NODE_TRAVERSAL_TIME      40
+#define NODE_TRAVERSAL_TIME      0.04
 #define PATH_DISCOVERY_TIME      2 * NET_TRAVERSAL_TIME
 #define RERR_RATELIMIT           10
 #define RING_TRAVERSAL_TIME      2 * NODE_TRAVERSAL_TIME * (TTL_VALUE + TIMEOUT_BUFFER)
