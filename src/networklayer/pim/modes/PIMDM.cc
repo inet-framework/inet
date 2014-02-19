@@ -223,7 +223,7 @@ void PIMDM::processPrune(Route *route, int intId, int holdTime, int numRpfNeighb
 
 	// See Prune(S,G) AND S is NOT directly connected ?
 	UpstreamInterface *upstream = route->upstreamInterface;
-	if (upstream->ie->getInterfaceId() == intId && !upstream->isSourceDirectlyConnected)
+	if (upstream->ie->getInterfaceId() == intId && !upstream->isSourceDirectlyConnected())
 	{
 	    // This event is only relevant if RPF_interface(S) is a shared
 	    // medium.  This router sees another router on RPF_interface(S) send
@@ -455,7 +455,7 @@ void PIMDM::processOlistEmptyEvent(Route *route)
     // upstream state transitions
 
     // olist(S,G) -> NULL AND S NOT directly connected?
-    if (!upstream->isSourceDirectlyConnected)
+    if (!upstream->isSourceDirectlyConnected())
     {
         if(upstream->graftPruneState == UpstreamInterface::FORWARDING || upstream->graftPruneState == UpstreamInterface::ACK_PENDING)
         {
@@ -494,7 +494,7 @@ void PIMDM::processOlistNonEmptyEvent(Route *route)
         // Graft message to RPF'(S).  The Graft Retry Timer (GRT(S,G)) MUST
         // be set to Graft_Retry_Period.
 
-        if (!upstream->isSourceDirectlyConnected)
+        if (!upstream->isSourceDirectlyConnected())
         {
             EV << "Route is not pruned any more, send Graft to upstream" << endl;
             sendGraftPacket(upstream->rpfNeighbor(), route->source, route->group, upstream->getInterfaceId());
@@ -1279,7 +1279,7 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         {
             // create new outgoing interface
             DownstreamInterface *downstream = route->createDownstreamInterface(pimInterface->getInterfacePtr());
-            downstream->hasConnectedReceivers = hasConnectedReceivers;
+            downstream->setHasConnectedReceivers(hasConnectedReceivers);
             allDownstreamInterfacesArePruned = false;
         }
     }
@@ -1330,7 +1330,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
     //      avoid examining the TTL of every multicast packet it handles.
 
     // Is source directly connected?
-    if (upstream->isSourceDirectlyConnected)
+    if (upstream->isSourceDirectlyConnected())
     {
         // State Refresh Originator state machine event: Receive Data from S AND S directly connected
         if (upstream->originatorState == UpstreamInterface::NOT_ORIGINATOR)
@@ -1349,7 +1349,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
 	// upstream state transition
 
 	// Data Packet arrives on RPF_Interface(S) AND olist(S,G) == NULL AND S is NOT directly connected ?
-    if (upstream->ie->getInterfaceId() == interfaceId && route->isOilistNull() && !upstream->isSourceDirectlyConnected)
+    if (upstream->ie->getInterfaceId() == interfaceId && route->isOilistNull() && !upstream->isSourceDirectlyConnected())
     {
         EV_DETAIL << "Route does not have any outgoing interface and source is not directly connected.\n";
 
@@ -1420,7 +1420,7 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 			{
 				EV << "Route is not forwarding any more, send Prune to upstream" << endl;
 				upstream->graftPruneState = UpstreamInterface::PRUNED;
-				if (!upstream->isSourceDirectlyConnected)
+				if (!upstream->isSourceDirectlyConnected())
 				{
 					sendPrunePacket(upstream->rpfNeighbor(), source, group, pruneInterval, upstream->getInterfaceId());
 				}
@@ -1500,7 +1500,7 @@ void PIMDM::multicastReceiverAdded(InterfaceEntry *ie, IPv4Address group)
             ipv4Route->addOutInterface(new PIMDMOutInterface(ie, downstream));
         }
 
-        downstream->hasConnectedReceivers = true;
+        downstream->setHasConnectedReceivers(true);
 
         // fire upstream state machine event
         if (upstream->graftPruneState == UpstreamInterface::PRUNED && downstream->isInOlist())
@@ -1532,7 +1532,7 @@ void PIMDM::multicastReceiverRemoved(InterfaceEntry *ie, IPv4Address group)
             if (downstream)
             {
                 bool wasInOlist = downstream->isInOlist();
-                downstream->hasConnectedReceivers = false;
+                downstream->setHasConnectedReceivers(false);
                 if (wasInOlist && !downstream->isInOlist())
                 {
                     EV_DEBUG << "Removed interface '" << ie->getName() << "' from the outgoing interface list of route " << route << ".\n";
@@ -1599,7 +1599,7 @@ void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *ipv4Route, IPv4Route *rou
     // upstream state transitions
 
     // RPF'(S) Changes AND olist(S,G) != NULL AND S is NOT directly connected?
-    if (!isOlistNull && !upstream->isSourceDirectlyConnected)
+    if (!isOlistNull && !upstream->isSourceDirectlyConnected())
     {
         // The Upstream(S,G) state
         // machine MUST transition to the AckPending (AP) state, unicast a
@@ -1865,7 +1865,7 @@ bool PIMDM::DownstreamInterface::isInOlist() const
 {
     // TODO check boundary
     bool hasNeighbors = pimdm()->pimNbt->getNumNeighborsOnInterface(ie->getInterfaceId()) > 0; // XXX optimize
-    return ((hasNeighbors && pruneState != PRUNED) || hasConnectedReceivers) && assertState != I_LOST_ASSERT;
+    return ((hasNeighbors && pruneState != PRUNED) || hasConnectedReceivers()) && assertState != I_LOST_ASSERT;
 }
 
 bool PIMDM::Route::isOilistNull()

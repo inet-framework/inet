@@ -78,6 +78,7 @@ class INET_API PIMBase : public cSimpleModule
         {
             RouteEntry *owner;
             InterfaceEntry *ie;
+            int flags;
 
             // assert winner state
             enum AssertState { NO_ASSERT_INFO, I_LOST_ASSERT, I_WON_ASSERT };
@@ -86,10 +87,15 @@ class INET_API PIMBase : public cSimpleModule
             AssertMetric winnerMetric;
 
             Interface(RouteEntry *owner, InterfaceEntry *ie)
-                : owner(owner), ie(ie),
+                : owner(owner), ie(ie), flags(0),
                   assertState(NO_ASSERT_INFO), assertTimer(NULL)
                 { ASSERT(owner), ASSERT(ie);}
             virtual ~Interface() { owner->owner->cancelAndDelete(assertTimer); }
+
+            bool isFlagSet(int flag) const { return (flags & flag) != 0; }
+            void setFlags(int flags)   { this->flags |= flags; }
+            void clearFlag(int flag)  { flags &= (~flag); }
+            void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
 
             void startAssertTimer(double assertTime)
             {

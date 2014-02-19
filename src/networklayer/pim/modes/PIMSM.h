@@ -39,10 +39,9 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         struct PimsmInterface : public Interface
         {
-            int flags;
             cMessage *expiryTimer;
 
-            enum
+            enum Flags
             {
                 RECEIVER_INCLUDE        = 1 << 0,
                 RECEIVER_EXCLUDE        = 1 << 1,
@@ -50,16 +49,12 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 ASSERT_TRACKING_DESIRED = 1 << 3
             };
 
-            bool isFlagSet(int flag) const { return (flags & flag) != 0; }
-            void setFlags(int flags)   { this->flags |= flags; }
-            void clearFlag(int flag)  { flags &= (~flag); }
-            void setFlag(int flag, bool value) { if (value) setFlags(flag); else clearFlag(flag); }
-
             PimsmInterface(Route *owner, InterfaceEntry *ie);
             virtual ~PimsmInterface();
             Route *route() const { return check_and_cast<Route*>(owner); }
             PIMSM *pimsm() const { return check_and_cast<PIMSM*>(owner->owner); }
             void startExpiryTimer(double holdTime);
+
             bool localReceiverInclude() const { return isFlagSet(RECEIVER_INCLUDE); }
             void setLocalReceiverInclude(bool value) { setFlag(RECEIVER_INCLUDE, value); }
             bool localReceiverExclude() const { return isFlagSet(RECEIVER_EXCLUDE); }

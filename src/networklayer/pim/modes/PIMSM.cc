@@ -1987,7 +1987,7 @@ void PIMSM::Route::removeDownstreamInterface(unsigned int i)
 }
 
 PIMSM::PimsmInterface::PimsmInterface(Route *owner, InterfaceEntry *ie)
-    : Interface(owner, ie), flags(0), expiryTimer(NULL)
+    : Interface(owner, ie), expiryTimer(NULL)
 {
 }
 

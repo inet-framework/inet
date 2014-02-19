@@ -42,6 +42,11 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
         struct UpstreamInterface : public Interface
         {
+            enum Flags
+            {
+                SOURCE_DIRECTLY_CONNECTED = 0x01
+            };
+
             enum GraftPruneState
             {
                 FORWARDING, // oiflist != NULL
@@ -52,7 +57,6 @@ class INET_API PIMDM : public PIMBase, protected cListener
             enum OriginatorState { NOT_ORIGINATOR, ORIGINATOR };
 
             IPv4Address nextHop; // rpf neighbor
-            bool isSourceDirectlyConnected;
 
             // graft prune state
             GraftPruneState graftPruneState;
@@ -67,15 +71,16 @@ class INET_API PIMDM : public PIMBase, protected cListener
             unsigned short maxTtlSeen;
 
             UpstreamInterface(Route *owner, InterfaceEntry *ie, IPv4Address neighbor, bool isSourceDirectlyConnected)
-                : Interface(owner, ie), nextHop(neighbor), isSourceDirectlyConnected(isSourceDirectlyConnected),
+                : Interface(owner, ie), nextHop(neighbor),
                   graftPruneState(FORWARDING), graftRetryTimer(NULL), overrideTimer(NULL), lastPruneSentTime(0.0),
                   originatorState(NOT_ORIGINATOR), sourceActiveTimer(NULL), stateRefreshTimer(NULL), maxTtlSeen(0)
-                { ASSERT(owner); ASSERT(ie); }
+                { ASSERT(owner); ASSERT(ie); setFlag(SOURCE_DIRECTLY_CONNECTED, isSourceDirectlyConnected); }
             virtual ~UpstreamInterface();
             Route *route() const { return check_and_cast<Route*>(owner); }
             PIMDM *pimdm() const { return check_and_cast<PIMDM*>(owner->owner); }
             int getInterfaceId() const { return ie->getInterfaceId(); }
             IPv4Address rpfNeighbor() { return assertState == I_LOST_ASSERT ? winnerMetric.address : nextHop; }
+            bool isSourceDirectlyConnected() const { return isFlagSet(SOURCE_DIRECTLY_CONNECTED); }
 
             void startGraftRetryTimer();
             void startOverrideTimer();
@@ -88,14 +93,17 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
         struct DownstreamInterface : public Interface
         {
+            enum Flags
+            {
+                HAS_CONNECTED_RECEIVERS = 0x01
+            };
+
             enum PruneState
             {
                 NO_INFO,       // no prune info, neither pruneTimer or prunePendingTimer is running
                 PRUNE_PENDING, // received a prune from a downstream neighbor, waiting for an override
                 PRUNED         // received a prune from a downstream neighbor and it was not overridden
             };
-
-            bool hasConnectedReceivers;
 
             // prune state
             PruneState pruneState;
@@ -109,6 +117,8 @@ class INET_API PIMDM : public PIMBase, protected cListener
             ~DownstreamInterface();
             Route *route() const { return check_and_cast<Route*>(owner); }
             PIMDM *pimdm() const { return check_and_cast<PIMDM*>(owner->owner); }
+            bool hasConnectedReceivers() const { return isFlagSet(HAS_CONNECTED_RECEIVERS); }
+            void setHasConnectedReceivers(bool value) { setFlag(HAS_CONNECTED_RECEIVERS, value); }
             bool isInOlist() const;
             void startPruneTimer(double holdTime);
             void stopPruneTimer();
