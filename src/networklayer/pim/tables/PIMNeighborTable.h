@@ -37,6 +37,8 @@ class INET_API PIMNeighbor: public cObject
 		InterfaceEntry *ie;
 		IPv4Address address;
 		int version;
+		unsigned int generationId;
+		long drPriority;     // -1 if not present
 		cMessage *livenessTimer;
 
 	public:
@@ -48,7 +50,12 @@ class INET_API PIMNeighbor: public cObject
 	    InterfaceEntry *getInterfacePtr() const {return ie;}
 	    IPv4Address getAddress() const {return address;}
 	    int getVersion() const {return version;}
+	    unsigned int getGenerationId() const { return generationId; }
+	    long getDRPriority() const { return drPriority; }
 	    cMessage *getLivenessTimer() const {return livenessTimer;}
+
+	    void setGenerationId(unsigned int genId) { generationId = genId; }
+	    void setDRPriority(long priority) { drPriority = priority; }
 };
 
 /**
@@ -80,7 +87,7 @@ class INET_API PIMNeighborTable: public cSimpleModule
 		 * if there is a neighbor with the same (ie,address) in the table.
 		 * Success is indicated by the returned value.
 		 */
-		virtual bool addNeighbor(PIMNeighbor *neighbor);
+		virtual bool addNeighbor(PIMNeighbor *neighbor, double holdTime);
 
 		/**
 		 * Deletes a neighbor from the table. If the neighbor was
@@ -93,7 +100,7 @@ class INET_API PIMNeighborTable: public cSimpleModule
          * Restarts the Neighbor Liveness timer of the given neighbor.
          * When the timer expires, the neigbor is automatically deleted.
          */
-        virtual void restartLivenessTimer(PIMNeighbor *neighbor);
+        virtual void restartLivenessTimer(PIMNeighbor *neighbor, double holdTime);
 
         /**
          * Returns the neighbor that is identified by the given (interfaceId,addr),

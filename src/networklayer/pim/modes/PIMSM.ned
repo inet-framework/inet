@@ -28,8 +28,11 @@ simple PIMSM
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
 
+        int designatedRouterPriority = default(-1);
+
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s;
+        double holdTime @unit(s) = default(3.5 * helloPeriod);
         double joinPrunePeriod @unit(s) = default(60s); // period between Join/Prune messages (called t_periodic in the RFC)
         double defaultOverrideInterval @unit(s) = 2.5s;
         double defaultPropagationDelay @unit(s) = 0.5s;

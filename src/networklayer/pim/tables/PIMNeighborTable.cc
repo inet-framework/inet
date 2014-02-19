@@ -24,7 +24,7 @@ Define_Module(PIMNeighborTable);
 using namespace std;
 
 PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
-    : ie(ie), address(address), version(version)
+    : ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
 
@@ -41,7 +41,8 @@ PIMNeighbor::~PIMNeighbor()
 // for WATCH_VECTOR()
 std::ostream& operator<<(std::ostream& os, const PIMNeighbor* e)
 {
-    os << "Neighbor: If = " << e->getInterfacePtr()->getName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion();
+    os << "Neighbor: If = " << e->getInterfacePtr()->getName() << "; Addr = " << e->getAddress() << "; Ver = " << e->getVersion()
+       << "; GenID = " << e->getGenerationId() << "; Pr = " << e->getDRPriority();
     return os;
 };
 
@@ -96,7 +97,7 @@ void PIMNeighborTable::processLivenessTimer(cMessage *livenessTimer)
     EV << "PIM::processNLTimer: Neighbor " << neighborAddress << "was removed from PIM neighbor table.\n";
 }
 
-bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
+bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
 {
     Enter_Method_Silent();
     if (!findNeighbor(entry->getInterfaceId(), entry->getAddress()))
@@ -105,7 +106,7 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry)
 
         this->neighbors.push_back(entry);
         take(entry->getLivenessTimer());
-        restartLivenessTimer(entry);
+        restartLivenessTimer(entry, holdTime);
         return true;
     }
     else
@@ -127,13 +128,11 @@ bool PIMNeighborTable::deleteNeighbor(PIMNeighbor* neighbor)
         return false;
 }
 
-#define HT 30.0                                     /**< Hello Timer = 30s. */
-
-void PIMNeighborTable::restartLivenessTimer(PIMNeighbor *neighbor)
+void PIMNeighborTable::restartLivenessTimer(PIMNeighbor *neighbor, double holdTime)
 {
     Enter_Method_Silent();
     cancelEvent(neighbor->getLivenessTimer());
-    scheduleAt(simTime() + 3.5*HT, neighbor->getLivenessTimer()); // XXX should use Hold Time from Hello Message
+    scheduleAt(simTime() + holdTime, neighbor->getLivenessTimer());
 }
 
 PIMNeighbor *PIMNeighborTable::findNeighbor(int interfaceId, IPv4Address addr)

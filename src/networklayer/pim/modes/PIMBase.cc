@@ -83,6 +83,10 @@ void PIMBase::initialize(int stage)
         hostname = host->getName();
 
         helloPeriod = par("helloPeriod");
+        holdTime = par("holdTime");
+        designatedRouterPriority = par("designatedRouterPriority");
+
+        generationID = intrand(UINT32_MAX);
     }
     else if (stage == INITSTAGE_TRANSPORT_LAYER)
     {
@@ -136,6 +140,23 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     EV_INFO << "Sending Hello packet on interface '" << pimInterface->getInterfacePtr()->getName() << "'\n";
 
     PIMHello *msg = new PIMHello("PIMHello");
+
+    msg->setOptionsArraySize(designatedRouterPriority < 0 ? 2 : 3);
+    HoldtimeOption *holdtimeOption = new HoldtimeOption();
+    holdtimeOption->setHoldTime(holdTime < 0 ? (uint16_t)0xffff: (uint16_t)holdTime);
+    msg->setOptions(0, holdtimeOption);
+
+    GenerationIDOption *genIdOption = new GenerationIDOption();
+    genIdOption->setGenerationID(generationID);
+    msg->setOptions(1, genIdOption);
+
+    if (designatedRouterPriority >= 0)
+    {
+        DRPriorityOption *drPriorityOption = new DRPriorityOption();
+        drPriorityOption->setPriority(designatedRouterPriority);
+        msg->setOptions(2, drPriorityOption);
+    }
+
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
     ctrl->setDestAddr(ALL_PIM_ROUTERS_MCAST);
     ctrl->setProtocol(IP_PROT_PIM);
@@ -153,21 +174,40 @@ void PIMBase::processHelloPacket(PIMHello *packet)
     IPv4Address address = ctrl->getSrcAddr();
     int version = packet->getVersion();
 
+    // process options
+    double holdTime = 3.5 * 30;
+    long drPriority = -1L;
+    unsigned int generationId = 0;
+    for (unsigned int i = 0; i < packet->getOptionsArraySize(); i++)
+    {
+        HelloOption *option = packet->getOptions(i);
+        if (dynamic_cast<HoldtimeOption*>(option))
+            holdTime = (double)dynamic_cast<HoldtimeOption*>(option)->getHoldTime();
+        else if (dynamic_cast<DRPriorityOption*>(option))
+            drPriority = check_and_cast<DRPriorityOption*>(option)->getPriority();
+        else if (dynamic_cast<GenerationIDOption*>(option))
+            generationId = check_and_cast<GenerationIDOption*>(option)->getGenerationID();
+    }
+
     InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
 
     EV_INFO << "Received PIM Hello from neighbor: interface=" << ie->getName() << " address=" << address << "\n";
 
     PIMNeighbor *neighbor = pimNbt->findNeighbor(interfaceId, address);
     if (neighbor)
-        pimNbt->restartLivenessTimer(neighbor);
+        pimNbt->restartLivenessTimer(neighbor, holdTime);
     else
     {
-        pimNbt->addNeighbor(new PIMNeighbor(ie, address, version));
+        neighbor = new PIMNeighbor(ie, address, version);
+        pimNbt->addNeighbor(neighbor, holdTime);
 
         // TODO If a Hello message is received from a new neighbor, the
         // receiving router SHOULD send its own Hello message after a random
         // delay between 0 and Triggered_Hello_Delay.
     }
+
+    neighbor->setGenerationId(generationId);
+    neighbor->setDRPriority(drPriority);
 
     delete packet;
 }

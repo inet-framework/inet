@@ -37,12 +37,53 @@ enum PIMPacketType
    StateRefresh = 9;
 }
 
-// Hello record in format TLV
-struct HelloEntry
+enum PIMHelloOptionType
 {
-	short Type;
-	short Value;	   
+   Holdtime = 1;
+   LANPruneDelay = 2;
+   DRPriority = 19;
+   GenerationID = 20;
+   StateRefreshCapable = 21;
+   AddressList = 24;
 }
+
+class HelloOption
+{
+	short type enum(PIMHelloOptionType);
+}
+
+class HoldtimeOption extends HelloOption
+{
+    type = Holdtime;
+    uint16_t holdTime;
+}
+
+class LANPruneDelayOption extends HelloOption
+{
+    type = LANPruneDelay;
+    uint16_t propagationDelay;
+    uint16_t overrideInterval;
+}
+
+class DRPriorityOption extends HelloOption
+{
+    type = DRPriority;
+    uint32_t priority;
+}
+
+class GenerationIDOption extends HelloOption
+{
+    type = GenerationID;
+    uint32_t generationID;
+}
+
+//class AddressListOption extends HelloOption
+//{
+//    IPv4Address secondaryAddresses[];
+//}
+
+cplusplus {{ class HelloOption; typedef HelloOption *HelloOptionPtr; }}
+class noncobject HelloOptionPtr;
 
 struct EncodedAddress
 {
@@ -73,8 +114,9 @@ packet PIMPacket
 // DM, SM
 packet PIMHello extends PIMPacket
 {
-	short 			type enum(PIMPacketType) = Hello;
-	HelloEntry		helloContent[];	   
+    @customize(true);
+	type = Hello;
+	abstract HelloOptionPtr  options[];
 }
 
 // Join/Prune message

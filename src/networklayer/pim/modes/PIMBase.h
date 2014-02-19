@@ -25,7 +25,7 @@
 #include "IIPv4RoutingTable.h"
 #include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"
-#include "PIMPacket_m.h"
+#include "PIMPacket.h"
 
 
 /**
@@ -163,8 +163,11 @@ class INET_API PIMBase : public cSimpleModule
 
         // parameters
         double helloPeriod;
+        double holdTime;
+        int designatedRouterPriority;
 
         PIMInterface::PIMMode mode;
+        uint32_t generationID;
         cMessage *helloTimer;
 
     public:
