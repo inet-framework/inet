@@ -66,10 +66,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
                                              ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);}
         };
 
-        /**
-         * @brief Structure of incoming interface.
-         * @details E.g.: GigabitEthernet1/4, RPF nbr 10.10.51.145
-         */
         struct UpstreamInterface : public PimsmInterface
         {
             IPv4Address nextHop; // RPF nexthop, <unspec> at the DR in (S,G) routes
@@ -120,18 +116,17 @@ class INET_API PIMSM : public PIMBase, protected cListener
         // Holds (*,G), (S,G) or (S,G,rpt) state
         struct Route : public RouteEntry
         {
-                // flags
-                enum
+                enum Flags
                 {
-                    NO_FLAG      = 0x00,
-                    PRUNED       = 0x01,              /**< Pruned */          // UpstreamJPState
-                    REGISTER     = 0x02,              /**< Register flag*/
-                    SPT_BIT      = 0x04,              /**< SPT bit*/          // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
-                    JOIN_DESIRED = 0x08
+                    PRUNED                    = 0x01, // UpstreamJPState
+                    REGISTER                  = 0x02, // Register flag
+                    SPT_BIT                   = 0x04, // used to distinguish whether to forward on (*,*,RP)/(*,G) or on (S,G) state
+                    JOIN_DESIRED              = 0x08,
+                    SOURCE_DIRECTLY_CONNECTED = 0x10
                 };
 
                 RouteType type;
-                IPv4Address rpAddr;                     /**< Randevous point */
+                IPv4Address rpAddr;
 
                 // related routes
                 Route *rpRoute;
@@ -169,6 +164,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                 bool isImmediateOlistNull();
                 bool isInheritedOlistNull();
                 bool joinDesired() const { return isFlagSet(JOIN_DESIRED); }
+                bool isSourceDirectlyConnected() const { return isFlagSet(SOURCE_DIRECTLY_CONNECTED); }
 
                 void startKeepAliveTimer(double keepAlivePeriod);
                 void startRegisterStopTimer(double interval);
@@ -260,7 +256,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // helpers
         bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
-        bool IamDR (IPv4Address sourceAddr);
+        bool IamDR (InterfaceEntry *ie);
         PIMInterface *getIncomingInterface(IPv4Datagram *datagram);
         bool deleteMulticastRoute(Route *route);
         void clearRoutes();

@@ -398,23 +398,9 @@ void PIMSM::processJoinG(IPv4Address group, IPv4Address rp, IPv4Address upstream
     }
 }
 
-/**
- * The method is used to process (S,G) Join PIM message. SG Join is process in
- * source tree between RP and source DR. If (S,G) route doesn't exist is created
- * along with (*,G) route. Otherwise outgoing interface and JT are created.
- */
 void PIMSM::processJoinSG(IPv4Address source, IPv4Address group, IPv4Address upstreamNeighborField, int holdTime, InterfaceEntry *inInterface)
 {
     EV_DETAIL << "Processing Join(" << source << ", " << group <<") received on interface '" << inInterface->getName() << "'.'n";
-
-    if (!IamDR(source))
-    {
-        Route *routeG = findRouteG(group);
-        if (!routeG)        // create (*,G) route between RP and source DR
-        {
-            addNewRouteG(group, Route::PRUNED);
-        }
-    }
 
     //
     // Downstream per-interface (S,G) state machine; event = Receive Join(S,G)
@@ -1158,18 +1144,18 @@ void PIMSM::restartExpiryTimer(Route *route, InterfaceEntry *originIntf, int hol
 
 void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address group)
 {
-    InterfaceEntry *interfaceTowardSource = rt->getInterfaceForDestAddr(source);
-    if (!interfaceTowardSource)
+    IPv4Route *routeTowardSource = rt->findBestMatchingRoute(source); // rt->getInterfaceForDestAddr(source);
+    if (!routeTowardSource)
         return;
 
-    PIMInterface *rpfInterface = pimIft->getInterfaceById(interfaceTowardSource->getInterfaceId());
+    PIMInterface *rpfInterface = pimIft->getInterfaceById(routeTowardSource->getInterface()->getInterfaceId());
     if (!rpfInterface || rpfInterface->getMode() != PIMInterface::SparseMode)
         return;
 
     InterfaceEntry *interfaceTowardRP = rt->getInterfaceForDestAddr(rpAddr);
 
     // RPF check and check if I am DR of the source
-    if ((interfaceTowardRP != interfaceTowardSource) && IamDR(source))
+    if ((interfaceTowardRP != routeTowardSource->getInterface()) && routeTowardSource->getGateway().isUnspecified())
     {
         EV_DETAIL << "New multicast source observed: source=" << source << ", group=" << group << ".\n";
 
@@ -1177,8 +1163,6 @@ void PIMSM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         Route *newRouteSG = addNewRouteSG(source, group, Route::PRUNED | Route::REGISTER | Route::SPT_BIT);
         newRouteSG->startKeepAliveTimer(keepAlivePeriod);
         newRouteSG->registerState = Route::RS_JOIN;
-        //DownstreamInterface *downstream = newRouteSG->findDownstreamInterfaceByInterfaceId(interfaceTowardRP->getInterfaceId());
-        //downstream->shRegTun = false;
 
         // create new (*,G) route
         addNewRouteG(newRouteSG->group, Route::PRUNED | Route::REGISTER);
@@ -1387,7 +1371,7 @@ void PIMSM::joinDesiredChanged(Route *route)
             // Upstream (S,G) State Machine; event: JoinDesired(S,G) -> TRUE
             //
             routeSG->clearFlag(Route::PRUNED);
-            if (!IamDR(routeSG->source))
+            if (!routeSG->isSourceDirectlyConnected())
             {
                 sendPIMJoin(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
                 routeSG->startJoinTimer(joinPrunePeriod);
@@ -1406,7 +1390,7 @@ void PIMSM::joinDesiredChanged(Route *route)
             routeSG->setFlags(Route::PRUNED);
             routeSG->clearFlag(Route::SPT_BIT);
             cancelAndDeleteTimer(routeSG->joinTimer);
-            if (!IamDR(routeSG->source))
+            if (!routeSG->isSourceDirectlyConnected())
                 sendPIMPrune(routeSG->group, routeSG->source, routeSG->upstreamInterface->rpfNeighbor(), SG);
         }
     }
@@ -1616,18 +1600,34 @@ void PIMSM::updateJoinDesired(Route *route)
 //                                Helpers
 //============================================================================
 
-bool PIMSM::IamDR (IPv4Address source)
+bool PIMSM::IamDR (InterfaceEntry *ie)
 {
-    for (int i=0; i < ift->getNumInterfaces(); i++)
-    {
-        InterfaceEntry *ie = ift->getInterface(i);
-        IPv4Address localAddr = ie->ipv4Data()->getIPAddress();
-        IPv4Address netmask = ie->ipv4Data()->getNetmask();
+    // bool I_am_DR(I) { return DR(I) == me }
 
-        if (IPv4Address::maskedAddrAreEqual(source, localAddr, netmask))
-            return true;
-    }
+    //  host
+    //  DR(I) {
+    //    dr = me
+    //    for each neighbor on interface I {
+    //        if ( dr_is_better( neighbor, dr, I ) == TRUE ) {
+    //            dr = neighbor
+    //        }
+    //    }
+    //    return dr
+    //  }
 
+    // bool
+    //     dr_is_better(a,b,I) {
+    //         if( there is a neighbor n on I for which n.dr_priority_present
+    //                 is false ) {
+    //             return a.primary_ip_address > b.primary_ip_address
+    //         } else {
+    //             return ( a.dr_priority > b.dr_priority ) OR
+    //                    ( a.dr_priority == b.dr_priority AND
+    //                      a.primary_ip_address > b.primary_ip_address )
+    //         }
+    //     }
+
+    // TODO
     return false;
 }
 
@@ -1752,6 +1752,9 @@ PIMSM::Route *PIMSM::addNewRouteG(IPv4Address group, int flags)
 
 PIMSM::Route *PIMSM::addNewRouteSG(IPv4Address source, IPv4Address group, int flags)
 {
+    ASSERT(!source.isUnspecified());
+    ASSERT(group.isMulticast() && !group.isLinkLocalMulticast());
+
     Route *newRouteSG = new Route(this, SG, source, group);
     newRouteSG->setFlags(flags);
     newRouteSG->rpAddr = rpAddr;
@@ -1761,10 +1764,12 @@ PIMSM::Route *PIMSM::addNewRouteSG(IPv4Address source, IPv4Address group, int fl
     if (routeToSource)
     {
         InterfaceEntry *ieTowardSource = routeToSource->getInterface();
-        IPv4Address rpfNeighbor;
-        if (!IamDR(source))
+        IPv4Address rpfNeighbor = routeToSource->getGateway();
+
+        if (rpfNeighbor.isUnspecified())
+            newRouteSG->setFlag(Route::SOURCE_DIRECTLY_CONNECTED, true);
+        else
         {
-            rpfNeighbor = routeToSource->getGateway();
             if (!pimNbt->findNeighbor(ieTowardSource->getInterfaceId(), rpfNeighbor))
             {
                 PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(ieTowardSource->getInterfaceId());
