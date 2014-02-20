@@ -25,7 +25,7 @@ import inet.nodes.access.NgnAccessNode2;
 import inet.nodes.access.NgnAccessSplitter;
 import inet.nodes.inet.RouterWithEthernetInterface2;
 import inet.nodes.inet.StandardHost3WithEthernetInterface2;
-import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLThruputMeter;
+import inet.nodes.inet.StandardHost3WithEthernetInterface2WithDLPerformanceMeter;
 import inet.nodes.inet.StandardServerWithEthernetInterface2;
 
 
@@ -103,12 +103,12 @@ network NgnAccess
 
 
 //
-// 'NgnAccess' network with hosts with DLThruputMeter.
+// 'NgnAccess' network with hosts with DLPerformanceMeter.
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-15
 //
-network NgnAccessWithDLThruputMeter
+network NgnAccessWithDLPerformanceMeter
 {
     parameters:
         int N = default(1);	// number of ONUs (subscribers)
@@ -152,7 +152,7 @@ network NgnAccessWithDLThruputMeter
             gates:
                 ethg[n+1];
         }
-        host[N*n]: StandardHost3WithEthernetInterface2WithDLThruputMeter {
+        host[N*n]: StandardHost3WithEthernetInterface2WithDLPerformanceMeter {
             parameters:
                 @display("i=device/laptop;p=46,119");
             gates:
