@@ -1377,8 +1377,6 @@ void IGMPv3::processRouterGroupTimer(cMessage *msg)
         {
             EV_DETAIL << "Deleting multicast listener for group '" << groupData->groupAddr << "' from the interface table.\n";
             ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
-            IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-            emit(NF_IPv4_MCAST_UNREGISTERED, &info);
             groupData->parent->deleteGroupData(groupData->groupAddr);
 
             EV_DETAIL << "New Router State is <deleted>.\n";
@@ -1416,8 +1414,6 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
     if(last)
     {
         ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
-        IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-        emit(NF_IPv4_MCAST_UNREGISTERED, &info);
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
 }
