@@ -19,8 +19,10 @@
 #ifndef __INET_UDPSOCKET_H
 #define __INET_UDPSOCKET_H
 
+#include <vector>
 #include "INETDefs.h"
 #include "Address.h"
+#include "UDPControlInfo.h"
 
 class UDPDataIndication;
 
@@ -169,7 +171,7 @@ class INET_API UDPSocket
      * One can also optionally specify the output interface for packets sent to
      * that address.
      */
-    void joinMulticastGroup(const Address& multicastAddr, int interfaceId=-1);
+    void joinMulticastGroup(const Address &multicastAddr, int interfaceId=-1);
 
     /**
      * Joins the socket to each multicast group that are registered with
@@ -181,13 +183,48 @@ class INET_API UDPSocket
      * Causes the socket to leave the given multicast group, i.e. UDP packets
      * arriving to the given multicast address will no longer passed up to the socket.
      */
-    void leaveMulticastGroup(const Address& multicastAddr);
+    void leaveMulticastGroup(const Address &multicastAddr);
 
     /**
      * Causes the socket to leave each multicast groups that are registered with
      * any of the interfaces.
      */
     void leaveLocalMulticastGroups();
+
+    /**
+     * Blocks multicast traffic of the specified group address from specific sources.
+     * Use this method only if joinMulticastGroup() was previously called for that group.
+     */
+    void blockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList);
+
+    /**
+     * Unblocks the multicast traffic of the specified group address from the specified sources.
+     * Use this method only if the traffic was previously blocked by calling blockMulticastSources().
+     */
+    void unblockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList);
+
+    /**
+     * Adds the socket to the given multicast group and source addresses, that is,
+     * UDP packets arriving from one of the sources and to the given multicast address
+     * will be passed up to the socket.
+     */
+    void joinMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList);
+
+    /**
+     * Causes the socket to leave the given multicast group for the specified sources,
+     * i.e. UDP packets arriving from those sources to the given multicast address
+     * will no longer passed up to the socket.
+     */
+    void leaveMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList);
+
+    /**
+     * Sets the source filter for the given multicast group.
+     * If filterMode is INCLUDE, then UDP packets arriving from one of the sources and to
+     * to given multicast group will be passed up to the socket. If filterMode is EXCLUDE,
+     * then all UDP packets arriving to the given multicast group will be passed up except
+     * those that arrive from the specified sources.
+     */
+    void setMulticastSourceFilter(int interfaceId, const Address &multicastAddr, UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList);
 
     /**
      * Sends a data packet to the given address and port.

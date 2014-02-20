@@ -267,7 +267,6 @@ class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 }
 
 //
-//
 // Control info for letting an UDP socket leave multicast groups.
 // To set the option, send a message to the ~UDP module with kind=UDP_C_SETOPTION
 // and an and instance of this control info class attached.
@@ -279,3 +278,67 @@ class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
     Address multicastAddr[];
 }
 
+//
+// Control info for letting an UDP socket to block multicast traffic from
+// specific sources after joining a multicast group.
+//
+// see IP_BLOCK_SOURCE socket option
+class UDPBlockMulticastSourcesCommand extends UDPSetOptionCommand
+{
+    int interfaceId;
+    Address multicastAddr;
+    Address sourceList[];
+}
+
+//
+// Control info for letting an UDP socket to permit multicast traffic from
+// a previously blocked source.
+//
+// see IP_UNBLOCK_SOURCE socket option
+class UDPUnblockMulticastSourcesCommand extends UDPSetOptionCommand
+{
+    int interfaceId;
+    Address multicastAddr;
+    Address sourceList[];
+}
+
+//
+// Control info for letting an UDP socket to join a multicast group
+// only for the selected sources.
+//
+// see IP_ADD_SOURCE_MEMBERSHIP socket option
+class UDPJoinMulticastSourcesCommand extends UDPSetOptionCommand
+{
+    int interfaceId;
+    Address multicastAddr;
+    Address sourceList[];
+}
+
+//
+// Control info for letting an UDP socket to leave a multicast group
+// for the selected sources.
+//
+// see IP_DROP_SOURCE_MEMBERSHIP socket option
+class UDPLeaveMulticastSourcesCommand extends UDPSetOptionCommand
+{
+    int interfaceId;
+    Address multicastAddr;
+    Address sourceList[];
+}
+
+enum UDPSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOURCES = 2; }
+
+//
+// Control info for letting an UDP socket to specify the excluded/included
+// sources for a multicast group.
+//
+// Unlike Block/Unblock/Join/LeaveMulticastSource commands, this method is
+// not incremental.
+//
+class UDPSetMulticastSourceFilterCommand extends UDPSetOptionCommand
+{
+    int interfaceId;
+    Address multicastAddr;
+    int filterMode @enum(UDPSourceFilterMode);
+    Address sourceList[];
+}

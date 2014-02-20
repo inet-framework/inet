@@ -45,6 +45,21 @@ const bool DEFAULT_MULTICAST_LOOP = true;
 class INET_API UDP : public cSimpleModule, public ILifecycle
 {
   public:
+
+    struct MulticastMembership
+    {
+        Address multicastAddress;
+        int interfaceId;  // -1 = all
+        UDPSourceFilterMode filterMode;
+        std::vector<Address> sourceList;
+
+        bool isSourceAllowed(Address sourceAddr);
+    };
+
+    // For a given multicastAddress and interfaceId there is at most one membership record.
+    // Records are ordered first by multicastAddress, then by interfaceId (-1 interfaceId is the last)
+    typedef std::vector<MulticastMembership*> MulticastMembershipTable;
+
     struct SockDesc
     {
         SockDesc(int sockId, int appGateIndex);
@@ -62,7 +77,12 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         bool multicastLoop;
         int ttl;
         unsigned char typeOfService;
-        std::map<Address,int> multicastAddrs; // key: multicast address; value: output interface Id or -1
+        MulticastMembershipTable multicastMembershipTable;
+
+        MulticastMembershipTable::iterator findFirstMulticastMembership(const Address &multicastAddress);
+        MulticastMembership *findMulticastMembership(const Address &multicastAddress, int interfaceId);
+        void addMulticastMembership(MulticastMembership *membership);
+        void deleteMulticastMembership(MulticastMembership *membership);
     };
 
     typedef std::list<SockDesc *> SockDescList;   // might contain duplicated local addresses if their reuseAddr flag is set
@@ -113,6 +133,12 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses);
+    virtual void blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
+    virtual void unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
+    virtual void joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
+    virtual void leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
+    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList);
+
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const Address& multicastAddr);
 
     // ephemeral port

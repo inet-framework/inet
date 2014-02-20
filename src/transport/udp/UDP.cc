@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-#include <string.h>
+#include <algorithm>
+#include <string>
 #include "UDP.h"
 #include "UDPPacket.h"
 #include "IInterfaceTable.h"
@@ -59,6 +59,13 @@ simsignal_t UDP::sentPkSignal = registerSignal("sentPk");
 simsignal_t UDP::passedUpPkSignal = registerSignal("passedUpPk");
 simsignal_t UDP::droppedPkWrongPortSignal = registerSignal("droppedPkWrongPort");
 simsignal_t UDP::droppedPkBadChecksumSignal = registerSignal("droppedPkBadChecksum");
+
+bool UDP::MulticastMembership::isSourceAllowed(Address sourceAddr)
+{
+    std::vector<Address>::iterator it = std::find(sourceList.begin(), sourceList.end(), sourceAddr);
+    return (filterMode == UDP_INCLUDE_MCAST_SOURCES && it != sourceList.end()) ||
+           (filterMode == UDP_EXCLUDE_MCAST_SOURCES && it == sourceList.end());
+}
 
 static std::ostream & operator<<(std::ostream & os, const UDP::SockDesc& sd)
 {
@@ -240,6 +247,51 @@ void UDP::processCommandFromApp(cMessage *msg)
                     addresses.push_back(cmd->getMulticastAddr(i));
                 leaveMulticastGroups(sd, addresses);
             }
+            else if (dynamic_cast<UDPBlockMulticastSourcesCommand*>(ctrl))
+            {
+                UDPBlockMulticastSourcesCommand *cmd = (UDPBlockMulticastSourcesCommand*)ctrl;
+                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                std::vector<Address> sourceList;
+                for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
+                blockMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+            }
+            else if (dynamic_cast<UDPUnblockMulticastSourcesCommand*>(ctrl))
+            {
+                UDPUnblockMulticastSourcesCommand *cmd = (UDPUnblockMulticastSourcesCommand*)ctrl;
+                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                std::vector<Address> sourceList;
+                for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
+                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+            }
+            else if (dynamic_cast<UDPJoinMulticastSourcesCommand*>(ctrl))
+            {
+                UDPJoinMulticastSourcesCommand *cmd = (UDPJoinMulticastSourcesCommand*)ctrl;
+                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                std::vector<Address> sourceList;
+                for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
+                joinMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+            }
+            else if (dynamic_cast<UDPLeaveMulticastSourcesCommand*>(ctrl))
+            {
+                UDPLeaveMulticastSourcesCommand *cmd = (UDPLeaveMulticastSourcesCommand*)ctrl;
+                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                std::vector<Address> sourceList;
+                for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
+                leaveMulticastSources(sd, ie, cmd->getMulticastAddr(), sourceList);
+            }
+            else if (dynamic_cast<UDPSetMulticastSourceFilterCommand*>(ctrl))
+            {
+                UDPSetMulticastSourceFilterCommand *cmd = (UDPSetMulticastSourceFilterCommand*)ctrl;
+                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                std::vector<Address> sourceList;
+                for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
+                    sourceList.push_back(cmd->getSourceList(i));
+                setMulticastSourceFilter(sd, ie, cmd->getMulticastAddr(), (UDPSourceFilterMode)cmd->getFilterMode(), sourceList);
+            }
             else
                 throw cRuntimeError("Unknown subclass of UDPSetOptionCommand received from app: %s", ctrl->getClassName());
             break;
@@ -266,8 +318,8 @@ void UDP::processPacketFromApp(cPacket *appData)
     int interfaceId = ctrl->getInterfaceId();
     if (interfaceId == -1 && destAddr.isMulticast())
     {
-        std::map<Address,int>::iterator it = sd->multicastAddrs.find(destAddr);
-        interfaceId = (it != sd->multicastAddrs.end() && it->second != -1) ? it->second : sd->multicastOutputInterfaceId;
+        MulticastMembershipTable::iterator membership = sd->findFirstMulticastMembership(destAddr);
+        interfaceId = (membership != sd->multicastMembershipTable.end() && (*membership)->interfaceId != -1) ? (*membership)->interfaceId : sd->multicastOutputInterfaceId;
     }
     sendDown(appData, srcAddr, sd->localPort, destAddr, destPort, interfaceId, sd->multicastLoop, sd->ttl, sd->typeOfService);
 
@@ -685,10 +737,12 @@ std::vector<UDP::SockDesc*> UDP::findSocketsForMcastBcastPacket(const Address& l
         }
         else if (isMulticast)
         {
-            if (sd->multicastAddrs.find(localAddr) != sd->multicastAddrs.end())
+            MulticastMembershipTable::iterator membership = sd->findFirstMulticastMembership(localAddr);
+            if (membership != sd->multicastMembershipTable.end())
             {
                 if ((sd->remotePort == -1 || sd->remotePort == remotePort) &&
-                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr))
+                    (sd->remoteAddr.isUnspecified() || sd->remoteAddr == remoteAddr) &&
+                    (*membership)->isSourceAllowed(remoteAddr))
                     result.push_back(sd);
             }
         }
@@ -861,6 +915,7 @@ void UDP::setReuseAddress(SockDesc *sd, bool reuseAddr)
 
 void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds)
 {
+    IInterfaceTable *ift = InterfaceTableAccess().get(this);
     int multicastAddressesLen = multicastAddresses.size();
     int interfaceIdsLen = interfaceIds.size();
     for (int k = 0; k < multicastAddressesLen; k++)
@@ -868,28 +923,46 @@ void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicas
         const Address &multicastAddr = multicastAddresses[k];
         int interfaceId = k < interfaceIdsLen ? interfaceIds[k] : -1;
         ASSERT(multicastAddr.isMulticast());
-        sd->multicastAddrs[multicastAddr] = interfaceId;
+
+        MulticastMembership *membership = sd->findMulticastMembership(multicastAddr, interfaceId);
+        if (membership)
+            throw cRuntimeError("UPD::joinMulticastGroups(): %s group on interface %s is already joined.",
+                    multicastAddr.str().c_str(), ift->getInterfaceById(interfaceId)->getFullName());
+
+        membership = new MulticastMembership();
+        membership->interfaceId = interfaceId;
+        membership->multicastAddress = multicastAddr;
+        membership->filterMode = UDP_EXCLUDE_MCAST_SOURCES;
+        membership->sourceList.clear();
+        sd->addMulticastMembership(membership);
 
         // add the multicast address to the selected interface or all interfaces
-        IInterfaceTable *ift = InterfaceTableAccess().get(this);
         if (interfaceId != -1)
         {
             InterfaceEntry *ie = ift->getInterfaceById(interfaceId);
             if (!ie)
                 error("Interface id=%d does not exist", interfaceId);
+            ASSERT(ie->isMulticast());
             addMulticastAddressToInterface(ie, multicastAddr);
         }
         else
         {
             int n = ift->getNumInterfaces();
             for (int i = 0; i < n; i++)
-                addMulticastAddressToInterface(ift->getInterface(i), multicastAddr);
+            {
+                InterfaceEntry *ie = ift->getInterface(i);
+                if (ie->isMulticast())
+                    addMulticastAddressToInterface(ie, multicastAddr);
+            }
         }
     }
 }
 
 void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& multicastAddr)
 {
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddr.isMulticast());
+
     if (multicastAddr.getType() == Address::IPv4)
     {
 #ifdef WITH_IPv4
@@ -908,9 +981,218 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& mult
 
 void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses)
 {
+    IInterfaceTable *ift = InterfaceTableAccess().get(this);
+    std::vector<Address> empty;
+
     for (unsigned int i = 0; i < multicastAddresses.size(); i++)
-        sd->multicastAddrs.erase(multicastAddresses[i]);
-    // note: we cannot remove the address from the interface, because someone else may still use it
+    {
+        MulticastMembershipTable::iterator it = sd->findFirstMulticastMembership(multicastAddresses[i]);
+        while (it != sd->multicastMembershipTable.end())
+        {
+            MulticastMembership *membership = *it;
+            if (membership->multicastAddress != multicastAddresses[i])
+                break;
+            it = sd->multicastMembershipTable.erase(it);
+
+            McastSourceFilterMode oldFilterMode = membership->filterMode == UDP_INCLUDE_MCAST_SOURCES ?
+                                                    MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
+
+            if (membership->interfaceId != -1)
+            {
+                InterfaceEntry *ie = ift->getInterfaceById(membership->interfaceId);
+                ie->changeMulticastGroupMembership(membership->multicastAddress,
+                        oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
+            }
+            else
+            {
+                for (int j = 0; j < ift->getNumInterfaces(); ++j)
+                {
+                    InterfaceEntry *ie = ift->getInterface(j);
+                    if (ie->isMulticast())
+                        ie->changeMulticastGroupMembership(membership->multicastAddress,
+                                oldFilterMode, membership->sourceList, MCAST_INCLUDE_SOURCES, empty);
+
+                }
+            }
+            delete membership;
+        }
+    }
+}
+
+void UDP::blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+        throw cRuntimeError("UDP::blockMulticastSources(): not a member of %s group on interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    if (membership->filterMode != UDP_EXCLUDE_MCAST_SOURCES)
+        throw cRuntimeError("UDP::blockMulticastSources(): socket was not joined to all sources of %s group on interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    std::vector<Address> oldSources(membership->sourceList);
+    std::vector<Address> &excludedSources = membership->sourceList;
+    bool changed = false;
+    for (unsigned int i = 0; i < sourceList.size(); ++i)
+    {
+        const Address &sourceAddress = sourceList[i];
+        std::vector<Address>::iterator it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
+        if (it != excludedSources.end())
+        {
+            excludedSources.push_back(sourceAddress);
+            changed = true;
+        }
+    }
+
+    if (changed)
+    {
+        ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
+    }
+}
+
+void UDP::unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+        throw cRuntimeError("UDP::unblockMulticastSources(): not a member of %s group in interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    if (membership->filterMode != UDP_EXCLUDE_MCAST_SOURCES)
+        throw cRuntimeError("UDP::unblockMulticastSources(): socket was not joined to all sources of %s group on interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    std::vector<Address> oldSources(membership->sourceList);
+    std::vector<Address> &excludedSources = membership->sourceList;
+    bool changed = false;
+    for (unsigned int i = 0; i < sourceList.size(); ++i)
+    {
+        const Address &sourceAddress = sourceList[i];
+        std::vector<Address>::iterator it = std::find(excludedSources.begin(), excludedSources.end(), sourceAddress);
+        if (it != excludedSources.end())
+        {
+            excludedSources.erase(it);
+            changed = true;
+        }
+    }
+
+    if (changed)
+    {
+        ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, excludedSources);
+    }
+}
+
+void UDP::joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+    {
+        membership = new MulticastMembership();
+        membership->interfaceId = ie->getInterfaceId();
+        membership->multicastAddress = multicastAddress;
+        membership->filterMode = UDP_INCLUDE_MCAST_SOURCES;
+    }
+
+    if (membership->filterMode == UDP_EXCLUDE_MCAST_SOURCES)
+        throw cRuntimeError("UDP::joinMulticastSources(): socket was joined to all sources of %s group on interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+
+    std::vector<Address> oldSources(membership->sourceList);
+    std::vector<Address> &includedSources = membership->sourceList;
+    bool changed = false;
+    for (unsigned int i = 0; i < sourceList.size(); ++i)
+    {
+        const Address &sourceAddress = sourceList[i];
+        std::vector<Address>::iterator it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
+        if (it != includedSources.end())
+        {
+            includedSources.push_back(sourceAddress);
+            changed = true;
+        }
+    }
+
+    if (changed)
+    {
+        ie->changeMulticastGroupMembership(multicastAddress, MCAST_INCLUDE_SOURCES, oldSources, MCAST_INCLUDE_SOURCES, includedSources);
+    }
+}
+
+void UDP::leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+        throw cRuntimeError("UDP::leaveMulticastSources(): not a member of %s group in interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    if (membership->filterMode == UDP_EXCLUDE_MCAST_SOURCES)
+        throw cRuntimeError("UDP::leaveMulticastSources(): socket was joined to all sources of %s group on interface '%s'",
+                                multicastAddress.str().c_str(), ie->getFullName());
+
+    std::vector<Address> oldSources(membership->sourceList);
+    std::vector<Address> &includedSources = membership->sourceList;
+    bool changed = false;
+    for (unsigned int i = 0; i < sourceList.size(); ++i)
+    {
+        const Address &sourceAddress = sourceList[i];
+        std::vector<Address>::iterator it = std::find(includedSources.begin(), includedSources.end(), sourceAddress);
+        if (it != includedSources.end())
+        {
+            includedSources.erase(it);
+            changed = true;
+        }
+    }
+
+    if (changed)
+    {
+        ie->changeMulticastGroupMembership(multicastAddress, MCAST_EXCLUDE_SOURCES, oldSources, MCAST_EXCLUDE_SOURCES, includedSources);
+    }
+
+    if (includedSources.empty())
+        sd->deleteMulticastMembership(membership);
+}
+
+void UDP::setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList)
+{
+    ASSERT(ie && ie->isMulticast());
+    ASSERT(multicastAddress.isMulticast());
+
+    MulticastMembership *membership = sd->findMulticastMembership(multicastAddress, ie->getInterfaceId());
+    if (!membership)
+    {
+        membership = new MulticastMembership();
+        membership->interfaceId = ie->getInterfaceId();
+        membership->multicastAddress = multicastAddress;
+        membership->filterMode = UDP_INCLUDE_MCAST_SOURCES;
+    }
+
+    bool changed = membership->filterMode != filterMode ||
+                   membership->sourceList.size() != sourceList.size() ||
+                   !equal(sourceList.begin(), sourceList.end(), membership->sourceList.begin());
+    if (changed)
+    {
+        std::vector<Address> oldSources(membership->sourceList);
+        McastSourceFilterMode oldFilterMode = membership->filterMode == UDP_INCLUDE_MCAST_SOURCES ?
+                                                MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
+        McastSourceFilterMode newFilterMode = filterMode == UDP_INCLUDE_MCAST_SOURCES ?
+                                                MCAST_INCLUDE_SOURCES : MCAST_EXCLUDE_SOURCES;
+
+        membership->filterMode = filterMode;
+        membership->sourceList = sourceList;
+
+        ie->changeMulticastGroupMembership(multicastAddress, oldFilterMode, oldSources, newFilterMode, sourceList);
+    }
 }
 
 bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -951,3 +1233,56 @@ bool UDP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     return true;
 }
 
+/*
+ * Multicast memberships are sorted first by multicastAddress, then by interfaceId.
+ * The interfaceId -1 comes after any other interfaceId.
+ */
+static bool lessMembership(const UDP::MulticastMembership *first, const UDP::MulticastMembership *second)
+{
+    if (first->multicastAddress != second->multicastAddress)
+        return first->multicastAddress < second->multicastAddress;
+
+    if (first->interfaceId == -1 || first->interfaceId >= second->interfaceId)
+        return false;
+
+    return true;
+}
+
+UDP::MulticastMembershipTable::iterator UDP::SockDesc::findFirstMulticastMembership(const Address &multicastAddress)
+{
+    MulticastMembership membership;
+    membership.multicastAddress = multicastAddress;
+    membership.interfaceId = 0; // less than any other interfaceId
+
+    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
+    if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress)
+        return it;
+    else
+        return multicastMembershipTable.end();
+}
+
+UDP::MulticastMembership *UDP::SockDesc::findMulticastMembership(const Address &multicastAddress, int interfaceId)
+{
+    MulticastMembership membership;
+    membership.multicastAddress = multicastAddress;
+    membership.interfaceId = interfaceId;
+
+    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), &membership, lessMembership);
+    if (it != multicastMembershipTable.end() && (*it)->multicastAddress == multicastAddress && (*it)->interfaceId == interfaceId)
+        return *it;
+    else
+        return NULL;
+}
+
+void UDP::SockDesc::addMulticastMembership(MulticastMembership *membership)
+{
+    UDP::MulticastMembershipTable::iterator it = lower_bound(multicastMembershipTable.begin(), multicastMembershipTable.end(), membership, lessMembership);
+    multicastMembershipTable.insert(it, membership);
+}
+
+void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
+{
+    multicastMembershipTable.erase(std::remove(multicastMembershipTable.begin(), multicastMembershipTable.end(), membership),
+                                    multicastMembershipTable.end());
+    delete membership;
+}

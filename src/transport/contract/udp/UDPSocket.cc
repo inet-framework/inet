@@ -294,6 +294,77 @@ void UDPSocket::leaveLocalMulticastGroups()
     }
 }
 
+void UDPSocket::blockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+{
+    cMessage *msg = new cMessage("BlockMulticastSources", UDP_C_SETOPTION);
+    UDPBlockMulticastSourcesCommand *ctrl = new UDPBlockMulticastSourcesCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setSourceListArraySize(sourceList.size());
+    for (int i = 0; i < (int)sourceList.size(); ++i)
+        ctrl->setSourceList(i, sourceList[i]);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::unblockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+{
+    cMessage *msg = new cMessage("UnblockMulticastSources", UDP_C_SETOPTION);
+    UDPUnblockMulticastSourcesCommand *ctrl = new UDPUnblockMulticastSourcesCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setSourceListArraySize(sourceList.size());
+    for (int i = 0; i < (int)sourceList.size(); ++i)
+        ctrl->setSourceList(i, sourceList[i]);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::joinMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+{
+    cMessage *msg = new cMessage("JoinMulticastSources", UDP_C_SETOPTION);
+    UDPJoinMulticastSourcesCommand *ctrl = new UDPJoinMulticastSourcesCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setSourceListArraySize(sourceList.size());
+    for (int i = 0; i < (int)sourceList.size(); ++i)
+        ctrl->setSourceList(i, sourceList[i]);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::leaveMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+{
+    cMessage *msg = new cMessage("LeaveMulticastSources", UDP_C_SETOPTION);
+    UDPLeaveMulticastSourcesCommand *ctrl = new UDPLeaveMulticastSourcesCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setSourceListArraySize(sourceList.size());
+    for (int i = 0; i < (int)sourceList.size(); ++i)
+        ctrl->setSourceList(i, sourceList[i]);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
+
+void UDPSocket::setMulticastSourceFilter(int interfaceId, const Address &multicastAddr,
+                                         UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList)
+{
+    cMessage *msg = new cMessage("SetMulticastSourceFilter", UDP_C_SETOPTION);
+    UDPSetMulticastSourceFilterCommand *ctrl = new UDPSetMulticastSourceFilterCommand();
+    ctrl->setSockId(sockId);
+    ctrl->setInterfaceId(interfaceId);
+    ctrl->setMulticastAddr(multicastAddr);
+    ctrl->setFilterMode(filterMode);
+    ctrl->setSourceListArraySize(sourceList.size());
+    for (int i = 0; i < (int)sourceList.size(); ++i)
+        ctrl->setSourceList(i, sourceList[i]);
+    msg->setControlInfo(ctrl);
+    sendToUDP(msg);
+}
 
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {
