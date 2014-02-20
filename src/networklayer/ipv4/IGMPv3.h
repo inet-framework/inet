@@ -26,7 +26,6 @@
 #define INET_IGMPV3_H
 
 #include "INETDefs.h"
-#include "INotifiable.h"
 #include "IPv4Address.h"
 #include "IGMPMessage.h"
 #include "InterfaceEntry.h"
@@ -38,7 +37,7 @@ class IInterfaceTable;
 class IRoutingTable;
 class NotificationBoard;
 
-class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
+class INET_API IGMPv3 : public cSimpleModule, protected cListener
 {
     protected:
         typedef std::vector<IPv4Address> IPv4AddressVector;
@@ -180,7 +179,6 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
     protected:
         IRoutingTable *rt;
         IInterfaceTable *ift;
-        NotificationBoard *nb;
 
         bool enabled;
         int robustness;
@@ -219,7 +217,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
         virtual int numInitStages() const {return NUM_INIT_STAGES;}
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
-        virtual void receiveChangeNotification(int category, const cPolymorphic *details);
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
         virtual ~IGMPv3();
 
     protected:

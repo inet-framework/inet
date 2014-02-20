@@ -28,7 +28,6 @@
 #include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "NotificationBoard.h"
 
 #include <algorithm>
 #include <bitset>
@@ -396,10 +395,10 @@ void IGMPv3::initialize(int stage)
     {
         ift = InterfaceTableAccess().get();
         rt = IPv4RoutingTableAccess().get();
-        nb = NotificationBoardAccess().get();
 
-        nb->subscribe(this, NF_INTERFACE_DELETED);
-        nb->subscribe(this, NF_IPv4_MCAST_CHANGE);
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_DELETED, this);
+        host->subscribe(NF_IPv4_MCAST_CHANGE, this);
 
         enabled = par("enabled");
         robustness = par("robustnessVariable");
@@ -455,7 +454,9 @@ void IGMPv3::initialize(int stage)
             if (ie->isMulticast())
                 configureInterface(ie);
         }
-        nb->subscribe(this, NF_INTERFACE_CREATED);
+
+        cModule *host = getContainingNode(this);
+        host->subscribe(NF_INTERFACE_CREATED, this);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_2) // ipv4Data() created in INITSTAGE_NETWORK_LAYER
     {
@@ -480,33 +481,33 @@ IGMPv3::~IGMPv3()
         deleteRouterInterfaceData(routerData.begin()->first);
 }
 
-void IGMPv3::receiveChangeNotification(int category, const cPolymorphic *details)
+void IGMPv3::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
 {
     Enter_Method_Silent();
 
     InterfaceEntry *ie;
     int interfaceId;
     const IPv4MulticastGroupSourceInfo *info;
-    switch (category)
+    if (signalID == NF_INTERFACE_CREATED)
     {
-        case NF_INTERFACE_CREATED:
-            ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie->isMulticast())
-                configureInterface(ie);
-            break;
-        case NF_INTERFACE_DELETED:
-            ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
-            if (ie->isMulticast())
-            {
-                interfaceId = ie->getInterfaceId();
-                deleteHostInterfaceData(interfaceId);
-                deleteRouterInterfaceData(interfaceId);
-            }
-            break;
-        case NF_IPv4_MCAST_CHANGE:
-            info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
-            multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
-            break;
+        ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
+        if (ie->isMulticast())
+            configureInterface(ie);
+    }
+    else if (signalID == NF_INTERFACE_DELETED)
+    {
+        ie = const_cast<InterfaceEntry*>(check_and_cast<const InterfaceEntry*>(details));
+        if (ie->isMulticast())
+        {
+            interfaceId = ie->getInterfaceId();
+            deleteHostInterfaceData(interfaceId);
+            deleteRouterInterfaceData(interfaceId);
+        }
+    }
+    else if (signalID == NF_IPv4_MCAST_CHANGE)
+    {
+        info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
+        multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
     }
 }
 
@@ -1377,7 +1378,7 @@ void IGMPv3::processRouterGroupTimer(cMessage *msg)
             EV_DETAIL << "Deleting multicast listener for group '" << groupData->groupAddr << "' from the interface table.\n";
             ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
             IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-            nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
+            emit(NF_IPv4_MCAST_UNREGISTERED, &info);
             groupData->parent->deleteGroupData(groupData->groupAddr);
 
             EV_DETAIL << "New Router State is <deleted>.\n";
@@ -1416,7 +1417,7 @@ void IGMPv3::processRouterSourceTimer(cMessage *msg)
     {
         ie->ipv4Data()->removeMulticastListener(groupData->groupAddr);
         IPv4MulticastGroupInfo info(ie, groupData->groupAddr);
-        nb->fireChangeNotification(NF_IPv4_MCAST_UNREGISTERED, &info);
+        emit(NF_IPv4_MCAST_UNREGISTERED, &info);
         groupData->parent->deleteGroupData(groupData->groupAddr);
     }
 }
