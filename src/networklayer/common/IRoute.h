@@ -153,6 +153,7 @@ class INET_API IMulticastRoute
     {
         MANUAL,       ///< manually added static route
         DVMRP,        ///< managed by DVMRP router
+        PIM_DM,       ///< managed by PIM-DM router
         PIM_SM,       ///< managed by PIM-SM router
     };
 
