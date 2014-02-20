@@ -120,6 +120,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
             RouterGroupData(IGMPv3 *owner, IPv4Address group);
             virtual ~RouterGroupData();
             std::string getStateInfo() const;
+            void collectForwardedSources(IPv4MulticastSourceList &result) const;
 
             private:
             void printSourceList(std::ostream &out, bool withRunningTimer) const;

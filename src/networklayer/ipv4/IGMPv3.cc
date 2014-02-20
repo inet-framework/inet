@@ -141,6 +141,33 @@ std::string IGMPv3::RouterGroupData::getStateInfo() const
     return out.str();
 }
 
+// See RFC 3376 6.3 for the description of forwarding rules
+void IGMPv3::RouterGroupData::collectForwardedSources(IPv4MulticastSourceList &result) const
+{
+    switch (filter)
+    {
+        case IGMPV3_FM_INCLUDE:
+            result.filterMode = MCAST_INCLUDE_SOURCES;
+            result.sources.clear();
+            for (SourceToGroupDataMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+            {
+                if (it->second->sourceTimer && it->second->sourceTimer->isScheduled())
+                    result.sources.push_back(it->first);
+            }
+            break;
+        case IGMPV3_FM_EXCLUDE:
+            result.filterMode = MCAST_EXCLUDE_SOURCES;
+            result.sources.clear();
+            for (SourceToGroupDataMap::const_iterator it = sources.begin(); it != sources.end(); ++it)
+            {
+                if (!it->second->sourceTimer || !it->second->sourceTimer->isScheduled())
+                    result.sources.push_back(it->first);
+            }
+            break;
+    }
+}
+
+
 void IGMPv3::RouterGroupData::printSourceList(std::ostream &out, bool withRunningTimer) const
 {
     bool first = true;
@@ -1046,6 +1073,9 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 //                numGroups++;
             }
 
+            IPv4MulticastSourceList oldSourceList;
+            groupData->collectForwardedSources(oldSourceList);
+
             EV_DETAIL << "Router State is " << groupData->getStateInfo() << ".\n";
 
 
@@ -1130,8 +1160,6 @@ void IGMPv3::processReport(IGMPv3Report *msg)
                             deleteSourceRecord(ie, groupData->groupAddr, it->first);
                         }
                     }
-
-
                 }
                 else if(groupData->filter == IGMPV3_FM_EXCLUDE)
                 {
@@ -1447,6 +1475,16 @@ void IGMPv3::processReport(IGMPv3Report *msg)
 
             EV_DETAIL << "New Router State is " << groupData->getStateInfo() << ".\n";
 
+
+            // update interface state
+            IPv4MulticastSourceList newSourceList;
+            groupData->collectForwardedSources(newSourceList);
+
+            if (newSourceList != oldSourceList)
+            {
+                ie->ipv4Data()->setMulticastListeners(groupData->groupAddr, newSourceList.filterMode, newSourceList.sources);
+                // TODO notifications?
+            }
         }
 
     }
