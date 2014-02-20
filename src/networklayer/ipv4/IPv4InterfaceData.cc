@@ -389,6 +389,9 @@ void IPv4InterfaceData::addMulticastListener(const IPv4Address &multicastAddress
     {
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
+
+        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        check_and_cast<cModule*>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
     }
 
     if (!groupData->sourceList.containsAll())
@@ -408,9 +411,12 @@ void IPv4InterfaceData::addMulticastListener(IPv4Address multicastAddress, IPv4A
     {
         groupData = new RouterMulticastGroupData(multicastAddress);
         getRouterData()->reportedMulticastGroups.push_back(groupData);
+
+        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        check_and_cast<cModule*>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_REGISTERED, &info);
     }
 
-    if (groupData->sourceList.contains(sourceAddress))
+    if (!groupData->sourceList.contains(sourceAddress))
     {
         groupData->sourceList.add(sourceAddress);
         changed1(F_MULTICAST_LISTENERS);
@@ -431,6 +437,9 @@ void IPv4InterfaceData::removeMulticastListener(const IPv4Address &multicastAddr
         delete multicastGroups[i];
         multicastGroups.erase(multicastGroups.begin() + i);
         changed1(F_MULTICAST_LISTENERS);
+
+        IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+        check_and_cast<cModule*>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
     }
 }
 
@@ -450,6 +459,9 @@ void IPv4InterfaceData::removeMulticastListener(IPv4Address multicastAddress, IP
         {
             delete multicastGroups[i];
             multicastGroups.erase(multicastGroups.begin() + i);
+
+            IPv4MulticastGroupInfo info(getInterfaceEntry(), multicastAddress);
+            check_and_cast<cModule*>(getInterfaceEntry()->getInterfaceTable())->emit(NF_IPv4_MCAST_UNREGISTERED, &info);
         }
         changed1(F_MULTICAST_LISTENERS);
     }

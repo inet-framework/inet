@@ -694,9 +694,6 @@ void IGMPv2::processLeaveTimer(cMessage *msg)
 
     // notify IPv4InterfaceData to update its listener list
     ctx->ie->ipv4Data()->removeMulticastListener(ctx->routerGroup->groupAddr);
-
-    IPv4MulticastGroupInfo info(ctx->ie, ctx->routerGroup->groupAddr);
-    emit(NF_IPv4_MCAST_UNREGISTERED, &info);
     numRouterGroups--;
 
     if (ctx->routerGroup->state ==  IGMP_RGS_CHECKING_MEMBERSHIP)
@@ -846,9 +843,6 @@ void IGMPv2::processV2Report(InterfaceEntry *ie, IGMPMessage *msg)
         {
             // notify IPv4InterfaceData to update its listener list
             ie->ipv4Data()->addMulticastListener(groupAddr);
-            // notify routing
-            IPv4MulticastGroupInfo info(ie, routerGroupData->groupAddr);
-            emit(NF_IPv4_MCAST_REGISTERED, &info);
             numRouterGroups++;
         }
         else if (routerGroupData->state == IGMP_RGS_CHECKING_MEMBERSHIP)
