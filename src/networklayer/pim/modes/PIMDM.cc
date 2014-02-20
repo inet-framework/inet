@@ -1366,6 +1366,8 @@ void PIMDM::newMulticast(IPv4Address srcAddr, IPv4Address destAddr)
 
     // create new multicast route
     PIMMulticastRoute *newRoute = new PIMMulticastRoute(srcAddr, destAddr);
+    newRoute->setSourceType(IMulticastRoute::PIM_DM);
+    newRoute->setSource(this);
     newRoute->setInInterface(new PIMMulticastRoute::PIMInInterface(rpfInterface->getInterfacePtr(), rpfInterface->getInterfaceId(), rpfNeighbor));
     if (routeToSrc->getSourceType() == IPv4Route::IFACENETMASK)
         newRoute->setFlags(PIMMulticastRoute::A);

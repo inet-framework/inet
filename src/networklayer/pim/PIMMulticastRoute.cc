@@ -23,7 +23,8 @@ Register_Abstract_Class(PIMMulticastRoute);
 
 PIMMulticastRoute::PIMMulticastRoute(IPv4Address origin, IPv4Address group)
     : IPv4MulticastRoute(), RP(IPv4Address::UNSPECIFIED_ADDRESS), flags(0),
-      graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL), keepAliveTimer(NULL), registerStopTimer(NULL), expiryTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL),
+      graftRetryTimer(NULL), sourceActiveTimer(NULL), stateRefreshTimer(NULL), keepAliveTimer(NULL),
+      registerStopTimer(NULL), expiryTimer(NULL), joinTimer(NULL), prunePendingTimer(NULL),
       sequencenumber(0)
 {
     setMulticastGroup(group);
