@@ -30,6 +30,7 @@
 #include "IPv4Address.h"
 #include "IGMPMessage.h"
 #include "InterfaceEntry.h"
+#include "IPv4InterfaceData.h"
 
 #include <set>
 
@@ -283,7 +284,7 @@ class INET_API IGMPv3 : public cSimpleModule, protected INotifiable
 
         virtual void multicastGroupJoined(InterfaceEntry *ie, IPv4Address groupAddr);
         virtual void multicastGroupLeft(InterfaceEntry *ie, IPv4Address groupAddr);
-        virtual void multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, McastSourceFilterMode filterMode, const IPv4AddressVector &sourceList);
+        virtual void multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, const IPv4MulticastSourceList &sourceList);
 
         /**
          * Function for computing the time value in seconds from an encoded value.

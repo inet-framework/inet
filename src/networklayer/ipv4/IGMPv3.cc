@@ -474,7 +474,7 @@ void IGMPv3::receiveChangeNotification(int category, const cPolymorphic *details
         case NF_IPv4_MCAST_CHANGE:
         {
             const IPv4MulticastGroupSourceInfo *info = check_and_cast<const IPv4MulticastGroupSourceInfo*>(details);
-            multicastSourceListChanged(info->ie, info->groupAddress, info->filterMode, info->sourceList);
+            multicastSourceListChanged(info->ie, info->groupAddress, info->sourceList);
         }
     }
 }
@@ -764,7 +764,7 @@ void IGMPv3::processHostGroupQueryTimer(cMessage *msg)
 /**
  * This function is sending report message if interface state was changed.
  */
-void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, McastSourceFilterMode filterMode, const IPv4AddressVector &sourceList)
+void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, const IPv4MulticastSourceList &sourceList)
 {
     ASSERT(ie);
 
@@ -782,52 +782,52 @@ void IGMPv3::multicastSourceListChanged(InterfaceEntry *ie, IPv4Address group, M
         numHostGroups++;
     }
 
-    FilterMode filter = filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
+    FilterMode filter = sourceList.filterMode == MCAST_INCLUDE_SOURCES ? IGMPV3_FM_INCLUDE : IGMPV3_FM_EXCLUDE;
 
     EV_DETAIL << "State of group '" << group << "' on interface '" << ie->getName() << "' has changed:\n";
     EV_DETAIL << "\tOld state: " << groupData->getStateInfo() << ".\n";
-    EV_DETAIL << "\tNew state: " << (filter == IGMPV3_FM_INCLUDE?"INCLUDE":"EXCLUDE") << sourceList << ".\n";
+    EV_DETAIL << "\tNew state: " << (filter == IGMPV3_FM_INCLUDE?"INCLUDE":"EXCLUDE") << sourceList.sources << ".\n";
 
     //Check if IF state is different
-    if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList))
+    if(!(groupData->filter == filter) || !(groupData->sourceAddressList == sourceList.sources))
     {
         // FIXME All dest addresses must be ALL_IGMPV3_ROUTERS_MCAST
         //OldState: INCLUDE(A) NewState: INCLUDE(B) StateChangeRecordSent: ALLOW(B-A) BLOCK(A-B)
-        if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList)
+        if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_INCLUDE && groupData->sourceAddressList != sourceList.sources)
         {
             // FIXME If the computed source list for either an ALLOW or a BLOCK State-
             //       Change Record is empty, that record should be omitted from the Report
             //       message.
             // XXX Send only one report (with two groups)
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(sourceList, groupData->sourceAddressList));
-            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(groupData->sourceAddressList, sourceList));
-            groupData->sourceAddressList = sourceList;
+            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(sourceList.sources, groupData->sourceAddressList));
+            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(groupData->sourceAddressList, sourceList.sources));
+            groupData->sourceAddressList = sourceList.sources;
         }
-        else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList)
+        else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_EXCLUDE && groupData->sourceAddressList != sourceList.sources)
         {
             // XXX If the computed source list for either an ALLOW or a BLOCK State-
             //     Change Record is empty, that record is omitted from the Report
             //     message.
             // XXX Send only one report (with two groups)
             EV_DETAIL << "Sending ALLOW/BLOCK report.\n";
-            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(groupData->sourceAddressList, sourceList));
-            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(sourceList, groupData->sourceAddressList));
-            groupData->sourceAddressList = sourceList;
+            sendGroupReport(ie, group, IGMPV3_RT_ALLOW, set_complement(groupData->sourceAddressList, sourceList.sources));
+            sendGroupReport(ie, group, IGMPV3_RT_BLOCK, set_complement(sourceList.sources, groupData->sourceAddressList));
+            groupData->sourceAddressList = sourceList.sources;
         }
         else if(groupData->filter == IGMPV3_FM_INCLUDE && filter == IGMPV3_FM_EXCLUDE)
         {
             EV_DETAIL << "Sending TO_EX report.\n";
-            sendGroupReport(ie, group, IGMPV3_RT_TO_EX, sourceList);
+            sendGroupReport(ie, group, IGMPV3_RT_TO_EX, sourceList.sources);
             groupData->filter = filter;
-            groupData->sourceAddressList = sourceList;
+            groupData->sourceAddressList = sourceList.sources;
         }
         else if(groupData->filter == IGMPV3_FM_EXCLUDE && filter == IGMPV3_FM_INCLUDE)
         {
             EV_DETAIL << "Sending TO_IN report.\n";
-            sendGroupReport(ie, group, IGMPV3_RT_TO_IN, sourceList);
+            sendGroupReport(ie, group, IGMPV3_RT_TO_IN, sourceList.sources);
             groupData->filter = filter;
-            groupData->sourceAddressList = sourceList;
+            groupData->sourceAddressList = sourceList.sources;
         }
     }
 

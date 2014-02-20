@@ -163,18 +163,24 @@ void IGMPTester::processCommand(const cXMLElement &node)
             for (int i = 0; i < ie->ipv4Data()->getNumOfJoinedMulticastGroups(); i++)
             {
                 IPv4Address group = ie->ipv4Data()->getJoinedMulticastGroup(i);
-                McastSourceFilterMode filterMode = ie->ipv4Data()->getJoinedGroupFilterMode(i);
-                const IPv4AddressVector &sourceList = ie->ipv4Data()->getJoinedGroupSourceList(i);
-                EV_DEBUG << (i==0?"":", ") << group << " " << (filterMode == MCAST_INCLUDE_SOURCES?"I":"E")
-                         << sourceList;
+                const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getJoinedMulticastSources(i);
+                EV_DEBUG << (i==0?"":", ") << group << " " << (sourceList.filterMode == MCAST_INCLUDE_SOURCES?"I":"E")
+                         << sourceList.sources;
             }
             EV_DEBUG << "\n";
         }
         else if (!strcmp(what, "listeners"))
         {
-            IPv4AddressVector groups(ie->ipv4Data()->getReportedMulticastGroups());
-            sort(groups.begin(), groups.end());
-            EV_DEBUG << ifname << ": listeners = " << groups << "\n";
+            EV_DEBUG << ifname << ": listeners = ";
+            for (int i = 0; i < ie->ipv4Data()->getNumOfReportedMulticastGroups(); i++)
+            {
+                IPv4Address group = ie->ipv4Data()->getReportedMulticastGroup(i);
+                const IPv4MulticastSourceList &sourceList = ie->ipv4Data()->getReportedMulticastSources(i);
+                EV_DEBUG << (i==0?"":", ") << group << " " << (sourceList.filterMode == MCAST_INCLUDE_SOURCES?"I":"E")
+                         << sourceList.sources;
+            }
+
+            EV_DEBUG << "\n";
         }
     }
     else if (!strcmp(tag, "send"))
