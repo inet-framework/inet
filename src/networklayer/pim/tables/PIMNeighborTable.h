@@ -74,10 +74,11 @@ class INET_API PIMNeighborTable: public cSimpleModule
 
 	protected:
         typedef std::vector<PIMNeighbor*> PIMNeighborVector;
+        typedef std::map<int,PIMNeighborVector> InterfaceToNeighborsMap;
+        friend std::ostream& operator<<(std::ostream& os, const PIMNeighborVector& v);
 
         // contains at most one neighbor with a given (ie,address)
-        // XXX group by interfaceId
-		PIMNeighborVector	neighbors;
+        InterfaceToNeighborsMap neighbors;
 
 	public:
 		virtual ~PIMNeighborTable();
@@ -108,32 +109,15 @@ class INET_API PIMNeighborTable: public cSimpleModule
          */
         virtual PIMNeighbor *findNeighbor(int interfaceId, IPv4Address addr);
 
-        /**
-         * Returns the number of neighbors.
-         */
-        virtual int getNumNeighbors() const {return neighbors.size();}
-
-        /**
-         * Returns the kth neighbor.
-         */
-        virtual PIMNeighbor *getNeighbor(int k) const {return neighbors[k];}
-
-        /**
-         * Returns all neighbors observed on the given interface.
-         */
-		virtual PIMNeighborVector getNeighborsOnInterface(int interfaceId);
-
-		/**
-		 * Returns the neighbor that was first observed on the given interface,
-		 * or NULL if there is none.
-		 * XXX What is the use case of this method?
-		 */
-		virtual PIMNeighbor *getFirstNeighborOnInterface(int interfaceId);
-
 		/**
 		 * Returns the number of neighbors on the given interface.
 		 */
-		virtual int getNumNeighborsOnInterface(int interfaceId);
+		virtual int getNumNeighbors(int interfaceId);
+
+		/**
+		 * Returns the neighbor on the given interface at the specified position.
+		 */
+		virtual PIMNeighbor *getNeighbor(int interfaceId, int index);
 
 	protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}

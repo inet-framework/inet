@@ -488,7 +488,7 @@ void PIMSM::processPruneG(IPv4Address group, IPv4Address upstreamNeighborField, 
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            double pruneOverrideInterval = pimNbt->getNumNeighborsOnInterface(inInterface->getInterfaceId()) > 1 ?
+            double pruneOverrideInterval = pimNbt->getNumNeighbors(inInterface->getInterfaceId()) > 1 ?
                                                 joinPruneOverrideInterval() : 0.0;
             downstream->startPrunePendingTimer(pruneOverrideInterval);
         }
@@ -524,7 +524,7 @@ void PIMSM::processPruneSG(IPv4Address source, IPv4Address group, IPv4Address up
             // otherwise, it is set to zero, causing it to expire
             // immediately.
             downstream->joinPruneState = DownstreamInterface::PRUNE_PENDING;
-            double pruneOverrideInterval = pimNbt->getNumNeighborsOnInterface(inInterface->getInterfaceId()) > 1 ?
+            double pruneOverrideInterval = pimNbt->getNumNeighbors(inInterface->getInterfaceId()) > 1 ?
                                                 joinPruneOverrideInterval() : 0.0;
             downstream->startPrunePendingTimer(pruneOverrideInterval);
         }
@@ -966,11 +966,10 @@ void PIMSM::processExpiryTimer(cMessage *timer)
         if (route->isInheritedOlistNull())
         {
             route->setFlags(Route::PRUNED);
-            PIMNeighbor *RPFneighbor = pimNbt->getFirstNeighborOnInterface(route->upstreamInterface->getInterfaceId());
             if (route->type == G && !IamRP(route->rpAddr))
-                sendPIMPrune(route->group, route->rpAddr, RPFneighbor->getAddress(), G);
+                sendPIMPrune(route->group, route->rpAddr, route->upstreamInterface->rpfNeighbor(), G);
             else if (route->type == SG)
-                sendPIMPrune(route->group, route->source, RPFneighbor->getAddress(), SG);
+                sendPIMPrune(route->group, route->source, route->upstreamInterface->rpfNeighbor(), SG);
 
             cancelAndDeleteTimer(route->joinTimer);
         }
@@ -1039,7 +1038,7 @@ void PIMSM::processPrunePendingTimer(cMessage *timer)
         delete timer;
 
         // optionally send PruneEcho message
-        if (pimNbt->getNumNeighborsOnInterface(downstream->ie->getInterfaceId()) > 1)
+        if (pimNbt->getNumNeighbors(downstream->ie->getInterfaceId()) > 1)
         {
             // A PruneEcho is simply a Prune message sent by the
             // upstream router on a LAN with its own address in the Upstream
@@ -1709,9 +1708,10 @@ PIMSM::Route *PIMSM::addNewRouteG(IPv4Address group, int flags)
         {
             InterfaceEntry *ieTowardRP = routeToRP->getInterface();
             IPv4Address rpfNeighbor = routeToRP->getGateway();
-            if (!pimNbt->findNeighbor(ieTowardRP->getInterfaceId(), rpfNeighbor))
+            if (!pimNbt->findNeighbor(ieTowardRP->getInterfaceId(), rpfNeighbor) &&
+                    pimNbt->getNumNeighbors(ieTowardRP->getInterfaceId()) > 0)
             {
-                PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(ieTowardRP->getInterfaceId());
+                PIMNeighbor *neighbor = pimNbt->getNeighbor(ieTowardRP->getInterfaceId(), 0);
                 if (neighbor)
                     rpfNeighbor = neighbor->getAddress();
             }
@@ -1770,9 +1770,10 @@ PIMSM::Route *PIMSM::addNewRouteSG(IPv4Address source, IPv4Address group, int fl
             newRouteSG->setFlag(Route::SOURCE_DIRECTLY_CONNECTED, true);
         else
         {
-            if (!pimNbt->findNeighbor(ieTowardSource->getInterfaceId(), rpfNeighbor))
+            if (!pimNbt->findNeighbor(ieTowardSource->getInterfaceId(), rpfNeighbor) &&
+                    pimNbt->getNumNeighbors(ieTowardSource->getInterfaceId()) > 0)
             {
-                PIMNeighbor *neighbor = pimNbt->getFirstNeighborOnInterface(ieTowardSource->getInterfaceId());
+                PIMNeighbor *neighbor = pimNbt->getNeighbor(ieTowardSource->getInterfaceId(), 0);
                 if (neighbor)
                     rpfNeighbor = neighbor->getAddress();
             }

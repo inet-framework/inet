@@ -180,7 +180,7 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
     }
 
     IPv4Address upstreamNeighborAddress = pkt->getUpstreamNeighborAddress();
-    int numRpfNeighbors = pimNbt->getNumNeighborsOnInterface(rpfInterface->getInterfaceId());
+    int numRpfNeighbors = pimNbt->getNumNeighbors(rpfInterface->getInterfaceId());
 
     for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
     {
@@ -1271,7 +1271,7 @@ void PIMDM::unroutableMulticastPacketArrived(IPv4Address source, IPv4Address gro
         if (pimInterface == rpfInterface || pimInterface->getMode() != PIMInterface::DenseMode) // XXX original code added downstream if data for PIM-SM interfaces too
             continue;
 
-        bool hasPIMNeighbors = pimNbt->getNumNeighborsOnInterface(pimInterface->getInterfaceId()) > 0;
+        bool hasPIMNeighbors = pimNbt->getNumNeighbors(pimInterface->getInterfaceId()) > 0;
         bool hasConnectedReceivers = pimInterface->getInterfacePtr()->ipv4Data()->hasMulticastListener(group);
 
         // if there are neighbors on interface, we will forward
@@ -1403,10 +1403,10 @@ void PIMDM::multicastPacketArrivedOnNonRpfInterface(IPv4Address group, IPv4Addre
 
     // in case of p2p link, send prune
 	// FIXME There should be better indicator of P2P link
-	if (pimNbt->getNumNeighborsOnInterface(interfaceId) == 1)
+	if (pimNbt->getNumNeighbors(interfaceId) == 1)
 	{
 		// send Prune msg to the neighbor who sent these multicast data
-		IPv4Address nextHop = (pimNbt->getNeighborsOnInterface(interfaceId))[0]->getAddress();
+		IPv4Address nextHop = (pimNbt->getNeighbor(interfaceId, 0))->getAddress();
 		sendPrunePacket(nextHop, source, group, pruneInterval, interfaceId);
 
 		// the incoming interface has to change its state to Pruned
@@ -1575,7 +1575,7 @@ void PIMDM::rpfInterfaceHasChanged(IPv4MulticastRoute *ipv4Route, IPv4Route *rou
 
     // set new upstream interface data
     bool isSourceDirectlyConnected = routeToSource->getSourceType() == IPv4Route::IFACENETMASK;
-    IPv4Address newRpfNeighbor = pimNbt->getNeighborsOnInterface(rpfId)[0]->getAddress(); // XXX what happens if no neighbors?
+    IPv4Address newRpfNeighbor = pimNbt->getNeighbor(rpfId, 0)->getAddress(); // XXX what happens if no neighbors?
     UpstreamInterface *upstream = route->upstreamInterface = new UpstreamInterface(route, newRpf, newRpfNeighbor, isSourceDirectlyConnected);
     ipv4Route->setInInterface(new IMulticastRoute::InInterface(newRpf));
 
@@ -1864,7 +1864,7 @@ PIMDM::DownstreamInterface *PIMDM::Route::removeDownstreamInterface(int interfac
 bool PIMDM::DownstreamInterface::isInOlist() const
 {
     // TODO check boundary
-    bool hasNeighbors = pimdm()->pimNbt->getNumNeighborsOnInterface(ie->getInterfaceId()) > 0; // XXX optimize
+    bool hasNeighbors = pimdm()->pimNbt->getNumNeighbors(ie->getInterfaceId()) > 0;
     return ((hasNeighbors && pruneState != PRUNED) || hasConnectedReceivers()) && assertState != I_LOST_ASSERT;
 }
 
