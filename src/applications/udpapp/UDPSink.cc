@@ -16,6 +16,7 @@
 //
 
 
+#include "AddressResolver.h"
 #include "UDPSink.h"
 #include "UDPControlInfo_m.h"
 
@@ -33,12 +34,28 @@ void UDPSink::initialize(int stage)
     {
         numReceived = 0;
         WATCH(numReceived);
+
+        localPort = par("localPort");
+        startTime = par("startTime").doubleValue();
+        stopTime = par("stopTime").doubleValue();
+        if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
+            error("Invalid startTime/stopTime parameters");
+        selfMsg = new cMessage("UDPSinkTimer");
     }
 }
 
 void UDPSink::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->getKind() == UDP_I_DATA)
+    if (msg->isSelfMessage())
+    {
+        ASSERT(msg == selfMsg);
+        switch (selfMsg->getKind()) {
+            case START: processStart(); break;
+            case STOP:  processStop(); break;
+            default: throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+        }
+    }
+    else if (msg->getKind() == UDP_I_DATA)
     {
         // process incoming packet
         processPacket(PK(msg));
@@ -67,6 +84,46 @@ void UDPSink::finish()
     EV << getFullPath() << ": received " << numReceived << " packets\n";
 }
 
+void UDPSink::setSocketOptions()
+{
+    bool receiveBroadcast = par("receiveBroadcast");
+    if (receiveBroadcast)
+        socket.setBroadcast(true);
+
+    socket.joinLocalMulticastGroups();
+
+    // join multicastGroup
+    const char *groupAddr = par("multicastGroup");
+    multicastGroup = AddressResolver().resolve(groupAddr);
+    if (!multicastGroup.isUnspecified())
+    {
+        if (!multicastGroup.isMulticast())
+            throw cRuntimeError("Wrong multicastGroup setting: not a multicast address: %s", groupAddr);
+        socket.joinMulticastGroup(multicastGroup);
+    }
+}
+
+void UDPSink::processStart()
+{
+    socket.setOutputGate(gate("udpOut"));
+    socket.bind(localPort);
+    setSocketOptions();
+
+    if (stopTime >= SIMTIME_ZERO)
+    {
+        selfMsg->setKind(STOP);
+        scheduleAt(stopTime, selfMsg);
+    }
+}
+
+void UDPSink::processStop()
+{
+    if (!multicastGroup.isUnspecified())
+        socket.leaveMulticastGroup(multicastGroup); // FIXME should be done by socket.close()
+    socket.close();
+}
+
+
 void UDPSink::processPacket(cPacket *pk)
 {
     EV << "Received packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
@@ -78,20 +135,25 @@ void UDPSink::processPacket(cPacket *pk)
 
 bool UDPSink::handleNodeStart(IDoneCallback *doneCallback)
 {
-    socket.setOutputGate(gate("udpOut"));
-    int localPort = par("localPort");
-    socket.bind(localPort);
-    socket.joinLocalMulticastGroups();
+    simtime_t start = std::max(startTime, simTime());
+    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
+    {
+        selfMsg->setKind(START);
+        scheduleAt(start, selfMsg);
+    }
     return true;
 }
 
 bool UDPSink::handleNodeShutdown(IDoneCallback *doneCallback)
 {
+    if (selfMsg)
+        cancelEvent(selfMsg);
     //TODO if(socket.isOpened()) socket.close();
     return true;
 }
 
 void UDPSink::handleNodeCrash()
 {
+    if (selfMsg)
+        cancelEvent(selfMsg);
 }
-

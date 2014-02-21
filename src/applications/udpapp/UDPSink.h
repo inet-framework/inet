@@ -32,18 +32,30 @@
 class INET_API UDPSink : public ApplicationBase
 {
   protected:
+    enum SelfMsgKinds { START = 1, STOP };
+
     UDPSocket socket;
+    int localPort;
+    Address multicastGroup;
+    simtime_t startTime;
+    simtime_t stopTime;
+    cMessage *selfMsg;
+
     int numReceived;
     static simsignal_t rcvdPkSignal;
 
   protected:
     virtual void processPacket(cPacket *msg);
+    virtual void setSocketOptions();
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessageWhenUp(cMessage *msg);
     virtual void finish();
+
+    virtual void processStart();
+    virtual void processStop();
 
     virtual bool handleNodeStart(IDoneCallback *doneCallback);
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
