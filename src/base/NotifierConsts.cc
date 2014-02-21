@@ -74,6 +74,10 @@ simsignal_t NF_IPv4_MDATA_REGISTER = cComponent::registerSignal("NF_IPv4_MDATA_R
 simsignal_t NF_IPv4_NEW_IGMP_ADDED_PISM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_ADDED_PISM");
 simsignal_t NF_IPv4_NEW_IGMP_REMOVED_PIMSM = cComponent::registerSignal("NF_IPv4_NEW_IGMP_REMOVED_PIMSM");
 
+simsignal_t NF_PIM_NEIGHBOR_ADDED = cComponent::registerSignal("NF_PIM_NEIGHBOR_ADDED");
+simsignal_t NF_PIM_NEIGHBOR_DELETED = cComponent::registerSignal("NF_PIM_NEIGHBOR_DELETED");
+simsignal_t NF_PIM_NEIGHBOR_CHANGED = cComponent::registerSignal("NF_PIM_NEIGHBOR_CHANGED");
+
 simsignal_t NF_IPv6_HANDOVER_OCCURRED = cComponent::registerSignal("NF_IPv6_HANDOVER_OCCURRED");
 simsignal_t NF_MIPv6_RO_COMPLETED = cComponent::registerSignal("NF_MIPv6_RO_COMPLETED");
 simsignal_t NF_IPv6_MCAST_JOIN = cComponent::registerSignal("NF_IPv6_MCAST_JOIN");

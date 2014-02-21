@@ -234,6 +234,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // internal events
         void joinDesiredChanged(Route *route);
+        void designatedRouterAddressHasChanged(InterfaceEntry *ie);
 
         // send pim messages
         void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
@@ -253,6 +254,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // update actions
         void updateJoinDesired(Route *route);
+        void updateDesignatedRouterAddress(InterfaceEntry *ie);
 
         // helpers
         bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }

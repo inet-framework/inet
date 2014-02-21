@@ -25,7 +25,7 @@
 #include "InterfaceEntry.h"
 
 /**
- * An entry of PIMInterfaceTable holding PIM specific parameters of the interface.
+ * An entry of PIMInterfaceTable holding PIM specific parameters and state of the interface.
  */
 class INET_API PIMInterface: public cObject
 {
@@ -38,8 +38,13 @@ class INET_API PIMInterface: public cObject
 
 	protected:
         InterfaceEntry *ie;
+
+        // parameters
         PIMMode mode;
         bool stateRefreshFlag;
+
+        // state
+        IPv4Address drAddress;
 
 	public:
         PIMInterface(InterfaceEntry *ie, PIMMode mode, bool stateRefreshFlag)
@@ -50,6 +55,9 @@ class INET_API PIMInterface: public cObject
 		InterfaceEntry *getInterfacePtr() const {return ie;}
 		PIMMode getMode() const {return mode;}
 		bool getSR() const {return stateRefreshFlag;}
+
+		IPv4Address getDRAddress() const { return drAddress; }
+		void setDRAddress(IPv4Address address) { drAddress = address; }
 };
 
 

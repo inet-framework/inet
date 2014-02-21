@@ -23,6 +23,8 @@
 #include "ModuleAccess.h"
 #include "InterfaceEntry.h"
 
+class PIMNeighborTable;
+
 /**
  * Class holding information about a neighboring PIM router.
  * Routers are identified by the link to which they are connected
@@ -33,7 +35,10 @@
  */
 class INET_API PIMNeighbor: public cObject
 {
+    friend class PIMNeighborTable;
+
 	protected:
+        PIMNeighborTable *nt;
 		InterfaceEntry *ie;
 		IPv4Address address;
 		int version;
@@ -54,8 +59,11 @@ class INET_API PIMNeighbor: public cObject
 	    long getDRPriority() const { return drPriority; }
 	    cMessage *getLivenessTimer() const {return livenessTimer;}
 
-	    void setGenerationId(unsigned int genId) { generationId = genId; }
-	    void setDRPriority(long priority) { drPriority = priority; }
+	    void setGenerationId(unsigned int genId) { if (generationId != genId) { generationId = genId; changed(); }}
+	    void setDRPriority(long priority) { if (drPriority != priority) { drPriority = priority; changed(); } }
+
+	protected:
+	    void changed();
 };
 
 /**

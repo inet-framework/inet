@@ -19,12 +19,13 @@
 #include <algorithm>
 #include "PIMNeighborTable.h"
 
+Register_Abstract_Class(PIMNeighbor);
 Define_Module(PIMNeighborTable);
 
 using namespace std;
 
 PIMNeighbor::PIMNeighbor(InterfaceEntry *ie, IPv4Address address, int version)
-    : ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
+    : nt(NULL), ie(ie), address(address), version(version), generationId(0), drPriority(-1L)
 {
     ASSERT(ie);
 
@@ -56,6 +57,12 @@ std::string PIMNeighbor::info() const
 	std::stringstream out;
 	out << this;
 	return out.str();
+}
+
+void PIMNeighbor::changed()
+{
+    if (nt)
+        nt->emit(NF_PIM_NEIGHBOR_CHANGED, this);
 }
 
 PIMNeighborTable::~PIMNeighborTable()
@@ -116,9 +123,13 @@ bool PIMNeighborTable::addNeighbor(PIMNeighbor *entry, double holdTime)
             return false;
 
     EV_DETAIL << "Added new neighbor to table: " << entry->info() << "\n";
+    entry->nt = this;
     neighborsOnInterface.push_back(entry);
     take(entry->getLivenessTimer());
     restartLivenessTimer(entry, holdTime);
+
+    emit(NF_PIM_NEIGHBOR_ADDED, entry);
+
     return true;
 }
 
@@ -133,9 +144,14 @@ bool PIMNeighborTable::deleteNeighbor(PIMNeighbor* neighbor)
         PIMNeighborVector::iterator it2 = find(neighborsOnInterface.begin(), neighborsOnInterface.end(), neighbor);
         if (it2 != neighborsOnInterface.end())
         {
-            cancelEvent((*it2)->getLivenessTimer());
-            delete (*it2);
             neighborsOnInterface.erase(it2);
+
+            emit(NF_PIM_NEIGHBOR_DELETED, neighbor);
+
+            neighbor->nt = NULL;
+            cancelEvent(neighbor->getLivenessTimer());
+            delete neighbor;
+
             return true;
         }
     }

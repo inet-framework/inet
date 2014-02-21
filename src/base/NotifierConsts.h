@@ -86,6 +86,9 @@ extern simsignal_t    // admin
     NF_IPv4_RPF_CHANGE,
     NF_IPv4_DATA_ON_RPF_PIMSM,
     NF_IPv4_MDATA_REGISTER,
+    NF_PIM_NEIGHBOR_ADDED,
+    NF_PIM_NEIGHBOR_DELETED,
+    NF_PIM_NEIGHBOR_CHANGED,
 
 
     // layer 3 - IPv6

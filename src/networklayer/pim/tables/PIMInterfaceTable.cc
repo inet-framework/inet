@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& os, const PIMInterface* e)
     if (e->getMode() == PIMInterface::DenseMode)
         os << "Dense";
     else if (e->getMode() == PIMInterface::SparseMode)
-        os << "Sparse";
+        os << "Sparse; DR = " << e->getDRAddress();
     return os;
 };
 

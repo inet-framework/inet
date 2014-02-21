@@ -125,6 +125,9 @@ void PIMSM::initialize(int stage)
                 host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
                 host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
                 host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+                host->subscribe(NF_PIM_NEIGHBOR_ADDED, this);
+                host->subscribe(NF_PIM_NEIGHBOR_DELETED, this);
+                host->subscribe(NF_PIM_NEIGHBOR_CHANGED, this);
             }
         }
         else
@@ -278,6 +281,11 @@ void PIMSM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *det
         route = findRouteSG(datagram->getSrcAddress(), datagram->getDestAddress());
         if (incomingInterface && incomingInterface->getMode() == PIMInterface::SparseMode)
             multicastPacketForwarded(datagram);
+    }
+    else if (signalID == NF_PIM_NEIGHBOR_ADDED || signalID == NF_PIM_NEIGHBOR_DELETED || signalID == NF_PIM_NEIGHBOR_CHANGED)
+    {
+        PIMNeighbor *neighbor = check_and_cast<PIMNeighbor*>(details);
+        updateDesignatedRouterAddress(neighbor->getInterfacePtr());
     }
 }
 
@@ -1396,6 +1404,12 @@ void PIMSM::joinDesiredChanged(Route *route)
 
 }
 
+void PIMSM::designatedRouterAddressHasChanged(InterfaceEntry *ie)
+{
+
+}
+
+
 //============================================================================
 //                      Sending PIM packets
 //============================================================================
@@ -1595,39 +1609,57 @@ void PIMSM::updateJoinDesired(Route *route)
     }
 }
 
+//
+// To be called when the set of neighbors changes,
+// or when the dr_priority or address of a neighbor changes.
+//
+void PIMSM::updateDesignatedRouterAddress(InterfaceEntry *ie)
+{
+    int interfaceId = ie->getInterfaceId();
+    int numNeighbors = pimNbt->getNumNeighbors(interfaceId);
+
+    bool eachNeighborHasPriority = true;
+    for (int i = 0; i < numNeighbors && eachNeighborHasPriority; i++)
+        if (pimNbt->getNeighbor(interfaceId, i))
+            eachNeighborHasPriority = false;
+
+    IPv4Address drAddress = ie->ipv4Data()->getIPAddress();
+    int drPriority = this->designatedRouterPriority;
+    for (int i = 0; i < numNeighbors; i++)
+    {
+        PIMNeighbor *neighbor = pimNbt->getNeighbor(interfaceId, i);
+        bool isBetter = eachNeighborHasPriority ?
+                            (neighbor->getDRPriority() > drPriority ||
+                                                  (neighbor->getDRPriority() == drPriority &&
+                                                   neighbor->getAddress() > drAddress)) :
+                            (neighbor->getAddress() > drAddress);
+        if (isBetter)
+        {
+            drPriority = neighbor->getDRPriority();
+            drAddress = neighbor->getAddress();
+        }
+    }
+
+    PIMInterface *pimInterface = pimIft->getInterfaceById(interfaceId);
+    ASSERT(pimInterface);
+    IPv4Address oldDRAddress = pimInterface->getDRAddress();
+    if (drAddress != oldDRAddress)
+    {
+        pimInterface->setDRAddress(drAddress);
+        designatedRouterAddressHasChanged(ie);
+    }
+}
+
 //============================================================================
 //                                Helpers
 //============================================================================
 
 bool PIMSM::IamDR (InterfaceEntry *ie)
 {
-    // bool I_am_DR(I) { return DR(I) == me }
-
-    //  host
-    //  DR(I) {
-    //    dr = me
-    //    for each neighbor on interface I {
-    //        if ( dr_is_better( neighbor, dr, I ) == TRUE ) {
-    //            dr = neighbor
-    //        }
-    //    }
-    //    return dr
-    //  }
-
-    // bool
-    //     dr_is_better(a,b,I) {
-    //         if( there is a neighbor n on I for which n.dr_priority_present
-    //                 is false ) {
-    //             return a.primary_ip_address > b.primary_ip_address
-    //         } else {
-    //             return ( a.dr_priority > b.dr_priority ) OR
-    //                    ( a.dr_priority == b.dr_priority AND
-    //                      a.primary_ip_address > b.primary_ip_address )
-    //         }
-    //     }
-
-    // TODO
-    return false;
+    PIMInterface *pimInterface = pimIft->getInterfaceById(ie->getInterfaceId());
+    ASSERT(pimInterface);
+    IPv4Address drAddress = pimInterface->getDRAddress();
+    return drAddress.isUnspecified() || drAddress == ie->ipv4Data()->getIPAddress();
 }
 
 PIMInterface *PIMSM::getIncomingInterface(IPv4Datagram *datagram)
