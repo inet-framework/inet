@@ -28,12 +28,8 @@ CSFQVLANQueue::CSFQVLANQueue()
 CSFQVLANQueue::~CSFQVLANQueue()
 {
 #ifndef NDEBUG
-    for (int i = 0; i < numFlows; i++)
-    {
-        for (int j = 0; j < 2; j++)
-        {
-            delete estRateVectors[i][j];
-        }
+    for (int i = 0; i <= numFlows; i++) {
+        delete estRateVectors[i];
     }
 #endif
 }
@@ -68,18 +64,14 @@ void CSFQVLANQueue::initialize(int stage)
         queueSizeVector.setName("FIFO queue size (bytes)");
         rateTotalVector.setName("aggregate rate of non-conformed packets");
         rateEnqueuedVector.setName("aggregate rate of enqueued non-conformed packets");
-        for (int i=0; i < numFlows; i++)
-        {
-            OutVectorVector estRateVector;
-            for (int j=0; j < 2; j++)
-            {
-                std::stringstream vname;
-                vname << (j == 0 ? "conformed" : "non-conformed") << " rate for flow[" << i << "] (bit/sec)";
-                cOutVector *vector = new cOutVector((vname.str()).c_str());
-                estRateVector.push_back(vector);
-            }
-            estRateVectors.push_back(estRateVector);
+        for (int i = 0; i < numFlows; i++) {
+            std::stringstream vname;
+            vname << "non-conformed rate for flow[" << i << "] (bit/sec)";
+            cOutVector *vector = new cOutVector((vname.str()).c_str());
+            estRateVectors.push_back(vector);
         }
+        cOutVector *vector = new cOutVector("conformed rate (bit/sec)");
+        estRateVectors.push_back(vector);
 #endif
     }
     if (stage == 1)
@@ -105,7 +97,6 @@ void CSFQVLANQueue::initialize(int stage)
         K_alpha = par("K_alpha").doubleValue();
         excessBW = linkRate;
         fairShareRate = excessBW;
-//        fairShareRate = 0.0;
         rateTotal = 0.0;
         rateEnqueued = 0.0;
         maxRate = 0.0;
@@ -118,8 +109,8 @@ void CSFQVLANQueue::initialize(int stage)
         // CSFQ++: Flow-specific variables
         weight.assign(numFlows, 0.0);
         sumBits.assign(numFlows, 0);
-        flowRate.assign(numFlows, std::vector<double>(2, 0.0));
-        prevTime.assign(numFlows, std::vector<simtime_t>(2, simtime_t(0.0)));
+        flowRate.assign(numFlows+1, 0.0);   // last index (i.e., numFlows) for combined conformant flow
+        prevTime.assign(numFlows+1, 0.0);   // last index (i.e., numFlows) for combined conformant flow
 
         double minTGR = tbm[0]->getMeanRate();
         for (int i = 1; i < numFlows; i++)
@@ -170,15 +161,10 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
             {
                 numPktsConformed[flowIndex]++;
             }
-            estimateRate(flowIndex, pktLength, simTime(), 0);
+            estimateRate(numFlows, pktLength, simTime());   // index of numFlows for conformed packets
 
             // update excess BW
-            double sum = 0.0;
-            for (int i = 0; i < numFlows; i++)
-            {
-                sum += flowRate[i][0];    // sum of conformed rates
-            }
-            excessBW = std::max(linkRate - sum, 0.0);
+            excessBW = std::max(linkRate - flowRate[numFlows], 0.0);
 #ifndef NDEBUG
             excessBWVector.record(excessBW);
 #endif
@@ -209,9 +195,7 @@ void CSFQVLANQueue::handleMessage(cMessage *msg)
         }
         else
         {   // frame is not conformed
-            double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
-//            conformedRate[flowIndex] = tbm[flowIndex]->getMeanRate(); // TODO: need skip?
-//            if (std::max(0.0, 1.0 - fairShareRate_ * weight[flowIndex] / rate) > dblrand())
+            double rate = estimateRate(flowIndex, pktLength, simTime());
 #ifndef NDEBUG
             double rv = dblrand();
             if (fairShareRate * weight[flowIndex] / rate < rv)
@@ -361,27 +345,28 @@ void CSFQVLANQueue::requestPacket()
 }
 
 // compute estimated flow rate by using exponential averaging
-// - color: result of metering -> 0 for conformed and 1 for non-conformed packets
-double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvTime, int color)
+// - flowIndex from 0 to numFlows-1: flow index of non-conformed packet
+// - flowIndex of numFlows: combined flow of conformed packets
+double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvTime)
 {
-    double T = (arrvTime - prevTime[flowIndex][color]).dbl();   // packet interarrival
+    double T = (arrvTime - prevTime[flowIndex]).dbl();   // packet interarrival
 
     if (T == 0.0)
     {   // multiple packets arrive simultaneously
         sumBits[flowIndex] += pktLength;
-        if (flowRate[flowIndex][color])
+        if (flowRate[flowIndex])
         {
 #ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
+            estRateVectors[flowIndex]->record(flowRate[flowIndex]);
 #endif
-            return flowRate[flowIndex][color];
+            return flowRate[flowIndex];
         }
         else
         {   // this is the first packet; just initialize the rate
 #ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(rateEnqueued / 2);
+            estRateVectors[flowIndex]->record(rateEnqueued / 2);
 #endif
-            return (flowRate[flowIndex][color] = rateEnqueued / 2);
+            return (flowRate[flowIndex] = rateEnqueued / 2);
         }
     }
     else
@@ -390,13 +375,13 @@ double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvT
         sumBits[flowIndex] = 0;
     }
 
-    prevTime[flowIndex][color] = arrvTime;
+    prevTime[flowIndex] = arrvTime;
     double w = exp(-T/K);
-    flowRate[flowIndex][color] = (1 - w)*pktLength/T + w*flowRate[flowIndex][color];
+    flowRate[flowIndex] = (1 - w)*pktLength/T + w*flowRate[flowIndex];
 #ifndef NDEBUG
-            estRateVectors[flowIndex][color]->record(flowRate[flowIndex][color]);
+            estRateVectors[flowIndex]->record(flowRate[flowIndex]);
 #endif
-    return flowRate[flowIndex][color];
+    return flowRate[flowIndex];
 }
 
 // estimate the link's (normalized) fair share rate (alpha)

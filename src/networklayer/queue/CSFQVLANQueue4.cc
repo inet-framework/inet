@@ -69,15 +69,10 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
             {
                 numPktsConformed[flowIndex]++;
             }
-            estimateRate(flowIndex, pktLength, simTime(), 0);
+            estimateRate(numFlows, pktLength, simTime());   // index of numFlows for conformed packets
 
             // update excess BW
-            double sum = 0.0;
-            for (int i = 0; i < numFlows; i++)
-            {
-                sum += flowRate[i][0];    // sum of conformed rates
-            }
-            excessBW = std::max(linkRate - sum, 0.0);
+            excessBW = std::max(linkRate - flowRate[numFlows], 0.0);
 #ifndef NDEBUG
             excessBWVector.record(excessBW);
 #endif
@@ -128,7 +123,7 @@ void CSFQVLANQueue4::handleMessage(cMessage *msg)
         }
         else
         {   // frame is not conformed
-            double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
+            double rate = estimateRate(flowIndex, pktLength, simTime());
             if ( thresholdPassed || (fairShareRate * weight[flowIndex] / rate < dblrand()) )
             // if (fairShareRate * weight[flowIndex] / rate < dblrand())
             {   // probabilistically drop the frame
@@ -297,32 +292,11 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
     else
     {   // link is not congested per rate estimation
         if (congested)
-        // {   // peviously congested
-        //     if (currentQueueSize >= queueThreshold)
-        //     {   // remains congested (per previous congestion and queue statuses)
-        //         if (arrvTime > startTime + k)
-        //         {
-        //             startTime = arrvTime;
-        //             fairShareRate *= excessBW / rateEnqueued;
-        //             fairShareRate = std::min(fairShareRate, excessBW);
-
-        //             // TODO: verify the following re-initialization
-        //             if (fairShareRate == 0.0)
-        //             {
-        //                 fairShareRate = std::min(rate, excessBW);   // initialize
-        //             }
-
-        //             // // TODO: check the validity of this reset
-        //             // congested = false;
-        //         }   
-        //     }
-        //     else
         {   // becomes uncongested (per both rate estimation and queue status)
             congested = false;
             startTime = arrvTime;
             maxRate = 0.0;
         }
-        // }
         else
         {   // remains uncongested
             if (arrvTime < startTime + k)
@@ -331,8 +305,6 @@ void CSFQVLANQueue4::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             }
             else
             {
-                // fairShareRate = maxRate;
-                // fairShareRate = linkRate;
                 fairShareRate = excessBW;
                 startTime = arrvTime;
                 maxRate = 0.0;

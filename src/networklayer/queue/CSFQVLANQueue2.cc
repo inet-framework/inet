@@ -66,15 +66,10 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
             {
                 numPktsConformed[flowIndex]++;
             }
-            estimateRate(flowIndex, pktLength, simTime(), 0);
+            estimateRate(numFlows, pktLength, simTime());   // index of numFlows for conformed packets
 
             // update excess BW
-            double sum = 0.0;
-            for (int i = 0; i < numFlows; i++)
-            {
-                sum += flowRate[i][0];    // sum of conformed rates
-            }
-            excessBW = std::max(linkRate - sum, 0.0);
+            excessBW = std::max(linkRate - flowRate[numFlows], 0.0);
 #ifndef NDEBUG
             excessBWVector.record(excessBW);
 #endif
@@ -105,7 +100,7 @@ void CSFQVLANQueue2::handleMessage(cMessage *msg)
         }
         else
         {   // frame is not conformed
-            double rate = estimateRate(flowIndex, pktLength, simTime(), 1);
+            double rate = estimateRate(flowIndex, pktLength, simTime());
             if ( (fairShareRate > 0.0) && (fairShareRate * weight[flowIndex] / rate < dblrand()) )
             {   // probabilistically drop the frame
                 // note that we skip packet dropping when fairShareRate == 0.0;
@@ -248,10 +243,6 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             congested = true;
             startTime = arrvTime;
             kalpha = max_alpha;
-//            if (fairShareRate == 0.0)
-//            {
-//                fairShareRate = std::min(rate, excessBW);   // initialize
-//            }
         }
         else
         {
@@ -259,10 +250,6 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             {
                 return;
             }
-//            {
-//                maxRate = std::max(maxRate, rate);  // TODO: check this
-//            }
-//            else
             startTime = arrvTime;
             fairShareRate *= excessBW / rateEnqueued;
             fairShareRate = std::min(fairShareRate, excessBW);
@@ -302,4 +289,3 @@ void CSFQVLANQueue2::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
         }
     }
 }
-

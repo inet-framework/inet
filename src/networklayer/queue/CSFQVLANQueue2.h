@@ -41,14 +41,8 @@ class INET_API CSFQVLANQueue2 : public CSFQVLANQueue
     int max_alpha;          // maximum number of times fair rate (alpha) can be decreased when queue overflows, during a time interval of length K_alpha
     int kalpha;             // counter for the number of times fair rate decreases due to buffer overflow
 
-  public:
-//    CSFQVLANQueue2();
-//    virtual ~CSFQVLANQueue2();
-
   protected:
-//    virtual void initialize();
     virtual void initialize(int stage);
-//    virtual int numInitStages() const {return 2;}
 
     /**
      * Redefined from PassiveQueueBase.
