@@ -250,7 +250,7 @@ void CSFQVLANQueue5::estimateAlpha(int pktLength, double rate, simtime_t arrvTim
             {
                 startTime = arrvTime;
                 fairShareRate *= excessBW / rateEnqueued;
-                // fairShareRate = std::min(fairShareRate, excessBW);
+                fairShareRate = std::min(fairShareRate, excessBW);
 
                 // TODO: verify the following re-initialization
                 if (fairShareRate == 0.0)
