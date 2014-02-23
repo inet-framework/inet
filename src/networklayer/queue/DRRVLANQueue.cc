@@ -205,19 +205,19 @@ void DRRVLANQueue::handleMessage(cMessage *msg)
 
 bool DRRVLANQueue::enqueue(cMessage *msg)
 {
-    int queueIndex = classifier->classifyPacket(msg);
+    int flowIndex = classifier->classifyPacket(msg);
     int pktByteLength = PK(msg)->getByteLength();
 
-    if (voqCurrentSize[queueIndex] + pktByteLength > voqSize)
+    if (voqCurrentSize[flowIndex] + pktByteLength > voqSize)
     {
-        EV << "VOQ[" << queueIndex << "] full, dropping packet.\n";
+        EV << "VOQ[" << flowIndex << "] full, dropping packet.\n";
         delete msg;
         return true;
     }
     else
     {
-        voq[queueIndex]->insert(msg);
-        voqCurrentSize[queueIndex] += pktByteLength;
+        voq[flowIndex]->insert(msg);
+        voqCurrentSize[flowIndex] += pktByteLength;
         return false;
     }
 }
