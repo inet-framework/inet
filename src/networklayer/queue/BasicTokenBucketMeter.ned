@@ -11,7 +11,7 @@ package inet.networklayer.queue;
 
 //
 // Interface for QoS meter implementations.
-// All QoS metersshould implement this (e.g., BasicTokenBucketMeter).
+// All QoS meters should implement this (e.g., BasicTokenBucketMeter).
 //
 // @author Kyeong Soo (Joseph) Kim <kyeongsoo.kim@gmail.com>
 // @date   2013-07-01
