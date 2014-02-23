@@ -66,6 +66,9 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
     inline double getMeanRate() {return meanRate;};
     inline int getMtu() {return mtu;};
     inline double getPeakRate() {return peakRate;};
+    inline long long getMeanBucketLength() {return meanBucketLength;};
+    inline int getPeakBucketLength() {return peakBucketLength;};
+    inline simtime_t getLastTime() {return lastTime;};
 };
 
 #endif
