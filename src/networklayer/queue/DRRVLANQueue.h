@@ -47,9 +47,9 @@ class INET_API DRRVLANQueue : public PassiveQueueBase
     typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
     typedef std::vector<long long> LongLongVector;
-    typedef std::vector<BasicTokenBucketMeter *> TbmVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
+    typedef std::vector<BasicTokenBucketMeter *> TbmVector;
     typedef std::vector<simtime_t> TimeVector;
 
   protected:
