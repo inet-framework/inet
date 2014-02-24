@@ -61,9 +61,6 @@ void DropTailVLANTBFQueue2::initialize()
     // Per-subscriber VOQs
     voqSize = par("voqSize").longValue();
     voq.assign(numFlows, (cQueue *)NULL);
-    // meanBucketLength.assign(numFlows, bucketSize);
-    // peakBucketLength.assign(numFlows, mtu);
-    // lastTime.assign(numFlows, simTime());
     conformityFlag.assign(numFlows, false);
     conformityTimer.assign(numFlows, (cMessage *)NULL);
     for (int i=0; i<numFlows; i++)
@@ -255,6 +252,7 @@ cMessage *DropTailVLANTBFQueue2::dequeue()
     }
 
     cMessage *msg = (cMessage *)voq[currentFlowIndex]->pop();
+    voqCurrentSize[currentFlowIndex] -= PK(msg)->getByteLength();
 
     // TO DO: update statistics
 
