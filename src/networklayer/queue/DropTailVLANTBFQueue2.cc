@@ -40,12 +40,7 @@ void DropTailVLANTBFQueue2::initialize()
     outGate = gate("out");
 
     // general
-    // frameCapacity = par("frameCapacity");
     numFlows = par("numFlows");
-//    bucketSize = par("bucketSize").longValue()*8LL; // in bit
-//    meanRate = par("meanRate"); // in bps
-//    mtu = par("mtu").longValue()*8; // in bit
-//    peakRate = par("peakRate"); // in bps
 
     // VLAN classifier
     const char *classifierClass = par("classifierClass").stringValue();
@@ -78,6 +73,7 @@ void DropTailVLANTBFQueue2::initialize()
         voq[i] = new cQueue(buf);
         conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a voq index
     }
+    voqCurrentSize.assign(numFlows, 0);
 
     // RR scheduler
     currentFlowIndex = 0;
@@ -86,7 +82,6 @@ void DropTailVLANTBFQueue2::initialize()
     warmupFinished = false;
     numBitsSent.assign(numFlows, 0.0);
     numPktsReceived.assign(numFlows, 0);
-    numPktsDropped.assign(numFlows, 0);
     numPktsUnshaped.assign(numFlows, 0);
     numPktsSent.assign(numFlows, 0);
 }
@@ -106,14 +101,14 @@ void DropTailVLANTBFQueue2::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
     {   // Conformity Timer expires
-        int flowIndex = msg->getKind();    // message kind carries a queue index
+        int flowIndex = msg->getKind();    // message kind carries a flow index
         conformityFlag[flowIndex] = true;
 
         // update TBF status
         // int pktLength = (check_and_cast<cPacket *>(voq[flowIndex]->front()))->getBitLength();
         // bool conformance = isConformed(flowIndex, pktLength);
-        cPacket *holPkt = check_and_cast<cPacket *>(voq[flowIndex]->front());
-        bool conformance = (tbm[flowIndex]->meterPacket(holPkt) == 0) ? true : false;   // result of metering; 0 for conformed and 1 for non-conformed packet
+        cPacket *frontPkt = check_and_cast<cPacket *>(voq[flowIndex]->front());
+        bool conformance = (tbm[flowIndex]->meterPacket(frontPkt) == 0) ? true : false;   // result of metering; 0 for conformed and 1 for non-conformed packet
 // DEBUG
         ASSERT(conformance == true);
 // DEBUG
@@ -225,10 +220,8 @@ bool DropTailVLANTBFQueue2::enqueue(cMessage *msg)
 {
     int flowIndex = classifier->classifyPacket(msg);
     int pktByteLength = PK(msg)->getByteLength();
-    // cQueue *queue = voq[flowIndex];
 
     if (voqCurrentSize[flowIndex] + pktByteLength > voqSize)
-    // if (frameCapacity && queue->length() >= frameCapacity)
     {
         EV << "VOQ[" << flowIndex << "] full, dropping packet.\n";
         delete msg;
@@ -238,7 +231,6 @@ bool DropTailVLANTBFQueue2::enqueue(cMessage *msg)
     {
         voq[flowIndex]->insert(msg);
         voqCurrentSize[flowIndex] += pktByteLength;
-        // queue->insert(msg);
         return false;
     }
 }
@@ -246,12 +238,12 @@ bool DropTailVLANTBFQueue2::enqueue(cMessage *msg)
 cMessage *DropTailVLANTBFQueue2::dequeue()
 {
     bool found = false;
-    int startQueueIndex = (currentFlowIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
+    int startFlowIndex = (currentFlowIndex + 1) % numFlows;  // search from the next queue for a frame to transmit
     for (int i = 0; i < numFlows; i++)
     {
-       if (conformityFlag[(i+startQueueIndex)%numFlows])
+       if (conformityFlag[(i+startFlowIndex)%numFlows])
        {
-           currentFlowIndex = (i+startQueueIndex)%numFlows;
+           currentFlowIndex = (i+startFlowIndex)%numFlows;
            found = true;
            break;
        }
@@ -270,12 +262,10 @@ cMessage *DropTailVLANTBFQueue2::dequeue()
     // conformity processing for the HOL frame
     if (voq[currentFlowIndex]->isEmpty() == false)
     {
-        // int pktLength = (check_and_cast<cPacket *>(voq[currentFlowIndex]->front()))->getBitLength();
-        cPacket *holPkt = check_and_cast<cPacket *>(voq[currentFlowIndex]->front());
-        int pktLength = holPkt->getBitLength();
-        if (tbm[currentFlowIndex]->meterPacket(holPkt) == 0)
-        // if (isConformed(currentFlowIndex, pktLength))
-        {
+        cPacket *frontPkt = check_and_cast<cPacket *>(voq[currentFlowIndex]->front());
+        int pktLength = frontPkt->getBitLength();
+        if (tbm[currentFlowIndex]->meterPacket(frontPkt) == 0)
+        {   // packet is conformed
             conformityFlag[currentFlowIndex] = true;
         }
         else
@@ -318,38 +308,6 @@ void DropTailVLANTBFQueue2::requestPacket()
     }
 }
 
-// bool DropTailVLANTBFQueue2::isConformed(int flowIndex, int pktLength)
-// {
-//     Enter_Method("isConformed()");
-
-// // DEBUG
-//     EV << "Last Time = " << lastTime[flowIndex] << endl;
-//     EV << "Current Time = " << simTime() << endl;
-//     EV << "Packet Length = " << pktLength << endl;
-// // DEBUG
-
-//     // update states
-//     simtime_t now = simTime();
-//     //unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)(meanRate*(now - lastTime[flowIndex]).dbl() + 0.5);
-//     unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[flowIndex]).dbl());
-//     meanBucketLength[flowIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
-//     //unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)(peakRate*(now - lastTime[flowIndex]).dbl() + 0.5);
-//     unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[flowIndex]).dbl());
-//     peakBucketLength[flowIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
-//     lastTime[flowIndex] = now;
-
-//     if (pktLength <= meanBucketLength[flowIndex])
-//     {
-//         if  (pktLength <= peakBucketLength[flowIndex])
-//         {
-//             meanBucketLength[flowIndex] -= pktLength;
-//             peakBucketLength[flowIndex] -= pktLength;
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
 // trigger TBF conformity timer for the HOL frame in the queue,
 // indicating that enough tokens will be available for its transmission
 void DropTailVLANTBFQueue2::triggerConformityTimer(int flowIndex, int pktLength)
@@ -390,7 +348,6 @@ void DropTailVLANTBFQueue2::finish()
     unsigned long sumPktsReceived = 0;
     unsigned long sumPktsDropped = 0;
     unsigned long sumPktsShaped = 0;
-    unsigned long sumPktsUnshaped = 0;
 
     for (int i=0; i < numFlows; i++)
     {
