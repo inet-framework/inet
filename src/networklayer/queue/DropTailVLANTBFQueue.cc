@@ -372,7 +372,6 @@ void DropTailVLANTBFQueue::finish()
     unsigned long sumQueueReceived = 0;
     unsigned long sumQueueDropped = 0;
     unsigned long sumQueueShaped = 0;
-    unsigned long sumQueueUnshaped = 0;
 
     for (int i=0; i < numQueues; i++)
     {
