@@ -35,13 +35,13 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
 
   protected:
     // TBF parameters
-    long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
+    unsigned long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;        // in bps
     int mtu;                // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;        // in bps
 
     // TBF states
-    long long meanBucketLength; // the current number of tokens (bits) in the bucket for mean rate/burst control
+    unsigned long long meanBucketLength; // the current number of tokens (bits) in the bucket for mean rate/burst control
     int peakBucketLength;       // the current number of tokens (bits) in the bucket for peak rate/MTU control
     simtime_t lastTime;         // the last time the token bucket was used
 
@@ -62,13 +62,14 @@ class INET_API BasicTokenBucketMeter : public cSimpleModule
      * for the given packet, 0 for conformance and 1 for not.
      */
     virtual int meterPacket(cMessage *msg);
-    inline long long getBucketSize() {return bucketSize;};
+    inline unsigned long long getBucketSize() {return bucketSize;};
     inline double getMeanRate() {return meanRate;};
     inline int getMtu() {return mtu;};
     inline double getPeakRate() {return peakRate;};
-    inline long long getMeanBucketLength() {return meanBucketLength;};
+    inline unsigned long long getMeanBucketLength() {return meanBucketLength;};
     inline int getPeakBucketLength() {return peakBucketLength;};
     inline simtime_t getLastTime() {return lastTime;};
+    void dumpStatus();
 };
 
 #endif

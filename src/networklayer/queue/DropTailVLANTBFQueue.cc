@@ -314,13 +314,13 @@ bool DropTailVLANTBFQueue::isConformed(int queueIndex, int pktLength)
     simtime_t now = simTime();
     //unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
     unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[queueIndex]).dbl());
-    meanBucketLength[queueIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    meanBucketLength[queueIndex] = (unsigned long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
     //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
     unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[queueIndex]).dbl());
-    peakBucketLength[queueIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
+    peakBucketLength[queueIndex] = int((peakTemp > (unsigned long long)mtu) ? mtu : peakTemp);
     lastTime[queueIndex] = now;
 
-    if (pktLength <= meanBucketLength[queueIndex])
+    if ((unsigned long long) pktLength <= meanBucketLength[queueIndex])
     {
         if  (pktLength <= peakBucketLength[queueIndex])
         {
@@ -338,19 +338,26 @@ void DropTailVLANTBFQueue::triggerConformityTimer(int queueIndex, int pktLength)
 {
     Enter_Method("triggerConformityCounter()");
 
-    double meanDelay = (pktLength - meanBucketLength[queueIndex]) / meanRate;
-    double peakDelay = (pktLength - peakBucketLength[queueIndex]) / peakRate;
+    double meanDelay = 0.0;
+    if ((unsigned long long)pktLength > meanBucketLength[queueIndex]) {
+        meanDelay = (pktLength - meanBucketLength[queueIndex]) / meanRate;
+    }
+    double peakDelay = 0.0;
+    if (pktLength > peakBucketLength[queueIndex]) {
+        peakDelay = (pktLength - peakBucketLength[queueIndex]) / peakRate;
+    }
 
 // DEBUG
+    EV << "** For VOQ[" << queueIndex << "]:" << endl;
     EV << "Packet Length = " << pktLength << endl;
-    dumpTbfStatus(queueIndex);
     EV << "Delay for Mean TBF = " << meanDelay << endl;
     EV << "Delay for Peak TBF = " << peakDelay << endl;
     EV << "Current Time = " << simTime() << endl;
-    EV << "Counter Expiration Time = " << simTime() + max(meanDelay, peakDelay) << endl;
+    EV << "Counter Expiration Time = " << simTime() + std::max(meanDelay, peakDelay) << endl;
+    dumpTbfStatus(queueIndex);
 // DEBUG
 
-    scheduleAt(simTime() + max(meanDelay, peakDelay), conformityTimer[queueIndex]);
+    scheduleAt(simTime() + std::max(meanDelay, peakDelay), conformityTimer[queueIndex]);
 }
 
 void DropTailVLANTBFQueue::dumpTbfStatus(int queueIndex)

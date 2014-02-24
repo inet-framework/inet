@@ -82,6 +82,7 @@ void DropTailVLANTBFQueue2::initialize()
     warmupFinished = false;
     numBitsSent.assign(numFlows, 0.0);
     numPktsReceived.assign(numFlows, 0);
+    numPktsDropped.assign(numFlows, 0);
     numPktsUnshaped.assign(numFlows, 0);
     numPktsSent.assign(numFlows, 0);
 }
@@ -105,8 +106,6 @@ void DropTailVLANTBFQueue2::handleMessage(cMessage *msg)
         conformityFlag[flowIndex] = true;
 
         // update TBF status
-        // int pktLength = (check_and_cast<cPacket *>(voq[flowIndex]->front()))->getBitLength();
-        // bool conformance = isConformed(flowIndex, pktLength);
         cPacket *frontPkt = check_and_cast<cPacket *>(voq[flowIndex]->front());
         bool conformance = (tbm[flowIndex]->meterPacket(frontPkt) == 0) ? true : false;   // result of metering; 0 for conformed and 1 for non-conformed packet
 // DEBUG
@@ -314,33 +313,28 @@ void DropTailVLANTBFQueue2::triggerConformityTimer(int flowIndex, int pktLength)
 {
     Enter_Method("triggerConformityCounter()");
 
-    double meanDelay = (pktLength - tbm[flowIndex]->getMeanBucketLength()) / tbm[flowIndex]->getMeanRate();
-    double peakDelay = (pktLength - tbm[flowIndex]->getPeakBucketLength()) / tbm[flowIndex]->getPeakRate();
+    double meanDelay = 0.0;
+    if ((unsigned long long)pktLength > tbm[flowIndex]->getMeanBucketLength())
+    {
+        meanDelay = (pktLength - tbm[flowIndex]->getMeanBucketLength()) / tbm[flowIndex]->getMeanRate();
+    }
+    double peakDelay = 0.0;
+    if (pktLength > tbm[flowIndex]->getPeakBucketLength())
+    {
+        peakDelay = (pktLength - tbm[flowIndex]->getPeakBucketLength()) / tbm[flowIndex]->getPeakRate();
+    }
 
 // DEBUG
+    EV << "** For VOQ[" << flowIndex << "]:" << endl;
     EV << "Packet Length = " << pktLength << endl;
-    dumpTbfStatus(flowIndex);
     EV << "Delay for Mean TBF = " << meanDelay << endl;
     EV << "Delay for Peak TBF = " << peakDelay << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Counter Expiration Time = " << simTime() + std::max(meanDelay, peakDelay) << endl;
+    tbm[flowIndex]->dumpStatus();
 // DEBUG
 
     scheduleAt(simTime() + std::max(meanDelay, peakDelay), conformityTimer[flowIndex]);
-}
-
-void DropTailVLANTBFQueue2::dumpTbfStatus(int flowIndex)
-{
-    EV << "Last Time = " << tbm[flowIndex]->getLastTime() << endl;
-    EV << "Current Time = " << simTime() << endl;
-    EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Bucket size [bit]: " << tbm[flowIndex]->getBucketSize() << endl;
-    EV << "- Mean rate [bps]: " << tbm[flowIndex]->getMeanRate() << endl;
-    EV << "- Bucket length [bit]: " << tbm[flowIndex]->getMeanBucketLength() << endl;
-    EV << "Token bucket for peak rate/MTU control " << endl;
-    EV << "- MTU [bit]: " << tbm[flowIndex]->getMtu() << endl;
-    EV << "- Peak rate [bps]: " << tbm[flowIndex]->getPeakRate() << endl;
-    EV << "- Bucket length [bit]: " << tbm[flowIndex]->getPeakBucketLength() << endl;
 }
 
 void DropTailVLANTBFQueue2::finish()

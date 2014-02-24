@@ -42,14 +42,12 @@ void BasicTokenBucketMeter::initialize()
     numPktsMetered = 0;
 }
 
-int BasicTokenBucketMeter::meterPacket(cMessage *msg)
-{
-    Enter_Method("meterPacket()");
+int BasicTokenBucketMeter::meterPacket(cMessage *msg) {
+    Enter_Method
+    ("meterPacket()");
 
-    if (warmupFinished == false)
-    {
-        if (simTime() >= simulation.getWarmupPeriod())
-        {
+    if (warmupFinished == false) {
+        if (simTime() >= simulation.getWarmupPeriod()) {
             warmupFinished = true;
         }
     }
@@ -57,38 +55,43 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
     int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
     simtime_t now = simTime();
 
-    if (warmupFinished == true)
-    {
+    if (warmupFinished == true) {
         numBitsMetered += pktLength;
         numPktsMetered++;
     }
 
-    // DEBUG
-        EV << "Last Time = " << lastTime << endl;
-        EV << "Current Time = " << now << endl;
-        EV << "Packet Length = " << pktLength << endl;
-        double tokenGenerated = (unsigned long long)ceil(meanRate*(now - lastTime).dbl());
-        EV << "Token Generated = " << tokenGenerated << endl;
-    // DEBUG
+//    // DEBUG
+//    EV << getFullPath() << ":" << endl;
+//    EV << "- Last Time = " << lastTime << endl;
+//    EV << "- Current Time = " << now << endl;
+//    EV << "- Packet Length = " << pktLength << endl;
+//    double tokenGenerated = (unsigned long long) ceil(meanRate * (now - lastTime).dbl());
+//    EV << "- Token Generated = " << tokenGenerated << endl;
+//    EV << "- Mean Bucket Size [bit]: " << bucketSize << endl;
+//    EV << "- Mean Rate [bps]: " << meanRate << endl;
+//    EV << "- Mean Bucket Length [bit]: " << meanBucketLength << endl;
+//    EV << "- Peak Bucket Size (MTU) [bit]: " << mtu << endl;
+//    EV << "- Peak Rate [bps]: " << peakRate << endl;
+//    EV << "- Peak Bucket length [bit]: " << peakBucketLength << endl;
+//    // DEBUG
 
     // update states
     //unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl() + 0.5);
-    unsigned long long meanTemp = meanBucketLength + (unsigned long long)ceil(meanRate*(now - lastTime).dbl());
-    meanBucketLength = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    unsigned long long meanTemp = meanBucketLength
+            + (unsigned long long)ceil(meanRate * (now - lastTime).dbl());
+    meanBucketLength = (unsigned long long) ((meanTemp > bucketSize) ? bucketSize : meanTemp);
     //unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl() + 0.5);
-    unsigned long long peakTemp = peakBucketLength + (unsigned long long)ceil(peakRate*(now - lastTime).dbl());
-    peakBucketLength = int((peakTemp > mtu) ? mtu : peakTemp);
+    unsigned long long peakTemp = peakBucketLength
+            + (unsigned long long)ceil(peakRate * (now - lastTime).dbl());
+    peakBucketLength = int((peakTemp > (unsigned long long)mtu) ? mtu : peakTemp);
     lastTime = now;
 
-    if (pktLength <= meanBucketLength)
-    {
-        if  (pktLength <= peakBucketLength)
-        {
+    if ((unsigned long long)pktLength <= meanBucketLength) {
+        if (pktLength <= peakBucketLength) {
             meanBucketLength -= pktLength;
             peakBucketLength -= pktLength;
 
-            if (warmupFinished == true)
-            {
+            if (warmupFinished == true) {
                 numBitsConformed += pktLength;
                 numPktsConformed++;
             }
@@ -99,19 +102,22 @@ int BasicTokenBucketMeter::meterPacket(cMessage *msg)
     return 1;   // not conformed
 }
 
-//void BasicTokenBucketMeter::dumpTbfStatus(int queueIndex)
-//{
-//    EV << "Last Time = " << lastTime[queueIndex] << endl;
-//    EV << "Current Time = " << simTime() << endl;
-//    EV << "Token bucket for mean rate/burst control " << endl;
-//    EV << "- Bucket size [bit]: " << bucketSize << endl;
-//    EV << "- Mean rate [bps]: " << meanRate << endl;
-//    EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
-//    EV << "Token bucket for peak rate/MTU control " << endl;
-//    EV << "- MTU [bit]: " << mtu << endl;
-//    EV << "- Peak rate [bps]: " << peakRate << endl;
-//    EV << "- Bucket length [bit]: " << peakBucketLength[queueIndex] << endl;
-//}
+void BasicTokenBucketMeter::dumpStatus() {
+    simtime_t now = simTime();
+    double tokenGenerated = (unsigned long long) ceil(meanRate * (now - lastTime).dbl());
+
+    EV << getFullPath() << ":" << endl;
+    EV << getFullPath() << ":" << endl;
+    EV << "- Last Time = " << lastTime << endl;
+    EV << "- Current Time = " << now << endl;
+    EV << "- Token Generated = " << tokenGenerated << endl;
+    EV << "- Mean Bucket Size [bit]: " << bucketSize << endl;
+    EV << "- Mean Rate [bps]: " << meanRate << endl;
+    EV << "- Mean Bucket Length [bit]: " << meanBucketLength << endl;
+    EV << "- Peak Bucket Size (MTU) [bit]: " << mtu << endl;
+    EV << "- Peak Rate [bps]: " << peakRate << endl;
+    EV << "- Peak Bucket length [bit]: " << peakBucketLength << endl;
+}
 
 void BasicTokenBucketMeter::finish()
 {
