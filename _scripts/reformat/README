@@ -1,0 +1,6 @@
+C++ source formatter tool for INET
+==================================
+
+The 'uncrustify' available at http://uncrustify.sourceforge.net/
+The binary generated from git://github.com/bengardner/uncrustify.git
+( The commit ID is 20cd06a17c4ac6e1ceffe59028cc80657a877d6d )
