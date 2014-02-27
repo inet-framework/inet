@@ -1,5 +1,6 @@
 //
 // Copyright (C) 1992-2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -106,5 +107,23 @@ Define_NED_Function2(nedf_select,
         "any select(int index, ...)",
         "misc",
         "Returns the <index>th item from the rest of the argument list; numbering starts from 0."
+);
+
+cNEDValue nedf_absPath(cComponent *context, cNEDValue argv[], int argc)
+{
+    if (argc != 1)
+        throw cRuntimeError("absPath(): must be one argument instead of %d argument(s)", argc);
+    const char *path = argv[0].stringValue();
+    switch (*path) {
+        case '.': return context->getFullPath() + path;
+        case '^': return context->getFullPath() + '.' + path;
+        default: return argv[0];
+    }
+}
+
+Define_NED_Function2(nedf_absPath,
+        "string absPath(string modulePath)",
+        "string",
+        "Returns absolute path of given module"
 );
 
