@@ -40,6 +40,7 @@
 class INET_API ObstacleControl : public cSimpleModule
 {
     public:
+        ObstacleControl();
         virtual ~ObstacleControl();
         virtual void initialize(int stage);
         virtual int numInitStages() const { return NUM_INIT_STAGES; }

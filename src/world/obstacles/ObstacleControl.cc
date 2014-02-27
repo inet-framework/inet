@@ -26,6 +26,13 @@
 
 Define_Module(ObstacleControl);
 
+ObstacleControl::ObstacleControl()
+{
+    obstaclesXml = NULL;
+    annotations = NULL;
+    annotationGroup = NULL;
+}
+
 ObstacleControl::~ObstacleControl() {
 }
 
