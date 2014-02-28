@@ -25,6 +25,7 @@ import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.IPv6NetworkLayer;
 import inet.networklayer.ipv6.IPv6RoutingTable;
+import inet.power.contract.IPowerSource;
 
 
 //
@@ -43,7 +44,8 @@ module NodeBase6
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
-        string mobilityType = default("StationaryMobility");
+        string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
+        string powerSourceType = default("");
         xml routes = default(xml("<routingTable/>"));
         bool IPForward = default(true);
     gates:
@@ -51,8 +53,13 @@ module NodeBase6
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
     submodules:
+        powerSource: <powerSourceType> like IPowerSource if powerSourceType != "" {
+            parameters:
+                @display("p=53,77;i=block/plug;is=s");
+        }
+
         // optional mobility module. Required only if wireless cards are present
-        mobility: <mobilityType> like IMobility if mobilityType != "" && numRadios > 0 {
+        mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
                 @display("p=53,111");
         }
