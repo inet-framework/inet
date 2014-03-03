@@ -67,7 +67,7 @@ PIMBase::~PIMBase()
 
 void PIMBase::initialize(int stage)
 {
-    cSimpleModule::initialize(stage);
+    OperationalBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -85,36 +85,51 @@ void PIMBase::initialize(int stage)
         helloPeriod = par("helloPeriod");
         holdTime = par("holdTime");
         designatedRouterPriority = par("designatedRouterPriority");
-
-        generationID = intrand(UINT32_MAX);
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER)
-    {
-        IPSocket ipSocket(gate("ipOut"));
-        ipSocket.registerProtocol(IP_PROT_PIM);
-    }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
-        // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
-        int numInterfaces = 0;
-        for (int i = 0; i < pimIft->getNumInterfaces(); i++)
-        {
-            PIMInterface *pimInterface = pimIft->getInterface(i);
-            if (pimInterface->getMode() == mode)
-            {
-                pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
-                numInterfaces++;
-            }
-        }
+}
 
-        if (numInterfaces > 0)
-        {
-            EV_INFO << "PIM is enabled on device " << hostname << endl;
+bool PIMBase::handleNodeStart(IDoneCallback *doneCallback)
+{
+    generationID = intrand(UINT32_MAX);
 
-            helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
-            scheduleAt(simTime() + par("triggeredHelloDelay").doubleValue(), helloTimer);
+    IPSocket ipSocket(gate("ipOut"));
+    ipSocket.registerProtocol(IP_PROT_PIM);
+
+    // to receive PIM messages, join to ALL_PIM_ROUTERS multicast group
+    isEnabled = false;
+    for (int i = 0; i < pimIft->getNumInterfaces(); i++)
+    {
+        PIMInterface *pimInterface = pimIft->getInterface(i);
+        if (pimInterface->getMode() == mode)
+        {
+            pimInterface->getInterfacePtr()->ipv4Data()->joinMulticastGroup(ALL_PIM_ROUTERS_MCAST);
+            isEnabled = true;
         }
     }
+
+    if (isEnabled)
+    {
+        EV_INFO << "PIM is enabled on device " << hostname << endl;
+        helloTimer = new cMessage("PIM HelloTimer", HelloTimer);
+        scheduleAt(simTime() + par("triggeredHelloDelay").doubleValue(), helloTimer);
+    }
+
+    return true;
+}
+
+bool PIMBase::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    // TODO unregister IP_PROT_PIM
+    cancelAndDelete(helloTimer);
+    helloTimer = NULL;
+    return true;
+}
+
+void PIMBase::handleNodeCrash()
+{
+    // TODO unregister IP_PROT_PIM
+    cancelAndDelete(helloTimer);
+    helloTimer = NULL;
 }
 
 void PIMBase::processHelloTimer(cMessage *timer)
@@ -211,4 +226,3 @@ void PIMBase::processHelloPacket(PIMHello *packet)
 
     delete packet;
 }
-

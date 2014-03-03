@@ -197,7 +197,11 @@ class INET_API PIMSM : public PIMBase, protected cListener
     protected:
         virtual int numInitStages() const  {return NUM_INIT_STAGES;}
         virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
+        virtual bool handleNodeStart(IDoneCallback *doneCallback);
+        virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+        virtual void handleNodeCrash();
+        virtual void stopPIMRouting();
+        virtual void handleMessageWhenUp(cMessage *msg);
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     private:

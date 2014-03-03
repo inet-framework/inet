@@ -171,7 +171,7 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
 	public:
         PIMDM() : PIMBase(PIMInterface::DenseMode) {}
-        virtual ~PIMDM() { clearRoutes(); }
+        virtual ~PIMDM();
 
 	private:
 	    // process signals
@@ -230,8 +230,12 @@ class INET_API PIMDM : public PIMBase, protected cListener
 
 	protected:
 		virtual int numInitStages() const  {return NUM_INIT_STAGES;}
-		virtual void handleMessage(cMessage *msg);
+		virtual void handleMessageWhenUp(cMessage *msg);
 		virtual void initialize(int stage);
+        virtual bool handleNodeStart(IDoneCallback *doneCallback);
+        virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+        virtual void handleNodeCrash();
+        virtual void stopPIMRouting();
 };
 
 #endif

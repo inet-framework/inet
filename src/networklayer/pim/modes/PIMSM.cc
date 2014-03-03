@@ -96,46 +96,71 @@ void PIMSM::initialize(int stage)
         WATCH_PTRMAP(gRoutes);
         WATCH_PTRMAP(sgRoutes);
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
-        // is PIMSM enabled?
-        bool hasPIMSMInterface = false;
-        for (int i = 0; i < pimIft->getNumInterfaces(); ++i)
-        {
-            if (pimIft->getInterface(i)->getMode() == PIMInterface::SparseMode)
-            {
-                hasPIMSMInterface = true;
-                break;
-            }
-        }
-
-        if (hasPIMSMInterface)
-        {
-            if (rpAddr.isUnspecified())
-                throw cRuntimeError("PIMSM: missing RP address parameter.");
-            if (sptThreshold.empty())
-                throw cRuntimeError("PIMSM: missing SPTthreshold parameter");
-
-            // subscribe for notifications
-            cModule *host = findContainingNode(this);
-            if (host != NULL) {
-                host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-                host->subscribe(NF_IPv4_MDATA_REGISTER, this);
-                host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-                host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-                host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-                host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-                host->subscribe(NF_PIM_NEIGHBOR_ADDED, this);
-                host->subscribe(NF_PIM_NEIGHBOR_DELETED, this);
-                host->subscribe(NF_PIM_NEIGHBOR_CHANGED, this);
-            }
-        }
-        else
-            EV << "PIM is NOT enabled on device " << endl;
-    }
 }
 
-void PIMSM::handleMessage(cMessage *msg)
+bool PIMSM::handleNodeStart(IDoneCallback *doneCallback)
+{
+    bool done = PIMBase::handleNodeStart(doneCallback);
+
+    if (isEnabled)
+    {
+        if (rpAddr.isUnspecified())
+            throw cRuntimeError("PIMSM: missing RP address parameter.");
+        if (sptThreshold.empty())
+            throw cRuntimeError("PIMSM: missing SPTthreshold parameter");
+
+        // subscribe for notifications
+        cModule *host = findContainingNode(this);
+        if (!host)
+            throw cRuntimeError("PIMDM: containing node not found.");
+        host->subscribe(NF_IPv4_NEW_MULTICAST, this);
+        host->subscribe(NF_IPv4_MDATA_REGISTER, this);
+        host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+        host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
+        host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
+        host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+        host->subscribe(NF_PIM_NEIGHBOR_ADDED, this);
+        host->subscribe(NF_PIM_NEIGHBOR_DELETED, this);
+        host->subscribe(NF_PIM_NEIGHBOR_CHANGED, this);
+    }
+
+    return done;
+}
+
+bool PIMSM::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    stopPIMRouting();
+    return PIMBase::handleNodeShutdown(doneCallback);
+}
+
+void PIMSM::handleNodeCrash()
+{
+    stopPIMRouting();
+    PIMBase::handleNodeCrash();
+}
+
+void PIMSM::stopPIMRouting()
+{
+    if (isEnabled)
+    {
+        cModule *host = findContainingNode(this);
+        if (!host)
+            throw cRuntimeError("PIMSM: containing node not found.");
+        host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
+        host->unsubscribe(NF_IPv4_MDATA_REGISTER, this);
+        host->unsubscribe(NF_IPv4_DATA_ON_RPF, this);
+        host->unsubscribe(NF_IPv4_DATA_ON_NONRPF, this);
+        host->unsubscribe(NF_IPv4_MCAST_REGISTERED, this);
+        host->unsubscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+        host->unsubscribe(NF_PIM_NEIGHBOR_ADDED, this);
+        host->unsubscribe(NF_PIM_NEIGHBOR_DELETED, this);
+        host->unsubscribe(NF_PIM_NEIGHBOR_CHANGED, this);
+    }
+
+    clearRoutes();
+}
+
+void PIMSM::handleMessageWhenUp(cMessage *msg)
 {
 	if (msg->isSelfMessage())
 	{
@@ -168,6 +193,13 @@ void PIMSM::handleMessage(cMessage *msg)
 	}
 	else if (dynamic_cast<PIMPacket *>(msg))
 	{
+	    if (!isEnabled)
+	    {
+	        EV_DETAIL << "PIM-SM is disabled, dropping packet.\n";
+	        delete msg;
+	        return;
+	    }
+
 	    PIMPacket *pkt = check_and_cast<PIMPacket *>(msg);
 	    switch(pkt->getType())
 	    {

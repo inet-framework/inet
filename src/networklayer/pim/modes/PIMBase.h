@@ -23,6 +23,7 @@
 
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
+#include "OperationalBase.h"
 #include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"
 #include "PIMPacket.h"
@@ -31,7 +32,7 @@
 /**
  * TODO
  */
-class INET_API PIMBase : public cSimpleModule
+class INET_API PIMBase : public OperationalBase
 {
     protected:
 
@@ -159,6 +160,8 @@ class INET_API PIMBase : public cSimpleModule
         PIMInterfaceTable *pimIft;
         PIMNeighborTable *pimNbt;
 
+        bool isUp;
+        bool isEnabled;
         const char *                hostname;
 
         // parameters
@@ -171,7 +174,7 @@ class INET_API PIMBase : public cSimpleModule
         cMessage *helloTimer;
 
     public:
-        PIMBase(PIMInterface::PIMMode mode) : mode(mode), helloTimer(NULL) {}
+        PIMBase(PIMInterface::PIMMode mode) : isUp(false), isEnabled(false), mode(mode), helloTimer(NULL) {}
         virtual ~PIMBase();
 
     protected:
@@ -182,6 +185,13 @@ class INET_API PIMBase : public cSimpleModule
         void sendHelloPacket(PIMInterface *pimInterface);
         void processHelloTimer(cMessage *timer);
         void processHelloPacket(PIMHello *pkt);
+
+        virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+        virtual bool isNodeStartStage(int stage)  { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+        virtual bool isNodeShutdownStage(int stage) { return stage == INITSTAGE_ROUTING_PROTOCOLS; }
+        virtual bool handleNodeStart(IDoneCallback *doneCallback);
+        virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
+        virtual void handleNodeCrash();
 };
 
 

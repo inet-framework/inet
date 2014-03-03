@@ -30,6 +30,13 @@ ostream& operator<<(ostream &out, const PIMDM::Route *route)
     return out;
 }
 
+PIMDM::~PIMDM()
+{
+    for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
+        delete it->second;
+    routes.clear();
+}
+
 void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp, int holdTime, int intId)
 {
     ASSERT(!src.isUnspecified());
@@ -1098,12 +1105,20 @@ void PIMDM::processPIMPacket(PIMPacket *pkt)
 	}
 }
 
-void PIMDM::handleMessage(cMessage *msg)
+void PIMDM::handleMessageWhenUp(cMessage *msg)
 {
    if (msg->isSelfMessage())
 	   processPIMTimer(msg);
    else if (dynamic_cast<PIMPacket *>(msg))
+   {
+       if (!isEnabled)
+       {
+           EV_DETAIL << "PIM-DM is disabled, dropping packet.\n";
+           delete msg;
+           return;
+       }
 	   processPIMPacket(dynamic_cast<PIMPacket *>(msg));
+   }
    else
        throw cRuntimeError("PIMDM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
 }
@@ -1123,22 +1138,57 @@ void PIMDM::initialize(int stage)
         stateRefreshInterval = par("stateRefreshInterval");
         assertTime = par("assertTime");
     }
-    else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-	{
-        // subscribe for notifications
+}
+
+bool PIMDM::handleNodeStart(IDoneCallback *doneCallback)
+{
+    bool done = PIMBase::handleNodeStart(doneCallback);
+
+    // subscribe for notifications
+    if (isEnabled)
+    {
         cModule *host = findContainingNode(this);
-        if (host != NULL)
-        {
-            host->subscribe(NF_IPv4_NEW_MULTICAST, this);
-            host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
-            host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
-            host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
-            host->subscribe(NF_IPv4_DATA_ON_RPF, this);
-            //host->subscribe(NF_IPv4_RPF_CHANGE, this);
-            host->subscribe(NF_ROUTE_ADDED, this);
-            host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
-        }
-	}
+        if (!host)
+            throw cRuntimeError("PIMDM: containing node not found.");
+        host->subscribe(NF_IPv4_NEW_MULTICAST, this);
+        host->subscribe(NF_IPv4_MCAST_REGISTERED, this);
+        host->subscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+        host->subscribe(NF_IPv4_DATA_ON_NONRPF, this);
+        host->subscribe(NF_IPv4_DATA_ON_RPF, this);
+        host->subscribe(NF_ROUTE_ADDED, this);
+        host->subscribe(NF_INTERFACE_STATE_CHANGED, this);
+    }
+
+    return done;
+}
+
+bool PIMDM::handleNodeShutdown(IDoneCallback *doneCallback)
+{
+    stopPIMRouting();
+    return PIMBase::handleNodeShutdown(doneCallback);
+}
+
+void PIMDM::handleNodeCrash()
+{
+    stopPIMRouting();
+    PIMBase::handleNodeCrash();
+}
+
+void PIMDM::stopPIMRouting()
+{
+    if (isEnabled)
+    {
+        cModule *host = findContainingNode(this);
+        if (!host)
+            throw cRuntimeError("PIMDM: containing node not found.");
+        host->unsubscribe(NF_IPv4_NEW_MULTICAST, this);
+        host->unsubscribe(NF_IPv4_MCAST_REGISTERED, this);
+        host->unsubscribe(NF_IPv4_MCAST_UNREGISTERED, this);
+        host->unsubscribe(NF_IPv4_DATA_ON_NONRPF, this);
+        host->unsubscribe(NF_IPv4_DATA_ON_RPF, this);
+        host->unsubscribe(NF_ROUTE_ADDED, this);
+        host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
+    }
 }
 
 void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
@@ -1690,6 +1740,24 @@ void PIMDM::deleteRoute(IPv4Address source, IPv4Address group)
 
 void PIMDM::clearRoutes()
 {
+    // delete IPv4 routes
+    bool changed = true;
+    while (changed)
+    {
+        changed = false;
+        for (int i = 0; i < rt->getNumMulticastRoutes(); i++)
+        {
+            IPv4MulticastRoute *ipv4Route = rt->getMulticastRoute(i);
+            if (ipv4Route->getSource() == this)
+            {
+                rt->deleteMulticastRoute(ipv4Route);
+                changed = true;
+                break;
+            }
+        }
+    }
+
+    // clear local table
     for (RoutingTable::iterator it = routes.begin(); it != routes.end(); ++it)
         delete it->second;
     routes.clear();
