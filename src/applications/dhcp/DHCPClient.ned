@@ -31,9 +31,9 @@ import inet.applications.IUDPApp;
 simple DHCPClient like IUDPApp
 {
     parameters:
-        string interface = default("");  // which NIC should be configured (i.e. wlan0, eth1 etc.); can be left  empty if there is only one non-loopback interface
-        string routingTableModule = default("^.routingTable");
-        string interfaceTableModule = default("^.interfaceTable");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string routingTableModule;
+        string interface = default("");  // which NIC should be configured (i.e. wlan0, eth1 etc.)
         double startTime @unit(s) = default(0s); // starting time of DHCP initialization
         @display("i=block/app2");
     gates:

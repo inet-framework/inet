@@ -49,7 +49,7 @@ import inet.networklayer.common.IRoutingTable;
 simple IPv4RoutingTable like IRoutingTable
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/table");
         string routerId = default("auto"); // for routers, the router id using IPv4 address dotted
                           // notation; specify "auto" to select the highest

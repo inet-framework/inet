@@ -57,6 +57,10 @@ module NodeBase
         string powerSourceType = default("");
         routingTable.IPForward = IPForward;
         routingTable.forwardMulticast = forwardMulticast; //      and use the parameters of the node in the C++ code?
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
+        *.powerSourceModule = default(powerSourceType != "" ? absPath(".powerSource") : "");
+        *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);

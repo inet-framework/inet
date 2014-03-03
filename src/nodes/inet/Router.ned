@@ -63,6 +63,7 @@ module Router extends NodeBase
         }
         bgp: BGPRouting if hasBGP {
             parameters:
+                ospfRoutingModule = default(hasOSPF ? "^.ospf" : "");
                 @display("p=214,80;i=block/network");
         }
         tcp: <tcpType> like ITCP if hasBGP {
@@ -70,7 +71,8 @@ module Router extends NodeBase
                 @display("p=214,180;i=block/transport");
         }
         rip: RIPRouting if hasRIP {
-            @display("p=404,80");
+            parameters:
+                @display("p=404,80");
         }
         udp: <udpType> like IUDP if hasRIP {
             @display("p=404,180");

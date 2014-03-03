@@ -530,10 +530,10 @@ MulticastGroupList InterfaceTable::collectMulticastGroups()
 #ifdef WITH_IPv4
         if (ie->ipv4Data())
         {
-            const IPv4InterfaceData::IPv4AddressVector &addresses = ie->ipv4Data()->getJoinedMulticastGroups();
-            for (unsigned int j = 0; j < addresses.size(); ++j)
+            int numOfMulticastGroups = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+            for (int j = 0; j < numOfMulticastGroups; ++j)
             {
-                mglist.push_back(MulticastGroup(addresses[j], interfaceId));
+                mglist.push_back(MulticastGroup(ie->ipv4Data()->getJoinedMulticastGroup(j), interfaceId));
             }
         }
 #endif

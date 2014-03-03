@@ -15,5 +15,5 @@ network SimpleTestNetwork
     server: StandardHost;
     configurator: IPv4NetworkConfigurator;
   connections:
-    client.pppg++ <--> pppline <--> server.pppg++;        
+    client.pppg++ <--> pppline <--> server.pppg++;
 }

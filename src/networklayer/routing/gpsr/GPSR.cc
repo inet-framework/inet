@@ -78,10 +78,10 @@ void GPSR::initialize(int stage)
         // context
         host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         mobility = check_and_cast<IMobility *>(host->getSubmodule("mobility"));
-        routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
-        networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));
+        routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
+        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");

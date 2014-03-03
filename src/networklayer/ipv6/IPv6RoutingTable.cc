@@ -70,7 +70,7 @@ void IPv6RoutingTable::initialize(int stage)
         multicastForward = par("forwardMulticast");
         WATCH(isrouter);
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
 #ifdef WITH_xMIPv6
         // the following MIPv6 related flags will be overridden by the MIPv6 module (if existing)
@@ -395,7 +395,7 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
 
 void IPv6RoutingTable::configureTunnelFromXML(cXMLElement* cfg)
 {
-    IPv6Tunneling* tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule")));
+    IPv6Tunneling* tunneling = getModuleFromPar<IPv6Tunneling>(par("ipv6TunnelingModule"), this);
 
     // parse basic config (attributes)
     cXMLElementList tunnelList = cfg->getElementsByTagName("tunnelEntry");

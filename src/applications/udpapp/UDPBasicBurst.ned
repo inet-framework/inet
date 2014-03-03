@@ -104,7 +104,7 @@ import inet.applications.IUDPApp;
 simple UDPBasicBurst like IUDPApp
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string destAddresses; // space-separated list of destination IP addresses, can be empty;
                               // see module description for possibilities
         bool excludeLocalDestAddresses = default(true);     // excluding local addresses from destAddresses

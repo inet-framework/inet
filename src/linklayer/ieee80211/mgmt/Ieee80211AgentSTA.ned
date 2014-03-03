@@ -28,7 +28,7 @@ package inet.linklayer.ieee80211.mgmt;
 simple Ieee80211AgentSTA
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         bool activeScan = default(true);  // selects between active and passive scanning
         string channelsToScan = default("");  // list of channel numbers to scan (space delimited); empty means all channels
         double probeDelay @unit(s) = default(100ms); // delay before sending a probe request during active scanning

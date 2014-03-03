@@ -115,7 +115,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
-        IInterfaceTable *ift = findModuleByPath<IInterfaceTable>(par("interfaceTableModule"), this);
+        IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         if (ift)
         {
             myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());

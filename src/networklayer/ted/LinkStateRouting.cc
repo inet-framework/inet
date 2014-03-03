@@ -44,9 +44,9 @@ void LinkStateRouting::initialize(int stage)
 
     if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
-        tedmod = check_and_cast<TED *>(getModuleByPath(par("tedModule")));
+        tedmod = getModuleFromPar<TED>(par("tedModule"), this);
 
-        IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         routerId = rt->getRouterId();
 
         // listen for TED modifications
@@ -56,7 +56,7 @@ void LinkStateRouting::initialize(int stage)
         // peers are given as interface names in the "peers" module parameter;
         // store corresponding interface addresses in peerIfAddrs[]
         cStringTokenizer tokenizer(par("peers"));
-        IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         const char *token;
         while ((token = tokenizer.nextToken())!=NULL)
         {

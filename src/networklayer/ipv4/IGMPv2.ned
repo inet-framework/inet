@@ -103,7 +103,7 @@ package inet.networklayer.ipv4;
 simple IGMPv2 like IIGMP
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         bool enabled = default(true);
         int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss

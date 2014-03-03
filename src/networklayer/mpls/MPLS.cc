@@ -21,6 +21,7 @@
 #include "Utils.h"
 
 #include "IClassifier.h"
+#include "ModuleAccess.h"
 
 
 // FIXME temporary fix
@@ -40,8 +41,8 @@ void MPLS::initialize(int stage)
     {
         // interfaceTable must be initialized
 
-        lt = check_and_cast<LIBTable *>(getModuleByPath(par("libTableModule")));
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         pct = check_and_cast<IClassifier*>(getParentModule()->getSubmodule(par("classifier")));
     }

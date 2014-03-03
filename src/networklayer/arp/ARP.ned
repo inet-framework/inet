@@ -43,7 +43,7 @@ package inet.networklayer.arp;
 simple ARP
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
         double retryTimeout @unit("s") = default(1s); // number seconds ARP waits between retries to resolve an IPv4 address
         int retryCount = default(3);   // number of times ARP will attempt to resolve an IPv4 address

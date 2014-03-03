@@ -36,8 +36,8 @@ simple DYMOUM extends BaseRouting like IManetRouting
     parameters:
         @class(DYMOUM);
         @reactive;                             // IP module will send control messages when no route is present to the destination
-        string interfaceTableModule = default("^.interfaceTable");
-        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule;
+        string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
         string arpCacheModule = default("^.networkLayer.arp");
         bool no_path_acc_ = default(false);  // Disable path accumulation

@@ -144,7 +144,7 @@ void ICMPv6::processEchoRequest(ICMPv6EchoRequestMsg *request)
 
     if (ctrl->getDestAddr().isMulticast() /*TODO check for anycast too*/)
     {
-        IInterfaceTable *it = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        IInterfaceTable *it = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         IPv6InterfaceData *ipv6Data = it->getInterfaceById(ctrl->getInterfaceId())->ipv6Data();
         replyCtrl->setSrcAddr(ipv6Data->getPreferredAddress());
         // TODO implement default address selection properly.

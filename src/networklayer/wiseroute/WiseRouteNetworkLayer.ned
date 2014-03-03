@@ -27,6 +27,8 @@ import inet.networklayer.contract.INetworkLayer;
 module WiseRouteNetworkLayer like INetworkLayer
 {
     parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork");
 
     gates:

@@ -46,7 +46,7 @@ package inet.linklayer.ppp;
 simple PPP
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         int txQueueLimit = default(1000);  // only used if queueModule==""; zero means infinite
         string queueModule = default("");  // name of external (QoS,RED,etc) queue module
         int mtu @unit("B") = default(4470B);

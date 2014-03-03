@@ -25,6 +25,7 @@ import inet.base.LayeredProtocolBase;
 simple NetworkProtocolBase extends LayeredProtocolBase
 {
     parameters:
+        string interfaceTableModule;
         @display("i=block/fork");
     gates:
         input upperLayerIn[] @labels(ITransportPacket/down);

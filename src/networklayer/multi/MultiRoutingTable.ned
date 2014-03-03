@@ -30,7 +30,8 @@ import inet.networklayer.ipv6.IPv6RoutingTable;
 module MultiRoutingTable like IRoutingTable
 {
     parameters:
-        *.interfaceTableModule = default("^.^.interfaceTable");
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/table");
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);

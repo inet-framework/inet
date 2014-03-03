@@ -26,8 +26,8 @@ package inet.applications.traci;
 simple TraCIDemo
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
-        string traciMobilityModule = default("^.mobility");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string mobilityModule;
         @display("i=block/app2");
     gates:
         inout udp;

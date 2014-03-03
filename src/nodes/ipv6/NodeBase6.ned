@@ -48,6 +48,10 @@ module NodeBase6
         string powerSourceType = default("");
         xml routes = default(xml("<routingTable/>"));
         bool IPForward = default(true);
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
+        *.powerSourceModule = default(powerSourceType != "" ? absPath(".battery") : "");
+        *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
     gates:
         input radioIn[numRadios] @directIn;
         inout pppg[] @labels(PPPFrame-conn);
@@ -67,9 +71,6 @@ module NodeBase6
         // network layer
         networkLayer: IPv6NetworkLayer {
             parameters:
-                ipv6.routingTableModule = "^.^.routingTable";
-                iptunneling.routingTableModule = "^.^.routingTable";
-                neighbourDiscovery.routingTableModule = "^.^.routingTable";
                 @display("p=329,287;q=queue");
         }
 

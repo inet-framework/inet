@@ -23,6 +23,7 @@
 #include "GenericRoute.h"
 #include "GenericRoutingTable.h"
 #include "GenericNetworkProtocolInterfaceData.h"
+#include "ModuleAccess.h"
 
 Define_Module(GenericNetworkProtocol);
 
@@ -30,8 +31,8 @@ void GenericNetworkProtocol::initialize()
 {
     QueueBase::initialize();
 
-    interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-    routingTable = check_and_cast<GenericRoutingTable *>(getModuleByPath(par("routingTableModule")));
+    interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+    routingTable = getModuleFromPar<GenericRoutingTable>(par("routingTableModule"), this);
 
     queueOutGate = gate("queueOut");
     defaultHopLimit = par("hopLimit");

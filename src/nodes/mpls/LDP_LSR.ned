@@ -43,6 +43,10 @@ module LDP_LSR
         string peers;
         string routerId = default("auto");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
+        *.tedModule = default(absPath(".ted"));
+        *.libTableModule = default(absPath(".libTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:

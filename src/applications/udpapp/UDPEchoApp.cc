@@ -17,6 +17,8 @@
 
 
 #include "UDPEchoApp.h"
+
+#include "ModuleAccess.h"
 #include "UDPControlInfo_m.h"
 
 
@@ -91,7 +93,7 @@ bool UDPEchoApp::handleNodeStart(IDoneCallback *doneCallback)
     socket.setOutputGate(gate("udpOut"));
     int localPort = par("localPort");
     socket.bind(localPort);
-    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
     return true;
 }

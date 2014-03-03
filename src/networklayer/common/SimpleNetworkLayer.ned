@@ -26,7 +26,9 @@ import inet.networklayer.contract.INetworkProtocol;
 module SimpleNetworkLayer like INetworkLayer
 {
     parameters:
+        string interfaceTableModule;
         string networkProtocolType;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/fork");
 
     gates:

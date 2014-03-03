@@ -25,9 +25,13 @@ import inet.power.contract.IPowerConsumer;
 module WirelessNic like IWirelessNic
 {
     parameters:
+        string interfaceTableModule;
+        string powerSourceModule;
         string macType;
         string radioType;
         string powerConsumerType = default("");
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.powerSourceModule = default(absPath(powerSourceModule));
         @display("i=block/ifcard;bgb=250,300");
     gates:
         input upperLayerIn;

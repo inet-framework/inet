@@ -15,7 +15,7 @@
 //
 
 #include "MACProtocolBase.h"
-#include "InterfaceTableAccess.h"
+#include "ModuleAccess.h"
 
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
@@ -41,7 +41,7 @@ void MACProtocolBase::initialize(int stage)
 void MACProtocolBase::registerInterface()
 {
     ASSERT(interfaceEntry == NULL);
-    IInterfaceTable *interfaceTable = InterfaceTableAccess().getIfExists();
+    IInterfaceTable *interfaceTable = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceTable) {
         interfaceEntry = createInterfaceEntry();
         interfaceTable->addInterface(interfaceEntry);

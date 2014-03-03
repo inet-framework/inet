@@ -75,13 +75,13 @@ void IPv6NeighbourDiscovery::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3)
     {
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt6 = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        icmpv6 = check_and_cast<ICMPv6 *>(getModuleByPath(par("icmpv6Module")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt6 = getModuleFromPar<IPv6RoutingTable>(par("routingTableModule"), this);
+        icmpv6 = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
 
 #ifdef WITH_xMIPv6
         if (rt6->isMobileNode())
-            mipv6 = check_and_cast<xMIPv6 *>(getModuleByPath(par("xmipv6Module")));
+            mipv6 = getModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
 #endif /* WITH_xMIPv6 */
 
         pendingQueue.setName("pendingQueue");

@@ -36,12 +36,11 @@ import inet.networklayer.IManetRouting;
 simple DYMO extends BaseRouting like IManetRouting
 {
     parameters:
-        
         @class(DYMO);
         @reactive;                             // IP module will send control messages when no route is present to the destination
-        
-        string interfaceTableModule = default("^.interfaceTable");
-        string routingTableModule = default("^.routingTable");
+
+        string interfaceTableModule;
+        string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
         string arpCacheModule = default("^.networkLayer.arp");
         int RESPONSIBLE_ADDRESSES_PREFIX = default(-1); // netmask of network this DYMO router is responsible for, -1 for self only

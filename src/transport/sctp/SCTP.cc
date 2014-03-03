@@ -23,6 +23,7 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
+#include "ModuleAccess.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
@@ -96,8 +97,8 @@ void SCTP::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         this->auth = (bool)par("auth");
         this->pktdrop = (bool)par("packetDrop");
         this->sackNow = (bool)par("sackNow");

@@ -39,7 +39,7 @@ package inet.networklayer.autorouting.ipv4;
 simple IPv4NodeConfigurator
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         @display("i=block/cogwheel_s");
         string networkConfiguratorModule = default("configurator"); // the absolute path to the IPv4NetworkConfigurator; use "" if there is no configurator
         bool configureRoutingTable = default(true);     // add routing entries to routing table (uses the configurator module)

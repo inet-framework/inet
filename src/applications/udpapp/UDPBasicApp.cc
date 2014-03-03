@@ -20,6 +20,7 @@
 #include "UDPBasicApp.h"
 
 #include "AddressResolver.h"
+#include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "UDPControlInfo_m.h"
 
@@ -80,7 +81,7 @@ void UDPBasicApp::setSocketOptions()
     const char *multicastInterface = par("multicastInterface");
     if (multicastInterface[0])
     {
-        IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
         if (!ie)
             throw cRuntimeError("Wrong multicastInterface setting: no interface named \"%s\"", multicastInterface);
@@ -94,7 +95,7 @@ void UDPBasicApp::setSocketOptions()
     bool joinLocalMulticastGroups = par("joinLocalMulticastGroups");
     if (joinLocalMulticastGroups)
     {
-        MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+        MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
 }

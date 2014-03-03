@@ -37,6 +37,8 @@ module BGPRouter
         @labels(node,ethernet-node);
         @display("i=abstract/router");
         string tcpType = default(firstAvailable("TCP","TCP_lwIP","TCP_NSC","TCP_None"));  // tcp implementation (e.g. ~TCP, ~TCP_lwIP, ~TCP_NSC) or ~TCPSpoof
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
         inout ethg[] @labels(EtherFrame-conn);
@@ -57,6 +59,7 @@ module BGPRouter
         }
         bgp: BGPRouting {
             parameters:
+                ospfRoutingModule = "^.ospf";
                 @display("p=160,50;i=block/network");
         }
         snifferIn: MessageChecker {

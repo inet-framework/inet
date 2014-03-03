@@ -20,7 +20,6 @@
 #include "DHCPClient.h"
 
 #include "IPv4InterfaceData.h"
-#include "IPv4RoutingTableAccess.h"
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
@@ -88,7 +87,7 @@ void DHCPClient::initialize(int stage)
         host->subscribe(NF_INTERFACE_DELETED, this);
 
         // get the routing table to update and subscribe it to the blackboard
-        irt = check_and_cast<IPv4RoutingTable*>(getModuleByPath(par("routingTableModule")));
+        irt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         // set client to idle state
         clientState = IDLE;
         // get the interface to configure
@@ -105,7 +104,7 @@ void DHCPClient::initialize(int stage)
 
 InterfaceEntry *DHCPClient::chooseInterface()
 {
-    IInterfaceTable* ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+    IInterfaceTable* ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     const char *interfaceName = par("interface");
     InterfaceEntry *ie = NULL;
 

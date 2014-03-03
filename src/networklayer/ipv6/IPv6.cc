@@ -51,11 +51,11 @@ void IPv6::initialize(int stage)
     {
         QueueBase::initialize();
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        nd = check_and_cast<IPv6NeighbourDiscovery *>(getModuleByPath(par("ipv6NeighbourDiscoveryModule")));
-        icmp = check_and_cast<ICMPv6 *>(getModuleByPath(par("icmpv6Module")));
-        tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IPv6RoutingTable>(par("routingTableModule"), this);
+        nd = getModuleFromPar<IPv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this);
+        icmp = getModuleFromPar<ICMPv6>(par("icmpv6Module"), this);
+        tunneling = getModuleFromPar<IPv6Tunneling>(par("ipv6TunnelingModule"), this);
 
         curFragmentId = 0;
         lastCheckTime = SIMTIME_ZERO;

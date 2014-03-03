@@ -370,7 +370,7 @@ int RTP::resolveMTU()
     // it returns MTU bytelength (ethernet) minus ip
     // and udp headers
     // TODO: How to do get the valid length of IP and ETHERNET header?
-    IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+    IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
     const InterfaceEntry* rtie = rt->getInterfaceForDestAddr(_destinationAddress);
 
     if (rtie == NULL)
@@ -402,7 +402,7 @@ void RTP::createProfile(const char *profileName)
 void RTP::createSocket()
 {
     _udpSocket.bind(_port);
-    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
     _udpSocket.joinLocalMulticastGroups(mgl); //TODO make it parameter-dependent
     connectRet();
 }

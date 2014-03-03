@@ -42,6 +42,7 @@ module EtherHost
         @node();
         @labels(node,ethernet-node);
         @display("i=device/pc2");
+        *.interfaceTableModule = default("");
     gates:
         inout ethg @labels(EtherFrame-conn);
     submodules:

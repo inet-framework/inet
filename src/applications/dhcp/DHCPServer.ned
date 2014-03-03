@@ -31,7 +31,7 @@ import inet.applications.IUDPApp;
 simple DHCPServer like IUDPApp
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string interface = default(""); // interface to listen on; can be left empty if there is only one non-loopback interface
         string subnetMask; // subnet mask to assign
         string ipAddressStart; // IP pool 1st address

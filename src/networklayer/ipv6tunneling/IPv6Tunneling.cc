@@ -67,8 +67,8 @@ void IPv6Tunneling::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IPv6RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IPv6RoutingTable>(par("routingTableModule"), this);
 
         vIfIndexTop = INT_MAX; // virtual interface number set to maximum int value
         noOfNonSplitTunnels = 0; // current number of non-split tunnels on this host
@@ -554,7 +554,7 @@ void IPv6Tunneling::decapsulateDatagram(IPv6Datagram* dgram)
             && (dgram->getTransportProtocol() != IP_PROT_IPv6EXT_MOB))
     {
         EV << "Checking Route Optimization for: " << dgram->getSrcAddress() << endl;
-        xMIPv6* mipv6 = findModuleByPath<xMIPv6>(par("xmipv6Module"), this);
+        xMIPv6* mipv6 = findModuleFromPar<xMIPv6>(par("xmipv6Module"), this);
         if(mipv6)
             mipv6->triggerRouteOptimization(dgram->getSrcAddress(), ie->ipv6Data()->getMNHomeAddress(), ie);
     }

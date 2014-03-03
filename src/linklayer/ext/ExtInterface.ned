@@ -29,7 +29,7 @@ import inet.linklayer.IExternalNic;
 simple ExtInterface like IExternalNic
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string filterString;
         string device;
         int mtu @unit("B") = default(1500B);

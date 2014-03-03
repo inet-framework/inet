@@ -86,10 +86,10 @@ package inet.networklayer.ipv4;
 simple IPv4
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        string arpCacheModule = default("^.arp");
-        string icmpModule = default("^.icmp");
+        string arpCacheModule;
+        string icmpModule;
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);
         int multicastTimeToLive = default(32);

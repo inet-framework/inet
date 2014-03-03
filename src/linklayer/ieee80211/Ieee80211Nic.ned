@@ -35,6 +35,8 @@ import inet.physicallayer.radio.contract.IRadio;
 module Ieee80211Nic like IWirelessNic
 {
     parameters:
+        string interfaceTableModule;
+        string powerSourceModule;
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
         string radioType = default("SimplifiedIeee80211Radio");
         string opMode @enum("b","g","a","p") = default("g");
@@ -45,6 +47,8 @@ module Ieee80211Nic like IWirelessNic
         **.opMode = opMode;
         **.bitrate = bitrate;
         @display("i=block/ifcard;bgb=336,357");
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.powerSourceModule = default(absPath(powerSourceModule));
     gates:
         input upperLayerIn; // to upper layers
         output upperLayerOut; // from upper layers

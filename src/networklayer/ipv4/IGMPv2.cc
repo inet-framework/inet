@@ -334,8 +334,8 @@ void IGMPv2::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
 
         cModule *host = getContainingNode(this);
         host->subscribe(NF_INTERFACE_DELETED, this);

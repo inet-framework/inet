@@ -87,10 +87,12 @@ module MultiNetworkLayer like INetworkLayer
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
-        *.*.interfaceTableModule = default("^.^.^.interfaceTable");
-        ipv4.*.routingTableModule = default("^.^.^.routingTable.ipv4");
-        ipv6.*.routingTableModule = default("^.^.^.routingTable.ipv6");
-        generic.*.routingTableModule = default("^.^.^.routingTable.generic");
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        string routingTableModule;
+        ipv4.routingTableModule = default(absPath(routingTableModule) + ".ipv4");
+        ipv6.routingTableModule = default(absPath(routingTableModule) + ".ipv6");
+        generic.routingTableModule = default(absPath(routingTableModule) + ".generic");
 
     gates:
         input ifIn[] @labels(INetworkDatagram);

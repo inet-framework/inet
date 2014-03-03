@@ -38,8 +38,8 @@ simple OLSR extends BaseRouting like IManetRouting
 {
     parameters:
         @class(OLSR);
-        string interfaceTableModule = default("^.interfaceTable");
-        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule;
+        string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
         string arpCacheModule = default("^.networkLayer.arp");
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)

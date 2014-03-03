@@ -23,6 +23,7 @@
 
 #include "UDPControlInfo_m.h"
 #include "AddressResolver.h"
+#include "ModuleAccess.h"
 
 
 EXECUTE_ON_STARTUP(
@@ -133,7 +134,7 @@ void UDPBasicBurst::processStart()
     const char *token;
     bool excludeLocalDestAddresses = par("excludeLocalDestAddresses").boolValue();
 
-    IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
     while ((token = tokenizer.nextToken()) != NULL)
     {

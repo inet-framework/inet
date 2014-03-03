@@ -50,6 +50,8 @@ module AccessPoint
         bool hasStatus = default(false);
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
         eth[*].encapType = "EtherEncapDummy";
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.powerSourceModule = default("");
     gates:
         input radioIn[numRadios] @directIn;
         inout ethg[] @labels(EtherFrame-conn);

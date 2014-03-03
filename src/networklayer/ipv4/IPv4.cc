@@ -52,10 +52,10 @@ void IPv4::initialize(int stage)
     {
         QueueBase::initialize();
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        arp = check_and_cast<IARPCache *>(getModuleByPath(par("arpCacheModule")));
-        icmp = check_and_cast<ICMP *>(getModuleByPath(par("icmpModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        arp = getModuleFromPar<IARPCache>(par("arpCacheModule"), this);
+        icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
 
         arpInGate = gate("arpIn");
         arpOutGate = gate("arpOut");
@@ -79,6 +79,7 @@ void IPv4::initialize(int stage)
         queuedDatagramsForHooks.clear();
 
         pendingPackets.clear();
+        cModule *arpModule = check_and_cast<cModule *>(arp);
         arpModule->subscribe(completedARPResolutionSignal, this);
         arpModule->subscribe(failedARPResolutionSignal, this);
 

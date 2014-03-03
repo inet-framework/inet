@@ -41,6 +41,11 @@ module RSVP_LSR
         bool hasStatus = default(false);
         string peers;
         string routerId = default("auto");
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
+        *.tedModule = default(absPath(".ted"));
+        *.rsvpModule = default(absPath(".rsvp"));
+        *.libTableModule = default(absPath(".libTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     submodules:

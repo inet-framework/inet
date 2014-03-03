@@ -15,7 +15,7 @@
 //
 
 #include "NetworkProtocolBase.h"
-#include "InterfaceTableAccess.h"
+#include "ModuleAccess.h"
 #include "NetworkProtocolCommand_m.h"
 
 NetworkProtocolBase::NetworkProtocolBase() :
@@ -27,7 +27,7 @@ void NetworkProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        interfaceTable = InterfaceTableAccess().get(this);
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 }
 
 void NetworkProtocolBase::handleUpperCommand(cMessage* message)

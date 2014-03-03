@@ -28,6 +28,7 @@
 #include "PingPayload_m.h"
 #include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
+#include "ModuleAccess.h"
 
 Define_Module(ICMP);
 
@@ -162,12 +163,12 @@ bool ICMP::possiblyLocalBroadcast(const IPv4Address& addr, int interfaceId)
     if ((addr.getInt()&1) == 0)
         return false;
 
-    IIPv4RoutingTable *rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+    IIPv4RoutingTable *rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
     if (rt->isLocalBroadcastAddress(addr))
         return true;
 
     // if the input interface is unconfigured, we won't recognize network-directed broadcasts because we don't what network we are on
-    IInterfaceTable *ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (interfaceId != -1)
     {
         InterfaceEntry *ie = ift->getInterfaceById(interfaceId);

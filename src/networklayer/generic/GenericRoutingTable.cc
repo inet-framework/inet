@@ -50,7 +50,7 @@ void GenericRoutingTable::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         // get a pointer to the IInterfaceTable
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         const char * addressTypeString = par("addressType");
         if (!strcmp(addressTypeString, "mac"))
@@ -81,7 +81,7 @@ void GenericRoutingTable::initialize(int stage)
     {
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface IPv4 data structures.
-        IInterfaceTable *interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         for (int i=0; i<interfaceTable->getNumInterfaces(); ++i)
             configureInterface(interfaceTable->getInterface(i));
         configureLoopback();

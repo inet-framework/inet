@@ -20,6 +20,7 @@ module EthTestHost
         bool csmacdSupport = default(true);  // by default use CSMA/CD
         string macType = default(csmacdSupport ? "EtherMAC" : "EtherMACFullDuplex"); // ~EtherMAC or ~EtherMACFullDuplex
         string queueType = default(""); // DropTailQueue, DiffServQueue, or empty to use the internal queue
+        *.interfaceTableModule = "";
         @node();
     gates:
         inout ethg @labels(EtherFrame-conn);

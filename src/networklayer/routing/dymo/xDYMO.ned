@@ -47,8 +47,8 @@ simple xDYMO like IDYMO
         @display("i=block/routing");
 
         // context parameters
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
-        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string routingTableModule;
         string networkProtocolModule = default("^.networkLayer.ip");
 
         // 1. DYMO parameter group
@@ -70,7 +70,7 @@ simple xDYMO like IDYMO
         // string MAX_METRIC = default("");
         // double MAXTIME;
         int discoveryAttemptsMax = default(3); // DISCOVERY_ATTEMPTS_MAX
-		// int MTU;
+        // int MTU;
 
         // 4. DYMO parameter group
         bool appendInformation = default(true); //APPEND_INFORMATION;
@@ -99,12 +99,15 @@ module MultiDYMO like IDYMO
         bool enableIPv4 = default(true);
         bool enableIPv6 = default(true);
         bool enableGeneric = default(true);
-        *.interfaceTableModule = default("^.^.interfaceTable");
-        ipv4.routingTableModule = default("^.^.routingTable.ipv4");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string routingTableModule;
+
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        ipv4.routingTableModule = default(absPath(routingTableModule)  + ".ipv4");
         ipv4.networkProtocolModule = default("^.^.networkLayer.ipv4.ip");
-        ipv6.routingTableModule = default("^.^.routingTable.ipv6");
+        ipv6.routingTableModule = default(absPath(routingTableModule)  + ".ipv6");
         ipv6.networkProtocolModule = default("^.^.networkLayer.ipv6.ipv6");
-        generic.routingTableModule = default("^.^.routingTable.generic");
+        generic.routingTableModule = default(absPath(routingTableModule)  + ".generic");
         generic.networkProtocolModule = default("^.^.networkLayer.generic.gnp");
 
     gates:

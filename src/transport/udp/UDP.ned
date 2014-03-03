@@ -54,7 +54,7 @@ import inet.transport.IUDP;
 simple UDP like IUDP
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string icmpModule = default("^.networkLayer.icmp");
         string icmpv6Module = default("^.networkLayer.icmpv6");
         @display("i=block/transport");

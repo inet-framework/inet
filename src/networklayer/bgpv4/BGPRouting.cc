@@ -48,8 +48,8 @@ void BGPRouting::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // we must wait until IPv4RoutingTable is completely initialized
-        _rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        _inft = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        _rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        _inft = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         // read BGP configuration
         cXMLElement *bgpConfig = par("bgpConfig").xmlValue();
@@ -361,7 +361,7 @@ unsigned char BGPRouting::decisionProcess(const BGPUpdateMessage& msg, BGP::Rout
             OSPF::IPv4AddressRange  OSPFnetAddr;
             OSPFnetAddr.address = entry->getDestination();
             OSPFnetAddr.mask = entry->getNetmask();
-            OSPFRouting* ospf = findModuleByPath<OSPFRouting>(par("ospfRoutingModule"), this);
+            OSPFRouting* ospf = findModuleFromPar<OSPFRouting>(par("ospfRoutingModule"), this);
             InterfaceEntry *ie = entry->getInterface();
             if (!ie)
                 throw cRuntimeError("Model error: interface entry is NULL");
@@ -465,7 +465,7 @@ bool BGPRouting::checkExternalRoute(const IPv4Route* route)
 {
     IPv4Address OSPFRoute;
     OSPFRoute = route->getDestination();
-    OSPFRouting* ospf = findModuleByPath<OSPFRouting>(par("ospfRoutingModule"), this);
+    OSPFRouting* ospf = findModuleFromPar<OSPFRouting>(par("ospfRoutingModule"), this);
     bool returnValue = ospf->checkExternalRoute(OSPFRoute);
     simulation.setContext(this);
     return returnValue;

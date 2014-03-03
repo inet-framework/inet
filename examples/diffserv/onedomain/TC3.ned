@@ -31,8 +31,10 @@ import inet.networklayer.diffserv.TokenBucketMeter;
 //
 module TC3 like ITrafficConditioner
 {
-    @display("i=block/classifier");
-
+    parameters:
+        string interfaceTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        @display("i=block/classifier");
     gates:
         input in;
         output out;

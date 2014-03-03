@@ -43,9 +43,13 @@ module IdealWirelessNic like IWirelessNic
 {
     parameters:
         @display("i=block/ifcard;bgb=214,335;bgl=53");
+        string interfaceTableModule;
+        string powerSourceModule;
         double bitrate @unit("bps");
         string queueType = default("DropTailQueue");    // DropTailQueue, a Diffserv queue, etc.
         string radioType = default("IdealRadio");
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.powerSourceModule = default(absPath(powerSourceModule));
         **.bitrate = bitrate;
     gates:
         input upperLayerIn;

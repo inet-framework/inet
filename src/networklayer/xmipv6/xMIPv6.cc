@@ -112,7 +112,7 @@ void xMIPv6::initialize(int stage)
         statVectorHoTfromCN.setName("HoT from CN");
         statVectorCoTfromCN.setName("CoT from CN");*/
 
-        tunneling = check_and_cast<IPv6Tunneling *>(getModuleByPath(par("ipv6TunnelingModule"))); // access to tunneling module, 21.08.07 - CB
+        tunneling = getModuleFromPar<IPv6Tunneling>(par("ipv6TunnelingModule"), this); // access to tunneling module, 21.08.07 - CB
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
@@ -129,17 +129,17 @@ void xMIPv6::initialize(int stage)
         rt6->setIsHomeAgent(par("isHomeAgent").boolValue());
         rt6->setIsMobileNode(par("isMobileNode").boolValue());
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        ipv6nd = check_and_cast<IPv6NeighbourDiscovery *>(getModuleByPath(par("ipv6NeighbourDiscoveryModule"))); //Zarrar Yousaf 17.07.07
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        ipv6nd = getModuleFromPar<IPv6NeighbourDiscovery>(par("ipv6NeighbourDiscoveryModule"), this); //Zarrar Yousaf 17.07.07
 
         if (rt6->isMobileNode())
         {
-            bul = check_and_cast<BindingUpdateList *>(getModuleByPath(par("bindingUpdateListModule")));  // Zarrar Yousaf 31.07.07
+            bul = getModuleFromPar<BindingUpdateList>(par("bindingUpdateListModule"), this);  // Zarrar Yousaf 31.07.07
             bc = NULL;
         }
         else
         {
-            bc = check_and_cast<BindingCache *>(getModuleByPath(par("bindingCacheModule"))); // Zarrar Yousaf 31.07.07
+            bc = getModuleFromPar<BindingCache>(par("bindingCacheModule"), this); // Zarrar Yousaf 31.07.07
             bul = NULL;
         }
 

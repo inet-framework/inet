@@ -30,8 +30,8 @@ import inet.networklayer.common.IRoutingTable;
 simple IPv6RoutingTable like IRoutingTable
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
-        string ipv6TunnelingModule = default("^.iptuneling");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string ipv6TunnelingModule = default("^.networkLayer.iptunneling");
         @display("i=block/table");
         xml routes = default(xml("<routingTable/>"));
         bool isRouter = default(false);

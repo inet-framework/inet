@@ -34,8 +34,8 @@ import inet.networklayer.IManetRouting;
 simple AODVUU extends BaseRouting like IManetRouting
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");
-        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule;
+        string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
         string arpCacheModule = default("^.networkLayer.arp");
         @class(AODVUU);

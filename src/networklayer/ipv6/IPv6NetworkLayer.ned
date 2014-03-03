@@ -36,7 +36,14 @@ module IPv6NetworkLayer like INetworkLayer
 {
     parameters:
         bool xMIPv6Support = default(false);
-        *.routingTableModule = default("^.^.routingTable");
+        *.xmipv6Module = xMIPv6Support ? absPath(".mipv6support.xMobileIPv6") : "";
+        string interfaceTableModule;
+        string routingTableModule;
+        *.interfaceTableModule = default(absPath(interfaceTableModule));
+        *.routingTableModule = default(absPath(routingTableModule));
+        *.ipv6NeighbourDiscoveryModule = default(absPath(".neighbourDiscovery"));
+        *.icmpv6Module = default(absPath(".icmpv6"));
+        *.ipv6TunnelingModule = default(absPath(".iptunneling"));
         @display("i=block/fork");
     gates:
         input ifIn[] @labels(INetworkDatagram);

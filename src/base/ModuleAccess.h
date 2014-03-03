@@ -70,18 +70,47 @@ INET_API cModule *getContainingNode(cModule *from);
 INET_API cModule *findModuleUnderContainingNode(cModule *from);
 
 /**
- * Finds a module in the module tree, given by its absolute or relative path.
- * Returns the pointer to a module of type T
- * Returns NULL if the module was not found.
+ * Finds a module in the module tree, given by its absolute or relative path
+ * defined by 'par' parameter.
+ * Returns NULL if the 'par' parameter is empty.
+ * Returns the pointer to a module of type T or throws an error if module not found
+ * or type mismatch.
  */
 template <typename T>
-INET_API T *findModuleByPath(const char *path, cModule *from)
+INET_API T *findModuleFromPar(cPar& par, cModule *from)
 {
-    cModule *module = from->getModuleByPath(path);
-    return module ? check_and_cast<T*>(module) : NULL;
+    const char *path = par.stringValue();
+    if (path && *path)
+    {
+        cModule *mod = from->getModuleByPath(path);
+        if (!mod)
+            throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+        T* m = dynamic_cast<T*>(mod);
+        if (!m)
+            throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
+        return m;
+    }
+    return NULL;
 }
 
-
+/**
+ * Gets a module in the module tree, given by its absolute or relative path
+ * defined by 'par' parameter.
+ * Returns the pointer to a module of type T or throws an error if module not found
+ * or type mismatch.
+ */
+template <typename T>
+INET_API T *getModuleFromPar(cPar& par, cModule *from)
+{
+    const char *path = par.stringValue();
+    cModule *mod = from->getModuleByPath(path);
+    if (!mod)
+        throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
+    T* m = dynamic_cast<T*>(mod);
+    if (!m)
+        throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
+    return m;
+}
 
 /**
  * Finds and returns the pointer to a module of type T and name N.

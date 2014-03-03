@@ -54,6 +54,8 @@ module InternetCloud
         @labels(node,ethernet-node);
         @display("i=misc/cloud");
         int numPcapRecorders = default(0); // no of PcapRecorders.
+        *.interfaceTableModule = default(absPath(".interfaceTable"));
+        *.routingTableModule = default(absPath(".routingTable"));
     gates:
         inout pppg[] @labels(PPPFrame-conn);
     types:
@@ -62,6 +64,12 @@ module InternetCloud
             parameters:
                 @display("i=block/fork");
                 bool proxyARP = default(true);
+                string interfaceTableModule;
+                string routingTableModule;
+                *.interfaceTableModule = default(absPath(interfaceTableModule));
+                *.routingTableModule = default(absPath(routingTableModule));
+                *.arpCacheModule = default(absPath(".arp"));
+                *.icmpModule = default(absPath(".icmp"));
             gates:
                 input ifIn[] @labels(IPDatagram);
                 output ifOut[];

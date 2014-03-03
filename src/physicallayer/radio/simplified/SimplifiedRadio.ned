@@ -29,8 +29,8 @@ import inet.physicallayer.radio.common.RadioBase;
 simple SimplifiedRadio extends RadioBase
 {
     parameters:
-        string batteryModule = default("^.battery");
-        string obstacleControlModule = default("^.obstacles");
+        string powerSourceModule;
+        string obstacleControlModule = default("");     // "obstacles"
         int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211
         double carrierFrequency @unit("Hz") = default(2.4GHz);
         double bitrate @unit("bps");

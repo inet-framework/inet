@@ -78,7 +78,7 @@ void IPv4RoutingTable::initialize(int stage)
         host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
         host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         IPForward = par("IPForward").boolValue();
         multicastForward = par("forwardMulticast");

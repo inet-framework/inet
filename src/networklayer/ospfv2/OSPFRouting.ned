@@ -19,8 +19,8 @@ package inet.networklayer.ospfv2;
 simple OSPFRouting
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");
-        string routingTableModule = default("^.routingTable");
+        string interfaceTableModule;
+        string routingTableModule;
         xml ospfConfig; // xml containing the full OSPF AS configuration
 
         // default values for attributes of interface xml entries:

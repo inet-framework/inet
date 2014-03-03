@@ -57,6 +57,6 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 simple MatrixCloudDelayer like ICloudDelayer
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;   // The path to the InterfaceTable module
         xml config;
 }

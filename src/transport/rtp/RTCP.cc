@@ -222,7 +222,7 @@ void RTCP::readRet(cPacket *sifpIn)
 void RTCP::createSocket()
 {
     _udpSocket.bind(_port);  //XXX this will fail if this function is invoked multiple times; not sure that may (or is expected to) happen
-    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
+    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
     _udpSocket.joinLocalMulticastGroups(mgl); //TODO make it parameter-dependent
     connectRet();
 }

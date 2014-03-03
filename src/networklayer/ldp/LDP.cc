@@ -113,10 +113,10 @@ void LDP::initialize(int stage)
         holdTime = par("holdTime").doubleValue();
         helloInterval = par("helloInterval").doubleValue();
 
-        ift = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
-        lt = check_and_cast<LIBTable *>(getModuleByPath(par("libTableModule")));
-        tedmod = check_and_cast<TED *>(getModuleByPath(par("tedModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        lt = getModuleFromPar<LIBTable>(par("libTableModule"), this);
+        tedmod = getModuleFromPar<TED>(par("tedModule"), this);
 
         WATCH_VECTOR(myPeers);
         WATCH_VECTOR(fecUp);

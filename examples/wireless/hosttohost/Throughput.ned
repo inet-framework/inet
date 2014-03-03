@@ -31,6 +31,8 @@ module ThroughputClient
     parameters:
         @display("i=device/wifilaptop");
         @node();
+        *.interfaceTableModule = "";
+        *.powerSourceModule = "";
     gates:
         input radioIn @directIn;
 
@@ -59,6 +61,8 @@ module ThroughputServer
     parameters:
         @display("i=device/wifilaptop");
         @node();
+        *.interfaceTableModule = "";
+        *.powerSourceModule = "";
     gates:
         input radioIn @directIn;
 

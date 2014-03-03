@@ -92,7 +92,7 @@ void SimplifiedRadio::initialize(int stage)
 
         WATCH(noiseLevel);
 
-        obstacles = findModuleByPath<ObstacleControl>(par("obstacleControlModule"), this);
+        obstacles = findModuleFromPar<ObstacleControl>(par("obstacleControlModule"), this);
         if (obstacles)
             EV << "Found ObstacleControl" << endl;
 

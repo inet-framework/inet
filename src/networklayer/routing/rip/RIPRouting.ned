@@ -63,11 +63,11 @@ package inet.networklayer.routing.rip;
 simple RIPRouting
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
         @display("i=block/network2");
 
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string routingTableModule;
         string mode @enum("RIPv2", "RIPng") = default("RIPv2");
-        string routingTableModule = default("^.routingTable");
         xml ripConfig = default(xml("<config><interface metric='1'/></config>"));
 
         int udpPort = (mode == "RIPng" ? 521 : 520);

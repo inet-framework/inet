@@ -16,6 +16,7 @@
 #include "DSDVhello_m.h"//created by opp_msgc 3.3 from DSDVhello.msg
 #include "DSDV_2.h"
 #include "IPSocket.h"
+#include "ModuleAccess.h"
 
 #define NOforwardHello
 
@@ -38,7 +39,7 @@ void DSDV_2::initialize(int stage)
         IPSocket socket(gate("to_ip"));
         socket.registerProtocol(IP_PROT_MANET);
 
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         /* Search the 80211 interface */
         int  num_80211 = 0;
         InterfaceEntry *   ie;
@@ -62,7 +63,7 @@ void DSDV_2::initialize(int stage)
             interface80211ptr = i_face;
         else
             opp_error("DSDV has found %i 80211 interfaces", num_80211);
-        rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         if (par("manetPurgeRoutingTables").boolValue())
         {
             IPv4Route *entry;
@@ -153,9 +154,9 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             //pointer to interface and routing table
             if (!ift)
-                ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+                ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
             if (!rt)
-                rt = check_and_cast<IIPv4RoutingTable *>(getModuleByPath(par("routingTableModule")));
+                rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
 
             rt->purge();
 
@@ -246,7 +247,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             // int numIntf = 0;
             if (ift!=NULL)
-                ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+                ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
             //InterfaceEntry *ie = NULL;
             //for (int k=0; k<ift->getNumInterfaces(); k++)
             //  if (!ift->getInterface(k)->isLoopback())
@@ -289,7 +290,7 @@ void DSDV_2::handleMessage(cMessage *msg)
 
             //pointer to interface and routing table
             //rt = RoutingTableAccess_DSDV().get(); // IPv4RoutingTable *rt = nodeInfo[i].rt;
-            //ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));//InterfaceTable *ift = nodeInfo[i].ift;
+            //ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);//InterfaceTable *ift = nodeInfo[i].ift;
 
 
             //reads DSDV hello message fields

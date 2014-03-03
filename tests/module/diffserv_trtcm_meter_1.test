@@ -10,6 +10,9 @@ import inet.networklayer.diffserv.TwoRateThreeColorMeter;
 
 network TestNetwork
 {
+  parameters:
+    *.interfaceTableModule = "";
+
   submodules:
     app: MeterTestApp { colors = "Green Yellow Red"; }
     meter: TwoRateThreeColorMeter;

@@ -162,8 +162,8 @@ void RIPRouting::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         host = getContainingNode(this);
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
         socket.setOutputGate(gate("udpOut"));
 
         const char *m = par("mode");

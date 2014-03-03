@@ -36,7 +36,6 @@
 #include "ModuleAccess.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"
-#include "InterfaceTableAccess.h"
 
 using std::make_pair;
 
@@ -81,7 +80,7 @@ void WiseRoute::initialize(int stage)
         AddressResolver addressResolver;
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 
-        IInterfaceTable* interfaceTable = InterfaceTableAccess().get(this);
+        IInterfaceTable* interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         myNetwAddr = interfaceTable->getInterface(1)->getNetworkAddress();
 
         // only schedule a flood of the node is a sink!!

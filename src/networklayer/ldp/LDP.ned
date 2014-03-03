@@ -37,10 +37,10 @@ package inet.networklayer.ldp;
 simple LDP
 {
     parameters:
-        string interfaceTableModule = default("^.interfaceTable");   // The path to the InterfaceTable module
-        string routingTableModule = default("^.routingTable");
-        string libTableModule = default("^.libTable");
-        string tedModule = default("^.ted");
+        string interfaceTableModule;   // The path to the InterfaceTable module
+        string routingTableModule;
+        string libTableModule;
+        string tedModule;
         double holdTime @unit("s") = default(15s);
         double helloInterval @unit("s") = default(5s);
         string dataTransferMode @enum("bytecount", "object", "bytestream") = default("bytecount"); // TCP data transfer mode

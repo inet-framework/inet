@@ -147,6 +147,8 @@ import inet.networklayer.diffserv.MultiFieldClassifier;
 
 network TestNetwork
 {
+  parameters:
+    *.interfaceTableModule = "";
   submodules:
     app: TestApp;
     classifier: MultiFieldClassifier { filters = xmldoc("filters.xml"); }

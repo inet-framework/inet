@@ -119,7 +119,7 @@ import inet.linklayer.IEtherMAC;
 simple EtherMACFullDuplex like IEtherMAC
 {
     parameters:
-        string interfaceTableModule = default("^.^.interfaceTable");   // The path to the InterfaceTable module
+        string interfaceTableModule;        // The path to the InterfaceTable module
         bool promiscuous = default(false);  // if true, all packets are received, otherwise only the
                                             // ones with matching destination MAC address
         string address = default("auto");   // MAC address as hex string (12 hex digits), or

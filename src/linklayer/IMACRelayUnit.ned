@@ -47,6 +47,7 @@ package inet.linklayer;
 moduleinterface IMACRelayUnit
 {
     parameters:
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string addressTableFile;  // set to empty string if not used
         int addressTableSize; // max size of address table
         double agingTime @unit("s"); // max idle time for address table entries
@@ -60,6 +61,7 @@ moduleinterface IMACRelayUnit
 simple MACRelayUnit_None like IMACRelayUnit
 {
     parameters:
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string addressTableFile = default("");  // see ~IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit

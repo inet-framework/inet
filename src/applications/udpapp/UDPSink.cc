@@ -18,6 +18,8 @@
 
 #include "AddressResolver.h"
 #include "UDPSink.h"
+
+#include "ModuleAccess.h"
 #include "UDPControlInfo_m.h"
 
 
@@ -99,7 +101,8 @@ void UDPSink::setSocketOptions()
     if (receiveBroadcast)
         socket.setBroadcast(true);
 
-    socket.joinLocalMulticastGroups();
+    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
+    socket.joinLocalMulticastGroups(mgl);
 
     // join multicastGroup
     const char *groupAddr = par("multicastGroup");
@@ -117,8 +120,6 @@ void UDPSink::processStart()
     socket.setOutputGate(gate("udpOut"));
     socket.bind(localPort);
     setSocketOptions();
-    MulticastGroupList mgl = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule"))) -> collectMulticastGroups();
-    socket.joinLocalMulticastGroups(mgl);
 
     if (stopTime >= SIMTIME_ZERO)
     {

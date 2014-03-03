@@ -46,7 +46,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
     }
     else if (stage == INITSTAGE_NETWORK_LAYER)
     {
-        IInterfaceTable *ift = findModuleByPath<IInterfaceTable>(par("interfaceTableModule"), this);
+        IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         PIR = parseInformationRate(par("pir"), "pir", ift, *this, 0);
         CIR = parseInformationRate(par("cir"), "cir", ift, *this, 0);
         lastUpdateTime = simTime();

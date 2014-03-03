@@ -85,9 +85,9 @@ void xDYMO::initialize(int stage)
         // context
         host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
-        interfaceTable = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTableModule")));
-        networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolModule")));
+        interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        routingTable = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
+        networkProtocol = getModuleFromPar<INetfilter>(par("networkProtocolModule"), this);
         // internal
         expungeTimer = new cMessage("ExpungeTimer");
     }

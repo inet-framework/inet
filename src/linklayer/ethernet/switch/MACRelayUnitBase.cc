@@ -20,7 +20,6 @@
 #include "EtherFrame_m.h"
 #include "EtherMACBase.h"
 #include "Ethernet.h"
-#include "InterfaceTableAccess.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
@@ -235,6 +234,7 @@ void MACRelayUnitBase::updateTableWithAddress(MACAddress& address, int portno)
     }
 }
 
+
 int MACRelayUnitBase::getPortForAddress(MACAddress& address)
 {
     AddressTable::iterator iter = addresstable.find(address);
@@ -312,7 +312,7 @@ void MACRelayUnitBase::sendPauseFrame(int portno, int pauseUnits)
 {
     EV << "Creating and sending PAUSE frame on port " << portno << " with duration=" << pauseUnits << " units\n";
 
-    IInterfaceTable *ift = InterfaceTableAccess().get();
+    IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     InterfaceEntry *ie = ift->getInterfaceByNetworkLayerGateIndex(portno);
     ASSERT(ie);
 

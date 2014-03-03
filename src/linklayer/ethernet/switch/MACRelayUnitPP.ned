@@ -37,6 +37,7 @@ import inet.linklayer.IMACRelayUnit;
 simple MACRelayUnitPP like IMACRelayUnit
 {
     parameters:
+        string interfaceTableModule;   // The path to the InterfaceTable module
         string addressTableFile = default("");  // see ~IMACRelayUnit
         int addressTableSize = default(100); // see ~IMACRelayUnit
         double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit
