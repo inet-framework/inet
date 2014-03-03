@@ -32,7 +32,6 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
-    virtual void finish();
 
     virtual void handleMessage(cMessage *msg);
     virtual void handleMessageWhenDown(cMessage *msg);
