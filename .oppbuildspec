@@ -1,4 +1,4 @@
 <buildspec version="4.0">
-<dir makemake-options="--deep --make-so -o inet -O out -pINET --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="src" type="makemake"/>
+<dir makemake-options="--deep --make-so -o inet -O out -pINET -lcudart --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags -- $O/physicallayer/radio/parallel/CUDARadioChannel.o" path="src" type="makemake"/>
 <dir makemake-options="--deep --nolink -O out --meta:recurse --meta:auto-include-path --meta:export-library --meta:use-exported-libs --meta:feature-cflags --meta:feature-ldflags" path="." type="custom"/>
 </buildspec>
