@@ -26,6 +26,7 @@
 #include "ILifecycle.h"
 #include "UDPControlInfo.h"
 
+class IInterfaceTable;
 class IPv4ControlInfo;
 class IPv6ControlInfo;
 class ICMP;
@@ -96,6 +97,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
     // other state vars
     ushort lastEphemeralPort;
+    IInterfaceTable *ift;
     ICMP *icmp;
     ICMPv6 *icmpv6;
 

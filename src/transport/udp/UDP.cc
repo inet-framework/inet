@@ -113,6 +113,7 @@ UDP::SockDesc::SockDesc(int sockId_, int appGateIndex_) {
 UDP::UDP()
 {
     isOperational = false;
+    ift = NULL;
     icmp = NULL;
     icmpv6 = NULL;
 }
@@ -132,6 +133,7 @@ void UDP::initialize(int stage)
         WATCH_MAP(socketsByPortMap);
 
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         icmp = NULL;
         icmpv6 = NULL;
 
@@ -250,7 +252,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPBlockMulticastSourcesCommand*>(ctrl))
             {
                 UDPBlockMulticastSourcesCommand *cmd = (UDPBlockMulticastSourcesCommand*)ctrl;
-                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
@@ -259,7 +261,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPUnblockMulticastSourcesCommand*>(ctrl))
             {
                 UDPUnblockMulticastSourcesCommand *cmd = (UDPUnblockMulticastSourcesCommand*)ctrl;
-                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
@@ -268,7 +270,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPJoinMulticastSourcesCommand*>(ctrl))
             {
                 UDPJoinMulticastSourcesCommand *cmd = (UDPJoinMulticastSourcesCommand*)ctrl;
-                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
@@ -277,7 +279,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPLeaveMulticastSourcesCommand*>(ctrl))
             {
                 UDPLeaveMulticastSourcesCommand *cmd = (UDPLeaveMulticastSourcesCommand*)ctrl;
-                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
@@ -286,7 +288,7 @@ void UDP::processCommandFromApp(cMessage *msg)
             else if (dynamic_cast<UDPSetMulticastSourceFilterCommand*>(ctrl))
             {
                 UDPSetMulticastSourceFilterCommand *cmd = (UDPSetMulticastSourceFilterCommand*)ctrl;
-                InterfaceEntry *ie = InterfaceTableAccess().get(this)->getInterfaceById(cmd->getInterfaceId());
+                InterfaceEntry *ie = ift->getInterfaceById(cmd->getInterfaceId());
                 std::vector<Address> sourceList;
                 for (int i = 0; i < (int)cmd->getSourceListArraySize(); i++)
                     sourceList.push_back(cmd->getSourceList(i));
@@ -915,7 +917,6 @@ void UDP::setReuseAddress(SockDesc *sd, bool reuseAddr)
 
 void UDP::joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds)
 {
-    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     int multicastAddressesLen = multicastAddresses.size();
     int interfaceIdsLen = interfaceIds.size();
     for (int k = 0; k < multicastAddressesLen; k++)
@@ -981,7 +982,6 @@ void UDP::addMulticastAddressToInterface(InterfaceEntry *ie, const Address& mult
 
 void UDP::leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses)
 {
-    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     std::vector<Address> empty;
 
     for (unsigned int i = 0; i < multicastAddresses.size(); i++)
