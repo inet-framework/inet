@@ -27,7 +27,7 @@
  * Represents an detailed radio frame. More info in the DetailedRadioFrame.msg file
  * (and the documentation generated from it).
  */
-class INET_API DetailedRadioFrame : public DetailedRadioFrame_Base, public IRadioFrame
+class INET_API DetailedRadioFrame : public DetailedRadioFrame_Base, public OldIRadioFrame
 {
   public:
     DetailedRadioFrame(const char *name = NULL, int kind = 0) : DetailedRadioFrame_Base(name, kind) {}

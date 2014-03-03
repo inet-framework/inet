@@ -18,8 +18,8 @@ Decider80211MultiChannel::~Decider80211MultiChannel()
 DeciderResult* Decider80211MultiChannel::createResult(const DetailedRadioFrame* frame) const {
     DeciderResult80211* result = static_cast<DeciderResult80211*>(Decider80211::createResult(frame));
 
-    IRadio *radio = check_and_cast<IRadio *>(phy);
-	if(result->isSignalCorrect() && frame->getChannel() != radio->getRadioChannel()) {
+    OldIRadio *radio = check_and_cast<OldIRadio *>(phy);
+	if(result->isSignalCorrect() && frame->getChannel() != radio->getOldRadioChannel()) {
 		EV << "Channel changed during reception. packet is lost!\n";
 		DeciderResult80211* oldResult = result;
 

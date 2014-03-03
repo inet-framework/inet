@@ -81,7 +81,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
 		, reservedMobileSlots(0)
 		, macQueue()
         , radio(NULL)
-        , radioTransmissionState(IRadio::RADIO_TRANSMISSION_STATE_UNDEFINED)
+        , transmissionState(OldIRadio::TRANSMISSION_STATE_UNDEFINED)
 		, queueLength(0)
 		, wakeup(NULL)
 		, timeout(NULL)
@@ -194,8 +194,8 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
         MacQueue macQueue;
 
         /** @brief The radio. */
-        IRadio *radio;
-        IRadio::RadioTransmissionState radioTransmissionState;
+        OldIRadio *radio;
+        OldIRadio::TransmissionState transmissionState;
 
         /** @brief length of the queue*/
         unsigned queueLength;

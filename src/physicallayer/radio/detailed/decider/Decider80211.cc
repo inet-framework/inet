@@ -25,7 +25,7 @@ Decider80211::Decider80211( DeciderToPhyInterface* phy
     , snrThreshold(0)
     , centerFrequency(0)
 {
-    int radioChannel = dynamic_cast<IRadio*>(phy)->getRadioChannel();
+    int radioChannel = dynamic_cast<OldIRadio*>(phy)->getOldRadioChannel();
 	assert(1 <= radioChannel);
 	assert(radioChannel <= 14);
 	centerFrequency = CENTER_FREQUENCIES[radioChannel];

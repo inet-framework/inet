@@ -23,20 +23,15 @@
 /**
  * This purely virtual interface provides an abstraction for different radio signals.
  */
+// TODO: obsolete, delete
 class INET_API IRadioSignal
 {
-  public:
-    virtual ~IRadioSignal() { }
+    public:
+        virtual ~IRadioSignal() { }
 
-//    virtual Coord getTransmissionBeginPosition() const = 0;
-    virtual simtime_t getTransmissionBeginTime() const = 0;
+        virtual simtime_t getTransmissionBeginTime() const = 0;
 
-//    virtual Coord getTransmissionEndPosition() const = 0;
-    virtual simtime_t getTransmissionEndTime() const = 0;
-
-//    virtual void *getTransmissionPower() const = 0;
-
-//    virtual void *getAttenuations() const = 0;
+        virtual simtime_t getTransmissionEndTime() const = 0;
 };
 
 #endif

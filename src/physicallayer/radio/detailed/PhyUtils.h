@@ -249,12 +249,12 @@ public:
 	 * define a factory method like this instead of an public constructor.
 	 */
 	static MiximRadio* createNewRadio(bool recordStats = false,
-                                     int initialState = IRadio::RADIO_MODE_OFF,
+                                     int initialState = OldIRadio::RADIO_MODE_OFF,
                                      Argument::mapped_type_cref minAtt = Argument::MappedOne,
                                      Argument::mapped_type_cref maxAtt = Argument::MappedZero,
                                      int nbChannels=1)
 	{
-		return new MiximRadio(IRadio::RADIO_MODE_SWITCHING + 1,
+		return new MiximRadio(OldIRadio::RADIO_MODE_SWITCHING + 1,
                                  recordStats,
                                  initialState,
                                  minAtt, maxAtt,
@@ -353,7 +353,7 @@ protected:
 	 */
 	MiximRadio(int numRadioStates,
 		  bool recordStats,
-		  int initialState = IRadio::RADIO_MODE_OFF,
+		  int initialState = OldIRadio::RADIO_MODE_OFF,
 		  Argument::mapped_type_cref minAtt = Argument::MappedOne, Argument::mapped_type_cref maxAtt = Argument::MappedZero,
 		  int nbChannels = 1);
 
@@ -371,7 +371,7 @@ protected:
 	 */
 	virtual Argument::mapped_type_cref mapStateToAtt(int state)
 	{
-		if (state == IRadio::RADIO_MODE_RECEIVER) {
+		if (state == OldIRadio::RADIO_MODE_RECEIVER) {
 			return minAtt;
 		}
 		else {

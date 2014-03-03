@@ -34,7 +34,7 @@ void TestMacLayer::initialize(int stage) {
 		phy = testPhy;
 
 		phy->subscribe(IRadio::radioModeChangedSignal, this);
-		phy->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+		phy->subscribe(IRadio::transmissionStateChangedSignal, this);
 	}
 }
 
@@ -316,7 +316,7 @@ void TestMacLayer::testRun6(int stage, const cMessage* msg)
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 0.5, "phy0");
 		assertSignal("RadioTransmissionStateChanged signal from phy",
-		              IRadio::radioTransmissionStateChangedSignal,
+		              IRadio::transmissionStateChangedSignal,
 					  simTime() + 0.5, "mac0");
 		testForMessage("4.", BasePhyLayer::AIR_FRAME, simTime() + 0.5, "phy1");
 
@@ -372,7 +372,7 @@ void TestMacLayer::testRun7(int stage, const cMessage* /*msg*/)
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 5.0, "phy0");
 		assertSignal("RadioTransmissionStateChanged signal from phy",
-                      IRadio::radioTransmissionStateChangedSignal,
+                      IRadio::transmissionStateChangedSignal,
 					  simTime() + 5.0, "mac0");
 
 		testForMessage("1.2", TEST_MACPKT, simTime(), "phy0");
@@ -406,7 +406,7 @@ void TestMacLayer::testRun7(int stage, const cMessage* /*msg*/)
 					  BasePhyLayer::TX_OVER,
 					  simTime() + 5.0, "phy2");
 		assertSignal("RadioTransmissionStateChanged signal from phy",
-		              IRadio::radioTransmissionStateChangedSignal,
+		              IRadio::transmissionStateChangedSignal,
 					  simTime() + 5.0, "mac2");
 
 		testForMessage("1.5.2", TEST_MACPKT, simTime(), "phy2");
@@ -491,7 +491,7 @@ void TestMacLayer::testSending1(int stage, const cMessage* /*lastMsg*/) {
 		waitForMessage("First process of AirFrame at Decider", BasePhyLayer::AIR_FRAME, simTime(), "decider3");
 
 		assertMessage("Transmission over message at phy", BasePhyLayer::TX_OVER, simTime() + 1.0, "phy0");
-		assertSignal("RadioTransmissionStateChanged signal from phy", IRadio::radioTransmissionStateChangedSignal, simTime() + 1.0);
+		assertSignal("RadioTransmissionStateChanged signal from phy", IRadio::transmissionStateChangedSignal, simTime() + 1.0);
 		break;
 	}
 	case 2:

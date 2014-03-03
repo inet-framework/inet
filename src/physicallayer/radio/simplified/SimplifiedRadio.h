@@ -72,7 +72,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess
      * reach us in the future - thus they are on the air - will be
      * received correctly.
      */
-    virtual void setRadioChannel(int radioChannel);
+    virtual void setOldRadioChannel(int radioChannel);
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 

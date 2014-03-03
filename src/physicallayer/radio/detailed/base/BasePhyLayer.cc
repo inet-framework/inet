@@ -744,7 +744,7 @@ void BasePhyLayer::finishRadioSwitching()
 
 void BasePhyLayer::setRadioMode(RadioMode radioMode) {
     Enter_Method_Silent();
-    if (radioMode == IRadio::RADIO_MODE_TRANSCEIVER)
+    if (radioMode == OldIRadio::RADIO_MODE_TRANSCEIVER)
         throw cRuntimeError("Transceiver radio mode is not supported");
     setRadioState(radioMode);
 }
@@ -783,37 +783,37 @@ ChannelState BasePhyLayer::getChannelState() const {
 
 void BasePhyLayer::updateTransceiverState() {
     // reception state
-    RadioReceptionState newRadioReceptionState;
+    ReceptionState newRadioReceptionState;
     ChannelState channelState = decider->getChannelState();
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
-        newRadioReceptionState = RADIO_RECEPTION_STATE_UNDEFINED;
+        newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (channelState.isReceiving())
-        newRadioReceptionState = RADIO_RECEPTION_STATE_RECEIVING;
+        newRadioReceptionState = RECEPTION_STATE_RECEIVING;
     else if (false) // NOTE: synchronization is not modeled in ideal radio
-        newRadioReceptionState = RADIO_RECEPTION_STATE_SYNCHRONIZING;
+        newRadioReceptionState = RECEPTION_STATE_SYNCHRONIZING;
     else if (channelState.isBusy())
-        newRadioReceptionState = RADIO_RECEPTION_STATE_BUSY;
+        newRadioReceptionState = RECEPTION_STATE_BUSY;
     else
-        newRadioReceptionState = RADIO_RECEPTION_STATE_IDLE;
-    if (radioReceptionState != newRadioReceptionState)
+        newRadioReceptionState = RECEPTION_STATE_IDLE;
+    if (receptionState != newRadioReceptionState)
     {
-        EV << "Changing radio reception state from " << getRadioReceptionStateName(radioReceptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
-        radioReceptionState = newRadioReceptionState;
-        emit(radioReceptionStateChangedSignal, newRadioReceptionState);
+        EV << "Changing radio reception state from " << getRadioReceptionStateName(receptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
+        receptionState = newRadioReceptionState;
+        emit(receptionStateChangedSignal, newRadioReceptionState);
     }
     // transmission state
-    RadioTransmissionState newRadioTransmissionState;
+    TransmissionState newRadioTransmissionState;
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_UNDEFINED;
+        newRadioTransmissionState = TRANSMISSION_STATE_UNDEFINED;
     else if (txOverTimer->isScheduled())
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_TRANSMITTING;
+        newRadioTransmissionState = TRANSMISSION_STATE_TRANSMITTING;
     else
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_IDLE;
-    if (radioTransmissionState != newRadioTransmissionState)
+        newRadioTransmissionState = TRANSMISSION_STATE_IDLE;
+    if (transmissionState != newRadioTransmissionState)
     {
-        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(radioTransmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
-        radioTransmissionState = newRadioTransmissionState;
-        emit(radioTransmissionStateChangedSignal, newRadioTransmissionState);
+        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(transmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
+        transmissionState = newRadioTransmissionState;
+        emit(transmissionStateChangedSignal, newRadioTransmissionState);
     }
 }
 
@@ -824,7 +824,7 @@ long BasePhyLayer::getPhyHeaderLength() const {
 	return headerLength;
 }
 
-void BasePhyLayer::setRadioChannel(int newRadioChannel) {
+void BasePhyLayer::setOldRadioChannel(int newRadioChannel) {
     Enter_Method_Silent();
 	if (newRadioChannel != radioChannel)
 	{
@@ -860,7 +860,7 @@ void BasePhyLayer::getChannelInfo(simtime_t_cref from, simtime_t_cref to, AirFra
 			}
 		};
 
-		airframe_filter_channel_fctr fctrFilterChannel(getRadioChannel());
+		airframe_filter_channel_fctr fctrFilterChannel(getOldRadioChannel());
 		channelInfo.getAirFrames(from, to, out, &fctrFilterChannel);
 	}
 }

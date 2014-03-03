@@ -92,7 +92,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     bool useModulationParameters;
     bool prioritizeMulticast;
   protected:
-    IRadio::RadioTransmissionState radioTransmissionState;
+    OldIRadio::TransmissionState transmissionState;
     /**
      * @name Configuration parameters
      * These are filled in during the initialization phase and not supposed to change afterwards.
@@ -335,7 +335,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     /** XXX Remember for which AC we wait for ACK. */
     //int ACKcurrentAC;
 
-    IRadio *radio;
+    OldIRadio *radio;
 
     Ieee80211DataOrMgmtFrame *fr;
 

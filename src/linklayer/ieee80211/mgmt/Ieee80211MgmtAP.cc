@@ -65,7 +65,7 @@ void Ieee80211MgmtAP::initialize(int stage)
         //TBD fill in supportedRates
 
         // subscribe for notifications
-        getParentModule()->getSubmodule("radio")->subscribe(IRadio::radioChannelChangedSignal, this);
+        getParentModule()->getSubmodule("radio")->subscribe(OldIRadio::radioChannelChangedSignal, this);
 
         // start beacon timer (randomize startup time)
         beaconTimer = new cMessage("beaconTimer");
@@ -116,7 +116,7 @@ void Ieee80211MgmtAP::handleCommand(int msgkind, cObject *ctrl)
 void Ieee80211MgmtAP::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioChannelChangedSignal)
+    if (signalID == OldIRadio::radioChannelChangedSignal)
     {
         EV << "updating channel number\n";
         channelNumber = value;

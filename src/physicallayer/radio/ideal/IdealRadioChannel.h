@@ -38,7 +38,7 @@ class INET_API IdealRadioChannel : public RadioChannelBase
     struct RadioEntry
     {
         cModule *radioModule;   // the module that registered this radio interface
-        IRadio *radio;          // the radio interface
+        OldIRadio *radio;          // the radio interface
     };
 
   protected:

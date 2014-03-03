@@ -214,8 +214,8 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     MACAddress address;
 
     /** @brief The radio. */
-    IRadio *radio;
-    IRadio::RadioTransmissionState radioTransmissionState;
+    OldIRadio *radio;
+    OldIRadio::TransmissionState transmissionState;
 
     /** @brief Maximum time between a packet and its ACK
      *

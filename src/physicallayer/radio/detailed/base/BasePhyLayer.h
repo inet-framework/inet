@@ -459,7 +459,7 @@ public:
 	/*@{ */
     virtual void setRadioMode(RadioMode radioMode);
 
-    virtual void setRadioChannel(int radioChannel);
+    virtual void setOldRadioChannel(int radioChannel);
 
 	/**
 	 * @brief Returns the current state the radio is in.

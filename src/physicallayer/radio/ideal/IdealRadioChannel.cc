@@ -51,7 +51,7 @@ IdealRadioChannel::RadioEntry *IdealRadioChannel::registerRadio(cModule *radioMo
     if (maxTransmissionRange < idealRadio->getTransmissionRange())
         maxTransmissionRange = idealRadio->getTransmissionRange();
     RadioEntry radioEntry;
-    IRadio *radio = check_and_cast<IRadio *>(radioModule);
+    OldIRadio *radio = check_and_cast<OldIRadio *>(radioModule);
     radioEntry.radioModule = radioModule;
     radioEntry.radio = radio;
     radios.push_back(radioEntry);

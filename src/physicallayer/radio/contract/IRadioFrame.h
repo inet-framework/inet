@@ -24,12 +24,12 @@
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
  */
-class INET_API IRadioFrame : public IPhysicalLayerFrame
+class INET_API OldIRadioFrame : public IPhysicalLayerFrame
 {
-  public:
-    virtual ~IRadioFrame() { }
+    public:
+        virtual ~OldIRadioFrame() { }
 
-    virtual IRadioSignal *getRadioSignal() = 0;
+        virtual IRadioSignal *getRadioSignal() = 0;
 };
 
 #endif

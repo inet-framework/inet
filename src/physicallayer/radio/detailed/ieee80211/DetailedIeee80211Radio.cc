@@ -41,7 +41,7 @@ DetailedRadioSignal *DetailedIeee80211Radio::createSignal(simtime_t_cref start, 
 
     //create and set tx power mapping
     // TODO: channel
-    double centerFreq = CENTER_FREQUENCIES[getRadioChannel()];
+    double centerFreq = CENTER_FREQUENCIES[getOldRadioChannel()];
     ConstMapping *txPowerMapping
             = createSingleFrequencyMapping( start, end,
                                             centerFreq, 11.0e6,

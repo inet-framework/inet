@@ -17,52 +17,52 @@
 
 #include "IRadio.h"
 
-simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
-simsignal_t IRadio::radioReceptionStateChangedSignal = cComponent::registerSignal("radioReceptionStateChanged");
-simsignal_t IRadio::radioTransmissionStateChangedSignal = cComponent::registerSignal("radioTransmissionStateChanged");
-simsignal_t IRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
+simsignal_t OldIRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
+simsignal_t OldIRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");
+simsignal_t OldIRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
+simsignal_t OldIRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
-cEnum *IRadio::radioModeEnum = NULL;
-cEnum *IRadio::radioReceptionStateEnum = NULL;
-cEnum *IRadio::radioTransmissionStateEnum = NULL;
+cEnum *OldIRadio::radioModeEnum = NULL;
+cEnum *OldIRadio::receptionStateEnum = NULL;
+cEnum *OldIRadio::transmissionStateEnum = NULL;
 
 Register_Enum(RadioMode,
-              (IRadio::RADIO_MODE_OFF,
-               IRadio::RADIO_MODE_SLEEP,
-               IRadio::RADIO_MODE_RECEIVER,
-               IRadio::RADIO_MODE_TRANSMITTER,
-               IRadio::RADIO_MODE_TRANSCEIVER,
-               IRadio::RADIO_MODE_SWITCHING));
+              (OldIRadio::RADIO_MODE_OFF,
+               OldIRadio::RADIO_MODE_SLEEP,
+               OldIRadio::RADIO_MODE_RECEIVER,
+               OldIRadio::RADIO_MODE_TRANSMITTER,
+               OldIRadio::RADIO_MODE_TRANSCEIVER,
+               OldIRadio::RADIO_MODE_SWITCHING));
 
-Register_Enum(RadioReceptionState,
-              (IRadio::RADIO_RECEPTION_STATE_UNDEFINED,
-               IRadio::RADIO_RECEPTION_STATE_IDLE,
-               IRadio::RADIO_RECEPTION_STATE_BUSY,
-               IRadio::RADIO_RECEPTION_STATE_SYNCHRONIZING,
-               IRadio::RADIO_RECEPTION_STATE_RECEIVING));
+Register_Enum(ReceptionState,
+              (OldIRadio::RECEPTION_STATE_UNDEFINED,
+               OldIRadio::RECEPTION_STATE_IDLE,
+               OldIRadio::RECEPTION_STATE_BUSY,
+               OldIRadio::RECEPTION_STATE_SYNCHRONIZING,
+               OldIRadio::RECEPTION_STATE_RECEIVING));
 
-Register_Enum(RadioTransmissionState,
-              (IRadio::RADIO_TRANSMISSION_STATE_UNDEFINED,
-               IRadio::RADIO_TRANSMISSION_STATE_IDLE,
-               IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING));
+Register_Enum(TransmissionState,
+              (OldIRadio::TRANSMISSION_STATE_UNDEFINED,
+               OldIRadio::TRANSMISSION_STATE_IDLE,
+               OldIRadio::TRANSMISSION_STATE_TRANSMITTING));
 
-const char *IRadio::getRadioModeName(RadioMode radioMode)
+const char *OldIRadio::getRadioModeName(RadioMode radioMode)
 {
     if (!radioModeEnum)
         radioModeEnum = cEnum::get("RadioMode");
     return radioModeEnum->getStringFor(radioMode) + 11;
 }
 
-const char *IRadio::getRadioReceptionStateName(RadioReceptionState radioReceptionState)
+const char *OldIRadio::getRadioReceptionStateName(ReceptionState receptionState)
 {
-    if (!radioReceptionStateEnum)
-        radioReceptionStateEnum = cEnum::get("RadioReceptionState");
-    return radioReceptionStateEnum->getStringFor(radioReceptionState) + 22;
+    if (!receptionStateEnum)
+        receptionStateEnum = cEnum::get("ReceptionState");
+    return receptionStateEnum->getStringFor(receptionState) + 16;
 }
 
-const char *IRadio::getRadioTransmissionStateName(RadioTransmissionState radioTransmissionState)
+const char *OldIRadio::getRadioTransmissionStateName(TransmissionState transmissionState)
 {
-    if (!radioTransmissionStateEnum)
-        radioTransmissionStateEnum = cEnum::get("RadioTransmissionState");
-    return radioTransmissionStateEnum->getStringFor(radioTransmissionState) + 25;
+    if (!transmissionStateEnum)
+        transmissionStateEnum = cEnum::get("TransmissionState");
+    return transmissionStateEnum->getStringFor(transmissionState) + 19;
 }

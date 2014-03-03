@@ -130,13 +130,13 @@ simtime_t MiximRadio::switchTo(int newState, simtime_t_cref now)
 	assert(0 <= newState && newState < numRadioStates);
 
 	// state to switch to must not be SWITCHING
-	assert(newState != IRadio::RADIO_MODE_SWITCHING);
+	assert(newState != OldIRadio::RADIO_MODE_SWITCHING);
 
 	// return error value if newState is the same as the current state
 	// if (newState == state) return -1;
 
 	// return error value if MiximRadio is currently switching
-	if (state == IRadio::RADIO_MODE_SWITCHING) return -1;
+	if (state == OldIRadio::RADIO_MODE_SWITCHING) return -1;
 
 
 	/* REGULAR CASE */
@@ -144,7 +144,7 @@ simtime_t MiximRadio::switchTo(int newState, simtime_t_cref now)
 	// set the nextState to the newState and the current state to SWITCHING
 	nextState = newState;
 	int lastState = state;
-	state = IRadio::RADIO_MODE_SWITCHING;
+	state = OldIRadio::RADIO_MODE_SWITCHING;
 	radioStates.record(state);
 
 	// make entry to RSAM
@@ -162,7 +162,7 @@ void MiximRadio::setSwitchTime(int from, int to, simtime_t_cref time)
 	assert(0 <= to && to < numRadioStates);
 
 	// it shall not be possible to set times to/from SWITCHING
-	assert(from != IRadio::RADIO_MODE_SWITCHING && to != IRadio::RADIO_MODE_SWITCHING);
+	assert(from != OldIRadio::RADIO_MODE_SWITCHING && to != OldIRadio::RADIO_MODE_SWITCHING);
 
 	swTimes[from][to] = time;
 	return;
@@ -171,7 +171,7 @@ void MiximRadio::setSwitchTime(int from, int to, simtime_t_cref time)
 void MiximRadio::endSwitch(simtime_t_cref now)
 {
 	// make sure we are currently switching
-	assert(state == IRadio::RADIO_MODE_SWITCHING);
+	assert(state == OldIRadio::RADIO_MODE_SWITCHING);
 
 	// set the current state finally to the next state
 	state = nextState;

@@ -34,7 +34,7 @@ public:
 	// KLUDGE: TODO: eliminate this enum by using the synchronizing reception state
 	enum UWBIRRadioMode {
 		/* receiving state*/
-		 RADIO_MODE_SYNC = IRadio::RADIO_MODE_SWITCHING + 1,
+		 RADIO_MODE_SYNC = OldIRadio::RADIO_MODE_SWITCHING + 1,
 		 UWBIR_NUM_RADIO_STATES
 	};
 
@@ -58,10 +58,10 @@ public:
 	virtual simtime_t switchTo(int newState, simtime_t_cref now) {
 		// state must be one of sleep, receive or transmit (not sync)
 		//assert(newState != Radio::SYNC);
-		if(newState == state || (newState == IRadio::RADIO_MODE_RECEIVER && state == RadioUWBIR::RADIO_MODE_SYNC)) {
+		if(newState == state || (newState == OldIRadio::RADIO_MODE_RECEIVER && state == RadioUWBIR::RADIO_MODE_SYNC)) {
 			return -1; // nothing to do
 		} else {
-			if(newState == IRadio::RADIO_MODE_RECEIVER) {
+			if(newState == OldIRadio::RADIO_MODE_RECEIVER) {
 				// prevent entering "frame reception" immediately
 				newState = RadioUWBIR::RADIO_MODE_SYNC;
 			}
@@ -73,7 +73,7 @@ public:
 		// set the nextState to the newState and the current state to SWITCHING
 		nextState = newState;
 		int lastState = state;
-		state = IRadio::RADIO_MODE_SWITCHING;
+		state = OldIRadio::RADIO_MODE_SWITCHING;
 		radioStates.record(state);
 		// make entry to RSAM
 		makeRSAMEntry(now, state);
@@ -89,7 +89,7 @@ protected:
 
 	virtual Argument::mapped_type_cref mapStateToAtt(int state)
 	{
-		if (state == IRadio::RADIO_MODE_RECEIVER || state == RadioUWBIR::RADIO_MODE_SYNC) {
+		if (state == OldIRadio::RADIO_MODE_RECEIVER || state == RadioUWBIR::RADIO_MODE_SYNC) {
 			return minAtt;
 		} else {
 			return maxAtt;
@@ -103,8 +103,8 @@ private:
 	 */
 	virtual void startReceivingFrame(simtime_t_cref now) {
 		assert(state == RadioUWBIR::RADIO_MODE_SYNC);
-		state = IRadio::RADIO_MODE_SWITCHING;
-		nextState = IRadio::RADIO_MODE_RECEIVER;
+		state = OldIRadio::RADIO_MODE_SWITCHING;
+		nextState = OldIRadio::RADIO_MODE_RECEIVER;
 		endSwitch(now);
 	}
 	/**
@@ -113,8 +113,8 @@ private:
 		 * synchronize on incoming frames.
 		 */
 	virtual void finishReceivingFrame(simtime_t_cref now) {
-		assert(state == IRadio::RADIO_MODE_RECEIVER);
-		state = IRadio::RADIO_MODE_SWITCHING;
+		assert(state == OldIRadio::RADIO_MODE_RECEIVER);
+		state = OldIRadio::RADIO_MODE_SWITCHING;
 		nextState = RadioUWBIR::RADIO_MODE_SYNC;
 		endSwitch(now);
 	}

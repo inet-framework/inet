@@ -48,7 +48,7 @@ simtime_t BaseDecider::processSignal(DetailedRadioFrame* frame) {
 
 	simtime_t HandleAgain = notAgain;
 
-    if(phy->getNbRadioChannels() > 1 && frame->getChannel() != dynamic_cast<IRadio*>(phy)->getRadioChannel()) {
+    if(phy->getNbRadioChannels() > 1 && frame->getChannel() != dynamic_cast<OldIRadio*>(phy)->getOldRadioChannel()) {
         // we cannot synchronize on a frame on another channel.
         return notAgain;
     }

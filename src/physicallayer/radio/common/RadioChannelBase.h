@@ -25,19 +25,16 @@
  *
  * @author Levente Meszaros
  */
-class INET_API RadioChannelBase : public cSimpleModule, public IRadioChannel
+class INET_API RadioChannelBase : public cSimpleModule, public OldIRadioChannel
 {
   protected:
     int numChannels;
 
   public:
     RadioChannelBase();
+    virtual ~RadioChannelBase() {}
 
     virtual int getNumChannels() { return numChannels; }
-
-//    virtual int addRadio(IRadio *radio);
-
-//    virtual void removeRadio(int id);
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

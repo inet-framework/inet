@@ -156,7 +156,7 @@ std::vector<Address> PingTestApp::getAllAddresses()
 {
     std::vector<Address> result;
 
-    for (int i=0; i<=simulation.getLastModuleId(); i++)
+    for (int i=0; i<=simulation.getLastComponentId(); i++)
     {
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(simulation.getModule(i));
         if (ift)

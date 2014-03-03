@@ -84,8 +84,8 @@ moduleinterface IRadio extends IPhysicalLayer
     parameters:
         @display("i=block/wrxtx");
         @signal[radioModeChanged](type=long);
-        @signal[radioReceptionStateChanged](type=long);
-        @signal[radioTransmissionStateChanged](type=long);
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);
     gates:
         input radioIn @labels(IRadioFrame);

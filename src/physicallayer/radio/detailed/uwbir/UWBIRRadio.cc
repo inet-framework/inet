@@ -35,20 +35,20 @@ MiximRadio* UWBIRRadio::initializeRadio() {
 
 	// Radio timers
 	// From Sleep mode
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_SLEEP, IRadio::RADIO_MODE_RECEIVER,    (hasPar("timeSleepToRX") ? par("timeSleepToRX") : par("timeTXToRX")).doubleValue());
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_SLEEP, IRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeSleepToTX") ? par("timeSleepToTX") : par("timeRXToTX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_SLEEP, OldIRadio::RADIO_MODE_RECEIVER,    (hasPar("timeSleepToRX") ? par("timeSleepToRX") : par("timeTXToRX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_SLEEP, OldIRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeSleepToTX") ? par("timeSleepToTX") : par("timeRXToTX")).doubleValue());
 
 	// From TX mode
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_TRANSMITTER,    RadioUWBIR::RADIO_MODE_SYNC,  (hasPar("timeTXToRX") ? par("timeTXToRX") : par("timeSleepToRX")).doubleValue());
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_TRANSMITTER,    IRadio::RADIO_MODE_RECEIVER,    (hasPar("timeTXToRX") ? par("timeTXToRX") : par("timeSleepToRX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_TRANSMITTER,    RadioUWBIR::RADIO_MODE_SYNC,  (hasPar("timeTXToRX") ? par("timeTXToRX") : par("timeSleepToRX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_TRANSMITTER,    OldIRadio::RADIO_MODE_RECEIVER,    (hasPar("timeTXToRX") ? par("timeTXToRX") : par("timeSleepToRX")).doubleValue());
 
 	// From RX mode
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_RECEIVER,    IRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeRXToTX") ? par("timeRXToTX") : par("timeSleepToTX")).doubleValue());
-	uwbradio->setSwitchTime(IRadio::RADIO_MODE_RECEIVER,    RadioUWBIR::RADIO_MODE_SYNC,  (readPar("timeRXToSYNC", readPar("timeSYNCToRX", 0.000000001))));
-	uwbradio->setSwitchTime(RadioUWBIR::RADIO_MODE_SYNC,  IRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeRXToTX") ? par("timeRXToTX") : par("timeSleepToTX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_RECEIVER,    OldIRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeRXToTX") ? par("timeRXToTX") : par("timeSleepToTX")).doubleValue());
+	uwbradio->setSwitchTime(OldIRadio::RADIO_MODE_RECEIVER,    RadioUWBIR::RADIO_MODE_SYNC,  (readPar("timeRXToSYNC", readPar("timeSYNCToRX", 0.000000001))));
+	uwbradio->setSwitchTime(RadioUWBIR::RADIO_MODE_SYNC,  OldIRadio::RADIO_MODE_TRANSMITTER,    (hasPar("timeRXToTX") ? par("timeRXToTX") : par("timeSleepToTX")).doubleValue());
 
 	// From SYNC mode
-	uwbradio->setSwitchTime(RadioUWBIR::RADIO_MODE_SYNC,  IRadio::RADIO_MODE_RECEIVER,    (readPar("timeSYNCToRX", readPar("timeRXToSYNC", 0.000000001))));
+	uwbradio->setSwitchTime(RadioUWBIR::RADIO_MODE_SYNC,  OldIRadio::RADIO_MODE_RECEIVER,    (readPar("timeSYNCToRX", readPar("timeRXToSYNC", 0.000000001))));
 
 	return uwbradio;
 }
@@ -124,7 +124,7 @@ Decider* UWBIRRadio::getDeciderFromName(const std::string& name, ParameterMap& p
 simtime_t UWBIRRadio::setRadioState(int rs) {
 	int prevState = radio->getCurrentState();
 
-	if(prevState == IRadio::RADIO_MODE_RECEIVER && rs != IRadio::RADIO_MODE_RECEIVER && rs != RadioUWBIR::RADIO_MODE_SYNC) {
+	if(prevState == OldIRadio::RADIO_MODE_RECEIVER && rs != OldIRadio::RADIO_MODE_RECEIVER && rs != RadioUWBIR::RADIO_MODE_SYNC) {
 	    decider->cancelProcessSignal();
 	}
 
@@ -134,7 +134,7 @@ simtime_t UWBIRRadio::setRadioState(int rs) {
 bool UWBIRRadio::isRadioInRX() const {
     const int iCurRS = getRadioState();
 
-    return iCurRS == IRadio::RADIO_MODE_RECEIVER || iCurRS == RadioUWBIR::RADIO_MODE_SYNC;
+    return iCurRS == OldIRadio::RADIO_MODE_RECEIVER || iCurRS == RadioUWBIR::RADIO_MODE_SYNC;
 }
 
 DetailedRadioFrame* UWBIRRadio::encapsMsg(cPacket *macPkt)
@@ -160,7 +160,7 @@ DetailedRadioFrame* UWBIRRadio::encapsMsg(cPacket *macPkt)
 	frame->setProtocolId(myProtocolId());
 	frame->setBitLength(headerLength);
 	frame->setId(simulation.getUniqueNumber());
-	frame->setChannel(getRadioChannel());
+	frame->setChannel(getOldRadioChannel());
 	frame->setCfg(cfg);
 
     delete macPkt->removeControlInfo();

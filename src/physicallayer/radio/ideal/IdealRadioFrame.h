@@ -25,7 +25,7 @@
  * Represents an ideal radio frame. More info in the IdealRadioFrame.msg file
  * (and the documentation generated from it).
  */
-class INET_API IdealRadioFrame : public IdealRadioFrame_Base, public IRadioFrame
+class INET_API IdealRadioFrame : public IdealRadioFrame_Base, public OldIRadioFrame
 {
   public:
     IdealRadioFrame(const char *name = NULL, int kind = 0) : IdealRadioFrame_Base(name, kind) {}

@@ -30,7 +30,7 @@ class InterfaceEntry;
 class IPassiveQueue;
 
 /**
- * Implements a MAC suitable for use with IdealRadio.
+ * Implements a simplified ideal MAC.
  *
  * See the NED file for details.
  */
@@ -46,8 +46,8 @@ class INET_API IdealMac : public MACProtocolBase
     MACAddress address;     // MAC address
     bool fullDuplex;
 
-    IRadio *radio;
-    IRadio::RadioTransmissionState radioTransmissionState;
+    OldIRadio *radio;
+    OldIRadio::TransmissionState transmissionState;
     IPassiveQueue *queueModule;
 
     int outStandingRequests;

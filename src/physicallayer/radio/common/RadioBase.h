@@ -27,14 +27,14 @@
  *
  * @author Levente Meszaros
  */
-class INET_API RadioBase : public PhysicalLayerBase, public IRadio
+class INET_API RadioBase : public PhysicalLayerBase, public OldIRadio
 {
   protected:
     /** Internal state */
     //@{
     RadioMode radioMode;
-    RadioReceptionState radioReceptionState;
-    RadioTransmissionState radioTransmissionState;
+    ReceptionState receptionState;
+    TransmissionState transmissionState;
     int radioChannel;
     //@}
 
@@ -59,11 +59,15 @@ class INET_API RadioBase : public PhysicalLayerBase, public IRadio
 
     virtual RadioMode getRadioMode() const { return radioMode; }
 
-    virtual RadioReceptionState getRadioReceptionState() const { return radioReceptionState; }
+    virtual void setRadioMode(RadioMode newRadioMode);
 
-    virtual RadioTransmissionState getRadioTransmissionState() const { return radioTransmissionState; }
+    virtual ReceptionState getReceptionState() const { return receptionState; }
 
-    virtual int getRadioChannel() const { return radioChannel; }
+    virtual TransmissionState getTransmissionState() const { return transmissionState; }
+
+    virtual int getOldRadioChannel() const { return radioChannel; }
+
+    virtual void setOldRadioChannel(int newRadioChannel);
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

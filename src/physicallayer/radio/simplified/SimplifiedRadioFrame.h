@@ -27,7 +27,7 @@
  * Represents a simplified radio frame. More info in the SimplifiedRadioFrame.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimplifiedRadioFrame : public SimplifiedRadioFrame_Base, public IRadioFrame
+class INET_API SimplifiedRadioFrame : public SimplifiedRadioFrame_Base, public OldIRadioFrame
 {
   public:
     SimplifiedRadioFrame(const char *name = NULL, int kind = 0) : SimplifiedRadioFrame_Base(name, kind) {}

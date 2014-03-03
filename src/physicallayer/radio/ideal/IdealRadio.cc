@@ -247,37 +247,37 @@ bool IdealRadio::handleOperationStage(LifecycleOperation *operation, int stage, 
 void IdealRadio::updateTransceiverState()
 {
     // reception state
-    RadioReceptionState newRadioReceptionState;
+    ReceptionState newRadioReceptionState;
     unsigned int endReceptionCount = endReceptionTimers.size();
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
-        newRadioReceptionState = RADIO_RECEPTION_STATE_UNDEFINED;
+        newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (interferenceCount < endReceptionCount)
-        newRadioReceptionState = RADIO_RECEPTION_STATE_RECEIVING;
+        newRadioReceptionState = RECEPTION_STATE_RECEIVING;
     else if (false) // NOTE: synchronization is not modeled in ideal radio
-        newRadioReceptionState = RADIO_RECEPTION_STATE_SYNCHRONIZING;
+        newRadioReceptionState = RECEPTION_STATE_SYNCHRONIZING;
     else if (interferenceCount > 0)
-        newRadioReceptionState = RADIO_RECEPTION_STATE_BUSY;
+        newRadioReceptionState = RECEPTION_STATE_BUSY;
     else
-        newRadioReceptionState = RADIO_RECEPTION_STATE_IDLE;
-    if (radioReceptionState != newRadioReceptionState)
+        newRadioReceptionState = RECEPTION_STATE_IDLE;
+    if (receptionState != newRadioReceptionState)
     {
-        EV << "Changing radio reception state from " << getRadioReceptionStateName(radioReceptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
-        radioReceptionState = newRadioReceptionState;
-        emit(radioReceptionStateChangedSignal, newRadioReceptionState);
+        EV << "Changing radio reception state from " << getRadioReceptionStateName(receptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
+        receptionState = newRadioReceptionState;
+        emit(receptionStateChangedSignal, newRadioReceptionState);
     }
     // transmission state
-    RadioTransmissionState newRadioTransmissionState;
+    TransmissionState newRadioTransmissionState;
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_UNDEFINED;
+        newRadioTransmissionState = TRANSMISSION_STATE_UNDEFINED;
     else if (endTransmissionTimer->isScheduled())
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_TRANSMITTING;
+        newRadioTransmissionState = TRANSMISSION_STATE_TRANSMITTING;
     else
-        newRadioTransmissionState = RADIO_TRANSMISSION_STATE_IDLE;
-    if (radioTransmissionState != newRadioTransmissionState)
+        newRadioTransmissionState = TRANSMISSION_STATE_IDLE;
+    if (transmissionState != newRadioTransmissionState)
     {
-        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(radioTransmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
-        radioTransmissionState = newRadioTransmissionState;
-        emit(radioTransmissionStateChangedSignal, newRadioTransmissionState);
+        EV << "Changing radio transmission state from " << getRadioTransmissionStateName(transmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
+        transmissionState = newRadioTransmissionState;
+        emit(transmissionStateChangedSignal, newRadioTransmissionState);
     }
 }
 

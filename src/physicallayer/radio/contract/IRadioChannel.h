@@ -24,36 +24,15 @@
 /**
  * This purely virtual interface provides an abstraction for different radio channels.
  */
-class INET_API IRadioChannel
+class INET_API OldIRadioChannel
 {
-  public:
-    virtual ~IRadioChannel() { }
+    public:
+        virtual ~OldIRadioChannel() { }
 
-    /**
-     * Returns the number of available radio channels.
-     */
-    virtual int getNumChannels() = 0;
-
-//    /**
-//     * Adds a new radio to the radio channel and returns its id.
-//     */
-//    virtual int addRadio(IRadio *radio) = 0;
-
-//    /**
-//     * Removes a previously added radio from the radio channel.
-//     */
-//    virtual void removeRadio(int id) = 0;
-
-//    /**
-//     * Transmits a radio frame through the radio channel to all radios within
-//     * interference distance.
-//     */
-//    virtual void transmitRadioFrame(int id, IRadioFrame *radioFrame) = 0;
-
-//    /**
-//     * Returns the radio frames of all ongoing transmissions for the provided channel.
-//     */
-//    virtual std::vector<IRadioFrame *>& getOngoingTransmissions(int radioChannel) = 0;
+        /**
+         * Returns the number of available radio channels.
+         */
+        virtual int getNumChannels() = 0;
 };
 
 #endif

@@ -27,12 +27,12 @@ simple RadioBase like IRadio
     parameters:
         @display("i=block/wrxtx");
         @signal[radioModeChanged](type=long);
-        @signal[radioReceptionStateChanged](type=long);
-        @signal[radioTransmissionStateChanged](type=long);
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[radioReceptionState](title="Radio reception state"; source=radioReceptionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[radioTransmissionState](title="Radio transmission state"; source=radioReceptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);

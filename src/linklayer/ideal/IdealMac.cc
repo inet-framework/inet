@@ -22,7 +22,6 @@
 
 #include "IdealMac.h"
 
-#include "IdealRadio.h"
 #include "IdealMacFrame_m.h"
 #include "Ieee802Ctrl.h"
 #include "IInterfaceTable.h"
@@ -73,9 +72,9 @@ void IdealMac::initialize(int stage)
         fullDuplex = par("fullDuplex");
 
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
-        radio = check_and_cast<IRadio *>(radioModule);
-        radioTransmissionState = IRadio::RADIO_TRANSMISSION_STATE_UNDEFINED;
+        radioModule->subscribe(OldIRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<OldIRadio *>(radioModule);
+        transmissionState = OldIRadio::TRANSMISSION_STATE_UNDEFINED;
 
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
@@ -87,7 +86,7 @@ void IdealMac::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
+        radio->setRadioMode(fullDuplex ? OldIRadio::RADIO_MODE_TRANSCEIVER : OldIRadio::RADIO_MODE_RECEIVER);
         getNextMsgFromHL();
         registerInterface();
     }
@@ -139,15 +138,15 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
 void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    if (signalID == OldIRadio::transmissionStateChangedSignal)
     {
-        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        OldIRadio::TransmissionState newRadioTransmissionState = (OldIRadio::TransmissionState)value;
+        if (transmissionState == OldIRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == OldIRadio::TRANSMISSION_STATE_IDLE)
         {
-            radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
+            radio->setRadioMode(fullDuplex ? OldIRadio::RADIO_MODE_TRANSCEIVER : OldIRadio::RADIO_MODE_RECEIVER);
             getNextMsgFromHL();
         }
-        radioTransmissionState = newRadioTransmissionState;
+        transmissionState = newRadioTransmissionState;
     }
 }
 
@@ -158,7 +157,7 @@ void IdealMac::startTransmitting(cPacket *msg)
 
     // send
     EV << "Starting transmission of " << frame << endl;
-    radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(fullDuplex ? OldIRadio::RADIO_MODE_TRANSCEIVER : OldIRadio::RADIO_MODE_TRANSMITTER);
     sendDown(frame);
 }
 
@@ -176,7 +175,7 @@ void IdealMac::getNextMsgFromHL()
 void IdealMac::handleUpperPacket(cPacket *msg)
 {
     outStandingRequests--;
-    if (radio->getRadioTransmissionState() == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING)
+    if (radio->getTransmissionState() == OldIRadio::TRANSMISSION_STATE_TRANSMITTING)
     {
         // Logic error: we do not request packet from the external queue when radio is transmitting
         error("Received msg for transmission but transmitter is busy");
