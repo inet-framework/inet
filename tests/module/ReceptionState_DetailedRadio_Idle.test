@@ -2,7 +2,7 @@
 
 This is a test for DetailedRadio idle reception state.
 The received signal is too weak to sense at all.
-Transmission and reception parameters must match with SimplifiedRadio.
+Transmission and reception parameters must match with ScalarRadio.
 
 %file: test.ned
 

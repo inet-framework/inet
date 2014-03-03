@@ -1,8 +1,9 @@
 %description:
 
-This is a test for SimplifiedRadio interference handling.
+This is a test for scalar radio interference handling.
 The first signal is stronger than the reception threshold.
-The second signal is weaker than the reception threshold.
+The second signal is stronger than the reception threshold.
+The first signal is much stronger than the second signal.
 The second signal is strong enough to cause bit errors.
 No signals are expected to be received.
 
@@ -10,12 +11,12 @@ No signals are expected to be received.
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.scalar.ScalarRadioChannel;
 
 network Test
 {
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: ScalarRadioChannel;
         configurator: IPv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;
@@ -46,28 +47,26 @@ ned-path = .;../../../../src
 *.hostSender2.mobility.initialX = 800m
 *.hostReceiver.mobility.initialX = 400m
 
-# channel
-*.radioChannel.carrierFrequency = 2.4e+9Hz
-*.radioChannel.pMax = 1000mW
-*.radioChannel.sat = -110dBm
-*.radioChannel.alpha = 2
+# radio channel
+*.radioChannel.backgroundNoise.power = -110dBm
+*.radioChannel.attenuation.alpha = 2
 
 # nic
 *.host*.wlan[*].typename = "IdealWirelessNic"
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radioType = "GenericRadio"
-*.host*.wlan[*].radio.thermalNoise = -110dBm
-*.host*.wlan[*].radio.sensitivity = -80dBm
-*.host*.wlan[*].radio.receptionThreshold = -90dBm
-*.host*.wlan[*].radio.setReceptionThreshold = true
-*.host*.wlan[*].radio.snirThreshold = 10dB
-*.host*.wlan[*].radio.headerLengthBits = 100b
+*.host*.wlan[*].radioType = "ScalarRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.carrierFrequency = 2.4GHz
 *.host*.wlan[*].radio.bandwidth = 2MHz
-*.host*.wlan[*].radio.modulation = "BPSK"
-*.hostSender1.wlan[*].radio.transmitterPower = 10mW
-*.hostSender2.wlan[*].radio.transmitterPower = 10mW
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -80dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+*.hostSender1.wlan[*].radio.transmitter.power = 100mW
+*.hostSender2.wlan[*].radio.transmitter.power = 100mW
+*.hostReceiver.wlan[*].radio.transmitter.power = 0W
 
 # ping app
 *.hostSender*.numPingApps = 1

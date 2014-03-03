@@ -35,13 +35,13 @@ sim-time-limit = 3s
 import inet.base.LifecycleController;
 import inet.nodes.wireless.AccessPoint;
 import inet.status.NodeStatus;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 import inet.world.scenario.ScenarioManager;
 
 network Test
 {
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: Ieee80211RadioChannel;
         scenarioManager: ScenarioManager;
         lifecycleController: LifecycleController;
         host: AccessPoint;

@@ -2,7 +2,7 @@
 
 This is a test for DetailedRadio busy reception state.
 The received signal is strong enough to sense but too weak to receive.
-Transmission and reception parameters must match with SimplifiedRadio.
+Transmission and reception parameters must match with ScalarRadio.
 
 %file: test.ned
 

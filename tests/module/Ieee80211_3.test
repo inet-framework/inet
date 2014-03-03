@@ -6,12 +6,12 @@ Carrier sense test for Ieee80211 out of range concurrent and synchronized mutual
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 network Test
 {
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: Ieee80211RadioChannel;
         configurator: IPv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
@@ -35,6 +35,9 @@ ned-path = .;../../../../src
 **.mobility.constraintAreaMaxY = 1000m
 **.mobility.constraintAreaMaxZ = 0m
 
+# radio
+**.radio.receiver.energyDetection = -100dBm
+
 # ping app
 *.host*.numPingApps = 1
 *.host*.pingApp[0].count = 1
@@ -51,7 +54,7 @@ ned-path = .;../../../../src
 *.host*.pingApp[0].startTime = 0s
 
 %contains: results/General-0.elog
-- Radio is not in receiver mode, dropping frame
+- Radio is not in receiver or transceiver mode, dropping frame
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

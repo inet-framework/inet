@@ -7,7 +7,7 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 import inet.nodes.wireless.AccessPoint;
 import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
@@ -114,7 +114,7 @@ network Throughput
             parameters:
                 @display("p=200,200;r=,,#707070");
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: ScalarRadioChannel {
             parameters:
                 @display("p=61,46");
         }

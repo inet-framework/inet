@@ -1,5 +1,5 @@
 %description:
-Testing IdealRadio, IdealChannelModel, IdealWirelessMac, IdealWirelessNic modules
+Testing ideal radio
 host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets
 Nic modules use internal queues
 %#--------------------------------------------------------------------------------------------------------------
@@ -33,7 +33,12 @@ tkenv-plugin-path = ../../../etc/plugins
 **.wlan[*].bitrate = 2Mbps
 **.wlan[*].mac.address = "auto"
 **.wlan[*].mac.headerLength = 22B
-**.wlan[*].radio.transmissionRange = 100m
+**.wlan[*].radioType = "IdealRadio"
+**.wlan[*].radio.transmitter.bitrate = 2Mbps
+**.wlan[*].radio.transmitter.maxCommunicationRange = 100m
+**.wlan[*].radio.transmitter.maxInterferenceRange = 500m
+**.wlan[*].radio.transmitter.maxDetectionRange = 1000m
+**.wlan[*].radio.receiver.ignoreInterference = true
 
 description = "host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets"
 

@@ -30,10 +30,17 @@ sim-time-limit = 3s
 **.mobility.initialY = 500m
 **.mobility.initialZ = 0m
 
-*.host.wlan[*].typename = "IdealWirelessNic"
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
 *.host.wlan[*].bitrate = 54Mbps
-*.host.wlan[*].mac.headerLength = 10B
-*.host.wlan[*].radio.transmissionRange = 1km
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radioType = "IdealRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.maxCommunicationRange = 1km
+*.host*.wlan[*].radio.transmitter.maxInterferenceRange = 5km
+*.host*.wlan[*].radio.transmitter.maxDetectionRange = 10km
+*.host*.wlan[*].radio.receiver.ignoreInterference = true
 
 %file: test.ned
 
