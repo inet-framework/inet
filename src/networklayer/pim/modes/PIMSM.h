@@ -186,6 +186,16 @@ class INET_API PIMSM : public PIMBase, protected cListener
         double assertTime;
         double assertOverrideInterval;
 
+        // signals
+        static simsignal_t sentRegisterPkSignal;
+        static simsignal_t rcvdRegisterPkSignal;
+        static simsignal_t sentRegisterStopPkSignal;
+        static simsignal_t rcvdRegisterStopPkSignal;
+        static simsignal_t sentJoinPrunePkSignal;
+        static simsignal_t rcvdJoinPrunePkSignal;
+        static simsignal_t sentAssertPkSignal;
+        static simsignal_t rcvdAssertPkSignal;
+
         // state
         RoutingTable gRoutes;
         RoutingTable sgRoutes;

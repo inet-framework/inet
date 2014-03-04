@@ -173,6 +173,10 @@ class INET_API PIMBase : public OperationalBase
         uint32_t generationID;
         cMessage *helloTimer;
 
+        // signals
+        static simsignal_t sentHelloPkSignal;
+        static simsignal_t rcvdHelloPkSignal;
+
     public:
         PIMBase(PIMInterface::PIMMode mode) : isUp(false), isEnabled(false), mode(mode), helloTimer(NULL) {}
         virtual ~PIMBase();

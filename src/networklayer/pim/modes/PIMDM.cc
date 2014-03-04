@@ -23,6 +23,17 @@ Define_Module(PIMDM);
 
 using namespace std;
 
+simsignal_t PIMDM::sentGraftPkSignal = registerSignal("sentGraftPk");
+simsignal_t PIMDM::rcvdGraftPkSignal = registerSignal("rcvdGraftPk");
+simsignal_t PIMDM::sentGraftAckPkSignal = registerSignal("sentGraftAckPk");
+simsignal_t PIMDM::rcvdGraftAckPkSignal = registerSignal("rcvdGraftAckPk");
+simsignal_t PIMDM::sentJoinPrunePkSignal = registerSignal("sentJoinPrunePk");
+simsignal_t PIMDM::rcvdJoinPrunePkSignal = registerSignal("rcvdJoinPrunePk");
+simsignal_t PIMDM::sentAssertPkSignal = registerSignal("sentAssertPk");
+simsignal_t PIMDM::rcvdAssertPkSignal = registerSignal("rcvdAssertPk");
+simsignal_t PIMDM::sentStateRefreshPkSignal = registerSignal("sentStateRefreshPk");
+simsignal_t PIMDM::rcvdStateRefreshPkSignal = registerSignal("rcvdStateRefreshPk");
+
 // for logging
 ostream& operator<<(ostream &out, const PIMDM::Route *route)
 {
@@ -56,6 +67,8 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress &address = group.getPrunedSourceAddress(0);
 	address.IPaddress = src;
 
+	emit(sentJoinPrunePkSignal, packet);
+
 	sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, intId);
 }
 
@@ -77,6 +90,8 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
     group.setJoinedSourceAddressArraySize(1);
     EncodedAddress &address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
+
+    emit(sentJoinPrunePkSignal, packet);
 
     sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, intId);
 }
@@ -102,6 +117,8 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress &address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
 
+    emit(sentGraftPkSignal, msg);
+
 	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, nextHop, intId);
 }
 
@@ -126,6 +143,8 @@ void PIMDM::sendGraftAckPacket(PIMGraft *graftPacket)
     msg->setName("PIMGraftAck");
     msg->setType(GraftAck);
 
+    emit(sentGraftAckPkSignal, msg);
+
     sendToIP(msg, srcAddr, destAddr, outInterfaceId);
 }
 
@@ -143,6 +162,8 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
 	msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
     // TODO set metric
 
+	emit(sentStateRefreshPkSignal, msg);
+
 	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
 }
 
@@ -156,6 +177,8 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
     pkt->setR(false);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
+
+    emit(sentAssertPkSignal, pkt);
 
     sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId());
 }
@@ -175,6 +198,8 @@ void PIMDM::sendToIP(PIMPacket *packet, IPv4Address srcAddr, IPv4Address destAdd
 void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
 {
     EV_INFO << "Received JoinPrune packet.\n";
+
+    emit(rcvdJoinPrunePkSignal, pkt);
 
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     IPv4Address sender = ctrlInfo->getSrcAddr();
@@ -358,6 +383,8 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
 {
     EV_INFO << "Received Graft packet.\n";
 
+    emit(rcvdGraftPkSignal, pkt);
+
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     IPv4Address sender = ctrl->getSrcAddr();
     InterfaceEntry * rpfInterface = rt->getInterfaceForDestAddr(sender);
@@ -520,6 +547,8 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
 {
     EV_INFO << "Received GraftAck packet.\n";
 
+    emit(rcvdGraftAckPkSignal, pkt);
+
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     IPv4Address destAddress = ctrlInfo->getDestAddr();
 
@@ -569,6 +598,8 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
 void PIMDM::processStateRefreshPacket(PIMStateRefresh *pkt)
 {
 	EV << "pimDM::processStateRefreshPacket" << endl;
+
+	emit(rcvdStateRefreshPkSignal, pkt);
 
 	// first check if there is route for given group address and source
 	Route *route = findRoute(pkt->getSourceAddress(), pkt->getGroupAddress());
@@ -688,6 +719,8 @@ void PIMDM::processAssertPacket(PIMAssert *pkt)
 
     EV_INFO << "Received Assert(S=" << source << ", G=" << group
             << ") packet on interface '" << incomingInterface->ie->getName() <<"'.\n";
+
+    emit(rcvdAssertPkSignal, pkt);
 
     processAssert(incomingInterface, receivedMetric, 0);
 

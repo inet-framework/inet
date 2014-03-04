@@ -166,6 +166,18 @@ class INET_API PIMDM : public PIMBase, protected cListener
         double stateRefreshInterval;
         double assertTime;
 
+        // signals
+        static simsignal_t sentGraftPkSignal;
+        static simsignal_t rcvdGraftPkSignal;
+        static simsignal_t sentGraftAckPkSignal;
+        static simsignal_t rcvdGraftAckPkSignal;
+        static simsignal_t sentJoinPrunePkSignal;
+        static simsignal_t rcvdJoinPrunePkSignal;
+        static simsignal_t sentAssertPkSignal;
+        static simsignal_t rcvdAssertPkSignal;
+        static simsignal_t sentStateRefreshPkSignal;
+        static simsignal_t rcvdStateRefreshPkSignal;
+
         // state
         RoutingTable routes;
 

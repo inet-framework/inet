@@ -33,6 +33,9 @@ const IPv4Address PIMBase::ALL_PIM_ROUTERS_MCAST("224.0.0.13");
 
 const PIMBase::AssertMetric PIMBase::AssertMetric::INFINITE;
 
+simsignal_t PIMBase::sentHelloPkSignal = registerSignal("sentHelloPk");
+simsignal_t PIMBase::rcvdHelloPkSignal = registerSignal("rcvdHelloPk");
+
 bool PIMBase::AssertMetric::operator==(const AssertMetric& other) const
 {
     return rptBit == other.rptBit && preference == other.preference &&
@@ -179,6 +182,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     ctrl->setInterfaceId(pimInterface->getInterfaceId());
     msg->setControlInfo(ctrl);
 
+    emit(sentHelloPkSignal, msg);
+
     send(msg, "ipOut");
 }
 
@@ -188,6 +193,8 @@ void PIMBase::processHelloPacket(PIMHello *packet)
     int interfaceId = ctrl->getInterfaceId();
     IPv4Address address = ctrl->getSrcAddr();
     int version = packet->getVersion();
+
+    emit(rcvdHelloPkSignal, packet);
 
     // process options
     double holdTime = 3.5 * 30;

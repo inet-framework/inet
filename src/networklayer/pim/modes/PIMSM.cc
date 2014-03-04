@@ -24,6 +24,16 @@
 
 Define_Module(PIMSM);
 
+
+simsignal_t PIMSM::sentRegisterPkSignal = registerSignal("sentRegisterPk");
+simsignal_t PIMSM::rcvdRegisterPkSignal = registerSignal("rcvdRegisterPk");
+simsignal_t PIMSM::sentRegisterStopPkSignal = registerSignal("sentRegisterStopPk");
+simsignal_t PIMSM::rcvdRegisterStopPkSignal = registerSignal("rcvdRegisterStopPk");
+simsignal_t PIMSM::sentJoinPrunePkSignal = registerSignal("sentJoinPrunePk");
+simsignal_t PIMSM::rcvdJoinPrunePkSignal = registerSignal("rcvdJoinPrunePk");
+simsignal_t PIMSM::sentAssertPkSignal = registerSignal("sentAssertPk");
+simsignal_t PIMSM::rcvdAssertPkSignal = registerSignal("rcvdAssertPk");
+
 std::ostream& operator<<(std::ostream &out, const PIMSM::SourceAndGroup &sourceGroup)
 {
     out << "(" << (sourceGroup.source.isUnspecified() ? "*" : sourceGroup.source.str()) << ", "
@@ -325,6 +335,8 @@ void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
 {
     EV_INFO << "Received JoinPrune packet.\n";
 
+    emit(rcvdJoinPrunePkSignal, pkt);
+
     IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     InterfaceEntry *inInterface = ift->getInterfaceById(ctrl->getInterfaceId());
     int holdTime = pkt->getHoldTime();
@@ -589,6 +601,8 @@ void PIMSM::processRegisterPacket(PIMRegister *pkt)
 {
     EV_INFO << "Received Register packet.\n";
 
+    emit(rcvdRegisterPkSignal, pkt);
+
     IPv4Datagram *encapData = check_and_cast<IPv4Datagram*>(pkt->decapsulate());
     IPv4Address source = encapData->getSrcAddress();
     IPv4Address group = encapData->getDestAddress();
@@ -661,6 +675,8 @@ void PIMSM::processRegisterStopPacket(PIMRegisterStop *pkt)
 {
     EV_INFO << "Received RegisterStop packet.\n";
 
+    emit(rcvdRegisterStopPkSignal, pkt);
+
     // TODO support wildcard source address
     Route *routeSG = findRouteSG(pkt->getSourceAddress(), pkt->getGroupAddress());
     if (routeSG)
@@ -691,6 +707,8 @@ void PIMSM::processAssertPacket(PIMAssert *pkt)
 
     EV_INFO << "Received Assert(" << (source.isUnspecified() ? "*" : source.str()) << ", " << group << ")"
             << " packet on interface '" << ift->getInterfaceById(incomingInterfaceId)->getName() <<"'.\n";
+
+    emit(rcvdAssertPkSignal, pkt);
 
     if (!source.isUnspecified() && !receivedMetric.rptBit)
     {
@@ -1466,6 +1484,8 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
+    emit(sentJoinPrunePkSignal, msg);
+
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
     sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
 }
@@ -1489,6 +1509,8 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     encodedAddr.S = true;
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
+
+    emit(sentJoinPrunePkSignal, msg);
 
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
     sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, interfaceToRP->getInterfaceId(), 1);
@@ -1515,6 +1537,8 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         datagram->setTransportProtocol(IP_PROT_PIM);
         msg->encapsulate(datagram);
 
+        emit(sentRegisterPkSignal, msg);
+
         InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(rpAddr);
         sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, rpAddr, interfaceToRP->getInterfaceId(), MAX_TTL);
     }
@@ -1533,6 +1557,8 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInt
     delete datagramCopy->removeControlInfo();
     msg->encapsulate(datagramCopy);
 
+    emit(sentRegisterPkSignal, msg);
+
     sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, dest, outInterfaceId, MAX_TTL);
 }
 
@@ -1549,6 +1575,8 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     msg->setSourceAddress(multSource);
     msg->setGroupAddress(multGroup);
 
+    emit(sentRegisterStopPkSignal, msg);
+
     // set IP packet
     InterfaceEntry *interfaceToDR = rt->getInterfaceForDestAddr(dest);
     sendToIP(msg, source, dest, interfaceToDR->getInterfaceId(), MAX_TTL);
@@ -1564,6 +1592,8 @@ void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric me
     pkt->setR(rptBit);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
+
+    emit(sentAssertPkSignal, pkt);
 
     sendToIP(pkt, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, ie->getInterfaceId(), 1);
 }
