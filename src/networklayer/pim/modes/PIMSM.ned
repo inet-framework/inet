@@ -19,7 +19,35 @@
 package inet.networklayer.pim.modes;
 
 //
-// TODO
+// Implementation of PIM-SM protocol (RFC 4601).
+//
+// PIM-SM is a multicast routing protocol which
+// build a shared multicast forwarding three rooted at a Rendezvous Point (RP)
+// per group, and a source specific forwarding trees from the sources to the RP.
+// It is also capable to switch to a shortest path tree, so that traffic from
+// sources to receivers do not have to pass through the RP.
+//
+// The module must access the ~PIMInterfaceTable and ~PIMNeighbortable
+// modules, their path is given as the 'pimInterfaceTableModule' and
+// 'pimNeighborTableModule' parameters.
+//
+// The 'RP' parameter specifies the address of the Rendezvous Point.
+// Currently only one global RP is supported.
+//
+// If there are multiple PIM routers on a multi-access LAN, only one
+// of them will be responsible for forwarding datagrams to the LAN.
+// This will be the router with the highest IP address except if
+// all routers has 'designatedRouterPriority' set, in which case
+// the highest priority wins (or highest IP address on ties).
+//
+// Other parameters set the time constants to the values specified
+// in RFC 4601. They should not be changed except for testing.
+//
+// Limitations:
+// - Only one global RP is supported and it must be specified statically.
+//   PIM Bootstrap and RP discovery is not yet implemented.
+// - Switchover to the shortest path tree is not supported.
+// - Source specific excludes in the shared tree are not supported.
 //
 simple PIMSM
 {
@@ -27,7 +55,7 @@ simple PIMSM
     	@display("i=block/network2");
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
-
+        string RP = default("");
         int designatedRouterPriority = default(-1);
 
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
@@ -42,8 +70,6 @@ simple PIMSM
         double registerProbeTime @unit(s) = 5s;
         double assertTime @unit(s) = 180s;
         double assertOverrideInterval @unit(s) = 3s;
-
-        string RP = default("");
 
         @signal[sentHelloPk](type=cPacket);
         @signal[rcvdHelloPk](type=cPacket);

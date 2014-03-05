@@ -19,7 +19,26 @@
 
 package inet.networklayer.pim.modes;
 
-// Simple module pimDM which is connected to pimSplitter module
+//
+// Implementation of PIM-DM protocol (RFC 3973).
+//
+// PIM-DM is a multicast routing protocol which is designed
+// for networks where the receivers are densely distributed.
+// PIM-DM initially floods the multicast datagrams to all areas
+// of the network. If some areas of the network does not have
+// group members, then they will be pruned off the forwarding tree.
+//
+// The prune state of a branch must be confirmed periodically,
+// otherwise the forwarding restarts automatically. The router
+// can also cancel the prune by sending a Graft message.
+//
+// The module must access the ~PIMInterfaceTable and ~PIMNeighbortable
+// modules, their path is given as the 'pimInterfaceTableModule' and
+// 'pimNeighborTableModule' parameters.
+//
+// Other parameters are timer values from the specification.
+// They should not be modified except for testing purposes.
+//
 simple PIMDM
 {
     parameters:
@@ -35,7 +54,7 @@ simple PIMDM
         double overrideInterval @unit(s) = 2.5s;
         double propagationDelay @unit(s) = 0.5s;
         double graftRetryInterval @unit(s) = 3s;
-        double sourceActiveInterval @unit(s) = 210s; // Cisco has 180s, after that, route is flushed
+        double sourceActiveInterval @unit(s) = 210s;
         double stateRefreshInterval @unit(s) = 60s;
         double assertTime @unit(s) = 180s;
 
