@@ -3,7 +3,6 @@
 
 #include "INETDefs.h"
 #include "IScriptable.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4Address.h"
 #include "IPv4InterfaceData.h"
 #include "IPv4ControlInfo.h"
@@ -11,6 +10,8 @@
 #include "IIPv4RoutingTable.h"
 #include "IPSocket.h"
 #include "IGMPMessage.h"
+#include "ModuleAccess.h"
+#include "NetworkProtocolCommand_m.h"
 
 using namespace std;
 
@@ -112,7 +113,7 @@ void IGMPTester::initialize(int stage)
 {
     if (stage == 0)
     {
-        ift = InterfaceTableAccess().get();
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
         InterfaceEntry *interfaceEntry = new InterfaceEntry(this);
         interfaceEntry->setName("eth0");
@@ -135,7 +136,7 @@ void IGMPTester::initialize(int stage)
 
 void IGMPTester::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == IP_C_REGISTER_PROTOCOL)
+    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg))
     {
         delete msg;
         return;

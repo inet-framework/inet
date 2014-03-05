@@ -24,10 +24,10 @@
 
 #include "IGMPv3.h"
 #include "IPSocket.h"
-#include "IPv4RoutingTableAccess.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
+#include "IPv4RoutingTable.h"
+#include "ModuleAccess.h"
 
 #include <algorithm>
 #include <bitset>
@@ -393,8 +393,8 @@ void IGMPv3::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
-        rt = IPv4RoutingTableAccess().get();
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
 
         cModule *host = getContainingNode(this);
         host->subscribe(NF_INTERFACE_DELETED, this);

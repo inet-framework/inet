@@ -104,6 +104,8 @@ simple IGMPv3 like IIGMP
 {
     parameters:
         bool enabled = default(true);
+        string interfaceTableModule;
+        string routingTableModule;
         int    robustnessVariable = default(2); // IGMP is roboust to (roboustnessVariable-1) packet loss
         double queryInterval @unit("s") = default(125s);
         double queryResponseInterval @unit("s") = default(10s);

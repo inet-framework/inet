@@ -13,7 +13,8 @@ network TestIGMPNetwork
             parameters:
                 @node;
                 string igmpType = default("IGMPv3");
-
+                *.interfaceTableModule = absPath(".interfaceTable");
+                *.routingTableModule = absPath(".routingTable");
             submodules:
                 interfaceTable: InterfaceTable {
                     @display("p=57,31");
