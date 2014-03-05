@@ -28,6 +28,8 @@ module MulticastRouter extends Router
         @display("i=abstract/router");
         bool hasPIM = default(true);
         forwardMulticast = true;
+        pim.*.interfaceTableModule = default("^.^.interfaceTable"); // TODO use absPath()
+        pim.*.routingTableModule = default("^.^.routingTable"); // TODO use absPath()
     submodules:
         pim: PIMRouting if hasPIM {
             @display("p=175,287");

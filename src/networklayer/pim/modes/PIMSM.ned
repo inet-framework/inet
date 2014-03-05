@@ -53,6 +53,8 @@ simple PIMSM
 {
     parameters:
     	@display("i=block/network2");
+        string interfaceTableModule;
+        string routingTableModule;
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
         string RP = default("");

@@ -18,13 +18,11 @@
 
 #include "IPv4Datagram.h"
 #include "IPSocket.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
 #include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4Address.h"
-#include "IPv4RoutingTableAccess.h"
 #include "PIMBase.h"
 
 using namespace std;
@@ -74,8 +72,8 @@ void PIMBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
-        rt = IPv4RoutingTableAccess().get();
+        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
+        rt = check_and_cast<IIPv4RoutingTable*>(getModuleByPath(par("routingTableModule")));
         pimIft = check_and_cast<PIMInterfaceTable*>(getModuleByPath(par("pimInterfaceTableModule")));
         pimNbt = check_and_cast<PIMNeighborTable*>(getModuleByPath(par("pimNeighborTableModule")));
 

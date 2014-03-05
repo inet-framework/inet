@@ -43,6 +43,8 @@ simple PIMDM
 {
     parameters:
     	@display("i=block/network2");
+        string interfaceTableModule;
+        string routingTableModule;
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
 

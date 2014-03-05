@@ -22,7 +22,6 @@
 #include "INETDefs.h"
 
 #include "PIMPacket_m.h"
-#include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
 #include "PIMNeighborTable.h"
 #include "PIMInterfaceTable.h"
