@@ -44,7 +44,6 @@ simple PIMSM
         double assertOverrideInterval @unit(s) = 3s;
 
         string RP = default("");
-        string sptThreshold = default("infinity");
 
         @signal[sentHelloPk](type=cPacket);
         @signal[rcvdHelloPk](type=cPacket);

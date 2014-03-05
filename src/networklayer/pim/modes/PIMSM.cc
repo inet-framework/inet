@@ -91,7 +91,6 @@ void PIMSM::initialize(int stage)
         const char *rp = par("RP");
         if (rp && *rp)
             rpAddr = IPv4Address(rp);
-        sptThreshold = par("sptThreshold").stdstringValue();
 
         joinPrunePeriod = par("joinPrunePeriod");
         defaultOverrideInterval = par("defaultOverrideInterval");
@@ -116,8 +115,6 @@ bool PIMSM::handleNodeStart(IDoneCallback *doneCallback)
     {
         if (rpAddr.isUnspecified())
             throw cRuntimeError("PIMSM: missing RP address parameter.");
-        if (sptThreshold.empty())
-            throw cRuntimeError("PIMSM: missing SPTthreshold parameter");
 
         // subscribe for notifications
         cModule *host = findContainingNode(this);
@@ -1309,16 +1306,6 @@ void PIMSM::multicastPacketArrivedOnRpfInterface(Route *route)
              }
          */
     }
-
-    //TODO SPT threshold at last hop router
-//    if (route->isFlagSet(Route::CONNECTED))
-//    {
-//        if (this->getSPTthreshold() != "infinity")
-//            EV << "pimSM::dataOnRpf - Last hop router should to send Join(S,G)" << endl;
-//        else
-//            EV << "pimSM::dataOnRpf - SPT threshold set to infinity" << endl;
-//
-//    }
 }
 
 void PIMSM::multicastPacketArrivedOnNonRpfInterface(Route *route, int interfaceId)

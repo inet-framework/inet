@@ -179,7 +179,6 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
         // parameters
         IPv4Address rpAddr;
-        std::string sptThreshold;
         double joinPrunePeriod;
         double defaultOverrideInterval;
         double defaultPropagationDelay;
