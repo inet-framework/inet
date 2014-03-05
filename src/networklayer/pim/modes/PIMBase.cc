@@ -87,7 +87,7 @@ void PIMBase::initialize(int stage)
 
         helloPeriod = par("helloPeriod");
         holdTime = par("holdTime");
-        designatedRouterPriority = par("designatedRouterPriority");
+        designatedRouterPriority = mode == PIMInterface::SparseMode ? par("designatedRouterPriority") : -1;
     }
 }
 

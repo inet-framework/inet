@@ -27,8 +27,6 @@ simple PIMDM
         string pimInterfaceTableModule;
         string pimNeighborTableModule;
 
-        int designatedRouterPriority = default(-1);
-
         volatile double triggeredHelloDelay @unit(s) = uniform(0s,5s);
         double helloPeriod @unit(s) = 30s;
         double holdTime @unit(s) = default(3.5 * helloPeriod);
