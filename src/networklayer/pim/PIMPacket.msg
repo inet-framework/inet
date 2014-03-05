@@ -18,6 +18,11 @@
 
 cplusplus {{
 #include "IPv4Address.h"
+
+#define PIM_HEADER_LENGTH 4
+#define ENCODED_UNICODE_ADDRESS_LENGTH 6 // IPv4 only
+#define ENCODED_GROUP_ADDRESS_LENGTH   8 // IPv4 only
+#define ENCODED_SOURCE_ADDRESS_LENGTH  8 // IPv4 only
 }}
 
 //struct IPAddress;

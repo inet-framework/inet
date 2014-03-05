@@ -67,6 +67,8 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
     EncodedAddress &address = group.getPrunedSourceAddress(0);
 	address.IPaddress = src;
 
+	packet->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
+
 	emit(sentJoinPrunePkSignal, packet);
 
 	sendToIP(packet, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, intId);
@@ -90,6 +92,8 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
     group.setJoinedSourceAddressArraySize(1);
     EncodedAddress &address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
+
+    packet->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
 
     emit(sentJoinPrunePkSignal, packet);
 
@@ -116,6 +120,8 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 	group.setJoinedSourceAddressArraySize(1);
     EncodedAddress &address = group.getJoinedSourceAddress(0);
     address.IPaddress = src;
+
+    msg->setByteLength(PIM_HEADER_LENGTH + 8 + ENCODED_GROUP_ADDRESS_LENGTH + 4 + ENCODED_SOURCE_ADDRESS_LENGTH);
 
     emit(sentGraftPkSignal, msg);
 
@@ -162,6 +168,12 @@ void PIMDM::sendStateRefreshPacket(IPv4Address originator, Route *route, Downstr
 	msg->setP(downstream->pruneState == DownstreamInterface::PRUNED);
     // TODO set metric
 
+	msg->setByteLength(PIM_HEADER_LENGTH +
+	                   ENCODED_GROUP_ADDRESS_LENGTH +
+	                   ENCODED_UNICODE_ADDRESS_LENGTH +
+	                   ENCODED_UNICODE_ADDRESS_LENGTH +
+	                   12);
+
 	emit(sentStateRefreshPkSignal, msg);
 
 	sendToIP(msg, IPv4Address::UNSPECIFIED_ADDRESS, ALL_PIM_ROUTERS_MCAST, downstream->ie->getInterfaceId());
@@ -177,6 +189,11 @@ void PIMDM::sendAssertPacket(IPv4Address source, IPv4Address group, AssertMetric
     pkt->setR(false);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
+
+    pkt->setByteLength(PIM_HEADER_LENGTH +
+                       ENCODED_GROUP_ADDRESS_LENGTH +
+                       ENCODED_UNICODE_ADDRESS_LENGTH +
+                       8);
 
     emit(sentAssertPkSignal, pkt);
 

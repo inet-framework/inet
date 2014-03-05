@@ -1475,6 +1475,13 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
+    msg->setByteLength(PIM_HEADER_LENGTH +
+                       ENCODED_UNICODE_ADDRESS_LENGTH +
+                       4 +
+                       ENCODED_GROUP_ADDRESS_LENGTH +
+                       4 +
+                       ENCODED_SOURCE_ADDRESS_LENGTH);
+
     emit(sentJoinPrunePkSignal, msg);
 
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
@@ -1501,6 +1508,13 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     encodedAddr.W = (routeType == G);
     encodedAddr.R = (routeType == G);
 
+    msg->setByteLength(PIM_HEADER_LENGTH +
+                       ENCODED_UNICODE_ADDRESS_LENGTH +
+                       4 +
+                       ENCODED_GROUP_ADDRESS_LENGTH +
+                       4 +
+                       ENCODED_SOURCE_ADDRESS_LENGTH);
+
     emit(sentJoinPrunePkSignal, msg);
 
     InterfaceEntry *interfaceToRP = rt->getInterfaceForDestAddr(source);
@@ -1521,11 +1535,14 @@ void PIMSM::sendPIMRegisterNull(IPv4Address multOrigin, IPv4Address multGroup)
         msg->setN(true);
         msg->setB(false);
 
+        msg->setByteLength(PIM_HEADER_LENGTH + 4);
+
         // set encapsulated packet (IPv4 header only)
         IPv4Datagram *datagram = new IPv4Datagram();
         datagram->setDestAddress(multGroup);
         datagram->setSrcAddress(multOrigin);
         datagram->setTransportProtocol(IP_PROT_PIM);
+        datagram->setByteLength(IP_HEADER_BYTES);
         msg->encapsulate(datagram);
 
         emit(sentRegisterPkSignal, msg);
@@ -1543,6 +1560,8 @@ void PIMSM::sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInt
     msg->setType(Register);
     msg->setN(false);
     msg->setB(false);
+
+    msg->setByteLength(PIM_HEADER_LENGTH + 4);
 
     IPv4Datagram *datagramCopy = datagram->dup();
     delete datagramCopy->removeControlInfo();
@@ -1566,6 +1585,8 @@ void PIMSM::sendPIMRegisterStop(IPv4Address source, IPv4Address dest, IPv4Addres
     msg->setSourceAddress(multSource);
     msg->setGroupAddress(multGroup);
 
+    msg->setByteLength(PIM_HEADER_LENGTH + ENCODED_GROUP_ADDRESS_LENGTH + ENCODED_UNICODE_ADDRESS_LENGTH);
+
     emit(sentRegisterStopPkSignal, msg);
 
     // set IP packet
@@ -1583,6 +1604,11 @@ void PIMSM::sendPIMAssert(IPv4Address source, IPv4Address group, AssertMetric me
     pkt->setR(rptBit);
     pkt->setMetricPreference(metric.preference);
     pkt->setMetric(metric.metric);
+
+    pkt->setByteLength(PIM_HEADER_LENGTH +
+                       ENCODED_GROUP_ADDRESS_LENGTH +
+                       ENCODED_UNICODE_ADDRESS_LENGTH +
+                       8);
 
     emit(sentAssertPkSignal, pkt);
 

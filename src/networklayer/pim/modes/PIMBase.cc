@@ -159,6 +159,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
 
     PIMHello *msg = new PIMHello("PIMHello");
 
+    int byteLength = PIM_HEADER_LENGTH + 6 + 8; // HoldTime + GenerationID option
+
     msg->setOptionsArraySize(designatedRouterPriority < 0 ? 2 : 3);
     HoldtimeOption *holdtimeOption = new HoldtimeOption();
     holdtimeOption->setHoldTime(holdTime < 0 ? (uint16_t)0xffff: (uint16_t)holdTime);
@@ -173,6 +175,7 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
         DRPriorityOption *drPriorityOption = new DRPriorityOption();
         drPriorityOption->setPriority(designatedRouterPriority);
         msg->setOptions(2, drPriorityOption);
+        byteLength += 8;
     }
 
     IPv4ControlInfo *ctrl = new IPv4ControlInfo();
@@ -181,6 +184,8 @@ void PIMBase::sendHelloPacket(PIMInterface *pimInterface)
     ctrl->setTimeToLive(1);
     ctrl->setInterfaceId(pimInterface->getInterfaceId());
     msg->setControlInfo(ctrl);
+
+    msg->setByteLength(byteLength);
 
     emit(sentHelloPkSignal, msg);
 
