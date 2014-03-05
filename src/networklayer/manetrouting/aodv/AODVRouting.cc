@@ -36,6 +36,7 @@ void AODVRouting::initialize(int stage)
         interfaceTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolPath")));
         AodvUDPPort = par("UDPPort");
+        askGratuitousRREP = par("askGratuitousRREP");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -151,7 +152,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
 
 void AODVRouting::startAODVRouting()
 {
-    //socket.bind(AodvUDPPort); // todo: multicast loop
+
 }
 
 void AODVRouting::stopAODVRouting()
@@ -297,6 +298,8 @@ void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned in
 AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
 {
     AODVRREQ *rreqPacket = new AODVRREQ("AODV-RREQ");
+
+    rreqPacket->setGratuitousRREPFlag(askGratuitousRREP);
     IRoute *lastKnownRoute = routingTable->findBestMatchingRoute(destAddr);
 
     rreqPacket->setPacketType(RREQ);
@@ -430,6 +433,7 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * route, const Address
  */
 AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* route)
 {
+    ASSERT(route != NULL);
     AODVRREP *grrep = new AODVRREP("AODV-GRREP");
     AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
 
@@ -438,7 +442,11 @@ AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* route)
     grrep->setDestAddr(rreq->getOriginatorAddr());
     grrep->setDestSeqNum(rreq->getOriginatorSeqNum());
     grrep->setOriginatorAddr(rreq->getDestAddr());
-    grrep->setLifeTime(routeData->getLifeTime()); // XXX
+
+    // XXX: ? The remaining lifetime of the route
+    // towards the originator of the RREQ,
+    // as known by the intermediate node.
+    grrep->setLifeTime(routeData->getLifeTime());
 
     return grrep;
 }
@@ -780,6 +788,23 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
             // send to the originator
             sendRREP(rrep, rreq->getOriginatorAddr(), 100); // FIXME: temporary, we set the TTL value to 100
 
+            // After a node receives a RREQ and responds with a RREP, it discards
+            // the RREQ.  If the RREQ has the 'G' flag set, and the intermediate
+            // node returns a RREP to the originating node, it MUST also unicast a
+            // gratuitous RREP to the destination node.
+
+            if (rreq->getGratuitousRREPFlag() && rreq->getDestAddr() != getSelfIPAddress())
+            {
+                // The gratuitous RREP is then sent to the next hop along the path to
+                // the destination node, just as if the destination node had already
+                // issued a RREQ for the originating node and this RREP was produced in
+                // response to that (fictitious) RREQ.
+
+                IRoute * originatorRoute = routingTable->findBestMatchingRoute(rreq->getOriginatorAddr());
+                AODVRREP * grrep = createGratuitousRREP(rreq, originatorRoute);
+                sendGRREP(grrep, rreq->getDestAddr(), 100);
+            }
+
             delete rreq;
             return; // discard RREQ, in this case, we do not forward it.
         }
@@ -1020,8 +1045,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 }
 
 
-bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage,
-        IDoneCallback* doneCallback)
+bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage, IDoneCallback* doneCallback)
 {
 
     // TODO (localInHook??): If the node
@@ -1115,6 +1139,14 @@ void AODVRouting::completeRouteDiscovery(const Address& target)
     ASSERT(waitRREPIter != waitForRREPTimers.end());
     cancelAndDelete(waitRREPIter->second);
     waitForRREPTimers.erase(waitRREPIter);
+}
+
+void AODVRouting::sendGRREP(AODVRREP* grrep, const Address& destAddr, unsigned int timeToLive)
+{
+    IRoute * destRoute = routingTable->findBestMatchingRoute(destAddr);
+    const Address& nextHop = destRoute->getNextHopAsGeneric();
+
+    sendAODVPacket(grrep, nextHop, timeToLive, 0); // TODO: temporary ttl
 }
 
 AODVRouting::~AODVRouting()

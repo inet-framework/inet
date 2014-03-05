@@ -71,6 +71,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         // parameters
         unsigned int AodvUDPPort; // UDP port
+        bool askGratuitousRREP;
 
         // state
         UDPSocket socket; // UDP socket to disseminate AODV control packets
@@ -115,6 +116,8 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void handleLinkBreakSendRERR(const Address& unreachableAddr);
 
         void sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
+        void sendGRREP(AODVRREP * grrep, const Address& destAddr, unsigned int timeToLive);
+
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
         IRoute * createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 

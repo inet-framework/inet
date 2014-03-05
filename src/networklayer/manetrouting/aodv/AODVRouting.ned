@@ -38,7 +38,7 @@ simple AODVRouting
         string routingTablePath = default("^.routingTable");
         string interfaceTablePath = default("^.interfaceTable");
         string networkProtocolPath = default("^.networkLayer.ip");
-
+        bool askGratuitousRREP = default(false);
         int UDPPort = default(654);
     gates:
         input ipIn;
