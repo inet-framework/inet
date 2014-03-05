@@ -19,6 +19,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
 #include "IPv4InterfaceData.h"
+#include "ModuleAccess.h"
 #include "NotifierConsts.h"
 #include "PIMSM.h"
 
@@ -339,9 +340,9 @@ void PIMSM::processJoinPrunePacket(PIMJoinPrune *pkt)
     int holdTime = pkt->getHoldTime();
     IPv4Address upstreamNeighbor = pkt->getUpstreamNeighborAddress();
 
-    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++)
     {
-        MulticastGroup group = pkt->getMulticastGroups(i);
+        JoinPruneGroup group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         // go through list of joined sources
@@ -1465,8 +1466,8 @@ void PIMSM::sendPIMJoin(IPv4Address group, IPv4Address source, IPv4Address upstr
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
 
-    msg->setMulticastGroupsArraySize(1);
-    MulticastGroup &multGroup = msg->getMulticastGroups(0);
+    msg->setJoinPruneGroupsArraySize(1);
+    JoinPruneGroup &multGroup = msg->getJoinPruneGroups(0);
     multGroup.setGroupAddress(group);
     multGroup.setJoinedSourceAddressArraySize(1);
     EncodedAddress &encodedAddr = multGroup.getJoinedSourceAddress(0);
@@ -1498,8 +1499,8 @@ void PIMSM::sendPIMPrune(IPv4Address group, IPv4Address source, IPv4Address upst
     msg->setUpstreamNeighborAddress(upstreamNeighbor);
     msg->setHoldTime(joinPruneHoldTime());
 
-    msg->setMulticastGroupsArraySize(1);
-    MulticastGroup &multGroup = msg->getMulticastGroups(0);
+    msg->setJoinPruneGroupsArraySize(1);
+    JoinPruneGroup &multGroup = msg->getJoinPruneGroups(0);
     multGroup.setGroupAddress(group);
     multGroup.setPrunedSourceAddressArraySize(1);
     EncodedAddress &encodedAddr = multGroup.getPrunedSourceAddress(0);

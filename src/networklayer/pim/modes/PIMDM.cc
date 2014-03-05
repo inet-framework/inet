@@ -17,6 +17,7 @@
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
 #include "IPv4Datagram.h"
+#include "ModuleAccess.h"
 #include "PIMDM.h"
 
 Define_Module(PIMDM);
@@ -60,8 +61,8 @@ void PIMDM::sendPrunePacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 	packet->setHoldTime(holdTime);
 
 	// set multicast groups
-    packet->setMulticastGroupsArraySize(1);
-	MulticastGroup &group = packet->getMulticastGroups(0);
+    packet->setJoinPruneGroupsArraySize(1);
+	JoinPruneGroup &group = packet->getJoinPruneGroups(0);
 	group.setGroupAddress(grp);
 	group.setPrunedSourceAddressArraySize(1);
     EncodedAddress &address = group.getPrunedSourceAddress(0);
@@ -86,8 +87,8 @@ void PIMDM::sendJoinPacket(IPv4Address nextHop, IPv4Address src, IPv4Address grp
     packet->setHoldTime(0); // ignored by the receiver
 
     // set multicast groups
-    packet->setMulticastGroupsArraySize(1);
-    MulticastGroup &group = packet->getMulticastGroups(0);
+    packet->setJoinPruneGroupsArraySize(1);
+    JoinPruneGroup &group = packet->getJoinPruneGroups(0);
     group.setGroupAddress(grp);
     group.setJoinedSourceAddressArraySize(1);
     EncodedAddress &address = group.getJoinedSourceAddress(0);
@@ -114,8 +115,8 @@ void PIMDM::sendGraftPacket(IPv4Address nextHop, IPv4Address src, IPv4Address gr
 	msg->setHoldTime(0);
 	msg->setUpstreamNeighborAddress(nextHop);
 
-    msg->setMulticastGroupsArraySize(1);
-	MulticastGroup &group = msg->getMulticastGroups(0);
+    msg->setJoinPruneGroupsArraySize(1);
+	JoinPruneGroup &group = msg->getJoinPruneGroups(0);
 	group.setGroupAddress(grp);
 	group.setJoinedSourceAddressArraySize(1);
     EncodedAddress &address = group.getJoinedSourceAddress(0);
@@ -231,9 +232,9 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
     IPv4Address upstreamNeighborAddress = pkt->getUpstreamNeighborAddress();
     int numRpfNeighbors = pimNbt->getNumNeighbors(rpfInterface->getInterfaceId());
 
-    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++)
     {
-        MulticastGroup group = pkt->getMulticastGroups(i);
+        JoinPruneGroup group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         // go through list of joined sources
@@ -413,9 +414,9 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
         return;
     }
 
-    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++)
     {
-        MulticastGroup &group = pkt->getMulticastGroups(i);
+        JoinPruneGroup &group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
@@ -569,9 +570,9 @@ void PIMDM::processGraftAckPacket(PIMGraftAck *pkt)
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
     IPv4Address destAddress = ctrlInfo->getDestAddr();
 
-    for (unsigned int i = 0; i < pkt->getMulticastGroupsArraySize(); i++)
+    for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++)
     {
-        MulticastGroup &group = pkt->getMulticastGroups(i);
+        JoinPruneGroup &group = pkt->getJoinPruneGroups(i);
         IPv4Address groupAddr = group.getGroupAddress();
 
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)

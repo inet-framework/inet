@@ -100,7 +100,7 @@ struct EncodedAddress
 
 // Record for Join/Prune message
 // in structure it is not possible to use dynamic arrays, iit is needed to use class
-class MulticastGroup
+class JoinPruneGroup
 {
 	IPv4Address 	groupAddress;
 	EncodedAddress 	joinedSourceAddress[]; 
@@ -132,7 +132,7 @@ packet PIMJoinPrune extends PIMPacket
 	IPv4Address		upstreamNeighborAddress;	
 	int				holdTime;
 	//int				numGroups;
-	MulticastGroup	multicastGroups[];   
+	JoinPruneGroup	joinPruneGroups[];
 }
 
 // Assert message
