@@ -18,10 +18,12 @@
 #ifndef AODVDEFS_H_
 #define AODVDEFS_H_
 
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 #define ACTIVE_ROUTE_TIMEOUT     3.0
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
-#define DELETE_PERIOD            1.0 // FIXME: it is just a temporary value
+#define DELETE_PERIOD            5 * MAX(ACTIVE_ROUTE_TIMEOUT, HELLO_INTERVAL)
 #define HELLO_INTERVAL           1.0
 #define LOCAL_ADD_TTL            2
 #define MAX_REPAIR_TTL           0.3 * NET_DIAMETER
@@ -40,7 +42,6 @@
 #define TTL_START                1
 #define TTL_INCREMENT            2
 #define TTL_THRESHOLD            7
-
 
 
 #endif /* AODVDEFS_H_ */

@@ -115,13 +115,11 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         {
             EV_INFO << "Active route found: " << route << endl;
             if (routeData)
-            {
                 routeData->setLastUsed(simTime());
-            }
 
             return ACCEPT;
         }
-        else
+        else if (sourceAddr.isUnspecified() || routingTable->isLocalAddress(sourceAddr))
         {
             // A node disseminates a RREQ when it determines that it needs a route
             // to a destination and does not have one available.  This can happen if
@@ -129,7 +127,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
             // valid route to the destination expires or is marked as invalid.
 
             EV_INFO << (isActive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
-            // TODO: delayDatagram(datagram);
+            delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr))
             {
@@ -142,10 +140,12 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
                     startRouteDiscovery(destAddr);
             }
             else
-                EV_DETAIL << "Route discovery is in progress: originator " << getSelfIPAddress() << " target " << destAddr << endl;
+                EV_DETAIL << "Route discovery is in progress, originator " << getSelfIPAddress() << " target " << destAddr << endl;
 
             return QUEUE;
         }
+        else
+            return ACCEPT;
     }
 }
 
@@ -180,7 +180,7 @@ void AODVRouting::startRouteDiscovery(const Address& destAddr, unsigned timeToLi
     EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << destAddr << endl;
     ASSERT(!hasOngoingRouteDiscovery(destAddr));
     AODVRREQ * rreq = createRREQ(destAddr);
-    sendRREQ(rreq,addressType->getBroadcastAddress(),timeToLive);
+    sendRREQ(rreq, addressType->getBroadcastAddress(), timeToLive);
 }
 
 Address AODVRouting::getSelfIPAddress()
@@ -190,7 +190,9 @@ Address AODVRouting::getSelfIPAddress()
 
 void AODVRouting::delayDatagram(INetworkDatagram* datagram)
 {
-
+    EV_DETAIL << "Queuing datagram, source " << datagram->getSourceAddress() << ", destination " << datagram->getDestinationAddress() << endl;
+    const Address& target = datagram->getDestinationAddress();
+    targetAddressToDelayedPackets.insert(std::pair<Address, INetworkDatagram *>(target, datagram));
 }
 
 void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned int timeToLive)
@@ -255,6 +257,8 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
     {
         WaitForRREP * newRREPTimerMsg = new WaitForRREP();
         waitForRREPTimers[rreq->getDestAddr()] = newRREPTimerMsg;
+        ASSERT(hasOngoingRouteDiscovery(rreq->getDestAddr()));
+
         timeToLive = TTL_START;
         newRREPTimerMsg->setLastTTL(TTL_START);
         newRREPTimerMsg->setFromInvalidEntry(false);
@@ -273,6 +277,8 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
 
 void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
 {
+    EV_INFO << "Sending Route Reply to " << destAddr << " for node: " << getSelfIPAddress() << endl;
+
     // When any node transmits a RREP, the precursor list for the
     // corresponding destination node is updated by adding to it
     // the next hop node to which the RREP is forwarded.
@@ -442,12 +448,8 @@ AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* route)
  */
 void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 {
-    std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.find(rrep->getDestAddr());
-    if (it != waitForRREPTimers.end())
-    {
-        cancelAndDelete(it->second);
-        waitForRREPTimers.erase(it);
-    }
+    EV_INFO << "Route Reply arrived from " << sourceAddr << endl;
+
     // When a node receives a RREP message, it searches (using longest-
     // prefix matching) for a route to the previous hop.
 
@@ -591,7 +593,11 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     }
     else
     {
-        // TODO: log
+        if (hasOngoingRouteDiscovery(rrep->getDestAddr()))
+        {
+            EV_INFO << "The Route Reply has arrived for our Route Request to node " << rrep->getDestAddr() << endl;
+            completeRouteDiscovery(rrep->getDestAddr());
+        }
         delete rrep;
     }
 
@@ -641,6 +647,7 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
 
 void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive)
 {
+    EV_INFO << "AODV Route Request arrived from " << sourceAddr << endl;
     // When a node receives a RREQ, it first creates or updates a route to
     // the previous hop without a valid sequence number (see section 6.2).
 
@@ -766,6 +773,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         if (rreq->getDestAddr() == getSelfIPAddress() ||
             (destRouteData && destRouteData->isActive() && destRouteData->hasValidDestNum() && destRouteData->getDestSeqNum() >= rreq->getDestSeqNum()))
         {
+            EV_INFO << "It is the destination node for which the route is desired" << endl;
             // create RREP
             AODVRREP * rrep = createRREP(rreq, destRoute, sourceAddr);
 
@@ -801,7 +809,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     }
     else
     {
-        EV_WARN << "Can't forward the RREQ because of its small TTL: " << timeToLive << " or the AODV reboot has not completed yet."  << endl;
+        EV_WARN << "Can't forward the RREQ because of its small TTL: " << timeToLive << " or the AODV reboot has not completed yet"  << endl;
         delete rreq;
     }
 }
@@ -860,7 +868,7 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
                 //           route in its routing table while transmitting data (and
                 //           route repair, if attempted, was unsuccessful), or
 
-                handleLinkBreakSendRERR(unreachableAddr);
+                //handleLinkBreakSendRERR(unreachableAddr);
 
             }
         }
@@ -1072,6 +1080,7 @@ void AODVRouting::handleWaitForRREP(WaitForRREP* rrepTimer)
 
 void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned int timeToLive)
 {
+    EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request." << endl;
     sendAODVPacket(rrep, destAddr, 100, 0);
 }
 
@@ -1080,6 +1089,32 @@ void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
     double delay = uniform(0,1);
     sendAODVPacket(rreq->dup(), addressType->getBroadcastAddress(), timeToLive, delay);
     delete rreq;
+}
+
+void AODVRouting::completeRouteDiscovery(const Address& target)
+{
+    EV_DETAIL << "Completing route discovery, originator " << getSelfIPAddress() << ", target " << target << endl;
+    ASSERT(hasOngoingRouteDiscovery(target));
+
+    std::multimap<Address, INetworkDatagram *>::iterator lt = targetAddressToDelayedPackets.lower_bound(target);
+    std::multimap<Address, INetworkDatagram *>::iterator ut = targetAddressToDelayedPackets.upper_bound(target);
+
+    // reinject the delayed datagrams
+    for (std::multimap<Address, INetworkDatagram *>::iterator it = lt; it != ut; it++)
+    {
+        INetworkDatagram * datagram = it->second;
+        EV_DETAIL << "Sending queued datagram: source " << datagram->getSourceAddress() << ", destination " << datagram->getDestinationAddress() << endl;
+        networkProtocol->reinjectQueuedDatagram(const_cast<const INetworkDatagram *>(datagram));
+    }
+
+    // clear the multimap
+    targetAddressToDelayedPackets.erase(lt, ut);
+
+    // we have a route for the destination, thus we must cancel the WaitForRREPTimer events
+    std::map<Address, WaitForRREP *>::iterator waitRREPIter = waitForRREPTimers.find(target);
+    ASSERT(waitRREPIter != waitForRREPTimers.end());
+    cancelAndDelete(waitRREPIter->second);
+    waitForRREPTimers.erase(waitRREPIter);
 }
 
 AODVRouting::~AODVRouting()

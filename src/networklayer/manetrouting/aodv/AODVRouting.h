@@ -81,6 +81,10 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         std::map<RREQIdentifier, simtime_t,RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
                                                               // an arbitrary RREQ in the network ) to arrival time
         simtime_t rebootTime;
+
+        // internal
+        std::multimap<Address, INetworkDatagram *> targetAddressToDelayedPackets;
+
     protected:
 
         void handleMessage(cMessage *msg);
@@ -103,6 +107,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         Address getSelfIPAddress();
         void delayDatagram(INetworkDatagram * datagram);
+        void completeRouteDiscovery(const Address& target);
         void sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned int timeToLive);
         void forwardRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void forwardRREQ(AODVRREQ * rreq, unsigned int timeToLive);
