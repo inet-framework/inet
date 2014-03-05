@@ -208,12 +208,22 @@ void TestIGMP::processCommand(const cXMLElement &node)
     const char *what = node.getAttribute("what");
     if (!strcmp(what, "groups"))
     {
-        const IPv4AddressVector &joinedGroups = ie->ipv4Data()->getJoinedMulticastGroups();
+        if (!ie)
+            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.detailedInfo().c_str());
+        IPv4AddressVector joinedGroups;
+        const int count = ie->ipv4Data()->getNumOfJoinedMulticastGroups();
+        for (int i = 0; i < count; ++i)
+            joinedGroups.push_back(ie->ipv4Data()->getJoinedMulticastGroup(i));
         dumpMulticastGroups(what, ifname, joinedGroups);
     }
     else if (!strcmp(what, "listeners"))
     {
-        const IPv4AddressVector &reportedGroups = ie->ipv4Data()->getReportedMulticastGroups();
+        if (!ie)
+            throw cRuntimeError("'ifname' attribute is missing at XML node ", node.detailedInfo().c_str());
+        IPv4AddressVector reportedGroups;
+        const int count = ie->ipv4Data()->getNumOfReportedMulticastGroups();
+        for (int i = 0; i < count; ++i)
+            reportedGroups.push_back(ie->ipv4Data()->getReportedMulticastGroup(i));
         dumpMulticastGroups("listeners", ifname, reportedGroups);
     }
   }
