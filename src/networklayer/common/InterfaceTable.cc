@@ -287,11 +287,11 @@ void InterfaceTable::discoverConnectingGates(InterfaceEntry *entry)
         return;  // virtual interface
 
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
-    cModule *host = getParentModule();
-    while (ifmod && ifmod->getParentModule()!=host)
+    ASSERT(host != NULL);
+    while (ifmod && ifmod->getParentModule() != host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError("addInterface(): specified module is not in this host/router");
+        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", entry->getInterfaceModule()->getFullPath().c_str(), this->getFullPath().c_str());
 
     // ASSUMPTIONS:
     // 1. The NIC module (ifmod) may or may not be connected to a network layer module (e.g. IPv4NetworkLayer or MPLS)
@@ -375,7 +375,7 @@ void InterfaceTable::updateLinkDisplayString(InterfaceEntry *entry)
     int outputGateId = entry->getNodeOutputGateId();
     if (outputGateId != -1)
     {
-        cModule *host = getParentModule();
+        ASSERT(host != NULL);
         cGate *outputGate = host->gate(outputGateId);
         if (!outputGate->getChannel())
             return;
@@ -434,11 +434,12 @@ InterfaceEntry *InterfaceTable::getInterfaceByNetworkLayerGateIndex(int index)
 InterfaceEntry *InterfaceTable::getInterfaceByInterfaceModule(cModule *ifmod)
 {
     // ifmod is something like "host.eth[1].mac"; climb up to find "host.eth[1]" from it
-    cModule *host = getParentModule();
+    ASSERT(host != NULL);
+    cModule *_ifmod = ifmod;
     while (ifmod && ifmod->getParentModule()!=host)
         ifmod = ifmod->getParentModule();
     if (!ifmod)
-        throw cRuntimeError("addInterface(): specified module is not in this host/router");
+        throw cRuntimeError("addInterface(): specified module (%s) is not in this host/router '%s'", _ifmod->getFullPath().c_str(), this->getFullPath().c_str());
 
     int nodeInputGateId = -1, nodeOutputGateId = -1;
     for (GateIterator i(ifmod); !i.end(); i++)
