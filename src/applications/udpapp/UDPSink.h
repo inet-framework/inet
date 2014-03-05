@@ -44,6 +44,9 @@ class INET_API UDPSink : public ApplicationBase
     int numReceived;
     static simsignal_t rcvdPkSignal;
 
+  public:
+    UDPSink();
+    virtual ~UDPSink();
   protected:
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();

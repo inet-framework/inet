@@ -25,6 +25,15 @@ Define_Module(UDPSink);
 
 simsignal_t UDPSink::rcvdPkSignal = registerSignal("rcvdPk");
 
+UDPSink::UDPSink()
+{
+    selfMsg = NULL;
+}
+
+UDPSink::~UDPSink()
+{
+    cancelAndDelete(selfMsg);
+}
 
 void UDPSink::initialize(int stage)
 {
