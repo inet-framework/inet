@@ -29,6 +29,7 @@ void AODVRouting::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        lastBroadcastTime = 0;
         rebootTime = 0;
         rreqId = sequenceNum = 0;
         host = this->getParentModule();
@@ -37,6 +38,7 @@ void AODVRouting::initialize(int stage)
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolPath")));
         AodvUDPPort = par("UDPPort");
         askGratuitousRREP = par("askGratuitousRREP");
+        useHelloMessages = par("useHelloMessages");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -48,6 +50,12 @@ void AODVRouting::initialize(int stage)
         socket.registerProtocol(IP_PROT_MANET);
         networkProtocol->registerHook(0, this);
         host->subscribe(NF_LINK_BREAK, this);
+
+        if (useHelloMessages)
+        {
+            helloMsgTimer = new cMessage("HelloMsgTimer");
+            scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
+        }
     }
 }
 
@@ -66,6 +74,8 @@ void AODVRouting::handleMessage(cMessage *msg)
     {
         if (dynamic_cast<WaitForRREP *>(msg))
             handleWaitForRREP((WaitForRREP*)msg);
+        else if (strcmp(msg->getName(), "HelloMsgTimer") == 0)
+           sendHelloMessagesIfNeeded();
         else
             throw cRuntimeError("Unknown self message");
     }
@@ -168,6 +178,7 @@ AODVRouting::AODVRouting()
     isOperational = false;
     networkProtocol = NULL;
     addressType = NULL;
+    helloMsgTimer = NULL;
 }
 
 bool AODVRouting::hasOngoingRouteDiscovery(const Address& destAddr)
@@ -458,6 +469,12 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 {
     EV_INFO << "Route Reply arrived from " << sourceAddr << endl;
 
+    if (rrep->getOriginatorAddr().isUnspecified())
+    {
+        EV_INFO << "This Route Reply is a Hello Message" << endl;
+        handleHelloMessage(rrep);
+        return;
+    }
     // When a node receives a RREP message, it searches (using longest-
     // prefix matching) for a route to the previous hop.
 
@@ -628,7 +645,7 @@ void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, uns
 void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destAddr, unsigned int timeToLive, double delay)
 {
 
-    ASSERT(timeToLive != 0); // for debugging
+    ASSERT(timeToLive != 0);
 
     INetworkProtocolControlInfo * networkProtocolControlInfo = addressType->createNetworkProtocolControlInfo();
 
@@ -646,6 +663,9 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     udpPacket->setSourcePort(AodvUDPPort);
     udpPacket->setDestinationPort(AodvUDPPort);
     udpPacket->setControlInfo(dynamic_cast<cObject *>(networkProtocolControlInfo));
+
+    if (destAddr.isBroadcast())
+        lastBroadcastTime = simTime();
 
     if (delay == 0)
         send(udpPacket, "ipOut");
@@ -1093,6 +1113,7 @@ void AODVRouting::clearState()
 
     waitForRREPTimers.clear();
     rreqsArrivalTime.clear();
+    cancelEvent(helloMsgTimer);
 
 }
 
@@ -1149,7 +1170,92 @@ void AODVRouting::sendGRREP(AODVRREP* grrep, const Address& destAddr, unsigned i
     sendAODVPacket(grrep, nextHop, timeToLive, 0); // TODO: temporary ttl
 }
 
+AODVRREP* AODVRouting::createHelloMessage()
+{
+    // called a Hello message, with the RREP
+    // message fields set as follows:
+    //
+    //    Destination IP Address         The node's IP address.
+    //
+    //    Destination Sequence Number    The node's latest sequence number.
+    //
+    //    Hop Count                      0
+    //
+    //    Lifetime                       ALLOWED_HELLO_LOSS * HELLO_INTERVAL
+
+    AODVRREP * helloMessage = new AODVRREP("AODV-HelloMsg");
+    helloMessage->setDestAddr(getSelfIPAddress());
+    helloMessage->setDestSeqNum(sequenceNum);
+    helloMessage->setHopCount(0);
+    helloMessage->setLifeTime(ALLOWED_HELLO_LOSS * HELLO_INTERVAL);
+
+    return helloMessage;
+}
+
+void AODVRouting::sendHelloMessagesIfNeeded()
+{
+    ASSERT(useHelloMessages);
+
+    // Every HELLO_INTERVAL milliseconds, the node checks whether it has
+    // sent a broadcast (e.g., a RREQ or an appropriate layer 2 message)
+    // within the last HELLO_INTERVAL.  If it has not, it MAY broadcast
+    // a RREP with TTL = 1
+
+    if (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > HELLO_INTERVAL)
+    {
+        AODVRREP * helloMessage = createHelloMessage();
+        double delay = uniform(0.0, 1.0);
+        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, delay);
+    }
+    scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
+}
+
+void AODVRouting::handleHelloMessage(AODVRREP* helloMessage)
+{
+    const Address& helloOriginatorAddr = helloMessage->getDestAddr();
+    IRoute * routeHelloOriginator = routingTable->findBestMatchingRoute(helloOriginatorAddr);
+
+    // Whenever a node receives a Hello message from a neighbor, the node
+    // SHOULD make sure that it has an active route to the neighbor, and
+    // create one if necessary.  If a route already exists, then the
+    // Lifetime for the route should be increased, if necessary, to be at
+    // least ALLOWED_HELLO_LOSS * HELLO_INTERVAL.  The route to the
+    // neighbor, if it exists, MUST subsequently contain the latest
+    // Destination Sequence Number from the Hello message.  The current node
+    // can now begin using this route to forward data packets.  Routes that
+    // are created by hello messages and not used by any other active routes
+    // will have empty precursor lists and would not trigger a RERR message
+    // if the neighbor moves away and a neighbor timeout occurs.
+
+    unsigned int latestDestSeqNum = helloMessage->getDestSeqNum();
+
+    if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
+    {
+        createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, true, latestDestSeqNum, true, ALLOWED_HELLO_LOSS * HELLO_INTERVAL);
+    }
+    else
+    {
+        AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(routeHelloOriginator->getProtocolData());
+        simtime_t newLifeTime = routeData->getLifeTime();
+
+        if (newLifeTime < ALLOWED_HELLO_LOSS * HELLO_INTERVAL)
+            newLifeTime = ALLOWED_HELLO_LOSS * HELLO_INTERVAL;
+
+        updateRoutingTable(routeHelloOriginator, helloOriginatorAddr, 1, true, latestDestSeqNum, true, newLifeTime);
+    }
+
+    // TODO:
+    // A node MAY determine connectivity by listening for packets from its
+    // set of neighbors.  If, within the past DELETE_PERIOD, it has received
+    // a Hello message from a neighbor, and then for that neighbor does not
+    // receive any packets (Hello messages or otherwise) for more than
+    // ALLOWED_HELLO_LOSS * HELLO_INTERVAL milliseconds, the node SHOULD
+    // assume that the link to this neighbor is currently lost.  When this
+    // happens, the node SHOULD proceed as in Section 6.11.
+}
+
 AODVRouting::~AODVRouting()
 {
     clearState();
+    delete helloMsgTimer;
 }

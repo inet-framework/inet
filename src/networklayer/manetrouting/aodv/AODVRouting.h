@@ -72,6 +72,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         // parameters
         unsigned int AodvUDPPort; // UDP port
         bool askGratuitousRREP;
+        bool useHelloMessages;
 
         // state
         UDPSocket socket; // UDP socket to disseminate AODV control packets
@@ -81,6 +82,9 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
         std::map<RREQIdentifier, simtime_t,RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
                                                               // an arbitrary RREQ in the network ) to arrival time
+        simtime_t lastBroadcastTime;
+
+        cMessage * helloMsgTimer;
         simtime_t rebootTime;
 
         // internal
@@ -113,6 +117,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void forwardRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void forwardRREQ(AODVRREQ * rreq, unsigned int timeToLive);
         void sendRERR();
+        void sendHelloMessagesIfNeeded();
         void handleLinkBreakSendRERR(const Address& unreachableAddr);
 
         void sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
@@ -121,14 +126,17 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
         IRoute * createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 
+        AODVRREP * createHelloMessage();
         AODVRREQ * createRREQ(const Address& destAddr);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr);
-        AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route); // FIXME
+        AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route);
         AODVRERR * createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum);
 
         void handleRREP(AODVRREP* rrep, const Address& sourceAddr);
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
         void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
+        void handleHelloMessage(AODVRREP * helloMessage);
+
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive, double delay);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
