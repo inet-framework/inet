@@ -104,6 +104,8 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         Address getSelfIPAddress();
         void delayDatagram(INetworkDatagram * datagram);
         void sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned int timeToLive);
+        void forwardRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
+        void forwardRREQ(AODVRREQ * rreq, unsigned int timeToLive);
         void sendRERR();
         void handleLinkBreakSendRERR(const Address& unreachableAddr);
 
@@ -111,7 +113,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
         IRoute * createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 
-        AODVRREQ * createRREQ(const Address& destAddr, unsigned int timeToLive);
+        AODVRREQ * createRREQ(const Address& destAddr);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr);
         AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route); // FIXME
         AODVRERR * createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum);
@@ -119,8 +121,10 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void handleRREP(AODVRREP* rrep, const Address& sourceAddr);
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
         void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
-        void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive);
+        void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive, double delay);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
+
+        void handleWaitForRREP(WaitForRREP * rrepTimer);
 
         // notification
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);

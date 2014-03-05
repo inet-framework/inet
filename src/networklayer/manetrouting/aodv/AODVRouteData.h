@@ -27,9 +27,6 @@ class INET_API AODVRouteData : public cObject
 
     protected:
         std::vector<Address> precursorList;
-        bool valid; // a false value indicates that the route has expired (lifeTime)
-                    // an invalid route cannot be used to forward data packets
-                    // but it can provide useful informations
         bool active;
         bool repariable;
         bool beingRepaired;
@@ -51,8 +48,6 @@ class INET_API AODVRouteData : public cObject
         void setIsBeingRepaired(bool isBeingRepaired) { this->beingRepaired = isBeingRepaired; }
         bool isRepariable() const { return repariable; }
         void setIsRepariable(bool isRepariable) { this->repariable = isRepariable; }
-        bool isValid() const { return valid; }
-        void setIsValid(bool isValid) { this->valid = isValid; }
         const simtime_t& getLifeTime() const { return lifeTime; }
         void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
         void setLastUsed(const simtime_t& lastUsed) { this->lastUsed = lastUsed; }

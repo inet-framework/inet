@@ -18,29 +18,28 @@
 #ifndef AODVDEFS_H_
 #define AODVDEFS_H_
 
-#define ACTIVE_ROUTE_TIMEOUT     3
+#define ACTIVE_ROUTE_TIMEOUT     3.0
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
-#define DELETE_PERIOD            1 // FIXME: it is just a temporary value
-#define HELLO_INTERVAL           1
+#define DELETE_PERIOD            1.0 // FIXME: it is just a temporary value
+#define HELLO_INTERVAL           1.0
 #define LOCAL_ADD_TTL            2
 #define MAX_REPAIR_TTL           0.3 * NET_DIAMETER
 // #define MIN_REPAIR_TTL
-#define MY_ROUTE_TIMEOUT         2 * ACTIVE_ROUTE_TIMEOUT
+#define MY_ROUTE_TIMEOUT         2.0 * ACTIVE_ROUTE_TIMEOUT
 #define NET_DIAMETER             35
 #define NET_TRAVERSAL_TIME       2 * NODE_TRAVERSAL_TIME * NET_DIAMETER
 #define NEXT_HOP_WAIT            NODE_TRAVERSAL_TIME + 10
 #define NODE_TRAVERSAL_TIME      0.04
-#define PATH_DISCOVERY_TIME      2 * NET_TRAVERSAL_TIME
+#define PATH_DISCOVERY_TIME      2.0 * NET_TRAVERSAL_TIME
 #define RERR_RATELIMIT           10
-#define RING_TRAVERSAL_TIME      2 * NODE_TRAVERSAL_TIME * (TTL_VALUE + TIMEOUT_BUFFER)
+#define RING_TRAVERSAL_TIME      2.0 * NODE_TRAVERSAL_TIME * (TTL_VALUE + TIMEOUT_BUFFER)
 #define RREQ_RETRIES             2
 #define RREQ_RATELIMIT           10
 #define TIMEOUT_BUFFER           2
 #define TTL_START                1
 #define TTL_INCREMENT            2
 #define TTL_THRESHOLD            7
-#define TTL_VALUE                1 // FIXME
 
 
 
