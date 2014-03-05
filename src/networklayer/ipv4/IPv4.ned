@@ -88,7 +88,7 @@ simple IPv4
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
         string routingTableModule;
-        string arpCacheModule;
+        string arpModule;
         string icmpModule;
         double procDelay @unit("s") = default(0s);
         int timeToLive = default(32);

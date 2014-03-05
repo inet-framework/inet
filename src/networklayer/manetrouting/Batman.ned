@@ -35,7 +35,7 @@ simple Batman extends BaseRouting like IManetRouting
         string interfaceTableModule;
         string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
-        string arpCacheModule = default("^.networkLayer.arp");
+        string arpModule = default("^.networkLayer.arp");
         @class(Batman);
         int debugLevel = default(4);
         double purgeTimeout @unit(s) = default(200s);

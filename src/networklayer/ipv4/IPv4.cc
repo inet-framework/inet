@@ -51,7 +51,7 @@ void IPv4::initialize(int stage)
 
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
-        arp = getModuleFromPar<IARP>(par("arpCacheModule"), this);
+        arp = getModuleFromPar<IARP>(par("arpModule"), this);
         icmp = getModuleFromPar<ICMP>(par("icmpModule"), this);
 
         arpInGate = gate("arpIn");

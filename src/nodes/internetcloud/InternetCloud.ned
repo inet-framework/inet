@@ -68,7 +68,7 @@ module InternetCloud
                 string routingTableModule;
                 *.interfaceTableModule = default(absPath(interfaceTableModule));
                 *.routingTableModule = default(absPath(routingTableModule));
-                *.arpCacheModule = default(absPath(".arp"));
+                *.arpModule = default(absPath(".arp"));
                 *.icmpModule = default(absPath(".icmp"));
             gates:
                 input ifIn[] @labels(IPDatagram);

@@ -39,7 +39,7 @@ simple DYMOUM extends BaseRouting like IManetRouting
         string interfaceTableModule;
         string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
-        string arpCacheModule = default("^.networkLayer.arp");
+        string arpModule = default("^.networkLayer.arp");
         bool no_path_acc_ = default(false);  // Disable path accumulation
         bool reissue_rreq_ = default(true); // Try more route discoveries when it fails the first time
         bool s_bit_ = default(false);        // Set S-bit of DYMO header

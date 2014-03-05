@@ -41,7 +41,7 @@ simple OLSR extends BaseRouting like IManetRouting
         string interfaceTableModule;
         string routingTableModule;
         string icmpModule = default("^.networkLayer.icmp");
-        string arpCacheModule = default("^.networkLayer.arp");
+        string arpModule = default("^.networkLayer.arp");
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)
         double Hello_ival @unit(s) = default(2s); // (s) HELLO messages' emission interval. (section 6.2)
         double Tc_ival @unit(s) = default(5s); // (s) Topology Control (TC) messages' emission interval. (section 9.3)

@@ -41,7 +41,7 @@ module IPv4NetworkLayer like INetworkLayer
         string routingTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         *.routingTableModule = default(absPath(routingTableModule));
-        *.arpCacheModule = default(absPath(".arp"));
+        *.arpModule = default(absPath(".arp"));
         *.icmpModule = default(absPath(".icmp"));
         @display("i=block/fork");
     gates:
