@@ -17,8 +17,8 @@
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
 #include "InterfaceMatcher.h"
-#include "InterfaceTableAccess.h"
 #include "IPv4InterfaceData.h"
+#include "ModuleAccess.h"
 #include "PIMInterfaceTable.h"
 
 using namespace std;
@@ -78,7 +78,7 @@ void PIMInterfaceTable::configureInterfaces(cXMLElement *config)
 {
     cXMLElementList interfaceElements = config->getChildrenByTagName("interface");
     InterfaceMatcher matcher(interfaceElements);
-    IInterfaceTable *ift = InterfaceTableAccess().get(this);
+    IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
     for (int k = 0; k < ift->getNumInterfaces(); ++k)
     {

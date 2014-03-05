@@ -42,5 +42,6 @@ simple PIMInterfaceTable
 {
     parameters:
         @display("i=block/table");
+        string interfaceTableModule;
         xml pimConfig = default(xml("<config/>"));
 }

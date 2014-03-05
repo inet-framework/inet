@@ -21,7 +21,6 @@
 
 #include "INETDefs.h"
 #include "IInterfaceTable.h"
-#include "ModuleAccess.h"
 #include "InterfaceEntry.h"
 
 /**

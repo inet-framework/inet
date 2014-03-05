@@ -20,7 +20,6 @@
 #define __INET_PIMNEIGHBORTABLE_H
 
 #include "INETDefs.h"
-#include "ModuleAccess.h"
 #include "InterfaceEntry.h"
 
 class PIMNeighborTable;

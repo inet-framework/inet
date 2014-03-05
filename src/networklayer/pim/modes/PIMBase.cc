@@ -20,9 +20,9 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "InterfaceTableAccess.h"
 #include "InterfaceTable.h"
 #include "IPv4Address.h"
+#include "ModuleAccess.h"
 #include "PIMBase.h"
 
 using namespace std;
@@ -72,10 +72,10 @@ void PIMBase::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = check_and_cast<IInterfaceTable*>(getModuleByPath(par("interfaceTableModule")));
-        rt = check_and_cast<IIPv4RoutingTable*>(getModuleByPath(par("routingTableModule")));
-        pimIft = check_and_cast<PIMInterfaceTable*>(getModuleByPath(par("pimInterfaceTableModule")));
-        pimNbt = check_and_cast<PIMNeighborTable*>(getModuleByPath(par("pimNeighborTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        pimIft = getModuleFromPar<PIMInterfaceTable>(par("pimInterfaceTableModule"), this);
+        pimNbt = getModuleFromPar<PIMNeighborTable>(par("pimNeighborTableModule"), this);
 
         cModule *host = findContainingNode(this);
         if (!host)

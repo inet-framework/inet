@@ -16,11 +16,11 @@
 //
 // Authors: Veronika Rybova, Vladimir Vesely (mailto:ivesely@fit.vutbr.cz)
 
-#include "InterfaceTableAccess.h"
 #include "IPProtocolId_m.h"
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "ICMPMessage_m.h"
+#include "ModuleAccess.h"
 #include "NetworkProtocolCommand_m.h"
 #include "PIMSplitter.h"
 
@@ -34,8 +34,8 @@ void PIMSplitter::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-        ift = InterfaceTableAccess().get();
-        pimIft = check_and_cast<PIMInterfaceTable*>(getModuleByPath(par("pimInterfaceTableModule")));
+        ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
+        pimIft = getModuleFromPar<PIMInterfaceTable>(par("pimInterfaceTableModule"), this);
 
         ipIn = gate("ipIn");
         ipOut = gate("ipOut");
