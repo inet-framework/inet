@@ -1456,9 +1456,13 @@ void PIMSM::joinDesiredChanged(Route *route)
 
 void PIMSM::designatedRouterAddressHasChanged(InterfaceEntry *ie)
 {
-
+    // TODO
 }
 
+void PIMSM::iAmDRHasChanged(InterfaceEntry *ie, bool iAmDR)
+{
+    // TODO
+}
 
 //============================================================================
 //                      Sending PIM packets
@@ -1709,8 +1713,55 @@ void PIMSM::updateDesignatedRouterAddress(InterfaceEntry *ie)
     {
         pimInterface->setDRAddress(drAddress);
         designatedRouterAddressHasChanged(ie);
+
+        IPv4Address myAddress = ie->ipv4Data()->getIPAddress();
+        bool iWasDR = oldDRAddress.isUnspecified() || oldDRAddress == myAddress;
+        bool iAmDR = drAddress == myAddress;
+        if (iWasDR != iAmDR)
+            iAmDRHasChanged(ie, iAmDR);
     }
 }
+
+void PIMSM::updateCouldAssert(DownstreamInterface *downstream)
+{
+    // TODO
+
+    // CouldAssert(S,G,I) =
+    // SPTbit(S,G)==TRUE
+    // AND (RPF_interface(S) != I)
+    // AND (I in ( ( joins(*,*,RP(G)) (+) joins(*,G) (-) prunes(S,G,rpt) )
+    //            (+) ( pim_include(*,G) (-) pim_exclude(S,G) )
+    //            (-) lost_assert(*,G)
+    //            (+) joins(S,G) (+) pim_include(S,G) ) )
+
+    // CouldAssert(*,G,I) =
+    // ( I in ( joins(*,*,RP(G)) (+) joins(*,G)
+    //          (+) pim_include(*,G)) )
+    // AND (RPF_interface(RP(G)) != I)
+}
+
+void PIMSM::updateAssertTrackingDesired(PimsmInterface *interface)
+{
+    // TODO
+
+    // AssertTrackingDesired(S,G,I) =
+    // (I in ( ( joins(*,*,RP(G)) (+) joins(*,G) (-) prunes(S,G,rpt) )
+    //         (+) ( pim_include(*,G) (-) pim_exclude(S,G) )
+    //         (-) lost_assert(*,G)
+    //         (+) joins(S,G) ) )
+    // OR (local_receiver_include(S,G,I) == TRUE
+    //     AND (I_am_DR(I) OR (AssertWinner(S,G,I) == me)))
+    // OR ((RPF_interface(S) == I) AND (JoinDesired(S,G) == TRUE))
+    // OR ((RPF_interface(RP(G)) == I) AND (JoinDesired(*,G) == TRUE)
+    //     AND (SPTbit(S,G) == FALSE))
+
+    // AssertTrackingDesired(*,G,I) =
+    //   CouldAssert(*,G,I)
+    //   OR (local_receiver_include(*,G,I)==TRUE
+    //       AND (I_am_DR(I) OR AssertWinner(*,G,I) == me))
+    //   OR (RPF_interface(RP(G)) == I AND RPTJoinDesired(G))
+}
+
 
 //============================================================================
 //                                Helpers
@@ -2123,7 +2174,6 @@ bool PIMSM::DownstreamInterface::isInImmediateOlist() const
     }
     return false;
 }
-
 
 bool PIMSM::DownstreamInterface::isInInheritedOlist() const
 {

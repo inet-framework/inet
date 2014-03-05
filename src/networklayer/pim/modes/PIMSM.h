@@ -43,10 +43,10 @@ class INET_API PIMSM : public PIMBase, protected cListener
 
             enum Flags
             {
-                RECEIVER_INCLUDE        = 1 << 0,
-                RECEIVER_EXCLUDE        = 1 << 1,
-                COULD_ASSERT            = 1 << 2,
-                ASSERT_TRACKING_DESIRED = 1 << 3
+                RECEIVER_INCLUDE        = 1 << 0, // local_receiver_include(S,G,I) or local_receiver_include(*,G,I)
+                RECEIVER_EXCLUDE        = 1 << 1, // local_receiver_exclude(S,G,I)
+                COULD_ASSERT            = 1 << 2, // CouldAssert(S,G,I)
+                ASSERT_TRACKING_DESIRED = 1 << 3  // AssertTrackingDesired(S,G,I)
             };
 
             PimsmInterface(Route *owner, InterfaceEntry *ie);
@@ -58,8 +58,12 @@ class INET_API PIMSM : public PIMBase, protected cListener
             bool localReceiverInclude() const { return isFlagSet(RECEIVER_INCLUDE); }
             void setLocalReceiverInclude(bool value) { setFlag(RECEIVER_INCLUDE, value); }
             bool localReceiverExclude() const { return isFlagSet(RECEIVER_EXCLUDE); }
+            void setLocalReceiverExclude(bool value) { setFlag(RECEIVER_EXCLUDE, value); }
             bool couldAssert() const { return isFlagSet(COULD_ASSERT); }
+            void setCouldAssert(bool value) { setFlag(COULD_ASSERT, value); }
             bool assertTrackingDesired() const { return isFlagSet(ASSERT_TRACKING_DESIRED); }
+            void setAssertTrackingDesired(bool value) { setFlag(ASSERT_TRACKING_DESIRED, value); }
+
             bool pimInclude() const { return localReceiverInclude() &&
                                              ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);}
             bool pimExclude() const { return localReceiverExclude() &&
@@ -249,6 +253,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         // internal events
         void joinDesiredChanged(Route *route);
         void designatedRouterAddressHasChanged(InterfaceEntry *ie);
+        void iAmDRHasChanged(InterfaceEntry *ie, bool iAmDR);
+
 
         // send pim messages
         void sendPIMRegister(IPv4Datagram *datagram, IPv4Address dest, int outInterfaceId);
@@ -269,6 +275,8 @@ class INET_API PIMSM : public PIMBase, protected cListener
         // update actions
         void updateJoinDesired(Route *route);
         void updateDesignatedRouterAddress(InterfaceEntry *ie);
+        void updateCouldAssert(DownstreamInterface *interface);
+        void updateAssertTrackingDesired(PimsmInterface *interface);
 
         // helpers
         bool IamRP (IPv4Address rpAddr) { return rt->isLocalAddress(rpAddr); }
