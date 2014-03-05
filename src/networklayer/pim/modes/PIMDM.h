@@ -32,7 +32,9 @@
 #include "PIMBase.h"
 
 /**
- * @brief Class implements PIM-DM (dense mode).
+ * Implementation of PIM-DM protocol (RFC 3973).
+ *
+ *
  */
 class INET_API PIMDM : public PIMBase, protected cListener
 {

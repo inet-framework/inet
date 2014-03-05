@@ -79,7 +79,7 @@ PIMSM::~PIMSM()
         delete it->second;
     for (RoutingTable::iterator it = sgRoutes.begin(); it != sgRoutes.end(); ++it)
         delete it->second;
-    // XXX rt contains references to the delete route entries
+    // XXX rt contains references to the deleted route entries
 }
 
 void PIMSM::initialize(int stage)

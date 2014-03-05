@@ -28,7 +28,22 @@
 #define MAX_TTL 255                     /**< Maximum TTL */
 
 /**
- * @brief Class implements PIM-SM (sparse mode).
+ * Implementation of PIM-SM protocol (RFC 4601).
+ *
+ * Protocol state is stored in two tables:
+ * - gRoutes table contains (*,G) state
+ * - sgRoutes table contains (S,G) state
+ * Note that (*,*,RP) and (S,G,rpt) state is currently missing.
+ *
+ * The routes stored in the tables are not the same as the routes
+ * of the IPv4RoutingTable. The RFC defines the terms "Tree Information Base" (TIB)
+ * and "Multicast Forwaring Information Base" (MFIB). According to this division,
+ * TIB is the state of this module, while MFIB is stored by IPv4RoutingTable.
+ *
+ * Incoming packets, notifications, and timer events may cause a change
+ * of the TIB, and of the MFIB (if the forwarding rules change).
+ *
+ *
  */
 class INET_API PIMSM : public PIMBase, protected cListener
 {
@@ -70,6 +85,7 @@ class INET_API PIMSM : public PIMBase, protected cListener
                                              ((/*I_am_DR AND*/ assertState != I_LOST_ASSERT) || assertState == I_WON_ASSERT);}
         };
 
+        // upstream interface is toward the RP or toward the source
         struct UpstreamInterface : public PimsmInterface
         {
             IPv4Address nextHop; // RPF nexthop, <unspec> at the DR in (S,G) routes

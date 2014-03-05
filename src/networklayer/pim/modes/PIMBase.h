@@ -28,9 +28,8 @@
 #include "PIMInterfaceTable.h"
 #include "PIMPacket.h"
 
-
 /**
- * TODO
+ * Base class of PIMSM and PIMDM modules.
  */
 class INET_API PIMBase : public OperationalBase
 {
