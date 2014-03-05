@@ -25,7 +25,7 @@ sim-time-limit = 100us
 record-eventlog = true
 ned-path = .;../../../../src
 
-**.globalARP = true
+**.arpType = "GlobalARP"
 
 **.host*.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m

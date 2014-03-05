@@ -29,7 +29,7 @@ network Synchronized
     parameters:
         int nodeCount;
         **.bitrate = 11Mbps;
-        **.globalARP = true;
+        **.arpType = "GlobalARP";
         @display("bgl=3");
     submodules:
         radioChannel: SimplifiedRadioChannel;

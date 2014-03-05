@@ -30,7 +30,7 @@ sim-time-limit = 400us
 record-eventlog = true
 ned-path = .;../../../../src
 
-**.globalARP = true
+**.arpType = "GlobalARP"
 
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
