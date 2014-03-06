@@ -63,6 +63,7 @@ class INET_API CSFQVLANQueue : public PassiveQueueBase
 
     // CSFQ++: System-wide variables
     double K;               // averaging interval for flow rate estimation
+    double K_scale;         // scaling factor for averaging constant in conformant flow rate estimation (typically set to 1.0/numFlows)
     double K_alpha;         // averaging interval for overall rate estimation
     double excessBW;        // excess bandwidth (i.e., C_{ex})
     double fairShareRate;   // normalized fair share rate for non-conformed flows

@@ -47,6 +47,9 @@ simple CSFQVLANQueue3 like OutputQueue
         int queueSize @unit(B) = default(15220000B);		// FIFO queue size; default value corresponds to 10,000 maximum-sized VLAN frames.
         int queueThreshold @unit(B) = default(3805000B);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
         double K @unit(s) = default(100ms);					// averaging constant for flow rate estimation
+        double K_scale = default(0);						// scaling factor for averaging constant in conformant flow rate estimation
+															// - default value of 0 means it is set to 1.0/numFlows;
+															// - otherwise, the given value is used.
 		int max_alpha = default(29);						// maximum number of times fair rate (alpha) can be decreased when queue overflows, during a time interval of length K_alpha
         double K_alpha @unit(s) = default(200ms);			// averaging constant for fair rate (alpha) estimation
         string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier

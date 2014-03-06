@@ -94,6 +94,8 @@ void CSFQVLANQueue::initialize(int stage)
 
         // CSFQ++: System-wide variables
         K = par("K").doubleValue();
+        double tmp = par("K_scale").doubleValue();
+        K_scale = (K_scale == 0.0) ? 1.0/numFlows : tmp; // default value (when the parameter value is 0) is 1.0/numFlows.
         K_alpha = par("K_alpha").doubleValue();
         excessBW = linkRate;
         fairShareRate = excessBW;
@@ -376,7 +378,11 @@ double CSFQVLANQueue::estimateRate(int flowIndex, int pktLength, simtime_t arrvT
     }
 
     prevTime[flowIndex] = arrvTime;
-    double w = exp(-T/K);
+
+    // use a different averaging constant for conformant and non-conformant flow rate estimation
+    // double w = exp(-T/K);
+    double w = (flowIndex < numFlows ? exp(-T/K) : exp(-T/(K_scale*K)));
+
     flowRate[flowIndex] = (1 - w)*pktLength/T + w*flowRate[flowIndex];
 #ifndef NDEBUG
             estRateVectors[flowIndex]->record(flowRate[flowIndex]);
