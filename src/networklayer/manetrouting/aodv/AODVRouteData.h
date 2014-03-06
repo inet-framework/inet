@@ -24,9 +24,6 @@
 
 class INET_API AODVRouteData : public cObject
 {
-    public:
-        static simtime_t nextExpungeTime; // the time of the next expiring route entry determined by lifetime field
-
     protected:
         std::vector<Address> precursorList;
         bool active;
@@ -51,7 +48,7 @@ class INET_API AODVRouteData : public cObject
         bool isRepariable() const { return repariable; }
         void setIsRepariable(bool isRepariable) { this->repariable = isRepariable; }
         const simtime_t& getLifeTime() const { return lifeTime; }
-        void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; if (lifeTime < nextExpungeTime) nextExpungeTime = lifeTime; }
+        void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
         void setLastUsed(const simtime_t& lastUsed) { this->lastUsed = lastUsed; }
         const simtime_t& getLastUsed() const { return lastUsed; }
         bool isActive() const { return active; }

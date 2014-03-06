@@ -125,6 +125,12 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         AODVRouteData* routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
         bool isActive = routeData && routeData->isActive();
 
+        // If a data packet is received for an invalid route, the Lifetime
+        // field is updated to current time plus DELETE_PERIOD.
+
+        if (route && !isActive && !route->getNextHopAsGeneric().isUnspecified() && sourceAddr.isUnspecified())
+            routeData->setLifeTime(simTime() + DELETE_PERIOD);
+
         if (route && !route->getNextHopAsGeneric().isUnspecified() && isActive)
         {
             EV_INFO << "Active route found: " << route << endl;
@@ -539,7 +545,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         //      known value is valid, or
         else if (destSeqNum > routeData->getDestSeqNum())
         {
-            updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, false, simTime() + lifeTime);
+            updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
         }
         else
         {
@@ -547,13 +553,13 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
             //       marked as inactive, or
             if (destSeqNum == routeData->getDestSeqNum() && !routeData->isActive())
             {
-                updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, false, simTime() + lifeTime);
+                updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
             }
             // (iv) the sequence numbers are the same, and the New Hop Count is
             //      smaller than the hop count in route table entry.
             else if (destSeqNum == routeData->getDestSeqNum() && rrep->getHopCount() < (unsigned int) route->getMetric())
             {
-                updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, false, simTime() + lifeTime);
+                updateRoutingTable(route, sourceAddr, newHopCount, true, destSeqNum, true, simTime() + lifeTime);
             }
         }
     }
@@ -578,7 +584,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         // message back (see section 6.8).
 
         IRoute * forwardRREPRoute = routingTable->findBestMatchingRoute(rrep->getOriginatorAddr());
-        if (forwardRREPRoute)
+        if (forwardRREPRoute && forwardRREPRoute->getSource() == this)
         {
             if (rrep->getAckRequiredFlag())
             {
@@ -894,7 +900,7 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
 
 void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj)
 {
-    Enter_Method("receiveChangeNotification");
+    /*Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK)
     {
         EV_DETAIL << "Received link break signal" << endl;
@@ -915,7 +921,7 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
 
             }
         }
-    }
+    }*/
 }
 
 void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
@@ -1258,8 +1264,7 @@ void AODVRouting::handleHelloMessage(AODVRREP* helloMessage)
 
 void AODVRouting::expungeRoutes()
 {
-    AODVRouteData::nextExpungeTime = SimTime::getMaxTime();
-
+    std::cout << "expunge host: " << this->getParentModule()->getFullName() << endl;
     for (int i = 0; i < routingTable->getNumRoutes(); i++)
     {
         IRoute * route = routingTable->getRoute(i);
@@ -1267,10 +1272,12 @@ void AODVRouting::expungeRoutes()
         {
             AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
             ASSERT(routeData != NULL);
-            if (routeData->getLifeTime() < simTime())
+            std::cout << "Route: " << route->getDestinationAsGeneric() << " lifetime: " << routeData->getLifeTime() << " now: " << simTime() << endl;
+            if (routeData->getLifeTime() <= simTime())
             {
                 if (routeData->isActive())
                 {
+                    EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and and set to inactive. It will be deleted after DELETE_PERIOD time" << endl;
                     // An expired routing table entry SHOULD NOT be expunged before
                     // (current_time + DELETE_PERIOD) (see section 6.11).  Otherwise, the
                     // soft state corresponding to the route (e.g., last known hop count)
@@ -1283,9 +1290,15 @@ void AODVRouting::expungeRoutes()
                     // Any routing table entry waiting for a RREP SHOULD NOT be expunged
                     // before (current_time + 2 * NET_TRAVERSAL_TIME).
                     if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric()))
+                    {
+                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME." << endl;
                         routeData->setLifeTime(simTime() + 2 * NET_TRAVERSAL_TIME);
+                    }
                     else
+                    {
+                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive and we are not expecting any RREP to this destination, so we delete this route." << endl;
                         routingTable->deleteRoute(route);
+                    }
                 }
             }
         }
@@ -1295,12 +1308,37 @@ void AODVRouting::expungeRoutes()
 
 void AODVRouting::scheduleExpungeRoutes()
 {
-    if (AODVRouteData::nextExpungeTime != SimTime::getMaxTime() && AODVRouteData::nextExpungeTime >= simTime())
+    simtime_t nextExpungeTime = SimTime::getMaxTime();
+    for (int i = 0; i < routingTable->getNumRoutes(); i++)
+    {
+        IRoute * route = routingTable->getRoute(i);
+
+        if (route->getSource() == this)
+        {
+            AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
+            ASSERT(routeData != NULL);
+
+            if (routeData->getLifeTime() < nextExpungeTime)
+                nextExpungeTime = routeData->getLifeTime();
+        }
+    }
+    if (nextExpungeTime == SimTime::getMaxTime())
     {
         if (expungeTimer->isScheduled())
             cancelEvent(expungeTimer);
-
-        scheduleAt(AODVRouteData::nextExpungeTime, expungeTimer);
+    }
+    else
+    {
+        if (!expungeTimer->isScheduled())
+            scheduleAt(nextExpungeTime, expungeTimer);
+        else
+        {
+            if (expungeTimer->getArrivalTime() != nextExpungeTime)
+            {
+                cancelEvent(expungeTimer);
+                scheduleAt(nextExpungeTime, expungeTimer);
+            }
+        }
     }
 }
 

@@ -16,5 +16,3 @@
 //
 
 #include "AODVRouteData.h"
-
-simtime_t AODVRouteData::nextExpungeTime = SimTime::getMaxTime();
