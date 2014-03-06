@@ -1240,6 +1240,8 @@ void PIMDM::stopPIMRouting()
         host->unsubscribe(NF_ROUTE_ADDED, this);
         host->unsubscribe(NF_INTERFACE_STATE_CHANGED, this);
     }
+
+    clearRoutes();
 }
 
 void PIMDM::receiveSignal(cComponent *source, simsignal_t signalID, cObject *details)
