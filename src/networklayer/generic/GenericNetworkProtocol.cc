@@ -442,7 +442,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
         throw cRuntimeError("No next hop");
 
     // send out datagram to NIC, with control info attached
-    MACAddress nextHopMAC = arp->resolveMACAddress(nextHop, ie);
+    MACAddress nextHopMAC = arp->resolveL3Address(nextHop, ie);
     if (nextHopMAC == MACAddress::UNSPECIFIED_ADDRESS)
     {
         throw cRuntimeError("ARP couldn't resolve the '%s' address", nextHop.str().c_str());

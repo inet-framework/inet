@@ -58,7 +58,7 @@ class INET_API IARP
     virtual ~IARP() {}
 
     /**
-     * Returns the IPv4 address for the given MAC address. If it is not available
+     * Returns the Layer 3 address for the given MAC address. If it is not available
      * (not in the cache, pending resolution, or already expired), UNSPECIFIED_ADDRESS
      * is returned.
      */
@@ -70,7 +70,7 @@ class INET_API IARP
      * an address resolution procedure. A signal is emitted when the address
      * resolution procedure terminates.
      */
-    virtual MACAddress resolveMACAddress(const Address& address, const InterfaceEntry *ie) = 0;
+    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie) = 0;
 };
 
 #endif

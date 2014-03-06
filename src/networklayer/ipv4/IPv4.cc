@@ -915,7 +915,7 @@ MACAddress IPv4::resolveNextHopMacAddress(cPacket *packet, IPv4Address nextHopAd
         return macAddr;
     }
 
-    return arp->resolveMACAddress(nextHopAddr, destIE);
+    return arp->resolveL3Address(nextHopAddr, destIE);
 }
 
 void IPv4::sendPacketToIeee802NIC(cPacket *packet, const InterfaceEntry *ie, const MACAddress& macAddress, int etherType)

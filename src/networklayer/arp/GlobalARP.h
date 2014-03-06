@@ -78,7 +78,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 
     /// IARPCache implementation  @{
     virtual Address getL3AddressFor(const MACAddress& addr) const;
-    virtual MACAddress resolveMACAddress(const Address& address, const InterfaceEntry *ie);
+    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie);
     /// @}
 
     // cListener

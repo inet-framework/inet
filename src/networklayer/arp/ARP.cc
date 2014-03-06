@@ -447,7 +447,7 @@ void ARP::updateARPCache(ARPCacheEntry *entry, const MACAddress& macAddress)
     emit(completedARPResolutionSignal, &signal);
 }
 
-MACAddress ARP::resolveMACAddress(const Address& address, const InterfaceEntry *ie)
+MACAddress ARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
 {
     Enter_Method("resolveMACAddress(%s,%s)", address.str().c_str(), ie->getName());
 

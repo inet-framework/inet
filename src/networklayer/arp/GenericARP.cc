@@ -26,7 +26,7 @@
 
 Define_Module(GenericARP);
 
-MACAddress GenericARP::resolveMACAddress(const Address& address, const InterfaceEntry *ie)
+MACAddress GenericARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
 {
     if (address.isUnicast())
         return mapUnicastAddress(address);

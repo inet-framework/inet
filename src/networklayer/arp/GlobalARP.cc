@@ -208,7 +208,7 @@ void GlobalARP::processARPPacket(ARPPacket *arp)
     delete arp;
 }
 
-MACAddress GlobalARP::resolveMACAddress(const Address& address, const InterfaceEntry *ie)
+MACAddress GlobalARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
 {
     Enter_Method_Silent();
 

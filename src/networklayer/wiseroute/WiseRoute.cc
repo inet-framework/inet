@@ -198,7 +198,7 @@ void WiseRoute::handleLowerPacket(cPacket* msg)
 				netwMsg->setSrcAddr(myNetwAddr);
 				netwMsg->setDestAddr(nextHop);
 				pCtrlInfo = netwMsg->removeControlInfo();
-				MACAddress nextHopMacAddr = arp->resolveMACAddress(nextHop, NULL);      //FIXME interface entry pointer needed
+				MACAddress nextHopMacAddr = arp->resolveL3Address(nextHop, NULL);      //FIXME interface entry pointer needed
 				if (nextHopMacAddr.isUnspecified())
 				    throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
 				setDownControlInfo(netwMsg, nextHopMacAddr);
@@ -259,7 +259,7 @@ void WiseRoute::handleUpperPacket(cPacket* msg)
 	else {
 		pkt->setIsFlood(0);
 		nbPureUnicastSent++;
-		nextHopMacAddr = arp->resolveMACAddress(nextHopAddr, NULL);   //FIXME interface entry pointer needed
+		nextHopMacAddr = arp->resolveL3Address(nextHopAddr, NULL);   //FIXME interface entry pointer needed
         if (nextHopMacAddr.isUnspecified())
             throw cRuntimeError("Cannot immediately resolve MAC address. Please configure a GenericARP module.");
 	}
