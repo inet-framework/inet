@@ -27,12 +27,6 @@ OperationalBase::OperationalBase() :
 {
 }
 
-void OperationalBase::finish()
-{
-    handleNodeShutdown(NULL);
-    setOperational(false);
-}
-
 void OperationalBase::initialize(int stage)
 {
     if (isInitializeStage(stage))
