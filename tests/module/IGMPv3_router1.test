@@ -1,0 +1,41 @@
+%description:
+
+Checks that a router sends general queries.
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%inifile: omnetpp.ini
+[General]
+ned-path = .;../../../../src;../../lib
+sim-time-limit=300s
+cmdenv-express-mode = false
+cmdenv-log-format = "%t %N: "
+
+network=TestIGMPNetwork
+**.igmpType = "IGMPv3"
+**.IPForward = true
+**.forwardMulticast = true
+
+**.scenarioManager.script = xml("<scenario/>")
+
+%#--------------------------------------------------------------------------------------------------------------
+
+%#
+%# Check that General Queries are sent.
+%#
+%# queryInterval = 125s
+%# startupQueryInterval = queryInterval / 4
+%#
+%postrun-command: grep "tester: Received" test.out > received.out || true
+%contains-regex: received.out
+0 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+31.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+156.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+281.25 tester: Received: IGMPv3Query<group=<unspec>, sourceList=,.*>.
+
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
