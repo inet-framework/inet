@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<OSPFASConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="OSPF.xsd">
+
+  <!-- Areas -->
+  <Area id="0.0.0.0">
+    <AddressRange address="192.168.0.0" mask="255.255.0.0" status="Advertise" />
+    <AddressRange address="10.0.0.0" mask="255.255.0.0" status="Advertise" />
+  </Area>
+
+  <!-- Routers -->
+  <Router name="R00" RFC1583Compatible="true">
+    <BroadcastInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1"/>
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth3" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="R33" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <BroadcastInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1"/>
+    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth3" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+  <Router name="R??" RFC1583Compatible="true">
+    <PointToPointInterface ifName="eth0" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth1" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth2" areaID="0.0.0.0" interfaceOutputCost="1" />
+    <PointToPointInterface ifName="eth3" areaID="0.0.0.0" interfaceOutputCost="1" />
+  </Router>
+
+</OSPFASConfig>
