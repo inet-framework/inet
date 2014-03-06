@@ -1,0 +1,30 @@
+%description:
+Testing the number of received multicast datagrams in examples/pim/sm/ simulation.
+%#--------------------------------------------------------------------------------------------------------------
+%testprog: opp_run
+%extraargs: -c Scenario1
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../../../examples
+sim-time-limit = 40s
+output-scalar-file = test.sca
+**.udpApp[*].sentPk*.scalar-recording = true
+**.udpApp[*].rcvdPk*.scalar-recording = true
+**.scalar-recording = false
+**.vector-recording = false
+
+**.configurator.config = xmldoc("../../../../examples/pim/sm/basic/networkConfig.xml")
+
+include ../../../../examples/pim/sm/basic/omnetpp.ini
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: test.sca
+scalar PIM_SM_Network.Source1.udpApp\[0\]\s+sentPk:count\s+10\n
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: test.sca
+scalar PIM_SM_Network.Receiver1.udpApp\[0\]\s+rcvdPk:count\s+10\n
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: test.sca
+scalar PIM_SM_Network.Receiver2.udpApp\[0\]\s+rcvdPk:count\s+10\n
