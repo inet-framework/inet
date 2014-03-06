@@ -115,30 +115,28 @@ static struct
 } confvals_def[CONFVAL_MAX] =
 {
 #ifdef DEBUG
-    {
-        "PrintDebug", 0, BINARY},
+    { "PrintDebug", 0, BINARY},
 #endif
-    {
-        "FlushLinkCache", 1, COMMAND}, {
-        "PromiscOperation", 1, BINARY}, {
-        "BroadcastJitter", 20, MILLISECONDS}, {
-        "RouteCacheTimeout", 300, SECONDS}, {
-        "SendBufferTimeout", 30, SECONDS}, {
-        "SendBufferSize", SEND_BUF_MAX_LEN, QUANTA}, {
-        "RequestTableSize", RREQ_TBL_MAX_LEN, QUANTA}, {
-        "RequestTableIds", RREQ_TLB_MAX_ID, QUANTA}, {
-        "MaxRequestRexmt", 16, QUANTA}, {
-        "MaxRequestPeriod", 10, SECONDS}, {
-        "RequestPeriod", 500, MILLISECONDS}, {
-        "NonpropRequestTimeout", 30, MILLISECONDS}, {
-        "RexmtBufferSize", MAINT_BUF_MAX_LEN}, {
-        "MaintHoldoffTime", 250, MILLISECONDS}, {
-        "MaxMaintRexmt", 2, QUANTA}, {
-        "UseNetworkLayerAck", 1, BINARY}, {
-        "TryPassiveAcks", 1, QUANTA}, {
-        "PassiveAckTimeout", 100, MILLISECONDS}, {
-        "GratReplyHoldOff", 1, SECONDS}, {
-        "MAX_SALVAGE_COUNT", 15, QUANTA}
+    { "FlushLinkCache", 1, COMMAND}
+    ,{ "PromiscOperation", 1, BINARY}
+    ,{ "BroadcastJitter", 20, MILLISECONDS}
+    ,{ "RouteCacheTimeout", 300, SECONDS}
+    ,{ "SendBufferTimeout", 30, SECONDS}
+    ,{ "SendBufferSize", SEND_BUF_MAX_LEN, QUANTA}
+    ,{ "RequestTableSize", RREQ_TBL_MAX_LEN, QUANTA}
+    ,{ "RequestTableIds", RREQ_TLB_MAX_ID, QUANTA}
+    ,{ "MaxRequestRexmt", 16, QUANTA}
+    ,{ "MaxRequestPeriod", 10, SECONDS}
+    ,{ "RequestPeriod", 500, MILLISECONDS}
+    ,{ "NonpropRequestTimeout", 30, MILLISECONDS}
+    ,{ "RexmtBufferSize", MAINT_BUF_MAX_LEN}
+    ,{ "MaintHoldoffTime", 250, MILLISECONDS}
+    ,{ "MaxMaintRexmt", 2, QUANTA}
+    ,{ "UseNetworkLayerAck", 1, BINARY}
+    ,{ "TryPassiveAcks", 1, QUANTA}
+    ,{ "PassiveAckTimeout", 100, MILLISECONDS}
+    ,{ "GratReplyHoldOff", 1, SECONDS}
+    ,{ "MAX_SALVAGE_COUNT", 15, QUANTA}
     ,{"RREQMulVisit",0,BINARY}
     ,{"RREQMaxVisit",1,QUANTA}
     ,{"RREPDestinationOnly",0,BINARY}

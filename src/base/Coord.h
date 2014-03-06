@@ -131,7 +131,8 @@ public:
      * This operator can change the dimension of the coordinate.
      */
     Coord& operator=(const Coord& other) {
-        if (this == &other) return *this;
+        if (this == &other)
+            return *this;
         cObject::operator=(other);
         copy(other);
         return *this;
@@ -163,9 +164,7 @@ public:
      *
      * Negation of the operator==.
      */
-    friend bool operator!=(const Coord& a, const Coord& b) {
-        return !(a==b);
-    }
+    friend bool operator!=(const Coord& a, const Coord& b) { return !(a==b); }
 
     /**
      * @brief Returns the distance to Coord 'a'.
@@ -191,18 +190,12 @@ public:
     /**
      * @brief Returns the square of the length of this Coords position vector.
      */
-    double squareLength() const
-    {
-        return x * x + y * y + z * z;
-    }
+    double squareLength() const { return x * x + y * y + z * z; }
 
     /**
      * @brief Returns the length of this Coords position vector.
      */
-    double length() const
-    {
-        return sqrt(squareLength());
-    }
+    double length() const { return sqrt(squareLength()); }
 
     /**
      * @brief Checks if this coordinate is inside a specified rectangle.
