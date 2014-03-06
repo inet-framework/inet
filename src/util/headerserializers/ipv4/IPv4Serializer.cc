@@ -182,8 +182,8 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
         break;
 
       case IP_PROT_IGMP:
-        encapPacket = new IGMPMessage("igmp-from-wire");
-        IGMPSerializer().parse(buf + headerLength, encapLength, (IGMPMessage *)encapPacket);
+        encapPacket = IGMPSerializer().parse(buf + headerLength, encapLength);
+        encapPacket->setName("igmp-from-wire");
         break;
 
 #ifdef WITH_UDP
