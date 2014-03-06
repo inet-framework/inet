@@ -1111,7 +1111,10 @@ void AODVRouting::clearState()
 
     waitForRREPTimers.clear();
     rreqsArrivalTime.clear();
-    cancelEvent(helloMsgTimer);
+
+    if (useHelloMessages)
+        cancelEvent(helloMsgTimer);
+
     cancelEvent(expungeTimer);
 }
 
