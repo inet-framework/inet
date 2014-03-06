@@ -56,6 +56,7 @@ void AODVRouting::initialize(int stage)
             helloMsgTimer = new cMessage("HelloMsgTimer");
             scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
         }
+        expungeTimer = new cMessage("ExpungeTimer");
     }
 }
 
@@ -74,8 +75,10 @@ void AODVRouting::handleMessage(cMessage *msg)
     {
         if (dynamic_cast<WaitForRREP *>(msg))
             handleWaitForRREP((WaitForRREP*)msg);
-        else if (strcmp(msg->getName(), "HelloMsgTimer") == 0)
+        else if (msg == helloMsgTimer)
            sendHelloMessagesIfNeeded();
+        else if (msg == expungeTimer)
+            expungeRoutes();
         else
             throw cRuntimeError("Unknown self message");
     }
@@ -160,16 +163,6 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
     }
 }
 
-void AODVRouting::startAODVRouting()
-{
-
-}
-
-void AODVRouting::stopAODVRouting()
-{
-
-}
-
 AODVRouting::AODVRouting()
 {
     interfaceTable = NULL;
@@ -179,6 +172,7 @@ AODVRouting::AODVRouting()
     networkProtocol = NULL;
     addressType = NULL;
     helloMsgTimer = NULL;
+    expungeTimer = NULL;
 }
 
 bool AODVRouting::hasOngoingRouteDiscovery(const Address& destAddr)
@@ -448,7 +442,7 @@ AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* route)
     AODVRREP *grrep = new AODVRREP("AODV-GRREP");
     AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
 
-    grrep->setPacketType(GRREP);
+    grrep->setPacketType(RREP);
     grrep->setHopCount(route->getMetric());
     grrep->setDestAddr(rreq->getOriginatorAddr());
     grrep->setDestSeqNum(rreq->getOriginatorSeqNum());
@@ -640,6 +634,8 @@ void AODVRouting::updateRoutingTable(IRoute * route, const Address& nextHop, uns
     routingData->setDestSeqNum(destSeqNum);
     routingData->setIsActive(isActive);
     routingData->setHasValidDestNum(hasValidDestNum);
+
+    scheduleExpungeRoutes();
 }
 
 void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destAddr, unsigned int timeToLive, double delay)
@@ -863,6 +859,7 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
         unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum,
         bool isActive, simtime_t lifeTime)
 {
+
     IRoute * newRoute = routingTable->createRoute();
     AODVRouteData * newProtocolData = new AODVRouteData();
 
@@ -891,6 +888,7 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
     newRoute->setPrefixLength(addressType->getMaxPrefixLength()); // TODO:
 
     routingTable->addRoute(newRoute);
+    scheduleExpungeRoutes();
     return newRoute;
 }
 
@@ -970,7 +968,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
 
             routeData->setIsActive(false);
             routeData->setLifeTime(simTime() + DELETE_PERIOD);
-
+            scheduleExpungeRoutes();
             // Note that, there is a bijection between unreachableNeighbors and unreachableNeighborsDestSeqNum
             unreachableNeighbors.push_back(route->getDestinationAsGeneric());
             unreachableNeighborsDestSeqNum.push_back(routeData->getDestSeqNum());
@@ -1047,7 +1045,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
                     routeData->setDestSeqNum(rerr->getUnreachableSeqNum(j));
                     routeData->setIsActive(false); // it means invalid, see 3. AODV Terminology p.3. in RFC 3561
                     routeData->setLifeTime(simTime() + DELETE_PERIOD);
-
+                    scheduleExpungeRoutes();
                     unreachableNeighbors.push_back(route->getDestinationAsGeneric());
                     unreachableNeighborsDestSeqNum.push_back(routeData->getDestSeqNum());
 
@@ -1114,7 +1112,7 @@ void AODVRouting::clearState()
     waitForRREPTimers.clear();
     rreqsArrivalTime.clear();
     cancelEvent(helloMsgTimer);
-
+    cancelEvent(expungeTimer);
 }
 
 void AODVRouting::handleWaitForRREP(WaitForRREP* rrepTimer)
@@ -1207,6 +1205,7 @@ void AODVRouting::sendHelloMessagesIfNeeded()
         double delay = uniform(0.0, 1.0);
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, delay);
     }
+
     scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
 }
 
@@ -1254,8 +1253,57 @@ void AODVRouting::handleHelloMessage(AODVRREP* helloMessage)
     // happens, the node SHOULD proceed as in Section 6.11.
 }
 
+void AODVRouting::expungeRoutes()
+{
+    AODVRouteData::nextExpungeTime = SimTime::getMaxTime();
+
+    for (int i = 0; i < routingTable->getNumRoutes(); i++)
+    {
+        IRoute * route = routingTable->getRoute(i);
+        if (route->getSource() == this)
+        {
+            AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
+            ASSERT(routeData != NULL);
+            if (routeData->getLifeTime() < simTime())
+            {
+                if (routeData->isActive())
+                {
+                    // An expired routing table entry SHOULD NOT be expunged before
+                    // (current_time + DELETE_PERIOD) (see section 6.11).  Otherwise, the
+                    // soft state corresponding to the route (e.g., last known hop count)
+                    // will be lost.
+                    routeData->setIsActive(false);
+                    routeData->setLifeTime(simTime() + DELETE_PERIOD);
+                }
+                else
+                {
+                    // Any routing table entry waiting for a RREP SHOULD NOT be expunged
+                    // before (current_time + 2 * NET_TRAVERSAL_TIME).
+                    if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric()))
+                        routeData->setLifeTime(simTime() + 2 * NET_TRAVERSAL_TIME);
+                    else
+                        routingTable->deleteRoute(route);
+                }
+            }
+        }
+    }
+    scheduleExpungeRoutes();
+}
+
+void AODVRouting::scheduleExpungeRoutes()
+{
+    if (AODVRouteData::nextExpungeTime != SimTime::getMaxTime() && AODVRouteData::nextExpungeTime >= simTime())
+    {
+        if (expungeTimer->isScheduled())
+            cancelEvent(expungeTimer);
+
+        scheduleAt(AODVRouteData::nextExpungeTime, expungeTimer);
+    }
+}
+
 AODVRouting::~AODVRouting()
 {
     clearState();
     delete helloMsgTimer;
+    delete expungeTimer;
 }

@@ -75,7 +75,6 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         bool useHelloMessages;
 
         // state
-        UDPSocket socket; // UDP socket to disseminate AODV control packets
         bool isOperational; // for lifecycle
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
         unsigned int sequenceNum; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
@@ -85,6 +84,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         simtime_t lastBroadcastTime;
 
         cMessage * helloMsgTimer;
+        cMessage * expungeTimer;
         simtime_t rebootTime;
 
         // internal
@@ -106,9 +106,6 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { return ACCEPT; }
         virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry) { return ACCEPT; }
         virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
-
-        void startAODVRouting();
-        void stopAODVRouting();
 
         Address getSelfIPAddress();
         void delayDatagram(INetworkDatagram * datagram);
@@ -137,6 +134,8 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
         void handleHelloMessage(AODVRREP * helloMessage);
 
+        void expungeRoutes();
+        void scheduleExpungeRoutes();
         void sendAODVPacket(AODVControlPacket * packet, const Address& destAddr, unsigned int timeToLive, double delay);
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 

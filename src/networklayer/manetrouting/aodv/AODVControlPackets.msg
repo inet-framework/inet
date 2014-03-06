@@ -27,8 +27,8 @@ enum AODVControlPacketType
 {
     RREQ = 1;
     RREP = 2;
-    GRREP = 3;
-    RERR = 4;
+    RERR = 3;
+    RREPACK = 4;
 };
 
 //
