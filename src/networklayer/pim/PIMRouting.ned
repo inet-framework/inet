@@ -41,17 +41,17 @@ module PIMRouting
     submodules:
         pimSplitter: PIMSplitter {
             parameters:
-                @display("p=69,95;q=queue;i=block/dispatch");
+                @display("p=69,95");
         }
 
         pimDM: PIMDM {
             parameters:
-                @display("p=165,142;q=queue;i=block/network2");
+                @display("p=165,142");
         }
 
         pimSM: PIMSM {
             parameters:
-                @display("p=165,56;q=queue;i=block/network2");
+                @display("p=165,56");
         }
 
         pimInterfaceTable: PIMInterfaceTable {
