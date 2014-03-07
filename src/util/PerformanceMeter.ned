@@ -29,8 +29,8 @@ simple PerformanceMeter
         @statistic[packetDelay](title="packet delay"; record=stats,vector?,percentile?);
         @statistic[bitThruput](title="throughput (bit/s)"; record=stats,vector?,percentile?);
         @statistic[packetThruput](title="throughput (packet/s)"; record=stats,vector?,percentile?);
-        double startTime @unit("s") = default(0s);
-        double measurementInterval @unit("s") = default(1s);
+        double startTime @unit(s) = default(0s);
+        double measurementInterval @unit(s) = default(1s);
     gates:
         input in;
         output out;
