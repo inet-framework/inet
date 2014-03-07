@@ -203,17 +203,16 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
     emit(rcvdJoinPrunePkSignal, pkt);
 
     IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-    IPv4Address sender = ctrlInfo->getSrcAddr();
-    InterfaceEntry *rpfInterface = rt->getInterfaceForDestAddr(sender);
+    InterfaceEntry *incomingInterface = ift->getInterfaceById(ctrlInfo->getInterfaceId());
 
-    if (!rpfInterface)
+    if (!incomingInterface)
     {
         delete pkt;
         return;
     }
 
     IPv4Address upstreamNeighborAddress = pkt->getUpstreamNeighborAddress();
-    int numRpfNeighbors = pimNbt->getNumNeighbors(rpfInterface->getInterfaceId());
+    int numRpfNeighbors = pimNbt->getNumNeighbors(incomingInterface->getInterfaceId());
 
     for (unsigned int i = 0; i < pkt->getJoinPruneGroupsArraySize(); i++)
     {
@@ -225,7 +224,7 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
         {
             EncodedAddress &source = group.getJoinedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
-            processJoin(route, rpfInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
+            processJoin(route, incomingInterface->getInterfaceId(), numRpfNeighbors, upstreamNeighborAddress);
         }
 
         // go through list of pruned sources
@@ -233,7 +232,7 @@ void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
         {
             EncodedAddress &source = group.getPrunedSourceAddress(j);
             Route *route = findRoute(source.IPaddress, groupAddr);
-            processPrune(route, rpfInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
+            processPrune(route, incomingInterface->getInterfaceId(), pkt->getHoldTime(), numRpfNeighbors, upstreamNeighborAddress);
         }
     }
 
@@ -386,12 +385,12 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
 
     emit(rcvdGraftPkSignal, pkt);
 
-    IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
-    IPv4Address sender = ctrl->getSrcAddr();
-    InterfaceEntry * rpfInterface = rt->getInterfaceForDestAddr(sender);
+    IPv4ControlInfo *ctrlInfo = check_and_cast<IPv4ControlInfo*>(pkt->getControlInfo());
+    IPv4Address sender = ctrlInfo->getSrcAddr();
+    InterfaceEntry * incomingInterface = ift->getInterfaceById(ctrlInfo->getInterfaceId());
 
     // does packet belong to this router?
-    if (pkt->getUpstreamNeighborAddress() != rpfInterface->ipv4Data()->getIPAddress())
+    if (pkt->getUpstreamNeighborAddress() != incomingInterface->ipv4Data()->getIPAddress())
     {
         delete pkt;
         return;
@@ -405,7 +404,7 @@ void PIMDM::processGraftPacket(PIMGraft *pkt)
         for (unsigned int j = 0; j < group.getJoinedSourceAddressArraySize(); j++)
         {
             EncodedAddress &source = group.getJoinedSourceAddress(j);
-            processGraft(source.IPaddress, groupAddr, sender, rpfInterface->getInterfaceId());
+            processGraft(source.IPaddress, groupAddr, sender, incomingInterface->getInterfaceId());
         }
     }
 
