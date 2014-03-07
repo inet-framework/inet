@@ -90,6 +90,7 @@ bool PIMDM::handleNodeStart(IDoneCallback *doneCallback)
 
 bool PIMDM::handleNodeShutdown(IDoneCallback *doneCallback)
 {
+    // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
     return PIMBase::handleNodeShutdown(doneCallback);
 }
@@ -122,7 +123,39 @@ void PIMDM::stopPIMRouting()
 void PIMDM::handleMessageWhenUp(cMessage *msg)
 {
    if (msg->isSelfMessage())
-       processPIMTimer(msg);
+   {
+       switch(msg->getKind())
+       {
+           case HelloTimer:
+               processHelloTimer(msg);
+              break;
+           case AssertTimer:
+               processAssertTimer(msg);
+               break;
+           case PruneTimer:
+               processPruneTimer(msg);
+               break;
+           case PrunePendingTimer:
+               processPrunePendingTimer(msg);
+               break;
+           case GraftRetryTimer:
+               processGraftRetryTimer(msg);
+               break;
+           case UpstreamOverrideTimer:
+               processOverrideTimer(msg);
+               break;
+           case PruneLimitTimer:
+               break;
+           case SourceActiveTimer:
+               processSourceActiveTimer(msg);
+               break;
+           case StateRefreshTimer:
+               processStateRefreshTimer(msg);
+               break;
+           default:
+               throw cRuntimeError("PIMDM: unknown self message: %s (%s)", msg->getName(), msg->getClassName());
+       }
+   }
    else if (dynamic_cast<PIMPacket *>(msg))
    {
        if (!isEnabled)
@@ -131,74 +164,36 @@ void PIMDM::handleMessageWhenUp(cMessage *msg)
            delete msg;
            return;
        }
-       processPIMPacket(dynamic_cast<PIMPacket *>(msg));
+
+       PIMPacket* pkt = dynamic_cast<PIMPacket*>(msg);
+       switch(pkt->getType())
+       {
+           case Hello:
+               processHelloPacket(check_and_cast<PIMHello*>(pkt));
+               break;
+           case JoinPrune:
+               processJoinPrunePacket(check_and_cast<PIMJoinPrune*>(pkt));
+               break;
+           case Assert:
+               processAssertPacket(check_and_cast<PIMAssert*>(pkt));
+               break;
+           case Graft:
+               processGraftPacket(check_and_cast<PIMGraft*>(pkt));
+               break;
+           case GraftAck:
+               processGraftAckPacket(check_and_cast<PIMGraftAck*>(pkt));
+               break;
+           case StateRefresh:
+               processStateRefreshPacket(check_and_cast<PIMStateRefresh *> (pkt));
+               break;
+           default:
+               EV_WARN << "Dropping packet " << pkt->getName() << ".\n";
+               delete pkt;
+               break;
+       }
    }
    else
        throw cRuntimeError("PIMDM: received unknown message: %s (%s).", msg->getName(), msg->getClassName());
-}
-
-void PIMDM::processPIMTimer(cMessage *timer)
-{
-    switch(timer->getKind())
-    {
-        case HelloTimer:
-            processHelloTimer(timer);
-           break;
-        case AssertTimer:
-            processAssertTimer(timer);
-            break;
-        case PruneTimer:
-            processPruneTimer(timer);
-            break;
-        case PrunePendingTimer:
-            processPrunePendingTimer(timer);
-            break;
-        case GraftRetryTimer:
-            processGraftRetryTimer(timer);
-            break;
-        case UpstreamOverrideTimer:
-            processOverrideTimer(timer);
-            break;
-        case PruneLimitTimer:
-            break;
-        case SourceActiveTimer:
-            processSourceActiveTimer(timer);
-            break;
-        case StateRefreshTimer:
-            processStateRefreshTimer(timer);
-            break;
-        default:
-            throw cRuntimeError("PIMDM: unknown self message: %s (%s)", timer->getName(), timer->getClassName());
-    }
-}
-
-void PIMDM::processPIMPacket(PIMPacket *pkt)
-{
-    switch(pkt->getType())
-    {
-        case Hello:
-            processHelloPacket(check_and_cast<PIMHello*>(pkt));
-            break;
-        case JoinPrune:
-            processJoinPrunePacket(check_and_cast<PIMJoinPrune*>(pkt));
-            break;
-        case Assert:
-            processAssertPacket(check_and_cast<PIMAssert*>(pkt));
-            break;
-        case Graft:
-            processGraftPacket(check_and_cast<PIMGraft*>(pkt));
-            break;
-        case GraftAck:
-            processGraftAckPacket(check_and_cast<PIMGraftAck*>(pkt));
-            break;
-        case StateRefresh:
-            processStateRefreshPacket(check_and_cast<PIMStateRefresh *> (pkt));
-            break;
-        default:
-            EV_WARN << "Dropping packet " << pkt->getName() << ".\n";
-            delete pkt;
-            break;
-    }
 }
 
 void PIMDM::processJoinPrunePacket(PIMJoinPrune *pkt)
@@ -1282,7 +1277,7 @@ void PIMDM::multicastPacketArrivedOnRpfInterface(int interfaceId, IPv4Address gr
         restartTimer(upstream->sourceActiveTimer, sourceActiveInterval);
 
         // record max TTL seen, it is used in StateRefresh messages
-        upstream->maxTtlSeen = std::max(upstream->maxTtlSeen, ttl);
+        upstream->maxTtlSeen = max(upstream->maxTtlSeen, ttl);
     }
 
 	// upstream state transition
@@ -1842,7 +1837,7 @@ PIMDM::DownstreamInterface *PIMDM::Route::createDownstreamInterface(InterfaceEnt
 
 PIMDM::DownstreamInterface *PIMDM::Route::removeDownstreamInterface(int interfaceId)
 {
-    for (std::vector<DownstreamInterface*>::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
+    for (vector<DownstreamInterface*>::iterator it = downstreamInterfaces.begin(); it != downstreamInterfaces.end(); ++it)
     {
         DownstreamInterface *downstream = *it;
         if (downstream->ie->getInterfaceId() == interfaceId)

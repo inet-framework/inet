@@ -197,7 +197,6 @@ class INET_API PIMDM : public PIMBase, protected cListener
 	    void rpfInterfaceHasChanged(IPv4MulticastRoute *route, IPv4Route *routeToSource);
 
 	    // process timers
-	    void processPIMTimer(cMessage *timer);
 	    void processPruneTimer(cMessage *timer);
 	    void processPrunePendingTimer(cMessage *timer);
 	    void processGraftRetryTimer(cMessage *timer);
@@ -207,7 +206,6 @@ class INET_API PIMDM : public PIMBase, protected cListener
 	    void processAssertTimer(cMessage *timer);
 
 	    // process PIM packets
-	    void processPIMPacket(PIMPacket *pkt);
         void processJoinPrunePacket(PIMJoinPrune *pkt);
         void processGraftPacket(PIMGraft *pkt);
         void processGraftAckPacket(PIMGraftAck *pkt);
