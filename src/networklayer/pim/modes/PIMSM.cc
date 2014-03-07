@@ -137,6 +137,7 @@ bool PIMSM::handleNodeStart(IDoneCallback *doneCallback)
 
 bool PIMSM::handleNodeShutdown(IDoneCallback *doneCallback)
 {
+    // TODO send PIM Hellos to neighbors with 0 HoldTime
     stopPIMRouting();
     return PIMBase::handleNodeShutdown(doneCallback);
 }
@@ -812,7 +813,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             // in error, and so we resend an (S,G) Assert and restart the
             // Assert Timer (Actions A3 below).
             sendPIMAssert(routeSG->source, routeSG->group, myMetric, interface->ie, false);
-            interface->startAssertTimer(assertTime - assertOverrideInterval);
+            restartTimer(interface->assertTimer, assertTime - assertOverrideInterval);
         }
         else if (isPreferredAssert)
         {
@@ -823,7 +824,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             // transitions in the upstream (S,G) or (S,G,rpt) state machines.
             interface->assertState = Interface::I_LOST_ASSERT;
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
     }
     else if (interface->assertState == Interface::I_LOST_ASSERT)
@@ -834,7 +835,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             // assert winner.  We stay in Loser state and perform Actions A2
             // below.
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
         else if (isAcceptableAssert && !receivedMetric.rptBit && receivedMetric.address == interface->winnerMetric.address)
         {
@@ -843,7 +844,7 @@ void PIMSM::processAssertSG(PimsmInterface *interface, const AssertMetric &recei
             // may be worse than the winner's previous metric).  We stay in
             // Loser state and perform Actions A2 below.
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
         else if (isInferiorAssert /* or AssertCancel */ && receivedMetric.address == interface->winnerMetric.address)
         {
@@ -912,7 +913,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
             // own.  Whoever sent the assert has lost, and so we resend a
             // (*,G) Assert and restart the Assert Timer (Actions A3 below).
             sendPIMAssert(IPv4Address::UNSPECIFIED_ADDRESS, routeG->group, myMetric, interface->ie, true);
-            interface->startAssertTimer(assertTime - assertOverrideInterval);
+            restartTimer(interface->assertTimer, assertTime - assertOverrideInterval);
         }
         else if (isPreferredAssert)
         {
@@ -921,7 +922,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
             // Actions A2 (below).
             interface->assertState = Interface::I_LOST_ASSERT;
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
     }
     else if (interface->assertState == Interface::I_LOST_ASSERT)
@@ -932,7 +933,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
             // current assert winner.  We stay in Loser state and perform
             // Actions A2 below.
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
         else if (isAcceptableAssert && receivedMetric.address == interface->winnerMetric.address && receivedMetric.rptBit)
         {
@@ -942,7 +943,7 @@ void PIMSM::processAssertG(PimsmInterface *interface, const AssertMetric &receiv
             // stay in Loser state and perform Actions A2 below.
             //interface->winnerAddress = ...;
             interface->winnerMetric = receivedMetric;
-            interface->startAssertTimer(assertTime);
+            restartTimer(interface->assertTimer, assertTime);
         }
         else if (isInferiorAssert /*or AssertCancel*/ && receivedMetric.address == interface->winnerMetric.address)
         {
@@ -1147,7 +1148,8 @@ void PIMSM::processAssertTimer(cMessage *timer)
             // timers on assert losers; this prevents unnecessary thrashing
             // of the forwarder and periodic flooding of duplicate packets.
             sendPIMAssert(route->source, route->group, route->metric, interfaceData->ie, route->type == G);
-            interfaceData->startAssertTimer(assertTime - assertOverrideInterval);
+            restartTimer(interfaceData->assertTimer, assertTime - assertOverrideInterval);
+            return;
         }
         else if (interfaceData->assertState == Interface::I_LOST_ASSERT)
         {
