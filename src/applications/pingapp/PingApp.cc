@@ -216,7 +216,7 @@ void PingApp::sendPingRequest()
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
-void PingApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
+void PingApp::sendToICMP(PingPayload *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
     IAddressType * addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo * controlInfo = addressType->createNetworkProtocolControlInfo();
