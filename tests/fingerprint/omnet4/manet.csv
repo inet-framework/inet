@@ -18,13 +18,13 @@
 /examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            45c1-bca2
 /examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            5657-ce01
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            02e9-6590
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            d1c4-19d1
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            5945-aedd
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            c758-7861
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            747d-6dbd
 # /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0,                 100s,            9d02-6e8d  # unstable fingerprint
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                  100s,            4c66-9cbd
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0,                   5s,              5bad-79b8
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              2f2b-b940
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c Batman -r 0,                 2s,              ab43-3deb
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0,                  100s,            bf4c-891f
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0,                   5s,              d98c-b729
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              5ba7-a84e
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c Batman -r 0,                 2s,              3660-39a8
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c General -r 0,                10s,             dfd8-f007
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMOUM -r 0,                 10s,             3162-ff28
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c AODVUU -r 0,                 10s,             6b45-f17e
