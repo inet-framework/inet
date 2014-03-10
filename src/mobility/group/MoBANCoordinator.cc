@@ -74,12 +74,12 @@ void MoBANCoordinator::initialize(int stage)
             if (!readMobilityPatternFile())
                 error("MoBAN Coordinator: error in reading the input mobility pattern file");
 
+        lastPosition = selectDestination();
         publishToNodes();
     }
 }
 
 void MoBANCoordinator::setInitialPosition() {
-    lastPosition = selectDestination();
 }
 
 /**
