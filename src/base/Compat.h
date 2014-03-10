@@ -30,6 +30,17 @@
 #  define EV_DETAIL EV << "DETAIL: "
 #  define EV_DEBUG  EV << "DEBUG: "
 #  define EV_TRACE  EV << "TRACE: "
+
+#  define EV_FATAL_C(category)  EV << "[" << category << "] FATAL: "
+#  define EV_ERROR_C(category)  EV << "[" << category << "] ERROR: "
+#  define EV_WARN_C(category)   EV << "[" << category << "] WARN: "
+#  define EV_INFO_C(category)   EV << "[" << category << "] "
+#  define EV_DETAIL_C(category) EV << "[" << category << "] DETAIL: "
+#  define EV_DEBUG_C(category)  EV << "[" << category << "] DEBUG: "
+#  define EV_TRACE_C(category)  EV << "[" << category << "] TRACE: "
+
+#  define EV_STATICCONTEXT  /* Empty */
+
 #endif  // OMNETPP_VERSION < 0x500
 
 #if OMNETPP_VERSION < 0x404
