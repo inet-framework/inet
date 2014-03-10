@@ -1563,8 +1563,8 @@ SCTPSackChunk* SCTPAssociation::createSack()
             << " numRGaps=" << numRevokableGaps
             << " numNRGaps=" << numNonRevokableGaps
             << " numDups=" << numDups
+            << " gapList={" << state->gapList << "}"
             << endl;
-    state->gapList.print(EV_DEBUG);
     return sackChunk;
 }
 

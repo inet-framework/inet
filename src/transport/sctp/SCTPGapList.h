@@ -64,6 +64,8 @@ class SCTPSimpleGapList
     uint32 GapStopList[MAX_GAP_COUNT];
 };
 
+inline std::ostream& operator<<(std::ostream& ostr, const SCTPSimpleGapList& gapList) { gapList.print(ostr); return ostr; }
+
 
 class SCTPGapList
 {
@@ -155,5 +157,7 @@ class SCTPGapList
     SCTPSimpleGapList NonRevokableGapList;
     SCTPSimpleGapList CombinedGapList;
 };
+
+inline std::ostream& operator<<(std::ostream& ostr, const SCTPGapList& gapList) { gapList.print(ostr); return ostr; }
 
 #endif

@@ -331,12 +331,9 @@ void SCTPGapList::check() const
 void SCTPGapList::print(std::ostream& os) const
 {
     os << "CumAck=" << CumAckTSN;
-    os << "   Combined-Gaps=";
-    CombinedGapList.print(os);
-    os << "   R-Gaps=";
-    RevokableGapList.print(os);
-    os << "   NR-Gaps=";
-    NonRevokableGapList.print(os);
+    os << "   Combined-Gaps=" << CombinedGapList;
+    os << "   R-Gaps=" << RevokableGapList;
+    os << "   NR-Gaps=" << NonRevokableGapList;
 }
 
 
