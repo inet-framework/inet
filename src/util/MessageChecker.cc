@@ -20,6 +20,23 @@
 Define_Module(MessageChecker);
 
 
+#if OMNETPP_VERSION < 0x0500
+//cClassDescriptor compatibility
+#define getFieldValueAsString(a, b, c)  getFieldAsString((a), (b), (c))
+#define getFieldProperty(a, b)  getFieldProperty(NULL, (a), (b))
+#define getFieldName(a)  getFieldName(NULL, (a))
+#define getFieldIsCObject(a)  getFieldIsCObject(NULL, (a))
+#define getFieldCount()  getFieldCount(NULL)
+#define getFieldTypeString(a)  getFieldTypeString(NULL, (a))
+#define getFieldIsArray(a)  getFieldIsArray(NULL, (a))
+#define getFieldArraySize(a, b)  getArraySize((a), (b))
+#define getFieldStructValuePointer(a, b, c)  getFieldStructPointer((a), (b), (c))
+#define getFieldTypeFlags(a)  getFieldTypeFlags(NULL, (a))
+#define getFieldStructName(a)  getFieldStructName(NULL, (a))
+
+#endif  // OMNETPP_VERSION < 0x0500
+
+
 MessageChecker::MessageChecker()
 : forwardedMsg(0)
 , checkedMsg(0)
