@@ -42,9 +42,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
             OSPFLSA* lsaOnRetransmissionList;
             OSPF::LSAKeyType lsaKey;
 
-            EV_DETAIL << "    ";
-            printLSAHeader(lsaHeader, EV_DETAIL);
-            EV_DETAIL << "\n";
+            EV_DETAIL << "    " << lsaHeader << "\n";
 
             lsaKey.linkStateID = lsaHeader.getLinkStateID();
             lsaKey.advertisingRouter = lsaHeader.getAdvertisingRouter();

@@ -417,9 +417,7 @@ void OSPF::MessageHandler::printDatabaseDescriptionPacket(const OSPFDatabaseDesc
 
     unsigned int lsaCount = ddPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
-        EV_DETAIL << "    ";
-        printLSAHeader(ddPacket->getLsaHeaders(i), EV_DETAIL);
-        EV_DETAIL << "\n";
+        EV_DETAIL << "    " << ddPacket->getLsaHeaders(i) << "\n";
     }
 }
 
@@ -445,9 +443,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
 
     for (i = 0; i < updateCount; i++) {
         const OSPFRouterLSA& lsa = updatePacket->getRouterLSAs(i);
-        EV_DETAIL << "  ";
-        printLSAHeader(lsa.getHeader(), EV_DETAIL);
-        EV_DETAIL << "\n";
+        EV_DETAIL << "  " << lsa.getHeader() << "\n";
 
         EV_DETAIL << "  bits="
            << ((lsa.getV_VirtualLinkEndpoint()) ? "V " : "_ ")
@@ -477,10 +473,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     updateCount = updatePacket->getNetworkLSAsArraySize();
     for (i = 0; i < updateCount; i++) {
         const OSPFNetworkLSA& lsa = updatePacket->getNetworkLSAs(i);
-        EV_DETAIL << "  ";
-        printLSAHeader(lsa.getHeader(), EV_DETAIL);
-        EV_DETAIL << "\n";
-
+        EV_DETAIL << "  " << lsa.getHeader() << "\n";
         EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
         EV_DETAIL << "  attachedRouters:\n";
 
@@ -493,9 +486,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     updateCount = updatePacket->getSummaryLSAsArraySize();
     for (i = 0; i < updateCount; i++) {
         const OSPFSummaryLSA& lsa = updatePacket->getSummaryLSAs(i);
-        EV_DETAIL << "  ";
-        printLSAHeader(lsa.getHeader(), EV_DETAIL);
-        EV_DETAIL << "\n";
+        EV_DETAIL << "  " << lsa.getHeader() << "\n";
         EV_DETAIL << "  netMask=" << lsa.getNetworkMask() << "\n";
         EV_DETAIL << "  cost=" << lsa.getRouteCost() << "\n";
     }
@@ -503,9 +494,7 @@ void OSPF::MessageHandler::printLinkStateUpdatePacket(const OSPFLinkStateUpdateP
     updateCount = updatePacket->getAsExternalLSAsArraySize();
     for (i = 0; i < updateCount; i++) {
         const OSPFASExternalLSA& lsa = updatePacket->getAsExternalLSAs(i);
-        EV_DETAIL << "  ";
-        printLSAHeader(lsa.getHeader(), EV_DETAIL);
-        EV_DETAIL << "\n";
+        EV_DETAIL << "  " << lsa.getHeader() << "\n";
 
         const OSPFASExternalLSAContents& contents = lsa.getContents();
         EV_DETAIL << "  netMask=" <<  contents.getNetworkMask() << "\n";
@@ -521,9 +510,7 @@ void OSPF::MessageHandler::printLinkStateAcknowledgementPacket(const OSPFLinkSta
 
     unsigned int lsaCount = ackPacket->getLsaHeadersArraySize();
     for (unsigned int i = 0; i < lsaCount; i++) {
-        EV_DETAIL << "    ";
-        printLSAHeader(ackPacket->getLsaHeaders(i), EV_DETAIL);
-        EV_DETAIL << "\n";
+        EV_DETAIL << "    " << ackPacket->getLsaHeaders(i) << "\n";
     }
 }
 

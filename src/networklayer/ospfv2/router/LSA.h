@@ -188,14 +188,9 @@ unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA);
 unsigned int calculateLSASize(const OSPFNetworkLSA* networkLSA);
 unsigned int calculateLSASize(const OSPFSummaryLSA* summaryLSA);
 unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA);
-void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output);
 
-inline std::ostream& operator<<(std::ostream& ostr, const OSPFLSA& lsa)
-{
-    printLSAHeader(lsa.getHeader(), ostr);
-    return ostr;
-}
-
+std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsa);
+inline std::ostream& operator<<(std::ostream& ostr, const OSPFLSA& lsa) { ostr << lsa.getHeader(); return ostr; }
 std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const TOSData& tos);
 std::ostream& operator<<(std::ostream& ostr, const Link& link);

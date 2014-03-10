@@ -103,21 +103,23 @@ unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA)
             (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
 }
 
-void printLSAHeader(const OSPFLSAHeader& lsaHeader, std::ostream& output) {
-    output << "LSAHeader: age=" << lsaHeader.getLsAge()
-           << ", type=";
+std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsaHeader)
+{
+    ostr << "LSAHeader: age=" << lsaHeader.getLsAge()
+         << ", type=";
     switch (lsaHeader.getLsType()) {
-        case ROUTERLSA_TYPE:                     output << "RouterLSA";                     break;
-        case NETWORKLSA_TYPE:                    output << "NetworkLSA";                    break;
-        case SUMMARYLSA_NETWORKS_TYPE:           output << "SummaryLSA_Networks";           break;
-        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  output << "SummaryLSA_ASBoundaryRouters";  break;
-        case AS_EXTERNAL_LSA_TYPE:               output << "ASExternalLSA";                 break;
-        default:                                 output << "Unknown";                       break;
+        case ROUTERLSA_TYPE:                     ostr << "RouterLSA";                     break;
+        case NETWORKLSA_TYPE:                    ostr << "NetworkLSA";                    break;
+        case SUMMARYLSA_NETWORKS_TYPE:           ostr << "SummaryLSA_Networks";           break;
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  ostr << "SummaryLSA_ASBoundaryRouters";  break;
+        case AS_EXTERNAL_LSA_TYPE:               ostr << "ASExternalLSA";                 break;
+        default:                                 ostr << "Unknown";                       break;
     }
-    output << ", LSID=" << lsaHeader.getLinkStateID().str(false)
-           << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
-           << ", seqNumber=" << lsaHeader.getLsSequenceNumber();
-    output << endl;
+    ostr << ", LSID=" << lsaHeader.getLinkStateID().str(false)
+         << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
+         << ", seqNumber=" << lsaHeader.getLsSequenceNumber()
+         << endl;
+    return ostr;
 }
 
 std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
@@ -130,8 +132,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
             ostr << " " << lsa.getAttachedRouters(i);
         }
     }
-    ostr << ", ";
-    printLSAHeader(lsa.getHeader(), ostr);
+    ostr << ", " << lsa.getHeader();
     return ostr;
 }
 
@@ -179,7 +180,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa)
         }
         ostr << "}, ";
     }
-    printLSAHeader(lsa.getHeader(), ostr);
+    ostr << lsa.getHeader();
     return ostr;
 }
 
@@ -195,7 +196,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa)
         }
         ostr << "}, ";
     }
-    printLSAHeader(lsa.getHeader(), ostr);
+    ostr << lsa.getHeader();
     return ostr;
 }
 
@@ -225,6 +226,6 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
         }
         ostr << "}, ";
     }
-    printLSAHeader(lsa.getHeader(), ostr);
+    ostr << lsa.getHeader();
     return ostr;
 }

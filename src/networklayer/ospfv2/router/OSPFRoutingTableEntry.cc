@@ -152,9 +152,8 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
     out << ", iface: " << entry.getInterfaceName();
     out << ", Cost: " << entry.getCost()
         << ", Type2Cost: " << entry.getType2Cost()
-        << ", Origin: [";
-    printLSAHeader(entry.getLinkStateOrigin()->getHeader(), out);
-    out << "], NextHops: ";
+        << ", Origin: [" << entry.getLinkStateOrigin()->getHeader()
+        << "], NextHops: ";
 
     unsigned int hopCount = entry.getNextHopCount();
     for (unsigned int i = 0; i < hopCount; i++) {
