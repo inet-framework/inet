@@ -500,7 +500,10 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.mobility.models
+                       inet.mobility.common
+                       inet.mobility.group
+                       inet.mobility.single
+                       inet.mobility.static
                       "
         extraSourceFolders = ""
         compileFlags = ""
