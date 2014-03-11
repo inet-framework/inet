@@ -134,11 +134,13 @@ InterfaceToken MACAddress::formInterfaceIdentifier() const
 
 MACAddress MACAddress::generateAutoAddress()
 {
+#if OMNETPP_VERSION >= 0x500
     if (!simulationLifetimeListenerAdded) {
         // NOTE: EXECUTE_ON_STARTUP is too early and would add the listener to StaticEnv
         ev.addListener(new MACAddress::SimulationLifetimeListener());
         simulationLifetimeListenerAdded = true;
     }
+#endif
     ++autoAddressCtr;
 
     uint64 intAddr = 0x0AAA00000000ULL + (autoAddressCtr & 0xffffffffUL);
