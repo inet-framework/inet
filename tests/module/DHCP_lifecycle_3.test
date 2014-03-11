@@ -20,8 +20,6 @@ record-eventlog = true
 **.server.udpApp[0].typename = "DHCPServer"
 **.server.status.initialStatus = "DOWN"
 
-**.client.udpApp[0].log-level = detail
-
 **.server.udpApp[0].subnetMask = "255.255.255.0"
 **.server.udpApp[0].ipAddressStart = "192.168.1.100"
 **.server.udpApp[0].maxNumClients = 100
