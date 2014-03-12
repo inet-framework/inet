@@ -1,3 +1,31 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-14  Zoltan Bojthe
+
+	backport: MANET protocols backport (uses ipv4::netfilter)
+
+2013-05-03  Alfonso Ariza
+
+	manet: synced with INETMANET (20130503)
+
+	Author: Alfonso Ariza <aarizaq_m@hotmail.com> olsr, dymo, dsr, dsdv,
+	batman, aodv, olsr, dsdv synced with INETMANET (20130503) manetbase:
+	introducing GlobatWirelessInspector, updated manet base.
+
+	Z.B.: remove GlobalWirelessLinkInspector added/fixed parameter units
+	fingerprints changed
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-03  Alfonso Ariza Quintana

@@ -1,4 +1,159 @@
-TODO: IPv4 NED documentation: ARP section must be revised!
+2014-03-11  Zoltan Bojthe
+
+	IPv4: EV output fixes
+
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+	backport IPv4Route::info()
+
+2014-01-17  Zoltan Bojthe
+
+	backport: InterfaceEntry: add field id to change notifications
+
+2014-01-15  Zoltan Bojthe
+
+	backported xDymo
+	backport: IPv4Route: backported get/setSource(), get/setProtocolData()
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+	backported registerProtocol
+	backport: backported ARP, IPv4
+	backport: copied IPv4 and ARP codes from integration branch
+
+2013-10-30  Zoltan Bojthe
+
+	register class IPv4Datagram
+
+2014-01-29  Zoltan Bojthe
+
+	omnet5 related fixes: getLastModuleId() --> getLastComponentId()
+
+2013-12-03  Zoltan Bojthe
+
+	ICMP: bugfix: check ipv4Data pointer, too
+
+2013-12-02  Zoltan Bojthe
+
+	ICMPv4: sendErrorMessage(): better check for multicast/broadcast dest
+	address -- fingerprints changed
+
+	We must not sent ICMP error in reply to any bcast/mcast packet, but
+	network-directed bcasts (e.g. 10.0.0.255) were checked for.
+
+2013-09-27  Zoltan Bojthe
+
+	IPv4Route: fixed NULL pointer usage: ipv4Data() == NULL was not checked
+
+2013-09-10  Zoltan Bojthe
+
+	IPv4: added log message
+
+2013-09-10  Zoltan Bojthe
+
+	IPv4InterfaceData: info(): print all multicast groups (do not filter out
+	ALL_HOST_MCAST)
+
+2013-08-15  Andras Varga
+
+	IPv4: allow MTU=0 (meaning infinite); error if MTU is too small for
+	packet
+
+2013-07-05  Zoltan Bojthe
+
+	loopback interface: using loopback interface
+
+2013-07-26  Tamás Borbély
+
+	- RoutingTable: add watch for 'multicastForward' parameter
+	- RoutingTable: make 'routes' and 'multicastRoutes' fields private
+	  to make sure that subclasses could not violate its invariants.
+	  (These vectors must be sorted according to prefix lengths.)
+	- add factory methods to routing tables to create new routes
+	  so subclasses can use their own route types
+
+2013-07-25  Tamás Borbély
+
+	IPv4: add notifications about multicast routing events
+
+	these notifications can be used by routing protocol modules (e.g. PIM) to
+	update their states
+
+2013-07-25  Tamás Borbély
+
+	rename and extend parent/child interface data in IPv4MulticastRoute
+
+	- the new names are more common (in/out)
+	- subclasses of IPv4MulticastRoute can extend InInterface and
+	OutInterface
+
+	Note: this is not backward compatible change
+
+2013-07-25  Tamás Borbély
+
+	IPv4Route/IPv6Route: add administrative distance field
+
+	The route entries are sorted first by administrative distance, then by
+	metric. When looking up the best route for a destination, then routes
+	with lower administrative distances are preferred. Metrics are compared
+	only if the administrative distances are the same.
+
+	Default values for these distances are defined in RouteAdminDist enums,
+	but they are set only for interface and static routes.
+
+2013-06-14  Tamás Borbély
+
+	new constants
+
+2013-02-06  Levente Mészáros
+
+	IPv4: routing table: added a new route check
+
+2013-02-01  Andras Varga
+
+	IPv4Address: rename getBroadcastAddress() to makeBroadcastAddress()
+
+	Also: added getNetworkBroadcastAddress() to IPv4InterfaceData
+
+2013-05-16  Levente Mészáros
+
+	IPv4Datagram: Fixed missed copy constructor to be like the one suggested
+	by msgc.
+
+2013-05-10  Levente Mészáros
+
+	IPv4NetworkConfigurator: Changed to compute all network configuration
+	only internally and apply them only upon explicit request.
+
+2013-05-10  Levente Mészáros
+
+	RoutingTable: Fixed IPv4NetworkConfigurator lookup.
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-09  Zoltan Bojthe
+
+	PingApp: send pings only between start and stop, and when the node is up.
+
+	Fixed "count" parameter in PingApp: -1 means forever Added test cases for
+	all combinations of node startup/shutdown and ping app start/stop
+	sequences.
+
+	-- pingapp count
+
+2013-04-27  Andras Varga
+
+	IPv4: added lifecycle support
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
 
 2013-08-22  ------ inet-2.2.0 released ------
 

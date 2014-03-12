@@ -1,14 +1,141 @@
+2014-01-07  Zoltan Bojthe
+
+	ieee802.1d: renames
+
+	Ieee8021D* -> Ieee8021d* IEEE8021D* -> Ieee8021d* ieee8021D* ->
+	ieee8021d*
+
+2014-01-07  Zoltan Bojthe
+
+	vlan: feature build test related changes
+
+2013-12-04  Benmartin92
+
+	IMACAddressTable: added class and moduleinterface for MAC tables.
+
+2013-11-21  Zsolt Prontvai
+
+	EtherSwitch: ned gui cosmetics
+
+2013-11-18  Benmartin92
+
+	Ieee8021D: minor changes, comments. Obsolete relay units were removed.
+
+2013-11-13  Benmartin92
+
+	EtherSwitch: L2NodeConfigurator is not needed in STP-unaware switch.
+
+2013-11-07  Benmartin92
+
+	EtherSwitch: spanningTreeProtocolVersion -> spanningTreeProtocol. - By
+	default the switch is STP/RSTP unaware. - relayUnit implements
+	IMACRelayUnit. - organized imports
+
+2013-10-31  ProZsolt
+
+	RSTP: deleted unnecessary files
+
+2013-10-30  Benmartin92
+
+	L2NetworkConfigurator, STP/RSTP: removed obsolete switches and examples.
+
+2013-10-28  Benmartin92
+
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+
+2013-10-24  Benmartin92
+
+	EtherSwitch: EtherSwitch now supports Spanning Tree algorithm.
+
+	ISpanningTree: moduleinterface added to supports different versions of
+	Spanning Tree protocols.
+
+	SpanningTree: module renamed to "STP", this abbreviation refer to the
+	protocol described in IEEE 802.1D-1998.
+
+2013-10-17  Benmartin92
+
+	STP: Spanning Tree Protocol added to INET.
+
+2013-09-18  Benmartin92
+
+	Switch:
+
+	MACAddressTable:
+
+	- MACAddressTable now has removeAgedEntriesIfNeeded() for efficient MAC
+	 table purge.
+	- Added clearTable() for lifecycle.
+
+	MACRelayUnit: Added a simplified MACRelayUnit. It was necessary because
+	MAC address table management has been separated from MACRelayUnitBase
+	module.
+
+	IMACRelayUnit: This moduleinterface changed to work with MACRelayUnit.
+	There are no need for MAC address table configuration parameters anymore.
+
+	EtherSwitch: Added MACAddressTable.
+
+	Examples: ethernet/lans/largeNet example changed to work with the new
+	RelayUnit.
+
+	MACAddressTableAccess: MACAddressTable access name changed to macTable.
+
+2013-08-23  Andras Varga
+
+	InterfaceTable: find connected network layer (NL) by NL's gates that need
+	to be called ifIn/ifOut
+
+	The code committed in this patch was the solution before 2012-04-12, when
+	it was changed to check upperLayerIn/upperLayerOut gates of the NIC
+	module; however that's not so so good because we need to store the gate
+	index of the gate of the *network layer*.
+
+	This patch reverts to original behaviour; allows NICs not connected to a
+	network layer; and provides better diagnistics.
+
+	ASSUMPTIONS:
+	1. The NIC module (ifmod) may or may not be connected to a network layer
+	module (e.g. IPv4NetworkLayer or MPLS)
+	2. If it *is* connected to a network layer (or a relay unit), the network
+	layer module's gates must be called
+	   ifIn[] and ifOut[], and NIC must be connected to identical gate
+	indices in both vectors.
+	3. If the NIC module is not connected to another modules ifIn[] and
+	ifOut[] gates, we assume
+	   that it is NOT connected to a network layer, and leave
+	networkLayerGateIndex
+	   in InterfaceEntry unfilled.
+	4. The NIC may or may not connect to gates of the containing host
+	compound module.
+
+2013-06-26  Zoltan Bojthe
+
+	switch/AP: made eth[] modules replaceable
+	switch/AP: enabled external queue usage - fingerprints changed
+	switch/AP: uses EthernetInterface, delete EthNic
+	replaced EtherMAC modules to EthNic in the EtherSwitch and AccessPoint
+	modules - fingerprints changed
+
+	scalar outputs checked
+
+2013-06-17  Zoltan Bojthe
+
+	EtherHost: changed submodule positions
+	EtherSwitch: added lifecycle support
+	EtherHost: added NodeStatus
+
 2013-11-07  Benjamin Seregi
 
-    EtherSwitch: added both STP and RSTP protocols. These protocols
-    are optional features of an EtherSwitch. The spanningTreeProtocol
-    parameter specifies which protocol will be used. The default value
-    of spanningTreeProtocol is an empty string indicating that the
-    switch is STP/RSTP unaware.
+	EtherSwitch: added both STP and RSTP protocols. These protocols
+	are optional features of an EtherSwitch. The spanningTreeProtocol
+	parameter specifies which protocol will be used. The default value
+	of spanningTreeProtocol is an empty string indicating that the
+	switch is STP/RSTP unaware.
 
-    IEEE8021DRelay: The default relayUnit was replaced with IEEE8021DRelay.
-    It is intended for supporting STP/RSTP port roles and states. In STP/RSTP
-    unaware cases, however, its behavior was not changed.
+	IEEE8021DRelay: The default relayUnit was replaced with IEEE8021DRelay.
+	It is intended for supporting STP/RSTP port roles and states. In STP/RSTP
+	unaware cases, however, its behavior was not changed.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

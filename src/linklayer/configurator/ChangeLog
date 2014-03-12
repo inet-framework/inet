@@ -1,3 +1,76 @@
+2014-01-07  Zoltan Bojthe
+
+	ieee802.1d: renames
+
+	Ieee8021D* -> Ieee8021d* IEEE8021D* -> Ieee8021d* ieee8021D* ->
+	ieee8021d*
+
+2013-12-18  Zoltan Bojthe
+
+	L2NodeConfigurator: removed omnet++ 4.2 specific code
+
+2013-12-13  Zoltan Bojthe
+
+	L2NetworkConfigurator NED doc: tipo
+
+2013-12-13  Zoltan Bojthe
+
+	L2NetworkConfigurator/L2NodeConfigurator: NED fixes
+
+	remove empty line between documentation and module definition add empty
+	lines at EOF
+
+2013-12-13  Zoltan Bojthe
+
+	L2NetworkConfigurator: include fixes: reordering, remove unused
+
+2013-12-13  Zoltan Bojthe
+
+	L2NetworkConfigurator: removed the redefined EV_DEBUG, EV_INFO macros
+
+2013-11-28  Zsolt Prontvai
+
+	Ieee8021D: Fixed L2NetworkConfigurator init problem
+
+2013-11-18  Benmartin92
+
+	Ieee8021D: minor changes, comments. Obsolete relay units were removed.
+
+2013-11-11  Benmartin92
+
+	L2NetworkConfigurator: module description + copyright
+
+2013-11-08  ProZsolt
+
+	L2NodeConfigurator: removed unnecessary includes
+
+2013-10-31  ProZsolt
+
+	L2NetworkConfugurator: added edge option
+
+2013-10-28  Benmartin92
+
+	L2NetworkConfigurator: fix to handle loopback interfaces.
+
+2013-10-21  Benmartin92
+
+	L2NetworkConfigurator: default config value changed.
+
+2013-10-14  Benmartin92
+
+	L2NetworkConfigurator: changed to work with IEEE8021DInterfaceData
+	entries
+
+2013-10-11  Benmartin92
+
+	L2NetworkConfigurator: FIXME: get the gate vector index from cGate
+
+2013-10-03  Benmartin92
+
+	L2NetworkConfigurator: module added. This module allows to configure
+	network scenarios at Layer 2. In this commit, the module only contains
+	configuration parameters for the (Rapid) Spanning Tree protocol.
+
 2013-11-07 Benjamin Seregi
 
-    L2NetworkConfigurator, L2NodeConfigurator: modules added.
+	L2NetworkConfigurator, L2NodeConfigurator: modules added.

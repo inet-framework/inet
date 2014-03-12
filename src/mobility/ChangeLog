@@ -1,3 +1,53 @@
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+	fingerprints of MoBAN mobility are changed
+
+2014-01-21  Zoltan Bojthe
+
+	backport: Mobility: Replaced getParentNode with the more inentional
+	getContainingNode.
+
+2013-04-12  Levente Mészáros
+
+	backport: Logging: Refactored mobility logging to be more consistent and
+	less redundant.
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-10-24  Rudolf Hornig
+
+	mobility: added missing INET_API macros.
+
+2013-03-25  Zoltan Bojthe
+
+	mobility: MoBANCoordinator: added FIXME
+
+2013-08-21  Andras Varga
+
+	StaticGridMobility: fixed 2 recently introduced bug
+
+2013-06-11  Zoltan Bojthe
+
+	mobility: redesigned StaticGridMobility - added new parameters, position
+	calculation changed
+	fingerprint changed
+
+2013-05-29  Levente Mészáros
+
+	TurtleMobility: Fixed getting the position from a mobility signal
+	listener during initialize.
+
+	The script was resumed before initialize finished resulting in incorrect
+	positioning.
+
 2014-01-22  Levente Meszaros
 
 	Split models directory into multiple directories:

@@ -1,3 +1,82 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	backport: fix access-after-send of msg objects (it's illegal)
+
+	- OrdinalBasedDuplicator: fixed order of emit(packet) / send(packet)
+	- OSPF bugfix: msg pointer was used after send(msg)
+	- SCTP: sctpmsg was used after send
+	- DHCP server: delete timer from timerlist before processing packet;
+	- unknown timer to throw an error
+	- pingapps: should use emit() before send()
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-12  Rudolf Hornig
+
+	sctp: additional statistics (total received bytes)
+
+2013-08-09  Rudolf Hornig
+
+	sctp: Code refactoring, output/logging changes, minor fixes
+
+2013-07-29  Rudolf Hornig
+
+	sctp: Added the packet drop feature
+	(draft-stewart-sctp-pktdrprep-15.txt), the "sack immediately" feature
+	(draft-ietf-tsvwg-sctp-sack-immediately) and several alternatives to send
+	fast retransmissions.
+
+2013-07-25  Rudolf Hornig
+
+	sctp: added statistics + more control over flow control.
+
+2013-07-17  Rudolf Hornig
+
+	sctp: Added 8 new strategies for stream scheduling
+
+2013-07-17  Rudolf Hornig
+
+	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene
+	Rüngeler).
+
+	+ missing sctp auth test.
+
+2013-07-11  Rudolf Hornig
+
+	sctp: Authentication (RFC 4895) (patch submitted by Irene Rüngeler).
+
+2013-07-10  Rudolf Hornig
+
+	sctp: Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by
+	Irene Rüngeler).
+
+2013-07-03  Rudolf Hornig
+
+	sctp: implementation of Partial Reliability SCTP (RFC 3758) by Irene
+	Rüngeler
+
+2013-07-02  Rudolf Hornig
+
+	sctp: fixed missing cOutVector initialization
+
+2013-07-02  Rudolf Hornig
+
+	sctp: NR_SACK feature, implemented submitted by Irene Rüngeler
+
+2013-04-03  Rudolf Hornig
+
+	sctp: refactoring, doc changes, renames
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-08-08  Irene Ruengeler

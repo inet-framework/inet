@@ -1,3 +1,206 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-22  Rudolf Hornig
+
+	doc: added 2.2 tags to ChangeLogs
+
+2013-08-07  Andras Varga
+
+	ChangeLogs updated (Andras, Rudolf)
+
+2013-07-30  Zoltan Bojthe
+
+	TCPConnection: translated function documentation
+
+2013-04-17  Zoltan Bojthe
+
+	TCP: added lifecycle support
+
+2013-04-03  Zoltan Bojthe
+
+	TCPSegmentTransmitInfo: redesigned, stores first and last sent times
+
+2013-04-03  Zoltan Bojthe
+
+	tcpvegas: removed an once used local variable
+
+2013-04-03  Zoltan Bojthe
+
+	tcpvegas: moved clear to end of func
+
+2013-04-02  Zoltan Bojthe
+
+	tcpwestwood: replaced 0.9047 to 19/21 -- fingerprint changed
+
+2013-04-02  Zoltan Bojthe
+
+	tcpvegas: removed some (used once) local variables
+
+2013-04-02  Zoltan Bojthe
+
+	tcpvegas: optimisation: 'expired' equals to 'found && expired' always
+
+2013-04-02  Zoltan Bojthe
+
+	tcpvegas: fixed a sequence number comparison bug
+
+2013-04-02  Zoltan Bojthe
+
+	tcpvegas: optimisation: removed checkRTTTimer() function
+
+	regions.get() was called again in function
+
+2013-04-02  Zoltan Bojthe
+
+	tcpvegas,westwood: typo
+
+2013-04-02  Zoltan Bojthe
+
+	tcpsegmenttransmitinfo: renamed member,store older time
+
+2013-03-29  Zoltan Bojthe
+
+	tcpvegas,tcpwestwood: uses TCPSegmentTransmitInfoList instead arrays
+
+2013-03-29  Zoltan Bojthe
+
+	tcpvegas: added dummy segmentRetransmitted
+
+2013-03-29  Zoltan Bojthe
+
+	added TCPSegmentTransmitInfoList
+
+2013-03-29  Zoltan Bojthe
+
+	tcpwestwood: uses segmentRetransmitted()
+
+2013-03-29  Zoltan Bojthe
+
+	tcpwestwood: added dummy segmentRetransmitted()
+
+2013-03-29  Zoltan Bojthe
+
+	TCPAlgorithm: added function: segmentRetransmitted(from, to)
+
+2013-03-27  Zoltan Bojthe
+
+	tcpvegas,tcpwestwood: code style changes: tab to space, indent, include
+	order, etc
+
+2013-03-27  Zoltan Bojthe
+
+	tcpwestwood: shows hidden relationships between 0.9047 and 0.0476, added
+	TODO
+
+2013-03-27  Zoltan Bojthe
+
+	tcpvegas,tcpwestwood: fixed simtime -> double conversions
+
+2013-03-27  Zoltan Bojthe
+
+	tcp: modified rcv_wnd calculation
+
+2013-03-27  Zoltan Bojthe
+
+	tcp: added howto show early history of tcp
+
+2013-03-26  Zoltan Bojthe
+
+	tcpwestwood: changes based on tcpvegas fixes
+
+	- initialize and delete vectors
+	- added "existing of vector" checks
+	- create vector if not created
+	- signed/unsigned comparison
+	- removed unused local variables
+
+2013-03-26  Zoltan Bojthe
+
+	tcp: modified "not enough space in rcv buffer" detection
+
+	the old version didn't calculate with overlapped segments
+
+2013-03-26  Zoltan Bojthe
+
+	tcp: moved the "not enough space in rcv buffer" detection to a new
+	function --- TRANSLATE!!!
+
+	identical change, for change detection easily the current detection
+	incorrect, doesn't check the overlap with existing slices
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: eliminate a warning: compared signed with unsigned
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: bugfix: was used wrong type: v_incr must store negative value
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: dos2unix
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: changed condition of initialization: initialize when not
+	initialized
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: added TODOs, removed fixed FIXME
+
+2013-03-26  Zoltan Bojthe
+
+	tcpvegas: fixed memory leak
+
+2013-03-25  Zoltan Bojthe
+
+	tipo
+
+2013-03-25  Zoltan Bojthe
+
+	TCPVegas: fixed NULL pointer exception (by María Fernández Hernández)
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: Vegas: style: was missed digit after decimal points
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: bugfix: retransmitData() at FIN was generated an error
+
+	this function used by DumbTCP only
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: Vegas: initialize some member variables, added FIXME
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: Vegas/Westwood: sendData() parameter missed
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: Vegas/Westwood: fixes: removed initialization of unused, undeclared
+	member variable
+
+2013-03-14  Zoltan Bojthe
+
+	TCP: Added Vegas and Westwood algorithms - original code
+
+	https://github.com/maferhe2/TCP-Vegas-Westwood
+	   5cae09feea84bd85b9d657833de90f4beae1de25
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-17  Zoltan Bojthe

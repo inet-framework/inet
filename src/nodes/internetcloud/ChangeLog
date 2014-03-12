@@ -1,3 +1,15 @@
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-13  Zoltan Bojthe
+
+	backport: InternetCloud backport (based on ARP, IPv4 Netfilter)
+
+2013-05-14  Levente Mészáros
+
+	IPv4NetworkLayer: Added IPv4NodeConfigurator and updated fingerprints.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-14  Levente Meszaros

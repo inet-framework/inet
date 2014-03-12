@@ -1,10 +1,220 @@
+2014-01-07  Zoltan Bojthe
+
+	vlan: feature build test related changes
+
+2013-12-18  Zoltan Bojthe
+
+	Ieee8021DRelay: fixes: clear all pointers in constructor, comparison
+	fixes
+
+	int and uint was compared uint < 0 was checked
+
+2013-12-18  Zoltan Bojthe
+
+	TAB to space
+
+2013-12-18  Zoltan Bojthe
+
+	MACAddressTable: changed default value of agingTime parameter -
+	fingerprints changed
+
+2013-12-17  Benmartin92
+
+	MACAddressTable: just added copyrights.
+	Ieee8021DRealy: added some statistics recording.
+	MACAddressTable: opp_error replaced with cRuntimeError.
+	MACAddressTable: bugfixes (memory leak and wrong behavior) in flush() and
+	updateTableWithAddress() - flush() erased wrong ports (j <--> cur). -
+	updateTableWithAddress() missed to set addressTable to VLAN ID 0 (after
+	clearTable()).
+
+2013-12-13  Zoltan Bojthe
+
+	MACRelayUnit: gate size read was twice
+	MACRelayUnit: bugfixes: should not read parameter in constructor
+
+2013-12-05  Benmartin92
+
+	Ieee8021DRelay: added interface autoselection.
+
+2013-12-04  Benmartin92
+
+	MACAddressTableAccess: removed obsolete MACAddressTableAccess.
+	STP/RSTP/Relays: MAC table module access changed to work with
+	IMACAddressTable.
+	MACAddressTable: FIX: added missing public inheritance and MACAddress.h
+	IMACAddressTable: added class and moduleinterface for MAC tables.
+	RSTP: facktor out statemachine and minor renaming
+
+2013-12-03  Andras Varga
+
+	MACAddressTable: made addressTable inspectable
+
+2013-11-20  Benmartin92
+
+	Ieee8021DRelay: fix memory leak, log.
+
+2013-11-20  Benmartin92
+
+	Ieee8021DRelay: fix: check arrival gate status.
+
+2013-11-18  Benmartin92
+
+	Ieee8021D: minor changes, comments. Obsolete relay units were removed.
+
+2013-11-14  Benmartin92
+
+	MACAddressTable: addressTable nullptr fix, IEEE8021DRelay: learn every
+	frame
+
+2013-11-13  Benmartin92
+
+	IEEE8021DRelay: STP/RSTP unaware fixes.
+
+2013-11-07  Benmartin92
+
+	IEEE8021DRelay: the absolute path param to the InterfaceTable STP: FIX:
+	missing interfaceTableName
+
+2013-11-07  Benmartin92
+
+	MACAddressTable: added module description.
+
+	Relay: folder name Relay -> relay - added isStpAware: if the switch is
+	STP/RSTP unaware then all its ports are forwarding (and learning) -
+	IEEE8021DRelay implements IMACRelayUnit interface - added STPGate to each
+	IMACRelayUnit implementations
+
+2013-10-31  Benmartin92
+
+	IEEE8021DRelay: InterfaceTableAccess replaced with getSubmodule()
+	IEEE8021DRelay: EthernetIIFrame --> EtherFrame.
+
+2013-10-28  Benmartin92
+
+	IEEE8021DRelay: dispatch(): it is not allowed to change the bytelength
+	when we relay a packet
+	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
+	IEEE8021DRelay: fix: handleAndDispatchFrame() must return after
+	broadcast.
+
+2013-10-21  Benmartin92
+
+	IEEE8021DRelay: added EV loglevels, bugfix in dispatch().
+
+2013-10-17  Benmartin92
+
+	IEEE8021DRelay: module added. This relay module is intended to work with
+	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
+
+2013-10-11  Benmartin92
+
+	MACAddressTable: Some (eg.: STP, RSTP) protocols may need to change
+	agingTime
+
+2013-09-18  Benmartin92
+
+	Switch:
+
+	MACAddressTable:
+
+	- MACAddressTable now has removeAgedEntriesIfNeeded() for efficient MAC
+	 table purge.
+	- Added clearTable() for lifecycle.
+
+	MACRelayUnit: Added a simplified MACRelayUnit. It was necessary because
+	MAC address table management has been separated from MACRelayUnitBase
+	module.
+
+	IMACRelayUnit: This moduleinterface changed to work with MACRelayUnit.
+	There are no need for MAC address table configuration parameters anymore.
+
+	EtherSwitch: Added MACAddressTable.
+
+	Examples: ethernet/lans/largeNet example changed to work with the new
+	RelayUnit.
+
+	MACAddressTableAccess: MACAddressTable access name changed to macTable.
+
+2013-09-16  Benmartin92
+
+	Switch: predefined address table support added to MACAddressTable.
+	Switch: MAC address comparator added to AddressTable.
+	Switch: MACAddressTable changes:
+
+	- Now it uses std::map for efficient Address Table search and access
+	- Some major renaming: registerMAC -> updateTableWithAddress,
+	 resolveMAC -> getPortForAddress, etc.
+	- Some parts of code are based on MACRelayUnitBase.
+	- resolveMAC/getPortForAddress: outputPorts removed from parameters
+	 as it is not needed because getPortForAddress always returns a
+	 single port.
+
+2013-09-09  ProZsolt
+
+	Switch: Created MACAddressTable
+
+2013-01-17  Zoltan Bojthe
+
+	ethernet: added EtherFrame.h
+
+2013-08-23  Andras Varga
+
+	InterfaceTable: find connected network layer (NL) by NL's gates that need
+	to be called ifIn/ifOut
+
+	The code committed in this patch was the solution before 2012-04-12, when
+	it was changed to check upperLayerIn/upperLayerOut gates of the NIC
+	module; however that's not so so good because we need to store the gate
+	index of the gate of the *network layer*.
+
+	This patch reverts to original behaviour; allows NICs not connected to a
+	network layer; and provides better diagnistics.
+
+	ASSUMPTIONS:
+	1. The NIC module (ifmod) may or may not be connected to a network layer
+	module (e.g. IPv4NetworkLayer or MPLS)
+	2. If it *is* connected to a network layer (or a relay unit), the network
+	layer module's gates must be called
+	   ifIn[] and ifOut[], and NIC must be connected to identical gate
+	indices in both vectors.
+	3. If the NIC module is not connected to another modules ifIn[] and
+	ifOut[] gates, we assume
+	   that it is NOT connected to a network layer, and leave
+	networkLayerGateIndex
+	   in InterfaceEntry unfilled.
+	4. The NIC may or may not connect to gates of the containing host
+	compound module.
+
+2013-06-24  Zoltan Bojthe
+
+	MACRelayUnit: removed testing ASSERTs
+
+2013-06-24  Zoltan Bojthe
+
+	switch: MACRelay uses interfacetable/interfaceentry instead direct access
+	for EtherMAC module
+
+	assert tests added for detects differrences between returned values by
+	MAC and by IE
+
+2013-06-18  Zoltan Bojthe
+
+	MACRelayUnit: added liifecycle support
+
+2013-06-17  Zoltan Bojthe
+
+	MACRelayUnitPP: added timer pointer to PortBuffer
+
+	stores all self message pointer
+
 2013-11-07 Benjamin Seregi
 
-    MACAddressTable: new module added because MACAddressTable was separated
-    from the RelayUnit. The new MACTable is ready for future VLAN support.
+	MACAddressTable: new module added because MACAddressTable was separated
+	from the RelayUnit. The new MACTable is ready for future VLAN support.
 
-    IEEE8021DRelay: added a new relay for supporting STP/RSTP protocols.
-    The CPU and memory modelling are no longer supported with this relay.
+	IEEE8021DRelay: added a new relay for supporting STP/RSTP protocols.
+	The CPU and memory modelling are no longer supported with this relay.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

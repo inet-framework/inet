@@ -1,3 +1,101 @@
+2014-02-04  Zoltan Bojthe
+
+	backport: Applications
+
+2014-01-24  Zoltan Bojthe
+
+	backport: fix access-after-send of msg objects (it's illegal)
+
+	- OrdinalBasedDuplicator: fixed order of emit(packet) / send(packet)
+	- OSPF bugfix: msg pointer was used after send(msg)
+	- SCTP: sctpmsg was used after send
+	- DHCP server: delete timer from timerlist before processing packet;
+	unknown timer to throw an error
+	- pingapps: should use emit() before send()
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-29  Zoltan Bojthe
+
+	omnet5 related fixes: getLastModuleId() --> getLastComponentId()
+
+2013-08-02  Zoltan Bojthe
+
+	apps: startTime/stopTime fixes
+
+	- apps start sending at startTime, and sending last packet before
+	stopTime
+	- negative stopTime means forever
+	- if startTime and stopTime are same, app send one packet (except TCP
+	apps)
+
+2013-07-30  Zoltan Bojthe
+
+	PingApp: throw error only if node down and receive self message. other
+	incoming messages dropped silently
+
+2013-07-04  Zoltan Bojthe
+
+	apps: stopTime checks changed: send packet when simTime() <= stopTime
+
+	some apps tested "simTime() < stopTime", another apps tested "simTime()
+	<= stopTime"
+
+2013-07-03  Zoltan Bojthe
+
+	applications: optimizations: case of stopTime == -1
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missed in some
+	handleOperationStage() function
+
+2013-04-25  Levente Mészáros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-22  Levente Mészáros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
+2013-05-09  Zoltan Bojthe
+
+	PingApp: send pings only between start and stop, and when the node is up.
+
+	Fixed "count" parameter in PingApp: -1 means forever Added test cases for
+	all combinations of node startup/shutdown and ping app start/stop
+	sequences.
+
+	-- pingapp count
+
+2013-04-17  Zoltan Bojthe
+
+	PingApp: added display string
+
+2013-04-12  Zoltan Bojthe
+
+	PingApp: various changes
+
+	-added constructor/destructor for init/deinit pointers
+	-timer deleted only in destructor
+	-starttime/stoptime usage: start at latest of startTime and uptime if
+	earlier than stopTime
+	-TODOs
+
+2013-04-27  Levente Meszaros
+
+	PingApp: initial lifecycle support
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-30  Zoltan Bojthe

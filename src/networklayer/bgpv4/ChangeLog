@@ -1,3 +1,24 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	eliminate some warnings
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-29  Andras Varga
+
+	bgp: operations not supported
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-29  Andras Varga

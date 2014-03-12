@@ -1,3 +1,58 @@
+2014-02-04  Zoltan Bojthe
+
+	backport: Applications
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-02  Zoltan Bojthe
+
+	apps: startTime/stopTime fixes
+
+	- apps start sending at startTime, and sending last packet before
+	stopTime
+	- negative stopTime means forever
+	- if startTime and stopTime are same, app send one packet (except TCP
+	apps)
+
+2013-07-03  Zoltan Bojthe
+
+	applications: optimizations: case of stopTime == -1
+
+2013-06-13  Zoltan Bojthe
+
+	IPvXTrafGen: removed static member 'counter', changed the message name
+	creation for sent message
+
+2013-06-13  Zoltan Bojthe
+
+	--IPvXTrafGen: fixed packet sending
+
+2013-06-13  Zoltan Bojthe
+
+	IPvXTrafGen: fixed initialize
+
+	- call IPvXTrafSink::initialize(stage) in all stages
+	- read destaddresses at start of session instead initialize(3)
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-16  Levente Mészáros
+
+	App: Adapted IPvXTrafGen to Lifecycle operations.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-03  Zoltan Bojthe
