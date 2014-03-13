@@ -58,7 +58,11 @@ void SCTPAlg::processTimer(cMessage* timer, SCTPEventCode& event)
 
 void SCTPAlg::sendCommandInvoked(SCTPPathVariables* path)
 {
+    if(state->allowCMT) {
+       assoc->sendOnAllPaths(path);
+    } else {
         assoc->sendOnPath(path);
+    }
 }
 
 void SCTPAlg::receivedDataAck(uint32)

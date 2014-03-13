@@ -192,7 +192,7 @@ cPacket* SCTPServer::makeAbortNotification(SCTPCommand* msg)
 
 void SCTPServer::handleMessage(cMessage *msg)
 {
-    int32 id;
+    int32 id = 0;
     cPacket* cmsg;
 
     if (msg->isSelfMessage())
