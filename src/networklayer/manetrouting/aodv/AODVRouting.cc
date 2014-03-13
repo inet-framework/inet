@@ -407,8 +407,6 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
     RREQIdentifier rreqIdentifier(getSelfIPAddress(),rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
 
-    // TODO: G flag
-
     return rreqPacket;
 }
 
@@ -530,7 +528,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     {
         EV_INFO << "This Route Reply is a Hello Message" << endl;
         handleHelloMessage(rrep);
-        delete rrep; // todo
+        delete rrep;
         return;
     }
     // When a node receives a RREP message, it searches (using longest-
@@ -640,12 +638,6 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
         IRoute * forwardRREPRoute = routingTable->findBestMatchingRoute(rrep->getOriginatorAddr());
         if (forwardRREPRoute && forwardRREPRoute->getSource() == this)
         {
-            if (rrep->getAckRequiredFlag())
-            {
-                // TODO: send RREP-ACK: (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0) IMPLEMENT!!
-                rrep->setAckRequiredFlag(false);
-            }
-
             AODVRouteData * forwardRREPRouteData = dynamic_cast<AODVRouteData *>(forwardRREPRoute->getProtocolData());
 
             // Also, at each node the (reverse) route used to forward a
@@ -728,7 +720,8 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
     networkProtocolControlInfo->setDestinationAddress(destAddr);
     networkProtocolControlInfo->setSourceAddress(getSelfIPAddress());
 
-    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0"); // FIXME
+    // TODO: Implement: support for multiple interfaces
+    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0");
     networkProtocolControlInfo->setInterfaceId(ifEntry->getInterfaceId());
 
     UDPPacket * udpPacket = new UDPPacket(packet->getName());
@@ -997,7 +990,7 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
                     //           route in its routing table while transmitting data (and
                     //           route repair, if attempted, was unsuccessful), or
 
-                    // TODO: local repair
+                    // TODO: Implement: local repair
 
                     IRoute * route = routingTable->findBestMatchingRoute(unreachableAddr);
 
@@ -1180,12 +1173,6 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 
 bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage, IDoneCallback* doneCallback)
 {
-
-    // TODO (localInHook??): If the node
-    // receives a data packet for some other destination, it SHOULD
-    // broadcast a RERR as described in subsection 6.11 and MUST reset the
-    // waiting timer to expire after current time plus DELETE_PERIOD.
-
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation))
     {
@@ -1456,6 +1443,11 @@ void AODVRouting::scheduleExpungeRoutes()
 
 INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* datagram, const InterfaceEntry* inputInterfaceEntry, const InterfaceEntry*& outputInterfaceEntry, Address& nextHopAddress)
 {
+    // TODO: Implement: Actions After Reboot
+    // If the node receives a data packet for some other destination, it SHOULD
+    // broadcast a RERR as described in subsection 6.11 and MUST reset the waiting
+    // timer to expire after current time plus DELETE_PERIOD.
+
     Enter_Method("datagramForwardHook");
     const Address& destAddr = datagram->getDestinationAddress();
     const Address& sourceAddr = datagram->getSourceAddress();

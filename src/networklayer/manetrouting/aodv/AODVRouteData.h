@@ -32,7 +32,6 @@ class INET_API AODVRouteData : public cObject
         bool validDestNum;
         unsigned int destSeqNum;
         simtime_t lifeTime; // expiration or deletion time of the route
-        simtime_t lastUsed; // the last time when the route was accessed
 
     public:
 
@@ -49,8 +48,6 @@ class INET_API AODVRouteData : public cObject
         void setIsRepariable(bool isRepariable) { this->repariable = isRepariable; }
         const simtime_t& getLifeTime() const { return lifeTime; }
         void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
-        void setLastUsed(const simtime_t& lastUsed) { this->lastUsed = lastUsed; }
-        const simtime_t& getLastUsed() const { return lastUsed; }
         bool isActive() const { return active; }
         void setIsActive(bool active) { this->active = active; }
         void addPrecursor(const Address& precursorAddr) { precursorList.push_back(precursorAddr); }

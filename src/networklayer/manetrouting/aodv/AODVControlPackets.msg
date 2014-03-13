@@ -22,7 +22,6 @@ cplusplus {{
 
 class noncobject Address;
 
-// TODO: check page 33
 enum AODVControlPacketType
 {
     RREQ = 1;
