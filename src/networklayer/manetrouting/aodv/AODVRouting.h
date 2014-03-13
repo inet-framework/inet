@@ -38,13 +38,12 @@
 class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook, public cListener
 {
     protected:
-
         class RREQIdentifier
         {
             public:
                 Address originatorAddr;
                 unsigned int rreqID;
-                RREQIdentifier(Address originatorAddr, unsigned int rreqID) : originatorAddr(originatorAddr), rreqID(rreqID) {};
+                RREQIdentifier(const Address& originatorAddr, unsigned int rreqID) : originatorAddr(originatorAddr), rreqID(rreqID) {};
                 bool operator==(const RREQIdentifier& other) const
                 {
                   return this->originatorAddr == other.originatorAddr && this->rreqID == other.rreqID;
@@ -70,7 +69,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         INetfilter *networkProtocol;
 
         // parameters
-        unsigned int AodvUDPPort; // UDP port
+        unsigned int aodvUDPPort; // UDP port
         bool askGratuitousRREP;
         bool useHelloMessages;
 
@@ -79,12 +78,22 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
         unsigned int sequenceNum; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
         std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
-        std::map<RREQIdentifier, simtime_t,RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
+        std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare> rreqsArrivalTime; // it maps (originatorAddr,rreqID) ( <- it is a unique identifier for
                                                               // an arbitrary RREQ in the network ) to arrival time
+        Address failedNextHop;
+        std::map<Address, simtime_t> blacklist;
+
+        int rerrCount;
+        int rreqCount;
+
         simtime_t lastBroadcastTime;
 
         cMessage * helloMsgTimer;
         cMessage * expungeTimer;
+        cMessage * counterTimer;
+        cMessage * rrepAckTimer;
+        cMessage * blacklistTimer;
+
         simtime_t rebootTime;
 
         // internal
@@ -102,7 +111,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         /* Netfilter */
         Result ensureRouteForDatagram(INetworkDatagram * datagram);
         virtual Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
-        virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { return ACCEPT; }
+        virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress);
         virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { return ACCEPT; }
         virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry) { return ACCEPT; }
         virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
@@ -113,26 +122,32 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         void sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned int timeToLive);
         void forwardRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void forwardRREQ(AODVRREQ * rreq, unsigned int timeToLive);
-        void sendRERR();
         void sendHelloMessagesIfNeeded();
         void handleLinkBreakSendRERR(const Address& unreachableAddr);
-
+        void sendRERRWhenNoRouteToForward(const Address& unreachableAddr);
+        void cancelRouteDiscovery(const Address& destAddr);
+        bool updateValidRouteLifeTime(const Address& destAddr, simtime_t lifetime);
+        void sendRREPACK(AODVRREPACK * rrepACK, const Address& destAddr);
         void sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
         void sendGRREP(AODVRREP * grrep, const Address& destAddr, unsigned int timeToLive);
 
         void updateRoutingTable(IRoute * route, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
         IRoute * createRoute(const Address& destAddr, const Address& nextHop, unsigned int hopCount, bool hasValidDestNum, unsigned int destSeqNum, bool isActive, simtime_t lifeTime);
 
+        AODVRREPACK * createRREPACK();
         AODVRREP * createHelloMessage();
         AODVRREQ * createRREQ(const Address& destAddr);
         AODVRREP * createRREP(AODVRREQ * rreq, IRoute * route, const Address& sourceAddr);
-        AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * route);
+        AODVRREP * createGratuitousRREP(AODVRREQ * rreq, IRoute * originatorRoute);
         AODVRERR * createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum);
 
         void handleRREP(AODVRREP* rrep, const Address& sourceAddr);
         void handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive);
         void handleRERR(AODVRERR* rerr, const Address& sourceAddr);
         void handleHelloMessage(AODVRREP * helloMessage);
+        void handleRREPACK(AODVRREPACK * rrepACK, const Address& neighborAddr);
+        void handleRREPACKTimer();
+        void handleBlackListTimer();
 
         void expungeRoutes();
         void scheduleExpungeRoutes();

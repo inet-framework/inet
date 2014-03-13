@@ -29,7 +29,9 @@ module AODVRouter extends WirelessHost
         IPForward = true;
         wlan[*].mgmtType = default("Ieee80211MgmtAdhoc");
     submodules:
-        aodv: AODVRouting;
+        aodv: AODVRouting {
+            @display("p=558,307");
+        }
     connections:
         aodv.ipOut --> networkLayer.transportIn++;
         aodv.ipIn <-- networkLayer.transportOut++;

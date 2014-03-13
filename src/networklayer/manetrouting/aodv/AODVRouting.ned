@@ -23,13 +23,17 @@ import inet.applications.IUDPApp;
 //
 // Ad hoc On-Demand Distance Vector Routing Protocol module.
 //
-// The AODV is designed for mobile ad hoc networks with populations
-// of tens to thousands of mobile nodes. AODV has been designed to
-// reduce the dissemination of control traffic and eliminate overhead
-// on data traffic, in order to improve scalability and performance.
+// The Ad hoc On-Demand Distance Vector (AODV) routing protocol is
+// intended for use by mobile nodes in an ad hoc network. It offers
+// quick adaptation to dynamic link conditions, low processing and
+// memory overhead, low network utilization, and determines unicast
+// routes to destinations within the ad hoc network.
 //
 // This routing protocol communicates over UDP and can be
 // used in ~AdhocHost nodes as a routing submodule.
+//
+// This implementation is based on RFC 3561. For more information, you may
+// refer to the following link: https://tools.ietf.org/html/rfc3561.html.
 //
 simple AODVRouting
 {

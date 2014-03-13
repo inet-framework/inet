@@ -85,6 +85,13 @@ class AODVRERR extends AODVControlPacket
 }
 
 //
+// Represents an AODV Route Error
+//
+class AODVRREPACK extends AODVControlPacket
+{
+}
+
+//
 // Represents a timer for a Route Reply packet
 //
 message WaitForRREP

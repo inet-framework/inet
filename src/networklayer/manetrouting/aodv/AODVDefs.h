@@ -20,7 +20,7 @@
 
 #define MAX(a,b) (((a)>(b))?(a):(b))
 
-#define ACTIVE_ROUTE_TIMEOUT     3.0
+#define ACTIVE_ROUTE_TIMEOUT     0.5
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
 #define DELETE_PERIOD            5 * MAX(ACTIVE_ROUTE_TIMEOUT, HELLO_INTERVAL)
