@@ -35,6 +35,7 @@ network Test
         host: StandardHost;
 }
 
+%#--------------------------------------------------------------------------------------------------------------
 %file: scenario.xml
  
 <scenario>
@@ -43,26 +44,28 @@ network Test
     </at>
 </scenario>
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-
-.*Event #\d+  T=3 .*
+\*\* Event #\d+  T=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
+processing <at> command\.\.\.
+processing <tell> command\.\.\.
+Doing stage 0/8 of operation NodeStartOperation on Test\.host
+Test\.host starting up
 .*
-Test.host starting up
+Test\.host started
+\*\* Event #\d+  T=6   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+Starting up with destination = 192\.168\.0\.42, source = <none>\.
+Sending ping request #0 to lower layer\.
 .*
-Test.host started
-.*Event #\d+  T=6 .*
-Starting up: .*
-Sending ping #0
-.*
-.*Event #\d+  T=9 .*
-Sending ping #3
+.*Event #\d+  T=9   Test\.host\.pingApp\[0\] \(PingApp, id=\d+\)
+Sending ping request #3 to lower layer\.
 .*
 
 <!> No more events -- simulation ended at event #\d+, t=9
-
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

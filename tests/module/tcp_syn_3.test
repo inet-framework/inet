@@ -13,6 +13,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
+cmdenv-log-format="%c %C@"
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -21,7 +22,21 @@ cmdenv-express-mode=false
 
 include ../../lib/defaults.ini
 
-%contains: stdout
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /(^testing)|(tcptester@)/)
+    {
+        $sor =~ s/^[^@]+@//;
+        print $sor;
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
 cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # deleting
@@ -38,6 +53,7 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

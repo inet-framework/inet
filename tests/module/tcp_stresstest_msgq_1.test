@@ -18,6 +18,10 @@ cmdenv-express-mode=false
 #[Parameters]
 *.testing=true
 
+cmdenv-log-format=""
+*.tcptester.cmdenv-ev-output=true
+**.cmdenv-ev-output=false
+
 # script format: "time numbytes; time numbytes; ..."
 *.cli_app.sendScript="1 1; 1 100; 1 4000; 1 16000; 1 10; 1 1; 1 1; 1 1; 1 64000; 1 10;\
                       1 1; 1 100; 1 4000; 1 16000; 1 10; 1 1; 1 1; 1 1; 1 64000; 1 10;\
@@ -36,14 +40,20 @@ cmdenv-express-mode=false
 
 include ../../lib/defaults.ini
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
+Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
+TcpTestNet2.cli_tcp: finishing with 1 connections open.
+TcpTestNet2.srv_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_app: received 252372 bytes in 129 packets
 [206.927] tcpdump finished, A:329 B:364 segments
 
+End.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

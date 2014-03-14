@@ -17,6 +17,8 @@ cmdenv-event-banners=false
 #[Parameters]
 *.testing=true
 
+cmdenv-log-format=""
+
 *.cli_app.tSend=1s
 *.cli_app.sendBytes=655360B  # 640K
 
@@ -26,14 +28,20 @@ cmdenv-event-banners=false
 
 include ../../lib/defaults.ini
 
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
+Calling finish() at end of Run #0...
 TcpTestNet2.cli_app: received 0 bytes in 0 packets
+TcpTestNet2.cli_tcp: finishing with 1 connections open.
+TcpTestNet2.srv_tcp: finishing with 1 connections open.
 TcpTestNet2.srv_app: received 655360 bytes in 447 packets
 [293.525] tcpdump finished, A:727 B:523 segments
 
+End.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

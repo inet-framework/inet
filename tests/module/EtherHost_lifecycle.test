@@ -102,6 +102,7 @@ Doing stage 3/8 of operation NodeStartOperation on Test\.sender\[0\]
 Doing stage 4/8 of operation NodeStartOperation on Test\.sender\[0\]
 Doing stage 5/8 of operation NodeStartOperation on Test\.sender\[0\]
 Doing stage 6/8 of operation NodeStartOperation on Test\.sender\[0\]
+Starting application
 Test\.sender\[0\]\.srv registering DSAP 241
 Doing stage 7/8 of operation NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
@@ -170,6 +171,7 @@ processing <tell> command\.\.\.
 Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
 Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[0\]
+Stop the application
 Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[0\]
 Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[0\]
 Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[0\]
@@ -224,6 +226,7 @@ processing <tell> command\.\.\.
 Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Stop the application
 Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[1\]
 Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[1\]
@@ -247,6 +250,7 @@ Doing stage 3/8 of operation NodeStartOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation NodeStartOperation on Test\.sender\[1\]
 Doing stage 5/8 of operation NodeStartOperation on Test\.sender\[1\]
 Doing stage 6/8 of operation NodeStartOperation on Test\.sender\[1\]
+Starting application
 Test\.sender\[1\]\.srv registering DSAP 241
 Doing stage 7/8 of operation NodeStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
@@ -283,6 +287,7 @@ processing <tell> command\.\.\.
 Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
 Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Stop the application
 Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[1\]
 Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[1\]
 Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[1\]
@@ -305,6 +310,7 @@ Doing stage 3/8 of operation NodeStartOperation on Test\.recip
 Doing stage 4/8 of operation NodeStartOperation on Test\.recip
 Doing stage 5/8 of operation NodeStartOperation on Test\.recip
 Doing stage 6/8 of operation NodeStartOperation on Test\.recip
+Starting application
 Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation NodeStartOperation on Test\.recip
 Test\.recip started
@@ -316,6 +322,7 @@ processing <tell> command\.\.\.
 Doing stage 0/8 of operation NodeShutdownOperation on Test.recip
 Test\.recip shutting down
 Doing stage 1/8 of operation NodeShutdownOperation on Test\.recip
+Stop the application
 Doing stage 2/8 of operation NodeShutdownOperation on Test\.recip
 Doing stage 3/8 of operation NodeShutdownOperation on Test\.recip
 Doing stage 4/8 of operation NodeShutdownOperation on Test\.recip
@@ -337,6 +344,7 @@ Doing stage 3/8 of operation NodeStartOperation on Test\.recip
 Doing stage 4/8 of operation NodeStartOperation on Test\.recip
 Doing stage 5/8 of operation NodeStartOperation on Test\.recip
 Doing stage 6/8 of operation NodeStartOperation on Test\.recip
+Starting application
 Test\.recip\.srv registering DSAP 241
 Doing stage 7/8 of operation NodeStartOperation on Test\.recip
 Test\.recip started

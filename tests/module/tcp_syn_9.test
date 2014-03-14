@@ -14,6 +14,7 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
+cmdenv-log-format="%c %C@"
 
 *.cli_app.tOpen=0s
 *.srv_app.tOpen=0s
@@ -27,7 +28,21 @@ cmdenv-express-mode=false
 
 include ../../lib/defaults.ini
 
-%contains: stdout
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /(^testing)|(tcptester@)/)
+    {
+        $sor =~ s/^[^@]+@//;
+        print $sor;
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
 cli_tcp: INIT --> SYN_SENT  (on OPEN_ACTIVE)
 srv_tcp: INIT --> LISTEN  (on OPEN_PASSIVE)
 [0.001 A001] A.1000 > B.2000: S 0:0(0) win 16384 # removing original
@@ -57,15 +72,20 @@ srv_tcp: SYN_RCVD --> ESTABLISHED  (on RCV_ACK)
 [5.003 B006] A.1000 < B.2000: A S 500:500(0) ack 1 win 16384 # introducing copy
 [5.003 B007] A.1000 < B.2000: A ack 101 win 16384
 [5.005 A007] A.1000 > B.2000: A ack 601 win 16384
-
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-TcpTestNet1.cli_app: received 100 bytes in 1 packets
-TcpTestNet1.srv_app: received 100 bytes in 1 packets
-[5.006] tcpdump finished, A:7 B:7 segments
+Calling finish() at end of Run #0...
+ (TcpTestClient)TcpTestNet1.cli_app@TcpTestNet1.cli_app: received 100 bytes in 1 packets
+ (TCP)TcpTestNet1.cli_tcp@TcpTestNet1.cli_tcp: finishing with 1 connections open.
+ (TCP)TcpTestNet1.srv_tcp@TcpTestNet1.srv_tcp: finishing with 1 connections open.
+ (TcpTestClient)TcpTestNet1.srv_app@TcpTestNet1.srv_app: received 100 bytes in 1 packets
+ (TCPScriptableTester)TcpTestNet1.tcptester@[5.006] tcpdump finished, A:7 B:7 segments
 
+End.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

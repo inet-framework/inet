@@ -13,13 +13,31 @@ cmdenv-express-mode=false
 
 #[Parameters]
 *.testing=true
+cmdenv-log-format="%c %C@"
+
+*.tcptester.cmdenv-ev-output=true
+**.cmdenv-ev-output=false
 
 # script format: "time numbytes; time numbytes; ..."
 *.cli_app.sendScript="1.00 2; 1.01 4; 1.02 8; 1.03 16; 1.04 32; 2.00 64; 2.01 128; 2.02 256; 2.03 512"
 
 include ../../lib/defaults.ini
 
-%contains: stdout
+%#--------------------------------------------------------------------------------------------------------------
+%file: postrun.pl
+open FILE, '<test.out';
+while($sor = <FILE>)
+{
+    if ($sor =~ /(^testing)|(tcptester@)/)
+    {
+        $sor =~ s/^[^@]+@//;
+        print $sor;
+    }
+}
+%#--------------------------------------------------------------------------------------------------------------
+%postrun-command:  perl ./postrun.pl
+%#--------------------------------------------------------------------------------------------------------------
+%contains: postrun-command(1).out
 [1.001 A003] A.1000 > B.2000: A 1:3(2) ack 501 win 16384
 [1.203 B002] A.1000 < B.2000: A ack 3 win 16384
 [1.205 A004] A.1000 > B.2000: A 3:63(60) ack 501 win 16384
@@ -28,15 +46,20 @@ include ../../lib/defaults.ini
 [2.203 B004] A.1000 < B.2000: A ack 127 win 16384
 [2.205 A006] A.1000 > B.2000: A 127:1023(896) ack 501 win 16384
 [2.407 B005] A.1000 < B.2000: A ack 1023 win 16384
-
+%#--------------------------------------------------------------------------------------------------------------
 %contains: stdout
-TcpTestNet1.cli_app: received 0 bytes in 0 packets
-TcpTestNet1.srv_app: received 1022 bytes in 4 packets
-[2.408] tcpdump finished, A:6 B:5 segments
+Calling finish() at end of Run #0...
+ (TcpTestClient)TcpTestNet1.cli_app@TcpTestNet1.cli_app: received 0 bytes in 0 packets
+ (TCP)TcpTestNet1.cli_tcp@TcpTestNet1.cli_tcp: finishing with 1 connections open.
+ (TCP)TcpTestNet1.srv_tcp@TcpTestNet1.srv_tcp: finishing with 1 connections open.
+ (TcpTestClient)TcpTestNet1.srv_app@TcpTestNet1.srv_app: received 1022 bytes in 4 packets
+ (TCPScriptableTester)TcpTestNet1.tcptester@[2.408] tcpdump finished, A:6 B:5 segments
 
+End.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
+%#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 -- check module destructor
 %#--------------------------------------------------------------------------------------------------------------

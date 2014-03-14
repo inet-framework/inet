@@ -15,6 +15,10 @@ cmdenv-express-mode=false
 #[Parameters]
 *.testing=true
 
+cmdenv-log-format=""
+*.tcptester.cmdenv-ev-output=true
+**.cmdenv-ev-output=false
+
 *.cli_app.active=true
 *.srv_app.active=true
 
