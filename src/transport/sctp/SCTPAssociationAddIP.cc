@@ -227,7 +227,7 @@ SCTPAuthenticationChunk* SCTPAssociation::createAuthChunk()
 
 bool SCTPAssociation::compareRandom()
 {
-    int32 i, sizeKeyVector, sizePeerKeyVector, size;
+    int32 i, sizeKeyVector, sizePeerKeyVector, size = 0;
 
     sizeKeyVector = sizeof(state->keyVector);
     sizePeerKeyVector = sizeof(state->peerKeyVector);

@@ -69,6 +69,7 @@ simple SCTP like ISCTP
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
+        bool natFriendly = default(false);
         int bytesToAddPerRcvdChunk = default(0);        // for flowcontrol
         int bytesToAddPerPeerChunk = default(0);        // for flowcontrol
         bool tellArwnd = default(false);            // for flowcontrol

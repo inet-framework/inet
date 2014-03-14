@@ -2901,6 +2901,18 @@ void SCTPAssociation::processErrorArrived(SCTPErrorChunk* errorChunk)
         parameterType = param->getParameterType();
         switch (parameterType)
         {
+            case MISSING_NAT_ENTRY:
+            {
+                if ((bool)sctpMain->par("addIP"))
+                {
+                    if (StartAddIP->isScheduled())
+                        stopTimer(StartAddIP);
+                    state->corrIdNum = state->asconfSn;
+                    const char* type = (const char *)sctpMain->par("addIpType");
+                    sendAsconf(type, true);
+                }
+                break;
+            }
             case UNSUPPORTED_HMAC:
             {
                 sendAbort();

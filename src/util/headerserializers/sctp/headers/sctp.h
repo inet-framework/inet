@@ -34,6 +34,8 @@
 #define T_FLAG        0x04
 #define B_FLAG        0x02
 #define M_FLAG        0x01
+#define NAT_M_FLAG    0x02
+#define NAT_T_FLAG    0x01
 
 
 #define CRC32C(c,d) (c=(c>>8)^crc_c[(c^(d))&0xFF])

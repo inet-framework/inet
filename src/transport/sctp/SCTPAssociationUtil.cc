@@ -521,6 +521,9 @@ void SCTPAssociation::sendInit()
     }
     uint32 addrNum = 0;
     bool friendly = false;
+    if (sctpMain->hasPar("natFriendly")) {
+        friendly = sctpMain->par("natFriendly");
+    }
     if (remoteAddr.isIPv6())
     {
         for (AddressVector::iterator i=adv.begin(); i!=adv.end(); ++i)
@@ -765,6 +768,9 @@ void SCTPAssociation::sendInitAck(SCTPInitChunk* initChunk)
     initTsn = initAckChunk->getInitTSN();
     uint32 addrNum = 0;
     bool friendly = false;
+    if (sctpMain->hasPar("natFriendly")) {
+        friendly = sctpMain->par("natFriendly");
+    }
     if (!friendly)
         for (AddressVector::iterator k=state->localAddresses.begin(); k!=state->localAddresses.end(); ++k)
         {

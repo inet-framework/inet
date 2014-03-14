@@ -177,7 +177,8 @@ enum SCTPParameterTypes
 
 enum SCTPErrorCauses
 {
-    UNSUPPORTED_HMAC  = 261
+    UNSUPPORTED_HMAC  = 261,
+    MISSING_NAT_ENTRY = 177
 };
 
 
