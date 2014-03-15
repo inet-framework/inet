@@ -44,12 +44,10 @@ simple CSFQVLANQueue5 like OutputQueue
         int numFlows = default(1);	// number of flows (i.e., subscribers)
 		double linkRate @unit(bps) = default(100Mbps);		// transmission rate of output link (i.e., feeder line rate (R_F))
         int queueSize @unit(B) = default(15220000B);		// FIFO queue size; default value corresponds to 10,000 maximum-sized VLAN frames.
-        int queueThreshold @unit(B) = default(3805000B);	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
+        int queueThreshold @unit(B) = default(int(0.25*this.queueSize));	// FIFO threshold to detect link congestion; default value is a quarter of default queueSize.
         double thresholdScaleFactor = default(0.0);			// scaling factor used to determine queue threshold lower and upper limits
         double K @unit(s) = default(100ms);					// averaging constant for flow rate estimation
-        double K_scale = default(0);						// scaling factor for averaging constant in conformant flow rate estimation
-															// - default value of 0 means it is set to 1.0/numFlows;
-															// - otherwise, the given value is used.
+        double K_scale = default(1.0/this.numFlows);		// scaling factor for averaging constant in conformant flow rate estimation
         double K_alpha @unit(s) = default(200ms);			// averaging constant for fair rate (alpha) estimation
 		int max_alpha = default(29);						// maximum number of times fair rate (alpha) can be decreased when queue overflows, during a time interval of length K_alpha
 		int max_beta = default(29);							// maximum number of times fair rate (alpha) can be decreased when queue passes threshold, during a time interval of length K_alpha

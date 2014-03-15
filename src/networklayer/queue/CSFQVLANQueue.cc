@@ -94,8 +94,7 @@ void CSFQVLANQueue::initialize(int stage)
 
         // CSFQ++: System-wide variables
         K = par("K").doubleValue();
-        double tmp = par("K_scale").doubleValue();
-        K_scale = (K_scale == 0.0) ? 1.0/numFlows : tmp; // default value (when the parameter value is 0) is 1.0/numFlows.
+        K_scale = par("K_scale").doubleValue();
         K_alpha = par("K_alpha").doubleValue();
         excessBW = linkRate;
         fairShareRate = excessBW;
