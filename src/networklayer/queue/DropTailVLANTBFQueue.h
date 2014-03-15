@@ -21,15 +21,11 @@
 #define __INET_DROPTAILVLANTBFQUEUE_H
 
 #include <omnetpp.h>
+#include <algorithm>
 #include <sstream>
 #include <vector>
 #include "PassiveQueueBase.h"
 #include "IQoSClassifier.h"
-
-/**
- * Returns the maximum of a and b.
- */
-inline double max(const double a, const double b) { return (a > b) ? a : b; }
 
 /**
  * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
@@ -42,7 +38,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
-    typedef std::vector<long long> LongLongVector;
+    typedef std::vector<unsigned long long> UnsignedLongLongVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
     typedef std::vector<simtime_t> TimeVector;
@@ -51,7 +47,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     // configuration
     int frameCapacity;
     int numQueues;
-    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
+    unsigned long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
@@ -59,7 +55,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     // state
     IQoSClassifier *classifier;
     QueueVector queues;
-    LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
+    UnsignedLongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF

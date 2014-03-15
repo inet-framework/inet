@@ -78,7 +78,7 @@ void DropTailTBFQueue::handleMessage(cMessage *msg)
     // else if (dynamic_cast<EtherFrame *>(msg) != NULL)
     else
     {
-        numQueueReceived++;
+        numPktsReceived++;
         int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
 // DEBUG
         ASSERT(pktLength > 0);
@@ -114,7 +114,7 @@ void DropTailTBFQueue::handleMessage(cMessage *msg)
         if (ev.isGUI())
         {
             char buf[40];
-            sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
+            sprintf(buf, "q rcvd: %d\nq dropped: %d", numPktsReceived, numQueueDropped);
             getDisplayString().setTagArg("t", 0, buf);
         }
     }

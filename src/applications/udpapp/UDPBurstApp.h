@@ -41,6 +41,10 @@ protected:
     virtual void sendPacket();
 //    virtual void sendToUDPDelayed(cPacket *msg, int srcPort, const IPvXAddress& destAddr, int destPort, double delay);
 
+public:
+  UDPBurstApp();
+  virtual ~UDPBurstApp();
+
 protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);

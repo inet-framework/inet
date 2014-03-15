@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2004 Andras Varga
 // Copyright (C) 2000 Institut fuer Telematik, Universitaet Karlsruhe
 //
@@ -29,7 +29,7 @@ import inet.applications.udpapp.UDPApp;
 //import inet.applications.udpapp.UDPVideoStreamCli;
 //import inet.applications.udpapp.VideoApp;
 import inet.base.NotificationBoard;
-import inet.linklayer.ethernet.EthernetInterface2;
+import inet.linklayer.ethernet.EthernetInterface2WithDLDelayMeter;
 import inet.linklayer.ext.ExtInterface;
 import inet.linklayer.ppp.PPPInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -42,10 +42,10 @@ import inet.util.TCPDump;
 
 
 //
-// \IP host with TCP, UDP layers and applications.
+// \IP host with TCP, UDP layers and applications AND EthernetInterface2WithDLDelayMeter.
 // Note that ping application has been removed from the original StandardHost module.
 //
-module StandardHost3WithEthernetInterface2
+module StandardHost3WithEthernetInterface2WithDLDelayMeter
 {
     parameters:
         @node();
@@ -140,7 +140,7 @@ module StandardHost3WithEthernetInterface2
             parameters:
                 @display("p=320,389,row,90;q=txQueue");
         }
-        eth[sizeof(ethg)]: EthernetInterface2 {
+        eth[sizeof(ethg)]: EthernetInterface2WithDLDelayMeter {
             parameters:
                 @display("p=476,389,row,90;q=txQueue");
         }

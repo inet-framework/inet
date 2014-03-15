@@ -43,7 +43,7 @@ network DedicatedAccess
         double uni_rate @unit(bps) = default(10Gbps);	// transmission rate of ONU Ethernet UNIs
         double uni_delay @unit(s) = default(0s);	// no delay at UNIs
         double distribution_rate @unit(bps) = default(10Gbps);	// transmission rate of distribution fiber (between Onu and OLT)
-        double distribution_delay @unit(s) = default(300us);	// default delay of 300 us corresponds to 60 km fiber;
+        double distribution_delay @unit(s) = default(300us);	// default delay of 300 us corresponds to 60 km fiber (60 km is the max. logical reach of GPON)
         														// note that there is no feeder fiber in dedicated access unlike PONs.
         double backbone_rate @unit(bps) = default(1Tbps);	// transmission rate of backbone link (between Olt and server)
         double backbone_delay @unit(s) = default(4.7ms);	// default delay of 4.7 ms gives total RTT of 10 ms including delays in access

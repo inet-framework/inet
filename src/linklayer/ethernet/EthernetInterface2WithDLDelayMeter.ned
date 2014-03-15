@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2012 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2006 Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
