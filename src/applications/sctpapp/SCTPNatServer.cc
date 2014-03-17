@@ -362,7 +362,7 @@ void SCTPNatServer::handleMessage(cMessage *msg)
             case SCTP_I_SEND_STREAMS_RESETTED:
             case SCTP_I_RCV_STREAMS_RESETTED:
             {
-                ev << "Streams have been resetted\n";
+                EV << "Streams have been resetted\n";
                 delete msg;
                 break;
             }
@@ -500,9 +500,9 @@ void SCTPNatServer::printNatVector(void)
 
 void SCTPNatServer::finish()
 {
-    ev << getFullPath() << ": opened " << numSessions << " sessions\n";
-    ev << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
+    EV << getFullPath() << ": opened " << numSessions << " sessions\n";
+    EV << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    ev << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
-    ev << getFullPath() << "Over all " << notifications << " notifications received\n ";
+    EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
+    EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 }
