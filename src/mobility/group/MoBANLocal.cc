@@ -58,7 +58,14 @@ void MoBANLocal::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MoBANLocal stage " << stage << endl;
-    if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
+    if (stage == INITSTAGE_LOCAL)
+    {
+        WATCH_PTR(coordinator);
+        WATCH(referencePosition);
+        WATCH(radius);
+        WATCH(speed);
+    }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
         updateVisualRepresentation();
 }
 
