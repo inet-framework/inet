@@ -364,9 +364,7 @@ public:
 	virtual ~BaseConnectionManager();
 
 	/** @brief Needs two initialization stages.*/
-	virtual int numInitStages() const {
-		return 2;
-	}
+	virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
 	/**
 	 * @brief Reads init parameters and calculates a maximal interference
