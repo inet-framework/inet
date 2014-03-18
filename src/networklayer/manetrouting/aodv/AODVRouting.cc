@@ -199,17 +199,17 @@ AODVRouting::AODVRouting()
     rrepAckTimer = NULL;
 }
 
-bool AODVRouting::hasOngoingRouteDiscovery(const Address& destAddr)
+bool AODVRouting::hasOngoingRouteDiscovery(const Address& target)
 {
-    return waitForRREPTimers.find(destAddr) != waitForRREPTimers.end();
+    return waitForRREPTimers.find(target) != waitForRREPTimers.end();
 }
 
-void AODVRouting::startRouteDiscovery(const Address& destAddr, unsigned timeToLive)
+void AODVRouting::startRouteDiscovery(const Address& target, unsigned timeToLive)
 {
 
-    EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << destAddr << endl;
-    ASSERT(!hasOngoingRouteDiscovery(destAddr));
-    AODVRREQ * rreq = createRREQ(destAddr);
+    EV_INFO << "Starting route discovery with originator " << getSelfIPAddress() << " and destination " << target << endl;
+    ASSERT(!hasOngoingRouteDiscovery(target));
+    AODVRREQ * rreq = createRREQ(target);
     sendRREQ(rreq, addressType->getBroadcastAddress(), timeToLive);
 }
 
@@ -349,9 +349,6 @@ void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned in
     sendAODVPacket(rrep, nextHop, timeToLive, 0); // FIXME: temporary TTL
 }
 
-/*
- * RFC 3561: 6.3. Generating Route Requests
- */
 AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
 {
     AODVRREQ *rreqPacket = new AODVRREQ("AODV-RREQ");
@@ -404,7 +401,7 @@ AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
     // In this way, when the node receives the packet again from its neighbors,
     // it will not reprocess and re-forward the packet.
 
-    RREQIdentifier rreqIdentifier(getSelfIPAddress(),rreqId);
+    RREQIdentifier rreqIdentifier(getSelfIPAddress(), rreqId);
     rreqsArrivalTime[rreqIdentifier] = simTime();
 
     return rreqPacket;
@@ -1210,6 +1207,9 @@ void AODVRouting::clearState()
 
     for (std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
         cancelAndDelete(it->second);
+
+    for (std::multimap<Address, INetworkDatagram *>::iterator it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
+        networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
     targetAddressToDelayedPackets.clear();
 

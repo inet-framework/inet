@@ -108,7 +108,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
         /* Route Discovery */
-        void startRouteDiscovery(const Address& destAddr, unsigned int timeToLive = 0);
+        void startRouteDiscovery(const Address& target, unsigned int timeToLive = 0);
         void completeRouteDiscovery(const Address& target);
         bool hasOngoingRouteDiscovery(const Address& destAddr);
         void cancelRouteDiscovery(const Address& destAddr);
