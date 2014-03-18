@@ -128,7 +128,6 @@ void AODVRouting::handleMessage(cMessage *msg)
             default:
                 throw cRuntimeError("AODV Control Packet arrived with undefined packet type: %d", ctrlPacket->getPacketType());
         }
-
         delete udpPacket;
     }
 }
@@ -311,6 +310,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
         scheduleAt(simTime() + ringTraversalTime, newRREPTimerMsg);
 
     }
+    EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
     sendAODVPacket(rreq, destAddr, timeToLive, uniform(0, maxJitter).dbl());
     rreqCount++;
 }
@@ -318,7 +318,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
 
 void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive)
 {
-    EV_INFO << "Sending Route Reply to " << destAddr << " for node: " << getSelfIPAddress() << endl;
+    EV_INFO << "Sending Route Reply to " << destAddr << endl;
 
     // When any node transmits a RREP, the precursor list for the
     // corresponding destination node is updated by adding to it
@@ -483,9 +483,6 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * destRoute, const Add
     return rrep;
 }
 
-/*
- * 6.6.3. Generating Gratuitous RREPs
- */
 AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* originatorRoute)
 {
     ASSERT(originatorRoute != NULL);
@@ -924,7 +921,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         rreq->setUnknownSeqNumFlag(false);
 
         AODVRREQ * outgoingRREQ = rreq->dup();
-        forwardRREQ(outgoingRREQ, timeToLive - 1);
+        broadcastRREQ(outgoingRREQ, timeToLive - 1);
     }
     else
         EV_WARN << "Can't forward the RREQ because of its small (<= 1) TTL: " << timeToLive << " or the AODV reboot has not completed yet"  << endl;
@@ -1085,6 +1082,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
     rerrCount++;
 
     // broadcast
+    EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
     sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
 }
 
@@ -1231,6 +1229,7 @@ void AODVRouting::clearState()
 
 void AODVRouting::handleWaitForRREP(WaitForRREP* rrepTimer)
 {
+    EV_INFO << "We didn't get any Route Reply within RREP timeout." << endl;
     AODVRREQ * rreq = createRREQ(rrepTimer->getDestAddr());
     sendRREQ(rreq, addressType->getBroadcastAddress(), 0);
 }
@@ -1241,8 +1240,9 @@ void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned 
     sendAODVPacket(rrep, destAddr, 100, 0);
 }
 
-void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
+void AODVRouting::broadcastRREQ(AODVRREQ* rreq, unsigned int timeToLive)
 {
+    EV_INFO << "Broadcasting the Route Request message with TTL= " << timeToLive << endl;
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, uniform(0, maxJitter).dbl());
 }
 
@@ -1541,7 +1541,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
     AODVRERR * rerr = createRERR(unreachableNeighbors, unreachableNeighborsDestSeqNum);
 
     rerrCount++;
-
+    EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
     sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl()); // TODO: unicast if there exists a route to the source
 }
 
