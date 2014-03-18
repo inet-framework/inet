@@ -34,7 +34,6 @@
 #define NODE_TRAVERSAL_TIME      0.04
 #define PATH_DISCOVERY_TIME      2.0 * NET_TRAVERSAL_TIME
 #define RERR_RATELIMIT           10
-#define RING_TRAVERSAL_TIME      2.0 * NODE_TRAVERSAL_TIME * (TTL_VALUE + TIMEOUT_BUFFER)
 #define RREQ_RETRIES             2
 #define RREQ_RATELIMIT           10
 #define TIMEOUT_BUFFER           2
