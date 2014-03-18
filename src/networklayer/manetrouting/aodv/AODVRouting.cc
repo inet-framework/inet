@@ -37,9 +37,10 @@ void AODVRouting::initialize(int stage)
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTablePath")));
         interfaceTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolPath")));
-        aodvUDPPort = par("UDPPort");
+        aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
+        maxJitter = par("maxJitter");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -307,8 +308,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
         scheduleAt(simTime() + ringTraversalTime, newRREPTimerMsg);
 
     }
-    double delay = uniform(0,0.01);
-    sendAODVPacket(rreq, destAddr, timeToLive, delay);
+    sendAODVPacket(rreq, destAddr, timeToLive, uniform(0, maxJitter).dbl());
     rreqCount++;
 }
 
@@ -346,7 +346,7 @@ void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned in
 
         scheduleAt(simTime() + NEXT_HOP_WAIT, rrepAckTimer);
     }
-    sendAODVPacket(rrep, nextHop, timeToLive, 0); // FIXME: temporary TTL
+    sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
 
 AODVRREQ * AODVRouting::createRREQ(const Address& destAddr)
@@ -856,7 +856,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         AODVRREP * rrep = createRREP(rreq, destRoute, sourceAddr);
 
         // send to the originator
-        sendRREP(rrep, rreq->getOriginatorAddr(), 100); // FIXME: temporary, we set the TTL value to 100
+        sendRREP(rrep, rreq->getOriginatorAddr(), 255);
 
         delete rreq;
         return; // discard RREQ, in this case, we do not forward it.
@@ -881,7 +881,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         AODVRREP * rrep = createRREP(rreq, destRoute, sourceAddr);
 
         // send to the originator
-        sendRREP(rrep, rreq->getOriginatorAddr(), 100); // FIXME: temporary, we set the TTL value to 100
+        sendRREP(rrep, rreq->getOriginatorAddr(), 255);
 
         if (rreq->getGratuitousRREPFlag())
         {
@@ -949,7 +949,7 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
     newProtocolData->setLifeTime(lifeTime);
     newProtocolData->setDestSeqNum(destSeqNum);
 
-    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0"); // TODO:
+    InterfaceEntry * ifEntry = interfaceTable->getInterfaceByName("wlan0"); // TODO: IMPLEMENT: multiple interfaces
     if (ifEntry)
         newRoute->setInterface(ifEntry);
 
@@ -1081,8 +1081,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
     rerrCount++;
 
     // broadcast
-    double delay = uniform(0,0.01);
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, delay);
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
 }
 
 AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum)
@@ -1239,8 +1238,7 @@ void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned 
 
 void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
 {
-    double delay = uniform(0,0.01);
-    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, delay);
+    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, uniform(0, maxJitter).dbl());
 }
 
 void AODVRouting::completeRouteDiscovery(const Address& target)
@@ -1276,7 +1274,7 @@ void AODVRouting::sendGRREP(AODVRREP* grrep, const Address& destAddr, unsigned i
     IRoute * destRoute = routingTable->findBestMatchingRoute(destAddr);
     const Address& nextHop = destRoute->getNextHopAsGeneric();
 
-    sendAODVPacket(grrep, nextHop, timeToLive, 0); // TODO: temporary ttl
+    sendAODVPacket(grrep, nextHop, timeToLive, 0);
 }
 
 AODVRREP* AODVRouting::createHelloMessage()
@@ -1313,8 +1311,7 @@ void AODVRouting::sendHelloMessagesIfNeeded()
     if (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > HELLO_INTERVAL)
     {
         AODVRREP * helloMessage = createHelloMessage();
-        double delay = uniform(0.0, 0.01);
-        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, delay);
+        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
     }
 
     scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
@@ -1539,8 +1536,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
     AODVRERR * rerr = createRERR(unreachableNeighbors, unreachableNeighborsDestSeqNum);
 
     rerrCount++;
-    double delay = uniform(0,0.01);
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, delay); // TODO: unicast if there exists a route to the source
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl()); // TODO: unicast if there exists a route to the source
 }
 
 void AODVRouting::cancelRouteDiscovery(const Address& destAddr)

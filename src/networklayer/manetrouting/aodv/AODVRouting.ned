@@ -44,7 +44,8 @@ simple AODVRouting
         string networkProtocolPath = default("^.networkLayer.ip");
         bool askGratuitousRREP = default(false);
         bool useHelloMessages = default(false);
-        int UDPPort = default(654);
+        int udpPort = default(654);
+        double maxJitter @unit("s") = default(10ms);
     gates:
         input ipIn;
         output ipOut;
