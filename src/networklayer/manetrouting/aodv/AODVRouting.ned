@@ -42,10 +42,13 @@ simple AODVRouting
         string routingTablePath = default("^.routingTable");
         string interfaceTablePath = default("^.interfaceTable");
         string networkProtocolPath = default("^.networkLayer.ip");
+
+        // AODV Parameters
         bool askGratuitousRREP = default(false);
         bool useHelloMessages = default(false);
         int udpPort = default(654);
         double maxJitter @unit("s") = default(10ms);
+        double activeRouteTimeout @unit("s") = default(3s);
     gates:
         input ipIn;
         output ipOut;

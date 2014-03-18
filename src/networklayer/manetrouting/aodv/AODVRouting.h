@@ -77,6 +77,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         bool askGratuitousRREP;
         bool useHelloMessages;
         simtime_t maxJitter;
+        double activeRouteTimeout;
 
         // state
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node

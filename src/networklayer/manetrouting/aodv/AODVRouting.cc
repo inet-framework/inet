@@ -41,6 +41,7 @@ void AODVRouting::initialize(int stage)
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
         maxJitter = par("maxJitter");
+        activeRouteTimeout = par("activeRouteTimeout");
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -539,10 +540,10 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
     if (!previousHopRoute || previousHopRoute->getSource() != this)
     {
         // create without valid sequence number
-        createRoute(sourceAddr, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + ACTIVE_ROUTE_TIMEOUT);
+        createRoute(sourceAddr, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
     }
     else
-        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + ACTIVE_ROUTE_TIMEOUT);
+        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rrep->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
 
     // Next, the node then increments the hop count value in the RREP by one,
     // to account for the new hop through the intermediate node
@@ -642,7 +643,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
             // lifetime, (current time + ACTIVE_ROUTE_TIMEOUT).
 
             simtime_t existingLifeTime = forwardRREPRouteData->getLifeTime();
-            forwardRREPRouteData->setLifeTime(std::max(simTime() + ACTIVE_ROUTE_TIMEOUT, existingLifeTime));
+            forwardRREPRouteData->setLifeTime(std::max(simTime() + activeRouteTimeout, existingLifeTime));
 
 
             // Finally, the precursor list for the next hop towards the
@@ -758,11 +759,11 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     if (!previousHopRoute || previousHopRoute->getSource() != this)
     {
         // create without valid sequence number
-        createRoute(sourceAddr, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + ACTIVE_ROUTE_TIMEOUT);
+        createRoute(sourceAddr, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
 
     }
     else
-        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + ACTIVE_ROUTE_TIMEOUT);
+        updateRoutingTable(previousHopRoute, sourceAddr, 1, false, rreq->getOriginatorSeqNum(), true, simTime() + activeRouteTimeout);
 
     // then checks to determine whether it has received a RREQ with the same
     // Originator IP Address and RREQ ID within at least the last PATH_DISCOVERY_TIME.
@@ -1453,7 +1454,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
     if (destAddr.isBroadcast() || routingTable->isLocalAddress(destAddr) || destAddr.isMulticast())
     {
         if (routingTable->isLocalAddress(destAddr) && ipSource && ipSource->getSource() == this)
-            updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + ACTIVE_ROUTE_TIMEOUT);
+            updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
 
         return ACCEPT;
     }
@@ -1468,11 +1469,11 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
     // path to the destination is updated to be no less than the current
     // time plus ACTIVE_ROUTE_TIMEOUT
 
-    updateValidRouteLifeTime(sourceAddr, simTime() + ACTIVE_ROUTE_TIMEOUT);
-    updateValidRouteLifeTime(destAddr, simTime() + ACTIVE_ROUTE_TIMEOUT);
+    updateValidRouteLifeTime(sourceAddr, simTime() + activeRouteTimeout);
+    updateValidRouteLifeTime(destAddr, simTime() + activeRouteTimeout);
 
     if (routeDest && routeDest->getSource() == this)
-        updateValidRouteLifeTime(routeDest->getNextHopAsGeneric(), simTime() + ACTIVE_ROUTE_TIMEOUT);
+        updateValidRouteLifeTime(routeDest->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
 
     // Since the route between each originator and destination pair is expected
     // to be symmetric, the Active Route Lifetime for the previous hop, along the
@@ -1480,7 +1481,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
     // current time plus ACTIVE_ROUTE_TIMEOUT.
 
     if (ipSource && ipSource->getSource() == this)
-        updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + ACTIVE_ROUTE_TIMEOUT);
+        updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
 
 
     if (routeDest && routeDestData && !routeDestData->isActive()) // exists but is not active
