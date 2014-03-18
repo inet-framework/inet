@@ -67,42 +67,44 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         IAddressType *addressType; // to support both IPv4 and v6 addresses.
 
         // environment
-        cModule *host; // the host module that owns this module
-        IRoutingTable *routingTable; // the routing table of the owner module
-        IInterfaceTable *interfaceTable; // the interface table of the owner module
+        cModule *host;
+        IRoutingTable *routingTable;
+        IInterfaceTable *interfaceTable;
         INetfilter *networkProtocol;
 
-        // parameters
+        // parameters: see the NED file
         unsigned int aodvUDPPort;
         bool askGratuitousRREP;
         bool useHelloMessages;
         simtime_t maxJitter;
         double activeRouteTimeout;
+        double deletePeriod;
+        double myRouteTimeout;
 
         // state
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
         unsigned int sequenceNum; // it helps to prevent loops in the routes (RFC 3561 6.1 p11.)
         std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
-        std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare> rreqsArrivalTime;
-        Address failedNextHop;
-        std::map<Address, simtime_t> blacklist;
-        int rerrCount;
-        int rreqCount;
-        simtime_t lastBroadcastTime;
+        std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
+        Address failedNextHop; // next hop to the destination who failed to send us RREP-ACK
+        std::map<Address, simtime_t> blacklist; // don't accept RREQs from blacklisted nodes
+        int rerrCount; // num of originated RERR in the last second
+        int rreqCount; // num of originated RREQ in the last second
+        simtime_t lastBroadcastTime; // the last time when any control packet broadcasted
 
         // self messages
-        cMessage * helloMsgTimer;
-        cMessage * expungeTimer;
-        cMessage * counterTimer;
-        cMessage * rrepAckTimer;
-        cMessage * blacklistTimer;
+        cMessage *helloMsgTimer; // timer to send hello messages (only if the feature is enabled)
+        cMessage *expungeTimer; // timer to clean the routing table out
+        cMessage *counterTimer; // timer to set rrerCount = rreqCount = 0 in each second
+        cMessage *rrepAckTimer; // timer to wait for RREP-ACKs (RREP-ACK timeout)
+        cMessage *blacklistTimer; // timer to clean the blacklist out
 
         // lifecycle
-        simtime_t rebootTime;
+        simtime_t rebootTime; // the last time when the node rebooted
         bool isOperational;
 
         // internal
-        std::multimap<Address, INetworkDatagram *> targetAddressToDelayedPackets;
+        std::multimap<Address, INetworkDatagram *> targetAddressToDelayedPackets; // queue for the datagrams we have no route for
 
     protected:
         void handleMessage(cMessage *msg);

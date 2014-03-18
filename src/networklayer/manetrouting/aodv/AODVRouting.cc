@@ -42,6 +42,8 @@ void AODVRouting::initialize(int stage)
         useHelloMessages = par("useHelloMessages");
         maxJitter = par("maxJitter");
         activeRouteTimeout = par("activeRouteTimeout");
+        deletePeriod = 5 * std::max(activeRouteTimeout, HELLO_INTERVAL);
+        myRouteTimeout = 2 * activeRouteTimeout;
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -150,7 +152,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         // field is updated to current time plus DELETE_PERIOD.
 
         if (route && !isActive && !route->getNextHopAsGeneric().isUnspecified() && sourceAddr.isUnspecified())
-            routeData->setLifeTime(simTime() + DELETE_PERIOD);
+            routeData->setLifeTime(simTime() + deletePeriod);
 
         if (route && !route->getNextHopAsGeneric().isUnspecified() && isActive)
         {
@@ -449,7 +451,7 @@ AODVRREP* AODVRouting::createRREP(AODVRREQ * rreq, IRoute * destRoute, const Add
 
         // The destination node copies the value MY_ROUTE_TIMEOUT
         // into the Lifetime field of the RREP.
-        rrep->setLifeTime(MY_ROUTE_TIMEOUT);
+        rrep->setLifeTime(myRouteTimeout);
 
     }
     else // intermediate node
@@ -652,7 +654,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 
             routeData->addPrecursor(forwardRREPRoute->getNextHopAsGeneric());
 
-            if (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0)
+            if (simTime() > rebootTime + deletePeriod || rebootTime == 0)
             {
                 // If a node forwards a RREP over a link that is likely to have errors
                 // or be unidirectional, the node SHOULD set the 'A' flag to require that
@@ -851,7 +853,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     // check (i)
     if (rreq->getDestAddr() == getSelfIPAddress())
     {
-        EV_INFO << "I am the destination node for which the route is desired" << endl;
+        EV_INFO << "I am the destination node for which the route was requested" << endl;
 
         // create RREP
         AODVRREP * rrep = createRREP(rreq, destRoute, sourceAddr);
@@ -915,7 +917,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (timeToLive > 1 && (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0))
+    if (timeToLive > 1 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
     {
         if (destRouteData)
             rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
@@ -962,6 +964,7 @@ IRoute * AODVRouting::createRoute(const Address& destAddr, const Address& nextHo
     newRoute->setNextHop(nextHop);
     newRoute->setPrefixLength(addressType->getMaxPrefixLength()); // TODO:
 
+    EV_DETAIL << "Adding new route " << newRoute << endl;
     routingTable->addRoute(newRoute);
     scheduleExpungeRoutes();
     return newRoute;
@@ -1059,7 +1062,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
             EV_DETAIL << "Marking route to " << route->getDestinationAsGeneric() << " as inactive" << endl;
 
             routeData->setIsActive(false);
-            routeData->setLifeTime(simTime() + DELETE_PERIOD);
+            routeData->setLifeTime(simTime() + deletePeriod);
             scheduleExpungeRoutes();
 
             // Note that, there is a bijection between unreachableNeighbors and unreachableNeighborsDestSeqNum
@@ -1106,10 +1109,11 @@ AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbo
 
 void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 {
+    EV_INFO << "Route Error arrived from " << sourceAddr << endl;
+
     // A node initiates processing for a RERR message in three situations:
     // (iii)   if it receives a RERR from a neighbor for one or more
     //         active routes.
-
     unsigned int unreachableArraySize = rerr->getUnreachableDestAddrsArraySize();
     std::vector<Address> unreachableNeighbors;
     std::vector<unsigned int> unreachableNeighborsDestSeqNum;
@@ -1142,7 +1146,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 
                     routeData->setDestSeqNum(rerr->getUnreachableSeqNum(j));
                     routeData->setIsActive(false); // it means invalid, see 3. AODV Terminology p.3. in RFC 3561
-                    routeData->setLifeTime(simTime() + DELETE_PERIOD);
+                    routeData->setLifeTime(simTime() + deletePeriod);
                     unreachableNeighbors.push_back(route->getDestinationAsGeneric());
                     unreachableNeighborsDestSeqNum.push_back(routeData->getDestSeqNum());
                     scheduleExpungeRoutes();
@@ -1158,7 +1162,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
         return;
     }
 
-    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + DELETE_PERIOD || rebootTime == 0))
+    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
     {
        AODVRERR * newRERR = createRERR(unreachableNeighbors, unreachableNeighborsDestSeqNum);
        sendAODVPacket(newRERR, addressType->getBroadcastAddress(),1,0);
@@ -1303,7 +1307,6 @@ AODVRREP* AODVRouting::createHelloMessage()
 void AODVRouting::sendHelloMessagesIfNeeded()
 {
     ASSERT(useHelloMessages);
-
     // Every HELLO_INTERVAL milliseconds, the node checks whether it has
     // sent a broadcast (e.g., a RREQ or an appropriate layer 2 message)
     // within the last HELLO_INTERVAL.  If it has not, it MAY broadcast
@@ -1311,6 +1314,7 @@ void AODVRouting::sendHelloMessagesIfNeeded()
 
     if (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > HELLO_INTERVAL)
     {
+        EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         AODVRREP * helloMessage = createHelloMessage();
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
     }
@@ -1380,7 +1384,7 @@ void AODVRouting::expungeRoutes()
                     // soft state corresponding to the route (e.g., last known hop count)
                     // will be lost.
                     routeData->setIsActive(false);
-                    routeData->setLifeTime(simTime() + DELETE_PERIOD);
+                    routeData->setLifeTime(simTime() + deletePeriod);
                 }
                 else
                 {
@@ -1483,7 +1487,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
     if (ipSource && ipSource->getSource() == this)
         updateValidRouteLifeTime(ipSource->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
 
-
+    EV_INFO << "We can't forward " << datagram << " because we have no active route for " << destAddr << endl;
     if (routeDest && routeDestData && !routeDestData->isActive()) // exists but is not active
     {
         // A node initiates processing for a RERR message in three situations:
@@ -1504,11 +1508,11 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
 
         // 3. The Lifetime field is updated to current time plus DELETE_PERIOD.
         //    Before this time, the entry SHOULD NOT be deleted.
-        routeDestData->setLifeTime(simTime() + DELETE_PERIOD);
+        routeDestData->setLifeTime(simTime() + deletePeriod);
 
         sendRERRWhenNoRouteToForward(destAddr);
     }
-    else // doesn't exist at all
+    else if (!routeDest || routeDest->getSource() != this) // doesn't exist at all
         sendRERRWhenNoRouteToForward(destAddr);
 
     return ACCEPT;
@@ -1537,6 +1541,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
     AODVRERR * rerr = createRERR(unreachableNeighbors, unreachableNeighborsDestSeqNum);
 
     rerrCount++;
+
     sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl()); // TODO: unicast if there exists a route to the source
 }
 
@@ -1559,7 +1564,9 @@ bool AODVRouting::updateValidRouteLifeTime(const Address& destAddr, simtime_t li
         AODVRouteData * routeData = dynamic_cast<AODVRouteData *>(route->getProtocolData());
         if (routeData->isActive())
         {
-            routeData->setLifeTime(std::max(routeData->getLifeTime(), lifetime));
+            simtime_t newLifeTime = std::max(routeData->getLifeTime(), lifetime);
+            EV_DETAIL << "Updating " << route << " lifetime to " << newLifeTime << endl;
+            routeData->setLifeTime(newLifeTime);
             return true;
         }
     }
@@ -1585,11 +1592,13 @@ void AODVRouting::handleRREPACK(AODVRREPACK* rrepACK, const Address& neighborAdd
     // which RREP it is acknowledging.  The time at which the RREP-ACK is
     // received will likely come just after the time when the RREP was sent
     // with the 'A' bit.
-
     ASSERT(rrepAckTimer->isScheduled());
+    EV_INFO << "RREP-ACK arrived from " << neighborAddr << endl;
+
     IRoute * route = routingTable->findBestMatchingRoute(neighborAddr);
     if (route && route->getSource() == this)
     {
+        EV_DETAIL << "Marking route " << route << " as active" << endl;
         AODVRouteData * routeData = dynamic_cast<AODVRouteData* >(route->getProtocolData());
         routeData->setIsActive(true);
         cancelEvent(rrepAckTimer);
@@ -1600,6 +1609,8 @@ void AODVRouting::handleRREPACKTimer()
 {
     // when a node detects that its transmission of a RREP message has failed,
     // it remembers the next-hop of the failed RREP in a "blacklist" set.
+
+    EV_INFO << "RREP-ACK didn't arrived within timeout. Adding " << failedNextHop << " to the blacklist" << endl;
 
     blacklist[failedNextHop] = simTime() + BLACKLIST_TIMEOUT; // lifetime
 
@@ -1618,7 +1629,10 @@ void AODVRouting::handleBlackListTimer()
 
         // Nodes are removed from the blacklist set after a BLACKLIST_TIMEOUT period
         if (it->second <= simTime())
+        {
+            EV_DETAIL << "Blacklist lifetime has expired for " << current->first << " removing it from the blacklisted addresses" << endl;
             blacklist.erase(current);
+        }
         else if(nextTime > current->second)
             nextTime = current->second;
     }

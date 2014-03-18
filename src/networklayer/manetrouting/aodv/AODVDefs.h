@@ -18,16 +18,17 @@
 #ifndef AODVDEFS_H_
 #define AODVDEFS_H_
 
-#define MAX(a,b) (((a)>(b))?(a):(b))
+// #define MAX(a,b) (((a)>(b))?(a):(b))
 
+// #define ACTIVE_ROUTE_TIMEOUT     0.9 // Note:
 #define ALLOWED_HELLO_LOSS       2
 #define BLACKLIST_TIMEOUT        RREQ_RETRIES * NET_TRAVERSAL_TIME
-#define DELETE_PERIOD            5 * MAX(ACTIVE_ROUTE_TIMEOUT, HELLO_INTERVAL)
+// #define DELETE_PERIOD            5 * MAX(ACTIVE_ROUTE_TIMEOUT, HELLO_INTERVAL)
 #define HELLO_INTERVAL           1.0
 #define LOCAL_ADD_TTL            2
 #define MAX_REPAIR_TTL           0.3 * NET_DIAMETER
 // #define MIN_REPAIR_TTL
-#define MY_ROUTE_TIMEOUT         2.0 * ACTIVE_ROUTE_TIMEOUT
+// #define MY_ROUTE_TIMEOUT         2.0 * ACTIVE_ROUTE_TIMEOUT
 #define NET_DIAMETER             35
 #define NET_TRAVERSAL_TIME       2 * NODE_TRAVERSAL_TIME * NET_DIAMETER
 #define NEXT_HOP_WAIT            NODE_TRAVERSAL_TIME + 10
