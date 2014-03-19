@@ -28,6 +28,8 @@
 #include "SCTPAlgorithm.h"
 #include "RoutingTable.h"
 #include "RoutingTableAccess.h"
+#include "RoutingTable6Access.h"
+#include "RoutingTable6.h"
 #include "InterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPv6Address.h"
@@ -2620,6 +2622,7 @@ void SCTPAssociation::pmStartPathManagement()
 {
     RoutingTableAccess routingTableAccess;
     SCTPPathVariables* path;
+    const InterfaceEntry* rtie;
     int32 i = 0;
     /* populate path structures !!! */
     /* set a high start value...this is appropriately decreased later (below) */
@@ -2628,7 +2631,20 @@ void SCTPAssociation::pmStartPathManagement()
     {
         path = piter->second;
         path->pathErrorCount = 0;
-        InterfaceEntry *rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.get4());
+        if (localAddr.isIPv6()) {
+            RoutingTable6Access routingTableAccess6;
+            int outInterfaceId;
+            routingTableAccess6.get()->lookupDestCache(path->remoteAddress.get6(), outInterfaceId);
+            if (outInterfaceId != -1) {
+                IInterfaceTable *ift = InterfaceTableAccess().get();
+                rtie =  ift->getInterfaceById(outInterfaceId);
+                if (rtie == NULL) {
+                    throw cRuntimeError("No interface for remote address %s found!", path->remoteAddress.get6().str().c_str());
+                }
+            }
+        } else {
+            rtie = routingTableAccess.get()->getInterfaceForDestAddr(path->remoteAddress.get4());
+        }
         path->pmtu = rtie->getMTU();
         sctpEV3 << "Path MTU of Interface "<< i << " = " << path->pmtu <<"\n";
         if (path->pmtu < state->assocPmtu)

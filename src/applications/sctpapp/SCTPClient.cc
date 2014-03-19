@@ -156,7 +156,13 @@ void SCTPClient::connect()
     setStatusString("connecting");
     EV << "connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
-    socket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    IPvXAddress destination;
+    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        socket.connect(destination, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    }
 
     if (!streamReset)
         streamReset = false;

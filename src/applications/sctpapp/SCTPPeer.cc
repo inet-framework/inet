@@ -189,7 +189,13 @@ void SCTPPeer::connect()
     sctpEV3 << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    clientSocket.connect(IPvXAddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    IPvXAddress destination;
+    IPvXAddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        clientSocket.connect(destination, connectPort, streamReset, (int32)par("prMethod"), (uint32)par("numRequestsPerSession"));
+    }
 
     if (!streamReset)
         streamReset = false;

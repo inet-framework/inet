@@ -28,6 +28,8 @@
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
 #include "RoutingTableAccess.h"
+#include "RoutingTable6Access.h"
+#include "RoutingTable6.h"
 
 
 
@@ -40,6 +42,7 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     confirmed = false;
     primaryPathCandidate = false;
     pathErrorCount = 0;
+    const InterfaceEntry* rtie;
     pathErrorThreshold = assoc->getSctpMain()->par("pathMaxRetrans");
 
     if (!pathErrorThreshold) {
@@ -61,15 +64,27 @@ SCTPPathVariables::SCTPPathVariables(const IPvXAddress& addr, SCTPAssociation* a
     partialBytesAcked = 0;
     queuedBytes = 0;
     outstandingBytes = 0;
-
-    RoutingTableAccess routingTableAccess;
-    const InterfaceEntry* rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.get4());
-
-    if (rtie == NULL) {
-        throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get4().str().c_str());
+    if (addr.isIPv6()) {
+        RoutingTable6Access routingTableAccess6;
+        int outInterfaceId;
+        routingTableAccess6.get()->lookupDestCache(remoteAddress.get6(), outInterfaceId);
+        if (outInterfaceId != -1) {
+            IInterfaceTable *ift = InterfaceTableAccess().get();
+            rtie = ift->getInterfaceById(outInterfaceId);
+            if (rtie == NULL) {
+                throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get6().str().c_str());
+            }
+            pmtu = rtie->getMTU();
+        }
+    } else {
+        RoutingTableAccess routingTableAccess;
+        rtie = routingTableAccess.get()->getInterfaceForDestAddr(remoteAddress.get4());
+        if (rtie == NULL) {
+            throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get4().str().c_str());
+        }
+        pmtu = rtie->getMTU();
     }
 
-    pmtu = rtie->getMTU();
     rttvar = 0.0;
 
     cwndTimeout = pathRto;
