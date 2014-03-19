@@ -1,16 +1,7 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2013-05-10  Tamás Borbély
 
 	backport: UDP: add option to specify the source address of the sent
 	datagram
-
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
 
 2014-01-15  Zoltan Bojthe
 
@@ -23,39 +14,6 @@
 
 	We must not sent ICMP error in reply to any bcast/mcast packet, but
 	network-directed bcasts (e.g. 10.0.0.255) were checked for.
-
-2013-08-21  Andras Varga
-
-	WHATSNEW and ChangeLog updates, better docu for IPv4NodeConfigurator
-
-2013-07-25  Tamás Borbély
-
-	UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
-	option in Linux)
-
-	If ReuseAddress is set to true on two sockets, then they can bind to the
-	same local address/port.
-
-	E.g. the following works:
-
-	      UDPSocket s1, s1;
-	     ...
-	     s1.setReuseAddress(true);
-	     s1.bind(7777);
-	     s2.setReuseAddress(true);
-	     s2.bind(IPv4Address("10.0.0.1"), 7777);
-
-	s2 will receive packets whose destination address is 10.0.0.1, s1 will
-	receive all other packets
-
-2013-05-15  Alfonso Ariza
-
-	udp: Send ICMP destination unreachable messages only to unicast
-	addresses. - fingerprint changes
-
-2013-04-24  Zoltan Bojthe
-
-	UDP: implemented lifecycle operations support
 
 2013-08-22  ------ inet-2.2.0 released ------
 

@@ -1,30 +1,18 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2014-01-15  Zoltan Bojthe
 
 	backported registerProtocol
 
 2013-11-18  Zoltan Bojthe
 
-	TCP_NSC/TCP_LWIP: icon was missed in ned files
+	TCP_NSC/TCP_LWIP: icon was missing in ned files
+
+2013-09-27  Andras Varga
+
+	ev.printf is going to be removed in OMNeT++ 5.0
 
 2013-09-20  Andras Varga
 
 	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-05-02  Zoltan Bojthe
-
-	TCP: lwip, nsc: added nodestatus DOWN
-
-2013-04-17  Zoltan Bojthe
-
-	TCP_lwIP,TCP_NSC: added ILifecycle as base class, but operations throw
-	error for now
-
-	- throws error when nodeStatus is not UP in initialize
-	- throws error when a lifecycle operation arrived
 
 2013-08-22  ------ inet-2.2.0 released ------
 

@@ -1,42 +1,10 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2014-01-24  Zoltan Bojthe
 
 	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
 
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
 2013-09-20  Andras Varga
 
 	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-02-19  Andras Varga
-
-	RTPHost moved from src/transport to src/nodes/
-
-	HOST MODELS MUST ALWAYS BE PLACED INTO nodes/ (or under an example
-	simulation)
-
-2013-05-02  Zoltan Bojthe
-
-	RTP: added NodeStatus DOWN detection
-
-2013-05-02  Zoltan Bojthe
-
-	RTP: added "unsupported" lifecycle
-
-2013-04-19  Zoltan Bojthe
-
-	RTPHost: based on StandardHost
-
-2013-04-23  Zoltan Bojthe
-
-	RTP: FIX: remove _profileName member, uses function argument instead
 
 2013-08-22  ------ inet-2.2.0 released ------
 

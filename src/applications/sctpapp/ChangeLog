@@ -1,72 +1,10 @@
-2014-02-04  Zoltan Bojthe
+2014-03-14  Irene Rungeler
 
-	backport: Applications
+	sctp: added SCTP NAT support
 
-2013-10-30  Zoltan Bojthe
+2014-03-13  Thomas Dreibholz
 
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
-2013-09-20  Andras Varga
-
-	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-08-02  Zoltan Bojthe
-
-	apps: startTime/stopTime fixes
-
-	- apps start sending at startTime, and sending last packet before
-	stopTime
-	- negative stopTime means forever
-	- if startTime and stopTime are same, app send one packet (except TCP
-	apps)
-
-2013-07-29  Rudolf Hornig
-
-	sctp: Added the packet drop feature
-	(draft-stewart-sctp-pktdrprep-15.txt), the "sack immediately" feature
-	(draft-ietf-tsvwg-sctp-sack-immediately) and several alternatives to send
-	fast retransmissions.
-
-2013-05-02  Zoltan Bojthe
-
-	Added NodeStatus::DOWN checks for initialize()
-
-2013-05-02  Zoltan Bojthe
-
-	lifecycle: Enter_Method_Silent() was missed in some
-	handleOperationStage() function
-
-2013-04-25  Levente Mészáros
-
-	App: Added ILifecycle to the rest of applications.
-
-	All application must either support lifecycle operations properly or
-	throw an error when executing any lifecycle operations.
-
-2013-04-22  Levente Mészáros
-
-	App: Changed stopTime to use -1 to run the application forever.
-
-2013-07-17  Rudolf Hornig
-
-	sctp: Added 8 new strategies for stream scheduling
-
-2013-07-17  Rudolf Hornig
-
-	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene
-	Rüngeler).
-
-	+ missing sctp auth test.
-
-2013-07-03  Rudolf Hornig
-
-	sctp: implementation of Partial Reliability SCTP (RFC 3758) by Irene
-	Rüngeler
-
-2013-04-03  Rudolf Hornig
-
-	sctp: refactoring, doc changes, renames
+	SCTP: CMT (Concurrent Multipath Transfer)
 
 2013-08-22  ------ inet-2.2.0 released ------
 

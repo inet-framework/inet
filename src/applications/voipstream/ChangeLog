@@ -1,39 +1,6 @@
-2014-02-04  Zoltan Bojthe
-
-	backport: Applications
-
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
 2014-01-07  Zoltan Bojthe
 
 	added/fixed @signal declarations, fixed type of emitted values
-
-2013-09-20  Andras Varga
-
-	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-05-02  Zoltan Bojthe
-
-	Added NodeStatus::DOWN checks for initialize()
-
-2013-05-02  Zoltan Bojthe
-
-	lifecycle: Enter_Method_Silent() was missed in some
-	handleOperationStage() function
-
-2013-04-25  Levente Mészáros
-
-	App: Added ILifecycle to the rest of applications.
-
-	All application must either support lifecycle operations properly or
-	throw an error when executing any lifecycle operations.
-
-2013-04-22  Levente Mészáros
-
-	App: Changed stopTime to use -1 to run the application forever.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

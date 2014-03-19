@@ -1,34 +1,6 @@
-2014-02-04  Zoltan Bojthe
-
-	backport: Applications
-
 2013-11-03  Andras Varga
 
 	backport: RTP: cosmetics
-
-2013-09-20  Andras Varga
-
-	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-05-02  Zoltan Bojthe
-
-	RTP: added NodeStatus DOWN detection
-
-2013-05-02  Zoltan Bojthe
-
-	RTP: added "unsupported" lifecycle
-
-2013-05-02  Zoltan Bojthe
-
-	lifecycle: Enter_Method_Silent() was missed in some
-	handleOperationStage() function
-
-2013-04-25  Levente Mészáros
-
-	App: Added ILifecycle to the rest of applications.
-
-	All application must either support lifecycle operations properly or
-	throw an error when executing any lifecycle operations.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

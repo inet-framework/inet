@@ -1,9 +1,3 @@
-2013-08-22  Rudolf Hornig
-
-	doc: added 2.2 tags to ChangeLogs
-
------------ lines above this marker have been added from git log -----------
-
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------
@@ -18,15 +12,15 @@
 
 2011-07-04 Thomas Reschka
 
-	* replaced "ExtRouter" by "Router" in ned file
-	* added new "outputHookType" parameter to ini file
-	* replaced "tcpAppType" by "tcpApp[*].typename" parameter in ini file
-	* removed obsolete "tcp.sendQueueClass" and "tcp.receiveQueueClass" parameters from ini file
+    * replaced "ExtRouter" by "Router" in ned file
+    * added new "outputHookType" parameter to ini file
+    * replaced "tcpAppType" by "tcpApp[*].typename" parameter in ini file
+    * removed obsolete "tcp.sendQueueClass" and "tcp.receiveQueueClass" parameters from ini file
 
 2010-06-19 Thomas Reschka
 
-	* added new tcp parameters to ini file
+    * added new tcp parameters to ini file
 
 2009-10-27 Thomas Reschka
 
-	* added
+    * added

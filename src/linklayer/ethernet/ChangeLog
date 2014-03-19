@@ -1,55 +1,12 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
 
 2014-01-24  Zoltan Bojthe
 
 	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
 
-2013-10-31  Andras Varga
-
-	backport: EtherMACBase: error messages improved
-
-2013-11-04  Andras Varga
-
-	backport: EtherLLC: do not refer to msg after having sent it
-
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
-2014-01-07  Zoltan Bojthe
-
-	added/fixed @signal declarations, fixed type of emitted values
-
-2014-01-07  Zoltan Bojthe
-
-	ieee802.1d: renames
-
-	Ieee8021D* -> Ieee8021d* IEEE8021D* -> Ieee8021d* ieee8021D* ->
-	ieee8021d*
-
-2013-12-18  Zoltan Bojthe
-
-	Ieee8021DRelay: fixes: clear all pointers in constructor, comparison
-	fixes
-
-	int and uint was compared uint < 0 was checked
-
-2013-12-18  Zoltan Bojthe
-
-	TAB to space
-
 2013-12-18  Zoltan Bojthe
 
 	MACAddressTable: changed default value of agingTime parameter -
 	fingerprints changed
-	Ieee8021DRealy: added some statistics recording.
-
-2013-12-17  Benmartin92
-
-	MACAddressTable: opp_error replaced with cRuntimeError.
 
 2013-12-17  Benmartin92
 
@@ -60,23 +17,11 @@
 
 2013-12-13  Zoltan Bojthe
 
-	MACRelayUnit: bugfixes: should not read parameter in constructor
-
-2013-12-13  Zoltan Bojthe
-
 	uses MACRelayUnit instead of MACRelayUnitNP/MACRelayUnitPP
-
-2013-12-04  Levente Mészáros
-
-	vlan: Dropped unused displayString field.
 
 2013-12-05  Benmartin92
 
 	Ieee8021DRelay: added interface autoselection.
-
-2013-12-04  Benmartin92
-
-	MACAddressTableAccess: removed obsolete MACAddressTableAccess.
 
 2013-12-04  Benmartin92
 
@@ -87,34 +32,13 @@
 
 	IMACAddressTable: added class and moduleinterface for MAC tables.
 
-2013-12-03  Andras Varga
-
-	MACAddressTable: made addressTable inspectable
-
 2013-11-21  ProZsolt
 
 	EtherMAC: transmission coloring
 
 	With a new parameter you can turn on/off transmission coloring
 
-2013-11-18  Benmartin92
-
-	Ieee8021D: minor changes, comments. Obsolete relay units were removed.
-
-2013-11-14  Benmartin92
-
-	MACAddressTable: addressTable nullptr fix, IEEE8021DRelay: learn every
-	frame
-
-2013-11-13  Benmartin92
-
-	IEEE8021DRelay: STP/RSTP unaware fixes.
-
 2013-11-07  Benmartin92
-
-	IEEE8021DRelay: the absolute path param to the InterfaceTable STP: FIX:
-	missing interfaceTableName
-
 
 	Relay: folder name Relay -> relay - added isStpAware: if the switch is
 	STP/RSTP unaware then all its ports are forwarding (and learning) -
@@ -127,31 +51,12 @@
 
 2013-10-28  Benmartin92
 
-	IEEE8021DRelay: dispatch(): it is not allowed to change the bytelength
-	when we relay a packet
-
-2013-10-28  Benmartin92
-
 	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
-
-2013-10-28  Benmartin92
-
-	IEEE8021DRelay: fix: handleAndDispatchFrame() must return after
-	broadcast.
-
-2013-10-21  Benmartin92
-
-	IEEE8021DRelay: added EV loglevels, bugfix in dispatch().
 
 2013-10-17  Benmartin92
 
 	IEEE8021DRelay: module added. This relay module is intended to work with
 	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
-
-2013-10-11  Benmartin92
-
-	MACAddressTable: Some (eg.: STP, RSTP) protocols may need to change
-	agingTime
 
 2013-09-18  Benmartin92
 
@@ -176,13 +81,7 @@
 	RelayUnit.
 
 	MACAddressTableAccess: MACAddressTable access name changed to macTable.
-
-2013-09-16  Benmartin92
-
 	Switch: predefined address table support added to MACAddressTable.
-
-2013-09-16  Benmartin92
-
 	Switch: MAC address comparator added to AddressTable.
 
 2013-09-12  Benmartin92
@@ -196,145 +95,6 @@
 	- resolveMAC/getPortForAddress: outputPorts removed from parameters
 	 as it is not needed because getPortForAddress always returns a
 	 single port.
-
-2013-09-09  ProZsolt
-
-	Switch: Created MACAddressTable
-
-2013-01-17  Zoltan Bojthe
-
-	vlan/ethernet: added fields to Ethernet1QTag
-
-2013-01-17  Zoltan Bojthe
-
-	ethernet: added EtherFrame.h
-
-2013-01-15  Zoltan Bojthe
-
-	vlan changes on existing codes from inetmanet
-
-2013-08-23  Andras Varga
-
-	InterfaceTable: find connected network layer (NL) by NL's gates that need
-	to be called ifIn/ifOut
-
-	The code committed in this patch was the solution before 2012-04-12, when
-	it was changed to check upperLayerIn/upperLayerOut gates of the NIC
-	module; however that's not so so good because we need to store the gate
-	index of the gate of the *network layer*.
-
-	This patch reverts to original behaviour; allows NICs not connected to a
-	network layer; and provides better diagnistics.
-
-	ASSUMPTIONS:
-	1. The NIC module (ifmod) may or may not be connected to a network layer
-	module (e.g. IPv4NetworkLayer or MPLS)
-	2. If it *is* connected to a network layer (or a relay unit), the network
-	layer module's gates must be called
-	   ifIn[] and ifOut[], and NIC must be connected to identical gate
-	indices in both vectors.
-	3. If the NIC module is not connected to another modules ifIn[] and
-	ifOut[] gates, we assume
-	   that it is NOT connected to a network layer, and leave
-	networkLayerGateIndex
-	   in InterfaceEntry unfilled.
-	4. The NIC may or may not connect to gates of the containing host
-	compound module.
-
-2013-08-07  Andras Varga
-
-	Ethernet: remove redundant useSNAP parameter
-
-2013-07-29  Zoltan Bojthe
-
-	MACBase and it descendants: added clearQueue() for clear outgoing queue
-	at CRASH operation
-
-	also added missing IdealWirelessMac::flushQueue() implementation
-
-2013-07-26  Zoltan Bojthe
-
-	MACBase: bugfix: isNodeUp() uses another module, should use it in stage 1
-	or later
-
-2013-07-02  Zoltan Bojthe
-
-	EtherMAC*: calculates periods without generates a temporary packet
-
-2013-06-27  Zoltan Bojthe
-
-	EtherMAC: throw error when receiving JAM in fullduplex mode
-
-2013-06-26  Zoltan Bojthe
-
-	switch/AP: uses EthernetInterface, delete EthNic
-
-2013-06-26  Zoltan Bojthe
-
-	EthernetInterface: added encapType parameter
-
-2013-06-25  Zoltan Bojthe
-
-	replaced EtherMAC modules to EthNic in the EtherSwitch and AccessPoint
-	modules - fingerprints changed
-
-	scalar outputs checked
-
-2013-06-25  Zoltan Bojthe
-
-	eth: added EtherEncapDummy module
-
-2013-06-24  Zoltan Bojthe
-
-	MACRelayUnit: removed testing ASSERTs
-
-2013-06-24  Zoltan Bojthe
-
-	switch: MACRelay uses interfacetable/interfaceentry instead direct access
-	for EtherMAC module
-
-	assert tests added for detects differrences between returned values by
-	MAC and by IE
-
-2013-06-18  Zoltan Bojthe
-
-	MACRelayUnit: added liifecycle support
-
-2013-06-17  Zoltan Bojthe
-
-	MACRelayUnitPP: added timer pointer to PortBuffer
-
-	stores all self message pointer
-
-2013-06-14  Zoltan Bojthe
-
-	EtherLLC: added lifecycle support
-
-2013-06-14  Zoltan Bojthe
-
-	EtherLLC: added Lifecycle as unsupported
-
-2013-04-29  Andras Varga
-
-	interface operations removed
-
-2013-04-23  Levente Mészáros
-
-	link layer: Ethernet: Adapted to lifecycle operations.
-
-2013-04-09  Andras Varga
-
-	link layer: introduced MACBase (INotifiable and ILifecycle), all MACs
-	adapted to it
-
-	Details:
-	- introduce isOperational etc in MACs
-	- remove hasSubscribers optimization from PPP, we'll use signals soon
-	anyway
-
-2013-04-27  Andras Varga
-
-	InterfaceTable, RoutingTable: added lifecycle support
 
 2013-08-22  ------ inet-2.2.0 released ------
 

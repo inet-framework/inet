@@ -1,40 +1,10 @@
-2014-03-10  Zoltan Bojthe
-
-	compatibility: EV macros for omnet++ 4.x
-
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
-2014-02-04  Zoltan Bojthe
-
-	backport: Applications
-
 2014-01-24  Zoltan Bojthe
 
-	backport: Moved compatibility definitions to Compat.cc & .h
-
-2013-04-12  Levente Mészáros
-
-	backport: Logging: Refactored mobility logging to be more consistent and
-	less redundant.
-
-2013-05-05  Andras Varga
-
-	backport: added check_and_cast for non-cObject pointers
+	Moved compatibility definitions to Compat.cc & .h
 
 2014-01-15  Zoltan Bojthe
 
 	backported xDymo
-
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
-2014-01-15  Zoltan Bojthe
-
-	backported registerProtocol
 
 2014-01-29  Zoltan Bojthe
 
@@ -42,15 +12,7 @@
 
 2014-01-07  Zoltan Bojthe
 
-	compatibility: define Register_Abstract_Class(x) macro if needed
-
-2014-01-07  Zoltan Bojthe
-
 	added/fixed @signal declarations, fixed type of emitted values
-
-2013-10-21  Benmartin92
-
-	INETDefs.h: EV_DETAIL backward compatibility
 
 2013-12-18  Zoltan Bojthe
 
@@ -60,102 +22,13 @@
 	OPP_Global::getModuleByPath(this, path) - uses
 	cModule::getModuleByPath(path)
 
-2013-11-20  Andras Varga
-
-	INETDefsh.h: added EV_DETAIL
-
 2013-11-25  Andras Varga
 
 	FSMA: compatibility with OMNeT++ 5.0 head
 
-2013-10-24  Rudolf Hornig
-
-	base: removed double function declaration.
-
-2013-09-27  Andras Varga
-
-	more logging-related fixes
-
 2013-09-27  Andras Varga
 
 	INETDefs.h: backwards compatibility EV macros for OMNeT++ 5.0
-
-2013-09-20  Andras Varga
-
-	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-09-10  Zoltan Bojthe
-
-	ByteArray: bugfix in addDataFromBuffer()
-
-2013-06-14  Tamás Borbély
-
-	new constants
-
-2013-07-22  Zoltan Bojthe
-
-	optimization: 0 replaced to SIMTIME_ZERO
-
-2013-06-13  Zoltan Bojthe
-
-	LifecycleController: fixed the name of time attribute
-
-2013-05-23  Zoltan Bojthe
-
-	Coord: fixed the info() function
-
-	old: printed the pointer new: print "(x, y, z)"
-
-2013-04-29  Andras Varga
-
-	interface operations removed
-
-2013-04-24  Andras Varga
-
-	OSPF: added lifecyle support
-
-2013-04-27  Andras Varga
-
-	IPv4: added lifecycle support
-
-2013-04-27  Andras Varga
-
-	Base: added lifecycle infrastructure: ILifecycle, LifecycleController,
-	NodeStatus, etc.
-
-	Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
-	NodeShutdownOperation) is applied to the submodule tree of the  node
-	(host or router) by LifecycleController. Each module can decide how to
-	handle the operation and how to store the resulting state (up/down,etc).
-	Operations can be multi-stage, and don't need to complete immediately
-	(i.e. they can take nonzero simulation time and multiple events to
-	complete).
-
-	Network nodes now also have a status submodule (type NodeStatus) with the
-	sole purpose of storing the whole node's status (up/down) and displaying
-	it via icons.
-
-	- classes: ILifecycle, LifecycleOperation (NodeOperation,
-	InterfaceOperation),
-	 LifecycleController, NodeStatus
-	- NodeStatus module to store the network node's status (up or down)
-	- added optional NodeStatus submodule to NodeBase
-	- added a test for the basic Lifecycle infrastructure
-
-2013-04-27  Andras Varga
-
-	ModuleAccess: isNode() renamed to isNetworkNode()
-
-2013-04-14  Andras Varga
-
-	queues: added pop() to IPassiveQueue
-
-	Useful for flushing queues in MACs when they do down. clear() is not good
-	enough because we want to use packets as drop signal value.
-
-2013-04-17  Andras Varga
-
-	base: remove obsolete classes QueueWithQoS and EnqueueHook
 
 2014-01-22  Levente Meszaros
 

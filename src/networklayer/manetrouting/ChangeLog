@@ -1,32 +1,7 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
-2014-01-24  Zoltan Bojthe
-
-	eliminate some warnings
-
-2014-01-24  Zoltan Bojthe
-
-	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
-
-2013-11-04  Zoltan Bojthe
-
-	backport: OLSR/OLSR_ETX: bugfix in initialize()
-
 2014-01-15  Zoltan Bojthe
 
 	backport: IPv4Route: renamed source to sourceType, getSource to
 	getSourceType, setSource to setSourceType
-
-2013-10-30  Zoltan Bojthe
-
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
-
-2014-01-15  Zoltan Bojthe
-
-	backported registerProtocol
 
 2014-01-14  Zoltan Bojthe
 
@@ -40,36 +15,9 @@
 	We must not sent ICMP error in reply to any bcast/mcast packet, but
 	network-directed bcasts (e.g. 10.0.0.255) were checked for.
 
-2013-12-02  Zoltan Bojthe
-
-	fixes for C++ 11
-
 2013-09-20  Andras Varga
 
 	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-05-03  Alfonso Ariza
-
-	manet: synced with INETMANET (20130503)
-
-	Author: Alfonso Ariza <aarizaq_m@hotmail.com> olsr, dymo, dsr, dsdv,
-	batman, aodv, olsr, dsdv synced with INETMANET (20130503) manetbase:
-	introducing GlobatWirelessInspector, updated manet base.
-
-	Z.B.: remove GlobalWirelessLinkInspector added/fixed parameter units
-	fingerprints changed
-
-2013-06-19  Zoltan Bojthe
-
-	removed unused variables
-
-2013-02-01  Andras Varga
-
-	Ieee802Ctrl.inputPort renamed to interfaceId
-
-2013-04-27  Andras Varga
-
-	InterfaceTable, RoutingTable: added lifecycle support
 
 2013-08-22  ------ inet-2.2.0 released ------
 

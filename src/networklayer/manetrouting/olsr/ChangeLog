@@ -1,29 +1,14 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2013-11-04  Zoltan Bojthe
 
 	backport: OLSR/OLSR_ETX: bugfix in initialize()
 
+2013-09-27  Andras Varga
+
+	ev.printf is going to be removed in OMNeT++ 5.0
+
 2013-09-20  Andras Varga
 
 	ev->EV and related OMNeT++ 5.0 logging compatible fixes
-
-2013-05-03  Alfonso Ariza
-
-	manet: synced with INETMANET (20130503)
-
-	Author: Alfonso Ariza <aarizaq_m@hotmail.com> olsr, dymo, dsr, dsdv,
-	batman, aodv, olsr, dsdv synced with INETMANET (20130503) manetbase:
-	introducing GlobatWirelessInspector, updated manet base.
-
-	Z.B.: remove GlobalWirelessLinkInspector added/fixed parameter units
-	fingerprints changed
-
-2013-06-19  Zoltan Bojthe
-
-	removed unused variables
 
 2013-08-22  ------ inet-2.2.0 released ------
 

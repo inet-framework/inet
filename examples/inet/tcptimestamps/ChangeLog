@@ -1,17 +1,3 @@
-2013-08-22  Rudolf Hornig
-
-	doc: added 2.2 tags to ChangeLogs
-
-2013-08-07  Andras Varga
-
-	ChangeLogs updated (Andras, Rudolf)
-
-2013-05-14  Levente Mészáros
-
-	Examples: Renamed IPv4NetworkConfigurator submodules to configurator.
-
------------ lines above this marker have been added from git log -----------
-
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-14  Levente Meszaros

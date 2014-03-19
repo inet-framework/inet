@@ -1,70 +1,12 @@
 2014-02-06  Zoltan Bojthe
 
 	Backport: mobility
+
 	fingerprints of MoBAN mobility are changed
 
-2014-01-07  Zoltan Bojthe
-
-	ieee802.1d: renames
-	Ieee8021D* -> Ieee8021d* IEEE8021D* -> Ieee8021d* ieee8021D* ->
-	ieee8021d*
-
-2014-01-07  Zoltan Bojthe
-
-	vlan: feature build test related changes
-
 2013-12-13  Zoltan Bojthe
 
-	AccessPoint.ned: macTable was missed
-
-2013-12-13  Zoltan Bojthe
-
-	uses MACRelayUnit instead of MACRelayUnitNP/MACRelayUnitPP
-
-2013-08-23  Andras Varga
-
-	InterfaceTable: find connected network layer (NL) by NL's gates that need
-	to be called ifIn/ifOut
-
-	The code committed in this patch was the solution before 2012-04-12, when
-	it was changed to check upperLayerIn/upperLayerOut gates of the NIC
-	module; however that's not so so good because we need to store the gate
-	index of the gate of the *network layer*.
-
-	This patch reverts to original behaviour; allows NICs not connected to a
-	network layer; and provides better diagnistics.
-
-	ASSUMPTIONS:
-	1. The NIC module (ifmod) may or may not be connected to a network layer
-	module (e.g. IPv4NetworkLayer or MPLS)
-	2. If it *is* connected to a network layer (or a relay unit), the network
-	layer module's gates must be called
-	   ifIn[] and ifOut[], and NIC must be connected to identical gate
-	indices in both vectors.
-	3. If the NIC module is not connected to another modules ifIn[] and
-	ifOut[] gates, we assume
-	   that it is NOT connected to a network layer, and leave
-	networkLayerGateIndex
-	   in InterfaceEntry unfilled.
-	4. The NIC may or may not connect to gates of the containing host
-	compound module.
-
-2013-06-26  Zoltan Bojthe
-
-	switch/AP: made eth[] modules replaceable
-	switch/AP: enabled external queue usage - fingerprints changed
-	switch/AP: uses EthernetInterface, delete EthNic
-
-2013-06-25  Zoltan Bojthe
-
-	replaced EtherMAC modules to EthNic in the EtherSwitch and AccessPoint
-	modules - fingerprints changed
-	scalar outputs checked
-
-2013-06-18  Zoltan Bojthe
-
-	AccessPoint: added NodeStatus module
-	also changed the position and icon size of some submodules
+	use MACRelayUnit instead of MACRelayUnitNP/MACRelayUnitPP
 
 2013-08-22  ------ inet-2.2.0 released ------
 

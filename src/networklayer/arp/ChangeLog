@@ -1,7 +1,3 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2014-01-17  Zoltan Bojthe
 
 	backport: InterfaceEntry: add field id to change notifications
@@ -9,38 +5,16 @@
 2014-01-14  Zoltan Bojthe
 
 	ARP: removed unused pendingQueue;
+
+2014-01-13  Zoltan Bojthe
+
 	backport: backported ARP, IPv4
+
+	TMP3
 
 2014-01-14  Zoltan Bojthe
 
 	backport: copied IPv4 and ARP codes from integration branch
-
-2014-01-07  Zoltan Bojthe
-
-	added/fixed @signal declarations, fixed type of emitted values
-
-2013-05-03  Alfonso Ariza
-
-	ARP: now sensitive to IPv4 config changes. Invalidates the cache if
-	necessary.
-
-	modified by Zoltan Bojthe:
-	   removed localAddressVector member,
-	   added 'owner' to ARPCacheEntry (used in GlobalArpCache)
-
-2013-02-01  Andras Varga
-
-	IPv4Address: rename getBroadcastAddress() to makeBroadcastAddress()
-
-	Also: added getNetworkBroadcastAddress() to IPv4InterfaceData
-
-2013-05-09  Levente Mészáros
-
-	ARP: Fixed when there's no IP address during initialize.
-
-2013-04-17  Andras Varga
-
-	ARP: added lifecycle support
 
 2013-08-22  ------ inet-2.2.0 released ------
 

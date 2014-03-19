@@ -1,15 +1,3 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
-2013-05-02  Zoltan Bojthe
-
-	Added NodeStatus::DOWN checks for initialize()
-
-2013-04-29  Andras Varga
-
-	ipv6: lifecycle operations not supported
-
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-29  Andras Varga

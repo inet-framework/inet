@@ -1,27 +1,6 @@
-2014-02-05  Zoltan Bojthe
-
-	backport: reduce differences in code
-
 2014-01-15  Zoltan Bojthe
 
 	backported registerProtocol
-
-2013-07-05  Zoltan Bojthe
-
-	loopback interface: using loopback interface
-
-2013-07-05  Zoltan Bojthe
-
-	loopback interface: added dummy LoopbackInterface module - fingerprints
-	changed
-
-2013-04-27  Levente Meszaros
-
-	MPLS,etc: removed obsolete ways of shutdown/restart: FailureManager,
-	PowerControl, LDP_FAILED/RSVP_FAILED
-
-	Temporarily breaks affected simulations (until RSVP and other support
-	ILifecycle).
 
 2013-08-22  ------ inet-2.2.0 released ------
 

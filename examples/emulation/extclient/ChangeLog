@@ -1,9 +1,3 @@
-2013-08-22  Rudolf Hornig
-
-	doc: added 2.2 tags to ChangeLogs
-
------------ lines above this marker have been added from git log -----------
-
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-01-30  ------ inet-2.1.0 released ------
@@ -18,8 +12,8 @@
 
 2009-08-05 Thomas Reschka
 
-	* moved here from examples/sctp
+    * moved here from examples/sctp
 
 2008-..-.. Irene Ruengeler
 
-	* initial implementation
+    * initial implementation
