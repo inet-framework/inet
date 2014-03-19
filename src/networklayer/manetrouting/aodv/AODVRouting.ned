@@ -29,8 +29,9 @@ import inet.applications.IUDPApp;
 // memory overhead, low network utilization, and determines unicast
 // routes to destinations within the ad hoc network.
 //
-// This routing protocol communicates over UDP and can be
-// used in ~AdhocHost nodes as a routing submodule.
+// This routing protocol communicates over UDP and used in ~AODVRouter
+// nodes as a routing submodule. ~AODVRouter is just a ~WirelessHost
+// extended with ~AODVRouting submodule.
 //
 // This implementation is based on RFC 3561. For more information, you may
 // refer to the following link: https://tools.ietf.org/html/rfc3561.html.
@@ -43,7 +44,6 @@ simple AODVRouting
         string interfaceTablePath = default("^.interfaceTable");
         string networkProtocolPath = default("^.networkLayer.ip");
 
-        // AODV Parameters
         bool askGratuitousRREP = default(false); // please, see the RFC 3561: 6.6.3
         bool useHelloMessages = default(false); // please, see the RFC 3561: 6.9
         int udpPort = default(654);
