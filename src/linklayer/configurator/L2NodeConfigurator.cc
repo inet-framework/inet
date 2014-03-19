@@ -31,16 +31,11 @@ void L2NodeConfigurator::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
+        cModule *host = getContainingNode(this);
+        nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         networkConfigurator = findModuleFromPar<L2NetworkConfigurator>(par("l2ConfiguratorModule"), this);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER_2)
-    {
-        if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
-            prepareNode();
-        if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
-            configureNode();
+        host->subscribe(NF_INTERFACE_CREATED, this);
     }
 }
 
@@ -82,4 +77,18 @@ void L2NodeConfigurator::configureNode()
     // std::cout << "configureNode(): " << interfaceTable->getNumInterfaces() << endl;
     for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
         networkConfigurator->configureInterface(interfaceTable->getInterface(i));
+}
+
+void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
+    if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
+        return;
+
+    if (signalID == NF_INTERFACE_CREATED)
+    {
+        InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
+        prepareInterface(ie);
+        if (networkConfigurator)
+            networkConfigurator->configureInterface(ie);
+    }
 }
