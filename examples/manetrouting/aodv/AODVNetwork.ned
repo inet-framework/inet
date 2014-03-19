@@ -23,7 +23,7 @@ import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.world.scenario.ScenarioManager;
 
 
-network AODVTest
+network AODVNetwork
 {
     parameters:
         int numHosts;
