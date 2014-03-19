@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2014-03-14  Rudolf Hornig
 
 	sctp: added SCTP NAT support (by Irene Rungeler)

@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2014-01-14  Zoltan Bojthe
 
 	backport: MANET protocols backport (uses ipv4::netfilter)

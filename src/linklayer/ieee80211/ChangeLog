@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2014-01-07  Zoltan Bojthe
 
 	added/fixed @signal declarations, fixed type of emitted values

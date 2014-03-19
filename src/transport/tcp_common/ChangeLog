@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2014-01-24  Zoltan Bojthe
 
 	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)

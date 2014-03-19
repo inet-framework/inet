@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-11-15  Rudolf Hornig
 
 	802.11mac: fixed missing default bitrate values. Changed the default

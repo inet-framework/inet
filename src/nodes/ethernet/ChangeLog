@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-11-13  Benmartin92
 
 	EtherSwitch: L2NodeConfigurator is not needed in STP-unaware switch.

@@ -1,3 +1,5 @@
+2014-03-19  ------ inet-2.3.0 released ------
+
 2013-05-10  Tamás Borbély
 
 	backport: UDP: add option to specify the source address of the sent
