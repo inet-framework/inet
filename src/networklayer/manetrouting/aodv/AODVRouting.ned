@@ -44,11 +44,23 @@ simple AODVRouting
         string networkProtocolPath = default("^.networkLayer.ip");
 
         // AODV Parameters
-        bool askGratuitousRREP = default(false);
-        bool useHelloMessages = default(false);
+        bool askGratuitousRREP = default(false); // please, see the RFC 3561: 6.6.3
+        bool useHelloMessages = default(false); // please, see the RFC 3561: 6.9
         int udpPort = default(654);
-        double maxJitter @unit("s") = default(10ms);
-        double activeRouteTimeout @unit("s") = default(3s);
+        double maxJitter @unit("s") = default(10ms); // the delay when we broadcast a control packet
+        double helloInterval @unit("s") = default(1s); // every helloInterval seconds a node broadcasts Hello messages (if it is necessary)
+        int allowedHelloLoss = default(2); // allowedHelloLoss * helloInterval is the lifetime value for Hello messages
+        double activeRouteTimeout @unit("s") = default(3s); // the timeout value for cached routes
+        int netDiameter = default(35); // the maximum possible number of hops between two nodes in the network
+        double nodeTraversalTime @unit("s") = default(0.04s); // an estimation of the average one-hop traversal time
+        int rerrRatelimit = default(10); // maximum number of RERR messages that the AODV may originate
+        int rreqRetries = default(2); // specifies the number of times AODV will repeat an expanded ring search for a destination
+        int rreqRatelimit = default(10); // maximum number of RREQ messages that the AODV may originate
+        int timeoutBuffer = default(2); // plus time to wait for a delayed RREP (due to congestion) (to omit this buffer set it to 0)
+        int ttlStart = default(1); // specifies the TTL value when initiating a route request
+        int ttlIncrement = default(2); // specifies the value by which the TTL will be incremented each time a RREQ is retransmitted
+        int ttlThreshold = default(7); // the maximum value of TTL over which NET_DIAMETER value will be used to broadcast any RREQ
+        int localAddTTL = default(2); // it is used by the formula which calculates the initial TTL of the RREQ for a local repair
     gates:
         input ipIn;
         output ipOut;

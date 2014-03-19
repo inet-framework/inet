@@ -72,14 +72,33 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         IInterfaceTable *interfaceTable;
         INetfilter *networkProtocol;
 
-        // parameters: see the NED file
+        // AODV parameters: the following parameters are configurable, see the NED file for more infos.
+        unsigned int rerrRatelimit;
         unsigned int aodvUDPPort;
         bool askGratuitousRREP;
         bool useHelloMessages;
         simtime_t maxJitter;
         double activeRouteTimeout;
-        double deletePeriod;
-        double myRouteTimeout;
+        double helloInterval;
+        unsigned int netDiameter;
+        unsigned int rreqRetries;
+        unsigned int rreqRatelimit;
+        unsigned int timeoutBuffer;
+        unsigned int ttlStart;
+        unsigned int ttlIncrement;
+        unsigned int ttlThreshold;
+        unsigned int localAddTTL;
+        unsigned int allowedHelloLoss;
+        double nodeTraversalTime;
+
+        // the following parameters are calculated from the parameters defined above
+        double deletePeriod; // the time after which an expired route is deleted
+        double myRouteTimeout; // the value of the lifetime field that a destination node places in RREPs
+        double blacklistTimeout; // the time after which a blacklisted node is removed from the blacklist
+        double maxRepairTTL; // if the destination was no farther than maxRepairTTL hops away a node may try a local repair
+        double netTraversalTime; // an estimation of the traversal time for the complete network
+        double nextHopWait; // timeout for a RREP-ACK
+        double pathDiscoveryTime; // buffer timeout for each broadcasted RREQ message
 
         // state
         unsigned int rreqId; // when sending a new RREQ packet, rreqID incremented by one from the last id used by this node
@@ -87,9 +106,9 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
         std::map<Address, WaitForRREP *> waitForRREPTimers; // timeout for a Route Replies
         std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare> rreqsArrivalTime; // maps RREQ id to its arriving time
         Address failedNextHop; // next hop to the destination who failed to send us RREP-ACK
-        std::map<Address, simtime_t> blacklist; // don't accept RREQs from blacklisted nodes
-        int rerrCount; // num of originated RERR in the last second
-        int rreqCount; // num of originated RREQ in the last second
+        std::map<Address, simtime_t> blacklist; // we don't accept RREQs from blacklisted nodes
+        unsigned int rerrCount; // num of originated RERR in the last second
+        unsigned int rreqCount; // num of originated RREQ in the last second
         simtime_t lastBroadcastTime; // the last time when any control packet broadcasted
 
         // self messages

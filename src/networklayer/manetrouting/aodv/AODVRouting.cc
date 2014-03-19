@@ -20,7 +20,6 @@
 #include "Ieee80211Frame_m.h"
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
-#include "AODVDefs.h"
 #include "NodeOperations.h"
 
 Define_Module(AODVRouting);
@@ -37,13 +36,33 @@ void AODVRouting::initialize(int stage)
         routingTable = check_and_cast<IRoutingTable *>(getModuleByPath(par("routingTablePath")));
         interfaceTable = check_and_cast<IInterfaceTable *>(getModuleByPath(par("interfaceTablePath")));
         networkProtocol = check_and_cast<INetfilter *>(getModuleByPath(par("networkProtocolPath")));
+
         aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
         maxJitter = par("maxJitter");
         activeRouteTimeout = par("activeRouteTimeout");
-        deletePeriod = 5 * std::max(activeRouteTimeout, HELLO_INTERVAL);
-        myRouteTimeout = 2 * activeRouteTimeout;
+        helloInterval = par("helloInterval");
+        allowedHelloLoss = par("allowedHelloLoss");
+        netDiameter = par("netDiameter");
+        nodeTraversalTime = par("nodeTraversalTime");
+        rerrRatelimit = par("rerrRatelimit");
+        rreqRetries = par("rreqRetries");
+        rreqRatelimit = par("rreqRatelimit");
+        timeoutBuffer = par("timeoutBuffer");
+        ttlStart = par("ttlStart");
+        ttlIncrement = par("ttlIncrement");
+        ttlThreshold = par("ttlThreshold");
+        localAddTTL = par("localAddTTL");
+
+        myRouteTimeout = 2.0 * activeRouteTimeout;
+        deletePeriod = 5.0 * std::max(activeRouteTimeout, helloInterval);
+        blacklistTimeout = rreqRetries * netTraversalTime;
+        maxRepairTTL = 0.3 * netDiameter;
+        netTraversalTime = 2.0 * nodeTraversalTime * netDiameter;
+        nextHopWait = nodeTraversalTime + 10;
+        pathDiscoveryTime = 2.0 * netTraversalTime;
+
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS)
     {
@@ -59,7 +78,7 @@ void AODVRouting::initialize(int stage)
         if (useHelloMessages)
         {
             helloMsgTimer = new cMessage("HelloMsgTimer");
-            scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
+            scheduleAt(simTime() + helloInterval, helloMsgTimer);
         }
 
         expungeTimer = new cMessage("ExpungeTimer");
@@ -174,7 +193,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
                 // (e.g., upon route loss), the TTL in the RREQ IP header is initially
                 // set to the Hop Count plus TTL_INCREMENT.
                 if (!isActive)
-                    startRouteDiscovery(destAddr, route->getMetric() + TTL_INCREMENT);
+                    startRouteDiscovery(destAddr, route->getMetric() + ttlIncrement);
                 else
                     startRouteDiscovery(destAddr);
             }
@@ -241,7 +260,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
     // until the TTL set in the RREQ reaches TTL_THRESHOLD, beyond which a
     // TTL = NET_DIAMETER is used for each attempt.
 
-    if (rreqCount >= RREQ_RATELIMIT)
+    if (rreqCount >= rreqRatelimit)
     {
         EV_WARN << "A node should not originate more than RREQ_RATELIMIT RREQ messages per second." << endl;
         delete rreq;
@@ -272,24 +291,24 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
             rrepTimerMsg->setFromInvalidEntry(true);
             cancelEvent(rrepTimerMsg);
         }
-        else if (lastTTL + TTL_INCREMENT < TTL_THRESHOLD)
+        else if (lastTTL + ttlIncrement < ttlThreshold)
         {
             ASSERT(!rrepTimerMsg->isScheduled());
-            timeToLive = lastTTL + TTL_INCREMENT;
-            rrepTimerMsg->setLastTTL(lastTTL + TTL_INCREMENT);
+            timeToLive = lastTTL + ttlIncrement;
+            rrepTimerMsg->setLastTTL(lastTTL + ttlIncrement);
         }
         else
         {
             ASSERT(!rrepTimerMsg->isScheduled());
-            timeToLive = NET_DIAMETER;
-            rrepTimerMsg->setLastTTL(NET_DIAMETER);
+            timeToLive = netDiameter;
+            rrepTimerMsg->setLastTTL(netDiameter);
         }
 
-        if (rrepTimerMsg->getLastTTL() == NET_DIAMETER && rrepTimerMsg->getFromInvalidEntry())
-            scheduleAt(simTime() + NET_TRAVERSAL_TIME, rrepTimerMsg);
+        if (rrepTimerMsg->getLastTTL() == netDiameter && rrepTimerMsg->getFromInvalidEntry())
+            scheduleAt(simTime() + netTraversalTime, rrepTimerMsg);
         else
         {
-            double ringTraversalTime = 2.0 * NODE_TRAVERSAL_TIME * (timeToLive + TIMEOUT_BUFFER);
+            double ringTraversalTime = 2.0 * nodeTraversalTime * (timeToLive + timeoutBuffer);
             scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
         }
     }
@@ -299,13 +318,13 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
         waitForRREPTimers[rreq->getDestAddr()] = newRREPTimerMsg;
         ASSERT(hasOngoingRouteDiscovery(rreq->getDestAddr()));
 
-        timeToLive = TTL_START;
-        newRREPTimerMsg->setLastTTL(TTL_START);
+        timeToLive = ttlStart;
+        newRREPTimerMsg->setLastTTL(ttlStart);
         newRREPTimerMsg->setFromInvalidEntry(false);
         newRREPTimerMsg->setDestAddr(rreq->getDestAddr());
 
         // Each time, the timeout for receiving a RREP is RING_TRAVERSAL_TIME.
-        double ringTraversalTime = 2.0 * NODE_TRAVERSAL_TIME * (TTL_START + TIMEOUT_BUFFER);
+        double ringTraversalTime = 2.0 * nodeTraversalTime * (ttlStart + timeoutBuffer);
 
         scheduleAt(simTime() + ringTraversalTime, newRREPTimerMsg);
 
@@ -347,7 +366,7 @@ void AODVRouting::sendRREP(AODVRREP * rrep, const Address& destAddr, unsigned in
         if (rrepAckTimer->isScheduled())
             cancelEvent(rrepAckTimer);
 
-        scheduleAt(simTime() + NEXT_HOP_WAIT, rrepAckTimer);
+        scheduleAt(simTime() + nextHopWait, rrepAckTimer);
     }
     sendAODVPacket(rrep, nextHop, timeToLive, 0);
 }
@@ -770,7 +789,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
     RREQIdentifier rreqIdentifier(rreq->getOriginatorAddr(), rreq->getRreqId());
     std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare>::iterator checkRREQArrivalTime = rreqsArrivalTime.find(rreqIdentifier);
-    if (checkRREQArrivalTime != rreqsArrivalTime.end() && simTime() - checkRREQArrivalTime->second <= PATH_DISCOVERY_TIME)
+    if (checkRREQArrivalTime != rreqsArrivalTime.end() && simTime() - checkRREQArrivalTime->second <= pathDiscoveryTime)
     {
         EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME. Discarding it." << endl;
         delete rreq;
@@ -816,7 +835,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     //   MinimalLifetime = (current time + 2*NET_TRAVERSAL_TIME - 2*HopCount*NODE_TRAVERSAL_TIME).
 
     unsigned int hopCount = rreq->getHopCount();
-    simtime_t minimalLifeTime = simTime() + 2 * NET_TRAVERSAL_TIME - 2 * hopCount * NODE_TRAVERSAL_TIME;
+    simtime_t minimalLifeTime = simTime() + 2 * netTraversalTime - 2 * hopCount * nodeTraversalTime;
     simtime_t newLifeTime = std::max(simTime(), minimalLifeTime);
 
     if (!reverseRoute || reverseRoute->getSource() != this) // create
@@ -1003,7 +1022,7 @@ void AODVRouting::receiveSignal(cComponent* source, simsignal_t signalID, cObjec
 
 void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
 {
-    if (rerrCount >= RERR_RATELIMIT)
+    if (rerrCount >= rerrRatelimit)
     {
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
         return;
@@ -1153,7 +1172,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
         }
     }
 
-    if (rerrCount >= RERR_RATELIMIT)
+    if (rerrCount >= rerrRatelimit)
     {
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
         delete rerr;
@@ -1299,7 +1318,7 @@ AODVRREP* AODVRouting::createHelloMessage()
     helloMessage->setDestAddr(getSelfIPAddress());
     helloMessage->setDestSeqNum(sequenceNum);
     helloMessage->setHopCount(0);
-    helloMessage->setLifeTime(ALLOWED_HELLO_LOSS * HELLO_INTERVAL);
+    helloMessage->setLifeTime(allowedHelloLoss * helloInterval);
 
     return helloMessage;
 }
@@ -1312,14 +1331,14 @@ void AODVRouting::sendHelloMessagesIfNeeded()
     // within the last HELLO_INTERVAL.  If it has not, it MAY broadcast
     // a RREP with TTL = 1
 
-    if (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > HELLO_INTERVAL)
+    if (lastBroadcastTime == 0 || simTime() - lastBroadcastTime > helloInterval)
     {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         AODVRREP * helloMessage = createHelloMessage();
         sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
     }
 
-    scheduleAt(simTime() + HELLO_INTERVAL, helloMsgTimer);
+    scheduleAt(simTime() + helloInterval, helloMsgTimer);
 }
 
 void AODVRouting::handleHelloMessage(AODVRREP* helloMessage)
@@ -1340,7 +1359,7 @@ void AODVRouting::handleHelloMessage(AODVRREP* helloMessage)
     // if the neighbor moves away and a neighbor timeout occurs.
 
     unsigned int latestDestSeqNum = helloMessage->getDestSeqNum();
-    simtime_t newLifeTime = simTime() + ALLOWED_HELLO_LOSS * HELLO_INTERVAL;
+    simtime_t newLifeTime = simTime() + allowedHelloLoss * helloInterval;
 
     if (!routeHelloOriginator || routeHelloOriginator->getSource() != this)
         createRoute(helloOriginatorAddr, helloOriginatorAddr, 1, true, latestDestSeqNum, true, newLifeTime);
@@ -1393,7 +1412,7 @@ void AODVRouting::expungeRoutes()
                     if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric()))
                     {
                         EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME." << endl;
-                        routeData->setLifeTime(simTime() + 2 * NET_TRAVERSAL_TIME);
+                        routeData->setLifeTime(simTime() + 2 * netTraversalTime);
                     }
                     else
                     {
@@ -1520,7 +1539,7 @@ INetfilter::IHook::Result AODVRouting::datagramForwardHook(INetworkDatagram* dat
 
 void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
 {
-    if (rerrCount >= RERR_RATELIMIT)
+    if (rerrCount >= rerrRatelimit)
     {
         EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
         return;
@@ -1612,10 +1631,10 @@ void AODVRouting::handleRREPACKTimer()
 
     EV_INFO << "RREP-ACK didn't arrived within timeout. Adding " << failedNextHop << " to the blacklist" << endl;
 
-    blacklist[failedNextHop] = simTime() + BLACKLIST_TIMEOUT; // lifetime
+    blacklist[failedNextHop] = simTime() + blacklistTimeout; // lifetime
 
     if (!blacklistTimer->isScheduled())
-        scheduleAt(simTime() + BLACKLIST_TIMEOUT, blacklistTimer);
+        scheduleAt(simTime() + blacklistTimeout, blacklistTimer);
 
 }
 
