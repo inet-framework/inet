@@ -164,7 +164,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         EV_INFO << "Finding route for source " << sourceAddr << " with destination " << destAddr << endl;
         IRoute* route = routingTable->findBestMatchingRoute(destAddr);
         AODVRouteData* routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
-        bool isActive = routeData && routeData->isActive(); // FIXME
+        bool isActive = routeData && routeData->isActive();
 
         // If a data packet is received for an invalid route, the Lifetime
         // field is updated to current time plus DELETE_PERIOD.
@@ -262,7 +262,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
 
     if (rreqCount >= rreqRatelimit)
     {
-        EV_WARN << "A node should not originate more than RREQ_RATELIMIT RREQ messages per second." << endl;
+        EV_WARN << "A node should not originate more than RREQ_RATELIMIT RREQ messages per second. Canceling sending RREQ" << endl;
         delete rreq;
         return;
     }
@@ -791,7 +791,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     std::map<RREQIdentifier, simtime_t, RREQIdentifierCompare>::iterator checkRREQArrivalTime = rreqsArrivalTime.find(rreqIdentifier);
     if (checkRREQArrivalTime != rreqsArrivalTime.end() && simTime() - checkRREQArrivalTime->second <= pathDiscoveryTime)
     {
-        EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME. Discarding it." << endl;
+        EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME. Discarding it" << endl;
         delete rreq;
         return;
     }
@@ -890,7 +890,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
 
         if (destRoute->getNextHopAsGeneric() == sourceAddr)
         {
-            EV_WARN << "This RREP would make a loop. Dropping it!" << endl;
+            EV_WARN << "This RREP would make a loop. Dropping it" << endl;
 
             delete rreq;
             return;
@@ -1024,7 +1024,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
 {
     if (rerrCount >= rerrRatelimit)
     {
-        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
+        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
         return;
     }
 
@@ -1174,7 +1174,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 
     if (rerrCount >= rerrRatelimit)
     {
-        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
+        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
         delete rerr;
         return;
     }
@@ -1229,8 +1229,8 @@ void AODVRouting::clearState()
     for (std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
         cancelAndDelete(it->second);
 
-    for (std::multimap<Address, INetworkDatagram *>::iterator it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
-        networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
+    //for (std::multimap<Address, INetworkDatagram *>::iterator it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
+    //    networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
     targetAddressToDelayedPackets.clear();
 
@@ -1248,14 +1248,14 @@ void AODVRouting::clearState()
 
 void AODVRouting::handleWaitForRREP(WaitForRREP* rrepTimer)
 {
-    EV_INFO << "We didn't get any Route Reply within RREP timeout." << endl;
+    EV_INFO << "We didn't get any Route Reply within RREP timeout" << endl;
     AODVRREQ * rreq = createRREQ(rrepTimer->getDestAddr());
     sendRREQ(rreq, addressType->getBroadcastAddress(), 0);
 }
 
 void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned int timeToLive)
 {
-    EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request." << endl;
+    EV_INFO << "Forwarding the Route Reply to the node " << rrep->getOriginatorAddr() << " which originated the Route Request" << endl;
     sendAODVPacket(rrep, destAddr, 100, 0);
 }
 
@@ -1411,12 +1411,12 @@ void AODVRouting::expungeRoutes()
                     // before (current_time + 2 * NET_TRAVERSAL_TIME).
                     if (hasOngoingRouteDiscovery(route->getDestinationAsGeneric()))
                     {
-                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME." << endl;
+                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive, but we are waiting for a RREP to this destination, so we extend its lifetime with 2 * NET_TRAVERSAL_TIME" << endl;
                         routeData->setLifeTime(simTime() + 2 * netTraversalTime);
                     }
                     else
                     {
-                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive and we are not expecting any RREP to this destination, so we delete this route." << endl;
+                        EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and is inactive and we are not expecting any RREP to this destination, so we delete this route" << endl;
                         routingTable->deleteRoute(route);
                     }
                 }
@@ -1541,7 +1541,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
 {
     if (rerrCount >= rerrRatelimit)
     {
-        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second" << endl;
+        EV_WARN << "A node should not generate more than RERR_RATELIMIT RERR messages per second. Canceling sending RERR" << endl;
         return;
     }
 
