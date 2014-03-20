@@ -33,14 +33,13 @@
 class Ieee8021dInterfaceData : public InterfaceProtocolData
 {
     public:
-
-        Ieee8021dInterfaceData();
         enum PortRole {ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT};
 
         enum PortState {DISCARDING, LEARNING, FORWARDING};
 
-        struct PortInfo
+        class PortInfo
         {
+            public:
                 /* The following values have same meaning in both STP and RSTP.
                  * See Ieee8021dBDPU for more info.
                  */
@@ -74,12 +73,16 @@ class Ieee8021dInterfaceData : public InterfaceProtocolData
 
                 unsigned int lostBPDU;
                 simtime_t nextUpgrade;
+            public:
+                PortInfo();
         };
 
     protected:
         PortInfo portData;
 
     public:
+        Ieee8021dInterfaceData();
+
         virtual std::string info() const;
         virtual std::string detailedInfo() const;
 
@@ -150,8 +153,6 @@ class Ieee8021dInterfaceData : public InterfaceProtocolData
         PortState getState() const {return portData.state;}
 
         void setState(PortState state) {portData.state = state;}
-
-        PortInfo getPortInfoData() {return portData;}
 
         bool isEdge() const {return portData.edge;}
 

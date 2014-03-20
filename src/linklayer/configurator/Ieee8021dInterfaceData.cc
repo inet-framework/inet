@@ -19,12 +19,28 @@
 
 #include "Ieee8021dInterfaceData.h"
 
-Ieee8021dInterfaceData::Ieee8021dInterfaceData()
+Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
+    priority = 0;
+    linkCost = 0;
+    edge = false;
+
     // If there is no STP module then all ports
     // must be in forwarding state.
-    portData.role = NOTASSIGNED;
-    portData.state = FORWARDING;
+    state = FORWARDING;
+    role = NOTASSIGNED;
+
+    rootPriority = 0;
+    rootPathCost = 0;
+    bridgePriority = 0;
+    portPriority = 0;
+    portNum = -1;
+
+    lostBPDU = 0;
+}
+
+Ieee8021dInterfaceData::Ieee8021dInterfaceData()
+{
 }
 
 std::string Ieee8021dInterfaceData::info() const
