@@ -20,6 +20,7 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
+#include "IAddressType.h"
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -359,21 +360,12 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address dest
     }
     else
     {
-        if (destAddr.isIPv6()) {
-            IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-            controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(srcAddr.get6());
-            controlInfo->setDestAddr(destAddr.get6());
-            msg->setControlInfo(controlInfo);
-            send(msg, "to_ipv6");
-        } else {
-            IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-            controlInfo->setProtocol(IP_PROT_SCTP);
-            controlInfo->setSrcAddr(srcAddr.toIPv4());
-            controlInfo->setDestAddr(destAddr.toIPv4());
-            msg->setControlInfo(controlInfo);
-            send(msg, "to_ip");
-        }
+        INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+        controlInfo->setTransportProtocol(IP_PROT_SCTP);
+        controlInfo->setSourceAddress(srcAddr);
+        controlInfo->setDestinationAddress(destAddr);
+        msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+        send(msg, "to_ip");
     }
 }
 
@@ -395,21 +387,13 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, A
 
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH*8);
     msg->addChunk(scChunk);
-    if (destAddr.isIPv6()) {
-        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
-        controlInfo->setProtocol(IP_PROT_SCTP);
-        controlInfo->setSrcAddr(srcAddr.get6());
-        controlInfo->setDestAddr(destAddr.get6());
-        msg->setControlInfo(controlInfo);
-        send(msg, "to_ipv6");
-    } else {
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_SCTP);
-        controlInfo->setSrcAddr(srcAddr.toIPv4());
-        controlInfo->setDestAddr(destAddr.toIPv4());
-        msg->setControlInfo(controlInfo);
-        send(msg, "to_ip");
-    }
+
+    INetworkProtocolControlInfo *controlInfo = destAddr.getAddressType()->createNetworkProtocolControlInfo();
+    controlInfo->setTransportProtocol(IP_PROT_SCTP);
+    controlInfo->setSourceAddress(srcAddr);
+    controlInfo->setDestinationAddress(destAddr);
+    msg->setControlInfo(check_and_cast<cObject *>(controlInfo));
+    send(msg, "to_ip");
 }
 
 

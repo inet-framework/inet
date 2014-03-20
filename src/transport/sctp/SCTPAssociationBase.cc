@@ -62,10 +62,10 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     queuedBytes = 0;
     outstandingBytes = 0;
 
-    const InterfaceEntry* rtie = rt->getOutputInterfaceForDestination(remoteAddress);
+    rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
     if (rtie == NULL) {
-                throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get6().str().c_str());
+                throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
     pmtu = rtie->getMTU();
@@ -411,6 +411,7 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
 {
     // ====== Initialize variables ===========================================
     rt=_rt;
+    rt6 = NULL; //FIXME
     ift=_ift;
     sctpMain = _module;
     appGateIndex = _appGateIndex;

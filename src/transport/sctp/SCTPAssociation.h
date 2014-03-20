@@ -26,6 +26,7 @@
 #include "SCTP.h"
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
+#include "IPv6RoutingTable.h"
 #include "SCTPGapList.h"
 #include "SCTPQueue.h"
 #include "SCTPSendStream.h"
@@ -857,6 +858,7 @@ class INET_API SCTPAssociation : public cObject
 
     protected:
         IIPv4RoutingTable*      rt;
+        IPv6RoutingTable*       rt6;
         IInterfaceTable*        ift;
 
         AddressVector           localAddressList;

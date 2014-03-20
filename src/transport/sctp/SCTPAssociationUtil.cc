@@ -2637,14 +2637,13 @@ void SCTPAssociation::pmStartPathManagement()
     {
         path = piter->second;
         path->pathErrorCount = 0;
-        if (localAddr.isIPv6()) {
-            RoutingTable6Access routingTableAccess6;
+        if (localAddr.getType() == Address::IPv6) {
             int outInterfaceId;
-            routingTableAccess6.get()->lookupDestCache(path->remoteAddress.get6(), outInterfaceId);
+            rt6->lookupDestCache(path->remoteAddress.toIPv6(), outInterfaceId);
             if (outInterfaceId != -1) {
                 rtie =  ift->getInterfaceById(outInterfaceId);
                 if (rtie == NULL) {
-                    throw cRuntimeError("No interface for remote address %s found!", path->remoteAddress.get6().str().c_str());
+                    throw cRuntimeError("No interface for remote address %s found!", path->remoteAddress.str().c_str());
                 }
             }
         } else {
