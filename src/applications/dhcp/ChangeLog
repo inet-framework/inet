@@ -1,22 +1,214 @@
+2014-02-04  Zoltan Bojthe
+
+	backport: Applications
+
+2013-05-10  Tamás Borbély
+
+	backport: UDP: add option to specify the source address of the sent
+	datagram
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2014-01-24  Zoltan Bojthe
+
+	DHCP bugfix: break was missed
+
+2013-12-05  Benmartin92
+
+	DHCP: improved message handling - Output warning msg when client receives
+	unexpected DHCP messages, that is, there is no
+	([clientState],[messageType]) case defined in the RFC 2131 FSM. - Added
+	getAndCheckMessageTypeName(), it throws an exception when client receives
+	unknown or invalid DHCP message type. - Removed some message types as
+	they are not part of RFC 2131.
+
+2013-12-05  Benmartin92
+
+	DHCP: throw error when client is in unknown or invalid state, merge two
+	ifs.
+
+2013-12-05  Benmartin92
+
+	DHCP: changed tests because of logging
+
+2013-12-05  Benmartin92
+
+	DHCP: added 2 tests, one renamed (dhcp_lifecycle_1->DHCP_lifecycle_1),
+	logging.
+
+2013-12-04  Benmartin92
+
+	DHCP: chooseInterface(): throw new -> throw.
+
+2013-12-02  Benmartin92
+
+	DHCP: added startTime to the DHCPServer - startTime handling now works
+	similarly as in UDP apps.
+
+2013-12-02  Benmartin92
+
+	DHCP: routing, logging. - delete last added route in unboundLease().
+
+2013-12-02  Benmartin92
+
+	DHCP: TODOs and comments. - added handleDHCPACK(DHCPMessage *) -
+	handleTimer() throws exception when T2 expires and clientState !=
+	RENEWING. - logging in handleDHCPMessage(). - extracted message type in
+	processDHCPMessage().
+
+2013-11-29  Andras Varga
+
+	DHCP: server: ignore received ICMP errors
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Added setting isOperational when handling lifecycle operations.
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Moved kludge to Ieee80211 mac.
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Extracted messageType.
+
+2013-11-29  Andras Varga
+
+	DHCP server: docu, fixes
+
+	- support interface autoselection
+	- etc.
+
+2013-11-29  Levente Mészáros
+
+	DHCP: More complete error handling.
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Moved case into handleTimer, easier to see that all cases are
+	covered.
+
+2013-11-29  Andras Varga
+
+	DHCP: docu, fixes
+
+	- doc: remove text that generally explains DHCP and not this model
+	- added auto interface selection (interface = default(""),
+	chooseInterface())
+	- manually firing NF_INTERFACE_IPv4CONFIG_CHANGED is unnecessary,
+	 InterfaceTable already does that, and RoutingTable already fires
+	 IPv4_ROUTE_ADDED
+	- updateDisplayString(): display status over DHCP module, not the host
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Removed obsolete check now that we support lifecycle interface.
+
+2013-11-29  Levente Mészáros
+
+	DHCP: Fixed pointer initialization.
+
+2013-11-29  Rudolf Hornig
+
+	DHCP: examples fixes (from Ben)
+
+2013-11-28  Benmartin92
+
+	DHCP: added openSocket() to DHCPClient. FIX: missing msg type in DHCPNAK.
+
+2013-11-27  Andras Varga
+
+	DHCP: DHCPMessage: 'flags' changed to 'broadcast', the only bit it
+	contains
+
+2013-11-27  Benmartin92
+
+	DHCP: long xid -> unsigned int xid - logging cosmetics - FIX: lease->ip
+	-> packet->getCiaddr() when ciaddr not found in leased map.
+
+2013-11-27  Benmartin92
+
+	DHCP: - DHCP.msg renamed to DHCPMessage.msg and merged with
+	DHCPOptions.msg. - Logging.
+
+2013-11-25  Benmartin92
+
+	DHCP: default value is already 0.0.0.0.
+
+2013-11-25  Benmartin92
+
+	DHCP: FIX: removed redundant network mask configuration info and added
+	subnet mask.
+
+2013-11-25  Benmartin92
+
+	DHCP: - Byte class removed - DHCPOptions -> DHCPOtions.msg - ChangeLog -
+	NED parameters renaming - module documentation - lifecycle example
+
+2013-11-20  Andras Varga
+
+	DHCP: DHCPOption->DHCPOptions
+
+2013-11-20  Benmartin92
+
+	DHCPClient: timer initializations moved to initialize().
+	DHCPClient: serverId was removed from recordLease().
+	DHCPClient: TODO ping. DHCPSever: // std::cout
+	DHCPServer and Client: Major changes made both in client's and server's
+	state machine. It is now extended with new states INIT-REBOOT and
+	REBOOTING and with new message types DHCPNAK and DHCPDECLINE.
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-03-25  Zoltan Bojthe
+
+	dhcp: optimisation, added TODO
+
+2013-06-12  Zoltan Bojthe
+
+	dhcp: parameter of notification was unfilled
+
+2013-02-01  Andras Varga
+
+	IPv4Address: rename getBroadcastAddress() to makeBroadcastAddress()
+
+	Also: added getNetworkBroadcastAddress() to IPv4InterfaceData
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-16  Levente Mészáros
+
+	App: Adapted DHCP to Lifecycle operations.
+
+2013-04-15  Zoltan Bojthe
+
+	App: DHCPServer: begin lifecycle - not completed
+
 2013-11-18 Benjamin Seregi
 
-    DHCPServer and Client: Major changes made both in client's and
-    server's state machine. It is now extended with new states INIT-REBOOT
-    and REBOOTING and with new message types DHCPNAK and DHCPDECLINE.
+	DHCPServer and Client: Major changes made both in client's and
+	server's state machine. It is now extended with new states INIT-REBOOT
+	and REBOOTING and with new message types DHCPNAK and DHCPDECLINE.
 
-    With the new REBOOTING states scenarios with lifecycle events
-    now work correctly.
+	With the new REBOOTING states scenarios with lifecycle events
+	now work correctly.
 
-    The server's performance modeling has been removed. The inner
-    representation of the DHCP options are moved to a DHCPOptions
-    INET message definition file.
+	The server's performance modeling has been removed. The inner
+	representation of the DHCP options are moved to a DHCPOptions
+	INET message definition file.
 
-    The client module currently does not support multiple DHCP servers
-    and BOOTP relay agents.
+	The client module currently does not support multiple DHCP servers
+	and BOOTP relay agents.
 
-    The whole implementation has been rewieved to bring it closer to
-    the standards defined in RFC 2131 and 2132.
-
+	The whole implementation has been rewieved to bring it closer to
+	the standards defined in RFC 2131 and 2132.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

@@ -61,12 +61,12 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         unsigned long numBroken;        // Counter for the number of broken connections
         unsigned long socketsOpened;    // Counter for opened sockets
 
+    protected:
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage *msg);
         int numInitStages() const { return NUM_INIT_STAGES; }
 
-    protected:
         /*
          * Sends a scripted browse event to a specific server
          */

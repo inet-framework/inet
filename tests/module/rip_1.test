@@ -105,14 +105,13 @@ tkenv-plugin-path = ../../../etc/plugins
 sim-time-limit = 250s
 
 **.rip.ripConfig = xmldoc("RIPConfig.xml")
-**.rip.startupTime = 0s
 
 **.numUdpApps = 2
 **.udpApp[0].typename = "UDPBasicApp"
 **.udpApp[0].destPort = 1234
 **.udpApp[0].messageLength = 32 bytes
 **.udpApp[0].sendInterval = 1s
-**.udpApp[0].startTime = 5s+5*${n}s
+**.udpApp[0].startTime = 11s+5*${n}s
 **.udpApp[0].stopTime = this.startTime + 99.9s
 **.H2.udpApp[0].destAddresses = "H1"
 **.H1.udpApp[0].destAddresses = "H2"

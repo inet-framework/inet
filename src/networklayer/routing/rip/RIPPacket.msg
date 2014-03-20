@@ -48,7 +48,7 @@ enum RIP_AF {
 //
 struct RIPEntry
 {
-    unsigned short addressFamilyId; // usually AF_INET (2), but NONE (0) for whole table requests
+    unsigned short addressFamilyId @enum(RIP_AF); // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
     Address address;                // destination address
     int prefixLength;               // prefix length of the destination

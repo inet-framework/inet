@@ -18,7 +18,7 @@ void AdaptiveProbabilisticBroadcast::initialize(int stage)
 {
 	ProbabilisticBroadcast::initialize(stage);
 
-	if(stage == 1){
+	if(stage == INITSTAGE_LOCAL){
 
 	    beta = 1.0;
 

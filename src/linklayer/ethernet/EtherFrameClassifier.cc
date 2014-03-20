@@ -18,7 +18,7 @@
 
 #include "EtherFrameClassifier.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 
 
 Define_Module(EtherFrameClassifier);

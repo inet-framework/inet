@@ -671,7 +671,7 @@ void IPv4::reassembleAndDeliverFinish(IPv4Datagram *datagram)
             }
         }
 
-        EV_ERROR << "L3 Protocol not connected. discarding packet" << endl;
+        EV_ERROR << "Transport protocol ID=" << protocol << " not connected, discarding packet\n";
         int inputInterfaceId = getSourceInterfaceFrom(datagram)->getInterfaceId();
         icmp->sendErrorMessage(datagram, inputInterfaceId, ICMP_DESTINATION_UNREACHABLE, ICMP_DU_PROTOCOL_UNREACHABLE);
     }

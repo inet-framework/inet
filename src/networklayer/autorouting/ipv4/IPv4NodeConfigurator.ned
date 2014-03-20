@@ -26,7 +26,7 @@ package inet.networklayer.autorouting.ipv4;
 // ~IPv4NetworkConfigurator.
 //
 // ~IPv4NetworkConfigurator only computes and remembers configuration data
-// (assigned IP addresses, static routes, etc), but does configure the nodes'
+// (assigned IP addresses, static routes, etc), but doesn't configure the nodes'
 // routing tables and interfaces accordingly. The actual configuration is
 // is carried out by this module, at network initialization time and also when
 // the node restarts (i.e. after a shutdown or a crash.)

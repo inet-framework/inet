@@ -42,33 +42,28 @@ package inet.linklayer;
 // per second, amount of memory available in the switch, etc.)
 // C++ implementations can subclass from the class <tt>MACRelayUnitBase</tt>.
 //
-// Known implementations are ~MACRelayUnitNP and ~MACRelayUnitPP.
+// Known implementations are ~MACRelayUnit and ~Ieee8021dRelay.
 //
 moduleinterface IMACRelayUnit
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string addressTableFile;  // set to empty string if not used
-        int addressTableSize; // max size of address table
-        double agingTime @unit("s"); // max idle time for address table entries
-                                     // (when it expires, entry is removed from the table)
         @display("i=block/switch");
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        input stpIn @loose;
+        output stpOut @loose;
 }
 
 simple MACRelayUnit_None like IMACRelayUnit
 {
     parameters:
-        string interfaceTableModule;   // The path to the InterfaceTable module
-        string addressTableFile = default("");  // see ~IMACRelayUnit
-        int addressTableSize = default(100); // see ~IMACRelayUnit
-        double agingTime @unit("s") = default(120s); // see ~IMACRelayUnit
         @display("i=old/x_noentry");
         @class("UnimplementedModule");
     gates:
         input ifIn[] @labels(EtherFrame);
         output ifOut[] @labels(EtherFrame);
+        input stpIn @loose;
+        output stpOut @loose;
 }
 

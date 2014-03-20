@@ -18,6 +18,7 @@ package inet.nodes.wireless;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
+import inet.linklayer.ethernet.switch.IMACAddressTable;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;
@@ -45,7 +46,8 @@ module AccessPoint
         @labels(node,ethernet-node,wireless-node);
         @display("i=device/accesspoint");
         string mobilityType = default("StationaryMobility"); // how the node moves around. see: inet.mobility
-        string relayUnitType = default(haveClass("MACRelayUnitNP")?"MACRelayUnitNP":"MACRelayUnit_None"); // type of the IMACRelayUnit (MACRelayUnitNP, MACRelayUnitPP, etc)
+        string relayUnitType = default(firstAvailable("Ieee8021dRelay","MACRelayUnit","MACRelayUnit_None")); // type of the IMACRelayUnit (MACRelayUnit, Ieee8021dRelay, etc)
+        string macTableType = default("MACAddressTable"); // type of the ~IMACAddressTable
         int numRadios = default(1);               // the number of radios in the access point
         bool hasStatus = default(false);
         wlan[*].mgmtType = default("Ieee80211MgmtAP");
@@ -66,6 +68,9 @@ module AccessPoint
         mobility: <mobilityType> like IMobility {
             parameters:
                 @display("p=208,43");
+        }
+        macTable: <macTableType> like IMACAddressTable {
+            @display("p=73,19;is=s");
         }
         relayUnit: <relayUnitType> like IMACRelayUnit if sizeof(ethg)+numRadios>1 {
             parameters:

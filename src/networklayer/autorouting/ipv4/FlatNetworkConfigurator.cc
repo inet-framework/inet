@@ -23,11 +23,7 @@
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
 
-#if OMNETPP_VERSION < 0x0403
-#include "WeightedTopology.h"
-#else
 typedef cTopology WeightedTopology;
-#endif
 
 
 Define_Module(FlatNetworkConfigurator);
@@ -39,7 +35,7 @@ void FlatNetworkConfigurator::initialize(int stage)
 
     if (stage == INITSTAGE_NETWORK_LAYER_2)
     {
-        WeightedTopology topo("topo");
+        cTopology topo("topo");
         NodeInfoVector nodeInfo; // will be of size topo.nodes[]
 
         // extract topology into the cTopology object, then fill in
@@ -155,9 +151,8 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
     }
 }
 
-void FlatNetworkConfigurator::fillRoutingTables(cTopology& _topo, NodeInfoVector& nodeInfo)
+void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
-    WeightedTopology &topo = (WeightedTopology &)_topo;
     // fill in routing tables with static routes
     for (int i=0; i<topo.getNumNodes(); i++)
     {

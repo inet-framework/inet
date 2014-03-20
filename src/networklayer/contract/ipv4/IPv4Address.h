@@ -111,6 +111,7 @@ class INET_API IPv4Address
     static const IPv4Address ALL_OSPF_DESIGNATED_ROUTERS_MCAST;  ///< 224.0.0.6 All OSPF Designated Routers
     static const IPv4Address ALL_IGMPV3_ROUTERS_MCAST;  ///< 224.0.0.22 All IGMPv3 routers
     static const IPv4Address LL_MANET_ROUTERS;  ///< 224.0.0.109 Manet all designated routers
+    static const IPv4Address ALL_RIP_ROUTERS_MCAST;
     //@}
 
     /** name Constructors, destructor */
@@ -225,6 +226,11 @@ class INET_API IPv4Address
     bool isMulticast() const {return (addr & 0xF0000000)==0xE0000000;}
 
     /**
+     * Returns true if this address is unicast address.
+     */
+    bool isUnicast() const { return !isMulticast() && !isLimitedBroadcastAddress(); }
+
+    /**
      * Returns true if this address is in the range 224.0.0.0 to 224.0.0.255.
      * These addresses are reserved for local purposes meaning, that routers should
      * not forward these datagrams since the applications that use these addresses
@@ -329,7 +335,7 @@ inline std::ostream& operator<<(std::ostream& os, const IPv4Address& ip)
     return os << ip.str();
 }
 
-inline void doPacking(cCommBuffer *buf, IPv4Address& addr)
+inline void doPacking(cCommBuffer *buf, const IPv4Address& addr)
 {
     buf->pack(addr.getInt());
 }

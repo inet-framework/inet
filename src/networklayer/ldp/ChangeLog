@@ -1,3 +1,19 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2013-07-29  Zoltan Bojthe
+
+	eliminate some compiler warnings
+
+2013-05-10  Levente Mészáros
+
+	LDP: Fixed bug when there's no IP address yet.
+
+2013-05-02  Andras Varga
+
+	LDP: adapted to lifecycle operations.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-10  Levente Meszaros

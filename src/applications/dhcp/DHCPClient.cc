@@ -437,9 +437,8 @@ void DHCPClient::handleDHCPMessage(DHCPMessage * msg)
     switch (clientState)
     {
         case INIT:
-        {
             EV_WARN << getAndCheckMessageTypeName(messageType) << " message arrived in INIT state. In this state, client does not wait for any message at all, dropping." << endl;
-        }
+            break;
         case SELECTING:
             if (messageType == DHCPOFFER)
             {

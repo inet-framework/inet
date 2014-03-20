@@ -216,8 +216,8 @@ void SCTP::handleMessage(cMessage *msg)
                 findListen = true;
 
             SCTPAssociation *assoc = findAssocForMessage(srcAddr, destAddr, sctpmsg->getSrcPort(), sctpmsg->getDestPort(), findListen);
-            if (!assoc && sctpAssocMap.size()>0 && (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()==ERRORTYPE 
-                || (sctpmsg->getChunksArraySize() > 1 && 
+            if (!assoc && sctpAssocMap.size()>0 && (((SCTPChunk*)(sctpmsg->getChunks(0)))->getChunkType()==ERRORTYPE
+                || (sctpmsg->getChunksArraySize() > 1 &&
                 (((SCTPChunk*)(sctpmsg->getChunks(1)))->getChunkType()==ASCONF || ((SCTPChunk*)(sctpmsg->getChunks(1)))->getChunkType()==ASCONF_ACK)))) {
                 assoc = findAssocWithVTag(sctpmsg->getTag(), sctpmsg->getSrcPort(), sctpmsg->getDestPort());
             }
@@ -836,13 +836,15 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
     for (uint16 i = 0; i < assoc->inboundStreams; i++) {
         snprintf((char*)&str, sizeof(str), "Bytes received on stream %d of assoc %d",
                 i, assoc->assocId);
-                recordScalar(str, assoc->getState()->streamThroughput[i]); 
-    } 
+                recordScalar(str, assoc->getState()->streamThroughput[i]);
+    }
+    recordScalar("Blocking TSNs Moved", assoc->state->blockingTSNsMoved);
+
     assoc->removePath();
     assoc->deleteStreams();
 
-    // TD 20.11.09: Chunks may be in the transmission and retransmission queues simultaneously.
-    //                   Remove entry from transmission queue if it is already in the retransmission queue.
+    // Chunks may be in the transmission and retransmission queues simultaneously.
+    // Remove entry from transmission queue if it is already in the retransmission queue.
     for (SCTPQueue::PayloadQueue::iterator i = assoc->getRetransmissionQueue()->payloadQueue.begin();
           i != assoc->getRetransmissionQueue()->payloadQueue.end(); i++) {
         SCTPQueue::PayloadQueue::iterator j = assoc->getTransmissionQueue()->payloadQueue.find(i->second->tsn);
@@ -850,7 +852,7 @@ void SCTP::removeAssociation(SCTPAssociation *assoc)
             assoc->getTransmissionQueue()->payloadQueue.erase(j);
         }
     }
-     // TD 20.11.09: Now, both queues can be safely deleted.
+     // Now, both queues can be safely deleted.
     delete assoc->getRetransmissionQueue();
     delete assoc->getTransmissionQueue();
 

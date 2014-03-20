@@ -43,6 +43,10 @@
 
 #endif  // OMNETPP_VERSION < 0x500
 
+#if OMNETPP_VERSION < 0x404
+#  define Register_Abstract_Class(x)    /* nothing */
+#endif
+
 #if OMNETPP_VERSION < 0x500
 #  define EVSTREAM  ev.getOStream()
 #else

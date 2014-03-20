@@ -34,8 +34,6 @@
 #endif
 #define MYSOCKET (*(SOCKET*)socketPtr)
 
-#define MYDEBUG EV
-
 #include "world/traci/TraCIScenarioManager.h"
 #include "world/traci/TraCIConstants.h"
 #include "mobility/single/TraCIMobility.h"

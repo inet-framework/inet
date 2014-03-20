@@ -1,0 +1,78 @@
+%description:
+Testing SCTP_NAT: One peer sends data over two separate paths and two NATs to a server.
+%#--------------------------------------------------------------------------------------------------------------
+
+
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+network=multinat
+cmdenv-event-banners=false
+cmdenv-express-mode = false
+cmdenv-module-messages=false
+tkenv-plugin-path = ../../../etc/plugins
+ned-path = .;../../../../src;../../lib
+**.testing = false
+**.testTimeout = 0
+
+# udp app (off)
+**.numUdpApps = 0
+**.udpType = ""
+
+**.numTcpApps = 0
+**.tcpType = "TCP"
+
+# sctp apps
+**.Peer_1.numSctpApps=1
+**.Peer_1.sctpApp[*].typename="SCTPNatPeer"
+**.Peer_1.sctpApp[*].localAddress="10.1.1.1"
+**.Peer_1.sctpApp[0].localPort=6000
+**.Peer_1.sctpApp[0].connectAddress="100.1.3.1"
+**.Peer_1.sctpApp[0].connectPort=6666
+**.Peer_1.sctpApp[0].startTime=1s
+**.Peer_1.sctpApp[0].numRequestsPerSession = 100
+**.Peer_1.sctpApp[0].requestLength= 1452
+**.Peer_1.sctpApp[0].outboundStreams = 4
+**.Peer_1.sctpApp[0].inboundStreams = 4
+**.Peer_1.sctpApp[0].queueSize = 0 #Size of sendQueue before App is notified to send new data
+
+**.Server.numSctpApps=1
+**.Server.sctpApp[*].typename="SCTPServer"
+**.Server.sctpApp[*].queueSize = 0
+**.Server.sctpApp[*].lifetime=0s
+**.Server.sctpApp[*].address=""
+**.Server.sctpApp[0].localPort=6666 
+**.Server.sctpApp[1].localPort=7777 
+**.Server.sctpApp[2].localPort=8888
+**.Server.sctpApp[3].localPort=9999
+**.Server.sctpApp[*].outboundStreams=4
+**.Server.sctpApp[*].inboundStreams=4
+**.Server.sctpApp[*].numPacketsToReceivePerClient =100
+
+# sctp settings
+**.sctp.sctpAlgorithmClass="SCTPAlg"
+**.sctp.auth = true
+**.Peer_1.sctp.addIP = true
+**.Server.sctp.addIP = true
+**.Peer_1.sctp.addTime = 0.05s
+**.Server.sctp.addTime = 0.1s
+**.Peer_1.sctp.addAddress = "10.2.1.1"
+**.Peer_1.sctp.addIpType = "49153"  #separate the type by ',' SET_PRIMARY_ADDRESS= 49156,ADD_IP_ADDRESS=49153,DELETE_IP_ADDRESS=49154
+**.Server.sctp.addAddress = "100.2.3.1"
+**.Server.sctp.addIpType = "49156"
+**.sctp.chunks=""
+**.sctp.packetDrop = false
+**.Peer_1.sctp.natFriendly = true
+
+**.Peer_1.routingTable.routingFile="../../lib/nat_peer1.mrt"
+**.Server.routingTable.routingFile="../../lib/nat_server.mrt"
+**.Nat_1_1.routingTable.routingFile="../../lib/nat1_1.mrt"
+**.Nat_1_2.routingTable.routingFile="../../lib/nat1_2.mrt"
+**.Router_1.routingTable.routingFile="../../lib/nat_mrouter_1.mrt"
+**.Router_2.routingTable.routingFile="../../lib/nat_mrouter_2.mrt"
+
+%#--------------------------------------------------------------------------------------------------------------
+%contains-regex: stdout
+multinat.Nat_1_2.natHook:[ \t]*Natted packets:[ \t]*[1-9][0-9][0-9]
+%#--------------------------------------------------------------------------------------------------------------

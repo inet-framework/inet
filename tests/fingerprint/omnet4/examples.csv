@@ -289,6 +289,7 @@
 
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            a69c-4ce2
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            5827-33c5
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            c64b-ea7f
 
 #/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 #/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000

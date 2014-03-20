@@ -38,6 +38,8 @@ simple SCTP like ISCTP
         double rtoAlpha = default(0.125);
         double rtoBeta = default(0.250);
         int maxBurst = default(4);
+        string maxBurstVariant = default("useItOrLoseIt");
+        int initialWindow = default(0);
         int assocMaxRetrans = default(10);
         int pathMaxRetrans = default(5);
         int maxInitRetrans = default(8);
@@ -70,9 +72,10 @@ simple SCTP like ISCTP
         int arwnd = default(65535);
         int swsLimit = default(3000);        // Limit for SWS
         bool udpEncapsEnabled = default(false);
+        bool natFriendly = default(false);
         int bytesToAddPerRcvdChunk = default(0);        // for flowcontrol
         int bytesToAddPerPeerChunk = default(0);        // for flowcontrol
-        bool tellArwnd = default(false);    // for flowcontrol
+        bool tellArwnd = default(false);            // for flowcontrol
         int messageAcceptLimit = default(0);        // for flowcontrol
         double fairStart @unit(s) = default(0s);
         double fairStop @unit(s) = default(0s);
@@ -98,12 +101,49 @@ simple SCTP like ISCTP
         //#====== SACK Now ====================================================
         bool sackNow = default(false);
 
+        //#====== High-Speed CC ===============================================
+        bool highSpeedCC = default(false);
+
         //#====== SACK Sequence Numbers =======================================
         bool checkSackSeqNumber = default(false);
 
         //#====== NR-SACK =====================================================
         bool nrSack = default(false);
         bool disableReneging = default(false);
+        int gapReportLimit = default(100000000);
+        string gapListOptimizationVariant = default("none");
+        bool smartOverfullSACKHandling = default(false);
+
+        //#====== QoS-SCTP ====================================================
+        bool allowQoSTracking = default(false);
+        double qosTrackingInterval @unit(s) = default(1.0s);
+
+        //#====== CMT-SCTP ====================================================
+        string cmtSendAllVariant = default("normal");
+        string cmtRetransmissionVariant = default("normal");
+        string cmtCUCVariant = default("normal");
+        string cmtBufferSplitVariant = default("none");
+        bool cmtBufferSplittingUsesOSB = default(false);
+        bool cmtUseSFR = default(true);
+        bool cmtUseDAC = default(true);
+        bool cmtUseFRC = default(true);
+        bool cmtSmartT3Reset = default(true);
+        bool cmtSmartFastRTX = default(true);
+        bool cmtSmartReneging = default(false);
+        bool cmtSlowPathRTTUpdate = default(false);
+        string cmtChunkReschedulingVariant = default("none");
+        double cmtChunkReschedulingThreshold = default(0.5);
+        bool cmtMovedChunksReduceCwnd = default(true);
+        double movedChunkFastRTXFactor = default(2.0);
+        string cmtSackPath = default("standard");
+
+        //#====== CMT/RP-SCTP =================================================
+        bool strictCwndBooking = default(false);
+        string cmtCCVariant = default("off");
+        string cmtCCPathGroups = default("");
+        bool rpPathBlocking = default(false);
+        bool rpScaleBlockingTimeout = default(false);
+        int rpMinCwnd = default(1);
 
         @display("i=block/wheelbarrow");
 

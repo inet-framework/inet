@@ -62,15 +62,6 @@ namespace OPP_Global
    * The limit is 1024 chars.
    */
   std::string vstringf(const char *fmt, va_list& args);
-
-#if OMNETPP_VERSION < 0x0403
-  /**
-   * For compatibility with OMNeT++ versions earlier than 4.3.
-   * In OMNeT++ 4.3+ this is a cModule member function.
-   */
-  cModule *getModuleByPath(cModule *startModule, const char *path);
-#endif
-
 }
 
 #endif

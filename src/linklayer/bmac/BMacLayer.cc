@@ -27,7 +27,7 @@ Define_Module(BMacLayer)
 void BMacLayer::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
-	if (stage == 0) {
+	if (stage == INITSTAGE_LOCAL) {
 		queueLength   = hasPar("queueLength")   ? par("queueLength")   : 10;
 		animation     = hasPar("animation")     ? par("animation")     : true;
 		slotDuration  = hasPar("slotDuration")  ? par("slotDuration")  : 1.;
@@ -64,7 +64,7 @@ void BMacLayer::initialize(int stage)
 		// init the dropped packet info
 		WATCH(macState);
 	}
-	else if (stage == 1) {
+	else if (stage == INITSTAGE_LINK_LAYER) {
 		wakeup = new cMessage("wakeup");
 		wakeup->setKind(BMAC_WAKE_UP);
 

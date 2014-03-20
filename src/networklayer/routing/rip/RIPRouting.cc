@@ -223,7 +223,9 @@ void RIPRouting::configureInitialRoutes()
     {
         IRoute *route = rt->getRoute(i);
         if (isLoopbackInterfaceRoute(route))
+        {
             /*ignore*/;
+        }
         else if (isLocalInterfaceRoute(route))
         {
             InterfaceEntry *ie = check_and_cast<InterfaceEntry*>(route->getSource());

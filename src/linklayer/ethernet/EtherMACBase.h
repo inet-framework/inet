@@ -136,6 +136,7 @@ class INET_API EtherMACBase : public MACBase
     bool promiscuous;               // if true, passes up all received frames
     bool duplexMode;                // true if operating in full-duplex mode
     bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
+    bool connectionColoring;        // colors the connection when transmitting
 
     // gate pointers, etc.
     MacQueue txQueue;               // the output queue

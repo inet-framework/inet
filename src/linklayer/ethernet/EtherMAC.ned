@@ -43,7 +43,7 @@ import inet.linklayer.IEtherMAC;
 // Expected environment:
 // - phys$i and phys$o should be connected to the "network"
 // - upperLayerIn and upperLayerOut are usually connected to ~EtherLLC (in hosts)
-//   or ~MACRelayUnitPP (in a switch)
+//   or ~MACRelayUnit (in a switch)
 //
 // <b>Operation</b>
 //
@@ -121,6 +121,7 @@ simple EtherMAC like IEtherMAC
         string queueModule = default("");   // name of optional external queue module
         bool frameBursting = default(true); // enable/disable frame bursting mode in Gigabit Ethernet
         int mtu @unit("B") = default(1500B);
+        bool connectionColoring = default(true); // colors the connection when transmitting
         @display("i=block/rxtx");
 
         @signal[txPk](type=EtherFrame);
@@ -152,8 +153,8 @@ simple EtherMAC like IEtherMAC
         @statistic[backoff](title="backoff"; record=count,vector; interpolationmode=none);
 
     gates:
-        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
-        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~MACRelayUnitPP
+        input upperLayerIn @labels(EtherFrame);    // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
+        output upperLayerOut @labels(EtherFrame);  // to ~EtherLLC or ~EtherEncap or ~IMACRelayUnit
         inout phys @labels(EtherFrame); // to physical layer or the network
 }
 

@@ -1,3 +1,106 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	eliminate some warnings
+
+2014-01-23  Zoltan Bojthe
+
+	backported IPv4NetworkConfigurator/IPv4NodeConfigurator
+
+2014-01-15  Zoltan Bojthe
+
+	backport: IPv4Route: backported get/setSource(), get/setProtocolData()
+	backport: IPv4Route: renamed source to sourceType, getSource to
+	getSourceType, setSource to setSourceType
+
+2013-12-18  Zoltan Bojthe
+
+	OMNeT++/OMNEST version 4.3 required
+
+	removed WeightedTopology - already implemented in cTopology removed
+	OPP_Global::getModuleByPath(this, path) - uses
+	cModule::getModuleByPath(path)
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-08-21  Andras Varga
+
+	fix: compatibility with OMNeT++ 4.2
+
+2013-08-16  Andras Varga
+
+	IPv4NodeConfigurator: just some useless code formatting
+
+2013-08-16  Andras Varga
+
+	IPv4NodeConfigurator: error if configurator is not found
+
+	When user dropped in an IPv4NetworkConfigurator that was not called
+	"configurator", the whole thing silently did NOT work! Caused a few
+	minutes of debugging...
+
+2013-07-30  Zoltan Bojthe
+
+	-- rename and extend parent/child interface data in IPv4MulticastRoute
+
+2013-07-25  Tamás Borbély
+
+	rename and extend parent/child interface data in IPv4MulticastRoute
+
+	- the new names are more common (in/out)
+	- subclasses of IPv4MulticastRoute can extend InInterface and
+	OutInterface
+
+	Note: this is not backward compatible change
+
+2013-04-12  Zoltan Bojthe
+
+	FlatNetworkConfiguator, FlatNetworkConfigurator6: changed isIPNode
+	detection
+
+	The non-IPNode AP, switch, etc. modules have InterfaceTable, but haven't
+	been RoutingTable/RoutingTable6 modules
+
+2013-05-15  Levente Mészáros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup to also try
+	IPv4NetworkConfigurator.
+
+	Fixes when the node is down and interface is not configured yet.
+
+2013-05-15  Levente Mészáros
+
+	IPv4NetworkConfigurator: Changed how multicast groups are joined and
+	updated fingerprints.
+
+2013-05-10  Levente Mészáros
+
+	IPv4NetworkConfigurator: Changed to compute all network configuration
+	only internally and apply them only upon explicit request.
+
+2013-05-14  Levente Mészáros
+
+	IPv4NetworkConfigurator: Fixed issue when static routes are re-added to
+	the routing table and updated fingerprint.
+
+2013-05-14  Levente Mészáros
+
+	IPv4NetworkLayer: Added IPv4NodeConfigurator and updated fingerprints.
+
+2013-04-24  Andras Varga
+
+	IPv4NetworkConfigurator: workaround crash when a node is down; added plan
+	to resolve it (Levy)
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-25  Tamas Borbely

@@ -1,7 +1,70 @@
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+	fingerprints of MoBAN mobility are changed
+
 2014-01-22  Levente Meszaros
 
 	Renamed batteryType parameter to powerSourceType in NodeBase.
 	Renamed battery submodule to powerSource in NodeBase.
+
+2014-01-21  Zoltan Bojthe
+
+	backport: Router node: added dynamic routing protocols
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-13  Zoltan Bojthe
+
+	backport: backported ARP, IPv4
+	TMP3
+
+2013-07-05  Zoltan Bojthe
+
+	loopback interface: using loopback interface
+
+2013-07-05  Zoltan Bojthe
+
+	loopback interface: added dummy LoopbackInterface module - fingerprints
+	changed
+
+2013-05-15  Alfonso Ariza
+
+	node: included Battery in the NodeBase
+
+2013-06-24  Zoltan Bojthe
+
+	NodeBase: set connection directions
+
+2013-05-14  Levente Mészáros
+
+	IPv4NetworkLayer: Added IPv4NodeConfigurator and updated fingerprints.
+
+2013-04-27  Andras Varga
+
+	Base: added lifecycle infrastructure: ILifecycle, LifecycleController,
+	NodeStatus, etc.
+
+	Lifecycle: for shutdown/crash/startup/etc, a LifecycleOperation (e.g.
+	NodeShutdownOperation) is applied to the submodule tree of the  node
+	(host or router) by LifecycleController. Each module can decide how to
+	handle the operation and how to store the resulting state (up/down,etc).
+	Operations can be multi-stage, and don't need to complete immediately
+	(i.e. they can take nonzero simulation time and multiple events to
+	complete).
+
+	Network nodes now also have a status submodule (type NodeStatus) with the
+	sole purpose of storing the whole node's status (up/down) and displaying
+	it via icons.
+
+	- classes: ILifecycle, LifecycleOperation (NodeOperation,
+	InterfaceOperation),
+	 LifecycleController, NodeStatus
+	- NodeStatus module to store the network node's status (up or down)
+	- added optional NodeStatus submodule to NodeBase
+	- added a test for the basic Lifecycle infrastructure
 
 2013-08-22  ------ inet-2.2.0 released ------
 

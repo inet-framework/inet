@@ -26,7 +26,7 @@ BaseConnectionManager::BaseConnectionManager()
 void BaseConnectionManager::initialize(int stage)
 {
 	RadioChannelBase::initialize(stage);
-	if (stage == 0)
+	if (stage == INITSTAGE_LOCAL)
 	{
 		drawMIR = hasPar("drawMaxIntfDist")
 						? par("drawMaxIntfDist").boolValue() : false;
@@ -119,10 +119,6 @@ void BaseConnectionManager::initialize(int stage)
 		assert(GridCoord(playgroundSize, findDistance).y == gridDim.y - 1);
 		assert(GridCoord(playgroundSize, findDistance).z == gridDim.z - 1);
 		EV_INFO << "findDistance is " << findDistance.info() << endl;
-	}
-	else if (stage == 1)
-	{
-
 	}
 }
 

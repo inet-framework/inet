@@ -81,7 +81,7 @@ class DYMO : public ManetRoutingBase
   public:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
-    void finish();
+    virtual void finish();
 
     DYMO();
     ~DYMO();

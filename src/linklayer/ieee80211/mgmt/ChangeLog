@@ -1,10 +1,68 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-01-17  Zoltan Bojthe
+
+	ethernet: added EtherFrame.h
+
+2013-11-29  Levente Mészáros
+
+	Ieee80211: send interface ID in notifications
+
+2013-06-11  Zoltan Bojthe
+
+	802.11: removed experimental Etx code
+
+2013-06-11  Zoltan Bojthe
+
+	802.11 mgmt: decapsulate() moved to specific mgmt classes from MgmtBase
+
+2013-05-03  Alfonso Ariza
+
+	802.11 mgmt: allow specifying the start/stop time of the ETX process
+
+	Author: Alfonso Ariza <aarizaq_m@hotmail.com> Removed the
+	GlobalWirelessLinkInspector related codes
+
+2013-05-17  Alfonso Ariza
+
+	802.11 mgmt: fix a problem with the Ieee802Ctrl sender address in ad-hoc
+	mode
+
+2013-06-19  Zoltan Bojthe
+
+	Ieee80211MgmtAP: fixed the undisposed object
+
+2013-06-19  Zoltan Bojthe
+
+	Ieee80211Mgmt*: added lifecycle support
+
+2013-06-19  Zoltan Bojthe
+
+	Ieee80211MgmtAP: schedule timer at initialize stage 1 - fingerprint
+	changed
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-19  Zoltan Bojthe
 
 	- Ieee80211MgmtAP: fixed the undisposed object problem
 	- Ieee80211Mgmt*: added lifecycle support
-	- Ieee80211MgmtAP: schedule timer at initialize stage 1 
+	- Ieee80211MgmtAP: schedule timer at initialize stage 1
 
 2013-06-11  Zoltan Bojthe
 

@@ -66,29 +66,4 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 #define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
 
-
-#ifdef _MSC_VER
-// complementary error function, not in MSVC
-double INET_API erfc(double x);
-
-// ISO C99 function, not in MSVC
-inline long lrint(double x)
-{
-    return (long)floor(x+0.5);
-}
-
-// ISO C99 function, not in MSVC
-inline double fmin(double a, double b)
-{
-    return a < b ? a : b;
-}
-
-// ISO C99 function, not in MSVC
-inline double fmax(double a, double b)
-{
-    return a > b ? a : b;
-}
-#endif
-
-
-#endif
+#endif  // __INET_INETDEFS_H

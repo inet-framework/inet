@@ -1,3 +1,48 @@
+2013-12-02  Zoltan Bojthe
+
+	fixes for C++ 11
+
+2013-09-20  Andras Varga
+
+	ev->EV and related OMNeT++ 5.0 logging compatible fixes
+
+2013-09-10  Zoltan Bojthe
+
+	UDPSerializer: parser: parses UDP packet to ByteArrayMessage with payload
+
+2013-08-12  Rudolf Hornig
+
+	sctp: sctp header serializer fixes by Irene Ruengeler
+	sctp: Code refactoring, output/logging changes, minor fixes
+
+2013-08-07  Andras Varga
+
+	ChangeLogs updated (Andras, Rudolf)
+
+2013-07-17  Rudolf Hornig
+
+	sctp: implemented SCTP Stream Reset (RFC 6525) (patch submitted by Irene
+	Rüngeler).
+	+ missing sctp auth test.
+
+2013-07-11  Rudolf Hornig
+
+	sctp: Authentication (RFC 4895) (patch submitted by Irene Rüngeler).
+
+2013-07-10  Rudolf Hornig
+
+	sctp: Implemented Add-IP feature for SCTP (RFC 5061) (patch submitted by
+	Irene Rüngeler).
+
+2013-07-03  Rudolf Hornig
+
+	sctp: implementation of Partial Reliability SCTP (RFC 3758) by Irene
+	Rüngeler
+
+2013-07-02  Rudolf Hornig
+
+	sctp: NR_SACK feature, implemented submitted by Irene Rüngeler
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-08-08  Irene Ruengeler

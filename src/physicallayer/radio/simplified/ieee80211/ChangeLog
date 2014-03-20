@@ -2,6 +2,19 @@
 
 	Moved Ieee80211 radio from linklayer.
 
+2013-05-15  Alfonso Ariza
+
+	802.11 radio: Fixed wrong speed calculation in BerTable calculation. Fix
+	error in computing the bit error rate
+
+	fingerprints changed
+
+2013-04-29  Zoltan Bojthe
+
+	Ieee80211RadioModel: removed unused uninitialized variables
+
+	these was used in EV out only
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-05-15  Alfonso Ariza Quintana

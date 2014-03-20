@@ -131,10 +131,8 @@ class  INET_API SCTPSocket
 
     /** @name Getter functions */
     //@{
-    //  Address localAddress() {return localAddr;}
     AddressVector getLocalAddresses()  {return localAddresses;}
     int getLocalPort() {return localPrt;}
-    //  Address remoteAddress() {return remoteAddr;}
     AddressVector getRemoteAddresses()  {return remoteAddresses;}
     int getRemotePort() {return remotePrt;}
     Address getRemoteAddr() {return remoteAddr;}

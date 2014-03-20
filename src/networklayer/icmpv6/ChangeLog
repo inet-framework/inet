@@ -1,3 +1,48 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+	Conflicts:
+	src/applications/generic/IPvXTrafGen.cc
+	src/applications/sctpapp/SCTPClient.cc
+	src/applications/sctpapp/SCTPPeer.cc
+	src/applications/tcpapp/TCPGenericCliAppBase.cc
+	src/applications/tcpapp/TCPSinkApp.cc
+	src/applications/traci/TraCIDemo.cc
+	src/applications/traci/TraCITestApp.cc
+	src/applications/voip/SimpleVoIPReceiver.cc
+	src/linklayer/ethernet/switch/MACRelayUnitPP.cc
+	src/linklayer/loopback/Loopback.cc
+	src/networklayer/arp/ARP.cc
+	src/networklayer/manetrouting/base/ManetRoutingBase.cc
+	src/networklayer/routing/rip/RIPRouting.cc
+	src/world/radio/IdealChannelModelAccess.cc
+
+2013-07-22  Zoltan Bojthe
+
+	optimization: 0 replaced to SIMTIME_ZERO
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-29  Andras Varga
+
+	ipv6: lifecycle operations not supported
+
+2013-04-27  Andras Varga
+
+	ModuleAccess: isNode() renamed to isNetworkNode()
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-29  Andras Varga

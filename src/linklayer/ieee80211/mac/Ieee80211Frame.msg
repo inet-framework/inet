@@ -156,7 +156,7 @@ packet Ieee80211DataFrame extends Ieee80211DataOrMgmtFrame
 packet Ieee80211DataFrameWithSNAP extends Ieee80211DataFrame
 {
     byteLength = LENGTH_DATAHDR / 8 + SNAP_HEADER_BYTES;
-    int etherType enum (EtherType);
+    int etherType @enum(EtherType);
 }
 
 //

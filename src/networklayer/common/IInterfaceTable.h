@@ -71,7 +71,7 @@ class INET_API IInterfaceTable
      * Checks if the address is on the network of one of the interfaces,
      * but not local.
      */
-    virtual bool isNeighborAddress(const Address &address) const = 0;
+    virtual bool isNeighborAddress(const Address& address) const = 0;
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.

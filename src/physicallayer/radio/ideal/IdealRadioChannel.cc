@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, const IdealRadioChannel::RadioEntry& 
 void IdealRadioChannel::initialize(int stage)
 {
     RadioChannelBase::initialize(stage);
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         EV << "initializing IdealRadioChannel" << endl;
         maxTransmissionRange = 0;

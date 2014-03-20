@@ -1459,6 +1459,7 @@ bool ManetRoutingBase::getRouteFromGlobal(const ManetAddress &src, const ManetAd
             }
         }
     }
+    throw cRuntimeError("model error");
 }
 
 

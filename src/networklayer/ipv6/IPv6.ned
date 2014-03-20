@@ -35,21 +35,12 @@ package inet.networklayer.ipv6;
 // an ~IPv6ControlInfo to the packet, with the source and destination IPv6 address,
 // etc. of the IPv6 datagram in which the packet arrived.
 //
-// ~IPv6 can serve several higher-layer protocols. When delivering packets
-// to them, the output gate is determined from the Protocol field in the
-// IPv6 datagram class. The protocol-to-gateindex mapping must be given
-// in the protocolMapping string parameter, in the following format:
-// <pre>
-// protocolnumber:gateindex, protocolnumber:gateindex, ...
-// </pre>
-//
-// The recommended setting is:
-// - TCP (6) : 0
-// - UDP (17) : 1
-// - RSVP (46) : 2
-// - ICMPv6 (89) : 3
-//
-// That is, <tt>protocolMapping="6:0,17:1,46:2,89:3"</tt>
+// ~IPv6 can serve several higher-layer protocols. The higher layer protocols should
+// send one or more RegisterProtocol message (a simple ~cMessage with
+// ~IPRegisterProtocolCommand controlinfo and kind=IP_C_REGISTER_PROTOCOL)
+// to IPv4 module, for fill up the protocol-to-gateindex map.
+// When delivering packets to them, the output gate is determined from the Protocol
+// field in the IPv6 header.
 //
 // <b>Routing and interfacing with lower layers</b>
 //

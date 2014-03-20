@@ -37,7 +37,6 @@ void NodeStatus::initialize(int stage)
         state = getStateByName(par("initialStatus"));
         origIcon = getDisplayString().getTagArg("i", 0);
         updateDisplayString();
-
     }
 }
 

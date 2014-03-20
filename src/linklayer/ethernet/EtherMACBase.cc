@@ -20,7 +20,7 @@
 
 #include "EtherMACBase.h"
 
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #include "Ethernet.h"
 #include "ModuleAccess.h"
 #include "InterfaceEntry.h"
@@ -160,6 +160,8 @@ EtherMACBase::~EtherMACBase()
 
 void EtherMACBase::initialize(int stage)
 {
+    connectionColoring = par("connectionColoring");
+
     MACBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL)
@@ -694,7 +696,7 @@ void EtherMACBase::updateConnectionColor(int txState)
     else
         color = "";
 
-    if (ev.isGUI())
+    if (ev.isGUI() && connectionColoring)
     {
         if (connected)
         {

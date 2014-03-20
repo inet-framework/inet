@@ -34,7 +34,6 @@ void TCPSinkApp::initialize(int stage)
 
     if (stage == INITSTAGE_LOCAL)
     {
-
         bytesRcvd = 0;
         WATCH(bytesRcvd);
     }

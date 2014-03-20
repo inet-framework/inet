@@ -57,7 +57,7 @@ void LMacLayer::initialize(int stage)
 
         WATCH(macState);
     }
-    else if (stage == 1) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         //int channel;
         //channel = hasPar("defaultChannel") ? par("defaultChannel") : 0;
 

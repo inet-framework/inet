@@ -63,7 +63,7 @@ void BasePhyLayer::initialize(int stage) {
 
 	DetailedRadioChannelAccess::initialize(stage);
 
-	if (stage == 0) {
+	if (stage == INITSTAGE_LOCAL) {
 		//read simple ned-parameters
 		//	- initialize basic parameters
 		if(par("useThermalNoise").boolValue()) {
@@ -99,7 +99,6 @@ void BasePhyLayer::initialize(int stage) {
 					  "Please adjust your omnetpp.ini file accordingly.");
 		}
 
-//	} else if (stage == 1){
 		//read complex(xml) ned-parameters
 		//	- analogue model parameters
 		initializeAnalogueModels(par("analogueModels").xmlValue());

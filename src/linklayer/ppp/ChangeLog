@@ -1,3 +1,45 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-07-29  Zoltan Bojthe
+
+	MACBase and it descendants: added clearQueue() for clear outgoing queue
+	at CRASH operation
+
+	also added missing IdealWirelessMac::flushQueue() implementation
+
+2013-04-29  Andras Varga
+
+	interface operations removed
+
+2013-04-16  Zoltan Bojthe
+
+	link layer: PPP lifecycle bugfix
+
+2013-04-09  Andras Varga
+
+	link layer: introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+	Details:
+	- introduce isOperational etc in MACs
+	- remove hasSubscribers optimization from PPP, we'll use signals soon
+	anyway
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-29  Zoltan Bojthe

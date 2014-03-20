@@ -1,3 +1,20 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-15  Levente Mészáros
+
+	RSVP,TED: added node operation handling
+	Fixes crashes in MPLS examples.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-15  Levente Meszaros

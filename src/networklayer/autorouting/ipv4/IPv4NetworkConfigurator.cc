@@ -215,6 +215,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         IPv4Route *original = node->staticRoutes[i];
         IPv4Route *clone = new IPv4Route();
         clone->setMetric(original->getMetric());
+        clone->setSourceType(original->getSourceType());
         clone->setSource(original->getSource());
         clone->setDestination(original->getDestination());
         clone->setNetmask(original->getNetmask());
@@ -226,6 +227,7 @@ void IPv4NetworkConfigurator::configureRoutingTable(Node *node)
         IPv4MulticastRoute *original = node->staticMulticastRoutes[i];
         IPv4MulticastRoute *clone = new IPv4MulticastRoute();
         clone->setMetric(original->getMetric());
+        clone->setSourceType(original->getSourceType());
         clone->setSource(original->getSource());
         clone->setOrigin(original->getOrigin());
         clone->setOriginNetmask(original->getOriginNetmask());

@@ -62,6 +62,8 @@ class SCTPCommand extends cPacket
     double prValue = 0;
     Address localAddr;
     Address remoteAddr;
+    int localPort = -1;
+    int remotePort = -1;
     int gate = -1;
 }
 
@@ -102,12 +104,9 @@ class SCTPErrorInfo extends SCTPCommand
 //
 class SCTPOpenCommand extends SCTPCommand
 {
-   //Address localAddr;             // may be left empty
     AddressVector localAddresses;
     Address remoteAddr;            // required for active open
     AddressVector remoteAddresses;
-    int localPort = -1;              // required for passive open
-    int remotePort = -1;             // required for active open
     bool fork = false;               // used only for passive open
     string queueClass = "SCTPQueue"; // may be left empty
     string sctpAlgorithmClass;       // may be left empty
@@ -143,11 +142,7 @@ class SCTPSendCommand extends SCTPCommand
 //
 class SCTPConnectInfo extends SCTPCommand
 {
-    //Address localAddr;
-    //Address remoteAddr;
     AddressVector remoteAddresses;
-    int localPort;
-    int remotePort;
     int status;
     int inboundStreams;
     int outboundStreams;

@@ -123,6 +123,10 @@ simple Ieee80211Mac extends MACProtocolBase like IMACProtocol
         @signal[NF_LINK_FULL_PROMISCUOUS](type=cPacket);
         @signal[NF_LINK_PROMISCUOUS](type=cPacket);
         @signal[NF_LINK_BREAK](type=Ieee80211DataOrMgmtFrame);
+        @signal[packetSentToLower](type=Ieee80211Frame);
+        @signal[packetReceivedFromLower](type=cPacket);     // expected type=Ieee80211Frame
+        @signal[packetSentToUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
+        @signal[packetReceivedFromUpper](type=cPacket);   // cPacket with Ieee802Ctrl ctrlinfo
 
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

@@ -1,7 +1,166 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
 2014-01-22  Levente Meszaros
 
 	Moved classes shared by implementations from contract to common.
 	Added NetworkProtocolBase.
+
+2014-01-16  Zoltan Bojthe
+
+	backport: backported RIP
+
+2014-01-17  Zoltan Bojthe
+
+	backport: added some IInterfaceTable functions
+	backport: InterfaceEntry: add field id to change notifications
+
+2013-08-30  Zoltan Bojthe
+
+	backport: InterfaceEntry: send notification only when the new the old
+	values are diffent
+
+2014-01-15  Zoltan Bojthe
+
+	backported xDymo
+
+2014-01-14  Zoltan Bojthe
+
+	backport: copied IPv4 and ARP code from integration branch
+
+2014-01-07  Zoltan Bojthe
+
+	ieee802.1d: renames
+
+	Ieee8021D* -> Ieee8021d* IEEE8021D* -> Ieee8021d* ieee8021D* ->
+	ieee8021d*
+
+2013-12-06  Zsolt Prontvai
+
+	Ieee8021DInterfaceData: info added
+
+2013-11-18  Benmartin92
+
+	Ieee8021D: minor changes, comments. Obsolete relay units were removed.
+
+2013-10-31  ProZsolt
+
+	RSTP: deleted unnecessary files
+
+2013-10-12  Benmartin92
+
+	InterfaceEntry: IEEE8021DInterfaceData added to InterfaceEntry
+
+2013-09-16  ProZsolt
+
+	Added VLANInterfacedata to InterfaceEntry
+
+2013-08-23  Andras Varga
+
+	InterfaceTable: find connected network layer (NL) by NL's gates that need
+	to be called ifIn/ifOut
+
+	The code committed in this patch was the solution before 2012-04-12, when
+	it was changed to check upperLayerIn/upperLayerOut gates of the NIC
+	module; however that's not so so good because we need to store the gate
+	index of the gate of the *network layer*.
+
+	This patch reverts to original behaviour; allows NICs not connected to a
+	network layer; and provides better diagnistics.
+
+	ASSUMPTIONS:
+	1. The NIC module (ifmod) may or may not be connected to a network layer
+	module (e.g. IPv4NetworkLayer or MPLS)
+	2. If it *is* connected to a network layer (or a relay unit), the network
+	layer module's gates must be called
+	   ifIn[] and ifOut[], and NIC must be connected to identical gate
+	indices in both vectors.
+	3. If the NIC module is not connected to another modules ifIn[] and
+	ifOut[] gates, we assume
+	   that it is NOT connected to a network layer, and leave
+	networkLayerGateIndex
+	   in InterfaceEntry unfilled.
+	4. The NIC may or may not connect to gates of the containing host
+	compound module.
+
+2013-08-21  Andras Varga
+
+	InterfaceEntry: made it compile without IPv4/IPv6 support
+
+2013-08-15  Andras Varga
+
+	IPv4: allow MTU=0 (meaning infinite); error if MTU is too small for
+	packet
+
+2013-07-05  Zoltan Bojthe
+
+	loopback interface: using loopback interface
+
+2013-07-30  Zoltan Bojthe
+
+	-- renamed protocol3data/protocol4data to isisdata/trilldata
+
+2013-07-25  Tamás Borbély
+
+	InterfaceEntry: replace protocol[34]data with isisdata and trilldata
+
+2013-07-31  Zoltan Bojthe
+
+	InterfaceEntry: bugfixes
+
+	- resetInterface() and destructor code was different
+	- uses resetInterface() in destructor
+	- always check owner of protocoldata pointer before delete it
+	- removed some unneeded type conversion
+	- setProtocol[34]Data(): deletion of old data was missed
+
+2013-07-29  Zoltan Bojthe
+
+	eliminate some compiler warnings
+
+2013-07-29  Zoltan Bojthe
+
+	FeatureBuildTest related fixes
+
+2013-05-15  Alfonso Ariza
+
+	network: InterfaceEntry leaks fixed. Delete protocol specific data when
+	ie is deleted.
+
+2013-06-19  Zoltan Bojthe
+
+	removed unused variables
+
+2013-05-10  Levente Mészáros
+
+	InterfaceTable: Changed the way how interfaces are registered.
+
+	Interfaces are unconditionally registered from initialize. Interfaces are
+	no longer registered during node startup. Interfaces are no longer
+	removed during node startup.
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-29  Andras Varga
+
+	interface operations removed
+
+2013-04-09  Andras Varga
+
+	link layer: introduced MACBase (INotifiable and ILifecycle), all MACs
+	adapted to it
+
+	Details:
+	- introduce isOperational etc in MACs
+	- remove hasSubscribers optimization from PPP, we'll use signals soon
+	anyway
+
+2013-04-27  Andras Varga
+
+	InterfaceTable, RoutingTable: added lifecycle support
 
 2013-08-22  ------ inet-2.2.0 released ------
 
@@ -13,13 +172,13 @@
 	a network layer, and leaves networkLayerGateIndex unfilled.
 
 	ASSUMPTIONS:
-	 1. The NIC module (ifmod) may or may not be connected to a network layer 
+	 1. The NIC module (ifmod) may or may not be connected to a network layer
 	    module (e.g. IPv4NetworkLayer or MPLS)
-	 2. If it *is* connected to a network layer (or a relay unit), the network 
-	    layer module's gates must be called ifIn[] and ifOut[], and NIC must be 
+	 2. If it *is* connected to a network layer (or a relay unit), the network
+	    layer module's gates must be called ifIn[] and ifOut[], and NIC must be
 	    connected to identical gate indices in both vectors.
-	 3. If the NIC module is not connected to another modules ifIn[] and ifOut[] 
-	    gates, we assume that it is NOT connected to a network layer, and leave 
+	 3. If the NIC module is not connected to another modules ifIn[] and ifOut[]
+	    gates, we assume that it is NOT connected to a network layer, and leave
 	    networkLayerGateIndex in InterfaceEntry unfilled.
 	4. The NIC may or may not connect to gates of the containing host compound module.
 

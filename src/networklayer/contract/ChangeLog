@@ -1,8 +1,54 @@
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
 2014-01-22  Levente Meszaros
 
 	Added a new purely virtual contract that defines the interface of network protocols.
 	Moved classes shared by implementations from contract to common.
 	Moved the IPv4 and IPv6 contracts into separate directories.
+
+2014-01-16  Zoltan Bojthe
+
+	backport: backported RIP
+
+2014-01-15  Zoltan Bojthe
+
+	backported registerProtocol
+
+2014-01-16  Zoltan Bojthe
+
+	bugfix for IPv4Address::doPacking() (by Ingmar Baumgart)
+
+2013-06-14  Tamás Borbély
+
+	new constants
+
+2013-07-29  Zoltan Bojthe
+
+	eliminate some compiler warnings
+
+2013-07-29  Zoltan Bojthe
+
+	FeatureBuildTest related fixes
+
+2013-05-15  Alfonso Ariza
+
+	networklayer: added method to address resolver to lookup a host using an
+	IP address.
+
+2013-02-01  Andras Varga
+
+	IPv4Address: rename getBroadcastAddress() to makeBroadcastAddress()
+
+	Also: added getNetworkBroadcastAddress() to IPv4InterfaceData
+
+2013-05-15  Levente Mészáros
+
+	IPvXAddressResolver: Extended interface IPv4 address lookup to also try
+	IPv4NetworkConfigurator.
+
+	Fixes when the node is down and interface is not configured yet.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

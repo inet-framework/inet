@@ -243,7 +243,7 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
 
     // ------ Set initial destination address -----------------------------
     if (sendCommand->getPrimary()) {
-     if (sendCommand->getRemoteAddr().isUnspecified()) {
+        if (sendCommand->getRemoteAddr().isUnspecified()) {
             datMsg->setInitialDestination(remoteAddr);
         }
         else {
@@ -284,11 +284,11 @@ void SCTPAssociation::process_SEND(SCTPEventCode& event, SCTPCommand* sctpComman
         if ((state->appSendAllowed) &&
             (state->sendQueueLimit > 0) &&
             ((uint64)state->sendBuffer >= state->sendQueueLimit) ) {
-        	// If there are not enough messages that could be dropped,
-        	// the buffer is really full and the app has to be notified.
-        	if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
-            	sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
-            	state->appSendAllowed = false;
+            // If there are not enough messages that could be dropped,
+            // the buffer is really full and the app has to be notified.
+            if (state->queuedDroppableBytes < state->sendBuffer - state->sendQueueLimit) {
+                sendIndicationToApp(SCTP_I_SENDQUEUE_FULL);
+                state->appSendAllowed = false;
             }
         }
     }

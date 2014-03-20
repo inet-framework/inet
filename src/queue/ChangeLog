@@ -2,6 +2,18 @@
 
 	Moved queue modules from linklayer because they are independent of it.
 
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2013-04-14  Andras Varga
+
+	queues: added pop() to IPassiveQueue
+
+	Useful for flushing queues in MACs when they do down. clear() is not good
+	enough because we want to use packets as drop signal value.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-14  Andras Varga

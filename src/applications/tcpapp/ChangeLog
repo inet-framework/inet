@@ -1,9 +1,80 @@
+2014-02-04  Zoltan Bojthe
+
+	backport: Applications
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2013-08-21  Andras Varga
+
+	TelnetApp: implemented lifecycle operations support
+
+2013-08-07  Andras Varga
+
+	ChangeLogs updated (Andras, Rudolf)
+
+2013-08-02  Zoltan Bojthe
+
+	apps: startTime/stopTime fixes
+
+	- apps start sending at startTime, and sending last packet before
+	stopTime
+	- negative stopTime means forever
+	- if startTime and stopTime are same, app send one packet (except TCP
+	apps)
+
+2013-07-04  Zoltan Bojthe
+
+	apps: stopTime checks changed: send packet when simTime() <= stopTime
+
+	some apps tested "simTime() < stopTime", another apps tested "simTime()
+	<= stopTime"
+
+2013-07-03  Zoltan Bojthe
+
+	applications: optimizations: case of stopTime == -1
+
+2013-05-10  Levente Mészáros
+
+	TCPGenericCliAppBase: Changed to allow unresolved destination address
+	when the server is down.
+
+2013-05-08  Levente Mészáros
+
+	TCPBasicClientApp: Fixed socket closing during shutdown.
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missed in some
+	handleOperationStage() function
+
+2013-04-25  Levente Mészáros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-23  Levente Mészáros
+
+	App: Adapted two simple TCP applications to lifecycle operations.
+
+2013-04-22  Levente Mészáros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-07-04  Zoltan Bojthe
 
 	- stopTime checks changed: send packet when simTime() <= stopTime
-      (some apps tested "simTime() < stopTime", another apps tested "simTime()<= stopTime")
+	  (some apps tested "simTime() < stopTime", another apps tested "simTime()<= stopTime")
 
 2013-05-02  Zoltan Bojthe
 
@@ -14,7 +85,7 @@
 2013-04-25  Levente Meszaros
 
 	- Added ILifecycle to the rest of applications.
-      (All application must either support lifecycle operations properly or
+	  (All application must either support lifecycle operations properly or
 	   throw an error when executing any lifecycle operations.)
 
 2013-04-23  Levente Meszaros

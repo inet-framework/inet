@@ -74,10 +74,8 @@ void HttpNodeBase::logEntry(std::string line)
     time_t curtime;
     time(&curtime);
 
-    bool exists = fileExists(logFileName.c_str()); // Check if the file exists. If not, add the field names at top.
-
     outfile.open(logFileName.c_str(), std::ios::app);
-    if (!exists)
+    if (outfile.tellp() == 0)
         outfile << "time;simtime;logging-node;sending-node;type;originator-url;target-url;protocol;keep-alive;serial;heading;bad-req;result-code;content-type" << endl;
     outfile << curtime << ";" << simTime() << ";" << getParentModule()->getName();
     if (outputFormat == lf_short)

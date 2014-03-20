@@ -147,6 +147,9 @@ void TCPScriptableTester::handleMessage(cMessage *msg)
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
     }
+    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
+        delete msg;
+    }
     else
     {
         throw cRuntimeError("Unknown message");
@@ -246,6 +249,9 @@ void TCPRandomTester::handleMessage(cMessage *msg)
         TCPSegment *seg = check_and_cast<TCPSegment *>(msg);
         bool fromA = msg->arrivedOn("in1");
         processIncomingSegment(seg, fromA);
+    }
+    else if (dynamic_cast<IPRegisterProtocolCommand *>(msg)) {
+        delete msg;
     }
     else
     {

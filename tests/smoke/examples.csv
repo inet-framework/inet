@@ -77,6 +77,14 @@
 /examples/httptools/socket/simpleddos/, -f omnetpp.ini -c General -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0
 /examples/inet/broadcast/,           -f omnetpp.ini -c General -r 0
@@ -280,6 +288,9 @@
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0
+/examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0
+/examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic2 -r 0
 /examples/rip/simpletest/,           -f omnetpp.ini -c IPv4 -r 0
 /examples/rtp/multicast1/,           -f omnetpp.ini -c General -r 0
 /examples/rtp/unicast/,              -f omnetpp.ini -c General -r 0

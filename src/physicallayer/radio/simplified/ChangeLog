@@ -8,6 +8,57 @@
 	Deleted power consumption code because that is shared among different radios and it's implemented as a separate module.
 	Delete enableReception/disableReception functions because they relied on incorrect assumptions.
 
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2014-01-07  Zoltan Bojthe
+
+	added/fixed @signal declarations, fixed type of emitted values
+
+2013-12-02  Zoltan Bojthe
+
+	fixes for C++ 11
+
+2013-05-03  Alfonso Ariza
+
+	radio: free space model distance calculation added
+
+2013-05-03  Alfonso Ariza
+
+	radio: fixes from INETMANET:
+
+	Author:    Alfonso Ariza <aarizaq_m@hotmail.com>
+	- Include receptionThreshold like liminum signal to change the radio
+	module to RECV state
+	- Draw coverge for free space and two ray in funtion of the selected
+	model
+
+2013-06-18  Zoltan Bojthe
+
+	Radio: was missing a throw error when operation unsupported
+
+2013-06-18  Zoltan Bojthe
+
+	Radio: bugfix: was a segfault when Radio module started at DOWN
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-04-29  Andras Varga
+
+	interface operations removed
+
+2013-04-27  Levente Meszaros
+
+	MPLS,etc: removed obsolete ways of shutdown/restart: FailureManager,
+	PowerControl, LDP_FAILED/RSVP_FAILED
+
+	Temporarily breaks affected simulations (until RSVP and other support
+	ILifecycle).
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-18  Zoltan Bojthe

@@ -16,13 +16,12 @@
 //
 
 #include "TCPAppBase.h"
-#include "AddressResolver.h"
 
+#include "AddressResolver.h"
 
 simsignal_t TCPAppBase::connectSignal = registerSignal("connect");
 simsignal_t TCPAppBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPAppBase::sentPkSignal = registerSignal("sentPk");
-
 
 void TCPAppBase::initialize(int stage)
 {

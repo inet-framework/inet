@@ -1,3 +1,19 @@
+2014-02-05  Zoltan Bojthe
+
+	backport: reduce differences in code
+
+2013-07-22  Zoltan Bojthe
+
+	optimization: 0 replaced to SIMTIME_ZERO
+
+2013-04-12  Zoltan Bojthe
+
+	FlatNetworkConfiguator, FlatNetworkConfigurator6: changed isIPNode
+	detection
+
+	The non-IPNode AP, switch, etc. modules have InterfaceTable, but haven't
+	been RoutingTable/RoutingTable6 modules
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-04-12  Zoltan Bojthe

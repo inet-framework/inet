@@ -15,12 +15,16 @@
 /examples/emulation/traceroute/,     -f omnetpp.ini -c General -r 0
 
 # /examples/ethernet/lans/,            -f defaults.ini -c General -r 0    # Skip this. The defaults.ini is just an included file.
+
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts1280 -r 0    # cpu time limit exceeded
 /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0    # cpu time limit exceeded
-/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0       # segmentation fault in OLSR_ETX
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_NSC -r 0      # shutdown/restart not supported by TCP_NSC
+/examples/inet/shutdownrestart/,     -f omnetpp.ini -c TCP_lwIP -r 0     # shutdown/restart not supported by TCP_lwIP
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClinux__NSCfreebsd -r 0   # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSCfreebsd__NSCfreebsd -r 0 # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
 /examples/inet/tcpclientserver/,     -f omnetpp.ini -c NSClwip__inet -r 0          # NSC lwip and freebsd cannot be built on Linux 64-bit platforms
+
+/examples/manetrouting/manetMultiradio/, -f 4_nodes.ini -c MultiRadio -r 0
 
 # /examples/mobility/,                 -f omnetpp.ini -c BonnMotionMobility2 -r 0    # this test does not inject any events into the simulation so it stops at T=0s
 # /examples/mobility/,                 -f omnetpp.ini -c StaticGridMobility -r 0  # static test. No events are generated so it stops at T=0s
@@ -34,3 +38,4 @@
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0    # you must run /examples/wireless/synchronized/generate-routing-files.pl before run this example
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0    # you must run /examples/wireless/synchronized/generate-routing-files.pl before run this example
+

@@ -110,19 +110,25 @@ cModule *InterfaceTable::getHostModule()
     return host;
 }
 
-bool InterfaceTable::isLocalAddress(const Address& address) const {
+bool InterfaceTable::isLocalAddress(const Address& address) const
+{
     return findInterfaceByAddress(address) != NULL;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) const {
-    if (!address.isUnspecified()) {
+InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) const
+{
+    if (!address.isUnspecified())
+    {
         Address::AddressType addrType = address.getType();
-        for (int i = 0; i < (int)idToInterface.size(); i++) {
+        for (int i = 0; i < (int)idToInterface.size(); i++)
+        {
             InterfaceEntry *ie = idToInterface[i];
-            if (ie) {
+            if (ie)
+            {
                 if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
                     return ie;
-                switch (addrType) {
+                switch (addrType)
+                {
 #ifdef WITH_IPv4
                     case Address::IPv4:
                         if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIPv4())

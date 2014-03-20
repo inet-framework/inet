@@ -20,7 +20,6 @@
 #include "InterfaceEntry.h"
 #include "AddressResolver.h"
 #include "LifecycleOperation.h"
-#include "opp_utils.h"   // for OPP_Global::getModuleByPath()
 
 Define_Module(LifecycleController);
 
@@ -63,11 +62,7 @@ void LifecycleController::processCommand(const cXMLElement& node)
 {
     // resolve target module
     const char *target = node.getAttribute("target");
-#if OMNETPP_VERSION < 0x0403
-            cModule *module = OPP_Global::getModuleByPath(this, target);  // compatibility
-#else
-            cModule *module = getModuleByPath(target);
-#endif
+    cModule *module = getModuleByPath(target);
     if (!module)
         throw cRuntimeError("Module '%s' not found", target);
 

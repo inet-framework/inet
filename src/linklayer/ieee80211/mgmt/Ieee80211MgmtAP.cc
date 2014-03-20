@@ -22,7 +22,7 @@
 #include "Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
-#include "EtherFrame_m.h"
+#include "EtherFrame.h"
 #endif
 
 #include "IRadio.h"

@@ -29,6 +29,8 @@ cmdenv-express-mode = false
 
 **.sender[*].trafGen.destAddresses = "recip"
 
+**.recip.trafGen.protocol = 17
+
 **.router.ppp[*].frameCapacity = 300
 **.router.ppp[*].bitCapacity = 0
 

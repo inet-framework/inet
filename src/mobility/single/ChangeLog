@@ -1,3 +1,9 @@
+2014-02-06  Zoltan Bojthe
+
+	Backport: mobility
+
+	fingerprints of MoBAN mobility are changed
+
 2013-10-24  Rudolf Hornig
 
 	Added missing INET_API macros to propely support DLL exporting with Visual C++

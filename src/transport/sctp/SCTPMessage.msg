@@ -85,21 +85,21 @@ message SCTPInitChunk extends SCTPChunk
 
 message SCTPInitAckChunk extends SCTPChunk
 {
-     // Initiate Tag
-     uint32 initTag;
-     // Advertised Receiver Window
-     uint32 a_rwnd;
-     // Number of Outbound Streams
-     uint16 noOutStreams;
-     // Number of Inbound Streams
-     uint16 noInStreams;
-     // Initial TSN
-     uint32 initTSN;
-     bool forwardTsn;
-     Address addresses[];
-     char cookie[];
-     uint8 unrecognizedParameters[];
-     cPacketPtr stateCookie;
+    // Initiate Tag
+    uint32 initTag;
+    // Advertised Receiver Window
+    uint32 a_rwnd;
+    // Number of Outbound Streams
+    uint16 noOutStreams;
+    // Number of Inbound Streams
+    uint16 noInStreams;
+    // Initial TSN
+    uint32 initTSN;
+    bool forwardTsn;
+    Address addresses[];
+    char cookie[];
+    uint8 unrecognizedParameters[];
+    cPacketPtr stateCookie;
     uint32 msg_rwnd;
     uint8 random[]; //Random Number
     uint16 chunkTypes[];
@@ -197,6 +197,7 @@ message SCTPSackChunk extends SCTPChunk
     uint32 nrGapStart[];
     uint32 nrGapStop[];
     uint32 msg_rwnd;
+    uint8  dacPacketsRcvd = 0;
     bool   nrSubtractRGaps = false;
 }
 
@@ -360,4 +361,15 @@ message SCTPSimpleErrorCauseParameter extends SCTPParameter
 message SCTPSuccessIndication extends SCTPParameter
 {
     uint32 responseCorrelationId;
+}
+
+message NatMessage extends cPacket
+{
+    bool        multi;
+    uint16      peer1;
+    Address     peer1Addresses[];
+    uint32      portPeer1;
+    uint16      peer2;
+    Address     peer2Addresses[];
+    uint32      portPeer2;
 }

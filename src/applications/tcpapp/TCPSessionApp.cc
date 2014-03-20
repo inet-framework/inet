@@ -266,3 +266,10 @@ void TCPSessionApp::parseScript(const char *script)
     EV_DEBUG << "parser finished\n";
 }
 
+void TCPSessionApp::finish()
+{
+    EV << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
+    recordScalar("bytesRcvd", bytesRcvd);
+    recordScalar("bytesSent", bytesSent);
+}
+

@@ -17,7 +17,7 @@ Define_NED_Function(ghassemzadehNLOSFPtr, "xml ghassemzadehNLOS()");
 
 void UWBIRRadio::initialize(int stage) {
     DetailedRadio::initialize(stage);
-	if (stage == 0) {
+	if (stage == INITSTAGE_LOCAL) {
 		uwbradio = dynamic_cast<RadioUWBIR*>(radio);
         prf = par("PRF");
         assert(prf == 4 || prf == 16);

@@ -242,11 +242,3 @@ std::vector<std::string> splitFile(std::string fileName)
     return res;
 }
 
-bool fileExists(const char *file)
-{
-#ifdef _WIN32
-    return _access(file, 0) == 0;
-#else
-    return access(file, F_OK) == 0;
-#endif
-}

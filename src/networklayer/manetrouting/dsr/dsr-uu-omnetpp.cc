@@ -377,7 +377,6 @@ void DSRUU::initialize(int stage)
         myaddr_.s_addr = interface80211ptr->ipv4Data()->getIPAddress().getInt();
         macaddr_ = interface80211ptr->getMacAddress();
 
-        // ASSERT(stage >= STAGE:NOTIFICATIONBOARD_AVAILABLE);
         cModule *host = getContainingNode(this);
         host->subscribe(NF_LINK_BREAK, this);
         if (get_confval(PromiscOperation))

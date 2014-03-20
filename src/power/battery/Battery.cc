@@ -40,7 +40,7 @@ Battery::~Battery()
 
 void Battery::initialize(int stage)
 {
-    if (stage == 0)
+    if (stage == INITSTAGE_LOCAL)
     {
         crashNodeWhenDepleted = par("crashNodeWhenDepleted");
         nominalCapacity = residualCapacity = par("nominalCapacity");

@@ -61,10 +61,10 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     queuedBytes = 0;
     outstandingBytes = 0;
 
-    const InterfaceEntry* rtie = rt->getInterfaceForDestAddr(remoteAddress.toIPv4());
+    const InterfaceEntry* rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
     if (rtie == NULL) {
-        throw cRuntimeError("No interface for remote address %s found!", remoteAddress.toIPv4().str().c_str());
+        throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
     }
 
     pmtu = rtie->getMTU();
@@ -73,9 +73,30 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     cwndTimeout = pathRto;
     cwnd = 0;
     ssthresh = 0;
+    tempCwnd = 0;
     rttUpdateTime = 0.0;
     fastRecoveryExitPoint = 0;
     fastRecoveryActive = false;
+
+    cmtCCGroup = 0;
+    lastTransmission = simTime();
+    sendAllRandomizer = uniform(0, (1 << 31));
+    pseudoCumAck = 0;
+    newPseudoCumAck = false;
+    findPseudoCumAck = true;   // Set findPseudoCumAck to TRUE for new destination.
+    rtxPseudoCumAck = 0;
+    newRTXPseudoCumAck = false;
+    findRTXPseudoCumAck = true;   // Set findRTXPseudoCumAck to TRUE for new destination.
+    oldestChunkTSN = 0;
+    oldestChunkSendTime = simTime();
+    highestNewAckInSack = 0;
+    lowestNewAckInSack = 0;
+    waitingForRTTCalculaton = false;
+    tsnForRTTCalculation = 0;
+    txTimeForRTTCalculation = 0;
+    blockingTimeout = simTime();
+    packetsInBurst = 0;
+    highSpeedCCThresholdIdx = 0;
 
     numberOfFastRetransmissions = 0;
     numberOfTimerBasedRetransmissions = 0;
@@ -173,6 +194,13 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     vectorPathAckedTSNCumAck = new cOutVector(str);
     snprintf(str, sizeof(str), "TSN Acked GapAck %d:%s", assoc->assocId, addr.str().c_str());
     vectorPathAckedTSNGapAck = new cOutVector(str);
+
+    snprintf(str, sizeof(str), "TSN PseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
+    vectorPathPseudoCumAck = new cOutVector(str);
+    snprintf(str, sizeof(str), "TSN RTXPseudoCumAck %d:%s", assoc->assocId, addr.str().c_str());
+    vectorPathRTXPseudoCumAck = new cOutVector(str);
+    snprintf(str, sizeof(str), "Blocking TSNs Moved %d:%s", assoc->assocId, addr.str().c_str());
+    vectorPathBlockingTSNsMoved = new cOutVector(str);
 }
 
 SCTPPathVariables::~SCTPPathVariables()
@@ -205,6 +233,10 @@ SCTPPathVariables::~SCTPPathVariables()
     delete vectorPathTSNTimerBased;
     delete vectorPathAckedTSNCumAck;
     delete vectorPathAckedTSNGapAck;
+
+    delete vectorPathPseudoCumAck;
+    delete vectorPathRTXPseudoCumAck;
+    delete vectorPathBlockingTSNsMoved;
 }
 
 
@@ -362,6 +394,7 @@ SCTPStateVariables::SCTPStateVariables()
     }
 
     count = 0;
+    blockingTSNsMoved = 0;
 }
 
 SCTPStateVariables::~SCTPStateVariables()
@@ -515,6 +548,9 @@ SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _asso
     assocThroughputVector = new cOutVector(vectorName);
     assocThroughputVector->record(0.0);
 
+    // ====== CMT Delayed Ack ================================================
+    dacPacketsRcvd = 0;
+
     // ====== Stream scheduling ==============================================
     ssModule = sctpMain->par("ssModule");
 
@@ -619,7 +655,7 @@ SCTPAssociation::~SCTPAssociation()
     if (assocThroughputVector != NULL) delete assocThroughputVector;
     if (FairStartTimer) delete cancelEvent(FairStartTimer);
     if (FairStopTimer) delete cancelEvent(FairStopTimer);
-    
+
     if (state->asconfOutstanding && state->asconfChunk)
         delete state->asconfChunk;
 
@@ -1022,6 +1058,211 @@ void SCTPAssociation::stateEntered(int32 status)
             state->checkSackSeqNumber = (bool)sctpMain->par("checkSackSeqNumber");
             state->outgoingSackSeqNum = 0;
             state->incomingSackSeqNum = 0;
+            state->highSpeedCC                 = (bool)sctpMain->par("highSpeedCC");
+            state->initialWindow               = (uint32)sctpMain->par("initialWindow");
+            if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "useItOrLoseIt") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseIt;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "congestionWindowLimiting") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_CongestionWindowLimiting;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "maxBurst") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_MaxBurst;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "aggressiveMaxBurst") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_AggressiveMaxBurst;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "totalMaxBurst") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_TotalMaxBurst;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "useItOrLoseItTempCwnd") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_UseItOrLoseItTempCwnd;
+            }
+            else if(strcmp((const char*)sctpMain->par("maxBurstVariant"), "congestionWindowLimitingTempCwnd") == 0) {
+               state->maxBurstVariant = SCTPStateVariables::MBV_CongestionWindowLimitingTempCwnd;
+            }
+            else {
+               throw cRuntimeError("Invalid setting of maxBurstVariant: %s.",
+                        (const char*)sctpMain->par("maxBurstVariant"));
+            }
+
+            if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "normal") == 0) {
+               state->cmtSendAllComparisonFunction = NULL;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "smallestLastTransmission") == 0) {
+               state->cmtSendAllComparisonFunction = pathMapSmallestLastTransmission;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "randomized") == 0) {
+               state->cmtSendAllComparisonFunction = pathMapRandomized;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "largestSSThreshold") == 0) {
+               state->cmtSendAllComparisonFunction = pathMapLargestSSThreshold;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "largestSpace") == 0) {
+               state->cmtSendAllComparisonFunction = pathMapLargestSpace;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSendAllVariant"), "largestSpaceAndSSThreshold") == 0) {
+               state->cmtSendAllComparisonFunction = pathMapLargestSpaceAndSSThreshold;
+            }
+            else {
+               throw cRuntimeError("Invalid setting of cmtSendAllVariant: %s.",
+                        (const char*)sctpMain->par("cmtSendAllVariant"));
+            }
+
+            state->cmtRetransmissionVariant = sctpMain->par("cmtRetransmissionVariant");
+            if(strcmp((const char*)sctpMain->par("cmtCUCVariant"), "normal") == 0) {
+            state->cmtCUCVariant = SCTPStateVariables::CUCV_Normal;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCUCVariant"), "pseudoCumAck") == 0) {
+               state->cmtCUCVariant = SCTPStateVariables::CUCV_PseudoCumAck;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCUCVariant"), "pseudoCumAckV2") == 0) {
+               state->cmtCUCVariant = SCTPStateVariables::CUCV_PseudoCumAckV2;
+            }
+            else {
+               throw cRuntimeError("Bad setting for cmtCUCVariant: %s\n",
+                        (const char*)sctpMain->par("cmtCUCVariant"));
+            }
+            state->smartOverfullSACKHandling = (bool)sctpMain->par("smartOverfullSACKHandling");
+
+            if(strcmp((const char*)sctpMain->par("cmtChunkReschedulingVariant"), "none") == 0) {
+            state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_None;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtChunkReschedulingVariant"), "senderOnly") == 0) {
+               state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_SenderOnly;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtChunkReschedulingVariant"), "receiverOnly") == 0) {
+               state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_ReceiverOnly;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtChunkReschedulingVariant"), "bothSides") == 0) {
+               state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_BothSides;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtChunkReschedulingVariant"), "test") == 0) {
+               state->cmtChunkReschedulingVariant = SCTPStateVariables::CCRV_Test;
+            }
+            else {
+               throw cRuntimeError("Bad setting for cmtChunkReschedulingVariant: %s\n",
+                        (const char*)sctpMain->par("cmtChunkReschedulingVariant"));
+            }
+
+            if(strcmp((const char*)sctpMain->par("cmtBufferSplitVariant"), "none") == 0) {
+            state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_None;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtBufferSplitVariant"), "senderOnly") == 0) {
+               state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_SenderOnly;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtBufferSplitVariant"), "receiverOnly") == 0) {
+               state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_ReceiverOnly;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtBufferSplitVariant"), "bothSides") == 0) {
+               state->cmtBufferSplitVariant = SCTPStateVariables::CBSV_BothSides;
+            }
+            else {
+               throw cRuntimeError("Bad setting for cmtBufferSplitVariant: %s\n",
+                        (const char*)sctpMain->par("cmtBufferSplitVariant"));
+            }
+            state->cmtBufferSplittingUsesOSB = (bool)sctpMain->par("cmtBufferSplittingUsesOSB");
+
+            if(strcmp((const char*)sctpMain->par("gapListOptimizationVariant"), "none") == 0) {
+               state->gapListOptimizationVariant = SCTPStateVariables::GLOV_None;
+            }
+            else if(strcmp((const char*)sctpMain->par("gapListOptimizationVariant"), "optimized1") == 0) {
+               state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Optimized1;
+            }
+            else if(strcmp((const char*)sctpMain->par("gapListOptimizationVariant"), "optimized2") == 0) {
+               state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Optimized2;
+            }
+            else if(strcmp((const char*)sctpMain->par("gapListOptimizationVariant"), "shrunken") == 0) {
+               state->gapListOptimizationVariant = SCTPStateVariables::GLOV_Shrunken;
+            }
+            else {
+               throw cRuntimeError("Bad setting for gapListOptimizationVariant: %s\n",
+                        (const char*)sctpMain->par("gapListOptimizationVariant"));
+            }
+
+            state->cmtUseSFR                     = (bool)sctpMain->par("cmtUseSFR");
+            state->cmtUseDAC                     = (bool)sctpMain->par("cmtUseDAC");
+            state->cmtUseFRC                     = (bool)sctpMain->par("cmtUseFRC");
+            state->gapReportLimit                = (uint32)sctpMain->par("gapReportLimit");
+            state->cmtSmartT3Reset               = (bool)sctpMain->par("cmtSmartT3Reset");
+            state->cmtSmartReneging              = (bool)sctpMain->par("cmtSmartReneging");
+            state->cmtSmartFastRTX               = (bool)sctpMain->par("cmtSmartFastRTX");
+            state->cmtSlowPathRTTUpdate          = (bool)sctpMain->par("cmtSlowPathRTTUpdate");
+            state->cmtMovedChunksReduceCwnd      = (bool)sctpMain->par("cmtMovedChunksReduceCwnd");
+            state->cmtChunkReschedulingThreshold = (double)sctpMain->par("cmtChunkReschedulingThreshold");
+            state->movedChunkFastRTXFactor       = (double)sctpMain->par("movedChunkFastRTXFactor");
+            state->strictCwndBooking             = (bool)sctpMain->par("strictCwndBooking");
+
+            if(strcmp((const char*)sctpMain->par("cmtSackPath"), "standard") == 0) {
+               state->cmtSackPath = SCTPStateVariables::CSP_Standard;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSackPath"), "primary") == 0) {
+               state->cmtSackPath = SCTPStateVariables::CSP_Primary;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSackPath"), "roundRobin") == 0) {
+               state->cmtSackPath = SCTPStateVariables::CSP_RoundRobin;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtSackPath"), "smallestSRTT") == 0) {
+               state->cmtSackPath = SCTPStateVariables::CSP_SmallestSRTT;
+            }
+            else {
+               throw cRuntimeError("Bad setting for cmtSackPath: %s\n",
+                        (const char*)sctpMain->par("cmtSackPath"));
+            }
+
+            if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "off") == 0) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_Off;
+               state->allowCMT     = false;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmt") == 0) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMT;
+               state->allowCMT     = true;
+            }
+            else if( (strcmp((const char*)sctpMain->par("cmtCCVariant"), "like-mptcp") == 0) ||
+                     (strcmp((const char*)sctpMain->par("cmtCCVariant"), "mptcp-like") == 0) ) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_Like_MPTCP;
+               state->allowCMT     = true;
+            }
+            else if( (strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmtrp") == 0) ||
+                     (strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmtrpv1") == 0) ) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRPv1;
+               state->allowCMT     = true;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmtrpv2") == 0) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRPv2;
+               state->allowCMT     = true;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmtrp-t1") == 0) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRP_Test1;
+               state->allowCMT     = true;
+            }
+            else if(strcmp((const char*)sctpMain->par("cmtCCVariant"), "cmtrp-t2") == 0) {
+               state->cmtCCVariant = SCTPStateVariables::CCCV_CMTRP_Test2;
+               state->allowCMT     = true;
+            }
+            else {
+               throw cRuntimeError("Bad setting for cmtCCVariant: %s\n",
+                        (const char*)sctpMain->par("cmtCCVariant"));
+            }
+
+            state->rpPathBlocking         = (bool)sctpMain->par("rpPathBlocking");
+            state->rpScaleBlockingTimeout = (bool)sctpMain->par("rpScaleBlockingTimeout");
+            state->rpMinCwnd              = sctpMain->par("rpMinCwnd");
+
+            cStringTokenizer pathGroupsTokenizer(sctpMain->par("cmtCCPathGroups").stringValue());
+            if(pathGroupsTokenizer.hasMoreTokens()) {
+               SCTPPathMap::iterator pathIterator = sctpPathMap.begin();
+               while(pathIterator != sctpPathMap.end()) {
+                  const char* token = pathGroupsTokenizer.nextToken();
+                  if(token == NULL) {
+                     throw cRuntimeError("Too few cmtCCGroup values to cover all paths!");
+                  }
+                  SCTPPathVariables* path = pathIterator->second;
+                  path->cmtCCGroup = atol(token);
+                  pathIterator++;
+               }
+            }
+
             state->osbWithHeader = (bool)sctpMain->par("osbWithHeader");
             state->padding = (bool)sctpMain->par("padding");
             if (state->osbWithHeader)

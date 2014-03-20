@@ -1,3 +1,96 @@
+2014-02-04  Zoltan Bojthe
+
+	backport: Applications
+
+2013-10-30  Zoltan Bojthe
+
+	backport: registerSignal() calls moved from initialize() to static
+	variable declaration
+
+2013-01-15  Zoltan Bojthe
+
+	added vlan code from inetmanet - 2996f0d703dc47b54d6262ae18b60f7a9e3e9757
+
+2013-08-02  Zoltan Bojthe
+
+	apps: startTime/stopTime fixes
+
+	- apps start sending at startTime, and sending last packet before
+	stopTime
+	- negative stopTime means forever
+	- if startTime and stopTime are same, app send one packet (except TCP
+	apps)
+
+2013-07-03  Zoltan Bojthe
+
+	applications: optimizations: case of stopTime == -1
+
+2013-07-02  Zoltan Bojthe
+
+	EtherAppCli: scheduleNextPacket() optimizations
+
+	 - parameter replaced to bool: schedule first/next packet
+	- gets current simtime only once
+
+2013-06-14  Zoltan Bojthe
+
+	--EtherAppCli: bugfix: cancelEvent(NULL) was generated error
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppSrv: removed remoteSAP NED parameter, in answers used incoming
+	ssap as outgoing dsap
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppCli, EtherAppSrv: added localSAP, remoteSAP NED parameters
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppSrv: added lifecycle support
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppSrv: moved registerSAP to stage 1 in initialize()
+
+	and register SAP only when the node status is UP fingerprint changed
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppCli: register DSAP and resolve dest MAC address at startTime
+	instead initialize
+
+	always register DSAP fingerprints changed
+
+2013-06-14  Zoltan Bojthe
+
+	EtherTrafGen: resolve destination MAC address at startTime instead
+	initialize
+
+2013-06-14  Zoltan Bojthe
+
+	EtherAppCli, EtherTrafGen: renamed isEnabled() to isGenerator()
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missed in some
+	handleOperationStage() function
+
+2013-04-25  Levente Mészáros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-05-02  Andras Varga
+
+	App: Adapted EtherAppCli and EtherTrafGen to lifecycle operations.
+
 2013-08-22  ------ inet-2.2.0 released ------
 
 2013-06-14  Zoltan Bojthe

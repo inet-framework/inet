@@ -1,7 +1,43 @@
+2014-03-11  Zoltan Bojthe
+
+	MACAddress: omnet++ 4.x compatibility
+
 2014-01-22  Levente Meszaros
 
 	Moved classes shared by implementations from ./contract to ./common
 	Added a new purely virtual contract that defines the interface of MAC protocols.
+
+2013-05-23  Levente Mészáros
+
+	backport: MACAddress: Fixed that interfaces were assigned different MAC
+	addresses when multiple runs were executed.
+
+	Added a cSimulationLifetimeListener to reset the MACAddress counter
+	before initialize is called.
+
+2014-01-24  Zoltan Bojthe
+
+	backport: msg files: legacy enum(Foo) syntax changed to @enum(Foo)
+
+2013-12-04  Zsolt Prontvai
+
+	RSTP: facktor out statemachine and minor renaming
+
+2013-12-17  Zoltan Bojthe
+
+	802.1d: Working RSTP
+
+2013-06-14  Tamás Borbély
+
+	new constants
+
+2013-02-01  Andras Varga
+
+	Ieee802Ctrl.inputPort renamed to interfaceId
+
+2013-02-01  Andras Varga
+
+	MACAddress: added makeMulticastAddress()
 
 2013-08-22  ------ inet-2.2.0 released ------
 
