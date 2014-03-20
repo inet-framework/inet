@@ -39,6 +39,7 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     confirmed = false;
     primaryPathCandidate = false;
     pathErrorCount = 0;
+    const InterfaceEntry* rtie;
     pathErrorThreshold = assoc->getSctpMain()->par("pathMaxRetrans");
 
     if (!pathErrorThreshold) {
@@ -64,7 +65,7 @@ SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc
     const InterfaceEntry* rtie = rt->getOutputInterfaceForDestination(remoteAddress);
 
     if (rtie == NULL) {
-        throw cRuntimeError("No interface for remote address %s found!", remoteAddress.str().c_str());
+                throw cRuntimeError("No interface for remote address %s found!", remoteAddress.get6().str().c_str());
     }
 
     pmtu = rtie->getMTU();

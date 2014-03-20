@@ -9,11 +9,23 @@ import string
 import subprocess
 
 # configuration
-since = '2013-04-28'
+since = '2013-08-24'
 entriesToIgnore = [
-"""2013-04-27  Andras Varga
+"""2014-03-12  Rudolf Hornig
 
-	tmp - started to fill in ChangeLogs
+    updated changelogs for v2.3
+
+""",
+"""2014-03-14  Rudolf Hornig
+
+    Revert "updated changelogs for v2.3"
+
+    This reverts commit 1bf7ee83a4677760c23c55cb7ce2b004a2bde193.
+
+""",
+"""2014-02-05  Zoltan Bojthe
+
+    backport: reduce differences in code
 
 """,
 ]

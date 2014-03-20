@@ -359,12 +359,21 @@ void SCTP::sendAbortFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address dest
     }
     else
     {
-        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-        controlInfo->setProtocol(IP_PROT_SCTP);
-        controlInfo->setSrcAddr(srcAddr.toIPv4());
-        controlInfo->setDestAddr(destAddr.toIPv4());
-        msg->setControlInfo(controlInfo);
-        send(msg, "to_ip");
+        if (destAddr.isIPv6()) {
+            IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+            controlInfo->setProtocol(IP_PROT_SCTP);
+            controlInfo->setSrcAddr(srcAddr.get6());
+            controlInfo->setDestAddr(destAddr.get6());
+            msg->setControlInfo(controlInfo);
+            send(msg, "to_ipv6");
+        } else {
+            IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
+            controlInfo->setProtocol(IP_PROT_SCTP);
+            controlInfo->setSrcAddr(srcAddr.toIPv4());
+            controlInfo->setDestAddr(destAddr.toIPv4());
+            msg->setControlInfo(controlInfo);
+            send(msg, "to_ip");
+        }
     }
 }
 
@@ -386,12 +395,21 @@ void SCTP::sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, A
 
     scChunk->setBitLength(SCTP_SHUTDOWN_ACK_LENGTH*8);
     msg->addChunk(scChunk);
-    IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
-    controlInfo->setProtocol(IP_PROT_SCTP);
-    controlInfo->setSrcAddr(srcAddr.toIPv4());
-    controlInfo->setDestAddr(destAddr.toIPv4());
-    msg->setControlInfo(controlInfo);
-    send(msg, "to_ip");
+    if (destAddr.isIPv6()) {
+        IPv6ControlInfo *controlInfo = new IPv6ControlInfo();
+        controlInfo->setProtocol(IP_PROT_SCTP);
+        controlInfo->setSrcAddr(srcAddr.get6());
+        controlInfo->setDestAddr(destAddr.get6());
+        msg->setControlInfo(controlInfo);
+        send(msg, "to_ipv6");
+    } else {
+        IPv4ControlInfo *controlInfo = new IPv4ControlInfo();
+        controlInfo->setProtocol(IP_PROT_SCTP);
+        controlInfo->setSrcAddr(srcAddr.toIPv4());
+        controlInfo->setDestAddr(destAddr.toIPv4());
+        msg->setControlInfo(controlInfo);
+        send(msg, "to_ip");
+    }
 }
 
 

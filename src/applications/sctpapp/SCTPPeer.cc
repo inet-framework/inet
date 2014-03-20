@@ -191,7 +191,13 @@ void SCTPPeer::connect()
     EV_INFO << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    clientSocket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
+    Address destination;
+    AddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        clientSocket.connect(destination, connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
+    }
 
     if (streamReset)
     {

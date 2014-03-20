@@ -26,6 +26,7 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.IPv6NetworkLayer;
 import inet.networklayer.ipv6.IPv6RoutingTable;
 import inet.power.contract.IPowerSource;
+import inet.util.PcapRecorder;
 
 
 //
@@ -44,6 +45,7 @@ module NodeBase6
         @labels(node,ethernet-node,wireless-node);
         int numExtInterfaces = default(0);
         int numRadios = default(0);               // the number of radios in the router. by default no wireless
+        int numPcapRecorders = default(0); // no of PcapRecorders.
         string mobilityType = default(numRadios > 0 ? "StationaryMobility" : "");
         string powerSourceType = default("");
         xml routes = default(xml("<routingTable/>"));
@@ -85,6 +87,10 @@ module NodeBase6
         interfaceTable: InterfaceTable {
             parameters:
                 @display("p=53,287;is=s");
+        }
+
+        pcapRecorder[numPcapRecorders]: PcapRecorder {
+            @display("p=53,338,r,10");
         }
 
         lo0: LoopbackInterface {

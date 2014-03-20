@@ -154,7 +154,13 @@ void SCTPClient::connect()
     setStatusString("connecting");
     EV_INFO << "issuing OPEN command, connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
-    socket.connect(AddressResolver().resolve(connectAddress, 1), connectPort, streamReset, par("prMethod"), par("numRequestsPerSession"));
+    Address destination;
+    AddressResolver().tryResolve(connectAddress, destination);
+    if (destination.isUnspecified())
+        EV << "cannot resolve destination address: " << connectAddress << endl;
+    else {
+        socket.connect(destination, connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
+    }
 
     if (streamReset)
     {
