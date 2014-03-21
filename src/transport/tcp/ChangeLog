@@ -1,5 +1,16 @@
 2014-03-19  ------ inet-2.3.0 released ------
 
+2014-03-15  Thomas Dreibholz
+
+    TCP: queue size limitation 
+
+    - By default, the TCP behaviour remains unchanged.
+    - If queue limit is set by the TCP_C_QUEUE_BYTES_LIMIT command,
+      the TCP model gives an indication to the application when it should 
+      generate more data.
+
+    This patch is helpful when comparing SCTP and TCP behaviour.
+
 2014-01-15  Zoltan Bojthe
 
 	backported registerProtocol

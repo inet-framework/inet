@@ -109,6 +109,9 @@ Other, smaller changes:
 
 - EtherApp* bugfixes
 
+- Added command to set TCP queue length limitation. TCP will notify the app if it is 
+  ready to transmit more bytes.
+
 - registerSignal() calls moved from initialize() to static variable declaration
 
 - Added/fixed @signal declarations, fixed type of emitted values
