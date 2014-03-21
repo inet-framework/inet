@@ -432,6 +432,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.dymo
+                       inet.nodes.dymo
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -446,6 +447,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.gpsr
+                       inet.nodes.gpsr
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -460,6 +462,21 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.rip
+                       inet.nodes.rip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="RIP_examples"
+        name="RIP examples"
+        description = "Routing Information Protocol examples"
+        initiallyEnabled = "true"
+        requires = "UDP IPv4 RIP"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.rip
                       "
         extraSourceFolders = ""
         compileFlags = ""
