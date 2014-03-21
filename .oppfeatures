@@ -595,6 +595,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
+                       inet.nodes.wireless
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -802,7 +803,6 @@
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8021d
-                       inet.linklayer.configurator
                       "
         extraSourceFolders = ""
         compileFlags = ""
