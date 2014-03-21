@@ -16,7 +16,7 @@
 //
 
 package inet.linklayer.ieee8021d.stp;
-import inet.linklayer.ieee8021d.ISpanningTree;
+import inet.linklayer.ISpanningTree;
 
 //
 // The Spanning Tree Protocol (STP) is a network protocol that ensures a loop-free
@@ -57,14 +57,14 @@ simple STP like ISpanningTree
 
         // The path to the InterfaceTable module
         string interfaceTablePath = default("^.interfaceTable");
-        
+
         // The path to the MACAddressTable module
         string macTablePath = default("^.macTable");
-        
+
         // Shows the spanning tree by coloring connections in the network graphics.
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
-        
+
         @display("i=block/network2");
     gates:
         input relayIn;

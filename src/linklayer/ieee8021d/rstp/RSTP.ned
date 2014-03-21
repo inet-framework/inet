@@ -17,7 +17,7 @@
 //
 
 package inet.linklayer.ieee8021d.rstp;
-import inet.linklayer.ieee8021d.ISpanningTree;
+import inet.linklayer.ISpanningTree;
 
 //
 // Implements the Rapid Spanning Tree Protocol (IEEE 802.D-2004) for IEC 48-bit
@@ -52,11 +52,11 @@ simple RSTP like ISpanningTree
         // The max age timer controls the maximum length of time that passes before a bridge port saves its configuration BPDU information.
         // This time is 20 sec by default, but you can tune the time to be between 6 and 40 sec.
         double maxAge @unit("s") = default(20s);
-        
+
         // The migrate time is the time after which a non-assigned port becomes designated. This time is equal to 6 sec by default,
         // but you can tune the time to be between 4 and 30 sec.
         double migrateTime @unit ("s")= default(3s);
-        
+
         // The topology change while time is the time while a port will send TC=true (Topology Change Notification)
         double tcWhileTime @unit("s") = default(6s);
 
@@ -66,17 +66,17 @@ simple RSTP like ISpanningTree
 
         // The path to the InterfaceTable module
         string interfaceTablePath = default("^.interfaceTable");
-        
+
         // The path to the MACAddressTable module
         string macTablePath = default("^.macTable");
-        
+
         // Shows the spanning tree by coloring connections in the network graphics.
         // Label ethernet interface with port role and status. Mark root switch
         bool visualize = default(false);
-        
+
         // If true, edge ports immediately become designated/forwarding, else it will have to wait to get designated.
         bool autoEdge = default(true);
-        
+
         @display("i=block/network2");
     gates:
         input relayIn;

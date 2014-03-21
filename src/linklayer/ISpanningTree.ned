@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ieee8021d;
+package inet.linklayer;
 
 //
 // Module interface for Spanning Tree protocols
