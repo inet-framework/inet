@@ -106,6 +106,7 @@
                        inet.networklayer.icmpv6
                        inet.networklayer.ipv6tunneling
                        inet.nodes.ipv6
+                       inet.util.headerserializers.ipv6
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
@@ -205,7 +206,7 @@
         name="SCTP"
         description = "SCTP Protocol support"
         initiallyEnabled = "true"
-        requires = "IPv4"
+        requires = "IPv4 IPv6"
         labels = ""
         nedPackages = "
                        inet.applications.sctpapp
@@ -427,7 +428,7 @@
         name="DYMO"
         description = "Dynamic MANET On-demand Routing"
         initiallyEnabled = "true"
-        requires = "UDP Ieee80211"
+        requires = "UDP IPv4 Ieee80211"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.dymo
@@ -441,7 +442,7 @@
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.gpsr
@@ -455,7 +456,7 @@
         name="RIP"
         description = "Routing Information Protocol"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.rip
