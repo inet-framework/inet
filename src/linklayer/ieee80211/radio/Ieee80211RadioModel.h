@@ -58,7 +58,7 @@ class INET_API Ieee80211RadioModel : public IRadioModel
 
     virtual double calculateDuration(AirFrame *airframe);
 
-    virtual bool isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
+    virtual PhyIndication isReceivedCorrectly(AirFrame *airframe, const SnrList& receivedList);
     ~Ieee80211RadioModel();
 
     // used by the Airtime Link Metric computation

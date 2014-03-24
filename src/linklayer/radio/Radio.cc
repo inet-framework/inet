@@ -716,10 +716,11 @@ void Radio::handleLowerMsgEnd(AirFrame * airframe)
         //    sendUp(airframe);
         //else
         //    delete airframe;
-        if (!radioModel->isReceivedCorrectly(airframe, list))
+        PhyIndication frameState = radioModel->isReceivedCorrectly(airframe, list);
+        if (frameState != FRAMEOK)
         {
-            airframe->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
-            airframe->setName(list.size()>1 ? "COLLISION" : "BITERROR");
+            airframe->getEncapsulatedPacket()->setKind(frameState);
+            airframe->setName(frameState == COLLISION ? "COLLISION" : "BITERROR");
 
             numGivenUp++;
         }

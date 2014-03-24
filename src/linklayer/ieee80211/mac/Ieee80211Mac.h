@@ -665,6 +665,15 @@ class INET_API Ieee80211Mac : public WirelessMacBase
 
     virtual bool isDuplicated(cMessage *msg);
 
+    virtual void sendNotification(int category, cMessage *pkt)
+    {
+        if (!nb)
+            return;
+        int tempKind = pkt->getKind();
+        pkt->setKind(this->getIndex());
+        nb->fireChangeNotification(category, pkt);
+        pkt->setKind(tempKind);
+    }
   public:
     virtual State getState() {return static_cast<State>(fsm.getState());}
     virtual unsigned int getQueueSize() {return transmissionQueueSize();}
