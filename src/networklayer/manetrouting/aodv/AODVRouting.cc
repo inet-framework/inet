@@ -1397,7 +1397,7 @@ void AODVRouting::expungeRoutes()
             {
                 if (routeData->isActive())
                 {
-                    EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and and set to inactive. It will be deleted after DELETE_PERIOD time" << endl;
+                    EV_DETAIL << "Route to " << route->getDestinationAsGeneric() << " expired and set to inactive. It will be deleted after DELETE_PERIOD time" << endl;
                     // An expired routing table entry SHOULD NOT be expunged before
                     // (current_time + DELETE_PERIOD) (see section 6.11).  Otherwise, the
                     // soft state corresponding to the route (e.g., last known hop count)
