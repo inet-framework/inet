@@ -1229,6 +1229,7 @@ void AODVRouting::clearState()
     for (std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
         cancelAndDelete(it->second);
 
+    // FIXME: Drop the queued datagrams.
     //for (std::multimap<Address, INetworkDatagram *>::iterator it = targetAddressToDelayedPackets.begin(); it != targetAddressToDelayedPackets.end(); it++)
     //    networkProtocol->dropQueuedDatagram(const_cast<const INetworkDatagram *>(it->second));
 
