@@ -18,7 +18,7 @@ package inet.nodes.wireless;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.ethernet.switch.IMACAddressTable;
+import inet.linklayer.IMACAddressTable;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
 import inet.status.NodeStatus;

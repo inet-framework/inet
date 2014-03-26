@@ -505,11 +505,13 @@ void PacketDump::udpDump(bool l2r, const char *label, UDPPacket* udppkt,
 
 void PacketDump::dumpARP(bool l2r, const char *label, ARPPacket *dgram, const char *comment)
 {
+#ifdef WITH_IPv4
     std::ostream& out = *outp;
     char buf[30];
     sprintf(buf, "[%.3f%s] ", simulation.getSimTime().dbl(), label);
     out << buf << " src: " << dgram->getSrcIPAddress() << ", " << dgram->getSrcMACAddress()
             << "; dest: " << dgram->getDestIPAddress() << ", " << dgram->getDestMACAddress() << endl;
+#endif
 }
 
 void PacketDump::dumpIPv4(bool l2r, const char *label, IPv4Datagram *dgram, const char *comment)

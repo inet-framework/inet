@@ -37,6 +37,7 @@ enum TcpCommandCode
     TCP_C_CLOSE = 5;         // "I have no more data to send"
     TCP_C_ABORT = 6;         // abort connection
     TCP_C_STATUS = 7;        // request status info (TCP_I_STATUS) from TCP
+    TCP_C_QUEUE_BYTES_LIMIT = 8; // set send queue limit (in bytes)
 }
 
 
@@ -57,6 +58,7 @@ enum TcpStatusInd
     TCP_I_CONNECTION_RESET = 7;  // connection reset
     TCP_I_TIMED_OUT = 8;         // conn-estab timer went off, or max retransm. count reached
     TCP_I_STATUS = 9;            // status info (will carry ~TCPStatusInfo)
+    TCP_I_SEND_MSG = 10;         // send queue abated, send more messages
 }
 
 

@@ -106,6 +106,7 @@
                        inet.networklayer.icmpv6
                        inet.networklayer.ipv6tunneling
                        inet.nodes.ipv6
+                       inet.util.headerserializers.ipv6
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
@@ -205,7 +206,7 @@
         name="SCTP"
         description = "SCTP Protocol support"
         initiallyEnabled = "true"
-        requires = "IPv4"
+        requires = "IPv4 IPv6"
         labels = ""
         nedPackages = "
                        inet.applications.sctpapp
@@ -427,10 +428,11 @@
         name="DYMO"
         description = "Dynamic MANET On-demand Routing"
         initiallyEnabled = "true"
-        requires = "UDP Ieee80211"
+        requires = "UDP IPv4 Ieee80211"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.dymo
+                       inet.nodes.dymo
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -441,10 +443,11 @@
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.gpsr
+                       inet.nodes.gpsr
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -455,10 +458,25 @@
         name="RIP"
         description = "Routing Information Protocol"
         initiallyEnabled = "true"
-        requires = "UDP"
+        requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.rip
+                       inet.nodes.rip
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
+        id="RIP_examples"
+        name="RIP examples"
+        description = "Routing Information Protocol examples"
+        initiallyEnabled = "true"
+        requires = "UDP IPv4 RIP"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.rip
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -576,6 +594,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
+                       inet.nodes.wireless
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -783,7 +802,6 @@
         labels = ""
         nedPackages = "
                        inet.linklayer.ieee8021d
-                       inet.linklayer.configurator
                       "
         extraSourceFolders = ""
         compileFlags = ""

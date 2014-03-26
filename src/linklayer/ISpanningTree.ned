@@ -15,15 +15,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.linklayer.ethernet.switch;
+package inet.linklayer;
 
 //
-// Interface for MAC address tables
+// Module interface for Spanning Tree protocols
 //
-moduleinterface IMACAddressTable
+moduleinterface ISpanningTree
 {
     parameters:
-        @display("i=block/table2");
-        double agingTime @unit("s");
-        string addressTableFile;
+        @display("i=block/network2");
+        double helloTime @unit("s");
+        double forwardDelay @unit("s");
+        double maxAge @unit("s");
+        int bridgePriority;
+        bool visualize;
+    gates:
+        input relayIn;
+        output relayOut;
 }

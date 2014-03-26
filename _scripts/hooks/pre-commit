@@ -22,6 +22,8 @@ def getStagedFiles():
 stagedFiles = getStagedFiles()
 
 for currentFile in stagedFiles:
+    if not os.path.exists(currentFile):
+        continue
     fr = open(currentFile,'r')
     sourceCode = fr.read()
     fr.close()
