@@ -934,6 +934,8 @@ void RSTP::flushOtherPorts(unsigned int portNum)
 //void RSTP::receiveChangeNotification(int signalID, const cObject *obj)
 void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
+    Enter_Method_Silent();
+
     if (signalID == NF_INTERFACE_STATE_CHANGED)
     {
         InterfaceEntry *changedIE = check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry();
