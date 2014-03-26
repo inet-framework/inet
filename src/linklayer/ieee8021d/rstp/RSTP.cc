@@ -50,13 +50,9 @@ void RSTP::initialize(int stage)
         helloTimer = new cMessage("itshellotime", SELF_HELLOTIME);
         upgradeTimer = new cMessage("upgrade", SELF_UPGRADE);
     }
-
-    if (stage == INITSTAGE_LINK_LAYER_2) // "auto" MAC addresses assignment takes place in stage 0
+    else if (stage == INITSTAGE_LINK_LAYER_2) // "auto" MAC addresses assignment takes place in stage 0
     {
-        initPorts();
         updateDisplay();
-        // programming next auto-messages.
-        scheduleAt(simTime(), helloTimer);
     }
 }
 

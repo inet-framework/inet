@@ -43,24 +43,6 @@ void STP::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {
-        initPortTable();
-
-        isRoot = true;
-        topologyChangeNotification = false;
-        topologyChangeRecvd = true;
-
-        rootPriority = bridgePriority;
-        rootAddress = bridgeAddress;
-        rootPathCost = 0;
-        rootPort = 0;
-        currentHelloTime = helloTime;
-        currentMaxAge = maxAge;
-        currentFwdDelay = forwardDelay;
-        currentBridgePriority = bridgePriority;
-
-        helloTime = 0;
-        setAllDesignated();
-        scheduleAt(simTime() + tickInterval, tick);
         updateDisplay();
     }
 }
@@ -723,7 +705,7 @@ void STP::start()
     helloTime = 0;
     setAllDesignated();
 
-    scheduleAt(simTime() + 1, tick);
+    scheduleAt(simTime() + tickInterval, tick);
 }
 
 void STP::stop()

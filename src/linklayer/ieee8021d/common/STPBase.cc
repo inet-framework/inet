@@ -62,13 +62,7 @@ void STPBase::initialize(int stage)
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
 
         if (isOperational)
-        {
-            ie = chooseInterface();
-            if (ie)
-                bridgeAddress = ie->getMacAddress(); // get the bridge's MAC address
-            else
-                throw cRuntimeError("No non-loopback interface found!");
-        }
+            start();
     }
 }
 
