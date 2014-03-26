@@ -53,9 +53,9 @@ simple AODVRouting
         double activeRouteTimeout @unit("s") = default(3s); // the timeout value for cached routes
         int netDiameter = default(35); // the maximum possible number of hops between two nodes in the network
         double nodeTraversalTime @unit("s") = default(0.04s); // an estimation of the average one-hop traversal time
-        int rerrRatelimit = default(10); // maximum number of RERR messages that the AODV may originate
+        int rerrRatelimit = default(10); // maximum number of RERR messages that the AODV may originate in 1s.
         int rreqRetries = default(2); // specifies the number of times AODV will repeat an expanded ring search for a destination
-        int rreqRatelimit = default(10); // maximum number of RREQ messages that the AODV may originate
+        int rreqRatelimit = default(10); // maximum number of RREQ messages that the AODV may originate in 1s.
         int timeoutBuffer = default(2); // plus time to wait for a delayed RREP (due to congestion) (to omit this buffer set it to 0)
         int ttlStart = default(1); // specifies the TTL value when initiating a route request
         int ttlIncrement = default(2); // specifies the value by which the TTL will be incremented each time a RREQ is retransmitted

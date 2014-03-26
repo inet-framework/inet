@@ -78,7 +78,9 @@ void AODVRouting::initialize(int stage)
         if (useHelloMessages)
         {
             helloMsgTimer = new cMessage("HelloMsgTimer");
-            scheduleAt(simTime() + helloInterval, helloMsgTimer);
+
+            if (isOperational)
+                scheduleAt(simTime() + helloInterval, helloMsgTimer);
         }
 
         expungeTimer = new cMessage("ExpungeTimer");
@@ -86,7 +88,8 @@ void AODVRouting::initialize(int stage)
         rrepAckTimer = new cMessage("RREPACKTimer");
         blacklistTimer = new cMessage("BlackListTimer");
 
-        scheduleAt(simTime() + 1, counterTimer);
+        if (isOperational)
+            scheduleAt(simTime() + 1, counterTimer);
     }
 }
 
@@ -1198,6 +1201,11 @@ bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage,
         {
             isOperational = true;
             rebootTime = simTime();
+
+            if (useHelloMessages)
+                scheduleAt(simTime() + helloInterval, helloMsgTimer);
+
+            scheduleAt(simTime() + 1, counterTimer);
         }
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation))
@@ -1224,7 +1232,7 @@ bool AODVRouting::handleOperationStage(LifecycleOperation* operation, int stage,
 
 void AODVRouting::clearState()
 {
-    rreqId = sequenceNum = 0;
+    rerrCount = rreqCount = rreqId = sequenceNum = 0;
 
     for (std::map<Address, WaitForRREP *>::iterator it = waitForRREPTimers.begin(); it != waitForRREPTimers.end(); ++it)
         cancelAndDelete(it->second);
