@@ -938,14 +938,14 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (timeToLive > 1 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
+    if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
     {
         if (destRouteData)
             rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
         rreq->setUnknownSeqNumFlag(false);
 
         AODVRREQ * outgoingRREQ = rreq->dup();
-        broadcastRREQ(outgoingRREQ, timeToLive - 1);
+        broadcastRREQ(outgoingRREQ, timeToLive);
     }
     else
         EV_WARN << "Can't forward the RREQ because of its small (<= 1) TTL: " << timeToLive << " or the AODV reboot has not completed yet"  << endl;
