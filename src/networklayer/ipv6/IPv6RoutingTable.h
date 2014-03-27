@@ -370,6 +370,7 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
+    // IRoutingTable methods:
     virtual bool isForwardingEnabled() const {return isRouter();}  //XXX inconsistent names
     virtual bool isMulticastForwardingEnabled() const {return true; /*TODO isMulticastForwardingEnabled();*/}
     virtual Address getRouterIdAsGeneric() const {return Address(IPv6Address()); /*TODO getRouterId();*/}
@@ -378,8 +379,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const {return getInterfaceByAddress(address.toIPv6());}
     virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const Address& dest) const {return NULL; /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/}
     virtual IRoute *findBestMatchingRoute(const Address& dest) const {return const_cast<IPv6Route*>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()));}  //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const {return NULL; /*TODO: getInterfaceForDestAddr(dest.toIPv6()); */} //XXX exists but different API
-    virtual Address getNextHopForDestination(const Address& dest) const {return Address(); /*TODO: getGatewayForDestAddr(dest.toIPv6());*/}  //XXX exists but different API
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : NULL; }
+    virtual Address getNextHopForDestination(const Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() :Address(); }
     virtual bool isLocalMulticastAddress(const Address& dest) const {return false; /*TODO isLocalMulticastAddress(dest.toIPv6());*/}
     virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address &origin, const Address& group) const {return NULL; /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/}
     virtual IRoute *getDefaultRoute() const {return NULL; /*TODO getDefaultRoute();*/}
