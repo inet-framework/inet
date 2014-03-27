@@ -541,7 +541,8 @@ AODVRREP* AODVRouting::createGratuitousRREP(AODVRREQ* rreq, IRoute* originatorRo
 
 void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 {
-    EV_INFO << "Route Reply arrived from " << sourceAddr << endl;
+    EV_INFO << "AODV Route Reply arrived with source addr: " << sourceAddr << " originator addr: " << rrep->getOriginatorAddr()
+            << " destination addr: " << rrep->getDestAddr() << endl;
 
     if (rrep->getOriginatorAddr().isUnspecified())
     {
@@ -760,7 +761,8 @@ void AODVRouting::sendAODVPacket(AODVControlPacket* packet, const Address& destA
 
 void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned int timeToLive)
 {
-    EV_INFO << "AODV Route Request arrived from " << sourceAddr << endl;
+    EV_INFO << "AODV Route Request arrived with source addr: " << sourceAddr << " originator addr: " << rreq->getOriginatorAddr()
+            << " destination addr: " << rreq->getDestAddr() << endl;
 
     // A node ignores all RREQs received from any node in its blacklist set.
 
@@ -1129,7 +1131,7 @@ AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbo
 
 void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
 {
-    EV_INFO << "Route Error arrived from " << sourceAddr << endl;
+    EV_INFO << "AODV Route Error arrived with source addr: " << sourceAddr << endl;
 
     // A node initiates processing for a RERR message in three situations:
     // (iii)   if it receives a RERR from a neighbor for one or more
