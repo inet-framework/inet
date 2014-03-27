@@ -95,7 +95,7 @@ void SCTP::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
+        rt = getModuleFromPar<IRoutingTable>(par("routingTableModule"), this);
         this->auth = (bool)par("auth");
         this->pktdrop = (bool)par("packetDrop");
         this->sackNow = (bool)par("sackNow");

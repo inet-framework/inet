@@ -271,7 +271,7 @@ inline double max(const double a, const double b) { return (a < b) ? b : a; }
 class INET_API SCTPPathVariables : public cObject
 {
     public:
-        SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IIPv4RoutingTable* rt);
+        SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IRoutingTable* rt);
         ~SCTPPathVariables();
 
         SCTPAssociation*     association;
@@ -857,8 +857,7 @@ class INET_API SCTPAssociation : public cObject
         uint8_t               dacPacketsRcvd;
 
     protected:
-        IIPv4RoutingTable*      rt;
-        IPv6RoutingTable*       rt6;
+        IRoutingTable*          rt;
         IInterfaceTable*        ift;
 
         AddressVector           localAddressList;
@@ -920,7 +919,7 @@ class INET_API SCTPAssociation : public cObject
         /**
         * Constructor.
         */
-        SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId, IIPv4RoutingTable* rt, IInterfaceTable *ift);
+        SCTPAssociation(SCTP* mod, int32 appGateIndex, int32 assocId, IRoutingTable* rt, IInterfaceTable *ift);
         /**
         * Destructor.
         */

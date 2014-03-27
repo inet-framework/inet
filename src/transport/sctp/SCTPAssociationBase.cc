@@ -30,7 +30,7 @@
 
 
 
-SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IIPv4RoutingTable* rt)
+SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IRoutingTable* rt)
 {
     // ====== Path Variable Initialization ===================================
     association = assoc;
@@ -407,11 +407,10 @@ SCTPStateVariables::~SCTPStateVariables()
 // FSM framework, SCTP FSM
 //
 
-SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _assocId, IIPv4RoutingTable* _rt, IInterfaceTable *_ift)
+SCTPAssociation::SCTPAssociation(SCTP* _module, int32 _appGateIndex, int32 _assocId, IRoutingTable* _rt, IInterfaceTable *_ift)
 {
     // ====== Initialize variables ===========================================
     rt=_rt;
-    rt6 = NULL; //FIXME
     ift=_ift;
     sctpMain = _module;
     appGateIndex = _appGateIndex;

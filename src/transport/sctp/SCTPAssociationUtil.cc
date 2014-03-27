@@ -326,7 +326,7 @@ void SCTPAssociation::sendToIP(SCTPMessage*       sctpmsg,
             controlInfo->setSrcAddr(IPv6Address());
             controlInfo->setDestAddr(dest.toIPv6());
             sctpmsg->setControlInfo(controlInfo);
-            sctpMain->send(sctpmsg, "to_ipv6");
+            sctpMain->send(sctpmsg, "to_ip");
         }
         else if (dest.getType() == Address::IPv4) {
             IPv4ControlInfo* controlInfo = new IPv4ControlInfo();
@@ -2637,18 +2637,7 @@ void SCTPAssociation::pmStartPathManagement()
     {
         path = piter->second;
         path->pathErrorCount = 0;
-        if (localAddr.getType() == Address::IPv6) {
-            int outInterfaceId;
-            rt6->lookupDestCache(path->remoteAddress.toIPv6(), outInterfaceId);
-            if (outInterfaceId != -1) {
-                rtie =  ift->getInterfaceById(outInterfaceId);
-                if (rtie == NULL) {
-                    throw cRuntimeError("No interface for remote address %s found!", path->remoteAddress.str().c_str());
-                }
-            }
-        } else {
-            rtie = rt->getInterfaceForDestAddr(path->remoteAddress.toIPv4());
-        }
+        rtie = rt->getOutputInterfaceForDestination(path->remoteAddress);
         path->pmtu = rtie->getMTU();
         EV_DETAIL << "Path MTU of Interface "<< i << " = " << path->pmtu <<"\n";
         if (path->pmtu < state->assocPmtu)

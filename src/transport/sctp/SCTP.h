@@ -178,7 +178,7 @@ class INET_API SCTP : public cSimpleModule
         UDPSocket udpSocket;
 
     protected:
-        IIPv4RoutingTable *rt;
+        IRoutingTable *rt;
         IInterfaceTable *ift;
 
         int32 sizeAssocMap;
