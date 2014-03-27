@@ -210,12 +210,12 @@
 /examples/inet/tcpwindowscale/,      -f omnetpp.ini -c WS_enabled -r 0,             1.5s,            12ed-896d
 /examples/inet/udpburst/,            -f omnetpp.ini -c General -r 0,                1000s,           87a6-d5e6
 
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,                 100s,            a5ff-9910
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,            100s,            e055-3c7e
-/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,            100s,            7be9-2d3f
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,                 100s,            f24a-db6a
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,            100s,            3373-ac2c
-/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,            100s,            207c-5813
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c simple -r 0,              100s,            a5ff-9910
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c two_senders -r 0,         100s,            e055-3c7e
+/examples/internetcloud/cloudandhosts/, -f omnetpp.ini -c ten_senders -r 0,         100s,            7be9-2d3f
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c simple -r 0,            100s,            f24a-db6a
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c two_senders -r 0,       100s,            3373-ac2c
+/examples/internetcloud/cloudandrouters/, -f omnetpp.ini -c ten_senders -r 0,       100s,            207c-5813
 /examples/internetcloud/earthcloud/, -f omnetpp.ini -c General -r 0,                100s,            99f3-5756
 
 /examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          85dd-87b7
@@ -293,7 +293,7 @@
 /examples/ospfv2/fulltest/,          -f omnetpp.ini -c General -r 0,                100s,            83fc-bba8
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c AlwaysUp -r 0,               500s,            e19a-db85
 /examples/ospfv2/simpletest/,        -f omnetpp.ini -c ShutdownAndRestart -r 0,     500s,            a5d5-a660
-/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,        500s,            a5d5-a660
+/examples/ospfv2/simpletest/,        -f omnetpp.ini -c CrashAndReboot -r 0,         500s,            a5d5-a660
 
 /examples/rip/dynamictest/,          -f omnetpp.ini -c stable -r 0,                 100s,            20fa-ab95
 /examples/rip/dynamictest/,          -f omnetpp.ini -c dynamic1 -r 0,               500s,            e80b-48e3
@@ -305,8 +305,10 @@
 # /examples/rtp/unicast1/,             -f omnetpp.ini -c General -r 0,                1000s,           a7c1-0e5b    # unstable fingerprint
 # /examples/rtp/unicast2/,             -f omnetpp.ini -c General -r 0,                500s,            feed-b09b    # unstable fingerprint
 
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            e567-cf41
 /examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            08c3-a142
 /examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            c2d8-f63b
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,               100s,            7a07-ce84
 
 #/examples/traci/,                    -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
 #/examples/traci_launchd/,            -f omnetpp.ini -c accident -r 0,               ---100s,         0000-0000
