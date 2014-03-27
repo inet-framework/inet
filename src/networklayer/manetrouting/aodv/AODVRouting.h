@@ -166,7 +166,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
 
         /* Control Packet forwarders */
         void forwardRREP(AODVRREP * rrep, const Address& destAddr, unsigned int timeToLive);
-        void broadcastRREQ(AODVRREQ * rreq, unsigned int timeToLive);
+        void forwardRREQ(AODVRREQ * rreq, unsigned int timeToLive);
 
         /* Self message handlers */
         void handleRREPACKTimer();

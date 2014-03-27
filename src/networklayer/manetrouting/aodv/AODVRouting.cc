@@ -800,7 +800,6 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         delete rreq;
         return;
     }
-
     // update or create
     rreqsArrivalTime[rreqIdentifier] = simTime();
 
@@ -945,7 +944,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         rreq->setUnknownSeqNumFlag(false);
 
         AODVRREQ * outgoingRREQ = rreq->dup();
-        broadcastRREQ(outgoingRREQ, timeToLive);
+        forwardRREQ(outgoingRREQ, timeToLive);
     }
     else
         EV_WARN << "Can't forward the RREQ because of its small (<= 1) TTL: " << timeToLive << " or the AODV reboot has not completed yet"  << endl;
@@ -1270,7 +1269,7 @@ void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned 
     sendAODVPacket(rrep, destAddr, 100, 0);
 }
 
-void AODVRouting::broadcastRREQ(AODVRREQ* rreq, unsigned int timeToLive)
+void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
 {
     EV_INFO << "Broadcasting the Route Request message with TTL= " << timeToLive << endl;
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, uniform(0, maxJitter).dbl());
