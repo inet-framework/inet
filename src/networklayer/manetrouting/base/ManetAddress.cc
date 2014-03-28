@@ -19,142 +19,6 @@
 #include "ManetAddress.h"
 
 
-ManetAddress ManetAddress::ZERO;
-
-
-void ManetAddress::set(const IPv6Address& addr)
-{
-    addrType = IPv6_ADDRESS;
-    const uint32_t *w = addr.words();
-    hi = ((uint64_t)w[0] << 32) + w[1];
-    lo = ((uint64_t)w[2] << 32) + w[3];
-}
-
-void ManetAddress::set(const Address& addr)
-{
-    if (addr.getType() == Address::IPv6)
-        set(addr.toIPv6());
-    else
-        set(addr.toIPv4());
-}
-
-ManetAddress ManetAddress::getPrefix(int masklen) const
-{
-    switch (addrType)
-    {
-        case IPv4_ADDRESS: return ManetAddress(_getIPv4().getPrefix(masklen));
-        case IPv6_ADDRESS: return ManetAddress(_getIPv6().getPrefix(masklen));
-        case MAC_ADDRESS:  if (masklen != 48) throw cRuntimeError("mask not supported for MACAddress"); return *this;
-        default: throw cRuntimeError("getPrefix(): Unaccepted address type");
-    }
-}
-
-IPv4Address ManetAddress::getIPv4() const
-{
-    if (addrType == IPv4_ADDRESS)
-        return _getIPv4();
-    if (addrType == UNDEFINED)
-        return IPv4Address::UNSPECIFIED_ADDRESS;
-    throw cRuntimeError("ManetAddress is not an IPv4Address");
-}
-
-IPv6Address ManetAddress::getIPv6() const
-{
-    if (addrType == IPv6_ADDRESS)
-        return _getIPv6();
-    if (addrType == UNDEFINED)
-        return IPv6Address::UNSPECIFIED_ADDRESS;
-    throw cRuntimeError("ManetAddress is not an IPv6Address");
-}
-
-Address ManetAddress::getIPvX() const
-{
-    if (addrType == IPv4_ADDRESS)
-        return Address(_getIPv4());
-    if (addrType == IPv6_ADDRESS)
-        return Address(_getIPv6());
-    if (addrType == UNDEFINED)
-        return Address(IPv4Address::UNSPECIFIED_ADDRESS);
-    throw cRuntimeError("ManetAddress is not an Address");
-}
-
-MACAddress ManetAddress::getMAC() const
-{
-    if (addrType == MAC_ADDRESS)
-        return _getMAC();
-    if (addrType == UNDEFINED)
-        return MACAddress::UNSPECIFIED_ADDRESS;
-    throw cRuntimeError("ManetAddress is not a MACAddress");
-}
-
-bool ManetAddress::isBroadcast() const
-{
-    switch (addrType)
-    {
-        case IPv4_ADDRESS: return _getIPv4().isLimitedBroadcastAddress();
-        case IPv6_ADDRESS: throw cRuntimeError("isBroadcast() not implemented in IPv6"); //FIXME !!!!!
-        case MAC_ADDRESS:  return _getMAC().isBroadcast();
-        default: break;
-    }
-    throw cRuntimeError("isBroadcast(): Undefined address type");
-}
-
-bool ManetAddress::isMulticast() const
-{
-    switch (addrType)
-    {
-        case IPv4_ADDRESS: return _getIPv4().isMulticast();
-        case IPv6_ADDRESS: return _getIPv6().isMulticast();
-        case MAC_ADDRESS:  return _getMAC().isMulticast();
-        default: break;
-    }
-    throw cRuntimeError("isMulticast(): Undefined address type");
-}
-
-bool ManetAddress::isUnspecified() const
-{
-    switch (addrType)
-    {
-        case IPv4_ADDRESS: return _getIPv4().isUnspecified();
-        case IPv6_ADDRESS: return _getIPv6().isUnspecified();
-        case MAC_ADDRESS:  return _getMAC().isUnspecified();
-        case UNDEFINED:    return true;
-        default: break;
-    }
-    return true;
-}
-
-short int ManetAddress::compare(const ManetAddress& other) const
-{
-    if (addrType < other.addrType)
-        return -1;
-    if (addrType > other.addrType)
-        return 1;
-    if (hi < other.hi)
-        return -1;
-    if (hi > other.hi)
-        return 1;
-    if (lo < other.lo)
-        return -1;
-    if (lo > other.lo)
-        return 1;
-    return 0;
-}
-
-std::string ManetAddress::str() const
-{
-    switch (addrType)
-    {
-        case IPv4_ADDRESS: return _getIPv4().str();
-        case IPv6_ADDRESS: return _getIPv6().str();
-        case MAC_ADDRESS:  return _getMAC().str();
-        case UNDEFINED: return "<undefined>";
-        default: break;
-    }
-    throw cRuntimeError("str(): Unknown address type");
-}
-
-
 void ManetNetworkAddress::set(IPv4Address addr, short unsigned int masklen)
 {
     IPv4Address maskedAddr = addr;
@@ -210,7 +74,11 @@ short int ManetNetworkAddress::compare(const ManetNetworkAddress& other) const
         return -1;
     if (prefixLength < other.prefixLength)
         return 1;
-    return address.compare(other.address);
+    if (address < other.address)
+        return -1;
+    if (other.address < address)
+        return 1;
+    return 0;
 }
 
 std::string ManetNetworkAddress::str() const
@@ -220,7 +88,7 @@ std::string ManetNetworkAddress::str() const
     return ss.str();
 }
 
-bool ManetNetworkAddress::contains(const ManetAddress& other) const
+bool ManetNetworkAddress::contains(const Address& other) const
 {
     if (getType() == other.getType())
     {

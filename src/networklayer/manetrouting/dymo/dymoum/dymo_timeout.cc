@@ -122,7 +122,7 @@ void NS_CLASS route_discovery_timeout(void *arg)
         }
     }
 #ifdef NS_PORT
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(entry->dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i ++)
     {

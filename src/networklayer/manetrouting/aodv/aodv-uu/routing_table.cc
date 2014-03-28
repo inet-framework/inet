@@ -80,8 +80,8 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 {
     rt_table_t *rt;
     struct in_addr nm;
-    ManetAddress dest;
-    nm.s_addr = ManetAddress::ZERO;
+    Address dest;
+    nm.s_addr = Address();
 
     dest = dest_addr.s_addr;
     /* Check if we already have an entry for dest_addr */
@@ -93,7 +93,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
         return NULL;
     }
 
-    ManetAddress apAdd;
+    Address apAdd;
     if (getAp(dest, apAdd))
     {
         struct in_addr dest_addrAux;
@@ -173,7 +173,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
     {
         rt_tbl.num_active++;
         /* Add route to omnet inet routing table ... */
-        nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+        nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
         if (useIndex)
             omnet_chg_rte(dest_addr, next, nm, hops,false,ifindex);
         else
@@ -194,7 +194,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -232,7 +232,7 @@ rt_table_t *NS_CLASS rt_table_find(struct in_addr dest_addr)
         return it->second;
     else
     {
-        ManetAddress apAdd;
+        Address apAdd;
         if (getAp(dest_addr.s_addr, apAdd))
         {
             it = aodvRtTableMap.find(apAdd);
@@ -334,7 +334,7 @@ int NS_CLASS rt_table_invalidate(rt_table_t * rt)
     /* delete route to omnet inet routing table ... */
     /* if delete is true fiels next, hops and mask are nor used */
     struct in_addr nm;
-    nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+    nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
     omnet_chg_rte(rt->dest_addr, rt->dest_addr, nm, 0,true);
 
 #ifdef CONFIG_GATEWAY
@@ -412,7 +412,7 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
         return;
     }
 
-    ManetAddress dest = rt->dest_addr.s_addr;
+    Address dest = rt->dest_addr.s_addr;
     AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
     if (it != aodvRtTableMap.end())
     {
@@ -427,7 +427,7 @@ void NS_CLASS rt_table_delete(rt_table_t * rt)
         /* delete route to omnet inet routing table ... */
         /* if delete is true fiels next, hops and mask are nor used */
         struct in_addr nm;
-        nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+        nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
         omnet_chg_rte(rt->dest_addr, rt->dest_addr, nm, 0,true);
         rt_tbl.num_active--;
     }
@@ -490,9 +490,9 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
 
     rt_table_t *rt;
     struct in_addr nm;
-    nm.s_addr = ManetAddress::ZERO;
+    nm.s_addr = Address();
 
-    ManetAddress dest = dest_addr.s_addr;
+    Address dest = dest_addr.s_addr;
 
     DEBUG(LOG_INFO, 0, "modifyAODVTables");
     /* Check if we already have an entry for dest_addr */
@@ -556,7 +556,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
 
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
 
     for (unsigned int i = 0; i < list.size(); i++)
@@ -750,7 +750,7 @@ rt_table_t *NS_CLASS rt_table_insert(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -1209,7 +1209,7 @@ rt_table_t *NS_CLASS modifyAODVTables(struct in_addr dest_addr,
 //#endif
     /* In case there are buffered packets for this destination, we
      * send them on the new route. */
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -1243,7 +1243,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
                                      u_int16_t flags,int iface,uint32_t cost,uint8_t hopfix)
 {
     struct in_addr nm;
-    nm.s_addr = ManetAddress::ZERO;
+    nm.s_addr = Address();
 
     if ((rt->state == INVALID && state == VALID) || (state == IMMORTAL))
     {
@@ -1265,7 +1265,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 #else
 #ifdef OMNETPP
         /* Add route to omnet inet routing table ... */
-        nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+        nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
         if (useIndex)
             omnet_chg_rte(rt->dest_addr, next, nm, hops,false,rt->ifindex);
         else
@@ -1287,7 +1287,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 #else
 #ifdef OMNETPP
         /* change route to omnet inet routing table ... */
-        nm.s_addr = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+        nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
         if (useIndex)
             omnet_chg_rte(rt->dest_addr, next, nm, hops,false,rt->ifindex);
         else
@@ -1345,7 +1345,7 @@ rt_table_t *NS_CLASS rt_table_update(rt_table_t * rt, struct in_addr next,
 
     /* In case there are buffered packets for this destination, we send
      * them on the new route. */
-    std::vector<ManetAddress> list;
+    std::vector<Address> list;
     getListRelatedAp(rt->dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {

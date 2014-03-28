@@ -84,7 +84,7 @@ void NS_CLASS dlog(int pri, int errnum, const char *func, const char *format, ..
 #endif
 }
 #ifdef OMNETPP
-const char *NS_CLASS ip2str(ManetAddress &ipaddr)
+const char *NS_CLASS ip2str(Address &ipaddr)
 {
     return ipaddr.str().c_str();
 }

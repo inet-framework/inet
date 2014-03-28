@@ -36,9 +36,9 @@
 
 #include "INETDefs.h"
 
-#include "ManetAddress.h"
+#include "Address.h"
 
-typedef ManetAddress nsaddr_t;
+typedef Address nsaddr_t;
 
 //#ifndef nsaddr_t
 //typedef int64_t nsaddr_t;

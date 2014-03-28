@@ -85,7 +85,7 @@ void hna_init(void)
 #endif
 
 /* this function can be called when the daemon starts or at runtime */
-void Batman::hna_local_task_add_ip(const ManetAddress &ip_addr, uint16_t netmask, uint8_t route_action)
+void Batman::hna_local_task_add_ip(const Address &ip_addr, uint16_t netmask, uint8_t route_action)
 {
     HnaTask hna_task;
 
@@ -266,7 +266,7 @@ void Batman::hna_local_update_routes(HnaLocalEntry *hna_local_entry, int8_t rout
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_THROW, route_action);
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_UNREACH, ROUTE_TYPE_THROW, route_action);
     //add_del_route(hna_local_entry->addr, hna_local_entry->netmask, 0, 0, "unknown", BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
-    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, ManetAddress::ZERO, 0, NULL, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
+    add_del_route(hna_local_entry->addr, hna_local_entry->netmask, Address(), 0, NULL, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, route_action);
 
     /* do not NAT HNA networks automatically */
     //hna_local_update_nat(hna_local_entry->addr, hna_local_entry->netmask, route_action);

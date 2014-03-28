@@ -248,7 +248,7 @@ void NS_CLASS aodv_socket_process_packet(AODV_msg * aodv_msg, int len,
     }
 #else
     if ((aodv_msg->type == AODV_RREP && ttl == 0 && // ttl is decremented for ip layer before send to aodv
-            dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST))))
+            dst.s_addr == Address(IPv4Address(AODV_BROADCAST))))
     {
         hello_process((RREP *) aodv_msg, len, ifindex);
         return;
@@ -594,14 +594,14 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
             dynamic_cast<RREQ*>(aodv_msg)->cost += costMobile;
         }
     }
-    ManetAddress destAdd;
-    if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
+    Address destAdd;
+    if (dst.s_addr == Address(IPv4Address(AODV_BROADCAST)))
     {
         gettimeofday(&this_host.bcast_time, NULL);
         if (!this->isInMacLayer())
-            destAdd = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+            destAdd = Address(IPv4Address::ALLONES_ADDRESS);
         else
-            destAdd = ManetAddress(MACAddress::BROADCAST_ADDRESS);
+            destAdd = Address(MACAddress::BROADCAST_ADDRESS);
     }
     else
     {
@@ -611,7 +611,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
     // if delay is lower than 0 compute the delay using the distributions in the configuration
     if (delay < 0)
     {
-        if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
+        if (dst.s_addr == Address(IPv4Address(AODV_BROADCAST)))
             delay = par ("broadcastDelay").doubleValue();
         else
             delay = par ("unicastDelay").doubleValue();
@@ -624,7 +624,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 #else
     /* If we broadcast this message we update the time of last broadcast
        to prevent unnecessary broadcasts of HELLO msg's */
-    if (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))
+    if (dst.s_addr == Address(IPv4Address(AODV_BROADCAST)))
     {
         gettimeofday(&this_host.bcast_time, NULL);
 
@@ -668,7 +668,7 @@ void NS_CLASS aodv_socket_send(AODV_msg * aodv_msg, struct in_addr dst,
 #endif // OMNETPP
 
     /* Do not print hello msgs... */
-    if (!(aodv_msg->type == AODV_RREP && (dst.s_addr == ManetAddress(IPv4Address(AODV_BROADCAST)))))
+    if (!(aodv_msg->type == AODV_RREP && (dst.s_addr == Address(IPv4Address(AODV_BROADCAST)))))
         DEBUG(LOG_INFO, 0, "AODV msg to %s ttl=%d retval=%u size=%u",
               ip_to_str(dst), ttl, retval, len);
 

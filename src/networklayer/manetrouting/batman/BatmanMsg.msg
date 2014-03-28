@@ -19,7 +19,7 @@
 // ***************************************************************************
 
 cplusplus {{
-#include "ManetAddress.h"
+#include "Address.h"
 #define DIRECTLINK 0x40
 #define UNIDIRECTIONAL 0x80
 
@@ -35,18 +35,18 @@ cplusplus {{
 
 
 class noncobject IPv4Address;
-class noncobject ManetAddress;
+class noncobject Address;
 
 struct vis_data
 {
     uint8_t type;
     uint8_t data;
-    ManetAddress ip;
+    Address ip;
 };
 
 struct HnaElement
 {
-    ManetAddress addr;
+    Address addr;
     uint8_t  netmask;
 };
 
@@ -59,8 +59,8 @@ packet BatmanPacket
     uint8_t        gatewayFlags;  // flags related to gateway functions: gateway class
     unsigned short seqNumber;
     unsigned short gatewayPort;
-    ManetAddress        orig;
-    ManetAddress        prevSender;
+    Address        orig;
+    Address        prevSender;
     uint8_t        tq;           // Quality
     uint8_t        hops;
     HnaElement   hnaMsg[];    ///< Packet body.
@@ -68,7 +68,7 @@ packet BatmanPacket
 
 
 packet visPacket {
-    ManetAddress senderIp;
+    Address senderIp;
     unsigned char version;
     unsigned char gwClass;
     unsigned char tqMax;

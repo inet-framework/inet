@@ -64,7 +64,7 @@ typedef AODV_msg hdr_aodvuu;    // Name convention for headers
 typedef struct
 {
     // u_int32_t dest_addr;
-    ManetAddress dest_addr;
+    Address dest_addr;
     u_int32_t dest_seqno;
 } RERR_udest;
 //#define RERR_UDEST_SIZE sizeof(RERR_udest)
@@ -96,7 +96,7 @@ struct RERR : public AODV_msg
     unsigned short getN() const {return n;}
     unsigned short getRes2() const {return res2;}
     int getUdestArraySize() {return dest_count;}
-    void addUdest(const ManetAddress &,unsigned int);
+    void addUdest(const Address &,unsigned int);
     void clearUdest();
     RERR_udest *getUdest(int);
     RERR_udest& getUdestRef(int i) {return *getUdest(i);}
@@ -120,10 +120,10 @@ struct RREP : public AODV_msg
     u_int16_t res2;
     u_int8_t hcnt;
 //  u_int32_t dest_addr;
-    ManetAddress dest_addr;
+    Address dest_addr;
     u_int32_t dest_seqno;
 //  u_int32_t orig_addr;
-    ManetAddress orig_addr;
+    Address orig_addr;
     u_int32_t lifetime;
     uint32_t cost;
     uint8_t  hopfix;
@@ -137,9 +137,9 @@ struct RREP : public AODV_msg
         prefix = 0;
         res2 = 0;
         hcnt = 0;
-        dest_addr = ManetAddress::ZERO;
+        dest_addr = Address();
         dest_seqno = 0;
-        orig_addr = ManetAddress::ZERO;
+        orig_addr = Address();
         lifetime = 0;
         cost = 0;
         hopfix = 0;
@@ -156,10 +156,10 @@ struct RREP : public AODV_msg
     uint16_t getRes2() const {return res2;}
     uint8_t getHcnt() const {return hcnt;}
     //uint32_t getDest_addr() const {return dest_addr;}
-    const ManetAddress& getDest_addr() const {return dest_addr;}
+    const Address& getDest_addr() const {return dest_addr;}
     uint32_t getDest_seqno() const {return dest_seqno;}
     //u_int32_t getOrig_addr() const {return orig_addr;}
-    const ManetAddress& getOrig_addr() const {return orig_addr;}
+    const Address& getOrig_addr() const {return orig_addr;}
     uint32_t getLifetime() const {return lifetime;}
     uint32_t getCost() const {return cost;}
     uint8_t  getHopfix() const {return hopfix;}
@@ -193,10 +193,10 @@ struct RREQ : public AODV_msg
     u_int8_t hcnt;
     u_int32_t rreq_id;
 //  u_int32_t dest_addr;
-    ManetAddress dest_addr;
+    Address dest_addr;
     u_int32_t dest_seqno;
 //  u_int32_t orig_addr;
-    ManetAddress orig_addr;
+    Address orig_addr;
     u_int32_t orig_seqno;
     uint32_t   cost;
     uint8_t  hopfix;
@@ -210,9 +210,9 @@ struct RREQ : public AODV_msg
         res2 = 0;
         hcnt  = 0;
         rreq_id = 0;
-        dest_addr = ManetAddress::ZERO;
+        dest_addr = Address();
         dest_seqno = 0;
-        orig_addr = ManetAddress::ZERO;
+        orig_addr = Address();
         orig_seqno = 0;
         cost = 0;
         hopfix = 0;
@@ -232,10 +232,10 @@ struct RREQ : public AODV_msg
     uint8_t getHcnt() const {return hcnt;}
     uint32_t getRreq_id() const {return rreq_id;}
     //uint32_t getDest_addr() const {return dest_addr;}
-    const ManetAddress& getDest_addr() const {return dest_addr;}
+    const Address& getDest_addr() const {return dest_addr;}
     uint32_t getDest_seqno() const {return dest_seqno;}
     //u_int32_t getOrig_addr() const {return orig_addr;}
-    const ManetAddress& getOrig_addr() const {return orig_addr;}
+    const Address& getOrig_addr() const {return orig_addr;}
     uint32_t getOrig_seqno() const {return orig_seqno;}
     uint32_t getCost() const {return cost;}
     uint8_t getHopfix() const {return hopfix;}

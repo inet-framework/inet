@@ -376,7 +376,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
     // XXX why is this needed? This check is not present in the original batman code.
     if (!isInMacLayer())
     {
-        ManetAddress next = omnet_exist_rte(orig_node->orig);
+        Address next = omnet_exist_rte(orig_node->orig);
         if (orig_node->router)
         {
             if (next != orig_node->router->addr)
@@ -385,7 +385,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
         }
         else
         {
-            if (next.getIPv4() != IPv4Address::ALLONES_ADDRESS)
+            if (next.toIPv4() != IPv4Address::ALLONES_ADDRESS)
                 add_del_route(orig_node->orig, 32, next, orig_node->batmanIf->if_index,
                       orig_node->batmanIf->dev, BATMAN_RT_TABLE_HOSTS, ROUTE_TYPE_UNICAST, ROUTE_DEL);
         }
@@ -634,7 +634,7 @@ static void send_vis_packet(void)
 }
 #endif
 
-uint8_t Batman::count_real_packets(BatmanPacket *in, const ManetAddress &neigh, BatmanIf *if_incoming)
+uint8_t Batman::count_real_packets(BatmanPacket *in, const Address &neigh, BatmanIf *if_incoming)
 {
     OrigNode *orig_node;
     NeighNode *tmp_neigh_node;
@@ -753,7 +753,7 @@ int8_t batman(void)
 /*
  cut from original int batman(void) function
 */
-void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
+void Batman::parseIncomingPacket(Address neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
 {
     OrigNode *orig_neigh_node, *orig_node;
     simtime_t curr_time;
@@ -833,7 +833,7 @@ void Batman::parseIncomingPacket(ManetAddress neigh, BatmanIf *if_incoming, Batm
             if (is_my_orig) {
                 orig_neigh_node = get_orig_node(neigh);
                 bool sameIf = false;
-                if (if_incoming->dev->ipv4Data()->getIPAddress() == bat_packet->getOrig().getIPv4())
+                if (if_incoming->dev->ipv4Data()->getIPAddress() == bat_packet->getOrig().toIPv4())
                     sameIf = true;
 
                 if ((has_directlink_flag) && (sameIf) && (bat_packet->getSeqNumber() - if_incoming->seqno + 2 == 0)) {

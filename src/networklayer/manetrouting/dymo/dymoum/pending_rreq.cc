@@ -53,8 +53,8 @@ pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t se
         exit(EXIT_FAILURE);
     }
 
-    ManetAddress dest = dest_addr.s_addr;
-    ManetAddress apAddr;
+    Address dest = dest_addr.s_addr;
+    Address apAddr;
     if (getAp(dest,apAddr))
         dest = apAddr;
 
@@ -88,8 +88,8 @@ int NS_CLASS pending_rreq_remove(pending_rreq_t *entry)
 
 pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
 {
-    ManetAddress dest = dest_addr.s_addr;
-    ManetAddress apAddr;
+    Address dest = dest_addr.s_addr;
+    Address apAddr;
     if (getAp(dest,apAddr))
         dest = apAddr;
 

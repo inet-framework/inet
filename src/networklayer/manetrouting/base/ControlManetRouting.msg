@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject ManetAddress;
+class noncobject Address;
 
 cplusplus {{
-#include "ManetAddress.h"
+#include "Address.h"
 }}
 
 
@@ -36,7 +36,7 @@ enum ManetControlType
 //
 packet ControlManetRouting
 {
-    ManetAddress srcAddress;
-    ManetAddress destAddress;
+    Address srcAddress;
+    Address destAddress;
     int optionCode @enum(ManetControlType) = MANET_ROUTE_NO_OPTION;
 }

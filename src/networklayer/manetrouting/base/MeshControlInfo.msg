@@ -23,7 +23,7 @@ cplusplus {{
 
 
 class noncobject Ieee802Ctrl;
-class noncobject ManetAddress;
+class noncobject Address;
 
 //
 // Control structure for communication between LLC and higher layers

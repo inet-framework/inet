@@ -31,7 +31,7 @@ Batman::Batman()
     routing_class = 0;
     originator_interval = 1;
     debug_timeout = 0;
-    pref_gateway = ManetAddress::ZERO;
+    pref_gateway = Address();
 
     nat_tool_avail = 0;
     disable_client_nat = 0;
@@ -141,7 +141,7 @@ void Batman::initialize(int stage)
         //createTimerQueue();
 
         const char *preferedGateWay = par("preferedGateWay");
-        pref_gateway =  ManetAddress(AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4));
+        pref_gateway =  Address(AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4));
 
         /*
         IPv4Address vis = par("visualizationServer");
@@ -192,13 +192,13 @@ void Batman::initialize(int stage)
             batman_if->if_active = true;
             if (isInMacLayer())
             {
-                batman_if->address = ManetAddress(iEntry->getMacAddress());
-                batman_if->broad = ManetAddress(MACAddress::BROADCAST_ADDRESS);
+                batman_if->address = Address(iEntry->getMacAddress());
+                batman_if->broad = Address(MACAddress::BROADCAST_ADDRESS);
             }
             else
             {
-                batman_if->address = ManetAddress(iEntry->ipv4Data()->getIPAddress());
-                batman_if->broad = ManetAddress(IPv4Address::ALLONES_ADDRESS);
+                batman_if->address = Address(iEntry->ipv4Data()->getIPAddress());
+                batman_if->broad = Address(IPv4Address::ALLONES_ADDRESS);
             }
 
             batman_if->if_rp_filter_old = -1;
@@ -225,7 +225,7 @@ void Batman::initialize(int stage)
             addr.doAnd(mask);
 
             // add to HNA:
-            hna_local_task_add_ip(ManetAddress(addr), mask.getNetmaskLength(), ROUTE_ADD);
+            hna_local_task_add_ip(Address(addr), mask.getNetmaskLength(), ROUTE_ADD);
         }
 
         /* add rule for hna networks */
@@ -261,7 +261,7 @@ void Batman::initialize(int stage)
 void Batman::handleMessage(cMessage *msg)
 {
     BatmanIf *if_incoming = NULL;
-    ManetAddress neigh;
+    Address neigh;
     simtime_t vis_timeout, select_timeout, curr_time;
 
     curr_time = getTime();
@@ -280,7 +280,7 @@ void Batman::handleMessage(cMessage *msg)
     {
         IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
         Address srcAddr = ctrl->getSrcAddr();
-        neigh = ManetAddress(srcAddr);
+        neigh = srcAddr;
         for (unsigned int i=0; i<if_list.size(); i++)
         {
             if (if_list[i]->dev->getInterfaceId() == ctrl->getInterfaceId())
@@ -295,7 +295,7 @@ void Batman::handleMessage(cMessage *msg)
     {
         Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
         MACAddress srcAddr = ctrl->getSrc();
-        neigh = ManetAddress(srcAddr);
+        neigh = srcAddr;
         if_incoming = if_list[0];
         delete ctrl;
     }
@@ -387,7 +387,7 @@ void Batman::scheduleNextEvent()
      }
 }
 
-uint32_t Batman::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &add)
+uint32_t Batman::getRoute(const Address &dest, std::vector<Address> &add)
 {
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
@@ -397,7 +397,7 @@ uint32_t Batman::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &a
         add.push_back(node->router->addr);
         return -1;
     }
-    ManetAddress apAddr;
+    Address apAddr;
     if (getAp(dest,apAddr))
     {
         OrigMap::iterator it = origMap.find(apAddr);
@@ -412,7 +412,7 @@ uint32_t Batman::getRoute(const ManetAddress &dest, std::vector<ManetAddress> &a
     return 0;
 }
 
-bool Batman::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface, double &val)
+bool Batman::getNextHop(const Address &dest, Address &add, int &iface, double &val)
 {
     OrigMap::iterator it = origMap.find(dest);
     if (it != origMap.end())
@@ -421,7 +421,7 @@ bool Batman::getNextHop(const ManetAddress &dest, ManetAddress &add, int &iface,
         add = node->router->addr;
         return true;
     }
-    ManetAddress apAddr;
+    Address apAddr;
     if (getAp(dest,apAddr))
     {
         OrigMap::iterator it = origMap.find(apAddr);
