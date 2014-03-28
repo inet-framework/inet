@@ -277,6 +277,11 @@ class INET_API IPv4Address
     int getNetmaskLength() const;
 
     /**
+     * Get the first prefixLength bits of the address, with the rest set to zero.
+     */
+    IPv4Address getPrefix(int prefixLength) const { return doAnd(makeNetmask(prefixLength)); }
+
+    /**
      * Returns true if the address is a valid netmask, i.e. ones are contiguous
      * and shifted fully to the left in the binary representation.
      */

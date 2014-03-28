@@ -38,14 +38,14 @@ void ManetAddress::set(const Address& addr)
         set(addr.toIPv4());
 }
 
-void ManetAddress::setPrefix(short unsigned int masklen)
+ManetAddress ManetAddress::getPrefix(int masklen) const
 {
     switch (addrType)
     {
-        case IPv4_ADDRESS: hi &= IPv4Address::makeNetmask(masklen).getInt(); break;
-        case IPv6_ADDRESS: set(_getIPv6().getPrefix(masklen)); break;
-        case MAC_ADDRESS:  if (masklen != 48) throw cRuntimeError("mask not supported for MACAddress"); break;
-        default: throw cRuntimeError("setPrefixLen(): Undefined address type"); break;
+        case IPv4_ADDRESS: return ManetAddress(_getIPv4().getPrefix(masklen));
+        case IPv6_ADDRESS: return ManetAddress(_getIPv6().getPrefix(masklen));
+        case MAC_ADDRESS:  if (masklen != 48) throw cRuntimeError("mask not supported for MACAddress"); return *this;
+        default: throw cRuntimeError("getPrefix(): Unaccepted address type");
     }
 }
 

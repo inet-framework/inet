@@ -292,6 +292,29 @@ bool Address::matches(const Address& other, int prefixLength) const
     }
 }
 
+Address Address::getPrefix(int prefixLength) const
+{
+    switch (getType())
+    {
+        case Address::NONE:
+            return *this;
+        case Address::IPv4:
+            return Address(toIPv4().getPrefix(prefixLength));
+        case Address::IPv6:
+            return Address(toIPv6().getPrefix(prefixLength));
+        case Address::MAC:
+            if (prefixLength != 48)
+                throw cRuntimeError("mask not supported for MACAddress");
+            return *this;
+        case Address::MODULEID:
+        case Address::MODULEPATH:
+            return *this;
+        default:
+            throw cRuntimeError("getPrefix(): Unknown type");
+    }
+}
+
+
 const char *Address::getTypeName(AddressType t)
 {
 #define CASE(x) case x: return #x

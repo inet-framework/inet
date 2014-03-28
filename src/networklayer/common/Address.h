@@ -80,6 +80,11 @@ class INET_API Address
         AddressType getType() const;
         IAddressType * getAddressType() const;
 
+        /**
+         * Get the first prefixLength bits of the address, with the rest set to zero.
+         */
+        Address getPrefix(int prefixLength) const;
+
         bool tryParse(const char *addr);
 
         bool isUnspecified() const;
