@@ -268,7 +268,7 @@ class DYMOUM : public ManetRoutingBase
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);
     void processMacPacket(cPacket * p, const Address &, const Address &, int);
-    void getMacAddress(INetworkDatagram *);
+    void storeMacAddressIpAddressPairOf(INetworkDatagram *) const;
 
     cPacket * get_packet_queue(struct in_addr dest_addr);
 

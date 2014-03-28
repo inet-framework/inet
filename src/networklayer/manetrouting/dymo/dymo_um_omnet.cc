@@ -613,7 +613,7 @@ const char *DYMOUM::if_indextoname(int ifindex, char *ifname)
 }
 
 
-void DYMOUM::getMacAddress(INetworkDatagram *dgram)
+void DYMOUM::storeMacAddressIpAddressPairOf(INetworkDatagram *dgram) const
 {
     if (dgram)
     {
@@ -649,7 +649,7 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         dst.s_addr = Address(destAddr);
         interfaceId = ctrl->getInterfaceId();
         INetworkDatagram *dgram = ctrl->removeOrigDatagram();
-        getMacAddress(dgram);
+        storeMacAddressIpAddressPairOf(dgram);
         delete dgram;
         delete ctrl;
     }
