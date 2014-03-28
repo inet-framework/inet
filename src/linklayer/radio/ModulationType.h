@@ -87,7 +87,7 @@ class ModulationType
    */
   uint32_t getBandwidth(void) const {return bandwidth;}
   void setBandwidth(uint32_t p) {bandwidth = p;}
-  uint32_t getFrequency(void) const {return bandwidth;}
+  uint32_t getFrequency(void) const {return frequency;}
   void setFrequency(uint32_t p) {frequency = p;}
   /**
    * \returns the physical bit rate of this signal.
