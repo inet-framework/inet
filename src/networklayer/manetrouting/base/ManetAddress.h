@@ -73,10 +73,6 @@ class ManetAddress
      */
     ManetAddress getPrefix(int masklen) const;
 
-    /// Set prefix: masking address with given mask. The mask specified by masklen
-    void setPrefix(int masklen) { *this = getPrefix(masklen); };
-
-
     /// Returns string representation
     std::string str() const;
 

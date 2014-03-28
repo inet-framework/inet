@@ -196,7 +196,7 @@ void ManetNetworkAddress::set(MACAddress addr, short unsigned int masklen)
 
 void ManetNetworkAddress::setPrefixLen(short unsigned int masklen)
 {
-    address.setPrefix(masklen);
+    address = address.getPrefix(masklen);
     prefixLength = masklen;
 }
 
