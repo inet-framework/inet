@@ -617,23 +617,18 @@ void DYMOUM::getMacAddress(INetworkDatagram *dgram)
 {
     if (dgram)
     {
-        MACAddress macAddressConv;
-        cObject * ctrl = check_and_cast<cPacket *>(dgram)->removeControlInfo();
+        Ieee802Ctrl *ctrl = check_and_cast_nullable<Ieee802Ctrl *>(check_and_cast<cPacket *>(dgram)->getControlInfo());
 
-        if (ctrl!=NULL)
+        if (ctrl != NULL)
         {
-            Ieee802Ctrl * ctrlmac = check_and_cast<Ieee802Ctrl *> (ctrl);
-            macAddressConv = ctrlmac->getSrc();
-            // memcpy (&dest,ctrlmac->getDest().getAddressBytes(),6);   /* destination eth addr */
-            delete ctrl;
+            MACAddress macAddressConv = ctrl->getSrc();
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
-            if (it==macToIpAdress->end())
+            if (it == macToIpAdress->end())
             {
                 Address ip_src = dgram->getSourceAddress();
                 macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
             }
         }
-        delete dgram;
     }
 }
 
@@ -653,7 +648,9 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         src.s_addr = Address(srcAddr);
         dst.s_addr = Address(destAddr);
         interfaceId = ctrl->getInterfaceId();
-        getMacAddress(ctrl->removeOrigDatagram());
+        INetworkDatagram *dgram = ctrl->removeOrigDatagram();
+        getMacAddress(dgram);
+        delete dgram;
         delete ctrl;
     }
     else
