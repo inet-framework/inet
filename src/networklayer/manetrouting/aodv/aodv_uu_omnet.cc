@@ -602,7 +602,7 @@ void NS_CLASS handleMessage (cMessage *msg)
             if (!isInMacLayer())
             {
                 INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo*>(udpPacket->removeControlInfo());
-                src_addr.s_addr = Address(controlInfo->getSourceAddress());
+                src_addr.s_addr = controlInfo->getSourceAddress();
                 aodvMsg->setControlInfo(check_and_cast<cObject *>(controlInfo));
             }
             else
@@ -851,8 +851,8 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
         Address srcAddr = ctrl->getSourceAddress();
         Address destAddr = ctrl->getDestinationAddress();
 
-        src.s_addr = Address(srcAddr);
-        dst.s_addr =  Address(destAddr);
+        src.s_addr = srcAddr;
+        dst.s_addr =  destAddr;
         interfaceId = ctrl->getInterfaceId();
 
     }

@@ -141,7 +141,7 @@ void Batman::initialize(int stage)
         //createTimerQueue();
 
         const char *preferedGateWay = par("preferedGateWay");
-        pref_gateway =  Address(AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4));
+        pref_gateway =  AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4);
 
         /*
         IPv4Address vis = par("visualizationServer");

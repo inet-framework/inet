@@ -2242,7 +2242,7 @@ OLSR::mac_failed(IPv4Datagram* p)
     double now = CURRENT_TIME;
 
 
-    nsaddr_t dest_addr = Address(p->getDestAddress());
+    nsaddr_t dest_addr = p->getDestinationAddress();
 
     EV_WARN <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);

@@ -643,10 +643,8 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
     if (!isInMacLayer())
     {
         IPv4ControlInfo *ctrl = check_and_cast<IPv4ControlInfo *>(msg->removeControlInfo());
-        Address srcAddr = ctrl->getSourceAddress();
-        Address destAddr = ctrl->getDestinationAddress();
-        src.s_addr = Address(srcAddr);
-        dst.s_addr = Address(destAddr);
+        src.s_addr = ctrl->getSourceAddress();
+        dst.s_addr = ctrl->getDestinationAddress();
         interfaceId = ctrl->getInterfaceId();
         INetworkDatagram *dgram = ctrl->removeOrigDatagram();
         storeMacAddressIpAddressPairOf(dgram);
@@ -763,7 +761,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
                         MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
                         if (it!=macToIpAdress->end())
                         {
-                            addr.s_addr = Address(it->second);
+                            addr.s_addr = it->second;
                             rerr_send(dest_addr, 1, entry, addr);
                         }
                     }
@@ -975,7 +973,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
 
             if (it!=macToIpAdress->end())
             {
-                gatewayAddr.s_addr = Address(it->second);
+                gatewayAddr.s_addr = it->second;
             }
             else
             {
@@ -1090,7 +1088,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
             macAddressConv = twoAddressFrame->getTransmitterAddress();
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it!=macToIpAdress->end())
-                addr.s_addr = Address(it->second);
+                addr.s_addr = it->second;
             else
             {
                 IPv4Datagram * ip_msg = dynamic_cast<IPv4Datagram *>(twoAddressFrame->getEncapsulatedPacket());
