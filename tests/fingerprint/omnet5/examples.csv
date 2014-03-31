@@ -325,11 +325,11 @@
 /examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              238b-d8c7
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           115e-a4a5
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              06df-562b
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7244-edc7
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            b426-0a05
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             1d86-ef8f
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             7a29-be7a
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             07f3-38a9
 
@@ -339,9 +339,9 @@
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            c1a3-0e5a
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            2b17-4d66
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              663b-0297
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              8422-337a
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              2efc-8339
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             12af-269e
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             59f0-d44b
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             8629-4b60
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            3f9d-96df
 
 /examples/inet/hierarchical99/,      -f networklayer.ini -c IPv4 -r 0,              10000s,          312d-17fc
