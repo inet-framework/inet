@@ -4,136 +4,116 @@ Recent changes in the INET Framework
 INET-2.3.0 (March 17, 2014)
 ---------------------------
 
-This release contains several new protocols and a lot of changes that were
+This release contains several new protocols, and a lot of changes that were
 backported from the current integration branch (destined to be INET 3.0).
 
 Application startTime/stopTime fixes:
 
-   - apps start sending at startTime, and sending their last packet 
+   - apps start sending at startTime, and send their last packet 
      before stopTime
    - negative stopTime means sending forever
    - if startTime and stopTime are the same, the app sends a single 
      packet only (except TCP apps)
 
-DHCPServer and Client: Major changes made both in client's and
-   server's state machine. It is now extended with new states INIT-REBOOT
-   and REBOOTING and with new message types DHCPNAK and DHCPDECLINE.
+DHCPServer and Client: 
 
-   With the new REBOOTING states scenarios with lifecycle events
-   now work correctly.
+   - The whole implementation has been reviewed to bring it closer to 
+     the standards defined in RFC 2131 and 2132.
 
-   The server's performance modeling has been removed. The inner
-   representation of the DHCP options were moved to a DHCPOptions
-   INET message definition file.
+   - Major changes were made both in client's and server's state machines. 
+     It is now extended with new states (INIT-REBOOT, REBOOTING) and 
+     with new message types (DHCPNAK, DHCPDECLINE). The new states allow 
+     the user to model scenarios with lifecycle events.
 
-   The client module currently does not support multiple DHCP servers
-   and BOOTP relay agents.
+   - The server's performance model has been removed. 
 
-   The whole implementation has been rewieved to bring it closer to 
-   the standards defined in RFC 2131 and 2132.
+   - The internal representation of the DHCP options were moved to the 
+     DHCPOptions INET message definition file.
 
-SCTP improvements submitted by Irene Rungeler and Thomas Dreibholz
+   - Limitation: The client module currently does not support multiple 
+     DHCP servers and BOOTP relay agents.
+
+SCTP improvements submitted by Irene Rungeler and Thomas Dreibholz:
+
    - added CMT support (Concurrent Multipath Transfer)
    - added SCTP NAT support
    - added support for using SCTP over IPv6
 
-STP / RSTP support added to the EthernetSwitch:
+STP / RSTP support (802.1d) added to the EthernetSwitch:
+
    - STP: added IEEE 802.1D-1998 implementation of Spanning Tree Protocol.
-     The source code is based on ANSA (https://github.com/kvetak/ANSA)
+     The source code is based on the ANSA (https://github.com/kvetak/ANSA)
      implementation.
 
    - RSTP: added IEEE 802.1D-2004 implementation of Spanning Tree Protocol.
      The source code is based on Juan Luis Garrote Molinero's implementation
-     from INETMANET
+     from INETMANET.
 
-   - IEEE8021DInterfaceData: InterfaceEntry is extended with IEEE8021DInterfaceData.
-     It is created to contain additional port interface information of an
-     EtherSwitch (e.g. is the port forwarding or not?).
+   - Interfaces can be configured using the new L2NetworkConfigurator module. 
+     This module allows one to configure network scenarios at Layer 2.
 
-   - Interface data can be configured by the new  L2NetworkConfigurator module. 
-     This module allows to configure network scenarios at Layer 2.
+   - Replaced the EtherSwitch relay unit with a new, STP/RSTP capable one.
+     The CPU and memory modelling are no longer supported in this relay unit.
 
-   - Added a new relay to the Ethernet Switch that supports STP/RSTP protocols.
-     The CPU and memory modelling are no longer supported with this relay.
+Nodes automatically pick-up the network configuration on restart:
 
-   - Added isStpAware parameter to the relay: if the switch is STP/RSTP unaware then 
-     all its ports are forwarding (and learning)
+   - An IPv4NodeConfigurator module has been added to hosts, which is responsible 
+     for configuring the host on restart based on information stored in the
+     IPv4NetworkConfigurator module.
 
-Nodes are configured now by the IPv4NetworkConfigurator and IPv4NodeConfigurator pair.
-   - NetworkConfigurator builds an internal database with IP addresses while
-     NodeConfigurator sets up the NICs on node initialization - based on the data from the
-     NetworkConfigurator. This allows network nodes to reboot and reinitialize from the 
-     central database even during the simulation (was required to properly support lifecycle
-     operations)
+INetFilter::IHook API:
 
-   - The IPv4NetworkConfigurator treats a module as a network node if it has both a RoutingTable
-     and an InterfaceTable internally. These nodes will receive separate IP addresses on each
-     of their NICs.
+   Modules can now hook into the IP module with the new 'NetFilter' API.
+   Routing protocols can be implemented now without modifying the IP 
+   module's code. ManetRoutingBase, InternetCloud and ARP have been updated
+   to use the new 'NetFilter' API.
 
-New INetFilter::IHook API:
-   Modules can now hook into the IP module with the 'netfilter' API.
-   Routing protocols now can be implemented without touching or modifying the IP module.
-   - Revised ManetRoutingBase is now using the netfilter API, too.
-   - InternetCloud is using the 'netfilter' API
-   - ARP is rewritten to use also the 'netfilter' API
+Added new routing protocols:
 
-New routing protocols using INetFilter::IHook in networklayer/routing:
-   (these protocols should be used as an example and starting point for 
-   future protocol development)
-   - GPSR
-   - RIP
-   - xDYMO
+   - RIP (networklayer/routing/rip)
+   - GPSR (networklayer/routing/gpsr)
+   - DYMO (networklayer/routing/dymo)
+   These protocols use INetFilter::IHook, too.
 
 Revised Mobility code: 
-   Split models directory into multiple directories:
+
+   Split the 'models' directory into multiple directories:
    - contract - specifies the interface of mobility models
-   - common - shared files among mobility models that are not complete mobility models
+   - common - shared files among mobility models that are not complete 
+     mobility models
    - static - mobility models that actually don't move
    - single - mobility models controlling only one moving object
    - group - mobility models controlling multiple interlinked moving objects
 
+Radio:
+
+    Added the Stanford University Interim radio propagation model contributed 
+    by Konrad Polys and Krzysztof Grochla.
+
 Other, smaller changes:
 
-- Added ILifecycle support to most applications
-
-- Renamed AppBase to ApplicationBase and moved to common.
-
-- UDP: added option to specify the source address of the sent datagram
-
-- UDPBasicBurst: added bool parameter: excludeLocalDestAddresses
-
-- UDPVideoStreamCli: uses stages in initialize
-
-- UDPApp*: Added AppBase and subclassed UDP apps from it.
-  Bind sockets at startTime and close at stopTime
-
-- EtherApp* bugfixes
-
-- Added command to set TCP queue length limitation. TCP will notify the app if it is 
-  ready to transmit more bytes.
-
-- registerSignal() calls moved from initialize() to static variable declaration
-
-- Added/fixed @signal declarations, fixed type of emitted values
-
-- httptools: removed the fileExists() function
-
-- New logging mechanism + EV handling in preparation for the new OMNeT++ 5.0 
-  logging mechanism.
-
-- IPv4Route/IPv6Route: added administrative distance field
-
-- Added IPv6 header serializer (so ext interfaces can be used with IPv6 too)
-
-- Invalid access of message pointers fixed in: OSPF, SCTP, DHCP, PingApp
-
-- Battery: code review, small fixes.
-
-- Revised init stages in all modules
-
-- Added Stanford University Interim radio propagation model by Konrad Polys, Krzysztof Grochla
-
-- Many smaller fixes and improvements (see the ChangeLog files for further detail.)
+  - Added ILifecycle support to most applications
+  - Renamed AppBase to ApplicationBase and moved to 'common'.
+  - UDP: added option to specify the source address of the sent datagram
+  - UDPBasicBurst: added bool parameter: excludeLocalDestAddresses
+  - UDPVideoStreamCli: use stages in initialize
+  - UDPApp*: Added AppBase and subclassed UDP apps from it.
+    Binds sockets at startTime and closes them at stopTime.
+  - EtherApp* bugfixes
+  - Added a command to set TCP queue length threshold. TCP will notify the 
+    application if it is ready to transmit more bytes.
+  - registerSignal() calls were moved from initialize() to static 
+    variable declarations.
+  - Added/fixed @signal declarations, fixed the type of emitted values.
+  - httptools: removed the fileExists() function.
+  - New logging mechanism + EV handling in preparation for the new OMNeT++ 5.0 
+    logging mechanism.
+  - IPv4Route/IPv6Route: added administrative distance field
+  - Added IPv6 header serializer (so ext interfaces can be used with IPv6, too)
+  - Invalid access of message pointers fixed in: OSPF, SCTP, DHCP, PingApp
+  - Battery: code review, small fixes.
+  - Revised init stages in all modules
+  - Many smaller fixes and improvements (see the ChangeLog files for further detail.)
 
 
 INET-2.2.0 (August 22, 2013)
@@ -228,54 +208,38 @@ New features:
 
 Other, smaller changes:
 
-- MANET protocols have been synchronized with the INETMANET project
-
-- NodeBase: added optional battery (off by default)
-
-- UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
-  option in Linux). If ReuseAddress is set to true on two sockets,
-  then they can bind to the same local address/port.
-
-- PingApp and other apps: for the stopTime parameter, 'none' is now represented
-  by -1, not 0. As this is the default setting, likely very few simulations
-  (ini files) are affected.
-
-- IPv4NetworkConfigurator: added @groups to <interface> (ie. multicast groups
-  can now be also specified in the <interface> element, not only in a separate
-  <multicast-group> element)
-
-- in many simulation examples, .irt files were replaced by IPv4NetworkConfigurator XML.
-
-- EtherMACFullDuplex: wait IFG *after* frames, not before.
-
-- Ieee80211Mac: added signals declarations and statistics in the NED file
-
-- EthernetInterface: the encap submodule was made replaceable ("like IEtherEncap")
-
-- NED: Added InterfaceTable unconditionally to bridge devices, as it is currently
-  required by IPv4NetworkConfigurator. Also added NotificationBoard required by
-  InterfaceTable.
-
-- IPv4NetworkConfigurator: Changed to support mixed wired and wireless LANs
-  for autoconfiguration.
-
-- Fixed IPv4NetworkConfigurator bug sometimes not being able to assign addresses.
-  Changed to assign most constrained addresses first.
-
-- RTPHost was moved from src/transport to src/nodes/, and changed to be based
-  on StandardHost
-
-- TurtleMobility: Fixed getting the position from a mobility signal listener
-  during initialization. The script was resumed before initialize() finished,
-  resulting in incorrect positioning.
-
-- StaticGridMobility: Added new parameters to specify the number of rows/columns
-  and the horizontal/verical separation between the nodes. Note that the way
-  the node positions are calculated has changed. You may need to update your
-  INI files (see the NED file for more info.)
-
-- Many smaller fixes and improvements
-
+  - MANET protocols have been synchronized with the INETMANET project
+  - NodeBase: added optional battery (off by default)
+  - UDP: implemented ReuseAddress option (it's like SO_REUSEADDR socket
+    option in Linux). If ReuseAddress is set to true on two sockets,
+    then they can bind to the same local address/port.
+  - PingApp and other apps: for the stopTime parameter, 'none' is now represented
+    by -1, not 0. As this is the default setting, likely very few simulations
+    (ini files) are affected.
+  - IPv4NetworkConfigurator: added @groups to <interface> (ie. multicast groups
+    can now be also specified in the <interface> element, not only in a separate
+    <multicast-group> element)
+  - in many simulation examples, .irt files were replaced by IPv4NetworkConfigurator XML.
+  - EtherMACFullDuplex: wait IFG *after* frames, not before.
+  - Ieee80211Mac: added signals declarations and statistics in the NED file
+  - EthernetInterface: the encap submodule was made replaceable ("like IEtherEncap")
+  - NED: Added InterfaceTable unconditionally to bridge devices, as it is currently
+    required by IPv4NetworkConfigurator. Also added NotificationBoard required by
+    InterfaceTable.
+  - IPv4NetworkConfigurator: Changed to support mixed wired and wireless LANs
+    for autoconfiguration.
+  - Fixed IPv4NetworkConfigurator bug sometimes not being able to assign addresses.
+    Changed to assign most constrained addresses first.
+  - RTPHost was moved from src/transport to src/nodes/, and changed to be based
+    on StandardHost
+  - TurtleMobility: Fixed getting the position from a mobility signal listener
+    during initialization. The script was resumed before initialize() finished,
+    resulting in incorrect positioning.
+  - StaticGridMobility: Added new parameters to specify the number of rows/columns
+    and the horizontal/verical separation between the nodes. Note that the way
+    the node positions are calculated has changed. You may need to update your
+    INI files (see the NED file for more info.)
+  - Many smaller fixes and improvements
 
 
 INET-2.1.0 (Jan 31, 2013)

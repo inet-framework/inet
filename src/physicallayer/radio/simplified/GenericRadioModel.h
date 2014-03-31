@@ -44,7 +44,7 @@ class INET_API GenericRadioModel : public IRadioModel
 
     virtual double calculateDuration(SimplifiedRadioFrame *radioFrame);
 
-    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList);
+    virtual PhyIndication isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList);
 
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame() {return false;}

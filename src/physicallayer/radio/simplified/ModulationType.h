@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <ostream>
+#include <stdint.h>
 
 
 enum ModulationClass {
@@ -64,7 +65,9 @@ enum CodeRate {
   /** Rate 2/3 */
   CODE_RATE_2_3,
   /** Rate 1/2 */
-  CODE_RATE_1_2
+  CODE_RATE_1_2,
+  /** Rate 5/6 */
+   CODE_RATE_5_6
 };
 
 /**
@@ -84,6 +87,8 @@ class ModulationType
    */
   uint32_t getBandwidth(void) const {return bandwidth;}
   void setBandwidth(uint32_t p) {bandwidth = p;}
+  uint32_t getFrequency(void) const {return frequency;}
+  void setFrequency(uint32_t p) {frequency = p;}
   /**
    * \returns the physical bit rate of this signal.
    *
@@ -96,6 +101,9 @@ class ModulationType
     codeRate = cRate;
     switch (cRate)
     {
+    case CODE_RATE_5_6:
+      phyRate = dataRate * 6 / 5;
+      break;
       case CODE_RATE_3_4:
       phyRate = dataRate * 4 / 3;
       break;
@@ -146,6 +154,11 @@ class ModulationType
       phyRate = 0;
       constellationSize = 0;
       modulationClass = MOD_CLASS_UNKNOWN;
+      frequency = 2400;
+  }
+  bool operator==(const ModulationType &b)
+  {
+      return *this == b;
   }
 private:
   bool isMandatory;
@@ -155,6 +168,7 @@ private:
   uint32_t phyRate;
   uint8_t constellationSize;
   enum ModulationClass modulationClass;
+  uint32_t frequency;
 };
 
 bool operator==(const ModulationType &a, const ModulationType &b);

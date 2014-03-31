@@ -186,6 +186,7 @@ class SimulationResult:
 class SimulationTestCase(unittest.TestCase):
     def runSimulation(self, title, command, workingdir):
         global logFile
+        ensure_dir(workingdir + "/results")
 
         # run the program and log the output
         t0 = time.time()
@@ -522,6 +523,10 @@ class SimulationTextTestResult(ThreadedTestResult):
 
 def _iif(cond,t,f):
     return t if cond else f
+
+def ensure_dir(f):
+    if not os.path.exists(f):
+        os.makedirs(f)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run the fingerprint tests specified in the input files.')

@@ -48,6 +48,7 @@ enum SAPCode
     SAP_NOVELL_IPX = 0xE0;
     SAP_LAN_MANAGER = 0xF4;
     SAP_CLNS = 0xFE;
+    SAP_STP = 0x42;
 }
 
 

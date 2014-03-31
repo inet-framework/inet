@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 #include "SimplifiedRadioFrame.h"
 #include "SnrList.h"
+#include "PhyControlInfo_m.h"
 
 /**
  * Abstract class to encapsulate the calculation of received power of a
@@ -56,7 +57,7 @@ class INET_API IRadioModel : public cObject
      * frame. The calculation may take into account the modulation scheme,
      * possible error correction code, etc.
      */
-    virtual bool isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList) = 0;
+    virtual PhyIndication isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList) = 0;
     // used by the Airtime Link Metric computation
     virtual bool haveTestFrame()=0;
     virtual double calculateDurationTestFrame(SimplifiedRadioFrame *radioFrame)=0;

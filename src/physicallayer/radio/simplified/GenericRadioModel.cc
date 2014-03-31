@@ -60,7 +60,7 @@ double GenericRadioModel::calculateDuration(SimplifiedRadioFrame *radioFrame)
 }
 
 
-bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList)
+PhyIndication GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, const SnrList& receivedList)
 {
     // calculate snirMin
     double snirMin = receivedList.begin()->snr;
@@ -72,17 +72,17 @@ bool GenericRadioModel::isReceivedCorrectly(SimplifiedRadioFrame *radioFrame, co
     {
         // if snir is too low for the packet to be recognized
         EV << "COLLISION! Packet got lost\n";
-        return false;
+        return COLLISION;
     }
     else if (isPacketOK(snirMin, radioFrame->getBitLength()+headerLengthBits, radioFrame->getBitrate()))
     {
         EV << "packet was received correctly, it is now handed to upper layer...\n";
-        return true;
+        return FRAMEOK;
     }
     else
     {
         EV << "Packet has BIT ERRORS! It is lost!\n";
-        return false;
+        return BITERROR;
     }
 }
 

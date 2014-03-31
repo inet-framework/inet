@@ -51,6 +51,7 @@ class PhyControlInfo
 //
 enum PhyIndication
 {
+    FRAMEOK = 0;
     BITERROR = -1; // the phy has recognized a bit error in the packet
     COLLISION = 9; // packet lost due to collision
 }

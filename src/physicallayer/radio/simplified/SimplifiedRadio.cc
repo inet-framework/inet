@@ -618,10 +618,11 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
         //    sendUp(radioFrame);
         //else
         //    delete radioFrame;
-        if (!radioModel->isReceivedCorrectly(radioFrame, list))
+        PhyIndication frameState = radioModel->isReceivedCorrectly(radioFrame, list);
+        if (frameState != FRAMEOK)
         {
-            radioFrame->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
-            radioFrame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
+            radioFrame->getEncapsulatedPacket()->setKind(frameState);
+            radioFrame->setName(frameState == COLLISION ? "COLLISION" : "BITERROR");
 
             numGivenUp++;
         }
