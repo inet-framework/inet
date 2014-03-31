@@ -621,7 +621,8 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
         PhyIndication frameState = radioModel->isReceivedCorrectly(radioFrame, list);
         if (frameState != FRAMEOK)
         {
-            radioFrame->getEncapsulatedPacket()->setKind(frameState);
+//            radioFrame->getEncapsulatedPacket()->setKind(frameState);
+            radioFrame->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
             radioFrame->setName(frameState == COLLISION ? "COLLISION" : "BITERROR");
 
             numGivenUp++;
