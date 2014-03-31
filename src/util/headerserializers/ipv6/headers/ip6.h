@@ -64,6 +64,15 @@
 #ifndef _NETINET_IP6_H_
 #define _NETINET_IP6_H_
 
+#if defined(_WIN32)
+typedef uint8_t u_int8_t;
+typedef uint16_t u_int16_t;
+typedef uint32_t u_int32_t;
+typedef uint8_t __uint8_t;
+typedef uint16_t __uint16_t;
+typedef uint32_t __uint32_t;
+#endif
+
 #ifndef __PACKED__
 #ifdef _MSC_VER
 #define __PACKED__
