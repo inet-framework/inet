@@ -40,7 +40,6 @@ void AODVRouting::initialize(int stage)
         aodvUDPPort = par("udpPort");
         askGratuitousRREP = par("askGratuitousRREP");
         useHelloMessages = par("useHelloMessages");
-        maxJitter = par("maxJitter");
         activeRouteTimeout = par("activeRouteTimeout");
         helloInterval = par("helloInterval");
         allowedHelloLoss = par("allowedHelloLoss");
@@ -168,26 +167,21 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         IRoute* route = routingTable->findBestMatchingRoute(destAddr);
         AODVRouteData* routeData = route ? dynamic_cast<AODVRouteData *>(route->getProtocolData()) : NULL;
         bool isActive = routeData && routeData->isActive();
-
-        // If a data packet is received for an invalid route, the Lifetime
-        // field is updated to current time plus DELETE_PERIOD.
-
-        if (route && !isActive && !route->getNextHopAsGeneric().isUnspecified() && sourceAddr.isUnspecified())
-            routeData->setLifeTime(simTime() + deletePeriod);
-
-        if (route && !route->getNextHopAsGeneric().isUnspecified() && isActive)
+        if (isActive && !route->getNextHopAsGeneric().isUnspecified())
         {
             EV_INFO << "Active route found: " << route << endl;
             return ACCEPT;
         }
         else if (sourceAddr.isUnspecified() || routingTable->isLocalAddress(sourceAddr))
         {
+            bool isInactive = routeData && !routeData->isActive();
             // A node disseminates a RREQ when it determines that it needs a route
             // to a destination and does not have one available.  This can happen if
             // the destination is previously unknown to the node, or if a previously
             // valid route to the destination expires or is marked as invalid.
 
-            EV_INFO << (isActive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
+            EV_INFO << (isInactive ? "Inactive" : "Missing") << " route for destination " << destAddr << endl;
+
             delayDatagram(datagram);
 
             if (!hasOngoingRouteDiscovery(destAddr))
@@ -195,7 +189,7 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
                 // When a new route to the same destination is required at a later time
                 // (e.g., upon route loss), the TTL in the RREQ IP header is initially
                 // set to the Hop Count plus TTL_INCREMENT.
-                if (!isActive)
+                if (isInactive)
                     startRouteDiscovery(destAddr, route->getMetric() + ttlIncrement);
                 else
                     startRouteDiscovery(destAddr);
@@ -333,7 +327,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
 
     }
     EV_INFO << "Sending a Route Request with target " << rreq->getDestAddr() << " and TTL= " << timeToLive << endl;
-    sendAODVPacket(rreq, destAddr, timeToLive, uniform(0, maxJitter).dbl());
+    sendAODVPacket(rreq, destAddr, timeToLive, par("jitter"));
     rreqCount++;
 }
 
@@ -800,6 +794,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
         delete rreq;
         return;
     }
+
     // update or create
     rreqsArrivalTime[rreqIdentifier] = simTime();
 
@@ -1106,7 +1101,7 @@ void AODVRouting::handleLinkBreakSendRERR(const Address& unreachableAddr)
 
     // broadcast
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, par("jitter"));
 }
 
 AODVRERR* AODVRouting::createRERR(const std::vector<Address>& unreachableNeighbors, const std::vector<unsigned int>& unreachableNeighborsDestSeqNum)
@@ -1272,7 +1267,7 @@ void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned 
 void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
 {
     EV_INFO << "Broadcasting the Route Request message with TTL= " << timeToLive << endl;
-    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive, uniform(0, maxJitter).dbl());
+    sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive,par("jitter"));
 }
 
 void AODVRouting::completeRouteDiscovery(const Address& target)
@@ -1345,7 +1340,7 @@ void AODVRouting::sendHelloMessagesIfNeeded()
     {
         EV_INFO << "It is hello time, broadcasting Hello Messages with TTL=1" << endl;
         AODVRREP * helloMessage = createHelloMessage();
-        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl());
+        sendAODVPacket(helloMessage, addressType->getBroadcastAddress(), 1, par("jitter"));
     }
 
     scheduleAt(simTime() + helloInterval, helloMsgTimer);
@@ -1571,7 +1566,7 @@ void AODVRouting::sendRERRWhenNoRouteToForward(const Address& unreachableAddr)
 
     rerrCount++;
     EV_INFO << "Broadcasting Route Error message with TTL=1" << endl;
-    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, uniform(0, maxJitter).dbl()); // TODO: unicast if there exists a route to the source
+    sendAODVPacket(rerr, addressType->getBroadcastAddress(), 1, par("jitter")); // TODO: unicast if there exists a route to the source
 }
 
 void AODVRouting::cancelRouteDiscovery(const Address& destAddr)
