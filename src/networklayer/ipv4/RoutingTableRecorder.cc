@@ -344,10 +344,18 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 
     // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
-    fprintf(routingLogFile, "%s %"LL"d  %s  %d  %s  %s  %d  %s\n",
+    /*fprintf(routingLogFile, "%s %"LL"d  %s  %d  %s  %s  %d  %s\n",
             tag,
             simulation.getEventNumber(),
             SIMTIME_STR(simTime()),
+            host->getId(),
+            (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),
+            route->getDestinationAsGeneric().str().c_str(),
+            route->getPrefixLength(),
+            route->getNextHopAsGeneric().str().c_str()
+    );*/
+    fprintf(routingLogFile, "%s %d  %s  %s  %d  %s\n",
+            tag,
             host->getId(),
             (rt ? rt->getRouterIdAsGeneric().str().c_str() : "*"),
             route->getDestinationAsGeneric().str().c_str(),
