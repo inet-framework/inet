@@ -77,7 +77,7 @@ void NS_CLASS route_discovery_timeout(void *arg)
         {
 
             if (TTL_VALUE < TTL_THRESHOLD) // FIXME: This is also a new request
-                TTL_VALUE += TTL_INCREMENT;
+                TTL_VALUE += TTL_INCREMENT; // FIXME: TTL is incremented by TTL_INCREMENT until TTL = TTL_THRESHOLD is reached.
             else
             {
                 TTL_VALUE = NET_DIAMETER;
