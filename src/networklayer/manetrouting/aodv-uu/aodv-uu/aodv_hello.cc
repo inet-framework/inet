@@ -95,6 +95,7 @@ void NS_CLASS hello_stop()
 
 void NS_CLASS hello_send(void *arg)
 {
+    return;
     RREP *rrep;
     AODV_ext *ext = NULL;
     u_int8_t flags = 0;
