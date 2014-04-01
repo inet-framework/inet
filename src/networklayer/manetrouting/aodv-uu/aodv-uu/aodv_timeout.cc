@@ -72,11 +72,11 @@ void NS_CLASS route_discovery_timeout(void *arg)
 
     if (seek_entry->reqs < RREQ_RETRIES)
     {
-
+        // I think seek_entry->reqs++ should be here.
         if (expanding_ring_search)
         {
 
-            if (TTL_VALUE < TTL_THRESHOLD)
+            if (TTL_VALUE < TTL_THRESHOLD) // FIXME: This is also a new request
                 TTL_VALUE += TTL_INCREMENT;
             else
             {
