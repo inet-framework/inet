@@ -293,6 +293,7 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
     if (rreq_record_find(rreq_orig, rreq_id))
     {
 #ifdef OMNETPP
+        EV_WARN << "The same packet has arrived within PATH_DISCOVERY_TIME. Discarding it" << endl;
         if (isBroadcast(rreq_dest.s_addr))
         {
 
