@@ -257,7 +257,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
     // until the TTL set in the RREQ reaches TTL_THRESHOLD, beyond which a
     // TTL = NET_DIAMETER is used for each attempt.
 
-    if (rreqCount >= rreqRatelimit)
+    if (rreqCount - 1 == rreqRatelimit)
     {
         EV_WARN << "A node should not originate more than RREQ_RATELIMIT RREQ messages per second. Canceling sending RREQ" << endl;
         delete rreq;
@@ -1261,7 +1261,14 @@ void AODVRouting::forwardRREP(AODVRREP* rrep, const Address& destAddr, unsigned 
 
 void AODVRouting::forwardRREQ(AODVRREQ* rreq, unsigned int timeToLive)
 {
+    if (rreqCount - 1 == rreqRatelimit)
+    {
+        EV_WARN << "A node should not originate more than RREQ_RATELIMIT RREQ messages per second. Canceling sending RREQ" << endl;
+        delete rreq;
+        return;
+    }
     EV_INFO << "Broadcasting the Route Request message with TTL= " << timeToLive << endl;
+    rreqCount++;
     sendAODVPacket(rreq, addressType->getBroadcastAddress(), timeToLive,par("jitter"));
 }
 
