@@ -288,7 +288,7 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
             rrepTimerMsg->setFromInvalidEntry(true);
             cancelEvent(rrepTimerMsg);
         }
-        else if (lastTTL + ttlIncrement < ttlThreshold)
+        else if (lastTTL < ttlThreshold)
         {
             ASSERT(!rrepTimerMsg->isScheduled());
             timeToLive = lastTTL + ttlIncrement;
@@ -301,13 +301,8 @@ void AODVRouting::sendRREQ(AODVRREQ * rreq, const Address& destAddr, unsigned in
             rrepTimerMsg->setLastTTL(netDiameter);
         }
 
-        if (rrepTimerMsg->getLastTTL() == netDiameter && rrepTimerMsg->getFromInvalidEntry())
-            scheduleAt(simTime() + netTraversalTime, rrepTimerMsg);
-        else
-        {
-            double ringTraversalTime = 2.0 * nodeTraversalTime * (timeToLive + timeoutBuffer);
-            scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
-        }
+        double ringTraversalTime = 2.0 * nodeTraversalTime * (timeToLive + timeoutBuffer);
+        scheduleAt(simTime() + ringTraversalTime, rrepTimerMsg);
     }
     else
     {
