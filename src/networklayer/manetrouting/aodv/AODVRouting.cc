@@ -1638,7 +1638,8 @@ void AODVRouting::handleRREPACKTimer()
 
     EV_INFO << "RREP-ACK didn't arrived within timeout. Adding " << failedNextHop << " to the blacklist" << endl;
 
-    blacklist[failedNextHop] = simTime() + blacklistTimeout; // lifetime
+    if (blacklist.find(failedNextHop) == blacklist.end()) // XXX: AODV-UU doesn't update lifetimes.
+        blacklist[failedNextHop] = simTime() + blacklistTimeout; // lifetime
 
     if (!blacklistTimer->isScheduled())
         scheduleAt(simTime() + blacklistTimeout, blacklistTimer);
