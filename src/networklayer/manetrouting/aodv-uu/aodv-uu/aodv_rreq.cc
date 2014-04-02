@@ -167,6 +167,7 @@ void NS_CLASS rreq_forward(RREQ * rreq, int size, int ttl)
     struct in_addr dest, orig;
     int i;
 
+    EV_INFO << "Forwarding RREQ msg with ttl: " << ttl << endl;
     dest.s_addr = ManetAddress(IPv4Address(AODV_BROADCAST));
     orig.s_addr = rreq->orig_addr;
 
@@ -212,7 +213,6 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
                            struct in_addr ip_dst, int ip_ttl,
                            unsigned int ifindex)
 {
-
     AODV_ext *ext=NULL;
     RREP *rrep = NULL;
     int rrep_size = RREP_SIZE;
@@ -248,14 +248,17 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
         hopfix++;
 
 
-
     /* Ignore RREQ's that originated from this node. Either we do this
        or we buffer our own sent RREQ's as we do with others we
        receive. */
 
 #ifndef OMNETPP
     if (rreq_orig.s_addr == DEV_IFINDEX(ifindex).ipaddr.s_addr)
+    {
+        EV_INFO << "RREQ received (ignored), Src Address :" << convertAddressToString(ip_src.s_addr) << "  RREQ origin :" <<
+                   convertAddressToString(rreq_orig.s_addr) << "  RREQ dest :" << convertAddressToString(rreq_dest.s_addr) << "\n";
         return;
+    }
 #else
     if (isLocalAddress (rreq_orig.s_addr))
         return;
@@ -381,8 +384,16 @@ void NS_CLASS rreq_process(RREQ * rreq, int rreqlen, struct in_addr ip_src,
        source of the RREQ. */
     rev_rt = rt_table_find(rreq_orig);
 
+    // FIXME:
+    // Whenever a RREQ message is received, the Lifetime of the reverse
+    // route entry for the Originator IP address is set to be the maximum of
+    // (ExistingLifetime, MinimalLifetime), where
+    //
+    //     MinimalLifetime =    (current time + 2*NET_TRAVERSAL_TIME -
+    //                          2*HopCount*NODE_TRAVERSAL_TIME).
+
     /* Calculate the extended minimal life time. */
-    life = PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME;
+    life = PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME; // why PATH_DISCOVERY_TIME ??
 
     if (rev_rt == NULL)
     {
