@@ -23,13 +23,13 @@
 
 #include "SocketsRTScheduler.h"
 
-#include <headers/ethernet.h>
+#include "ByteArrayMessage.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
 #endif
 
-std::vector<SocketsRTScheduler::Socket>SocketsRTScheduler::sockets;
+SocketsRTScheduler::SocketVector SocketsRTScheduler::sockets;
 timeval SocketsRTScheduler::baseTime;
 
 Register_Class(SocketsRTScheduler);
@@ -37,6 +37,11 @@ Register_Class(SocketsRTScheduler);
 inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 {
     return out << (uint32)tv.tv_sec << "s" << tv.tv_usec << "us";
+}
+
+std::ostream& operator<<(std::ostream& out, const SocketsRTScheduler::Socket& socket)
+{
+    return out << "{" << socket.module->getFullPath() << " " << socket.gate->getName() << " " << socket.fd << " " << socket.isListener << "}";
 }
 
 SocketsRTScheduler::SocketsRTScheduler() : cScheduler()
@@ -68,74 +73,78 @@ void SocketsRTScheduler::executionResumed()
     baseTime = timeval_substract(baseTime, sim->getSimTime().dbl());
 }
 
-static void packet_handler(int socket, const struct pcap_pkthdr *hdr, const u_char *bytes)
-{
-    unsigned i;
-    int32 headerLength;
-    int32 datalink;
-    struct ether_header *ethernet_hdr;
-
-    i = *(uint16 *)user;
-    cModule *module = SocketsRTScheduler::sockets[i].module;
-
-    // put the IP packet from wire into data[] array of ExtFrame
-    ExtFrame *notificationMsg = new ExtFrame("rtEvent");
-    notificationMsg->setDataArraySize(hdr->caplen - headerLength);
-    for (uint16 j=0; j < hdr->caplen - headerLength; j++)
-        notificationMsg->setData(j, bytes[j + headerLength]);
-
-    // signalize new incoming packet to the interface via cMessage
-    EV << "Captured " << hdr->caplen - headerLength << " bytes for an IP packet.\n";
-    timeval curTime;
-    gettimeofday(&curTime, NULL);
-    curTime = timeval_substract(curTime, SocketsRTScheduler::baseTime);
-    simtime_t t = curTime.tv_sec + curTime.tv_usec*1e-6;
-    // TBD assert that it's somehow not smaller than previous event's time
-    notificationMsg->setArrival(module, -1, t);
-
-    simulation.msgQueue.insert(notificationMsg);
-}
-
 bool SocketsRTScheduler::receiveWithTimeout()
 {
     bool found;
     struct timeval timeout;
     int32 n;
-#ifdef LINUX
+#if defined(linux) || defined(__linux)
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
 #endif
 
     found = false;
     timeout.tv_sec = 0;
-    timeout.tv_usec = PCAP_TIMEOUT * 1000;
-#ifdef LINUX
+    timeout.tv_usec = TIMEOUT;
+#if  defined(linux) || defined(__linux)
     FD_ZERO(&rdfds);
     maxfd = -1;
-    for (uint16 i = 0; i < pds.size(); i++)
+    for (uint16_t i = 0; i < sockets.size(); i++)
     {
-        fd[i] = pcap_get_selectable_fd(pds.at(i));
-        if (fd[i] > maxfd)
-            maxfd = fd[i];
-        FD_SET(fd[i], &rdfds);
+        ASSERT(i < FD_SETSIZE);
+        if (sockets[i].fd != INVALID_SOCKET)
+        {
+            fd[i] = sockets[i].fd;
+            if (fd[i] > maxfd)
+                maxfd = fd[i];
+            FD_SET(fd[i], &rdfds);
+        }
     }
+    if (maxfd == -1)
+        return false;
     if (select(maxfd + 1, &rdfds, NULL, NULL, &timeout) < 0)
-    {
-        return found;
-    }
+        return false;
 #endif
-    for (uint16 i = 0; i < pds.size(); i++)
+
+    for (uint16_t i = 0; i < sockets.size(); i++)
     {
-#ifdef LINUX
+#if defined(linux) || defined(__linux)
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
 #endif
-        if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
-            throw cRuntimeError("SocketsRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
-        if (n > 0)
-            found = true;
+        if (sockets[i].isListener)
+        {
+            // accept connection, and store FD in sockets
+            sockaddr_in sinRemote;
+            int addrSize = sizeof(sinRemote);
+            int newFd = accept(sockets[i].fd, (sockaddr*)&sinRemote, (socklen_t*)&addrSize);
+            if (newFd == INVALID_SOCKET)
+                throw cRuntimeError("SocketsRTScheduler: accept() failed");
+            EV << "SocketsRTScheduler: connected!\n";
+        }
+        else
+        {
+            int nBytes = recv(sockets[i].fd, buffer, BUFFERSIZE, 0);
+            if (nBytes > 0)
+            {
+                packetHandler(i, buffer, nBytes);
+            }
+            else if (nBytes == 0)
+            {
+                EV << "Socket " << sockets[i] << " closed by the client\n";
+                if (shutdown(sockets[i].fd, SHUT_WR) == SOCKET_ERROR)
+                    throw cRuntimeError("SocketsRTScheduler: shutdown() failed");
+                closeSocket(i);
+            }
+            else if (nBytes==SOCKET_ERROR)
+            {
+                EV << "cSocketRTScheduler: socket error " << sock_errno() << "\n";
+                closeSocket(i);
+            }
+        }
+        found = true;
     }
-#ifndef LINUX
+#if !defined(linux) && !defined(__linux)
     if (!found)
         select(0, NULL, NULL, NULL, &timeout);
 #endif
@@ -199,7 +208,7 @@ cMessage *SocketsRTScheduler::getNextEvent()
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
         diffTime = timeval_substract(curTime, targetTime);
-        EV << "We are behind: " << diffTime.tv_sec + diffTime.tv_usec * 1e-6 << " seconds\n";
+        EV << "We are behind: " << diffTime << "\n";
     }
     cEvent *tmp = sim->msgQueue.removeFirst();
     ASSERT(tmp == event);
@@ -214,23 +223,52 @@ void SocketsRTScheduler::putBackEvent(cEvent *event)
 }
 #endif
 
-void SocketsRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
+void SocketsRTScheduler::addSocket(ISocketRT *mod, cGate *gate, int fd, bool isListener)
 {
-    if (fd == INVALID_SOCKET)
-        throw cRuntimeError("SocketsRTScheduler::sendBytes(): no raw socket.");
-
-    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);  //note: no ssize_t on MSVC
-
-    if ((size_t)sent == numBytes)
-        EV << "Sent an IP packet with length of " << sent << " bytes.\n";
-    else
-        EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
+    for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); ++i)
+        if (i->fd == fd)
+            throw cRuntimeError("fd already added");
+    sockets.push_back(Socket(mod, gate, fd, isListener));
 }
 
-void SocketsRTScheduler::addSocket(ISocketRT *mod, int fd, bool isListener)
+void SocketsRTScheduler::removeSocket(ISocketRT *mod, int fd)
 {
-    //TODO search fd: error when already exists
-    Socket s(mod, fd, isListener);
-    sockets.push_back(s);
+    for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); ++i)
+    {
+        if (i->fd == fd)
+        {
+            if (i->module != mod)
+                throw cRuntimeError("Invalid module");
+            sockets.erase(i);
+            break;
+        }
+    }
+}
 
+void SocketsRTScheduler::closeSocket(int socketIndex)
+{
+    cMessage *msg = new cMessage("socketClosed");
+    msg->setKind(CLOSED);
+    insertMsg(socketIndex, msg);
+    closesocket(sockets[socketIndex].fd);
+    sockets[socketIndex].fd = INVALID_SOCKET;
+}
+
+void SocketsRTScheduler::insertMsg(int socketIndex, cMessage *msg)
+{
+    timeval curTime;
+    gettimeofday(&curTime, NULL);
+    curTime = timeval_substract(curTime, SocketsRTScheduler::baseTime);
+    simtime_t t = SimTime(curTime.tv_sec, SIMTIME_S) + SimTime(curTime.tv_usec, SIMTIME_US);
+    // TBD assert that it's somehow not smaller than previous event's time
+    msg->setArrival(sockets[socketIndex].module->getId(), -1, t);
+    simulation.msgQueue.insert(msg);
+}
+
+void SocketsRTScheduler::packetHandler(int socketIndex, const void *bytes, unsigned int length)
+{
+    ByteArrayMessage *notificationMsg = new ByteArrayMessage("rtEvent");
+    notificationMsg->setDataFromBuffer(bytes, length);
+    notificationMsg->setKind(DATA);
+    insertMsg(socketIndex, notificationMsg);
 }

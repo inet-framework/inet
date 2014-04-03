@@ -30,13 +30,7 @@
 #define HAVE_U_INT32_T
 #define HAVE_U_INT64_T
 
-
-class ISocketRT
-{
-  public:
-    virtual ~ISocketRT() {}
-    virtual void recved(int fd, int length, const char* bytes) = 0;
-};
+typedef cModule ISocketRT;
 
 class SocketsRTScheduler : public cScheduler
 {
@@ -45,25 +39,31 @@ class SocketsRTScheduler : public cScheduler
     {
       public:
         ISocketRT *module;
+        cGate *gate;
         int fd;
         bool isListener;
       public:
-        Socket() : module(NULL), fd(INVALID_SOCKET), isListener(false) {}
-        Socket(ISocketRT *module, int fd, bool isListener) : module(module), fd(fd), isListener(isListener) {}
+        Socket() : module(NULL), gate(NULL), fd(INVALID_SOCKET), isListener(false) {}
+        Socket(cModule *module, cGate *gate, int fd, bool isListener) : module(module), gate(gate), fd(fd), isListener(isListener) {}
     };
 
-  protected:
-    enum { TIMEOUT = 10000 /* 10 ms */ };
+    typedef std::vector<Socket> SocketVector;
 
   protected:
-    static std::vector<Socket> sockets;
+    enum { TIMEOUT = 10000 /* microseconds */ };
+    enum { BUFFERSIZE = 65000 /* bytes */ };
+
+  protected:
+    static SocketVector sockets;
     static timeval baseTime;
+    static char buffer[BUFFERSIZE];
 
   protected:
     virtual bool receiveWithTimeout();
     virtual int receiveUntil(const timeval& targetTime);
 
   public:
+    enum { ACCEPT, CLOSED, DATA};   // message kinds
     SocketsRTScheduler();
     virtual ~SocketsRTScheduler();
 
@@ -104,9 +104,16 @@ class SocketsRTScheduler : public cScheduler
     virtual cMessage *getNextEvent();
 #endif
 
-    /**
-     */
-    void addSocket(ISocketRT *mod, int fd, bool isListener);
+    void addSocket(ISocketRT *mod, cGate *gate, int fd, bool isListener);
+
+    void removeSocket(ISocketRT *mod, int fd);
+
+  protected:
+    void insertMsg(int socketIndex, cMessage *msg);
+
+    void packetHandler(int socketIndex, const void *bytes, unsigned int length);
+
+    void closeSocket(int socketIndex);
 };
 
 #endif
