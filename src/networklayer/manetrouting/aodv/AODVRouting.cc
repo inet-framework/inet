@@ -170,6 +170,8 @@ INetfilter::IHook::Result AODVRouting::ensureRouteForDatagram(INetworkDatagram *
         if (isActive && !route->getNextHopAsGeneric().isUnspecified())
         {
             EV_INFO << "Active route found: " << route << endl;
+            updateValidRouteLifeTime(destAddr, simTime() + activeRouteTimeout);
+            updateValidRouteLifeTime(route->getNextHopAsGeneric(), simTime() + activeRouteTimeout);
             return ACCEPT;
         }
         else if (sourceAddr.isUnspecified() || routingTable->isLocalAddress(sourceAddr))
@@ -663,7 +665,7 @@ void AODVRouting::handleRREP(AODVRREP* rrep, const Address& sourceAddr)
 
             routeData->addPrecursor(forwardRREPRoute->getNextHopAsGeneric());
 
-            if (simTime() > rebootTime + deletePeriod || rebootTime == 0)
+            if (true)
             {
                 // If a node forwards a RREP over a link that is likely to have errors
                 // or be unidirectional, the node SHOULD set the 'A' flag to require that
@@ -927,7 +929,7 @@ void AODVRouting::handleRREQ(AODVRREQ* rreq, const Address& sourceAddr, unsigned
     // incoming RREQ is larger than the value currently maintained by the
     // forwarding node.
 
-    if (timeToLive > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
+    if (timeToLive > 0)
     {
         if (destRouteData)
             rreq->setDestSeqNum(std::max(destRouteData->getDestSeqNum(), rreq->getDestSeqNum()));
@@ -1145,7 +1147,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
         // the created list of unreachable destinations and have a non-empty
         // precursor list.
 
-        if (route->getNextHopAsGeneric() == sourceAddr && routeData->getPrecursorList().size() > 0)
+        if (route->getNextHopAsGeneric() == sourceAddr)
         {
             for (unsigned int j = 0; j < unreachableArraySize; j++)
             {
@@ -1173,7 +1175,7 @@ void AODVRouting::handleRERR(AODVRERR* rerr, const Address& sourceAddr)
         return;
     }
 
-    if (unreachableNeighbors.size() > 0 && (simTime() > rebootTime + deletePeriod || rebootTime == 0))
+    if (unreachableNeighbors.size() > 0)
     {
        AODVRERR * newRERR = createRERR(unreachableNeighbors, unreachableNeighborsDestSeqNum);
        sendAODVPacket(newRERR, addressType->getBroadcastAddress(),1,0);
