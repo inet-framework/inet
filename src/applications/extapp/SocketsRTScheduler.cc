@@ -1,8 +1,5 @@
 //
-// Copyright (C) 2005-2009 Andras Varga,
-//                         Christian Dankbar,
-//                         Irene Ruengeler,
-//                         Michael Tuexen
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -17,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-
 // This file is based on the SocketsRTScheduler.cc of OMNeT++ written by
 // Andras Varga.
+//
+// author: Zoltan Bojthe
+//
 
 #include "SocketsRTScheduler.h"
 
@@ -31,6 +30,7 @@
 
 SocketsRTScheduler::SocketVector SocketsRTScheduler::sockets;
 timeval SocketsRTScheduler::baseTime;
+char SocketsRTScheduler::buffer[BUFFERSIZE];
 
 Register_Class(SocketsRTScheduler);
 
@@ -41,7 +41,7 @@ inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 
 std::ostream& operator<<(std::ostream& out, const SocketsRTScheduler::Socket& socket)
 {
-    return out << "{" << socket.module->getFullPath() << " " << socket.gate->getName() << " " << socket.fd << " " << socket.isListener << "}";
+    return out << "{" << socket.module->getFullPath() << " " << socket.fd << " " << socket.isListener << "}";
 }
 
 SocketsRTScheduler::SocketsRTScheduler() : cScheduler()
@@ -61,8 +61,7 @@ void SocketsRTScheduler::startRun()
 void SocketsRTScheduler::endRun()
 {
     for (uint16 i = 0; i < sockets.size(); i++)
-    {
-    }
+        closesocket(sockets[i].fd);
 
     sockets.clear();
 }
@@ -77,41 +76,38 @@ bool SocketsRTScheduler::receiveWithTimeout()
 {
     bool found;
     struct timeval timeout;
-    int32 n;
-#if defined(linux) || defined(__linux)
-    int32 fd[FD_SETSIZE], maxfd;
+    int32 maxfd;
     fd_set rdfds;
-#endif
 
     found = false;
     timeout.tv_sec = 0;
     timeout.tv_usec = TIMEOUT;
-#if  defined(linux) || defined(__linux)
     FD_ZERO(&rdfds);
     maxfd = -1;
+    for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); )
+    {
+        if (i->fd == INVALID_SOCKET)
+            i = sockets.erase(i);
+        else
+            ++i;
+    }
     for (uint16_t i = 0; i < sockets.size(); i++)
     {
-        ASSERT(i < FD_SETSIZE);
-        if (sockets[i].fd != INVALID_SOCKET)
-        {
-            fd[i] = sockets[i].fd;
-            if (fd[i] > maxfd)
-                maxfd = fd[i];
-            FD_SET(fd[i], &rdfds);
-        }
+        int curFd = sockets[i].fd;
+        if (curFd > maxfd)
+            maxfd = curFd;
+        FD_SET(curFd, &rdfds);
     }
     if (maxfd == -1)
         return false;
     if (select(maxfd + 1, &rdfds, NULL, NULL, &timeout) < 0)
         return false;
-#endif
 
     for (uint16_t i = 0; i < sockets.size(); i++)
     {
-#if defined(linux) || defined(__linux)
-        if (!(FD_ISSET(fd[i], &rdfds)))
+        if (!(FD_ISSET(sockets[i].fd, &rdfds)))
             continue;
-#endif
+
         if (sockets[i].isListener)
         {
             // accept connection, and store FD in sockets
@@ -121,6 +117,11 @@ bool SocketsRTScheduler::receiveWithTimeout()
             if (newFd == INVALID_SOCKET)
                 throw cRuntimeError("SocketsRTScheduler: accept() failed");
             EV << "SocketsRTScheduler: connected!\n";
+
+            cMessage *msg = new cMessage("Accepted");
+            msg->addPar("fd") = newFd;
+            msg->setKind(ACCEPT);
+            insertMsg(i, msg);
         }
         else
         {
@@ -144,10 +145,6 @@ bool SocketsRTScheduler::receiveWithTimeout()
         }
         found = true;
     }
-#if !defined(linux) && !defined(__linux)
-    if (!found)
-        select(0, NULL, NULL, NULL, &timeout);
-#endif
     return found;
 }
 
@@ -223,12 +220,12 @@ void SocketsRTScheduler::putBackEvent(cEvent *event)
 }
 #endif
 
-void SocketsRTScheduler::addSocket(ISocketRT *mod, cGate *gate, int fd, bool isListener)
+void SocketsRTScheduler::addSocket(ISocketRT *mod, int fd, bool isListener)
 {
     for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); ++i)
         if (i->fd == fd)
             throw cRuntimeError("fd already added");
-    sockets.push_back(Socket(mod, gate, fd, isListener));
+    sockets.push_back(Socket(mod, fd, isListener));
 }
 
 void SocketsRTScheduler::removeSocket(ISocketRT *mod, int fd)
@@ -245,10 +242,22 @@ void SocketsRTScheduler::removeSocket(ISocketRT *mod, int fd)
     }
 }
 
+void SocketsRTScheduler::removeAllSocketOf(ISocketRT *mod)
+{
+    for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); )
+    {
+        if (i->module == mod)
+            i = sockets.erase(i);
+        else
+            ++i;
+    }
+}
+
 void SocketsRTScheduler::closeSocket(int socketIndex)
 {
     cMessage *msg = new cMessage("socketClosed");
     msg->setKind(CLOSED);
+    msg->addPar("fd") = sockets[socketIndex].fd;
     insertMsg(socketIndex, msg);
     closesocket(sockets[socketIndex].fd);
     sockets[socketIndex].fd = INVALID_SOCKET;
@@ -267,8 +276,11 @@ void SocketsRTScheduler::insertMsg(int socketIndex, cMessage *msg)
 
 void SocketsRTScheduler::packetHandler(int socketIndex, const void *bytes, unsigned int length)
 {
-    ByteArrayMessage *notificationMsg = new ByteArrayMessage("rtEvent");
-    notificationMsg->setDataFromBuffer(bytes, length);
-    notificationMsg->setKind(DATA);
-    insertMsg(socketIndex, notificationMsg);
+    ByteArrayMessage *msg = new ByteArrayMessage("rtEvent");
+    msg->setByteLength(length);
+    msg->setDataFromBuffer(bytes, length);
+    msg->setKind(DATA);
+    msg->addPar("fd") = sockets[socketIndex].fd;
+    insertMsg(socketIndex, msg);
 }
+

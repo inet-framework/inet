@@ -28,6 +28,7 @@ import inet.applications.ITCPApp;
 simple TCPClientTunnel like ITCPApp
 {
     parameters:
+        string dataTransferMode = "bytestream";
         string localAddress = default(""); // local address or empty ("")
         int localPort = default(-1); // local port number
         string connectAddress;  // server address (may be symbolic)

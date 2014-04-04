@@ -20,32 +20,46 @@
 
 #include "INETDefs.h"
 
+#include "ByteArrayMessage.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "SocketsRTScheduler.h"
+#include "TCPAppBase.h"
 
-class TCPClientTunnel : public cSimpleModule, public ILifecycle
+class TCPClientTunnel : public TCPAppBase, public ILifecycle
 {
   protected:
     SocketsRTScheduler *rtScheduler;
     int listenerSocket;
+    int connSocket;
 
   public:
     TCPClientTunnel();
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleMessage(cMessage *msg);
-    bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void handleTimer(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketPeerClosed(int connId, void *yourPtr);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
 };
 
+Register_Class(TCPClientTunnel);
+
 TCPClientTunnel::TCPClientTunnel()
-    : rtScheduler(NULL), listenerSocket(INVALID_SOCKET)
+    : rtScheduler(NULL), listenerSocket(INVALID_SOCKET), connSocket(INVALID_SOCKET)
 {
 }
 
 void TCPClientTunnel::initialize(int stage)
 {
+    TCPAppBase::initialize(stage);
+
     if (stage == INITSTAGE_LOCAL)
     {
         rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
@@ -58,9 +72,10 @@ void TCPClientTunnel::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        listenerSocket = socket(AF_INET, SOCK_STREAM, 0);
+        listenerSocket = ::socket(AF_INET, SOCK_STREAM, 0);
         if (listenerSocket == INVALID_SOCKET)
             throw cRuntimeError("cannot create socket");
+        connSocket = INVALID_SOCKET;
 
         sockaddr_in sinInterface;
         sinInterface.sin_family = AF_INET;
@@ -71,13 +86,39 @@ void TCPClientTunnel::initialize(int stage)
 
         listen(listenerSocket, SOMAXCONN);
 
-        rtScheduler->addSocket(this, gate("xx"), listenerSocket, true);
+        rtScheduler->addSocket(this, listenerSocket, true);
     }
 }
 
 
-void TCPClientTunnel::handleMessage(cMessage *msg)
+void TCPClientTunnel::handleTimer(cMessage *msg)
 {
+    switch(msg->getKind())
+    {
+        case SocketsRTScheduler::DATA:
+        {
+            if (connSocket != msg->par("fd").longValue())
+                throw cRuntimeError("socket not opened");
+            ByteArrayMessage *pk = check_and_cast<ByteArrayMessage *>(msg);
+            sendPacket(pk);
+            break;
+        }
+        case SocketsRTScheduler::CLOSED:
+            if (connSocket != msg->par("fd").longValue())
+                throw cRuntimeError("unknown socket id");
+            close();
+            connSocket = INVALID_SOCKET;
+            delete msg;
+            break;
+        case SocketsRTScheduler::ACCEPT:
+            if (connSocket != INVALID_SOCKET)
+                throw cRuntimeError("socket already opened");
+            connSocket = msg->par("fd").longValue();
+            rtScheduler->addSocket(this, connSocket, false);
+            connect();
+            delete msg;
+            break;
+    }
 }
 
 bool TCPClientTunnel::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -85,3 +126,50 @@ bool TCPClientTunnel::handleOperationStage(LifecycleOperation *operation, int st
     Enter_Method_Silent();
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
 }
+
+void TCPClientTunnel::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+{
+    ByteArray& bytes = check_and_cast<ByteArrayMessage *>(msg)->getByteArray();
+    ::send(connSocket,bytes.getDataArrayPointer(), bytes.getDataArraySize(), 0);
+
+    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
+}
+
+void TCPClientTunnel::socketEstablished(int connId, void *ptr)
+{
+    TCPAppBase::socketEstablished(connId, ptr);
+}
+
+void TCPClientTunnel::socketPeerClosed(int connId, void *ptr)
+{
+    TCPAppBase::socketPeerClosed(connId, ptr);
+    if (connSocket != INVALID_SOCKET)
+    {
+        closesocket(connSocket);
+        rtScheduler->removeSocket(this, connSocket);
+        connSocket = INVALID_SOCKET;
+    }
+}
+
+void TCPClientTunnel::socketClosed(int connId, void *ptr)
+{
+    TCPAppBase::socketClosed(connId, ptr);
+    if (connSocket != INVALID_SOCKET)
+    {
+        closesocket(connSocket);
+        rtScheduler->removeSocket(this, connSocket);
+        connSocket = INVALID_SOCKET;
+    }
+}
+
+void TCPClientTunnel::socketFailure(int connId, void *ptr, int code)
+{
+    TCPAppBase::socketFailure(connId, ptr, code);
+    if (connSocket != INVALID_SOCKET)
+    {
+        closesocket(connSocket);
+        rtScheduler->removeSocket(this, connSocket);
+        connSocket = INVALID_SOCKET;
+    }
+}
+
