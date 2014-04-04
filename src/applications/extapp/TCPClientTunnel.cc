@@ -27,7 +27,7 @@
 #include "SocketsRTScheduler.h"
 #include "TCPAppBase.h"
 
-class TCPClientTunnel : public TCPAppBase, public ILifecycle
+class INET_API TCPClientTunnel : public TCPAppBase, public ILifecycle
 {
   protected:
     SocketsRTScheduler *rtScheduler;
