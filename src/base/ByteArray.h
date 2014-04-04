@@ -89,6 +89,11 @@ class ByteArray : public ByteArray_Base
      * Generate assert when not have enough bytes for truncation
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
+
+    /**
+     * Returns pointer of stored data
+     */
+    virtual const char *getDataArrayPointer() const { return data_var; }
 };
 
 #endif //  __INET_BYTEARRAY_H
