@@ -86,7 +86,7 @@ void TCPClientTunnel::initialize(int stage)
 
         listen(listenerSocket, SOMAXCONN);
 
-        rtScheduler->addSocket(this, listenerSocket, true);
+        rtScheduler->addSocket(this, NULL, listenerSocket, true);
     }
 }
 
@@ -114,10 +114,12 @@ void TCPClientTunnel::handleTimer(cMessage *msg)
             if (connSocket != INVALID_SOCKET)
                 throw cRuntimeError("socket already opened");
             connSocket = msg->par("fd").longValue();
-            rtScheduler->addSocket(this, connSocket, false);
+            rtScheduler->addSocket(this, NULL, connSocket, false);
             connect();
             delete msg;
             break;
+        default:
+            throw cRuntimeError("Invalid msg kind: %d", msg->getKind());
     }
 }
 

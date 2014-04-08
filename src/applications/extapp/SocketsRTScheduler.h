@@ -39,11 +39,12 @@ class SocketsRTScheduler : public cScheduler
     {
       public:
         ISocketRT *module;
+        void *contextPtr;
         int fd;
         bool isListener;
       public:
-        Socket() : module(NULL), fd(INVALID_SOCKET), isListener(false) {}
-        Socket(cModule *module, int fd, bool isListener) : module(module), fd(fd), isListener(isListener) {}
+        Socket() : module(NULL), contextPtr(NULL), fd(INVALID_SOCKET), isListener(false) {}
+        Socket(cModule *module, void *contextPtr, int fd, bool isListener) : module(module), contextPtr(contextPtr), fd(fd), isListener(isListener) {}
     };
 
     typedef std::vector<Socket> SocketVector;
@@ -103,7 +104,7 @@ class SocketsRTScheduler : public cScheduler
     virtual cMessage *getNextEvent();
 #endif
 
-    void addSocket(ISocketRT *mod, int fd, bool isListener);
+    void addSocket(ISocketRT *mod, void *contextPtr, int fd, bool isListener);
 
     void removeSocket(ISocketRT *mod, int fd);
 

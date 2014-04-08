@@ -33,6 +33,7 @@ simple TCPServerTunnel like ITCPApp
         int localPort; // port number to listen on
         string tunnelAddress;  // real computer IP address
         int tunnelPort; // port number on real computer
+        string serverThreadClass = default("TCPServerTunnelThread");
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);

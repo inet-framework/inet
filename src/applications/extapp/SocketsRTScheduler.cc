@@ -220,12 +220,12 @@ void SocketsRTScheduler::putBackEvent(cEvent *event)
 }
 #endif
 
-void SocketsRTScheduler::addSocket(ISocketRT *mod, int fd, bool isListener)
+void SocketsRTScheduler::addSocket(ISocketRT *mod, void *contextPtr, int fd, bool isListener)
 {
     for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); ++i)
         if (i->fd == fd)
             throw cRuntimeError("fd already added");
-    sockets.push_back(Socket(mod, fd, isListener));
+    sockets.push_back(Socket(mod, contextPtr, fd, isListener));
 }
 
 void SocketsRTScheduler::removeSocket(ISocketRT *mod, int fd)
@@ -271,6 +271,7 @@ void SocketsRTScheduler::insertMsg(int socketIndex, cMessage *msg)
     simtime_t t = SimTime(curTime.tv_sec, SIMTIME_S) + SimTime(curTime.tv_usec, SIMTIME_US);
     // TBD assert that it's somehow not smaller than previous event's time
     msg->setArrival(sockets[socketIndex].module->getId(), -1, t);
+    msg->setContextPointer(sockets[socketIndex].contextPtr);
     simulation.msgQueue.insert(msg);
 }
 
