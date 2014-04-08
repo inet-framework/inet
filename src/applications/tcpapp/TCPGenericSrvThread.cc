@@ -25,11 +25,14 @@ Register_Class(TCPGenericSrvThread);
 
 void TCPGenericSrvThread::established()
 {
+    EV_TRACE << "established()\n";
     // no initialization needed
 }
 
-void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
+void TCPGenericSrvThread::dataArrived(cMessage *msg, bool flag)
 {
+    EV_TRACE << "dataArrived( (" << msg->getClassName() << ")" << msg->getName() << ", " << flag << ")\n";
+
     GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
 
     if (!appmsg)
@@ -64,8 +67,9 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
         getSocket()->close();
 }
 
-void TCPGenericSrvThread::timerExpired(cMessage *timer)
+void TCPGenericSrvThread::timerExpired(cMessage *msg)
 {
+    EV_TRACE << "timerExpired( (" << msg->getClassName() << ")" << msg->getName() << ")\n";
     // no timers in this serverThread
 }
 
