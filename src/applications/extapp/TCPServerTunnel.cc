@@ -89,6 +89,7 @@ TCPServerTunnelThread::~TCPServerTunnelThread()
 
 void TCPServerTunnelThread::peerClosed()
 {
+    EV_TRACE << "peerClosed()";
     close(connSocket);
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     connSocket = INVALID_SOCKET;
@@ -97,6 +98,7 @@ void TCPServerTunnelThread::peerClosed()
 
 void TCPServerTunnelThread::closed()
 {
+    EV_TRACE << "closed()";
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     connSocket = INVALID_SOCKET;
     TCPServerThreadBase::closed();
@@ -104,39 +106,14 @@ void TCPServerTunnelThread::closed()
 
 void TCPServerTunnelThread::failure(int code)
 {
+    EV_TRACE << "failure()";
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     TCPServerThreadBase::failure(code);
 }
 
 void TCPServerTunnelThread::established()
 {
-#if 0
-    /* Create a TCP socket. */
-    s = socket (AF_INET, SOCK_STREAM, 0);
-    /* Use bind to set an address and port number for our end of the
-     * finger TCP connection. */
-    bzero (&sa, sizeof (sa));
-    sa.sin_family = AF_INET;
-    sa.sin_port = htons (0); /* tells OS to choose a port */
-    sa.sin_addr.s_addr = htonl (INADDR_ANY); /* tells OS to cho
-     ose IP addr */
-    if (bind (s, (struct sockaddr *) &sa, sizeof (sa)) < 0)
-    {
-        perror ("bind");
-        close (s);
-        return -1;
-    }
-    /* Now use h to set set the destination address. */
-    sa.sin_port = htons (port);
-    sa.sin_addr = *(struct in_addr *) h->h_addr;
-    /* And connect to the server */
-    if (connect (s, (struct sockaddr *) &sa, sizeof (sa)) < 0)
-    {
-        perror (host);
-        close (s);
-        return -1;
-    }
-#endif
+    EV_TRACE << "established()";
 
     int err;
 
@@ -176,6 +153,7 @@ void TCPServerTunnelThread::established()
 
 void TCPServerTunnelThread::dataArrived(cMessage *msg, bool urgent)
 {
+    EV_TRACE << "dataArrived(" << msg << ", " << urgent << ")";
     ByteArray& bytes = check_and_cast<ByteArrayMessage *>(msg)->getByteArray();
     ::send(connSocket, bytes.getDataArrayPointer(), bytes.getDataArraySize(), 0);
     delete msg;
@@ -183,6 +161,7 @@ void TCPServerTunnelThread::dataArrived(cMessage *msg, bool urgent)
 
 void TCPServerTunnelThread::timerExpired(cMessage *msg) // for processing messages from SocketsRTScheduler
 {
+    EV_TRACE << "timerExpired(" << msg <<  ")";
     switch(msg->getKind())
     {
         case SocketsRTScheduler::DATA:

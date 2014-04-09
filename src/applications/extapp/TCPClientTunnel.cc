@@ -33,9 +33,11 @@ class INET_API TCPClientTunnel : public TCPAppBase, public ILifecycle
     SocketsRTScheduler *rtScheduler;
     int listenerSocket;
     int connSocket;
+    uint16_t tunnelPort;
 
   public:
     TCPClientTunnel();
+    virtual ~TCPClientTunnel();
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleTimer(cMessage *msg);
@@ -47,6 +49,9 @@ class INET_API TCPClientTunnel : public TCPAppBase, public ILifecycle
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+
+  protected:
+    virtual void setDisplayString();
 };
 
 Register_Class(TCPClientTunnel);
@@ -54,6 +59,13 @@ Register_Class(TCPClientTunnel);
 TCPClientTunnel::TCPClientTunnel()
     : rtScheduler(NULL), listenerSocket(INVALID_SOCKET), connSocket(INVALID_SOCKET)
 {
+}
+
+TCPClientTunnel::~TCPClientTunnel()
+{
+    closesocket(connSocket);
+    closesocket(listenerSocket);
+    rtScheduler->removeAllSocketOf(this);
 }
 
 void TCPClientTunnel::initialize(int stage)
@@ -77,10 +89,11 @@ void TCPClientTunnel::initialize(int stage)
             throw cRuntimeError("cannot create socket");
         connSocket = INVALID_SOCKET;
 
+        tunnelPort = par("tunnelPort");
         sockaddr_in sinInterface;
         sinInterface.sin_family = AF_INET;
         sinInterface.sin_addr.s_addr = INADDR_ANY;
-        sinInterface.sin_port = htons(uint16_t(par("tunnelPort")));
+        sinInterface.sin_port = htons(tunnelPort);
         if (bind(listenerSocket, (sockaddr*)&sinInterface, sizeof(sockaddr_in)) == SOCKET_ERROR)
             throw cRuntimeError("socket bind() failed");
 
@@ -90,6 +103,17 @@ void TCPClientTunnel::initialize(int stage)
     }
 }
 
+void TCPClientTunnel::setDisplayString()
+{
+    if (!ev.isGUI())
+        return;
+    char buf[80];
+    if (connSocket == INVALID_SOCKET)
+        sprintf(buf, "listen on\nlocalhost:%d", tunnelPort);
+    else
+        sprintf(buf, "active conn on\nlocalhost:%d", tunnelPort);
+    getDisplayString().setTagArg("t", 0, buf);
+}
 
 void TCPClientTunnel::handleTimer(cMessage *msg)
 {

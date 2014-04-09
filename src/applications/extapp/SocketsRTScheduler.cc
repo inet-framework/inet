@@ -230,6 +230,8 @@ void SocketsRTScheduler::addSocket(ISocketRT *mod, void *contextPtr, int fd, boo
 
 void SocketsRTScheduler::removeSocket(ISocketRT *mod, int fd)
 {
+    if (fd == INVALID_SOCKET)
+        throw cRuntimeError("removeSocket: INVALID_SOCKET");
     for (SocketVector::iterator i = sockets.begin(); i != sockets.end(); ++i)
     {
         if (i->fd == fd)
