@@ -439,6 +439,21 @@
         linkerFlags = ""
         />
     <feature
+        id="AODV"
+        name="AODV"
+        description = "Ad hoc On-Demand Distance Vector (AODV) Routing"
+        initiallyEnabled = "true"
+        requires = "UDP IPv4 Ieee80211"
+        labels = "routing"
+        nedPackages = "
+                       inet.networklayer.routing.aodv
+                       inet.nodes.aodv
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_AODV"
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
