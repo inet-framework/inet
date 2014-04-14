@@ -25,14 +25,46 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "SocketsRTScheduler.h"
-#include "TCPAppBase.h"
+#include "TCPSrvHostApp.h"
+#include "TCPTunnelThread.h"
 
-class INET_API TCPClientTunnel : public TCPAppBase, public ILifecycle
+class INET_API TCPClientTunnelThread : public TCPTunnelThread
+{
+  protected:
+    int connSocket;
+
+  public:
+    TCPClientTunnelThread();
+    virtual ~TCPClientTunnelThread();
+
+    virtual void established();
+    virtual void dataArrived(cMessage *msg, bool urgent);
+    virtual void timerExpired(cMessage *timer); // for processing messages from SocketsRTScheduler
+
+    /*
+     * Called when the client closes the connection. By default it closes
+     * our side too, but it can be redefined to do something different.
+     */
+    virtual void peerClosed();
+
+    /*
+     * Called when the connection closes (successful TCP teardown). By default
+     * it deletes this thread, but it can be redefined to do something different.
+     */
+    virtual void closed();
+
+    /*
+     * Called when the connection breaks (TCP error). By default it deletes
+     * this thread, but it can be redefined to do something different.
+     */
+    virtual void failure(int code);
+};
+
+class INET_API TCPClientTunnel : public TCPMultiThreadApp
 {
   protected:
     SocketsRTScheduler *rtScheduler;
     int listenerSocket;
-    int connSocket;
     uint16_t tunnelPort;
 
   public:
@@ -40,83 +72,100 @@ class INET_API TCPClientTunnel : public TCPAppBase, public ILifecycle
     virtual ~TCPClientTunnel();
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleTimer(cMessage *msg);
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
-
-  protected:
-    virtual void setDisplayString();
 };
 
+Register_Class(TCPClientTunnelThread);
 Register_Class(TCPClientTunnel);
 
-TCPClientTunnel::TCPClientTunnel()
-    : rtScheduler(NULL), listenerSocket(INVALID_SOCKET), connSocket(INVALID_SOCKET)
+TCPClientTunnelThread::TCPClientTunnelThread() :
+        connSocket(INVALID_SOCKET)
 {
 }
 
-TCPClientTunnel::~TCPClientTunnel()
+TCPClientTunnelThread::~TCPClientTunnelThread()
 {
-    closesocket(connSocket);
-    closesocket(listenerSocket);
-    rtScheduler->removeAllSocketOf(this);
-}
-
-void TCPClientTunnel::initialize(int stage)
-{
-    TCPAppBase::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL)
+    if (connSocket != INVALID_SOCKET)
     {
-        rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
-    }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
-        bool isOperational;
-        NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(getContainingNode(this)->getSubmodule("status"));
-        isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
-        if (!isOperational)
-            throw cRuntimeError("This module doesn't support starting in node DOWN state");
-
-        listenerSocket = ::socket(AF_INET, SOCK_STREAM, 0);
-        if (listenerSocket == INVALID_SOCKET)
-            throw cRuntimeError("cannot create socket");
-        connSocket = INVALID_SOCKET;
-
-        tunnelPort = par("tunnelPort");
-        sockaddr_in sinInterface;
-        sinInterface.sin_family = AF_INET;
-        sinInterface.sin_addr.s_addr = INADDR_ANY;
-        sinInterface.sin_port = htons(tunnelPort);
-        if (bind(listenerSocket, (sockaddr*)&sinInterface, sizeof(sockaddr_in)) == SOCKET_ERROR)
-            throw cRuntimeError("socket bind() failed");
-
-        listen(listenerSocket, SOMAXCONN);
-
-        rtScheduler->addSocket(this, NULL, listenerSocket, true);
+        closesocket(connSocket);
+        check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     }
 }
 
-void TCPClientTunnel::setDisplayString()
+void TCPClientTunnelThread::peerClosed()
 {
-    if (!ev.isGUI())
-        return;
-    char buf[80];
-    if (connSocket == INVALID_SOCKET)
-        sprintf(buf, "listen on\nlocalhost:%d", tunnelPort);
-    else
-        sprintf(buf, "active conn on\nlocalhost:%d", tunnelPort);
-    getDisplayString().setTagArg("t", 0, buf);
+    EV_TRACE << "peerClosed()";
+    close(connSocket);
+    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
+    connSocket = INVALID_SOCKET;
+    TCPTunnelThread::peerClosed();
 }
 
-void TCPClientTunnel::handleTimer(cMessage *msg)
+void TCPClientTunnelThread::closed()
 {
+    EV_TRACE << "closed()";
+    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
+    connSocket = INVALID_SOCKET;
+    TCPTunnelThread::closed();
+}
+
+void TCPClientTunnelThread::failure(int code)
+{
+    EV_TRACE << "failure()";
+    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
+    TCPTunnelThread::failure(code);
+}
+
+void TCPClientTunnelThread::established()
+{
+    EV_TRACE << "established()";
+
+    int err;
+
+    if (connSocket != INVALID_SOCKET)
+        throw cRuntimeError("model error: socket already opened");;
+
+    // Create a TCP socket:
+    connSocket = ::socket(AF_INET, SOCK_STREAM, 0);
+
+    // Use bind to set an address and port number for our end of the finger TCP connection:
+    sockaddr_in sinInterface;
+    bzero(&sinInterface, sizeof(sinInterface));
+    sinInterface.sin_family = AF_INET;
+    sinInterface.sin_port = htons(0); /* tells OS to choose a port */
+    sinInterface.sin_addr.s_addr = htonl(INADDR_ANY); /* tells OS to choose IP addr */
+    if (::bind(connSocket, (struct sockaddr *)&sinInterface, sizeof(sinInterface)) < 0)
+    {
+        closesocket(connSocket);
+        throw cRuntimeError("bind error");
+    }
+    // Set the destination address:
+    IPv4Address tunnelAddr(hostmod->par("tunnelAddress").stringValue());
+    int tunnelPort = hostmod->par("tunnelPort");
+    bzero(&sinInterface, sizeof(sinInterface));
+    sinInterface.sin_family = AF_INET;
+    sinInterface.sin_port = htons(tunnelPort);
+    sinInterface.sin_addr.s_addr = htonl(tunnelAddr.getInt());
+    // Connect to the server
+    err = ::connect(connSocket, (struct sockaddr *)&sinInterface, sizeof(sinInterface));
+    if (err < 0)
+    {
+        closesocket(connSocket);
+        throw cRuntimeError("connect error to %s:%d : %d", tunnelAddr.str().c_str(), tunnelPort, err);
+    }
+    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->addSocket(hostmod, this, connSocket, false);
+}
+
+void TCPClientTunnelThread::dataArrived(cMessage *msg, bool urgent)
+{
+    EV_TRACE << "dataArrived(" << msg << ", " << urgent << ")";
+    ByteArray& bytes = check_and_cast<ByteArrayMessage *>(msg)->getByteArray();
+    ::send(connSocket, bytes.getDataArrayPointer(), bytes.getDataArraySize(), 0);
+    delete msg;
+}
+
+void TCPClientTunnelThread::timerExpired(cMessage *msg) // for processing messages from SocketsRTScheduler
+{
+    EV_TRACE << "timerExpired(" << msg <<  ")";
     switch(msg->getKind())
     {
         case SocketsRTScheduler::DATA:
@@ -124,78 +173,41 @@ void TCPClientTunnel::handleTimer(cMessage *msg)
             if (connSocket != msg->par("fd").longValue())
                 throw cRuntimeError("socket not opened");
             ByteArrayMessage *pk = check_and_cast<ByteArrayMessage *>(msg);
-            sendPacket(pk);
+            sock->send(pk);
             break;
         }
         case SocketsRTScheduler::CLOSED:
             if (connSocket != msg->par("fd").longValue())
                 throw cRuntimeError("unknown socket id");
-            close();
-            connSocket = INVALID_SOCKET;
+            sock->close();
             delete msg;
             break;
         case SocketsRTScheduler::ACCEPT:
-            if (connSocket != INVALID_SOCKET)
-                throw cRuntimeError("socket already opened");
-            connSocket = msg->par("fd").longValue();
-            rtScheduler->addSocket(this, NULL, connSocket, false);
-            connect();
-            delete msg;
-            break;
+            throw cRuntimeError("Model error: nem hasznalunk listener portot"); //FIXME translate
         default:
             throw cRuntimeError("Invalid msg kind: %d", msg->getKind());
     }
 }
 
-bool TCPClientTunnel::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+
+TCPClientTunnel::TCPClientTunnel() :
+        rtScheduler(NULL), listenerSocket(INVALID_SOCKET)
 {
-    Enter_Method_Silent();
-    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
 }
 
-void TCPClientTunnel::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urgent)
+TCPClientTunnel::~TCPClientTunnel()
 {
-    ByteArray& bytes = check_and_cast<ByteArrayMessage *>(msg)->getByteArray();
-    ::send(connSocket,bytes.getDataArrayPointer(), bytes.getDataArraySize(), 0);
-
-    TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
+    closesocket(listenerSocket);
+    rtScheduler->removeAllSocketOf(this);
 }
 
-void TCPClientTunnel::socketEstablished(int connId, void *ptr)
+void TCPClientTunnel::initialize(int stage)
 {
-    TCPAppBase::socketEstablished(connId, ptr);
-}
+    TCPMultiThreadApp::initialize(stage);
 
-void TCPClientTunnel::socketPeerClosed(int connId, void *ptr)
-{
-    TCPAppBase::socketPeerClosed(connId, ptr);
-    if (connSocket != INVALID_SOCKET)
+    if (stage == INITSTAGE_LOCAL)
     {
-        closesocket(connSocket);
-        rtScheduler->removeSocket(this, connSocket);
-        connSocket = INVALID_SOCKET;
-    }
-}
-
-void TCPClientTunnel::socketClosed(int connId, void *ptr)
-{
-    TCPAppBase::socketClosed(connId, ptr);
-    if (connSocket != INVALID_SOCKET)
-    {
-        closesocket(connSocket);
-        rtScheduler->removeSocket(this, connSocket);
-        connSocket = INVALID_SOCKET;
-    }
-}
-
-void TCPClientTunnel::socketFailure(int connId, void *ptr, int code)
-{
-    TCPAppBase::socketFailure(connId, ptr, code);
-    if (connSocket != INVALID_SOCKET)
-    {
-        closesocket(connSocket);
-        rtScheduler->removeSocket(this, connSocket);
-        connSocket = INVALID_SOCKET;
+        rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
     }
 }
 

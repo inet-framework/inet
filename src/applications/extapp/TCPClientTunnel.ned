@@ -34,6 +34,7 @@ simple TCPClientTunnel like ITCPApp
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to (port on the server)
         int tunnelPort; // local port number on real computer for listening to connect a real telnet client
+        string threadClass = default("TCPClientTunnelThread");
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
