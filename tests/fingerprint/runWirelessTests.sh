@@ -1,2 +1,2 @@
 #!/bin/sh
-./fingerprints omnet4/*.csv -m nic -m wlan -m wireless -m adhoc
+./fingerprints omnet4/*.csv -m wireless -m adhoc -m manet -m mobileipv6
