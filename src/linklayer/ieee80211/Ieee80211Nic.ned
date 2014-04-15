@@ -36,7 +36,7 @@ module Ieee80211Nic like IWirelessNic
 {
     parameters:
         string mgmtType = default("Ieee80211MgmtSTA"); // name of the management module type (implements IIeee80211Mgmt)
-        string radioType = default("SimplifiedIeee80211Radio");
+        string radioType = default("Ieee80211Radio");
         string opMode @enum("b","g","a","p") = default("g");
         double bitrate @unit("bps") = default(opMode == "b" ? 11Mbps : opMode == "p" ? 27Mbps : 54Mbps);
         int numOutputHooks = default(0);
