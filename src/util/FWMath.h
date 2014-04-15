@@ -158,6 +158,16 @@ class INET_API FWMath {
   static double max(double a, double b) { return (a<b)? b : a; }
 
   /**
+   * Converts a dB value to fraction.
+   */
+  static double dB2fraction(double dB) { return pow(10.0, dB/10.0); }
+
+  /**
+   * Convert a fraction value to dB.
+   */
+  static double fraction2dB(double fraction) { return (10 * log10(fraction)); }
+
+  /**
    * Converts a dBm value into milliwatts
    */
   static double dBm2mW(double dBm) { return pow(10.0, dBm/10.0); }
