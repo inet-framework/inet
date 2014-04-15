@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.ideal;
 
-#include "PhysicalLayerDefs.h"
+import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+module IdealRadioSignalTransmitter like IRadioSignalTransmitter
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+    parameters:
+        double bitrate @unit(bps);
+        double maxCommunicationRange @unit(m);
+        double maxInterferenceRange @unit(m);
+        double maxDetectionRange @unit(m);
+        @class(IdealRadioSignalTransmitter);
+}

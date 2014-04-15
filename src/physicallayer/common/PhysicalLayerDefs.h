@@ -15,18 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_PHYSICALLAYERDEFS_H_
+#define __INET_PHYSICALLAYERDEFS_H_
 
-#include "PhysicalLayerDefs.h"
+#include <math.h>
+#include <limits>
+#include "INETDefs.h"
+#include "Units.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
-{
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
+#define qNaN std::numeric_limits<double>::quiet_NaN()
+#define sNaN std::numeric_limits<double>::signaling_NaN()
+#define NaN qNaN
+#define isNaN(X) std::isnan(X)
+#define POSITIVE_INFINITY std::numeric_limits<double>::infinity()
+#define NEGATIVE_INFINITY -std::numeric_limits<double>::infinity()
+
+using namespace units::values;
 
 #endif

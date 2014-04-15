@@ -15,18 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALMODULATION_H_
+#define __INET_IRADIOSIGNALMODULATION_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IPrintableObject.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalModulation : public IPrintableObject
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalModulation() {}
+
+        virtual int getCodeWordLength() const = 0;
+
+        virtual int getConstellationSize() const = 0;
 };
 
 #endif

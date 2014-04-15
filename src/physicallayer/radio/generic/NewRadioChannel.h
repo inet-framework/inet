@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_NEWRADIOCHANNEL_H_
+#define __INET_NEWRADIOCHANNEL_H_
 
-#include "PhysicalLayerDefs.h"
+#include "RadioChannel.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API NewRadioChannel : public RadioChannel
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
+    protected:
+        virtual void initialize(int stage);
 };
 
 #endif

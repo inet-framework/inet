@@ -15,18 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOBACKGROUNDNOISE_H_
+#define __INET_IRADIOBACKGROUNDNOISE_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IRadioSignalReception.h"
+#include "IRadioSignalListening.h"
+#include "IRadioSignalNoise.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+// TODO: rename implementations to isotropicbackgroundnoise
+class INET_API IRadioBackgroundNoise
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioBackgroundNoise() {}
+
+        // TODO: merge the two?
+        virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const = 0;
+        virtual const IRadioSignalNoise *computeNoise(const IRadioSignalReception *reception) const = 0;
 };
 
 #endif

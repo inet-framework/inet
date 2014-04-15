@@ -15,18 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.common;
 
-#include "PhysicalLayerDefs.h"
-
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+module ConstantSpeedRadioSignalPropagation like IRadioSignalPropagation
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+    parameters:
+        double propagationSpeed @unit(mps) = default(299792458.0 mps);
+        @class(ConstantSpeedRadioSignalPropagation);
+}

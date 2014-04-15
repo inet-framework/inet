@@ -15,18 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALNOISE_H_
+#define __INET_IRADIOSIGNALNOISE_H_
 
 #include "PhysicalLayerDefs.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalNoise
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalNoise() {}
+
+        virtual const simtime_t getStartTime() const = 0;
+        virtual const simtime_t getEndTime() const = 0;
+        virtual const simtime_t getDuration() const = 0;
 };
 
 #endif

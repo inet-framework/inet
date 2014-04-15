@@ -15,18 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.contract;
 
-#include "PhysicalLayerDefs.h"
-
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+moduleinterface IRadioBackgroundNoise
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+}

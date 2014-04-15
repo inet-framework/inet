@@ -1,0 +1,81 @@
+1. Packet 
+part of MAC
+
+2. Bit 
+cyclic redundancy check insertion/removal (CRC)
+forward error correction coding/encoding (FEC)
+bit interleaving/deinterleaving
+
+3. Symbol 
+modulation/demodulation
+pilot/preamble insertion/removal
+spreading/despreading
+antenna beamforming
+space-time coding/decoding
+spatial multiplexing/demultiplexing
+
+4. sample or waveform 
+pulse shaping/matching filter
+carrier sensing/energy detection
+synchronization/pll
+
+5. analog 
+DA/AD conversion
+IF up/down conversion
+PLL
+
+decider -> snir
+
+
+
+
+
+TODO:
+ - doppler shift
+ - polarization
+ - preamble/pilot/sychronization
+ - mimo, antenna gain
+
+model:
+ - mobility (position)
+ - antenna (mobility)
+ - propagation (speed)
+ - attenuation (free space: alpha)
+ - background noise (isotropic: power)
+ - radio (receiver antenna, transmitter antenna, codec, modem, shaper, converter)
+ - radio channel (propagation, attenuation, background noise, radios, transmissions)
+ - listening (??? filter model)
+ - transmission (start position/time, end position/time, analog model)
+ - reception (transmission, start position/time, end position/time, analog model)
+ - noise (start position/time, end position/time, analog model)
+ - loss (factor)
+ - codec (coding scheme, header bit length, header bit rate, payload bit rate)
+ - modem (modulation scheme, preamble symbol length)
+ - shaper (?)
+ - converter (power, carrier frequency, bandwidth)
+
+transmission:
+ - packet model (length, bits)
+ - bit model (crc, fec, header bit length, total length, bits)
+ - symbol model (modulation, preamble symbol length, total length, symbols)
+ - sample model (pulse shape, length, samples)
+ - analog model (power, duration, carrier frequency, bandwidth) 
+
+reception:
+ - analog model indication (snir)
+ - sample model indication (rssi)
+ - symbol model indication (symbol error rate, symbol error count)
+ - bit model indication (bit error rate, bit error count)
+ - packet model indication (packet error rate, packet successful)
+
+algorithms:
+ - compute CRC
+ - check CRC
+ - FEC encode
+ - FEC decode
+ - Modulate
+ - Demodulate
+ - Shape pulse
+ - Filter pulse
+ - insert preamble/pilot
+ - synchronize

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,22 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERCONTROLINFO_H_
-#define __INET_IPHYSICALLAYERCONTROLINFO_H_
+package inet.physicallayer.radio.generic;
 
-#include "INETDefs.h"
+import inet.physicallayer.radio.contract.IRadioAntenna;
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer control infos.
- */
-class INET_API IPhysicalLayerControlInfo
+module ConstantGainRadioAntenna like IRadioAntenna
 {
-  public:
-    virtual ~IPhysicalLayerControlInfo() { }
-
-//    virtual double getRSSI() = 0;
-
-//    virtual double getBER() = 0;
-};
-
-#endif
+    parameters:
+        double gain @unit(dB);
+        @class(ConstantGainRadioAntenna);
+}

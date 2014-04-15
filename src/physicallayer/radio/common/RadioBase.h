@@ -27,7 +27,7 @@
  *
  * @author Levente Meszaros
  */
-class INET_API RadioBase : public PhysicalLayerBase, public OldIRadio
+class INET_API RadioBase : public PhysicalLayerBase, public virtual OldIRadio
 {
   protected:
     /** Internal state */
@@ -35,11 +35,13 @@ class INET_API RadioBase : public PhysicalLayerBase, public OldIRadio
     RadioMode radioMode;
     ReceptionState receptionState;
     TransmissionState transmissionState;
+    // TODO: delme
     int radioChannel;
     //@}
 
     /** Environment */
     //@{
+    // TODO: delme
     IMobility *mobility;
     //@}
 

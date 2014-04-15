@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.ieee80211;
 
-#include "PhysicalLayerDefs.h"
+import inet.physicallayer.radio.scalar.ScalarRadioChannel;
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+simple Ieee80211RadioChannel extends ScalarRadioChannel
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+    parameters:
+        carrierFrequency = default(2.4GHz);
+        minReceptionPower = default(-85dBm);
+        minInterferencePower = default(-110dBm);
+        backgroundNoise.power = default(-110dBm);
+}

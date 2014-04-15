@@ -15,18 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOCODEC_H_
+#define __INET_IRADIOCODEC_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IRadioSignalPacketModel.h"
+#include "IRadioSignalBitModel.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioCodec
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioCodec() {}
+
+        virtual const IRadioSignalTransmissionBitModel *encode(const IRadioSignalTransmissionPacketModel *packetModel) const = 0;
+
+        virtual const IRadioSignalReceptionPacketModel *decode(const IRadioSignalReceptionBitModel *bitModel) const = 0;
 };
 
 #endif

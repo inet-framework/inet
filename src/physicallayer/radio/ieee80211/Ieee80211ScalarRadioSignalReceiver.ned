@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,18 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.ieee80211;
 
-#include "PhysicalLayerDefs.h"
+import inet.physicallayer.radio.scalar.ScalarRadioSignalReceiver;
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+module Ieee80211ScalarRadioSignalReceiver extends ScalarRadioSignalReceiver
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+    parameters:
+        string opMode @enum("b","g","a","p") = default("g");
+        string errorModel @enum("yans","nist") = default("nist");
+        bool autoHeaderSize = default(false);
+        string berTableFile = default("");
+        @class(Ieee80211ScalarRadioSignalReceiver);
+}

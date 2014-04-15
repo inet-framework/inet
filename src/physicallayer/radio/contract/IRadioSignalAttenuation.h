@@ -15,18 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALATTENUATION_H_
+#define __INET_IRADIOSIGNALATTENUATION_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IRadio.h"
+#include "IRadioSignalTransmission.h"
+#include "IRadioSignalReception.h"
+#include "IRadioSignalLoss.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalAttenuation
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalAttenuation() {}
+
+        virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
+        virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
 };
 
 #endif

@@ -15,18 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALPROPAGATION_H_
+#define __INET_IRADIOSIGNALPROPAGATION_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IMobility.h"
+#include "IRadioSignalArrival.h"
+#include "IRadioSignalTransmission.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalPropagation
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalPropagation() {}
+
+        virtual mps getPropagationSpeed() const = 0;
+
+        virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const = 0;
 };
 
 #endif

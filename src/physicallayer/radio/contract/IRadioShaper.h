@@ -15,18 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSHAPER_H_
+#define __INET_IRADIOSHAPER_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IRadioSignalSymbolModel.h"
+#include "IRadioSignalSampleModel.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioShaper
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioShaper() {}
+
+        virtual const IRadioSignalTransmissionSampleModel *shape(const IRadioSignalTransmissionSymbolModel *symbolModel) const = 0;
+
+        virtual const IRadioSignalReceptionSymbolModel *filter(const IRadioSignalReceptionSampleModel *sampleModel) const = 0;
 };
 
 #endif

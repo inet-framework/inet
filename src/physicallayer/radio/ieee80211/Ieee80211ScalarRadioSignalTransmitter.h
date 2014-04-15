@@ -15,18 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IEEE80211SCALARRADIOSIGNALTRANSMITTER_H_
+#define __INET_IEEE80211SCALARRADIOSIGNALTRANSMITTER_H_
 
-#include "PhysicalLayerDefs.h"
+#include "ScalarImplementation.h"
+#include "WifiPreambleType.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalTransmitter
 {
+    protected:
+        WifiPreamble preambleMode;
+
+    protected:
+        virtual void initialize(int stage);
+
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        Ieee80211ScalarRadioSignalTransmitter() :
+            ScalarRadioSignalTransmitter(),
+            preambleMode((WifiPreamble)-1)
+        {}
+
+        virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };
 
 #endif

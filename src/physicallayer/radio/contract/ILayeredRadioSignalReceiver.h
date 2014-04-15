@@ -15,18 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_ILAYEREDRADIOSIGNALRECEIVER_H_
+#define __INET_ILAYEREDRADIOSIGNALRECEIVER_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IRadioSignalReceiver.h"
+#include "IRadioCodec.h"
+#include "IRadioModem.h"
+#include "IRadioShaper.h"
+#include "IRadioConverter.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API ILayeredRadioSignalReceiver : public virtual IRadioSignalReceiver
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual const IRadioCodec *getDecoder() const = 0;
+        virtual const IRadioModem *getDemodulator() const = 0;
+        virtual const IRadioShaper *getPulseFilter() const = 0;
+        virtual const IRadioConverter *getAnalogDigitalConverter() const = 0;
 };
 
 #endif

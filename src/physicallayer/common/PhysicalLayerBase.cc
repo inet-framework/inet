@@ -16,7 +16,3 @@
 //
 
 #include "PhysicalLayerBase.h"
-
-PhysicalLayerBase::PhysicalLayerBase()
-{
-}

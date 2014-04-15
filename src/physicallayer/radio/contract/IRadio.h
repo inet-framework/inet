@@ -21,6 +21,10 @@
 #include "IMobility.h"
 #include "IPhysicalLayer.h"
 #include "IRadioFrame.h"
+#include "IRadioSignalSource.h"
+#include "IRadioAntenna.h"
+#include "IRadioSignalReceiver.h"
+#include "IRadioSignalTransmitter.h"
 
 /**
  * This purely virtual interface provides an abstraction for different radios.
@@ -135,13 +139,13 @@ class INET_API OldIRadio : public IPhysicalLayer
             /**
              * The radio channel is busy, a signal strong enough to evaluate is detected,
              * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
-             * above the reception threshold but the SNR is not yet evaluated)
+             * above the reception threshold but the SNIR is not yet evaluated)
              */
             RECEPTION_STATE_SYNCHRONIZING,
 
             /**
              * The radio channel is busy, a signal strong enough to receive is detected.
-             * (e.g. the SNR was above the reception threshold during synchronize)
+             * (e.g. the SNIR was above the reception threshold during synchronize)
              */
             RECEPTION_STATE_RECEIVING
         };
@@ -251,6 +255,28 @@ class INET_API OldIRadio : public IPhysicalLayer
          * Returns the name of the provided radio transmission state.
          */
         static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
+};
+
+class IRadioChannel;
+
+// TODO: merge with OldIRadio
+class INET_API IRadio : public IRadioSignalSource
+{
+    public:
+        virtual ~IRadio() {}
+
+        virtual unsigned int getId() const = 0;
+
+        virtual const IRadioAntenna *getAntenna() const = 0;
+        virtual const IRadioSignalTransmitter *getTransmitter() const = 0;
+        virtual const IRadioSignalReceiver *getReceiver() const = 0;
+        virtual const IRadioChannel *getChannel() const = 0;
+
+        virtual IRadioFrame *transmitPacket(cPacket *packet, const simtime_t startTime) = 0;
+        virtual cPacket *receivePacket(IRadioFrame *frame) = 0;
+
+        virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
+        virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
 };
 
 #endif

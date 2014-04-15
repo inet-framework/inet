@@ -15,18 +15,20 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALLISTENINGDECISION_H_
+#define __INET_IRADIOSIGNALLISTENINGDECISION_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IPrintableObject.h"
+#include "IRadioSignalListening.h"
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalListeningDecision : public IPrintableObject
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalListeningDecision() {}
+
+        virtual const IRadioSignalListening *getListening() const = 0;
+
+        virtual bool isListeningPossible() const = 0;
 };
 
 #endif

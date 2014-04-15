@@ -20,6 +20,12 @@
 
 #include "IRadio.h"
 #include "IRadioFrame.h"
+#include "IRadioSignalArrival.h"
+#include "IRadioSignalPropagation.h"
+#include "IRadioSignalAttenuation.h"
+#include "IRadioBackgroundNoise.h"
+#include "IRadioSignalReceptionDecision.h"
+#include "IRadioSignalListeningDecision.h"
 
 /**
  * This purely virtual interface provides an abstraction for different radio channels.
@@ -33,6 +39,34 @@ class INET_API OldIRadioChannel
          * Returns the number of available radio channels.
          */
         virtual int getNumChannels() = 0;
+};
+
+// TODO: merge with OldIRadioChannel
+class INET_API IRadioChannel
+{
+    public:
+        virtual ~IRadioChannel() {}
+
+        virtual const IRadioSignalPropagation *getPropagation() const = 0;
+        virtual const IRadioSignalAttenuation *getAttenuation() const = 0;
+        virtual const IRadioBackgroundNoise *getBackgroundNoise() const = 0;
+
+        virtual void addRadio(const IRadio *radio) = 0;
+        virtual void removeRadio(const IRadio *radio) = 0;
+
+        // TODO: separate start and end of transmission to allow mobility changes in between
+        virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission) = 0;
+        virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame) = 0;
+
+        virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const = 0;
+        virtual const IRadioSignalListeningDecision *listenOnChannel(const IRadio *radio, const IRadioSignalListening *listening) const = 0;
+
+        virtual bool isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
+        virtual bool isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
+
+        virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
+        // KLUDGE: to keep fingerprint
+        virtual void setArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) = 0;
 };
 
 #endif

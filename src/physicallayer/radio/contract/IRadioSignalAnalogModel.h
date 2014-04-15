@@ -15,18 +15,34 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+#ifndef __INET_IRADIOSIGNALANALOGMODEL_H_
+#define __INET_IRADIOSIGNALANALOGMODEL_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IPrintableObject.h"
 
 /**
- * This purely virtual interface provides an abstraction for different physical layer frames.
+ * This purely virtual interface provides an abstraction for different radio
+ * signal models in the analog domain.
  */
-class INET_API IPhysicalLayerFrame
+class INET_API IRadioSignalAnalogModel : public IPrintableObject
 {
     public:
-        virtual ~IPhysicalLayerFrame() { }
+        virtual ~IRadioSignalAnalogModel() {}
+
+        virtual const simtime_t getDuration() const = 0;
+};
+
+class INET_API IRadioSignalTransmissionAnalogModel : public virtual IRadioSignalAnalogModel
+{
+};
+
+class INET_API IRadioSignalReceptionAnalogModel : public virtual IRadioSignalAnalogModel
+{
+    public:
+        /**
+         * Returns the signal to noise plus interference ratio.
+         */
+        virtual double getSNIR() const = 0;
 };
 
 #endif

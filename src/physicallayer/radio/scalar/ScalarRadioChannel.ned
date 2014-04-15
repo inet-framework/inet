@@ -15,18 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPHYSICALLAYERFRAME_H_
-#define __INET_IPHYSICALLAYERFRAME_H_
+package inet.physicallayer.radio.scalar;
 
-#include "PhysicalLayerDefs.h"
+import inet.physicallayer.radio.generic.NewRadioChannel;
 
-/**
- * This purely virtual interface provides an abstraction for different physical layer frames.
- */
-class INET_API IPhysicalLayerFrame
+simple ScalarRadioChannel extends NewRadioChannel
 {
-    public:
-        virtual ~IPhysicalLayerFrame() { }
-};
-
-#endif
+    parameters:
+        propagationType = default("ConstantSpeedRadioSignalPropagation");
+        attenuationType = default("ScalarRadioSignalFreeSpaceAttenuation");
+        backgroundNoiseType = default("ScalarRadioBackgroundNoise");
+}
