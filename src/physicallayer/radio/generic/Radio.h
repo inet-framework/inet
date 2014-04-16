@@ -36,13 +36,34 @@ class INET_API Radio : public RadioBase, public virtual IRadio
         const IRadioSignalReceiver *receiver;
         IRadioChannel *channel;
 
+        cMessage *endTransmissionTimer;
+        cMessage *endReceptionTimer;
+        typedef std::vector<cMessage *> EndReceptionTimers;
+        EndReceptionTimers endReceptionTimers;
+
+    protected:
+        virtual void initialize(int stage);
+
+        virtual void handleMessageWhenUp(cMessage *message);
+        virtual void handleSelfMessage(cMessage *message);
+        virtual void handleUpperCommand(cMessage *command);
+        virtual void handleLowerCommand(cMessage *command);
+        virtual void handleUpperFrame(cPacket *frame);
+        virtual void handleLowerFrame(RadioFrame *radioFrame);
+        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+
+        virtual void cancelAndDeleteEndReceptionTimers();
+        virtual void updateTransceiverState();
+
     public:
         Radio() :
             id(nextId++),
             antenna(NULL),
             transmitter(NULL),
             receiver(NULL),
-            channel(NULL)
+            channel(NULL),
+            endTransmissionTimer(NULL),
+            endReceptionTimer(NULL)
         {}
 
         Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
@@ -50,7 +71,9 @@ class INET_API Radio : public RadioBase, public virtual IRadio
             antenna(antenna),
             transmitter(transmitter),
             receiver(receiver),
-            channel(channel)
+            channel(channel),
+            endTransmissionTimer(NULL),
+            endReceptionTimer(NULL)
         {
             channel->addRadio(this);
         }
@@ -69,10 +92,12 @@ class INET_API Radio : public RadioBase, public virtual IRadio
         virtual IRadioFrame *transmitPacket(cPacket *packet, const simtime_t startTime);
         virtual cPacket *receivePacket(IRadioFrame *frame);
 
-        // TODO: delme
-        virtual const IRadioSignalTransmission *getTransmissionInProgress() const { return NULL; }
-        virtual const IRadioSignalTransmission *getReceptionInProgress() const { return NULL; }
-        virtual void handleMessageWhenUp(cMessage *msg) {}
+
+        virtual void setRadioMode(RadioMode radioMode);
+        virtual void setOldRadioChannel(int newRadioChannel);
+
+        virtual const IRadioSignalTransmission *getTransmissionInProgress() const;
+        virtual const IRadioSignalTransmission *getReceptionInProgress() const;
 };
 
 #endif

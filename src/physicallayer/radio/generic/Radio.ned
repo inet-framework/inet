@@ -22,13 +22,13 @@ import inet.physicallayer.radio.contract.IRadioAntenna;
 import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
 
-simple NewRadio extends RadioBase
+simple Radio extends RadioBase
 {
     parameters:
         string antennaType;
         string transmitterType;
         string receiverType;
-        @class(NewRadio);
+        @class(Radio);
 
     submodules:
         antenna: <antennaType> like IRadioAntenna;

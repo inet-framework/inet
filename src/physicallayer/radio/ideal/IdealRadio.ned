@@ -17,9 +17,9 @@
 
 package inet.physicallayer.radio.ideal;
 
-import inet.physicallayer.radio.generic.NewRadio;
+import inet.physicallayer.radio.generic.Radio;
 
-simple IdealRadio extends NewRadio
+simple IdealRadio extends Radio
 {
     parameters:
         antennaType = default("IsotropicRadioAntenna");
