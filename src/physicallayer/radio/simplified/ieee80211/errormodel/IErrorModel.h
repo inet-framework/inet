@@ -16,6 +16,8 @@
 #ifndef IERRORMODEL_H_
 #define IERRORMODEL_H_
 
+#include "ModulationType.h"
+
 class IErrorModel
 {
     public:

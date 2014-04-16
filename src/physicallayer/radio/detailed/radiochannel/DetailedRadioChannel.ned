@@ -20,6 +20,7 @@
 package inet.physicallayer.radio.detailed.radiochannel;
 
 import inet.physicallayer.radio.common.RadioChannelBase;
+import inet.physicallayer.radio.simplified.dummy;
 
 // Generic ConnectionMananger interface definition.
 moduleinterface IConnectionManager
@@ -74,6 +75,11 @@ simple DetailedRadioChannel extends RadioChannelBase like IConnectionManager
         // should the maximum interference distance be displayed for each node?
         bool drawMaxIntfDist = default(false);
 
-		@class(DetailedRadioChannel);
+        @class(DetailedRadioChannel);
         @display("i=abstract/multicast");
+
+    submodules:
+        propagation: dummy;
+        attenuation: dummy;
+        backgroundNoise: dummy;
 }

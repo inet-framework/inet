@@ -25,6 +25,7 @@
 #include <limits>
 
 #include "RadioBase.h"
+#include "IMobility.h"
 #include "ISimplifiedRadioChannel.h"
 
 // Forward declarations
@@ -70,12 +71,13 @@ class INET_API SimplifiedRadioChannelAccess : public RadioBase, protected cListe
     /** Finds the radio channel module in the network */
     static ISimplifiedRadioChannel *getSimplifiedRadioChannel();
 
+    const Coord getRadioPosition() const { return (check_and_cast<IMobility *>(hostModule->getSubmodule("mobility")))->getCurrentPosition(); }
+
   protected:
     /** Sends a message to all radios in range */
     virtual void sendToChannel(SimplifiedRadioFrame *msg);
 
     virtual cPar& getRadioChannelPar(const char *parName) { return dynamic_cast<cModule *>(cc)->par(parName); }
-    const Coord& getRadioPosition() const { return radioPos; }
     cModule *getHostModule() const { return hostModule; }
 
     virtual void initialize(int stage);

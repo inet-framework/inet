@@ -25,6 +25,7 @@
 #include "Radio80211aControlInfo_m.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
+#include "Ieee80211Consts.h"
 
 simsignal_t SimplifiedRadio::bitrateSignal = registerSignal("bitrate");
 simsignal_t SimplifiedRadio::lossRateSignal = registerSignal("lossRate");
@@ -535,6 +536,7 @@ void SimplifiedRadio::handleLowerMsgStart(SimplifiedRadioFrame* radioFrame)
     if (distance<MIN_DISTANCE)
         distance = MIN_DISTANCE;
 
+    EV << "Power: " << radioFrame->getPSend() << ", frequency: " << frequency << ", distance: " << distance << endl;
     double rcvdPower = receptionModel->calculateReceivedPower(radioFrame->getPSend(), frequency, distance);
     if (obstacles && distance > MIN_DISTANCE)
         rcvdPower = obstacles->calculateReceivedPower(rcvdPower, carrierFrequency, framePos, 0, getRadioPosition(), 0);
@@ -697,6 +699,7 @@ void SimplifiedRadio::setOldRadioChannel(int channel)
     EV << "Changing from channel " << radioChannel << " to " << channel << "\n";
     radioChannel = channel;
     emit(radioChannelChangedSignal, channel);
+    carrierFrequency = CENTER_FREQUENCIES[radioChannel + 1];
 
     cc->setRadioChannel(myRadioRef, radioChannel);
 
@@ -718,8 +721,11 @@ void SimplifiedRadio::setOldRadioChannel(int channel)
             continue;
 
         // time for the message to reach us
+        double interferenceRange = cc->getInterferenceRange(myRadioRef);
         double distance = getRadioPosition().distance(radioFrame->getSenderPos());
-        simtime_t propagationDelay = distance / 3.0E+8;
+        if (distance > interferenceRange)
+            continue;
+        simtime_t propagationDelay = distance / SPEED_OF_LIGHT;
 
         // if this transmission is on our new channel and it would reach us in the future, then schedule it
         if (channel == radioFrame->getChannelNumber())
@@ -1004,14 +1010,17 @@ void SimplifiedRadio::connectReceiver()
             continue;
 
         // time for the message to reach us
+        double interferenceRange = cc->getInterferenceRange(myRadioRef);
         double distance = getRadioPosition().distance(radioFrame->getSenderPos());
-        simtime_t propagationDelay = distance / 3.0E+8;
+        if (distance > interferenceRange)
+            continue;
+        simtime_t propagationDelay = distance / SPEED_OF_LIGHT;
 
         // if there is a message on the air which will reach us in the future
         if (radioFrame->getTimestamp() + propagationDelay >= simTime())
         {
             EV << " - (" << radioFrame->getClassName() << ")" << radioFrame->getName() << ": ";
-            EV << "will arrive in the future, scheduling it\n";
+            EV << "will arrive in the future, already scheduled\n";
 
             // we need to send to each radioIn[] gate of this host
             //for (int i = 0; i < radioGate->size(); i++)
@@ -1019,7 +1028,7 @@ void SimplifiedRadio::connectReceiver()
 
             // JcM Fix: we need to this radio only. no need to send the packet to each radioIn
             // since other radios might be not in the same channel
-            sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() );
+//            sendDirect(radioFrame->dup(), radioFrame->getTimestamp() + propagationDelay - simTime(), radioFrame->getDuration(), myHost, radioGate->getId() );
         }
         // if we hear some part of the message
         else if (radioFrame->getTimestamp() + radioFrame->getDuration() + propagationDelay > simTime())

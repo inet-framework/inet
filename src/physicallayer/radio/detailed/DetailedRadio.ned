@@ -18,6 +18,7 @@
 package inet.physicallayer.radio.detailed;
 
 import inet.physicallayer.radio.common.RadioBase;
+import inet.physicallayer.radio.simplified.dummy;
 
 // Physical layer module which knows how to initialize the Deciders
 // and AnalogueModels from the modules directory.
@@ -59,4 +60,9 @@ simple DetailedRadio extends RadioBase
         int initialRadioChannel = default(0);  // Initial radio channel.
 
         @class(DetailedRadio);
+
+    submodules:
+        antenna: dummy;
+        transmitter: dummy;
+        receiver: dummy;
 }

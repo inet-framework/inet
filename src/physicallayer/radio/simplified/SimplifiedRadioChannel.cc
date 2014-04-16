@@ -16,6 +16,7 @@
 
 
 #include "SimplifiedRadioChannel.h"
+#include "SimplifiedRadioChannelAccess.h"
 #include "FWMath.h"
 #include <cassert>
 
@@ -242,15 +243,6 @@ void SimplifiedRadioChannel::addOngoingTransmission(RadioRef h, SimplifiedRadioF
 {
     Enter_Method_Silent();
 
-    // we only keep track of ongoing transmissions so that we can support
-    // NICs switching channels -- so there's no point doing it if there's only
-    // one channel
-    if (numChannels == 1)
-    {
-        delete frame;
-        return;
-    }
-
     // purge old transmissions from time to time
     if (simTime() - lastOngoingTransmissionsUpdate > TRANSMISSION_PURGE_INTERVAL)
     {
@@ -300,7 +292,13 @@ void SimplifiedRadioChannel::sendToChannel(RadioRef srcRadio, SimplifiedRadioFra
             EV << "sending message to radio listening on the same channel\n";
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps
-            simtime_t delay = srcRadio->pos.distance(r->pos) / SPEED_OF_LIGHT;
+            Coord srcPos = check_and_cast<SimplifiedRadioChannelAccess *>(srcRadio->radioModule)->getRadioPosition();
+            Coord destPos = check_and_cast<SimplifiedRadioChannelAccess *>(r->radioModule)->getRadioPosition();
+            simtime_t delay = srcPos.distance(destPos) / SPEED_OF_LIGHT;
+            EV_DEBUG << "Sending " << radioFrame
+                     << " from " << srcRadio << " at " << srcPos
+                     << " to " << r << " at " << destPos
+                     << " in " << delay * 1E+6 << " us propagation time." << endl;
             check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(radioFrame->dup(), delay, radioFrame->getDuration(), r->radioInGate);
         }
         else

@@ -23,6 +23,10 @@ package inet.physicallayer.radio.simplified;
 
 import inet.physicallayer.radio.common.RadioBase;
 
+module dummy
+{
+}
+
 //
 // This is an abstract module that defines all parameters for radio modules
 //
@@ -67,4 +71,9 @@ simple SimplifiedRadio extends RadioBase
         @signal[lossRate](type="double"); // 0..1; percentage of frames received incorrectly in the last period
         @statistic[bitrate](title="tx bitrate"; record=min,max,timeavg,vector; interpolationmode=sample-hold; unit=bps);
         @statistic[lossRate](title="packet loss rate"; record=min,max,timeavg,vector; interpolationmode=backward-sample-hold);
+
+    submodules:
+        antenna: dummy;
+        transmitter: dummy;
+        receiver: dummy;
 }
