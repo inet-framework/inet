@@ -21,11 +21,6 @@
 
 unsigned int Radio::nextId = 0;
 
-void RadioFrame::printToStream(std::ostream &stream) const
-{
-    stream << (cPacket *)this;
-}
-
 Radio::~Radio()
 {
     delete antenna;

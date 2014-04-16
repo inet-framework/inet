@@ -21,22 +21,7 @@
 #include "IRadioChannel.h"
 #include "IRadioAntenna.h"
 #include "RadioBase.h"
-
-// TODO: merge with RadioFrame
-class INET_API RadioFrame : public cPacket, public IRadioFrame
-{
-    protected:
-        const IRadioSignalTransmission *transmission;
-
-    public:
-        RadioFrame(const IRadioSignalTransmission *transmission) :
-            transmission(transmission)
-        {}
-
-        virtual void printToStream(std::ostream &stream) const;
-
-        virtual const IRadioSignalTransmission *getTransmission() const { return transmission; }
-};
+#include "RadioFrame.h"
 
 // TODO: merge with RadioBase
 class INET_API Radio : public RadioBase, public virtual IRadio
