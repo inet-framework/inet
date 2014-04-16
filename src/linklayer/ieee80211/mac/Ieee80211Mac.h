@@ -33,6 +33,7 @@
 #include "FSMA.h"
 #include "IQoSClassifier.h"
 #include "IRadio.h"
+#include "ILifecycle.h"
 
 /**
  * IEEE 802.11g with e Media Access Control Layer.
@@ -659,9 +660,13 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual bool isDuplicated(cMessage *msg);
 
+    virtual void start();
+    virtual void stop();
+
   public:
     virtual State getState() {return static_cast<State>(fsm.getState());}
     virtual unsigned int getQueueSize() {return transmissionQueueSize();}
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif

@@ -2820,3 +2820,34 @@ bool Ieee80211Mac::isBackoffPending()
     return false;
 }
 
+bool Ieee80211Mac::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            start();
+    }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
+            stop();
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeStartOperation::STAGE_LOCAL)  // crash is immediate
+            stop();
+    }
+    else
+        throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
+    return true;
+}
+
+void Ieee80211Mac::start()
+{
+    isOperational = true;
+    initializeQueueModule();
+    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+}
+
+void Ieee80211Mac::stop()
+{
+    isOperational = false;
+}
