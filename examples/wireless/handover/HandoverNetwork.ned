@@ -21,7 +21,7 @@ package inet.examples.wireless.handover;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 
 network HandoverNetwork
@@ -37,7 +37,7 @@ network HandoverNetwork
         ap2: AccessPoint {
             @display("p=500,200;r=,,#707070");
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             @display("p=60,50");
         }
         configurator: IPv4NetworkConfigurator {

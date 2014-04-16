@@ -24,7 +24,7 @@ import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 module ThroughputClient
 {
@@ -100,7 +100,7 @@ network Throughput
                 @display("p=200,200;r=,,#707070");
                 wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             parameters:
                 @display("p=61,46");
         }

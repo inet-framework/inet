@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2010 Alfonso Ariza
+// Copyright (C) 2006 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,37 +16,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.examples.manetrouting.fg80211;
+package inet.examples.wireless.scaling;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.nodes.inet.WirelessHost;
+import inet.physicallayer.radio.contract.IRadioChannel;
 
-
-network Fg80211Net
+network TestRadioScaling
 {
     parameters:
         int numHosts;
-        int numFixHosts;
+        string radioChannelType;
     submodules:
-        fixhost[numFixHosts]: AdhocHost {
+        radioChannel: <radioChannelType> like IRadioChannel {
             parameters:
-                @display("i=device/pocketpc_s;r=,,#707070");
-        }
-        host[numHosts]: AdhocHost {
-            parameters:
-                @display("i=device/pocketpc_s;r=,,#707070");
-        }
-        radioChannel: Ieee80211RadioChannel {
-            parameters:
-                @display("p=60,50;i=misc/sun");
+                @display("p=50,50");
         }
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
-                @display("p=140,50;i=block/cogwheel_s");
+                @display("p=50,100");
         }
-    connections allowunconnected:
+        host[numHosts]: WirelessHost {
+            parameters:
+                @display("r=,,#707070;p=250,58");
+        }
 }
-
-

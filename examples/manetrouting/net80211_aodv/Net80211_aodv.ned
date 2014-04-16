@@ -20,7 +20,7 @@ package inet.examples.manetrouting.net80211_aodv;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 
 //
@@ -42,7 +42,7 @@ network Net80211_aodv
             parameters:
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
