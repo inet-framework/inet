@@ -19,7 +19,7 @@
 
 package inet.physicallayer.radio.simplified;
 
-import inet.physicallayer.radio.common.RadioChannelBase;
+import inet.physicallayer.radio.contract.IRadioChannel;
 
 //
 // ~SimplifiedRadioChannel has exactly one instance in every network model that
@@ -36,9 +36,10 @@ import inet.physicallayer.radio.common.RadioChannelBase;
 // @author Andras Varga (based on MF's SimplifiedRadioChannel by Steffen Sroka and Daniel Willkomm)
 // @see ~IMobility
 //
-simple SimplifiedRadioChannel extends RadioChannelBase
+simple SimplifiedRadioChannel like IRadioChannel
 {
     parameters:
+        int numChannels = default(1);
         double pMax @unit("mW") = default(20mW); // maximum sending power used for this network (in mW)
         double sat @unit("dBm") = default(-110dBm); // signal attenuation threshold (in dBm)
         double alpha = default(2); // path loss coefficient

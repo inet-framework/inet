@@ -7,7 +7,6 @@
 
 #include "INETDefs.h"
 #include "NicEntry.h"
-#include "RadioChannelBase.h"
 
 class DetailedRadioChannelAccess;
 
@@ -27,7 +26,7 @@ class DetailedRadioChannelAccess;
  * @author Christoph Sommer ("unregisterNic()"-method)
  * @sa ConnectionManagerAccess
  */
-class INET_API BaseConnectionManager : public RadioChannelBase
+class INET_API BaseConnectionManager : public cSimpleModule
 {
 private:
 	/**

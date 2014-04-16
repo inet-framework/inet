@@ -20,13 +20,13 @@
 
 #include <vector>
 #include <algorithm>
-#include "RadioChannelBase.h"
+#include "IRadioChannel.h"
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalPropagation.h"
 #include "IRadioSignalAttenuation.h"
 #include "IRadioBackgroundNoise.h"
 
-class INET_API RadioChannel : public RadioChannelBase, public IRadioChannel
+class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 {
     protected:
         // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time

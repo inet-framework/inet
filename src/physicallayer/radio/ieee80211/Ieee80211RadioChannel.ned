@@ -22,8 +22,10 @@ import inet.physicallayer.radio.scalar.ScalarRadioChannel;
 simple Ieee80211RadioChannel extends ScalarRadioChannel
 {
     parameters:
+        int numChannels = default(1);
         carrierFrequency = default(2.4GHz);
         minReceptionPower = default(-85dBm);
         minInterferencePower = default(-110dBm);
         backgroundNoise.power = default(-110dBm);
+        @class(Ieee80211RadioChannel);
 }

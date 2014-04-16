@@ -15,17 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.common;
+#include "Ieee80211RadioChannel.h"
 
-import inet.physicallayer.radio.contract.IRadioChannel;
+Define_Module(Ieee80211RadioChannel);
 
-
-//
-// This is an abstract base module for radio channel models.
-//
-simple RadioChannelBase like IRadioChannel
+void Ieee80211RadioChannel::initialize(int stage)
 {
-    parameters:
-        int numChannels = default(1); // number of radio channels (frequencies)
-        @display("i=misc/sun_s");
+    NewRadioChannel::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+    {
+        numChannels = par("numChannels");
+    }
 }

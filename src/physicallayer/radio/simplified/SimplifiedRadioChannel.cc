@@ -57,9 +57,9 @@ SimplifiedRadioChannel::~SimplifiedRadioChannel()
  */
 void SimplifiedRadioChannel::initialize(int stage)
 {
-    RadioChannelBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
+        numChannels = par("numChannels");
         transmissions.resize(numChannels);
 
         lastOngoingTransmissionsUpdate = 0;

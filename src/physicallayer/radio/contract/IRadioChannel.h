@@ -30,18 +30,6 @@
 /**
  * This purely virtual interface provides an abstraction for different radio channels.
  */
-class INET_API OldIRadioChannel
-{
-    public:
-        virtual ~OldIRadioChannel() { }
-
-        /**
-         * Returns the number of available radio channels.
-         */
-        virtual int getNumChannels() = 0;
-};
-
-// TODO: merge with OldIRadioChannel
 class INET_API IRadioChannel
 {
     public:

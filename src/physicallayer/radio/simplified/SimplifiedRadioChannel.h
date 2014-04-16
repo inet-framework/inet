@@ -23,7 +23,6 @@
 
 #include "INETDefs.h"
 #include "Coord.h"
-#include "RadioChannelBase.h"
 #include "ISimplifiedRadioChannel.h"
 
 // Forward declarations
@@ -61,11 +60,13 @@ struct ISimplifiedRadioChannel::RadioEntry {
  * @ingroup radioChannel
  * @see ChannelAccess
  */
-class INET_API SimplifiedRadioChannel : public RadioChannelBase, public ISimplifiedRadioChannel
+class INET_API SimplifiedRadioChannel : public cSimpleModule, public ISimplifiedRadioChannel
 {
   protected:
     typedef std::list<RadioEntry> RadioList;
     typedef std::vector<RadioRef> RadioRefVector;
+
+    int numChannels;
 
     RadioList radios;
 
@@ -90,6 +91,8 @@ class INET_API SimplifiedRadioChannel : public RadioChannelBase, public ISimplif
 
     /** Calculate interference distance*/
     virtual double calcInterfDist();
+
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /** Reads init parameters and calculates a maximal interference distance*/
     virtual void initialize(int stage);

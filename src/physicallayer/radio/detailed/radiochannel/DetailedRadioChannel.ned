@@ -19,7 +19,7 @@
 
 package inet.physicallayer.radio.detailed.radiochannel;
 
-import inet.physicallayer.radio.common.RadioChannelBase;
+import inet.physicallayer.radio.contract.IRadioChannel;
 import inet.physicallayer.radio.simplified.dummy;
 
 // Generic ConnectionMananger interface definition.
@@ -54,7 +54,7 @@ moduleinterface IConnectionManager
 // @author Steffen Sroka, Daniel Willkomm, Karl Wessel
 // @see MobilityBase
 //
-simple DetailedRadioChannel extends RadioChannelBase like IConnectionManager
+simple DetailedRadioChannel like IRadioChannel, IConnectionManager
 {
     parameters:
         double playgroundSizeX @unit(m); // x size of the area the nodes are in (in meters)
