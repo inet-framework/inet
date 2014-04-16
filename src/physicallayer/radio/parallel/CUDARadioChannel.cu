@@ -18,6 +18,8 @@
 #include "CUDARadioChannel.h"
 #include "ScalarImplementation.h"
 
+Define_Module(CUDARadioChannel);
+
 #define cudaErrorCheck(code) { gpuAssert((code), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, char *file, int line)
 {

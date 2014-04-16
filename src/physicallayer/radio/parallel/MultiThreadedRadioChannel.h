@@ -79,6 +79,7 @@ class INET_API MultiThreadedRadioChannel : public CachedRadioChannel
         std::priority_queue<ComputeCacheJob, std::vector<ComputeCacheJob>, ComputeCacheJobComparer> pendingComputeCacheJobs;
 
     protected:
+        virtual void initialize(int stage);
         virtual void initializeWorkers(int workerCount);
         virtual void terminateWorkers();
         virtual void *workerMain(void *argument);

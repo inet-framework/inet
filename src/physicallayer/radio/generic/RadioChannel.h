@@ -45,6 +45,8 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         std::vector<std::vector<const IRadioSignalArrival *> > arrivals;
 
     protected:
+        virtual void initialize(int stage);
+
         // TODO: virtual W computeMaxTransmissionPower() const = 0;
         // TODO: virtual W computeMinReceptionPower() const = 0;
 

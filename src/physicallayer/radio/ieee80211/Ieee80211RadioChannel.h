@@ -18,9 +18,9 @@
 #ifndef __INET_IEEE80211RADIOCHANNEL_H_
 #define __INET_IEEE80211RADIOCHANNEL_H_
 
-#include "NewRadioChannel.h"
+#include "RadioChannel.h"
 
-class INET_API Ieee80211RadioChannel : public NewRadioChannel
+class INET_API Ieee80211RadioChannel : public RadioChannel
 {
     protected:
         int numChannels;
@@ -30,12 +30,12 @@ class INET_API Ieee80211RadioChannel : public NewRadioChannel
 
     public:
         Ieee80211RadioChannel() :
-            NewRadioChannel(),
+            RadioChannel(),
             numChannels(-1)
         {}
 
         Ieee80211RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, int numChannels) :
-            NewRadioChannel(propagation, attenuation, backgroundNoise),
+            RadioChannel(propagation, attenuation, backgroundNoise),
             numChannels(numChannels)
         {}
 

@@ -17,9 +17,20 @@
 
 #include <MultiThreadedRadioChannel.h>
 
+Define_Module(MultiThreadedRadioChannel);
+
 MultiThreadedRadioChannel::~MultiThreadedRadioChannel()
 {
     terminateWorkers();
+}
+
+void MultiThreadedRadioChannel::initialize(int stage)
+{
+    MultiThreadedRadioChannel::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+    {
+        initializeWorkers(3);
+    }
 }
 
 void MultiThreadedRadioChannel::initializeWorkers(int workerCount)

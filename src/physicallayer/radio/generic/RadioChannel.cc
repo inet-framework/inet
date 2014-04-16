@@ -20,6 +20,8 @@
 // TODO: should not be here
 #include "ScalarImplementation.h"
 
+Define_Module(RadioChannel);
+
 RadioChannel::~RadioChannel()
 {
     delete propagation;
@@ -30,6 +32,30 @@ RadioChannel::~RadioChannel()
 //        delete *it;
     for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;
+}
+
+void RadioChannel::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        minInterferenceTime = computeMinInterferenceTime();
+        maxTransmissionDuration = computeMaxTransmissionDuration();
+        // TODO: use computeMaxCommunicationRange();
+        maxCommunicationRange = computeMaxInterferenceRange();
+        maxInterferenceRange = computeMaxInterferenceRange();
+        propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
+        attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
+        backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
+    }
+    else if (stage == INITSTAGE_LAST)
+    {
+        EV_DEBUG << "Radio channel initialized with"
+                 << " minimum interference time = " << minInterferenceTime << " s"
+                 << ", maximum transmission duration = " << maxTransmissionDuration << " s"
+                 << ", maximum communication range = " << maxCommunicationRange
+                 << ", maximum interference range = " << maxInterferenceRange
+                 << ", " << propagation << ", " << attenuation << ", " << backgroundNoise << endl;
+    }
 }
 
 // TODO: factor

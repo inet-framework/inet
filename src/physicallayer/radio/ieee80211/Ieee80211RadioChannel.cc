@@ -21,7 +21,7 @@ Define_Module(Ieee80211RadioChannel);
 
 void Ieee80211RadioChannel::initialize(int stage)
 {
-    NewRadioChannel::initialize(stage);
+    RadioChannel::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         numChannels = par("numChannels");

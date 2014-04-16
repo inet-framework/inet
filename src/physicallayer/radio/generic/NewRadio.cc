@@ -16,7 +16,7 @@
 //
 
 #include "NewRadio.h"
-#include "NewRadioChannel.h"
+#include "RadioChannel.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"

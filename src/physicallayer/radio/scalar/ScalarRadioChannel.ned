@@ -17,9 +17,9 @@
 
 package inet.physicallayer.radio.scalar;
 
-import inet.physicallayer.radio.generic.NewRadioChannel;
+import inet.physicallayer.radio.generic.RadioChannel;
 
-simple ScalarRadioChannel extends NewRadioChannel
+simple ScalarRadioChannel extends RadioChannel
 {
     parameters:
         propagationType = default("ConstantSpeedRadioSignalPropagation");

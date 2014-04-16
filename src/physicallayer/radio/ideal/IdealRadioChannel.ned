@@ -17,9 +17,9 @@
 
 package inet.physicallayer.radio.ideal;
 
-import inet.physicallayer.radio.generic.NewRadioChannel;
+import inet.physicallayer.radio.generic.RadioChannel;
 
-simple IdealRadioChannel extends NewRadioChannel
+simple IdealRadioChannel extends RadioChannel
 {
     parameters:
         propagationType = default("ConstantSpeedRadioSignalPropagation");

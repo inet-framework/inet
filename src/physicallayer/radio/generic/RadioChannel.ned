@@ -18,11 +18,11 @@
 package inet.physicallayer.radio.generic;
 
 import inet.physicallayer.radio.common.IRadioSignalPropagation;
-import inet.physicallayer.radio.common.RadioChannelBase;
 import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
+import inet.physicallayer.radio.contract.IRadioChannel;
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
 
-simple NewRadioChannel extends RadioChannelBase
+simple RadioChannel like IRadioChannel
 {
     parameters:
         string propagationType;
@@ -37,7 +37,7 @@ simple NewRadioChannel extends RadioChannelBase
         double minInterferencePower @unit(dBm) = default(1dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
         double maxCommunicationRange @unit(m) = default(1m/0);
         double maxInterferenceRange @unit(m) = default(1m/0);
-        @class(NewRadioChannel);
+        @class(RadioChannel);
 
     submodules:
         propagation: <propagationType> like IRadioSignalPropagation if propagationType != "";
