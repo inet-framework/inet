@@ -25,16 +25,7 @@
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
  */
-class INET_API OldIRadioFrame : public IPhysicalLayerFrame
-{
-    public:
-        virtual ~OldIRadioFrame() { }
-
-        virtual IRadioSignal *getRadioSignal() = 0;
-};
-
-// TODO: merge with OldIRadioFrame
-class INET_API IRadioFrame : public IPrintableObject
+class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
 {
     public:
         virtual ~IRadioFrame() {}

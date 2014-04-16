@@ -20,14 +20,13 @@
 #define __INET_DETAILEDRADIOFRAME_H_
 
 #include "INETDefs.h"
-#include "IRadioFrame.h"
 #include "DetailedRadioFrame_m.h"
 
 /**
  * Represents an detailed radio frame. More info in the DetailedRadioFrame.msg file
  * (and the documentation generated from it).
  */
-class INET_API DetailedRadioFrame : public DetailedRadioFrame_Base, public OldIRadioFrame
+class INET_API DetailedRadioFrame : public DetailedRadioFrame_Base
 {
   public:
     DetailedRadioFrame(const char *name = NULL, int kind = 0) : DetailedRadioFrame_Base(name, kind) {}
@@ -35,8 +34,6 @@ class INET_API DetailedRadioFrame : public DetailedRadioFrame_Base, public OldIR
     DetailedRadioFrame& operator=(const DetailedRadioFrame& other) {DetailedRadioFrame_Base::operator=(other); return *this;}
 
     virtual DetailedRadioFrame *dup() const {return new DetailedRadioFrame(*this);}
-
-    virtual IRadioSignal * getRadioSignal() { return &signal_var; }
 };
 
 #endif

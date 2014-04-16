@@ -20,14 +20,13 @@
 #define __INET_SIMPLIFIEDRADIOFRAME_H_
 
 #include "INETDefs.h"
-#include "IRadioFrame.h"
 #include "SimplifiedRadioFrame_m.h"
 
 /**
  * Represents a simplified radio frame. More info in the SimplifiedRadioFrame.msg file
  * (and the documentation generated from it).
  */
-class INET_API SimplifiedRadioFrame : public SimplifiedRadioFrame_Base, public OldIRadioFrame
+class INET_API SimplifiedRadioFrame : public SimplifiedRadioFrame_Base
 {
   public:
     SimplifiedRadioFrame(const char *name = NULL, int kind = 0) : SimplifiedRadioFrame_Base(name, kind) {}
@@ -35,8 +34,6 @@ class INET_API SimplifiedRadioFrame : public SimplifiedRadioFrame_Base, public O
     SimplifiedRadioFrame& operator=(const SimplifiedRadioFrame& other) {SimplifiedRadioFrame_Base::operator=(other); return *this;}
 
     virtual SimplifiedRadioFrame *dup() const {return new SimplifiedRadioFrame(*this);}
-
-    virtual IRadioSignal * getRadioSignal() { return NULL; }
 };
 
 #endif
