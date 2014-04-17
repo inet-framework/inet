@@ -28,13 +28,14 @@ import inet.applications.ITCPApp;
 simple TCPClientTunnel like ITCPApp
 {
     parameters:
+        @class(TCPClientTunnel);
         string dataTransferMode = "bytestream";
         string localAddress = default(""); // local address or empty ("")
         int localPort = default(-1); // local port number
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to (port on the server)
-        int tunnelPort; // local port number on real computer for listening to connect a real telnet client
-        string threadClass = default("TCPClientTunnelThread");
+        int tunnelPort; // local port number on the real computer for listening for connect a real TCP client
+        string threadClass = default("TCPActiveTunnelThread");
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
@@ -46,5 +47,12 @@ simple TCPClientTunnel like ITCPApp
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
+
+    submodules:
+        listener: TCPPassiveTunnelThread
+        {
+            tunnelPort = tunnelPort;
+        }
+    connections allowunconnected:
 }
 

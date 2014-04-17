@@ -21,7 +21,32 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-Define_Module(TCPMultiThreadApp);
+//Define_Module(TCPMultiThreadApp);
+
+void TCPThreadBase::connect(Address destination, int connectPort)
+{
+    EV_INFO << "Connecting to " << destination << " port=" << connectPort << endl;
+    socket.renewSocket();
+    socket.connect(destination, connectPort);
+}
+
+void TCPThreadBase::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        hostmod = check_and_cast<TCPMultiThreadApp *>(getParentModule());
+        socket.setCallbackObject(this);
+        socket.setOutputGate(hostmod->gate("tcpOut"));
+    }
+}
+
+void TCPThreadBase::handleMessage(cMessage *msg)
+{
+    if (msg->isSelfMessage())
+        handleSelfMessage(msg);
+    else
+        socket.processMessage(msg);
+}
 
 
 void TCPMultiThreadApp::initialize(int stage)
@@ -65,37 +90,44 @@ void TCPMultiThreadApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
-        TCPThreadBase *thread = (TCPThreadBase *)msg->getContextPointer();
-        thread->timerExpired(msg);
+        handleSelfMessage(msg);
     }
     else
     {
         TCPThreadBase *thread = findThreadFor(msg);
-
         if (!thread)
         {
-            // new connection -- create new socket object and server process
-            TCPSocket *socket = new TCPSocket(msg);
-            socket->setOutputGate(gate("tcpOut"));
-            const char *serverThreadClass = par("serverThreadClass");
-            thread = check_and_cast<TCPThreadBase *>(createOne(serverThreadClass));
-            thread->finalizeParameters();
-            socket->setCallbackObject(thread);
-            thread->init(this, socket);
-            thread->callInitialize();
-            threadMap.insert(std::pair<int, TCPThreadBase *>(socket->getConnectionId(), thread));
-
+            thread = createNewThreadFor(msg);
             updateDisplay();
         }
 
-        thread->getSocket()->processMessage(msg);
+        if (thread)
+            thread->getSocket()->processMessage(msg);
+        else
+        {
+            EV_WARN << "message dropped because thread not found for it\n";
+            delete msg;
+        }
     }
+}
+
+TCPThreadBase *TCPMultiThreadApp::createNewThreadFor(cMessage *msg)
+{
+    Enter_Method_Silent();
+
+    // new connection -- create new socket object and server process
+//    TCPSocket *socket = new TCPSocket(msg);
+//    socket->setOutputGate(gate("tcpOut"));
+    const char *threadClass = par("threadClass");
+    TCPThreadBase *thread = check_and_cast<TCPThreadBase *>(createOne(threadClass));
+    thread->finalizeParameters();
+    thread->callInitialize();
+    threadMap.insert(std::pair<int, TCPThreadBase *>(thread->getSocket()->getConnectionId(), thread));
+    return thread;
 }
 
 void TCPMultiThreadApp::finish()
 {
-    for (TCPThreadMap::iterator i = threadMap.begin(); i != threadMap.end(); ++i)
-        i->second->callFinish();
 }
 
 void TCPMultiThreadApp::removeThread(TCPThreadBase *thread)

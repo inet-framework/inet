@@ -25,58 +25,33 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 #include "SocketsRTScheduler.h"
-#include "TCPSrvHostApp.h"
-#include "TCPTunnelThread.h"
+#include "TCPMultiThreadApp.h"
+#include "TCPTunnelThreadBase.h"
 
-class INET_API TCPClientTunnelThread : public TCPTunnelThread
-{
-  protected:
-    int connSocket;
 
-  public:
-    TCPClientTunnelThread();
-    virtual ~TCPClientTunnelThread();
-
-    virtual void established();
-    virtual void dataArrived(cMessage *msg, bool urgent);
-    virtual void timerExpired(cMessage *timer); // for processing messages from SocketsRTScheduler
-
-    /*
-     * Called when the client closes the connection. By default it closes
-     * our side too, but it can be redefined to do something different.
-     */
-    virtual void peerClosed();
-
-    /*
-     * Called when the connection closes (successful TCP teardown). By default
-     * it deletes this thread, but it can be redefined to do something different.
-     */
-    virtual void closed();
-
-    /*
-     * Called when the connection breaks (TCP error). By default it deletes
-     * this thread, but it can be redefined to do something different.
-     */
-    virtual void failure(int code);
-};
-
+/**
+ * listen on a real socket on localhost, create threads for accepted real connections
+ */
 class INET_API TCPClientTunnel : public TCPMultiThreadApp
 {
   protected:
     SocketsRTScheduler *rtScheduler;
-    int listenerSocket;
-    uint16_t tunnelPort;
 
   public:
     TCPClientTunnel();
     virtual ~TCPClientTunnel();
+    TCPThreadBase *createNewThreadFor(cMessage *msg);
+
+  protected:
     virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleSelfMessage(cMessage *msg) { throw cRuntimeError("this module doesn't use self messages"); };
 };
 
-Register_Class(TCPClientTunnelThread);
-Register_Class(TCPClientTunnel);
+//Register_Class(TCPClientTunnelThread);
+Define_Module(TCPClientTunnel);
 
+#if 0
 TCPClientTunnelThread::TCPClientTunnelThread() :
         connSocket(INVALID_SOCKET)
 {
@@ -91,31 +66,31 @@ TCPClientTunnelThread::~TCPClientTunnelThread()
     }
 }
 
-void TCPClientTunnelThread::peerClosed()
+void TCPClientTunnelThread::socketPeerClosed(int connId, void *yourPtr)
 {
     EV_TRACE << "peerClosed()";
     close(connSocket);
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     connSocket = INVALID_SOCKET;
-    TCPTunnelThread::peerClosed();
+    TCPTunnelThreadBase::socketPeerClosed(connId, yourPtr);
 }
 
-void TCPClientTunnelThread::closed()
+void TCPClientTunnelThread::socketClosed(int connId, void *yourPtr)
 {
     EV_TRACE << "closed()";
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
     connSocket = INVALID_SOCKET;
-    TCPTunnelThread::closed();
+    TCPTunnelThreadBase::socketClosed(connId, yourPtr);
 }
 
-void TCPClientTunnelThread::failure(int code)
+void TCPClientTunnelThread::socketFailure(int connId, void *yourPtr, int code)
 {
     EV_TRACE << "failure()";
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->removeSocket(hostmod, connSocket);
-    TCPTunnelThread::failure(code);
+    TCPTunnelThreadBase::socketFailure(connId, yourPtr, code);
 }
 
-void TCPClientTunnelThread::established()
+void TCPClientTunnelThread::socketEstablished(int connId, void *yourPtr)
 {
     EV_TRACE << "established()";
 
@@ -155,7 +130,7 @@ void TCPClientTunnelThread::established()
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->addSocket(hostmod, this, connSocket, false);
 }
 
-void TCPClientTunnelThread::dataArrived(cMessage *msg, bool urgent)
+void TCPClientTunnelThread::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
     EV_TRACE << "dataArrived(" << msg << ", " << urgent << ")";
     ByteArray& bytes = check_and_cast<ByteArrayMessage *>(msg)->getByteArray();
@@ -163,9 +138,9 @@ void TCPClientTunnelThread::dataArrived(cMessage *msg, bool urgent)
     delete msg;
 }
 
-void TCPClientTunnelThread::timerExpired(cMessage *msg) // for processing messages from SocketsRTScheduler
+void TCPClientTunnelThread::handleSelfMessage(cMessage *msg) // for processing messages from SocketsRTScheduler
 {
-    EV_TRACE << "timerExpired(" << msg <<  ")";
+    EV_TRACE << "handleSelfMessage(" << msg <<  ")";
     switch(msg->getKind())
     {
         case SocketsRTScheduler::DATA:
@@ -173,13 +148,13 @@ void TCPClientTunnelThread::timerExpired(cMessage *msg) // for processing messag
             if (connSocket != msg->par("fd").longValue())
                 throw cRuntimeError("socket not opened");
             ByteArrayMessage *pk = check_and_cast<ByteArrayMessage *>(msg);
-            sock->send(pk);
+            socket.send(pk);
             break;
         }
         case SocketsRTScheduler::CLOSED:
             if (connSocket != msg->par("fd").longValue())
                 throw cRuntimeError("unknown socket id");
-            sock->close();
+            socket.close();
             delete msg;
             break;
         case SocketsRTScheduler::ACCEPT:
@@ -188,17 +163,15 @@ void TCPClientTunnelThread::timerExpired(cMessage *msg) // for processing messag
             throw cRuntimeError("Invalid msg kind: %d", msg->getKind());
     }
 }
-
+#endif
 
 TCPClientTunnel::TCPClientTunnel() :
-        rtScheduler(NULL), listenerSocket(INVALID_SOCKET)
+        rtScheduler(NULL)
 {
 }
 
 TCPClientTunnel::~TCPClientTunnel()
 {
-    closesocket(listenerSocket);
-    rtScheduler->removeAllSocketOf(this);
 }
 
 void TCPClientTunnel::initialize(int stage)
@@ -209,5 +182,11 @@ void TCPClientTunnel::initialize(int stage)
     {
         rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
     }
+}
+
+TCPThreadBase *TCPClientTunnel::createNewThreadFor(cMessage *msg)
+{
+    TCPTunnelThreadBase *thread = check_and_cast<TCPTunnelThreadBase *>(TCPMultiThreadApp::createNewThreadFor(msg));
+    return thread;
 }
 

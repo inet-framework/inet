@@ -16,50 +16,39 @@
 //
 // author: Zoltan Bojthe
 
-#ifndef __INET_TCPTUNNELTHREAD
-#define __INET_TCPTUNNELTHREAD
+#ifndef __INET_TCPCLIENTTUNNELTHREAD
+#define __INET_TCPCLIENTTUNNELTHREAD
+
+#include <platdep/sockets.h>
 
 #include "INETDefs.h"
 
-#include "TCPMultiThreadApp.h"
+#include "ByteArrayMessage.h"
+#include "ModuleAccess.h"
+#include "NodeOperations.h"
+#include "NodeStatus.h"
+#include "SocketsRTScheduler.h"
+#include "TCPSrvHostApp.h"
+#include "TCPTunnelThreadBase.h"
 
-class ByteArrayMessage;
-
-class INET_API TCPTunnelThread : public TCPThreadBase
+/**
+ * Thread for an active tunnel thread
+ */
+class INET_API TCPActiveTunnelThread : public TCPTunnelThreadBase
 {
-  protected:
-    int realSocket;
+};
 
+/**
+ * Thread for a passive tunnel thread (a listener tunnel)
+ */
+class INET_API TCPPassiveTunnelThread : public TCPTunnelThreadBase
+{
   public:
-    TCPTunnelThread();
-    virtual ~TCPTunnelThread();
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
 
-    virtual void established();
-    virtual void dataArrived(cMessage *msg, bool urgent);
-    virtual void timerExpired(cMessage *timer); // for processing messages from SocketsRTScheduler
-
-    /*
-     * Called when the client closes the connection. By default it closes
-     * our side too, but it can be redefined to do something different.
-     */
-    virtual void peerClosed();
-
-    /*
-     * Called when the connection closes (successful TCP teardown). By default
-     * it deletes this thread, but it can be redefined to do something different.
-     */
-    virtual void closed();
-
-    /*
-     * Called when the connection breaks (TCP error). By default it deletes
-     * this thread, but it can be redefined to do something different.
-     */
-    virtual void failure(int code);
-
-    virtual void realDataArrived(ByteArrayMessage *msg);
-    virtual void realSocketClosed(cMessage *msg);
     virtual void realSocketAccept(cMessage *msg);
 };
 
-#endif // __INET_TCPTUNNELTHREAD
+#endif
 
