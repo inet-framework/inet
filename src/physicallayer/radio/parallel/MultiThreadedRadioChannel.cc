@@ -140,6 +140,7 @@ void MultiThreadedRadioChannel::setCachedDecision(const IRadio *radio, const IRa
 {
     pthread_mutex_lock(&cachedDecisionsLock);
     CachedRadioChannel::setCachedDecision(radio, transmission, decision);
+    CachedRadioChannel::setCachedReception(radio, transmission, decision->getReception());
     pthread_mutex_unlock(&cachedDecisionsLock);
 }
 
@@ -188,7 +189,7 @@ void MultiThreadedRadioChannel::transmitToChannel(const IRadio *transmitterRadio
         }
     }
     // TODO: what shall we do with already running computation jobs?
-    EV_DEBUG << "Transmission count: " << transmissions.size() << " pending job count: " << pendingComputeCacheJobs.size() << " cache hit count: " << cacheHitCount << " cache get count: " << cacheGetCount << " cache %: " << (100 * (double)cacheHitCount / (double)cacheGetCount) << "%\n";
+    EV_DEBUG << "Transmission count: " << transmissions.size() << " pending job count: " << pendingComputeCacheJobs.size() << " decision cache hit count: " << decisionCacheHitCount << " decision cache get count: " << decisionCacheGetCount << " decision cache %: " << (100 * (double)decisionCacheHitCount / (double)decisionCacheGetCount) << "%\n";
     pthread_cond_broadcast(&pendingJobsCondition);
     pthread_mutex_unlock(&pendingJobsLock);
 }
