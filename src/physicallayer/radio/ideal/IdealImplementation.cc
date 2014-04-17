@@ -30,9 +30,10 @@ const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(c
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
-    IdealRadioSignalLoss::Factor attenuationFactor = check_and_cast<const IdealRadioSignalLoss *>(computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition))->getFactor();
+    const IRadioSignalLoss *loss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
+    IdealRadioSignalLoss::Factor lossFactor = check_and_cast<const IdealRadioSignalLoss *>(loss)->getFactor();
     IdealRadioSignalReception::Power power;
-    switch (attenuationFactor)
+    switch (lossFactor)
     {
         case IdealRadioSignalLoss::FACTOR_WITHIN_COMMUNICATION_RANGE:
             power = IdealRadioSignalReception::POWER_RECEIVABLE; break;
@@ -45,6 +46,7 @@ const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(c
         default:
             throw cRuntimeError("Unknown attenuation factor");
     }
+    delete loss;
     return new IdealRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, power);
 }
 

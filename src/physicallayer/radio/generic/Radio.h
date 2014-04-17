@@ -38,8 +38,7 @@ class INET_API Radio : public RadioBase, public virtual IRadio
 
         cMessage *endTransmissionTimer;
         cMessage *endReceptionTimer;
-        typedef std::vector<cMessage *> EndReceptionTimers;
-        EndReceptionTimers endReceptionTimers;
+        std::vector<cMessage *> endReceptionTimers;
 
     protected:
         virtual void initialize(int stage);

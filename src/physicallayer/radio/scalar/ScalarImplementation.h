@@ -120,6 +120,8 @@ class INET_API ScalarRadioSignalNoise : public RadioSignalNoiseBase
             bandwidth(bandwidth)
         {}
 
+        virtual ~ScalarRadioSignalNoise() { delete powerChanges; }
+
         virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
         virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
         virtual Hz getCarrierFrequency() const { return carrierFrequency; }

@@ -46,13 +46,17 @@ void CachedRadioChannel::setCachedDecision(const IRadio *radio, const IRadioSign
     unsigned int radioId = radio->getId();
     if (radioId >= cachedTransmissionDecisions.size())
         cachedTransmissionDecisions.resize(radioId + 1);
+    else
+        delete cachedTransmissionDecisions[radioId];
     cachedTransmissionDecisions[radioId] = decision;
 }
 
 void CachedRadioChannel::removeCachedDecision(const IRadio *radio, const IRadioSignalTransmission *transmission)
 {
     std::vector<const IRadioSignalReceptionDecision *> &cachedTransmissionDecisions = cachedDecisions[transmission->getId() - baseTransmissionId];
-    cachedTransmissionDecisions[radio->getId()] = NULL;
+    unsigned int radioId = radio->getId();
+    delete cachedTransmissionDecisions[radioId];
+    cachedTransmissionDecisions[radioId] = NULL;
 }
 
 void CachedRadioChannel::invalidateCachedDecisions(const IRadioSignalTransmission *transmission)
@@ -80,7 +84,9 @@ void CachedRadioChannel::invalidateCachedDecision(const IRadioSignalReceptionDec
     const IRadio *radio = reception->getReceiver();
     const IRadioSignalTransmission *transmission = reception->getTransmission();
     std::vector<const IRadioSignalReceptionDecision *> &cachedTransmissionDecisions = cachedDecisions[transmission->getId() - baseTransmissionId];
-    cachedTransmissionDecisions[radio->getId()] = NULL;
+    unsigned int radioId = radio->getId();
+    delete cachedTransmissionDecisions[radioId];
+    cachedTransmissionDecisions[radioId] = NULL;
 }
 
 const IRadioSignalReceptionDecision *CachedRadioChannel::receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const

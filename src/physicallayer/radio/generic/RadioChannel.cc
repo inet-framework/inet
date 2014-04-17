@@ -27,11 +27,11 @@ RadioChannel::~RadioChannel()
     delete propagation;
     delete attenuation;
     delete backgroundNoise;
-// TODO:
-//    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-//        delete *it;
     for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;
+    for (std::vector<std::vector<const IRadioSignalArrival *> >::const_iterator it = arrivals.begin(); it != arrivals.end(); it++)
+        for (std::vector<const IRadioSignalArrival *>::const_iterator jt = it->begin(); jt != it->end(); jt++)
+            delete *jt;
 }
 
 void RadioChannel::initialize(int stage)
@@ -171,7 +171,13 @@ void RadioChannel::removeNonInterferingTransmissions()
         const IRadioSignalTransmission *transmission = *it;
         if (transmission->getEndTime() < minInterferingTransmissionEndTime) {
             EV << "Removing non-interfering " << transmission << " from " << this << endl;
+            const IRadioSignalTransmission *transmission = *it;
             transmissions.erase(it);
+            // TODO: revive after fingerprint kuldges are removed from radio
+            // delete transmission;
+            const std::vector<const IRadioSignalArrival *> &transmissionArrivals = *(arrivals.begin() + (it - transmissions.begin()));
+            for (std::vector<const IRadioSignalArrival *>::const_iterator jt = transmissionArrivals.begin(); jt != transmissionArrivals.end(); jt++)
+                delete *jt;
             arrivals.erase(arrivals.begin() + (it - transmissions.begin()));
         }
         else
@@ -246,14 +252,24 @@ const IRadioSignalReceptionDecision *RadioChannel::computeReceptionDecision(cons
     const IRadioSignalReception *reception = computeReception(radio, transmission);
     const std::vector<const IRadioSignalReception *> *interferingReceptions = computeInterferingReceptions(reception, transmissions);
     const IRadioSignalNoise *noise = backgroundNoise ? backgroundNoise->computeNoise(reception) : NULL;
-    return radio->getReceiver()->computeReceptionDecision(listening, reception, interferingReceptions, noise);
+    const IRadioSignalReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interferingReceptions, noise);
+    delete noise;
+    for (std::vector<const IRadioSignalReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
+        delete *it;
+    delete interferingReceptions;
+    return decision;
 }
 
 const IRadioSignalListeningDecision *RadioChannel::computeListeningDecision(const IRadio *radio, const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const
 {
     const std::vector<const IRadioSignalReception *> *interferingReceptions = computeInterferingReceptions(listening, transmissions);
     const IRadioSignalNoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
-    return radio->getReceiver()->computeListeningDecision(listening, interferingReceptions, noise);
+    const IRadioSignalListeningDecision *decision = radio->getReceiver()->computeListeningDecision(listening, interferingReceptions, noise);
+    delete noise;
+    for (std::vector<const IRadioSignalReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
+        delete *it;
+    delete interferingReceptions;
+    return decision;
 }
 
 void RadioChannel::transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission)

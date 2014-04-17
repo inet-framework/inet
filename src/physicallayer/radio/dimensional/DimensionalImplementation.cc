@@ -34,9 +34,11 @@ const IRadioSignalReception *DimensionalRadioSignalAttenuationBase::computeRecep
     // TODO: use antenna gains
     double transmitterAntennaGain = transmitterAntenna->getGain(direction);
     double receiverAntennaGain = receiverAntenna->getGain(direction);
-    const ConstMapping *attenuationFactor = check_and_cast<const DimensionalRadioSignalLoss *>(computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition))->getFactor();
+    const IRadioSignalLoss *loss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
+    const ConstMapping *lossFactor = check_and_cast<const DimensionalRadioSignalLoss *>(loss)->getFactor();
     const Mapping *transmissionPower = dimensionalTransmission->getPower();
-    const Mapping *receptionPower = MappingUtils::multiply(*transmissionPower, *attenuationFactor, Argument::MappedZero);
+    const Mapping *receptionPower = MappingUtils::multiply(*transmissionPower, *lossFactor, Argument::MappedZero);
+    delete loss;
     return new DimensionalRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionPower, dimensionalTransmission->getCarrierFrequency());
 }
 

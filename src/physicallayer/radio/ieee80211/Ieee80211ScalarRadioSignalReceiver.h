@@ -56,6 +56,8 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
             parseTable(NULL)
         {}
 
+        virtual ~Ieee80211ScalarRadioSignalReceiver();
+
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
 };
 

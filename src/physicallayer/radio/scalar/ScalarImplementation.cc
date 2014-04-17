@@ -64,9 +64,11 @@ const IRadioSignalReception *ScalarRadioSignalAttenuationBase::computeReception(
     const Coord direction = receptionStartPosition - transmission->getStartPosition();
     double transmitterAntennaGain = transmitterAntenna->getGain(direction);
     double receiverAntennaGain = receiverAntenna->getGain(direction);
-    double attenuationFactor = check_and_cast<const ScalarRadioSignalLoss *>(computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition))->getFactor();
+    const IRadioSignalLoss *loss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
+    double lossFactor = check_and_cast<const ScalarRadioSignalLoss *>(loss)->getFactor();
     W transmissionPower = scalarTransmission->getPower();
-    W receptionPower = transmitterAntennaGain * receiverAntennaGain * attenuationFactor * transmissionPower;
+    W receptionPower = transmitterAntennaGain * receiverAntennaGain * lossFactor * transmissionPower;
+    delete loss;
     return new ScalarRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionPower, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth());
 }
 

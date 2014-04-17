@@ -96,6 +96,7 @@ cPacket *Radio::receivePacket(IRadioFrame *frame)
     if (!radioDecision->isReceptionSuccessful())
         packet->setKind(radioDecision->getBitErrorCount() > 0 ? BITERROR : COLLISION);
     packet->setControlInfo(const_cast<cObject *>(check_and_cast<const cObject *>(radioDecision)));
+    delete listening;
     return packet;
 }
 
@@ -107,7 +108,7 @@ void Radio::setRadioMode(RadioMode newRadioMode)
         if (newRadioMode == OldIRadio::RADIO_MODE_RECEIVER)
         {
             // KLUDGE: to keep fingerprint
-            for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
+            for (std::vector<cMessage *>::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
             {
                 cMessage *timer = *it;
                 RadioFrame *radioFrame = static_cast<RadioFrame*>(timer->getContextPointer());
@@ -127,7 +128,7 @@ void Radio::setRadioMode(RadioMode newRadioMode)
         {
             // KLUDGE: to keep fingerprint
             endReceptionTimer = NULL;
-            for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
+            for (std::vector<cMessage *>::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
             {
                 cMessage *timer = *it;
                 timer->setKind(false);
@@ -217,7 +218,7 @@ void Radio::handleSelfMessage(cMessage *message)
     else
     {
         EV << "Frame is completely received now.\n";
-        for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
+        for (std::vector<cMessage *>::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
         {
             if (*it == message)
             {
@@ -328,7 +329,7 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
 
 void Radio::cancelAndDeleteEndReceptionTimers()
 {
-    for (EndReceptionTimers::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++) {
+    for (std::vector<cMessage *>::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++) {
         cMessage *timer = *it;
         RadioFrame *radioFrame = static_cast<RadioFrame*>(timer->getContextPointer());
         delete radioFrame;
@@ -343,9 +344,9 @@ void Radio::updateTransceiverState()
     ReceptionState newRadioReceptionState;
     const simtime_t now = simTime();
     const Coord position = antenna->getMobility()->getCurrentPosition();
-    // TODO: use 2 * minInterferenceTime for lookahead?
-    // TODO: maybe simply use 0 duration listening?
-    const IRadioSignalListeningDecision *listeningDecision = channel->listenOnChannel(this, receiver->createListening(this, now, now + 1E-12, position, position));
+    // TODO: use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
+    const IRadioSignalListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
+    const IRadioSignalListeningDecision *listeningDecision = channel->listenOnChannel(this, listening);
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
         newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (endReceptionTimer && endReceptionTimer->isScheduled())
@@ -362,6 +363,8 @@ void Radio::updateTransceiverState()
         receptionState = newRadioReceptionState;
         emit(receptionStateChangedSignal, newRadioReceptionState);
     }
+    delete listening;
+    delete listeningDecision;
     // transmission state
     TransmissionState newRadioTransmissionState;
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)

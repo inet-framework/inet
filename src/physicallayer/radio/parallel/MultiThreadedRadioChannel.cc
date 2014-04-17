@@ -118,6 +118,8 @@ void *MultiThreadedRadioChannel::workerMain(void *argument)
             pthread_mutex_unlock(&pendingJobsLock);
             const IRadioSignalReceptionDecision *decision = computeReceptionDecision(computeCacheJob.radio, computeCacheJob.listening, computeCacheJob.transmission, transmissionsCopy);
             setCachedDecision(computeCacheJob.radio, computeCacheJob.transmission, decision);
+            delete computeCacheJob.listening;
+            delete transmissionsCopy;
         }
         else
             pthread_mutex_unlock(&pendingJobsLock);

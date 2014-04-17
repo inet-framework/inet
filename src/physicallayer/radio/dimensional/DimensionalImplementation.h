@@ -34,6 +34,7 @@ class INET_API DimensionalRadioSignalTransmission : public RadioSignalTransmissi
             carrierFrequency(carrierFrequency)
         {}
 
+        virtual ~DimensionalRadioSignalTransmission() { delete power; }
         virtual const Mapping *getPower() const { return power; }
         virtual Hz getCarrierFrequency() const { return carrierFrequency; }
 };
@@ -47,6 +48,8 @@ class INET_API DimensionalRadioSignalLoss : public IRadioSignalLoss
         DimensionalRadioSignalLoss(const ConstMapping *factor) :
             factor(factor)
         {}
+
+        virtual ~DimensionalRadioSignalLoss() { delete factor; }
 
         virtual const ConstMapping *getFactor() const { return factor; }
 };
@@ -63,6 +66,8 @@ class INET_API DimensionalRadioSignalReception : public RadioSignalReceptionBase
             power(power),
             carrierFrequency(carrierFrequency)
         {}
+
+        virtual ~DimensionalRadioSignalReception() { delete power; }
 
         virtual const Mapping *getPower() const { return power; }
         virtual Hz getCarrierFrequency() const { return carrierFrequency; }

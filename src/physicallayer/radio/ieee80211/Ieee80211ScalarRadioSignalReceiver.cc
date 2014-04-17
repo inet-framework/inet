@@ -25,6 +25,12 @@
 
 Define_Module(Ieee80211ScalarRadioSignalReceiver);
 
+Ieee80211ScalarRadioSignalReceiver::~Ieee80211ScalarRadioSignalReceiver()
+{
+    delete errorModel;
+    delete parseTable;
+}
+
 void Ieee80211ScalarRadioSignalReceiver::initialize(int stage)
 {
     ScalarRadioSignalReceiver::initialize(stage);
