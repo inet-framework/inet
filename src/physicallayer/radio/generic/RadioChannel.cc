@@ -58,38 +58,31 @@ void RadioChannel::initialize(int stage)
     }
 }
 
-// TODO: factor
+m RadioChannel::computeMaxRange(W maxPower, W minPower) const
+{
+    double alpha = par("alpha");
+    Hz carrierFrequency = Hz(par("carrierFrequency"));
+    m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
+    double minFactor = (minPower / maxPower).get();
+    return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
+}
+
 m RadioChannel::computeMaxCommunicationRange() const
 {
     Hz carrierFrequency = Hz(par("carrierFrequency"));
     if (isNaN(carrierFrequency.get()))
         return m(par("maxCommunicationRange"));
-    else {
-        // distance = waveLength / (factor * 16 * pi ^ 2) ^ (1 / alpha)
-        double alpha = par("alpha");
-        W maxTransmissionPower = W(par("maxTransmissionPower"));
-        W minReceptionPower = mW(FWMath::dBm2mW(par("minReceptionPower")));
-        m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
-        double minFactor = (minReceptionPower / maxTransmissionPower).get();
-        return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
-    }
+    else
+        return computeMaxRange(W(par("maxTransmissionPower")), mW(FWMath::dBm2mW(par("minReceptionPower"))));
 }
 
-// TODO: factor
 m RadioChannel::computeMaxInterferenceRange() const
 {
     Hz carrierFrequency = Hz(par("carrierFrequency"));
     if (isNaN(carrierFrequency.get()))
         return m(par("maxInterferenceRange"));
-    else {
-        // distance = waveLength / (factor * 16 * pi ^ 2) ^ (1 / alpha)
-        double alpha = par("alpha");
-        W maxTransmissionPower = W(par("maxTransmissionPower"));
-        W minInterferencePower = mW(FWMath::dBm2mW(par("minInterferencePower")));
-        m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
-        double minFactor = (minInterferencePower / maxTransmissionPower).get();
-        return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
-    }
+    else
+        return computeMaxRange(W(par("maxTransmissionPower")), mW(FWMath::dBm2mW(par("minInterferencePower"))));
 }
 
 const simtime_t RadioChannel::computeMinInterferenceTime() const
@@ -190,58 +183,28 @@ const IRadioSignalReception *RadioChannel::computeReception(const IRadio *radio,
     return attenuation->computeReception(radio, transmission);
 }
 
-// TODO: factor out common part
-const std::vector<const IRadioSignalTransmission *> *RadioChannel::computeInterferingTransmissions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const
-{
-    std::vector<const IRadioSignalTransmission *> *interferingTransmissions = new std::vector<const IRadioSignalTransmission *>();
-    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions->begin(); it != transmissions->end(); it++)
-    {
-        const IRadioSignalTransmission *transmission = *it;
-        if (isInterferingTransmission(transmission, listening))
-            interferingTransmissions->push_back(transmission);
-    }
-    return interferingTransmissions;
-}
-
-// TODO: factor out common part
-const std::vector<const IRadioSignalTransmission *> *RadioChannel::computeInterferingTransmissions(const IRadioSignalReception *reception, const std::vector<const IRadioSignalTransmission *> *transmissions) const
-{
-    std::vector<const IRadioSignalTransmission *> *interferingTransmissions = new std::vector<const IRadioSignalTransmission *>();
-    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions->begin(); it != transmissions->end(); it++)
-    {
-        const IRadioSignalTransmission *transmission = *it;
-        if (reception->getTransmission() != transmission && isInterferingTransmission(transmission, reception))
-            interferingTransmissions->push_back(transmission);
-    }
-    return interferingTransmissions;
-}
-
-// TODO: factor out common part
 const std::vector<const IRadioSignalReception *> *RadioChannel::computeInterferingReceptions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const
 {
     const IRadio *radio = listening->getReceiver();
     std::vector<const IRadioSignalReception *> *interferingReceptions = new std::vector<const IRadioSignalReception *>();
-    const std::vector<const IRadioSignalTransmission *> *interferingTransmissions = computeInterferingTransmissions(listening, transmissions);
-    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = interferingTransmissions->begin(); it != interferingTransmissions->end(); it++)
+    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions->begin(); it != transmissions->end(); it++)
     {
         const IRadioSignalTransmission *interferingTransmission = *it;
-        if (interferingTransmission->getTransmitter() != radio)
+        if (interferingTransmission->getTransmitter() != radio && isInterferingTransmission(interferingTransmission, listening))
             interferingReceptions->push_back(computeReception(radio, interferingTransmission));
     }
     return interferingReceptions;
 }
 
-// TODO: factor out common part
 const std::vector<const IRadioSignalReception *> *RadioChannel::computeInterferingReceptions(const IRadioSignalReception *reception, const std::vector<const IRadioSignalTransmission *> *transmissions) const
 {
     const IRadio *radio = reception->getReceiver();
     const IRadioSignalTransmission *transmission = reception->getTransmission();
     std::vector<const IRadioSignalReception *> *interferingReceptions = new std::vector<const IRadioSignalReception *>();
-    const std::vector<const IRadioSignalTransmission *> *interferingTransmissions = computeInterferingTransmissions(reception, transmissions);
-    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = interferingTransmissions->begin(); it != interferingTransmissions->end(); it++)
+    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions->begin(); it != transmissions->end(); it++)
     {
         const IRadioSignalTransmission *interferingTransmission = *it;
-        if (interferingTransmission != transmission)
+        if (transmission != interferingTransmission && isInterferingTransmission(interferingTransmission, reception))
             interferingReceptions->push_back(computeReception(radio, interferingTransmission));
     }
     return interferingReceptions;

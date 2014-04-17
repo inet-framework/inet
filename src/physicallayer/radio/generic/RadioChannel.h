@@ -53,6 +53,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual const simtime_t computeMinInterferenceTime() const;
         virtual const simtime_t computeMaxTransmissionDuration() const;
 
+        virtual m computeMaxRange(W maxPower, W minPower) const;
         virtual m computeMaxCommunicationRange() const;
         virtual m computeMaxInterferenceRange() const;
 
@@ -65,8 +66,6 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual void removeNonInterferingTransmissions();
 
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
-        virtual const std::vector<const IRadioSignalTransmission *> *computeInterferingTransmissions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
-        virtual const std::vector<const IRadioSignalTransmission *> *computeInterferingTransmissions(const IRadioSignalReception *reception, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
         virtual const std::vector<const IRadioSignalReception *> *computeInterferingReceptions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
         virtual const std::vector<const IRadioSignalReception *> *computeInterferingReceptions(const IRadioSignalReception *reception, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
