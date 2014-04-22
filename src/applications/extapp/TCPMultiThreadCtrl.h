@@ -32,7 +32,7 @@ class TCPThreadBase;
  * is a cSimpleModule). Creates one instance (using dynamic module creation)
  * for each incoming connection. More info in the corresponding NED file.
  */
-class INET_API TCPMultiThreadApp : public cSimpleModule, public ILifecycle
+class INET_API TCPMultiThreadCtrl : public cSimpleModule, public ILifecycle
 {
   protected:
     typedef std::map<int, TCPThreadBase*> TCPThreadMap;
@@ -63,17 +63,25 @@ class INET_API TCPMultiThreadApp : public cSimpleModule, public ILifecycle
 class INET_API TCPThreadBase : public cSimpleModule, public TCPSocket::CallbackInterface
 {
   protected:
-    TCPMultiThreadApp *hostmod;
     TCPSocket socket;
+
+  protected:
+    // szol a Ctrl-nek, hogy engem meg szuntessen meg - vagy a modul megszunteti sajat magat
+    virtual void removeMe();
+
+    /*
+     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
+     */
+    virtual void handleSelfMessage(cMessage *msg) = 0;
 
     // TCPSocket::CallbackInterface methods
     virtual void socketPeerClosed(int, void *) { getSocket()->close(); }
-    virtual void socketClosed(int, void *) { hostmod->removeThread(this); }
-    virtual void socketFailure(int, void *, int code) { hostmod->removeThread(this); }
+    virtual void socketClosed(int, void *) { removeMe(); }
+    virtual void socketFailure(int, void *, int code) { removeMe(); }
     virtual void socketStatusArrived(int, void *, TCPStatusInfo *status) { delete status; }
 
   public:
-    TCPThreadBase() { hostmod = NULL; }
+    TCPThreadBase() {}
     virtual ~TCPThreadBase() {}
 
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -86,23 +94,6 @@ class INET_API TCPThreadBase : public cSimpleModule, public TCPSocket::CallbackI
      * Returns the socket object
      */
     virtual TCPSocket *getSocket() { return &socket; }
-
-    /*
-     * Returns pointer to the host module
-     */
-    virtual TCPMultiThreadApp *getHostModule() { return hostmod; }
-
-    /*
-     * Called when a timer (scheduled via scheduleAt()) expires. To be redefined.
-     */
-    virtual void handleSelfMessage(cMessage *msg) = 0;
-
-    /*
-     * Called when a status arrives in response to getSocket()->getStatus().
-     * By default it deletes the status object, redefine it to add code
-     * to examine the status.
-     */
-    virtual void statusArrived(TCPStatusInfo *status) { delete status; }
 };
 
 #endif

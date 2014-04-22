@@ -25,17 +25,17 @@ import inet.applications.ITCPApp;
 //
 // TODO
 //
-simple TCPClientTunnel like ITCPApp
+module TCPClientTunnel like ITCPApp
 {
     parameters:
         @class(TCPClientTunnel);
-        string dataTransferMode = "bytestream";
+        string dataTransferMode @enum("bytecount","object","bytestream") = "bytestream";
         string localAddress = default(""); // local address or empty ("")
         int localPort = default(-1); // local port number
         string connectAddress;  // server address (may be symbolic)
         int connectPort; // port number to connect to (port on the server)
         int tunnelPort; // local port number on the real computer for listening for connect a real TCP client
-        string threadClass = default("TCPActiveTunnelThread");
+        string threadClass = default("inet.applications.extapp.TCPActiveTunnelThread");
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
@@ -49,10 +49,19 @@ simple TCPClientTunnel like ITCPApp
         output tcpOut @labels(TCPCommand/down);
 
     submodules:
-        listener: TCPPassiveTunnelThread
-        {
-            tunnelPort = tunnelPort;
+        ctrl: TCPMultiThreadCtrl {
+            @display("p=72,167");
+        }
+        listener: TCPRealListenerThread {
+            parameters:
+                tunnelPort = tunnelPort;
+                @display("p=72,61");
         }
     connections allowunconnected:
+        tcpIn --> ctrl.tcpIn;
+        ctrl.tcpOut --> tcpOut;
+
+        ctrl.threadOut++ --> listener.tcpIn;
+        listener.tcpOut --> ctrl.threadIn++;
 }
 

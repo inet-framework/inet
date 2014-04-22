@@ -21,14 +21,18 @@
 #include "AddressResolver.h"
 
 
-Register_Class(TCPActiveTunnelThread);
-Register_Class(TCPPassiveTunnelThread);
+Define_Module(TCPActiveTunnelThread);
+Define_Module(TCPPassiveTunnelThread);
 
 void TCPPassiveTunnelThread::realSocketAccept(cMessage *msg)
 {
     int connSocket = msg->par("fd").longValue();
-    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->addSocket(this, NULL, connSocket, false);
-    hostmod->createNewThreadFor(msg);
+    TCPTunnelThreadBase *thread = check_and_cast<TCPTunnelThreadBase *>(hostmod->createNewThreadFor(msg));
+    check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->addSocket(thread, NULL, connSocket, false);
+    thread->setRealSocket(connSocket);
+    Address destAddr = AddressResolver().resolve(hostmod->par("connectAddress"));
+    int destPort = hostmod->par("connectPort");
+    thread->connect(destAddr, destPort);
 }
 
 void TCPPassiveTunnelThread::initialize(int stage)

@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TCPMultiThreadApp.h"
+#include "TCPMultiThreadCtrl.h"
 
 #include "AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-//Define_Module(TCPMultiThreadApp);
+//Define_Module(TCPMultiThreadCtrl);
 
 void TCPThreadBase::connect(Address destination, int connectPort)
 {
@@ -34,9 +34,9 @@ void TCPThreadBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        hostmod = check_and_cast<TCPMultiThreadApp *>(getParentModule());
         socket.setCallbackObject(this);
-        socket.setOutputGate(hostmod->gate("tcpOut"));
+        socket.setOutputGate(gate("tcpOut"));
+        socket.readDataTransferModePar(*this);
     }
 }
 
@@ -48,8 +48,7 @@ void TCPThreadBase::handleMessage(cMessage *msg)
         socket.processMessage(msg);
 }
 
-
-void TCPMultiThreadApp::initialize(int stage)
+void TCPMultiThreadCtrl::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
@@ -63,11 +62,11 @@ void TCPMultiThreadApp::initialize(int stage)
     }
 }
 
-TCPThreadBase *TCPMultiThreadApp::findThreadFor(cMessage *msg)
+TCPThreadBase *TCPMultiThreadCtrl::findThreadFor(cMessage *msg)
 {
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
     if (!ind)
-        throw cRuntimeError("TCPMultiThreadApp: findThreadFor: no TCPCommand control info in message (not from TCP?)");
+        throw cRuntimeError("TCPMultiThreadCtrl: findThreadFor: no TCPCommand control info in message (not from TCP?)");
 
     int connId = ind->getConnId();
     TCPThreadMap::iterator i = threadMap.find(connId);
@@ -76,7 +75,7 @@ TCPThreadBase *TCPMultiThreadApp::findThreadFor(cMessage *msg)
 }
 
 
-void TCPMultiThreadApp::updateDisplay()
+void TCPMultiThreadCtrl::updateDisplay()
 {
     if (!ev.isGUI())
         return;
@@ -86,7 +85,7 @@ void TCPMultiThreadApp::updateDisplay()
     getDisplayString().setTagArg("t", 0, buf);
 }
 
-void TCPMultiThreadApp::handleMessage(cMessage *msg)
+void TCPMultiThreadCtrl::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage())
     {
@@ -111,26 +110,31 @@ void TCPMultiThreadApp::handleMessage(cMessage *msg)
     }
 }
 
-TCPThreadBase *TCPMultiThreadApp::createNewThreadFor(cMessage *msg)
+TCPThreadBase *TCPMultiThreadCtrl::createNewThreadFor(cMessage *msg)
 {
     Enter_Method_Silent();
 
     // new connection -- create new socket object and server process
-//    TCPSocket *socket = new TCPSocket(msg);
-//    socket->setOutputGate(gate("tcpOut"));
-    const char *threadClass = par("threadClass");
-    TCPThreadBase *thread = check_and_cast<TCPThreadBase *>(createOne(threadClass));
+    const char *moduleNedType = par("threadClass");
+    cModuleType *moduleType = cModuleType::find(moduleNedType);
+    if (moduleType == NULL)
+        throw cRuntimeError("TCPMultiThreadCtrl: module '%s' not found", moduleNedType);
+
+    TCPThreadBase *thread = check_and_cast<TCPThreadBase *>(moduleType->create(moduleNedType, this));
     thread->finalizeParameters();
     thread->callInitialize();
+    char moduleName[100];
+    sprintf(moduleName, "connect-%i", thread->getSocket()->getConnectionId());
+    thread->setName(moduleName);
     threadMap.insert(std::pair<int, TCPThreadBase *>(thread->getSocket()->getConnectionId(), thread));
     return thread;
 }
 
-void TCPMultiThreadApp::finish()
+void TCPMultiThreadCtrl::finish()
 {
 }
 
-void TCPMultiThreadApp::removeThread(TCPThreadBase *thread)
+void TCPMultiThreadCtrl::removeThread(TCPThreadBase *thread)
 {
     TCPThreadMap::iterator i = threadMap.find(thread->getSocket()->getConnectionId());
     if (i != threadMap.end())
@@ -145,7 +149,7 @@ void TCPMultiThreadApp::removeThread(TCPThreadBase *thread)
     updateDisplay();
 }
 
-bool TCPMultiThreadApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+bool TCPMultiThreadCtrl::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());

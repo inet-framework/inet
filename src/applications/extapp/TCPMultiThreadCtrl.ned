@@ -19,12 +19,16 @@
 
 package inet.applications.extapp;
 
-simple TCPPassiveTunnelThread
+simple TCPMultiThreadCtrl
 {
     parameters:
-        int tunnelPort;
-        string dataTransferMode = default("bytestream");
+        string dataTransferMode = default("bytecount");
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(1000); // port number to listen on
+
     gates:
-        input tcpIn;
-        output tcpOut;
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
+        input threadIn[];
+        output threadOut[];
 }

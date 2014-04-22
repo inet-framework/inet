@@ -42,6 +42,15 @@ TCPTunnelThreadBase::~TCPTunnelThreadBase()
     }
 }
 
+void TCPTunnelThreadBase::initialize(int stage)
+{
+    TCPThreadBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+    {
+        WATCH(realSocket);
+    }
+}
+
 void TCPTunnelThreadBase::socketPeerClosed(int connId, void *yourPtr)
 {
     EV_TRACE << "peerClosed()\n";
@@ -136,8 +145,9 @@ void TCPTunnelThreadBase::handleSelfMessage(cMessage *msg) // for processing mes
 void TCPTunnelThreadBase::realDataArrived(ByteArrayMessage *msg)
 {
     EV_TRACE << "realDataArrived(" << msg << ")\n";
-    if (realSocket != msg->par("fd").longValue())
-        throw cRuntimeError("socket not opened");
+    int fd = msg->par("fd").longValue();
+    if (realSocket != fd)
+        throw cRuntimeError("Model error: socket problem: realSocket=%d, fd=%d", realSocket, fd);
     socket.send(msg);
 }
 

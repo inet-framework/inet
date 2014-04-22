@@ -19,7 +19,21 @@
 
 package inet.applications.extapp;
 
-simple TCPActiveTunnelThread
+// a real extTcpPort-on bejovo adatot tovabbitja a connectAddress:connectPort-ra a tcpOut gate-en,
+// a tcpIn gate-en bejovo adatot pedig az extTcpPort-on kuldi ki.
+// kezeli a CLOSE, stb parancsokat is.
+simple TCPTunnelThread
 {
     parameters:
+        string dataTransferMode @enum("bytecount","object","bytestream") = "bytestream";
+        string extTcpAddress = default(""); // may be left empty ("")
+        int extTcpPort;     // real port number on computer
+        string localAddress = default(""); // may be left empty ("")
+        int localPort = default(-1); // port number to listen on
+        string connectAddress;  // server address (may be symbolic)
+        int connectPort; // port number to connect to (port on the server)
+
+    gates:
+        input tcpIn @labels(TCPCommand/up);
+        output tcpOut @labels(TCPCommand/down);
 }

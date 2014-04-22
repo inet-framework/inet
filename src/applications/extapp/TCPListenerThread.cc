@@ -16,15 +16,28 @@
 //
 // author: Zoltan Bojthe
 
+#include "TCPListenerThread.h"
 
-package inet.applications.extapp;
+#include "AddressResolver.h"
 
-simple TCPPassiveTunnelThread
+
+Define_Module(TCPListenerThread);
+
+void TCPListenerThread::initialize(int stage)
 {
-    parameters:
-        int tunnelPort;
-        string dataTransferMode = default("bytestream");
-    gates:
-        input tcpIn;
-        output tcpOut;
+    TCPThreadBase::initialize(stage);
+
+    if (stage == INITSTAGE_APPLICATION_LAYER)
+    {
+        const char *localAddress = par("localAddress");
+        int localPort = par("localPort");
+        Address localAddr;
+        if (localAddress[0])
+            localAddr = AddressResolver().resolve(localAddress);
+        socket.readDataTransferModePar(*this);
+        socket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
+        socket.listen();
+        EV_INFO << "listening on " << localAddr << ":" << localPort << " port\n";
+    }
 }
+

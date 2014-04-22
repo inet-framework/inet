@@ -34,6 +34,11 @@ class INET_API TCPTunnelThreadBase : public TCPThreadBase
     TCPTunnelThreadBase();
     virtual ~TCPTunnelThreadBase();
 
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+
+    void setRealSocket(int sock) { realSocket = sock; }
+
     virtual void socketEstablished(int connId, void *yourPtr);
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
     virtual void handleSelfMessage(cMessage *timer); // for processing messages from SocketsRTScheduler

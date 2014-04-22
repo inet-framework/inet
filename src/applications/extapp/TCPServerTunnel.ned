@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 package inet.applications.extapp;
 
 
@@ -25,15 +24,15 @@ import inet.applications.ITCPApp;
 //
 // TODO
 //
-simple TCPServerTunnel like ITCPApp
+module TCPServerTunnel like ITCPApp
 {
     parameters:
-        string dataTransferMode = "bytestream";
+        string dataTransferMode @enum("bytecount","object","bytestream") = "bytestream";
         string localAddress = default(""); // local address or empty ("")
         int localPort; // port number to listen on
         string tunnelAddress;  // real computer IP address
         int tunnelPort; // port number on real computer
-        string serverThreadClass = default("TCPServerTunnelThread");
+        string serverThreadClass = default("inet.applications.extapp.TCPActiveTunnelThread");
         @display("i=block/telnet");
         @signal[sentPk](type=cPacket);
         @signal[rcvdPk](type=cPacket);
@@ -45,5 +44,14 @@ simple TCPServerTunnel like ITCPApp
     gates:
         input tcpIn @labels(TCPCommand/up);
         output tcpOut @labels(TCPCommand/down);
+
+    submodules:
+        listener: TCPListenerThread
+        {
+            localAddress = localAddress;
+            localPort = localPort;
+            dataTransferMode = dataTransferMode;
+        }
+    connections allowunconnected:
 }
 

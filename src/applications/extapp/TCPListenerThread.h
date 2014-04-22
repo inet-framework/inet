@@ -16,7 +16,8 @@
 //
 // author: Zoltan Bojthe
 
-#include <platdep/sockets.h>
+#ifndef __INET_TCPLISTENERTHREAD
+#define __INET_TCPLISTENERTHREAD
 
 #include "INETDefs.h"
 
@@ -24,35 +25,20 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "SocketsRTScheduler.h"
 #include "TCPMultiThreadApp.h"
 
-class INET_API TCPServerTunnel : public TCPMultiThreadCtrl
+/**
+ * Thread for an active tunnel thread
+ */
+class INET_API TCPListenerThread : public TCPThreadBase
 {
-  protected:
-    SocketsRTScheduler *rtScheduler;
-
   public:
-    TCPServerTunnel();
-    virtual void initialize(int stage);
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
-    virtual void handleSelfMessage(cMessage *msg) { throw cRuntimeError("this module doesn't use self messages"); };
+    virtual void initialize(int stage);
+
+    virtual void handleSelfMessage(cMessage *msg) { throw cRuntimeError("listener socket doesn't accept self messages"); }
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent) { throw cRuntimeError("listener socket doesn't accept incoming data packets"); }
 };
 
-Define_Module(TCPServerTunnel);
-
-TCPServerTunnel::TCPServerTunnel() :
-        rtScheduler(NULL)
-{
-}
-
-void TCPServerTunnel::initialize(int stage)
-{
-    TCPMultiThreadCtrl::initialize(stage);
-
-    if (stage == INITSTAGE_LOCAL)
-    {
-        rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
-    }
-}
+#endif
 
