@@ -17,6 +17,7 @@
 
 #include "AODVRouting.h"
 #include "IPv4Route.h"
+#include "IdealMacFrame_m.h"
 #include "Ieee80211Frame_m.h"
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
@@ -985,8 +986,12 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
     if (signalID == NF_LINK_BREAK) {
         EV_DETAIL << "Received link break signal" << endl;
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
-        Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject *>(obj));
-        INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *> (ieee80211Frame == NULL ? obj : ieee80211Frame->getEncapsulatedPacket());
+        cPacket *frame = check_and_cast<cPacket *>(obj);
+        INetworkDatagram *datagram = NULL;
+        if (dynamic_cast<Ieee80211Frame *>(frame) || dynamic_cast<IdealMacFrame *>(frame))
+            datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
+        else
+            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
         if (datagram) {
             const Address& unreachableAddr = datagram->getDestinationAddress();
             if (unreachableAddr.getAddressType() == addressType) {
@@ -1004,8 +1009,6 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
                     handleLinkBreakSendRERR(route->getNextHopAsGeneric());
             }
         }
-        else
-            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
     }
 }
 

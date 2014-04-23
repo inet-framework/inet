@@ -45,9 +45,11 @@ simple IdealMac extends MACProtocolBase like ILinkLayer
         int headerLength @unit("B");        // IdealMacFrame.byteLength = headerLength + packetFromUpperLayer.byteLength
         bool promiscuous = default(false);
         bool fullDuplex = default(true);    // allows transmitting and receiving simultaneously (transceiver radio mode)
+        double ackTimeout @unit("s") = default(100ms);
 
         @class(IdealMac);
         @signal[dropPkNotForUs](type=IdealMacFrame);
+        @signal[NF_LINK_BREAK](type=IdealMacFrame);
         @statistic[passedUpPk](title="packets passed to higher layer"; source=packetSentToUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[sentDownPk](title="packets sent to lower layer"; source=packetSentToLower; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);
         @statistic[rcvdPkFromHL](title="packets received from higher layer"; source=packetReceivedFromUpper; record=count,"sum(packetBytes)","vector(packetBytes)"; interpolationmode=none);

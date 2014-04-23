@@ -19,6 +19,7 @@
 #include "xDYMO.h"
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
+#include "IdealMacFrame_m.h"
 #include "Ieee80211Frame_m.h"
 #include "AddressResolver.h"
 #include "INetworkProtocolControlInfo.h"
@@ -1419,9 +1420,9 @@ void xDYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
         EV_WARN << "Received link break" << endl;
-        Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject*>(obj));
-        if (ieee80211Frame) {
-            INetworkDatagram * datagram = dynamic_cast<INetworkDatagram *>(ieee80211Frame->getEncapsulatedPacket());
+        cPacket *frame = check_and_cast<cPacket *>(obj);
+        if (dynamic_cast<Ieee80211Frame *>(frame) || dynamic_cast<IdealMacFrame *>(frame)) {
+            INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
             if (datagram) {
                 // TODO: get nexthop and interface from the packet
                 // INetworkProtocolControlInfo * networkProtocolControlInfo = dynamic_cast<INetworkProtocolControlInfo *>(datagram->getControlInfo());
@@ -1435,6 +1436,8 @@ void xDYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
                 }
             }
         }
+        else
+            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
     }
 }
 
