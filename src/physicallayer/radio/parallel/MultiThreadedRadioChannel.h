@@ -96,8 +96,8 @@ class INET_API MultiThreadedRadioChannel : public CachedRadioChannel
             CachedRadioChannel()
         {}
 
-        MultiThreadedRadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *noise, int workerCount) :
-            CachedRadioChannel(propagation, attenuation, noise)
+        MultiThreadedRadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *noise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange, int workerCount) :
+            CachedRadioChannel(propagation, attenuation, noise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange)
         { initializeWorkers(workerCount); }
 
         virtual ~MultiThreadedRadioChannel();

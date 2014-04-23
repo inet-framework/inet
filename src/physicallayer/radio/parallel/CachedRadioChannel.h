@@ -96,8 +96,8 @@ class INET_API CachedRadioChannel : public RadioChannel
             baseTransmissionId(0)
         {}
 
-        CachedRadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise) :
-            RadioChannel(propagation, attenuation, backgroundNoise),
+        CachedRadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
+            RadioChannel(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange),
             receptionCacheGetCount(0),
             receptionCacheHitCount(0),
             decisionCacheGetCount(0),

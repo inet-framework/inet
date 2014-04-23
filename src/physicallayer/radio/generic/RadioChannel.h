@@ -29,15 +29,15 @@
 class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 {
     protected:
+        const IRadioSignalPropagation *propagation;
+        const IRadioSignalAttenuation *attenuation;
+        const IRadioBackgroundNoise *backgroundNoise;
+
         // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time
         simtime_t minInterferenceTime;
         simtime_t maxTransmissionDuration;
         m maxCommunicationRange;
         m maxInterferenceRange;
-
-        const IRadioSignalPropagation *propagation;
-        const IRadioSignalAttenuation *attenuation;
-        const IRadioBackgroundNoise *backgroundNoise;
 
         std::vector<const IRadio *> radios;
         std::vector<const IRadioSignalTransmission *> transmissions;
@@ -73,23 +73,23 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 
     public:
         RadioChannel() :
-            minInterferenceTime(sNaN),
-            maxTransmissionDuration(sNaN),
-            maxCommunicationRange(m(sNaN)),
-            maxInterferenceRange(m(sNaN)),
             propagation(NULL),
             attenuation(NULL),
-            backgroundNoise(NULL)
-        {}
-
-        RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise) :
+            backgroundNoise(NULL),
             minInterferenceTime(sNaN),
             maxTransmissionDuration(sNaN),
             maxCommunicationRange(m(sNaN)),
-            maxInterferenceRange(m(sNaN)),
+            maxInterferenceRange(m(sNaN))
+        {}
+
+        RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
             propagation(propagation),
             attenuation(attenuation),
-            backgroundNoise(backgroundNoise)
+            backgroundNoise(backgroundNoise),
+            minInterferenceTime(minInterferenceTime),
+            maxTransmissionDuration(maxTransmissionDuration),
+            maxCommunicationRange(m(maxCommunicationRange)),
+            maxInterferenceRange(m(maxInterferenceRange))
         {}
 
         virtual ~RadioChannel();

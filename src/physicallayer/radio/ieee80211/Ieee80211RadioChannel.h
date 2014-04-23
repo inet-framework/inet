@@ -34,8 +34,8 @@ class INET_API Ieee80211RadioChannel : public RadioChannel
             numChannels(-1)
         {}
 
-        Ieee80211RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, int numChannels) :
-            RadioChannel(propagation, attenuation, backgroundNoise),
+        Ieee80211RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange, int numChannels) :
+            RadioChannel(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange),
             numChannels(numChannels)
         {}
 

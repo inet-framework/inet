@@ -32,8 +32,8 @@ class INET_API CUDARadioChannel : public CachedRadioChannel
             CachedRadioChannel()
         {}
 
-        CUDARadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise) :
-            CachedRadioChannel(propagation, attenuation, backgroundNoise)
+        CUDARadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
+            CachedRadioChannel(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange)
         {}
 
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission);

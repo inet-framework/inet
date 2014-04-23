@@ -42,7 +42,7 @@ void testIdealRadio()
 
     IRadioSignalPropagation *propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
     IRadioSignalAttenuation *attenuation = new IdealRadioSignalFreeSpaceAttenuation();
-    IRadioChannel *channel = new RadioChannel(propagation, attenuation, NULL);
+    IRadioChannel *channel = new RadioChannel(propagation, attenuation, NULL, 1E-12, 10E-3, m(sNaN), m(sNaN));
 
     IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
     IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
@@ -70,7 +70,7 @@ void testScalarRadio()
     IRadioSignalPropagation *propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
     IRadioSignalAttenuation *attenuation = new ScalarRadioSignalFreeSpaceAttenuation(2);
     IRadioBackgroundNoise *backgroundNoise = new ScalarRadioBackgroundNoise(W(1E-14));
-    IRadioChannel *channel = new RadioChannel(propagation, attenuation, backgroundNoise);
+    IRadioChannel *channel = new RadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
 
     IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
     IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
@@ -79,11 +79,12 @@ void testScalarRadio()
 
     IMobility *receiverMobility = new StationaryMobility(Coord(100, 0));
     IRadioAntenna *receiverAntenna = new IsotropicRadioAntenna(receiverMobility);
-    IRadioSignalReceiver *receiverReceiver = new ScalarRadioSignalReceiver(10, W(1E-12), W(1E-11), Hz(2.4E+9), Hz(2E+6));
+    IRadioSignalReceiver *receiverReceiver = new ScalarRadioSignalReceiver(10, W(1E-12), W(1E-12), Hz(2.4E+9), Hz(2E+6));
     IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
     IRadioFrame *radioFrame = transmitterRadio->transmitPacket(transmitterMacFrame, simTime());
     cPacket *receiverMacFrame = receiverRadio->receivePacket(radioFrame);
+    IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     if (debug)
         std::cout << "ScalarRadio: " << receiverMacFrame->getName() << " : " << receiverMacFrame->getKind() << endl;
@@ -96,7 +97,7 @@ void testDimensionalRadio()
     IRadioSignalPropagation *propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
     IRadioSignalAttenuation *attenuation = new DimensionalRadioSignalFreeSpaceAttenuation(2);
     IRadioBackgroundNoise *backgroundNoise = new DimensionalRadioBackgroundNoise(W(1E-14));
-    IRadioChannel *channel = new RadioChannel(propagation, attenuation, backgroundNoise);
+    IRadioChannel *channel = new RadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
 
     IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
     IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
@@ -110,6 +111,7 @@ void testDimensionalRadio()
 
     IRadioFrame *radioFrame = transmitterRadio->transmitPacket(transmitterMacFrame, simTime());
     cPacket *receiverMacFrame = receiverRadio->receivePacket(radioFrame);
+    IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     if (debug)
         std::cout << "DimensionalRadio: " << receiverMacFrame->getName() << " : " << receiverMacFrame->getKind() << endl;
@@ -180,12 +182,12 @@ void testMultipleScalarRadiosWithAllChannels(int radioCount, int frameCount, sim
     IRadioSignalPropagation *propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
     IRadioSignalAttenuation *attenuation = new ScalarRadioSignalFreeSpaceAttenuation(2);
     IRadioBackgroundNoise *backgroundNoise = new ScalarRadioBackgroundNoise(W(1E-14));
-    RadioChannel *radioChannel = new RadioChannel(propagation, attenuation, backgroundNoise);
-    MultiThreadedRadioChannel *multiThreadedRadioChannel = new MultiThreadedRadioChannel(propagation, attenuation, backgroundNoise, 3);
-    CUDARadioChannel *cudaRadioChannel = new CUDARadioChannel(propagation, attenuation, backgroundNoise);
-    //TIME(testMultipleScalarRadios(radioChannel, radioCount, frameCount, duration, playgroundSize));
-    //TIME(testMultipleScalarRadios(multiThreadedRadioChannel, radioCount, frameCount, duration, playgroundSize));
-    TIME(testMultipleScalarRadios(cudaRadioChannel, radioCount, frameCount, duration, playgroundSize));
+    RadioChannel *radioChannel = new RadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
+    TIME(testMultipleScalarRadios(radioChannel, radioCount, frameCount, duration, playgroundSize));
+//    MultiThreadedRadioChannel *multiThreadedRadioChannel = new MultiThreadedRadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN), 3);
+//    TIME(testMultipleScalarRadios(multiThreadedRadioChannel, radioCount, frameCount, duration, playgroundSize));
+//    CUDARadioChannel *cudaRadioChannel = new CUDARadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
+//    TIME(testMultipleScalarRadios(cudaRadioChannel, radioCount, frameCount, duration, playgroundSize));
 }
 
 Define_Module(RadioTest);
