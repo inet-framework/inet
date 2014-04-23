@@ -1418,13 +1418,15 @@ void NS_CLASS rt_table_update_route_timeouts(rt_table_t * fwd_rt,
 
     if (fwd_rt && fwd_rt->state == VALID)
     {
-        if (llfeedback || (fwd_rt->flags & RT_INET_DEST) || fwd_rt->hcnt != 1 || fwd_rt->hello_timer.used)
+        //if (llfeedback || (fwd_rt->flags & RT_INET_DEST) || fwd_rt->hcnt != 1 || fwd_rt->hello_timer.used)
             rt_table_update_timeout(fwd_rt, ACTIVE_ROUTE_TIMEOUT);
+
         next_hop_rt = rt_table_find(fwd_rt->next_hop);
 
-        if (next_hop_rt && next_hop_rt->state == VALID &&
-                next_hop_rt->dest_addr.s_addr != fwd_rt->dest_addr.s_addr &&
-                (llfeedback || fwd_rt->hello_timer.used))
+        //if (next_hop_rt && next_hop_rt->state == VALID &&
+        ///        next_hop_rt->dest_addr.s_addr != fwd_rt->dest_addr.s_addr &&
+        //        (llfeedback || fwd_rt->hello_timer.used))
+        if (next_hop_rt && next_hop_rt->state == VALID)
             rt_table_update_timeout(next_hop_rt, ACTIVE_ROUTE_TIMEOUT);
 
     }
@@ -1434,14 +1436,15 @@ void NS_CLASS rt_table_update_route_timeouts(rt_table_t * fwd_rt,
     if (rev_rt && rev_rt->state == VALID)
     {
 
-        if (llfeedback || rev_rt->hcnt != 1 || rev_rt->hello_timer.used)
+        // if (llfeedback || rev_rt->hcnt != 1 || rev_rt->hello_timer.used)
             rt_table_update_timeout(rev_rt, ACTIVE_ROUTE_TIMEOUT);
 
         next_hop_rt = rt_table_find(rev_rt->next_hop);
 
-        if (next_hop_rt && next_hop_rt->state == VALID && rev_rt &&
-                next_hop_rt->dest_addr.s_addr != rev_rt->dest_addr.s_addr &&
-                (llfeedback || rev_rt->hello_timer.used))
+        //if (next_hop_rt && next_hop_rt->state == VALID && rev_rt &&
+        //        next_hop_rt->dest_addr.s_addr != rev_rt->dest_addr.s_addr &&
+        //        (llfeedback || rev_rt->hello_timer.used))
+        if (next_hop_rt && next_hop_rt->state == VALID)
             rt_table_update_timeout(next_hop_rt, ACTIVE_ROUTE_TIMEOUT);
 
         /* Update HELLO timer of next hop neighbor if active */
