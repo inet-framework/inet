@@ -590,7 +590,7 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
     if (signalID == NF_LINK_BREAK)
     {
         Enter_Method("Dsr Link Break");
-        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject *>(obj));
+        Ieee80211DataFrame *frame = dynamic_cast<Ieee80211DataFrame *>(obj);
         if (frame)
         {
             if (dynamic_cast<IPv4Datagram *>(frame->getEncapsulatedPacket()))
@@ -617,7 +617,7 @@ void DSRUU::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj
         {
             Enter_Method("Dsr promisc");
 
-            if (dynamic_cast<Ieee80211DataFrame *>(const_cast<cObject*>(obj)))
+            if (dynamic_cast<Ieee80211DataFrame *>(obj))
             {
                 const Ieee80211DataFrame *frame = check_and_cast<const Ieee80211DataFrame *>(obj);
                 if (dynamic_cast<DSRPkt *>(frame->getEncapsulatedPacket()))
