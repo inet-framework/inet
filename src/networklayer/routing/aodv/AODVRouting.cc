@@ -984,27 +984,28 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
         EV_DETAIL << "Received link break signal" << endl;
+        // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
         Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject *>(obj));
-        if (ieee80211Frame) {
-            INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *>(ieee80211Frame->getEncapsulatedPacket());
-            if (datagram) {
-                const Address& unreachableAddr = datagram->getDestinationAddress();
-                if (unreachableAddr.getAddressType() == addressType) {
-                    // A node initiates processing for a RERR message in three situations:
-                    //
-                    //   (i)     if it detects a link break for the next hop of an active
-                    //           route in its routing table while transmitting data (and
-                    //           route repair, if attempted, was unsuccessful), or
+        INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *> (ieee80211Frame == NULL ? obj : ieee80211Frame->getEncapsulatedPacket());
+        if (datagram) {
+            const Address& unreachableAddr = datagram->getDestinationAddress();
+            if (unreachableAddr.getAddressType() == addressType) {
+                // A node initiates processing for a RERR message in three situations:
+                //
+                //   (i)     if it detects a link break for the next hop of an active
+                //           route in its routing table while transmitting data (and
+                //           route repair, if attempted, was unsuccessful), or
 
-                    // TODO: Implement: local repair
+                // TODO: Implement: local repair
 
-                    IRoute *route = routingTable->findBestMatchingRoute(unreachableAddr);
+                IRoute *route = routingTable->findBestMatchingRoute(unreachableAddr);
 
-                    if (route && route->getSource() == this)
-                        handleLinkBreakSendRERR(route->getNextHopAsGeneric());
-                }
+                if (route && route->getSource() == this)
+                    handleLinkBreakSendRERR(route->getNextHopAsGeneric());
             }
         }
+        else
+            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
     }
 }
 
