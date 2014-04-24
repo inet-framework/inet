@@ -29,7 +29,7 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
     public:
         virtual ~IRadioSignalTransmission() {}
 
-        virtual unsigned int getId() const = 0;
+        virtual int getId() const = 0;
 
         virtual const IRadio *getTransmitter() const = 0;
 

@@ -24,7 +24,7 @@ Define_Module(ConstantGainRadioAntenna);
 Define_Module(ImmediateRadioSignalPropagation);
 Define_Module(ConstantSpeedRadioSignalPropagation);
 
-unsigned int RadioSignalTransmissionBase::nextId = 0;
+int RadioSignalTransmissionBase::nextId = 0;
 
 void RadioSignalTransmissionBase::printToStream(std::ostream &stream) const
 {

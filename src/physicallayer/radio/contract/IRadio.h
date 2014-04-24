@@ -265,7 +265,7 @@ class INET_API IRadio : public IRadioSignalSource
     public:
         virtual ~IRadio() {}
 
-        virtual unsigned int getId() const = 0;
+        virtual int getId() const = 0;
 
         virtual const IRadioAntenna *getAntenna() const = 0;
         virtual const IRadioSignalTransmitter *getTransmitter() const = 0;

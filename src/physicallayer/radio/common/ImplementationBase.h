@@ -44,10 +44,10 @@
 class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmission
 {
     protected:
-        static unsigned int nextId;
+        static int nextId;
 
     protected:
-        const unsigned int id;
+        const int id;
         const IRadio *transmitter;
         const eventnumber_t eventNumber;
         const simtime_t startTime;
@@ -70,7 +70,7 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
             propagationSpeed(mps(SPEED_OF_LIGHT))
         {}
 
-        virtual unsigned int getId() const { return id; }
+        virtual int getId() const { return id; }
 
         virtual void printToStream(std::ostream &stream) const;
 

@@ -27,7 +27,7 @@
 #include "ImplementationBase.h"
 #include "PhyControlInfo_m.h"
 
-unsigned int Radio::nextId = 0;
+int Radio::nextId = 0;
 
 Define_Module(Radio);
 

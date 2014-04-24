@@ -27,10 +27,10 @@
 class INET_API Radio : public RadioBase, public virtual IRadio
 {
     protected:
-        static unsigned int nextId;
+        static int nextId;
 
     protected:
-        const unsigned int id;
+        const int id;
         const IRadioAntenna *antenna;
         const IRadioSignalTransmitter *transmitter;
         const IRadioSignalReceiver *receiver;
@@ -79,7 +79,7 @@ class INET_API Radio : public RadioBase, public virtual IRadio
 
         virtual ~Radio();
 
-        virtual unsigned int getId() const { return id; }
+        virtual int getId() const { return id; }
 
         virtual void printToStream(std::ostream &stream) const;
 
