@@ -135,7 +135,6 @@ void TCPSocket::listen(bool fork)
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->take(msg);
     sendToTCP(msg);
     sockstate = LISTENING;
 }
@@ -164,7 +163,6 @@ void TCPSocket::connect(Address remoteAddress, int remotePort)
     openCmd->setTcpAlgorithmClass(tcpAlgorithmClass.c_str());
 
     msg->setControlInfo(openCmd);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->take(msg);
     sendToTCP(msg);
     sockstate = CONNECTING;
 }
@@ -190,7 +188,6 @@ void TCPSocket::close()
     TCPCommand *cmd = new TCPCommand();
     cmd->setConnId(connId);
     msg->setControlInfo(cmd);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->take(msg);
     sendToTCP(msg);
     sockstate = (sockstate == CONNECTED) ? LOCALLY_CLOSED : CLOSED;
 }
@@ -203,7 +200,6 @@ void TCPSocket::abort()
         TCPCommand *cmd = new TCPCommand();
         cmd->setConnId(connId);
         msg->setControlInfo(cmd);
-        check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->take(msg);
         sendToTCP(msg);
     }
     sockstate = CLOSED;
@@ -215,7 +211,6 @@ void TCPSocket::requestStatus()
     TCPCommand *cmd = new TCPCommand();
     cmd->setConnId(connId);
     msg->setControlInfo(cmd);
-    check_and_cast<cSimpleModule *>(gateToTcp->getOwnerModule())->take(msg);
     sendToTCP(msg);
 }
 

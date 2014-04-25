@@ -25,12 +25,12 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "TCPMultiThreadApp.h"
+#include "TCPTunnelThreadBase.h"
 
 /**
  * Thread for an active tunnel thread
  */
-class INET_API TCPListenerThread : public TCPThreadBase
+class INET_API TCPListenerThread : public TCPTunnelThreadBase
 {
   public:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

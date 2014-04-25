@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "TCPMultiThreadApp.h"
+#include "TCPMultiThreadCtrl.h"
 
 class ByteArrayMessage;
 

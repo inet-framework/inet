@@ -27,7 +27,7 @@ Define_Module(TCPPassiveTunnelThread);
 void TCPPassiveTunnelThread::realSocketAccept(cMessage *msg)
 {
     int connSocket = msg->par("fd").longValue();
-    TCPTunnelThreadBase *thread = check_and_cast<TCPTunnelThreadBase *>(hostmod->createNewThreadFor(msg));
+    TCPTunnelThreadBase *thread = createNewActiveThread();
     check_and_cast<SocketsRTScheduler *>(simulation.getScheduler())->addSocket(thread, NULL, connSocket, false);
     thread->setRealSocket(connSocket);
     Address destAddr = AddressResolver().resolve(hostmod->par("connectAddress"));
