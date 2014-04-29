@@ -83,7 +83,7 @@ packet Ieee80211Frame
     simtime_t duration = -1; // "duration" in the Duration/ID field (-1=no duration)
     short AID = -1;          // "id" (Association ID) in the Duration/ID field (-1=no ID)
     MACAddress receiverAddress; // aka address1
-    simtime_t MACArrive;
+    simtime_t MACArrive;    // FIXME remove it, technical data, used inside of MAC module
 }
 
 //
