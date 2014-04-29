@@ -1,4 +1,10 @@
 # workingdir,                        args
+/examples/aodv/,    				-f omnetpp.ini -c IPv4SlowMobility -r 0
+/examples/aodv/,    				-f omnetpp.ini -c IPv4ModerateFastMobility -r 0
+/examples/aodv/,    				-f omnetpp.ini -c IPv4FastMobility -r 0
+/examples/aodv/,    				-f omnetpp.ini -c StaticIPv4 -r 0
+/examples/aodv/,    				-f omnetpp.ini -c Dynamic -r 0
+/examples/aodv/,    				-f omnetpp.ini -c MoreDynamic -r 0
 /examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0
 # /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
