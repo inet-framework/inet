@@ -51,7 +51,7 @@ packet AirFrame
 {
     double pSend; // Power with which this packet is transmitted
     int channelNumber; // Channel on which the packet is sent
-    simtime_t duration; // Time it takes to transmit the packet, in seconds
+    simtime_t duration; // Time it takes to transmit the packet, in seconds     //FIXME overwrites the cMessage::duration
     double bitrate;
     double snr;
     double lossRate;
