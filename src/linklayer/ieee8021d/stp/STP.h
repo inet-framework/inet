@@ -33,7 +33,7 @@
 /**
  * Implements the Spanning Tree Protocol. See the NED file for details.
  */
-class STP : public STPBase
+class INET_API STP : public STPBase
 {
     public:
         typedef Ieee8021dInterfaceData::PortInfo PortInfo;

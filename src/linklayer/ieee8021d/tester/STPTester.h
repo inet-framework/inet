@@ -33,7 +33,7 @@
  * with cycle detection. The results can be obtained with getter methods.
  */
 // TODO: this module should be moved into the test folder somewhere
-class STPTester : public cSimpleModule
+class INET_API STPTester : public cSimpleModule
 {
     public:
         enum Color
