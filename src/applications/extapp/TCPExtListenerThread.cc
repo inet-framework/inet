@@ -21,30 +21,8 @@
 
 #include "ByteArrayMessage.h"
 #include "SocketsRTScheduler.h"
+#include "TCPExtActiveThread.h"
 #include "TCPSocket.h"
-
-class TCPExtActiveThread : public TCPSocket::CallbackInterface
-{
-  protected:
-    int extSocketId;
-    cModule *appModule;
-    SocketsRTScheduler *rtScheduler;
-    TCPSocket inetSocket;
-  public:
-    TCPExtActiveThread();
-    virtual ~TCPExtActiveThread();
-    virtual void handleMessage(cMessage *msg);
-    virtual void openActiveInetSocket(const char *, int port);      //TODO
-    virtual void acceptExtConnection(cModule *module, int extConnSocketID);
-    virtual void acceptInetConnection(cModule *module, cMessage *msg);
-
-    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-    virtual void socketEstablished(int connId, void *yourPtr);
-    virtual void socketPeerClosed(int connId, void *yourPtr);
-    virtual void socketClosed(int connId, void *yourPtr);
-    virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
-};
 
 class TCPExtListenerThread
 {
@@ -119,44 +97,5 @@ void TCPExtListenerThread::acceptExtConnection(cMessage *msg)
     TCPExtActiveThread *thread = new TCPExtActiveThread();
     int extConnSocket = msg->par("fd").longValue();
     thread->acceptExtConnection(appModule, extConnSocket);
-}
-
-void TCPExtActiveThread::acceptExtConnection(cModule *module, int extConnSocketID)
-{
-    appModule = module;
-    extSocketId = extConnSocketID;
-    openActiveInetSocket(appModule->par("connectAddress").stringValue(), appModule->par("connectPort").longValue());
-    rtScheduler->addSocket(appModule, this, extSocketId, false);
-}
-
-void TCPExtActiveThread::acceptInetConnection(cModule *module, cMessage *msg)
-{
-    appModule = module;
-}
-
-void TCPExtActiveThread::handleMessage(cMessage *msg)
-{
-    switch(msg->getKind())
-    {
-        case SocketsRTScheduler::DATA:
-        {
-            if (extSocketId != msg->par("fd").longValue())
-                throw cRuntimeError("socket not opened");
-            ByteArrayMessage *pk = check_and_cast<ByteArrayMessage *>(msg);
-            inetSocket.send(pk);
-            break;
-        }
-        case SocketsRTScheduler::CLOSED:
-            if (extSocketId != msg->par("fd").longValue())
-                throw cRuntimeError("unknown socket id");
-            closesocket(extSocketId);
-            extSocketId = INVALID_SOCKET;
-            delete msg;
-            break;
-        case SocketsRTScheduler::ACCEPT:
-            throw cRuntimeError("socket already opened");
-            delete msg;
-            break;
-    }
 }
 

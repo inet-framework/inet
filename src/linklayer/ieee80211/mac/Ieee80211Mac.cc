@@ -1394,7 +1394,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
                                      );
         }
     }
-    EV_TRACE << "leaving handleWithFSM\n\t";
+    EV_TRACE << "leaving handleWithFSM\n";
     logState();
     stateVector.record(fsm.getState());
     if (simTime() - last > 0.1)
@@ -2191,10 +2191,10 @@ void Ieee80211Mac::logState()
     EV_TRACE << ", backoff 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)
         EV_TRACE << " " << edcCAF[i].backoff;
-    EV_TRACE <<  "\n# backoffPeriod 0.." << numCategs << " =";
+    EV_TRACE <<  "\n" << "# backoffPeriod 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)
         EV_TRACE << " " << edcCAF[i].backoffPeriod;
-    EV_TRACE << "\n# retryCounter 0.." << numCategs << " =";
+    EV_TRACE << "\n" << "# retryCounter 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)
         EV_TRACE << " " << edcCAF[i].retryCounter;
     EV_TRACE << ", radioMode = " << radio->getRadioMode()
@@ -2210,11 +2210,11 @@ void Ieee80211Mac::logState()
     EV_TRACE << ", scheduled backoff are";
     for (int i=0; i<numCategs; i++)
         EV_TRACE << " " << i << "(" << (edcCAF[i].endBackoff->isScheduled() ? "scheduled" : "") << ")";
-    EV_TRACE << "\n# currentAC: " << currentAC << ", oldcurrentAC: " << oldcurrentAC;
+    EV_TRACE << "\n" << "# currentAC: " << currentAC << ", oldcurrentAC: " << oldcurrentAC;
     if (getCurrentTransmission() != NULL)
-        EV_TRACE << "\n# current transmission: " << getCurrentTransmission()->getId();
+        EV_TRACE << "\n" << "# current transmission: " << getCurrentTransmission()->getId();
     else
-        EV_TRACE << "\n# current transmission: none";
+        EV_TRACE << "\n" << "# current transmission: none";
     EV_TRACE << endl;
 }
 
