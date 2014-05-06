@@ -23,21 +23,15 @@
 #include "SocketsRTScheduler.h"
 #include "TCPSocket.h"
 
-class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterface
+class TCPInetListenerThread : public TCPSocket::CallbackInterface
 {
   protected:
-    int extSocketId;
-    cModule *appModule;
-    SocketsRTScheduler *rtScheduler;
     TCPSocket inetSocket;
-  protected:
-    void closeExtSocket();
+    cModule *appModule;
   public:
-    TCPExtActiveThread();
-    virtual ~TCPExtActiveThread();
+    TCPInetListenerThread();
+    virtual ~TCPInetListenerThread();
     virtual void handleMessage(cMessage *msg);
-    virtual void openActiveInetSocket(const char *, int port) {}      //TODO
-    virtual void acceptExtConnection(cModule *module, int extConnSocketID);
     virtual void acceptInetConnection(cModule *module, cMessage *msg);
 
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);

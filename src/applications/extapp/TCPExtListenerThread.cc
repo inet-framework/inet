@@ -24,7 +24,7 @@
 #include "TCPExtActiveThread.h"
 #include "TCPSocket.h"
 
-class TCPExtListenerThread
+class TCPExtListenerThread : public cOwnedObject
 {
   protected:
     int extListenerSocketId;
@@ -37,6 +37,9 @@ class TCPExtListenerThread
     virtual void handleMessage(cMessage *msg);
     virtual void acceptExtConnection(cMessage *msg);
 };
+
+
+Register_Class(TCPExtListenerThread);
 
 TCPExtListenerThread::TCPExtListenerThread()
 {
