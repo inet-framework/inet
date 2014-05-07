@@ -247,6 +247,7 @@ m RadioChannel::computeMaxRange(W maxPower, W minPower) const
 
 m RadioChannel::computeMaxCommunicationRange() const
 {
+    // TODO: use max if specified
     Hz carrierFrequency = Hz(par("carrierFrequency"));
     if (isNaN(carrierFrequency.get()))
         return m(par("maxCommunicationRange"));
@@ -311,6 +312,7 @@ bool RadioChannel::isInterferingTransmission(const IRadioSignalTransmission *tra
 
 void RadioChannel::removeNonInterferingTransmissions()
 {
+    // TODO: erase non interfering transmissions at the exact time they need to be erased
     double minX = DBL_MAX;
     double maxX = DBL_MIN;
     double minY = DBL_MAX;
@@ -535,6 +537,7 @@ const IRadioSignalListeningDecision *RadioChannel::listenOnChannel(const IRadio 
 bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const
 {
     // TODO: KLUDGE: move to some scalar specific class
+    // TODO: oversimplification
     const ScalarRadioSignalReceiver *scalarReceiver = dynamic_cast<const ScalarRadioSignalReceiver *>(radio->getReceiver());
     const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
     if (scalarReceiver && scalarTransmission && scalarTransmission->getCarrierFrequency() != scalarReceiver->getCarrierFrequency())

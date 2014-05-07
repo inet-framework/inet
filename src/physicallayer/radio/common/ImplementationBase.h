@@ -30,6 +30,7 @@
 // TODO: optimize interface in terms of constness, use of references, etc.
 // TODO: add proper destructors with freeing resources
 // TODO: add delete operator calls where appropriate and do proper memory management
+// TODO: create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
 // TODO: !!! extend radio decider interface to allow a separate decision for the detection of preambles during synchronization
 // TODO: !!! extend radio decider interface to provide reception state for listeners? and support for carrier sensing for MACs
 // TODO: avoid the need for subclassing radio and radio channel to be able to have only one parameterizable radio and radio channel NED types

@@ -28,6 +28,7 @@ simple Radio extends RadioBase
         string antennaType;
         string transmitterType;
         string receiverType;
+        // TODO: add parameter to specify radio channel
         @class(Radio);
 
     submodules:

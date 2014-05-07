@@ -74,6 +74,7 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
     ModulationType modeBody;
     ModulationType modeHeader;
 
+    // TODO: use transmission's opMode for error detection
     WifiPreamble preambleUsed = wifiPreamble;
     double headerNoError;
     uint32_t headerSize;

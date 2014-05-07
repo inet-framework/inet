@@ -24,6 +24,8 @@
 #include "IRadioSignalListeningDecision.h"
 #include "IRadioSignalReceptionDecision.h"
 
+// TODO: this is rather an interface for receivers that support "what if" questions for the future
+// TODO: create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
 // TODO: add support for synchronization
 // TODO: add support for reception state
 // TODO: extract reception, totalNoise interface

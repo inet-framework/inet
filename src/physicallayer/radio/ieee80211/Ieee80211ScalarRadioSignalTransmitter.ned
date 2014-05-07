@@ -24,5 +24,6 @@ module Ieee80211ScalarRadioSignalTransmitter extends ScalarRadioSignalTransmitte
     parameters:
         int channelNumber = default(1);
         string preambleMode @enum("long", "short");
+        // TODO: add opMode as in receiver?
         @class(Ieee80211ScalarRadioSignalTransmitter);
 }

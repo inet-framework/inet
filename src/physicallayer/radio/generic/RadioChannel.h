@@ -94,6 +94,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         /**
          * The list of ongoing transmissions on the radio channel.
          */
+        // TODO: consider using an interval graph for receptions (per receiver radio)
         std::vector<const IRadioSignalTransmission *> transmissions;
         //@}
 

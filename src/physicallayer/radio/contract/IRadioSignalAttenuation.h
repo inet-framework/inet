@@ -29,7 +29,7 @@ class INET_API IRadioSignalAttenuation
         virtual ~IRadioSignalAttenuation() {}
 
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
-        virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
+        virtual const IRadioSignalReception *computeReception(const IRadio *receiver, const IRadioSignalTransmission *transmission) const = 0;
 };
 
 #endif
