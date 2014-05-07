@@ -1,0 +1,49 @@
+%description:
+
+%file: test.ned
+
+network Test
+{
+    submodules:
+        radioTest: RadioTest;
+}
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+record-eventlog = true
+ned-path = .;../../../../src;../lib
+**.log-level = info
+debugger-attach-on-error = true
+
+%contains: results/General-0.elog
+Ideal radio received (cPacket)Hello, reception is successful
+%contains: results/General-0.elog
+Scalar radio received (cPacket)Hello, reception is successful
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.elog
+Sequential radio channel received packets, successful reception count = 983, failed reception count = 17
+%contains: results/General-0.elog
+Parallel radio channel received packets, successful reception count = 983, failed reception count = 17
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.elog
+Sequential radio channel received packets, successful reception count = 3703, failed reception count = 297
+%contains: results/General-0.elog
+Parallel radio channel received packets, successful reception count = 3703, failed reception count = 297
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.elog
+Sequential radio channel received packets, successful reception count = 14105, failed reception count = 1895
+%contains: results/General-0.elog
+Parallel radio channel received packets, successful reception count = 14105, failed reception count = 1895
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.elog
+Sequential radio channel received packets, successful reception count = 50335, failed reception count = 13665
+%contains: results/General-0.elog
+Parallel radio channel received packets, successful reception count = 50335, failed reception count = 13665
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
