@@ -69,7 +69,7 @@ void Ieee80211ScalarRadioSignalReceiver::initialize(int stage)
     }
 }
 
-bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int lengthMPDU, double bitrate) const
+bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int bitLength, double bitrate) const
 {
     ModulationType modeBody;
     ModulationType modeHeader;
@@ -106,11 +106,11 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
     // probability of no bit error in the MPDU
     double MpduNoError;
     if (parseTable)
-        MpduNoError = 1 - parseTable->getPer(bitrate, snirMin, lengthMPDU / 8);
+        MpduNoError = 1 - parseTable->getPer(bitrate, snirMin, bitLength / 8);
     else
-        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, lengthMPDU);
+        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, bitLength);
 
-    EV << "bit length = " << lengthMPDU << " packet error rate = " << 1 - MpduNoError << " header error rate = " << 1 - headerNoError << endl;
+    EV << "bit length = " << bitLength << " packet error rate = " << 1 - MpduNoError << " header error rate = " << 1 - headerNoError << endl;
     if (MpduNoError >= 1 && headerNoError >= 1)
         return false;
     if (dblrand() > headerNoError)
@@ -131,6 +131,7 @@ const IRadioSignalReceptionDecision *Ieee80211ScalarRadioSignalReceiver::compute
         const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(reception->getTransmission());
         const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
         double snirMin = computeSNIRMin(reception, noise);
+        delete noise;
         bool isReceptionPossible = computeIsReceptionPossible(reception);
         if (isReceptionPossible && snirMin > snirThreshold)
         {

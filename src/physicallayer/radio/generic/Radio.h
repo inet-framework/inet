@@ -52,6 +52,7 @@ class INET_API Radio : public RadioBase, public virtual IRadio
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
         virtual void cancelAndDeleteEndReceptionTimers();
+        virtual bool isListeningPossible();
         virtual void updateTransceiverState();
 
     public:
@@ -90,7 +91,6 @@ class INET_API Radio : public RadioBase, public virtual IRadio
 
         virtual IRadioFrame *transmitPacket(cPacket *packet, const simtime_t startTime);
         virtual cPacket *receivePacket(IRadioFrame *frame);
-
 
         virtual void setRadioMode(RadioMode radioMode);
         virtual void setOldRadioChannel(int newRadioChannel);

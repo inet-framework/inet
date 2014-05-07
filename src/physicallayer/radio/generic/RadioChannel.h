@@ -29,23 +29,151 @@
 class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 {
     protected:
-        const IRadioSignalPropagation *propagation;
-        const IRadioSignalAttenuation *attenuation;
-        const IRadioBackgroundNoise *backgroundNoise;
+        /**
+         * The intermediate computation results related to a transmission and a
+         * receiver radio.
+         */
+        class CacheEntry
+        {
+            public:
+                const IRadioSignalArrival *arrival;
+                const IRadioSignalReception *reception;
+                const IRadioSignalReceptionDecision *decision;
 
-        // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time
-        simtime_t minInterferenceTime;
-        simtime_t maxTransmissionDuration;
-        m maxCommunicationRange;
-        m maxInterferenceRange;
-
-        std::vector<const IRadio *> radios;
-        std::vector<const IRadioSignalTransmission *> transmissions;
-        // TODO: is it a cache or part of the transmission?
-        std::vector<std::vector<const IRadioSignalArrival *> > arrivals;
+            public:
+                CacheEntry() :
+                    arrival(NULL),
+                    reception(NULL),
+                    decision(NULL)
+                {}
+        };
 
     protected:
+        /** @name Parameters that control the behavior of the radio channel. */
+        //@{
+        /**
+         * The propagation model of transmissions.
+         */
+        const IRadioSignalPropagation *propagation;
+        /**
+         * The attenuation model of transmissions.
+         */
+        const IRadioSignalAttenuation *attenuation;
+        /**
+         * The radio channel background noise model.
+         */
+        const IRadioBackgroundNoise *backgroundNoise;
+        /**
+         * The minimum time needed to consider two transmissions interfering.
+         */
+        // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time
+        simtime_t minInterferenceTime;
+        /**
+         * The maximum transmission duration of a radio signal.
+         */
+        simtime_t maxTransmissionDuration;
+        /**
+         * The maximum communication range where a transmission can still be
+         * potentially successfully received.
+         */
+        m maxCommunicationRange;
+        /**
+         * The maximum interference range where a transmission has still some
+         * effect on other transmissions.
+         */
+        m maxInterferenceRange;
+        //@}
+
+        /** @name State */
+        //@{
+        /**
+         * The list of radios that transmit and receive radio signals on the
+         * radio channel.
+         */
+        std::vector<const IRadio *> radios;
+        /**
+         * The list of ongoing transmissions on the radio channel.
+         */
+        std::vector<const IRadioSignalTransmission *> transmissions;
+        //@}
+
+        /** @name Cache */
+        //@{
+        /**
+         * The smallest transmission id of all ongoing transmissions.
+         */
+        int baseTransmissionId;
+        /**
+         * Caches pre-computed radio signal information for transmissions and
+         * radios. The outer vector is indexed by transmission id (offset with
+         * base transmission id) and the inner vector is indexed by radio id.
+         * Values that are no longer needed are removed from the beginning only.
+         * May contain NULL values for not yet pre-computed information.
+         */
+        mutable std::vector<std::vector<CacheEntry> *> cache;
+        /**
+         * Last time non-interfering transmissions were removed.
+         */
+        simtime_t lastRemoveNonInterferingTransmissions;
+        //@}
+
+        /** @name Statistics */
+        //@{
+        /**
+         * Total number of transmissions.
+         */
+        mutable long transmissionCount;
+        /**
+         * Total number of reception computations.
+         */
+        mutable long receptionComputationCount;
+        /**
+         * Total number of reception decision computations.
+         */
+        mutable long receptionDecisionComputationCount;
+        /**
+         * Total number of listening decision computations.
+         */
+        mutable long listeningDecisionComputationCount;
+        /**
+         * Total number of radio signal reception cache queries.
+         */
+        mutable long cacheReceptionGetCount;
+        /**
+         * Total number of radio signal reception cache hits.
+         */
+        mutable long cacheReceptionHitCount;
+        /**
+         * Total number of radio signal reception decision cache queries.
+         */
+        mutable long cacheDecisionGetCount;
+        /**
+         * Total number of radio signal reception decision cache hits.
+         */
+        mutable long cacheDecisionHitCount;
+        //@}
+
+    protected:
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
+        virtual void finish();
+
+        virtual CacheEntry *getCacheEntry(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual const IRadioSignalArrival *getCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual void setCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) const;
+        virtual void removeCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual const IRadioSignalReception *getCachedReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual void setCachedReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalReception *reception) const;
+        virtual void removeCachedReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual const IRadioSignalReceptionDecision *getCachedDecision(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual void setCachedDecision(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalReceptionDecision *decision) const;
+        virtual void removeCachedDecision(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual void invalidateCachedDecisions(const IRadioSignalTransmission *transmission);
+        virtual void invalidateCachedDecision(const IRadioSignalReceptionDecision *decision);
 
         // TODO: virtual W computeMaxTransmissionPower() const = 0;
         // TODO: virtual W computeMinReceptionPower() const = 0;
@@ -64,6 +192,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual bool isInterferingTransmission(const IRadioSignalTransmission *transmission, const IRadioSignalReception *reception) const;
 
         virtual void removeNonInterferingTransmissions();
+        virtual void removeNonInterferingTransmission(const IRadioSignalTransmission *transmission) {}
 
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
         virtual const std::vector<const IRadioSignalReception *> *computeInterferingReceptions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
@@ -71,35 +200,20 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
         virtual const IRadioSignalListeningDecision *computeListeningDecision(const IRadio *radio, const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
 
+        virtual const IRadioSignalReception *getReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual const IRadioSignalReceptionDecision *getReceptionDecision(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
+
     public:
-        RadioChannel() :
-            propagation(NULL),
-            attenuation(NULL),
-            backgroundNoise(NULL),
-            minInterferenceTime(sNaN),
-            maxTransmissionDuration(sNaN),
-            maxCommunicationRange(m(sNaN)),
-            maxInterferenceRange(m(sNaN))
-        {}
-
-        RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
-            propagation(propagation),
-            attenuation(attenuation),
-            backgroundNoise(backgroundNoise),
-            minInterferenceTime(minInterferenceTime),
-            maxTransmissionDuration(maxTransmissionDuration),
-            maxCommunicationRange(m(maxCommunicationRange)),
-            maxInterferenceRange(m(maxInterferenceRange))
-        {}
-
+        RadioChannel();
+        RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange);
         virtual ~RadioChannel();
 
         virtual const IRadioSignalPropagation *getPropagation() const { return propagation; }
         virtual const IRadioSignalAttenuation *getAttenuation() const { return attenuation; }
         virtual const IRadioBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
 
-        virtual void addRadio(const IRadio *radio) { radios.push_back(radio); }
-        virtual void removeRadio(const IRadio *radio) { radios.erase(std::remove(radios.begin(), radios.end(), radio)); }
+        virtual void addRadio(const IRadio *radio);
+        virtual void removeRadio(const IRadio *radio);
 
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission);
         virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame);

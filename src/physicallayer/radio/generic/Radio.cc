@@ -112,16 +112,23 @@ void Radio::setRadioMode(RadioMode newRadioMode)
             {
                 cMessage *timer = *it;
                 RadioFrame *radioFrame = static_cast<RadioFrame*>(timer->getContextPointer());
+                EV << "Picking up " << (IRadioFrame *)radioFrame << endl;
                 const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
                 const IRadioSignalArrival *arrival = channel->getPropagation()->computeArrival(transmission, antenna->getMobility());
-                channel->setArrival(this, transmission, arrival);
                 simtime_t startArrivalTime = arrival->getStartTime();
                 simtime_t endArrivalTime = arrival->getEndTime();
-                EV << "Picking up " << (IRadioFrame *)radioFrame << endl;
                 if (startArrivalTime >= simTime())
+                {
+                    channel->setArrival(this, transmission, arrival);
                     sendDirect(radioFrame, startArrivalTime - simTime(), radioFrame->getDuration(), getContainingNode(this), getRadioGate()->getId());
+                }
                 else if (endArrivalTime > simTime())
+                {
+                    channel->setArrival(this, transmission, arrival);
                     scheduleAt(endArrivalTime, timer);
+                }
+                else
+                    delete arrival;
             }
         }
         else
@@ -218,12 +225,15 @@ void Radio::handleSelfMessage(cMessage *message)
     else
     {
         EV << "Frame is completely received now.\n";
+        // TODO: this loop seems to be slow when there are many transmitters/receivers (just to remove a timer)
+        // TODO: we could use cMessageHeap or something similar to keep messages ordered by the end reception time and erase quickly
         for (std::vector<cMessage *>::iterator it = endReceptionTimers.begin(); it != endReceptionTimers.end(); it++)
         {
             if (*it == message)
             {
                 endReceptionTimers.erase(it);
                 RadioFrame *radioFrame = static_cast<RadioFrame *>(message->getContextPointer());
+                // TODO: avoid using setKind/getKind directly
                 if (message->getKind())
                 {
                     cPacket *macFrame = receivePacket(radioFrame);
@@ -338,22 +348,30 @@ void Radio::cancelAndDeleteEndReceptionTimers()
     endReceptionTimers.clear();
 }
 
-void Radio::updateTransceiverState()
+bool Radio::isListeningPossible()
 {
-    // reception state
-    ReceptionState newRadioReceptionState;
     const simtime_t now = simTime();
     const Coord position = antenna->getMobility()->getCurrentPosition();
     // TODO: use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
     const IRadioSignalListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
     const IRadioSignalListeningDecision *listeningDecision = channel->listenOnChannel(this, listening);
+    bool isListeningPossible = listeningDecision->isListeningPossible();
+    delete listening;
+    delete listeningDecision;
+    return isListeningPossible;
+}
+
+void Radio::updateTransceiverState()
+{
+    // reception state
+    ReceptionState newRadioReceptionState;
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_TRANSMITTER)
         newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (endReceptionTimer && endReceptionTimer->isScheduled())
         newRadioReceptionState = RECEPTION_STATE_RECEIVING;
     else if (false) // NOTE: synchronization is not modeled in New radio
         newRadioReceptionState = RECEPTION_STATE_SYNCHRONIZING;
-    else if (listeningDecision->isListeningPossible())
+    else if (isListeningPossible())
         newRadioReceptionState = RECEPTION_STATE_BUSY;
     else
         newRadioReceptionState = RECEPTION_STATE_IDLE;
@@ -363,8 +381,6 @@ void Radio::updateTransceiverState()
         receptionState = newRadioReceptionState;
         emit(receptionStateChangedSignal, newRadioReceptionState);
     }
-    delete listening;
-    delete listeningDecision;
     // transmission state
     TransmissionState newRadioTransmissionState;
     if (radioMode == RADIO_MODE_OFF || radioMode == RADIO_MODE_SLEEP || radioMode == RADIO_MODE_RECEIVER)

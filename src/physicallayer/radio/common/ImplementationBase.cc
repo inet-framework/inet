@@ -75,7 +75,7 @@ double RadioSignalFreeSpaceAttenuationBase::computePathLoss(const IRadioSignalTr
     double ratio = (waveLength / distance).get();
     double raisedRatio = alpha == 2.0 ? ratio * ratio : pow(ratio, alpha);
     double factor = distance.get() == 0 ? 1.0 : raisedRatio / (16.0 * M_PI * M_PI);
-    EV << "Computing path loss with frequency = " << carrierFrequency << ", distance = " << distance << " results in factor = " << factor << endl;
+    EV_DEBUG << "Computing path loss with frequency = " << carrierFrequency << ", distance = " << distance << " results in factor = " << factor << endl;
     return factor;
 }
 
@@ -95,6 +95,9 @@ bool RadioSignalReceiverBase::computeIsReceptionAttempted(const IRadioSignalRece
 {
     if (!computeIsReceptionPossible(reception))
         return false;
+    else if (simTime() == reception->getStartTime())
+        // TODO: isn't there a better way for this optimization? see also in RadioChannel::isReceptionAttempted
+        return !reception->getReceiver()->getReceptionInProgress();
     else
     {
         const IRadio *radio = reception->getReceiver();
@@ -138,6 +141,7 @@ const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeRecepti
     double snirMin = computeSNIRMin(reception, noise);
     bool isReceptionPossible = computeIsReceptionPossible(reception);
     bool isReceptionSuccessful = isReceptionPossible && snirMin > snirThreshold;
+    delete noise;
     return new RadioSignalReceptionDecision(reception, isReceptionPossible, isReceptionSuccessful, snirMin);
 }
 
@@ -145,6 +149,12 @@ const IRadioSignalArrival *ImmediateRadioSignalPropagation::computeArrival(const
 {
     const Coord position = mobility->getCurrentPosition();
     return new RadioSignalArrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position);
+}
+
+void ConstantSpeedRadioSignalPropagation::finish()
+{
+    EV_INFO << "Radio signal arrival computation count = " << arrivalComputationCount << endl;
+    recordScalar("Radio signal arrival computation count", arrivalComputationCount);
 }
 
 const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
@@ -169,6 +179,7 @@ const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const si
 
 const IRadioSignalArrival *ConstantSpeedRadioSignalPropagation::computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const
 {
+    arrivalComputationCount++;
     const simtime_t startTime = transmission->getStartTime();
     const simtime_t endTime = transmission->getEndTime();
     const Coord startPosition = transmission->getStartPosition();
@@ -176,7 +187,6 @@ const IRadioSignalArrival *ConstantSpeedRadioSignalPropagation::computeArrival(c
     const Coord startArrivalPosition = computeArrivalPosition(startTime, startPosition, mobility);
     const Coord endArrivalPosition = computeArrivalPosition(endTime, endPosition, mobility);
     const simtime_t startPropagationTime = startPosition.distance(startArrivalPosition) / propagationSpeed.get();
-    EV << "*** " << startPosition.distance(startArrivalPosition) << " speed: " << propagationSpeed.get() << " time: " << startPropagationTime << endl;
     const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
     const simtime_t startArrivalTime = startTime + startPropagationTime;
     const simtime_t endArrivalTime = endTime + endPropagationTime;

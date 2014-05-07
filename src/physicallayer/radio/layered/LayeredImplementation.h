@@ -487,7 +487,6 @@ class INET_API ScalarRadioConverter : public IRadioConverter
             return new ScalarRadioSignalTransmissionAnalogModel(duration, power, carrierFrequency, bandwidth);
         }
 
-        // TODO: return type including IRadioSignalSampleModel, rssi, etc.
         virtual const IRadioSignalReceptionSampleModel *convertAnalogToDigital(const IRadioSignalReceptionAnalogModel *analogModel) const
         {
             const simtime_t duration = analogModel->getDuration();
