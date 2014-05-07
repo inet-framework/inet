@@ -28,7 +28,7 @@ class INET_API IModulation
   public:
     virtual ~IModulation() {}
     virtual const char *getName() = 0;
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) = 0;
+    virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
 };
 
 #endif
