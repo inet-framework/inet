@@ -16,6 +16,7 @@
 //
 
 #include "ScalarImplementation.h"
+#include "Modulation.h"
 #include "IRadioChannel.h"
 
 Define_Module(ScalarRadioSignalFreeSpaceAttenuation);
@@ -60,7 +61,7 @@ const IRadioSignalReception *ScalarRadioSignalAttenuationBase::computeReception(
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
-    // TODO: revise
+    // TODO: revise antenna gain computation
     const Coord direction = receptionStartPosition - transmission->getStartPosition();
     double transmitterAntennaGain = transmitterAntenna->getGain(direction);
     double receiverAntennaGain = receiverAntenna->getGain(direction);
@@ -169,6 +170,18 @@ void ScalarRadioSignalReceiver::initialize(int stage)
         sensitivity = mW(FWMath::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
+        // TODO: move to subclass?
+        const char *modulationName = par("modulation");
+        if (strcmp(modulationName, "NULL")==0)
+            modulation = new NullModulation();
+        else if (strcmp(modulationName, "BPSK")==0)
+            modulation = new BPSKModulation();
+        else if (strcmp(modulationName, "16-QAM")==0)
+            modulation = new QAM16Modulation();
+        else if (strcmp(modulationName, "256-QAM")==0)
+            modulation = new QAM256Modulation();
+        else
+            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
     }
 }
 
@@ -259,9 +272,23 @@ const IRadioSignalNoise *ScalarRadioSignalReceiver::computeNoise(const IRadioSig
 
 const IRadioSignalListeningDecision *ScalarRadioSignalReceiver::computeListeningDecision(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
 {
-    const ScalarRadioSignalNoise *scalarNoise = check_and_cast<const ScalarRadioSignalNoise *>(computeNoise(listening, interferingReceptions, backgroundNoise));
+    const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
+    const ScalarRadioSignalNoise *scalarNoise = check_and_cast<const ScalarRadioSignalNoise *>(noise);
     W maxPower = scalarNoise->computeMaxPower(listening->getStartTime(), listening->getEndTime());
+    delete noise;
     return new ScalarRadioSignalListeningDecision(listening, maxPower >= energyDetection, maxPower);
+}
+
+bool ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int bitLength, double bitrate) const
+{
+    double ber = modulation->calculateBER(snirMin, bandwidth.get(), bitrate);
+    if (ber == 0.0)
+        return false;
+    else
+    {
+        double pErrorless = pow(1.0 - ber, bitLength);
+        return dblrand() > pErrorless;
+    }
 }
 
 const IRadioSignalReceptionDecision *ScalarRadioSignalReceiver::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
@@ -270,7 +297,20 @@ const IRadioSignalReceptionDecision *ScalarRadioSignalReceiver::computeReception
     const ScalarRadioSignalListening *scalarListening = check_and_cast<const ScalarRadioSignalListening *>(listening);
     const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);
     if (scalarListening->getCarrierFrequency() == scalarReception->getCarrierFrequency() && scalarListening->getBandwidth() == scalarReception->getBandwidth())
-        SNIRRadioSignalReceiverBase::computeReceptionDecision(listening, reception, interferingReceptions, backgroundNoise);
+    {
+        const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(reception->getTransmission());
+        const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
+        double snirMin = computeSNIRMin(reception, noise);
+        delete noise;
+        bool isReceptionPossible = computeIsReceptionPossible(reception);
+        if (isReceptionPossible && snirMin > snirThreshold)
+        {
+            bool hasBitError = computeHasBitError(snirMin, scalarTransmission->getPayloadBitLength(), scalarTransmission->getBitrate().get());
+            return new RadioSignalReceptionDecision(reception, isReceptionPossible, !hasBitError, snirMin);
+        }
+        else
+            return new RadioSignalReceptionDecision(reception, false, false, snirMin);
+    }
     else if (areOverlappingBands(scalarListening->getCarrierFrequency(), scalarListening->getBandwidth(), scalarReception->getCarrierFrequency(), scalarReception->getBandwidth()))
         throw cRuntimeError("Overlapping bands are not supported");
     else

@@ -27,5 +27,6 @@ module ScalarRadioSignalReceiver like IRadioSignalReceiver
         double snirThreshold @unit(dB);
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
+        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL" selects bit error calculation method
         @class(ScalarRadioSignalReceiver);
 }

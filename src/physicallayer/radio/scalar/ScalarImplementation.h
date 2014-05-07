@@ -20,6 +20,7 @@
 
 #include "ImplementationBase.h"
 #include "IRadioConverter.h"
+#include "IModulation.h"
 #include "Radio.h"
 
 class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBase
@@ -206,6 +207,7 @@ class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virt
         W power;
         Hz carrierFrequency;
         Hz bandwidth;
+        // TODO: ? const IModulation *modulation;
 
     protected:
         virtual void initialize(int stage);
@@ -254,6 +256,8 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
         W sensitivity;
         Hz carrierFrequency;
         Hz bandwidth;
+        // TODO: move to subclass?
+        const IModulation *modulation;
 
     protected:
         virtual void initialize(int stage);
@@ -262,6 +266,7 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
         virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const;
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *receptions, const IRadioSignalNoise *backgroundNoise) const;
         virtual double computeSNIRMin(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const;
+        virtual bool computeHasBitError(double snirMin, int bitLength, double bitrate) const;
 
     public:
         ScalarRadioSignalReceiver() :
@@ -269,7 +274,8 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
             energyDetection(W(sNaN)),
             sensitivity(W(sNaN)),
             carrierFrequency(Hz(sNaN)),
-            bandwidth(Hz(sNaN))
+            bandwidth(Hz(sNaN)),
+            modulation(NULL)
         {}
 
         ScalarRadioSignalReceiver(double snirThreshold, W energyDetection, W sensitivity, Hz carrierFrequency, Hz bandwidth) :
@@ -277,8 +283,11 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
             energyDetection(energyDetection),
             sensitivity(sensitivity),
             carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth)
+            bandwidth(bandwidth),
+            modulation(NULL)
         {}
+
+        virtual ~ScalarRadioSignalReceiver() { delete modulation; }
 
         virtual void printToStream(std::ostream &stream) const;
 
