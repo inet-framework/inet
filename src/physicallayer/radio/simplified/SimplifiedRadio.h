@@ -157,7 +157,7 @@ class INET_API SimplifiedRadio : public SimplifiedRadioChannelAccess
     /** Timers */
     //@{
     cMessage *endTransmissionTimer;
-    typedef std::list<cMessage *> EndReceptionTimers;
+    typedef std::vector<cMessage *> EndReceptionTimers;
     EndReceptionTimers endReceptionTimers;
     //@}
 
