@@ -18,22 +18,22 @@
 #ifndef __INET_CUDARADIOCHANNEL_H_
 #define __INET_CUDARADIOCHANNEL_H_
 
-#include "CachedRadioChannel.h"
+#include "RadioChannel.h"
 
 typedef int64_t cuda_simtime_t;
 
-class INET_API CUDARadioChannel : public CachedRadioChannel
+class INET_API CUDARadioChannel : public RadioChannel
 {
     protected:
         virtual void computeCache(const std::vector<const IRadio *> *radios, const std::vector<const IRadioSignalTransmission *> *transmissions);
 
     public:
         CUDARadioChannel() :
-            CachedRadioChannel()
+            RadioChannel()
         {}
 
         CUDARadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
-            CachedRadioChannel(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange)
+            RadioChannel(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange)
         {}
 
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission);

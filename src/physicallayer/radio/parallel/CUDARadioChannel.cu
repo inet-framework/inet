@@ -317,7 +317,7 @@ void CUDARadioChannel::transmitToChannel(const IRadio *radio, const IRadioSignal
 const IRadioSignalReceptionDecision *CUDARadioChannel::receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const
 {
     // KLUDGE: for testing
-    if (cachedDecisions.size() == 0)
+    if (cache.size() == 0)
         const_cast<CUDARadioChannel *>(this)->computeCache((const std::vector<const IRadio *> *)(&radios), (const std::vector<const IRadioSignalTransmission *> *)(&transmissions));
-    return CachedRadioChannel::receiveFromChannel(radio, listening, transmission);
+    return RadioChannel::receiveFromChannel(radio, listening, transmission);
 }
