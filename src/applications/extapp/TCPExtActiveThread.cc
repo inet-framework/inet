@@ -31,24 +31,16 @@ TCPExtActiveThread::~TCPExtActiveThread()
 {
 }
 
-void TCPExtActiveThread::acceptExtConnection(cModule *module, int extConnSocketID)
+void TCPExtActiveThread::init(cSimpleModule *module, cGate *toTcp, cMessage *msg)
 {
-    if (extSocketId != INVALID_SOCKET)
+    if (extSocketId != INVALID_SOCKET || appModule || rtScheduler)
         throw cRuntimeError("Model error: socket already used");
     appModule = module;
-    extSocketId = extConnSocketID;
-    openActiveInetSocket(appModule->par("connectAddress").stringValue(), appModule->par("connectPort").longValue());
+    extSocketId = msg->par("fd").longValue();
     rtScheduler->addSocket(appModule, this, extSocketId, false);
 }
 
-void TCPExtActiveThread::acceptInetConnection(cModule *module, cMessage *msg)
-{
-    if (extSocketId != INVALID_SOCKET)
-        throw cRuntimeError("Model error: socket already used");
-    appModule = module;
-}
-
-void TCPExtActiveThread::handleMessage(cMessage *msg)
+void TCPExtActiveThread::processMessage(cMessage *msg)
 {
     switch(msg->getKind())
     {

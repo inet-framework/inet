@@ -22,12 +22,13 @@
 #include "ByteArrayMessage.h"
 #include "SocketsRTScheduler.h"
 #include "TCPSocket.h"
+#include "TCPThread.h"
 
-class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterface
+class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterface, public ITCPAppThread
 {
   protected:
     int extSocketId;
-    cModule *appModule;
+    cSimpleModule *appModule;
     SocketsRTScheduler *rtScheduler;
     TCPSocket inetSocket;
   protected:
@@ -35,11 +36,13 @@ class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterf
   public:
     TCPExtActiveThread();
     virtual ~TCPExtActiveThread();
-    virtual void handleMessage(cMessage *msg);
-    virtual void openActiveInetSocket(const char *, int port) {}      //TODO
-    virtual void acceptExtConnection(cModule *module, int extConnSocketID);
-    virtual void acceptInetConnection(cModule *module, cMessage *msg);
 
+    // TCPThread:
+    virtual void init(cSimpleModule *appModule, cGate *outGate, cMessage *msg);
+    virtual void processMessage(cMessage *msg);
+    virtual int getConnectionId() const;
+
+    // TCPSocket::CallbackInterface
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
     virtual void socketEstablished(int connId, void *yourPtr);
     virtual void socketPeerClosed(int connId, void *yourPtr);

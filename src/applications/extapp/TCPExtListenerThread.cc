@@ -24,17 +24,21 @@
 #include "TCPExtActiveThread.h"
 #include "TCPSocket.h"
 
-class TCPExtListenerThread : public cOwnedObject
+class TCPExtListenerThread : public cOwnedObject, public ITCPAppThread
 {
   protected:
     int extListenerSocketId;
-    cModule *appModule;
+    cSimpleModule *appModule;
     SocketsRTScheduler *rtScheduler;
   public:
     TCPExtListenerThread();
     virtual ~TCPExtListenerThread();
-    virtual void init(cModule *appModule); // called in INITSTAGE_APPLICATION_LAYER
-    virtual void handleMessage(cMessage *msg);
+
+    //TCPAppThread:
+    virtual void init(cSimpleModule *appModule, cGate *toTcp, cMessage *msg);
+    virtual void processMessage(cMessage *msg);
+    virtual int getConnectionId() const;
+
     virtual void acceptExtConnection(cMessage *msg);
 };
 
@@ -52,7 +56,7 @@ TCPExtListenerThread::~TCPExtListenerThread()
 {
 }
 
-void TCPExtListenerThread::init(cModule *appModulePar) // called in INITSTAGE_APPLICATION_LAYER
+void TCPExtListenerThread::init(cSimpleModule *appModulePar, cGate *toTcp, cMessage *msg)
 {
     appModule = appModulePar;
     rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
@@ -97,8 +101,9 @@ void TCPExtListenerThread::handleMessage(cMessage *msg)
 
 void TCPExtListenerThread::acceptExtConnection(cMessage *msg)
 {
+    msg->setContextPointer(NULL);
     TCPExtActiveThread *thread = new TCPExtActiveThread();
-    int extConnSocket = msg->par("fd").longValue();
-    thread->acceptExtConnection(appModule, extConnSocket);
+    thread->init(appModule, outGate, msg);
+    appModule->addThread(thread);
 }
 
