@@ -19,6 +19,7 @@
 #include "RadioChannel.h"
 // TODO: should not be here
 #include "ScalarImplementation.h"
+#include "PhyControlInfo_m.h"
 
 Define_Module(RadioChannel);
 
@@ -507,10 +508,10 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
     if (recordTransmissions)
-        transmissionLog << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
-                        << radioFrame->getName() << " " << transmission->getId() << " "
-                        << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
-                        << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
+        transmissionLog << "T " << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
+                        << "M " << radioFrame->getName() << " " << transmission->getId() << " "
+                        << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
+                        << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << this << "." << endl;
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
@@ -526,10 +527,44 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
                      << " to " << *it << " at " << arrival->getStartPosition()
                      << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
             RadioFrame *frameCopy = new RadioFrame(radioFrame->getTransmission());
+            frameCopy->setName(radioFrame->getName());
+            frameCopy->setDuration(radioFrame->getDuration());
             frameCopy->encapsulate(radioFrame->getEncapsulatedPacket()->dup());
             const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
         }
     }
+}
+
+IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame, const simtime_t startTime)
+{
+    const IRadioSignalTransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, startTime);
+    transmitToChannel(radio, transmission);
+    RadioFrame *radioFrame = new RadioFrame(transmission);
+    radioFrame->setName(macFrame->getName());
+    radioFrame->setDuration(transmission->getDuration());
+    radioFrame->encapsulate(macFrame);
+    return radioFrame;
+}
+
+cPacket *RadioChannel::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
+{
+    const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
+    const IRadioSignalListening *listening = radio->getReceiver()->createListening(radio, transmission->getStartTime(), transmission->getEndTime(), transmission->getStartPosition(), transmission->getEndPosition());
+    const IRadioSignalReceptionDecision *decision = receiveFromChannel(radio, listening, transmission);
+    if (recordTransmissions) {
+        const IRadioSignalReception *reception = decision->getReception();
+        transmissionLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
+                        << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
+                        << "S " << reception->getStartTime() << " " <<  reception->getStartPosition() << " -> "
+                        << "D " << reception->getEndTime() << " " <<  reception->getEndPosition() << " "
+                        << "F " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
+    }
+    cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
+    if (!decision->isReceptionSuccessful())
+        macFrame->setKind(decision->getBitErrorCount() > 0 ? BITERROR : COLLISION);
+    macFrame->setControlInfo(const_cast<cObject *>(check_and_cast<const cObject *>(decision)));
+    delete listening;
+    return macFrame;
 }
 
 const IRadioSignalReceptionDecision *RadioChannel::receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const

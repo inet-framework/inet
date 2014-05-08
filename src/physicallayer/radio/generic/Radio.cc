@@ -78,26 +78,12 @@ void Radio::printToStream(std::ostream &stream) const
 
 IRadioFrame *Radio::transmitPacket(cPacket *packet, const simtime_t startTime)
 {
-    const IRadioSignalTransmission *transmission = transmitter->createTransmission(this, packet, startTime);
-    channel->transmitToChannel(this, transmission);
-    RadioFrame *radioFrame = new RadioFrame(transmission);
-    radioFrame->setName(packet->getName());
-    radioFrame->setDuration(transmission->getDuration());
-    radioFrame->encapsulate(packet);
-    return radioFrame;
+    return channel->transmitPacket(this, packet, startTime);
 }
 
 cPacket *Radio::receivePacket(IRadioFrame *frame)
 {
-    const IRadioSignalTransmission *transmission = frame->getTransmission();
-    const IRadioSignalListening *listening = receiver->createListening(this, transmission->getStartTime(), transmission->getEndTime(), transmission->getStartPosition(), transmission->getEndPosition());
-    const IRadioSignalReceptionDecision *radioDecision = channel->receiveFromChannel(this, listening, transmission);
-    cPacket *packet = check_and_cast<cPacket *>(frame)->decapsulate();
-    if (!radioDecision->isReceptionSuccessful())
-        packet->setKind(radioDecision->getBitErrorCount() > 0 ? BITERROR : COLLISION);
-    packet->setControlInfo(const_cast<cObject *>(check_and_cast<const cObject *>(radioDecision)));
-    delete listening;
-    return packet;
+    return channel->receivePacket(this, frame);
 }
 
 void Radio::setRadioMode(RadioMode newRadioMode)
