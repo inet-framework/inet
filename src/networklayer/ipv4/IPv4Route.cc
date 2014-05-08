@@ -25,6 +25,9 @@
 #include "InterfaceEntry.h"
 #include "IRoutingTable.h"
 
+#ifdef WITH_AODV
+#include "AODVRouteData.h"
+#endif
 
 Register_Class(IPv4Route);
 Register_Class(IPv4MulticastRoute);
@@ -67,6 +70,13 @@ std::string IPv4Route::info() const
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
     out << " " << sourceTypeName(sourceType);
 
+#ifdef WITH_AODV
+    if (dynamic_cast<AODVRouteData*>(protocolData))
+    {
+        AODVRouteData * data = (AODVRouteData*) protocolData;
+        out << data;
+    }
+#endif
     return out.str();
 }
 
