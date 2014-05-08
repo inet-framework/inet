@@ -24,6 +24,15 @@
 #include "RadioFrame.h"
 
 // TODO: merge with RadioBase
+// TODO: KLUDGE: when removing fingerprint kludges think about the following
+// TODO: do we really need to support interference-free simultaneous reception of multiple transmissions?
+// TODO: if we don't send all radio frames to all radios how will they update their reception state?
+// TODO: in case of a listening state change (e.g. radio state, carrier frequency) what about the ongoing transmissions?
+// TODO: there are a few things that can affect how we send/receive transmissions:
+// TODO: 1. we may send transmissions to all receivers or to potential receivers only
+// TODO:    receivers may be filtered based on their distance/reception state/listening state
+// TODO: 2. we may want to add/remove receptions for ongoing transmissions based on the same criteria
+// TODO: 3. we may also directly call receivers at reception starts/ends from the radio channel
 class INET_API Radio : public RadioBase, public virtual IRadio
 {
     protected:
