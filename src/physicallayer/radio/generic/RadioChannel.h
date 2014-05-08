@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <fstream>
 #include "IRadioChannel.h"
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalPropagation.h"
@@ -82,6 +83,10 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
          * effect on other transmissions.
          */
         m maxInterferenceRange;
+        /**
+         * Record all transmissions into a separate
+         */
+        bool recordTransmissions;
         //@}
 
         /** @name State */
@@ -96,6 +101,10 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
          */
         // TODO: consider using an interval graph for receptions (per receiver radio)
         std::vector<const IRadioSignalTransmission *> transmissions;
+        /**
+         *
+         */
+        std::ofstream transmissionLog;
         //@}
 
         /** @name Cache */

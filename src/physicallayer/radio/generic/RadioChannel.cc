@@ -30,6 +30,7 @@ RadioChannel::RadioChannel() :
     maxTransmissionDuration(sNaN),
     maxCommunicationRange(m(sNaN)),
     maxInterferenceRange(m(sNaN)),
+    recordTransmissions(false),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -51,6 +52,7 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     maxTransmissionDuration(maxTransmissionDuration),
     maxCommunicationRange(m(maxCommunicationRange)),
     maxInterferenceRange(m(maxInterferenceRange)),
+    recordTransmissions(false),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -86,6 +88,8 @@ RadioChannel::~RadioChannel()
             delete cacheEntries;
         }
     }
+    if (recordTransmissions)
+        transmissionLog.close();
 }
 
 void RadioChannel::initialize(int stage)
@@ -100,6 +104,9 @@ void RadioChannel::initialize(int stage)
         propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
         attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
+        recordTransmissions = par("recordTransmissions");
+        if (recordTransmissions)
+            transmissionLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -499,6 +506,11 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     const Radio *transmitterRadio = check_and_cast<Radio *>(radio);
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
+    if (recordTransmissions)
+        transmissionLog << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
+                        << radioFrame->getName() << " " << transmission->getId() << " "
+                        << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
+                        << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << this << "." << endl;
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
