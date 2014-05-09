@@ -660,13 +660,11 @@ class INET_API Ieee80211Mac : public MACProtocolBase
 
     virtual bool isDuplicated(cMessage *msg);
 
-    virtual void start();
-    virtual void stop();
+    virtual bool handleNodeStart(IDoneCallback *doneCallback);
 
   public:
     virtual State getState() {return static_cast<State>(fsm.getState());}
     virtual unsigned int getQueueSize() {return transmissionQueueSize();}
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
 #endif
