@@ -40,10 +40,14 @@ IdealWirelessMac::IdealWirelessMac()
 {
     queueModule = NULL;
     radioModule = NULL;
+    lastSentPk = NULL;
+    ackTimeoutMsg = NULL;
 }
 
 IdealWirelessMac::~IdealWirelessMac()
 {
+    delete lastSentPk;
+    cancelAndDelete(ackTimeoutMsg);
 }
 
 void IdealWirelessMac::flushQueue()
@@ -77,6 +81,7 @@ void IdealWirelessMac::initialize(int stage)
         bitrate = par("bitrate").doubleValue();
         headerLength = par("headerLength").longValue();
         promiscuous = par("promiscuous");
+        ackTimeout = par("ackTimeout");
 
         radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
         IdealRadio *irm = check_and_cast<IdealRadio *>(radioModule);
@@ -86,9 +91,11 @@ void IdealWirelessMac::initialize(int stage)
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
         queueModule = dynamic_cast<IPassiveQueue *>(queueOut->getOwnerModule());
         if (!queueModule)
-            error("Missing queueModule");
+            throw cRuntimeError("Missing queueModule");
 
         initializeMACAddress();
+
+        ackTimeoutMsg = new cMessage("link-break");
 
         // register our interface entry in IInterfaceTable
         registerInterface();
@@ -151,16 +158,22 @@ void IdealWirelessMac::receiveSignal(cComponent *src, simsignal_t id, long x)
 void IdealWirelessMac::startTransmitting(cPacket *msg)
 {
     // if there's any control info, remove it; then encapsulate the packet
+    if (lastSentPk)
+        throw cRuntimeError("Model error: unacked send");
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->getControlInfo());
+    MACAddress dest = ctrl->getDest();
+    if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified())
+    {   // unicast
+        lastSentPk = msg->dup();
+        lastSentPk->setControlInfo(ctrl->dup());
+        scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
+    }
+
     IdealWirelessFrame *frame = encapsulate(msg);
 
     // send
     EV << "Starting transmission of " << frame << endl;
     sendDown(frame);
-}
-
-void IdealWirelessMac::handleSelfMsg(cMessage *msg)
-{
-    error("Unexpected self-message");
 }
 
 void IdealWirelessMac::getNextMsgFromHL()
@@ -211,10 +224,44 @@ void IdealWirelessMac::handleLowerMsg(cPacket *msg)
 
     if (!dropFrameNotForUs(frame))
     {
+        int senderModuleId = frame->getSrcModuleId();
+        IdealWirelessMac *senderMac = dynamic_cast<IdealWirelessMac *>(simulation.getModule(senderModuleId));
+        if (senderMac)
+            senderMac->acked(frame);
         // decapsulate and attach control info
         cPacket *higherlayerMsg = decapsulate(frame);
         EV << "Passing up contained packet `" << higherlayerMsg->getName() << "' to higher layer\n";
         sendUp(higherlayerMsg);
+    }
+}
+
+void IdealWirelessMac::handleSelfMsg(cMessage* message)
+{
+    if (message == ackTimeoutMsg)
+    {
+        // packet lost
+        emit(NF_LINK_BREAK, lastSentPk);
+        delete lastSentPk;
+        lastSentPk = NULL;
+        getNextMsgFromHL();
+    }
+    else
+    {
+        throw cRuntimeError("model error: unknown self message");
+    }
+}
+
+
+void IdealWirelessMac::acked(IdealWirelessFrame *frame)
+{
+    Enter_Method_Silent();
+
+    if (lastSentPk && lastSentPk->getTreeId() == frame->getEncapsulatedPacket()->getTreeId())
+    {
+        cancelEvent(ackTimeoutMsg);
+        delete lastSentPk;
+        lastSentPk = NULL;
+        getNextMsgFromHL();
     }
 }
 
@@ -225,6 +272,7 @@ IdealWirelessFrame *IdealWirelessMac::encapsulate(cPacket *msg)
     frame->setByteLength(headerLength);
     frame->setSrc(ctrl->getSrc());
     frame->setDest(ctrl->getDest());
+    frame->setSrcModuleId(lastSentPk ? getId() : -1);
     frame->encapsulate(msg);
     delete ctrl;
     return frame;
