@@ -19,13 +19,13 @@
 #define AODVROUTEDATA_H_
 
 #include <set>
-#include "Address.h"
+#include "IPv4Address.h"
 #include "INETDefs.h"
 
 class INET_API AODVRouteData : public cObject
 {
   protected:
-    std::set<Address> precursorList;
+    std::set<IPv4Address> precursorList;
     bool active;
     bool repariable;
     bool beingRepaired;
@@ -59,8 +59,8 @@ class INET_API AODVRouteData : public cObject
     void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
     bool isActive() const { return active; }
     void setIsActive(bool active) { this->active = active; }
-    void addPrecursor(const Address& precursorAddr) { precursorList.insert(precursorAddr); }
-    const std::set<Address>& getPrecursorList() const { return precursorList; }
+    void addPrecursor(const IPv4Address& precursorAddr) { precursorList.insert(precursorAddr); }
+    const std::set<IPv4Address>& getPrecursorList() const { return precursorList; }
 };
 
 std::ostream& operator<<(std::ostream& out, const AODVRouteData *data);

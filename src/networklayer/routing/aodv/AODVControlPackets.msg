@@ -16,18 +16,18 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "IPv4Address.h"
 #include "simtime_t.h"
 }}
 
-class noncobject Address;
+class noncobject IPv4Address;
 
 //
-// Helper struct to represent (Address, sequence number) pairs in a RERR message
+// Helper struct to represent (IPv4Address, sequence number) pairs in a RERR message
 //
 struct UnreachableNode
 {
-    Address addr;
+    IPv4Address addr;
     unsigned int seqNum;
 };
 
@@ -60,9 +60,9 @@ class AODVRREQ extends AODVControlPacket
     bool unknownSeqNumFlag;
     unsigned int hopCount;
     unsigned int rreqId;
-    Address destAddr;
+    IPv4Address destAddr;
     unsigned int destSeqNum;
-    Address originatorAddr;
+    IPv4Address originatorAddr;
     unsigned int originatorSeqNum;
 }
 
@@ -76,9 +76,9 @@ class AODVRREP extends AODVControlPacket
     bool ackRequiredFlag;
     unsigned int prefixSize;
     unsigned int hopCount;
-    Address destAddr;
+    IPv4Address destAddr;
     unsigned int destSeqNum;
-    Address originatorAddr;
+    IPv4Address originatorAddr;
     unsigned int originatorSeqNum;
     simtime_t lifeTime;
 }
@@ -107,7 +107,7 @@ class AODVRREPACK extends AODVControlPacket
 //
 message WaitForRREP
 {
-    Address destAddr;
+    IPv4Address destAddr;
     unsigned int lastTTL;
     bool fromInvalidEntry;
 }

@@ -24,11 +24,11 @@ std::ostream & operator<<(std::ostream& out, const AODVRouteData *data)
         << ", destNum = " << data->getDestSeqNum()
         << ", lifetime = " << data->getLifeTime();
 
-    const std::set<Address>& preList = data->getPrecursorList();
+    const std::set<IPv4Address>& preList = data->getPrecursorList();
 
     if (!preList.empty()) {
         out << ", precursor list: ";
-        std::set<Address>::const_iterator iter = preList.begin();
+        std::set<IPv4Address>::const_iterator iter = preList.begin();
         out << *iter;
         for (++iter; iter != preList.end(); ++iter)
             out << "; " << *iter;
