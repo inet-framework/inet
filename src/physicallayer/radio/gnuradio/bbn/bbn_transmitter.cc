@@ -42,7 +42,7 @@ void bbn_transmitter::end()
     d_input_queue->insert_tail(msg);
 }
 
-char* bbn_transmitter::transmit(const char* data, int &length /*inout*/)
+gr_complex* bbn_transmitter::transmit(const char* data, int &length /*inout*/)
 {
     start();
     send(data, length);
@@ -56,8 +56,9 @@ char* bbn_transmitter::transmit(const char* data, int &length /*inout*/)
         result += msg->to_string();
     }
 
-    length = result.size();
-    char *d = new char[length];
-    memcpy(d, result.data(), length);
+    assert(result.size() % sizeof(gr_complex) == 0);
+    length = result.size() / sizeof(gr_complex);
+    gr_complex *d = new gr_complex[length];
+    memcpy(d, result.data(), result.size());
     return d;
 }

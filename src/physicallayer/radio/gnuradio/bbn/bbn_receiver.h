@@ -18,12 +18,12 @@ class bbn_receiver : virtual public gr::top_block {
   friend bbn_receiver_sptr bbn_make_receiver(int spb, double alpha, bool use_barker, int msgq_limit);
 
   bbn_receiver(int spb, double alpha, bool use_barker, int msgq_limit);
-  void send(const char* data, int length);
+  void send(const gr_complex* data, int length);
   void end();
 
 public:
   ~bbn_receiver();
-  char* receive(const char* data, int &length/*inout*/);
+  char* receive(const gr_complex* data, int &length/*inout*/);
 
 private:
   bbn_receive_path_sptr d_receive_path;

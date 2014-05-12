@@ -27,9 +27,9 @@ bbn_receiver::bbn_receiver (int spb, double alpha, bool use_barker, int msgq_lim
     connect(d_tx_input, 0, d_receive_path, 0);
 }
 
-void bbn_receiver::send(const char* data, int length)
+void bbn_receiver::send(const gr_complex* data, int length)
 {
-    string s(data, length);
+    string s((const char *)data, length*sizeof(gr_complex));
     message::sptr msg = message::make_from_string(s);
     d_input_queue->insert_tail(msg);
 }
@@ -40,7 +40,7 @@ void bbn_receiver::end()
     d_input_queue->insert_tail(msg);
 }
 
-char* bbn_receiver::receive(const char* data, int &length /*inout*/)
+char* bbn_receiver::receive(const gr_complex* data, int &length /*inout*/)
 {
     start();
     send(data, length);

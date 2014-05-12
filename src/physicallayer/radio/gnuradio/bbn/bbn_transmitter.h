@@ -24,7 +24,7 @@ class bbn_transmitter : virtual public gr::top_block {
 
 public:
   ~bbn_transmitter();
-  char* transmit(const char* data, int &length/*inout*/);
+  gr_complex* transmit(const char* data, int &length/*inout*/);
 
 private:
   bbn_transmit_path_sptr d_transmit_path;
