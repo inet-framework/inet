@@ -11,13 +11,13 @@
 class bbn_receiver;
 typedef boost::shared_ptr<bbn_receiver> bbn_receiver_sptr;
 
-bbn_receiver_sptr bbn_make_receiver(int spb, double alpha, int msgq_limit=2);
+bbn_receiver_sptr bbn_make_receiver(int spb, double alpha, bool use_barker, int msgq_limit=2);
 
 
 class bbn_receiver : virtual public gr::top_block {
-  friend bbn_receiver_sptr bbn_make_receiver(int spb, double alpha, int msgq_limit);
+  friend bbn_receiver_sptr bbn_make_receiver(int spb, double alpha, bool use_barker, int msgq_limit);
 
-  bbn_receiver(int spb, double alpha, int msgq_limit);
+  bbn_receiver(int spb, double alpha, bool use_barker, int msgq_limit);
   void send(const char* data, int length);
   void end();
 

@@ -12,13 +12,13 @@
 class bbn_transmitter;
 typedef boost::shared_ptr<bbn_transmitter> bbn_transmitter_sptr;
 
-bbn_transmitter_sptr bbn_make_transmitter(int spb, double alpha, double gain, int msgq_limit=2);
+bbn_transmitter_sptr bbn_make_transmitter(int spb, double alpha, double gain, bool use_barker=false, int msgq_limit=2);
 
 
 class bbn_transmitter : virtual public gr::top_block {
-  friend bbn_transmitter_sptr bbn_make_transmitter(int spb, double alpha, double gain, int msgq_limit);
+  friend bbn_transmitter_sptr bbn_make_transmitter(int spb, double alpha, double gain, bool use_barker, int msgq_limit);
 
-  bbn_transmitter(int spb, double alpha, double gain, int msgq_limit);
+  bbn_transmitter(int spb, double alpha, double gain, bool use_barker, int msgq_limit);
   void send(const char* data, int length);
   void end();
 

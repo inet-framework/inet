@@ -5,6 +5,7 @@
 #endif
 
 #include <gnuradio/blocks/pdu.h>
+#include "bbn_firdes_barker.h"
 #include "bbn_receive_path.h"
 #include "bbn_crc16.h"
 
@@ -30,7 +31,8 @@ bbn_receive_path::bbn_receive_path (gr::msg_queue::sptr target_queue, int spb, d
     int ntaps = 2 * spb -1;
 
     if (use_barker) {
-        // TODO
+        vector<float> barker_taps = bbn_firdes_barker(spb);
+        d_rx_filter = gr::filter::fir_filter_ccf::make(1, barker_taps);
     }
     else {
         vector<float> rrc_taps = gr::filter::firdes::root_raised_cosine(1, spb, 1.0, alpha, ntaps);

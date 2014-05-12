@@ -9,20 +9,20 @@
 using namespace std;
 using namespace gr;
 
-bbn_receiver_sptr bbn_make_receiver (int spb, double alpha, int msgq_limit) {
-  return gnuradio::get_initial_sptr (new bbn_receiver(spb, alpha, msgq_limit));
+bbn_receiver_sptr bbn_make_receiver (int spb, double alpha, bool use_barker, int msgq_limit) {
+  return gnuradio::get_initial_sptr (new bbn_receiver(spb, alpha, use_barker, msgq_limit));
 }
 
 bbn_receiver::~bbn_receiver () {
 }
 
-bbn_receiver::bbn_receiver (int spb, double alpha, int msgq_limit)
+bbn_receiver::bbn_receiver (int spb, double alpha, bool use_barker, int msgq_limit)
   : top_block ("bbn_receiver")
 {
     d_input_queue = msg_queue::make(msgq_limit);
     d_tx_input = blocks::message_source::make(sizeof(gr_complex), d_input_queue, "packet_len");
     d_output_queue = msg_queue::make();
-    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, false, true);
+    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, true);
 
     connect(d_tx_input, 0, d_receive_path, 0);
 }

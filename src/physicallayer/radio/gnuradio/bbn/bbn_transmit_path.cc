@@ -4,6 +4,7 @@
 #include "config.h"
 #endif
 
+#include "bbn_firdes_barker.h"
 #include "bbn_transmit_path.h"
 #include "bbn_crc16.h"
 
@@ -39,7 +40,8 @@ bbn_transmit_path::bbn_transmit_path (int spb, double alpha, double gain, bool u
     d_diff_encoder = gr::digital::diff_encoder_bb::make(2);
 
     if (use_barker) {
-        // TODO
+        vector<float> barker_taps = bbn_firdes_barker(spb);
+        d_tx_filter = gr::filter::interp_fir_filter_ccf::make(spb, barker_taps);
     }
     else {
         vector<float> rrc_taps = gr::filter::firdes::root_raised_cosine(4*gain, spb, 1.0, alpha, ntaps);

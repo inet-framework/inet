@@ -9,19 +9,19 @@
 using namespace std;
 using namespace gr;
 
-bbn_transmitter_sptr bbn_make_transmitter (int spb, double alpha, double gain, int msgq_limit) {
-  return gnuradio::get_initial_sptr (new bbn_transmitter(spb, alpha, gain, msgq_limit));
+bbn_transmitter_sptr bbn_make_transmitter (int spb, double alpha, double gain, bool use_barker, int msgq_limit) {
+  return gnuradio::get_initial_sptr (new bbn_transmitter(spb, alpha, gain, use_barker, msgq_limit));
 }
 
 bbn_transmitter::~bbn_transmitter () {
 }
 
-bbn_transmitter::bbn_transmitter (int spb, double alpha, double gain, int msgq_limit)
+bbn_transmitter::bbn_transmitter (int spb, double alpha, double gain, bool use_barker, int msgq_limit)
   : top_block ("bbn_transmitter")
 {
     d_input_queue = msg_queue::make(msgq_limit);
     d_tx_input = blocks::message_source::make(sizeof(char), d_input_queue, "packet_len");
-    d_transmit_path = bbn_make_transmit_path(spb, alpha, gain, false, "packet_len");
+    d_transmit_path = bbn_make_transmit_path(spb, alpha, gain, use_barker, "packet_len");
     d_output_queue = msg_queue::make();
     d_tx_output = blocks::message_sink::make(sizeof(gr_complex), d_output_queue, true/*, "packet_len"*/);
 
