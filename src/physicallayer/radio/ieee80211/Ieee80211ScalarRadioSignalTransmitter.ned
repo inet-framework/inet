@@ -22,8 +22,8 @@ import inet.physicallayer.radio.scalar.ScalarRadioSignalTransmitter;
 module Ieee80211ScalarRadioSignalTransmitter extends ScalarRadioSignalTransmitter
 {
     parameters:
-        int channelNumber = default(1);
+        int channelNumber;
+        string opMode @enum("b","g","a","p");
         string preambleMode @enum("long", "short");
-        // TODO: add opMode as in receiver?
         @class(Ieee80211ScalarRadioSignalTransmitter);
 }

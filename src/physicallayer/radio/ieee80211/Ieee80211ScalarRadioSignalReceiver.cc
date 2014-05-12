@@ -47,9 +47,13 @@ void Ieee80211ScalarRadioSignalReceiver::initialize(int stage)
             opMode = 'p';
         else
             opMode = 'g';
-
-        wifiPreamble = WIFI_PREAMBLE_LONG;
-
+        const char *preambleModeString = par("preambleMode");
+        if (!strcmp("short", preambleModeString))
+            preambleMode = WIFI_PREAMBLE_SHORT;
+        else if (!strcmp("long", preambleModeString))
+            preambleMode = WIFI_PREAMBLE_LONG;
+        else
+            throw cRuntimeError("Unknown preamble mode");
         const char *errorModelString = par("errorModel");
         if (!strcmp("yans", errorModelString))
             errorModel = new YansErrorRateModel();
@@ -75,17 +79,17 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
     ModulationType modeHeader;
 
     // TODO: use transmission's opMode for error detection
-    WifiPreamble preambleUsed = wifiPreamble;
+    WifiPreamble preambleUsed = preambleMode;
     double headerNoError;
     uint32_t headerSize;
-    if (opMode=='b')
+    if (opMode == 'b')
         headerSize = HEADER_WITHOUT_PREAMBLE;
     else
         headerSize = 24;
 
     modeBody = WifiModulationType::getModulationType(opMode, bitrate);
     modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
-    if (opMode=='g')
+    if (opMode == 'g')
     {
         if (autoHeaderSize)
         {
@@ -93,7 +97,7 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed))*modeHeader.getDataRate());
         }
     }
-    else if (opMode=='b' || opMode=='a' || opMode=='p')
+    else if (opMode == 'b' || opMode == 'a' || opMode == 'p')
     {
         if (autoHeaderSize)
              headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBody, preambleUsed))*modeHeader.getDataRate());

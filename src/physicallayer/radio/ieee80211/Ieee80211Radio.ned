@@ -29,11 +29,12 @@ simple Ieee80211Radio extends ScalarRadio
         transmitter.bitrate = default(11Mbps);
         transmitter.headerBitLength = default(192b);
         transmitter.power = default(20mW);
-        transmitter.preambleMode = default("long");
         receiverType = default("Ieee80211ScalarRadioSignalReceiver");
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
         *.channelNumber = channelNumber;
+        *.opMode = default("g");
+        *.preambleMode = default("long");
         @class(Ieee80211Radio);
 }

@@ -24,6 +24,7 @@
 class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalTransmitter
 {
     protected:
+        char opMode;
         WifiPreamble preambleMode;
 
     protected:
@@ -32,6 +33,7 @@ class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalT
     public:
         Ieee80211ScalarRadioSignalTransmitter() :
             ScalarRadioSignalTransmitter(),
+            opMode('\0'),
             preambleMode((WifiPreamble)-1)
         {}
 

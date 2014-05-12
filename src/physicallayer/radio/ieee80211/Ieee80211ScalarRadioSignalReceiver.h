@@ -27,8 +27,8 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
 {
     protected:
         char opMode;
+        WifiPreamble preambleMode;
         IErrorModel *errorModel;
-        WifiPreamble wifiPreamble;
         bool autoHeaderSize;
         BerParseFile *parseTable;
 
@@ -41,8 +41,8 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
         Ieee80211ScalarRadioSignalReceiver() :
             ScalarRadioSignalReceiver(),
             opMode('\0'),
+            preambleMode((WifiPreamble)-1),
             errorModel(NULL),
-            wifiPreamble((WifiPreamble)-1),
             autoHeaderSize(false),
             parseTable(NULL)
         {}
@@ -50,8 +50,8 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
         Ieee80211ScalarRadioSignalReceiver(double snirThreshold, W energyDetecion, W sensitivity, Hz carrierFrequency, Hz bandwidth) :
             ScalarRadioSignalReceiver(snirThreshold, energyDetecion, sensitivity, carrierFrequency, bandwidth),
             opMode('\0'),
+            preambleMode((WifiPreamble)-1),
             errorModel(NULL),
-            wifiPreamble((WifiPreamble)-1),
             autoHeaderSize(false),
             parseTable(NULL)
         {}

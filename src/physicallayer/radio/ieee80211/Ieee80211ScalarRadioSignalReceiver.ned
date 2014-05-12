@@ -22,7 +22,8 @@ import inet.physicallayer.radio.scalar.ScalarRadioSignalReceiver;
 module Ieee80211ScalarRadioSignalReceiver extends ScalarRadioSignalReceiver
 {
     parameters:
-        string opMode @enum("b","g","a","p") = default("g");
+        string opMode @enum("b","g","a","p");
+        string preambleMode @enum("long", "short");
         string errorModel @enum("yans","nist") = default("nist");
         bool autoHeaderSize = default(false);
         string berTableFile = default("");

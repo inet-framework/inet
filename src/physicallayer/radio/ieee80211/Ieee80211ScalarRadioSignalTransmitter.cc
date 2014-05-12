@@ -28,6 +28,17 @@ void Ieee80211ScalarRadioSignalTransmitter::initialize(int stage)
     ScalarRadioSignalTransmitter::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
+        const char *opModeString = par("opMode");
+        if (!strcmp("b", opModeString))
+            opMode = 'b';
+        else if (!strcmp("g", opModeString))
+            opMode = 'g';
+        else if (!strcmp("a", opModeString))
+            opMode = 'a';
+        else if (!strcmp("p", opModeString))
+            opMode = 'p';
+        else
+            opMode = 'g';
         const char *preambleModeString = par("preambleMode");
         if (!strcmp("short", preambleModeString))
             preambleMode = WIFI_PREAMBLE_SHORT;
@@ -41,10 +52,9 @@ void Ieee80211ScalarRadioSignalTransmitter::initialize(int stage)
 
 const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const
 {
-    // KLUDGE: TODO: operation mode
     PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo *>(packet->getControlInfo());
     bps bitrate = controlInfo ? bps(controlInfo->getBitrate()) : this->bitrate;
-    ModulationType modulationType = WifiModulationType::getModulationType('g', bitrate.get());
+    ModulationType modulationType = WifiModulationType::getModulationType(opMode, bitrate.get());
     simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(packet->getBitLength(), modulationType, preambleMode));
     simtime_t endTime = startTime + duration;
     IMobility *mobility = radio->getAntenna()->getMobility();
