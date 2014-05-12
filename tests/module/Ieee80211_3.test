@@ -54,7 +54,9 @@ ned-path = .;../../../../src
 *.host*.pingApp[0].startTime = 0s
 
 %contains: results/General-0.elog
-- Radio is not in receiver or transceiver mode, dropping frame
+is ignored
+%not-contains: results/General-0.elog
+is attempted
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
