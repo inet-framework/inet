@@ -191,7 +191,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual const simtime_t computeMinInterferenceTime() const;
         virtual const simtime_t computeMaxTransmissionDuration() const;
 
-        virtual m computeMaxRange(W maxPower, W minPower) const;
+        virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
         virtual m computeMaxCommunicationRange() const;
         virtual m computeMaxInterferenceRange() const;
 

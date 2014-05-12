@@ -37,6 +37,7 @@ simple RadioChannel like IRadioChannel
         double minInterferencePower @unit(dBm) = default(1dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
         double maxCommunicationRange @unit(m) = default(1m/0);
         double maxInterferenceRange @unit(m) = default(1m/0);
+        double maxAntennaGain @unit(dB) = default(0dB);
         bool recordTransmissions = default(false);
         @class(RadioChannel);
 

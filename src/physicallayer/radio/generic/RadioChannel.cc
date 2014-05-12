@@ -244,12 +244,13 @@ void RadioChannel::invalidateCachedDecision(const IRadioSignalReceptionDecision 
     if (cacheEntry) cacheEntry->decision = NULL;
 }
 
-m RadioChannel::computeMaxRange(W maxPower, W minPower) const
+m RadioChannel::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     double alpha = par("alpha");
     Hz carrierFrequency = Hz(par("carrierFrequency"));
     m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
-    double minFactor = (minPower / maxPower).get();
+    double maxAntennaGain = FWMath::dB2fraction(par("maxAntennaGain"));
+    double minFactor = (minReceptionPower / maxAntennaGain / maxTransmissionPower).get();
     return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
 }
 

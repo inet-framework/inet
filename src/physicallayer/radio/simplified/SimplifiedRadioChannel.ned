@@ -44,6 +44,7 @@ simple SimplifiedRadioChannel like IRadioChannel
         double sat @unit("dBm") = default(-110dBm); // signal attenuation threshold (in dBm)
         double alpha = default(2); // path loss coefficient
         double carrierFrequency @unit("Hz") = default(2.4GHz); // base carrier frequency of all the channels (in Hz)
+        double maxAntennaGain @unit("dB") = default(0dB);  // maximum antenna gain
         string propagationModel @enum("FreeSpaceModel","TwoRayGroundModel","RiceModel","RayleighModel","NakagamiModel","LogNormalShadowingModel") = default("FreeSpaceModel");
 
         @class(SimplifiedRadioChannel);

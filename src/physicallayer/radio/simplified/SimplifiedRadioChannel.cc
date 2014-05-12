@@ -96,9 +96,10 @@ double SimplifiedRadioChannel::calcInterfDist()
     double waveLength = (SPEED_OF_LIGHT / carrierFrequency);
     //minimum power level to be able to physically receive a signal
     double minReceivePower = pow(10.0, sat / 10.0);
+    double maxAntennaGain = pow(10, par("maxAntennaGain").doubleValue() / 10.0);
 
     interfDistance = pow(waveLength * waveLength * pMax /
-                         (16.0 * M_PI * M_PI * minReceivePower), 1.0 / alpha);
+                         (16.0 * M_PI * M_PI * minReceivePower / maxAntennaGain), 1.0 / alpha);
 
     EV << "max interference distance:" << interfDistance << endl;
 
