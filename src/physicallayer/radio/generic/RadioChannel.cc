@@ -584,17 +584,18 @@ const IRadioSignalListeningDecision *RadioChannel::listenOnChannel(const IRadio 
 
 bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const
 {
+    return true;
     // TODO: KLUDGE: move to some scalar specific class
     // TODO: oversimplification
-    const ScalarRadioSignalReceiver *scalarReceiver = dynamic_cast<const ScalarRadioSignalReceiver *>(radio->getReceiver());
-    const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
-    if (scalarReceiver && scalarTransmission && scalarTransmission->getCarrierFrequency() != scalarReceiver->getCarrierFrequency())
-        return false;
-    else
-    {
-        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
-        return isInCommunicationRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
-    }
+//    const ScalarRadioSignalReceiver *scalarReceiver = dynamic_cast<const ScalarRadioSignalReceiver *>(radio->getReceiver());
+//    const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
+//    if (scalarReceiver && scalarTransmission && scalarTransmission->getCarrierFrequency() != scalarReceiver->getCarrierFrequency())
+//        return false;
+//    else
+//    {
+//        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
+//        return isInCommunicationRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
+//    }
 }
 
 bool RadioChannel::isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const
@@ -615,6 +616,6 @@ const IRadioSignalArrival *RadioChannel::getArrival(const IRadio *radio, const I
 
 void RadioChannel::setArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival)
 {
-    delete getCachedArrival(radio, transmission);
+//    delete getCachedArrival(radio, transmission);
     setCachedArrival(radio, transmission, arrival);
 }

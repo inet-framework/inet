@@ -100,7 +100,9 @@ void Radio::setRadioMode(RadioMode newRadioMode)
                 RadioFrame *radioFrame = static_cast<RadioFrame*>(timer->getContextPointer());
                 EV << "Picking up " << (IRadioFrame *)radioFrame << endl;
                 const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
-                const IRadioSignalArrival *arrival = channel->getPropagation()->computeArrival(transmission, antenna->getMobility());
+                const IRadioSignalArrival *arrival = channel->getArrival(this, transmission);
+                if (!arrival)
+                    arrival = channel->getPropagation()->computeArrival(transmission, antenna->getMobility());
                 simtime_t startArrivalTime = arrival->getStartTime();
                 simtime_t endArrivalTime = arrival->getEndTime();
                 if (startArrivalTime >= simTime())
@@ -113,8 +115,6 @@ void Radio::setRadioMode(RadioMode newRadioMode)
                     channel->setArrival(this, transmission, arrival);
                     scheduleAt(endArrivalTime, timer);
                 }
-                else
-                    delete arrival;
             }
         }
         else
@@ -300,8 +300,7 @@ void Radio::handleLowerFrame(RadioFrame *radioFrame)
         endReceptionTimer = timer;
     }
     endReceptionTimers.push_back(timer);
-// TODO:   scheduleAt(receptionDecision->getReception()->getEndTime(), newEndReceptionTimer);
-    scheduleAt(simTime() + radioFrame->getDuration(), timer);
+    scheduleAt(channel->getArrival(this, transmission)->getEndTime(), timer);
     updateTransceiverState();
 }
 
