@@ -28,15 +28,15 @@ simple RadioChannel like IRadioChannel
         string propagationType;
         string attenuationType;
         string backgroundNoiseType;
-        double minInterferenceTime @unit(s) = default(1ps);
+        double alpha = default(2); // TODO: rename to maxRangeAlpha
+        double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
+        double maxTransmissionPower @unit(W) = default(0W/0);
         double maxTransmissionDuration @unit(s) = default(10ms);
-        double alpha = default(2);
-        double carrierFrequency @unit(Hz) = default(1Hz/0);
-        double maxTransmissionPower @unit(W) = default(1W/0);
-        double minReceptionPower @unit(dBm) = default(1dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
-        double minInterferencePower @unit(dBm) = default(1dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
-        double maxCommunicationRange @unit(m) = default(1m/0);
-        double maxInterferenceRange @unit(m) = default(1m/0);
+        double minInterferenceTime @unit(s) = default(1ps);
+        double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double maxCommunicationRange @unit(m) = default(0m/0);
+        double maxInterferenceRange @unit(m) = default(0m/0);
         double maxAntennaGain @unit(dB) = default(0dB);
         bool recordCommunication = default(false);
         @class(RadioChannel);

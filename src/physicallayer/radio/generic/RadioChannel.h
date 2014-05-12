@@ -165,10 +165,15 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         //@}
 
     protected:
+        /** @name Module */
+        //@{
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void finish();
+        //@}
 
+        /** @name Cache */
+        //@{
         virtual CacheEntry *getCacheEntry(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 
         virtual const IRadioSignalArrival *getCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
@@ -185,16 +190,22 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 
         virtual void invalidateCachedDecisions(const IRadioSignalTransmission *transmission);
         virtual void invalidateCachedDecision(const IRadioSignalReceptionDecision *decision);
+        //@}
 
-        // TODO: virtual W computeMaxTransmissionPower() const = 0;
-        // TODO: virtual W computeMinReceptionPower() const = 0;
+        /** @name Limits */
+        //@{
+        virtual W computeMaxTransmissionPower() const;
+        virtual W computeMinInterferencePower() const;
+        virtual W computeMinReceptionPower() const;
+        virtual double computeMaxAntennaGain() const;
 
         virtual const simtime_t computeMinInterferenceTime() const;
         virtual const simtime_t computeMaxTransmissionDuration() const;
 
         virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
-        virtual m computeMaxCommunicationRange() const;
         virtual m computeMaxInterferenceRange() const;
+        virtual m computeMaxCommunicationRange() const;
+        //@}
 
         virtual bool isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
         virtual bool isInInterferenceRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
