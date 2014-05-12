@@ -15,8 +15,8 @@
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c OLSR -r 0,                   10s,             f3b7-58bc
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSDV_2 -r 0,                 5s,              b656-88fe
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c Batman -r 0,                 10s,             4608-f65e
-/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            053e-7a1c
-/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            7b13-5b71
+/examples/manetrouting/hna/,         -f omnetpp.ini -c single_radio -r 0,           100s,            1462-5bc4
+/examples/manetrouting/hna/,         -f omnetpp.ini -c multi_radio -r 0,            100s,            800f-3bdb
 /examples/manetrouting/manetMultiradio/, -f 3_nodes.ini -c MultiRadio -r 0,             100s,            dd45-be70
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0,                 100s,            7b3a-2f62
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0,                   100s,            b25b-dde6
