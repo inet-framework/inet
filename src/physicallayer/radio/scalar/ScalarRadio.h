@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.scalar;
+#ifndef __INET_SCALARRADIO_H_
+#define __INET_SCALARRADIO_H_
 
-import inet.physicallayer.radio.generic.Radio;
+#include "Radio.h"
 
-simple ScalarRadio extends Radio
+class INET_API ScalarRadio : public Radio
 {
-    parameters:
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        antennaType = default("IsotropicRadioAntenna");
-        transmitterType = default("ScalarRadioSignalTransmitter");
-        receiverType = default("ScalarRadioSignalReceiver");
-        *.carrierFrequency = carrierFrequency;
-        *.bandwidth = bandwidth;
-        @class(ScalarRadio);
-}
+    protected:
+        void handleUpperCommand(cMessage *message);
+
+    public:
+        ScalarRadio();
+        ScalarRadio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel);
+};
+
+#endif

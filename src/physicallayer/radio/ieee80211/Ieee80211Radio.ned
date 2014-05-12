@@ -35,4 +35,5 @@ simple Ieee80211Radio extends ScalarRadio
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
         *.channelNumber = channelNumber;
+        @class(Ieee80211Radio);
 }

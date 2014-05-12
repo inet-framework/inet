@@ -17,15 +17,8 @@
 
 #include "Radio.h"
 #include "RadioChannel.h"
-#include "ModuleAccess.h"
 #include "NodeOperations.h"
-#include "NodeStatus.h"
-// TODO: should not be here
-#include "ScalarImplementation.h"
-// TODO: should not be here
-#include "Ieee80211Consts.h"
 #include "ImplementationBase.h"
-#include "PhyControlInfo_m.h"
 
 int Radio::nextId = 0;
 
@@ -74,19 +67,6 @@ void Radio::initialize(int stage)
         receiver = check_and_cast<IRadioSignalReceiver *>(getSubmodule("receiver"));
         channel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
         channel->addRadio(this);
-    }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER)
-    {
-        // TODO: KLUDGE: push down to ScalarRadio and Ieee80211Radio?
-        if (hasPar("channelNumber")) {
-            int newChannelNumber = par("channelNumber");
-            Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-            ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
-            ScalarRadioSignalReceiver *scalarReceiver = const_cast<ScalarRadioSignalReceiver *>(check_and_cast<const ScalarRadioSignalReceiver *>(receiver));
-            scalarTransmitter->setCarrierFrequency(carrierFrequency);
-            scalarReceiver->setCarrierFrequency(carrierFrequency);
-            setOldRadioChannel(newChannelNumber);
-        }
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -167,13 +147,8 @@ void Radio::handleMessageWhenUp(cMessage *message)
     {
         if (!message->isPacket())
             handleLowerCommand(message);
-        else // if (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER)
+        else
             handleLowerFrame(check_and_cast<RadioFrame*>(message));
-//        else
-//        {
-//            EV << "Radio is not in receiver or transceiver mode, dropping frame.\n";
-//            delete message;
-//        }
     }
     else
     {
@@ -192,32 +167,7 @@ void Radio::handleSelfMessage(cMessage *message)
 
 void Radio::handleUpperCommand(cMessage *message)
 {
-    // TODO: revise interface
-    if (message->getKind() == PHY_C_CONFIGURERADIO)
-    {
-        PhyControlInfo *phyControlInfo = check_and_cast<PhyControlInfo *>(message->getControlInfo());
-        int newChannelNumber = phyControlInfo->getChannelNumber();
-        bps newBitrate = bps(phyControlInfo->getBitrate());
-        delete phyControlInfo;
-
-        // TODO: KLUDGE: push down to ScalarRadio and Ieee80211Radio?
-        ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
-        ScalarRadioSignalReceiver *scalarReceiver = const_cast<ScalarRadioSignalReceiver *>(check_and_cast<const ScalarRadioSignalReceiver *>(receiver));
-        if (newChannelNumber != -1)
-        {
-            Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-            scalarTransmitter->setCarrierFrequency(carrierFrequency);
-            scalarReceiver->setCarrierFrequency(carrierFrequency);
-            // KLUDGE: channel
-            setOldRadioChannel(newChannelNumber);
-        }
-        else if (newBitrate.get() != -1)
-        {
-            scalarTransmitter->setBitrate(newBitrate);
-        }
-    }
-    else
-        throw cRuntimeError("Unsupported command");
+    throw cRuntimeError("Unsupported command");
 }
 
 void Radio::handleLowerCommand(cMessage *message)
