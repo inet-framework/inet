@@ -56,8 +56,6 @@ class INET_API IRadioChannel
         virtual bool isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
 
         virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const = 0;
-        // KLUDGE: to keep fingerprint
-        virtual void setArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) = 0;
 };
 
 #endif

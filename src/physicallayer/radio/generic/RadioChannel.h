@@ -238,8 +238,6 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual bool isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 
         virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
-        // KLUDGE: to keep fingerprint
-        virtual void setArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival);
 };
 
 #endif

@@ -613,9 +613,3 @@ const IRadioSignalArrival *RadioChannel::getArrival(const IRadio *radio, const I
 {
     return getCachedArrival(radio, transmission);
 }
-
-void RadioChannel::setArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival)
-{
-//    delete getCachedArrival(radio, transmission);
-    setCachedArrival(radio, transmission, arrival);
-}
