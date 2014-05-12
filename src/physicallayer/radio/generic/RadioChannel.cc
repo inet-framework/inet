@@ -31,7 +31,7 @@ RadioChannel::RadioChannel() :
     maxTransmissionDuration(sNaN),
     maxCommunicationRange(m(sNaN)),
     maxInterferenceRange(m(sNaN)),
-    recordTransmissions(false),
+    recordCommunication(false),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -53,7 +53,7 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     maxTransmissionDuration(maxTransmissionDuration),
     maxCommunicationRange(m(maxCommunicationRange)),
     maxInterferenceRange(m(maxInterferenceRange)),
-    recordTransmissions(false),
+    recordCommunication(false),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -89,8 +89,8 @@ RadioChannel::~RadioChannel()
             delete cacheEntries;
         }
     }
-    if (recordTransmissions)
-        transmissionLog.close();
+    if (recordCommunication)
+        communicationLog.close();
 }
 
 void RadioChannel::initialize(int stage)
@@ -105,9 +105,9 @@ void RadioChannel::initialize(int stage)
         propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
         attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
-        recordTransmissions = par("recordTransmissions");
-        if (recordTransmissions)
-            transmissionLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+        recordCommunication = par("recordCommunication");
+        if (recordCommunication)
+            communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -508,11 +508,11 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     const Radio *transmitterRadio = check_and_cast<Radio *>(radio);
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
-    if (recordTransmissions)
-        transmissionLog << "T " << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
-                        << "M " << radioFrame->getName() << " " << transmission->getId() << " "
-                        << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
-                        << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
+    if (recordCommunication)
+        communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
+                         << "M " << radioFrame->getName() << " " << transmission->getId() << " "
+                         << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
+                         << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << this << "." << endl;
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
@@ -552,13 +552,13 @@ cPacket *RadioChannel::receivePacket(const IRadio *radio, IRadioFrame *radioFram
     const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
     const IRadioSignalListening *listening = radio->getReceiver()->createListening(radio, transmission->getStartTime(), transmission->getEndTime(), transmission->getStartPosition(), transmission->getEndPosition());
     const IRadioSignalReceptionDecision *decision = receiveFromChannel(radio, listening, transmission);
-    if (recordTransmissions) {
+    if (recordCommunication) {
         const IRadioSignalReception *reception = decision->getReception();
-        transmissionLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
-                        << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
-                        << "S " << reception->getStartTime() << " " <<  reception->getStartPosition() << " -> "
-                        << "D " << reception->getEndTime() << " " <<  reception->getEndPosition() << " "
-                        << "F " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
+        communicationLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
+                         << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
+                         << "S " << reception->getStartTime() << " " <<  reception->getStartPosition() << " -> "
+                         << "D " << reception->getEndTime() << " " <<  reception->getEndPosition() << " "
+                         << "F " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
     }
     cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
     if (!decision->isReceptionSuccessful())

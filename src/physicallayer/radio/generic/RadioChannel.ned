@@ -38,7 +38,7 @@ simple RadioChannel like IRadioChannel
         double maxCommunicationRange @unit(m) = default(1m/0);
         double maxInterferenceRange @unit(m) = default(1m/0);
         double maxAntennaGain @unit(dB) = default(0dB);
-        bool recordTransmissions = default(false);
+        bool recordCommunication = default(false);
         @class(RadioChannel);
 
     submodules:

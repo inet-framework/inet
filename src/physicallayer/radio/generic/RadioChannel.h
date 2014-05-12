@@ -84,9 +84,10 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
          */
         m maxInterferenceRange;
         /**
-         * Record all transmissions into a separate
+         * Record all transmissions and receptions into a separate trace file.
+         * The file is at ${resultdir}/${configname}-${runnumber}.tlog
          */
-        bool recordTransmissions;
+        bool recordCommunication;
         //@}
 
         /** @name State */
@@ -102,9 +103,9 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         // TODO: consider using an interval graph for receptions (per receiver radio)
         std::vector<const IRadioSignalTransmission *> transmissions;
         /**
-         *
+         * The output file where communication log is written to.
          */
-        std::ofstream transmissionLog;
+        std::ofstream communicationLog;
         //@}
 
         /** @name Cache */
