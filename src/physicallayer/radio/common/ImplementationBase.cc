@@ -105,11 +105,9 @@ bool RadioSignalReceiverBase::computeIsReceptionAttempted(const IRadioSignalRece
         for (std::vector<const IRadioSignalReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
         {
             const IRadioSignalReception *interferingReception = *it;
-            // KLUDGE: to match the old radio fingerprint when two signals arrive at the exact same time
-            // KLUDGE: we only receive the one that arrived earlier
             bool isPrecedingReception = interferingReception->getStartTime() < reception->getStartTime() ||
                                        (interferingReception->getStartTime() == reception->getStartTime() &&
-                                        interferingReception->getTransmission()->getEventNumber() < reception->getTransmission()->getEventNumber());
+                                        interferingReception->getTransmission()->getId() < reception->getTransmission()->getId());
             if (isPrecedingReception)
             {
                 const IRadioSignalTransmission *interferingTransmission = interferingReception->getTransmission();

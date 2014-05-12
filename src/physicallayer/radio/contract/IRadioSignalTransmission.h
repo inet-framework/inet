@@ -42,9 +42,6 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         // TODO: should we separate transmission begin and end? or should it be an approximation only?
         virtual const Coord getEndPosition() const = 0;
         virtual mps getPropagationSpeed() const = 0;
-
-        // KLUDGE: fingerprint
-        virtual eventnumber_t getEventNumber() const = 0;
 };
 
 #endif

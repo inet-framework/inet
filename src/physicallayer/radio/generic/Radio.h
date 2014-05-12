@@ -24,7 +24,6 @@
 #include "RadioFrame.h"
 
 // TODO: merge with RadioBase
-// TODO: KLUDGE: when removing fingerprint kludges think about the following
 // TODO: do we really need to support interference-free simultaneous reception of multiple transmissions?
 // TODO: if we don't send all radio frames to all radios how will they update their reception state?
 // TODO: in case of a listening state change (e.g. radio state, carrier frequency) what about the ongoing transmissions?

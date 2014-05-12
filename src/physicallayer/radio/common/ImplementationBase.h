@@ -51,7 +51,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
     protected:
         const int id;
         const IRadio *transmitter;
-        const eventnumber_t eventNumber;
         const simtime_t startTime;
         const simtime_t endTime;
         const Coord startPosition;
@@ -64,7 +63,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         RadioSignalTransmissionBase(const IRadio *transmitter, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
             id(nextId++),
             transmitter(transmitter),
-            eventNumber(simulation.getEventNumber()),
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
@@ -85,9 +83,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
         virtual mps getPropagationSpeed() const { return propagationSpeed; }
-
-        // KLUDGE: delete
-        virtual eventnumber_t getEventNumber() const { return eventNumber; }
 };
 
 class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
