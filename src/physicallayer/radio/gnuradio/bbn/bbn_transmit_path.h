@@ -15,13 +15,15 @@
 class bbn_transmit_path;
 typedef boost::shared_ptr<bbn_transmit_path> bbn_transmit_path_sptr;
 
-bbn_transmit_path_sptr bbn_make_transmit_path(int spb, double alpha, double gain, bool use_barker=false, const std::string& lengthtagname="packet_len");
+bbn_transmit_path_sptr bbn_make_transmit_path(int spb, double alpha, double gain, bool use_barker=false,
+                                              bool generate_crc=true, const std::string& lengthtagname="packet_len");
 
 
 class bbn_transmit_path : virtual public gr::hier_block2 {
-  friend bbn_transmit_path_sptr bbn_make_transmit_path(int spb, double alpha, double gain, bool use_barker, const std::string& lengthtagname);
+  friend bbn_transmit_path_sptr bbn_make_transmit_path(int spb, double alpha, double gain, bool use_barker,
+                                                       bool generate_crc, const std::string& lengthtagname);
 
-  bbn_transmit_path(int spb, double alpha, double gain, bool use_barker, const std::string& lengthtagname);
+  bbn_transmit_path(int spb, double alpha, double gain, bool use_barker, bool generate_crc, const std::string& lengthtagname);
 
 public:
   ~bbn_transmit_path();

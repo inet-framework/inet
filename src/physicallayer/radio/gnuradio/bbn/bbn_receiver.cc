@@ -22,7 +22,7 @@ bbn_receiver::bbn_receiver (int spb, double alpha, bool use_barker, int msgq_lim
     d_input_queue = msg_queue::make(msgq_limit);
     d_tx_input = blocks::message_source::make(sizeof(gr_complex), d_input_queue, "packet_len");
     d_output_queue = msg_queue::make();
-    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, true);
+    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, false);
 
     connect(d_tx_input, 0, d_receive_path, 0);
 }

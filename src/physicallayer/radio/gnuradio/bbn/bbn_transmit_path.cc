@@ -10,14 +10,14 @@
 
 using namespace std;
 
-bbn_transmit_path_sptr bbn_make_transmit_path (int spb, double alpha, double gain, bool use_barker, const std::string& lengthtagname) {
-  return gnuradio::get_initial_sptr (new bbn_transmit_path(spb, alpha, gain, use_barker, lengthtagname));
+bbn_transmit_path_sptr bbn_make_transmit_path (int spb, double alpha, double gain, bool use_barker, bool generate_crc, const std::string& lengthtagname) {
+  return gnuradio::get_initial_sptr (new bbn_transmit_path(spb, alpha, gain, use_barker, generate_crc, lengthtagname));
 }
 
 bbn_transmit_path::~bbn_transmit_path () {
 }
 
-bbn_transmit_path::bbn_transmit_path (int spb, double alpha, double gain, bool use_barker, const std::string& lengthtagname)
+bbn_transmit_path::bbn_transmit_path (int spb, double alpha, double gain, bool use_barker, bool generate_crc, const std::string& lengthtagname)
   : gr::hier_block2 ("bbn_transmit_path",
                gr::io_signature::make (1, 1, sizeof(char)),
                gr::io_signature::make (1, 1, sizeof(gr_complex)))
@@ -35,7 +35,7 @@ bbn_transmit_path::bbn_transmit_path (int spb, double alpha, double gain, bool u
     constellation.push_back(gr_complex(-0.707,-0.707));
     d_chunks_to_symbols = gr::digital::chunks_to_symbols_bc::make(constellation);
 
-    d_encapsulator = bbn_make_encapsulator_bb(lengthtagname);
+    d_encapsulator = bbn_make_encapsulator_bb(generate_crc, lengthtagname);
     d_scrambler = bbn_make_scrambler_bb(true);
     d_diff_encoder = gr::digital::diff_encoder_bb::make(2);
 

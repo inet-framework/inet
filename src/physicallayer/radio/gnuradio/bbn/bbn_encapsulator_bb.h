@@ -9,12 +9,14 @@
 class bbn_encapsulator_bb;
 typedef boost::shared_ptr<bbn_encapsulator_bb> bbn_encapsulator_bb_sptr;
 
-bbn_encapsulator_bb_sptr bbn_make_encapsulator_bb(const std::string& lengthtagname="packet_len");
+bbn_encapsulator_bb_sptr bbn_make_encapsulator_bb(bool generate_crc = true, const std::string& lengthtagname="packet_len");
 
 class bbn_encapsulator_bb : public gr::tagged_stream_block
 {
+  private:
+    bool d_generate_crc;
   public:
-    bbn_encapsulator_bb(const std::string& length_tag_name);
+    bbn_encapsulator_bb(bool generate_crc, const std::string& length_tag_name);
 
     virtual int calculate_output_stream_length(const gr_vector_int &ninput_items);
 
