@@ -52,8 +52,8 @@ void testIdealRadio()
     IRadioSignalReceiver *receiverReceiver = new IdealRadioSignalReceiver(false);
     IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
-    IRadioFrame *radioFrame = transmitterRadio->transmitPacket(transmitterMacFrame, simTime());
-    cPacket *receiverMacFrame = receiverRadio->receivePacket(radioFrame);
+    IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
+    cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
     IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     EV_INFO << "Ideal radio received " << receiverMacFrame << ", reception is " << (receptionDecision->isReceptionSuccessful() ? "successful" : "unsuccessful") << endl;
@@ -87,8 +87,8 @@ void testScalarRadio()
     IRadioSignalReceiver *receiverReceiver = new ScalarRadioSignalReceiver(10, W(1E-12), W(1E-12), Hz(2.4E+9), Hz(2E+6));
     IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
-    IRadioFrame *radioFrame = transmitterRadio->transmitPacket(transmitterMacFrame, simTime());
-    cPacket *receiverMacFrame = receiverRadio->receivePacket(radioFrame);
+    IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
+    cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
     IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     EV_INFO << "Scalar radio received " << receiverMacFrame << ", reception is " << (receptionDecision->isReceptionSuccessful() ? "successful" : "unsuccessful") << endl;
@@ -122,8 +122,8 @@ void testDimensionalRadio()
     IRadioSignalReceiver *receiverReceiver = new DimensionalRadioSignalReceiver(10, W(1E-12), W(1E-11));
     IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
-    IRadioFrame *radioFrame = transmitterRadio->transmitPacket(transmitterMacFrame, simTime());
-    cPacket *receiverMacFrame = receiverRadio->receivePacket(radioFrame);
+    IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
+    cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
     IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     EV_INFO << "Dimensional radio received " << receiverMacFrame << ", reception is " << (receptionDecision->isReceptionSuccessful() ? "successful" : "unsuccessful") << endl;
@@ -165,7 +165,7 @@ void testMultipleScalarRadios(const char *name, IRadioChannel *channel, int radi
         simtime_t startTime = random(0, duration.dbl());
         cPacket *transmitterMacFrame = new cPacket("Hello", 0, 64 * 8);
         EV_DEBUG << "Sending at " << startTime << " from " << index << endl;
-        IRadioFrame *radioFrame = radio->transmitPacket(transmitterMacFrame, startTime);
+        IRadioFrame *radioFrame = channel->transmitPacket(radio, transmitterMacFrame);
         radioFrames.push_back(radioFrame);
     }
 
@@ -175,7 +175,7 @@ void testMultipleScalarRadios(const char *name, IRadioChannel *channel, int radi
         for (std::vector<IRadioFrame *>::iterator jt = radioFrames.begin(); jt != radioFrames.end(); jt++)
         {
             IRadioFrame *radioFrame = *jt;
-            cPacket *receiverMacFrame = radio->receivePacket(radioFrame);
+            cPacket *receiverMacFrame = channel->receivePacket(radio, radioFrame);
             RadioSignalReceptionDecision *decision = check_and_cast<RadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
             if (decision->isReceptionSuccessful())
                 successfulReceptionCount++;

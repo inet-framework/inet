@@ -79,16 +79,6 @@ void Radio::printToStream(std::ostream &stream) const
     stream << (cSimpleModule *)this;
 }
 
-IRadioFrame *Radio::transmitPacket(cPacket *macFrame, const simtime_t startTime)
-{
-    return channel->transmitPacket(this, macFrame, startTime);
-}
-
-cPacket *Radio::receivePacket(IRadioFrame *radioFrame)
-{
-    return channel->receivePacket(this, radioFrame);
-}
-
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
     Enter_Method_Silent();
@@ -208,7 +198,7 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
 
 void Radio::startTransmission(cPacket *macFrame)
 {
-    const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(transmitPacket(macFrame, simTime()));
+    const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(channel->transmitPacket(this, macFrame));
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
     ASSERT(radioFrame->getDuration() != 0);
     channel->sendToChannel(this, radioFrame);
@@ -246,7 +236,7 @@ void Radio::endReception(cMessage *message)
     EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message->getKind() && lastReceptionStateChange <= message->getSendingTime())
     {
-        cPacket *macFrame = receivePacket(radioFrame);
+        cPacket *macFrame = channel->receivePacket(this, radioFrame);
         EV << "Sending up " << macFrame << ".\n";
         send(macFrame, upperLayerOut);
         endReceptionTimer = NULL;

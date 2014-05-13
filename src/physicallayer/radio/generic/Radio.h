@@ -83,9 +83,6 @@ class INET_API Radio : public RadioBase, public virtual IRadio
         virtual const IRadioSignalReceiver *getReceiver() const { return receiver; }
         virtual const IRadioChannel *getChannel() const { return channel; }
 
-        virtual IRadioFrame *transmitPacket(cPacket *packet, const simtime_t startTime);
-        virtual cPacket *receivePacket(IRadioFrame *frame);
-
         virtual void setRadioMode(RadioMode radioMode);
 
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const;

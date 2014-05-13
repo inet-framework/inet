@@ -240,7 +240,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission);
         virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame);
 
-        virtual IRadioFrame *transmitPacket(const IRadio *radio, cPacket *macFrame, const simtime_t startTime);
+        virtual IRadioFrame *transmitPacket(const IRadio *radio, cPacket *macFrame);
         virtual cPacket *receivePacket(const IRadio *radio, IRadioFrame *radioFrame);
 
         virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;

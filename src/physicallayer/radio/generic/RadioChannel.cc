@@ -536,11 +536,6 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     const Radio *transmitterRadio = check_and_cast<Radio *>(radio);
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
-    if (recordCommunication)
-        communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmission->getTransmitter()->getId() << " "
-                         << "M " << radioFrame->getName() << " " << transmission->getId() << " "
-                         << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
-                         << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << this << "." << endl;
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
@@ -564,14 +559,21 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     }
 }
 
-IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame, const simtime_t startTime)
+IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame)
 {
-    const IRadioSignalTransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, startTime);
+    const IRadioSignalTransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime());
     transmitToChannel(radio, transmission);
     RadioFrame *radioFrame = new RadioFrame(transmission);
     radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getDuration());
     radioFrame->encapsulate(macFrame);
+    if (recordCommunication) {
+        const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
+        communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmitterRadio->getId() << " "
+                         << "M " << radioFrame->getName() << " " << transmission->getId() << " "
+                         << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
+                         << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
+    }
     return radioFrame;
 }
 

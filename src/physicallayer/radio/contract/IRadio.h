@@ -277,9 +277,6 @@ class INET_API IRadio : public IRadioSignalSource
 //        TODO: virtual W getMinReceptionPower() const = 0;
 //        TODO: virtual double getMaxAntennaGain() const = 0;
 
-        virtual IRadioFrame *transmitPacket(cPacket *packet, const simtime_t startTime) = 0;
-        virtual cPacket *receivePacket(IRadioFrame *frame) = 0;
-
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
         virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
 };

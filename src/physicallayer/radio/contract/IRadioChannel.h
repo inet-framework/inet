@@ -46,7 +46,7 @@ class INET_API IRadioChannel
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission) = 0;
         virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame) = 0;
 
-        virtual IRadioFrame *transmitPacket(const IRadio *radio, cPacket *macFrame, const simtime_t startTime) = 0;
+        virtual IRadioFrame *transmitPacket(const IRadio *radio, cPacket *macFrame) = 0;
         virtual cPacket *receivePacket(const IRadio *radio, IRadioFrame *radioFrame) = 0;
 
         virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const = 0;
