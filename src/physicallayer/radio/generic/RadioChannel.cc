@@ -17,8 +17,6 @@
 
 #include "Radio.h"
 #include "RadioChannel.h"
-// TODO: should not be here
-#include "ScalarImplementation.h"
 #include "PhyControlInfo_m.h"
 
 Define_Module(RadioChannel);
@@ -615,14 +613,10 @@ const IRadioSignalListeningDecision *RadioChannel::listenOnChannel(const IRadio 
 bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const
 {
     return true;
-    // TODO: KLUDGE: move to some scalar specific class
-    // TODO: oversimplification
-//    const ScalarRadioSignalReceiver *scalarReceiver = dynamic_cast<const ScalarRadioSignalReceiver *>(radio->getReceiver());
-//    const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
-//    if (scalarReceiver && scalarTransmission && scalarTransmission->getCarrierFrequency() != scalarReceiver->getCarrierFrequency())
+    // TODO: add flags to control this optimization and notify radios with direct calls instead
+//    if (!radio->getReceiver()->computeIsReceptionPossible(transmission))
 //        return false;
-//    else
-//    {
+//    else {
 //        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
 //        return isInCommunicationRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
 //    }

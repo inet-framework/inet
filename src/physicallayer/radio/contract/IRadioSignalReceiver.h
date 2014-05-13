@@ -38,6 +38,7 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
         virtual const IRadioSignalListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
         virtual const IRadioSignalListeningDecision *computeListeningDecision(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;
 
+        virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const = 0;
         virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const = 0;
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const = 0;
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;

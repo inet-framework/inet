@@ -370,6 +370,8 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
 class INET_API RadioSignalReceiverBase : public cCompoundModule, public virtual IRadioSignalReceiver
 {
     protected:
+        virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const;
+        virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const = 0;
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const;
 
     public:

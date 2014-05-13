@@ -91,6 +91,11 @@ void RadioSignalReceptionDecision::printToStream(std::ostream &stream) const
     stream << ", snir = " << snir;
 }
 
+bool RadioSignalReceiverBase::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
+{
+    return true;
+}
+
 bool RadioSignalReceiverBase::computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const
 {
     if (!computeIsReceptionPossible(reception))

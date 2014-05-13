@@ -204,6 +204,17 @@ bool ScalarRadioSignalReceiver::areOverlappingBands(Hz carrierFrequency1, Hz ban
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
+bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
+{
+    const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(transmission);
+    if (carrierFrequency == scalarTransmission->getCarrierFrequency() && bandwidth == scalarTransmission->getBandwidth())
+        return true;
+    else if (areOverlappingBands(carrierFrequency, bandwidth, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth()))
+        throw cRuntimeError("Overlapping bands are not supported");
+    else
+        return false;
+}
+
 bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalReception *reception) const
 {
     const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);
