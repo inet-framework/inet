@@ -27,5 +27,6 @@ module ScalarRadioSignalTransmitter like IRadioSignalTransmitter
         double power @unit(W);
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
+        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
         @class(ScalarRadioSignalTransmitter);
 }

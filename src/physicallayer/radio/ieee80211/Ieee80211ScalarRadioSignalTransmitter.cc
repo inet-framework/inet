@@ -60,5 +60,5 @@ const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTra
     IMobility *mobility = radio->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
+    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
 }

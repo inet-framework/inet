@@ -139,6 +139,17 @@ void ScalarRadioSignalTransmitter::initialize(int stage)
         power = W(par("power"));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
+        const char *modulationName = par("modulation");
+        if (strcmp(modulationName, "NULL")==0)
+            modulation = new NullModulation();
+        else if (strcmp(modulationName, "BPSK")==0)
+            modulation = new BPSKModulation();
+        else if (strcmp(modulationName, "16-QAM")==0)
+            modulation = new QAM16Modulation();
+        else if (strcmp(modulationName, "256-QAM")==0)
+            modulation = new QAM256Modulation();
+        else
+            throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
     }
 }
 
@@ -158,7 +169,7 @@ const IRadioSignalTransmission *ScalarRadioSignalTransmitter::createTransmission
     IMobility *mobility = radio->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
+    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
 }
 
 void ScalarRadioSignalReceiver::initialize(int stage)
@@ -170,7 +181,6 @@ void ScalarRadioSignalReceiver::initialize(int stage)
         sensitivity = mW(FWMath::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
-        // TODO: move to subclass?
         const char *modulationName = par("modulation");
         if (strcmp(modulationName, "NULL")==0)
             modulation = new NullModulation();

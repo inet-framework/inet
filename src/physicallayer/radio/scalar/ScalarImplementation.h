@@ -26,6 +26,7 @@
 class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBase
 {
     protected:
+        const IModulation *modulation;
         const int headerBitLength;
         const int payloadBitLength;
         const bps bitrate;
@@ -34,8 +35,9 @@ class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBas
         const Hz bandwidth;
 
     public:
-        ScalarRadioSignalTransmission(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
+        ScalarRadioSignalTransmission(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const IModulation *modulation, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
             RadioSignalTransmissionBase(radio, startTime, endTime, startPosition, endPosition),
+            modulation(modulation),
             headerBitLength(headerBitLength),
             payloadBitLength(payloadBitLength),
             bitrate(bitrate),
@@ -46,6 +48,7 @@ class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBas
 
         virtual void printToStream(std::ostream &stream) const;
 
+        virtual const IModulation *getModulation() const { return modulation; }
         virtual int getHeaderBitLength() const { return headerBitLength; }
         virtual int getPayloadBitLength() const { return payloadBitLength; }
         virtual bps getBitrate() const { return bitrate; }
@@ -202,18 +205,19 @@ class INET_API ScalarRadioSignalListeningDecision : public RadioSignalListeningD
 class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virtual IRadioSignalTransmitter
 {
     protected:
+        const IModulation *modulation;
         int headerBitLength;
         bps bitrate;
         W power;
         Hz carrierFrequency;
         Hz bandwidth;
-        // TODO: ? const IModulation *modulation;
 
     protected:
         virtual void initialize(int stage);
 
     public:
         ScalarRadioSignalTransmitter() :
+            modulation(NULL),
             headerBitLength(-1),
             bitrate(sNaN),
             power(W(sNaN)),
@@ -221,7 +225,8 @@ class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virt
             bandwidth(Hz(sNaN))
         {}
 
-        ScalarRadioSignalTransmitter(int headerBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
+        ScalarRadioSignalTransmitter(const IModulation *modulation, int headerBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
+            modulation(modulation),
             headerBitLength(headerBitLength),
             bitrate(bitrate),
             power(power),
@@ -233,11 +238,13 @@ class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virt
 
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 
-        virtual bps getBitrate() const { return bitrate; }
-        virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
+        virtual const IModulation *getModulation() const { return modulation; }
 
         virtual int getHeaderBitLength() const { return headerBitLength; }
         virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }
+
+        virtual bps getBitrate() const { return bitrate; }
+        virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
 
         virtual W getPower() const { return power; }
         virtual void setPower(W power) { this->power = power; }
@@ -252,12 +259,11 @@ class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virt
 class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
 {
     protected:
+        const IModulation *modulation;
         W energyDetection;
         W sensitivity;
         Hz carrierFrequency;
         Hz bandwidth;
-        // TODO: move to subclass?
-        const IModulation *modulation;
 
     protected:
         virtual void initialize(int stage);
@@ -272,20 +278,20 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
     public:
         ScalarRadioSignalReceiver() :
             SNIRRadioSignalReceiverBase(),
+            modulation(NULL),
             energyDetection(W(sNaN)),
             sensitivity(W(sNaN)),
             carrierFrequency(Hz(sNaN)),
-            bandwidth(Hz(sNaN)),
-            modulation(NULL)
+            bandwidth(Hz(sNaN))
         {}
 
-        ScalarRadioSignalReceiver(double snirThreshold, W energyDetection, W sensitivity, Hz carrierFrequency, Hz bandwidth) :
+        ScalarRadioSignalReceiver(const IModulation *modulation, double snirThreshold, W energyDetection, W sensitivity, Hz carrierFrequency, Hz bandwidth) :
             SNIRRadioSignalReceiverBase(snirThreshold),
+            modulation(modulation),
             energyDetection(energyDetection),
             sensitivity(sensitivity),
             carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth),
-            modulation(NULL)
+            bandwidth(bandwidth)
         {}
 
         virtual ~ScalarRadioSignalReceiver() { delete modulation; }
@@ -296,6 +302,8 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
 
         virtual const IRadioSignalListeningDecision *computeListeningDecision(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
+
+        virtual const IModulation *getModulation() const { return modulation; }
 
         virtual Hz getCarrierFrequency() const { return carrierFrequency; }
         virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
