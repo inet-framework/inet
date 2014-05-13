@@ -26,6 +26,7 @@
 #include "INetfilter.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
 #include "UDPSocket.h"
 #include "AODVRouteData.h"
 #include "UDPPacket.h"
@@ -37,7 +38,7 @@
  * in the IP-layer required by this protocol.
  */
 
-class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook, public cListener
+class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INetfilter::IHook, public INotifiable
 {
   protected:
     /*
@@ -73,6 +74,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     IRoutingTable *routingTable;
     IInterfaceTable *interfaceTable;
     INetfilter *networkProtocol;
+    NotificationBoard *nb;
 
     // AODV parameters: the following parameters are configurable, see the NED file for more info.
     unsigned int rerrRatelimit;
@@ -182,7 +184,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     /* General functions to handle route errors */
     void sendRERRWhenNoRouteToForward(const IPv4Address& unreachableAddr);
     void handleLinkBreakSendRERR(const IPv4Address& unreachableAddr);
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveChangeNotification(int signalID, const cObject *obj);
 
     /* Netfilter hooks */
     Result ensureRouteForDatagram(IPv4Datagram *datagram);

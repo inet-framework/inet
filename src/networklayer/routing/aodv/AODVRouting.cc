@@ -73,7 +73,8 @@ void AODVRouting::initialize(int stage)
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_MANET);
         networkProtocol->registerHook(0, this);
-        host->subscribe(NF_LINK_BREAK, this);
+        nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_LINK_BREAK);
 
         if (useHelloMessages) {
             helloMsgTimer = new cMessage("HelloMsgTimer");
@@ -224,6 +225,7 @@ AODVRouting::AODVRouting()
     blacklistTimer = NULL;
     rrepAckTimer = NULL;
     jitterPar = NULL;
+    nb = NULL;
 }
 
 bool AODVRouting::hasOngoingRouteDiscovery(const IPv4Address& target)
@@ -980,14 +982,14 @@ IPv4Route *AODVRouting::createRoute(const IPv4Address& destAddr, const IPv4Addre
     return newRoute;
 }
 
-void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void AODVRouting::receiveChangeNotification(int signalID, const cObject *obj)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {
         EV_DETAIL << "Received link break signal" << endl;
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
         Ieee80211Frame *ieee80211Frame = dynamic_cast<Ieee80211Frame *>(const_cast<cObject *>(obj));
-        IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *> (ieee80211Frame == NULL ? obj : ieee80211Frame->getEncapsulatedPacket());
+        IPv4Datagram *datagram = dynamic_cast<IPv4Datagram *> (ieee80211Frame == NULL ? const_cast<cObject *>(obj) : ieee80211Frame->getEncapsulatedPacket());
         if (datagram) {
             const IPv4Address& unreachableAddr = datagram->getDestAddress();
             if (true) {
@@ -1006,7 +1008,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
             }
         }
         else
-            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
+            throw cRuntimeError("Unknown packet type in NF_LINK_BREAK notification");
     }
 }
 
@@ -1658,5 +1660,9 @@ AODVRouting::~AODVRouting()
     delete counterTimer;
     delete rrepAckTimer;
     delete blacklistTimer;
+
+    nb = NotificationBoardAccess().getIfExists(this);
+    if (nb)
+        nb->unsubscribe(this, NF_LINK_BREAK);
 }
 
