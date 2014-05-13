@@ -25,6 +25,8 @@ class INET_API IRadioSignalTransmitter : public IPrintableObject
     public:
         virtual ~IRadioSignalTransmitter() {}
 
+        virtual W getMaxPower() const = 0;
+
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const = 0;
 };
 

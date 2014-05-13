@@ -29,7 +29,8 @@ class INET_API IRadioAntenna
 
         virtual IMobility *getMobility() const = 0;
 
-        // TODO: is this so simple? 0..1 or what?
+        virtual double getMaxGain() const = 0;
+
         virtual double getGain(Coord direction) const = 0;
 };
 

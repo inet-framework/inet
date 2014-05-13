@@ -237,6 +237,8 @@ class INET_API ConstantGainRadioAntenna : public RadioAntennaBase
             gain(gain)
         {}
 
+        virtual double getMaxGain() const { return gain; }
+
         virtual double getGain(Coord direction) const { return gain; }
 };
 
@@ -250,6 +252,8 @@ class INET_API IsotropicRadioAntenna : public RadioAntennaBase
         IsotropicRadioAntenna(IMobility *mobility) :
             RadioAntennaBase(mobility)
         {}
+
+        virtual double getMaxGain() const { return 1; }
 
         virtual double getGain(Coord direction) const { return 1; }
 };
@@ -266,6 +270,11 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
         {}
 
         virtual m getLength() const { return length; }
+
+        // TODO: compute maximum gain
+        virtual double getMaxGain() const { return 1; }
+
+        // TODO: compute gain
         virtual double getGain(Coord direction) const { return 1; }
 };
 
@@ -367,6 +376,12 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
         virtual double getSNIR() const { return snir; }
 };
 
+class INET_API RadioSignalTransmitterBase : public cCompoundModule, public virtual IRadioSignalTransmitter
+{
+    public:
+        virtual W getMaxPower() const { return W(POSITIVE_INFINITY); }
+};
+
 class INET_API RadioSignalReceiverBase : public cCompoundModule, public virtual IRadioSignalReceiver
 {
     protected:
@@ -375,8 +390,10 @@ class INET_API RadioSignalReceiverBase : public cCompoundModule, public virtual 
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const;
 
     public:
-        RadioSignalReceiverBase()
-        {}
+        RadioSignalReceiverBase() {}
+
+        virtual W getMinInterferencePower() const { return W(0); }
+        virtual W getMinReceptionPower() const { return W(0); }
 };
 
 class INET_API SNIRRadioSignalReceiverBase : public RadioSignalReceiverBase

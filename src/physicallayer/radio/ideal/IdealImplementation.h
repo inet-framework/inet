@@ -107,7 +107,7 @@ class INET_API IdealRadioSignalFreeSpaceAttenuation : public IdealRadioSignalAtt
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
 };
 
-class INET_API IdealRadioSignalTransmitter : public cCompoundModule, public virtual IRadioSignalTransmitter
+class INET_API IdealRadioSignalTransmitter : public RadioSignalTransmitterBase
 {
     protected:
         bps bitrate;

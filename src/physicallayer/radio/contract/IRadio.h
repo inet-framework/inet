@@ -272,11 +272,6 @@ class INET_API IRadio : public IRadioSignalSource
         virtual const IRadioSignalReceiver *getReceiver() const = 0;
         virtual const IRadioChannel *getChannel() const = 0;
 
-//        TODO: virtual W getMaxTransmissionPower() const = 0;
-//        TODO: virtual W getMinInterferencePower() const = 0;
-//        TODO: virtual W getMinReceptionPower() const = 0;
-//        TODO: virtual double getMaxAntennaGain() const = 0;
-
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
         virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
 };

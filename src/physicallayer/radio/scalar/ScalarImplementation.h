@@ -202,7 +202,7 @@ class INET_API ScalarRadioSignalListeningDecision : public RadioSignalListeningD
         virtual W getPowerMax() const { return powerMax; }
 };
 
-class INET_API ScalarRadioSignalTransmitter: public cCompoundModule, public virtual IRadioSignalTransmitter
+class INET_API ScalarRadioSignalTransmitter: public RadioSignalTransmitterBase
 {
     protected:
         const IModulation *modulation;

@@ -547,7 +547,7 @@ class INET_API LayeredRadioSignalReception : public RadioSignalReceptionBase, pu
         virtual const IRadioSignalReceptionAnalogModel *getAnalogModel() const { return analogModel; }
 };
 
-class INET_API LayeredRadioSignalTransmitter : public virtual ILayeredRadioSignalTransmitter
+class INET_API LayeredRadioSignalTransmitter : public RadioSignalTransmitterBase
 {
     protected:
         const IRadioCodec *encoder;
@@ -571,7 +571,7 @@ class INET_API LayeredRadioSignalTransmitter : public virtual ILayeredRadioSigna
         virtual const IRadioConverter *getDigitalAnalogConverter() const { return digitalAnalogConverter; }
 };
 
-class INET_API LayeredRadioSignalReceiver : public virtual ILayeredRadioSignalReceiver
+class INET_API LayeredRadioSignalReceiver : public RadioSignalReceiverBase, public virtual ILayeredRadioSignalReceiver
 {
     protected:
         const IRadioCodec *decoder;

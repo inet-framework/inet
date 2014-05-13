@@ -130,7 +130,7 @@ class INET_API DimensionalRadioBackgroundNoise : public IRadioBackgroundNoise
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalReception *reception) const;
 };
 
-class INET_API DimensionalRadioSignalTransmitter : public virtual IRadioSignalTransmitter
+class INET_API DimensionalRadioSignalTransmitter : public RadioSignalTransmitterBase
 {
     protected:
         bps bitrate;
