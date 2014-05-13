@@ -19,7 +19,6 @@
 #define __INET_IRADIOFRAME_H_
 
 #include "IPhysicalLayerFrame.h"
-#include "IRadioSignal.h"
 #include "IRadioSignalTransmission.h"
 
 /**

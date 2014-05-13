@@ -4,7 +4,6 @@
 #include <list>
 #include "INETDefs.h"
 #include "INETDefs.h"
-#include "IRadioSignal.h"
 #include "Mapping.h"
 
 /**
@@ -32,7 +31,7 @@
  */
 // TODO: this class should represent the radio signal without reception details
 // TODO: move all reception related data into the corresponding radio frame
-class INET_API DetailedRadioSignal : public IRadioSignal {
+class INET_API DetailedRadioSignal {
 public:
 	/**
 	 * @brief Shortcut type for a concatenated Mapping using multiply operator.
