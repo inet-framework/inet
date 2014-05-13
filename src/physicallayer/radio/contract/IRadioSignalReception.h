@@ -30,7 +30,6 @@ class INET_API IRadioSignalReception : public IPrintableObject
 
         virtual const simtime_t getStartTime() const = 0;
         virtual const simtime_t getEndTime() const = 0;
-        virtual const simtime_t getDuration() const = 0;
 
         virtual const Coord getStartPosition() const = 0;
         virtual const Coord getEndPosition() const = 0;

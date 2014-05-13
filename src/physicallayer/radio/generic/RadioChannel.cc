@@ -563,7 +563,7 @@ IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame
     transmitToChannel(radio, transmission);
     RadioFrame *radioFrame = new RadioFrame(transmission);
     radioFrame->setName(macFrame->getName());
-    radioFrame->setDuration(transmission->getDuration());
+    radioFrame->setDuration(transmission->getEndTime() - transmission->getStartTime());
     radioFrame->encapsulate(macFrame);
     if (recordCommunication) {
         const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);

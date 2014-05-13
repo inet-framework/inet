@@ -78,7 +78,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }
-        virtual const simtime_t getDuration() const { return endTime - startTime; }
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
@@ -112,7 +111,6 @@ class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }
-        virtual const simtime_t getDuration() const { return endTime - startTime; }
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
@@ -142,7 +140,6 @@ class INET_API RadioSignalListeningBase : public IRadioSignalListening
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }
-        virtual const simtime_t getDuration() const { return endTime - startTime; }
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
@@ -175,7 +172,6 @@ class INET_API RadioSignalReceptionBase : public virtual IRadioSignalReception
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }
-        virtual const simtime_t getDuration() const { return endTime - startTime; }
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
@@ -195,7 +191,6 @@ class INET_API RadioSignalNoiseBase : public IRadioSignalNoise
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }
-        virtual const simtime_t getDuration() const { return endTime - startTime; }
 };
 
 class INET_API RadioAntennaBase : public IRadioAntenna, public cCompoundModule

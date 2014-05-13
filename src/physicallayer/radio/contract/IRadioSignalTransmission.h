@@ -35,7 +35,6 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
 
         virtual const simtime_t getStartTime() const = 0;
         virtual const simtime_t getEndTime() const = 0;
-        virtual const simtime_t getDuration() const = 0;
 
         virtual const Coord getStartPosition() const = 0;
         // TODO: FIXME: we don't know the end position at the time of the transmission begin, we can only have a guess

@@ -27,7 +27,6 @@ class INET_API IRadioSignalNoise
 
         virtual const simtime_t getStartTime() const = 0;
         virtual const simtime_t getEndTime() const = 0;
-        virtual const simtime_t getDuration() const = 0;
 };
 
 #endif
