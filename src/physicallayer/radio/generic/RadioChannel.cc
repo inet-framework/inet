@@ -34,6 +34,7 @@ RadioChannel::RadioChannel() :
     maxCommunicationRange(m(sNaN)),
     maxInterferenceRange(m(sNaN)),
     recordCommunication(false),
+    baseRadioId(0),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -60,6 +61,7 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     maxCommunicationRange(m(maxCommunicationRange)),
     maxInterferenceRange(m(maxInterferenceRange)),
     recordCommunication(false),
+    baseRadioId(0),
     baseTransmissionId(0),
     lastRemoveNonInterferingTransmissions(0),
     transmissionCount(0),
@@ -155,9 +157,15 @@ RadioChannel::CacheEntry *RadioChannel::getCacheEntry(const IRadio *radio, const
         if (!cacheEntries)
             cacheEntries = cache[transmissionIndex] = new std::vector<CacheEntry>(radios.size());
         int radioId = radio->getId();
-        if (radioId >= (int)cacheEntries->size())
-            cacheEntries->resize(radioId + 1);
-        return &(*cacheEntries)[radioId];
+        int radioIndex = radioId - baseRadioId;
+        if (radioIndex < 0)
+            return NULL;
+        else
+        {
+            if (radioIndex >= (int)cacheEntries->size())
+                cacheEntries->resize(radioIndex + 1);
+            return &(*cacheEntries)[radioIndex];
+        }
     }
 }
 

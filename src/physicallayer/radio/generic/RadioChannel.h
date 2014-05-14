@@ -127,6 +127,10 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         /** @name Cache */
         //@{
         /**
+         * The smallest radio id of all ongoing transmissions.
+         */
+        int baseRadioId;
+        /**
          * The smallest transmission id of all ongoing transmissions.
          */
         int baseTransmissionId;
