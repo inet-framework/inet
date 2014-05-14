@@ -150,7 +150,7 @@ void CUDARadioChannel::computeCache(const std::vector<const IRadio *> *radios, c
         const IRadioSignalTransmission *transmission = *it;
         Coord startPosition = transmission->getStartPosition();
         hostTransmissionStartTimes[index] = transmission->getStartTime().raw();
-        hostTransmissionDurations[index] = transmission->getDuration().raw();
+        hostTransmissionDurations[index] = (transmission->getStartTime() - transmission->getEndTime()).raw();
         hostTransmissionPositionXs[index] = startPosition.x;
         hostTransmissionPositionYs[index] = startPosition.y;
         hostTransmissionPositionZs[index] = startPosition.z;
@@ -263,7 +263,7 @@ void CUDARadioChannel::computeCache(const std::vector<const IRadio *> *radios, c
         simtime_t receptionStartTime;
         simtime_t receptionEndTime;
         receptionStartTime.setRaw(hostReceptionStartTimes[receptionIndex]);
-        receptionEndTime.setRaw(receptionStartTime.raw() + transmission->getDuration().raw());
+        receptionEndTime.setRaw(receptionStartTime.raw() + (transmission->getStartTime() - transmission->getEndTime()).raw());
         W receptionPower = W(hostReceptionPowers[receptionIndex]);
         const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(transmission);
         // TODO: add reception coordinates

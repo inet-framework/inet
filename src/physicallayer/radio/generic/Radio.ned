@@ -28,6 +28,7 @@ simple Radio extends RadioBase
         string antennaType;
         string transmitterType;
         string receiverType;
+        // TODO: string powerConsumerType = default("");
         // TODO: add parameter to specify radio channel
         @class(Radio);
 
@@ -35,4 +36,5 @@ simple Radio extends RadioBase
         antenna: <antennaType> like IRadioAntenna;
         transmitter: <transmitterType> like IRadioSignalTransmitter;
         receiver: <receiverType> like IRadioSignalReceiver;
+        // TODO: powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "";
 }
