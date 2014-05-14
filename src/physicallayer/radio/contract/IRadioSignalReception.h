@@ -20,18 +20,48 @@
 
 #include "IRadioSignalTransmission.h"
 
+/**
+ * This interface represents the reception of a transmission at a receiver.
+ */
 class INET_API IRadioSignalReception : public IPrintableObject
 {
     public:
         virtual ~IRadioSignalReception() {}
 
+        /**
+         * Returns the receiver that received the corresponding transmission
+         * from the radio channel. This function never returns NULL.
+         */
         virtual const IRadio *getReceiver() const = 0;
+
+        /**
+         * Returns the transmission that corresponds to this reception at the
+         * receiver. This function never returns NULL.
+         */
         virtual const IRadioSignalTransmission *getTransmission() const = 0;
 
+        /**
+         * Returns the time when the receiver started to receive the corresponding
+         * transmission. It is the start of the first bit's reception.
+         */
         virtual const simtime_t getStartTime() const = 0;
+
+        /**
+         * Returns the time when the receiver ended to receive the corresponding
+         * transmission. It is the end of the last bit's reception.
+         */
         virtual const simtime_t getEndTime() const = 0;
 
+        /**
+         * Returns the position where the receiver started to receive the
+         * corresponding transmission.
+         */
         virtual const Coord getStartPosition() const = 0;
+
+        /**
+         * Returns the position where the receiver ended to receive the
+         * corresponding transmission.
+         */
         virtual const Coord getEndPosition() const = 0;
 };
 

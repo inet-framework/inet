@@ -21,6 +21,12 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
+/**
+ * This interface represents the space and time coordinates of a transmission
+ * arriving at a receiver.
+ */
+// TODO: which transmission at which receiver?
+// TODO: do we really need an interface for this?
 class INET_API IRadioSignalArrival : public IPrintableObject
 {
     public:

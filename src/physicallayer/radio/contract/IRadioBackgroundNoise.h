@@ -22,6 +22,9 @@
 #include "IRadioSignalListening.h"
 #include "IRadioSignalNoise.h"
 
+/**
+ * This interface models a source which provides background noise over space and time.
+ */
 // TODO: rename implementations to isotropicbackgroundnoise
 class INET_API IRadioBackgroundNoise
 {

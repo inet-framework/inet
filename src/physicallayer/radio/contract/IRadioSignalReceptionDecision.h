@@ -21,6 +21,9 @@
 #include "IPhysicalLayerIndication.h"
 #include "IRadioSignalReception.h"
 
+/**
+ * This interface represents the result of a receiver's reception process.
+ */
 class INET_API IRadioSignalReceptionDecision : public IPhysicalLayerIndication, public IPrintableObject
 {
     public:

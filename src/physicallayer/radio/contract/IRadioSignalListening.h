@@ -21,6 +21,9 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
+/**
+ * This interface represents how a receiver is listening on the radio channel.
+ */
 class INET_API IRadioSignalListening : public IPrintableObject
 {
     public:

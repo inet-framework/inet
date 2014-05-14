@@ -22,11 +22,15 @@
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalTransmission.h"
 
+/**
+ * This interface models how a radio signal propagates through space over time.
+ */
 class INET_API IRadioSignalPropagation
 {
     public:
         virtual ~IRadioSignalPropagation() {}
 
+        // TODO: should not be here
         virtual mps getPropagationSpeed() const = 0;
 
         virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const = 0;

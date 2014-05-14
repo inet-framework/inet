@@ -20,6 +20,9 @@
 
 #include "PhysicalLayerDefs.h"
 
+/**
+ * This interface represents a meaningless radio signal.
+ */
 class INET_API IRadioSignalNoise
 {
     public:

@@ -28,10 +28,10 @@
 
 /**
  * This purely virtual interface provides an abstraction for different radios.
- * It represents a physical device that is capable of receiving and transmitting
- * radio signals. Simultaneous reception and transmission is also supported. The
- * radio has an operation mode, it's bound to a radio channel, and it provides
- * the state of the radio channel at its position.
+ * This interface represents a physical device that is capable of transmitting
+ * and receiving radio signals. Simultaneous reception and transmission is also
+ * supported. The radio has an operation mode, it's bound to a radio channel,
+ * and it provides the state of the radio channel at its position.
  *
  * @author Levente Meszaros
  */

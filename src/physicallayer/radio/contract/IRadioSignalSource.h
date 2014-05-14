@@ -21,8 +21,8 @@
 #include "IPrintableObject.h"
 
 /**
- * This purely virtual interface provides an abstraction for different radio
- * signal sources.
+ * This interface represents a physical device which is only capable of transmitting
+ * radio signals.
  */
 class INET_API IRadioSignalSource : public IPrintableObject
 {

@@ -28,7 +28,8 @@
 #include "IRadioSignalListeningDecision.h"
 
 /**
- * This purely virtual interface provides an abstraction for different radio channels.
+ * This interface represents the whole radio medium. It keeps track of all radio
+ * signal sources, all radio signal transmissions, and all radio signal receptions.
  */
 class INET_API IRadioChannel
 {

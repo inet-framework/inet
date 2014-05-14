@@ -21,6 +21,9 @@
 #include "IPrintableObject.h"
 #include "IRadioSignalListening.h"
 
+/**
+ * This interface represents the result of a receiver's listening process.
+ */
 class INET_API IRadioSignalListeningDecision : public IPrintableObject
 {
     public:

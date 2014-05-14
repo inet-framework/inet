@@ -24,6 +24,10 @@
 #include "IRadioSignalListeningDecision.h"
 #include "IRadioSignalReceptionDecision.h"
 
+/**
+ * This interface represents a physical device (a part of the radio) which converts
+ * electric signals into packets.
+ */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future
 // TODO: create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
 // TODO: add support for synchronization

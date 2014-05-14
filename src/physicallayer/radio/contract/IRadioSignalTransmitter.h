@@ -20,6 +20,10 @@
 
 #include "IPrintableObject.h"
 
+/**
+ * This interface represents a physical device (a part of the radio) which converts
+ * packets into electric signals.
+ */
 class INET_API IRadioSignalTransmitter : public IPrintableObject
 {
     public:

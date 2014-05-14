@@ -23,6 +23,11 @@
 #include "IRadioSignalReception.h"
 #include "IRadioSignalLoss.h"
 
+/**
+ * This interface models how a radio signal attenuates during propagation. It
+ * includes various effects such as free-space path loss, shadowing, refraction,
+ * reflection, absorption, diffraction and others.
+ */
 class INET_API IRadioSignalAttenuation
 {
     public:
