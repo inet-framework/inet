@@ -31,13 +31,13 @@ simple RadioChannel like IRadioChannel
         double alpha = default(2); // TODO: rename to maxRangeAlpha
         double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
         double maxTransmissionPower @unit(W) = default(0W/0);
-        double maxTransmissionDuration @unit(s) = default(10ms);
-        double minInterferenceTime @unit(s) = default(1ps);
-        double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
         double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double maxAntennaGain @unit(dB) = default(0dB);
+        double minInterferenceTime @unit(s) = default(1ps);
+        double maxTransmissionDuration @unit(s) = default(10ms);
         double maxCommunicationRange @unit(m) = default(0m/0);
         double maxInterferenceRange @unit(m) = default(0m/0);
-        double maxAntennaGain @unit(dB) = default(0dB);
         bool recordCommunication = default(false);
         @class(RadioChannel);
 

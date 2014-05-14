@@ -65,6 +65,22 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
          */
         const IRadioBackgroundNoise *backgroundNoise;
         /**
+         * The maximum transmission power among the radio transmitters.
+         */
+        W maxTransmissionPower;
+        /**
+         * The minimum interference power among the radio receivers.
+         */
+        W minInterferencePower;
+        /**
+         * The minimum reception power among the radio receivers.
+         */
+        W minReceptionPower;
+        /**
+         * The maximum gain among the radio antennas.
+         */
+        double maxAntennaGain;
+        /**
          * The minimum time needed to consider two transmissions interfering.
          */
         // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time
@@ -203,8 +219,10 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual const simtime_t computeMaxTransmissionDuration() const;
 
         virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
-        virtual m computeMaxInterferenceRange() const;
         virtual m computeMaxCommunicationRange() const;
+        virtual m computeMaxInterferenceRange() const;
+
+        virtual void updateLimits();
         //@}
 
         virtual bool isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;

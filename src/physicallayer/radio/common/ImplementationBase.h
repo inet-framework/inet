@@ -374,7 +374,7 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
 class INET_API RadioSignalTransmitterBase : public cCompoundModule, public virtual IRadioSignalTransmitter
 {
     public:
-        virtual W getMaxPower() const { return W(POSITIVE_INFINITY); }
+        virtual W getMaxPower() const { return W(qNaN); }
 };
 
 class INET_API RadioSignalReceiverBase : public cCompoundModule, public virtual IRadioSignalReceiver

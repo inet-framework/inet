@@ -25,6 +25,10 @@ RadioChannel::RadioChannel() :
     propagation(NULL),
     attenuation(NULL),
     backgroundNoise(NULL),
+    maxTransmissionPower(W(sNaN)),
+    minInterferencePower(W(sNaN)),
+    minReceptionPower(W(sNaN)),
+    maxAntennaGain(sNaN),
     minInterferenceTime(sNaN),
     maxTransmissionDuration(sNaN),
     maxCommunicationRange(m(sNaN)),
@@ -47,6 +51,10 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     propagation(propagation),
     attenuation(attenuation),
     backgroundNoise(backgroundNoise),
+    maxTransmissionPower(W(sNaN)),
+    minInterferencePower(W(sNaN)),
+    minReceptionPower(W(sNaN)),
+    maxAntennaGain(sNaN),
     minInterferenceTime(minInterferenceTime),
     maxTransmissionDuration(maxTransmissionDuration),
     maxCommunicationRange(m(maxCommunicationRange)),
@@ -95,16 +103,13 @@ void RadioChannel::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
-        minInterferenceTime = computeMinInterferenceTime();
-        maxTransmissionDuration = computeMaxTransmissionDuration();
-        maxCommunicationRange = computeMaxCommunicationRange();
-        maxInterferenceRange = computeMaxInterferenceRange();
         propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
         attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
         recordCommunication = par("recordCommunication");
         if (recordCommunication)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+        updateLimits();
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -241,62 +246,79 @@ void RadioChannel::invalidateCachedDecision(const IRadioSignalReceptionDecision 
     if (cacheEntry) cacheEntry->decision = NULL;
 }
 
+template<typename T> inline T minIgnoreNaN(T a, T b)
+{
+    if (isNaN(a.get())) return b;
+    else if (isNaN(b.get())) return a;
+    else if (a < b) return a;
+    else return b;
+}
+
+template<typename T> inline T maxIgnoreNaN(T a, T b)
+{
+    if (isNaN(a.get())) return b;
+    else if (isNaN(b.get())) return a;
+    else if (a > b) return a;
+    else return b;
+}
+
+inline double maxIgnoreNaN(double a, double b)
+{
+    if (isNaN(a)) return b;
+    else if (isNaN(b)) return a;
+    else if (a > b) return a;
+    else return b;
+}
+
+W RadioChannel::computeMaxTransmissionPower() const
+{
+    W maxTransmissionPower = W(par("maxTransmissionPower"));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        maxTransmissionPower = maxIgnoreNaN(maxTransmissionPower, (*it)->getTransmitter()->getMaxPower());
+    return maxTransmissionPower;
+}
+
+W RadioChannel::computeMinInterferencePower() const
+{
+    W minInterferencePower = mW(FWMath::dBm2mW(par("minInterferencePower")));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        minInterferencePower = minIgnoreNaN(minInterferencePower, (*it)->getReceiver()->getMinInterferencePower());
+    return minInterferencePower;
+}
+
+W RadioChannel::computeMinReceptionPower() const
+{
+    W minReceptionPower = mW(FWMath::dBm2mW(par("minReceptionPower")));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        minReceptionPower = minIgnoreNaN(minReceptionPower, (*it)->getReceiver()->getMinReceptionPower());
+    return minReceptionPower;
+}
+
+double RadioChannel::computeMaxAntennaGain() const
+{
+    double maxAntennaGain = FWMath::dB2fraction(par("maxAntennaGain"));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        maxAntennaGain = maxIgnoreNaN(maxAntennaGain, (*it)->getAntenna()->getMaxGain());
+    return maxAntennaGain;
+}
+
 m RadioChannel::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
     double alpha = par("alpha");
     Hz carrierFrequency = Hz(par("carrierFrequency"));
     m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
-    double maxAntennaGain = computeMaxAntennaGain();
-    double minFactor = (minReceptionPower / maxAntennaGain / maxTransmissionPower).get();
+    double minFactor = (minReceptionPower / maxAntennaGain / maxAntennaGain / maxTransmissionPower).get();
     return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
-}
-
-m RadioChannel::computeMaxInterferenceRange() const
-{
-    m maxInterferenceRange = m(par("maxInterferenceRange"));
-    Hz carrierFrequency = Hz(par("carrierFrequency"));
-    if (!isNaN(maxInterferenceRange.get()))
-        return maxInterferenceRange;
-    else if (!isNaN(carrierFrequency.get()))
-        return computeMaxRange(computeMaxTransmissionPower(), computeMinInterferencePower());
-    else
-        return m(qNaN);
 }
 
 m RadioChannel::computeMaxCommunicationRange() const
 {
-    m maxCommunicationRange = m(par("maxCommunicationRange"));
-    Hz carrierFrequency = Hz(par("carrierFrequency"));
-    if (!isNaN(maxCommunicationRange.get()))
-        return maxCommunicationRange;
-    else if (!isNaN(carrierFrequency.get()))
-        return computeMaxRange(computeMaxTransmissionPower(), computeMinReceptionPower());
-    else
-        return m(qNaN);
+    return maxIgnoreNaN(m(par("maxCommunicationRange")), computeMaxRange(maxTransmissionPower, minReceptionPower));
 }
 
-W RadioChannel::computeMaxTransmissionPower() const
+m RadioChannel::computeMaxInterferenceRange() const
 {
-    // TODO: query all radios if unspecified?
-    return W(par("maxTransmissionPower"));
-}
-
-W RadioChannel::computeMinInterferencePower() const
-{
-    // TODO: query all radios if unspecified?
-    return mW(FWMath::dBm2mW(par("minInterferencePower")));
-}
-
-W RadioChannel::computeMinReceptionPower() const
-{
-    // TODO: query all radios if unspecified?
-    return mW(FWMath::dBm2mW(par("minReceptionPower")));
-}
-
-double RadioChannel::computeMaxAntennaGain() const
-{
-    // TODO: query all radios if unspecified?
-    return FWMath::dB2fraction(par("maxAntennaGain"));
+    return maxIgnoreNaN(m(par("maxInterferenceRange")), computeMaxRange(maxTransmissionPower, minInterferencePower));
 }
 
 const simtime_t RadioChannel::computeMinInterferenceTime() const
@@ -307,6 +329,18 @@ const simtime_t RadioChannel::computeMinInterferenceTime() const
 const simtime_t RadioChannel::computeMaxTransmissionDuration() const
 {
     return par("maxTransmissionDuration").doubleValue();
+}
+
+void RadioChannel::updateLimits()
+{
+    maxTransmissionPower = computeMaxTransmissionPower();
+    minInterferencePower = computeMinInterferencePower();
+    minReceptionPower = computeMinReceptionPower();
+    maxAntennaGain = computeMaxAntennaGain();
+    minInterferenceTime = computeMinInterferenceTime();
+    maxTransmissionDuration = computeMaxTransmissionDuration();
+    maxCommunicationRange = computeMaxCommunicationRange();
+    maxInterferenceRange = computeMaxInterferenceRange();
 }
 
 bool RadioChannel::isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const
