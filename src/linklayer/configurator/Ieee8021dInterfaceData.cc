@@ -22,7 +22,7 @@
 Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
     priority = 0;
-    linkCost = 0;
+    linkCost = 1;
     edge = false;
 
     // If there is no STP module then all ports
