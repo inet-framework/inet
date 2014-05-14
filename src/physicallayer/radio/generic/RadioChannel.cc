@@ -111,6 +111,9 @@ void RadioChannel::initialize(int stage)
         recordCommunication = par("recordCommunication");
         if (recordCommunication)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+    }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER)
+    {
         updateLimits();
     }
     else if (stage == INITSTAGE_LAST)
@@ -544,13 +547,22 @@ const IRadioSignalReceptionDecision *RadioChannel::getReceptionDecision(const IR
 void RadioChannel::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
-    // TODO: add arrivals
+    for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
+    {
+        const IRadioSignalTransmission *transmission = *it;
+        const IRadioSignalArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+        setCachedArrival(radio, transmission, arrival);
+    }
+    if (initialized())
+        updateLimits();
 }
 
 void RadioChannel::removeRadio(const IRadio *radio)
 {
     radios.erase(std::remove(radios.begin(), radios.end(), radio));
-    // TODO: remove transmissions, arrivals
+    // TODO: remove all references to radio and erase entries from cache
+    if (initialized())
+        updateLimits();
 }
 
 void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadioSignalTransmission *transmission)
