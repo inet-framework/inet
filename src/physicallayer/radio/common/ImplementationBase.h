@@ -330,6 +330,9 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
 {
     protected:
         const IRadioSignalReception *reception;
+        const bool isSynchronizationPossible_;
+        const bool isSynchronizationAttempted_;
+        const bool isSynchronizationSuccessful_;
         const bool isReceptionPossible_;
         const bool isReceptionAttempted_;
         const bool isReceptionSuccessful_;
@@ -338,6 +341,9 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
     public:
         RadioSignalReceptionDecision(const IRadioSignalReception *reception, bool isReceptionPossible, bool isReceptionSuccessful, double snir) :
             reception(reception),
+            isSynchronizationPossible_(false),
+            isSynchronizationAttempted_(false),
+            isSynchronizationSuccessful_(false),
             isReceptionPossible_(isReceptionPossible),
             isReceptionAttempted_(false),
             isReceptionSuccessful_(isReceptionSuccessful),
@@ -353,6 +359,12 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
         virtual bool isReceptionAttempted() const { return isReceptionAttempted_; }
 
         virtual bool isReceptionSuccessful() const { return isReceptionSuccessful_; }
+
+        virtual bool isSynchronizationPossible() const { return isSynchronizationPossible_; }
+
+        virtual bool isSynchronizationAttempted() const { return isSynchronizationAttempted_; }
+
+        virtual bool isSynchronizationSuccessful() const { return isSynchronizationSuccessful_; }
 
         virtual bool isPacketErrorless() const { return isReceptionSuccessful_; }
 
