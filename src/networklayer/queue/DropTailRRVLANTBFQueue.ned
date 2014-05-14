@@ -20,15 +20,14 @@
 package inet.networklayer.queue;
 
 //
-// Drop-tail queue with VLAN classifier and token bucket filter (TBF) traffic shaper
-// to be used in network interfaces.
+// Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
+// and round-robin (RR) scheduler to be used in network interfaces.
 // Conforms to the OutputQueue interface.
 //
-simple DropTailVLANTBFQueue like OutputQueue
+simple DropTailRRVLANTBFQueue like OutputQueue
 {
     parameters:
-		int fifoCapacity = default(100);	// common FIFO queue capacity
-        int frameCapacity = default(100);	// per-subqueue capacity
+        int frameCapacity = default(100);  // per-subqueue capacity
         int numQueues = default(1);	// number of per-VLAN queues
 		string classifierClass = default("BasicVLANClassifier");  // class that inherits from IQoSClassifier
         int bucketSize @unit(byte) = default(3000B);

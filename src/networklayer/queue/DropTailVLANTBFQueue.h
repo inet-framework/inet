@@ -28,8 +28,7 @@
 #include "IQoSClassifier.h"
 
 /**
- * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic shaper,
- * and round-robin (RR) scheduler.
+ * Drop-tail queue with VLAN classifier and token bucket filter (TBF) traffic shaper.
  * See NED for more info.
  */
 class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
@@ -38,6 +37,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     typedef std::vector<bool> BoolVector;
     typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
+    typedef std::vector<unsigned long> UnsignedLongVector;
     typedef std::vector<unsigned long long> UnsignedLongLongVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
@@ -45,6 +45,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 
   protected:
     // configuration
+    int fifoCapacity;
     int frameCapacity;
     int numQueues;
     unsigned long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
@@ -53,6 +54,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     double peakRate;
 
     // state
+    cQueue fifo;
     IQoSClassifier *classifier;
     QueueVector queues;
     UnsignedLongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
@@ -60,16 +62,16 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
 
-    // state: RR scheduler
-    int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling
+    /* // state: RR scheduler */
+    /* int currentQueueIndex;  // index of a queue whose HOL frame is scheduled for TX during the last RR scheduling */
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
     DoubleVector numBitsSent;
-    IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
-    IntVector numQueueUnshaped;
-    IntVector numQueueSent;
+    UnsignedLongVector numPktsReceived; // redefined from PassiveQueueBase with 'name hiding'
+    UnsignedLongVector numPktsDropped;  // redefined from PassiveQueueBase with 'name hiding'
+    UnsignedLongVector numPktsUnshaped;
+    UnsignedLongVector numPktsSent;
 
     // timer
     MsgVector conformityTimer;  // vector of timer indicating that enough tokens will be available for the transmission of the HOL frame
@@ -99,7 +101,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     virtual bool enqueue(cMessage *msg);
 
     /**
-     * Redefined from PassiveQueueBase to implement round-robin (RR) scheduling.
+     * Redefined from PassiveQueueBase.
      */
     virtual cMessage *dequeue();
 
@@ -118,11 +120,13 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     /**
      * Newly defined.
      */
-    virtual bool isConformed(int queueIndex, int pktLength);
+    virtual bool voqEnqueue(cMessage *msg);
 
-    virtual void triggerConformityTimer(int queueIndex, int pktLength);
+    virtual bool isConformed(int flowIndex, int pktLength);
 
-    virtual void dumpTbfStatus(int queueIndex);
+    virtual void triggerConformityTimer(int flowIndex, int pktLength);
+
+    virtual void dumpTbfStatus(int flowIndex);
 };
 
 #endif

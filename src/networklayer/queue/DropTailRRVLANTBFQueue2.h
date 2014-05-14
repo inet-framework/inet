@@ -29,11 +29,11 @@
 #include "IQoSClassifier.h"
 
 /**
- * Drop-tail queue with VLAN classifier and token bucket filter (TBF) traffic
- * shaper based on external token bucket meter.
+ * Drop-tail queue with VLAN classifier, token bucket filter (TBF) traffic
+ * shaper based on external token bucket meter, and round-robin (RR) scheduler.
  * See NED for more info.
  */
-class INET_API DropTailVLANTBFQueue2 : public PassiveQueueBase
+class INET_API DropTailRRVLANTBFQueue2 : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
@@ -84,8 +84,8 @@ class INET_API DropTailVLANTBFQueue2 : public PassiveQueueBase
     cGate *outGate;
 
   public:
-    DropTailVLANTBFQueue2();
-    virtual ~DropTailVLANTBFQueue2();
+    DropTailRRVLANTBFQueue2();
+    virtual ~DropTailRRVLANTBFQueue2();
 
   protected:
     virtual void initialize();
