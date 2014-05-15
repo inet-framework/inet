@@ -62,60 +62,67 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         /** @name Parameters that control the behavior of the radio channel. */
         //@{
         /**
-         * The propagation model of transmissions.
+         * The propagation model of transmissions is never NULL.
          */
         const IRadioSignalPropagation *propagation;
         /**
-         * The attenuation model of transmissions.
+         * The attenuation model of transmissions is never NULL.
          */
         const IRadioSignalAttenuation *attenuation;
         /**
-         * The radio channel background noise model.
+         * The radio channel background noise model or NULL if unspecified.
          */
         const IRadioBackgroundNoise *backgroundNoise;
         /**
-         * The maximum transmission power among the radio transmitters.
+         * The maximum transmission power among the radio transmitters is in the
+         * range [0, +infinity] or NaN if unspecified.
          */
         W maxTransmissionPower;
         /**
-         * The minimum interference power among the radio receivers.
+         * The minimum interference power among the radio receivers is in the
+         * range [0, +infinity] or NaN if unspecified.
          */
         W minInterferencePower;
         /**
-         * The minimum reception power among the radio receivers.
+         * The minimum reception power among the radio receivers is in the range
+         * [0, +infinity] or NaN if unspecified.
          */
         W minReceptionPower;
         /**
-         * The maximum gain among the radio antennas.
+         * The maximum gain among the radio antennas is in the range [1, +infinity].
          */
         double maxAntennaGain;
         /**
-         * The minimum time needed to consider two transmissions interfering.
+         * The minimum overlapping in time needed to consider two transmissions
+         * interfering.
          */
-        // TODO: compute from longest frame duration, maximum mobility speed and signal propagation time
+        // TODO: maybe compute from longest frame duration, maximum mobility speed and signal propagation time
         simtime_t minInterferenceTime;
         /**
          * The maximum transmission duration of a radio signal.
          */
+        // TODO: maybe compute from maximum bit length and minimum bitrate
         simtime_t maxTransmissionDuration;
         /**
          * The maximum communication range where a transmission can still be
-         * potentially successfully received.
+         * potentially successfully received is in the range [0, +infinity] or
+         * NaN if unspecified.
          */
         m maxCommunicationRange;
         /**
-         * The maximum interference range where a transmission has still some
-         * effect on other transmissions.
+         * The maximum interference range where a transmission is still considered
+         * to some effect on other transmissions is in the range [0, +infinity]
+         * or NaN if unspecified.
          */
         m maxInterferenceRange;
         /**
-         * The radio channel doesn't send radio frames to a radio if it is outside
+         * The radio channel doesn't send radio frames to a radio if it's outside
          * the provided range.
          */
         RangeFilterKind rangeFilter;
         /**
          * True means the radio channel doesn't send radio frames to a radio if
-         * it is neither in receiver nor in transceiver mode.
+         * it's neither in receiver nor in transceiver mode.
          */
         bool radioModeFilter;
         /**
@@ -128,6 +135,7 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          * True means the radio channel doesn't send radio frames to a radio if
          * it the destination mac address differs.
          */
+        // TODO: complete implementation
         bool macAddressFilter;
         /**
          * Record all transmissions and receptions into a separate trace file.

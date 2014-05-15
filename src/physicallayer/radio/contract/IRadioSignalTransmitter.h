@@ -29,8 +29,17 @@ class INET_API IRadioSignalTransmitter : public IPrintableObject
     public:
         virtual ~IRadioSignalTransmitter() {}
 
+        /**
+         * Returns the maximum transmission power above which no transmission is
+         * ever transmitted. Returns a value in the range [0, +infinity] or NaN
+         * if unspecified.
+         */
         virtual W getMaxPower() const = 0;
 
+        /**
+         * Returns a transmission which describes the radio signal corresponding
+         * to the provided mac frame. This function never returns NULL.
+         */
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
 };
 
