@@ -51,6 +51,7 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
     protected:
         const int id;
         const IRadio *transmitter;
+        const cPacket *macFrame;
         const simtime_t startTime;
         const simtime_t endTime;
         const Coord startPosition;
@@ -60,9 +61,10 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         const mps propagationSpeed;
 
     public:
-        RadioSignalTransmissionBase(const IRadio *transmitter, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+        RadioSignalTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
             id(nextId++),
             transmitter(transmitter),
+            macFrame(macFrame),
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
@@ -75,6 +77,7 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadio *getTransmitter() const { return transmitter; }
+        virtual const cPacket *getMacFrame() const { return macFrame; }
 
         virtual const simtime_t getStartTime() const { return startTime; }
         virtual const simtime_t getEndTime() const { return endTime; }

@@ -101,11 +101,11 @@ void DimensionalRadioSignalTransmitter::printToStream(std::ostream &stream) cons
            << "bandwidth = " << bandwidth;
 }
 
-const IRadioSignalTransmission *DimensionalRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const
+const IRadioSignalTransmission *DimensionalRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    simtime_t duration = packet->getBitLength() / bitrate.get();
+    simtime_t duration = macFrame->getBitLength() / bitrate.get();
     simtime_t endTime = startTime + duration;
-    IMobility *mobility = radio->getAntenna()->getMobility();
+    IMobility *mobility = transmitter->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
     Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, DimensionSet::timeFreqDomain, Mapping::LINEAR);
@@ -120,7 +120,7 @@ const IRadioSignalTransmission *DimensionalRadioSignalTransmitter::createTransmi
     powerMapping->setValue(position, power.get());
     position.setTime(endTime);
     powerMapping->setValue(position, power.get());
-    return new DimensionalRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, powerMapping, carrierFrequency);
+    return new DimensionalRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, powerMapping, carrierFrequency);
 }
 
 void DimensionalRadioSignalReceiver::printToStream(std::ostream &stream) const

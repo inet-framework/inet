@@ -28,8 +28,8 @@ class INET_API IdealRadioSignalTransmission : public RadioSignalTransmissionBase
         const m maxDetectionRange;
 
     public:
-        IdealRadioSignalTransmission(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
-            RadioSignalTransmissionBase(radio, startTime, endTime, startPosition, endPosition),
+        IdealRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
             maxCommunicationRange(maxCommunicationRange),
             maxInterferenceRange(maxInterferenceRange),
             maxDetectionRange(maxDetectionRange)

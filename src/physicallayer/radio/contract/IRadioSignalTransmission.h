@@ -45,6 +45,11 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         virtual const IRadio *getTransmitter() const = 0;
 
         /**
+         * TODO
+         */
+        virtual const cPacket *getMacFrame() const = 0;
+
+        /**
          * Returns the time when the transmitter started this transmission. It is
          * the start of the first bit's transmission.
          */

@@ -505,8 +505,8 @@ class INET_API LayeredRadioSignalTransmission : public RadioSignalTransmissionBa
         const IRadioSignalTransmissionAnalogModel *analogModel;
 
     public:
-        LayeredRadioSignalTransmission(const IRadioSignalTransmissionPacketModel *packetModel, const IRadioSignalTransmissionBitModel *bitModel, const IRadioSignalTransmissionSymbolModel *symbolModel, const IRadioSignalTransmissionSampleModel *sampleModel, const IRadioSignalTransmissionAnalogModel *analogModel, const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) :
-            RadioSignalTransmissionBase(radio, startTime, endTime, startPosition, endPosition),
+        LayeredRadioSignalTransmission(const IRadioSignalTransmissionPacketModel *packetModel, const IRadioSignalTransmissionBitModel *bitModel, const IRadioSignalTransmissionSymbolModel *symbolModel, const IRadioSignalTransmissionSampleModel *sampleModel, const IRadioSignalTransmissionAnalogModel *analogModel, const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
             packetModel(packetModel),
             bitModel(bitModel),
             symbolModel(symbolModel),

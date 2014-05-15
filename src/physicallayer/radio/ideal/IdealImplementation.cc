@@ -85,14 +85,14 @@ void IdealRadioSignalTransmitter::printToStream(std::ostream &stream) const
            << "maxDetectionRange = " << maxDetectionRange;
 }
 
-const IRadioSignalTransmission *IdealRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const
+const IRadioSignalTransmission *IdealRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    simtime_t duration = (b(packet->getBitLength()) / bitrate).get();
+    simtime_t duration = (b(macFrame->getBitLength()) / bitrate).get();
     simtime_t endTime = startTime + duration;
-    IMobility *mobility = radio->getAntenna()->getMobility();
+    IMobility *mobility = transmitter->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
-    return new IdealRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
+    return new IdealRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
 }
 
 void IdealRadioSignalReceiver::initialize(int stage)

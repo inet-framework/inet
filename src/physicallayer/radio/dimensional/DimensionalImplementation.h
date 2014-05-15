@@ -28,8 +28,8 @@ class INET_API DimensionalRadioSignalTransmission : public RadioSignalTransmissi
         const Hz carrierFrequency; // TODO: shouldn't be here
 
     public:
-        DimensionalRadioSignalTransmission(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, const Mapping *power, Hz carrierFrequency) :
-            RadioSignalTransmissionBase(radio, startTime, endTime, startPosition, endPosition),
+        DimensionalRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Mapping *power, Hz carrierFrequency) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
             power(power),
             carrierFrequency(carrierFrequency)
         {}

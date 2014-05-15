@@ -27,6 +27,7 @@ simple RadioBase like IRadio
     parameters:
         @display("i=block/wrxtx");
         @signal[radioModeChanged](type=long);
+        @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);
         @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);

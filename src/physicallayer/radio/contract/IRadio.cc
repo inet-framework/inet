@@ -18,6 +18,7 @@
 #include "IRadio.h"
 
 simsignal_t OldIRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
+simsignal_t OldIRadio::listeningChangedSignal = cComponent::registerSignal("listeningChanged");
 simsignal_t OldIRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");
 simsignal_t OldIRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
 simsignal_t OldIRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");

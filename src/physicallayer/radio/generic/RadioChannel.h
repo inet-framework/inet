@@ -27,7 +27,7 @@
 #include "IRadioSignalAttenuation.h"
 #include "IRadioBackgroundNoise.h"
 
-class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
+class INET_API RadioChannel : public cSimpleModule, public cListener, public IRadioChannel
 {
     protected:
         /**
@@ -37,12 +37,14 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         class CacheEntry
         {
             public:
+                bool isRadioFrameSent;
                 const IRadioSignalArrival *arrival;
                 const IRadioSignalReception *reception;
                 const IRadioSignalReceptionDecision *decision;
 
             public:
                 CacheEntry() :
+                    isRadioFrameSent(false),
                     arrival(NULL),
                     reception(NULL),
                     decision(NULL)
@@ -119,9 +121,14 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         /**
          * True means the radio channel doesn't send radio frames to a radio if
          * it listens on the channel in incompatible mode (e.g. different carrier
-         * frequency and bandwidth)
+         * frequency and bandwidth, different modulation, etc.)
          */
         bool listeningFilter;
+        /**
+         * True means the radio channel doesn't send radio frames to a radio if
+         * it the destination mac address differs.
+         */
+        bool macAddressFilter;
         /**
          * Record all transmissions and receptions into a separate trace file.
          * The file is at ${resultdir}/${configname}-${runnumber}.tlog
@@ -252,6 +259,8 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual void updateLimits();
         //@}
 
+        /** @name Reception */
+        //@{
         virtual bool isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
         virtual bool isInInterferenceRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
 
@@ -269,6 +278,7 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
 
         virtual const IRadioSignalReception *getReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalReceptionDecision *getReceptionDecision(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
+        //@}
 
     public:
         RadioChannel();
@@ -295,6 +305,8 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
         virtual bool isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 
         virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object);
 };
 
 #endif

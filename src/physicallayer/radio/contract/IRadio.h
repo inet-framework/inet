@@ -48,6 +48,12 @@ class INET_API OldIRadio : public IPhysicalLayer
         static simsignal_t radioModeChangedSignal;
 
         /**
+         * This signal is emitted every time the radio listening changes.
+         * The signal value is the new listening.
+         */
+        static simsignal_t listeningChangedSignal;
+
+        /**
          * This signal is emitted every time the radio reception state changes.
          * The signal value is the new radio reception state.
          */

@@ -45,7 +45,8 @@ simple RadioChannel like IRadioChannel
         // filter parameters that control when radio frames are sent to receiver radios
         string rangeFilter = default(""); // whet either set to 'interferenceRange' or 'communicationRange' the radio channel doesn't send radio frames to a radio if it's outside the provided range
         bool radioModeFilter = default(false); // when enabled the radio channel doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode 
-        bool listeningFilter = default(false); // when enabled the radio channel doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth)
+        bool listeningFilter = default(false); // when enabled the radio channel doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        bool macAddressFilter = default(false); // when enabled the radio channel doesn't send radio frames to a radio if it the destination mac address differs 
 
         // logging parameters
         bool recordCommunication = default(false);

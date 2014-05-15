@@ -50,15 +50,15 @@ void Ieee80211ScalarRadioSignalTransmitter::initialize(int stage)
     }
 }
 
-const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const
+const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
-    PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo *>(packet->getControlInfo());
+    PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo *>(macFrame->getControlInfo());
     bps bitrate = controlInfo ? bps(controlInfo->getBitrate()) : this->bitrate;
     ModulationType modulationType = WifiModulationType::getModulationType(opMode, bitrate.get());
-    simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(packet->getBitLength(), modulationType, preambleMode));
+    simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
     simtime_t endTime = startTime + duration;
-    IMobility *mobility = radio->getAntenna()->getMobility();
+    IMobility *mobility = transmitter->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
+    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, macFrame->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
 }

@@ -35,8 +35,8 @@ class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBas
         const Hz bandwidth;
 
     public:
-        ScalarRadioSignalTransmission(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const IModulation *modulation, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
-            RadioSignalTransmissionBase(radio, startTime, endTime, startPosition, endPosition),
+        ScalarRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const IModulation *modulation, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
             modulation(modulation),
             headerBitLength(headerBitLength),
             payloadBitLength(payloadBitLength),

@@ -57,18 +57,18 @@ void ScalarRadioSignalAnalogModel::printToStream(std::ostream &stream) const
     RadioSignalAnalogModel::printToStream(stream);
 }
 
-const IRadioSignalTransmission *LayeredRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const
+const IRadioSignalTransmission *LayeredRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    const IRadioSignalTransmissionPacketModel *packetModel = new RadioSignalTransmissionPacketModel(packet);
+    const IRadioSignalTransmissionPacketModel *packetModel = new RadioSignalTransmissionPacketModel(macFrame);
     const IRadioSignalTransmissionBitModel *bitModel = encoder->encode(packetModel);
     const IRadioSignalTransmissionSymbolModel *symbolModel = modulator->modulate(bitModel);
     const IRadioSignalTransmissionSampleModel *sampleModel = pulseShaper->shape(symbolModel);
     const IRadioSignalTransmissionAnalogModel *analogModel = digitalAnalogConverter->convertDigitalToAnalog(sampleModel);
     const simtime_t endTime = startTime + analogModel->getDuration();
-    IMobility *mobility = radio->getAntenna()->getMobility();
+    IMobility *mobility = transmitter->getAntenna()->getMobility();
     const Coord startPosition = mobility->getPosition(startTime);
     const Coord endPosition = mobility->getPosition(endTime);
-    return new LayeredRadioSignalTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, radio, startTime, endTime, startPosition, endPosition);
+    return new LayeredRadioSignalTransmission(packetModel, bitModel, symbolModel, sampleModel, analogModel, transmitter, macFrame, startTime, endTime, startPosition, endPosition);
 }
 
 const IRadioSignalListening *LayeredRadioSignalReceiver::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const

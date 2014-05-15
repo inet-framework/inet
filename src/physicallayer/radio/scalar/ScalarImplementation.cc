@@ -162,14 +162,14 @@ void ScalarRadioSignalTransmitter::printToStream(std::ostream &stream) const
            << "bandwidth = " << bandwidth;
 }
 
-const IRadioSignalTransmission *ScalarRadioSignalTransmitter::createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const
+const IRadioSignalTransmission *ScalarRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    simtime_t duration = (packet->getBitLength() + headerBitLength) / bitrate.get();
+    simtime_t duration = (macFrame->getBitLength() + headerBitLength) / bitrate.get();
     simtime_t endTime = startTime + duration;
-    IMobility *mobility = radio->getAntenna()->getMobility();
+    IMobility *mobility = transmitter->getAntenna()->getMobility();
     Coord startPosition = mobility->getPosition(startTime);
     Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(radio, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, packet->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
+    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, macFrame->getBitLength(), bitrate, power, carrierFrequency, bandwidth);
 }
 
 void ScalarRadioSignalReceiver::initialize(int stage)
@@ -216,6 +216,7 @@ bool ScalarRadioSignalReceiver::areOverlappingBands(Hz carrierFrequency1, Hz ban
 
 bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
 {
+    // TODO: check if modulation matches?
     const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(transmission);
     if (carrierFrequency == scalarTransmission->getCarrierFrequency() && bandwidth == scalarTransmission->getBandwidth())
         return true;
