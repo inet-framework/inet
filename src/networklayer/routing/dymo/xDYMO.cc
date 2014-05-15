@@ -25,6 +25,7 @@
 #include "IPv4ControlInfo.h"
 #include "UDPControlInfo.h"
 #include "NodeOperations.h"
+#include "NotificationBoard.h"
 
 DYMO_NAMESPACE_BEGIN
 
@@ -42,6 +43,7 @@ xDYMO::xDYMO()
     routingTable = NULL;
     networkProtocol = NULL;
     expungeTimer = NULL;
+    nb = NULL;
 }
 
 xDYMO::~xDYMO()
@@ -49,6 +51,9 @@ xDYMO::~xDYMO()
     for (std::map<IPv4Address, RREQTimer *>::iterator it = targetAddressToRREQTimer.begin(); it != targetAddressToRREQTimer.end(); it++)
         cancelAndDelete(it->second);
     cancelAndDelete(expungeTimer);
+    nb = NotificationBoardAccess().getIfExists(this);
+    if (nb)
+        nb->unsubscribe(this, NF_LINK_BREAK);
 }
 
 //
@@ -115,7 +120,8 @@ void xDYMO::initialize(int stage)
         IPSocket socket(gate("ipOut"));
         socket.registerProtocol(IP_PROT_MANET);
 
-        host->subscribe(NF_LINK_BREAK, this);
+        nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_LINK_BREAK);
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
             configureInterfaces();
@@ -1417,7 +1423,7 @@ bool xDYMO::handleOperationStage(LifecycleOperation * operation, int stage, IDon
 // notification
 //
 
-void xDYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void xDYMO::receiveChangeNotification(int signalID, const cObject *obj)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {

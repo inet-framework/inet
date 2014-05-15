@@ -55,6 +55,9 @@ GPSR::~GPSR()
 {
     cancelAndDelete(beaconTimer);
     cancelAndDelete(purgeNeighborsTimer);
+    nb = NotificationBoardAccess().getIfExists(this);
+    if (nb)
+        nb->unsubscribe(this, NF_LINK_BREAK);
 }
 
 //
@@ -92,7 +95,8 @@ void GPSR::initialize(int stage)
         socket.registerProtocol(IP_PROT_MANET);
 
         globalPositionTable.clear();
-        host->subscribe(NF_LINK_BREAK, this);
+        nb = NotificationBoardAccess().get();
+        nb->subscribe(this, NF_LINK_BREAK);
         networkProtocol->registerHook(0, this);
         if (isNodeUp())
             configureInterfaces();
@@ -635,7 +639,7 @@ bool GPSR::handleOperationStage(LifecycleOperation * operation, int stage, IDone
 // notification
 //
 
-void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+void GPSR::receiveChangeNotification(int signalID, const cObject *obj)
 {
     Enter_Method("receiveChangeNotification");
     if (signalID == NF_LINK_BREAK) {

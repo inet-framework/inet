@@ -26,6 +26,7 @@
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
 #include "UDPPacket.h"
 #include "DYMOdefs.h"
 #include "DYMORouteData.h"
@@ -49,7 +50,7 @@ DYMO_NAMESPACE_BEGIN
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
+class INET_API xDYMO : public cSimpleModule, public ILifecycle, public INotifiable, public INetfilter::IHook
 {
   private:
     // DYMO parameters from RFC
@@ -79,6 +80,7 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener
     IInterfaceTable * interfaceTable;
     IRoutingTable * routingTable;
     INetfilter * networkProtocol;
+    NotificationBoard *nb;
 
     // internal
     cMessage * expungeTimer;
@@ -217,7 +219,7 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener
     virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
     // notification
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void receiveChangeNotification(int signalID, const cObject *obj);
 };
 
 DYMO_NAMESPACE_END

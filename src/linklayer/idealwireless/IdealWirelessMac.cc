@@ -99,6 +99,7 @@ void IdealWirelessMac::initialize(int stage)
 
         // register our interface entry in IInterfaceTable
         registerInterface();
+        nb = NotificationBoardAccess().get();
     }
 }
 
@@ -150,7 +151,7 @@ void IdealWirelessMac::receiveSignal(cComponent *src, simsignal_t id, long x)
     if (id == radioStateSignal && src == radioModule)
     {
         radioState = (RadioState::State)x;
-        if (radioState != RadioState::TRANSMIT)
+        if (radioState != RadioState::TRANSMIT && !lastSentPk)
             getNextMsgFromHL();
     }
 }
@@ -240,7 +241,7 @@ void IdealWirelessMac::handleSelfMsg(cMessage* message)
     if (message == ackTimeoutMsg)
     {
         // packet lost
-        emit(NF_LINK_BREAK, lastSentPk);
+        nb->fireChangeNotification(NF_LINK_BREAK, lastSentPk);
         delete lastSentPk;
         lastSentPk = NULL;
         getNextMsgFromHL();

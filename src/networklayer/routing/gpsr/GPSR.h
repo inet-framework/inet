@@ -26,6 +26,7 @@
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NodeStatus.h"
+#include "NotificationBoard.h"
 #include "PositionTable.h"
 #include "UDPPacket.h"
 #include "GPSR_m.h"
@@ -41,7 +42,7 @@
 // KLUDGE: implement position registry protocol instead of using a global variable
 // KLUDGE: the GPSR packet is now used to wrap the content of network datagrams
 // KLUDGE: we should rather add these fields as header extensions
-class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
+class INET_API GPSR : public cSimpleModule, public ILifecycle, public INotifiable, public INetfilter::IHook
 {
     private:
         // GPSR parameters
@@ -58,6 +59,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         IInterfaceTable * interfaceTable;
         IRoutingTable * routingTable; // TODO: delete when necessary functions are moved to interface table
         INetfilter * networkProtocol;
+        NotificationBoard *nb;
         static PositionTable globalPositionTable; // KLUDGE: implement position registry protocol
 
         // internal
@@ -145,7 +147,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
 
         // notification
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void receiveChangeNotification(int signalID, const cObject *obj);
 };
 
 #endif
