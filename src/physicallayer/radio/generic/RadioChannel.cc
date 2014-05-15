@@ -33,6 +33,9 @@ RadioChannel::RadioChannel() :
     maxTransmissionDuration(sNaN),
     maxCommunicationRange(m(sNaN)),
     maxInterferenceRange(m(sNaN)),
+    rangeFilter(RANGE_FILTER_ANYWHERE),
+    radioModeFilter(false),
+    listeningFilter(false),
     recordCommunication(false),
     baseRadioId(0),
     baseTransmissionId(0),
@@ -60,6 +63,9 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     maxTransmissionDuration(maxTransmissionDuration),
     maxCommunicationRange(m(maxCommunicationRange)),
     maxInterferenceRange(m(maxInterferenceRange)),
+    rangeFilter(RANGE_FILTER_ANYWHERE),
+    radioModeFilter(false),
+    listeningFilter(false),
     recordCommunication(false),
     baseRadioId(0),
     baseTransmissionId(0),
@@ -108,6 +114,17 @@ void RadioChannel::initialize(int stage)
         propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
         attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
+        const char *rangeFilterString = par("rangeFilter");
+        if (!strcmp(rangeFilterString, ""))
+            rangeFilter = RANGE_FILTER_ANYWHERE;
+        else if (!strcmp(rangeFilterString, "interferenceRange"))
+            rangeFilter = RANGE_FILTER_INTERFERENCE_RANGE;
+        else if (!strcmp(rangeFilterString, "communicationRange"))
+            rangeFilter = RANGE_FILTER_COMMUNICATION_RANGE;
+        else
+            throw cRuntimeError("Unknown range filter: '%s'", rangeFilter);
+        radioModeFilter = par("radioModeFilter");
+        listeningFilter = par("listeningFilter");
         recordCommunication = par("recordCommunication");
         if (recordCommunication)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
@@ -585,7 +602,7 @@ void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadi
 
 void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
 {
-    const Radio *transmitterRadio = check_and_cast<Radio *>(radio);
+    const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
@@ -666,14 +683,21 @@ const IRadioSignalListeningDecision *RadioChannel::listenOnChannel(const IRadio 
 
 bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const
 {
-    return true;
-    // TODO: add flags to control this optimization and notify radios with direct calls instead
-//    if (!radio->getReceiver()->computeIsReceptionPossible(transmission))
-//        return false;
-//    else {
-//        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
-//        return isInCommunicationRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
-//    }
+    const Radio *receiverRadio = check_and_cast<const Radio *>(radio);
+    if (radioModeFilter && receiverRadio->getRadioMode() != OldIRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != OldIRadio::RADIO_MODE_TRANSCEIVER)
+        return false;
+    else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(transmission))
+        return false;
+    else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
+        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
+        return isInInterferenceRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
+    }
+    else if (rangeFilter == RANGE_FILTER_COMMUNICATION_RANGE) {
+        const IRadioSignalArrival *arrival = getArrival(radio, transmission);
+        return isInCommunicationRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
+    }
+    else
+        return true;
 }
 
 bool RadioChannel::isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const

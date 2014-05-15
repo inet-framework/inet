@@ -49,6 +49,13 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
                 {}
         };
 
+        enum RangeFilterKind
+        {
+            RANGE_FILTER_ANYWHERE,
+            RANGE_FILTER_INTERFERENCE_RANGE,
+            RANGE_FILTER_COMMUNICATION_RANGE,
+        };
+
     protected:
         /** @name Parameters that control the behavior of the radio channel. */
         //@{
@@ -99,6 +106,22 @@ class INET_API RadioChannel : public cSimpleModule, public IRadioChannel
          * effect on other transmissions.
          */
         m maxInterferenceRange;
+        /**
+         * The radio channel doesn't send radio frames to a radio if it is outside
+         * the provided range.
+         */
+        RangeFilterKind rangeFilter;
+        /**
+         * True means the radio channel doesn't send radio frames to a radio if
+         * it is neither in receiver nor in transceiver mode.
+         */
+        bool radioModeFilter;
+        /**
+         * True means the radio channel doesn't send radio frames to a radio if
+         * it listens on the channel in incompatible mode (e.g. different carrier
+         * frequency and bandwidth)
+         */
+        bool listeningFilter;
         /**
          * Record all transmissions and receptions into a separate trace file.
          * The file is at ${resultdir}/${configname}-${runnumber}.tlog
