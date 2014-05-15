@@ -30,6 +30,24 @@ Register_Class(IPv4Route);
 Register_Class(IPv4MulticastRoute);
 
 
+const char *IPv4Route::sourceTypeName(SourceType sourceType)
+{
+    switch (sourceType)
+    {
+        case MANUAL:               return "MANUAL";
+        case IFACENETMASK:         return "IFACENETMASK";
+        case RIP:                  return "RIP";
+        case OSPF:                 return "OSPF";
+        case BGP:                  return "BGP";
+        case ZEBRA:                return "ZEBRA";
+        case MANET:                return "MANET";
+        case MANET2:               return "MANET2";
+        case DYMO:                 return "DYMO";
+        case AODV:                 return "AODV";
+        default:                   return "???";
+    }
+}
+
 IPv4Route::~IPv4Route()
 {
 }
@@ -47,18 +65,7 @@ std::string IPv4Route::info() const
         out << "(" << interfacePtr->ipv4Data()->getIPAddress() << ")";
     out << "  ";
     out << (gateway.isUnspecified() ? "DIRECT" : "REMOTE");
-
-    switch (sourceType)
-    {
-        case MANUAL:       out << " MANUAL"; break;
-        case IFACENETMASK: out << " IFACENETMASK"; break;
-        case RIP:          out << " RIP"; break;
-        case OSPF:         out << " OSPF"; break;
-        case BGP:          out << " BGP"; break;
-        case ZEBRA:        out << " ZEBRA"; break;
-        case MANET:        out << " MANET"; break;
-        default:           out << " ???"; break;
-    }
+    out << " " << sourceTypeName(sourceType);
 
     return out.str();
 }

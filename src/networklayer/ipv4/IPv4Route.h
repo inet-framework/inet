@@ -149,6 +149,8 @@ class INET_API IPv4Route : public cObject
 
     cObject *getProtocolData() const { return protocolData; }
     void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
+
+    static const char *sourceTypeName(SourceType sourceType);
 };
 
 /**
