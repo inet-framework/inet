@@ -28,9 +28,10 @@ import inet.physicallayer.radio.simplified.SimplifiedRadio;
 // @see Radio
 // @author Alfonso Ariza Quintana
 //
-simple SimplifiedIeee80211Radio extends SimplifiedRadio
+module SimplifiedIeee80211Radio extends SimplifiedRadio
 {
     parameters:
+        @class(SimplifiedIeee80211Radio);
         @display("i=block/wrxtx");
         radioModel = "Ieee80211RadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation
         double snirThreshold @unit("dB") = default(4dB); // if signal-noise ratio is below this threshold, frame is considered noise (in dB)

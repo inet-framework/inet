@@ -19,7 +19,7 @@ package inet.physicallayer.radio.ieee80211;
 
 import inet.physicallayer.radio.scalar.ScalarRadio;
 
-simple Ieee80211Radio extends ScalarRadio
+module Ieee80211Radio extends ScalarRadio
 {
     parameters:
         int channelNumber = default(0);

@@ -19,10 +19,11 @@ package inet.physicallayer.radio.ideal;
 
 import inet.physicallayer.radio.generic.Radio;
 
-simple IdealRadio extends Radio
+module IdealRadio extends Radio
 {
     parameters:
         antennaType = default("IsotropicRadioAntenna");
         transmitterType = default("IdealRadioSignalTransmitter");
         receiverType = default("IdealRadioSignalReceiver");
+        @class(Radio);
 }

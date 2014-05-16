@@ -24,9 +24,10 @@ package inet.physicallayer.radio.simplified;
 // @see ~IRadio
 // @author Andras Varga
 //
-simple GenericRadio extends SimplifiedRadio
+module GenericRadio extends SimplifiedRadio
 {
     parameters:
+        @class(GenericRadio);
         @display("i=block/wrxtx");
 
         radioModel = "GenericRadioModel";  // specify the radio model responsible for modulation, error correction and frame length calculation

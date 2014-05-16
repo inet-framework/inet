@@ -30,7 +30,7 @@ module dummy
 //
 // This is an abstract module that defines all parameters for radio modules
 //
-simple SimplifiedRadio extends RadioBase
+module SimplifiedRadio extends RadioBase
 {
     parameters:
         int channelNumber = default(0); // channel identifier this radio listens. Works only with simlified management module. Otherwise it scans all the channels as specified in ieee 80211

@@ -19,7 +19,7 @@ package inet.physicallayer.radio.detailed.ieee80211;
 
 import inet.physicallayer.radio.detailed.DetailedRadio;
 
-simple DetailedIeee80211Radio extends DetailedRadio
+module DetailedIeee80211Radio extends DetailedRadio
 {
     @class(DetailedIeee80211Radio);
 }

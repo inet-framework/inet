@@ -23,7 +23,7 @@ import inet.physicallayer.radio.simplified.dummy;
 // Physical layer module which knows how to initialize the Deciders
 // and AnalogueModels from the modules directory.
 // See the classes documentation for details.
-simple DetailedRadio extends RadioBase
+module DetailedRadio extends RadioBase
 {
     parameters:
         bool recordStats = default(false); //enable/disable tracking of statistics (eg. cOutvectors)

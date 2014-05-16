@@ -43,7 +43,7 @@ import inet.physicallayer.radio.detailed.DetailedRadio;
 // <a href="http://portal.acm.org/citation.cfm?id=1537714">http://portal.acm.org/citation.cfm?id=1537714</a>.
 //
 // @author Jérôme Rousselot
-simple UWBIRRadio extends DetailedRadio
+module UWBIRRadio extends DetailedRadio
 {
     parameters:
         bool RSDecoder = default(true);

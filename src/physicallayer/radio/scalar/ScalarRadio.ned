@@ -19,7 +19,7 @@ package inet.physicallayer.radio.scalar;
 
 import inet.physicallayer.radio.generic.Radio;
 
-simple ScalarRadio extends Radio
+module ScalarRadio extends Radio
 {
     parameters:
         double carrierFrequency @unit(Hz);

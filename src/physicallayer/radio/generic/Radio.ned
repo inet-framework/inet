@@ -22,7 +22,7 @@ import inet.physicallayer.radio.contract.IRadioAntenna;
 import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
 
-simple Radio extends RadioBase
+module Radio extends RadioBase
 {
     parameters:
         string antennaType;

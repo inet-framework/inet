@@ -22,9 +22,10 @@ import inet.physicallayer.radio.contract.IRadio;
 //
 // This is an abstract base module for radio models.
 //
-simple RadioBase like IRadio
+module RadioBase like IRadio
 {
     parameters:
+        @class(RadioBase);
         @display("i=block/wrxtx");
         @signal[radioModeChanged](type=long);
         @signal[listeningChanged];
