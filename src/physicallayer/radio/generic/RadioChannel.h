@@ -26,6 +26,7 @@
 #include "IRadioSignalPropagation.h"
 #include "IRadioSignalAttenuation.h"
 #include "IRadioBackgroundNoise.h"
+#include "MACAddress.h"
 
 class INET_API RadioChannel : public cSimpleModule, public cListener, public IRadioChannel
 {
@@ -293,6 +294,8 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 
         /** @name Reception */
         //@{
+        virtual bool isRadioMacAddress(const IRadio *radio, const MACAddress address) const;
+
         virtual bool isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
         virtual bool isInInterferenceRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
 

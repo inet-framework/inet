@@ -18,6 +18,8 @@
 #include "Radio.h"
 #include "RadioChannel.h"
 #include "PhyControlInfo_m.h"
+#include "IMACFrame.h"
+#include "InterfaceTableAccess.h"
 
 Define_Module(RadioChannel);
 
@@ -401,6 +403,18 @@ void RadioChannel::updateLimits()
     maxInterferenceRange = computeMaxInterferenceRange();
 }
 
+bool RadioChannel::isRadioMacAddress(const IRadio *radio, const MACAddress address) const
+{
+    IInterfaceTable *interfaceTable = InterfaceTableAccess().get(const_cast<cModule *>(check_and_cast<const cModule *>(radio)));
+    for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
+    {
+        const InterfaceEntry *interface = interfaceTable->getInterface(i);
+        if (interface && interface->getMacAddress() == address)
+            return true;
+    }
+    return false;
+}
+
 bool RadioChannel::isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const
 {
     return isNaN(maxCommunicationRange.get()) ||
@@ -553,7 +567,6 @@ void RadioChannel::addRadio(const IRadio *radio)
         radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
     if (listeningFilter)
         radioModule->subscribe(OldIRadio::listeningChangedSignal, this);
-//    if (macAddressFilter) TODO: listen on MAC address changes
 }
 
 void RadioChannel::removeRadio(const IRadio *radio)
@@ -676,7 +689,8 @@ bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTr
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(transmission))
         return false;
-    // TODO: else if (macAddressFilter && MAC address is different) return false;
+    else if (macAddressFilter && !isRadioMacAddress(radio, check_and_cast<const IMACFrame *>(transmission->getMacFrame())->getDestinationAddress()))
+        return false;
     else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE) {
         const IRadioSignalArrival *arrival = getArrival(radio, transmission);
         return isInInterferenceRange(transmission, arrival->getStartPosition(), arrival->getEndPosition());
