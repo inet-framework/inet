@@ -303,9 +303,6 @@ void MultiThreadedRadioChannel::removeNonInterferingTransmission(const IRadioSig
 void MultiThreadedRadioChannel::invalidateCachedDecisions(const IRadioSignalTransmission *transmission)
 {
     pthread_mutex_lock(&cacheLock);
-    // TODO: revise
-    if (simTime() - lastRemoveNonInterferingTransmissions > maxTransmissionDuration)
-        removeNonInterferingTransmissions();
     transmissionsCopy = transmissions;
     RadioChannel::invalidateCachedDecisions(transmission);
     pthread_mutex_unlock(&cacheLock);

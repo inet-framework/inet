@@ -31,10 +31,9 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 {
     protected:
         /**
-         * The intermediate computation results related to a transmission and a
-         * receiver radio.
+         * Caches the intermediate computation results related to a reception.
          */
-        class CacheEntry
+        class ReceptionCacheEntry
         {
             public:
                 bool isRadioFrameSent;
@@ -43,11 +42,26 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
                 const IRadioSignalReceptionDecision *decision;
 
             public:
-                CacheEntry() :
+                ReceptionCacheEntry() :
                     isRadioFrameSent(false),
                     arrival(NULL),
                     reception(NULL),
                     decision(NULL)
+                {}
+        };
+
+        /**
+         * Caches the intermediate computation results related to a transmission.
+         */
+        class TransmissionCacheEntry
+        {
+            public:
+                simtime_t interferenceEndTime;
+                std::vector<ReceptionCacheEntry> *receptionCacheEntries;
+
+            public:
+                TransmissionCacheEntry() :
+                    receptionCacheEntries(NULL)
                 {}
         };
 
@@ -144,6 +158,14 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         bool recordCommunication;
         //@}
 
+        /** @name Timer */
+        //@{
+        /**
+         * The message used to purge internal state and cache.
+         */
+        cMessage *removeNonInterferingTransmissionsTimer;
+        //@}
+
         /** @name State */
         //@{
         /**
@@ -156,16 +178,12 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          */
         // TODO: consider using an interval graph for receptions (per receiver radio)
         std::vector<const IRadioSignalTransmission *> transmissions;
-        /**
-         * The output file where communication log is written to.
-         */
-        std::ofstream communicationLog;
         //@}
 
         /** @name Cache */
         //@{
         /**
-         * The smallest radio id of all ongoing transmissions.
+         * The smallest radio id of all radios.
          */
         int baseRadioId;
         /**
@@ -179,11 +197,15 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          * Values that are no longer needed are removed from the beginning only.
          * May contain NULL values for not yet pre-computed information.
          */
-        mutable std::vector<std::vector<CacheEntry> *> cache;
+        mutable std::vector<TransmissionCacheEntry> cache;
+        //@}
+
+        /** @name Logging */
+        //@{
         /**
-         * Last time non-interfering transmissions were removed.
+         * The output file where communication log is written to.
          */
-        simtime_t lastRemoveNonInterferingTransmissions;
+        std::ofstream communicationLog;
         //@}
 
         /** @name Statistics */
@@ -228,11 +250,13 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void finish();
+        virtual void handleMessage(cMessage *message);
         //@}
 
         /** @name Cache */
         //@{
-        virtual CacheEntry *getCacheEntry(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual TransmissionCacheEntry *getTransmissionCacheEntry(const IRadioSignalTransmission *transmission) const;
+        virtual ReceptionCacheEntry *getReceptionCacheEntry(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 
         virtual const IRadioSignalArrival *getCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
         virtual void setCachedArrival(const IRadio *radio, const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) const;
@@ -276,7 +300,6 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual bool isInterferingTransmission(const IRadioSignalTransmission *transmission, const IRadioSignalReception *reception) const;
 
         virtual void removeNonInterferingTransmissions();
-        virtual void removeNonInterferingTransmission(const IRadioSignalTransmission *transmission) {}
 
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
         virtual const std::vector<const IRadioSignalReception *> *computeInterferingReceptions(const IRadioSignalListening *listening, const std::vector<const IRadioSignalTransmission *> *transmissions) const;
