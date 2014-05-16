@@ -72,9 +72,6 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         // TODO: FIXME: we don't know the end position at the time of the transmission begin, we can only have a guess
         // TODO: should we separate transmission begin and end? or should it be an approximation only?
         virtual const Coord getEndPosition() const = 0;
-
-        // TODO: use the propagation model instead?
-        virtual mps getPropagationSpeed() const = 0;
 };
 
 #endif

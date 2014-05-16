@@ -25,6 +25,7 @@
 #include "IRadioSignalPropagation.h"
 #include "IRadioSignalTransmitter.h"
 #include "IRadioSignalReceiver.h"
+#include "IRadioChannel.h"
 
 // TODO: revise all names here and also in contract.h
 // TODO: optimize interface in terms of constness, use of references, etc.
@@ -58,7 +59,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         // TODO: FIXME: we don't know the end position at the time of the transmission begin, we can only have a guess
         // TODO: should we separate transmission begin and end? or should it be an approximation only?
         const Coord endPosition;
-        const mps propagationSpeed;
 
     public:
         RadioSignalTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
@@ -68,8 +68,7 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
-            endPosition(endPosition),
-            propagationSpeed(mps(SPEED_OF_LIGHT))
+            endPosition(endPosition)
         {}
 
         virtual int getId() const { return id; }
@@ -84,7 +83,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
-        virtual mps getPropagationSpeed() const { return propagationSpeed; }
 };
 
 class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
@@ -432,40 +430,47 @@ class INET_API SNIRRadioSignalReceiverBase : public RadioSignalReceiverBase
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
 };
 
-class INET_API ImmediateRadioSignalPropagation : public cCompoundModule, public IRadioSignalPropagation
+class INET_API RadioSignalPropagationBase : public cCompoundModule, public IRadioSignalPropagation
+{
+    protected:
+        mps propagationSpeed;
+        mutable long arrivalComputationCount;
+
+    protected:
+        virtual void initialize(int stage);
+        virtual void finish();
+
+    public:
+        RadioSignalPropagationBase();
+        RadioSignalPropagationBase(mps propagationSpeed);
+
+        virtual mps getPropagationSpeed() const { return propagationSpeed; }
+};
+
+class INET_API ImmediateRadioSignalPropagation : public RadioSignalPropagationBase
 {
     public:
-        virtual mps getPropagationSpeed() const { return mps(POSITIVE_INFINITY); }
+        ImmediateRadioSignalPropagation();
+        ImmediateRadioSignalPropagation(mps propagationSpeed);
+
+        virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const;
 };
 
-class INET_API ConstantSpeedRadioSignalPropagation : public cCompoundModule, public IRadioSignalPropagation
+class INET_API ConstantSpeedRadioSignalPropagation : public RadioSignalPropagationBase
 {
     protected:
-        const mps propagationSpeed;
         const int mobilityApproximationCount;
-        mutable long arrivalComputationCount;
 
     protected:
-        virtual void finish();
-
         virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
 
     public:
-        ConstantSpeedRadioSignalPropagation() :
-            propagationSpeed(SPEED_OF_LIGHT),
-            mobilityApproximationCount(0),
-            arrivalComputationCount(0)
-        {}
+        ConstantSpeedRadioSignalPropagation();
+        ConstantSpeedRadioSignalPropagation(mps propagationSpeed, int mobilityApproximationCount);
 
-        ConstantSpeedRadioSignalPropagation(mps propagationSpeed, int mobilityApproximationCount) :
-            propagationSpeed(propagationSpeed),
-            mobilityApproximationCount(mobilityApproximationCount),
-            arrivalComputationCount(0)
-        {}
-
-        virtual mps getPropagationSpeed() const { return propagationSpeed; }
+        virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const;
 };

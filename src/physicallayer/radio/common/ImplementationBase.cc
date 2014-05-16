@@ -44,33 +44,27 @@ void RadioSignalReceptionBase::printToStream(std::ostream &stream) const
 void RadioAntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-    {
         mobility = check_and_cast<IMobility *>(getContainingNode(this)->getSubmodule("mobility"));
-    }
 }
 
 void ConstantGainRadioAntenna::initialize(int stage)
 {
     RadioAntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-    {
         gain = FWMath::dB2fraction(par("gain"));
-    }
 }
 
 void RadioSignalFreeSpaceAttenuationBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-    {
         alpha = par("alpha");
-    }
 }
 
 double RadioSignalFreeSpaceAttenuationBase::computePathLoss(const IRadioSignalTransmission *transmission, simtime_t receptionStartTime, simtime_t receptionEndTime, Coord receptionStartPosition, Coord receptionEndPosition, Hz carrierFrequency) const
 {
     // factor = (waveLength / distance) ^ alpha / (16 * pi ^ 2)
     m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
-    m waveLength = transmission->getPropagationSpeed() / carrierFrequency;
+    m waveLength = transmission->getTransmitter()->getChannel()->getPropagation()->getPropagationSpeed() / carrierFrequency;
     // this check allows to get the same result from the GPU and the CPU when the alpha is exactly 2
     double ratio = (waveLength / distance).get();
     double raisedRatio = alpha == 2.0 ? ratio * ratio : pow(ratio, alpha);
@@ -133,9 +127,7 @@ void SNIRRadioSignalReceiverBase::initialize(int stage)
 {
     RadioSignalReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-    {
         snirThreshold = FWMath::dB2fraction(par("snirThreshold"));
-    }
 }
 
 const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
@@ -148,17 +140,55 @@ const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeRecepti
     return new RadioSignalReceptionDecision(reception, isReceptionPossible, isReceptionSuccessful, snirMin);
 }
 
-const IRadioSignalArrival *ImmediateRadioSignalPropagation::computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const
+RadioSignalPropagationBase::RadioSignalPropagationBase() :
+    propagationSpeed(mps(sNaN))
+{}
+
+RadioSignalPropagationBase::RadioSignalPropagationBase(mps propagationSpeed) :
+    propagationSpeed(propagationSpeed)
+{}
+
+void RadioSignalPropagationBase::initialize(int stage)
 {
-    const Coord position = mobility->getCurrentPosition();
-    return new RadioSignalArrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position);
+    if (stage == INITSTAGE_LOCAL)
+        propagationSpeed = mps(SPEED_OF_LIGHT); // TODO: mps(par("propagationSpeed"));
 }
 
-void ConstantSpeedRadioSignalPropagation::finish()
+void RadioSignalPropagationBase::finish()
 {
     EV_INFO << "Radio signal arrival computation count = " << arrivalComputationCount << endl;
     recordScalar("Radio signal arrival computation count", arrivalComputationCount);
 }
+
+ImmediateRadioSignalPropagation::ImmediateRadioSignalPropagation() :
+    RadioSignalPropagationBase()
+{}
+
+ImmediateRadioSignalPropagation::ImmediateRadioSignalPropagation(mps propagationSpeed) :
+    RadioSignalPropagationBase(propagationSpeed)
+{}
+
+const IRadioSignalArrival *ImmediateRadioSignalPropagation::computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const
+{
+    arrivalComputationCount++;
+    const Coord position = mobility->getCurrentPosition();
+    return new RadioSignalArrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position);
+}
+
+void ImmediateRadioSignalPropagation::printToStream(std::ostream &stream) const
+{
+    stream << "immediate radio signal propagation, theoretical propagation speed = " << propagationSpeed;
+}
+
+ConstantSpeedRadioSignalPropagation::ConstantSpeedRadioSignalPropagation() :
+    RadioSignalPropagationBase(),
+    mobilityApproximationCount(0)
+{}
+
+ConstantSpeedRadioSignalPropagation::ConstantSpeedRadioSignalPropagation(mps propagationSpeed, int mobilityApproximationCount) :
+    RadioSignalPropagationBase(propagationSpeed),
+    mobilityApproximationCount(mobilityApproximationCount)
+{}
 
 const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
 {
@@ -176,8 +206,15 @@ const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const si
             return mobility->getPosition(time + propagationTime);
         }
         default:
-            throw cRuntimeError("Unknown mobility approximation");
+            throw cRuntimeError("Unknown mobility approximation count '%d'", mobilityApproximationCount);
     }
+}
+
+void ConstantSpeedRadioSignalPropagation::printToStream(std::ostream &stream) const
+{
+    stream << "constant speed radio signal propagation"
+           << ", theoretical propagation speed = " << propagationSpeed
+           << ", mobility approximation count = " << mobilityApproximationCount;
 }
 
 const IRadioSignalArrival *ConstantSpeedRadioSignalPropagation::computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const

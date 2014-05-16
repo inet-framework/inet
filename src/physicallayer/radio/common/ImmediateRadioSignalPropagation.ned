@@ -17,8 +17,8 @@
 
 package inet.physicallayer.radio.common;
 
-module ConstantSpeedRadioSignalPropagation like IRadioSignalPropagation
+module ImmediateRadioSignalPropagation like IRadioSignalPropagation
 {
     parameters:
-        @class(ConstantSpeedRadioSignalPropagation);
+        @class(ImmediateRadioSignalPropagation);
 }

@@ -25,14 +25,23 @@
 /**
  * This interface models how a radio signal propagates through space over time.
  */
-class INET_API IRadioSignalPropagation
+class INET_API IRadioSignalPropagation : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalPropagation() {}
-
-        // TODO: should not be here
+        /**
+         * Returns the theoretical propagation speed of radio signals in the range
+         * (0, +infinity). The value might be different from the approximation
+         * that is used in the actual computation of arrival times.
+         */
+        // TODO: move this to the radio channel, because it's independent of the approximation?
         virtual mps getPropagationSpeed() const = 0;
 
+        /**
+         * Returns the time and space coordinates when the transmission arrives
+         * at the object that moves with the provided mobility. The result might
+         * be an approximation only, because there's a tradeoff between precision
+         * and performance. This function never returns NULL.
+         */
         virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const = 0;
 };
 
