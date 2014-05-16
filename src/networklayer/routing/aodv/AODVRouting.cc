@@ -993,7 +993,7 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         else
             throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
         if (datagram) {
-            const Address& unreachableAddr = datagram->getDestinationAddress();
+            Address unreachableAddr = datagram->getDestinationAddress();
             if (unreachableAddr.getAddressType() == addressType) {
                 // A node initiates processing for a RERR message in three situations:
                 //
