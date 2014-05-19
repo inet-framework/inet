@@ -141,10 +141,7 @@ void Radio::handleMessageWhenUp(cMessage *message)
             handleLowerFrame(check_and_cast<RadioFrame*>(message));
     }
     else
-    {
         throw cRuntimeError("Unknown arrival gate '%s'.", message->getArrivalGate()->getFullName());
-        delete message;
-    }
 }
 
 void Radio::handleSelfMessage(cMessage *message)

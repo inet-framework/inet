@@ -726,7 +726,7 @@ void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, long va
     if (signal == OldIRadio::radioModeChangedSignal || signal == OldIRadio::listeningChangedSignal)
     {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
-        for (std::vector<const IRadioSignalTransmission *>::iterator it = transmissions.begin(); it != transmissions.end();)
+        for (std::vector<const IRadioSignalTransmission *>::iterator it = transmissions.begin(); it != transmissions.end(); it++)
         {
             const IRadioSignalTransmission *transmission = *it;
             const Radio *transmitterRadio = check_and_cast<const Radio *>(transmission->getTransmitter());
