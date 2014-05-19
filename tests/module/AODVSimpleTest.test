@@ -7,7 +7,7 @@ import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.nodes.aodv.AODVRouter;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.world.radio.ChannelControl;
 import inet.world.scenario.ScenarioManager;
 
 network AODVTest
@@ -15,7 +15,7 @@ network AODVTest
     parameters:
         @display("bgb=525,437");
     submodules:
-        radioChannel: SimplifiedRadioChannel {
+        channelControl: ChannelControl {
             parameters:
                 @display("p=50,50");
         }
@@ -110,12 +110,12 @@ sim-time-limit = 100s
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.rt
 .*
-\+R 35  3\.1989\d+  8  145\.236\.0\.2  145\.236\.0\.1  32  145\.236\.0\.1
-\+R 56  3\.2032\d+  7  145\.236\.0\.1  145\.236\.0\.2  32  145\.236\.0\.2
-\+R 57  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.2  32  145\.236\.0\.2
-\+R 57  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.1  32  145\.236\.0\.2
-\+R 115  3\.2053\d+  8  145\.236\.0\.2  145\.236\.0\.3  32  145\.236\.0\.3
-\+R 189  3\.2116\d+  7  145\.236\.0\.1  145\.236\.0\.3  32  145\.236\.0\.2
+\+R \d+  3\.1989\d+  8  145\.236\.0\.2  145\.236\.0\.1  255.255.255.255  145\.236\.0\.1
+\+R \d+  3\.2032\d+  7  145\.236\.0\.1  145\.236\.0\.2  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.2  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.1  255.255.255.255  145\.236\.0\.2
+\+R \d+  3\.2053\d+  8  145\.236\.0\.2  145\.236\.0\.3  255.255.255.255  145\.236\.0\.3
+\+R \d+  3\.2116\d+  7  145\.236\.0\.1  145\.236\.0\.3  255.255.255.255  145\.236\.0\.2
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

@@ -5,12 +5,16 @@
 /examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0   # [Config Ping2] # __interactive__
-/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0
-/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0
-/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0
-/examples/aodv/,                     -f omnetpp.ini -c Static -r 0
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0
+/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0
 /examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0
+/examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0
+/examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ -r 0
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0
+/examples/aodv/,                     -f omnetpp.ini -c Static -r 0
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGPCompleteTest/,    -f omnetpp.ini -c config1 -r 0
