@@ -28,6 +28,7 @@
 #include "IRadioBackgroundNoise.h"
 #include "MACAddress.h"
 
+// TODO: add tests for various optimization configurations
 class INET_API RadioChannel : public cSimpleModule, public cListener, public IRadioChannel
 {
     protected:

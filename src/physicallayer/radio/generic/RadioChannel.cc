@@ -567,6 +567,7 @@ void RadioChannel::addRadio(const IRadio *radio)
         radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
     if (listeningFilter)
         radioModule->subscribe(OldIRadio::listeningChangedSignal, this);
+    // TODO: subscribe to macAddress changes
 }
 
 void RadioChannel::removeRadio(const IRadio *radio)

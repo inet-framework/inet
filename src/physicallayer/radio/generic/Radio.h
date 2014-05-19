@@ -46,8 +46,10 @@ class INET_API Radio : public RadioBase, public virtual IRadio
         IRadioChannel *channel;
 
         cMessage *endTransmissionTimer;
+        // TODO: currently we support receiving multiple transmissions simultaneously (which we shouldn't, see above)
         cMessage *endReceptionTimer;
 
+        // TODO: make sure it's always updated whenever reception state, listening state, etc. changes
         simtime_t lastReceptionStateChange;
 
     protected:
