@@ -643,7 +643,7 @@ IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame
         communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmitterRadio->getId() << " "
                          << "M " << radioFrame->getName() << " " << transmission->getId() << " "
                          << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
-                         << "D " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
+                         << "E " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     }
     return radioFrame;
 }
@@ -658,8 +658,8 @@ cPacket *RadioChannel::receivePacket(const IRadio *radio, IRadioFrame *radioFram
         communicationLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
                          << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
                          << "S " << reception->getStartTime() << " " <<  reception->getStartPosition() << " -> "
-                         << "D " << reception->getEndTime() << " " <<  reception->getEndPosition() << " "
-                         << "F " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
+                         << "E " << reception->getEndTime() << " " <<  reception->getEndPosition() << " "
+                         << "D " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
     }
     cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
     if (!decision->isReceptionSuccessful())
