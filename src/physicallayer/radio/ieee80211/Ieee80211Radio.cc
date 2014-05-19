@@ -61,5 +61,5 @@ void Ieee80211Radio::setOldRadioChannel(int newRadioChannel)
     scalarTransmitter->setCarrierFrequency(carrierFrequency);
     scalarReceiver->setCarrierFrequency(carrierFrequency);
     Radio::setOldRadioChannel(newRadioChannel);
-    emit(listeningChangedSignal, (void*)NULL);
+    emit(listeningChangedSignal, 0);
 }

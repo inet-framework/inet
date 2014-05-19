@@ -340,7 +340,7 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 
         virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 
-        virtual void receiveSignal(cComponent *source, simsignal_t signal, cObject *object);
+        virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
 
 #endif

@@ -719,7 +719,7 @@ const IRadioSignalArrival *RadioChannel::getArrival(const IRadio *radio, const I
     return getCachedArrival(radio, transmission);
 }
 
-void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, cObject *object)
+void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, long value)
 {
     Enter_Method_Silent();
     if (signal == OldIRadio::radioModeChangedSignal || signal == OldIRadio::listeningChangedSignal)
