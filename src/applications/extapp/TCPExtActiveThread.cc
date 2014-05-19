@@ -31,12 +31,12 @@ TCPExtActiveThread::~TCPExtActiveThread()
 {
 }
 
-void TCPExtActiveThread::init(cSimpleModule *module, cGate *toTcp, cMessage *msg)
+void TCPExtActiveThread::init(TCPMultithreadApp *module, cGate *toTcp, cMessage *msg)
 {
     if (extSocketId != INVALID_SOCKET || appModule || rtScheduler)
         throw cRuntimeError("Model error: socket already used");
     appModule = module;
-    extSocketId = msg->par("fd").longValue();
+    extSocketId = msg->par("newfd").longValue();
     rtScheduler->addSocket(appModule, this, extSocketId, false);
 }
 

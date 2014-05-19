@@ -21,11 +21,13 @@
 
 #include "INETDefs.h"
 
+class TCPMultithreadApp;
+
 class INET_API ITCPAppThread
 {
   public:
     virtual ~ITCPAppThread();
-    virtual void init(cSimpleModule *module, cGate *toTcp, cMessage *msg) = 0;
+    virtual void init(TCPMultithreadApp *module, cGate *toTcp, cMessage *msg) = 0;
     virtual void processMessage(cMessage *msg) = 0;
     virtual int getConnectionId() const = 0;
 };

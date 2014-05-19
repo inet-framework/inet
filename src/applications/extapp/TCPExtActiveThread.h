@@ -21,6 +21,7 @@
 
 #include "ByteArrayMessage.h"
 #include "SocketsRTScheduler.h"
+#include "TCPMultithreadApp.h"
 #include "TCPSocket.h"
 #include "TCPThread.h"
 
@@ -28,7 +29,7 @@ class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterf
 {
   protected:
     int extSocketId;
-    cSimpleModule *appModule;
+    TCPMultithreadApp *appModule;
     SocketsRTScheduler *rtScheduler;
     TCPSocket inetSocket;
   protected:
@@ -38,7 +39,7 @@ class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterf
     virtual ~TCPExtActiveThread();
 
     // TCPThread:
-    virtual void init(cSimpleModule *appModule, cGate *outGate, cMessage *msg);
+    virtual void init(TCPMultithreadApp *appModule, cGate *outGate, cMessage *msg);
     virtual void processMessage(cMessage *msg);
     virtual int getConnectionId() const;
 

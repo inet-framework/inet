@@ -28,14 +28,14 @@ class TCPExtListenerThread : public cOwnedObject, public ITCPAppThread
 {
   protected:
     int extListenerSocketId;
-    cSimpleModule *appModule;
+    TCPMultithreadApp *appModule;
     SocketsRTScheduler *rtScheduler;
   public:
     TCPExtListenerThread();
     virtual ~TCPExtListenerThread();
 
     //TCPAppThread:
-    virtual void init(cSimpleModule *appModule, cGate *toTcp, cMessage *msg);
+    virtual void init(TCPMultithreadApp *appModule, cGate *toTcp, cMessage *msg);
     virtual void processMessage(cMessage *msg);
     virtual int getConnectionId() const;
 
@@ -56,7 +56,7 @@ TCPExtListenerThread::~TCPExtListenerThread()
 {
 }
 
-void TCPExtListenerThread::init(cSimpleModule *appModulePar, cGate *toTcp, cMessage *msg)
+void TCPExtListenerThread::init(TCPMultithreadApp *appModulePar, cGate *toTcp, cMessage *msg)
 {
     appModule = appModulePar;
     rtScheduler = check_and_cast<SocketsRTScheduler *>(simulation.getScheduler());
@@ -77,7 +77,7 @@ void TCPExtListenerThread::init(cSimpleModule *appModulePar, cGate *toTcp, cMess
     rtScheduler->addSocket(appModule, this, extListenerSocketId, true);
 }
 
-void TCPExtListenerThread::handleMessage(cMessage *msg)
+void TCPExtListenerThread::processMessage(cMessage *msg)
 {
     switch(msg->getKind())
     {
@@ -103,7 +103,7 @@ void TCPExtListenerThread::acceptExtConnection(cMessage *msg)
 {
     msg->setContextPointer(NULL);
     TCPExtActiveThread *thread = new TCPExtActiveThread();
-    thread->init(appModule, outGate, msg);
+    thread->init(appModule, appModule->gate("tcpOut"), msg);
     appModule->addThread(thread);
 }
 
