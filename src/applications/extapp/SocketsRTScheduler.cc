@@ -121,7 +121,8 @@ bool SocketsRTScheduler::receiveWithTimeout()
             EV << "SocketsRTScheduler: connected!\n";
 
             cMessage *msg = new cMessage("Accepted");
-            msg->addPar("fd") = newFd;
+            msg->addPar("fd") = sockets[i].fd;
+            msg->addPar("newfd") = newFd;
             msg->setKind(ACCEPT);
             insertMsg(i, msg);
         }
@@ -168,14 +169,10 @@ int32 SocketsRTScheduler::receiveUntil(const timeval& targetTime)
 }
 
 #if OMNETPP_VERSION >= 0x0500
-cEvent *SocketsRTScheduler::guessNextEvent()
-{
-    return sim->msgQueue.peekFirst();
-}
 cEvent *SocketsRTScheduler::takeNextEvent()
 #else
-cMessage *SocketsRTScheduler::getNextEvent()
 #define cEvent cMessage
+cMessage *SocketsRTScheduler::getNextEvent()
 #endif
 {
     timeval targetTime, curTime, diffTime;
@@ -213,9 +210,16 @@ cMessage *SocketsRTScheduler::getNextEvent()
     ASSERT(tmp == event);
     return event;
 }
+#if OMNETPP_VERSION < 0x0500
 #undef cEvent
+#endif
 
 #if OMNETPP_VERSION >= 0x0500
+cEvent *SocketsRTScheduler::guessNextEvent()
+{
+    return sim->msgQueue.peekFirst();
+}
+
 void SocketsRTScheduler::putBackEvent(cEvent *event)
 {
     sim->msgQueue.putBackFirst(event);
