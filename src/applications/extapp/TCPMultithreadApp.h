@@ -42,8 +42,7 @@ class INET_API TCPMultithreadApp : public cSimpleModule, public ILifecycle, publ
     virtual void finish();
     virtual void updateDisplay();
 
-    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
     virtual void addThread(ITCPAppThread *thread);

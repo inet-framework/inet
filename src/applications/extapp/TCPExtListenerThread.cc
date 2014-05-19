@@ -30,6 +30,7 @@ class TCPExtListenerThread : public cOwnedObject, public ITCPAppThread
     int extListenerSocketId;
     TCPMultithreadApp *appModule;
     SocketsRTScheduler *rtScheduler;
+    TCPSocket inetSocket;
   public:
     TCPExtListenerThread();
     virtual ~TCPExtListenerThread();
@@ -37,7 +38,7 @@ class TCPExtListenerThread : public cOwnedObject, public ITCPAppThread
     //TCPAppThread:
     virtual void init(TCPMultithreadApp *appModule, cGate *toTcp, cMessage *msg);
     virtual void processMessage(cMessage *msg);
-    virtual int getConnectionId() const;
+    virtual int getConnectionId() const { return inetSocket.getConnectionId(); }
 
     virtual void acceptExtConnection(cMessage *msg);
 };
@@ -65,12 +66,13 @@ void TCPExtListenerThread::init(TCPMultithreadApp *appModulePar, cGate *toTcp, c
     if (extListenerSocketId == INVALID_SOCKET)
         throw cRuntimeError("cannot create socket");
 
+    int tunnelPort = appModule->par("tunnelPort");
     sockaddr_in sinInterface;
     sinInterface.sin_family = AF_INET;
     sinInterface.sin_addr.s_addr = INADDR_ANY;
-    sinInterface.sin_port = htons(uint16_t(appModule->par("tunnelPort")));
+    sinInterface.sin_port = htons(uint16_t(tunnelPort));
     if (bind(extListenerSocketId, (sockaddr*) &sinInterface, sizeof(sockaddr_in)) == SOCKET_ERROR)
-        throw cRuntimeError("socket bind() failed");
+        throw cRuntimeError("socket bind() to port %i failed", tunnelPort);
 
     listen(extListenerSocketId, SOMAXCONN);
 

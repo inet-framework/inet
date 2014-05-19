@@ -72,6 +72,13 @@ void TCPMultithreadApp::finish()
 {
 }
 
+void TCPMultithreadApp::addThread(ITCPAppThread *thread)
+{
+    threadMap.addThread(thread);
+
+    updateDisplay();
+}
+
 void TCPMultithreadApp::removeThread(ITCPAppThread *thread)
 {
     // remove socket
@@ -83,3 +90,9 @@ void TCPMultithreadApp::removeThread(ITCPAppThread *thread)
     updateDisplay();
 }
 
+bool TCPMultithreadApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+{
+    Enter_Method_Silent();
+    throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    return true;
+}

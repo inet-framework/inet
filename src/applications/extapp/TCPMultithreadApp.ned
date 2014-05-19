@@ -16,7 +16,7 @@
 //
 
 
-package inet.applications.tcpapp;
+package inet.applications.extapp;
 
 import inet.applications.ITCPApp;
 
@@ -69,13 +69,18 @@ import inet.applications.ITCPApp;
 //
 // Compatible with both ~IPv4 and ~IPv6.
 //
-simple TCPSrvHostApp like ITCPApp
+simple TCPMultithreadApp like ITCPApp
 {
     parameters:
         string localAddress = default(""); // may be left empty ("")
         int localPort = default(1000); // port number to listen on
-        string serverThreadClass; // class name of "thread" objects to launch on incoming connections
-        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytecount");
+        string mainThreadClass; // class name of "thread" objects to launch on incoming connections
+        string activeThreadClass;
+        string dataTransferMode @enum("bytecount","object","bytestream") = default("bytestream");
+        string tunnelAddress;
+        int tunnelPort;
+        string connectAddress;
+        int connectPort;
         @display("i=block/app");
     gates:
         input tcpIn @labels(TCPCommand/up);

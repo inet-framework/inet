@@ -22,8 +22,9 @@
 #include "ByteArrayMessage.h"
 #include "SocketsRTScheduler.h"
 #include "TCPSocket.h"
+#include "TCPThread.h"
 
-class TCPInetListenerThread : public TCPSocket::CallbackInterface
+class TCPInetListenerThread : public cOwnedObject, public TCPSocket::CallbackInterface, public ITCPAppThread
 {
   protected:
     TCPSocket inetSocket;
@@ -31,7 +32,10 @@ class TCPInetListenerThread : public TCPSocket::CallbackInterface
   public:
     TCPInetListenerThread();
     virtual ~TCPInetListenerThread();
-    virtual void handleMessage(cMessage *msg);
+    virtual void init(TCPMultithreadApp *module, cGate *toTcp, cMessage *msg);
+    virtual void processMessage(cMessage *msg);
+    virtual int getConnectionId() const { return inetSocket.getConnectionId(); }
+
     virtual void acceptInetConnection(cModule *module, cMessage *msg);
 
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
@@ -39,6 +43,6 @@ class TCPInetListenerThread : public TCPSocket::CallbackInterface
     virtual void socketPeerClosed(int connId, void *yourPtr);
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status);
 };
 

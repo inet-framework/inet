@@ -26,7 +26,7 @@ class TCPMultithreadApp;
 class INET_API ITCPAppThread
 {
   public:
-    virtual ~ITCPAppThread();
+    virtual ~ITCPAppThread() {}
     virtual void init(TCPMultithreadApp *module, cGate *toTcp, cMessage *msg) = 0;
     virtual void processMessage(cMessage *msg) = 0;
     virtual int getConnectionId() const = 0;
@@ -35,7 +35,7 @@ class INET_API ITCPAppThread
 class INET_API ITCPMultithreadApp
 {
   public:
-    virtual ~ITCPMultithreadApp();
+    virtual ~ITCPMultithreadApp() {}
     virtual void addThread(ITCPAppThread *thread) = 0;
     virtual void removeThread(ITCPAppThread *thread) = 0;
 };

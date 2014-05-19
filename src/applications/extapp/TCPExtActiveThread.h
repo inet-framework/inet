@@ -41,7 +41,7 @@ class TCPExtActiveThread : public cOwnedObject, public TCPSocket::CallbackInterf
     // TCPThread:
     virtual void init(TCPMultithreadApp *appModule, cGate *outGate, cMessage *msg);
     virtual void processMessage(cMessage *msg);
-    virtual int getConnectionId() const;
+    virtual int getConnectionId() const { return inetSocket.getConnectionId(); }
 
     // TCPSocket::CallbackInterface
     virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
