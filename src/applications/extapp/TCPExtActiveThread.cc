@@ -34,7 +34,7 @@ TCPExtActiveThread::~TCPExtActiveThread()
 void TCPExtActiveThread::init(TCPMultithreadApp *module, cGate *toTcp, cMessage *msg)
 {
     if (extSocketId != INVALID_SOCKET || appModule || rtScheduler)
-        throw cRuntimeError("Model error: socket already used");
+        throw cRuntimeError("TCPExtActiveThread: Model error: socket already used");
     appModule = module;
     extSocketId = msg->par("newfd").longValue();
     rtScheduler->addSocket(appModule, this, extSocketId, false);
@@ -47,22 +47,22 @@ void TCPExtActiveThread::processMessage(cMessage *msg)
         case SocketsRTScheduler::DATA:
         {
             if (extSocketId == INVALID_SOCKET)
-                throw cRuntimeError("socket not opened");
+                throw cRuntimeError("TCPExtActiveThread: socket not opened");
             if (extSocketId != msg->par("fd").longValue())
-                throw cRuntimeError("unknown socket id");
+                throw cRuntimeError("TCPExtActiveThread: unknown socket id");
             ByteArrayMessage *pk = check_and_cast<ByteArrayMessage *>(msg);
             inetSocket.send(pk);
             break;
         }
         case SocketsRTScheduler::CLOSED:
             if (extSocketId != msg->par("fd").longValue())
-                throw cRuntimeError("unknown socket id");
+                throw cRuntimeError("TCPExtActiveThread: unknown socket id");
             closesocket(extSocketId);
             extSocketId = INVALID_SOCKET;
             delete msg;
             break;
         case SocketsRTScheduler::ACCEPT:
-            throw cRuntimeError("socket already opened");
+            throw cRuntimeError("TCPExtActiveThread: socket already opened");
             delete msg;
             break;
     }

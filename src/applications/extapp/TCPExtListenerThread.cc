@@ -64,7 +64,7 @@ void TCPExtListenerThread::init(TCPMultithreadApp *appModulePar, cGate *toTcp, c
 
     extListenerSocketId = socket(AF_INET, SOCK_STREAM, 0);
     if (extListenerSocketId == INVALID_SOCKET)
-        throw cRuntimeError("cannot create socket");
+        throw cRuntimeError("TCPExtListenerThread: cannot create socket");
 
     int tunnelPort = appModule->par("tunnelPort");
     sockaddr_in sinInterface;
@@ -72,7 +72,7 @@ void TCPExtListenerThread::init(TCPMultithreadApp *appModulePar, cGate *toTcp, c
     sinInterface.sin_addr.s_addr = INADDR_ANY;
     sinInterface.sin_port = htons(uint16_t(tunnelPort));
     if (bind(extListenerSocketId, (sockaddr*) &sinInterface, sizeof(sockaddr_in)) == SOCKET_ERROR)
-        throw cRuntimeError("socket bind() to port %i failed", tunnelPort);
+        throw cRuntimeError("TCPExtListenerThread: socket bind() to port %i failed", tunnelPort);
 
     listen(extListenerSocketId, SOMAXCONN);
 
@@ -84,12 +84,12 @@ void TCPExtListenerThread::processMessage(cMessage *msg)
     switch(msg->getKind())
     {
         case SocketsRTScheduler::DATA:
-            throw cRuntimeError("DATA not accepted");
+            throw cRuntimeError("TCPExtListenerThread: DATA not accepted");
             delete msg;
             break;
         case SocketsRTScheduler::CLOSED:
             if (extListenerSocketId != msg->par("fd").longValue())
-                throw cRuntimeError("unknown socket id");
+                throw cRuntimeError("TCPExtListenerThread: unknown socket id");
             close(extListenerSocketId);
             extListenerSocketId = INVALID_SOCKET;
             delete msg;
