@@ -142,10 +142,11 @@ const IRadioSignalListeningDecision *IdealRadioSignalReceiver::computeListeningD
 const IRadioSignalReceptionDecision *IdealRadioSignalReceiver::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
 {
     const IdealRadioSignalReception::Power power = check_and_cast<const IdealRadioSignalReception *>(reception)->getPower();
+    RadioReceptionIndication *indication = new RadioReceptionIndication();
     if (power == IdealRadioSignalReception::POWER_RECEIVABLE)
     {
         if (ignoreInterference)
-            return new RadioSignalReceptionDecision(reception, true, true, NaN);
+            return new RadioSignalReceptionDecision(reception, indication, true, true, true);
         else
         {
             for (std::vector<const IRadioSignalReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
@@ -153,11 +154,11 @@ const IRadioSignalReceptionDecision *IdealRadioSignalReceiver::computeReceptionD
                 const IRadioSignalReception *interferingReception = *it;
                 IdealRadioSignalReception::Power interferingPower = check_and_cast<const IdealRadioSignalReception *>(interferingReception)->getPower();
                 if (interferingPower == IdealRadioSignalReception::POWER_RECEIVABLE || interferingPower == IdealRadioSignalReception::POWER_INTERFERING)
-                    return new RadioSignalReceptionDecision(reception, true, false, NaN);
+                    return new RadioSignalReceptionDecision(reception, indication, true, true, false);
             }
-            return new RadioSignalReceptionDecision(reception, true, true, NaN);
+            return new RadioSignalReceptionDecision(reception, indication, true, true, true);
         }
     }
     else
-        return new RadioSignalReceptionDecision(reception, false, false, NaN);
+        return new RadioSignalReceptionDecision(reception, indication, false, false, false);
 }

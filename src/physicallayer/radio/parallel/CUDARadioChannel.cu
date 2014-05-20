@@ -270,7 +270,9 @@ void CUDARadioChannel::computeCache(const std::vector<const IRadio *> *radios, c
         ScalarRadioSignalReception *reception = new ScalarRadioSignalReception(radio, transmission, receptionStartTime, receptionEndTime, Coord(), Coord(), receptionPower, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth());
         double snrMinimum = hostSNRMinimums[receptionIndex];
         double snrThreshold = 0; // TODO: check_and_cast<const ScalarSNRRadioDecider *>(radio->getDecider())->getSNRThreshold();
-        RadioSignalReceptionDecision *decision = new RadioSignalReceptionDecision(reception, true, snrMinimum > snrThreshold, snrMinimum);
+        RadioReceptionIndication *indication = new RadioReceptionIndication();
+        indication->setMinSNIR(snrMinimum);
+        RadioSignalReceptionDecision *decision = new RadioSignalReceptionDecision(reception, indication, true, true, snrMinimum > snrThreshold);
         setCachedDecision(radio, transmission, decision);
         EV_DEBUG << snrMinimum << " ";
     }

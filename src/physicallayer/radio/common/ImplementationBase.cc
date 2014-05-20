@@ -82,7 +82,7 @@ void RadioSignalReceptionDecision::printToStream(std::ostream &stream) const
 {
     stream << "reception decision, " << (isReceptionPossible_ ? "possible" : "impossible");
     stream << ", " << (isReceptionSuccessful_ ? "successful" : "unsuccessful");
-    stream << ", snir = " << snir;
+    stream << ", indication = " << indication;
 }
 
 bool RadioSignalReceiverBase::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
@@ -135,9 +135,12 @@ const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeRecepti
     const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
     double snirMin = computeSNIRMin(reception, noise);
     bool isReceptionPossible = computeIsReceptionPossible(reception);
+    bool isReceptionAttempted = isReceptionPossible; // TODO:
     bool isReceptionSuccessful = isReceptionPossible && snirMin > snirThreshold;
     delete noise;
-    return new RadioSignalReceptionDecision(reception, isReceptionPossible, isReceptionSuccessful, snirMin);
+    RadioReceptionIndication *indication = new RadioReceptionIndication();
+    indication->setMinSNIR(snirMin);
+    return new RadioSignalReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 
 RadioSignalPropagationBase::RadioSignalPropagationBase() :

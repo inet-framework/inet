@@ -19,6 +19,7 @@
 #define __INET_IRADIOSIGNALRECEPTIONDECISION_H_
 
 #include "IRadioSignalReception.h"
+#include "RadioControlInfo_m.h"
 
 /**
  * This interface represents the result of a receiver's reception process.
@@ -33,6 +34,11 @@ class INET_API IRadioSignalReceptionDecision : public IPrintableObject
          * and the received transmission. This function never returns NULL.
          */
         virtual const IRadioSignalReception *getReception() const = 0;
+
+        /**
+         * Returns the physical properties of the reception.
+         */
+        virtual const RadioReceptionIndication *getIndication() const = 0;
 
         /**
          * Returns whether synchronization is possible according to the physical

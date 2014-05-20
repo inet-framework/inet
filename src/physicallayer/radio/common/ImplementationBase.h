@@ -335,29 +335,31 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
 {
     protected:
         const IRadioSignalReception *reception;
+        const RadioReceptionIndication *indication;
         const bool isSynchronizationPossible_;
         const bool isSynchronizationAttempted_;
         const bool isSynchronizationSuccessful_;
         const bool isReceptionPossible_;
         const bool isReceptionAttempted_;
         const bool isReceptionSuccessful_;
-        double snir;
 
     public:
-        RadioSignalReceptionDecision(const IRadioSignalReception *reception, bool isReceptionPossible, bool isReceptionSuccessful, double snir) :
+        RadioSignalReceptionDecision(const IRadioSignalReception *reception, const RadioReceptionIndication *indication, bool isReceptionPossible, bool isReceptionAttempted, bool isReceptionSuccessful) :
             reception(reception),
+            indication(indication),
             isSynchronizationPossible_(false),
             isSynchronizationAttempted_(false),
             isSynchronizationSuccessful_(false),
             isReceptionPossible_(isReceptionPossible),
-            isReceptionAttempted_(false),
-            isReceptionSuccessful_(isReceptionSuccessful),
-            snir(snir)
+            isReceptionAttempted_(isReceptionAttempted),
+            isReceptionSuccessful_(isReceptionSuccessful)
         {}
 
         virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadioSignalReception *getReception() const { return reception; }
+
+        virtual const RadioReceptionIndication *getIndication() const { return indication; }
 
         virtual bool isReceptionPossible() const { return isReceptionPossible_; }
 
@@ -370,22 +372,6 @@ class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecisi
         virtual bool isSynchronizationAttempted() const { return isSynchronizationAttempted_; }
 
         virtual bool isSynchronizationSuccessful() const { return isSynchronizationSuccessful_; }
-
-        virtual bool isPacketErrorless() const { return isReceptionSuccessful_; }
-
-        virtual int getBitErrorCount() const { return -1; }
-
-        virtual int getSymbolErrorCount() const { return -1; }
-
-        virtual double getPER() const { return NaN; }
-
-        virtual double getBER() const { return NaN; }
-
-        virtual double getSER() const { return NaN; }
-
-        virtual const W getRSSI() const { return W(NaN); }
-
-        virtual double getSNIR() const { return snir; }
 };
 
 class INET_API RadioSignalTransmitterBase : public cCompoundModule, public virtual IRadioSignalTransmitter

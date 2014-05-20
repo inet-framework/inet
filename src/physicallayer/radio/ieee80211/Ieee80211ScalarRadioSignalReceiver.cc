@@ -137,17 +137,20 @@ const IRadioSignalReceptionDecision *Ieee80211ScalarRadioSignalReceiver::compute
         const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
         double snirMin = computeSNIRMin(reception, noise);
         delete noise;
+        RadioReceptionIndication *indication = new RadioReceptionIndication();
         bool isReceptionPossible = computeIsReceptionPossible(reception);
         if (isReceptionPossible && snirMin > snirThreshold)
         {
             bool hasBitError = computeHasBitError(snirMin, scalarTransmission->getPayloadBitLength(), scalarTransmission->getBitrate().get());
-            return new RadioSignalReceptionDecision(reception, isReceptionPossible, !hasBitError, snirMin);
+            bool isReceptionAttempted = isReceptionPossible; // TODO:
+            indication->setMinSNIR(snirMin);
+            return new RadioSignalReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, !hasBitError);
         }
         else
-            return new RadioSignalReceptionDecision(reception, false, false, snirMin);
+            return new RadioSignalReceptionDecision(reception, indication, false, false, false);
     }
     else if (areOverlappingBands(scalarListening->getCarrierFrequency(), scalarListening->getBandwidth(), scalarReception->getCarrierFrequency(), scalarReception->getBandwidth()))
         throw cRuntimeError("Overlapping bands are not supported");
     else
-        return new RadioSignalReceptionDecision(reception, false, false, NaN);
+        return new RadioSignalReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
