@@ -23,10 +23,10 @@
 /**
  * This purely virtual interface provides an abstraction for different physical layer indications.
  */
-class INET_API IPhysicalLayerIndication
+class INET_API IPhysicalLayerControlInfo
 {
     public:
-        virtual ~IPhysicalLayerIndication() { }
+        virtual ~IPhysicalLayerControlInfo() { }
 
         /**
          * Returns true if the packet is actually free of errors.

@@ -18,13 +18,13 @@
 #ifndef __INET_IRADIOSIGNALRECEPTIONDECISION_H_
 #define __INET_IRADIOSIGNALRECEPTIONDECISION_H_
 
-#include "IPhysicalLayerIndication.h"
+#include "IPhysicalLayerControlInfo.h"
 #include "IRadioSignalReception.h"
 
 /**
  * This interface represents the result of a receiver's reception process.
  */
-class INET_API IRadioSignalReceptionDecision : public IPhysicalLayerIndication, public IPrintableObject
+class INET_API IRadioSignalReceptionDecision : public IPhysicalLayerControlInfo, public IPrintableObject
 {
     public:
         virtual ~IRadioSignalReceptionDecision() {}
