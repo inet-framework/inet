@@ -17,7 +17,7 @@
 
 #include "Radio.h"
 #include "RadioChannel.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "IMACFrame.h"
 #include "InterfaceTableAccess.h"
 #include "NotifierConsts.h"
@@ -99,7 +99,8 @@ RadioChannel::~RadioChannel()
     for (std::vector<TransmissionCacheEntry>::const_iterator it = cache.begin(); it != cache.end(); it++)
     {
         const TransmissionCacheEntry &transmissionCacheEntry = *it;
-        delete transmissionCacheEntry.frame;
+        if (transmissionCacheEntry.frame && !check_and_cast<const RadioFrame *>(transmissionCacheEntry.frame)->getOwner())
+            delete transmissionCacheEntry.frame;
         const std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries)
         {
@@ -689,8 +690,7 @@ cPacket *RadioChannel::receivePacket(const IRadio *radio, IRadioFrame *radioFram
                          << "D " << decision->isReceptionPossible() << " " << decision->isReceptionAttempted() << " " << decision->isReceptionSuccessful() << endl;
     }
     cPacket *macFrame = check_and_cast<cPacket *>(radioFrame)->decapsulate();
-    if (!decision->isReceptionSuccessful())
-        macFrame->setBitError(!decision->isPacketErrorless());
+    macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<cObject *>(check_and_cast<const cObject *>(decision)));
     delete listening;
     return macFrame;

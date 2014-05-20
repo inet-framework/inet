@@ -23,7 +23,7 @@
 #include "ModuleAccess.h"
 #include "Ieee802Ctrl.h"
 #include "NotifierConsts.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "InterfaceTableAccess.h"
 #include "opp_utils.h"
@@ -280,11 +280,10 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
 
-    // sending PHY_C_CONFIGURERADIO command to MAC
-    PhyControlInfo *phyCtrl = new PhyControlInfo();
-    phyCtrl->setChannelNumber(channelNum);
-    cMessage *msg = new cMessage("changeChannel", PHY_C_CONFIGURERADIO);
-    msg->setControlInfo(phyCtrl);
+    RadioConfigureCommand *configureCommand = new RadioConfigureCommand();
+    configureCommand->setChannelNumber(channelNum);
+    cMessage *msg = new cMessage("changeChannel", RADIO_C_CONFIGURE);
+    msg->setControlInfo(configureCommand);
     send(msg, "macOut");
 }
 

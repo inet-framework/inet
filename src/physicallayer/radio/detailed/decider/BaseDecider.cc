@@ -13,7 +13,6 @@
 #include "DetailedRadioFrame.h"
 #include "PhyToMacControlInfo.h"
 #include "FWMath.h"
-#include "PhyControlInfo_m.h"
 
 /** @brief Flag for channel sense (channel idle) handling.
  *

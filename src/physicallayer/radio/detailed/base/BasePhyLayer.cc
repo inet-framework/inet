@@ -4,7 +4,7 @@
 #include <limits>
 
 #include "IRadio.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "PhyToMacControlInfo.h"
 #include "FindModule.h"
 #include "AnalogueModel.h"
@@ -558,12 +558,12 @@ void BasePhyLayer::handleChannelSenseRequest(cMessage* msg) {
 void BasePhyLayer::handleUpperControlMessage(cMessage* msg) {
 	switch(msg->getKind()) {
 // TODO: complete implementation
-    case PHY_C_CONFIGURERADIO:
+    case RADIO_C_CONFIGURE:
     {
-        PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-        if (phyCtrl->getBitrate() != -1)
-            bitrate = phyCtrl->getBitrate();
-        delete phyCtrl;
+        RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(msg->getControlInfo());
+        if (!isNaN(configureCommand->getBitrate().get()))
+            bitrate = configureCommand->getBitrate().get();
+        delete configureCommand;
         break;
     }
 	case CHANNEL_SENSE_REQUEST:
@@ -927,8 +927,8 @@ cObject* BasePhyLayer::setUpControlInfo(cMessage *const pMsg, DeciderResult *con
 
 DetailedRadioSignal* BasePhyLayer::createSignal(cPacket *macPkt)
 {
-    PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo*>(macPkt->getControlInfo());
-    double bitrate = controlInfo ? controlInfo->getBitrate() : this->bitrate;
+    RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest*>(macPkt->getControlInfo());
+    double bitrate = controlInfo ? controlInfo->getBitrate().get() : this->bitrate;
     if (bitrate <= 0)
         throw cRuntimeError("Cannot create signal because the bitrate is undefined");
     double duration = macPkt->getBitLength() / bitrate;

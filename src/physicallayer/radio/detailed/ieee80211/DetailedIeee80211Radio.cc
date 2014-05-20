@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "DetailedIeee80211Radio.h"
 #include "Ieee80211Frame_m.h"
 
@@ -25,8 +25,8 @@ Define_Module(DetailedIeee80211Radio);
 DetailedRadioSignal *DetailedIeee80211Radio::createSignal(cPacket *macFrame)
 {
     if (dynamic_cast<Ieee80211Frame*>(macFrame)) {
-        PhyControlInfo *controlInfo = dynamic_cast<PhyControlInfo*>(macFrame->getControlInfo());
-        double bitrate = controlInfo ? controlInfo->getBitrate() : this->bitrate;
+        RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest*>(macFrame->getControlInfo());
+        double bitrate = controlInfo ? controlInfo->getBitrate().get() : this->bitrate;
         return createSignal(simTime(), packetDuration(macFrame, bitrate), txPower, bitrate);
     }
     else

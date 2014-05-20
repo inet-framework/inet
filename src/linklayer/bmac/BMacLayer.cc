@@ -20,7 +20,6 @@
 #include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
-#include "PhyControlInfo_m.h"
 
 Define_Module(BMacLayer)
 

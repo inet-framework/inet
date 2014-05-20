@@ -18,7 +18,7 @@
 #include "Ieee80211Radio.h"
 #include "Ieee80211Consts.h"
 #include "ScalarImplementation.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 
 Define_Module(Ieee80211Radio);
 
@@ -41,10 +41,10 @@ void Ieee80211Radio::initialize(int stage)
 
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
-    if (message->getKind() == PHY_C_CONFIGURERADIO)
+    if (message->getKind() == RADIO_C_CONFIGURE)
     {
-        PhyControlInfo *phyControlInfo = check_and_cast<PhyControlInfo *>(message->getControlInfo());
-        int newChannelNumber = phyControlInfo->getChannelNumber();
+        RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
+        int newChannelNumber = configureCommand->getChannelNumber();
         if (newChannelNumber != -1)
             setOldRadioChannel(newChannelNumber);
         ScalarRadio::handleUpperCommand(message);

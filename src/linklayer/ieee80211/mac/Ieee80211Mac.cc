@@ -21,7 +21,7 @@
 #include "IRadio.h"
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
@@ -686,18 +686,18 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 
 void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 {
-    if (msg->getKind()==PHY_C_CONFIGURERADIO)
+    if (msg->getKind() == RADIO_C_CONFIGURE)
     {
         EV << "Passing on command " << msg->getName() << " to physical layer\n";
         if (pendingRadioConfigMsg != NULL)
         {
             // merge contents of the old command into the new one, then delete it
-            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
-            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-            if (pNew->getChannelNumber()==-1 && pOld->getChannelNumber()!=-1)
-                pNew->setChannelNumber(pOld->getChannelNumber());
-            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
-                pNew->setBitrate(pOld->getBitrate());
+            RadioConfigureCommand *oldConfigureCommand = check_and_cast<RadioConfigureCommand *>(pendingRadioConfigMsg->getControlInfo());
+            RadioConfigureCommand *newConfigureCommand = check_and_cast<RadioConfigureCommand *>(msg->getControlInfo());
+            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
+                newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
+            if (isNaN(newConfigureCommand->getBitrate().get()) && !isNaN(oldConfigureCommand->getBitrate().get()))
+                newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
             delete pendingRadioConfigMsg;
             pendingRadioConfigMsg = NULL;
         }
@@ -1627,9 +1627,9 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
 {
     double tim;
     double bitRate = bitrate;
-    if (dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo()))
+    if (dynamic_cast<RadioTransmissionRequest*> (frameToSend->getControlInfo()))
     {
-        bitRate = dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo())->getBitrate();
+        bitRate = dynamic_cast<RadioTransmissionRequest*> (frameToSend->getControlInfo())->getBitrate().get();
         if (bitRate == 0)
             bitRate = bitrate;
     }
@@ -1866,9 +1866,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (frameToSend->getControlInfo()!=NULL)
     {
         cObject * ctr = frameToSend->getControlInfo();
-        PhyControlInfo *ctrl = dynamic_cast <PhyControlInfo*> (ctr);
+        RadioTransmissionRequest *ctrl = dynamic_cast <RadioTransmissionRequest*> (ctr);
         if (ctrl == NULL)
-            opp_error("control info is not PhyControlInfo type %s");
+            opp_error("control info is not RadioTransmissionRequest type %s");
         frame->setControlInfo(ctrl->dup());
     }
     if (isMulticast(frameToSend))
@@ -1885,9 +1885,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
             ASSERT(transmissionQueue()->end() != nextframeToSend);
             double bitRate = bitrate;
             int size = (*nextframeToSend)->getBitLength();
-            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo()))
+            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<RadioTransmissionRequest*>(transmissionQueue()->front()->getControlInfo()))
             {
-                bitRate = dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo())->getBitrate();
+                bitRate = dynamic_cast<RadioTransmissionRequest*>(transmissionQueue()->front()->getControlInfo())->getBitrate().get();
                 if (bitRate == 0)
                     bitRate = bitrate;
             }
@@ -1942,14 +1942,14 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
-    PhyControlInfo *phyControlInfo_old = dynamic_cast<PhyControlInfo *>( frameToSend->getControlInfo() );
-    if (phyControlInfo_old)
+    RadioTransmissionRequest *oldTransmissionRequest = dynamic_cast<RadioTransmissionRequest *>( frameToSend->getControlInfo() );
+    if (oldTransmissionRequest)
     {
         EV<<"Per frame1 params"<<endl;
-        PhyControlInfo *phyControlInfo_new = new PhyControlInfo;
-        *phyControlInfo_new = *phyControlInfo_old;
+        RadioTransmissionRequest *newTransmissionRequest = new RadioTransmissionRequest();
+        *newTransmissionRequest = *oldTransmissionRequest;
         //EV<<"PhyControlInfo bitrate "<<phyControlInfo->getBitrate()/1e6<<"Mbps txpower "<<phyControlInfo->txpower()<<"mW"<<endl;
-        frame->setControlInfo(  phyControlInfo_new  );
+        frame->setControlInfo(newTransmissionRequest);
     }
 
     frame->setDuration(0);
@@ -1959,8 +1959,8 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==NULL);
-    PhyControlInfo *ctrl = new PhyControlInfo();
-    ctrl->setBitrate(basicBitrate);
+    RadioTransmissionRequest *ctrl = new RadioTransmissionRequest();
+    ctrl->setBitrate(bps(basicBitrate));
     frame->setControlInfo(ctrl);
     return frame;
 }
@@ -1973,16 +1973,16 @@ Ieee80211Frame *Ieee80211Mac::setBitrateFrame(Ieee80211Frame *frame)
             delete  frame->removeControlInfo();
         return frame;
     }
-    PhyControlInfo *ctrl = NULL;
+    RadioTransmissionRequest *ctrl = NULL;
     if (frame->getControlInfo()==NULL)
     {
-        ctrl = new PhyControlInfo();
+        ctrl = new RadioTransmissionRequest();
         frame->setControlInfo(ctrl);
     }
     else
-        ctrl = dynamic_cast<PhyControlInfo*>(frame->getControlInfo());
+        ctrl = dynamic_cast<RadioTransmissionRequest*>(frame->getControlInfo());
     if (ctrl)
-        ctrl->setBitrate(getBitrate());
+        ctrl->setBitrate(bps(getBitrate()));
     return frame;
 }
 
@@ -2141,15 +2141,14 @@ void Ieee80211Mac::popTransmissionQueue()
 
 double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 {
-
-    PhyControlInfo *ctrl;
+    RadioTransmissionRequest *ctrl;
     double duration;
     EV<<*msg;
-    ctrl = dynamic_cast<PhyControlInfo*> ( msg->removeControlInfo() );
+    ctrl = dynamic_cast<RadioTransmissionRequest*> ( msg->removeControlInfo() );
     if ( ctrl )
     {
-        EV<<"Per frame2 params bitrate "<<ctrl->getBitrate()/1e6<<endl;
-        duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate());
+        EV<<"Per frame2 params bitrate "<<ctrl->getBitrate().get()/1e6<<endl;
+        duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate().get());
         delete ctrl;
         return duration;
     }

@@ -21,7 +21,7 @@
 
 #include "SimplifiedRadio.h"
 #include "ModuleAccess.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
@@ -300,9 +300,7 @@ void SimplifiedRadio::bufferMsg(SimplifiedRadioFrame *radioFrame) //FIXME: add e
 
 SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
 {
-    PhyControlInfo *ctrl = dynamic_cast<PhyControlInfo *>(frame->removeControlInfo());
-    ASSERT(!ctrl || ctrl->getChannelNumber()==-1); // per-packet channel switching not supported
-
+    RadioTransmissionRequest *transmissionRequest = dynamic_cast<RadioTransmissionRequest *>(frame->removeControlInfo());
     // Note: we don't set length() of the SimplifiedRadioFrame, because duration will be used everywhere instead
     //if (ctrl && ctrl->getAdaptiveSensitivity()) updateSensitivity(ctrl->getBitrate());
     SimplifiedRadioFrame *radioFrame = createRadioFrame();
@@ -310,11 +308,11 @@ SimplifiedRadioFrame *SimplifiedRadio::encapsulatePacket(cPacket *frame)
     radioFrame->setPSend(transmitterPower);
     radioFrame->setChannelNumber(radioChannel);
     radioFrame->encapsulate(frame);
-    radioFrame->setBitrate(ctrl ? ctrl->getBitrate() : bitrate);
+    radioFrame->setBitrate(transmissionRequest ? transmissionRequest->getBitrate().get() : bitrate);
     radioFrame->setDuration(radioModel->calculateDuration(radioFrame));
     radioFrame->setSenderPos(getRadioPosition());
     radioFrame->setCarrierFrequency(carrierFrequency);
-    delete ctrl;
+    delete transmissionRequest;
 
     EV << "Frame (" << frame->getClassName() << ")" << frame->getName()
     << " will be transmitted at " << (radioFrame->getBitrate()/1e6) << "Mbps\n";
@@ -411,15 +409,15 @@ void SimplifiedRadio::handleUpperMsg(SimplifiedRadioFrame *radioFrame)
 
 void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
 {
-    if (msgkind==PHY_C_CONFIGURERADIO)
+    if (msgkind == RADIO_C_CONFIGURE)
     {
         // extract new channel number
-        PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
-        int newChannel = phyCtrl->getChannelNumber();
-        double newBitrate = phyCtrl->getBitrate();
+        RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(ctrl);
+        int newChannel = configureCommand->getChannelNumber();
+        double newBitrate = configureCommand->getBitrate().get();
+        double newTransmitterPower = configureCommand->getPower().get();
         delete ctrl;
-
-        if (newChannel!=-1)
+        if (newChannel != -1)
         {
             EV << "Command received: change to channel #" << newChannel << "\n";
 
@@ -434,7 +432,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             else
                 setOldRadioChannel(newChannel); // change channel right now
         }
-        if (newBitrate!=-1)
+        if (!isNaN(newBitrate))
         {
             EV << "Command received: change bitrate to " << (newBitrate/1e6) << "Mbps\n";
 
@@ -449,12 +447,7 @@ void SimplifiedRadio::handleCommand(int msgkind, cObject *ctrl)
             else
                 setBitrate(newBitrate); // change bitrate right now
         }
-    }
-    else if (msgkind==PHY_C_CHANGETRANSMITTERPOWER)
-    {
-        PhyControlInfo *phyCtrl = check_and_cast<PhyControlInfo *>(ctrl);
-        double newTransmitterPower = phyCtrl->getTransmitterPower();
-        if (newTransmitterPower!=-1)
+        if (!isNaN(newTransmitterPower))
         {
             if (newTransmitterPower > (double)getRadioChannelPar("pMax"))
                 transmitterPower = (double) getRadioChannelPar("pMax");

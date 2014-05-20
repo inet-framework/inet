@@ -17,7 +17,7 @@
 
 #include "ScalarRadio.h"
 #include "ScalarImplementation.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 
 Define_Module(ScalarRadio);
 
@@ -33,15 +33,15 @@ ScalarRadio::ScalarRadio(RadioMode radioMode, const IRadioAntenna *antenna, cons
 
 void ScalarRadio::handleUpperCommand(cMessage *message)
 {
-    if (message->getKind() == PHY_C_CONFIGURERADIO)
+    if (message->getKind() == RADIO_C_CONFIGURE)
     {
-        PhyControlInfo *phyControlInfo = check_and_cast<PhyControlInfo *>(message->getControlInfo());
-        bps newBitrate = bps(phyControlInfo->getBitrate());
-        if (newBitrate.get() != -1) {
+        RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
+        bps newBitrate = configureCommand->getBitrate();
+        if (!isNaN(newBitrate.get())) {
             ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
             scalarTransmitter->setBitrate(newBitrate);
         }
-        delete phyControlInfo;
+        delete configureCommand;
     }
     else
         Radio::handleUpperCommand(message);

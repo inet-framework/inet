@@ -27,7 +27,6 @@
 #include "IInterfaceTable.h"
 #include "InterfaceTableAccess.h"
 #include "IPassiveQueue.h"
-#include "PhyControlInfo_m.h"
 #include "opp_utils.h"
 
 

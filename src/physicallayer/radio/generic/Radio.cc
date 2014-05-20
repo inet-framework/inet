@@ -53,6 +53,7 @@ Radio::~Radio()
     delete antenna;
     delete transmitter;
     delete receiver;
+    endTransmissionTimer->removeControlInfo();
     cancelAndDelete(endTransmissionTimer);
 }
 
