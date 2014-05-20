@@ -30,6 +30,13 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
             transmission(transmission)
         {}
 
+        RadioFrame(const RadioFrame &other) :
+            cPacket(other),
+            transmission(other.transmission)
+        {}
+
+        virtual RadioFrame *dup() const {return new RadioFrame(*this);}
+
         virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadioSignalTransmission *getTransmission() const { return transmission; }

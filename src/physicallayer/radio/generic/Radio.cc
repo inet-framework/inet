@@ -66,6 +66,9 @@ void Radio::initialize(int stage)
         transmitter = check_and_cast<IRadioSignalTransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IRadioSignalReceiver *>(getSubmodule("receiver"));
         channel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
+    }
+    else if (stage == INITSTAGE_PHYSICAL_LAYER)
+    {
         channel->addRadio(this);
     }
     else if (stage == INITSTAGE_LAST)
@@ -202,13 +205,13 @@ void Radio::startTransmission(cPacket *macFrame)
     endTransmissionTimer->setControlInfo(const_cast<RadioFrame *>(radioFrame));
     scheduleAt(simTime() + radioFrame->getDuration(), endTransmissionTimer);
     updateTransceiverState();
+    delete macFrame->removeControlInfo();
 }
 
 void Radio::endTransmission()
 {
     RadioFrame *radioFrame = static_cast<RadioFrame*>(endTransmissionTimer->removeControlInfo());
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
-    delete radioFrame;
     updateTransceiverState();
 }
 
@@ -216,13 +219,16 @@ void Radio::startReception(RadioFrame *radioFrame)
 {
     const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
     const IRadioSignalArrival *arrival = channel->getArrival(this, radioFrame->getTransmission());
-    bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && channel->isReceptionAttempted(this, transmission);
-    EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
     cMessage *timer = new cMessage("endReception");
-    timer->setKind(isReceptionAttempted);
     timer->setControlInfo(radioFrame);
-    if (isReceptionAttempted)
-        endReceptionTimer = timer;
+    if (arrival->getStartTime() == simTime())
+    {
+        bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && channel->isReceptionAttempted(this, transmission);
+        EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
+        timer->setKind(isReceptionAttempted);
+        if (isReceptionAttempted)
+            endReceptionTimer = timer;
+    }
     scheduleAt(arrival->getEndTime(), timer);
     updateTransceiverState();
 }
@@ -263,7 +269,7 @@ void Radio::updateTransceiverState()
         newRadioReceptionState = RECEPTION_STATE_UNDEFINED;
     else if (endReceptionTimer && endReceptionTimer->isScheduled())
         newRadioReceptionState = RECEPTION_STATE_RECEIVING;
-    else if (false) // NOTE: synchronization is not modeled in New radio
+    else if (false) // TODO: synchronization model
         newRadioReceptionState = RECEPTION_STATE_SYNCHRONIZING;
     else if (isListeningPossible())
         newRadioReceptionState = RECEPTION_STATE_BUSY;

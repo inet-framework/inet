@@ -29,6 +29,7 @@
 #include "MACAddress.h"
 
 // TODO: add tests for various optimization configurations
+// TODO: should we move transmitPacket/receivePacket/sendToChannel functions to the radio instead?
 class INET_API RadioChannel : public cSimpleModule, public cListener, public IRadioChannel
 {
     protected:
@@ -38,14 +39,17 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         class ReceptionCacheEntry
         {
             public:
-                bool isRadioFrameSent;
+                /**
+                 * The radio frame that was sent to the receiver or NULL.
+                 */
+                const IRadioFrame *frame;
                 const IRadioSignalArrival *arrival;
                 const IRadioSignalReception *reception;
                 const IRadioSignalReceptionDecision *decision;
 
             public:
                 ReceptionCacheEntry() :
-                    isRadioFrameSent(false),
+                    frame(NULL),
                     arrival(NULL),
                     reception(NULL),
                     decision(NULL)
@@ -58,11 +62,23 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         class TransmissionCacheEntry
         {
             public:
+                /**
+                 * The last moment when this transmission may have any effect on
+                 * other transmissions by interfering with them.
+                 */
                 simtime_t interferenceEndTime;
+                /**
+                 * The radio frame that was created by the transmitter is never NULL.
+                 */
+                const IRadioFrame *frame;
+                /**
+                 * The list of intermediate reception computation results.
+                 */
                 std::vector<ReceptionCacheEntry> *receptionCacheEntries;
 
             public:
                 TransmissionCacheEntry() :
+                    frame(NULL),
                     receptionCacheEntries(NULL)
                 {}
         };
@@ -216,6 +232,10 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          * Total number of transmissions.
          */
         mutable long transmissionCount;
+        /**
+         * Total number of radio frame sends.
+         */
+        mutable long sendCount;
         /**
          * Total number of reception computations.
          */
