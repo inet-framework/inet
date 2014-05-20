@@ -267,11 +267,15 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
 
         virtual m getLength() const { return length; }
 
-        // TODO: compute maximum gain
-        virtual double getMaxGain() const { return 1; }
+        virtual double getMaxGain() const { return 1.5; }
 
-        // TODO: compute gain
-        virtual double getGain(Coord direction) const { return 1; }
+        // TODO: compute gain based on positions/orientations
+        virtual double getGain(Coord direction) const { return 1.5; }
+};
+
+class INET_API InterpolatingRadioAntenna : public RadioAntennaBase
+{
+    // TODO: compute antenna gain based on a linear interpolation between two elements of the antenna gain table using the antenna positions/orientations
 };
 
 class INET_API RadioSignalFreeSpaceAttenuationBase : public virtual IRadioSignalAttenuation, public cCompoundModule

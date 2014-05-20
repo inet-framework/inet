@@ -20,6 +20,7 @@
 #include "PhyControlInfo_m.h"
 #include "IMACFrame.h"
 #include "InterfaceTableAccess.h"
+#include "NotifierConsts.h"
 
 Define_Module(RadioChannel);
 
@@ -588,13 +589,13 @@ void RadioChannel::addRadio(const IRadio *radio)
         radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
     if (listeningFilter)
         radioModule->subscribe(OldIRadio::listeningChangedSignal, this);
-    // TODO: subscribe to macAddress changes
+    if (macAddressFilter)
+        getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
 }
 
 void RadioChannel::removeRadio(const IRadio *radio)
 {
     radios.erase(std::remove(radios.begin(), radios.end(), radio));
-    // TODO: remove all references to radio and erase entries from cache
     if (initialized())
         updateLimits();
 }
@@ -745,7 +746,7 @@ const IRadioSignalArrival *RadioChannel::getArrival(const IRadio *radio, const I
 
 void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, long value)
 {
-    if (signal == OldIRadio::radioModeChangedSignal || signal == OldIRadio::listeningChangedSignal)
+    if (signal == OldIRadio::radioModeChangedSignal || signal == OldIRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED)
     {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
         for (std::vector<const IRadioSignalTransmission *>::iterator it = transmissions.begin(); it != transmissions.end(); it++)
