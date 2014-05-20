@@ -98,7 +98,9 @@ RadioChannel::~RadioChannel()
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
     for (std::vector<TransmissionCacheEntry>::const_iterator it = cache.begin(); it != cache.end(); it++)
     {
-        const std::vector<ReceptionCacheEntry> *receptionCacheEntries = (*it).receptionCacheEntries;
+        const TransmissionCacheEntry &transmissionCacheEntry = *it;
+        delete transmissionCacheEntry.frame;
+        const std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries)
         {
             for (std::vector<ReceptionCacheEntry>::const_iterator jt = receptionCacheEntries->begin(); jt != receptionCacheEntries->end(); jt++)
@@ -284,7 +286,8 @@ void RadioChannel::invalidateCachedDecisions(const IRadioSignalTransmission *tra
 {
     for (std::vector<TransmissionCacheEntry>::iterator it = cache.begin(); it != cache.end(); it++)
     {
-        std::vector<ReceptionCacheEntry> *receptionCacheEntries = (*it).receptionCacheEntries;
+        const TransmissionCacheEntry &transmissionCacheEntry = *it;
+        std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries)
         {
             for (std::vector<ReceptionCacheEntry>::iterator jt = receptionCacheEntries->begin(); jt != receptionCacheEntries->end(); jt++)
