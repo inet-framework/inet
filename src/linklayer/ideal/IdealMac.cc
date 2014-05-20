@@ -191,7 +191,7 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
-    if (frame->hasBitError() || frame->getKind() == BITERROR || frame->getKind() == COLLISION)
+    if (frame->hasBitError())
     {
         EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         delete frame;

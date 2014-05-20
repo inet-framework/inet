@@ -43,14 +43,3 @@ class PhyControlInfo
     bool adaptiveSensitivity = false;
     double transmitterPower = -1; // With PHY_C_CHANGETRANSMITTERPOWER: the transmission power to swith to
 }
-
-//
-// Sent up from the radio as message kind value
-//
-// NOTE: make sure it does not conflict with _802_11frameType in Consts80211.h
-//
-enum PhyIndication
-{
-    BITERROR = -1; // the phy has recognized a bit error in the packet
-    COLLISION = 9; // packet lost due to collision
-}

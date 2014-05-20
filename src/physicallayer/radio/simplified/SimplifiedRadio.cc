@@ -622,7 +622,7 @@ void SimplifiedRadio::handleLowerMsgEnd(SimplifiedRadioFrame *radioFrame)
         //    delete radioFrame;
         if (!radioModel->isReceivedCorrectly(radioFrame, list))
         {
-            radioFrame->getEncapsulatedPacket()->setKind(list.size()>1 ? COLLISION : BITERROR);
+            radioFrame->getEncapsulatedPacket()->setBitError(true);
             radioFrame->setName(list.size()>1 ? "COLLISION" : "BITERROR");
 
             numGivenUp++;

@@ -864,15 +864,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
     int frameType = frame ? frame->getType() : -1;
-    int msgKind = msg->getKind();
     logState();
     stateVector.record(fsm.getState());
 
     bool receptionError = false;
     if (frame && isLowerMessage(frame))
     {
-        lastReceiveFailed = (msgKind == COLLISION || msgKind == BITERROR);
-        receptionError = (msgKind == COLLISION || msgKind == BITERROR);
+        lastReceiveFailed = receptionError = frame ? frame->hasBitError() : false;
         scheduleReservePeriod(frame);
     }
 
@@ -1351,7 +1349,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMessage(msg) && (msgKind == COLLISION || msgKind == BITERROR),
+                                     isLowerMessage(msg) && receptionError,
                                      IDLE,
                                      EV << "received frame contains bit errors or collision, next wait period is EIFS\n";
                                      numCollision++;

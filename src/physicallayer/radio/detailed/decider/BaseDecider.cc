@@ -170,7 +170,7 @@ simtime_t BaseDecider::processSignalEnd(DetailedRadioFrame* frame) {
         else {
             ++nbFramesWithoutInterferenceDropped;
         }
-        frame->getEncapsulatedPacket()->setKind(BITERROR);
+        frame->getEncapsulatedPacket()->setBitError(true);
         phy->sendUp(frame, pResult);
     }
     currentSignal.finishProcessing();
