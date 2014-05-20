@@ -1,0 +1,11 @@
+# Failures:
+/examples/httptools/direct/flashdirect/, -f omnetpp.ini -c General -r 0,                500000s,         25e4-59d6
+/examples/httptools/direct/pairdirect/, -f omnetpp.ini -c random -r 0,                 500000s,         b6c9-6992
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c uniform -r 0,                50000s,          5c31-5023
+/examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          b473-2a47
+/examples/inet/nclients/,            -f basicHTTP.ini -c General -r 0,              500000s,         981d-c7bd
+/examples/ipv6/demonetworketh/,      -f omnetpp.ini -c General -r 0,                50000s,          2e82-e76f
+/examples/sctp/multihomed/,          -f omnetpp.ini -c General -r 0,                500s,            a69c-4ce2
+/examples/sctp/nclients/,            -f omnetpp.ini -c General -r 0,                500s,            5827-33c5
+/examples/sctp/cmttest/,             -f omnetpp.ini -c General -r 0,                100s,            cb80-49c7
+/examples/ipv6/nclients/,            -f omnetpp.ini -c PPP_SCTP -r 0,                100s,           95d7-ac71
