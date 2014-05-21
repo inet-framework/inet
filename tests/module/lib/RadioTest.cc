@@ -19,8 +19,6 @@
 #include "RadioTest.h"
 #include "StationaryMobility.h"
 #include "RadioChannel.h"
-#include "MultiThreadedRadioChannel.h"
-#include "CUDARadioChannel.h"
 #include "IdealImplementation.h"
 #include "ScalarImplementation.h"
 #include "DimensionalImplementation.h"
@@ -213,18 +211,6 @@ void testMultipleScalarRadiosWithAllRadioChannels(int radioCount, int frameCount
     IRadioBackgroundNoise *backgroundNoise = new ScalarRadioBackgroundNoise(W(1E-14));
     IRadioChannel *radioChannel = new RadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
     TIME(testMultipleScalarRadios("Sequential", radioChannel, radioCount, frameCount, duration, playgroundSize));
-
-    propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
-    attenuation = new ScalarRadioSignalFreeSpaceAttenuation(2);
-    backgroundNoise = new ScalarRadioBackgroundNoise(W(1E-14));
-    radioChannel = new MultiThreadedRadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN), 3);
-    TIME(testMultipleScalarRadios("Parallel", radioChannel, radioCount, frameCount, duration, playgroundSize));
-
-//    propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
-//    attenuation = new ScalarRadioSignalFreeSpaceAttenuation(2);
-//    backgroundNoise = new ScalarRadioBackgroundNoise(W(1E-14));
-//    radioChannel = new CUDARadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
-//    TIME(testMultipleScalarRadios("CUDA", radioChannel, radioCount, frameCount, duration, playgroundSize));
 }
 
 Define_Module(RadioTest);
