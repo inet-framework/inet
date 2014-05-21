@@ -144,11 +144,13 @@ const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeRecepti
 }
 
 RadioSignalPropagationBase::RadioSignalPropagationBase() :
-    propagationSpeed(mps(sNaN))
+    propagationSpeed(mps(sNaN)),
+    arrivalComputationCount(0)
 {}
 
 RadioSignalPropagationBase::RadioSignalPropagationBase(mps propagationSpeed) :
-    propagationSpeed(propagationSpeed)
+    propagationSpeed(propagationSpeed),
+    arrivalComputationCount(0)
 {}
 
 void RadioSignalPropagationBase::initialize(int stage)
