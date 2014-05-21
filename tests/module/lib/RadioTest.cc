@@ -21,7 +21,6 @@
 #include "RadioChannel.h"
 #include "IdealImplementation.h"
 #include "ScalarImplementation.h"
-#include "DimensionalImplementation.h"
 
 #define TIME(CODE) { struct timespec timeStart, timeEnd; clock_gettime(CLOCK_REALTIME, &timeStart); CODE; clock_gettime(CLOCK_REALTIME, &timeEnd); \
     EV_INFO << "Elapsed time is " << ((timeEnd.tv_sec - timeStart.tv_sec) + (timeEnd.tv_nsec - timeStart.tv_nsec) / 1E+9) << "s during running " << #CODE << endl << endl; }
@@ -90,41 +89,6 @@ void testScalarRadio()
     IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
 
     EV_INFO << "Scalar radio received " << receiverMacFrame << ", reception is " << (receptionDecision->isReceptionSuccessful() ? "successful" : "unsuccessful") << endl;
-
-    delete channel;
-    delete transmitterMobility;
-    delete transmitterRadio;
-    delete transmitterMacFrame;
-    delete receiverMobility;
-    delete receiverRadio;
-    ASSERT(receiverMacFrame == transmitterMacFrame);
-    delete radioFrame;
-}
-
-void testDimensionalRadio()
-{
-    cPacket *transmitterMacFrame = new cPacket("Hello", 0, 64 * 8);
-
-    IRadioSignalPropagation *propagation = new ConstantSpeedRadioSignalPropagation(mps(SPEED_OF_LIGHT), 0);
-    IRadioSignalAttenuation *attenuation = new DimensionalRadioSignalFreeSpaceAttenuation(2);
-    IRadioBackgroundNoise *backgroundNoise = new DimensionalRadioBackgroundNoise(W(1E-14));
-    IRadioChannel *channel = new RadioChannel(propagation, attenuation, backgroundNoise, 1E-12, 10E-3, m(sNaN), m(sNaN));
-
-    IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
-    IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
-    IRadioSignalTransmitter *transmitterTransmitter = new DimensionalRadioSignalTransmitter(bps(2E+6), W(1E-3), Hz(2.4E+9), Hz(2E+6));
-    IRadio *transmitterRadio = new Radio(OldIRadio::RADIO_MODE_TRANSMITTER, transmitterAntenna, transmitterTransmitter, NULL, channel);
-
-    IMobility *receiverMobility = new StationaryMobility(Coord(100, 0));
-    IRadioAntenna *receiverAntenna = new IsotropicRadioAntenna(receiverMobility);
-    IRadioSignalReceiver *receiverReceiver = new DimensionalRadioSignalReceiver(10, W(1E-12), W(1E-11));
-    IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
-
-    IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
-    cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
-    IRadioSignalReceptionDecision *receptionDecision = check_and_cast<IRadioSignalReceptionDecision *>(receiverMacFrame->getControlInfo());
-
-    EV_INFO << "Dimensional radio received " << receiverMacFrame << ", reception is " << (receptionDecision->isReceptionSuccessful() ? "successful" : "unsuccessful") << endl;
 
     delete channel;
     delete transmitterMobility;
@@ -219,7 +183,6 @@ void RadioTest::initialize(int stage)
 {
     testIdealRadio();
     testScalarRadio();
-//    testDimensionalRadio();
     testMultipleScalarRadiosWithAllRadioChannels(10, 100, 2, 100);
     testMultipleScalarRadiosWithAllRadioChannels(20, 200, 2, 100);
     testMultipleScalarRadiosWithAllRadioChannels(40, 400, 2, 100);
