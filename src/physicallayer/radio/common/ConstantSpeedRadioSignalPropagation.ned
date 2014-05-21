@@ -17,6 +17,8 @@
 
 package inet.physicallayer.radio.common;
 
+import inet.physicallayer.radio.contract.IRadioSignalPropagation;
+
 module ConstantSpeedRadioSignalPropagation like IRadioSignalPropagation
 {
     parameters:

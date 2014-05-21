@@ -17,10 +17,10 @@
 
 package inet.physicallayer.radio.generic;
 
-import inet.physicallayer.radio.common.IRadioSignalPropagation;
 import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
 import inet.physicallayer.radio.contract.IRadioChannel;
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
+import inet.physicallayer.radio.contract.IRadioSignalPropagation;
 
 simple RadioChannel like IRadioChannel
 {
