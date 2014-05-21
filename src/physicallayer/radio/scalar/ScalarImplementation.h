@@ -19,7 +19,6 @@
 #define __INET_SCALARIMPLEMENTATION_H_
 
 #include "ImplementationBase.h"
-#include "IRadioConverter.h"
 #include "IModulation.h"
 #include "Radio.h"
 

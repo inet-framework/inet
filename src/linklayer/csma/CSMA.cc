@@ -30,9 +30,6 @@
 
 #include "opp_utils.h"
 #include "FWMath.h"
-#include "BaseDecider.h"
-#include "BasePhyLayer.h"
-#include "BaseConnectionManager.h"
 #include "InterfaceEntry.h"
 #include "IMACProtocolControlInfo.h"
 #include "FindModule.h"
