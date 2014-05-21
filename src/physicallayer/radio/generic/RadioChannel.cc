@@ -99,8 +99,7 @@ RadioChannel::~RadioChannel()
     for (std::vector<TransmissionCacheEntry>::const_iterator it = cache.begin(); it != cache.end(); it++)
     {
         const TransmissionCacheEntry &transmissionCacheEntry = *it;
-        if (transmissionCacheEntry.frame && !check_and_cast<const RadioFrame *>(transmissionCacheEntry.frame)->getOwner())
-            delete transmissionCacheEntry.frame;
+        delete transmissionCacheEntry.frame;
         const std::vector<ReceptionCacheEntry> *receptionCacheEntries = transmissionCacheEntry.receptionCacheEntries;
         if (receptionCacheEntries)
         {
@@ -672,7 +671,8 @@ IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame
                          << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
                          << "E " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     }
-    getTransmissionCacheEntry(transmission)->frame = radioFrame;
+    cMethodCallContextSwitcher contextSwitcher(this);
+    getTransmissionCacheEntry(transmission)->frame = radioFrame->dup();
     return radioFrame;
 }
 

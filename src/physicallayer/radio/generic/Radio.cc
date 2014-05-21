@@ -53,7 +53,6 @@ Radio::~Radio()
     delete antenna;
     delete transmitter;
     delete receiver;
-    endTransmissionTimer->removeControlInfo();
     cancelAndDelete(endTransmissionTimer);
 }
 
@@ -214,6 +213,7 @@ void Radio::endTransmission()
     RadioFrame *radioFrame = static_cast<RadioFrame*>(endTransmissionTimer->removeControlInfo());
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     updateTransceiverState();
+    delete radioFrame;
 }
 
 void Radio::startReception(RadioFrame *radioFrame)
