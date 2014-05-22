@@ -32,12 +32,7 @@
  * purely functional because they may be called several times before the actual
  * transmission arrives at the receiver.
  */
-// TODO: this is rather an interface for receivers that support "what if" questions for the future
-// TODO: create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
-// TODO: add support for synchronization
-// TODO: add support for reception state
-// TODO: extract reception, totalNoise interface
-// TODO: virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const = 0;
+// TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 class INET_API IRadioSignalReceiver : public IPrintableObject
 {
     public:

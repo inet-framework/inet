@@ -24,8 +24,7 @@
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
  */
-// TODO: antenna gain should be computable with two angles
-// TODO: add antenna "snapshot" to transmission
+// TODO: antenna gain should be computable with one angle?
 class INET_API IRadioAntenna
 {
     public:

@@ -27,23 +27,6 @@
 #include "IRadioSignalReceiver.h"
 #include "IRadioChannel.h"
 
-// TODO: revise all names here and also in contract.h
-// TODO: optimize interface in terms of constness, use of references, etc.
-// TODO: add proper destructors with freeing resources
-// TODO: add delete operator calls where appropriate and do proper memory management
-// TODO: create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
-// TODO: !!! extend radio decider interface to allow a separate decision for the detection of preambles during synchronization
-// TODO: !!! extend radio decider interface to provide reception state for listeners? and support for carrier sensing for MACs
-// TODO: avoid the need for subclassing radio and radio channel to be able to have only one parameterizable radio and radio channel NED types
-// TODO: add classification of radios into grid cells to be able provide an approximation of the list of radios within communication range quickly
-// TODO: add time parameters to specify the amount of time needed to switch between radio modes
-// TODO: extend attenuation model with obstacles, is it a separate model or just another attenuation model?
-// TODO: refactor optimizing radio channel to allow turning on and off optimization via runtime parameters instead of subclassing
-// TODO: extend interface to allow CUDA optimizations e.g. with adding Pi(x, y, z, t, f, b) and SNIRi, etc. multiple nested loops to compute the minimum SNIR for all transmissions at all receiver radios at once
-// TODO: add a skeleton for sampled radio signals or maybe support for GNU radio?
-// TODO: using random numbers during computing the radio signal reception decisision is fundamentally wrong because the computation is not purely functional anymore and thus prevents deterministic concurrent parallel computing (because the order of random number generation matters)
-// TODO: to solve this issue we might use multiple random number generators (one for each worker) and/or request receivers to provide an upper limit for the count of random numbers needed to be able to deterministically provide them
-
 class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmission
 {
     protected:
@@ -56,8 +39,6 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         const simtime_t startTime;
         const simtime_t endTime;
         const Coord startPosition;
-        // TODO: FIXME: we don't know the end position at the time of the transmission begin, we can only have a guess
-        // TODO: should we separate transmission begin and end? or should it be an approximation only?
         const Coord endPosition;
 
     public:

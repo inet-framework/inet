@@ -1,40 +1,40 @@
-1. Packet 
-part of MAC
+todo:
+ - revise all names
+ - create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
+ - extend receiver interface to allow a separate decision for the detection of preambles during synchronization
+ - remove those interfaces which are unlikely to have multiple different implementations
+ - add classification of radios into grid cells to be able provide an approximation of the list of radios within communication range quickly
+ - extend attenuation model with obstacles, is it a separate model or just another attenuation model?
+ - we don't know the end position at the time of the transmission begin, we can only have a guess
+   should we separate transmission begin and end? or should it be an approximation only?
+ - using random numbers during computing the radio signal reception decisision is fundamentally wrong because the computation is not purely functional anymore and thus prevents deterministic concurrent parallel computing (because the order of random number generation matters)
+   to solve this issue we might use multiple random number generators (one for each worker) and/or request receivers to provide an upper limit for the count of random numbers needed to be able to deterministically provide them
 
-2. Bit 
-cyclic redundancy check insertion/removal (CRC)
-forward error correction coding/encoding (FEC)
-bit interleaving/deinterleaving
+packet domain:
+ - part of MAC
 
-3. Symbol 
-modulation/demodulation
-pilot/preamble insertion/removal
-spreading/despreading
-antenna beamforming
-space-time coding/decoding
-spatial multiplexing/demultiplexing
+bit domain:
+ - cyclic redundancy check insertion/removal (CRC)
+ - forward error correction coding/encoding (FEC)
+ - bit interleaving/deinterleaving
 
-4. sample or waveform 
-pulse shaping/matching filter
-carrier sensing/energy detection
-synchronization/pll
+symbol domain:
+ - modulation/demodulation
+ - pilot/preamble insertion/removal
+ - spreading/despreading
+ - antenna beamforming
+ - space-time coding/decoding
+ - spatial multiplexing/demultiplexing
 
-5. analog 
-DA/AD conversion
-IF up/down conversion
-PLL
+sample or waveform domain:
+ - pulse shaping/matching filter
+ - carrier sensing/energy detection
+ - synchronization/pll
 
-decider -> snir
-
-
-
-
-
-TODO:
- - doppler shift
- - polarization
- - preamble/pilot/sychronization
- - mimo, antenna gain
+analog domain:
+ - DA/AD conversion
+ - IF up/down conversion
+ - PLL
 
 model:
  - mobility (position)
@@ -79,3 +79,9 @@ algorithms:
  - Filter pulse
  - insert preamble/pilot
  - synchronize
+
+missing:
+ - doppler shift
+ - polarization
+ - preamble/pilot/sychronization
+ - mimo, antenna gain

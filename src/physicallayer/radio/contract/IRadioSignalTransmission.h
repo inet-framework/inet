@@ -45,7 +45,8 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         virtual const IRadio *getTransmitter() const = 0;
 
         /**
-         * TODO
+         * Returns the mac frame corresponding to this transmission. This function
+         * never returns NULL.
          */
         virtual const cPacket *getMacFrame() const = 0;
 
@@ -69,8 +70,6 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         /**
          * Returns the position where the transmitter ended this transmission.
          */
-        // TODO: FIXME: we don't know the end position at the time of the transmission begin, we can only have a guess
-        // TODO: should we separate transmission begin and end? or should it be an approximation only?
         virtual const Coord getEndPosition() const = 0;
 };
 

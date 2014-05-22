@@ -43,7 +43,6 @@ class INET_API IRadioChannel
         virtual void addRadio(const IRadio *radio) = 0;
         virtual void removeRadio(const IRadio *radio) = 0;
 
-        // TODO: separate start and end of transmission to allow mobility changes in between
         virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission) = 0;
         virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame) = 0;
 

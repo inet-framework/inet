@@ -31,9 +31,8 @@ class INET_API IRadioSignalPropagation : public IPrintableObject
         /**
          * Returns the theoretical propagation speed of radio signals in the range
          * (0, +infinity). The value might be different from the approximation
-         * that is used in the actual computation of arrival times.
+         * provided by the actual computation of arrival times.
          */
-        // TODO: move this to the radio channel, because it's independent of the approximation?
         virtual mps getPropagationSpeed() const = 0;
 
         /**
