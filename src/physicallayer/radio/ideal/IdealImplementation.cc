@@ -16,6 +16,7 @@
 //
 
 #include "IdealImplementation.h"
+#include "GenericImplementation.h"
 #include "IRadioChannel.h"
 
 Define_Module(IdealRadioSignalFreeSpaceAttenuation);
