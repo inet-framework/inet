@@ -37,8 +37,6 @@
 class INET_API IRadioSignalReceiver : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalReceiver() {}
-
         /**
          * Returns the minimum interference power below which receptions are to
          * be ignored while computing the interference. Returns a value in the

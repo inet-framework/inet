@@ -26,8 +26,6 @@
  */
 class INET_API IRadioSignalSource : public IPrintableObject
 {
-    public:
-        virtual ~IRadioSignalSource() {}
 };
 
 #endif

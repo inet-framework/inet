@@ -30,8 +30,6 @@ class IRadio;
 class INET_API IRadioSignalTransmission : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalTransmission() {}
-
         /**
          * Returns an identifier for this transmission which is globally unique
          * for the whole lifetime of the simulation among all transmissions.

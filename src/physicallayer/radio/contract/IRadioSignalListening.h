@@ -27,8 +27,6 @@
 class INET_API IRadioSignalListening : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalListening() {}
-
         virtual const IRadio *getReceiver() const = 0;
 
         virtual const simtime_t getStartTime() const = 0;

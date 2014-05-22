@@ -195,8 +195,6 @@ class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
         static cEnum *transmissionStateEnum;
 
     public:
-        virtual ~IRadio() { }
-
         /**
          * Returns the gate of the radio that receives incoming radio frames.
          */

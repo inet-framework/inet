@@ -27,8 +27,6 @@
 class INET_API IRadioSignalListeningDecision : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalListeningDecision() {}
-
         virtual const IRadioSignalListening *getListening() const = 0;
 
         virtual bool isListeningPossible() const = 0;

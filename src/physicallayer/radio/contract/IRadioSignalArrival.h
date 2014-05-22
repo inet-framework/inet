@@ -28,8 +28,6 @@
 class INET_API IRadioSignalArrival : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalArrival() {}
-
         virtual const simtime_t getStartPropagationTime() const = 0;
         virtual const simtime_t getEndPropagationTime() const = 0;
 

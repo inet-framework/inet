@@ -27,8 +27,6 @@
 class INET_API IRadioSignalReceptionDecision : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalReceptionDecision() {}
-
         /**
          * Returns the corresponding reception that also specifies the receiver
          * and the received transmission. This function never returns NULL.

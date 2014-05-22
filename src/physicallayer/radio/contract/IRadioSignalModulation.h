@@ -23,8 +23,6 @@
 class INET_API IRadioSignalModulation : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalModulation() {}
-
         virtual int getCodeWordLength() const = 0;
 
         virtual int getConstellationSize() const = 0;

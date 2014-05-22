@@ -26,8 +26,6 @@
 class INET_API IRadioSignalReception : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalReception() {}
-
         /**
          * Returns the receiver that received the corresponding transmission
          * from the radio channel. This function never returns NULL.

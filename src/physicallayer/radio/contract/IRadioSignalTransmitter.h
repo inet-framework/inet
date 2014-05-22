@@ -27,8 +27,6 @@
 class INET_API IRadioSignalTransmitter : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalTransmitter() {}
-
         /**
          * Returns the maximum transmission power above which no transmission is
          * ever transmitted. Returns a value in the range [0, +infinity] or NaN

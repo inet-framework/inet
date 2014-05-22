@@ -27,8 +27,6 @@
 class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
 {
     public:
-        virtual ~IRadioFrame() {}
-
         virtual const IRadioSignalTransmission *getTransmission() const = 0;
 };
 
