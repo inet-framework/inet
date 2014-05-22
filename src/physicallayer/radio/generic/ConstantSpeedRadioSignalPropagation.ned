@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.common;
+package inet.physicallayer.radio.generic;
 
-import inet.physicallayer.radio.contract.IRadioSignalPropagation;
+import inet.physicallayer.radio.common.RadioSignalPropagationBase;
 
-module ImmediateRadioSignalPropagation like IRadioSignalPropagation
+module ConstantSpeedRadioSignalPropagation extends RadioSignalPropagationBase
 {
     parameters:
-        @class(ImmediateRadioSignalPropagation);
+        @class(ConstantSpeedRadioSignalPropagation);
 }

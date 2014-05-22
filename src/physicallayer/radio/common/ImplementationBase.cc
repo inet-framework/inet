@@ -156,7 +156,7 @@ RadioSignalPropagationBase::RadioSignalPropagationBase(mps propagationSpeed) :
 void RadioSignalPropagationBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
-        propagationSpeed = mps(SPEED_OF_LIGHT); // TODO: mps(par("propagationSpeed"));
+        propagationSpeed = mps(par("propagationSpeed"));
 }
 
 void RadioSignalPropagationBase::finish()
