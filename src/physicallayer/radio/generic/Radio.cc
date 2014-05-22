@@ -88,12 +88,12 @@ void Radio::setRadioMode(RadioMode newRadioMode)
     if (radioMode != newRadioMode)
     {
         EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
-        if (newRadioMode != OldIRadio::RADIO_MODE_RECEIVER && newRadioMode != OldIRadio::RADIO_MODE_TRANSCEIVER)
+        if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
         {
             endReceptionTimer = NULL;
             lastReceptionStateChange = simTime();
         }
-        else if (newRadioMode != OldIRadio::RADIO_MODE_TRANSMITTER && newRadioMode != OldIRadio::RADIO_MODE_TRANSCEIVER)
+        else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
         {
             if (endTransmissionTimer->isScheduled())
                 throw cRuntimeError("Aborting ongoing transmissions is not supported");

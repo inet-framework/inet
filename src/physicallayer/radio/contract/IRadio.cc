@@ -17,51 +17,51 @@
 
 #include "IRadio.h"
 
-simsignal_t OldIRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
-simsignal_t OldIRadio::listeningChangedSignal = cComponent::registerSignal("listeningChanged");
-simsignal_t OldIRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");
-simsignal_t OldIRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
-simsignal_t OldIRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
+simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
+simsignal_t IRadio::listeningChangedSignal = cComponent::registerSignal("listeningChanged");
+simsignal_t IRadio::receptionStateChangedSignal = cComponent::registerSignal("receptionStateChanged");
+simsignal_t IRadio::transmissionStateChangedSignal = cComponent::registerSignal("transmissionStateChanged");
+simsignal_t IRadio::radioChannelChangedSignal = cComponent::registerSignal("radioChannelChanged");
 
-cEnum *OldIRadio::radioModeEnum = NULL;
-cEnum *OldIRadio::receptionStateEnum = NULL;
-cEnum *OldIRadio::transmissionStateEnum = NULL;
+cEnum *IRadio::radioModeEnum = NULL;
+cEnum *IRadio::receptionStateEnum = NULL;
+cEnum *IRadio::transmissionStateEnum = NULL;
 
 Register_Enum(RadioMode,
-              (OldIRadio::RADIO_MODE_OFF,
-               OldIRadio::RADIO_MODE_SLEEP,
-               OldIRadio::RADIO_MODE_RECEIVER,
-               OldIRadio::RADIO_MODE_TRANSMITTER,
-               OldIRadio::RADIO_MODE_TRANSCEIVER,
-               OldIRadio::RADIO_MODE_SWITCHING));
+              (IRadio::RADIO_MODE_OFF,
+               IRadio::RADIO_MODE_SLEEP,
+               IRadio::RADIO_MODE_RECEIVER,
+               IRadio::RADIO_MODE_TRANSMITTER,
+               IRadio::RADIO_MODE_TRANSCEIVER,
+               IRadio::RADIO_MODE_SWITCHING));
 
 Register_Enum(ReceptionState,
-              (OldIRadio::RECEPTION_STATE_UNDEFINED,
-               OldIRadio::RECEPTION_STATE_IDLE,
-               OldIRadio::RECEPTION_STATE_BUSY,
-               OldIRadio::RECEPTION_STATE_SYNCHRONIZING,
-               OldIRadio::RECEPTION_STATE_RECEIVING));
+              (IRadio::RECEPTION_STATE_UNDEFINED,
+               IRadio::RECEPTION_STATE_IDLE,
+               IRadio::RECEPTION_STATE_BUSY,
+               IRadio::RECEPTION_STATE_SYNCHRONIZING,
+               IRadio::RECEPTION_STATE_RECEIVING));
 
 Register_Enum(TransmissionState,
-              (OldIRadio::TRANSMISSION_STATE_UNDEFINED,
-               OldIRadio::TRANSMISSION_STATE_IDLE,
-               OldIRadio::TRANSMISSION_STATE_TRANSMITTING));
+              (IRadio::TRANSMISSION_STATE_UNDEFINED,
+               IRadio::TRANSMISSION_STATE_IDLE,
+               IRadio::TRANSMISSION_STATE_TRANSMITTING));
 
-const char *OldIRadio::getRadioModeName(RadioMode radioMode)
+const char *IRadio::getRadioModeName(RadioMode radioMode)
 {
     if (!radioModeEnum)
         radioModeEnum = cEnum::get("RadioMode");
     return radioModeEnum->getStringFor(radioMode) + 11;
 }
 
-const char *OldIRadio::getRadioReceptionStateName(ReceptionState receptionState)
+const char *IRadio::getRadioReceptionStateName(ReceptionState receptionState)
 {
     if (!receptionStateEnum)
         receptionStateEnum = cEnum::get("ReceptionState");
     return receptionStateEnum->getStringFor(receptionState) + 16;
 }
 
-const char *OldIRadio::getRadioTransmissionStateName(TransmissionState transmissionState)
+const char *IRadio::getRadioTransmissionStateName(TransmissionState transmissionState)
 {
     if (!transmissionStateEnum)
         transmissionStateEnum = cEnum::get("TransmissionState");

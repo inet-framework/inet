@@ -589,9 +589,9 @@ void RadioChannel::addRadio(const IRadio *radio)
         updateLimits();
     cModule *radioModule = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     if (radioModeFilter)
-        radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
     if (listeningFilter)
-        radioModule->subscribe(OldIRadio::listeningChangedSignal, this);
+        radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
 }
@@ -713,7 +713,7 @@ const IRadioSignalListeningDecision *RadioChannel::listenOnChannel(const IRadio 
 bool RadioChannel::isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const
 {
     const Radio *receiverRadio = check_and_cast<const Radio *>(radio);
-    if (radioModeFilter && receiverRadio->getRadioMode() != OldIRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != OldIRadio::RADIO_MODE_TRANSCEIVER)
+    if (radioModeFilter && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_RECEIVER && receiverRadio->getRadioMode() != IRadio::RADIO_MODE_TRANSCEIVER)
         return false;
     else if (listeningFilter && !radio->getReceiver()->computeIsReceptionPossible(transmission))
         return false;
@@ -749,7 +749,7 @@ const IRadioSignalArrival *RadioChannel::getArrival(const IRadio *radio, const I
 
 void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, long value)
 {
-    if (signal == OldIRadio::radioModeChangedSignal || signal == OldIRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED)
+    if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED)
     {
         const Radio *receiverRadio = check_and_cast<const Radio *>(source);
         for (std::vector<const IRadioSignalTransmission *>::iterator it = transmissions.begin(); it != transmissions.end(); it++)

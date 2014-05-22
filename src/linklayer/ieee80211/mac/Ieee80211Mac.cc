@@ -357,14 +357,14 @@ void Ieee80211Mac::initialize(int stage)
         initWatches();
 
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
-        radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(OldIRadio::receptionStateChangedSignal, this);
-        radioModule->subscribe(OldIRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<OldIRadio *>(radioModule);
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         // interface
         if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
@@ -819,14 +819,14 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == OldIRadio::receptionStateChangedSignal)
+    if (signalID == IRadio::receptionStateChangedSignal)
         handleWithFSM(mediumStateChange);
-    else if (signalID == OldIRadio::transmissionStateChangedSignal)
+    else if (signalID == IRadio::transmissionStateChangedSignal)
     {
         handleWithFSM(mediumStateChange);
-        OldIRadio::TransmissionState newRadioTransmissionState = (OldIRadio::TransmissionState)value;
-        if (transmissionState == OldIRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == OldIRadio::TRANSMISSION_STATE_IDLE)
-            radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         transmissionState = newRadioTransmissionState;
     }
 }
@@ -1695,7 +1695,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
             reserve = std::max(reserve, oldReserve);
             cancelEvent(endReserve);
         }
-        else if (radio->getReceptionState() == OldIRadio::RECEPTION_STATE_IDLE)
+        else if (radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE)
         {
             // NAV: the channel just became virtually busy according to the spec
             scheduleAt(simTime(), mediumStateChange);
@@ -1775,7 +1775,7 @@ void Ieee80211Mac::sendACKFrame(Ieee80211DataOrMgmtFrame *frameToACK)
 {
     EV << "sending ACK frame\n";
     numAckSend++;
-    radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildACKFrame(frameToACK)));
 }
 
@@ -1821,14 +1821,14 @@ void Ieee80211Mac::sendDataFrame(Ieee80211DataOrMgmtFrame *frameToSend)
         scheduleAt(simTime() + time, endTXOP);
     }
     EV << "sending Data frame\n";
-    radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBitrateFrame(frameToSend))));
 }
 
 void Ieee80211Mac::sendRTSFrame(Ieee80211DataOrMgmtFrame *frameToSend)
 {
     EV << "sending RTS frame\n";
-    radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildRTSFrame(frameToSend)));
 }
 
@@ -1837,7 +1837,7 @@ void Ieee80211Mac::sendMulticastFrame(Ieee80211DataOrMgmtFrame *frameToSend)
     EV << "sending Multicast frame\n";
     if (frameToSend->getControlInfo())
         delete frameToSend->removeControlInfo();
-    radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(buildDataFrame(dynamic_cast<Ieee80211DataOrMgmtFrame*>(setBasicBitrate(frameToSend))));
 }
 
@@ -1852,7 +1852,7 @@ void Ieee80211Mac::sendCTSFrameOnEndSIFS()
 void Ieee80211Mac::sendCTSFrame(Ieee80211RTSFrame *rtsFrame)
 {
     EV << "sending CTS frame\n";
-    radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+    radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
     sendDown(setBasicBitrate(buildCTSFrame(rtsFrame)));
 }
 
@@ -2061,12 +2061,12 @@ void Ieee80211Mac::resetStateVariables()
 
 bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
 {
-    return msg == mediumStateChange || (msg == endReserve && radio->getReceptionState() == OldIRadio::RECEPTION_STATE_IDLE);
+    return msg == mediumStateChange || (msg == endReserve && radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
 }
 
 bool Ieee80211Mac::isMediumFree()
 {
-    return !endReserve->isScheduled() && radio->getReceptionState() == OldIRadio::RECEPTION_STATE_IDLE;
+    return !endReserve->isScheduled() && radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 }
 
 bool Ieee80211Mac::isMulticast(Ieee80211Frame *frame)

@@ -51,9 +51,9 @@ void LMacLayer::initialize(int stage)
         registerInterface();
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
-        radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(OldIRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<OldIRadio *>(radioModule);
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
         WATCH(macState);
     }
@@ -234,7 +234,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			{
 				EV_DETAIL << "Waking up in my slot. Switch to RECV first to check the channel.\n";
 				macState = CCA;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+				radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 				EV_DETAIL << "Old state: SLEEP, New state: CCA" << endl;
 
 				double small_delay = controlDuration*dblrand();
@@ -245,7 +245,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			{
 				EV_DETAIL << "Waking up in a foreign slot. Ready to receive control packet.\n";
 				macState = WAIT_CONTROL;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+				radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 				EV_DETAIL << "Old state: SLEEP, New state: WAIT_CONTROL" << endl;
 				if (!SETUP_PHASE)	//in setup phase do not sleep
 					scheduleAt(simTime()+2.f*controlDuration, timeout);
@@ -281,7 +281,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			EV << "Channel is free, so let's prepare for sending.\n";
 
 			macState = SEND_CONTROL;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			EV_DETAIL << "Old state: CCA, New state: SEND_CONTROL" << endl;
 
 		}
@@ -343,7 +343,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 				EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
 				macState = SLEEP;
 				EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				if (timeout->isScheduled())
 					cancelEvent(timeout);
 			}
@@ -374,7 +374,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			// in any case, go back to sleep
 			macState = SLEEP;
 			EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 		}
 		else if(msg->getKind() == LMAC_SETUP_PHASE_END)
 		{
@@ -398,7 +398,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			EV_DETAIL << "Control timeout. Go back to sleep.\n";
 			macState = SLEEP;
 			EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 		}
 		else if(msg->getKind() == LMAC_CONTROL)
 		{
@@ -458,7 +458,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 				EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
 				macState = SLEEP;
 				EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				if (timeout->isScheduled())
 					cancelEvent(timeout);
 			}
@@ -523,7 +523,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			if (currSlot != mySlot)
 			{
 				EV_DETAIL << "ERROR: Send data message received, but we are not in our slot!!! Repair.\n";
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				if (timeout->isScheduled())
 					cancelEvent(timeout);
 				return;
@@ -588,7 +588,7 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
 			// in any case, go back to sleep
 			macState = SLEEP;
 			EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 			if (timeout->isScheduled())
 				cancelEvent(timeout);
 		}
@@ -623,10 +623,10 @@ void LMacLayer::handleLowerPacket(cPacket *msg)
  */
 void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == OldIRadio::transmissionStateChangedSignal)
+    if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        OldIRadio::TransmissionState newRadioTransmissionState = (OldIRadio::TransmissionState)value;
-        if (transmissionState == OldIRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == OldIRadio::TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             // if data is scheduled for transfer, don;t do anything.
             if (sendData->isScheduled())
@@ -638,17 +638,17 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
                 EV_DETAIL << " transmission over. nothing else is scheduled, get back to sleep." << endl;
                 macState = SLEEP;
                 EV_DETAIL << "Old state: ?, New state: SLEEP" << endl;
-                radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+                radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
                 if (timeout->isScheduled())
                     cancelEvent(timeout);
             }
         }
         transmissionState = newRadioTransmissionState;
     }
-	else if (signalID == OldIRadio::radioModeChangedSignal)
+	else if (signalID == IRadio::radioModeChangedSignal)
     {
-        OldIRadio::RadioMode radioMode = (OldIRadio::RadioMode)value;
-        if (macState == SEND_CONTROL && radioMode == OldIRadio::RADIO_MODE_TRANSMITTER)
+        IRadio::RadioMode radioMode = (IRadio::RadioMode)value;
+        if (macState == SEND_CONTROL && radioMode == IRadio::RADIO_MODE_TRANSMITTER)
         {
             // we just switched to TX after CCA, so simply send the first sendPremable self message
             scheduleAt(simTime(), send_control);

@@ -27,7 +27,7 @@
  *
  * @author Levente Meszaros
  */
-class INET_API RadioBase : public PhysicalLayerBase, public virtual OldIRadio
+class INET_API RadioBase : public PhysicalLayerBase, public virtual IRadio
 {
   protected:
     /** Internal state */

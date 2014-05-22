@@ -33,7 +33,7 @@
 // TODO: 2. we may want to add/remove receptions for ongoing transmissions based on the same criteria
 // TODO: 3. we may also directly call receivers at reception starts/ends from the radio channel instead of sending a message
 // TODO: implement pick up mechanism for transmissions that were not sent by the channel but affect the radio's state and/or output
-class INET_API Radio : public RadioBase, public virtual IRadio
+class INET_API Radio : public RadioBase
 {
     protected:
         static int nextId;

@@ -26,6 +26,8 @@
 #include "IRadioSignalReceiver.h"
 #include "IRadioSignalTransmitter.h"
 
+class IRadioChannel;
+
 /**
  * This purely virtual interface provides an abstraction for different radios.
  * This interface represents a physical device that is capable of transmitting
@@ -38,7 +40,7 @@
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value
 // TODO: make enums global or remove prefix or abbreviate prefix or maybe keep as it is?
-class INET_API OldIRadio : public IPhysicalLayer
+class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
 {
     public:
         /**
@@ -195,7 +197,7 @@ class INET_API OldIRadio : public IPhysicalLayer
         static cEnum *transmissionStateEnum;
 
     public:
-        virtual ~OldIRadio() { }
+        virtual ~IRadio() { }
 
         /**
          * Returns the mobility of the radio.
@@ -246,6 +248,16 @@ class INET_API OldIRadio : public IPhysicalLayer
         // TODO: obsolete
         virtual void setOldRadioChannel(int radioChannel) = 0;
 
+        virtual int getId() const = 0;
+
+        virtual const IRadioAntenna *getAntenna() const = 0;
+        virtual const IRadioSignalTransmitter *getTransmitter() const = 0;
+        virtual const IRadioSignalReceiver *getReceiver() const = 0;
+        virtual const IRadioChannel *getChannel() const = 0;
+
+        virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
+        virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
+
     public:
         /**
          * Returns the name of the provided radio mode.
@@ -261,25 +273,6 @@ class INET_API OldIRadio : public IPhysicalLayer
          * Returns the name of the provided radio transmission state.
          */
         static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
-};
-
-class IRadioChannel;
-
-// TODO: merge with OldIRadio
-class INET_API IRadio : public IRadioSignalSource
-{
-    public:
-        virtual ~IRadio() {}
-
-        virtual int getId() const = 0;
-
-        virtual const IRadioAntenna *getAntenna() const = 0;
-        virtual const IRadioSignalTransmitter *getTransmitter() const = 0;
-        virtual const IRadioSignalReceiver *getReceiver() const = 0;
-        virtual const IRadioChannel *getChannel() const = 0;
-
-        virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
-        virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
 };
 
 #endif

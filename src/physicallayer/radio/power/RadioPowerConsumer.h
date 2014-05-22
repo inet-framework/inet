@@ -41,7 +41,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
     double transmitterTransmittingPowerConsumption;
 
     // environment
-    OldIRadio *radio;
+    IRadio *radio;
     IPowerSource *powerSource;
 
     // internal state

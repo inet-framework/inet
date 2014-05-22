@@ -56,9 +56,9 @@ void BMacLayer::initialize(int stage)
         registerInterface();
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
-        radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(OldIRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<OldIRadio *>(radioModule);
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
 		// init the dropped packet info
 		WATCH(macState);
@@ -255,7 +255,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 		{
 			EV_DETAIL << "State INIT, message BMAC_START, new state SLEEP" << endl;
 			changeDisplayColor(BLACK);
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 			macState = SLEEP;
 			scheduleAt(simTime()+dblrand()*slotDuration, wakeup);
 			return;
@@ -266,7 +266,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 		{
 			EV_DETAIL << "State SLEEP, message BMAC_WAKEUP, new state CCA" << endl;
 			scheduleAt(simTime() + checkInterval, cca_timeout);
-			radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+			radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 			changeDisplayColor(GREEN);
 			macState = CCA;
 			return;
@@ -282,7 +282,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				EV_DETAIL << "State CCA, message CCA_TIMEOUT, new state"
 						  " SEND_PREAMBLE" << endl;
 				macState = SEND_PREAMBLE;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+				radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 				changeDisplayColor(YELLOW);
 				scheduleAt(simTime() + slotDuration, stop_preambles);
 				return;
@@ -294,7 +294,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 					   << endl;
 				scheduleAt(simTime() + slotDuration, wakeup);
 				macState = SLEEP;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				changeDisplayColor(BLACK);
 				return;
 			}
@@ -378,7 +378,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				EV_DETAIL << "State WAIT_TX_DATA_OVER, message BMAC_DATA_TX_OVER,"
 						  " new state WAIT_ACK" << endl;
 				macState = WAIT_ACK;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+				radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 				changeDisplayColor(GREEN);
 				scheduleAt(simTime()+checkInterval, ack_timeout);
 			}
@@ -394,7 +394,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				else
 					scheduleAt(simTime() + slotDuration, wakeup);
 				macState = SLEEP;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				changeDisplayColor(BLACK);
 			}
 			return;
@@ -411,7 +411,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				txAttempts++;
 				macState = SEND_PREAMBLE;
 				scheduleAt(simTime() + slotDuration, stop_preambles);
-				radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+				radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 				changeDisplayColor(YELLOW);
 			}
 			else
@@ -427,7 +427,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				else
 					scheduleAt(simTime() + slotDuration, wakeup);
 				macState = SLEEP;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				changeDisplayColor(BLACK);
 				nbMissedAcks++;
 			}
@@ -463,7 +463,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				else
 					scheduleAt(simTime() + slotDuration, wakeup);
 				macState = SLEEP;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				changeDisplayColor(BLACK);
 				lastDataPktDestAddr = MACAddress::BROADCAST_ADDRESS;
 			}
@@ -512,7 +512,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 						  " SEND_ACK" << endl;
 				macState = SEND_ACK;
 				lastDataPktSrcAddr = src;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+				radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 				changeDisplayColor(YELLOW);
 			}
 			else
@@ -525,7 +525,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 				else
 					scheduleAt(simTime() + slotDuration, wakeup);
 				macState = SLEEP;
-				radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 				changeDisplayColor(BLACK);
 			}
 			return;
@@ -540,7 +540,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 			else
 				scheduleAt(simTime() + slotDuration, wakeup);
 			macState = SLEEP;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 			changeDisplayColor(BLACK);
 			return;
 		}
@@ -568,7 +568,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 			else
 				scheduleAt(simTime() + slotDuration, wakeup);
 			macState = SLEEP;
-			radio->setRadioMode(OldIRadio::RADIO_MODE_SLEEP);
+			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
 			changeDisplayColor(BLACK);
 			lastDataPktSrcAddr = MACAddress::BROADCAST_ADDRESS;
 			return;
@@ -608,10 +608,10 @@ void BMacLayer::sendDataPacket()
 void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == OldIRadio::radioModeChangedSignal)
+    if (signalID == IRadio::radioModeChangedSignal)
     {
-        OldIRadio::RadioMode radioMode = (OldIRadio::RadioMode)value;
-        if (radioMode == OldIRadio::RADIO_MODE_TRANSMITTER)
+        IRadio::RadioMode radioMode = (IRadio::RadioMode)value;
+        if (radioMode == IRadio::RADIO_MODE_TRANSMITTER)
         {
             // we just switched to TX after CCA, so simply send the first
             // sendPremable self message
@@ -626,10 +626,10 @@ void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
         }
     }
     // Transmission of one packet is over
-    else if (signalID == OldIRadio::transmissionStateChangedSignal)
+    else if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        OldIRadio::TransmissionState newRadioTransmissionState = (OldIRadio::TransmissionState)value;
-        if (transmissionState == OldIRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == OldIRadio::TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             if (macState == WAIT_TX_DATA_OVER)
                 scheduleAt(simTime(), data_tx_over);

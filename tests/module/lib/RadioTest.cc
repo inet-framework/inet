@@ -42,12 +42,12 @@ void testIdealRadio()
     IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
     IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
     IRadioSignalTransmitter *transmitterTransmitter = new IdealRadioSignalTransmitter(bps(2E+6), m(100), m(500), m(1000));
-    IRadio *transmitterRadio = new Radio(OldIRadio::RADIO_MODE_TRANSMITTER, transmitterAntenna, transmitterTransmitter, NULL, channel);
+    IRadio *transmitterRadio = new Radio(IRadio::RADIO_MODE_TRANSMITTER, transmitterAntenna, transmitterTransmitter, NULL, channel);
 
     IMobility *receiverMobility = new StationaryMobility(Coord(100, 0));
     IRadioAntenna *receiverAntenna = new IsotropicRadioAntenna(receiverMobility);
     IRadioSignalReceiver *receiverReceiver = new IdealRadioSignalReceiver(false);
-    IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
+    IRadio *receiverRadio = new Radio(IRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
     IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
     cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
@@ -77,12 +77,12 @@ void testScalarRadio()
     IMobility *transmitterMobility = new StationaryMobility(Coord(0, 0));
     IRadioAntenna *transmitterAntenna = new IsotropicRadioAntenna(transmitterMobility);
     IRadioSignalTransmitter *transmitterTransmitter = new ScalarRadioSignalTransmitter(NULL, 100, bps(2E+6), W(1E-3), Hz(2.4E+9), Hz(2E+6));
-    IRadio *transmitterRadio = new Radio(OldIRadio::RADIO_MODE_TRANSMITTER, transmitterAntenna, transmitterTransmitter, NULL, channel);
+    IRadio *transmitterRadio = new Radio(IRadio::RADIO_MODE_TRANSMITTER, transmitterAntenna, transmitterTransmitter, NULL, channel);
 
     IMobility *receiverMobility = new StationaryMobility(Coord(100, 0));
     IRadioAntenna *receiverAntenna = new IsotropicRadioAntenna(receiverMobility);
     IRadioSignalReceiver *receiverReceiver = new ScalarRadioSignalReceiver(NULL, 10, W(1E-12), W(1E-12), Hz(2.4E+9), Hz(2E+6));
-    IRadio *receiverRadio = new Radio(OldIRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
+    IRadio *receiverRadio = new Radio(IRadio::RADIO_MODE_RECEIVER, receiverAntenna, NULL, receiverReceiver, channel);
 
     IRadioFrame *radioFrame = channel->transmitPacket(transmitterRadio, transmitterMacFrame);
     cPacket *receiverMacFrame = channel->receivePacket(receiverRadio, radioFrame);
@@ -113,7 +113,7 @@ void testMultipleScalarRadios(const char *name, IRadioChannel *channel, int radi
     {
         IMobility *mobility = new StationaryMobility(Coord(random(0, playgroundSize), random(0, playgroundSize)));
         IRadioAntenna *antenna = new IsotropicRadioAntenna(mobility);
-        OldIRadio::RadioMode radioMode = random(0, 1) < 0.5 ? OldIRadio::RADIO_MODE_TRANSMITTER : OldIRadio::RADIO_MODE_RECEIVER;
+        IRadio::RadioMode radioMode = random(0, 1) < 0.5 ? IRadio::RADIO_MODE_TRANSMITTER : IRadio::RADIO_MODE_RECEIVER;
         IRadioSignalTransmitter *transmitter = new ScalarRadioSignalTransmitter(NULL, 100, bps(2E+6), W(1E-3), Hz(2.4E+9), Hz(2E+6));
         IRadioSignalReceiver *receiver = new ScalarRadioSignalReceiver(NULL, 10, W(1E-12), W(1E-11), Hz(2.4E+9), Hz(2E+6));
         IRadio *radio = new Radio(radioMode, antenna, transmitter, receiver, channel);

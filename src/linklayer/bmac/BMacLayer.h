@@ -113,8 +113,8 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     MacQueue macQueue;
 
     /** @brief The radio. */
-    OldIRadio *radio;
-    OldIRadio::TransmissionState transmissionState;
+    IRadio *radio;
+    IRadio::TransmissionState transmissionState;
 
     /** @name Different tracked statistics.*/
 	/*@{*/

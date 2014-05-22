@@ -100,9 +100,9 @@ void CSMA::initialize(int stage) {
         registerInterface();
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
-        radioModule->subscribe(OldIRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(OldIRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<OldIRadio *>(radioModule);
+        radioModule->subscribe(IRadio::radioModeChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
+        radio = check_and_cast<IRadio *>(radioModule);
 
         //check parameters for consistency
 		//aTurnaroundTime should match (be equal or bigger) the RX to TX
@@ -120,7 +120,7 @@ void CSMA::initialize(int stage) {
 
 	}
 	else if (stage == INITSTAGE_LINK_LAYER) {
-        radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     	EV_DETAIL << "queueLength = " << queueLength
 		          << " bitrate = " << bitrate
 		          << " backoff method = " << par("backoffMethod").stringValue() << endl;
@@ -260,7 +260,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		delete msg;
 
 		if(useMACAcks) {
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		}
@@ -273,7 +273,7 @@ void CSMA::updateStatusIdle(t_mac_event event, cMessage *msg) {
 		delete msg;
 
 		if(useMACAcks) {
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		}
@@ -298,7 +298,7 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 		<< " starting CCA timer." << endl;
 		startTimer(TIMER_CCA);
 		updateMacState(CCA_3);
-		radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+		radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 		break;
 	case EV_DUPLICATE_RECEIVED:
 		// suspend current transmission attempt,
@@ -309,7 +309,7 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 			EV_DETAIL << "suspending current transmit tentative and transmitting ack";
 			transmissionAttemptInterruptedByRx = true;
 			cancelEvent(backoffTimer);
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		} else {
@@ -329,7 +329,7 @@ void CSMA::updateStatusBackoff(t_mac_event event, cMessage *msg) {
 			transmissionAttemptInterruptedByRx = true;
 			cancelEvent(backoffTimer);
 
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		} else {
@@ -371,11 +371,11 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 	case EV_TIMER_CCA:
 	{
 		EV_DETAIL << "(25) FSM State CCA_3, EV_TIMER_CCA" << endl;
-		bool isIdle = radio->getReceptionState() == OldIRadio::RECEPTION_STATE_IDLE;
+		bool isIdle = radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 		if(isIdle) {
 			EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
 			updateMacState(TRANSMITFRAME_4);
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			CSMAFrame* mac = check_and_cast<CSMAFrame*>(macQueue.front()->dup());
 			attachSignal(mac, simTime()+aTurnaroundTime);
 			//sendDown(msg);
@@ -419,7 +419,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			transmissionAttemptInterruptedByRx = true;
 			cancelEvent(ccaTimer);
 
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		} else {
@@ -438,7 +438,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 			// and resume transmission when entering manageQueue()
 			transmissionAttemptInterruptedByRx = true;
 			cancelEvent(ccaTimer);
-			radio->setRadioMode(OldIRadio::RADIO_MODE_TRANSMITTER);
+			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
 			updateMacState(WAITSIFS_6);
 			startTimer(TIMER_SIFS);
 		} else {
@@ -463,7 +463,7 @@ void CSMA::updateStatusTransmitFrame(t_mac_event event, cMessage *msg) {
 	if (event == EV_FRAME_TRANSMITTED) {
 		//    delete msg;
 	    CSMAFrame* packet = macQueue.front();
-		radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+		radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 
 		bool expectAck = useMACAcks;
 		if (!packet->getDestAddr().isBroadcast()) {
@@ -585,7 +585,7 @@ void CSMA::updateStatusTransmitAck(t_mac_event event, cMessage *msg) {
 	if (event == EV_FRAME_TRANSMITTED) {
 		EV_DETAIL << "(19) FSM State TRANSMITACK_7, EV_FRAME_TRANSMITTED:"
 		<< " ->manageQueue." << endl;
-		radio->setRadioMode(OldIRadio::RADIO_MODE_RECEIVER);
+		radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
 		//		delete msg;
 		manageQueue();
 	} else {
@@ -856,10 +856,10 @@ void CSMA::handleLowerPacket(cPacket *msg) {
 
 void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value) {
     Enter_Method_Silent();
-    if (signalID == OldIRadio::transmissionStateChangedSignal)
+    if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        OldIRadio::TransmissionState newRadioTransmissionState = (OldIRadio::TransmissionState)value;
-        if (transmissionState == OldIRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == OldIRadio::TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             // KLUDGE: we used to get a cMessage from the radio (the identity was not important)
             executeMac(EV_FRAME_TRANSMITTED, new cMessage("Transmission over"));
