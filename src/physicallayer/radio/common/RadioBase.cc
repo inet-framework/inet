@@ -23,7 +23,6 @@ RadioBase::RadioBase()
     radioMode = RADIO_MODE_OFF;
     receptionState = RECEPTION_STATE_UNDEFINED;
     transmissionState = TRANSMISSION_STATE_UNDEFINED;
-    radioChannel = -1;
     upperLayerOut = NULL;
     upperLayerIn = NULL;
     radioIn = NULL;
@@ -42,7 +41,6 @@ void RadioBase::initialize(int stage)
         WATCH(radioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
-        WATCH(radioChannel);
     }
 }
 
@@ -54,16 +52,5 @@ void RadioBase::setRadioMode(RadioMode newRadioMode)
         EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
         radioMode = newRadioMode;
         emit(radioModeChangedSignal, newRadioMode);
-    }
-}
-
-void RadioBase::setOldRadioChannel(int newRadioChannel)
-{
-    Enter_Method_Silent();
-    if (radioChannel != newRadioChannel)
-    {
-        EV << "Changing radio channel from " << radioChannel << " to " << newRadioChannel << ".\n";
-        radioChannel = newRadioChannel;
-        emit(radioChannelChangedSignal, newRadioChannel);
     }
 }

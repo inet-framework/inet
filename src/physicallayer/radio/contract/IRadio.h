@@ -227,20 +227,6 @@ class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
          */
         virtual TransmissionState getTransmissionState() const = 0;
 
-        /**
-         * Returns the current radio channel. This is the same channel as the one emitted
-         * with the last radioChannelChangedSignal.
-         */
-        // TODO: obsolete
-        virtual int getOldRadioChannel() const = 0;
-
-        /**
-         * Changes the current radio channel. The actual change may take zero or more time.
-         * The new radio channel will be published with emitting a radioChannelChangedSignal.
-         */
-        // TODO: obsolete
-        virtual void setOldRadioChannel(int radioChannel) = 0;
-
         virtual int getId() const = 0;
 
         virtual const IRadioAntenna *getAntenna() const = 0;

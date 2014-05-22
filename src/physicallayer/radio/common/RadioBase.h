@@ -35,8 +35,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public virtual IRadio
     RadioMode radioMode;
     ReceptionState receptionState;
     TransmissionState transmissionState;
-    // TODO: delme
-    int radioChannel;
     //@}
 
     /** Gates */
@@ -58,10 +56,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public virtual IRadio
     virtual ReceptionState getReceptionState() const { return receptionState; }
 
     virtual TransmissionState getTransmissionState() const { return transmissionState; }
-
-    virtual int getOldRadioChannel() const { return radioChannel; }
-
-    virtual void setOldRadioChannel(int newRadioChannel);
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

@@ -23,12 +23,14 @@
 Define_Module(Ieee80211Radio);
 
 Ieee80211Radio::Ieee80211Radio() :
-    ScalarRadio()
+    ScalarRadio(),
+    channelNumber(-1)
 {
 }
 
 Ieee80211Radio::Ieee80211Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
-    ScalarRadio(radioMode, antenna, transmitter, receiver, channel)
+    ScalarRadio(radioMode, antenna, transmitter, receiver, channel),
+    channelNumber(-1)
 {
 }
 
@@ -36,7 +38,7 @@ void Ieee80211Radio::initialize(int stage)
 {
     ScalarRadio::initialize(stage);
     if (stage == INITSTAGE_PHYSICAL_LAYER)
-        setOldRadioChannel(par("channelNumber"));
+        setChannelNumber(par("channelNumber"));
 }
 
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
@@ -46,20 +48,25 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
         RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
         int newChannelNumber = configureCommand->getChannelNumber();
         if (newChannelNumber != -1)
-            setOldRadioChannel(newChannelNumber);
+            setChannelNumber(newChannelNumber);
         ScalarRadio::handleUpperCommand(message);
     }
     else
         ScalarRadio::handleUpperCommand(message);
 }
 
-void Ieee80211Radio::setOldRadioChannel(int newRadioChannel)
+void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
-    Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newRadioChannel + 1]);
-    ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
-    ScalarRadioSignalReceiver *scalarReceiver = const_cast<ScalarRadioSignalReceiver *>(check_and_cast<const ScalarRadioSignalReceiver *>(receiver));
-    scalarTransmitter->setCarrierFrequency(carrierFrequency);
-    scalarReceiver->setCarrierFrequency(carrierFrequency);
-    Radio::setOldRadioChannel(newRadioChannel);
-    emit(listeningChangedSignal, 0);
+    if (channelNumber != newChannelNumber)
+    {
+        Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
+        ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
+        ScalarRadioSignalReceiver *scalarReceiver = const_cast<ScalarRadioSignalReceiver *>(check_and_cast<const ScalarRadioSignalReceiver *>(receiver));
+        scalarTransmitter->setCarrierFrequency(carrierFrequency);
+        scalarReceiver->setCarrierFrequency(carrierFrequency);
+        EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";
+        channelNumber = newChannelNumber;
+        emit(radioChannelChangedSignal, newChannelNumber);
+        emit(listeningChangedSignal, 0);
+    }
 }

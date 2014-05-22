@@ -23,6 +23,9 @@
 class INET_API Ieee80211Radio : public ScalarRadio
 {
     protected:
+        int channelNumber;
+
+    protected:
         void initialize(int stage);
 
         void handleUpperCommand(cMessage *message);
@@ -31,7 +34,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
         Ieee80211Radio();
         Ieee80211Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel);
 
-        void setOldRadioChannel(int newRadioChannel);
+        void setChannelNumber(int newChannelNumber);
 };
 
 #endif
