@@ -39,12 +39,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public virtual IRadio
     int radioChannel;
     //@}
 
-    /** Environment */
-    //@{
-    // TODO: delme
-    IMobility *mobility;
-    //@}
-
     /** Gates */
     //@{
     cGate *upperLayerOut;
@@ -54,8 +48,6 @@ class INET_API RadioBase : public PhysicalLayerBase, public virtual IRadio
 
   public:
     RadioBase();
-
-    virtual IMobility *getMobility() const { return mobility; }
 
     virtual const cGate *getRadioGate() const { return radioIn; }
 

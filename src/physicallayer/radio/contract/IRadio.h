@@ -18,7 +18,6 @@
 #ifndef __INET_IRADIO_H_
 #define __INET_IRADIO_H_
 
-#include "IMobility.h"
 #include "IPhysicalLayer.h"
 #include "IRadioFrame.h"
 #include "IRadioSignalSource.h"
@@ -198,12 +197,6 @@ class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
 
     public:
         virtual ~IRadio() { }
-
-        /**
-         * Returns the mobility of the radio.
-         */
-        // TODO: obsolete
-        virtual IMobility *getMobility() const = 0;
 
         /**
          * Returns the gate of the radio that receives incoming radio frames.

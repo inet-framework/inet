@@ -24,7 +24,6 @@ RadioBase::RadioBase()
     receptionState = RECEPTION_STATE_UNDEFINED;
     transmissionState = TRANSMISSION_STATE_UNDEFINED;
     radioChannel = -1;
-    mobility = NULL;
     upperLayerOut = NULL;
     upperLayerIn = NULL;
     radioIn = NULL;
@@ -36,8 +35,6 @@ void RadioBase::initialize(int stage)
     EV << "Initializing RadioBase, stage = " << stage << endl;
     if (stage == INITSTAGE_LOCAL)
     {
-        cModule *node = getContainingNode(this);
-        mobility = check_and_cast<IMobility*>(node->getSubmodule("mobility"));
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
