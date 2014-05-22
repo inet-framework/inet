@@ -73,7 +73,7 @@ void Ieee80211ScalarRadioSignalReceiver::initialize(int stage)
     }
 }
 
-bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int bitLength, double bitrate) const
+bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double minSNIR, int bitLength, double bitrate) const
 {
     ModulationType modeBody;
     ModulationType modeHeader;
@@ -107,13 +107,13 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
         opp_error("Radio model not supported yet, must be a,b,g or p");
     }
 
-    headerNoError = errorModel->GetChunkSuccessRate(modeHeader, snirMin, headerSize);
+    headerNoError = errorModel->GetChunkSuccessRate(modeHeader, minSNIR, headerSize);
     // probability of no bit error in the MPDU
     double MpduNoError;
     if (parseTable)
-        MpduNoError = 1 - parseTable->getPer(bitrate, snirMin, bitLength / 8);
+        MpduNoError = 1 - parseTable->getPer(bitrate, minSNIR, bitLength / 8);
     else
-        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, snirMin, bitLength);
+        MpduNoError = errorModel->GetChunkSuccessRate(modeBody, minSNIR, bitLength);
 
     EV << "bit length = " << bitLength << " packet error rate = " << 1 - MpduNoError << " header error rate = " << 1 - headerNoError << endl;
     if (MpduNoError >= 1 && headerNoError >= 1)
@@ -124,33 +124,4 @@ bool Ieee80211ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int 
         return true;
     else
         return false;
-}
-
-const IRadioSignalReceptionDecision *Ieee80211ScalarRadioSignalReceiver::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
-{
-    // TODO: factor with base class
-    const ScalarRadioSignalListening *scalarListening = check_and_cast<const ScalarRadioSignalListening *>(listening);
-    const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);
-    if (scalarListening->getCarrierFrequency() == scalarReception->getCarrierFrequency() && scalarListening->getBandwidth() == scalarReception->getBandwidth())
-    {
-        const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(reception->getTransmission());
-        const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
-        double snirMin = computeSNIRMin(reception, noise);
-        delete noise;
-        RadioReceptionIndication *indication = new RadioReceptionIndication();
-        bool isReceptionPossible = computeIsReceptionPossible(reception);
-        if (isReceptionPossible && snirMin > snirThreshold)
-        {
-            bool hasBitError = computeHasBitError(snirMin, scalarTransmission->getPayloadBitLength(), scalarTransmission->getBitrate().get());
-            bool isReceptionAttempted = isReceptionPossible; // TODO:
-            indication->setMinSNIR(snirMin);
-            return new RadioSignalReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, !hasBitError);
-        }
-        else
-            return new RadioSignalReceptionDecision(reception, indication, false, false, false);
-    }
-    else if (areOverlappingBands(scalarListening->getCarrierFrequency(), scalarListening->getBandwidth(), scalarReception->getCarrierFrequency(), scalarReception->getBandwidth()))
-        throw cRuntimeError("Overlapping bands are not supported");
-    else
-        return new RadioSignalReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }

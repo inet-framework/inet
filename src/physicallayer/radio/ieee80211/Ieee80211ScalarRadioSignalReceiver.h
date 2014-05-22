@@ -35,7 +35,7 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
     protected:
         virtual void initialize(int stage);
 
-        virtual bool computeHasBitError(double snirMin, int lengthMPDU, double bitrate) const;
+        virtual bool computeHasBitError(double minSNIR, int bitLength, double bitrate) const;
 
     public:
         Ieee80211ScalarRadioSignalReceiver() :
@@ -57,8 +57,6 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
         {}
 
         virtual ~Ieee80211ScalarRadioSignalReceiver();
-
-        virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
 };
 
 #endif

@@ -301,9 +301,9 @@ const IRadioSignalListeningDecision *ScalarRadioSignalReceiver::computeListening
     return new ScalarRadioSignalListeningDecision(listening, maxPower >= energyDetection, maxPower);
 }
 
-bool ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int bitLength, double bitrate) const
+bool ScalarRadioSignalReceiver::computeHasBitError(double minSNIR, int bitLength, double bitrate) const
 {
-    double ber = modulation->calculateBER(snirMin, bandwidth.get(), bitrate);
+    double ber = modulation->calculateBER(minSNIR, bandwidth.get(), bitrate);
     if (ber == 0.0)
         return false;
     else
@@ -313,36 +313,26 @@ bool ScalarRadioSignalReceiver::computeHasBitError(double snirMin, int bitLength
     }
 }
 
+bool ScalarRadioSignalReceiver::computeIsReceptionSuccessful(const IRadioSignalReception *reception, const RadioReceptionIndication *indication) const
+{
+    const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(reception->getTransmission());
+    return SNIRRadioSignalReceiverBase::computeIsReceptionSuccessful(reception, indication) &&
+           !computeHasBitError(indication->getMinSNIR(), scalarTransmission->getPayloadBitLength(), scalarTransmission->getBitrate().get());
+}
+
 const IRadioSignalReceptionDecision *ScalarRadioSignalReceiver::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
 {
-    // TODO: factor with base class
     const ScalarRadioSignalListening *scalarListening = check_and_cast<const ScalarRadioSignalListening *>(listening);
     const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);
     if (scalarListening->getCarrierFrequency() == scalarReception->getCarrierFrequency() && scalarListening->getBandwidth() == scalarReception->getBandwidth())
-    {
-        const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(reception->getTransmission());
-        const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
-        double snirMin = computeSNIRMin(reception, noise);
-        delete noise;
-        RadioReceptionIndication *indication = new RadioReceptionIndication();
-        bool isReceptionPossible = computeIsReceptionPossible(reception);
-        if (isReceptionPossible && snirMin > snirThreshold)
-        {
-            bool hasBitError = computeHasBitError(snirMin, scalarTransmission->getPayloadBitLength(), scalarTransmission->getBitrate().get());
-            bool isReceptionAttempted = isReceptionPossible; // TODO:
-            indication->setMinSNIR(snirMin);
-            return new RadioSignalReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, !hasBitError);
-        }
-        else
-            return new RadioSignalReceptionDecision(reception, indication, false, false, false);
-    }
+        return SNIRRadioSignalReceiverBase::computeReceptionDecision(listening, reception, interferingReceptions, backgroundNoise);
     else if (areOverlappingBands(scalarListening->getCarrierFrequency(), scalarListening->getBandwidth(), scalarReception->getCarrierFrequency(), scalarReception->getBandwidth()))
         throw cRuntimeError("Overlapping bands are not supported");
     else
         return new RadioSignalReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
 
-double ScalarRadioSignalReceiver::computeSNIRMin(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const
+double ScalarRadioSignalReceiver::computeMinSNIR(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const
 {
     const ScalarRadioSignalNoise *scalarNoise = check_and_cast<const ScalarRadioSignalNoise *>(noise);
     const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);

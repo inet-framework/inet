@@ -206,7 +206,13 @@ class INET_API RadioSignalReceiverBase : public cCompoundModule, public virtual 
 {
     protected:
         virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const;
+
+        /**
+         * Returns whether the transmission represented by the reception can be
+         * received successfully or not. Part of the reception process, see class comment.
+         */
         virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const = 0;
+
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const;
 
     public:
@@ -224,8 +230,21 @@ class INET_API SNIRRadioSignalReceiverBase : public RadioSignalReceiverBase
     protected:
         virtual void initialize(int stage);
 
+        /**
+         * Returns the physical properties of the reception including noise and
+         * signal related measures, error probabilities, actual error counts, etc.
+         * Part of the reception process, see class comment.
+         */
+        virtual const RadioReceptionIndication *computeReceptionIndication(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
+
+        /**
+         * Returns whether the reception is free of any errors. Part of the reception
+         * process, see class comment.
+         */
+        virtual bool computeIsReceptionSuccessful(const IRadioSignalReception *reception, const RadioReceptionIndication *indication) const;
+
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *receptions, const IRadioSignalNoise *backgroundNoise) const = 0;
-        virtual double computeSNIRMin(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const = 0;
+        virtual double computeMinSNIR(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const = 0;
 
     public:
         SNIRRadioSignalReceiverBase() :

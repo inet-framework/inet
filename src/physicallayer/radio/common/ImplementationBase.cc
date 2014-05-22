@@ -107,16 +107,27 @@ void SNIRRadioSignalReceiverBase::initialize(int stage)
         snirThreshold = FWMath::dB2fraction(par("snirThreshold"));
 }
 
-const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
+const RadioReceptionIndication *SNIRRadioSignalReceiverBase::computeReceptionIndication(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
 {
     const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
-    double snirMin = computeSNIRMin(reception, noise);
-    bool isReceptionPossible = computeIsReceptionPossible(reception);
-    bool isReceptionAttempted = isReceptionPossible; // TODO:
-    bool isReceptionSuccessful = isReceptionPossible && snirMin > snirThreshold;
+    double minSNIR = computeMinSNIR(reception, noise);
     delete noise;
     RadioReceptionIndication *indication = new RadioReceptionIndication();
-    indication->setMinSNIR(snirMin);
+    indication->setMinSNIR(minSNIR);
+    return indication;
+}
+
+bool SNIRRadioSignalReceiverBase::computeIsReceptionSuccessful(const IRadioSignalReception *reception, const RadioReceptionIndication *indication) const
+{
+    return indication->getMinSNIR() > snirThreshold;
+}
+
+const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
+{
+    bool isReceptionPossible = computeIsReceptionPossible(reception);
+    bool isReceptionAttempted = isReceptionPossible && computeIsReceptionAttempted(reception, interferingReceptions);
+    const RadioReceptionIndication *indication = isReceptionAttempted ? computeReceptionIndication(listening, reception, interferingReceptions, backgroundNoise) : NULL;
+    bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(reception, indication);
     return new RadioSignalReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
 

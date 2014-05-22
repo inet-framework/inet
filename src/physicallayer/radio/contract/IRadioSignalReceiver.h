@@ -23,6 +23,7 @@
 #include "IRadioSignalReception.h"
 #include "IRadioSignalListeningDecision.h"
 #include "IRadioSignalReceptionDecision.h"
+#include "RadioControlInfo_m.h"
 
 /**
  * This interface represents a physical device (a part of the radio) which converts
@@ -62,12 +63,6 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
         virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const = 0;
 
         /**
-         * Returns whether the transmission represented by the reception can be
-         * received successfully or not. Part of the reception process, see class comment.
-         */
-        virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const = 0;
-
-        /**
          * Returns whether the reception is actually attempted or ignored by the
          * receiver. Part of the reception process, see class comment.
          */
@@ -75,7 +70,7 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
 
         /**
          * Returns the result of the reception process specifying whether it is
-         * successful or not and other physical properties. Part of the reception
+         * successful or not and any other physical properties. Part of the reception
          * process, see class comment.
          */
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;

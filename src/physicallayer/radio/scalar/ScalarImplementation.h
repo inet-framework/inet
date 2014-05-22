@@ -271,9 +271,11 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
         virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
         virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const;
         virtual bool computeIsReceptionPossible(const IRadioSignalReception *reception) const;
+        virtual bool computeIsReceptionSuccessful(const IRadioSignalReception *reception, const RadioReceptionIndication *indication) const;
+
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *receptions, const IRadioSignalNoise *backgroundNoise) const;
-        virtual double computeSNIRMin(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const;
-        virtual bool computeHasBitError(double snirMin, int bitLength, double bitrate) const;
+        virtual double computeMinSNIR(const IRadioSignalReception *reception, const IRadioSignalNoise *noise) const;
+        virtual bool computeHasBitError(double minSNIR, int bitLength, double bitrate) const;
 
     public:
         ScalarRadioSignalReceiver() :
