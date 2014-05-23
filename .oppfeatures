@@ -652,7 +652,7 @@
     <feature
         id="VoIPStream"
         name="VoIPStream"
-        description = "Voice over IP tool. Required external libraries: libavcodec, libavformat libavutil"
+        description = "Voice over IP tool. Required external libraries: libavcodec libavformat libavresample libavutil"
         initiallyEnabled = "false"
         requires = "UDP"
         labels = ""
