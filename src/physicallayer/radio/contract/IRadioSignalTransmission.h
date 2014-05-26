@@ -25,7 +25,9 @@
 class IRadio;
 
 /**
- * This interface represents the transmission of a radio signal.
+ * This interface represents the transmission of a radio signal. There's one
+ * instance per transmission of this interface that is sent to all potential
+ * receiver radios in a radio frame.
  */
 class INET_API IRadioSignalTransmission : public IPrintableObject
 {
@@ -61,14 +63,24 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         virtual const simtime_t getEndTime() const = 0;
 
         /**
-         * Returns the position where the transmitter started this transmission.
+         * Returns the antenna's position when the transmitter started this transmission.
          */
         virtual const Coord getStartPosition() const = 0;
 
         /**
-         * Returns the position where the transmitter ended this transmission.
+         * Returns the antenna's position when the transmitter ended this transmission.
          */
         virtual const Coord getEndPosition() const = 0;
+
+        /**
+         * Returns the antenna's orientation when the transmitter ended this transmission.
+         */
+        // TODO: virtual const Orientation getStartOrientation() const = 0;
+
+        /**
+         * Returns the antenna's orientation when the transmitter ended this transmission.
+         */
+        // TODO: virtual const Orientation getStartOrientation() const = 0;
 };
 
 #endif

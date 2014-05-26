@@ -31,7 +31,8 @@
  *
  * Some functions are marked to be part of the reception process. These must be
  * purely functional because they may be called several times before the actual
- * transmission arrives at the receiver.
+ * transmission arrives at the receiver. This allows optimistic parallel computation
+ * of reception decisions.
  */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 class INET_API IRadioSignalReceiver : public IPrintableObject

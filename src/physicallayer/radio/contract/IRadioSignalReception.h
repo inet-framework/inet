@@ -51,16 +51,28 @@ class INET_API IRadioSignalReception : public IPrintableObject
         virtual const simtime_t getEndTime() const = 0;
 
         /**
-         * Returns the position where the receiver started to receive the
-         * corresponding transmission.
+         * Returns the antenna's position when the receiver started to receive
+         * the corresponding transmission.
          */
         virtual const Coord getStartPosition() const = 0;
 
         /**
-         * Returns the position where the receiver ended to receive the
+         * Returns the antenna's position when the receiver ended to receive the
          * corresponding transmission.
          */
         virtual const Coord getEndPosition() const = 0;
+
+        /**
+         * Returns the antenna's orientation when the receiver started to receive
+         * the corresponding transmission.
+         */
+        // TODO: virtual const Orientation getStartOrientation() const = 0;
+
+        /**
+         * Returns the antenna's orientation when the receiver ended to receive
+         * the corresponding transmission.
+         */
+        // TODO: virtual const Orientation getStartOrientation() const = 0;
 };
 
 #endif

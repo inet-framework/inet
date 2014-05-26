@@ -34,6 +34,12 @@ class INET_API IRadioSignalAttenuation
         virtual ~IRadioSignalAttenuation() {}
 
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
+
+        /**
+         * Returns the reception for the provided transmission at the receiver.
+         * The result incorporates all modeled attenuation including the way the
+         * receiver listens on the radio channel. This function never returns NULL.
+         */
         virtual const IRadioSignalReception *computeReception(const IRadio *receiver, const IRadioSignalTransmission *transmission) const = 0;
 };
 

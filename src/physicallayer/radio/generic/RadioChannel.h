@@ -356,10 +356,16 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalListeningDecision *listenOnChannel(const IRadio *radio, const IRadioSignalListening *listening) const;
 
-        virtual bool isPotentialReceiver(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
-        virtual bool isReceptionAttempted(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        /**
+         * Returns true if the radio can potentially receive the transmission
+         * successfully. If this function returns false then the radio channel
+         * doesn't send a radio frame to this receiver.
+         */
+        virtual bool isPotentialReceiver(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
 
-        virtual const IRadioSignalArrival *getArrival(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+        virtual bool isReceptionAttempted(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
+
+        virtual const IRadioSignalArrival *getArrival(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
 
         virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
