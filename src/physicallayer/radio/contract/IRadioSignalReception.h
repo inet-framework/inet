@@ -21,7 +21,10 @@
 #include "IRadioSignalTransmission.h"
 
 /**
- * This interface represents the reception of a transmission at a receiver.
+ * This interface represents the reception of a transmission at a receiver. There's
+ * one instance per transmission of this interface for each receiver.
+ *
+ * This interface is strictly immutable to safely support parallel computation.
  */
 class INET_API IRadioSignalReception : public IPrintableObject
 {

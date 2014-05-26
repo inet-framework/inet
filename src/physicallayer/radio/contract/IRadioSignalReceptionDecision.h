@@ -23,6 +23,8 @@
 
 /**
  * This interface represents the result of a receiver's reception process.
+ *
+ * This interface is strictly immutable to safely support parallel computation.
  */
 class INET_API IRadioSignalReceptionDecision : public IPrintableObject
 {

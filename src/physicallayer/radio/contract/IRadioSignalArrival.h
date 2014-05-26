@@ -24,6 +24,8 @@
 /**
  * This interface represents the space and time coordinates of a transmission
  * arriving at a receiver.
+ *
+ * This interface is strictly immutable to safely support parallel computation.
  */
 class INET_API IRadioSignalArrival : public IPrintableObject
 {

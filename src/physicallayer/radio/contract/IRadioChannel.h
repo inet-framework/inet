@@ -31,8 +31,8 @@
  * This interface represents the whole radio medium. It keeps track of all radio
  * signal sources, all radio signal transmissions, and all radio signal receptions.
  *
- * This interface supports optimistic parallel and concurrent computation of
- * reception decisions and related information.
+ * This interface supports optimistic parallel computation of reception decisions
+ * and related information.
  */
 class INET_API IRadioChannel : public IPrintableObject
 {

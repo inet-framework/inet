@@ -28,7 +28,6 @@
 class IRadioChannel;
 
 /**
- * This purely virtual interface provides an abstraction for different radios.
  * This interface represents a physical device that is capable of transmitting
  * and receiving radio signals. Simultaneous reception and transmission is also
  * supported. The radio has an operation mode, it's bound to a radio channel,
@@ -224,14 +223,44 @@ class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
          */
         virtual TransmissionState getTransmissionState() const = 0;
 
+        /**
+         * Returns an identifier for this radio which is globally unique
+         * for the whole lifetime of the simulation among all radios.
+         */
         virtual int getId() const = 0;
 
+        /**
+         * Returns the antenna used by the transceiver of this radio. This function
+         * never returns NULL.
+         */
         virtual const IRadioAntenna *getAntenna() const = 0;
+
+        /**
+         * Returns the transmitter part of this radio. This function never returns NULL.
+         */
         virtual const IRadioSignalTransmitter *getTransmitter() const = 0;
+
+        /**
+         * Returns the receiver part of this radio. This function never returns NULL.
+         */
         virtual const IRadioSignalReceiver *getReceiver() const = 0;
+
+        /**
+         * Returns the radio channel where this radio is transmitting and receiving
+         * radio signals. This function never returns NULL.
+         */
         virtual const IRadioChannel *getChannel() const = 0;
 
+        /**
+         * Returns the ongoing transmission that the transmitter is currently
+         * transmitting or NULL.
+         */
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
+
+        /**
+         * Returns the ongoing reception that the receiver is currently receiving
+         * or NULL.
+         */
         virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
 
     public:

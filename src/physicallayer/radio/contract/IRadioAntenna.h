@@ -28,10 +28,20 @@
 class INET_API IRadioAntenna : public IPrintableObject
 {
     public:
+        /**
+         * Returns the mobility of this antenna that describes its position and
+         * orientation over time.
+         */
         virtual IMobility *getMobility() const = 0;
 
+        /**
+         * Returns the maximum possible gain in any direction.
+         */
         virtual double getMaxGain() const = 0;
 
+        /**
+         * Returns the antenna gain in the provided direction.
+         */
         virtual double getGain(Coord direction) const = 0;
 };
 
