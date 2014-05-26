@@ -67,6 +67,8 @@ class INET_API ScalarRadioSignalLoss : public IRadioSignalLoss
             factor(factor)
         {}
 
+        virtual void printToStream(std::ostream &stream) const { stream << "scalar loss"; }
+
         virtual double getFactor() const { return factor; }
 };
 
@@ -126,6 +128,7 @@ class INET_API ScalarRadioSignalNoise : public RadioSignalNoiseBase
 
         virtual ~ScalarRadioSignalNoise() { delete powerChanges; }
 
+        virtual void printToStream(std::ostream &stream) const { stream << "scalar noise"; }
         virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
         virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
         virtual Hz getCarrierFrequency() const { return carrierFrequency; }
@@ -148,6 +151,8 @@ class INET_API ScalarRadioSignalFreeSpaceAttenuation : public RadioSignalFreeSpa
         ScalarRadioSignalFreeSpaceAttenuation(double alpha) :
             RadioSignalFreeSpaceAttenuationBase(alpha)
         {}
+
+        virtual void printToStream(std::ostream &stream) const { stream << "scalar free space attenuation"; }
 
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const;
 };
@@ -179,7 +184,8 @@ class INET_API ScalarRadioBackgroundNoise : public cCompoundModule, public IRadi
             power(power)
         {}
 
-    public:
+        virtual void printToStream(std::ostream &stream) const { stream << "scalar background noise"; }
+
         virtual W getPower() const { return power; }
 
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const;

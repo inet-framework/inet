@@ -23,11 +23,9 @@
 /**
  * This interface represents a meaningless radio signal.
  */
-class INET_API IRadioSignalNoise
+class INET_API IRadioSignalNoise : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalNoise() {}
-
         virtual const simtime_t getStartTime() const = 0;
         virtual const simtime_t getEndTime() const = 0;
 };

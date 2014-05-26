@@ -28,11 +28,9 @@
  * includes various effects such as free-space path loss, shadowing, refraction,
  * reflection, absorption, diffraction and others.
  */
-class INET_API IRadioSignalAttenuation
+class INET_API IRadioSignalAttenuation : public IPrintableObject
 {
     public:
-        virtual ~IRadioSignalAttenuation() {}
-
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
 
         /**

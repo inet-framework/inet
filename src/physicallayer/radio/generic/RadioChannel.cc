@@ -634,7 +634,7 @@ void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     const IRadioSignalTransmission *transmission = frame->getTransmission();
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
-             << " from " << radio << " on " << this << "." << endl;
+             << " from " << radio << " on " << (IRadioChannel *)this << "." << endl;
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
     {
         const Radio *receiverRadio = check_and_cast<const Radio *>(*it);

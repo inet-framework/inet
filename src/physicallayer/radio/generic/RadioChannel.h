@@ -340,6 +340,8 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange);
         virtual ~RadioChannel();
 
+        virtual void printToStream(std::ostream &stream) const { stream << "radio channel"; }
+
         virtual const IRadioSignalPropagation *getPropagation() const { return propagation; }
         virtual const IRadioSignalAttenuation *getAttenuation() const { return attenuation; }
         virtual const IRadioBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }

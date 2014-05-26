@@ -59,6 +59,8 @@ class INET_API IdealRadioSignalLoss : public IRadioSignalLoss
             factor(factor)
         {}
 
+        virtual void printToStream(std::ostream &stream) const { stream << "ideal radio signal loss, factor = " << factor; }
+
         virtual Factor getFactor() const { return factor; }
 };
 
@@ -103,6 +105,8 @@ class INET_API IdealRadioSignalFreeSpaceAttenuation : public IdealRadioSignalAtt
 {
     public:
         IdealRadioSignalFreeSpaceAttenuation() {}
+
+        virtual void printToStream(std::ostream &stream) const { stream << "ideal free space attenuation"; }
 
         virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
 };

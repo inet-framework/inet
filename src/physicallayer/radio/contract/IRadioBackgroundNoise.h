@@ -25,11 +25,9 @@
 /**
  * This interface models a source which provides background noise over space and time.
  */
-class INET_API IRadioBackgroundNoise
+class INET_API IRadioBackgroundNoise : public IPrintableObject
 {
     public:
-        virtual ~IRadioBackgroundNoise() {}
-
         // TODO: merge the two computeNoise functions?
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const = 0;
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalReception *reception) const = 0;

@@ -25,11 +25,9 @@
  * electric signals into radio waves, and vice versa.
  */
 // TODO: antenna gain should be computable with one angle?
-class INET_API IRadioAntenna
+class INET_API IRadioAntenna : public IPrintableObject
 {
     public:
-        virtual ~IRadioAntenna() {}
-
         virtual IMobility *getMobility() const = 0;
 
         virtual double getMaxGain() const = 0;

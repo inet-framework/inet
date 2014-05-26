@@ -71,6 +71,8 @@ class INET_API ConstantGainRadioAntenna : public RadioAntennaBase
             gain(gain)
         {}
 
+        virtual void printToStream(std::ostream &stream) const { stream << "constant gain antenna"; }
+
         virtual double getMaxGain() const { return gain; }
 
         virtual double getGain(Coord direction) const { return gain; }
@@ -86,6 +88,8 @@ class INET_API IsotropicRadioAntenna : public RadioAntennaBase
         IsotropicRadioAntenna(IMobility *mobility) :
             RadioAntennaBase(mobility)
         {}
+
+        virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
 
         virtual double getMaxGain() const { return 1; }
 
@@ -103,6 +107,8 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
             length(length)
         {}
 
+        virtual void printToStream(std::ostream &stream) const { stream << "dipole antenna"; }
+
         virtual m getLength() const { return length; }
 
         virtual double getMaxGain() const { return 1.5; }
@@ -113,6 +119,8 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
 
 class INET_API InterpolatingRadioAntenna : public RadioAntennaBase
 {
+    public:
+        virtual void printToStream(std::ostream &stream) const { stream << "interpolating antenna"; }
     // TODO: compute antenna gain based on a linear interpolation between two elements of the antenna gain table using the antenna positions/orientations
 };
 

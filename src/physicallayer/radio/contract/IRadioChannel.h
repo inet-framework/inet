@@ -34,11 +34,9 @@
  * This interface supports optimistic parallel and concurrent computation of
  * reception decisions and related information.
  */
-class INET_API IRadioChannel
+class INET_API IRadioChannel : public IPrintableObject
 {
     public:
-        virtual ~IRadioChannel() {}
-
         /**
          * Returns the radio signal propagation model of this radio channel. This
          * function never returns NULL.

@@ -18,12 +18,10 @@
 #ifndef __INET_IRADIOSIGNALLOSS_H_
 #define __INET_IRADIOSIGNALLOSS_H_
 
-#include "PhysicalLayerDefs.h"
+#include "IPrintableObject.h"
 
-class INET_API IRadioSignalLoss
+class INET_API IRadioSignalLoss : public IPrintableObject
 {
-    public:
-        virtual ~IRadioSignalLoss() {}
 };
 
 #endif
