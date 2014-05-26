@@ -65,31 +65,27 @@ const IRadioSignalReception *ScalarRadioSignalAttenuationBase::computeReception(
     const Coord direction = receptionStartPosition - transmission->getStartPosition();
     double transmitterAntennaGain = transmitterAntenna->getGain(direction);
     double receiverAntennaGain = receiverAntenna->getGain(direction);
-    const IRadioSignalLoss *loss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
-    double lossFactor = check_and_cast<const ScalarRadioSignalLoss *>(loss)->getFactor();
+    double attenuationLoss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
     W transmissionPower = scalarTransmission->getPower();
-    W receptionPower = transmitterAntennaGain * receiverAntennaGain * lossFactor * transmissionPower;
-    delete loss;
+    W receptionPower = transmitterAntennaGain * receiverAntennaGain * attenuationLoss * transmissionPower;
     return new ScalarRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionPower, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth());
 }
 
-const IRadioSignalLoss *ScalarRadioSignalFreeSpaceAttenuation::computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const
+double ScalarRadioSignalFreeSpaceAttenuation::computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const
 {
     const ScalarRadioSignalTransmission *scalarTransmission = check_and_cast<const ScalarRadioSignalTransmission *>(transmission);
-    double pathLoss = computePathLoss(transmission, startTime, endTime, startPosition, endPosition, scalarTransmission->getCarrierFrequency());
-    return new ScalarRadioSignalLoss(pathLoss);
+    return computePathLoss(transmission, startTime, endTime, startPosition, endPosition, scalarTransmission->getCarrierFrequency());
 }
 
-const IRadioSignalLoss *ScalarRadioSignalCompoundAttenuation::computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const
+double ScalarRadioSignalCompoundAttenuation::computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const
 {
     double totalLoss;
     for (std::vector<const IRadioSignalAttenuation *>::const_iterator it = elements->begin(); it != elements->end(); it++)
     {
-        const IRadioSignalAttenuation *element = *it;
-        const ScalarRadioSignalLoss *scalarLoss = check_and_cast<const ScalarRadioSignalLoss *>(element->computeLoss(transmission, startTime, endTime, startPosition, endPosition));
-        totalLoss *= scalarLoss->getFactor();
+        const ScalarRadioSignalAttenuationBase *element = check_and_cast<const ScalarRadioSignalAttenuationBase *>(*it);
+        totalLoss *= element->computeLoss(transmission, startTime, endTime, startPosition, endPosition);
     }
-    return new ScalarRadioSignalLoss(totalLoss);
+    return totalLoss;
 }
 
 void ScalarRadioBackgroundNoise::initialize(int stage)

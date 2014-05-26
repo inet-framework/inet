@@ -40,30 +40,6 @@ class INET_API IdealRadioSignalTransmission : public RadioSignalTransmissionBase
         virtual m getMaxDetectionRange() const { return maxDetectionRange; }
 };
 
-class INET_API IdealRadioSignalLoss : public IRadioSignalLoss
-{
-    public:
-        enum Factor
-        {
-            FACTOR_WITHIN_COMMUNICATION_RANGE,
-            FACTOR_WITHIN_INTERFERENCE_RANGE,
-            FACTOR_WITHIN_DETECTION_RANGE,
-            FACTOR_OUT_OF_DETECTION_RANGE
-        };
-
-    protected:
-        const Factor factor;
-
-    public:
-        IdealRadioSignalLoss(const Factor factor) :
-            factor(factor)
-        {}
-
-        virtual void printToStream(std::ostream &stream) const { stream << "ideal radio signal loss, factor = " << factor; }
-
-        virtual Factor getFactor() const { return factor; }
-};
-
 class INET_API IdealRadioSignalListening : public RadioSignalListeningBase
 {
     public:
@@ -107,8 +83,6 @@ class INET_API IdealRadioSignalFreeSpaceAttenuation : public IdealRadioSignalAtt
         IdealRadioSignalFreeSpaceAttenuation() {}
 
         virtual void printToStream(std::ostream &stream) const { stream << "ideal free space attenuation"; }
-
-        virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
 };
 
 class INET_API IdealRadioSignalTransmitter : public RadioSignalTransmitterBase

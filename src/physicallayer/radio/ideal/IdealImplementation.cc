@@ -27,44 +27,22 @@ const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(c
 {
     const IRadioChannel *channel = receiverRadio->getChannel();
     const IRadioSignalArrival *arrival = channel->getArrival(receiverRadio, transmission);
+    const IdealRadioSignalTransmission *idealTransmission = check_and_cast<const IdealRadioSignalTransmission *>(transmission);
     const simtime_t receptionStartTime = arrival->getStartTime();
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
-    const IRadioSignalLoss *loss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
-    IdealRadioSignalLoss::Factor lossFactor = check_and_cast<const IdealRadioSignalLoss *>(loss)->getFactor();
+    m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
     IdealRadioSignalReception::Power power;
-    switch (lossFactor)
-    {
-        case IdealRadioSignalLoss::FACTOR_WITHIN_COMMUNICATION_RANGE:
-            power = IdealRadioSignalReception::POWER_RECEIVABLE; break;
-        case IdealRadioSignalLoss::FACTOR_WITHIN_INTERFERENCE_RANGE:
-            power = IdealRadioSignalReception::POWER_INTERFERING; break;
-        case IdealRadioSignalLoss::FACTOR_WITHIN_DETECTION_RANGE:
-            power = IdealRadioSignalReception::POWER_DETECTABLE; break;
-        case IdealRadioSignalLoss::FACTOR_OUT_OF_DETECTION_RANGE:
-            power = IdealRadioSignalReception::POWER_UNDETECTABLE; break;
-        default:
-            throw cRuntimeError("Unknown attenuation factor");
-    }
-    delete loss;
-    return new IdealRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, power);
-}
-
-const IRadioSignalLoss *IdealRadioSignalFreeSpaceAttenuation::computeLoss(const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
-{
-    const IdealRadioSignalTransmission *idealTransmission = check_and_cast<const IdealRadioSignalTransmission *>(transmission);
-    m distance = m(transmission->getStartPosition().distance(startPosition));
-    IdealRadioSignalLoss::Factor factor;
     if (distance <= idealTransmission->getMaxCommunicationRange())
-        factor = IdealRadioSignalLoss::FACTOR_WITHIN_COMMUNICATION_RANGE;
+        power = IdealRadioSignalReception::POWER_RECEIVABLE;
     else if (distance <= idealTransmission->getMaxInterferenceRange())
-        factor = IdealRadioSignalLoss::FACTOR_WITHIN_INTERFERENCE_RANGE;
+        power = IdealRadioSignalReception::POWER_INTERFERING;
     else if (distance <= idealTransmission->getMaxDetectionRange())
-        factor = IdealRadioSignalLoss::FACTOR_WITHIN_DETECTION_RANGE;
+        power = IdealRadioSignalReception::POWER_DETECTABLE;
     else
-        factor = IdealRadioSignalLoss::FACTOR_OUT_OF_DETECTION_RANGE;
-    return new IdealRadioSignalLoss(factor);
+        power = IdealRadioSignalReception::POWER_UNDETECTABLE;
+    return new IdealRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, power);
 }
 
 void IdealRadioSignalTransmitter::initialize(int stage)

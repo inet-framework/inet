@@ -21,7 +21,6 @@
 #include "IRadio.h"
 #include "IRadioSignalTransmission.h"
 #include "IRadioSignalReception.h"
-#include "IRadioSignalLoss.h"
 
 /**
  * This interface models how a radio signal attenuates during propagation. It
@@ -31,8 +30,6 @@
 class INET_API IRadioSignalAttenuation : public IPrintableObject
 {
     public:
-        virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
-
         /**
          * Returns the reception for the provided transmission at the receiver.
          * The result incorporates all modeled attenuation including the way the

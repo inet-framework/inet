@@ -57,21 +57,6 @@ class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBas
         virtual Hz getBandwidth() const { return bandwidth; }
 };
 
-class INET_API ScalarRadioSignalLoss : public IRadioSignalLoss
-{
-    protected:
-        const double factor;
-
-    public:
-        ScalarRadioSignalLoss(double factor) :
-            factor(factor)
-        {}
-
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar loss"; }
-
-        virtual double getFactor() const { return factor; }
-};
-
 class INET_API ScalarRadioSignalListening : public RadioSignalListeningBase
 {
     protected:
@@ -139,6 +124,8 @@ class INET_API ScalarRadioSignalAttenuationBase : public virtual IRadioSignalAtt
 {
     public:
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
+
+        virtual double computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const = 0;
 };
 
 class INET_API ScalarRadioSignalFreeSpaceAttenuation : public RadioSignalFreeSpaceAttenuationBase, public ScalarRadioSignalAttenuationBase
@@ -154,7 +141,7 @@ class INET_API ScalarRadioSignalFreeSpaceAttenuation : public RadioSignalFreeSpa
 
         virtual void printToStream(std::ostream &stream) const { stream << "scalar free space attenuation"; }
 
-        virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const;
+        virtual double computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const;
 };
 
 class INET_API ScalarRadioSignalCompoundAttenuation : public CompoundAttenuationBase, public ScalarRadioSignalAttenuationBase
@@ -164,7 +151,7 @@ class INET_API ScalarRadioSignalCompoundAttenuation : public CompoundAttenuation
             CompoundAttenuationBase(elements)
         {}
 
-        virtual const IRadioSignalLoss *computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const;
+        virtual double computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const;
 };
 
 class INET_API ScalarRadioBackgroundNoise : public cCompoundModule, public IRadioBackgroundNoise

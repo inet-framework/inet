@@ -18,7 +18,6 @@
 #ifndef __INET_IMPLEMENTATIONBASE_H_
 #define __INET_IMPLEMENTATIONBASE_H_
 
-#include "IRadioSignalLoss.h"
 #include "IRadioBackgroundNoise.h"
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalAttenuation.h"
