@@ -95,6 +95,7 @@ extern const uint8_t    etherbroadcastaddr[ETHER_ADDR_LEN];
 #define ETHERTYPE_DLOG1         0x0660  /* DLOG (?) */
 #define ETHERTYPE_DLOG2         0x0661  /* DLOG (?) */
 #define ETHERTYPE_IP            0x0800  /* IP protocol */
+#define ETHERTYPE_IPv6          0x86DD  /* IPv6 protocol */
 #define ETHERTYPE_X75           0x0801  /* X.75 Internet */
 #define ETHERTYPE_NBS           0x0802  /* NBS Internet */
 #define ETHERTYPE_ECMA          0x0803  /* ECMA Internet */
