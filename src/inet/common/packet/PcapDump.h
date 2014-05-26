@@ -25,6 +25,8 @@
 
 namespace inet {
 
+#include "EtherFrame.h"
+
 // Foreign declarations:
 class IPv4Datagram;
 class IPv6Datagram;
@@ -69,7 +71,7 @@ class PcapDump
      * and throws an exception otherwise.
      */
     void writeFrame(simtime_t time, const IPv4Datagram *ipPacket);
-    void writeIPv6Frame(simtime_t stime, const IPv6Datagram *ipPacket);
+    void writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPacket);
 
     /**
      * Closes the output file if it is open.

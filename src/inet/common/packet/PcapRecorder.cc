@@ -28,6 +28,7 @@
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
+#include "EtherFrame.h"
 
 namespace inet {
 
@@ -126,47 +127,27 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         packetDumper.dumpPacket(l2r, msg);
     }
 
-#if defined(WITH_IPv4) || defined(WITH_IPv6)
     if (!pcapDumper.isOpen())
         return;
 
     bool hasBitError = false;
 
-#ifdef WITH_IPv4
-    IPv4Datagram *ip4Packet = NULL;
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    IPv6Datagram *ip6Packet = NULL;
-#endif // ifdef WITH_IPv6
-    while (msg) {
+    EthernetIIFrame *etherFrame = NULL;
+    while (msg)
+    {
         if (msg->hasBitError())
             hasBitError = true;
-#ifdef WITH_IPv4
-        if (NULL != (ip4Packet = dynamic_cast<IPv4Datagram *>(msg))) {
+        if (NULL != (etherFrame = dynamic_cast<EthernetIIFrame *>(msg))) {
             break;
         }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-        if (NULL != (ip6Packet = dynamic_cast<IPv6Datagram *>(msg))) {
-            break;
-        }
-#endif // ifdef WITH_IPv6
 
         msg = msg->getEncapsulatedPacket();
     }
-#endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
-#ifdef WITH_IPv4
-    if (ip4Packet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simulation.getSimTime();
-        pcapDumper.writeFrame(stime, ip4Packet);
+    if (etherFrame && (dumpBadFrames || !hasBitError))
+    {
+        const simtime_t stime = etherFrame->getSendingTime();
+        pcapDumper.writeEtherFrame(stime, etherFrame);
     }
-#endif // ifdef WITH_IPv4
-#ifdef WITH_IPv6
-    if (ip6Packet && (dumpBadFrames || !hasBitError)) {
-        const simtime_t stime = simulation.getSimTime();
-        pcapDumper.writeIPv6Frame(stime, ip6Packet);
-    }
-#endif // ifdef WITH_IPv6
 }
 
 void PcapRecorder::finish()
@@ -176,4 +157,3 @@ void PcapRecorder::finish()
 }
 
 } // namespace inet
-
