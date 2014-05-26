@@ -684,7 +684,8 @@ IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame
 cPacket *RadioChannel::receivePacket(const IRadio *radio, IRadioFrame *radioFrame)
 {
     const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
-    const IRadioSignalListening *listening = radio->getReceiver()->createListening(radio, transmission->getStartTime(), transmission->getEndTime(), transmission->getStartPosition(), transmission->getEndPosition());
+    const IRadioSignalArrival *arrival = getArrival(radio, transmission);
+    const IRadioSignalListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
     const IRadioSignalReceptionDecision *decision = receiveFromChannel(radio, listening, transmission);
     if (recordCommunication) {
         const IRadioSignalReception *reception = decision->getReception();
