@@ -59,12 +59,13 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
         // variable for a video trace
         TraceFormat traceFormat;	///< file format of trace file
         long numFrames;			///< total number of frames for a video trace
+        long numFramesSent;     ///< counter for the number of frames sent; reset to zero once the whole frames in the trace file have been sent
         double framePeriod;		///< frame period for a video trace
-        long currentFrame;		///< frame index (starting from 0) to read from the trace (will be wrapped around);
+        long currentFrame;		///< frame index (starting from 0) to read from the trace (will be wrapped around)
         long frameNumber;		///< frame number (display order) of the current frame
-        double frameTime;		///< cumulative display time of the current frame
+        double frameTime;		///< cumulative display time of the current frame in millisecond
         FrameType frameType;	///< type of the current frame
-        long frameSize;			///< size (in byte) of the current frame
+        long frameSize;			///< size of the current frame in byte
         long bytesLeft;			///< bytes left to transmit in the current frame
         double pktInterval;		///< interval between consecutive packet transmissions in a given frame
 
@@ -84,6 +85,7 @@ class INET_API UDPVideoStreamSvrWithTrace : public UDPAppBase
     int serverPort;
     int appOverhead;
     int maxPayloadSize;
+    bool frameSpreading;
 
     // variables for a trace file
     TraceFormat traceFormat;	///< file format of trace file

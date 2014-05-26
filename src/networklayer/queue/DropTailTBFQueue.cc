@@ -42,13 +42,13 @@ void DropTailTBFQueue::initialize()
     numQueueSent = 0;
 
     // configuration
-    burstSize = par("burstSize").longValue()*8; // in bit
+    bucketSize = par("bucketSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
 
     // state
-    meanBucketLength = burstSize;
+    meanBucketLength = bucketSize;
     peakBucketLength = mtu;
     lastTime = simTime();
     isTxScheduled = false;
@@ -160,7 +160,7 @@ bool DropTailTBFQueue::isConformed(int pktLength)
     simtime_t now = simTime();
     unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl() + 0.5);
     // unsigned long long meanTemp = meanBucketLength + (unsigned long long)(meanRate*(now - lastTime).dbl());
-    meanBucketLength = int((meanTemp > burstSize) ? burstSize : meanTemp);
+    meanBucketLength = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
     unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl() + 0.5);
     // unsigned long long peakTemp = peakBucketLength + (unsigned long long)(peakRate*(now - lastTime).dbl());
     peakBucketLength = int((peakTemp > mtu) ? mtu : peakTemp);
@@ -202,7 +202,7 @@ void DropTailTBFQueue::dumpTbfStatus()
     EV << "Last Time = " << lastTime << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Burst size [bit]: " << burstSize << endl;
+    EV << "- Bucket size [bit]: " << bucketSize << endl;
     EV << "- Mean rate [bps]: " << meanRate << endl;
     EV << "- Bucket length [bit]: " << meanBucketLength << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;

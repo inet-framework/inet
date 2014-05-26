@@ -87,13 +87,13 @@ void HttpClientApp::sendHtmlRequest()
 
 void HttpClientApp::connect()
 {
-	TCPGenericCliAppBase::connect();
-
 	// Initialise per session.
 	// Note that session delays will include connection (i.e., socket) set up time as well.
 	// To exclude connection set up time, initialise this variable in "socketEstablished()".
 	sessionStart = simTime();
 	bytesRcvdAtSessionStart = bytesRcvd;
+
+	TCPGenericCliAppBase::connect();
 }
 
 void HttpClientApp::handleTimer(cMessage *msg)
@@ -151,9 +151,9 @@ void HttpClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool 
 {
     TCPGenericCliAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
-    if (htmlObjectRcvd) {
-        // this is the 2nd (or later) response to embedded object.
-        if (numEmbeddedObjects>0)
+    if (htmlObjectRcvd)
+    {   // this is the 2nd (or later) response to embedded object.
+        if (numEmbeddedObjects > 0)
         {
             EV << "reply for embedded object arrived\n";
             timeoutMsg->setKind(MSGKIND_SEND);
@@ -166,12 +166,19 @@ void HttpClientApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool 
         }
     }
     else
-    {
-        // this is the response to HTML object (i.e., 1st response from the server).
+    {   // this is the response to HTML object (i.e., 1st response from the server).
         EV << "reply for HTML object arrived\n";
-        timeoutMsg->setKind(MSGKIND_SEND);
-        scheduleAt(simTime()+(simtime_t)par("parsingTime"), timeoutMsg);
-        htmlObjectRcvd = true;
+        if (numEmbeddedObjects > 0)
+        {
+            timeoutMsg->setKind(MSGKIND_SEND);
+            scheduleAt(simTime()+(simtime_t)par("parsingTime"), timeoutMsg);
+            htmlObjectRcvd = true;
+        }
+        else
+        {
+            EV << "no embedded object, closing session\n";
+            close();
+        }
     }
 }
 

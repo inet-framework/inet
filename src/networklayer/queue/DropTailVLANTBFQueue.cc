@@ -43,7 +43,7 @@ void DropTailVLANTBFQueue::initialize()
     // configuration
     frameCapacity = par("frameCapacity");
     numQueues = par("numQueues");
-    burstSize = par("burstSize").longValue()*8; // in bit
+    bucketSize = par("bucketSize").longValue()*8LL; // in bit
     meanRate = par("meanRate"); // in bps
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
@@ -57,7 +57,7 @@ void DropTailVLANTBFQueue::initialize()
 
     // set subqueues
     queues.assign(numQueues, (cQueue *)NULL);
-    meanBucketLength.assign(numQueues, burstSize);
+    meanBucketLength.assign(numQueues, bucketSize);
     peakBucketLength.assign(numQueues, mtu);
     lastTime.assign(numQueues, simTime());
     conformityFlag.assign(numQueues, false);
@@ -75,9 +75,9 @@ void DropTailVLANTBFQueue::initialize()
 
     // statistic
     warmupFinished = false;
+    numBitsSent.assign(numQueues, 0.0);
     numQueueReceived.assign(numQueues, 0);
     numQueueDropped.assign(numQueues, 0);
-//    numQueueShaped.assign(numQueues, 0);
     numQueueUnshaped.assign(numQueues, 0);
     numQueueSent.assign(numQueues, 0);
 }
@@ -99,17 +99,25 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
     {   // Conformity Timer expires
         int queueIndex = msg->getKind();    // message kind carries a queue index
         conformityFlag[queueIndex] = true;
+
+        // update TBF status
+        int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
+        bool conformance = isConformed(queueIndex, pktLength);
+// DEBUG
+        ASSERT(conformance == true);
+// DEBUG
         if (packetRequested > 0)
         {
-            cMessage *msg = dequeue();
-            if (msg != NULL)
+            cPacket *pkt = check_and_cast<cPacket *>(dequeue());
+            if (pkt != NULL)
             {
                 packetRequested--;
                 if (warmupFinished == true)
                 {
+                    numBitsSent[currentQueueIndex] += pkt->getBitLength();
                     numQueueSent[currentQueueIndex]++;
                 }
-                sendOut(msg);
+                sendOut(pkt);
             }
             else
             {
@@ -142,6 +150,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                     packetRequested--;
                     if (warmupFinished == true)
                     {
+                        numBitsSent[queueIndex] += pktLength;
                         numQueueSent[queueIndex]++;
                     }
                     currentQueueIndex = queueIndex;
@@ -164,8 +173,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                 }
             }
             else
-            {
-//                numQueueShaped[queueIndex]++;
+            {   // frame is not conformed
                 bool dropped = enqueue(msg);
                 if (dropped)
                 {
@@ -182,7 +190,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
             }
         }
         else
-        {
+        {   // queue is not empty
             bool dropped = enqueue(msg);
             if (dropped)
             {
@@ -234,7 +242,7 @@ cMessage *DropTailVLANTBFQueue::dequeue()
        }
     }
 
-    if (!found)
+    if (found == false)
     {
         // TO DO: further processing?
         return NULL;
@@ -245,7 +253,7 @@ cMessage *DropTailVLANTBFQueue::dequeue()
     // TO DO: update statistics
 
     // conformity processing for the HOL frame
-    if (!queues[currentQueueIndex]->isEmpty())
+    if (queues[currentQueueIndex]->isEmpty() == false)
     {
         int pktLength = (check_and_cast<cPacket *>(queues[currentQueueIndex]->front()))->getBitLength();
         if (isConformed(currentQueueIndex, pktLength))
@@ -285,6 +293,7 @@ void DropTailVLANTBFQueue::requestPacket()
     {
         if (warmupFinished == true)
         {
+            numBitsSent[currentQueueIndex] += (check_and_cast<cPacket *>(msg))->getBitLength();
             numQueueSent[currentQueueIndex]++;
         }
         sendOut(msg);
@@ -303,9 +312,11 @@ bool DropTailVLANTBFQueue::isConformed(int queueIndex, int pktLength)
 
     // update states
     simtime_t now = simTime();
-    unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    meanBucketLength[queueIndex] = int((meanTemp > burstSize) ? burstSize : meanTemp);
-    unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
+    //unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
+    unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[queueIndex]).dbl());
+    meanBucketLength[queueIndex] = (long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
+    unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[queueIndex]).dbl());
     peakBucketLength[queueIndex] = int((peakTemp > mtu) ? mtu : peakTemp);
     lastTime[queueIndex] = now;
 
@@ -347,7 +358,7 @@ void DropTailVLANTBFQueue::dumpTbfStatus(int queueIndex)
     EV << "Last Time = " << lastTime[queueIndex] << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Token bucket for mean rate/burst control " << endl;
-    EV << "- Burst size [bit]: " << burstSize << endl;
+    EV << "- Bucket size [bit]: " << bucketSize << endl;
     EV << "- Mean rate [bps]: " << meanRate << endl;
     EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;
@@ -365,15 +376,17 @@ void DropTailVLANTBFQueue::finish()
 
     for (int i=0; i < numQueues; i++)
     {
-        std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent;
+        std::stringstream ss_received, ss_dropped, ss_shaped, ss_sent, ss_throughput;
         ss_received << "packets received by per-VLAN queue[" << i << "]";
         ss_dropped << "packets dropped by per-VLAN queue[" << i << "]";
         ss_shaped << "packets shaped by per-VLAN queue[" << i << "]";
         ss_sent << "packets sent by per-VLAN queue[" << i << "]";
+        ss_throughput << "bits/sec sent per-VLAN queue[" << i << "]";
         recordScalar((ss_received.str()).c_str(), numQueueReceived[i]);
         recordScalar((ss_dropped.str()).c_str(), numQueueDropped[i]);
         recordScalar((ss_shaped.str()).c_str(), numQueueReceived[i]-numQueueUnshaped[i]);
         recordScalar((ss_sent.str()).c_str(), numQueueSent[i]);
+        recordScalar((ss_throughput.str()).c_str(), numBitsSent[i]/(simTime()-simulation.getWarmupPeriod()).dbl());
         sumQueueReceived += numQueueReceived[i];
         sumQueueDropped += numQueueDropped[i];
         sumQueueShaped += numQueueReceived[i] - numQueueUnshaped[i];

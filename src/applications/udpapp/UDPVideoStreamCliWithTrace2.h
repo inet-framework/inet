@@ -42,17 +42,23 @@
 ///
 class INET_API UDPVideoStreamCliWithTrace2 : public UDPVideoStreamCliWithTrace
 {
-    protected:
-        // variables used for delay to loss conversion based on EvalVid algorithm
-        bool firstFrameReceived;
-        simtime_t prevFrameArrivalTime;
-        simtime_t prevOrgFrameArrivalTime;
-        simtime_t currFrameArrivalTime;
-        simtime_t currOrgFrameArrivalTime;
+protected:
+    double framePeriod; ///< frame period for a video trace
 
-    protected:
-        virtual void initialize();
-        virtual void receiveStream(UDPVideoStreamPacket *pkt);
+    // variables used for delay to loss conversion based on EvalVid algorithm
+    bool startupFrameReceived;
+    simtime_t startupFrameArrivalTime;
+    long startupFrameNumber;
+    /* simtime_t prevFrameArrivalTime; */
+    /* simtime_t prevOrgFrameArrivalTime; */
+    /* simtime_t currFrameArrivalTime; */
+    /* simtime_t currOrgFrameArrivalTime; */
+
+protected:
+    virtual void initialize();
+    virtual void receiveStream(UDPVideoStreamPacket *pkt);
+    void updateStartupFrameVariables(long frameNumber);
+    int convertFrameDelayIntoLoss(long frameNumber, simtime_t frameArrivalTime, FrameType frameType);
 };
 
 

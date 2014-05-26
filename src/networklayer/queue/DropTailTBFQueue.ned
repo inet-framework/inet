@@ -34,7 +34,7 @@ simple DropTailTBFQueue like OutputQueue
 {
     parameters:
         int frameCapacity = default(100);
-		int burstSize @unit(byte) = default(3000B);
+		int bucketSize @unit(byte) = default(3000B);
 			// token bucket size; must be larger than mtu.
 			// note that with a finite line/peak rate,
 			// the maximum burst size is not equal to token bucket size.

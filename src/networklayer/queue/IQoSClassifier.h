@@ -1,4 +1,5 @@
 //
+// Copyright (C) 2013 Kyeong Soo (Joseph) Kim
 // Copyright (C) 2005 Andras Varga
 //
 // This program is free software; you can redistribute it and/or
@@ -41,6 +42,13 @@ class INET_API IQoSClassifier : public cPolymorphic
      * - due to compatibility with classes not implementing this function.
      */
     virtual void setMaxNumQueues(int n) {};
+
+    /**
+     * Initialize the classifier (e.g., index table).
+     * - note that this is not declared as a pure virtual function
+     * - due to compatibility with classes not implementing this function.
+     */
+    virtual void initialize(const char *str) {};
 
     /**
      * Returns the largest value plus one classifyPacket() returns.

@@ -40,7 +40,9 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 {
     // type definitions for member variables
     typedef std::vector<bool> BoolVector;
+    typedef std::vector<double> DoubleVector;
     typedef std::vector<int> IntVector;
+    typedef std::vector<long long> LongLongVector;
     typedef std::vector<cMessage *> MsgVector;
     typedef std::vector<cQueue *> QueueVector;
     typedef std::vector<simtime_t> TimeVector;
@@ -49,7 +51,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     // configuration
     int frameCapacity;
     int numQueues;
-    int burstSize; // in bit; note that the corresponding parameter in NED/INI is in byte.
+    long long bucketSize;    // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
@@ -57,7 +59,7 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
     // state
     IQoSClassifier *classifier;
     QueueVector queues;
-    IntVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
+    LongLongVector meanBucketLength;  // vector of the number of tokens (bits) in the bucket for mean rate/burst control
     IntVector peakBucketLength;  // vector of the number of tokens (bits) in the bucket for peak rate/MTU control
     TimeVector lastTime; // vector of the last time the TBF used
     BoolVector conformityFlag;  // vector of flag to indicate whether the HOL frame conforms to TBF
@@ -67,10 +69,10 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
 
     // statistics
     bool warmupFinished;        ///< if true, start statistics gathering
+    DoubleVector numBitsSent;
     IntVector numQueueReceived; // redefined from PassiveQueueBase with 'name hiding'
     IntVector numQueueDropped;  // redefined from PassiveQueueBase with 'name hiding'
     IntVector numQueueUnshaped;
-//    IntVector numQueueShaped;
     IntVector numQueueSent;
 
     // timer

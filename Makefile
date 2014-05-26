@@ -1,3 +1,13 @@
+#
+# Check operating system
+#
+UNAME := $(shell uname -o)
+ifeq ($(UNAME),Msys)
+OPP_LIBS =
+else
+OPP_LIBS = -loppcommon
+endif
+
 all: checkmakefiles
 	cd src && $(MAKE)
 
@@ -12,10 +22,12 @@ cleanall: checkmakefiles
 makefiles:
 ### To create a shared library
 #	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF
-	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
+##  for support of SQLite interfacing and custom result recorders
+	cd src && opp_makemake -f --deep --make-so -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/src/common -I$(OMNETPP_ROOT)/src/envir -I$(OMNETPP_ROOT)/include/platdep -I/usr/local/include -L/usr/local/lib $(OPP_LIBS) -lsqlite3
 ### To create a single executable
 #	cd src && opp_makemake -f --deep -o inet -O out $$NSC_VERSION_DEF
-#	cd src && opp_makemake -f --deep -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/include/platdep -I$(OMNETPP_ROOT)/src/common
+##  for support of SQLite interfacing and custom result recorders
+#	cd src && opp_makemake -f --deep -o inet -O out $$NSC_VERSION_DEF -I$(OMNETPP_ROOT)/src/common -I$(OMNETPP_ROOT)/src/envir -I$(OMNETPP_ROOT)/include/platdep $(OPP_LIBS) -lsqlite3
 
 checkmakefiles:
 	@if [ ! -f src/Makefile ]; then \

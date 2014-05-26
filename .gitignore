@@ -29,8 +29,12 @@ xxx
 /tmp/
 
 # added by Joseph Kim
-doc/doxy
+TAGS
+*.RData
+*.Rhistory
 *.anf
+*.db
+*.debug
 *.dly
 *.ecr
 *.eps

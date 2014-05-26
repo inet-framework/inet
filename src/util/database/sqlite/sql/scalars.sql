@@ -1,0 +1,22 @@
+--
+-- Create tables for cSQLiteOutputScalarManager.
+--
+
+DROP TABLE IF EXISTS scalar;
+DROP TABLE IF EXISTS srun;
+
+CREATE TABLE srun (
+	id INTEGER PRIMARY KEY,
+	runnumber INTEGER NOT NULL,
+	network VARCHAR(80) NOT NULL,
+	date DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scalar (
+	runid INTEGER UNSIGNED NOT NULL,
+	module VARCHAR(200) NOT NULL,
+	name VARCHAR(80) NOT NULL,
+	value DOUBLE PRECISION NOT NULL,
+	PRIMARY KEY (runid,module,name),
+	FOREIGN KEY (runid) REFERENCES srun(id)
+);

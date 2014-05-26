@@ -50,6 +50,11 @@ class INET_API BasicVLANClassifier : public IQoSClassifier
         virtual void setMaxNumQueues(int n) {maxNumQueues = n;}
 
         /**
+         * Initialize the indexTable with a given set of VIDs.
+         */
+        virtual void initialize(const char *str);
+
+        /**
          * Returns the current number of subqueue indexes assigned to VIDs.
          */
         virtual int getNumQueues();

@@ -130,6 +130,7 @@ void UDPVideoStreamSvrWithTrace::initialize()
 	serverPort = par("serverPort");
 	appOverhead = par("appOverhead").longValue();
 	maxPayloadSize = par("maxPayloadSize").longValue();
+    frameSpreading = par("frameSpreading").boolValue();
 	framePeriod = 1.0 / par("fps").longValue();
 	numFrames = 0;
 
@@ -256,9 +257,9 @@ void UDPVideoStreamSvrWithTrace::processStreamRequest(cMessage *msg)
 	d->currentSequenceNumber = intuniform(0, 65535);	///< made random according to RFC 3550
 	d->numPktSent = 0;
 	d->numFrames = numFrames;
+    d->numFramesSent = 0;
 	d->framePeriod = framePeriod;
-//	d->currentFrame = intuniform(1, numFrames); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
-	d->currentFrame = intuniform(0, numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+	d->currentFrame = intuniform(0, d->numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
 	streamVector.push_back(d);
 
 	// initialize self messages
@@ -278,14 +279,28 @@ void UDPVideoStreamSvrWithTrace::readFrameData(cMessage *frameTimer)
 {
 	VideoStreamData *d = (VideoStreamData *) frameTimer->getContextPointer();
 
-//	d->currentFrame = (d->currentFrame < numFrames) ? d->currentFrame + 1 : 1; ///> wrap around to the first frame if it reaches the last one
-	d->currentFrame = (d->currentFrame + 1) % numFrames; ///> wrap around to the first frame if it reaches the last one
+    if (d->numFramesSent == d->numFrames)
+    {   // sent the whole frames in the trace file; reset the frame counter
+        d->numFramesSent = 0;
+        d->currentFrame = intuniform(0, d->numFrames-1); ///< start frame is randomly selected; here we assume sizeof(int) = sizeof(long)
+    }
+    else {
+        d->numFramesSent++;
+    }
+	d->currentFrame = (d->currentFrame + 1) % d->numFrames; ///> wrap around to the first frame if it reaches the last one
 	d->frameNumber = frameNumberVector[d->currentFrame];
 	d->frameTime = frameTimeVector[d->currentFrame];
 	d->frameType = frameTypeVector[d->currentFrame];
 	d->frameSize = frameSizeVector[d->currentFrame];
 	d->bytesLeft = d->frameSize;
-	d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over the frame period
+    if (frameSpreading)
+    {
+        d->pktInterval = d->framePeriod / ceil(d->bytesLeft / double(maxPayloadSize));	///> spread out packet transmissions over a frame period
+    }
+    else
+    {
+        d->pktInterval = 0.0;
+    }
 
 	// schedule next frame start
 	scheduleAt(simTime() + framePeriod, frameTimer);
@@ -302,9 +317,10 @@ void UDPVideoStreamSvrWithTrace::sendStreamData(cMessage *pktTimer)
 	UDPVideoStreamPacket *pkt = new UDPVideoStreamPacket("UDPVideoStreamPacket");
 	long payloadSize = (d->bytesLeft >= maxPayloadSize) ? maxPayloadSize : d->bytesLeft;
 	pkt->setByteLength(payloadSize + appOverhead);
+	pkt->setMarker(d->bytesLeft == payloadSize ? true : false); ///< indicator for the last packet of a frame
 	pkt->setSequenceNumber(d->currentSequenceNumber);	///< in RTP header
 	pkt->setFragmentStart(d->bytesLeft == d->frameSize ? true : false);	///< in FU header in RTP payload
-	pkt->setFragmentEnd(d->bytesLeft == payloadSize ? true : false);	///< in FU header in RTP payload
+	pkt->setFragmentEnd(pkt->getMarker());    ///< in FU header in RTP payload
 	pkt->setFrameNumber(d->frameNumber);	///< non-RTP field
 	pkt->setFrameTime(d->frameTime);	///< non-RTP field
 	pkt->setFrameType(d->frameType);	///> non-RTP field

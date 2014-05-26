@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2004-2009 Andras Varga; Kyeong Soo (Joseph) Kim
+// Copyright (C) 2009 Kyeong Soo (Joseph) Kim
+// Copyright (C) 2004 Andras Varga
 //
 // This library is free software, you can redistribute it and/or modify
 // it under  the terms of the GNU Lesser General Public License

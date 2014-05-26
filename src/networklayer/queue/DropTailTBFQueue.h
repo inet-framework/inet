@@ -36,13 +36,13 @@ class INET_API DropTailTBFQueue : public DropTailQueue
 {
   protected:
     // configuration
-    int burstSize; // in bit; note that the corresponding parameter in NED/INI is in byte.
+    long long bucketSize;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double meanRate;
     int mtu;   // in bit; note that the corresponding parameter in NED/INI is in byte.
     double peakRate;
 
     // state
-    int meanBucketLength;  // the number of tokens (bits) in the bucket for mean rate/burst control
+    long long meanBucketLength;  // the number of tokens (bits) in the bucket for mean rate/burst control
     int peakBucketLength;  // the number of tokens (bits) in the bucket for peak rate/MTU control
     simtime_t lastTime; // the last time the TBF used
     bool isTxScheduled; // flag to indicate whether there is any scheduled frame transmission

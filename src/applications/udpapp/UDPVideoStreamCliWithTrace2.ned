@@ -22,10 +22,11 @@ package inet.applications.udpapp;
 //
 // Video streaming client to be used with UDPVideoStreamSvrWithTrace.
 //
-// It has a capability to convert delay into loss based on play-out
-// buffering [1] and reports packet-level as well as frame-level (meaningful
-// only with trace files in <i>verbose</i> format) statistics at the end of
-// simulation.
+// It has a capability to convert frame delay into frame loss based on the
+// cumulative display time of a frame and simple play-out buffering model (note
+// that it is different from that in [1]) and reports packet-level as well as
+// frame-level (meaningful only with trace files in <i>verbose</i> format)
+// statistics at the end of simulation.
 //
 // References:
 // -# Jirka Klaue, Berthold Rathke, and Adam Wolisz,
@@ -43,10 +44,10 @@ simple UDPVideoStreamCliWithTrace2 like UDPApp
         int serverPort;
         double startTime @unit("s") = default(1s);
         double startupDelay @unit(s) = default(5s);	// due to play-out buffering; 5s is default value for Windows Media Player
-        int fps = default(30);	// frames per second (fps) of the trace file
         int appOverhead @unit(byte) = default(12B);	// size of application layer overhead (e.g., RTP header)
 													// default of 1460B is MTU of 1500B minus RTP (12B), UDP (8B), and IP (20B) headers.
 		// parameters for trace statistics (default values are for 'Terminator 2'
+		int fps = default(30);	// frames per second (fps) of the trace file
 		int numTraceFrames = default(17998);	// number of frames in the trace file (needed to handle wrap around of frames by the server)
 		int gopSize = default(12);	// number of frames per GOP
 		int numBFrames = default(2);	// number of B frames between two consecutive I or P frames
