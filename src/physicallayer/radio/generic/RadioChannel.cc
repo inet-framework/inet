@@ -159,7 +159,12 @@ void RadioChannel::initialize(int stage)
                  << ", maximum transmission duration = " << maxTransmissionDuration << " s"
                  << ", maximum communication range = " << maxCommunicationRange
                  << ", maximum interference range = " << maxInterferenceRange
-                 << ", " << propagation << ", " << attenuation << ", " << backgroundNoise << endl;
+                 << ", " << propagation << ", " << attenuation;
+        if (backgroundNoise)
+            EV_DEBUG << ", " << backgroundNoise;
+        else
+            EV_DEBUG << ", no background noise";
+        EV_DEBUG << endl;
     }
 }
 
