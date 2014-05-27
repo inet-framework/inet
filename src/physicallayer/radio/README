@@ -1,0 +1,316 @@
+1. Requirements
+
+The following is a list of high level goals that the radio design and implementation
+must fulfill.
+ 
+ - be able exploit multiple CPUs and highly parallel GPU to increase performance
+ - provide performance vs. accuracy tradeoff configuration options
+   (e.g. range, radio mode, listening mode, receiver mac address optimizations)
+ - support different level of details (see below)
+ - support different radio signal models (scale from range based to emulation models)
+ - support different propagation models (scale from immediate to accurate models)
+ - support different attenuation models (scale from free space to trace based models)
+ - support different antenna models (scale from isotropic to directional models)
+ - support different power consumption models (scale from mode based to signal based models)
+ - provide concurrent transmitter and receiver mode (transceiver mode)
+ - provide burst mode (back to back) transmission
+ - provide synchronization/preamble detection
+ - provide capture during reception (switching to another transmission)
+ - provide finite time radio mode switching
+
+2. Actor Model
+
+This chapter contains the models that describe the actors of the communication
+on the radio medium.
+
+2.1. Radio
+
+The radio model represents the physical device that is capable of transmitting
+or receiving radio signals. Simultaneous transmission and reception is also
+supported. The radio consists of antenna, transmitter and receiver. The receiver
+can receive, and similarly the transmitter can transmit, at most one radio signal
+at any given time.
+
+The radio has an operation mode that is either off, sleep, receiver, transmitter,
+transceiver or switching. The radio never initiates a radio mode switch on its
+own, this mode is controlled by the mac module. The radio also provides the current
+state of its transmitter and receiver. The possible transmitter states are
+unknown, idle and transmitting. The possible receiver states are unknown, idle,
+busy, synchronizing and receiving.
+
+This model is implemented in the Radio module.
+
+2.2. Antenna
+
+The antenna model represents the physical device (a part of the radio) which
+converts electric signals into radio waves, and vice versa. The antenna provides
+its position and orientation using a mobility model. It also computes the antenna
+gain for a given transmission or reception. This computation is based on the
+transmitter/receiver positions/orientations and the antenna characteristics.
+
+The simplest model is the isotropic antenna that has constant 1 gain independently
+of the direction. This model is implemented in the IsotropicAntenna module.
+
+Another simple model is the constant gain antenna that has a configurable direction
+independent gain. This model is implemented in the ConstantGainAntenna module.
+
+A more widely used model is the dipole antenna that has a length property and a
+gain that depends on the 3D direction. This model is implemented in the
+DipoleAntenna module.
+
+A quite generic model is the interpolating antenna that has a table of angles
+and antenna gains. This model computes the actual gain by interpolating in this
+table using the direction and the antenna's orientation. This model is implemented
+in the InterpolatingAntenna module. 
+
+2.3. Transmitter
+
+The transmitter represents the physical device (a part of the radio) which
+converts packets into electric signals. It takes a mac frame and produces a
+description of the radio signal that will be emitted to the radio medium by the
+antenna.
+
+The simplest transmitter model has communication range, interference range and
+detection range parameters. This transmitter produces transmissions that carry
+the range information independently of the receiver. This model is implemented in
+the IdealRadioSignalTransmitter module.
+
+A more realistic but still quite simple transmitter model has modulation, carrier 
+frequency, bandwidth and power scalar parameters. This transmitter produces
+transmissions that carry the above configuration information. This model is
+implemented in the ScalarRadioSignalTransmitter module.
+
+A more computationally complex transmitter model has similar parameters to the
+one above. Nevertheless this transmitter produces transmissions with power that  
+changes over time and/or frequency. This model is implemented in the 
+DimensionalRadioSignalTransmitter module.
+
+A more flexible transmitter model has separate components for the packet, bit,
+symbol, sample and analog domains and their functions (e.g. CRC, FEC, interleaving,
+modulation, spreading, space-time coding, spatial multiplexing, pulse shaping,
+etc.) This model allows the representation of the radio signal down to the bit,
+symbol or even the sample level. This model is implemented in the
+LayeredRadioSignalTransmitter module.
+
+Finally, the most detailed transmitter model utilizes the open source GNU software
+defined radio toolkit to produce transmissions. This model produces detailed
+radio signals that are good enough to send to the real hardware. This model is
+implemented in the GNURadioSignalTransmitter module.
+
+2.4. Receiver
+
+The receiver represents the physical device (a part of the radio) which converts
+electric signals into packets. It takes a radio signal along with the interference
+including other radio signals, meaningless noise signals and background noise,
+and it produces a mac frame along with a reception indication.
+
+The simplest receiver model receives a transmission successfully within the signal's
+communication range as long as there are no other interfering radio signal within
+their interference range. This model is implemented in the IdealRadioSignalReceiver
+module.
+
+A more realistic but still quite simple receiver model receives a transmission
+if the modulation, carrier frequency, bandwidth parameters match and the minimum
+signal to noise and interference ratio is above a configured threshold. This model
+is implemented in the ScalarRadioSignalReceiver module.
+
+A more computationally complex receiver model computes the signal to noise and
+interference ratio using the dimensional transmission that carries power that
+change over time and/or frequency. This model is implemented in the
+DimensionalRadioSignalReceiver module.
+
+A more flexible receiver model has separate components for the packet, bit, symbol,
+sample and analog domains and their functions (e.g. CRC, FEC, deinterleaving,
+demodulation, despreading, space-time decoding, spatial demultiplexing, pulse
+filtering, preamble detection, carrier sensing, etc.) This model allows the
+interpretation of radio signal down to the bit, symbol or even the sample level.
+This model is implemented in the LayeredRadioSignalReceiver module.
+
+Finally, the most detailed receiver model utilizes the open source GNU software
+defined radio toolkit to receive transmissions. This model interprets detailed
+radio signals that are good enough to be received from the real hardware. This
+model is implemented in the GNURadioSignalReceiver module.
+
+2.5. Medium
+
+The radio medium model is the central component in the actor model that describes
+the state of the shared radio channel where the communication takes place. The
+model keeps track of all radios, transmissions, receptions and interferences.
+
+This model is implemented in the RadioMedium module.
+
+2.6. Propagation
+
+The propagation model describes how radio signals propagate through space over
+time. There are many ways to model propagation and the difference lies in the
+tradeoff between performance and accuracy. The propagation model interface is
+specified in the IRadioSignalPropagation module interface.
+
+The simplest propagation model is when propagation time is neglected and radio
+signals travel from transmitter to receiver in zero simulation time. Although
+this model is very cheap in terms of computation, it's also very inaccurate. This
+model is implemented in the ImmediateRadioSignalPropagation module. 
+
+The most complicated model is when propagation time is accurately computed taking
+into account the movement of both transmitter and receiver during the transmission
+and propagation of the radio signal. The complexity arises from the fact that the
+actual movement becomes only known while the radio signal is being transmitted
+and propagated. This model is currently not supported by the interface.
+
+A less computationally complex but still useful model is when the propagation of
+radio signals are approximated at the start of the transmission. This makes the
+transmission end position less accurate because the movement of the transmitter
+is only approximated. It also makes the reception start/end time/position less
+accurate because the movement of the receiver is also approximated. This model
+requires that mobility models are able to provide position approximations for
+the near future. This model is implemented in ConstantSpeedRadioSignalPropagation
+module.
+
+Another way to tradeoff accuracy for performance is to prevent computing the
+positions for every transmission and reception, and use a periodically updated
+value. This model require much less computational effort and it's especially
+useful when the speed of radios is neglectable compared to the propagation speed
+of radio signals. This model is supported by the interface but currently not yet
+implemented.
+
+2.7. Attenuation
+
+The attenuation model describes how radio signals attenuate during propagation.
+These models include various effects such as free-space path loss, shadowing,
+refraction, reflection, absorption, diffraction and others.
+
+2.8. Background Noise
+
+The background noise model describes a radio noise source TODOTODO over space and time.
+
+3. Communication Model
+
+This chapter contains the models that describe the process of the communication
+on the radio medium.
+
+3.1. Transmission Request
+
+The transmission request model describes the parameters of a radio transmission.
+This data structure sent by the mac along with the mac frame attached as a control info.
+
+3.2. Transmission
+
+The transmission model represents the transmission of a radio signal. There's one
+instance per transmission of this interface that is sent to all potential
+receiver radios in a separate radio frame instance.
+
+3.3. Arrival
+
+The arrival model describe the space and time coordinates of a transmission
+arriving at a receiver.
+
+3.4. Interference
+
+3.5. Reception
+
+The reception model represents the reception of a transmission by a receiver
+radio. There's one instance per transmission of this interface for each receiver.
+
+3.6. Reception Decision
+
+3.7. Reception Indication
+
+This interface represents the result of a receiver's reception process.
+
+3.8. Listening
+
+This interface represents how a receiver is listening on the radio channel.
+
+3.9. Listening Decision
+
+This interface represents the result of a receiver's listening process.
+
+4. Level of Detail
+
+4.1. Ideal Radio
+
+4.2. Scalar Radio
+
+4.3. Dimensional Radio
+
+4.4. Layered Radio
+
+4.5. GNU Radio
+
+TODO:
+
+packet domain:
+ - part of MAC
+
+bit domain:
+ - cyclic redundancy check insertion/removal (CRC)
+ - forward error correction coding/encoding (FEC)
+ - bit interleaving/deinterleaving
+
+symbol domain:
+ - modulation/demodulation
+ - pilot/preamble insertion/removal
+ - spreading/despreading
+ - antenna beamforming
+ - space-time coding/decoding
+ - spatial multiplexing/demultiplexing
+
+sample or waveform domain:
+ - pulse shaping/matching filter
+ - carrier sensing/energy detection
+ - synchronization/pll
+
+analog domain:
+ - DA/AD conversion
+ - IF up/down conversion
+ - PLL
+
+model:
+ - mobility (position)
+ - antenna (mobility)
+ - propagation (speed)
+ - attenuation (free space: alpha)
+ - background noise (isotropic: power)
+ - radio (receiver antenna, transmitter antenna, codec, modem, shaper, converter)
+ - radio channel (propagation, attenuation, background noise, radios, transmissions)
+ - listening (??? filter model)
+ - transmission (start position/time, end position/time, analog model)
+ - reception (transmission, start position/time, end position/time, analog model)
+ - noise (start position/time, end position/time, analog model)
+ - loss (factor)
+ - codec (coding scheme, header bit length, header bit rate, payload bit rate)
+ - modem (modulation scheme, preamble symbol length)
+ - shaper (?)
+ - converter (power, carrier frequency, bandwidth)
+
+transmission:
+ - packet model (length, bits)
+ - bit model (crc, fec, header bit length, total length, bits)
+ - symbol model (modulation, preamble symbol length, total length, symbols)
+ - sample model (pulse shape, length, samples)
+ - analog model (power, duration, carrier frequency, bandwidth) 
+
+reception:
+ - analog model indication (snir)
+ - sample model indication (rssi)
+ - symbol model indication (symbol error rate, symbol error count)
+ - bit model indication (bit error rate, bit error count)
+ - packet model indication (packet error rate, packet successful)
+
+algorithms:
+ - compute CRC
+ - check CRC
+ - FEC encode
+ - FEC decode
+ - Modulate
+ - Demodulate
+ - Shape pulse
+ - Filter pulse
+ - insert preamble/pilot
+ - synchronize
+
+missing:
+ - doppler shift
+ - polarization
+ - preamble/pilot/sychronization
+ - mimo, antenna gain
