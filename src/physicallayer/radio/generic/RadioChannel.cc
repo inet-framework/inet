@@ -44,6 +44,7 @@ RadioChannel::RadioChannel() :
     removeNonInterferingTransmissionsTimer(NULL),
     baseRadioId(0),
     baseTransmissionId(0),
+    neighborCache(NULL),
     transmissionCount(0),
     sendCount(0),
     receptionComputationCount(0),
@@ -76,6 +77,7 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
     removeNonInterferingTransmissionsTimer(NULL),
     baseRadioId(0),
     baseTransmissionId(0),
+    neighborCache(NULL),
     transmissionCount(0),
     sendCount(0),
     receptionComputationCount(0),
@@ -143,6 +145,8 @@ void RadioChannel::initialize(int stage)
         recordCommunication = par("recordCommunication");
         if (recordCommunication)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+        // TODO: create cache based on parameter?
+        // e.g. neighborCache = new XXXNeighborCache();
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
@@ -635,29 +639,36 @@ void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadi
 
 void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
 {
-    const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
-    const IRadioSignalTransmission *transmission = frame->getTransmission();
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << (IRadioChannel *)this << "." << endl;
-    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+    if (neighborCache)
+        neighborCache->sendToNeighbors(radio, frame);
+    else
+        for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+            sendToRadio(radio, *it, frame);
+}
+
+void RadioChannel::sendToRadio(IRadio *transmitter, const IRadio *receiver, const IRadioFrame *frame)
+{
+    const Radio *transmitterRadio = check_and_cast<const Radio *>(transmitter);
+    const Radio *receiverRadio = check_and_cast<const Radio *>(receiver);
+    const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
+    const IRadioSignalTransmission *transmission = frame->getTransmission();
+    ReceptionCacheEntry *receptionCacheEntry = getReceptionCacheEntry(receiverRadio, transmission);
+    if (receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
     {
-        const Radio *receiverRadio = check_and_cast<const Radio *>(*it);
-        ReceptionCacheEntry *receptionCacheEntry = getReceptionCacheEntry(receiverRadio, transmission);
-        if (receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
-        {
-            const IRadioSignalArrival *arrival = getArrival(receiverRadio, transmission);
-            simtime_t propagationTime = arrival->getStartPropagationTime();
-            EV_DEBUG << "Sending " << frame
-                     << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
-                     << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
-                     << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
-            RadioFrame *frameCopy = radioFrame->dup();
-            cGate *gate = receiverRadio->RadioBase::getRadioGate()->getPathStartGate();
-            const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
-            receptionCacheEntry->frame = frameCopy;
-            sendCount++;
-        }
+        const IRadioSignalArrival *arrival = getArrival(receiverRadio, transmission);
+        simtime_t propagationTime = arrival->getStartPropagationTime();
+        EV_DEBUG << "Sending " << frame
+                 << " from " << (IRadio *)transmitterRadio << " at " << transmission->getStartPosition()
+                 << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
+                 << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
+        RadioFrame *frameCopy = radioFrame->dup();
+        cGate *gate = receiverRadio->RadioBase::getRadioGate()->getPathStartGate();
+        const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
+        receptionCacheEntry->frame = frameCopy;
+        sendCount++;
     }
 }
 

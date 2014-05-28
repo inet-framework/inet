@@ -83,6 +83,12 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
                 {}
         };
 
+        class INeighborCache
+        {
+            public:
+                virtual void sendToNeighbors(const IRadio *transmitter, const IRadioFrame *frame) = 0;
+        };
+
         enum RangeFilterKind
         {
             RANGE_FILTER_ANYWHERE,
@@ -208,6 +214,10 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          * The smallest transmission id of all ongoing transmissions.
          */
         int baseTransmissionId;
+        /**
+         * Caches neighbors for all radios or NULL if turned off.
+         */
+        mutable INeighborCache *neighborCache;
         /**
          * Caches pre-computed radio signal information for transmissions and
          * radios. The outer vector is indexed by transmission id (offset with
@@ -349,11 +359,12 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual void addRadio(const IRadio *radio);
         virtual void removeRadio(const IRadio *radio);
 
-        virtual void transmitToChannel(const IRadio *radio, const IRadioSignalTransmission *transmission);
-        virtual void sendToChannel(IRadio *radio, const IRadioFrame *frame);
+        virtual void transmitToChannel(const IRadio *transmitter, const IRadioSignalTransmission *transmission);
+        virtual void sendToChannel(IRadio *transmitter, const IRadioFrame *frame);
+        virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
 
-        virtual IRadioFrame *transmitPacket(const IRadio *radio, cPacket *macFrame);
-        virtual cPacket *receivePacket(const IRadio *radio, IRadioFrame *radioFrame);
+        virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame);
+        virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame);
 
         virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalListeningDecision *listenOnChannel(const IRadio *radio, const IRadioSignalListening *listening) const;
