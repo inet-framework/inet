@@ -35,6 +35,10 @@
  * of reception decisions.
  */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
+// TODO: the reception API must be purely functional enforced by the compiler (unfortunately this is impossible in C++)
+// TODO: so we need to be very careful, because it's pretty easy to break the purely function API just be reading a non-const member
+// TODO: it's probably better to split this interface and all other interfaces into two, one with state that changes over time
+// TDOO: and another with purely function API qualified with const functions and members variables
 class INET_API IRadioSignalReceiver : public IPrintableObject
 {
     public:
@@ -72,7 +76,7 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const = 0;
 
         /**
-         * Returns the result of the reception process specifying whether it is
+         * Returns the result of the reception process specifying whether it is/
          * successful or not and any other physical properties. Part of the reception
          * process, see class comment.
          */

@@ -210,6 +210,7 @@ bool ScalarRadioSignalReceiver::areOverlappingBands(Hz carrierFrequency1, Hz ban
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
+// TODO: this is not purely functional, see interface comment
 bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
 {
     // TODO: check if modulation matches?
@@ -222,6 +223,7 @@ bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalTra
         return false;
 }
 
+// TODO: this is not purely functional, see interface comment
 bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalReception *reception) const
 {
     const ScalarRadioSignalReception *scalarReception = check_and_cast<const ScalarRadioSignalReception *>(reception);
@@ -297,6 +299,7 @@ const IRadioSignalListeningDecision *ScalarRadioSignalReceiver::computeListening
     return new ScalarRadioSignalListeningDecision(listening, maxPower >= energyDetection, maxPower);
 }
 
+// TODO: this is not purely functional, see interface comment
 bool ScalarRadioSignalReceiver::computeHasBitError(double minSNIR, int bitLength, double bitrate) const
 {
     double ber = modulation->calculateBER(minSNIR, bandwidth.get(), bitrate);
