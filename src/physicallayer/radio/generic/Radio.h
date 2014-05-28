@@ -37,7 +37,6 @@ class INET_API Radio : public RadioBase
 {
     protected:
         static int nextId;
-
     protected:
         const int id;
         const IRadioAntenna *antenna;
@@ -45,12 +44,21 @@ class INET_API Radio : public RadioBase
         const IRadioSignalReceiver *receiver;
         IRadioChannel *channel;
 
+        RadioMode nextRadioMode;
+        RadioMode prevRadioMode;
         cMessage *endTransmissionTimer;
         // TODO: currently we support receiving multiple transmissions simultaneously (which we shouldn't, see above)
         cMessage *endReceptionTimer;
 
         // TODO: make sure it's always updated whenever reception state, listening state, etc. changes
+        cMessage *setRadioModeTimer;
+        simtime_t switchingTimes[5][5];
         simtime_t lastReceptionStateChange;
+
+    private:
+        void parseSwitchingTimes();
+        void startSetRadioMode(RadioMode newRadioMode, simtime_t switchingTime);
+        void endSetRadioMode(RadioMode newRadioMode);
 
     protected:
         virtual void initialize(int stage);

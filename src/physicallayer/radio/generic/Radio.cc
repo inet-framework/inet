@@ -32,6 +32,7 @@ Radio::Radio() :
     channel(NULL),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
+    setRadioModeTimer(NULL),
     lastReceptionStateChange(0)
 {}
 
@@ -43,6 +44,7 @@ Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSign
     channel(channel),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
+    setRadioModeTimer(NULL),
     lastReceptionStateChange(0)
 {
     channel->addRadio(this);
@@ -54,6 +56,7 @@ Radio::~Radio()
     delete transmitter;
     delete receiver;
     cancelAndDelete(endTransmissionTimer);
+    cancelAndDelete(setRadioModeTimer);
 }
 
 void Radio::initialize(int stage)
@@ -70,6 +73,9 @@ void Radio::initialize(int stage)
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
         channel->addRadio(this);
+        setRadioModeTimer = new cMessage();
+        parseSwitchingTimes();
+        prevRadioMode = nextRadioMode = RADIO_MODE_SWITCHING;
     }
     else if (stage == INITSTAGE_LAST)
     {
@@ -85,23 +91,84 @@ void Radio::printToStream(std::ostream &stream) const
 void Radio::setRadioMode(RadioMode newRadioMode)
 {
     Enter_Method_Silent();
-    if (radioMode != newRadioMode)
+
+    if (newRadioMode == RADIO_MODE_SWITCHING)
+        throw cRuntimeError("It is not allowed to switch manually to RADIO_MODE_SWITCHING");
+    if (radioMode != newRadioMode && newRadioMode != nextRadioMode)
     {
-        EV << "Changing radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
-        if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
-        {
-            endReceptionTimer = NULL;
-            lastReceptionStateChange = simTime();
-        }
-        else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
-        {
-            if (endTransmissionTimer->isScheduled())
-                throw cRuntimeError("Aborting ongoing transmissions is not supported");
-        }
-        radioMode = newRadioMode;
-        emit(radioModeChangedSignal, newRadioMode);
-        updateTransceiverState();
+        if (radioMode == RADIO_MODE_SWITCHING || setRadioModeTimer->isScheduled())
+            throw cRuntimeError("Radio module attempted to switch to a new mode when an another switching has not yet completed");
+        if (newRadioMode > 4)
+            throw cRuntimeError("Radio module attempted to switch to an unknown radio mode");
+
+        simtime_t switchingTime = switchingTimes[radioMode][newRadioMode];
+
+        if (switchingTime != 0)
+            startSetRadioMode(newRadioMode, switchingTime);
+        else
+            endSetRadioMode(newRadioMode);
     }
+}
+
+void Radio::parseSwitchingTimes()
+{
+    const char *times = par("switchingTimes");
+
+    char prefix[3];
+    unsigned int count = sscanf(times,"%s",prefix);
+
+    if (count > 2)
+        throw cRuntimeError("Metric prefix should no more than two characters long");
+
+    double metric = 1;
+
+    if (strcmp("s",prefix) == 0)
+        metric = 1;
+    else if (strcmp("ms",prefix) == 0)
+        metric = 0.001;
+    else if (strcmp("ns",prefix) == 0)
+        metric = 0.000000001;
+    else
+        throw cRuntimeError("Undefined or missed metric prefix for switchingTimes parameter");
+
+    cStringTokenizer tok(times + count + 1);
+    unsigned int idx = 0;
+    while (tok.hasMoreTokens())
+    {
+        switchingTimes[idx/5][idx%5] = atof(tok.nextToken()) * metric;
+        idx++;
+    }
+    if (idx != 25)
+        throw cRuntimeError("Check your switchingTimes parameter! Some parameters may be missed");
+}
+
+void Radio::startSetRadioMode(RadioMode newRadioMode, simtime_t switchingTime)
+{
+    EV_DETAIL << "Starting to change radio mode from " << getRadioModeName(radioMode) << " to " << getRadioModeName(newRadioMode) << ".\n";
+    prevRadioMode = radioMode;
+    radioMode = RADIO_MODE_SWITCHING;
+    emit(radioModeChangedSignal, radioMode);
+    nextRadioMode = newRadioMode;
+    setRadioModeTimer->setName(getRadioModeName(newRadioMode));
+    scheduleAt(simTime() + switchingTime, setRadioModeTimer);
+}
+
+void Radio::endSetRadioMode(RadioMode newRadioMode)
+{
+    EV_DETAIL << "Radio mode changed from " << getRadioModeName(prevRadioMode) << " to " << getRadioModeName(newRadioMode) << endl;
+    if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
+    {
+        endReceptionTimer = NULL;
+        lastReceptionStateChange = simTime();
+    }
+    else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
+    {
+        if (endTransmissionTimer->isScheduled())
+            throw cRuntimeError("Aborting ongoing transmissions is not supported");
+    }
+    radioMode = newRadioMode;
+    emit(radioModeChangedSignal, newRadioMode);
+    updateTransceiverState();
 }
 
 const IRadioSignalTransmission *Radio::getTransmissionInProgress() const
@@ -151,6 +218,13 @@ void Radio::handleSelfMessage(cMessage *message)
 {
     if (message == endTransmissionTimer)
         endTransmission();
+    else if(message == setRadioModeTimer)
+    {
+        if (strcmp(getRadioModeName(nextRadioMode), message->getName()) != 0)
+                throw cRuntimeError("nextRadioMode and the setRadioModeTimer's name are not identical!");
+
+        endSetRadioMode(nextRadioMode);
+    }
     else
         endReception(message);
 }

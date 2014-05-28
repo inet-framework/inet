@@ -22,12 +22,30 @@ import inet.physicallayer.radio.contract.IRadioAntenna;
 import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
 
+// switchingTimes parameter should be regarded as a 5x5 matrix:
+//
+//               OFF SLEEP RECEIVER TRANSMITTER TRANSCEIVER
+// OFF           0 0 0 0 0
+// SLEEP         0 0 0 0 0
+// RECEIVER      0 0 0 0 0
+// TRANSMITTER   0 0 0 0 0
+// TRANSCEIVER   0 0 0 0 0
+//
+// The corresponding RadioMode pairs contain the time needed to
+// switch from one state to another.
+// For example: the 6th number identifies the time needed to switch
+// from SLEEP to OFF.
+//
+// The first entry of the switchingTimes string indicates the
+// time-related metric prefix and it MUST be s, ms or ns.
+//
 module Radio extends RadioBase
 {
     parameters:
         string antennaType;
         string transmitterType;
         string receiverType;
+        string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
         // TODO: string powerConsumerType = default("");
         // TODO: add parameter to specify radio channel
         @class(Radio);
