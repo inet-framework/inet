@@ -19,7 +19,7 @@ package inet.physicallayer.radio.ieee80211;
 
 import inet.physicallayer.radio.scalar.ScalarRadioChannel;
 
-simple Ieee80211RadioChannel extends ScalarRadioChannel
+module Ieee80211RadioChannel extends ScalarRadioChannel
 {
     parameters:
         // TODO: move to management and remove channel class

@@ -22,7 +22,7 @@ import inet.physicallayer.radio.contract.IRadioChannel;
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
 import inet.physicallayer.radio.contract.IRadioSignalPropagation;
 
-simple RadioChannel like IRadioChannel
+module RadioChannel like IRadioChannel
 {
     parameters:
         // submodule type parameters
