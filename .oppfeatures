@@ -480,7 +480,7 @@
                        inet.nodes.rip
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_RIP"
         linkerFlags = ""
         />
     <feature
@@ -598,7 +598,7 @@
                        inet.world.radio
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_RADIO"
         linkerFlags = ""
         />
     <feature
@@ -613,7 +613,7 @@
                        inet.nodes.wireless
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_IEEE80211"
         linkerFlags = ""
         />
     <feature
