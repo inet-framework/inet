@@ -89,6 +89,7 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
         checkSourceAndParameters(vp);
         ok = vp->getSeqNo() > curConn.seqNo && vp->getTimeStamp() > curConn.timeStamp;
     }
+
     if (ok)
     {
         emit(rcvdPkSignal, vp);
@@ -102,27 +103,12 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
 
 void VoIPStreamReceiver::Connection::openAudio(const char *fileName)
 {
-/*
-    AVCodecContext *c;
-    AVCodec *avcodec;
-
-    c = audio_st->codec;
-
-    // find the audio encoder
-    avcodec = avcodec_find_encoder(c->codec_id);
-    if (!avcodec)
-        throw cRuntimeError("Codec %d not found", c->codec_id);
-
-    // open it
-    if (avcodec_open(c, avcodec) < 0)
-        throw cRuntimeError("Could not open codec %d", c->codec_id);
-*/
-    outFile.open(fileName, sampleRate, av_get_bits_per_sample_format(decCtx->sample_fmt));
+    outFile.open(fileName, sampleRate, 8 * av_get_bytes_per_sample(decCtx->sample_fmt));
 }
 
 void VoIPStreamReceiver::Connection::writeLostSamples(int sampleCount)
 {
-    int pktBytes = sampleCount * av_get_bits_per_sample_format(decCtx->sample_fmt) / 8;
+    int pktBytes = sampleCount * av_get_bytes_per_sample(decCtx->sample_fmt);
     if (outFile.isOpen())
     {
         uint8_t decBuf[pktBytes];
@@ -138,17 +124,17 @@ void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
     avpkt.data = inbuf;
     avpkt.size = inbytes;
 
-    int decBufSize = AVCODEC_MAX_AUDIO_FRAME_SIZE;
-    int16_t *decBuf = new int16_t[decBufSize]; // output is 16bit
-//    int ret = avcodec_decode_audio2(decCtx, decBuf, &decBufSize, inbuf, inbytes);
-    int ret = avcodec_decode_audio3(decCtx, decBuf, &decBufSize, &avpkt);
-    if (ret < 0)
-        throw cRuntimeError("avcodec_decode_audio2(): received packet decoding error: %d", ret);
-
-    lastPacketFinish += simtime_t(1.0) * (decBufSize * 8 / av_get_bits_per_sample_format(decCtx->sample_fmt)) / sampleRate;
+    int gotFrame;
+    AVFrame decodedFrame = {{0}};
+    int consumedBytes = avcodec_decode_audio4(decCtx, &decodedFrame, &gotFrame, &avpkt);
+    if (consumedBytes < 0 || !gotFrame)
+        throw cRuntimeError("Error in avcodec_decode_audio4(): returns: %d, gotFrame: %d", consumedBytes, gotFrame);
+    if (consumedBytes != inbytes)
+        throw cRuntimeError("Model error: remained bytes after avcodec_decode_audio4(): %d = ( %d - %d )", inbytes - consumedBytes, inbytes, consumedBytes);
+    simtime_t decodedTime(1.0 * decodedFrame.nb_samples / sampleRate);
+    lastPacketFinish += decodedTime;
     if (outFile.isOpen())
-        outFile.write(decBuf, decBufSize);
-    delete [] decBuf;
+        outFile.write(decodedFrame.data[0], decodedFrame.linesize[0]);
 }
 
 void VoIPStreamReceiver::Connection::closeAudio()
@@ -180,18 +166,13 @@ void VoIPStreamReceiver::createConnection(VoIPStreamPacket *vp)
     if (curConn.pCodecDec == NULL)
         throw cRuntimeError("Codec %d not found", curConn.codec);
 
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(53,21,0)
-    curConn.decCtx = avcodec_alloc_context();
-#else
     curConn.decCtx = avcodec_alloc_context3(curConn.pCodecDec);
-#endif
-
     curConn.decCtx->bit_rate = curConn.transmitBitrate;
     curConn.decCtx->sample_rate = curConn.sampleRate;
     curConn.decCtx->channels = 1;
     curConn.decCtx->bits_per_coded_sample = curConn.sampleBits;
 
-    int ret = avcodec_open(curConn.decCtx, curConn.pCodecDec);
+    int ret = avcodec_open2(curConn.decCtx, curConn.pCodecDec, NULL);
     if (ret < 0)
         throw cRuntimeError("could not open decoding codec %d (%s): err=%d", curConn.codec, curConn.pCodecDec->name, ret);
 
@@ -236,17 +217,9 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
 {
     switch (vp->getType())
     {
-        case VOICE:
-            emit(packetHasVoiceSignal, 1);
-            break;
-
-        case SILENCE:
-            emit(packetHasVoiceSignal, 0);
-            break;
-
-        default:
-            throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
-            return;
+        case VOICE: emit(packetHasVoiceSignal, 1); break;
+        case SILENCE: emit(packetHasVoiceSignal, 0); break;
+        default: throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
     }
     uint16_t newSeqNo = vp->getSeqNo();
     if (newSeqNo > curConn.seqNo + 1)
