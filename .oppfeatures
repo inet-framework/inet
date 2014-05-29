@@ -480,7 +480,7 @@
                        inet.nodes.rip
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_RIP"
         linkerFlags = ""
         />
     <feature
@@ -593,11 +593,29 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.power.contract
-                       inet.physicallayer.radio
+                       inet.physicallayer.radio.common
+                       inet.physicallayer.radio.detailed
+                       inet.physicallayer.radio.ideal
+                       inet.physicallayer.radio.power
+                       inet.physicallayer.radio.simplified
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_RADIO"
+        linkerFlags = ""
+        />
+    <feature
+        id="power"
+        name="Power"
+        description = "Power supply / Battery / Etc."
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.power.battery
+                       inet.power.common
+                       inet.power.ideal
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_POWER"
         linkerFlags = ""
         />
     <feature
@@ -612,7 +630,7 @@
                        inet.nodes.wireless
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_IEEE80211"
         linkerFlags = ""
         />
     <feature
