@@ -6,7 +6,7 @@ must fulfill.
  
  - exploit multiple CPUs and the highly parallel GPU to increase performance
  - provide performance vs. accuracy tradeoff configuration options
-   (e.g. range filter, radio mode filter, listening mode filter, mac address filter)
+   (e.g. range filter, radio mode filter, listening mode filter, MAC address filter)
  - support different level of details (see details below)
  - support different radio signal models (scale from range based to accurate emulation models)
  - support different propagation models (scale from immediate to accurate models)
@@ -23,7 +23,7 @@ must fulfill.
 ==============
 
 This chapter contains the models that describe the actors of the communication
-on the radio medium. All actors are implemented as omnetpp modules some of which
+on the radio medium. All actors are implemented as OMNETPP modules some of which
 may have other submodules to further split up their configuration and services.
 
 2.1. Radio
@@ -37,7 +37,7 @@ at any given time.
 
 The radio has an operation mode that is either off, sleep, receiver, transmitter,
 transceiver or switching. The radio never initiates a radio mode switch on its
-own, this mode is controlled by the mac module. The radio also provides the current
+own, this mode is controlled by the MAC module. The radio also provides the current
 state of its transmitter and receiver. The possible transmitter states are
 unknown, idle and transmitting. The possible receiver states are unknown, idle,
 busy, synchronizing and receiving.
@@ -72,7 +72,7 @@ in the InterpolatingAntenna module.
 ----------------
 
 The transmitter represents the physical device (a part of the radio) which
-converts packets into electric signals. It takes a mac frame and produces a
+converts packets into electric signals. It takes a MAC frame and produces a
 description of the radio signal that will be emitted to the radio medium by the
 antenna.
 
@@ -109,7 +109,7 @@ implemented in the GNURadioSignalTransmitter module.
 The receiver represents the physical device (a part of the radio) which converts
 electric signals into packets. It takes a radio signal along with the interference
 including other radio signals, meaningless noise signals and background noise,
-and it produces a mac frame along with a reception indication.
+and it produces a MAC frame along with a reception indication.
 
 The simplest receiver model receives a transmission successfully within the signal's
 communication range as long as there are no other interfering radio signal within
@@ -118,13 +118,13 @@ module.
 
 A more realistic but still quite simple receiver model receives a transmission
 if the modulation, carrier frequency, bandwidth parameters match and the minimum
-signal to noise and interference ratio is above a configured threshold. This model
+signal to noise plus interference ratio is above a configured threshold. This model
 is implemented in the ScalarRadioSignalReceiver module.
 
-A more computationally complex receiver model computes the signal to noise and
-interference ratio using the dimensional transmission that carries power that
-changes over time and/or frequency. This model is implemented in the
-DimensionalRadioSignalReceiver module.
+A more computationally complex receiver model computes the signal to noise plus
+interference ratio from a dimension transmission power that changes over time
+and/or frequency. This model is implemented in the DimensionalRadioSignalReceiver
+module.
 
 A more flexible receiver model has separate components for the packet, bit, symbol,
 sample and analog domains and their functions (e.g. CRC checking, FEC decoding,
@@ -142,12 +142,39 @@ model is implemented in the GNURadioSignalReceiver module.
 2.5. Medium
 -----------
 
-The radio medium model is the central component in the actor model that describes
+The radio medium model is the central component in the actor model that maintains
 the state of the shared radio channel where the communication takes place. The
-model keeps track of all radios, transmissions, receptions and interferences.
+model keeps track of all radios, transmissions, receptions and their interferences.
+It uses a propagation and an attenuation model to compute the receptions for all
+required transmission and receiver pair. It also uses a background noise to provide
+the noise interfering with a reception.
 
-The medium model uses a propagation, an attenuation and a background noise model
-for operation. This model is implemented in the RadioMedium module.
+The radio medium maintains a number of global limits among the radios that take
+part in the communication. These limits include among others the maximum antenna
+gain, maximum transmission power, minimum interference power, minimum reception
+power, minimum interference time, maximum transmission duration, maximum detection
+range, maximum interference range, maximum communication range and maximum speed.
+
+The radio medium provides a couple of parameters to optimize its performance. Some
+parameters control how the model determines the set of affected radios when a new
+transmission enters the medium. This may potentially reduce the number of radio
+frames sent per transmission from the number of radios to 1. The optimization 
+depends on multiple factors such as the average time a radio is in receiver mode,
+whether the MAC module needs the receiver state, the spatial distribution of the
+radios and so on.
+
+Finally, the transmission and reception algorithms intentionally start and end
+in the radio medium model. This centralization and the fact that the reception
+API is purely functional allows parallel computation. This means that the radio
+medium can utilize multiple CPUs or even the GPU for the optimistic computation
+of reception decisions before they are actually needed. So when the main simulation
+thread enters the radio it may simply retrieve the cached result and quickly
+continue execution. On the other hand when a new transmission enters the medium
+some of the already computed result must be removed from the cache. Overall, the
+simulation performance may increase and may scale better with the number of
+communicating radios.
+
+This model is implemented in the RadioMedium module.
 
 2.6. Propagation
 ----------------
@@ -191,15 +218,19 @@ The attenuation model describes how radio signals attenuate during propagation.
 These models include various effects such as free-space path loss, shadowing,
 refraction, reflection, absorption, diffraction and others.
 
-The simplest attenuation model is the free-space path loss attenuation. This
-model is implemented in the FreeSpaceAttenuation module.
+The simplest attenuation model is the free-space path loss attenuation. Currently
+the attenuation model depends on the signal representation, so there are as many
+free-space path loss attenuation models as radio signal transmission representations.
+This model is implemented in the IdealRadioSignalFreeSpaceAttenuation and the
+ScalarRadioSignalFreeSpaceAttenuation module.
 
-TODO: other models
+TODO: other signal representations and attenuation models
 
 2.8. Background Noise
 ---------------------
 
-This model describes how the background noise changes over space and time.
+This model describes how the background noise changes over space and time. It
+provides a noise signal for a requested time and space interval.
 
 3. Communication Model
 ======================
@@ -211,8 +242,8 @@ on the radio medium. All communication models are implemented as C++ classes.
 -------------------------
 
 The transmission request model contains parameters that control how the transmitter
-produces the transmission. This data structure is attached to the mac frame as a
-control info object.
+produces the transmission. This data structure is attached as a control info object
+to the MAC frame sent down from the MAC module to the radio.
 
 The simplest parameters override the default transmission power and bitrate of
 the transmitter. This is implemented in the RadioTransmissionRequest class.
@@ -231,7 +262,7 @@ The simplest transmission model extends the above with communication range,
 interference range and detection range parameters. This is implemented in the
 IdealRadioSignalTransmission class.
 
-A more realistic but still quite simple transmission model carries modulation,
+A more realistic but still quite simple transmission model specifies modulation,
 carrier frequency, bandwidth and scalar power parameters. This is implemented in
 the ScalarRadioSignalTransmission class.
 
@@ -250,28 +281,35 @@ in the RadioSignalArrival class.
 3.4 Noise
 ---------
 
-The noise model represents a meaningless radio signal or the interference of 
+The noise model represents a meaningless radio signal or the composition of 
 multiple radio signals on the radio medium. All models contain at least the
-start/end time.
+start/end time and start/end position.
+
+The simplest noise model specifies carrier frequency, bandwidth and power changing
+over time parameters. This model is implemented in the ScalarRadioSignalNoise class.
 
 3.5. Interference
 -----------------
 
-TODO
+The interference of multiple radio signal transmissions at a particular receiver
+radio is represented as a sequence of interfering receptions. This data structure
+exists only temporarily during the computation of the reception decision. The 
+receiver computes a noise signal that is the composition of the background noise
+and all interfering receptions.
 
 3.6. Reception
 --------------
 
-The reception model represents the reception of a transmission by a particular
-radio. All models contain at least the start/end time, start/end antenna position,
-start/end antenna orientation of the receiver. There's one instance per transmission
-per receiver.
+The reception model represents the reception of a radio signal transmission by a
+particular radio. All models contain at least the start/end time, start/end
+antenna position, start/end antenna orientation of the receiver. There's one
+instance per transmission per receiver.
 
 The simplest reception model extends the above with a reception power that is
-either receivable, interfering, detectable or undetectable. This is implemented
+one of receivable, interfering, detectable or undetectable. This is implemented
 in the IdealRadioSignalReception class.
 
-A more realistic but still quite simple reception model carries modulation,
+A more realistic but still quite simple reception model specifies modulation,
 carrier frequency, bandwidth and scalar power parameters. This is implemented in
 the ScalarRadioSignalReception class.
 
@@ -280,35 +318,118 @@ TODO: DimensionalRadioSignalReception, LayeredRadioSignalReception, GNURadioSign
 3.7. Reception Decision
 -----------------------
 
-The reception decision model represents the result of the reception process.
-TODO: possible, attempted, successful
+The reception decision model describes the result of the reception process. It
+specifies if the reception is possible at all, whether if it's attempted or not,
+and finally if it's successful or failed.
 
 3.8. Reception Indication
 -------------------------
 
 The reception indication model contains the physical properties of a successful
-reception process. These include among others the bit error rate, bit error count,
-symbol error rate, symbol error count, sample error rate, receive signal strength
-indication, signal to noise and interference ratio
+reception process. It may include among others the bit error flag, bit error rate,
+bit error count, symbol error rate, symbol error count, sample error rate,
+minimum/average/maximum receive signal strength indication (RSSI) and minimum 
+signal to noise plus interference ratio (SNIR).
 
-    int bitErrorCount = -1;    // number of erroneous bits in the range [0, +infinity) or -1 if unknown.
-    int symbolErrorCount = -1; // number of erroneous symbols in the range [0, +infinity) or -1 if unknown.
-    double per = sNaN;         // packet error rate (probability) in the range [0, 1] or NaN if unknown.
-    double ber = sNaN;         // bit error rate (probability) in the range [0, 1] or NaN if unknown.
-    double ser = sNaN;         // symbol error rate (probability) in the range [0, 1] or NaN if unknown.
-    W minRSSI = W(sNaN);       // minimum receive signal strength indication in the range (0, +infinity) or NaN if unknown.
-    double minSNIR = sNaN;     // minimum signal to noise plus interference ratio in the range (0, +infinity) or NaN if unknown.
-
+This data structure is attached as a control info object to the MAC frame that
+is sent up from the radio to the MAC module. Note that all of the above is optional
+and may be omitted if the receiver is configured to do so or if it doesn't support
+providing that data.
 
 3.9. Listening
 --------------
 
-The listening model specifies how a receiver is listening on the radio channel.
+The listening model specifies how a receiver is listening on the radio medium.
+This may be used for optimization by simply ignoring certain transmissions either
+during computing interference or even the complete reception of such transmissions.
+
+The simplest listening model specifies modulation, carrier frequency and bandwidth
+parameters. This is implemented in the ScalarRadioSignalListening class.
 
 3.10. Listening Decision
 -----------------------
 
-The listening decision model represents the result of the receiver's listening process.
+The listening decision model describes the result of the listening process. It
+specifies if the radio medium is idle or busy according to the receiver.
+
+4. Communication Process
+========================
+
+This chapter describes the communication process focusing on how information
+flows between actors.
+
+4.1 Transmission
+----------------
+
+The transmission process starts when the radio module receives a MAC frame from
+the MAC module. The MAC module must make sure that the radio is in transmitter
+or transceiver mode before sending down the MAC frame, otherwise the radio throws
+an exception.
+
+Thereafter the transmitter converts the MAC frame to a radio signal. This process
+depends on the configured level of detail and the selected radio signal representation.
+The resulting radio signal is put into an OMNETPP packet called the radio frame.
+This packet also encapsulates the received MAC frame, but it intentionally doesn't
+contain anything else to avoid unnecessary duplication of data. 
+
+In the next step the radio medium determines all affected radios. Which radio
+constitutes affected depends on a number of factors that can be configured on
+the radio medium using module parameters. It may depend among others the maximum
+communication and interference range, the radio mode of the receiver, the listening
+mode of the receiver, or even the MAC address of the receiver. 
+
+Thereafter the propagation model determines the arrival time and position of the
+transmission to all affected radios, and the radio medium sends them a shallow
+copy of the radio frame. The radio sets its transmitter state to transmitting
+and emits a transmitter state changed signal. Finally the radio schedules a timer
+to the end of the transmission. This is the end of the transmission start event
+that started with the MAC frame arriving to the radio.
+
+The transmission end event starts when the above timer expires. The radio sets
+its transmitter state back to idle and emits a transmitter state changed signal.
+This notification indicates the completion of the transmission and the end of the
+event.
+
+Sometimes a radio might change its position, radio mode, listening mode or MAC
+address and become affected by an ongoing transmission. In this case the radio
+medium sends a radio frame along with the transmission that affects the radio.
+Such transmissions may be still received successfully if the reception start is
+in the future, otherwise they only affect the reception state.
+
+The computing the transmission arrival times and positions may be done parallel
+utilizing multiple CPUs or even the GPU. This may increase performance only if
+the average number of potential receivers is high enough.
+
+4.2 Reception
+-------------
+
+The reception process starts when the radio module receives a radio frame. The
+MAC module must make sure that the radio is in receiver or transceiver mode before
+the radio frame arrives, otherwise the incoming packet is just ignored.
+
+The first thing that the radio determines is whether the reception is actually
+attempted or not. This decision depends on the reception power, whether there's
+another ongoing reception process and capturing is enabled or not. Then the radio
+updates its receiver state to the appropriate value and emits a receiver state
+changed signal. In any case it also schedules a timer to the end of the reception.
+This is the end of the reception start event that started with the radio frame
+arriving to the radio.
+
+The reception end event starts when one of the above timer expires. If the timer 
+corresponds to an attempted reception and the listening mode didn't change during
+the reception, then the radio determines the reception decision. If the reception
+is successful, then the encapsulated MAC frame is sent up to the MAC module with
+the reception indication as a control info object.
+
+The computation of the reception decision depends on the configured level of detail
+and the selected radio signal representation. At first the radio medium determines
+the background noise and all the interfering transmissions and their corresponding
+receptions at the receiver. Finally the receiver computes the reception decision
+by combining these data and the way it's listening on the radio medium. 
+
+Whether the reception was successful or not the radio always updates its receiver
+state to the appropriate value and emits a receiver state changed signal. This
+notification indicates the completion of the reception and the end of the event.
 
 
 
@@ -316,9 +437,8 @@ The listening decision model represents the result of the receiver's listening p
 
 
 
-
-
-TODO:
+Scratchpad
+==========
 
 packet domain:
  - part of MAC
@@ -353,7 +473,7 @@ model:
  - attenuation (free space: alpha)
  - background noise (isotropic: power)
  - radio (receiver antenna, transmitter antenna, codec, modem, shaper, converter)
- - radio channel (propagation, attenuation, background noise, radios, transmissions)
+ - radio medium (propagation, attenuation, background noise, radios, transmissions)
  - listening (??? filter model)
  - transmission (start position/time, end position/time, analog model)
  - reception (transmission, start position/time, end position/time, analog model)
