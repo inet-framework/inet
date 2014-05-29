@@ -61,7 +61,7 @@ int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf
 #endif
 
 #ifdef WITH_IPv6
-        case ETHERTYPE_IPv6:
+        case ETHERTYPE_IPV6:
             packetLength += IPv6Serializer().serialize(check_and_cast<IPv6Datagram *>(encapPacket),
                                                                buf+ETHER_HDR_LEN, bufsize-ETHER_HDR_LEN);
             break;
@@ -102,7 +102,7 @@ void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, E
 #endif
 
 #ifdef WITH_IPv6
-        case ETHERTYPE_IPv6:
+        case ETHERTYPE_IPV6:
             encapPacket = new IPv6Datagram("ipv6-from-wire");
             //IPv6Serializer().parse(buf+ETHER_HDR_LEN, bufsize-ETHER_HDR_LEN, (IPv6Datagram *)encapPacket);
             break;
