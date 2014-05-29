@@ -18,10 +18,12 @@
 
 package inet.examples.inet.pcaprecorder;
 
-import inet.common.misc.NetAnimTrace;
-import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.node.inet.StandardHost;
-import ned.DatarateChannel;
+
+import inet.util.NetAnimTrace;
+import inet.nodes.inet.StandardHost;
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.util.PcapParser;
+import inet.base.Sink;
 
 
 network PcapRecorderTest
@@ -34,10 +36,6 @@ network PcapRecorderTest
             delay = 0.1us;
         }
     submodules:
-        client0: StandardHost {
-            parameters:
-                @display("p=164,36;i=device/pc3");
-        }
         client1: StandardHost {
             parameters:
                 @display("p=164,136;i=device/pc3");
@@ -54,7 +52,14 @@ network PcapRecorderTest
             @display("p=46,105");
         }
     connections:
-        client0.pppg++ <--> C <--> server.pppg++;
         client1.ethg++ <--> C <--> server.ethg++;
 }
 
+network PcapParserTest
+{
+    submodules:
+        PCAP: PcapParser;
+        Sink: Sink;
+    connections:
+        PCAP.packageOut --> Sink.in++;
+}
