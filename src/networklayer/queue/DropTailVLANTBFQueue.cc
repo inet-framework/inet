@@ -49,22 +49,21 @@ void DropTailVLANTBFQueue::initialize()
     mtu = par("mtu").longValue()*8; // in bit
     peakRate = par("peakRate"); // in bps
 
-    // state
+    // VLAN classifier
     const char *classifierClass = par("classifierClass");
     classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
     classifier->setMaxNumQueues(numQueues);
 
     outGate = gate("out");
 
-    // set common FIFO queue
+    // Common FIFO queue
     fifo.setName("FIFO queue");
 
-    // set subqueues
+    // Per-subscriber VOQs
     queues.assign(numQueues, (cQueue *)NULL);
     meanBucketLength.assign(numQueues, bucketSize);
     peakBucketLength.assign(numQueues, mtu);
     lastTime.assign(numQueues, simTime());
-    conformityFlag.assign(numQueues, false);
     conformityTimer.assign(numQueues, (cMessage *)NULL);
     for (int i=0; i<numQueues; i++)
     {
@@ -74,10 +73,7 @@ void DropTailVLANTBFQueue::initialize()
         conformityTimer[i] = new cMessage("Conformity Timer", i);   // message kind carries a flow index
     }
 
-    // // state: RR scheduler
-    // currentQueueIndex = 0;
-
-    // statistic
+    // statistics
     warmupFinished = false;
     numBitsSent.assign(numQueues, 0.0);
     numPktsReceived.assign(numQueues, 0);
@@ -94,7 +90,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
             warmupFinished = true;
             for (int i = 0; i < numQueues; i++)
             {
-                numPktsReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in queues
+                numPktsReceived[i] = queues[i]->getLength();   // take into account the frames/packets already in VOQs
             }
         }
     }
@@ -102,11 +98,11 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
     {   // Conformity Timer expires
         int flowIndex = msg->getKind();    // message kind carries a flow index
-        conformityFlag[flowIndex] = true;
 
-        cPacket *pkt = check_and_cast<cPacket *>(dequeue());
+        // cPacket *pkt = check_and_cast<cPacket *>(dequeue());
+        cPacket *pkt = PK(voqDequeue(flowIndex));
         int pktLength = pkt->getBitLength();
-        bool conformance = isConformed(flowIndex, pktLength);  // update TBF status
+        bool conformance = isConformed(flowIndex, pktLength);  // check conformance
 // DEBUG
         ASSERT(conformance == true);
 // DEBUG
@@ -117,7 +113,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                 packetRequested--;
                 if (warmupFinished == true)
                 {
-                    numBitsSent[flowIndex] += pkt->getBitLength();
+                    numBitsSent[flowIndex] += pktLength;
                     numPktsSent[flowIndex]++;
                 }
                 sendOut(pkt);
@@ -132,6 +128,13 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                         numPktsDropped[flowIndex]++;
                     }
                 }
+            }
+            updateTbf(flowIndex, pktLength); // update TBF after sending the frame to channel or FIFO queue
+
+            // process HOL frame in the same VOQ
+            if (queues[flowIndex]->isEmpty() == false)
+            {
+                triggerConformityTimer(flowIndex);
             }
         }
         else
@@ -151,7 +154,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
 // DEBUG
         ASSERT(pktLength > 0);
 // DEBUG
-        if (queue->isEmpty())
+        if (queue->isEmpty() == true)
         {
             if (isConformed(flowIndex, pktLength))
             {
@@ -179,11 +182,8 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                             numPktsDropped[flowIndex]++;
                         }
                     }
-                    else
-                    {
-                        conformityFlag[flowIndex] = true;
-                    }
                 }
+                updateTbf(flowIndex, pktLength); // update TBF after sending the frame to channel or FIFO queue
             }
             else
             {   // frame is not conformed
@@ -197,8 +197,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
                 }
                 else
                 {
-                    triggerConformityTimer(flowIndex, pktLength);
-                    conformityFlag[flowIndex] = false;
+                    triggerConformityTimer(flowIndex);
                 }
             }
         }
@@ -225,7 +224,7 @@ void DropTailVLANTBFQueue::handleMessage(cMessage *msg)
 
 bool DropTailVLANTBFQueue::enqueue(cMessage *msg)
 {
-    if (frameCapacity && fifo.length() >= frameCapacity)
+    if (fifoCapacity && fifo.length() >= fifoCapacity)
     {
         EV << "FIFO full, dropping packet.\n";
         delete msg;
@@ -236,6 +235,16 @@ bool DropTailVLANTBFQueue::enqueue(cMessage *msg)
         fifo.insert(msg);
         return false;
     }
+}
+
+cMessage *DropTailVLANTBFQueue::dequeue()
+{
+    if (fifo.isEmpty() == true)
+    {
+        return NULL;
+    }
+    cMessage *msg = (cMessage *)fifo.pop();
+    return msg;
 }
 
 bool DropTailVLANTBFQueue::voqEnqueue(cMessage *msg)
@@ -256,59 +265,36 @@ bool DropTailVLANTBFQueue::voqEnqueue(cMessage *msg)
     }
 }
 
-cMessage *DropTailVLANTBFQueue::dequeue()
+cMessage *DropTailVLANTBFQueue::voqDequeue(int flowIndex)
 {
-    if (fifo.empty())
+    cQueue *queue = queues[flowIndex];
+
+    if (queue->isEmpty() == true)
     {
         return NULL;
     }
-
-    cMessage *msg = (cMessage *)fifo.pop();
-    
-    return msg;
-    // bool found = false;
-    // int startQueueIndex = (currentQueueIndex + 1) % numQueues;  // search from the next queue for a frame to transmit
-    // for (int i = 0; i < numQueues; i++)
-    // {
-    //    if (conformityFlag[(i+startQueueIndex)%numQueues])
-    //    {
-    //        currentQueueIndex = (i+startQueueIndex)%numQueues;
-    //        found = true;
-    //        break;
-    //    }
-    // }
-
-    // if (found == false)
-    // {
-    //     // TO DO: further processing?
-    //     return NULL;
-    // }
-
-    // cMessage *msg = (cMessage *)queues[currentQueueIndex]->pop();
-
-    // // TO DO: update statistics
+    cMessage *msg = (cMessage *)queue->pop();
 
     // // conformity processing for the HOL frame
-    // if (queues[currentQueueIndex]->isEmpty() == false)
+    // if (queue->isEmpty() == false)
     // {
-    //     int pktLength = (check_and_cast<cPacket *>(queues[currentQueueIndex]->front()))->getBitLength();
-    //     if (isConformed(currentQueueIndex, pktLength))
+    //     int pktLength = PK(queue->front())->getBitLength();
+    //     if (isConformed(flowIndex, pktLength))
     //     {
-    //         conformityFlag[currentQueueIndex] = true;
+    //         conformityFlag[flowIndex] = true;
     //     }
     //     else
     //     {
-    //         conformityFlag[currentQueueIndex] = false;
-    //         triggerConformityTimer(currentQueueIndex, pktLength);
+    //         conformityFlag[flowIndex] = false;
+    //         triggerConformityTimer(flowIndex, pktLength);
     //     }
     // }
     // else
     // {
-    //     conformityFlag[currentQueueIndex] = false;
+    //     conformityFlag[flowIndex] = false;
     // }
 
-    // // return a packet from the scheduled queue for transmission
-    // return (msg);
+    return msg;
 }
 
 void DropTailVLANTBFQueue::sendOut(cMessage *msg)
@@ -361,24 +347,47 @@ bool DropTailVLANTBFQueue::isConformed(int flowIndex, int pktLength)
     {
         if  (pktLength <= peakBucketLength[flowIndex])
         {
-            meanBucketLength[flowIndex] -= pktLength;
-            peakBucketLength[flowIndex] -= pktLength;
+            // meanBucketLength[flowIndex] -= pktLength;
+            // peakBucketLength[flowIndex] -= pktLength;
             return true;
         }
     }
     return false;
 }
 
+void DropTailVLANTBFQueue::updateTbf(int flowIndex, int pktLength)
+{   // update TBF right after a packet transmission
+    Enter_Method("updateTbf()");
+
+    // update states
+    simtime_t now = simTime();
+    //unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)(meanRate*(now - lastTime[flowIndex]).dbl() + 0.5);
+    unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[flowIndex]).dbl());
+    meanBucketLength[flowIndex] = (unsigned long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    //unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)(peakRate*(now - lastTime[flowIndex]).dbl() + 0.5);
+    unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[flowIndex]).dbl());
+    peakBucketLength[flowIndex] = int((peakTemp > (unsigned long long)mtu) ? mtu : peakTemp);
+    lastTime[flowIndex] = now;
+
+    ASSERT((unsigned long long) pktLength <= meanBucketLength[flowIndex]);
+    meanBucketLength[flowIndex] -= pktLength;
+    ASSERT(pktLength <= peakBucketLength[flowIndex]);
+    peakBucketLength[flowIndex] -= pktLength;
+}
+
 // trigger TBF conformity timer for the HOL frame in the queue,
 // indicating that enough tokens will be available for its transmission
-void DropTailVLANTBFQueue::triggerConformityTimer(int flowIndex, int pktLength)
+void DropTailVLANTBFQueue::triggerConformityTimer(int flowIndex)
 {
     Enter_Method("triggerConformityCounter()");
+
+    int pktLength = (check_and_cast<cPacket *>(queues[flowIndex]->front()))->getBitLength();
 
     double meanDelay = 0.0;
     if ((unsigned long long)pktLength > meanBucketLength[flowIndex]) {
         meanDelay = (pktLength - meanBucketLength[flowIndex]) / meanRate;
     }
+
     double peakDelay = 0.0;
     if (pktLength > peakBucketLength[flowIndex]) {
         peakDelay = (pktLength - peakBucketLength[flowIndex]) / peakRate;

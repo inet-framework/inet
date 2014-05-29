@@ -118,13 +118,11 @@ class INET_API DropTailRRVLANTBFQueue : public PassiveQueueBase
     /**
      * Newly defined.
      */
-    virtual bool isConformed(int queueIndex, int pktLength);
+    virtual bool isConformed(int flowIndex, int pktLength);
 
-    virtual void triggerConformityTimer(int queueIndex, int pktLength);
+    virtual void triggerConformityTimer(int flowIndex);
 
-    virtual void dumpTbfStatus(int queueIndex);
+    virtual void dumpTbfStatus(int flowIndex);
 };
 
 #endif
-
-

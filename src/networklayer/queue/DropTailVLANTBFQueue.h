@@ -122,9 +122,13 @@ class INET_API DropTailVLANTBFQueue : public PassiveQueueBase
      */
     virtual bool voqEnqueue(cMessage *msg);
 
+    virtual cMessage *voqDequeue(int flowIndex);
+
     virtual bool isConformed(int flowIndex, int pktLength);
 
-    virtual void triggerConformityTimer(int flowIndex, int pktLength);
+    virtual void updateTbf(int flowIndex, int pktLength);
+    
+    virtual void triggerConformityTimer(int flowIndex);
 
     virtual void dumpTbfStatus(int flowIndex);
 };

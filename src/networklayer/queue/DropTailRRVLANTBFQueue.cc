@@ -97,12 +97,12 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
 
     if (msg->isSelfMessage())
     {   // Conformity Timer expires
-        int queueIndex = msg->getKind();    // message kind carries a queue index
-        conformityFlag[queueIndex] = true;
+        int flowIndex = msg->getKind();    // message kind carries a queue index
+        conformityFlag[flowIndex] = true;
 
         // update TBF status
-        int pktLength = (check_and_cast<cPacket *>(queues[queueIndex]->front()))->getBitLength();
-        bool conformance = isConformed(queueIndex, pktLength);
+        int pktLength = (check_and_cast<cPacket *>(queues[flowIndex]->front()))->getBitLength();
+        bool conformance = isConformed(flowIndex, pktLength);
 // DEBUG
         ASSERT(conformance == true);
 // DEBUG
@@ -127,11 +127,11 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
     }
     else
     {   // a frame arrives
-        int queueIndex = classifier->classifyPacket(msg);
-        cQueue *queue = queues[queueIndex];
+        int flowIndex = classifier->classifyPacket(msg);
+        cQueue *queue = queues[flowIndex];
         if (warmupFinished == true)
         {
-            numQueueReceived[queueIndex]++;
+            numQueueReceived[flowIndex]++;
         }
         int pktLength = (check_and_cast<cPacket *>(msg))->getBitLength();
 // DEBUG
@@ -139,21 +139,21 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
 // DEBUG
         if (queue->isEmpty())
         {
-            if (isConformed(queueIndex, pktLength))
+            if (isConformed(flowIndex, pktLength))
             {
                 if (warmupFinished == true)
                 {
-                    numQueueUnshaped[queueIndex]++;
+                    numQueueUnshaped[flowIndex]++;
                 }
                 if (packetRequested > 0)
                 {
                     packetRequested--;
                     if (warmupFinished == true)
                     {
-                        numBitsSent[queueIndex] += pktLength;
-                        numQueueSent[queueIndex]++;
+                        numBitsSent[flowIndex] += pktLength;
+                        numQueueSent[flowIndex]++;
                     }
-                    currentQueueIndex = queueIndex;
+                    currentQueueIndex = flowIndex;
                     sendOut(msg);
                 }
                 else
@@ -163,12 +163,12 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
                     {
                         if (warmupFinished == true)
                         {
-                            numQueueDropped[queueIndex]++;
+                            numQueueDropped[flowIndex]++;
                         }
                     }
                     else
                     {
-                        conformityFlag[queueIndex] = true;
+                        conformityFlag[flowIndex] = true;
                     }
                 }
             }
@@ -179,13 +179,13 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
                 {
                     if (warmupFinished == true)
                     {
-                        numQueueDropped[queueIndex]++;
+                        numQueueDropped[flowIndex]++;
                     }
                 }
                 else
                 {
-                    triggerConformityTimer(queueIndex, pktLength);
-                    conformityFlag[queueIndex] = false;
+                    triggerConformityTimer(flowIndex);
+                    conformityFlag[flowIndex] = false;
                 }
             }
         }
@@ -196,7 +196,7 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
             {
                 if (warmupFinished == true)
                 {
-                    numQueueDropped[queueIndex]++;
+                    numQueueDropped[flowIndex]++;
                 }
             }
         }
@@ -204,7 +204,7 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
         if (ev.isGUI())
         {
             char buf[40];
-            sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived[queueIndex], numQueueDropped[queueIndex]);
+            sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived[flowIndex], numQueueDropped[flowIndex]);
             getDisplayString().setTagArg("t", 0, buf);
         }
     }
@@ -212,12 +212,12 @@ void DropTailRRVLANTBFQueue::handleMessage(cMessage *msg)
 
 bool DropTailRRVLANTBFQueue::enqueue(cMessage *msg)
 {
-    int queueIndex = classifier->classifyPacket(msg);
-    cQueue *queue = queues[queueIndex];
+    int flowIndex = classifier->classifyPacket(msg);
+    cQueue *queue = queues[flowIndex];
 
     if (frameCapacity && queue->length() >= frameCapacity)
     {
-        EV << "Queue " << queueIndex << " full, dropping packet.\n";
+        EV << "Queue " << flowIndex << " full, dropping packet.\n";
         delete msg;
         return true;
     }
@@ -263,7 +263,7 @@ cMessage *DropTailRRVLANTBFQueue::dequeue()
         else
         {
             conformityFlag[currentQueueIndex] = false;
-            triggerConformityTimer(currentQueueIndex, pktLength);
+            triggerConformityTimer(currentQueueIndex);
         }
     }
     else
@@ -300,32 +300,32 @@ void DropTailRRVLANTBFQueue::requestPacket()
     }
 }
 
-bool DropTailRRVLANTBFQueue::isConformed(int queueIndex, int pktLength)
+bool DropTailRRVLANTBFQueue::isConformed(int flowIndex, int pktLength)
 {
     Enter_Method("isConformed()");
 
 // DEBUG
-    EV << "Last Time = " << lastTime[queueIndex] << endl;
+    EV << "Last Time = " << lastTime[flowIndex] << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Packet Length = " << pktLength << endl;
 // DEBUG
 
     // update states
     simtime_t now = simTime();
-    //unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)(meanRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long meanTemp = meanBucketLength[queueIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[queueIndex]).dbl());
-    meanBucketLength[queueIndex] = (unsigned long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
-    //unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)(peakRate*(now - lastTime[queueIndex]).dbl() + 0.5);
-    unsigned long long peakTemp = peakBucketLength[queueIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[queueIndex]).dbl());
-    peakBucketLength[queueIndex] = int((peakTemp > (unsigned long long)mtu) ? mtu : peakTemp);
-    lastTime[queueIndex] = now;
+    //unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)(meanRate*(now - lastTime[flowIndex]).dbl() + 0.5);
+    unsigned long long meanTemp = meanBucketLength[flowIndex] + (unsigned long long)ceil(meanRate*(now - lastTime[flowIndex]).dbl());
+    meanBucketLength[flowIndex] = (unsigned long long)((meanTemp > bucketSize) ? bucketSize : meanTemp);
+    //unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)(peakRate*(now - lastTime[flowIndex]).dbl() + 0.5);
+    unsigned long long peakTemp = peakBucketLength[flowIndex] + (unsigned long long)ceil(peakRate*(now - lastTime[flowIndex]).dbl());
+    peakBucketLength[flowIndex] = int((peakTemp > (unsigned long long)mtu) ? mtu : peakTemp);
+    lastTime[flowIndex] = now;
 
-    if ((unsigned long long) pktLength <= meanBucketLength[queueIndex])
+    if ((unsigned long long) pktLength <= meanBucketLength[flowIndex])
     {
-        if  (pktLength <= peakBucketLength[queueIndex])
+        if  (pktLength <= peakBucketLength[flowIndex])
         {
-            meanBucketLength[queueIndex] -= pktLength;
-            peakBucketLength[queueIndex] -= pktLength;
+            meanBucketLength[flowIndex] -= pktLength;
+            peakBucketLength[flowIndex] -= pktLength;
             return true;
         }
     }
@@ -334,44 +334,46 @@ bool DropTailRRVLANTBFQueue::isConformed(int queueIndex, int pktLength)
 
 // trigger TBF conformity timer for the HOL frame in the queue,
 // indicating that enough tokens will be available for its transmission
-void DropTailRRVLANTBFQueue::triggerConformityTimer(int queueIndex, int pktLength)
+void DropTailRRVLANTBFQueue::triggerConformityTimer(int flowIndex)
 {
     Enter_Method("triggerConformityCounter()");
 
+    int pktLength = (check_and_cast<cPacket *>(queues[flowIndex]->front()))->getBitLength();
+
     double meanDelay = 0.0;
-    if ((unsigned long long)pktLength > meanBucketLength[queueIndex]) {
-        meanDelay = (pktLength - meanBucketLength[queueIndex]) / meanRate;
+    if ((unsigned long long)pktLength > meanBucketLength[flowIndex]) {
+        meanDelay = (pktLength - meanBucketLength[flowIndex]) / meanRate;
     }
     double peakDelay = 0.0;
-    if (pktLength > peakBucketLength[queueIndex]) {
-        peakDelay = (pktLength - peakBucketLength[queueIndex]) / peakRate;
+    if (pktLength > peakBucketLength[flowIndex]) {
+        peakDelay = (pktLength - peakBucketLength[flowIndex]) / peakRate;
     }
 
 // DEBUG
-    EV << "** For VOQ[" << queueIndex << "]:" << endl;
+    EV << "** For VOQ[" << flowIndex << "]:" << endl;
     EV << "Packet Length = " << pktLength << endl;
     EV << "Delay for Mean TBF = " << meanDelay << endl;
     EV << "Delay for Peak TBF = " << peakDelay << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Counter Expiration Time = " << simTime() + std::max(meanDelay, peakDelay) << endl;
-    dumpTbfStatus(queueIndex);
+    dumpTbfStatus(flowIndex);
 // DEBUG
 
-    scheduleAt(simTime() + std::max(meanDelay, peakDelay), conformityTimer[queueIndex]);
+    scheduleAt(simTime() + std::max(meanDelay, peakDelay), conformityTimer[flowIndex]);
 }
 
-void DropTailRRVLANTBFQueue::dumpTbfStatus(int queueIndex)
+void DropTailRRVLANTBFQueue::dumpTbfStatus(int flowIndex)
 {
-    EV << "Last Time = " << lastTime[queueIndex] << endl;
+    EV << "Last Time = " << lastTime[flowIndex] << endl;
     EV << "Current Time = " << simTime() << endl;
     EV << "Token bucket for mean rate/burst control " << endl;
     EV << "- Bucket size [bit]: " << bucketSize << endl;
     EV << "- Mean rate [bps]: " << meanRate << endl;
-    EV << "- Bucket length [bit]: " << meanBucketLength[queueIndex] << endl;
+    EV << "- Bucket length [bit]: " << meanBucketLength[flowIndex] << endl;
     EV << "Token bucket for peak rate/MTU control " << endl;
     EV << "- MTU [bit]: " << mtu << endl;
     EV << "- Peak rate [bps]: " << peakRate << endl;
-    EV << "- Bucket length [bit]: " << peakBucketLength[queueIndex] << endl;
+    EV << "- Bucket length [bit]: " << peakBucketLength[flowIndex] << endl;
 }
 
 void DropTailRRVLANTBFQueue::finish()
