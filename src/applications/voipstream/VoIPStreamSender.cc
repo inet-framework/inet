@@ -16,11 +16,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+
 #include "VoIPStreamSender.h"
 
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "UDPControlInfo_m.h"
+
+extern "C" {
+#include <libavutil/opt.h>
+}
 
 Define_Module(VoIPStreamSender);
 
@@ -68,9 +73,9 @@ void VoIPStreamSender::initialize(int stage)
         samplesPerPacket = (int)round(sampleRate * SIMTIME_DBL(packetTimeLength));
         if (samplesPerPacket & 1)
             samplesPerPacket++;
-        EV << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
+        EV_INFO << "The packetTimeLength parameter is " << packetTimeLength * 1000.0 << "ms, ";
         packetTimeLength = ((double)samplesPerPacket) / sampleRate;
-        EV << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
+        EV_INFO << "adjusted to " << packetTimeLength * 1000.0 << "ms" << endl;
 
         soundFile = par("soundFile").stringValue();
         repeatCount = par("repeatCount");
@@ -89,7 +94,7 @@ void VoIPStreamSender::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // say HELLO to the world
-        EV << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
+        EV_TRACE << "VoIPSourceApp -> initialize(" << stage << ")" << endl;
 
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
@@ -164,46 +169,27 @@ void VoIPStreamSender::finish()
     outFile.close();
 
     if (pReSampleCtx)
-        audio_resample_close(pReSampleCtx);
-
-    pReSampleCtx = NULL;
+    {
+        avresample_close(pReSampleCtx);
+        avresample_free(&pReSampleCtx);
+        pReSampleCtx = NULL;
+    }
 
     if (this->pFormatCtx)
-        av_close_input_file(pFormatCtx);
+        avformat_close_input(&pFormatCtx);
 }
-
-/*
-static void choose_sample_fmt(AVStream *st, AVCodec *codec)
-{
-    if (codec && codec->sample_fmts)
-    {
-        const AVSampleFormat *p = codec->sample_fmts;
-        for (; *p != -1; p++)
-        {
-            if (*p == st->codec->sample_fmt)
-                break;
-        }
-
-        if (*p == -1)
-        {
-            av_log(NULL, AV_LOG_WARNING,
-                    "Incompatible sample format '%s' for codec '%s', auto-selecting format '%s'\n",
-                    av_get_sample_fmt_name(st->codec->sample_fmt), codec->name, av_get_sample_fmt_name(
-                            codec->sample_fmts[0]));
-            st->codec->sample_fmt = codec->sample_fmts[0];
-        }
-    }
-}
-*/
 
 void VoIPStreamSender::openSoundFile(const char *name)
 {
-    int ret = av_open_input_file(&pFormatCtx, name, NULL, 0, NULL);
+    int ret;
 
-    if (ret)
-        error("Audiofile '%s' open error: %d", name, ret);
+    ret = avformat_open_input(&pFormatCtx, name, NULL, NULL);
+    if (ret < 0)
+        throw cRuntimeError("Audiofile '%s' open error: %d", name, ret);
 
-    av_find_stream_info(pFormatCtx);
+    ret = avformat_find_stream_info(pFormatCtx, NULL);
+    if (ret < 0)
+        throw cRuntimeError("Audiofile '%s' avformat_find_stream_info() error: %d", name, ret);
 
     //get stream number
     streamIndex = -1;
@@ -217,19 +203,23 @@ void VoIPStreamSender::openSoundFile(const char *name)
     }
 
     if (streamIndex == -1)
-        error("The file '%s' not contains any audio stream.", name);
+        throw cRuntimeError("The file '%s' not contains any audio stream.", name);
 
     pCodecCtx = pFormatCtx->streams[streamIndex]->codec;
 
     //find decoder and open the correct codec
     pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
-    ret = avcodec_open(pCodecCtx, pCodec);
+    if (!pCodec)
+        throw cRuntimeError("Audiofile '%s' avcodec_find_decoder() error: decoder not found", name);
 
-    if (ret)
-        error("avcodec_open() error on file '%s': %d", name, ret);
+    ret = avcodec_open2(pCodecCtx, pCodec, NULL);
+    if (ret < 0)
+        throw cRuntimeError("avcodec_open() error on file '%s': %d", name, ret);
 
     //allocate encoder
-    pEncoderCtx = avcodec_alloc_context();
+    pEncoderCtx = avcodec_alloc_context3(NULL);
+    if (!pEncoderCtx)
+        throw cRuntimeError("error occured in avcodec_alloc_context3()");
     //set bitrate:
     pEncoderCtx->bit_rate = compressedBitRate;
 
@@ -237,41 +227,44 @@ void VoIPStreamSender::openSoundFile(const char *name)
     pEncoderCtx->channels = 1;
 
     pCodecEncoder = avcodec_find_encoder_by_name(codec);
-
-    if (pCodecEncoder == NULL)
-        error("Codec '%s' not found!", codec);
+    if (!pCodecEncoder)
+        throw cRuntimeError("Codec '%s' not found!", codec);
 
     pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
 
-    if (avcodec_open(pEncoderCtx, pCodecEncoder) < 0)
-        error("could not open %s encoding codec!", codec);
+    if (avcodec_open2(pEncoderCtx, pCodecEncoder, NULL) < 0)
+        throw cRuntimeError("could not open %s encoding codec!", codec);
 
-    if (pCodecCtx->sample_rate != sampleRate
-            || pEncoderCtx->sample_fmt != pCodecCtx->sample_fmt
-            || pCodecCtx->channels != 1)
-    {
-        pReSampleCtx = av_audio_resample_init(1, pCodecCtx->channels, sampleRate, pCodecCtx->sample_rate,
-                pEncoderCtx->sample_fmt, pCodecCtx->sample_fmt, 16, 10, 0, 0.8);
-                // parameters copied from the implementation of deprecated audio_resample_init()
-        // begin HACK
-        long int sec = 2;
-        short int *inb = new short int[sec * pCodecCtx->channels * pCodecCtx->sample_rate * av_get_bits_per_sample_format(pCodecCtx->sample_fmt) / (8 * sizeof(short int))];
-        short int *outb = new short int[sec * sampleRate * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / (8 * sizeof(short int))+16];
-        int decoded = audio_resample(pReSampleCtx, outb, inb, sec * pCodecCtx->sample_rate);
-        EV << "decoded:" <<decoded << endl;
-        delete [] inb;
-        delete [] outb;
-        // end HACK
-    }
-    else
+    if (pCodecCtx->sample_rate == sampleRate
+            && pCodecCtx->sample_fmt == pEncoderCtx->sample_fmt
+            && pCodecCtx->channels == 1)
     {
         pReSampleCtx = NULL;
     }
+    else
+    {
+        pReSampleCtx = avresample_alloc_context();
+        if (!pReSampleCtx)
+            throw cRuntimeError("error in av_audio_resample_init()");
+
+        int inChannelLayout = pCodecCtx->channel_layout == 0 ? av_get_default_channel_layout(pCodecCtx->channels) : pCodecCtx->channel_layout;
+        if (av_opt_set_int(pReSampleCtx, "in_channel_layout",   inChannelLayout,           0))  throw cRuntimeError("error in option setting of 'in_channel_layout'");
+        if (av_opt_set_int(pReSampleCtx, "in_sample_fmt",       pCodecCtx->sample_fmt,     0))  throw cRuntimeError("error in option setting of 'in_sample_fmt'");
+        if (av_opt_set_int(pReSampleCtx, "in_sample_rate",      pCodecCtx->sample_rate,    0))  throw cRuntimeError("error in option setting of 'in_sample_rate'");
+        if (av_opt_set_int(pReSampleCtx, "out_channel_layout",  AV_CH_LAYOUT_MONO,         0))  throw cRuntimeError("error in option setting of 'out_channel_layout'");
+        if (av_opt_set_int(pReSampleCtx, "out_sample_fmt",      pEncoderCtx->sample_fmt,   0))  throw cRuntimeError("error in option setting of 'out_sample_fmt'");
+        if (av_opt_set_int(pReSampleCtx, "out_sample_rate",     sampleRate,                0))  throw cRuntimeError("error in option setting of 'out_sample_rate'");
+        if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP,        0))  throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
+
+        ret = avresample_open(pReSampleCtx);
+        if (ret < 0)
+            throw cRuntimeError("Error opening context");
+    }
 
     if (traceFileName && *traceFileName)
-        outFile.open(traceFileName, sampleRate, av_get_bits_per_sample_format(pEncoderCtx->sample_fmt));
+        outFile.open(traceFileName, sampleRate, 8 * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
 
-    sampleBuffer.clear(samplesPerPacket * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / 8);
+    sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
 }
 
 VoIPStreamPacket* VoIPStreamSender::generatePacket()
@@ -281,47 +274,38 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
     if (sampleBuffer.empty())
         return NULL;
 
-    short int bitsPerInSample = av_get_bits_per_sample_format(pEncoderCtx->sample_fmt);
-    short int bitsPerOutSample = av_get_bits_per_sample(pEncoderCtx->codec->id);
-    int samples = std::min(sampleBuffer.length() / (bitsPerInSample/8), samplesPerPacket);
+    short int bytesPerInSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
+    int samples = std::min(sampleBuffer.length() / (bytesPerInSample), samplesPerPacket);
+    int inBytes = samples * bytesPerInSample;
     bool isSilent = checkSilence(pEncoderCtx->sample_fmt, sampleBuffer.readPtr(), samples);
     VoIPStreamPacket *vp = new VoIPStreamPacket();
-    int outByteCount = 0;
-    uint8_t *outBuf = NULL;
 
-//    if (pEncoderCtx->frame_size > 1)
-//    {
-//        error("Unsupported codec");
-//        // int encoderBufSize = (int)(compressedBitRate * SIMTIME_DBL(packetTimeLength)) / 8 + 256;
-//    }
-//    else
-    {
-        pEncoderCtx->frame_size = samples; //HACK!!!!
+    AVPacket opacket;
+    av_init_packet(&opacket);
+    opacket.data = NULL;
+    opacket.size = 0;
+    AVFrame *frame = avcodec_alloc_frame();
 
-        int encoderBufSize = std::max(std::max(pEncoderCtx->frame_size, samples * bitsPerOutSample/8 + 256), samples);
-        outBuf = new uint8_t[encoderBufSize];
-        memset(outBuf, 0, encoderBufSize);
+    frame->nb_samples = samples;
+    frame->channel_layout = AV_CH_LAYOUT_MONO;
+    frame->sample_rate = pEncoderCtx->sample_rate;
 
-        // FFMPEG doc bug:
-        // When codec is PCM, the return value is count of output bytes,
-        // and read (buf_size/(av_get_bits_per_sample(avctx->codec->id)/8)) samples from input buffer
-        // When codec is g726, the return value is count of output bytes,
-        // and read buf_size samples from input buffer
-        int buf_size = (bitsPerOutSample) ? samples * bitsPerOutSample / 8 : samples;
+    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, pEncoderCtx->sample_fmt,
+            (const uint8_t*)(sampleBuffer.readPtr()), inBytes, 1);
+    if (ret < 0)
+        throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
-        // The bitsPerOutSample is not 0 when codec is PCM.
-        outByteCount = avcodec_encode_audio(pEncoderCtx, outBuf, buf_size, (short int*)(sampleBuffer.readPtr()));
-        if(encoderBufSize < outByteCount)
-            error("avcodec_encode_audio() error: too small buffer: %d instead %d", encoderBufSize, outByteCount);
-        if (outByteCount <= 0)
-            error("avcodec_encode_audio() error: %d", outByteCount);
+    // The bitsPerOutSample is not 0 when codec is PCM.
+    int gotPacket;
+    ret = avcodec_encode_audio2(pEncoderCtx, &opacket, frame, &gotPacket);
+    if(ret < 0 || gotPacket != 1)
+        throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
 
-        if (outFile.isOpen())
-            outFile.write(sampleBuffer.readPtr(), samples * bitsPerInSample/8);
-        sampleBuffer.notifyRead(samples * bitsPerInSample/8);
-    }
+    if (outFile.isOpen())
+        outFile.write(sampleBuffer.readPtr(), inBytes);
+    sampleBuffer.notifyRead(inBytes);
 
-    vp->setDataFromBuffer(outBuf, outByteCount);
+    vp->setDataFromBuffer(opacket.data, opacket.size);
 
     if (isSilent)
     {
@@ -331,10 +315,9 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
     }
     else
     {
-
         vp->setName("VOICE");
         vp->setType(VOICE);
-        vp->setByteLength(voipHeaderSize + outByteCount);
+        vp->setByteLength(voipHeaderSize + opacket.size);
     }
 
     vp->setTimeStamp(pktID);
@@ -347,18 +330,19 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
 
     pktID++;
 
-    delete [] outBuf;
+    av_free_packet(&opacket);
+    avcodec_free_frame(&frame);
     return vp;
 }
 
-bool VoIPStreamSender::checkSilence(SampleFormat sampleFormat, void* _buf, int samples)
+bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int samples)
 {
     int max = 0;
     int i;
 
     switch (sampleFormat)
     {
-    case SAMPLE_FMT_U8:
+    case AV_SAMPLE_FMT_U8:
         {
             uint8_t *buf = (uint8_t *)_buf;
             for (i=0; i<samples; ++i)
@@ -370,7 +354,7 @@ bool VoIPStreamSender::checkSilence(SampleFormat sampleFormat, void* _buf, int s
         }
         break;
 
-    case SAMPLE_FMT_S16:
+    case AV_SAMPLE_FMT_S16:
         {
             int16_t *buf = (int16_t *)_buf;
             for (i=0; i<samples; ++i)
@@ -382,7 +366,7 @@ bool VoIPStreamSender::checkSilence(SampleFormat sampleFormat, void* _buf, int s
         }
         break;
 
-    case SAMPLE_FMT_S32:
+    case AV_SAMPLE_FMT_S32:
         {
             int32_t *buf = (int32_t *)_buf;
 
@@ -416,22 +400,17 @@ void VoIPStreamSender::Buffer::align()
 
 void VoIPStreamSender::readFrame()
 {
-    short int inBytesPerSample = av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / 8;
+    short int inBytesPerSample = av_get_bytes_per_sample(pEncoderCtx->sample_fmt);
+    short int outBytesPerSample = av_get_bytes_per_sample(pCodecCtx->sample_fmt);
     if (sampleBuffer.length() >= samplesPerPacket * inBytesPerSample)
         return;
 
     sampleBuffer.align();
 
-    char *tmpSamples = NULL;
-
-    if (pReSampleCtx)
-        tmpSamples = new char[Buffer::BUFSIZE];
-
     while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample)
     {
         //read one frame
         int err = av_read_frame(pFormatCtx, &packet);
-
         if (err < 0)
             break;
 
@@ -452,34 +431,59 @@ void VoIPStreamSender::readFrame()
         while (avpkt.size > 0)
         {
             // decode audio and save the decoded samples in our buffer
-            int16_t *rbuf, *nbuf;
-            nbuf = (int16_t*)(sampleBuffer.writePtr());
-            rbuf = (pReSampleCtx) ? (int16_t*)tmpSamples : nbuf;
-
-            int frame_size = (pReSampleCtx) ? Buffer::BUFSIZE : sampleBuffer.availableSpace();
-            memset(rbuf, 0, frame_size);
-            int decoded = avcodec_decode_audio3(pCodecCtx, rbuf, &frame_size, &avpkt);
-
-            if (decoded < 0)
-                error("Error decoding frame, err=%d", decoded);
+            AVFrame *frame = avcodec_alloc_frame();
+            int gotFrame;
+            int decoded = avcodec_decode_audio4(pCodecCtx, frame, &gotFrame, &avpkt);
+            if (decoded < 0 || !gotFrame)
+                throw cRuntimeError("Error in avcodec_decode_audio4(), err=%d, gotFrame=%d", decoded, gotFrame);
 
             avpkt.data += decoded;
             avpkt.size -= decoded;
 
-            if (frame_size == 0)
-                continue;
+            if (!pReSampleCtx)
+            {
+                // copy frame to sampleBuffer
+                int dataSize = av_samples_get_buffer_size(NULL, pCodecCtx->channels, frame->nb_samples, pCodecCtx->sample_fmt, 1);
+                memcpy(sampleBuffer.writePtr(), frame->data[0], dataSize);
+                sampleBuffer.notifyWrote(dataSize);
+            }
+            else
+            {
+                uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
 
-            decoded = frame_size / (inBytesPerSample * pCodecCtx->channels);
-            ASSERT(frame_size == decoded * inBytesPerSample * pCodecCtx->channels);
+                uint8_t **in_data = frame->extended_data;
+                int in_linesize = frame->linesize[0];
+                int in_nb_samples = frame->nb_samples;
 
-            if (pReSampleCtx)
-                decoded = audio_resample(pReSampleCtx, nbuf, rbuf, decoded);
+                uint8_t *out_data[AVRESAMPLE_MAX_CHANNELS] = { 0 };
+                int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
+                int out_linesize;
+                int ret;
+                ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples,
+                        1, maxOutSamples,
+                        pEncoderCtx->sample_fmt, 0);
+                if (ret < 0)
+                    throw cRuntimeError("failed out_data fill arrays");
 
-            sampleBuffer.notifyWrote(decoded * inBytesPerSample);
+//                ret = avresample_open(pReSampleCtx);
+//                if (ret < 0)
+//                    throw cRuntimeError("avresample_open() failed: %d", ret);
+
+                decoded = avresample_convert(pReSampleCtx, out_data, out_linesize, decoded,
+                        in_data, in_linesize, in_nb_samples);
+                if (!decoded)
+                    throw cRuntimeError("audio_resample() returns error");
+//                if (avresample_get_delay(pReSampleCtx) > 0)
+//                    throw cRuntimeError("%d delay samples not converted\n", avresample_get_delay(pReSampleCtx));
+//                if (avresample_available(pReSampleCtx) > 0)
+//                    throw cRuntimeError("%d samples available for output\n", avresample_available(pReSampleCtx));
+//                avresample_close(pReSampleCtx);
+                memcpy(sampleBuffer.writePtr(), out_data[0], decoded * outBytesPerSample);
+                sampleBuffer.notifyWrote(decoded * outBytesPerSample);
+                delete [] tmpSamples;
+            }
+            avcodec_free_frame(&frame);
         }
     }
-
-    if (pReSampleCtx)
-        delete [] tmpSamples;
 }
 
