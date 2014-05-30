@@ -37,7 +37,7 @@ class bbn_plcp80211_bb;
 typedef boost::shared_ptr<bbn_plcp80211_bb> bbn_plcp80211_bb_sptr;
 
 bbn_plcp80211_bb_sptr bbn_make_plcp80211_bb(gr::msg_queue::sptr target_queue,
-                                            bool check_crc = 0);
+                                            bool check_crc = false, const std::string &stop_tagname="");
 
 #define SFD (0x05cf)
 #define RSFD (0xf3a0)
@@ -56,7 +56,7 @@ typedef enum plcp_state_enum {
   PLCP_STATE_PDU
 } plcp_state_t;
 
-typedef enum plcp_current_rate_enum {
+enum plcp_current_rate_enum {
   PLCP_RATE_1MBPS,
   PLCP_RATE_2MBPS
 };
@@ -68,9 +68,10 @@ typedef enum plcp_current_rate_enum {
 class bbn_plcp80211_bb : public gr::block {
   friend bbn_plcp80211_bb_sptr bbn_make_plcp80211_bb(gr::msg_queue::sptr 
                                                      target_queue,
-                                                     bool check_crc);
+                                                     bool check_crc,
+                                                     const std::string &stop_tagname);
 
-  bbn_plcp80211_bb (gr::msg_queue::sptr target_queue, bool check_crc);
+  bbn_plcp80211_bb (gr::msg_queue::sptr target_queue, bool check_crc, const std::string &stop_tagname);
 
 public:
   ~bbn_plcp80211_bb ();
@@ -101,6 +102,7 @@ private:
   unsigned char bit_reverse_table[256];
   unsigned char d_pkt_data[MAX_PDU_LENGTH];
   unsigned char d_scrambler_seed;
+  pmt::pmt_t d_stop_tagkey;
 };
 
 #endif

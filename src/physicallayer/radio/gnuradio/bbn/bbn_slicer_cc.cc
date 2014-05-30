@@ -94,7 +94,11 @@ bbn_slicer_cc::general_work (int noutput_items,
   gr_complex *optr = (gr_complex *) output_items[0];
   int samples_to_process;
   float max_val;
-    
+
+#if BBN_SLICER_DEBUG
+  printf("Slicer requested: %d\n", noutput_items);
+#endif
+
   samples_to_process = noutput_items * d_samples_per_symbol;
   while(samples_to_process > 0) {
     int i;
@@ -172,6 +176,10 @@ bbn_slicer_cc::general_work (int noutput_items,
   }
 
   consume_each (noutput_items * d_samples_per_symbol);
+
+#if BBN_SLICER_DEBUG
+  printf("Slicer produced: %d\n", noutput_items);
+#endif
 
   return noutput_items;
 }

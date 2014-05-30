@@ -46,3 +46,5 @@ ifneq (,$(findstring -DWITH_VOIPSTREAM,$(COPTS)))
   endif
 endif
 
+$O/$(TARGET): $(OBJS) $(EXTRA_OBJS) Makefile
+

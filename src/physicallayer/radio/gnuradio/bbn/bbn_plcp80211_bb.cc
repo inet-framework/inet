@@ -36,6 +36,7 @@
 #include <bbn_tap.h>
 #include <math.h>
 #include <cstdio>
+#include <queue>
 
 #define PLCP_DEBUG 0
 
@@ -44,16 +45,15 @@ static inline unsigned char reverse_bits(unsigned char c);
 #define REVERSE_BITS(c) ( bit_reverse_table[(c) & 0xff])
 
 bbn_plcp80211_bb_sptr bbn_make_plcp80211_bb (gr::msg_queue::sptr target_queue,
-                                             bool check_crc) {
-  return bbn_plcp80211_bb_sptr (new bbn_plcp80211_bb (target_queue, check_crc)
-                                );
+                                             bool check_crc, const std::string &stop_tagname) {
+  return bbn_plcp80211_bb_sptr (new bbn_plcp80211_bb (target_queue, check_crc, stop_tagname));
 }
 
 bbn_plcp80211_bb::~bbn_plcp80211_bb () {
 }
 
 bbn_plcp80211_bb::bbn_plcp80211_bb (gr::msg_queue::sptr target_queue,
-                                    bool check_crc)
+                                    bool check_crc, const std::string &stop_tagname)
   : gr::block ("plcp80211_bb",
                gr::io_signature::make (1, 2, sizeof (unsigned short)),
                gr::io_signature::make (0,0,0)),
@@ -79,6 +79,8 @@ bbn_plcp80211_bb::bbn_plcp80211_bb (gr::msg_queue::sptr target_queue,
 
   d_descrambler = bbn_make_scrambler_bb(false);
 
+  d_stop_tagkey = stop_tagname.empty() ? pmt::PMT_F : pmt::string_to_symbol(stop_tagname);
+
   message_port_register_out(PDU_PORT_ID);
 }
 
@@ -89,7 +91,7 @@ bbn_plcp80211_bb::forecast (int noutput_items,
   unsigned ninputs = ninput_items_required.size();
 
   for (unsigned i = 0; i < ninputs; i++) {
-    ninput_items_required[i] = noutput_items + 3;
+    ninput_items_required[i] = noutput_items/* + 3*/;
   }
 }
 
@@ -153,8 +155,24 @@ bbn_plcp80211_bb::general_work (int noutput_items,
   unsigned short *iptr1 = (unsigned short *) input_items[0];
   unsigned short *iptr2 = (unsigned short *) input_items[1];
 
+#if PLCP_DEBUG
+  printf("PLCP requested: %d\n", noutput_items);
+#endif
+
+  // collect offsets where plcp must emit a stop marker
+  uint64_t abs_N = nitems_read(0);
+  std::queue<uint64_t> last_item_offsets;
+  if (pmt::is_symbol(d_stop_tagkey))
+  {
+      std::vector<gr::tag_t> tags;
+      get_tags_in_range(tags, 0, abs_N, abs_N + (uint64_t)(noutput_items), d_stop_tagkey);
+      for (size_t i = 0; i < tags.size(); i++)
+          last_item_offsets.push(tags[i].offset);
+  }
+
   num_output = 0;
   for(i=0; i<noutput_items; ++i) {
+
     saved_scrambler_seed = d_scrambler_seed;
 
     d_data1_in = (d_data1_in << 8) | (*iptr1 & 0xff);
@@ -169,6 +187,10 @@ bbn_plcp80211_bb::general_work (int noutput_items,
       descrambled_byte2[1] = (d_data2_in >> d_shift) & 0xff;
       d_descrambler->process_byte(&descrambled_byte2[1], &d_scrambler_seed);
     }
+
+#if PLCP_DEBUG
+    printf("PLCP i: %d state: %d, data: %d\n", i, (int)d_state, (int)descrambled_byte);
+#endif
 
     switch(d_state) {
     case PLCP_STATE_SEARCH_PREAMBLE:
@@ -394,6 +416,9 @@ bbn_plcp80211_bb::general_work (int noutput_items,
       break;
     case PLCP_STATE_PDU:
       if(d_rate == PLCP_RATE_1MBPS) {
+#if PLCP_DEBUG
+        printf("Read byte %d\n", d_byte_count);
+#endif
         d_pkt_data[d_byte_count] = REVERSE_BITS(descrambled_byte);
         ++d_byte_count;
       } else {
@@ -438,12 +463,30 @@ bbn_plcp80211_bb::general_work (int noutput_items,
       }
       break;
     }
+
+
+    // emit next stop marker
+    // (an empty message is inserted into the output
+    //  so the receiver can synchronize with the gr block).
+    if (!last_item_offsets.empty() && last_item_offsets.front() == abs_N+i) // last byte processed?
+    {
+        gr::message::sptr msg = gr::message::make(0, 0, 0, 0);
+        d_target_queue->insert_tail(msg);               // send it
+        msg.reset();                            // free it up
+
+        last_item_offsets.pop();
+    }
+
     ++iptr1;
     ++iptr2;
   }
 
   consume_each (noutput_items);
   d_symbol_count += (noutput_items << 3);
+
+#if PLCP_DEBUG
+  printf("PLCP produced: %d\n", num_output);
+#endif
 
   return num_output;
 }

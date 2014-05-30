@@ -14,13 +14,15 @@
 class bbn_receive_path;
 typedef boost::shared_ptr<bbn_receive_path> bbn_receive_path_sptr;
 
-bbn_receive_path_sptr bbn_make_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker=false, bool check_crc=true);
+bbn_receive_path_sptr bbn_make_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker=false, bool check_crc=true,
+                                            const std::string &stop_tagname="");
 
 
 class bbn_receive_path : virtual public gr::hier_block2 {
-  friend bbn_receive_path_sptr bbn_make_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc);
+  friend bbn_receive_path_sptr bbn_make_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc,
+                                                     const std::string &stop_tagname);
 
-  bbn_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc);
+  bbn_receive_path(gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc, const std::string &stop_tagname);
 
 public:
   ~bbn_receive_path();
@@ -29,7 +31,6 @@ private:
   bbn_slicer_cc_sptr d_slicer;
   bbn_dpsk_demod_cb_sptr d_dpsk_demod;
   bbn_plcp80211_bb_sptr d_plcp;
-  //bbn_decapsulator_sptr d_decapsulator;
 };
 
 #endif

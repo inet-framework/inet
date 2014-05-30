@@ -11,14 +11,15 @@
 
 using namespace std;
 
-bbn_receive_path_sptr bbn_make_receive_path (gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc) {
-  return gnuradio::get_initial_sptr (new bbn_receive_path(target_queue, spb, alpha, use_barker, check_crc));
+bbn_receive_path_sptr bbn_make_receive_path (gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc,
+                                             const string &stop_tagname) {
+  return gnuradio::get_initial_sptr (new bbn_receive_path(target_queue, spb, alpha, use_barker, check_crc, stop_tagname));
 }
 
 bbn_receive_path::~bbn_receive_path () {
 }
 
-bbn_receive_path::bbn_receive_path (gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc)
+bbn_receive_path::bbn_receive_path (gr::msg_queue::sptr target_queue, int spb, double alpha, bool use_barker, bool check_crc, const string &stop_tagname)
   : gr::hier_block2 ("bbn_receive_path",
                gr::io_signature::make (1, 1, sizeof(gr_complex)),
                gr::io_signature::make (0, 0, 0))
@@ -38,11 +39,9 @@ bbn_receive_path::bbn_receive_path (gr::msg_queue::sptr target_queue, int spb, d
         vector<float> rrc_taps = gr::filter::firdes::root_raised_cosine(1, spb, 1.0, alpha, ntaps);
         d_rx_filter = gr::filter::fir_filter_ccf::make(1, rrc_taps);
     }
-
     d_slicer = bbn_make_slicer_cc(spb, 16);
     d_dpsk_demod = bbn_make_dpsk_demod_cb();
-    d_plcp = bbn_make_plcp80211_bb(target_queue, check_crc);
-    //d_decapsulator = bbn_make_decapsulator();
+    d_plcp = bbn_make_plcp80211_bb(target_queue, check_crc, stop_tagname);
 
     connect(self(), 0, d_rx_filter, 0);
     connect(d_rx_filter, 0, d_slicer, 0);

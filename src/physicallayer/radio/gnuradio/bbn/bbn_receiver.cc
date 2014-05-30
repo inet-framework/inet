@@ -20,38 +20,36 @@ bbn_receiver::bbn_receiver (int spb, double alpha, bool use_barker, int msgq_lim
   : top_block ("bbn_receiver")
 {
     d_input_queue = msg_queue::make(msgq_limit);
-    d_tx_input = blocks::message_source::make(sizeof(gr_complex), d_input_queue, "packet_len");
+    d_tx_input = bbn_make_message_source(sizeof(gr_complex), d_input_queue, "packet_len", "last-item", pmt::PMT_T, -64);
     d_output_queue = msg_queue::make();
-    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, false);
+    d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, false, "last-item");
 
     connect(d_tx_input, 0, d_receive_path, 0);
 }
 
-void bbn_receiver::send(const gr_complex* data, int length)
+char* bbn_receiver::receive(const gr_complex* data, int &length /*inout*/)
 {
     string s((const char *)data, length*sizeof(gr_complex));
     message::sptr msg = message::make_from_string(s);
     d_input_queue->insert_tail(msg);
-}
 
-void bbn_receiver::end()
-{
-    message::sptr msg = message::make(1/*eof*/);
-    d_input_queue->insert_tail(msg);
-}
-
-char* bbn_receiver::receive(const gr_complex* data, int &length /*inout*/)
-{
-    start();
-    send(data, length);
-    end();
-    wait();
-
+    bool messageReceived = false;
     string result;
-    while (!d_output_queue->empty_p())
+    while (!messageReceived)
     {
-        message::sptr msg = d_output_queue->delete_head();
-        result += msg->to_string();
+        while (d_output_queue->empty_p())
+            ;
+        while (!d_output_queue->empty_p())
+        {
+            message::sptr msg = d_output_queue->delete_head();
+            if (msg->length() == 0)
+            {
+                messageReceived = true;
+                break;
+            }
+            else
+                result += msg->to_string();
+        }
     }
 
     length = result.size();

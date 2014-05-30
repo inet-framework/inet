@@ -35,7 +35,7 @@
 #include <gnuradio/sincos.h>
 #include <math.h>
 
-#define BBN_SLICER_DEBUG 1
+#define BBN_DPSK_DEBUG 0
 
 bbn_dpsk_demod_cb_sptr bbn_make_dpsk_demod_cb () {
   return bbn_dpsk_demod_cb_sptr (new bbn_dpsk_demod_cb ());
@@ -72,6 +72,10 @@ bbn_dpsk_demod_cb::general_work (int noutput_items,
                                  gr_vector_const_void_star &input_items,
                                  gr_vector_void_star &output_items) {
   int nstreams = output_items.size();
+
+#if BBN_DPSK_DEBUG
+  printf("DPSK requested: %d\n", noutput_items);
+#endif
 
   gr_complex *iptr = (gr_complex *) input_items[0];
   unsigned short *optr1 = (unsigned short *) output_items[0];
@@ -180,6 +184,10 @@ bbn_dpsk_demod_cb::general_work (int noutput_items,
   }
 
   consume_each(noutput_items * 8);
+
+#if BBN_DPSK_DEBUG
+  printf("DPSK produced: %d\n", noutput_items);
+#endif
 
   return noutput_items;
 }
