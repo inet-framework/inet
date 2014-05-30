@@ -318,13 +318,6 @@
 /examples/voip/,                     -f omnetpp.ini -c BadChannel -r 0,             200s,            3141-5126
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            7f06-a1ec
 
-/examples/voipstream/VoIPStreamLargeNet/, -f omnetpp.ini -c General -r 0,                5s,              e7b4-2b2b
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g726 -r 0,                   5s,              c0dc-4736
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_aLaw -r 0,              5s,              910f-2ca4
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c g711_muLaw -r 0,             5s,              90df-1085
-/examples/voipstream/VoIPStreamTest/, -f omnetpp.ini -c pcm_s16le -r 0,              5s,              b37e-b503
-/examples/voipstream/VoIPStreamTrafficTest/, -f omnetpp.ini -c General -r 0,                2s,              814b-4e07
-
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           0ac8-a0e0
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              735d-1851
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            87bc-1f0b
