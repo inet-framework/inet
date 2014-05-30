@@ -20,6 +20,11 @@ bbn_receiver::bbn_receiver (int spb, double alpha, bool use_barker, int msgq_lim
   : top_block ("bbn_receiver")
 {
     d_input_queue = msg_queue::make(msgq_limit);
+    // We mark the 64th item from the end so the plcp block can recognize the end of the signal
+    // The reason of -64 is that the slicer and the dpsk demodulator decimates the sample by 8,
+    // thus the plcp receives the mark on the last byte.
+    // TODO rewrite the bbn blocks to implement gr::tagged_stream_block, that makes the extra
+    //      marking unnecessary
     d_tx_input = bbn_make_message_source(sizeof(gr_complex), d_input_queue, "packet_len", "last-item", pmt::PMT_T, -64);
     d_output_queue = msg_queue::make();
     d_receive_path = bbn_make_receive_path(d_output_queue, spb, alpha, use_barker, false, "last-item");
