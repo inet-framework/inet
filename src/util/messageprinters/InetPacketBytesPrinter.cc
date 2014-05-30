@@ -18,6 +18,8 @@
 
 #include "INETDefs.h"
 
+#ifdef Register_MessagePrinter
+
 //TODO HACK, remove next line
 #include "cmessageprinter.h"
 
@@ -56,3 +58,4 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << outs;
 }
 
+#endif // Register_MessagePrinter
