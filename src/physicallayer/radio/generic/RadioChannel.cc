@@ -140,7 +140,7 @@ void RadioChannel::initialize(int stage)
         listeningFilter = par("listeningFilter");
         macAddressFilter = par("macAddressFilter");
         // initialize timers
-        removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissionsTimer");
+        removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissions");
         // initialize logging
         recordCommunication = par("recordCommunication");
         if (recordCommunication)

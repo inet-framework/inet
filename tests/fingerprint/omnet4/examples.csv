@@ -15,7 +15,7 @@
 /examples/bgpv4/BGPandOSPFSimple/,   -f omnetpp.ini -c config1 -r 0,                1000s,           c5df-dddc
 
 /examples/dhcp/,                     -f omnetpp.ini -c WiredDHCP -r 0,              5000s,           96c0-ffc2
-/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            5b48-2ea3
+/examples/dhcp/,                     -f omnetpp.ini -c WirelessDHCP -r 0,           500s,            1676-254e
 /examples/dhcp/,                     -f omnetpp.ini -c RebootingDHCP -r 0,          500s,            2b2f-f6a6
 
 /examples/diffserv/onedomain,        -f omnetpp.ini -c Exp11 -r 0,                  10s,             0af0-44ee

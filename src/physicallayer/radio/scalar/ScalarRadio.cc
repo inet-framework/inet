@@ -41,7 +41,7 @@ void ScalarRadio::handleUpperCommand(cMessage *message)
             ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
             scalarTransmitter->setBitrate(newBitrate);
         }
-        delete configureCommand;
+        delete message;
     }
     else
         Radio::handleUpperCommand(message);
