@@ -145,7 +145,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
     }
     if (etherFrame && (dumpBadFrames || !hasBitError))
     {
-        const simtime_t stime = etherFrame->getSendingTime();
+        const simtime_t stime = simulation.getSimTime();
         pcapDumper.writeEtherFrame(stime, etherFrame);
     }
 }
