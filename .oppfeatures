@@ -71,7 +71,7 @@
         nedPackages = "
                        inet.networklayer.ipv4
                        inet.networklayer.autorouting.ipv4
-                       inet.networklayer.arp
+                       inet.networklayer.arp.ipv4
                        inet.nodes.inet
                        inet.util.headerserializers.ipv4
                       "

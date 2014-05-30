@@ -16,7 +16,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.arp;
+package inet.networklayer.arp.ipv4;
+
+import inet.networklayer.arp.IARP;
+
 
 //
 // Implements the Address Resolution Protocol for IPv4 and IEEE 802 6-byte
@@ -55,11 +58,11 @@ simple ARP like IARP
         @signal[initiatedARPResolution](type=IARP::Notification);
         @signal[completedARPResolution](type=IARP::Notification);
         @signal[failedARPResolution](type=IARP::Notification);
-        @statistic[sentReq](title="ARP request sent";record=count,vector);
-        @statistic[sentReply](title="ARP replies sent";record=count,vector);
-        @statistic[initiatedARPResolution](title="ARP initiated resolutions";record=count);
-        @statistic[completedARPResolution](title="ARP completed resolutions";record=count);
-        @statistic[failedARPResolution](title="ARP failed resolutions";record=count);
+        @statistic[sentReq](title="ARP request sent"; record=count,vector);
+        @statistic[sentReply](title="ARP replies sent"; record=count,vector);
+        @statistic[initiatedARPResolution](title="ARP initiated resolutions"; record=count);
+        @statistic[completedARPResolution](title="ARP completed resolutions"; record=count);
+        @statistic[failedARPResolution](title="ARP failed resolutions"; record=count);
     gates:
         input netwIn @labels(ARPPacket+Ieee802Ctrl); // incoming ARP requests and replies
         output netwOut @labels(ARPPacket+Ieee802Ctrl,IPv4Datagram+Ieee802Ctrl);  // outgoing ARP requests/replies, and datagrams with resolved next hop

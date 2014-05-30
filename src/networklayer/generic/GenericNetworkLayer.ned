@@ -17,7 +17,7 @@
 
 package inet.networklayer.generic;
 
-import inet.networklayer.arp.GenericARP;
+import inet.networklayer.arp.generic.GenericARP;
 import inet.networklayer.common.EchoProtocol;
 import inet.networklayer.contract.INetworkLayer;
 

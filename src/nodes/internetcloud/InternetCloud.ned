@@ -21,11 +21,10 @@ package inet.nodes.internetcloud;
 
 
 import inet.linklayer.IWiredNic;
-import inet.networklayer.arp.ARP;
+import inet.networklayer.arp.ipv4.ARP;
 import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.internetcloud.ICloudDelayer;
-import inet.networklayer.internetcloud.InternetCloudTaggerChannel;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
@@ -80,7 +79,7 @@ module InternetCloud
                         timeToLive = 32;
                         multicastTimeToLive = 32;
                         fragmentTimeout = 60s;
-                        useProxyARP = true; 
+                        useProxyARP = true;
                         routingTableModule = "^.^.routingTable";
                         @display("p=85,95;q=queue");
                     gates:
