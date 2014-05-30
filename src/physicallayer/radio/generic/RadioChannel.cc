@@ -603,6 +603,8 @@ void RadioChannel::addRadio(const IRadio *radio)
         radioModule->subscribe(IRadio::listeningChangedSignal, this);
     if (macAddressFilter)
         getContainingNode(radioModule)->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
+    if (neighborCache)
+        neighborCache->addRadio(radio);
 }
 
 void RadioChannel::removeRadio(const IRadio *radio)
@@ -610,6 +612,8 @@ void RadioChannel::removeRadio(const IRadio *radio)
     radios.erase(std::remove(radios.begin(), radios.end(), radio));
     if (initialized())
         updateLimits();
+    if (neighborCache)
+        neighborCache->removeRadio(radio);
 }
 
 void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadioSignalTransmission *transmission)

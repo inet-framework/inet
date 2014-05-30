@@ -83,17 +83,22 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
                 {}
         };
 
-        class INeighborCache
-        {
-            public:
-                virtual void sendToNeighbors(const IRadio *transmitter, const IRadioFrame *frame) = 0;
-        };
-
         enum RangeFilterKind
         {
             RANGE_FILTER_ANYWHERE,
             RANGE_FILTER_INTERFERENCE_RANGE,
             RANGE_FILTER_COMMUNICATION_RANGE,
+        };
+
+    public:
+        class INeighborCache
+        {
+            public:
+                virtual void addRadio(const IRadio *radio) = 0;
+
+                virtual void removeRadio(const IRadio *radio) = 0;
+
+                virtual void sendToNeighbors(const IRadio *transmitter, const IRadioFrame *frame) = 0;
         };
 
     protected:
