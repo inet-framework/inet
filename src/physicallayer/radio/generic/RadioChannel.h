@@ -332,6 +332,13 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         //@{
         virtual bool isRadioMacAddress(const IRadio *radio, const MACAddress address) const;
 
+        /**
+         * Returns true if the radio can potentially receive the transmission
+         * successfully. If this function returns false then the radio channel
+         * doesn't send a radio frame to this receiver.
+         */
+        virtual bool isPotentialReceiver(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
+
         virtual bool isInCommunicationRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
         virtual bool isInInterferenceRange(const IRadioSignalTransmission *transmission, const Coord startPosition, const Coord endPosition) const;
 
@@ -373,13 +380,6 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 
         virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalListeningDecision *listenOnChannel(const IRadio *radio, const IRadioSignalListening *listening) const;
-
-        /**
-         * Returns true if the radio can potentially receive the transmission
-         * successfully. If this function returns false then the radio channel
-         * doesn't send a radio frame to this receiver.
-         */
-        virtual bool isPotentialReceiver(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
 
         virtual bool isReceptionAttempted(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
 

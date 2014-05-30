@@ -210,7 +210,6 @@ bool ScalarRadioSignalReceiver::areOverlappingBands(Hz carrierFrequency1, Hz ban
            carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
 }
 
-// TODO: this is not purely functional, see interface comment
 bool ScalarRadioSignalReceiver::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
 {
     // TODO: check if modulation matches?

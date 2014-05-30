@@ -29,10 +29,14 @@
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into packets.
  *
- * Some functions are marked to be part of the reception process. These must be
- * purely functional because they may be called several times before the actual
- * transmission arrives at the receiver. This allows optimistic parallel computation
- * of reception decisions.
+ * The receiver interface supports optimistic parallel computation of reception
+ * results. For this reason some functions are marked to be purely functional.
+ * They are qualified with const and all of their parameters are also qualified
+ * with const. Moreover they don't access any state that can change over time to
+ * avoid non-deterministic behavior. These functions may be called from background
+ * threads running parallel with the main simulation thread. They may also be
+ * called several times due to cache invalidation before the actual result is
+ * needed.
  */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 // TODO: the reception API must be purely functional enforced by the compiler (unfortunately this is impossible in C++)
@@ -61,24 +65,27 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
          */
         virtual const IRadioSignalListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
 
+        /**
+         * Returns the result of the listening process specifying the reception
+         * state of the receiver.
+         */
         virtual const IRadioSignalListeningDecision *computeListeningDecision(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;
 
         /**
          * Returns whether the transmission can be received successfully or not.
-         * Part of the reception process, see class comment.
          */
         virtual bool computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const = 0;
 
         /**
          * Returns whether the reception is actually attempted or ignored by the
-         * receiver. Part of the reception process, see class comment.
+         * receiver.
          */
         virtual bool computeIsReceptionAttempted(const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions) const = 0;
 
         /**
-         * Returns the result of the reception process specifying whether it is/
-         * successful or not and any other physical properties. Part of the reception
-         * process, see class comment.
+         * Returns the result of the reception process specifying whether it was
+         * successful or not and any other physical properties. This function must
+         * be purely functional and support optimistic parallel computation.
          */
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;
 };
