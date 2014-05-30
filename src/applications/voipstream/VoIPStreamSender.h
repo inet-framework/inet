@@ -49,6 +49,7 @@ extern "C" {
 class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
 {
   public:
+    VoIPStreamSender();
     ~VoIPStreamSender();
 
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
