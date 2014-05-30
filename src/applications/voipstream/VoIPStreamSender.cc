@@ -32,6 +32,19 @@ Define_Module(VoIPStreamSender);
 
 simsignal_t VoIPStreamSender::sentPkSignal = registerSignal("sentPk");
 
+VoIPStreamSender::VoIPStreamSender()
+{
+    codec = NULL;
+    soundFile = NULL;
+    pFormatCtx = NULL;
+    pCodecCtx = NULL;
+    pCodec = NULL;
+    pReSampleCtx = NULL;
+    pEncoderCtx = NULL;
+    pCodecEncoder = NULL;
+    timer = NULL;
+}
+
 VoIPStreamSender::~VoIPStreamSender()
 {
     cancelAndDelete(timer);
