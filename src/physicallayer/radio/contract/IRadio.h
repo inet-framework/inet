@@ -20,7 +20,6 @@
 
 #include "IPhysicalLayer.h"
 #include "IRadioFrame.h"
-#include "IRadioSignalSource.h"
 #include "IRadioAntenna.h"
 #include "IRadioSignalReceiver.h"
 #include "IRadioSignalTransmitter.h"
@@ -38,7 +37,7 @@ class IRadioChannel;
 // TODO: add burst support, sending of radio frames back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
-class INET_API IRadio : public IRadioSignalSource, public IPhysicalLayer
+class INET_API IRadio : public IPhysicalLayer
 {
     public:
         /**
