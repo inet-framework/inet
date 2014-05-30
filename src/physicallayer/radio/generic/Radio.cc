@@ -275,7 +275,6 @@ void Radio::startTransmission(cPacket *macFrame)
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(channel->transmitPacket(this, macFrame));
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
     ASSERT(radioFrame->getDuration() != 0);
-    channel->sendToChannel(this, radioFrame);
     endTransmissionTimer->setControlInfo(const_cast<RadioFrame *>(radioFrame));
     scheduleAt(simTime() + radioFrame->getDuration(), endTransmissionTimer);
     updateTransceiverState();

@@ -616,7 +616,7 @@ void RadioChannel::removeRadio(const IRadio *radio)
         neighborCache->removeRadio(radio);
 }
 
-void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadioSignalTransmission *transmission)
+void RadioChannel::addTransmission(const IRadio *transmitterRadio, const IRadioSignalTransmission *transmission)
 {
     transmissionCount++;
     transmissions.push_back(transmission);
@@ -641,7 +641,7 @@ void RadioChannel::transmitToChannel(const IRadio *transmitterRadio, const IRadi
     }
 }
 
-void RadioChannel::sendToChannel(IRadio *radio, const IRadioFrame *frame)
+void RadioChannel::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
 {
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
@@ -679,7 +679,7 @@ void RadioChannel::sendToRadio(IRadio *transmitter, const IRadio *receiver, cons
 IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame)
 {
     const IRadioSignalTransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime());
-    transmitToChannel(radio, transmission);
+    addTransmission(radio, transmission);
     RadioFrame *radioFrame = new RadioFrame(transmission);
     radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getEndTime() - transmission->getStartTime());
@@ -691,6 +691,7 @@ IRadioFrame *RadioChannel::transmitPacket(const IRadio *radio, cPacket *macFrame
                          << "S " << transmission->getStartTime() << " " <<  transmission->getStartPosition() << " -> "
                          << "E " << transmission->getEndTime() << " " <<  transmission->getEndPosition() << endl;
     }
+    sendToAffectedRadios(const_cast<IRadio *>(radio), radioFrame);
     cMethodCallContextSwitcher contextSwitcher(this);
     getTransmissionCacheEntry(transmission)->frame = radioFrame->dup();
     return radioFrame;

@@ -69,33 +69,20 @@ class INET_API IRadioChannel : public IPrintableObject
          */
         virtual void removeRadio(const IRadio *radio) = 0;
 
-        virtual void transmitToChannel(const IRadio *transmitter, const IRadioSignalTransmission *transmission) = 0;
-
         /**
-         * Sends a copy of the provided radio frame to all potential receivers on
-         * the radio channel.
-         */
-        virtual void sendToChannel(IRadio *transmitter, const IRadioFrame *frame) = 0;
-
-        /**
-         * Returns a new radio frame including a new radio signal transmission
-         * that represents the provided mac frame. The mac frame control info
-         * is an instance of the RadioTransmissionRequest class.
+         * Returns a new radio frame containing the radio signal transmission that
+         * represents the provided MAC frame. A copy of this radio frame is sent
+         * to all affected radios. The MAC frame control info must be an instance
+         * of the RadioTransmissionRequest class.
          */
         virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame) = 0;
 
         /**
-         * Returns the mac frame that was transmitted in the provided radio frame.
-         * The mac frame control info is an instance of the RadioReceptionIndication
+         * Returns the MAC frame that was transmitted in the provided radio frame.
+         * The MAC frame control info will be an instance of the RadioReceptionIndication
          * class.
          */
         virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame) = 0;
-
-        /**
-         * Returns a reception decision that describes the reception of the provided
-         * transmission by the receiver.
-         */
-        virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *receiver, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const = 0;
 
         /**
          * Returns a listening decision that describes that the receiver detects

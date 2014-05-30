@@ -328,6 +328,20 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual void updateLimits();
         //@}
 
+        /** @name Transmission */
+        //@{
+        /**
+         * Adds a new transmission to the radio channel.
+         */
+        virtual void addTransmission(const IRadio *transmitter, const IRadioSignalTransmission *transmission);
+
+        /**
+         * Sends a copy of the provided radio frame to all affected receivers on
+         * the radio channel.
+         */
+        virtual void sendToAffectedRadios(IRadio *transmitter, const IRadioFrame *frame);
+        //@}
+
         /** @name Reception */
         //@{
         virtual bool isRadioMacAddress(const IRadio *radio, const MACAddress address) const;
@@ -355,6 +369,12 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 
         virtual const IRadioSignalReception *getReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalReceptionDecision *getReceptionDecision(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
+
+        /**
+         * Returns a reception decision that describes the reception of the provided
+         * transmission by the receiver.
+         */
+        virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
         //@}
 
     public:
@@ -371,14 +391,11 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual void addRadio(const IRadio *radio);
         virtual void removeRadio(const IRadio *radio);
 
-        virtual void transmitToChannel(const IRadio *transmitter, const IRadioSignalTransmission *transmission);
-        virtual void sendToChannel(IRadio *transmitter, const IRadioFrame *frame);
         virtual void sendToRadio(IRadio *trasmitter, const IRadio *receiver, const IRadioFrame *frame);
 
         virtual IRadioFrame *transmitPacket(const IRadio *transmitter, cPacket *macFrame);
         virtual cPacket *receivePacket(const IRadio *receiver, IRadioFrame *radioFrame);
 
-        virtual const IRadioSignalReceptionDecision *receiveFromChannel(const IRadio *radio, const IRadioSignalListening *listening, const IRadioSignalTransmission *transmission) const;
         virtual const IRadioSignalListeningDecision *listenOnChannel(const IRadio *radio, const IRadioSignalListening *listening) const;
 
         virtual bool isReceptionAttempted(const IRadio *receiver, const IRadioSignalTransmission *transmission) const;
