@@ -20,8 +20,7 @@
 
 #ifdef Register_MessagePrinter
 
-#include "Address.h"
-#include "INetworkDatagram.h"
+#include "IPvXAddress.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_IPv4
@@ -30,6 +29,12 @@
 #else
 class ICMPMessage;
 class IPv4Datagram;
+#endif
+
+#ifdef WITH_IPv6
+#include "IPv6Datagram.h"
+#else
+class IPv6Datagram;
 #endif
 
 #ifdef WITH_TCP_COMMON
@@ -50,9 +55,9 @@ class UDPPacket;
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
-    void printTCPPacket(std::ostream& os, Address srcAddr, Address destAddr, TCPSegment *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, Address srcAddr, Address destAddr, UDPPacket *udpPacket) const;
-    void printICMPPacket(std::ostream& os, Address srcAddr, Address destAddr, ICMPMessage *packet) const;
+    void printTCPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, TCPSegment *tcpSeg) const;
+    void printUDPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, UDPPacket *udpPacket) const;
+    void printICMPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, ICMPMessage *packet) const;
 
   public:
     InetPacketPrinter() {}
@@ -70,22 +75,28 @@ int InetPacketPrinter::getScoreFor(cMessage *msg) const
 
 void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 {
-    Address srcAddr, destAddr;
+    IPvXAddress srcAddr, destAddr;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); pk; pk = pk->getEncapsulatedPacket()) {
-        if (dynamic_cast<INetworkDatagram *>(pk)) {
-            INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
-            srcAddr = dgram->getSourceAddress();
-            destAddr = dgram->getDestinationAddress();
-#ifdef WITH_IPv4
-            if (dynamic_cast<IPv4Datagram *>(pk)) {
-                IPv4Datagram *ipv4dgram = static_cast<IPv4Datagram *>(pk);
-                if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0)
-                    os << (ipv4dgram->getMoreFragments() ? "" : "last ")
-                       << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
-            }
-#endif
+        if (false) {
         }
+#ifdef WITH_IPv4
+        else if (dynamic_cast<IPv4Datagram *>(pk)) {
+            IPv4Datagram *ipv4dgram = static_cast<IPv4Datagram *>(pk);
+            srcAddr = ipv4dgram->getSrcAddress();
+            destAddr = ipv4dgram->getDestAddress();
+            if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0)
+                os << (ipv4dgram->getMoreFragments() ? "" : "last ")
+                   << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
+        }
+#endif
+#ifdef WITH_IPv6
+        else if (dynamic_cast<IPv6Datagram *>(pk)) {
+            IPv6Datagram *dgram = static_cast<IPv6Datagram *>(pk);
+            srcAddr = dgram->getSrcAddress();
+            destAddr = dgram->getDestAddress();
+        }
+#endif
 #ifdef WITH_TCP_COMMON
         else if (dynamic_cast<TCPSegment *>(pk)) {
             printTCPPacket(os, srcAddr, destAddr, static_cast<TCPSegment *>(pk));
@@ -108,7 +119,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Address destAddr, TCPSegment *tcpSeg) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, TCPSegment *tcpSeg) const
 {
 #ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";
@@ -143,7 +154,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Addres
 #endif
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Address destAddr, UDPPacket *udpPacket) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, UDPPacket *udpPacket) const
 {
 #ifdef WITH_UDP
     os << " UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
@@ -153,7 +164,7 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Addres
 #endif
 }
 
-void InetPacketPrinter::printICMPPacket(std::ostream& os, Address srcAddr, Address destAddr, ICMPMessage *packet) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, IPvXAddress srcAddr, IPvXAddress destAddr, ICMPMessage *packet) const
 {
 #ifdef WITH_IPv4
     switch (packet->getType()) {

@@ -20,7 +20,7 @@
 
 #ifdef Register_MessagePrinter
 
-#include "Address.h"
+#include "IPvXAddress.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame.h"
@@ -36,6 +36,12 @@ class EtherFrame;
 class ARPPacket;
 class ICMPMessage;
 class IPv4Datagram;
+#endif
+
+#ifdef WITH_IPv6
+#include "IPv6Datagram.h"
+#else
+class IPv6Datagram;
 #endif
 
 #ifdef WITH_TCP_COMMON
@@ -56,7 +62,6 @@ class UDPPacket;
 class Ieee80211Frame;
 #endif
 
-#include "INetworkDatagram.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_RIP
@@ -66,9 +71,9 @@ class RIPPacket;
 #endif
 
 #ifdef WITH_RADIO
-#include "SimplifiedRadioFrame.h"
+#include "AirFrame_m.h"
 #else
-class SimplifiedRadioFrame;
+class AirFrame;
 #endif
 
 //TODO HACK, remove next line
@@ -78,15 +83,15 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
     protected:
         mutable bool showEncapsulatedPackets;
-        mutable Address srcAddr;
-        mutable Address destAddr;
+        mutable IPvXAddress srcAddr;
+        mutable IPvXAddress destAddr;
     protected:
         std::string formatARPPacket(ARPPacket *packet) const;
         std::string formatICMPPacket(ICMPMessage *packet) const;
         std::string formatIeee80211Frame(Ieee80211Frame *packet) const;
         std::string formatPingPayload(PingPayload *packet) const;
         std::string formatRIPPacket(RIPPacket *packet) const;
-        std::string formatSimplifiedRadioFrame(SimplifiedRadioFrame *packet) const;
+        std::string formatAirFrame(AirFrame *packet) const;
         std::string formatTCPPacket(TCPSegment *tcpSeg) const;
         std::string formatUDPPacket(UDPPacket *udpPacket) const;
     public:
@@ -98,6 +103,9 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 
 Register_MessagePrinter(InetPacketPrinter2);
 
+//static const char INFO_SEPAR[] = "  \t";
+static const char INFO_SEPAR[] = "   ";
+
 int InetPacketPrinter2::getScoreFor(cMessage *msg) const
 {
     return msg->isPacket() ? 21 : 0;
@@ -108,28 +116,25 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
     std::string outs;
 
     //reset mutable variables
-    srcAddr = destAddr = Address();
+    srcAddr = destAddr = IPvXAddress();
     showEncapsulatedPackets = true;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); showEncapsulatedPackets && pk; pk = pk->getEncapsulatedPacket()) {
         std::ostringstream out;
-        if (dynamic_cast<INetworkDatagram *>(pk)) {
-            INetworkDatagram *dgram = dynamic_cast<INetworkDatagram *>(pk);
-            srcAddr = dgram->getSourceAddress();
-            destAddr = dgram->getDestinationAddress();
-#ifdef WITH_IPv4
-            if (dynamic_cast<IPv4Datagram *>(pk)) {
-                IPv4Datagram *ipv4dgram = static_cast<IPv4Datagram *>(pk);
-                out << "IPv4: " << srcAddr << " > " << destAddr;
-                if (ipv4dgram->getMoreFragments() || ipv4dgram->getFragmentOffset() > 0) {
-                    out << " " << (ipv4dgram->getMoreFragments() ? "" : "last ")
-                        << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
-                }
-            }
-            else
-#endif
-                out << pk->getClassName() << ": " << srcAddr << " > " << destAddr;
+        if (false) {
         }
+#ifdef WITH_IPv4
+        else if (dynamic_cast<IPv4Datagram *>(pk)) {
+            IPv4Datagram *dgram = dynamic_cast<IPv4Datagram *>(pk);
+            srcAddr = dgram->getSrcAddress();
+            destAddr = dgram->getDestAddress();
+            out << "IPv4: " << srcAddr << " > " << destAddr;
+            if (dgram->getMoreFragments() || dgram->getFragmentOffset() > 0) {
+                out << " " << (dgram->getMoreFragments() ? "" : "last ")
+                    << "fragment with offset=" << dgram->getFragmentOffset() << " of ";
+            }
+        }
+#endif
 #ifdef WITH_ETHERNET
         else if (dynamic_cast<EtherFrame *>(pk)) {
             EtherFrame *eth = static_cast<EtherFrame *>(pk);
@@ -168,14 +173,14 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif
 #ifdef WITH_RADIO
-        else if (dynamic_cast<SimplifiedRadioFrame *>(pk)) {
-            out << formatSimplifiedRadioFrame(static_cast<SimplifiedRadioFrame *>(pk));
+        else if (dynamic_cast<AirFrame *>(pk)) {
+            out << formatAirFrame(static_cast<AirFrame *>(pk));
         }
 #endif
         else
             out << pk->getClassName() <<":" << pk->getByteLength() << " bytes";
         if (outs.length())
-            out << "  \t" << outs;
+            out << INFO_SEPAR << outs;
         outs = out.str();
     }
     os << outs;
@@ -379,7 +384,7 @@ std::string InetPacketPrinter2::formatICMPPacket(ICMPMessage *packet) const
             break;
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
-               << " origin:  \t";
+               << " origin:" << INFO_SEPAR;
             InetPacketPrinter2().printMessage(os, packet->getEncapsulatedPacket());
             showEncapsulatedPackets = false; // stop printing
             break;
@@ -422,7 +427,7 @@ std::string InetPacketPrinter2::formatRIPPacket(RIPPacket *packet) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatSimplifiedRadioFrame(SimplifiedRadioFrame *packet) const
+std::string InetPacketPrinter2::formatAirFrame(AirFrame *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_RADIO

@@ -34,6 +34,9 @@ class INET_API InetPacketBytesPrinter : public cMessagePrinter
 
 Register_MessagePrinter(InetPacketBytesPrinter);
 
+//static const char INFO_SEPAR[] = "  \t";
+static const char INFO_SEPAR[] = "   ";
+
 int InetPacketBytesPrinter::getScoreFor(cMessage *msg) const
 {
     return msg->isPacket() ? 18 : 0;
@@ -50,7 +53,7 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
         std::ostringstream out;
         out << pk->getClassName() <<":" << pk->getByteLength() << " bytes";
         if (outs.length())
-            out << "  \t" << outs;
+            out << INFO_SEPAR << outs;
         outs = out.str();
     }
     os << outs;
