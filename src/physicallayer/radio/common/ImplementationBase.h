@@ -26,12 +26,8 @@
 #include "IRadioSignalReceiver.h"
 #include "IRadioChannel.h"
 
-// TODO: the current unique id generation for transmissions prevents other radio implementations that do not subclass from this base class
 class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmission
 {
-    protected:
-        static int nextId;
-
     protected:
         const int id;
         const IRadio *transmitter;

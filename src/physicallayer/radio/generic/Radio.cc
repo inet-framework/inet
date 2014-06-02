@@ -20,8 +20,6 @@
 #include "NodeOperations.h"
 #include "ImplementationBase.h"
 
-int Radio::nextId = 0;
-
 Define_Module(Radio);
 
 Radio::Radio() :

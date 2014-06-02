@@ -28,12 +28,8 @@
  * The standard implementation of the radio interface.
  */
 // TODO: support capturing a stronger transmission
-// TODO: the current unique id generation for radios prevents other radio implementations that do not subclass from this base class
 class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
-    protected:
-        static int nextId;
-
     protected:
         /**
          * An identifier which is globally unique for the whole lifetime of the

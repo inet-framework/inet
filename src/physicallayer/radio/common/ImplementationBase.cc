@@ -20,8 +20,6 @@
 #include "ModuleAccess.h"
 #include "IRadioChannel.h"
 
-int RadioSignalTransmissionBase::nextId = 0;
-
 void RadioSignalTransmissionBase::printToStream(std::ostream &stream) const
 {
     stream << "transmission, id = " << id << ", transmitter id = " << transmitter->getId();

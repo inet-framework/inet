@@ -33,6 +33,9 @@ class IRadio;
  */
 class INET_API IRadioSignalTransmission : public IPrintableObject
 {
+    protected:
+        static int nextId;
+
     public:
         /**
          * Returns an identifier for this transmission which is globally unique

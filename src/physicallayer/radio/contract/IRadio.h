@@ -39,6 +39,9 @@ class IRadioChannel;
 //       the current state, and thus allowing listeners to use the current value too
 class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 {
+    protected:
+        static int nextId;
+
     public:
         /**
          * This signal is emitted every time the radio mode changes.
