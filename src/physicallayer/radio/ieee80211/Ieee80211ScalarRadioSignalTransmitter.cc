@@ -53,8 +53,8 @@ void Ieee80211ScalarRadioSignalTransmitter::initialize(int stage)
 const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime) const
 {
     RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest *>(macFrame->getControlInfo());
-    W transmissionPower = power; // TODO: controlInfo ? controlInfo->getPower() : power;
-    bps transmissionBitrate = controlInfo ? controlInfo->getBitrate() : bitrate;
+    W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
+    bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     ModulationType modulationType = WifiModulationType::getModulationType(opMode, transmissionBitrate.get());
     simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
     simtime_t endTime = startTime + duration;
