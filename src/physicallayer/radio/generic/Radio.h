@@ -47,21 +47,37 @@ class INET_API Radio : public RadioBase
         const IRadioSignalReceiver *receiver;
         IRadioChannel *channel;
 
+        /**
+         * The radio is switching to this radio radio mode if a switch is in
+         * progress, otherwise this is the same as the current radio mode.
+         */
         RadioMode nextRadioMode;
-        RadioMode prevRadioMode;
+        /**
+         * The radio is switching from this radio mode to another if a switch is
+         * in progress, otherwise this is the same as the current radio mode.
+         */
+        RadioMode previousRadioMode;
+
         cMessage *endTransmissionTimer;
         // TODO: currently we support receiving multiple transmissions simultaneously (which we shouldn't, see above)
         cMessage *endReceptionTimer;
 
+        /**
+         * The timer that is scheduled to the end of the radio mode switch.
+         */
+        cMessage *endSwitchTimer;
+        /**
+         * Simulation time required to switch from one radio mode to another.
+         */
+        simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
+
         // TODO: make sure it's always updated whenever reception state, listening state, etc. changes
-        cMessage *setRadioModeTimer;
-        simtime_t switchingTimes[5][5];
         simtime_t lastReceptionStateChange;
 
     private:
-        void parseSwitchingTimes();
-        void startSetRadioMode(RadioMode newRadioMode, simtime_t switchingTime);
-        void endSetRadioMode(RadioMode newRadioMode);
+        void parseRadioModeSwitchingTimes();
+        void startRadioModeSwitch(RadioMode newRadioMode, simtime_t switchingTime);
+        void completeRadioModeSwitch(RadioMode newRadioMode);
 
     protected:
         virtual void initialize(int stage);

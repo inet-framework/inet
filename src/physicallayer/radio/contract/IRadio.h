@@ -114,7 +114,7 @@ class INET_API IRadio : public IPhysicalLayer
              * The radio is switching from one mode to another, frame reception or
              * transmission is not possible, power consumption is minimal.
              */
-            RADIO_MODE_SWITCHING
+            RADIO_MODE_SWITCHING // this radio mode must be the very last
         };
 
         /**
