@@ -25,15 +25,6 @@
 
 // TODO: merge with RadioBase
 // TODO: support capturing a stronger transmission
-// TODO: do we really need to support interference-free simultaneous reception of multiple transmissions?
-// TODO: if we don't send all radio frames to all radios how will they update their reception state?
-// TODO: in case of a listening state change (e.g. radio state, carrier frequency) what about the ongoing transmissions?
-// TODO: there are a few things that can affect how we send/receive transmissions:
-// TODO: 1. we may send transmissions to all receivers or to potential receivers only
-// TODO:    receivers may be filtered based on their distance/radio mode/listening state
-// TODO: 2. we may want to add/remove receptions for ongoing transmissions based on the same criteria
-// TODO: 3. we may also directly call receivers at reception starts/ends from the radio channel instead of sending a message
-// TODO: implement pick up mechanism for transmissions that were not sent by the channel but affect the radio's state and/or output
 // TODO: the current unique id generation for radios prevents other radio implementations that do not subclass from this base class
 class INET_API Radio : public RadioBase
 {
