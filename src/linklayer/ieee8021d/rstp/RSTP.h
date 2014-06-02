@@ -32,7 +32,7 @@
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
-class RSTP : public STPBase {
+class INET_API RSTP : public STPBase {
 protected:
     // kind codes for self messages
     enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE};

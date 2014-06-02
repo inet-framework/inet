@@ -12,8 +12,8 @@
 /examples/aodv/,                     -f omnetpp.ini -c MoreDynamic -r 0
 /examples/aodv/,                     -f omnetpp.ini -c ShortestPath -r 0
 /examples/aodv/,                     -f omnetpp.ini -c SimpleLifecycle -r 0
-/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0
 /examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ -r 0
+/examples/aodv/,                     -f omnetpp.ini -c SimpleRREQ2 -r 0
 /examples/aodv/,                     -f omnetpp.ini -c Static -r 0
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0

@@ -98,6 +98,9 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 
 Register_MessagePrinter(InetPacketPrinter2);
 
+static const char INFO_SEPAR[] = "  \t";
+//static const char INFO_SEPAR[] = "   ";
+
 int InetPacketPrinter2::getScoreFor(cMessage *msg) const
 {
     return msg->isPacket() ? 21 : 0;
@@ -175,7 +178,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         else
             out << pk->getClassName() <<":" << pk->getByteLength() << " bytes";
         if (outs.length())
-            out << "  \t" << outs;
+            out << INFO_SEPAR << outs;
         outs = out.str();
     }
     os << outs;
@@ -379,7 +382,7 @@ std::string InetPacketPrinter2::formatICMPPacket(ICMPMessage *packet) const
             break;
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
-               << " origin:  \t";
+               << " origin:" << INFO_SEPAR;
             InetPacketPrinter2().printMessage(os, packet->getEncapsulatedPacket());
             showEncapsulatedPackets = false; // stop printing
             break;

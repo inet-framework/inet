@@ -281,7 +281,6 @@ IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
     frame->setDest(ctrl->getDest());
     frame->encapsulate(msg);
     frame->setSrcModuleId(getId());
-
     delete ctrl;
     return frame;
 }

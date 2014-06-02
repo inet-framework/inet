@@ -30,7 +30,7 @@
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 // See the NED definition for details.
 //
-class Ieee8021dRelay : public cSimpleModule, public ILifecycle
+class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
 {
     public:
         Ieee8021dRelay();
