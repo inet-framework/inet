@@ -30,6 +30,14 @@ Radio::Radio() :
     transmitter(NULL),
     receiver(NULL),
     channel(NULL),
+    upperLayerOut(NULL),
+    upperLayerIn(NULL),
+    radioIn(NULL),
+    radioMode(RADIO_MODE_OFF),
+    nextRadioMode(RADIO_MODE_OFF),
+    previousRadioMode(RADIO_MODE_OFF),
+    receptionState(RECEPTION_STATE_UNDEFINED),
+    transmissionState(TRANSMISSION_STATE_UNDEFINED),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
     endSwitchTimer(NULL)
@@ -41,6 +49,14 @@ Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSign
     transmitter(transmitter),
     receiver(receiver),
     channel(channel),
+    upperLayerOut(NULL),
+    upperLayerIn(NULL),
+    radioIn(NULL),
+    radioMode(RADIO_MODE_OFF),
+    nextRadioMode(RADIO_MODE_OFF),
+    previousRadioMode(RADIO_MODE_OFF),
+    receptionState(RECEPTION_STATE_UNDEFINED),
+    transmissionState(TRANSMISSION_STATE_UNDEFINED),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
     endSwitchTimer(NULL)
@@ -59,7 +75,7 @@ Radio::~Radio()
 
 void Radio::initialize(int stage)
 {
-    RadioBase::initialize(stage);
+    PhysicalLayerBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
     {
         endTransmissionTimer = new cMessage("endTransmission");
@@ -67,6 +83,13 @@ void Radio::initialize(int stage)
         transmitter = check_and_cast<IRadioSignalTransmitter *>(getSubmodule("transmitter"));
         receiver = check_and_cast<IRadioSignalReceiver *>(getSubmodule("receiver"));
         channel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
+        upperLayerIn = gate("upperLayerIn");
+        upperLayerOut = gate("upperLayerOut");
+        radioIn = gate("radioIn");
+        radioIn->setDeliverOnReceptionStart(true);
+        WATCH(radioMode);
+        WATCH(receptionState);
+        WATCH(transmissionState);
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
@@ -188,7 +211,7 @@ void Radio::handleMessageWhenUp(cMessage *message)
         if (!message->isPacket())
             handleUpperCommand(message);
         else if (radioMode == RADIO_MODE_TRANSMITTER || radioMode == RADIO_MODE_TRANSCEIVER)
-            handleUpperFrame(check_and_cast<cPacket *>(message));
+            startTransmission(check_and_cast<cPacket *>(message));
         else
         {
             EV << "Radio is not in transmitter or transceiver mode, dropping frame.\n";
@@ -200,7 +223,7 @@ void Radio::handleMessageWhenUp(cMessage *message)
         if (!message->isPacket())
             handleLowerCommand(message);
         else
-            handleLowerFrame(check_and_cast<RadioFrame*>(message));
+            startReception(check_and_cast<RadioFrame*>(message));
     }
     else
         throw cRuntimeError("Unknown arrival gate '%s'.", message->getArrivalGate()->getFullName());
@@ -226,19 +249,6 @@ void Radio::handleLowerCommand(cMessage *message)
     throw cRuntimeError("Unsupported command");
 }
 
-void Radio::handleUpperFrame(cPacket *macFrame)
-{
-    if (endTransmissionTimer->isScheduled())
-        throw cRuntimeError("Received frame from upper layer while already transmitting.");
-    else
-        startTransmission(macFrame);
-}
-
-void Radio::handleLowerFrame(RadioFrame *radioFrame)
-{
-    startReception(radioFrame);
-}
-
 bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
@@ -259,6 +269,8 @@ bool Radio::handleOperationStage(LifecycleOperation *operation, int stage, IDone
 
 void Radio::startTransmission(cPacket *macFrame)
 {
+    if (endTransmissionTimer->isScheduled())
+        throw cRuntimeError("Received frame from upper layer while already transmitting.");
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(channel->transmitPacket(this, macFrame));
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
     ASSERT(radioFrame->getDuration() != 0);

@@ -669,7 +669,7 @@ void RadioChannel::sendToRadio(IRadio *transmitter, const IRadio *receiver, cons
                  << " to " << (IRadio *)receiverRadio << " at " << arrival->getStartPosition()
                  << " in " << propagationTime * 1E+6 << " us propagation time." << endl;
         RadioFrame *frameCopy = radioFrame->dup();
-        cGate *gate = receiverRadio->RadioBase::getRadioGate()->getPathStartGate();
+        cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
         const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, propagationTime, radioFrame->getDuration(), gate);
         receptionCacheEntry->frame = frameCopy;
         sendCount++;
@@ -795,7 +795,7 @@ void RadioChannel::receiveSignal(cComponent *source, simsignal_t signal, long va
                     RadioFrame *frameCopy = dynamic_cast<const RadioFrame *>(transmissionCacheEntry->frame)->dup();
                     simtime_t delay = arrival->getStartTime() - simTime();
                     simtime_t duration = delay > 0 ? frameCopy->getDuration() : frameCopy->getDuration() + delay;
-                    cGate *gate = receiverRadio->RadioBase::getRadioGate()->getPathStartGate();
+                    cGate *gate = receiverRadio->getRadioGate()->getPathStartGate();
                     const_cast<Radio *>(transmitterRadio)->sendDirect(frameCopy, delay > 0 ? delay : 0, duration, gate);
                     receptionCacheEntry->frame = frameCopy;
                     sendCount++;

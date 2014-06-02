@@ -28,6 +28,9 @@
 #include "IRadioBackgroundNoise.h"
 #include "MACAddress.h"
 
+/**
+ * The default implementation of the radio channel interface.
+ */
 // TODO: add tests for various optimization configurations
 // TODO: should we move transmitPacket/receivePacket/sendToChannel functions to the radio instead?
 class INET_API RadioChannel : public cSimpleModule, public cListener, public IRadioChannel

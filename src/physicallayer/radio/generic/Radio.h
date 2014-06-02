@@ -18,26 +18,66 @@
 #ifndef __INET_RADIO_H_
 #define __INET_RADIO_H_
 
+#include "IRadio.h"
 #include "IRadioChannel.h"
 #include "IRadioAntenna.h"
-#include "RadioBase.h"
+#include "PhysicalLayerBase.h"
 #include "RadioFrame.h"
 
-// TODO: merge with RadioBase
+/**
+ * The standard implementation of the radio interface.
+ */
 // TODO: support capturing a stronger transmission
 // TODO: the current unique id generation for radios prevents other radio implementations that do not subclass from this base class
-class INET_API Radio : public RadioBase
+class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 {
     protected:
         static int nextId;
 
     protected:
+        /**
+         * An identifier which is globally unique for the whole lifetime of the
+         * simulation among all radios.
+         */
         const int id;
-        const IRadioAntenna *antenna;
-        const IRadioSignalTransmitter *transmitter;
-        const IRadioSignalReceiver *receiver;
-        IRadioChannel *channel;
 
+        /** @name Parameters that determine the behavior of the radio channel. */
+        //@{
+        /**
+         * The radio antenna model is never NULL.
+         */
+        const IRadioAntenna *antenna;
+        /**
+         * The transmitter model is never NULL.
+         */
+        const IRadioSignalTransmitter *transmitter;
+        /**
+         * The receiver model is never NULL.
+         */
+        const IRadioSignalReceiver *receiver;
+        /**
+         * The radio channel model is never.
+         */
+        IRadioChannel *channel;
+        /**
+         * Simulation time required to switch from one radio mode to another.
+         */
+        simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
+        //@}
+
+        /** Gates */
+        //@{
+        cGate *upperLayerOut;
+        cGate *upperLayerIn;
+        cGate *radioIn;
+        //@}
+
+        /** State */
+        //@{
+        /**
+         * The current radio mode.
+         */
+        RadioMode radioMode;
         /**
          * The radio is switching to this radio radio mode if a switch is in
          * progress, otherwise this is the same as the current radio mode.
@@ -48,7 +88,18 @@ class INET_API Radio : public RadioBase
          * in progress, otherwise this is the same as the current radio mode.
          */
         RadioMode previousRadioMode;
+        /**
+         * The current reception state.
+         */
+        ReceptionState receptionState;
+        /**
+         * The current transmission state.
+         */
+        TransmissionState transmissionState;
+        //@}
 
+        /** @name Timer */
+        //@{
         /**
          * The timer that is scheduled to the end of the current transmission.
          * If this timer is not scheduled then no transmission is in progress.
@@ -60,15 +111,11 @@ class INET_API Radio : public RadioBase
          * there still may be incoming receptions which are not attempted.
          */
         cMessage *endReceptionTimer;
-
         /**
          * The timer that is scheduled to the end of the radio mode switch.
          */
         cMessage *endSwitchTimer;
-        /**
-         * Simulation time required to switch from one radio mode to another.
-         */
-        simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
+        //@}
 
     private:
         void parseRadioModeSwitchingTimes();
@@ -76,14 +123,13 @@ class INET_API Radio : public RadioBase
         void completeRadioModeSwitch(RadioMode newRadioMode);
 
     protected:
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
 
         virtual void handleMessageWhenUp(cMessage *message);
         virtual void handleSelfMessage(cMessage *message);
         virtual void handleUpperCommand(cMessage *command);
         virtual void handleLowerCommand(cMessage *command);
-        virtual void handleUpperFrame(cPacket *macFrame);
-        virtual void handleLowerFrame(RadioFrame *radioFrame);
         virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
         virtual void startTransmission(cPacket *macFrame);
@@ -109,7 +155,13 @@ class INET_API Radio : public RadioBase
         virtual const IRadioSignalReceiver *getReceiver() const { return receiver; }
         virtual const IRadioChannel *getChannel() const { return channel; }
 
-        virtual void setRadioMode(RadioMode radioMode);
+        virtual const cGate *getRadioGate() const { return radioIn; }
+
+        virtual RadioMode getRadioMode() const { return radioMode; }
+        virtual void setRadioMode(RadioMode newRadioMode);
+
+        virtual ReceptionState getReceptionState() const { return receptionState; }
+        virtual TransmissionState getTransmissionState() const { return transmissionState; }
 
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const;
         virtual const IRadioSignalTransmission *getReceptionInProgress() const;

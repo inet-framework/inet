@@ -17,7 +17,7 @@
 
 package inet.physicallayer.radio.generic;
 
-import inet.physicallayer.radio.common.RadioBase;
+import inet.physicallayer.radio.contract.IRadio;
 import inet.physicallayer.radio.contract.IRadioAntenna;
 import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
@@ -39,7 +39,7 @@ import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
 // The first entry of the switchingTimes string indicates the
 // time-related metric prefix and it MUST be s, ms or ns.
 //
-module Radio extends RadioBase
+module Radio like IRadio
 {
     parameters:
         string antennaType;
@@ -49,10 +49,22 @@ module Radio extends RadioBase
         // TODO: string powerConsumerType = default("");
         // TODO: add parameter to specify radio channel
         @class(Radio);
-
+        @display("i=block/wrxtx");
+        @signal[radioModeChanged](type=long);
+        @signal[listeningChanged];
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
+        @signal[radioChannelChanged](type=long);
+        @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
+        @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
+    gates:
+        input upperLayerIn @labels(ILinkLayerFrame/down);
+        output upperLayerOut @labels(ILinkLayerFrame/up);
+        input radioIn @labels(IRadioFrame);
     submodules:
         antenna: <antennaType> like IRadioAntenna;
         transmitter: <transmitterType> like IRadioSignalTransmitter;
         receiver: <receiverType> like IRadioSignalReceiver;
-        // TODO: powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "";
 }

@@ -29,15 +29,15 @@ class IRadioChannel;
 /**
  * This interface represents a physical device that is capable of transmitting
  * and receiving radio signals. Simultaneous reception and transmission is also
- * supported. The radio has an operation mode, it's bound to a radio channel,
- * and it provides the state of the radio channel at its position.
+ * supported. The radio has an operation mode and it provides the state of the
+ * radio channel at its position.
  *
  * @author Levente Meszaros
  */
 // TODO: add burst support, sending of radio frames back to back (using a resource limited queue)
 // TODO: rename *Changed signals to *Change signals and emit them just before overwriting
 //       the current state, and thus allowing listeners to use the current value too
-class INET_API IRadio : public IPhysicalLayer
+class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 {
     public:
         /**
