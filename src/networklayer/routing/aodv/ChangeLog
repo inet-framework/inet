@@ -1,3 +1,7 @@
+2014-05-23  Zoltan Bojthe
+
+	Backported the AODV implementation from the integration branch.
+
 2014-03-19  ------ inet-2.3.0 released ------
 
 2014-01-14  Zoltan Bojthe

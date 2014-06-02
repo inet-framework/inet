@@ -1,6 +1,20 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-2.4.0 (June 02, 2014)
+--------------------------
+
+   - Added support for link break detection in IdealWireless 
+     (using the NF_LINK_BREAK signal)
+   - VoIPStream updated to match the latest version of ffmpeg library.
+   - Added packet printers that can dump packet data in OMNeT++ 4.5/Tkenv
+     in the packet trace window.
+
+Added new routing protocol:
+
+   - Brand new AODV implementation in network/routing folder 
+     backported from the integration branch.
+
 INET-2.3.0 (March 17, 2014)
 ---------------------------
 
