@@ -176,6 +176,16 @@ class INET_API FWMath {
    * Convert a mW value to dBm.
    */
   static double mW2dBm(double mW) { return (10 * log10(mW)); }
+
+  /**
+   * Convert a degree value to radian.
+   */
+  static double deg2rad(double deg) { return deg * M_PI / 180; }
+
+  /**
+   * Convert a radian value to degree.
+   */
+  static double rad2deg(double rad) { return rad * 180 / M_PI; }
 };
 
 #endif

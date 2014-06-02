@@ -52,6 +52,7 @@ MobilityBase::MobilityBase()
     constraintAreaMin = Coord::ZERO;
     constraintAreaMax = Coord::ZERO;
     lastPosition = Coord::ZERO;
+    lastOrientation = EulerAngles::IDENTITY;
 }
 
 void MobilityBase::initialize(int stage)
@@ -77,6 +78,7 @@ void MobilityBase::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
     {
+        initializeOrientation();
         initializePosition();
     }
 }
@@ -122,6 +124,16 @@ void MobilityBase::checkPosition()
               lastPosition.x, lastPosition.y, lastPosition.z,
               constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
               constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
+}
+
+void MobilityBase::initializeOrientation()
+{
+    if (hasPar("initialAlpha") && hasPar("initialBeta") && hasPar("initialGamma"))
+    {
+        lastOrientation.alpha = par("initialAlpha");
+        lastOrientation.beta = par("initialBeta");
+        lastOrientation.gamma = par("initialGamma");
+    }
 }
 
 void MobilityBase::handleMessage(cMessage * message)
