@@ -168,7 +168,7 @@ protected:
     /**
      * @brief schedule next upgrade self-message
      */
-    virtual void scheduleNextUpgrde();
+    virtual void scheduleNextUpgrade();
 
     /**
      * @brief flush all port expect one

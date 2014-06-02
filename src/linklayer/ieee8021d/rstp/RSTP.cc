@@ -56,7 +56,7 @@ void RSTP::initialize(int stage)
     }
 }
 
-void RSTP::scheduleNextUpgrde()
+void RSTP::scheduleNextUpgrade()
 {
     cancelEvent(upgradeTimer);
     Ieee8021dInterfaceData *nextInterfaceData = NULL;
@@ -163,7 +163,7 @@ void RSTP::handleUpgrade(cMessage * msg)
         }
     }
     updateDisplay();
-    scheduleNextUpgrde();
+    scheduleNextUpgrade();
 }
 
 void RSTP::handleHelloTime(cMessage * msg)
@@ -200,7 +200,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                         iPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                         iPort->setState(Ieee8021dInterfaceData::DISCARDING);// if there is not a better BPDU, that will become FORWARDING
                         iPort->setNextUpgrade(simTime() + forwardDelay);
-                        scheduleNextUpgrde();
+                        scheduleNextUpgrade();
                         initInterfacedata(i);// reset, then a new BPDU will be allowed to upgrade the best received info for this port
                         candidatePort->setRole(Ieee8021dInterfaceData::ROOT);
                         candidatePort->setState(Ieee8021dInterfaceData::FORWARDING);
@@ -224,7 +224,7 @@ void RSTP::handleHelloTime(cMessage * msg)
                     iPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                     iPort->setState(Ieee8021dInterfaceData::DISCARDING);// a new content will start in case of another switch were in alternate
                     iPort->setNextUpgrade(simTime() + forwardDelay);
-                    scheduleNextUpgrde();
+                    scheduleNextUpgrade();
                     // if there is no problem, this will become forwarding in a few seconds
                     initInterfacedata(i);
                 }
@@ -415,7 +415,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                         iPort->setRole(Ieee8021dInterfaceData::NOTASSIGNED);
                         iPort->setState(Ieee8021dInterfaceData::DISCARDING);
                         iPort->setNextUpgrade(simTime() + migrateTime);
-                        scheduleNextUpgrde();
+                        scheduleNextUpgrade();
                         initInterfacedata(i);
                     }
                 }
@@ -455,7 +455,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                 rootPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                 rootPort->setState(Ieee8021dInterfaceData::DISCARDING);
                 rootPort->setNextUpgrade(simTime() + forwardDelay);
-                scheduleNextUpgrde();
+                scheduleNextUpgrade();
             }
             return true;
 
@@ -474,7 +474,7 @@ bool RSTP::processBetterSource(BPDU *frame, unsigned int arrivalPortNum)
                 arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                 arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                 arrivalPort->setNextUpgrade(simTime() + forwardDelay);
-                scheduleNextUpgrde();
+                scheduleNextUpgrade();
                 sendBPDU(arrivalPortNum); // BPDU to show him a better root as soon as possible
             }
             else
@@ -517,7 +517,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                 arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                 arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                 arrivalPort->setNextUpgrade(simTime() + forwardDelay);
-                scheduleNextUpgrde();
+                scheduleNextUpgrade();
                 macTable->copyTable(arrivalPortNum,alternative); // copy cache from old to new root
                 flushOtherPorts(alternative);
                 alternativePort->setRole(Ieee8021dInterfaceData::ROOT);
@@ -551,7 +551,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
             arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
             arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
             arrivalPort->setNextUpgrade(simTime() + forwardDelay);
-            scheduleNextUpgrde();
+            scheduleNextUpgrade();
             updateInterfacedata(frame,arrivalPortNum);
             sendBPDU(arrivalPortNum); //Show him a better Root as soon as possible
         }
@@ -583,7 +583,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                         arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED);
                         arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                         arrivalPort->setNextUpgrade(simTime() + forwardDelay);
-                        scheduleNextUpgrde();
+                        scheduleNextUpgrade();
                     }
                     else
                     {
@@ -610,7 +610,7 @@ bool RSTP::processSameSource(BPDU *frame, unsigned int arrivalPortNum)
                 arrivalPort->setRole(Ieee8021dInterfaceData::DESIGNATED); // if the frame is worse than this module generated frame, switch to Designated/Discarding
                 arrivalPort->setState(Ieee8021dInterfaceData::DISCARDING);
                 arrivalPort->setNextUpgrade(simTime() + forwardDelay);
-                scheduleNextUpgrde();
+                scheduleNextUpgrade();
                 sendBPDU(arrivalPortNum);// show him a better BPDU as soon as possible
             }
             else
@@ -796,7 +796,7 @@ void RSTP::initPorts()
         initInterfacedata(j);
         macTable->flush(j);
     }
-    scheduleNextUpgrde();
+    scheduleNextUpgrade();
 }
 
 void RSTP::updateInterfacedata(BPDU *frame, unsigned int portNum)
@@ -952,7 +952,7 @@ void RSTP::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
                     else if (iPort->getRole() == Ieee8021dInterfaceData::DESIGNATED
                              && (iPort->getState() == Ieee8021dInterfaceData::DISCARDING || iPort->getState() == Ieee8021dInterfaceData::LEARNING))
                             iPort->setNextUpgrade(simTime() + forwardDelay);
-                    scheduleNextUpgrde();
+                    scheduleNextUpgrade();
                 }
             }
         }
