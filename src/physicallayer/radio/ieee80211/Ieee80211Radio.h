@@ -34,7 +34,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
         Ieee80211Radio();
         Ieee80211Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel);
 
-        void setChannelNumber(int newChannelNumber);
+        virtual void setChannelNumber(int newChannelNumber);
 };
 
 #endif

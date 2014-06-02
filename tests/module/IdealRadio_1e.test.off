@@ -1,3 +1,5 @@
+TODO: attempting to receive multiple parallel radio signals is intentionally not supported by the radio
+
 %description:
 Testing ideal radio
 3 hosts pings host0: inside, on border, outside of transmitRange, pong host1 and host2 only

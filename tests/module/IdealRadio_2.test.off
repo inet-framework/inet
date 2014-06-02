@@ -1,3 +1,5 @@
+TODO: attempting to receive multiple parallel radio signals is intentionally not supported by the radio
+
 %description:
 Testing ideal radio
 host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets

@@ -37,12 +37,17 @@ void ScalarRadio::handleUpperCommand(cMessage *message)
     {
         RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
         bps newBitrate = configureCommand->getBitrate();
-        if (!isNaN(newBitrate.get())) {
-            ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
-            scalarTransmitter->setBitrate(newBitrate);
-        }
+        if (!isNaN(newBitrate.get()))
+            setBitrate(newBitrate);
         delete message;
     }
     else
         Radio::handleUpperCommand(message);
+}
+
+void ScalarRadio::setBitrate(bps newBitrate)
+{
+    ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
+    scalarTransmitter->setBitrate(newBitrate);
+    endReceptionTimer = NULL;
 }

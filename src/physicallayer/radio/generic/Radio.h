@@ -58,8 +58,16 @@ class INET_API Radio : public RadioBase
          */
         RadioMode previousRadioMode;
 
+        /**
+         * The timer that is scheduled to the end of the current transmission.
+         * If this timer is not scheduled then no transmission is in progress.
+         */
         cMessage *endTransmissionTimer;
-        // TODO: currently we support receiving multiple transmissions simultaneously (which we shouldn't, see above)
+        /**
+         * The timer that is scheduled to the end of the current reception.
+         * If this timer is NULL then no attempted reception is in progress but
+         * there still may be incoming receptions which are not attempted.
+         */
         cMessage *endReceptionTimer;
 
         /**
@@ -70,9 +78,6 @@ class INET_API Radio : public RadioBase
          * Simulation time required to switch from one radio mode to another.
          */
         simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
-
-        // TODO: make sure it's always updated whenever reception state, listening state, etc. changes
-        simtime_t lastReceptionStateChange;
 
     private:
         void parseRadioModeSwitchingTimes();

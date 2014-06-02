@@ -66,6 +66,7 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
         scalarReceiver->setCarrierFrequency(carrierFrequency);
         EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";
         channelNumber = newChannelNumber;
+        endReceptionTimer = NULL;
         emit(radioChannelChangedSignal, newChannelNumber);
         emit(listeningChangedSignal, 0);
     }

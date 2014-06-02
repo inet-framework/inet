@@ -32,8 +32,7 @@ Radio::Radio() :
     channel(NULL),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
-    endSwitchTimer(NULL),
-    lastReceptionStateChange(0)
+    endSwitchTimer(NULL)
 {}
 
 Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
@@ -44,8 +43,7 @@ Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSign
     channel(channel),
     endTransmissionTimer(NULL),
     endReceptionTimer(NULL),
-    endSwitchTimer(NULL),
-    lastReceptionStateChange(0)
+    endSwitchTimer(NULL)
 {
     channel->addRadio(this);
 }
@@ -154,7 +152,6 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
     if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
     {
         endReceptionTimer = NULL;
-        lastReceptionStateChange = simTime();
     }
     else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
     {
@@ -289,7 +286,6 @@ void Radio::startReception(RadioFrame *radioFrame)
     {
         bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && channel->isReceptionAttempted(this, transmission);
         EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
-        timer->setKind(isReceptionAttempted);
         if (isReceptionAttempted)
             endReceptionTimer = timer;
     }
@@ -301,7 +297,7 @@ void Radio::endReception(cMessage *message)
 {
     RadioFrame *radioFrame = static_cast<RadioFrame *>(message->getControlInfo());
     EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
-    if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message->getKind() && lastReceptionStateChange <= message->getSendingTime())
+    if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer)
     {
         cPacket *macFrame = channel->receivePacket(this, radioFrame);
         EV << "Sending up " << macFrame << ".\n";

@@ -127,7 +127,7 @@ class INET_API IdealRadioSignalReceiver : public RadioSignalReceiverBase
 
     public:
         IdealRadioSignalReceiver() :
-            ignoreInterference(true)
+            ignoreInterference(false)
         {}
 
         IdealRadioSignalReceiver(bool ignoreInterference) :

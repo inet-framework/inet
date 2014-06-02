@@ -28,6 +28,8 @@ class INET_API ScalarRadio : public Radio
     public:
         ScalarRadio();
         ScalarRadio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel);
+
+        virtual void setBitrate(bps bitrate);
 };
 
 #endif

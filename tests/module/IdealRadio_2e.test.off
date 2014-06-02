@@ -1,7 +1,9 @@
+TODO: attempting to receive multiple parallel radio signals is intentionally not supported by the radio
+
 %description:
 Testing ideal radio
-3 hosts pings host0: inside, on border, outside of transmitRange, pong host1 and host2 only
-Nic modules use internal queues
+host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets
+Nic modules use external DropTailQueues
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %inifile: omnetpp.ini
@@ -39,17 +41,26 @@ tkenv-plugin-path = ../../../etc/plugins
 **.wlan[*].radio.transmitter.maxInterferenceRange = 500m
 **.wlan[*].radio.transmitter.maxDetectionRange = 1000m
 **.wlan[*].radio.receiver.ignoreInterference = true
+**.wlan[*].queueType = "DropTailQueue"
 
-description = "3 hosts pings host0: inside, on border, outside of transmitRange, pong host1, host2"
+description = "host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets"
 
-*.numHosts = 4
+*.numHosts = 3
 
-# ping app (host[0] pinged by others)
-*.host[1..3].numPingApps = 1
-*.host[1..3].pingApp[0].destAddr = "host[0]"
-*.host[1..3].pingApp[0].startTime = 1s
-*.host[1..3].pingApp[0].stopTime = 101s-1us
-*.host[1..3].pingApp[0].printPing = true
+*.host[0].numUdpApps = 2
+*.host[0].udpApp[*].typename = "UDPSink"
+*.host[0].udpApp[0].localPort = 1001
+*.host[0].udpApp[1].localPort = 1002
+
+*.host[1..2].numUdpApps = 1
+*.host[1..2].udpApp[0].typename = "UDPBasicApp"
+*.host[1..2].udpApp[0].destAddresses = "host[0]"
+*.host[1].udpApp[0].destPort = 1001
+*.host[2].udpApp[0].destPort = 1002
+*.host[1..2].udpApp[0].startTime = 1s
+*.host[1..2].udpApp[0].stopTime = 101s-1us
+*.host[1..2].udpApp[0].sendInterval = 10ms
+*.host[1..2].udpApp[0].messageLength = 2450B    # +8(UDP)+20(IPv4)+22(wireless) bytes headers, = 20000bit --> 20kb/10ms = 2Mbps
 
 # mobility
 *.host[*].mobility.initFromDisplayString = false
@@ -58,39 +69,19 @@ description = "3 hosts pings host0: inside, on border, outside of transmitRange,
 *.host[*].mobility.initialZ = 0m
 
 *.host[0].mobility.initialX = 300m
-*.host[1].mobility.initialX = 200m+1mm    # inside
-*.host[2].mobility.initialX = 200m      # on border
-*.host[3].mobility.initialX = 200m-1mm    # outside
-
+*.host[1].mobility.initialX = 270m
+*.host[2].mobility.initialX = 330m
 
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.sca
-scalar NetIdealRadios.host[1].pingApp[0] 	"Pings sent" 	100
-scalar NetIdealRadios.host[1].pingApp[0] 	"ping loss rate (%)" 	0
-scalar NetIdealRadios.host[1].pingApp[0] 	"ping out-of-order rate (%)" 	0
+scalar NetIdealRadios.host[0].udpApp[0] 	rcvdPk:count 	10000
 %contains: results/General-0.sca
-scalar NetIdealRadios.host[1].pingApp[0] 	pingRxSeq:count 	100
+scalar NetIdealRadios.host[0].udpApp[1] 	rcvdPk:count 	10000
 %contains: results/General-0.sca
-scalar NetIdealRadios.host[1].pingApp[0] 	pingTxSeq:count 	100
-
+scalar NetIdealRadios.host[1].udpApp[0] 	sentPk:count 	10000
 %contains: results/General-0.sca
-scalar NetIdealRadios.host[2].pingApp[0] 	"Pings sent" 	100
-scalar NetIdealRadios.host[2].pingApp[0] 	"ping loss rate (%)" 	0
-scalar NetIdealRadios.host[2].pingApp[0] 	"ping out-of-order rate (%)" 	0
-%contains: results/General-0.sca
-scalar NetIdealRadios.host[2].pingApp[0] 	pingRxSeq:count 	100
-%contains: results/General-0.sca
-scalar NetIdealRadios.host[2].pingApp[0] 	pingTxSeq:count 	100
-
-%contains: results/General-0.sca
-scalar NetIdealRadios.host[3].pingApp[0] 	"Pings sent" 	100
-scalar NetIdealRadios.host[3].pingApp[0] 	"ping loss rate (%)" 	100
-scalar NetIdealRadios.host[3].pingApp[0] 	"ping out-of-order rate (%)" 	0
-%contains: results/General-0.sca
-scalar NetIdealRadios.host[3].pingApp[0] 	pingRxSeq:count 	0
-%contains: results/General-0.sca
-scalar NetIdealRadios.host[3].pingApp[0] 	pingTxSeq:count 	100
+scalar NetIdealRadios.host[2].udpApp[0] 	sentPk:count 	10000
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:
