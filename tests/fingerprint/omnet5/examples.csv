@@ -64,22 +64,22 @@
 /examples/httptools/socket/tenserverssocket/, -f omnetpp.ini -c histogram -r 0,              50000s,          2f97-f719
 
 # /examples/ieee8021d/,                -f omnetpp.ini -c LargeNet -r 0,                180s,         0000-0000
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                    180s,         0495-f6a1
-/examples/ieee8021d/,                -f omnetpp.ini -c STP -r 0,                     180s,         d87d-596d
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP -r 0,                    180s,         4d3b-59f7
+/examples/ieee8021d/,                -f omnetpp.ini -c STP -r 0,                     180s,         9a4b-5190
 /examples/ieee8021d/,                -f omnetpp.ini -c Switch3RootByPriority -r 0,   180s,         ad0d-b15c
 /examples/ieee8021d/,                -f omnetpp.ini -c Switch7to4BySrcPriority -r 0, 180s,         ad0d-b15c
 /examples/ieee8021d/,                -f omnetpp.ini -c TopologyChange -r 0,          180s,         02f6-4f4b
 /examples/ieee8021d/,                -f omnetpp.ini -c LinkReconnect -r 0,           180s,         02f6-4f4b
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,         0495-f6a1
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,         d87d-596d
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,      4a1c-051c
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,       ef45-303e
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,    4adc-568c
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch1RootByMAC -r 0,   180s,         4d3b-59f7
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch1RootByMAC -r 0,    180s,         9a4b-5190
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch3RootByPriority -r 0, 180s,      4065-f221
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch3RootByPriority -r 0, 180s,       89e0-5ad0
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-Switch7to4BySrcPriority -r 0, 180s,    82c9-f7eb
 /examples/ieee8021d/,                -f omnetpp.ini -c STP-Switch7to4BySrcPriority -r 0, 180s,     0be5-670a
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,         9cea-a098
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,         713b-49e4
-/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,         482c-51b9
-/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,         fa55-e32e
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LargeNet -r 0,           180s,         a62d-b2a3
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LargeNet -r 0,            180s,         ab0d-4699
+/examples/ieee8021d/,                -f omnetpp.ini -c RSTP-LinkReconnect -r 0,      180s,         1ce1-3a2a
+/examples/ieee8021d/,                -f omnetpp.ini -c STP-LinkReconnect -r 0,       180s,         be4e-7041
 
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-sack-experiment -r 0,    20s,             0560-96b5
 /examples/inet/ber/,                 -f omnetpp.ini -c ber-flavour-experiment -r 0, 20s,             9cfb-6d91
