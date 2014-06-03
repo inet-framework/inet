@@ -6,12 +6,12 @@ Carrier sense test for Ieee80211 out of range concurrent and delayed mutual tran
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 network Test
 {
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: Ieee80211RadioChannel;
         configurator: IPv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
@@ -28,8 +28,6 @@ cmdenv-express-mode = false
 
 **.arpType = "GlobalARP"
 
-**.radio.setReceptionThreshold = true
-
 **.host*.mobilityType = "StationaryMobility"
 **.mobility.constraintAreaMinZ = 0m
 **.mobility.constraintAreaMinX = 0m
@@ -37,6 +35,9 @@ cmdenv-express-mode = false
 **.mobility.constraintAreaMaxX = 1000m
 **.mobility.constraintAreaMaxY = 1000m
 **.mobility.constraintAreaMaxZ = 0m
+
+# radio
+**.radio.receiver.energyDetection = -100dBm
 
 # ping app
 *.host*.numPingApps = 1
@@ -56,10 +57,9 @@ cmdenv-express-mode = false
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains: results/General-0.elog
-- reception of noise message over, removing recvdPower from noiseLevel....
+results in reception is ignored
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
-frame ping0 with rcvdPower .*? is just noise
 Changing radio reception state from IDLE to BUSY\.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

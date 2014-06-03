@@ -8,7 +8,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.Router;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 import ned.DatarateChannel;
 
 
@@ -19,7 +19,7 @@ network MultiRadio
         bool useEthernetSwitching = default(true);
         bool useRouting = default(false);
     submodules:
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             @display("p=53,32");
         }
         host1: WirelessHost {

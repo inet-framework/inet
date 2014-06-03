@@ -22,12 +22,10 @@
 
 #include "IdealMac.h"
 
-#include "IdealRadio.h"
 #include "IdealMacFrame_m.h"
 #include "Ieee802Ctrl.h"
 #include "IInterfaceTable.h"
 #include "IPassiveQueue.h"
-#include "PhyControlInfo_m.h"
 #include "opp_utils.h"
 
 
@@ -82,9 +80,9 @@ void IdealMac::initialize(int stage)
         ackTimeout = par("ackTimeout");
 
         cModule *radioModule = gate("lowerLayerOut")->getPathEndGate()->getOwnerModule();
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-        radioTransmissionState = IRadio::RADIO_TRANSMISSION_STATE_UNDEFINED;
+        transmissionState = IRadio::TRANSMISSION_STATE_UNDEFINED;
 
         // find queueModule
         cGate *queueOut = gate("upperLayerIn")->getPathStartGate();
@@ -149,16 +147,16 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
 void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             if (!lastSentPk)
                 getNextMsgFromHL();
         }
-        radioTransmissionState = newRadioTransmissionState;
+        transmissionState = newRadioTransmissionState;
     }
 }
 
@@ -200,7 +198,7 @@ void IdealMac::getNextMsgFromHL()
 void IdealMac::handleUpperPacket(cPacket *msg)
 {
     outStandingRequests--;
-    if (radio->getRadioTransmissionState() == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING)
+    if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
     {
         // Logic error: we do not request packet from the external queue when radio is transmitting
         throw cRuntimeError("Received msg for transmission but transmitter is busy");
@@ -216,7 +214,7 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
-    if (frame->hasBitError() || frame->getKind() == BITERROR || frame->getKind() == COLLISION)
+    if (frame->hasBitError())
     {
         EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         delete frame;

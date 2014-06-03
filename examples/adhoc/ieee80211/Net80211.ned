@@ -20,7 +20,7 @@ package inet.examples.adhoc.ieee80211;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 network Net80211
 {
@@ -31,7 +31,7 @@ network Net80211
             parameters:
                 @display("r=,,#707070;p=250,58");
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             parameters:
                 @display("p=60,50");
         }

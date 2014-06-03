@@ -17,18 +17,12 @@
 
 package inet.physicallayer.radio.ideal;
 
-import inet.physicallayer.radio.common.RadioChannelBase;
+import inet.physicallayer.radio.generic.RadioChannel;
 
-//
-// Radio channel module for ~IdealRadio.
-//
-// ~IdealRadioChannel should have exactly one instance in every network model that
-// contains wireless nodes with ~IdealRadio. This module gets informed about the
-// location and movement of nodes, and determines which nodes are within
-// communication distance.
-//
-simple IdealRadioChannel extends RadioChannelBase
+module IdealRadioChannel extends RadioChannel
 {
     parameters:
-        @class(IdealRadioChannel);
+        propagationType = default("ConstantSpeedRadioSignalPropagation");
+        attenuationType = default("IdealRadioSignalFreeSpaceAttenuation");
+        backgroundNoiseType = default("");
 }

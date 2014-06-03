@@ -55,13 +55,28 @@ void MassMobility::setTargetPosition()
     Coord direction(cos(rad), sin(rad));
     simtime_t nextChangeInterval = changeIntervalParameter->doubleValue();
     EV_DEBUG << "interval: " << nextChangeInterval << endl;
+    sourcePosition = lastPosition;
     targetPosition = lastPosition + direction * speedParameter->doubleValue() * nextChangeInterval.dbl();
-    nextChange = simTime() + nextChangeInterval;
+    previousChange = simTime();
+    nextChange = previousChange + nextChangeInterval;
 }
 
 void MassMobility::move()
 {
-    LineSegmentsMobilityBase::move();
-    Coord dummy;
-    handleIfOutside(REFLECT, dummy, lastSpeed, angle);
+    simtime_t now = simTime();
+    if (now == nextChange) {
+        lastPosition = targetPosition;
+        handleIfOutside(REFLECT, lastPosition, lastSpeed, angle);
+        EV_INFO << "reached current target position = " << lastPosition << endl;
+        setTargetPosition();
+        EV_INFO << "new target position = " << targetPosition << ", next change = " << nextChange << endl;
+        lastSpeed = (targetPosition - lastPosition) / (nextChange - simTime()).dbl();
+    }
+    else if (now > lastUpdate) {
+        ASSERT(nextChange == -1 || now < nextChange);
+        double alpha = (now - previousChange) / (nextChange - previousChange);
+        lastPosition = sourcePosition * (1 - alpha) + targetPosition * alpha;
+        double dummyAngle;
+        handleIfOutside(REFLECT, lastPosition, lastSpeed, dummyAngle);
+    }
 }

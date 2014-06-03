@@ -17,21 +17,13 @@
 
 package inet.physicallayer.radio.ideal;
 
-import inet.physicallayer.radio.common.RadioBase;
+import inet.physicallayer.radio.generic.Radio;
 
-//
-// Implements a unit disk radio for use in ~IdealWirelessNic.
-//
-// See ~IdealWirelessNic for rationale and details.
-//
-// See ~IdealRadioChannel, ~IdealMac, ~IdealWirelessNic
-//
-simple IdealRadio extends RadioBase
+module IdealRadio extends Radio
 {
     parameters:
-        double bitrate @unit("bps");                         // transmission speed [bit/sec]
-        double transmissionRange @unit("m") = default(1m/0); // max. distance from sender where reception is possible
-        double interferenceRange @unit("m") = default(1m/0); // max. distance from sender where interference is possible
-        bool drawCoverage = default(true);                   // draw the coverage area in Tkenv
-        @class(IdealRadio);
+        antennaType = default("IsotropicRadioAntenna");
+        transmitterType = default("IdealRadioSignalTransmitter");
+        receiverType = default("IdealRadioSignalReceiver");
+        @class(Radio);
 }

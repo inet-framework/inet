@@ -18,15 +18,15 @@
 #ifndef __INET_IPHYSICALLAYER_H_
 #define __INET_IPHYSICALLAYER_H_
 
-#include "INETDefs.h"
+#include "PhysicalLayerDefs.h"
 
 /**
  * This purely virtual interface provides an abstraction for different physical layers.
  */
 class INET_API IPhysicalLayer
 {
-  public:
-    virtual ~IPhysicalLayer() { }
+    public:
+        virtual ~IPhysicalLayer() { }
 };
 
 #endif

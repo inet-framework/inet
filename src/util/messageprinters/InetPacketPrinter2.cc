@@ -66,9 +66,10 @@ class RIPPacket;
 #endif
 
 #ifdef WITH_RADIO
-#include "SimplifiedRadioFrame.h"
+#include "RadioFrame.h"
+#include "ScalarImplementation.h"
 #else
-class SimplifiedRadioFrame;
+class RadioFrame;
 #endif
 
 //TODO HACK, remove next line
@@ -86,7 +87,7 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
         std::string formatIeee80211Frame(Ieee80211Frame *packet) const;
         std::string formatPingPayload(PingPayload *packet) const;
         std::string formatRIPPacket(RIPPacket *packet) const;
-        std::string formatSimplifiedRadioFrame(SimplifiedRadioFrame *packet) const;
+        std::string formatRadioFrame(RadioFrame *packet) const;
         std::string formatTCPPacket(TCPSegment *tcpSeg) const;
         std::string formatUDPPacket(UDPPacket *udpPacket) const;
     public:
@@ -171,8 +172,8 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         }
 #endif
 #ifdef WITH_RADIO
-        else if (dynamic_cast<SimplifiedRadioFrame *>(pk)) {
-            out << formatSimplifiedRadioFrame(static_cast<SimplifiedRadioFrame *>(pk));
+        else if (dynamic_cast<RadioFrame *>(pk)) {
+            out << formatRadioFrame(static_cast<RadioFrame *>(pk));
         }
 #endif
         else
@@ -425,12 +426,20 @@ std::string InetPacketPrinter2::formatRIPPacket(RIPPacket *packet) const
     return os.str();
 }
 
-std::string InetPacketPrinter2::formatSimplifiedRadioFrame(SimplifiedRadioFrame *packet) const
+std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_RADIO
-    os << "RADIO from " << packet->getSenderPos() << " on " << packet->getCarrierFrequency()/1e6
-       << "MHz, ch=" << packet->getChannelNumber() << ", duration=" << SIMTIME_DBL(packet->getDuration())*1000 << "ms";
+    const IRadioSignalTransmission *transmission = packet->getTransmission();
+    const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
+    os << "RADIO from " << transmission->getStartPosition();
+    if (scalarTransmission)
+        os << " on " << scalarTransmission->getCarrierFrequency().get()/1e6 << "MHz, ";
+    // TODO: revive
+    // const Ieee80211RadioSignalTransmission *ieee80211Transmission = dynamic_cast<const Ieee80211RadioSignalTransmission *>(transmission);
+    // if (ieee80211Transmission)
+    //     os << "ch=" << ieee80211Transmission->getChannelNumber() << ", ";
+    os << "duration=" << SIMTIME_DBL(packet->getDuration())*1000 << "ms";
 #endif
     return os.str();
 }

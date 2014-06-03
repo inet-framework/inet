@@ -262,11 +262,14 @@ class FingerprintTestCase(SimulationTestCase):
         wdname = '' + self.wd
         wdname = re.sub('/', '_', wdname);
         wdname = re.sub('[\W]+', '_', wdname);
+        resultdir = os.path.abspath(".") + "/results/" + self.csvFile + "/" + wdname;
+        if not os.path.exists(resultdir):
+            os.makedirs(resultdir)
         command = opp_run + " -n " + nedPath + " -l " + inetLib + " -u Cmdenv " + self.args + \
             _iif(self.simtimelimit != "", " --sim-time-limit=" + self.simtimelimit, "") + \
             " --fingerprint=" + self.fingerprint + " --cpu-time-limit=" + cpuTimeLimit + \
             " --vector-recording=false --scalar-recording=true" + \
-            " \"--output-scalar-file=" + os.path.abspath(".") + "/results/" + self.csvFile + "_" + wdname + "_${inifile}_${configname}-${runnumber}.sca\"" + \
+            " --result-dir=" + resultdir + \
             extraOppRunArgs;
 
         anyFingerpintBad = False;

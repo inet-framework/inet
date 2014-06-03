@@ -19,17 +19,37 @@
 #define __INET_IRADIOFRAME_H_
 
 #include "IPhysicalLayerFrame.h"
-#include "IRadioSignal.h"
+#include "IRadioSignalTransmission.h"
 
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
  */
-class INET_API IRadioFrame : public IPhysicalLayerFrame
+class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
 {
-  public:
-    virtual ~IRadioFrame() { }
+    public:
+        /**
+         * Returns the radio signal transmission that this radio frame represents.
+         * This function never returns NULL.
+         */
+        virtual const IRadioSignalTransmission *getTransmission() const = 0;
 
-    virtual IRadioSignal *getRadioSignal() = 0;
+        /**
+         * TODO: fill in the background?
+         * This function may return NULL if this is not yet computed.
+         */
+        // virtual const IRadioSignalArrival *getArrival() const = 0;
+
+        /**
+         * TODO: fill in the background?
+         * This function may return NULL if this is not yet computed.
+         */
+        // virtual const IRadioSignalReception *getReception() const = 0;
+
+        /**
+         * TODO: fill in the background?
+         * This function may return NULL if this is not yet computed.
+         */
+        // virtual const IRadioSignalReceptionDecision *getReceptionDecision() const = 0;
 };
 
 #endif

@@ -26,13 +26,14 @@
 #include "INETDefs.h"
 
 #include "Coord.h"
+#include "EulerAngles.h"
 
 
 /**
  * @brief Abstract base class defining the public interface that must be provided by all mobility modules.
  *
  * @ingroup mobility
- * @author Levente M�sz�ros
+ * @author Levente Meszaros
  */
 class INET_API IMobility
 {
@@ -53,13 +54,13 @@ class INET_API IMobility
     // virtual Coord getCurrentAcceleration() = 0;
 
     /** @brief Returns the current angular position at the current simulation time. */
-    // virtual Coord getCurrentAngularPosition() = 0;
+    virtual EulerAngles getCurrentAngularPosition() = 0;
 
     /** @brief Returns the current angular speed at the current simulation time. */
-    // virtual Coord getCurrentAngularSpeed() = 0;
+    virtual EulerAngles getCurrentAngularSpeed() = 0;
 
     /** @brief Returns the current angular acceleration at the current simulation time. */
-    // virtual Coord getCurrentAngularAcceleration() = 0;
+    // virtual Orientation getCurrentAngularAcceleration() = 0;
 };
 
 #endif

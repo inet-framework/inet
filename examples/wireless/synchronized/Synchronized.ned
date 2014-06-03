@@ -21,7 +21,7 @@ package inet.examples.wireless.synchronized;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 
 network Synchronized
@@ -32,7 +32,7 @@ network Synchronized
         **.arpType = "GlobalARP";
         @display("bgl=3");
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: Ieee80211RadioChannel;
         node[nodeCount]: AdhocHost {
             parameters:
                 numUdpApps = 1;

@@ -1,0 +1,89 @@
+TODO: attempting to receive multiple parallel radio signals is intentionally not supported by the radio
+
+%description:
+Testing ideal radio
+host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets
+Nic modules use internal queues
+%#--------------------------------------------------------------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%inifile: omnetpp.ini
+
+[General]
+ned-path = .;../../../../src;../../lib
+network = NetIdealRadios
+#record-eventlog = true
+#eventlog-message-detail-pattern = *:(not declaredOn(cMessage) and not declaredOn(cNamedObject) and not declaredOn(cObject))
+
+num-rngs = 3
+**.mobility.rng-0 = 1
+**.wlan[*].mac.rng-0 = 2
+#debug-on-errors = true
+
+tkenv-plugin-path = ../../../etc/plugins
+
+**.constraintAreaMinX = 0m
+**.constraintAreaMinY = 0m
+**.constraintAreaMinZ = 0m
+**.constraintAreaMaxX = 600m
+**.constraintAreaMaxY = 400m
+**.constraintAreaMaxZ = 0m
+**.debug = true
+**.coreDebug = false
+
+# nic settings
+**.wlan[*].typename = "IdealWirelessNic"
+**.wlan[*].bitrate = 2Mbps
+**.wlan[*].mac.address = "auto"
+**.wlan[*].mac.headerLength = 22B
+**.wlan[*].radioType = "IdealRadio"
+**.wlan[*].radio.transmitter.bitrate = 2Mbps
+**.wlan[*].radio.transmitter.maxCommunicationRange = 100m
+**.wlan[*].radio.transmitter.maxInterferenceRange = 500m
+**.wlan[*].radio.transmitter.maxDetectionRange = 1000m
+**.wlan[*].radio.receiver.ignoreInterference = true
+
+description = "host1 and host2 send UDP packets to host0: both senders use full transmit capacity, host0 receives all packets"
+
+*.numHosts = 3
+
+*.host[0].numUdpApps = 2
+*.host[0].udpApp[*].typename = "UDPSink"
+*.host[0].udpApp[0].localPort = 1001
+*.host[0].udpApp[1].localPort = 1002
+
+*.host[1..2].numUdpApps = 1
+*.host[1..2].udpApp[0].typename = "UDPBasicApp"
+*.host[1..2].udpApp[0].destAddresses = "host[0]"
+*.host[1].udpApp[0].destPort = 1001
+*.host[2].udpApp[0].destPort = 1002
+*.host[1..2].udpApp[0].startTime = 1s
+*.host[1..2].udpApp[0].stopTime = 101s-1us
+*.host[1..2].udpApp[0].sendInterval = 10ms
+*.host[1..2].udpApp[0].messageLength = 2450B    # +8(UDP)+20(IPv4)+22(wireless) bytes headers, = 20000bit --> 20kb/10ms = 2Mbps
+
+# mobility
+*.host[*].mobility.initFromDisplayString = false
+*.host[*].mobilityType = "StationaryMobility"
+*.host[*].mobility.initialY = 200m
+*.host[*].mobility.initialZ = 0m
+
+*.host[0].mobility.initialX = 300m
+*.host[1].mobility.initialX = 270m
+*.host[2].mobility.initialX = 330m
+
+%#--------------------------------------------------------------------------------------------------------------
+%#--------------------------------------------------------------------------------------------------------------
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[0].udpApp[0] 	rcvdPk:count 	10000
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[0].udpApp[1] 	rcvdPk:count 	10000
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[1].udpApp[0] 	sentPk:count 	10000
+%contains: results/General-0.sca
+scalar NetIdealRadios.host[2].udpApp[0] 	sentPk:count 	10000
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------

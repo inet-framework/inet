@@ -7,7 +7,7 @@ import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.nodes.aodv.AODVRouter;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 import inet.world.scenario.ScenarioManager;
 
 network AODVTest
@@ -15,7 +15,7 @@ network AODVTest
     parameters:
         @display("bgb=525,437");
     submodules:
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             parameters:
                 @display("p=50,50");
         }
@@ -71,8 +71,7 @@ sim-time-limit = 100s
 
 # channel physical parameters
 *.radioChannel.carrierFrequency = 2.4GHz
-*.radioChannel.pMax = 2.0mW
-*.radioChannel.sat = -110dBm
+*.radioChannel.maxTransmissionPower = 2.0mW
 *.radioChannel.alpha = 2
 
 # mobility
@@ -101,21 +100,19 @@ sim-time-limit = 100s
 **.wlan[*].mac.cwMinData = 7
 **.wlan[*].mac.cwMinMulticast = 31
 
-**.wlan[*].radio.transmitterPower = 2mW
-**.wlan[*].radio.thermalNoise = -110dBm
-**.wlan[*].radio.sensitivity = -85dBm
-**.wlan[*].radio.pathLossAlpha = 2
-**.wlan[*].radio.snirThreshold = 4dB
+**.wlan[*].radio.transmitter.power = 2mW
+**.wlan[*].radio.receiver.sensitivity = -85dBm
+**.wlan[*].radio.receiver.snirThreshold = 4dB
 
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: results/General-0.rt
 .*
-\+R 35  3\.1989\d+  8  145\.236\.0\.2  145\.236\.0\.1  32  145\.236\.0\.1
-\+R 56  3\.2032\d+  7  145\.236\.0\.1  145\.236\.0\.2  32  145\.236\.0\.2
-\+R 57  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.2  32  145\.236\.0\.2
-\+R 57  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.1  32  145\.236\.0\.2
-\+R 115  3\.2053\d+  8  145\.236\.0\.2  145\.236\.0\.3  32  145\.236\.0\.3
-\+R 189  3\.2116\d+  7  145\.236\.0\.1  145\.236\.0\.3  32  145\.236\.0\.2
+\+R \d+  3\.1989\d+  8  145\.236\.0\.2  145\.236\.0\.1  32  145\.236\.0\.1
+\+R \d+  3\.2032\d+  7  145\.236\.0\.1  145\.236\.0\.2  32  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.2  32  145\.236\.0\.2
+\+R \d+  3\.2032\d+  9  145\.236\.0\.3  145\.236\.0\.1  32  145\.236\.0\.2
+\+R \d+  3\.2053\d+  8  145\.236\.0\.2  145\.236\.0\.3  32  145\.236\.0\.3
+\+R \d+  3\.2116\d+  7  145\.236\.0\.1  145\.236\.0\.3  32  145\.236\.0\.2
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

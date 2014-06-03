@@ -50,8 +50,8 @@ void RadioPowerConsumer::initialize(int stage)
         transmitterTransmittingPowerConsumption = par("transmitterTransmittingPowerConsumption");
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::radioReceptionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio*>(radioModule);
         cModule *node = findContainingNode(this);
         powerSource = dynamic_cast<IPowerSource *>(node->getSubmodule("powerSource"));
@@ -63,7 +63,7 @@ void RadioPowerConsumer::initialize(int stage)
 
 void RadioPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::radioReceptionStateChangedSignal || signalID == IRadio::radioTransmissionStateChangedSignal)
+    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal)
     {
         if (powerSource)
             powerSource->setPowerConsumption(powerConsumerId, getPowerConsumption());
@@ -80,24 +80,24 @@ double RadioPowerConsumer::getPowerConsumption()
     else if (radioMode == IRadio::RADIO_MODE_SWITCHING)
         return switchingPowerConsumption;
     double powerConsumption = 0;
-    IRadio::RadioReceptionState radioReceptionState = radio->getRadioReceptionState();
-    IRadio::RadioTransmissionState radioTransmissionState = radio->getRadioTransmissionState();
+    IRadio::ReceptionState receptionState = radio->getReceptionState();
+    IRadio::TransmissionState transmissionState = radio->getTransmissionState();
     if (radioMode == IRadio::RADIO_MODE_RECEIVER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (radioReceptionState == IRadio::RADIO_RECEPTION_STATE_IDLE)
+        if (receptionState == IRadio::RECEPTION_STATE_IDLE)
             powerConsumption += receiverIdlePowerConsumption;
-        else if (radioReceptionState == IRadio::RADIO_RECEPTION_STATE_BUSY)
+        else if (receptionState == IRadio::RECEPTION_STATE_BUSY)
             powerConsumption += receiverBusyPowerConsumption;
-        else if (radioReceptionState == IRadio::RADIO_RECEPTION_STATE_SYNCHRONIZING)
+        else if (receptionState == IRadio::RECEPTION_STATE_SYNCHRONIZING)
             powerConsumption += receiverSynchronizingPowerConsumption;
-        else if (radioReceptionState == IRadio::RADIO_RECEPTION_STATE_RECEIVING)
+        else if (receptionState == IRadio::RECEPTION_STATE_RECEIVING)
             powerConsumption += receiverReceivingPowerConsumption;
         else
             throw cRuntimeError("Unknown radio reception state");
     }
     if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        if (transmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             powerConsumption += transmitterIdlePowerConsumption;
-        else if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING)
+        else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING)
             powerConsumption += transmitterTransmittingPowerConsumption;
         else
             throw cRuntimeError("Unknown radio transmission state");

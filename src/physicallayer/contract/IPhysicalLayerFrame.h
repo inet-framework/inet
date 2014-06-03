@@ -18,15 +18,15 @@
 #ifndef __INET_IPHYSICALLAYERFRAME_H_
 #define __INET_IPHYSICALLAYERFRAME_H_
 
-#include "INETDefs.h"
+#include "PhysicalLayerDefs.h"
 
 /**
  * This purely virtual interface provides an abstraction for different physical layer frames.
  */
 class INET_API IPhysicalLayerFrame
 {
-  public:
-    virtual ~IPhysicalLayerFrame() { }
+    public:
+        virtual ~IPhysicalLayerFrame() { }
 };
 
 #endif

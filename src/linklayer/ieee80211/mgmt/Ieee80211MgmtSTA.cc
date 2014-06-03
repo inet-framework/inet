@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
+#include "Ieee80211RadioChannel.h"
 #include "Ieee80211MgmtSTA.h"
 
 #include "IRadioChannel.h"
@@ -24,7 +24,7 @@
 #include "ModuleAccess.h"
 #include "Ieee802Ctrl.h"
 #include "NotifierConsts.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
@@ -113,7 +113,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        IRadioChannel *radioChannel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
+        Ieee80211RadioChannel *radioChannel = check_and_cast<Ieee80211RadioChannel *>(simulation.getModuleByPath("radioChannel"));
         numChannels = radioChannel->getNumChannels();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
@@ -281,11 +281,10 @@ void Ieee80211MgmtSTA::changeChannel(int channelNum)
 {
     EV << "Tuning to channel #" << channelNum << "\n";
 
-    // sending PHY_C_CONFIGURERADIO command to MAC
-    PhyControlInfo *phyCtrl = new PhyControlInfo();
-    phyCtrl->setChannelNumber(channelNum);
-    cMessage *msg = new cMessage("changeChannel", PHY_C_CONFIGURERADIO);
-    msg->setControlInfo(phyCtrl);
+    RadioConfigureCommand *configureCommand = new RadioConfigureCommand();
+    configureCommand->setChannelNumber(channelNum);
+    cMessage *msg = new cMessage("changeChannel", RADIO_C_CONFIGURE);
+    msg->setControlInfo(configureCommand);
     send(msg, "macOut");
 }
 
@@ -361,10 +360,10 @@ void Ieee80211MgmtSTA::receiveSignal(cComponent *source, simsignal_t signalID, l
 {
     Enter_Method_Silent();
     // Note that we are only subscribed during scanning!
-    if (signalID == IRadio::radioReceptionStateChangedSignal)
+    if (signalID == IRadio::receptionStateChangedSignal)
     {
-        IRadio::RadioReceptionState newRadioReceptionState = (IRadio::RadioReceptionState)value;
-        if (newRadioReceptionState != IRadio::RADIO_RECEPTION_STATE_UNDEFINED && newRadioReceptionState != IRadio::RADIO_RECEPTION_STATE_IDLE)
+        IRadio::ReceptionState newReceptionState = (IRadio::ReceptionState)value;
+        if (newReceptionState != IRadio::RECEPTION_STATE_UNDEFINED && newReceptionState != IRadio::RECEPTION_STATE_IDLE)
         {
             EV << "busy radio channel detected during scanning\n";
             scanning.busyChannelDetected = true;
@@ -435,7 +434,7 @@ void Ieee80211MgmtSTA::processScanCommand(Ieee80211Prim_ScanRequest *ctrl)
 
     // start scanning
     if (scanning.activeScan)
-        host->subscribe(IRadio::radioReceptionStateChangedSignal, this);
+        host->subscribe(IRadio::receptionStateChangedSignal, this);
     scanning.currentChannelIndex = -1; // so we'll start with index==0
     isScanning = true;
     scanNextChannel();
@@ -448,7 +447,7 @@ bool Ieee80211MgmtSTA::scanNextChannel()
     {
         EV << "Finished scanning last channel\n";
         if (scanning.activeScan)
-            host->unsubscribe(IRadio::radioReceptionStateChangedSignal, this);
+            host->unsubscribe(IRadio::receptionStateChangedSignal, this);
         isScanning = false;
         return true; // we're done
     }

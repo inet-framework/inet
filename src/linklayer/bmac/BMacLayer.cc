@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "opp_utils.h"
 #include "FWMath.h"
@@ -20,7 +20,6 @@
 #include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
-#include "PhyControlInfo_m.h"
 
 Define_Module(BMacLayer)
 
@@ -58,7 +57,7 @@ void BMacLayer::initialize(int stage)
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
 		// init the dropped packet info
@@ -576,8 +575,8 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
 		}
 		break;
 	}
-	opp_error("Undefined event of type %d in state %d (radio mode %, radio reception state %d, radio transmission state %d)!",
-			  msg->getKind(), macState, radio->getRadioMode(), radio->getRadioReceptionState(), radio->getRadioTransmissionState());
+	opp_error("Undefined event of type %d in state %d (radio mode %d, radio reception state %d, radio transmission state %d)!",
+			  msg->getKind(), macState, radio->getRadioMode(), radio->getReceptionState(), radio->getTransmissionState());
 }
 
 
@@ -586,7 +585,7 @@ void BMacLayer::handleSelfMessage(cMessage *msg)
  */
 void BMacLayer::handleLowerPacket(cPacket *msg)
 {
-    if (msg->getKind() == BITERROR || msg->getKind() == COLLISION) {
+    if (msg->hasBitError()) {
         EV << "Received " << msg << " contains bit errors or collision, dropping it\n";
         delete msg;
         return;
@@ -627,17 +626,17 @@ void BMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
         }
     }
     // Transmission of one packet is over
-    else if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    else if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             if (macState == WAIT_TX_DATA_OVER)
                 scheduleAt(simTime(), data_tx_over);
             else if (macState == WAIT_ACK_TX)
                 scheduleAt(simTime(), ack_tx_over);
         }
-        radioTransmissionState = newRadioTransmissionState;
+        transmissionState = newRadioTransmissionState;
     }
 }
 

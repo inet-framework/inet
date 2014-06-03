@@ -20,7 +20,7 @@
 #include "Ieee80211Mac.h"
 #include "IRadio.h"
 #include "IInterfaceTable.h"
-#include "PhyControlInfo_m.h"
+#include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
@@ -358,13 +358,14 @@ void Ieee80211Mac::initialize(int stage)
 
         cModule *radioModule = gate("lowerLayerOut")->getNextGate()->getOwnerModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::radioReceptionStateChangedSignal, this);
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+        if (isOperational)
+            radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
         // interface
         if (isInterfaceRegistered().isUnspecified()) //TODO do we need multi-MAC feature? if so, should they share interfaceEntry??  --Andras
             registerInterface();
@@ -686,18 +687,18 @@ int Ieee80211Mac::mappingAccessCategory(Ieee80211DataOrMgmtFrame *frame)
 
 void Ieee80211Mac::handleUpperCommand(cMessage *msg)
 {
-    if (msg->getKind()==PHY_C_CONFIGURERADIO)
+    if (msg->getKind() == RADIO_C_CONFIGURE)
     {
         EV_DEBUG << "Passing on command " << msg->getName() << " to physical layer\n";
         if (pendingRadioConfigMsg != NULL)
         {
             // merge contents of the old command into the new one, then delete it
-            PhyControlInfo *pOld = check_and_cast<PhyControlInfo *>(pendingRadioConfigMsg->getControlInfo());
-            PhyControlInfo *pNew = check_and_cast<PhyControlInfo *>(msg->getControlInfo());
-            if (pNew->getChannelNumber()==-1 && pOld->getChannelNumber()!=-1)
-                pNew->setChannelNumber(pOld->getChannelNumber());
-            if (pNew->getBitrate()==-1 && pOld->getBitrate()!=-1)
-                pNew->setBitrate(pOld->getBitrate());
+            RadioConfigureCommand *oldConfigureCommand = check_and_cast<RadioConfigureCommand *>(pendingRadioConfigMsg->getControlInfo());
+            RadioConfigureCommand *newConfigureCommand = check_and_cast<RadioConfigureCommand *>(msg->getControlInfo());
+            if (newConfigureCommand->getChannelNumber() == -1 && oldConfigureCommand->getChannelNumber() != -1)
+                newConfigureCommand->setChannelNumber(oldConfigureCommand->getChannelNumber());
+            if (isNaN(newConfigureCommand->getBitrate().get()) && !isNaN(oldConfigureCommand->getBitrate().get()))
+                newConfigureCommand->setBitrate(oldConfigureCommand->getBitrate());
             delete pendingRadioConfigMsg;
             pendingRadioConfigMsg = NULL;
         }
@@ -819,15 +820,15 @@ void Ieee80211Mac::handleLowerPacket(cPacket *msg)
 void Ieee80211Mac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioReceptionStateChangedSignal)
+    if (signalID == IRadio::receptionStateChangedSignal)
         handleWithFSM(mediumStateChange);
-    else if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    else if (signalID == IRadio::transmissionStateChangedSignal)
     {
         handleWithFSM(mediumStateChange);
-        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
             radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-        radioTransmissionState = newRadioTransmissionState;
+        transmissionState = newRadioTransmissionState;
     }
 }
 
@@ -864,15 +865,13 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
 
     Ieee80211Frame *frame = dynamic_cast<Ieee80211Frame*>(msg);
     int frameType = frame ? frame->getType() : -1;
-    int msgKind = msg->getKind();
     logState();
     stateVector.record(fsm.getState());
 
     bool receptionError = false;
     if (frame && isLowerMessage(frame))
     {
-        lastReceiveFailed = (msgKind == COLLISION || msgKind == BITERROR);
-        receptionError = (msgKind == COLLISION || msgKind == BITERROR);
+        lastReceiveFailed = receptionError = frame ? frame->hasBitError() : false;
         scheduleReservePeriod(frame);
     }
 
@@ -1351,7 +1350,7 @@ void Ieee80211Mac::handleWithFSM(cMessage *msg)
         FSMA_State(RECEIVE)
         {
             FSMA_No_Event_Transition(Immediate-Receive-Error,
-                                     isLowerMessage(msg) && (msgKind == COLLISION || msgKind == BITERROR),
+                                     isLowerMessage(msg) && receptionError,
                                      IDLE,
                                      EV_WARN << "received frame contains bit errors or collision, next wait period is EIFS\n";
                                      numCollision++;
@@ -1629,9 +1628,9 @@ void Ieee80211Mac::scheduleDataTimeoutPeriod(Ieee80211DataOrMgmtFrame *frameToSe
 {
     double tim;
     double bitRate = bitrate;
-    if (dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo()))
+    if (dynamic_cast<RadioTransmissionRequest*> (frameToSend->getControlInfo()))
     {
-        bitRate = dynamic_cast<PhyControlInfo*> (frameToSend->getControlInfo())->getBitrate();
+        bitRate = dynamic_cast<RadioTransmissionRequest*> (frameToSend->getControlInfo())->getBitrate().get();
         if (bitRate == 0)
             bitRate = bitrate;
     }
@@ -1697,7 +1696,7 @@ void Ieee80211Mac::scheduleReservePeriod(Ieee80211Frame *frame)
             reserve = std::max(reserve, oldReserve);
             cancelEvent(endReserve);
         }
-        else if (radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE)
+        else if (radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE)
         {
             // NAV: the channel just became virtually busy according to the spec
             scheduleAt(simTime(), mediumStateChange);
@@ -1868,7 +1867,7 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
     if (frameToSend->getControlInfo()!=NULL)
     {
         cObject * ctr = frameToSend->getControlInfo();
-        PhyControlInfo *ctrl = dynamic_cast <PhyControlInfo*> (ctr);
+        RadioTransmissionRequest *ctrl = dynamic_cast <RadioTransmissionRequest*> (ctr);
         if (ctrl == NULL)
             throw cRuntimeError("control info is not PhyControlInfo type %s");
         frame->setControlInfo(ctrl->dup());
@@ -1887,9 +1886,9 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildDataFrame(Ieee80211DataOrMgmtFrame 
             ASSERT(transmissionQueue()->end() != nextframeToSend);
             double bitRate = bitrate;
             int size = (*nextframeToSend)->getBitLength();
-            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo()))
+            if (transmissionQueue()->front()->getControlInfo() && dynamic_cast<RadioTransmissionRequest*>(transmissionQueue()->front()->getControlInfo()))
             {
-                bitRate = dynamic_cast<PhyControlInfo*>(transmissionQueue()->front()->getControlInfo())->getBitrate();
+                bitRate = dynamic_cast<RadioTransmissionRequest*>(transmissionQueue()->front()->getControlInfo())->getBitrate().get();
                 if (bitRate == 0)
                     bitRate = bitrate;
             }
@@ -1944,14 +1943,14 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 {
     Ieee80211DataOrMgmtFrame *frame = (Ieee80211DataOrMgmtFrame *)frameToSend->dup();
 
-    PhyControlInfo *phyControlInfo_old = dynamic_cast<PhyControlInfo *>( frameToSend->getControlInfo() );
-    if (phyControlInfo_old)
+    RadioTransmissionRequest *oldTransmissionRequest = dynamic_cast<RadioTransmissionRequest *>( frameToSend->getControlInfo() );
+    if (oldTransmissionRequest)
     {
         EV_DEBUG << "Per frame1 params"<<endl;
-        PhyControlInfo *phyControlInfo_new = new PhyControlInfo;
-        *phyControlInfo_new = *phyControlInfo_old;
-        //EV_DEBUG << "PhyControlInfo bitrate "<<phyControlInfo->getBitrate()/1e6<<"Mbps txpower "<<phyControlInfo->txpower()<<"mW"<<endl;
-        frame->setControlInfo(  phyControlInfo_new  );
+        RadioTransmissionRequest *newTransmissionRequest = new RadioTransmissionRequest();
+        *newTransmissionRequest = *oldTransmissionRequest;
+        //EV<<"PhyControlInfo bitrate "<<phyControlInfo->getBitrate()/1e6<<"Mbps txpower "<<phyControlInfo->txpower()<<"mW"<<endl;
+        frame->setControlInfo(newTransmissionRequest);
     }
 
     frame->setDuration(0);
@@ -1961,8 +1960,8 @@ Ieee80211DataOrMgmtFrame *Ieee80211Mac::buildMulticastFrame(Ieee80211DataOrMgmtF
 Ieee80211Frame *Ieee80211Mac::setBasicBitrate(Ieee80211Frame *frame)
 {
     ASSERT(frame->getControlInfo()==NULL);
-    PhyControlInfo *ctrl = new PhyControlInfo();
-    ctrl->setBitrate(basicBitrate);
+    RadioTransmissionRequest *ctrl = new RadioTransmissionRequest();
+    ctrl->setBitrate(bps(basicBitrate));
     frame->setControlInfo(ctrl);
     return frame;
 }
@@ -1975,16 +1974,16 @@ Ieee80211Frame *Ieee80211Mac::setBitrateFrame(Ieee80211Frame *frame)
             delete  frame->removeControlInfo();
         return frame;
     }
-    PhyControlInfo *ctrl = NULL;
+    RadioTransmissionRequest *ctrl = NULL;
     if (frame->getControlInfo()==NULL)
     {
-        ctrl = new PhyControlInfo();
+        ctrl = new RadioTransmissionRequest();
         frame->setControlInfo(ctrl);
     }
     else
-        ctrl = dynamic_cast<PhyControlInfo*>(frame->getControlInfo());
+        ctrl = dynamic_cast<RadioTransmissionRequest*>(frame->getControlInfo());
     if (ctrl)
-        ctrl->setBitrate(getBitrate());
+        ctrl->setBitrate(bps(getBitrate()));
     return frame;
 }
 
@@ -2063,12 +2062,12 @@ void Ieee80211Mac::resetStateVariables()
 
 bool Ieee80211Mac::isMediumStateChange(cMessage *msg)
 {
-    return msg == mediumStateChange || (msg == endReserve && radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE);
+    return msg == mediumStateChange || (msg == endReserve && radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE);
 }
 
 bool Ieee80211Mac::isMediumFree()
 {
-    return !endReserve->isScheduled() && radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE;
+    return !endReserve->isScheduled() && radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 }
 
 bool Ieee80211Mac::isMulticast(Ieee80211Frame *frame)
@@ -2143,15 +2142,14 @@ void Ieee80211Mac::popTransmissionQueue()
 
 double Ieee80211Mac::computeFrameDuration(Ieee80211Frame *msg)
 {
-
-    PhyControlInfo *ctrl;
+    RadioTransmissionRequest *ctrl;
     double duration;
     EV_DEBUG << *msg;
-    ctrl = dynamic_cast<PhyControlInfo*> ( msg->removeControlInfo() );
+    ctrl = dynamic_cast<RadioTransmissionRequest*> ( msg->removeControlInfo() );
     if ( ctrl )
     {
         EV_DEBUG << "Per frame2 params bitrate "<<ctrl->getBitrate()/1e6<<endl;
-        duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate());
+        duration = computeFrameDuration(msg->getBitLength(), ctrl->getBitrate().get());
         delete ctrl;
         return duration;
     }
@@ -2198,8 +2196,8 @@ void Ieee80211Mac::logState()
     for (int i=0; i<numCategs; i++)
         EV_TRACE << " " << edcCAF[i].retryCounter;
     EV_TRACE << ", radioMode = " << radio->getRadioMode()
-             << ", radioReceptionState = " << radio->getRadioReceptionState()
-             << ", radioTransmissionState = " << radio->getRadioTransmissionState()
+             << ", receptionState = " << radio->getReceptionState()
+             << ", transmissionState = " << radio->getTransmissionState()
              << ", nav = " << nav <<  ", txop is "<< txop << "\n";
     EV_TRACE << "#queue size 0.." << numCategs << " =";
     for (int i=0; i<numCategs; i++)

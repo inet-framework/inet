@@ -30,9 +30,6 @@
 
 #include "opp_utils.h"
 #include "FWMath.h"
-#include "BaseDecider.h"
-#include "BasePhyLayer.h"
-#include "BaseConnectionManager.h"
 #include "InterfaceEntry.h"
 #include "IMACProtocolControlInfo.h"
 #include "FindModule.h"
@@ -104,7 +101,7 @@ void CSMA::initialize(int stage) {
 
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
-        radioModule->subscribe(IRadio::radioTransmissionStateChangedSignal, this);
+        radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
 
         //check parameters for consistency
@@ -374,7 +371,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg) {
 	case EV_TIMER_CCA:
 	{
 		EV_DETAIL << "(25) FSM State CCA_3, EV_TIMER_CCA" << endl;
-		bool isIdle = radio->getRadioReceptionState() == IRadio::RADIO_RECEPTION_STATE_IDLE;
+		bool isIdle = radio->getReceptionState() == IRadio::RECEPTION_STATE_IDLE;
 		if(isIdle) {
 			EV_DETAIL << "(3) FSM State CCA_3, EV_TIMER_CCA, [Channel Idle]: -> TRANSMITFRAME_4." << endl;
 			updateMacState(TRANSMITFRAME_4);
@@ -859,15 +856,15 @@ void CSMA::handleLowerPacket(cPacket *msg) {
 
 void CSMA::receiveSignal(cComponent *source, simsignal_t signalID, long value) {
     Enter_Method_Silent();
-    if (signalID == IRadio::radioTransmissionStateChangedSignal)
+    if (signalID == IRadio::transmissionStateChangedSignal)
     {
-        IRadio::RadioTransmissionState newRadioTransmissionState = (IRadio::RadioTransmissionState)value;
-        if (radioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::RADIO_TRANSMISSION_STATE_IDLE)
+        IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
         {
             // KLUDGE: we used to get a cMessage from the radio (the identity was not important)
             executeMac(EV_FRAME_TRANSMITTED, new cMessage("Transmission over"));
         }
-        radioTransmissionState = newRadioTransmissionState;
+        transmissionState = newRadioTransmissionState;
     }
 }
 

@@ -93,7 +93,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     bool useModulationParameters;
     bool prioritizeMulticast;
   protected:
-    IRadio::RadioTransmissionState radioTransmissionState;
+    IRadio::TransmissionState transmissionState;
     /**
      * @name Configuration parameters
      * These are filled in during the initialization phase and not supposed to change afterwards.

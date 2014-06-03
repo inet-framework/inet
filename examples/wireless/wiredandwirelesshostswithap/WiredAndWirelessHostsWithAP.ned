@@ -10,7 +10,7 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 
 network WiredAndWirelessHostsWithAP
@@ -37,7 +37,7 @@ network WiredAndWirelessHostsWithAP
                 assignDisjunctSubnetAddresses = false;
                 @display("p=367,165");
         }
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             @display("p=115,165");
         }
     connections:

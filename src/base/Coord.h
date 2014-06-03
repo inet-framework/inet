@@ -126,6 +126,20 @@ public:
     }
 
     /**
+     * @brief Dot product
+     */
+    float operator*(const Coord& v) {
+        return (x * v.x + y * v.y + z * v.z);
+    }
+
+    /**
+     * @brief Cross product
+     */
+    Coord operator%(const Coord& v) {
+        return Coord(y*v.z-z*v.y, z*v.x - x*v.z, x*v.y - y*v.x);
+    }
+
+    /**
      * @brief Assigns coordinate vector 'other' to this.
      *
      * This operator can change the dimension of the coordinate.

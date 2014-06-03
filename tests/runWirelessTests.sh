@@ -10,7 +10,3 @@ cd module
 ./runWirelessTests.sh
 cd ..
 
-# detailed radio tests
-cd detailedradio
-./runTests.sh
-cd ..

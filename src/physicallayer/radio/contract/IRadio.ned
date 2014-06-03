@@ -54,7 +54,7 @@ import inet.physicallayer.contract.IPhysicalLayer;
 // and ~GenericRadio are derived, basically first calculates the received
 // power of the frame, taking a path loss model into account.
 // Then it calculates the signal-noise ratio, thermal noise and other
-// frames being counted as noise. It is determined from the SNR
+// frames being counted as noise. It is determined from the SNIR
 // whether the packet was received correctly, taking modulation
 // scheme and possible forward error correction into account.
 // For details please see the C++ code and its documentation.
@@ -84,8 +84,9 @@ moduleinterface IRadio extends IPhysicalLayer
     parameters:
         @display("i=block/wrxtx");
         @signal[radioModeChanged](type=long);
-        @signal[radioReceptionStateChanged](type=long);
-        @signal[radioTransmissionStateChanged](type=long);
+        @signal[listeningChanged];
+        @signal[receptionStateChanged](type=long);
+        @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);
     gates:
         input radioIn @labels(IRadioFrame);

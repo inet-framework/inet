@@ -6,12 +6,12 @@ Carrier sense test for Ieee80211 in range concurrent and delayed mutual transmis
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 network Test
 {
     submodules:
-        radioChannel: SimplifiedRadioChannel;
+        radioChannel: Ieee80211RadioChannel;
         configurator: IPv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;
@@ -35,6 +35,9 @@ ned-path = .;../../../../src
 **.mobility.constraintAreaMaxY = 1000m
 **.mobility.constraintAreaMaxZ = 0m
 
+# radio
+**.radio.receiver.energyDetection = -100dBm
+
 # ping app
 *.host*.numPingApps = 1
 *.host*.pingApp[0].count = 1
@@ -52,7 +55,7 @@ ned-path = .;../../../../src
 *.host2.pingApp[0].startTime = 3us
 
 %not-contains: results/General-0.elog
-- reception of noise message over, removing recvdPower from noiseLevel....
+reception decision, impossible, unsuccessful
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

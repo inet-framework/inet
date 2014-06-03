@@ -18,21 +18,19 @@ package inet.examples.manetrouting.multiradio;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
 
 
 //
 // Models a network with several hosts. Each host may contain one or
 // more radios. Nodes are using adhoc routing to pass information.
-// It is necessary to use SimplifiedRadioChannelExtended instead of
-// SimplifiedRadioChannel because only the extended version handles multiple radios.
 //
 network MultiRadio
 {
     parameters:
         int numHosts;
     submodules:
-        radioChannel: SimplifiedRadioChannel {
+        radioChannel: Ieee80211RadioChannel {
             @display("p=83,15");
         }
         configurator: IPv4NetworkConfigurator {

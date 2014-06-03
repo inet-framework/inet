@@ -81,7 +81,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
     {
         orig_node = it->second;
 
-        EV_DETAIL << "count own bcast (schedule_own_packet): old = " << orig_node->bcast_own_sum[batman_if->if_num] << ", ";
+        EV_DETAIL << "count own bcast (schedule_own_packet): old = " << (unsigned)orig_node->bcast_own_sum[batman_if->if_num] << ", ";
         std::vector<TYPE_OF_WORD>vectorAux;
         for (unsigned int i=0; i<num_words; i++) {
             vectorAux.push_back(orig_node->bcast_own[(batman_if->if_num * num_words)+i]);
@@ -92,7 +92,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
             orig_node->bcast_own[(batman_if->if_num * num_words)+i] = vectorAux[i];
         }
         vectorAux.clear();
-        EV_DETAIL << "new = " << orig_node->bcast_own_sum[batman_if->if_num] << "\n";
+        EV_DETAIL << "new = " << (unsigned)orig_node->bcast_own_sum[batman_if->if_num] << "\n";
     }
 }
 
@@ -294,7 +294,7 @@ void Batman::send_outstanding_packets(const simtime_t &curr_time)
                 if ((batman_if->wifi_if) && (!forw_node->own) && (forw_node->if_incoming == batman_if))
                     bat_packetAux->setTq((bat_packetAux->getTq() * (TQ_MAX_VALUE - (2 * hop_penalty))) / (TQ_MAX_VALUE));
 
-                EV_DETAIL << (curr_packet_num > 0 ? "Forwarding" : (forw_node->own ? "Sending own" : "Forwarding")) << " " << (curr_packet_num > 0 ? "aggregated " : "") << "packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TQ " << bat_packet->getTq() << ", TTL " << bat_packet->getTtl() << ", IDF " << (bat_packet->getFlags() & DIRECTLINK ? "on" : "off") << ") on interface " << batman_if->dev << "\n";
+                EV_DETAIL << (curr_packet_num > 0 ? "Forwarding" : (forw_node->own ? "Sending own" : "Forwarding")) << " " << (curr_packet_num > 0 ? "aggregated " : "") << "packet (originator " << bat_packet->getOrig() << ", seqno " << bat_packet->getSeqNumber() << ", TQ " << (unsigned)bat_packet->getTq() << ", TTL " << bat_packet->getTtl() << ", IDF " << (bat_packet->getFlags() & DIRECTLINK ? "on" : "off") << ") on interface " << batman_if->dev << "\n";
 
                 bat_packetAux = const_cast<BatmanPacket *> (dynamic_cast<BatmanPacket *>(bat_packetAux->getEncapsulatedPacket()));
             }

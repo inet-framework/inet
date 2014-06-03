@@ -158,6 +158,16 @@ class INET_API FWMath {
   static double max(double a, double b) { return (a<b)? b : a; }
 
   /**
+   * Converts a dB value to fraction.
+   */
+  static double dB2fraction(double dB) { return pow(10.0, dB/10.0); }
+
+  /**
+   * Convert a fraction value to dB.
+   */
+  static double fraction2dB(double fraction) { return (10 * log10(fraction)); }
+
+  /**
    * Converts a dBm value into milliwatts
    */
   static double dBm2mW(double dBm) { return pow(10.0, dBm/10.0); }
@@ -166,6 +176,16 @@ class INET_API FWMath {
    * Convert a mW value to dBm.
    */
   static double mW2dBm(double mW) { return (10 * log10(mW)); }
+
+  /**
+   * Convert a degree value to radian.
+   */
+  static double deg2rad(double deg) { return deg * M_PI / 180; }
+
+  /**
+   * Convert a radian value to degree.
+   */
+  static double rad2deg(double rad) { return rad * 180 / M_PI; }
 };
 
 #endif

@@ -1,6 +1,6 @@
 %description:
 
-This is a test for IdealRadio idle reception state.
+This is a test for ideal radio idle reception state.
 The received signal is too weak to sense at all.
 
 %file: test.ned
@@ -46,8 +46,12 @@ ned-path = .;../../../../src
 *.host*.wlan[*].bitrate = 2Mbps
 *.host*.wlan[*].mac.headerLength = 10B
 *.host*.wlan[*].mac.fullDuplex = false
-*.host*.wlan[*].radio.transmissionRange = 200m
-*.host*.wlan[*].radio.interferenceRange = 500m
+*.host*.wlan[*].radioType = "IdealRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.maxCommunicationRange = 200m
+*.host*.wlan[*].radio.transmitter.maxInterferenceRange = 400m
+*.host*.wlan[*].radio.transmitter.maxDetectionRange = 600m
+*.host*.wlan[*].radio.receiver.ignoreInterference = true
 
 # ping app
 *.host1.numPingApps = 1
