@@ -35,8 +35,8 @@ class INET_API ScalarRadioSignalTransmission : public RadioSignalTransmissionBas
         const Hz bandwidth;
 
     public:
-        ScalarRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const IModulation *modulation, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
-            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
+        ScalarRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
             modulation(modulation),
             headerBitLength(headerBitLength),
             payloadBitLength(payloadBitLength),
@@ -82,8 +82,8 @@ class INET_API ScalarRadioSignalReception : public RadioSignalReceptionBase
         const Hz bandwidth;
 
     public:
-        ScalarRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, W power, Hz carrierFrequency, Hz bandwidth) :
-            RadioSignalReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition),
+        ScalarRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, W power, Hz carrierFrequency, Hz bandwidth) :
+            RadioSignalReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
             power(power),
             carrierFrequency(carrierFrequency),
             bandwidth(bandwidth)
@@ -120,7 +120,7 @@ class INET_API ScalarRadioSignalNoise : public RadioSignalNoiseBase
         virtual Hz getBandwidth() const { return bandwidth; }
 };
 
-class INET_API ScalarRadioSignalAttenuationBase : public virtual IRadioSignalAttenuation
+class INET_API ScalarRadioSignalAttenuationBase : public RadioSignalAttenuationBase, public virtual IRadioSignalAttenuation
 {
     public:
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;

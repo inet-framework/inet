@@ -33,7 +33,7 @@
  * @brief Abstract base class defining the public interface that must be provided by all mobility modules.
  *
  * @ingroup mobility
- * @author Levente M�sz�ros
+ * @author Levente Meszaros
  */
 class INET_API IMobility
 {
@@ -46,9 +46,6 @@ class INET_API IMobility
 
     /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() = 0;
-
-    // TODO:
-    virtual Coord getPosition(simtime_t time) { return getCurrentPosition(); }
 
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() = 0;

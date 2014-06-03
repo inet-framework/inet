@@ -41,6 +41,18 @@ void RadioAntennaBase::initialize(int stage)
         mobility = check_and_cast<IMobility *>(getContainingNode(this)->getSubmodule("mobility"));
 }
 
+EulerAngles RadioSignalAttenuationBase::computeTransmissionDirection(const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) const
+{
+    const Coord transmissionStartPosition = transmission->getStartPosition();
+    const Coord arrivalStartPosition = arrival->getStartPosition();
+    Coord transmissionStartDirection = arrivalStartPosition - transmissionStartPosition;
+    double z = transmissionStartDirection.z;
+    transmissionStartDirection.z = 0;
+    double heading = atan2(transmissionStartDirection.y, transmissionStartDirection.x);
+    double elevation = atan2(z, transmissionStartDirection.length());
+    return EulerAngles(heading, elevation, 0);
+}
+
 void RadioSignalFreeSpaceAttenuationBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)

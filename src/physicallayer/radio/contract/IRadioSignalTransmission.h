@@ -20,6 +20,7 @@
 
 #include "Units.h"
 #include "Coord.h"
+#include "EulerAngles.h"
 #include "IPrintableObject.h"
 
 class IRadio;
@@ -78,14 +79,14 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
         virtual const Coord getEndPosition() const = 0;
 
         /**
-         * Returns the antenna's orientation when the transmitter ended this transmission.
+         * Returns the antenna's orientation when the transmitter started this transmission.
          */
-        // TODO: virtual const Orientation getStartOrientation() const = 0;
+        virtual const EulerAngles getStartOrientation() const = 0;
 
         /**
          * Returns the antenna's orientation when the transmitter ended this transmission.
          */
-        // TODO: virtual const Orientation getStartOrientation() const = 0;
+        virtual const EulerAngles getEndOrientation() const = 0;
 };
 
 #endif

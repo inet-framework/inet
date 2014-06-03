@@ -24,7 +24,6 @@
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
  */
-// TODO: antenna gain should be computable with one angle?
 class INET_API IRadioAntenna : public IPrintableObject
 {
     public:
@@ -35,14 +34,19 @@ class INET_API IRadioAntenna : public IPrintableObject
         virtual IMobility *getMobility() const = 0;
 
         /**
-         * Returns the maximum possible gain in any direction.
+         * Returns the maximum possible antenna gain independent of any direction.
          */
         virtual double getMaxGain() const = 0;
 
         /**
-         * Returns the antenna gain in the provided direction.
+         * Returns the antenna gain in the provided direction. The direction is
+         * relative to the antenna geometry, so the result depends only on the
+         * antenna characteristics. For transmissions it determines how well the
+         * antenna converts input power into radio waves headed in the specified
+         * direction. For receptions it determines how well the antenna converts
+         * radio waves arriving from the the specified direction.
          */
-        virtual double getGain(Coord direction) const = 0;
+        virtual double computeGain(EulerAngles direction) const = 0;
 };
 
 #endif

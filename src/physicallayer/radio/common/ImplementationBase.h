@@ -36,16 +36,20 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
         const simtime_t endTime;
         const Coord startPosition;
         const Coord endPosition;
+        const EulerAngles startOrientation;
+        const EulerAngles endOrientation;
 
     public:
-        RadioSignalTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+        RadioSignalTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
             id(nextId++),
             transmitter(transmitter),
             macFrame(macFrame),
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
-            endPosition(endPosition)
+            endPosition(endPosition),
+            startOrientation(startOrientation),
+            endOrientation(endOrientation)
         {}
 
         virtual int getId() const { return id; }
@@ -60,6 +64,9 @@ class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmis
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
+
+        virtual const EulerAngles getStartOrientation() const { return startOrientation; }
+        virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
 
 class INET_API RadioSignalListeningBase : public IRadioSignalListening
@@ -100,15 +107,19 @@ class INET_API RadioSignalReceptionBase : public virtual IRadioSignalReception
         const simtime_t endTime;
         const Coord startPosition;
         const Coord endPosition;
+        const EulerAngles startOrientation;
+        const EulerAngles endOrientation;
 
     public:
-        RadioSignalReceptionBase(const IRadio *receiver, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) :
+        RadioSignalReceptionBase(const IRadio *receiver, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
             receiver(receiver),
             transmission(transmission),
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
-            endPosition(endPosition)
+            endPosition(endPosition),
+            startOrientation(startOrientation),
+            endOrientation(endOrientation)
         {}
 
         virtual void printToStream(std::ostream &stream) const;
@@ -121,6 +132,9 @@ class INET_API RadioSignalReceptionBase : public virtual IRadioSignalReception
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
+
+        virtual const EulerAngles getStartOrientation() const { return startOrientation; }
+        virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
 
 class INET_API RadioSignalNoiseBase : public IRadioSignalNoise
@@ -157,6 +171,12 @@ class INET_API RadioAntennaBase : public IRadioAntenna, public cCompoundModule
         {}
 
         virtual IMobility *getMobility() const { return mobility; }
+};
+
+class INET_API RadioSignalAttenuationBase
+{
+    protected:
+        virtual EulerAngles computeTransmissionDirection(const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) const;
 };
 
 class INET_API RadioSignalFreeSpaceAttenuationBase : public virtual IRadioSignalAttenuation, public cCompoundModule

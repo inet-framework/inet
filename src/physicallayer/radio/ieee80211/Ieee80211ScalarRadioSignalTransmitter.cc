@@ -56,10 +56,12 @@ const IRadioSignalTransmission *Ieee80211ScalarRadioSignalTransmitter::createTra
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
     ModulationType modulationType = WifiModulationType::getModulationType(opMode, transmissionBitrate.get());
-    simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
-    simtime_t endTime = startTime + duration;
+    const simtime_t duration = SIMTIME_DBL(WifiModulationType::calculateTxDuration(macFrame->getBitLength(), modulationType, preambleMode));
+    const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    Coord startPosition = mobility->getPosition(startTime);
-    Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, transmissionPower, carrierFrequency, bandwidth);
+    const Coord startPosition = mobility->getCurrentPosition();
+    const Coord endPosition = mobility->getCurrentPosition();
+    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
+    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, transmissionPower, carrierFrequency, bandwidth);
 }

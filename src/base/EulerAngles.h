@@ -26,11 +26,11 @@ class EulerAngles
         EulerAngles(double alpha, double beta = 0.0, double gamma = 0.0)
             : alpha(alpha), beta(beta), gamma(gamma) {}
 
-        EulerAngles operator+(EulerAngles a){return EulerAngles(alpha+a.alpha, beta+a.beta, gamma+a.gamma);}
+        EulerAngles operator+(const EulerAngles a) const {return EulerAngles(alpha+a.alpha, beta+a.beta, gamma+a.gamma);}
 
-        EulerAngles operator-(EulerAngles a){return EulerAngles(alpha-a.alpha, beta-a.beta, gamma-a.gamma);}
+        EulerAngles operator-(const EulerAngles a) const {return EulerAngles(alpha-a.alpha, beta-a.beta, gamma-a.gamma);}
 
-        EulerAngles operator*(float f){return EulerAngles(alpha*f, beta*f, gamma*f);}
+        EulerAngles operator*(float f) const {return EulerAngles(alpha*f, beta*f, gamma*f);}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)

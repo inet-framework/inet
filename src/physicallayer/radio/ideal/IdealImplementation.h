@@ -28,8 +28,8 @@ class INET_API IdealRadioSignalTransmission : public RadioSignalTransmissionBase
         const m maxDetectionRange;
 
     public:
-        IdealRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
-            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition),
+        IdealRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+            RadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
             maxCommunicationRange(maxCommunicationRange),
             maxInterferenceRange(maxInterferenceRange),
             maxDetectionRange(maxDetectionRange)
@@ -63,8 +63,8 @@ class INET_API IdealRadioSignalReception : public RadioSignalReceptionBase
         const Power power;
 
     public:
-        IdealRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const Power power) :
-            RadioSignalReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition),
+        IdealRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
+            RadioSignalReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
             power(power)
         {}
 

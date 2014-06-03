@@ -32,6 +32,8 @@ const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(c
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
+    const EulerAngles receptionStartOrientation = arrival->getStartOrientation();
+    const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
     m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
     IdealRadioSignalReception::Power power;
     if (distance <= idealTransmission->getMaxCommunicationRange())
@@ -42,7 +44,7 @@ const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(c
         power = IdealRadioSignalReception::POWER_DETECTABLE;
     else
         power = IdealRadioSignalReception::POWER_UNDETECTABLE;
-    return new IdealRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, power);
+    return new IdealRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
 }
 
 void IdealRadioSignalTransmitter::initialize(int stage)
@@ -66,12 +68,14 @@ void IdealRadioSignalTransmitter::printToStream(std::ostream &stream) const
 
 const IRadioSignalTransmission *IdealRadioSignalTransmitter::createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const
 {
-    simtime_t duration = (b(macFrame->getBitLength()) / bitrate).get();
-    simtime_t endTime = startTime + duration;
+    const simtime_t duration = (b(macFrame->getBitLength()) / bitrate).get();
+    const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    Coord startPosition = mobility->getPosition(startTime);
-    Coord endPosition = mobility->getPosition(endTime);
-    return new IdealRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
+    const Coord startPosition = mobility->getCurrentPosition();
+    const Coord endPosition = mobility->getCurrentPosition();
+    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
+    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    return new IdealRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
 }
 
 void IdealRadioSignalReceiver::initialize(int stage)

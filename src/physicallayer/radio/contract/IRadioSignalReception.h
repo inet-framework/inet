@@ -69,13 +69,13 @@ class INET_API IRadioSignalReception : public IPrintableObject
          * Returns the antenna's orientation when the receiver started to receive
          * the corresponding transmission.
          */
-        // TODO: virtual const Orientation getStartOrientation() const = 0;
+        virtual const EulerAngles getStartOrientation() const = 0;
 
         /**
          * Returns the antenna's orientation when the receiver ended to receive
          * the corresponding transmission.
          */
-        // TODO: virtual const Orientation getStartOrientation() const = 0;
+        virtual const EulerAngles getEndOrientation() const = 0;
 };
 
 #endif

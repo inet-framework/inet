@@ -61,14 +61,17 @@ const IRadioSignalReception *ScalarRadioSignalAttenuationBase::computeReception(
     const simtime_t receptionEndTime = arrival->getEndTime();
     const Coord receptionStartPosition = arrival->getStartPosition();
     const Coord receptionEndPosition = arrival->getEndPosition();
-    // TODO: revise antenna gain computation
-    const Coord direction = receptionStartPosition - transmission->getStartPosition();
-    double transmitterAntennaGain = transmitterAntenna->getGain(direction);
-    double receiverAntennaGain = receiverAntenna->getGain(direction);
+    const EulerAngles receptionStartOrientation = arrival->getStartOrientation();
+    const EulerAngles receptionEndOrientation = arrival->getEndOrientation();
+    const EulerAngles transmissionDirection = computeTransmissionDirection(transmission, arrival);
+    const EulerAngles transmissionAntennaDirection = transmission->getStartOrientation() - transmissionDirection;
+    const EulerAngles receptionAntennaDirection = transmissionDirection - arrival->getStartOrientation();
+    double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
+    double receiverAntennaGain = receiverAntenna->computeGain(receptionAntennaDirection);
     double attenuationLoss = computeLoss(transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition);
     W transmissionPower = scalarTransmission->getPower();
     W receptionPower = transmitterAntennaGain * receiverAntennaGain * attenuationLoss * transmissionPower;
-    return new ScalarRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionPower, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth());
+    return new ScalarRadioSignalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, receptionPower, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth());
 }
 
 double ScalarRadioSignalFreeSpaceAttenuation::computeLoss(const IRadioSignalTransmission *transmission, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) const
@@ -163,12 +166,14 @@ const IRadioSignalTransmission *ScalarRadioSignalTransmitter::createTransmission
     RadioTransmissionRequest *controlInfo = dynamic_cast<RadioTransmissionRequest *>(macFrame->getControlInfo());
     W transmissionPower = controlInfo && !isNaN(controlInfo->getPower().get()) ? controlInfo->getPower() : power;
     bps transmissionBitrate = controlInfo && !isNaN(controlInfo->getBitrate().get()) ? controlInfo->getBitrate() : bitrate;
-    simtime_t duration = (macFrame->getBitLength() + headerBitLength) / transmissionBitrate.get();
-    simtime_t endTime = startTime + duration;
+    const simtime_t duration = (macFrame->getBitLength() + headerBitLength) / transmissionBitrate.get();
+    const simtime_t endTime = startTime + duration;
     IMobility *mobility = transmitter->getAntenna()->getMobility();
-    Coord startPosition = mobility->getPosition(startTime);
-    Coord endPosition = mobility->getPosition(endTime);
-    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, modulation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, transmissionPower, carrierFrequency, bandwidth);
+    const Coord startPosition = mobility->getCurrentPosition();
+    const Coord endPosition = mobility->getCurrentPosition();
+    const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
+    const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
+    return new ScalarRadioSignalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), transmissionBitrate, transmissionPower, carrierFrequency, bandwidth);
 }
 
 void ScalarRadioSignalReceiver::initialize(int stage)

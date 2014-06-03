@@ -19,6 +19,8 @@
 
 Define_Module(IsotropicRadioAntenna);
 Define_Module(ConstantGainRadioAntenna);
+Define_Module(DipoleRadioAntenna);
+Define_Module(InterpolatingRadioAntenna);
 Define_Module(ImmediateRadioSignalPropagation);
 Define_Module(ConstantSpeedRadioSignalPropagation);
 
@@ -27,6 +29,19 @@ void ConstantGainRadioAntenna::initialize(int stage)
     RadioAntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
         gain = FWMath::dB2fraction(par("gain"));
+}
+
+void DipoleRadioAntenna::initialize(int stage)
+{
+    RadioAntennaBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        length = m(par("length"));
+}
+
+double DipoleRadioAntenna::computeGain(EulerAngles direction) const
+{
+    double q = sin(direction.beta - M_PI_2);
+    return 1.5 * q * q;
 }
 
 void RadioSignalListeningDecision::printToStream(std::ostream &stream) const
@@ -53,7 +68,8 @@ const IRadioSignalArrival *ImmediateRadioSignalPropagation::computeArrival(const
 {
     arrivalComputationCount++;
     const Coord position = mobility->getCurrentPosition();
-    return new RadioSignalArrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position);
+    const EulerAngles orientation = mobility->getCurrentAngularPosition();
+    return new RadioSignalArrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position, orientation, orientation);
 }
 
 void ImmediateRadioSignalPropagation::printToStream(std::ostream &stream) const
@@ -77,15 +93,16 @@ const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const si
     {
         case 0:
             return mobility->getCurrentPosition();
-        case 1:
-            return mobility->getPosition(time);
-        case 2:
-        {
-            // NOTE: repeat once again to approximate the movement during propagation
-            double distance = position.distance(mobility->getPosition(time));
-            simtime_t propagationTime = distance / propagationSpeed.get();
-            return mobility->getPosition(time + propagationTime);
-        }
+// TODO: revive
+//        case 1:
+//            return mobility->getPosition(time);
+//        case 2:
+//        {
+//            // NOTE: repeat once again to approximate the movement during propagation
+//            double distance = position.distance(mobility->getPosition(time));
+//            simtime_t propagationTime = distance / propagationSpeed.get();
+//            return mobility->getPosition(time + propagationTime);
+//        }
         default:
             throw cRuntimeError("Unknown mobility approximation count '%d'", mobilityApproximationCount);
     }
@@ -111,5 +128,7 @@ const IRadioSignalArrival *ConstantSpeedRadioSignalPropagation::computeArrival(c
     const simtime_t endPropagationTime = endPosition.distance(endArrivalPosition) / propagationSpeed.get();
     const simtime_t startArrivalTime = startTime + startPropagationTime;
     const simtime_t endArrivalTime = endTime + endPropagationTime;
-    return new RadioSignalArrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition);
+    const EulerAngles startArrivalOrientation = mobility->getCurrentAngularPosition();
+    const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
+    return new RadioSignalArrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
 }

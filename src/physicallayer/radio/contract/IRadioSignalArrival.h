@@ -19,6 +19,7 @@
 #define __INET_IRADIOSIGNALARRIVAL_H_
 
 #include "Coord.h"
+#include "EulerAngles.h"
 #include "IPrintableObject.h"
 
 /**
@@ -38,6 +39,9 @@ class INET_API IRadioSignalArrival : public IPrintableObject
 
         virtual const Coord getStartPosition() const = 0;
         virtual const Coord getEndPosition() const = 0;
+
+        virtual const EulerAngles getStartOrientation() const = 0;
+        virtual const EulerAngles getEndOrientation() const = 0;
 };
 
 #endif

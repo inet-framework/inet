@@ -29,15 +29,19 @@ class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
         const simtime_t endTime;
         const Coord startPosition;
         const Coord endPosition;
+        const EulerAngles startOrientation;
+        const EulerAngles endOrientation;
 
     public:
-        RadioSignalArrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) :
+        RadioSignalArrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
             startPropagationTime(startPropagationTime),
             endPropagationTime(endPropagationTime),
             startTime(startTime),
             endTime(endTime),
             startPosition(startPosition),
-            endPosition(endPosition)
+            endPosition(endPosition),
+            startOrientation(startOrientation),
+            endOrientation(endOrientation)
         {}
 
         virtual void printToStream(std::ostream &stream) const {}
@@ -50,6 +54,27 @@ class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
 
         virtual const Coord getStartPosition() const { return startPosition; }
         virtual const Coord getEndPosition() const { return endPosition; }
+
+        virtual const EulerAngles getStartOrientation() const { return startOrientation; }
+        virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+};
+
+class INET_API IsotropicRadioAntenna : public RadioAntennaBase
+{
+    public:
+        IsotropicRadioAntenna() :
+            RadioAntennaBase()
+        {}
+
+        IsotropicRadioAntenna(IMobility *mobility) :
+            RadioAntennaBase(mobility)
+        {}
+
+        virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
+
+        virtual double getMaxGain() const { return 1; }
+
+        virtual double computeGain(EulerAngles direction) const { return 1; }
 };
 
 class INET_API ConstantGainRadioAntenna : public RadioAntennaBase
@@ -75,33 +100,22 @@ class INET_API ConstantGainRadioAntenna : public RadioAntennaBase
 
         virtual double getMaxGain() const { return gain; }
 
-        virtual double getGain(Coord direction) const { return gain; }
-};
-
-class INET_API IsotropicRadioAntenna : public RadioAntennaBase
-{
-    public:
-        IsotropicRadioAntenna() :
-            RadioAntennaBase()
-        {}
-
-        IsotropicRadioAntenna(IMobility *mobility) :
-            RadioAntennaBase(mobility)
-        {}
-
-        virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
-
-        virtual double getMaxGain() const { return 1; }
-
-        virtual double getGain(Coord direction) const { return 1; }
+        virtual double computeGain(EulerAngles direction) const { return gain; }
 };
 
 class INET_API DipoleRadioAntenna : public RadioAntennaBase
 {
     protected:
-        const m length;
+        m length;
+
+    protected:
+        virtual void initialize(int stage);
 
     public:
+        DipoleRadioAntenna() :
+            RadioAntennaBase()
+        {}
+
         DipoleRadioAntenna(IMobility *mobility, m length) :
             RadioAntennaBase(mobility),
             length(length)
@@ -113,15 +127,27 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
 
         virtual double getMaxGain() const { return 1.5; }
 
-        // TODO: compute gain based on positions/orientations
-        virtual double getGain(Coord direction) const { return 1.5; }
+        virtual double computeGain(EulerAngles direction) const;
 };
 
 class INET_API InterpolatingRadioAntenna : public RadioAntennaBase
 {
     public:
+        InterpolatingRadioAntenna() :
+            RadioAntennaBase()
+        {}
+
+        InterpolatingRadioAntenna(IMobility *mobility) :
+            RadioAntennaBase(mobility)
+        {}
+
         virtual void printToStream(std::ostream &stream) const { stream << "interpolating antenna"; }
-    // TODO: compute antenna gain based on a linear interpolation between two elements of the antenna gain table using the antenna positions/orientations
+
+        // TODO: compute max gain
+        virtual double getMaxGain() const { return 1; }
+
+        // TODO: compute antenna gain based on a linear interpolation between two elements of the antenna gain table using the antenna positions/orientations
+        virtual double computeGain(EulerAngles direction) const { return 1; }
 };
 
 class INET_API RadioSignalListeningDecision : public IRadioSignalListeningDecision, public cObject
