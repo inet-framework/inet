@@ -26,7 +26,7 @@
 #include "INETEndians.h"
 
 extern "C" {
-#include <libavutil/channel_layout.h>
+#include <libavutil/audioconvert.h>
 }
 
 
@@ -125,8 +125,11 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
     AVFrame *frame = avcodec_alloc_frame();
 
     frame->nb_samples = samples;
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = c->sample_rate;
+#endif
 
     int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, c->sample_fmt,
             (const uint8_t*)(decBuf), pktBytes, 1);

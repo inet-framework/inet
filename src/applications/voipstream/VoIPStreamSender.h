@@ -21,7 +21,7 @@
 #define VOIPSTREAM_VOIPSTREAMSENDER_H
 
 #ifndef HAVE_FFMPEG
-#error Please install libavcodec, libavformat, libavresample, libavutil or disable 'VoIPStream' feature
+#error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
 #endif
 
 #include <fnmatch.h>
@@ -34,7 +34,13 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#ifndef HAVE_FFMPEG_AVRESAMPLE
+#error Please install libavresample or disable 'VoIPStream' feature
+#endif
 #include <libavresample/avresample.h>
+#endif
 };
 
 #include "AudioOutFile.h"
@@ -113,7 +119,13 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     AVFormatContext *pFormatCtx;
     AVCodecContext *pCodecCtx;
     AVCodec *pCodec;                // input decoder codec
+
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
     AVAudioResampleContext *pReSampleCtx;
+#else
+    ReSampleContext *pReSampleCtx;
+#endif
+
     AVCodecContext *pEncoderCtx;
     AVCodec *pCodecEncoder;         // output encoder codec
 
