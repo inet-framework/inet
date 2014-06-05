@@ -18,9 +18,8 @@
 #ifndef __INET_PHYSICALLAYERDEFS_H_
 #define __INET_PHYSICALLAYERDEFS_H_
 
-#include <math.h>
 #include <limits>
-#include "INETDefs.h"
+#include "FWMath.h"
 #include "Units.h"
 
 #define qNaN std::numeric_limits<double>::quiet_NaN()
