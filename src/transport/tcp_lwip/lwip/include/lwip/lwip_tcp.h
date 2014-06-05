@@ -49,8 +49,8 @@
 #include "lwip/memp.h"
 
 #include "lwip/pbuf.h"
-#include "lwip/ip.h"
-#include "lwip/icmp.h"
+#include "lwip/lwip_ip.h"
+#include "lwip/lwip_icmp.h"
 #include "lwip/err.h"
 
 

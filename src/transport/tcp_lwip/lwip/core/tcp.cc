@@ -56,7 +56,7 @@
 #include "lwip/mem.h"
 #include "lwip/memp.h"
 #include "lwip/snmp.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "lwip/debug.h"
 #include "lwip/stats.h"
 

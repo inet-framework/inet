@@ -28,7 +28,7 @@
 #include "ILifecycle.h"
 #include "Address.h"
 #include "TCPCommand_m.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "LwipTcpStackIf.h"
 
 // forward declarations:

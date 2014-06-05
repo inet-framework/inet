@@ -35,7 +35,7 @@
 
 #include "lwip/opt.h"
 #include "lwip/netif.h"
-#include "lwip/udp.h"
+#include "lwip/lwip_udp.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -20,7 +20,7 @@
 
 //#include "headers/defs.h"   // for endian macros
 //#include "headers/in_systm.h"
-#include "lwip/ip.h"
+#include "lwip/lwip_ip.h"
 
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
@@ -36,7 +36,7 @@
 #include "IPProtocolId_m.h"
 
 #include "headers/tcp.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TcpLwipConnection.h"

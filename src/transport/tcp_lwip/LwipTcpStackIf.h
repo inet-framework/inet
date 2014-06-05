@@ -16,7 +16,7 @@
 //
 
 #include "lwip/opt.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 
 //forward declarations:
 class Address;

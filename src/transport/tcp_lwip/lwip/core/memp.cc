@@ -42,10 +42,10 @@
 
 #include "lwip/memp.h"
 #include "lwip/pbuf.h"
-#include "lwip/udp.h"
+#include "lwip/lwip_udp.h"
 #include "lwip/raw.h"
-#include "lwip/tcp.h"
-#include "lwip/igmp.h"
+#include "lwip/lwip_tcp.h"
+#include "lwip/lwip_igmp.h"
 #include "lwip/api.h"
 #include "lwip/api_msg.h"
 #include "lwip/tcpip.h"

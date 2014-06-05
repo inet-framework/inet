@@ -21,7 +21,7 @@
 
 #include "headers/defs.h"   // for endian macros
 #include "headers/tcp.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "TCP_lwIP.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"

@@ -53,7 +53,7 @@
 
 #if LWIP_TCP /* don't build if not configured for use in lwipopts.h */
 
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "lwip/def.h"
 #include "lwip/ip_addr.h"
 #include "lwip/netif.h"

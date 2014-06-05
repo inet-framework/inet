@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 
 #include "lwip/memp.h"
 

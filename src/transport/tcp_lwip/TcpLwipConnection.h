@@ -23,7 +23,7 @@
 #include "INETDefs.h"
 
 #include "Address.h"
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 

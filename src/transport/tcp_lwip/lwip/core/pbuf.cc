@@ -85,7 +85,7 @@
 #include "lwip/sys.h"
 #include "arch/perf.h"
 #if TCP_QUEUE_OOSEQ
-#include "lwip/tcp.h"
+#include "lwip/lwip_tcp.h"
 #endif
 
 #include <string.h>
