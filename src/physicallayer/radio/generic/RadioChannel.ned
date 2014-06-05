@@ -20,6 +20,7 @@ package inet.physicallayer.radio.generic;
 import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
 import inet.physicallayer.radio.contract.IRadioChannel;
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
+import inet.physicallayer.radio.contract.IRadioSignalPathLoss;
 import inet.physicallayer.radio.contract.IRadioSignalPropagation;
 
 module RadioChannel like IRadioChannel
@@ -27,6 +28,7 @@ module RadioChannel like IRadioChannel
     parameters:
         // submodule type parameters
         string propagationType;
+        string pathLossType;
         string attenuationType;
         string backgroundNoiseType;
 
@@ -49,7 +51,7 @@ module RadioChannel like IRadioChannel
         bool macAddressFilter = default(false); // when enabled the radio channel doesn't send radio frames to a radio if it the destination mac address differs 
 
         // logging parameters
-        bool recordCommunication = default(true);
+        bool recordCommunication = default(false);
 
         @class(RadioChannel);
         @display("i=misc/sun");
@@ -58,6 +60,10 @@ module RadioChannel like IRadioChannel
         propagation: <propagationType> like IRadioSignalPropagation {
             parameters:
                 @display("p=100,50");
+        }
+        pathLoss: <pathLossType> like IRadioSignalPathLoss {
+            parameters:
+                @display("p=100,150");
         }
         attenuation: <attenuationType> like IRadioSignalAttenuation {
             parameters:

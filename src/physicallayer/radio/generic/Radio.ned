@@ -21,6 +21,7 @@ import inet.physicallayer.radio.contract.IRadio;
 import inet.physicallayer.radio.contract.IRadioAntenna;
 import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
+import inet.power.contract.IPowerConsumer;
 
 // switchingTimes parameter should be regarded as a 5x5 matrix:
 //
@@ -45,24 +46,30 @@ module Radio like IRadio
         string antennaType;
         string transmitterType;
         string receiverType;
+        string powerConsumerType = default("");
+
+        string radioChannelModule = default("radioChannel");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
-        // TODO: string powerConsumerType = default("");
-        // TODO: add parameter to specify radio channel
+
         @class(Radio);
         @display("i=block/wrxtx");
+
         @signal[radioModeChanged](type=long);
         @signal[listeningChanged];
         @signal[receptionStateChanged](type=long);
         @signal[transmissionStateChanged](type=long);
         @signal[radioChannelChanged](type=long);
+
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
+
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);
         output upperLayerOut @labels(ILinkLayerFrame/up);
         input radioIn @labels(IRadioFrame);
+
     submodules:
         antenna: <antennaType> like IRadioAntenna {
             parameters:
@@ -75,5 +82,9 @@ module Radio like IRadio
         receiver: <receiverType> like IRadioSignalReceiver {
             parameters:
                 @display("p=100,250");
+        }
+        powerConsumer: <powerConsumerType> like IPowerConsumer if powerConsumerType != "" {
+            parameters:
+                @display("p=100,350");
         }
 }

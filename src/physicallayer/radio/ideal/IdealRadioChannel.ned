@@ -23,6 +23,7 @@ module IdealRadioChannel extends RadioChannel
 {
     parameters:
         propagationType = default("ConstantSpeedRadioSignalPropagation");
+        pathLossType = default("FreeSpacePathLoss");
         attenuationType = default("IdealRadioSignalFreeSpaceAttenuation");
         backgroundNoiseType = default("");
 }
