@@ -15,20 +15,27 @@ fileType = '*.h'
 def getUpperCaseFilename(filename) :
     return filename[:-2].upper()
 
+err = 0
+symbolmap = dict()
 for root, dirs, files in os.walk(rootPath):
-    for filename in fnmatch.filter(files,fileType):
-        f = open(os.path.join(root,filename),'r')
-        headerFile = f.read()
-        pattern = "#ifndef .*_H.*\n#define.*"
-        m = re.search(pattern,headerFile)
-        if not m:
-            print filename
+    for filename in fnmatch.filter(files, fileType):
+        symbol = "__INET_" + getUpperCaseFilename(filename) + "_H"
+        fullpath = os.path.join(root, filename)
+        if symbol in symbolmap:
+            print "ERR: duplicated filename: ", filename, ": ", fullpath, " vs ", symbolmap[symbol]
         else:
-            symbol = "__INET_" + getUpperCaseFilename(filename) + "_H"
-            replacement = "#ifndef " + symbol + "\n#define " + symbol
-            newHeader = re.sub(pattern,replacement,headerFile)
-            if headerFile != newHeader:
-                f2 = open(os.path.join(root,filename),'w')
-                f2.write(newHeader)
-                f2.close()
-        f.close()
+            symbolmap[symbol] = fullpath
+            f = open(fullpath, 'r')
+            headerFile = f.read()
+            pattern = "#ifndef .*_H.*\n#define.*"
+            m = re.search(pattern, headerFile)
+            if not m:
+                print "ERR: ", filename, " doesn't have any headerguard"
+            else:
+                replacement = "#ifndef " + symbol + "\n#define " + symbol
+                newHeader = re.sub(pattern, replacement, headerFile)
+                if headerFile != newHeader:
+                    f2 = open(fullpath, 'w')
+                    f2.write(newHeader)
+                    f2.close()
+            f.close()
