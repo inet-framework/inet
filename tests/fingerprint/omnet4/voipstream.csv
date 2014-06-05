@@ -1,3 +1,11 @@
+#
+# These fingerprints depends on FFMpeg library versions.
+#    libavcodec:    54.35.0
+#    libavformat:   54.20.4
+#    libavresample: 1.0.1
+#    libavutil:     52.3.0
+#
+# workingdir,                                args,                         simtimelimit,  fingerprint
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 0,        60s,     3216-82ef
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 1,        60s,     d288-a72a
 /examples/voipstream/VoIPStreamTest/,        -f omnetpp.ini -c g726 -r 2,        60s,     e42d-2c57
