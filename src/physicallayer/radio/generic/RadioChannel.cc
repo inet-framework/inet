@@ -15,6 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#include "FreeSpacePathLoss.h"
 #include "Radio.h"
 #include "RadioChannel.h"
 #include "RadioControlInfo_m.h"
@@ -27,6 +28,7 @@ Define_Module(RadioChannel);
 
 RadioChannel::RadioChannel() :
     propagation(NULL),
+    pathLoss(NULL),
     attenuation(NULL),
     backgroundNoise(NULL),
     maxTransmissionPower(W(sNaN)),
@@ -60,6 +62,7 @@ RadioChannel::RadioChannel() :
 
 RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRadioSignalAttenuation *attenuation, const IRadioBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
     propagation(propagation),
+    pathLoss(NULL),
     attenuation(attenuation),
     backgroundNoise(backgroundNoise),
     maxTransmissionPower(W(sNaN)),
@@ -94,6 +97,7 @@ RadioChannel::RadioChannel(const IRadioSignalPropagation *propagation, const IRa
 RadioChannel::~RadioChannel()
 {
     delete propagation;
+    delete pathLoss;
     delete attenuation;
     delete backgroundNoise;
     for (std::vector<const IRadioSignalTransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
@@ -126,6 +130,7 @@ void RadioChannel::initialize(int stage)
     {
         // initialize parameters
         propagation = check_and_cast<IRadioSignalPropagation *>(getSubmodule("propagation"));
+        pathLoss = new FreeSpacePathLoss();
         attenuation = check_and_cast<IRadioSignalAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IRadioBackgroundNoise *>(getSubmodule("backgroundNoise"));
         const char *rangeFilterString = par("rangeFilter");

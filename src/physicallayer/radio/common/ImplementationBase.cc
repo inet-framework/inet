@@ -53,25 +53,6 @@ EulerAngles RadioSignalAttenuationBase::computeTransmissionDirection(const IRadi
     return EulerAngles(heading, elevation, 0);
 }
 
-void RadioSignalFreeSpaceAttenuationBase::initialize(int stage)
-{
-    if (stage == INITSTAGE_LOCAL)
-        alpha = par("alpha");
-}
-
-double RadioSignalFreeSpaceAttenuationBase::computePathLoss(const IRadioSignalTransmission *transmission, simtime_t receptionStartTime, simtime_t receptionEndTime, Coord receptionStartPosition, Coord receptionEndPosition, Hz carrierFrequency) const
-{
-    // factor = (waveLength / distance) ^ alpha / (16 * pi ^ 2)
-    m distance = m(transmission->getStartPosition().distance(receptionStartPosition));
-    m waveLength = transmission->getTransmitter()->getChannel()->getPropagation()->getPropagationSpeed() / carrierFrequency;
-    // this check allows to get the same result from the GPU and the CPU when the alpha is exactly 2
-    double ratio = (waveLength / distance).get();
-    double raisedRatio = alpha == 2.0 ? ratio * ratio : pow(ratio, alpha);
-    double factor = distance.get() == 0 ? 1.0 : raisedRatio / (16.0 * M_PI * M_PI);
-    EV_DEBUG << "Computing path loss with frequency = " << carrierFrequency << ", distance = " << distance << " results in factor = " << factor << endl;
-    return factor;
-}
-
 bool RadioSignalReceiverBase::computeIsReceptionPossible(const IRadioSignalTransmission *transmission) const
 {
     return true;

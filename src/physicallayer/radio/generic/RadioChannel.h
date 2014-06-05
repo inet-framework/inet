@@ -112,6 +112,10 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
          */
         const IRadioSignalPropagation *propagation;
         /**
+         * The path loss model of transmissions is never NULL.
+         */
+        const IRadioSignalPathLoss *pathLoss;
+        /**
          * The attenuation model of transmissions is never NULL.
          */
         const IRadioSignalAttenuation *attenuation;
@@ -388,6 +392,7 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
         virtual void printToStream(std::ostream &stream) const { stream << "radio channel"; }
 
         virtual const IRadioSignalPropagation *getPropagation() const { return propagation; }
+        virtual const IRadioSignalPathLoss *getPathLoss() const { return pathLoss; }
         virtual const IRadioSignalAttenuation *getAttenuation() const { return attenuation; }
         virtual const IRadioBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
 

@@ -19,9 +19,8 @@ package inet.physicallayer.radio.scalar;
 
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
 
-module ScalarRadioSignalFreeSpaceAttenuation like IRadioSignalAttenuation
+module ScalarRadioSignalAttenuation like IRadioSignalAttenuation
 {
     parameters:
-        double alpha = default(2);
-        @class(ScalarRadioSignalFreeSpaceAttenuation);
+        @class(ScalarRadioSignalAttenuation);
 }

@@ -19,6 +19,7 @@
 #define __INET_IMPLEMENTATIONBASE_H_
 
 #include "IRadioBackgroundNoise.h"
+#include "IRadioSignalPathLoss.h"
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalAttenuation.h"
 #include "IRadioSignalPropagation.h"
@@ -173,32 +174,10 @@ class INET_API RadioAntennaBase : public IRadioAntenna, public cModule
         virtual IMobility *getMobility() const { return mobility; }
 };
 
-class INET_API RadioSignalAttenuationBase
+class INET_API RadioSignalAttenuationBase : public cModule, public virtual IRadioSignalAttenuation
 {
     protected:
         virtual EulerAngles computeTransmissionDirection(const IRadioSignalTransmission *transmission, const IRadioSignalArrival *arrival) const;
-};
-
-class INET_API RadioSignalFreeSpaceAttenuationBase : public virtual IRadioSignalAttenuation, public cModule
-{
-    protected:
-        double alpha;
-
-    protected:
-        virtual void initialize(int stage);
-
-        virtual double computePathLoss(const IRadioSignalTransmission *transmission, simtime_t receptionStartTime, simtime_t receptionEndTime, Coord receptionStartPosition, Coord receptionEndPosition, Hz carrierFrequency) const;
-
-    public:
-        RadioSignalFreeSpaceAttenuationBase() :
-            alpha(sNaN)
-        {}
-
-        RadioSignalFreeSpaceAttenuationBase(double alpha) :
-            alpha(alpha)
-        {}
-
-        virtual double getAlpha() const { return alpha; }
 };
 
 class INET_API CompoundAttenuationBase : public IRadioSignalAttenuation

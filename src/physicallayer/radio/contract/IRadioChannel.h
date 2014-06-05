@@ -22,6 +22,7 @@
 #include "IRadioFrame.h"
 #include "IRadioSignalArrival.h"
 #include "IRadioSignalPropagation.h"
+#include "IRadioSignalPathLoss.h"
 #include "IRadioSignalAttenuation.h"
 #include "IRadioBackgroundNoise.h"
 #include "IRadioSignalReceptionDecision.h"
@@ -42,6 +43,12 @@ class INET_API IRadioChannel : public IPrintableObject
          * function never returns NULL.
          */
         virtual const IRadioSignalPropagation *getPropagation() const = 0;
+
+        /**
+         * Returns the radio signal path loss model of this radio channel. This
+         * function never returns NULL.
+         */
+        virtual const IRadioSignalPathLoss *getPathLoss() const = 0;
 
         /**
          * Returns the radio signal attenuation model of this radio channel. This

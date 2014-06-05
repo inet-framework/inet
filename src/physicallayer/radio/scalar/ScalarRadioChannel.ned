@@ -23,6 +23,6 @@ module ScalarRadioChannel extends RadioChannel
 {
     parameters:
         propagationType = default("ConstantSpeedRadioSignalPropagation");
-        attenuationType = default("ScalarRadioSignalFreeSpaceAttenuation");
+        attenuationType = default("ScalarRadioSignalAttenuation");
         backgroundNoiseType = default("ScalarRadioBackgroundNoise");
 }
