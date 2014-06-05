@@ -52,9 +52,19 @@ module RadioChannel like IRadioChannel
         bool recordCommunication = default(true);
 
         @class(RadioChannel);
+        @display("i=misc/sun");
 
     submodules:
-        propagation: <propagationType> like IRadioSignalPropagation if propagationType != "";
-        attenuation: <attenuationType> like IRadioSignalAttenuation if attenuationType != "";
-        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "";
+        propagation: <propagationType> like IRadioSignalPropagation {
+            parameters:
+                @display("p=100,50");
+        }
+        attenuation: <attenuationType> like IRadioSignalAttenuation {
+            parameters:
+                @display("p=100,250");
+        }
+        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+            parameters:
+                @display("p=100,350");
+        }
 }

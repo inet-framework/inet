@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioSignalReceiver
 {
+    parameters:
+        @display("i=block/wrx");
 }

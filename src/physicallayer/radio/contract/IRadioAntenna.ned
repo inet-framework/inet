@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioAntenna
 {
+    parameters:
+        @display("i=device/antennatower");
 }

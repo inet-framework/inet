@@ -64,7 +64,16 @@ module Radio like IRadio
         output upperLayerOut @labels(ILinkLayerFrame/up);
         input radioIn @labels(IRadioFrame);
     submodules:
-        antenna: <antennaType> like IRadioAntenna;
-        transmitter: <transmitterType> like IRadioSignalTransmitter;
-        receiver: <receiverType> like IRadioSignalReceiver;
+        antenna: <antennaType> like IRadioAntenna {
+            parameters:
+                @display("p=100,50");
+        }
+        transmitter: <transmitterType> like IRadioSignalTransmitter {
+            parameters:
+                @display("p=100,150");
+        }
+        receiver: <receiverType> like IRadioSignalReceiver {
+            parameters:
+                @display("p=100,250");
+        }
 }

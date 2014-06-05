@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioSignalPathLoss
 {
+    parameters:
+        @display("i=block/control");
 }

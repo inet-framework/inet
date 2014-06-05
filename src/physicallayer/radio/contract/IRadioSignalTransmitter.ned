@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioSignalTransmitter
 {
+    parameters:
+        @display("i=block/wtx");
 }

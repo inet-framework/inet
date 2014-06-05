@@ -25,5 +25,5 @@ package inet.power.contract;
 moduleinterface IPowerConsumer
 {
     parameters:
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
 }

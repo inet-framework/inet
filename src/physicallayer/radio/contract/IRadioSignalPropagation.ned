@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioSignalPropagation
 {
+    parameters:
+        @display("i=block/timer");
 }

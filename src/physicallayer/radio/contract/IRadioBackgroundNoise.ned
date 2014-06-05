@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioBackgroundNoise
 {
+    parameters:
+        @display("i=block/mac");
 }

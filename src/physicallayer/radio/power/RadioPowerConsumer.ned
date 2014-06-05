@@ -34,5 +34,5 @@ simple RadioPowerConsumer like IPowerConsumer
         double receiverReceivingPowerConsumption @unit(mW) = default(10mW);
         double transmitterIdlePowerConsumption @unit(mW) = default(2mW);
         double transmitterTransmittingPowerConsumption @unit(mW) = default(100mW);
-        @display("i=block/cogwheel_s");
+        @display("i=block/cogwheel");
 }

@@ -19,4 +19,6 @@ package inet.physicallayer.radio.contract;
 
 moduleinterface IRadioSignalAttenuation
 {
+    parameters:
+        @display("i=block/cogwheel");
 }
