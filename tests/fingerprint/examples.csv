@@ -1,9 +1,9 @@
 # workingdir,                        args,                                          simtimelimit,    fingerprint
-/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            d190-4ece
+/examples/adhoc/hostautoconf/,       -f omnetpp.ini -c General -r 0,                100s,            62ad-6c10
 /examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping1 -r 0,                  100s,            49c0-d28f
 #/examples/adhoc/idealwireless/,      -f omnetpp.ini -c Ping2 -r 0,                   100s,          0000-0000    # interactive config, needed a *.numHosts parameter
-/examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           4564-f14b
-/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            a008-e10d
+/examples/adhoc/ieee80211/,          -f fingerprints.ini -c Ping1 -r 0,             1000s,           6677-42ce
+/examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            ebed-b4ab
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
 /examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,           eff6-d7dd
@@ -319,21 +319,21 @@
 /examples/voip/,                     -f omnetpp.ini -c PeriodicChannel -r 0,        200s,            7f06-a1ec
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           0ac8-a0e0
-/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              735d-1851
-/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            87bc-1f0b
+/examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              7ea7-01fd
+/examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            cf68-76a4
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 
-/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             636d-ad0a
+/examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             634f-f521
 # /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming2 -r 0,   100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping1 -r 0,                  25s,             b56f-8b43
 
 # /examples/wireless/lan80211/,        -f omnetpp.ini -c Ping2 -r 0,                  ---100s,         0000-0000   # [Config Ping2] # __interactive__
 
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            8c05-7f83
-/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            ce36-fe94
+/examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            0a15-4706
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            839a-cc41
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              775a-e4b4
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              3dcb-afa6
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             daee-5b7a
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             1838-ad1b
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            8f2c-0737
+/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              ae54-4dd1
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             7516-c686
+/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             86a1-d42b
+/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            c138-2ec8
