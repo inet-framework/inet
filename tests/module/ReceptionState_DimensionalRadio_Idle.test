@@ -1,0 +1,94 @@
+%description:
+
+This is a test for DimensionalRadio idle reception state.
+The received signal is too weak to sense at all.
+Transmission and reception parameters must match with ScalarRadio.
+
+%file: test.ned
+
+import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.nodes.inet.WirelessHost;
+import inet.physicallayer.radio.dimensional.DimensionalRadioChannel;
+
+network Test
+{
+    submodules:
+        radioChannel: DimensionalRadioChannel;
+        configurator: IPv4NetworkConfigurator;
+        host1: WirelessHost;
+        host2: WirelessHost;
+}
+
+%file: generic.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <AnalogueModels>
+        <AnalogueModel type="SimplePathlossModel">
+            <parameter name="alpha" type="double" value="2.0"/>
+            <parameter name="carrierFrequency" type="double" value="2.4e+9"/>
+        </AnalogueModel>
+    </AnalogueModels>
+    <Decider type="SNRThresholdDecider">
+        <parameter name="snrThreshold" type="double" value="1000"/>
+        <parameter name="busyThreshold" type="double" value="1E-9"/>
+    </Decider>
+</root>
+
+%inifile: omnetpp.ini
+
+[General]
+network = Test
+sim-time-limit = 80us
+record-eventlog = true
+ned-path = .;../../../../src
+
+**.arpType = "GlobalARP"
+
+**.mobility.constraintAreaMinZ = 0m
+**.mobility.constraintAreaMinX = 0m
+**.mobility.constraintAreaMinY = 0m
+**.mobility.constraintAreaMaxX = 1000m
+**.mobility.constraintAreaMaxY = 1000m
+**.mobility.constraintAreaMaxZ = 0m
+**.mobility.initFromDisplayString = false
+**.mobility.initialY = 500m
+**.mobility.initialZ = 0m
+*.host*.mobilityType = "StationaryMobility"
+*.host1.mobility.initialX = 200m
+*.host2.mobility.initialX = 800m
+
+# radio channel
+*.radioChannel.backgroundNoise.power = -110dBm
+
+# nic
+*.host*.wlan[*].typename = "IdealWirelessNic"
+*.host*.wlan[*].bitrate = 2Mbps
+*.host*.wlan[*].mac.headerLength = 10B
+*.host*.wlan[*].mac.fullDuplex = false
+*.host*.wlan[*].radioType = "DimensionalRadio"
+*.host*.wlan[*].radio.transmitter.bitrate = 2Mbps
+*.host*.wlan[*].radio.transmitter.headerBitLength = 100b
+*.host*.wlan[*].radio.transmitter.power = 1mW
+*.host*.wlan[*].radio.carrierFrequency = 2.4GHz
+*.host*.wlan[*].radio.bandwidth = 2MHz
+*.host*.wlan[*].radio.receiver.energyDetection = -90dBm
+*.host*.wlan[*].radio.receiver.sensitivity = -80dBm
+*.host*.wlan[*].radio.receiver.snirThreshold = 10dB
+
+# ping app
+*.host1.numPingApps = 1
+*.host1.pingApp[0].count = 1
+*.host1.pingApp[0].printPing = true
+*.host1.pingApp[0].destAddr = "host2"
+*.host1.pingApp[0].startTime = 0s
+
+%not-contains: results/General-0.elog
+ - Changing radio reception state from IDLE to BUSY.
+%not-contains: results/General-0.elog
+ - Changing radio reception state from IDLE to RECEIVING.
+%#--------------------------------------------------------------------------------------------------------------
+%not-contains: stdout
+undisposed object:
+%not-contains: stdout
+-- check module destructor
+%#--------------------------------------------------------------------------------------------------------------
