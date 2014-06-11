@@ -544,7 +544,7 @@ const IRadioSignalReceptionDecision *RadioChannel::computeReceptionDecision(cons
     receptionDecisionComputationCount++;
     const IRadioSignalReception *reception = getReception(radio, transmission);
     const std::vector<const IRadioSignalReception *> *interferingReceptions = computeInterferingReceptions(reception, transmissions);
-    const IRadioSignalNoise *noise = backgroundNoise ? backgroundNoise->computeNoise(reception) : NULL;
+    const IRadioSignalNoise *noise = backgroundNoise ? backgroundNoise->computeNoise(listening) : NULL;
     const IRadioSignalReceptionDecision *decision = radio->getReceiver()->computeReceptionDecision(listening, reception, interferingReceptions, noise);
     delete noise;
     delete interferingReceptions;

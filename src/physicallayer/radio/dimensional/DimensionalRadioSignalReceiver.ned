@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2013 OpenSim Ltd
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,20 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IRADIOBACKGROUNDNOISE_H_
-#define __INET_IRADIOBACKGROUNDNOISE_H_
+package inet.physicallayer.radio.dimensional;
 
-#include "IRadioSignalReception.h"
-#include "IRadioSignalListening.h"
-#include "IRadioSignalNoise.h"
+import inet.physicallayer.radio.contract.IRadioSignalReceiver;
 
-/**
- * This interface models a source which provides background noise over space and time.
- */
-class INET_API IRadioBackgroundNoise : public IPrintableObject
+module DimensionalRadioSignalReceiver like IRadioSignalReceiver
 {
-    public:
-        virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const = 0;
-};
-
-#endif
+    parameters:
+        double energyDetection @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double sensitivity @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
+        double snirThreshold @unit(dB);
+        double carrierFrequency @unit(Hz);
+        double bandwidth @unit(Hz);
+        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
+        @class(DimensionalRadioSignalReceiver);
+}

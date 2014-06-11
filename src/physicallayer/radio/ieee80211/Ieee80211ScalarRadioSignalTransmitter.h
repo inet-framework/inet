@@ -37,12 +37,6 @@ class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalT
             preambleMode((WifiPreamble)-1)
         {}
 
-        Ieee80211ScalarRadioSignalTransmitter(const IModulation *modulation, int headerBitLength, bps bitrate, W power, Hz carrierFrequency, Hz bandwidth) :
-            ScalarRadioSignalTransmitter(modulation, headerBitLength, bitrate, power, carrierFrequency, bandwidth),
-            opMode('\0'),
-            preambleMode((WifiPreamble)-1)
-        {}
-
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };
 

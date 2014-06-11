@@ -15,20 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IRADIOBACKGROUNDNOISE_H_
-#define __INET_IRADIOBACKGROUNDNOISE_H_
+package inet.physicallayer.radio.dimensional;
 
-#include "IRadioSignalReception.h"
-#include "IRadioSignalListening.h"
-#include "IRadioSignalNoise.h"
+import inet.physicallayer.radio.generic.RadioChannel;
 
-/**
- * This interface models a source which provides background noise over space and time.
- */
-class INET_API IRadioBackgroundNoise : public IPrintableObject
+module DimensionalRadioChannel extends RadioChannel
 {
-    public:
-        virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const = 0;
-};
-
-#endif
+    parameters:
+        propagationType = default("ConstantSpeedRadioSignalPropagation");
+        pathLossType = default("FreeSpacePathLoss");
+        attenuationType = default("DimensionalRadioSignalAttenuation");
+        backgroundNoiseType = default("DimensionalRadioBackgroundNoise");
+}

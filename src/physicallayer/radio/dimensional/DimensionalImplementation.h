@@ -15,75 +15,98 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SCALARIMPLEMENTATION_H_
-#define __INET_SCALARIMPLEMENTATION_H_
+#ifndef __INET_DIMENSIONALIMPLEMENTATION_H_
+#define __INET_DIMENSIONALIMPLEMENTATION_H_
 
 #include "FlatImplementationBase.h"
-#include "FreeSpacePathLoss.h"
-#include "GenericImplementation.h"
-#include "IModulation.h"
-#include "Radio.h"
+#include "MappingBase.h"
+#include "MappingUtils.h"
 
-class INET_API ScalarRadioSignalTransmission : public FlatRadioSignalTransmissionBase
+class INET_API DimensionalRadioSignalTransmission : public FlatRadioSignalTransmissionBase
 {
     protected:
         const bps bitrate;
-        const W power;
+        const ConstMapping *power;
 
     public:
-        ScalarRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
+        DimensionalRadioSignalTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, const ConstMapping *power) :
             FlatRadioSignalTransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth),
             bitrate(bitrate),
             power(power)
         {}
 
-        virtual void printToStream(std::ostream &stream) const;
-
+        virtual ~DimensionalRadioSignalTransmission() { delete power; }
         virtual bps getBitrate() const { return bitrate; }
-        virtual W getPower() const { return power; }
+        virtual const ConstMapping *getPower() const { return power; }
 };
 
-class INET_API ScalarRadioSignalReception : public FlatRadioSignalReceptionBase
+class INET_API DimensionalRadioSignalReception : public FlatRadioSignalReceptionBase
 {
     protected:
-        const W power;
+        const ConstMapping *power;
 
     public:
-        ScalarRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
+        DimensionalRadioSignalReception(const IRadio *radio, const IRadioSignalTransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
             FlatRadioSignalReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
             power(power)
         {}
 
-        virtual void printToStream(std::ostream &stream) const;
+        virtual ~DimensionalRadioSignalReception() { delete power; }
 
-        virtual W getPower() const { return power; }
+        virtual const ConstMapping *getPower() const { return power; }
+        virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
 };
 
-class INET_API ScalarRadioSignalNoise : public FlatRadioSignalNoiseBase
+class INET_API DimensionalRadioSignalNoise : public FlatRadioSignalNoiseBase
 {
     protected:
-        const std::map<simtime_t, W> *powerChanges;
+        const ConstMapping *power;
 
     public:
-        ScalarRadioSignalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
+        DimensionalRadioSignalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
             FlatRadioSignalNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
-            powerChanges(powerChanges)
+            power(power)
         {}
 
-        virtual ~ScalarRadioSignalNoise() { delete powerChanges; }
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar noise"; }
-        virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
+        virtual ~DimensionalRadioSignalNoise() { delete power; }
+        virtual void printToStream(std::ostream &stream) const { stream << "dimensional noise"; }
+        virtual const ConstMapping *getPower() const { return power; }
         virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };
 
-class INET_API ScalarRadioSignalAttenuation : public RadioSignalAttenuationBase
+class INET_API DimensionalRadioSignalAttenuation : public RadioSignalAttenuationBase
 {
+    protected:
+        class INET_API LossConstMapping : public SimpleConstMapping
+        {
+            private:
+                LossConstMapping &operator=(const LossConstMapping&);
+
+            protected:
+                const double factor;
+
+            public:
+                LossConstMapping(const DimensionSet &dimensions, double factor) :
+                    SimpleConstMapping(dimensions),
+                    factor(factor)
+                {}
+
+                LossConstMapping(const LossConstMapping &other) :
+                    SimpleConstMapping(other),
+                    factor(other.factor)
+                {}
+
+                virtual double getValue(const Argument &position) const { return factor; }
+
+                virtual ConstMapping *constClone() const { return new LossConstMapping(*this); }
+        };
+
     public:
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar radio signal attenuation"; }
+        virtual void printToStream(std::ostream &stream) const { stream << "dimensional radio signal attenuation"; }
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
 };
 
-class INET_API ScalarRadioBackgroundNoise : public cModule, public IRadioBackgroundNoise
+class INET_API DimensionalRadioBackgroundNoise : public cModule, public IRadioBackgroundNoise
 {
     protected:
         W power;
@@ -92,34 +115,16 @@ class INET_API ScalarRadioBackgroundNoise : public cModule, public IRadioBackgro
         virtual void initialize(int stage);
 
     public:
-        ScalarRadioBackgroundNoise() :
+        DimensionalRadioBackgroundNoise() :
             power(W(sNaN))
         {}
 
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar background noise"; }
-
-        virtual W getPower() const { return power; }
-
+    public:
+        virtual void printToStream(std::ostream &stream) const { stream << "dimensional background noise"; }
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const;
 };
 
-class INET_API ScalarRadioSignalListeningDecision : public RadioSignalListeningDecision
-{
-    protected:
-        const W powerMax;
-
-    public:
-        ScalarRadioSignalListeningDecision(const IRadioSignalListening *listening, bool isListeningPossible, W powerMax) :
-            RadioSignalListeningDecision(listening, isListeningPossible),
-            powerMax(powerMax)
-        {}
-
-        virtual void printToStream(std::ostream &stream) const;
-
-        virtual W getPowerMax() const { return powerMax; }
-};
-
-class INET_API ScalarRadioSignalTransmitter: public FlatRadioSignalTransmitterBase
+class INET_API DimensionalRadioSignalTransmitter : public FlatRadioSignalTransmitterBase
 {
     protected:
         bps bitrate;
@@ -129,7 +134,7 @@ class INET_API ScalarRadioSignalTransmitter: public FlatRadioSignalTransmitterBa
         virtual void initialize(int stage);
 
     public:
-        ScalarRadioSignalTransmitter() :
+        DimensionalRadioSignalTransmitter() :
             FlatRadioSignalTransmitterBase(),
             bitrate(sNaN),
             power(W(sNaN))
@@ -138,15 +143,9 @@ class INET_API ScalarRadioSignalTransmitter: public FlatRadioSignalTransmitterBa
         virtual void printToStream(std::ostream &stream) const;
 
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
-
-        virtual bps getBitrate() const { return bitrate; }
-        virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
-
-        virtual W getPower() const { return power; }
-        virtual void setPower(W power) { this->power = power; }
 };
 
-class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
+class INET_API DimensionalRadioSignalReceiver : public SNIRRadioSignalReceiverBase
 {
     protected:
         const IModulation *modulation;
@@ -167,7 +166,7 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
         virtual bool computeHasBitError(double minSNIR, int bitLength, double bitrate) const;
 
     public:
-        ScalarRadioSignalReceiver() :
+        DimensionalRadioSignalReceiver() :
             SNIRRadioSignalReceiverBase(),
             modulation(NULL),
             energyDetection(W(sNaN)),
@@ -176,7 +175,7 @@ class INET_API ScalarRadioSignalReceiver : public SNIRRadioSignalReceiverBase
             bandwidth(Hz(sNaN))
         {}
 
-        virtual ~ScalarRadioSignalReceiver() { delete modulation; }
+        virtual ~DimensionalRadioSignalReceiver() { delete modulation; }
 
         virtual void printToStream(std::ostream &stream) const;
 

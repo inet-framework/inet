@@ -19,11 +19,11 @@
 #include "GenericImplementation.h"
 #include "IRadioChannel.h"
 
-Define_Module(IdealRadioSignalFreeSpaceAttenuation);
+Define_Module(IdealRadioSignalAttenuation);
 Define_Module(IdealRadioSignalTransmitter);
 Define_Module(IdealRadioSignalReceiver);
 
-const IRadioSignalReception *IdealRadioSignalAttenuationBase::computeReception(const IRadio *receiverRadio, const IRadioSignalTransmission *transmission) const
+const IRadioSignalReception *IdealRadioSignalAttenuation::computeReception(const IRadio *receiverRadio, const IRadioSignalTransmission *transmission) const
 {
     const IRadioChannel *channel = receiverRadio->getChannel();
     const IRadioSignalArrival *arrival = channel->getArrival(receiverRadio, transmission);

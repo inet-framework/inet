@@ -167,10 +167,6 @@ class INET_API RadioAntennaBase : public IRadioAntenna, public cModule
             mobility(NULL)
         {}
 
-        RadioAntennaBase(IMobility *mobility) :
-            mobility(mobility)
-        {}
-
         virtual IMobility *getMobility() const { return mobility; }
 };
 
@@ -225,6 +221,8 @@ class INET_API SNIRRadioSignalReceiverBase : public RadioSignalReceiverBase
     protected:
         virtual void initialize(int stage);
 
+        virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
+
         /**
          * Returns the physical properties of the reception including noise and
          * signal related measures, error probabilities, actual error counts, etc.
@@ -247,11 +245,6 @@ class INET_API SNIRRadioSignalReceiverBase : public RadioSignalReceiverBase
             snirThreshold(sNaN)
         {}
 
-        SNIRRadioSignalReceiverBase(double snirThreshold) :
-            RadioSignalReceiverBase(),
-            snirThreshold(snirThreshold)
-        {}
-
         virtual double getSNIRThreshold() const { return snirThreshold; }
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
 };
@@ -268,7 +261,6 @@ class INET_API RadioSignalPropagationBase : public cModule, public IRadioSignalP
 
     public:
         RadioSignalPropagationBase();
-        RadioSignalPropagationBase(mps propagationSpeed);
 
         virtual mps getPropagationSpeed() const { return propagationSpeed; }
 };

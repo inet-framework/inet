@@ -59,15 +59,28 @@ class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
         virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
 
+class INET_API BandRadioSignalListening : public RadioSignalListeningBase
+{
+    protected:
+        const Hz carrierFrequency;
+        const Hz bandwidth;
+
+    public:
+        BandRadioSignalListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
+            RadioSignalListeningBase(radio, startTime, endTime, startPosition, endPosition),
+            carrierFrequency(carrierFrequency),
+            bandwidth(bandwidth)
+        {}
+
+        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+        virtual Hz getBandwidth() const { return bandwidth; }
+};
+
 class INET_API IsotropicRadioAntenna : public RadioAntennaBase
 {
     public:
         IsotropicRadioAntenna() :
             RadioAntennaBase()
-        {}
-
-        IsotropicRadioAntenna(IMobility *mobility) :
-            RadioAntennaBase(mobility)
         {}
 
         virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
@@ -91,11 +104,6 @@ class INET_API ConstantGainRadioAntenna : public RadioAntennaBase
             gain(sNaN)
         {}
 
-        ConstantGainRadioAntenna(IMobility *mobility, double gain) :
-            RadioAntennaBase(mobility),
-            gain(gain)
-        {}
-
         virtual void printToStream(std::ostream &stream) const { stream << "constant gain antenna"; }
 
         virtual double getMaxGain() const { return gain; }
@@ -116,11 +124,6 @@ class INET_API DipoleRadioAntenna : public RadioAntennaBase
             RadioAntennaBase()
         {}
 
-        DipoleRadioAntenna(IMobility *mobility, m length) :
-            RadioAntennaBase(mobility),
-            length(length)
-        {}
-
         virtual void printToStream(std::ostream &stream) const { stream << "dipole antenna"; }
 
         virtual m getLength() const { return length; }
@@ -135,10 +138,6 @@ class INET_API InterpolatingRadioAntenna : public RadioAntennaBase
     public:
         InterpolatingRadioAntenna() :
             RadioAntennaBase()
-        {}
-
-        InterpolatingRadioAntenna(IMobility *mobility) :
-            RadioAntennaBase(mobility)
         {}
 
         virtual void printToStream(std::ostream &stream) const { stream << "interpolating antenna"; }
@@ -167,7 +166,6 @@ class INET_API RadioSignalListeningDecision : public IRadioSignalListeningDecisi
         virtual const IRadioSignalListening *getListening() const { return listening; }
 
         virtual bool isListeningPossible() const { return isListeningPossible_; }
-
 };
 
 class INET_API RadioSignalReceptionDecision : public IRadioSignalReceptionDecision, public cObject
@@ -217,7 +215,6 @@ class INET_API ImmediateRadioSignalPropagation : public RadioSignalPropagationBa
 {
     public:
         ImmediateRadioSignalPropagation();
-        ImmediateRadioSignalPropagation(mps propagationSpeed);
 
         virtual void printToStream(std::ostream &stream) const;
 
@@ -234,7 +231,6 @@ class INET_API ConstantSpeedRadioSignalPropagation : public RadioSignalPropagati
 
     public:
         ConstantSpeedRadioSignalPropagation();
-        ConstantSpeedRadioSignalPropagation(mps propagationSpeed, int mobilityApproximationCount);
 
         virtual void printToStream(std::ostream &stream) const;
 

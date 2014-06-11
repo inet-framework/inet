@@ -71,18 +71,11 @@ class INET_API IdealRadioSignalReception : public RadioSignalReceptionBase
         virtual Power getPower() const { return power; }
 };
 
-class INET_API IdealRadioSignalAttenuationBase : public IRadioSignalAttenuation
+class INET_API IdealRadioSignalAttenuation : public cModule, public IRadioSignalAttenuation
 {
     public:
         virtual const IRadioSignalReception *computeReception(const IRadio *radio, const IRadioSignalTransmission *transmission) const;
-};
-
-class INET_API IdealRadioSignalFreeSpaceAttenuation : public IdealRadioSignalAttenuationBase, public cModule
-{
-    public:
-        IdealRadioSignalFreeSpaceAttenuation() {}
-
-        virtual void printToStream(std::ostream &stream) const { stream << "ideal free space attenuation"; }
+        virtual void printToStream(std::ostream &stream) const { stream << "ideal radio signal attenuation"; }
 };
 
 class INET_API IdealRadioSignalTransmitter : public RadioSignalTransmitterBase
@@ -104,13 +97,6 @@ class INET_API IdealRadioSignalTransmitter : public RadioSignalTransmitterBase
             maxDetectionRange(sNaN)
         {}
 
-        IdealRadioSignalTransmitter(bps bitrate, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
-            bitrate(bitrate),
-            maxCommunicationRange(maxCommunicationRange),
-            maxInterferenceRange(maxInterferenceRange),
-            maxDetectionRange(maxDetectionRange)
-        {}
-
         virtual void printToStream(std::ostream &stream) const;
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
@@ -128,10 +114,6 @@ class INET_API IdealRadioSignalReceiver : public RadioSignalReceiverBase
     public:
         IdealRadioSignalReceiver() :
             ignoreInterference(false)
-        {}
-
-        IdealRadioSignalReceiver(bool ignoreInterference) :
-            ignoreInterference(ignoreInterference)
         {}
 
         virtual void printToStream(std::ostream &stream) const;

@@ -1,4 +1,5 @@
- - revise all names
+ - revise all names, rename speed to velocity (speed is scalar)
+ - separate propagation, antenna models, etc.
  - create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
  - extend receiver interface to allow a separate decision for the detection of preambles during synchronization
  - remove those interfaces which are unlikely to have multiple different implementations

@@ -19,8 +19,8 @@ package inet.physicallayer.radio.ideal;
 
 import inet.physicallayer.radio.contract.IRadioSignalAttenuation;
 
-module IdealRadioSignalFreeSpaceAttenuation like IRadioSignalAttenuation
+module IdealRadioSignalAttenuation like IRadioSignalAttenuation
 {
     parameters:
-        @class(IdealRadioSignalFreeSpaceAttenuation);
+        @class(IdealRadioSignalAttenuation);
 }

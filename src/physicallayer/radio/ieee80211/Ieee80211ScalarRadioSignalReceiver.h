@@ -47,15 +47,6 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
             parseTable(NULL)
         {}
 
-        Ieee80211ScalarRadioSignalReceiver(const IModulation *modulation, double snirThreshold, W energyDetecion, W sensitivity, Hz carrierFrequency, Hz bandwidth) :
-            ScalarRadioSignalReceiver(modulation, snirThreshold, energyDetecion, sensitivity, carrierFrequency, bandwidth),
-            opMode('\0'),
-            preambleMode((WifiPreamble)-1),
-            errorModel(NULL),
-            autoHeaderSize(false),
-            parseTable(NULL)
-        {}
-
         virtual ~Ieee80211ScalarRadioSignalReceiver();
 };
 

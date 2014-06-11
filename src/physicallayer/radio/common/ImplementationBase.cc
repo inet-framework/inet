@@ -18,7 +18,6 @@
 #include "ImplementationBase.h"
 #include "GenericImplementation.h"
 #include "ModuleAccess.h"
-#include "IRadioChannel.h"
 
 void RadioSignalTransmissionBase::printToStream(std::ostream &stream) const
 {
@@ -98,6 +97,12 @@ void SNIRRadioSignalReceiverBase::initialize(int stage)
         snirThreshold = FWMath::dB2fraction(par("snirThreshold"));
 }
 
+bool SNIRRadioSignalReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const
+{
+    return carrierFrequency1 + bandwidth1 / 2 >= carrierFrequency2 - bandwidth2 / 2 &&
+           carrierFrequency1 - bandwidth1 / 2 <= carrierFrequency2 + bandwidth2 / 2;
+}
+
 const RadioReceptionIndication *SNIRRadioSignalReceiverBase::computeReceptionIndication(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const
 {
     const IRadioSignalNoise *noise = computeNoise(listening, interferingReceptions, backgroundNoise);
@@ -124,11 +129,6 @@ const IRadioSignalReceptionDecision *SNIRRadioSignalReceiverBase::computeRecepti
 
 RadioSignalPropagationBase::RadioSignalPropagationBase() :
     propagationSpeed(mps(sNaN)),
-    arrivalComputationCount(0)
-{}
-
-RadioSignalPropagationBase::RadioSignalPropagationBase(mps propagationSpeed) :
-    propagationSpeed(propagationSpeed),
     arrivalComputationCount(0)
 {}
 

@@ -60,10 +60,6 @@ ImmediateRadioSignalPropagation::ImmediateRadioSignalPropagation() :
     RadioSignalPropagationBase()
 {}
 
-ImmediateRadioSignalPropagation::ImmediateRadioSignalPropagation(mps propagationSpeed) :
-    RadioSignalPropagationBase(propagationSpeed)
-{}
-
 const IRadioSignalArrival *ImmediateRadioSignalPropagation::computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const
 {
     arrivalComputationCount++;
@@ -80,11 +76,6 @@ void ImmediateRadioSignalPropagation::printToStream(std::ostream &stream) const
 ConstantSpeedRadioSignalPropagation::ConstantSpeedRadioSignalPropagation() :
     RadioSignalPropagationBase(),
     mobilityApproximationCount(0)
-{}
-
-ConstantSpeedRadioSignalPropagation::ConstantSpeedRadioSignalPropagation(mps propagationSpeed, int mobilityApproximationCount) :
-    RadioSignalPropagationBase(propagationSpeed),
-    mobilityApproximationCount(mobilityApproximationCount)
 {}
 
 const Coord ConstantSpeedRadioSignalPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
