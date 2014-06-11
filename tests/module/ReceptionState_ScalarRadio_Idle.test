@@ -26,7 +26,6 @@ network = Test
 sim-time-limit = 80us
 record-eventlog = true
 ned-path = .;../../../../src
-#debugger-attach-on-error = true
 
 **.arpType = "GlobalARP"
 
@@ -45,7 +44,6 @@ ned-path = .;../../../../src
 
 # radio channel
 *.radioChannel.backgroundNoise.power = -110dBm
-*.radioChannel.attenuation.alpha = 2
 
 # nic
 *.host*.wlan[*].typename = "IdealWirelessNic"

@@ -48,7 +48,6 @@ ned-path = .;../../../../src
 
 # radio channel
 *.radioChannel.backgroundNoise.power = -110dBm
-*.radioChannel.attenuation.alpha = 2
 
 # nic
 *.host*.wlan[*].typename = "IdealWirelessNic"
