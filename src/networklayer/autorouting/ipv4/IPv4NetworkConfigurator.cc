@@ -99,6 +99,7 @@ void IPv4NetworkConfigurator::computeConfiguration()
 {
     long initializeStartTime = clock();
     topology.clear();
+    topology.linkInfos.clear();
     // extract topology into the IPv4Topology object, then fill in a LinkInfo[] vector
     T(extractTopology(topology));
     // read the configuration from XML; it will serve as input for address assignment
@@ -2190,5 +2191,20 @@ bool IPv4NetworkConfigurator::getInterfaceIPv4Address(IPvXAddress &ret, Interfac
         if (interfaceInfo->configure)
             ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
         return interfaceInfo->configure;
+    }
+}
+int IPv4NetworkConfigurator::addNodeToTopology(cModule* module){
+    int nodeId = topology.addNode(new Node(module));
+    computeConfiguration();
+    configureAllInterfaces();
+    configureAllRoutingTables();
+    return nodeId;
+}
+
+void IPv4NetworkConfigurator::removeNodeFromTopology(cModule* module){
+    topology.deleteNode(topology.getNodeFor(module));
+    if (simulation.getSimulationStage() != CTX_FINISH){
+        configureAllInterfaces();
+        configureAllRoutingTables();
     }
 }

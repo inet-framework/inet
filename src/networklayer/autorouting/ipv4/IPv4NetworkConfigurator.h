@@ -232,6 +232,10 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
          */
         virtual void configureRoutingTable(IRoutingTable *routingTable);
 
+        virtual int addNodeToTopology(cModule* module);
+
+        virtual void removeNodeFromTopology(cModule* module);
+
     protected:
         virtual int numInitStages() const  { return 4; }
         virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }

@@ -378,8 +378,13 @@ void IPv4::datagramLocalOut(IPv4Datagram* datagram, const InterfaceEntry* destIE
                 EV << "datagram destination address is local, ignoring destination interface specified in the control info\n";
                 destIE = NULL;
             }
-            if (!destIE)
+            if (!destIE){
                 destIE = ift->getFirstLoopbackInterface();
+                if(!destIE){
+                    std::cout << destAddr << " does not exist anymore!" << std::endl;
+                    return;
+                }
+            }
             ASSERT(destIE);
             routeUnicastPacket(datagram, NULL, destIE, destAddr);
         }
