@@ -21,6 +21,9 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
+namespace radio
+{
+
 /**
  * This interface represents how a receiver is listening on the radio channel.
  */
@@ -35,5 +38,7 @@ class INET_API IRadioSignalListening : public IPrintableObject
         virtual const Coord getStartPosition() const = 0;
         virtual const Coord getEndPosition() const = 0;
 };
+
+}
 
 #endif

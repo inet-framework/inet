@@ -20,6 +20,9 @@
 
 #include "RadioChannel.h"
 
+namespace radio
+{
+
 class INET_API Ieee80211RadioChannel : public RadioChannel
 {
     protected:
@@ -41,5 +44,7 @@ class INET_API Ieee80211RadioChannel : public RadioChannel
 
         virtual int getNumChannels() const { return numChannels; }
 };
+
+}
 
 #endif

@@ -17,6 +17,8 @@
 
 #include "LogNormalShadowing.h"
 
+using namespace radio;
+
 Register_Class(LogNormalShadowing);
 
 LogNormalShadowing::LogNormalShadowing() :

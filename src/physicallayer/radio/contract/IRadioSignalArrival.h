@@ -22,6 +22,9 @@
 #include "EulerAngles.h"
 #include "IPrintableObject.h"
 
+namespace radio
+{
+
 /**
  * This interface represents the space and time coordinates of a transmission
  * arriving at a receiver.
@@ -43,5 +46,7 @@ class INET_API IRadioSignalArrival : public IPrintableObject
         virtual const EulerAngles getStartOrientation() const = 0;
         virtual const EulerAngles getEndOrientation() const = 0;
 };
+
+}
 
 #endif

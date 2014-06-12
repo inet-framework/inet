@@ -21,6 +21,9 @@
 #include "ScalarImplementation.h"
 #include "WifiPreambleType.h"
 
+namespace radio
+{
+
 class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalTransmitter
 {
     protected:
@@ -39,5 +42,7 @@ class INET_API Ieee80211ScalarRadioSignalTransmitter : public ScalarRadioSignalT
 
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };
+
+}
 
 #endif

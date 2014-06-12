@@ -22,6 +22,9 @@
 #include "IRadioSignalListening.h"
 #include "IRadioSignalNoise.h"
 
+namespace radio
+{
+
 /**
  * This interface models a source which provides background noise over space and time.
  */
@@ -30,5 +33,7 @@ class INET_API IRadioBackgroundNoise : public IPrintableObject
     public:
         virtual const IRadioSignalNoise *computeNoise(const IRadioSignalListening *listening) const = 0;
 };
+
+}
 
 #endif

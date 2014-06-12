@@ -17,6 +17,8 @@
 
 #include "IRadio.h"
 
+using namespace radio;
+
 int IRadio::nextId = 0;
 
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");

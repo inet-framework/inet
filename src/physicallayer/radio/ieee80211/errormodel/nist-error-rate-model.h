@@ -25,6 +25,9 @@
 #include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
+namespace radio
+{
+
 /**
  * \ingroup wifi
  *
@@ -56,4 +59,7 @@ private:
   double GetFec64QamBer (double snr, uint32_t nbits,
                          uint32_t bValue) const;
 };
+
+}
+
 #endif /* NIST_ERROR_RATE_MODEL_H */

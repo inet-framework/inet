@@ -22,6 +22,9 @@
 #include "IRadioSignalTransmission.h"
 #include "IRadioSignalReception.h"
 
+namespace radio
+{
+
 /**
  * This interface models how a radio signal attenuates during propagation. It
  * includes various effects such as free-space path loss, shadowing, refraction,
@@ -37,5 +40,7 @@ class INET_API IRadioSignalAttenuation : public IPrintableObject
          */
         virtual const IRadioSignalReception *computeReception(const IRadio *receiver, const IRadioSignalTransmission *transmission) const = 0;
 };
+
+}
 
 #endif

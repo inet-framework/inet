@@ -20,6 +20,9 @@
 
 #include "IRadioSignalTransmission.h"
 
+namespace radio
+{
+
 /**
  * This interface represents the reception of a transmission at a receiver. There's
  * one instance per transmission of this interface for each receiver.
@@ -77,5 +80,7 @@ class INET_API IRadioSignalReception : public IPrintableObject
          */
         virtual const EulerAngles getEndOrientation() const = 0;
 };
+
+}
 
 #endif

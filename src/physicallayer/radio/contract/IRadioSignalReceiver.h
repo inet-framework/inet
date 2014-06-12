@@ -25,6 +25,9 @@
 #include "IRadioSignalReceptionDecision.h"
 #include "RadioControlInfo_m.h"
 
+namespace radio
+{
+
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into packets.
@@ -89,5 +92,7 @@ class INET_API IRadioSignalReceiver : public IPrintableObject
          */
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const = 0;
 };
+
+}
 
 #endif

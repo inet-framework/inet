@@ -28,6 +28,9 @@
 #include "IRadioSignalReceptionDecision.h"
 #include "IRadioSignalListeningDecision.h"
 
+namespace radio
+{
+
 /**
  * This interface represents the whole radio medium. It keeps track of all radio
  * signal sources, all radio signal transmissions, and all radio signal receptions.
@@ -110,5 +113,7 @@ class INET_API IRadioChannel : public IPrintableObject
          */
         virtual const IRadioSignalArrival *getArrival(const IRadio *receiver, const IRadioSignalTransmission *transmission) const = 0;
 };
+
+}
 
 #endif

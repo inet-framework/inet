@@ -21,6 +21,9 @@
 #include "IPrintableObject.h"
 #include "IRadioSignalListening.h"
 
+namespace radio
+{
+
 /**
  * This interface represents the result of a receiver's listening process.
  *
@@ -33,5 +36,7 @@ class INET_API IRadioSignalListeningDecision : public IPrintableObject
 
         virtual bool isListeningPossible() const = 0;
 };
+
+}
 
 #endif

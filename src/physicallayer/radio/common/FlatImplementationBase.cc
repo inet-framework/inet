@@ -18,6 +18,8 @@
 #include "FlatImplementationBase.h"
 #include "Modulation.h"
 
+using namespace radio;
+
 void FlatRadioSignalTransmitterBase::initialize(int stage)
 {
     RadioSignalTransmitterBase::initialize(stage);

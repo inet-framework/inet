@@ -20,6 +20,9 @@
 
 #include "ImplementationBase.h"
 
+namespace radio
+{
+
 class INET_API IdealRadioSignalTransmission : public RadioSignalTransmissionBase
 {
     protected:
@@ -121,5 +124,7 @@ class INET_API IdealRadioSignalReceiver : public RadioSignalReceiverBase
         virtual const IRadioSignalListeningDecision *computeListeningDecision(const IRadioSignalListening *listening, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
         virtual const IRadioSignalReceptionDecision *computeReceptionDecision(const IRadioSignalListening *listening, const IRadioSignalReception *reception, const std::vector<const IRadioSignalReception *> *interferingReceptions, const IRadioSignalNoise *backgroundNoise) const;
 };
+
+}
 
 #endif

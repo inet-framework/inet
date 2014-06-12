@@ -20,6 +20,9 @@
 
 #include "IPrintableObject.h"
 
+namespace radio
+{
+
 /**
  * This interface models path loss (or path attenuation) that is the reduction
  * in power density of a radio signal as it propagates through space.
@@ -34,5 +37,7 @@ class INET_API IRadioSignalPathLoss : public IPrintableObject
          */
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const = 0;
 };
+
+}
 
 #endif

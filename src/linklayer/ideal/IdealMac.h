@@ -25,6 +25,8 @@
 #include "MACAddress.h"
 #include "MACProtocolBase.h"
 
+using namespace radio;
+
 class IdealMacFrame;
 class InterfaceEntry;
 class IPassiveQueue;

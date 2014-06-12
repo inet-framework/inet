@@ -19,6 +19,9 @@
  */
 
 #include "nist-error-rate-model.h"
+
+using namespace radio;
+
 NistErrorRateModel::NistErrorRateModel()
 {
 }

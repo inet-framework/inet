@@ -17,6 +17,8 @@
 
 #include "FreeSpacePathLoss.h"
 
+using namespace radio;
+
 Register_Class(FreeSpacePathLoss);
 
 FreeSpacePathLoss::FreeSpacePathLoss() :

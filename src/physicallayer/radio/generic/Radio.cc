@@ -20,6 +20,8 @@
 #include "NodeOperations.h"
 #include "ImplementationBase.h"
 
+using namespace radio;
+
 Define_Module(Radio);
 
 Radio::Radio() :

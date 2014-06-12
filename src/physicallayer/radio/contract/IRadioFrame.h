@@ -21,6 +21,9 @@
 #include "IPhysicalLayerFrame.h"
 #include "IRadioSignalTransmission.h"
 
+namespace radio
+{
+
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
  */
@@ -51,5 +54,7 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
          */
         // virtual const IRadioSignalReceptionDecision *getReceptionDecision() const = 0;
 };
+
+}
 
 #endif

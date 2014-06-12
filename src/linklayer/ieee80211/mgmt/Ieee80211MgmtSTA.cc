@@ -28,6 +28,8 @@
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
+using namespace radio;
+
 //TBD supportedRates!
 //TBD use command msg kinds?
 //TBD implement bitrate switching (Radio already supports it)

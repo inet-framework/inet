@@ -23,6 +23,9 @@
 #include "IErrorModel.h"
 #include "BerParseFile.h"
 
+namespace radio
+{
+
 class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalReceiver
 {
     protected:
@@ -49,5 +52,7 @@ class INET_API Ieee80211ScalarRadioSignalReceiver : public ScalarRadioSignalRece
 
         virtual ~Ieee80211ScalarRadioSignalReceiver();
 };
+
+}
 
 #endif

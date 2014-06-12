@@ -19,10 +19,10 @@
  */
 
 #include <math.h>
-
 #include "INETDefs.h"
-
 #include "dsss-error-rate-model.h"
+
+using namespace radio;
 
 #ifndef ENABLE_GSL
 const double DsssErrorRateModel::WLAN_SIR_PERFECT = 10.0;

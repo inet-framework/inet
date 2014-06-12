@@ -24,6 +24,8 @@
 #include "ModuleAccess.h"
 #include "IInterfaceTable.h"
 
+using namespace radio;
+
 Define_Module(RadioChannel);
 
 RadioChannel::RadioChannel() :

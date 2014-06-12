@@ -17,6 +17,8 @@
 
 #include "TwoRayGroundReflection.h"
 
+using namespace radio;
+
 Register_Class(TwoRayGroundReflection);
 
 TwoRayGroundReflection::TwoRayGroundReflection() :

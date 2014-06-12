@@ -17,6 +17,8 @@
 
 #include "RayleighFading.h"
 
+using namespace radio;
+
 Register_Class(RayleighFading);
 
 void RayleighFading::printToStream(std::ostream &stream) const

@@ -20,6 +20,9 @@
 
 #include "FreeSpacePathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the probabilistic Rayleigh fading model, see Rappaport
  * for more details.
@@ -32,5 +35,7 @@ class INET_API RayleighFading : public FreeSpacePathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

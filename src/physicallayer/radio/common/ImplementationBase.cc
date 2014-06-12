@@ -19,6 +19,8 @@
 #include "GenericImplementation.h"
 #include "ModuleAccess.h"
 
+using namespace radio;
+
 void RadioSignalTransmissionBase::printToStream(std::ostream &stream) const
 {
     stream << "transmission, id = " << id << ", transmitter id = " << transmitter->getId();

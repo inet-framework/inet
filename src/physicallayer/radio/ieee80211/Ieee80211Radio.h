@@ -20,6 +20,9 @@
 
 #include "ScalarRadio.h"
 
+namespace radio
+{
+
 class INET_API Ieee80211Radio : public ScalarRadio
 {
     protected:
@@ -36,5 +39,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
 
         virtual void setChannelNumber(int newChannelNumber);
 };
+
+}
 
 #endif

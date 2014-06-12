@@ -21,6 +21,9 @@
 #include "IPowerSource.h"
 #include "IRadio.h"
 
+namespace radio
+{
+
 /**
  * This is radio power consumer model.
  *
@@ -59,5 +62,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 
     virtual void initialize(int stage);
 };
+
+}
 
 #endif

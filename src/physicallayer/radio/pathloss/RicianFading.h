@@ -20,6 +20,9 @@
 
 #include "FreeSpacePathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the stochastic Rician fading model.
  *
@@ -38,5 +41,7 @@ class INET_API RicianFading : public FreeSpacePathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

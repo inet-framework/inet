@@ -1,5 +1,8 @@
 #include "MappingBase.h"
 #include <assert.h>
+
+using namespace radio;
+
 //---Dimension implementation-----------------------------
 
 const Dimension             Dimension::time      = Dimension::time_static();

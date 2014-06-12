@@ -21,6 +21,9 @@
 
 #include "IModulation.h"
 
+namespace radio
+{
+
 /**
  * Ideal modulation which returns zero bit error rate, regardless of the parameters.
  */
@@ -61,6 +64,6 @@ class INET_API QAM256Modulation : public IModulation
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
 
+}
 
 #endif
-

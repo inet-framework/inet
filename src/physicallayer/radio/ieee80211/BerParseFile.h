@@ -22,6 +22,10 @@
 
 #include <vector>
 #include <math.h>
+
+namespace radio
+{
+
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
@@ -74,6 +78,8 @@ class BerParseFile
     BerParseFile(char p) {setPhyOpMode(p); fileBer = false;}
     ~BerParseFile();
 };
+
+}
 
 #endif
 

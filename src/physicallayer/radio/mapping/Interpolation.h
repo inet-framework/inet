@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <assert.h>
 
+namespace radio {
+
 /**
  * @brief Represents an interpolated value of any type.
  *
@@ -842,5 +844,7 @@ public:
 		return it;
 	}
 };
+
+}
 
 #endif

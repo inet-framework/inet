@@ -33,6 +33,8 @@
 #include "MACProtocolBase.h"
 #include "CSMAFrame_m.h"
 
+using namespace radio;
+
 /**
  * @brief Generic CSMA Mac-Layer.
  *

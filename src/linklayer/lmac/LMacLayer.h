@@ -18,6 +18,8 @@
 #include "MACProtocolBase.h"
 #include "LMacFrame_m.h"
 
+using namespace radio;
+
 /**
  * @brief Implementation of L-MAC (Lightweight Medium Access Protocol for
  * Wireless Sensor Networks [van Hoesel 04] ).

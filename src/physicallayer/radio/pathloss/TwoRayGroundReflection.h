@@ -20,6 +20,9 @@
 
 #include "FreeSpacePathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the two ray ground radio path loss model.
  */
@@ -37,5 +40,7 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

@@ -20,6 +20,9 @@
 
 #include "IMobility.h"
 
+namespace radio
+{
+
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
@@ -48,5 +51,7 @@ class INET_API IRadioAntenna : public IPrintableObject
          */
         virtual double computeGain(EulerAngles direction) const = 0;
 };
+
+}
 
 #endif

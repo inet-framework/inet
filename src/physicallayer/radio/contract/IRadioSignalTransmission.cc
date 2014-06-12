@@ -17,4 +17,6 @@
 
 #include "IRadioSignalTransmission.h"
 
+using namespace radio;
+
 int IRadioSignalTransmission::nextId = 0;

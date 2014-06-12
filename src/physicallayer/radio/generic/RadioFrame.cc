@@ -17,6 +17,8 @@
 
 #include "RadioFrame.h"
 
+using namespace radio;
+
 void RadioFrame::printToStream(std::ostream &stream) const
 {
     stream << (cPacket *)this;

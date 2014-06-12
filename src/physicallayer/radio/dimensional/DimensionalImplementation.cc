@@ -19,6 +19,8 @@
 #include "GenericImplementation.h"
 #include "Modulation.h"
 
+using namespace radio;
+
 Define_Module(DimensionalRadioSignalAttenuation);
 Define_Module(DimensionalRadioBackgroundNoise);
 Define_Module(DimensionalRadioSignalReceiver);

@@ -20,6 +20,9 @@
 
 #include "PhysicalLayerDefs.h"
 
+namespace radio
+{
+
 /**
  * This purely virtual interface provides an abstraction for printable objects.
  */
@@ -60,5 +63,7 @@ inline std::ostream &operator<<(std::ostream &stream, const IPrintableObject &ob
     object.printToStream(stream);
     return stream;
 };
+
+}
 
 #endif

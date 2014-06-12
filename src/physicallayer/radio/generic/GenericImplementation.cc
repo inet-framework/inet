@@ -17,6 +17,8 @@
 
 #include "GenericImplementation.h"
 
+using namespace radio;
+
 Define_Module(IsotropicRadioAntenna);
 Define_Module(ConstantGainRadioAntenna);
 Define_Module(DipoleRadioAntenna);

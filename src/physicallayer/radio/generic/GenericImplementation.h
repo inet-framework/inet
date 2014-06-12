@@ -20,6 +20,9 @@
 
 #include "ImplementationBase.h"
 
+namespace radio
+{
+
 class INET_API RadioSignalArrival : public virtual IRadioSignalArrival
 {
     protected:
@@ -236,5 +239,7 @@ class INET_API ConstantSpeedRadioSignalPropagation : public RadioSignalPropagati
 
         virtual const IRadioSignalArrival *computeArrival(const IRadioSignalTransmission *transmission, IMobility *mobility) const;
 };
+
+}
 
 #endif

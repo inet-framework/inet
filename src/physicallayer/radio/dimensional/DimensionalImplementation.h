@@ -22,6 +22,9 @@
 #include "MappingBase.h"
 #include "MappingUtils.h"
 
+namespace radio
+{
+
 class INET_API DimensionalRadioSignalTransmission : public FlatRadioSignalTransmissionBase
 {
     protected:
@@ -192,5 +195,7 @@ class INET_API DimensionalRadioSignalReceiver : public SNIRRadioSignalReceiverBa
         virtual Hz getBandwidth() const { return bandwidth; }
         virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
 };
+
+}
 
 #endif

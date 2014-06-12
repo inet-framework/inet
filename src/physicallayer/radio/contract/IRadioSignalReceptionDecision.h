@@ -21,6 +21,9 @@
 #include "IRadioSignalReception.h"
 #include "RadioControlInfo_m.h"
 
+namespace radio
+{
+
 /**
  * This interface represents the result of a receiver's reception process.
  *
@@ -74,5 +77,7 @@ class INET_API IRadioSignalReceptionDecision : public IPrintableObject
          */
         virtual bool isReceptionSuccessful() const = 0;
 };
+
+}
 
 #endif

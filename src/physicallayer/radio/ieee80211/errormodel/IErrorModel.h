@@ -18,6 +18,9 @@
 
 #include "ModulationType.h"
 
+namespace radio
+{
+
 class IErrorModel
 {
     public:
@@ -25,5 +28,7 @@ class IErrorModel
         virtual ~IErrorModel() {};
         virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
 };
+
+}
 
 #endif /* IERRORMODEL_H_ */

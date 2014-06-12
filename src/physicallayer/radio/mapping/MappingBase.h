@@ -13,6 +13,9 @@
 #include "INETDefs.h"
 #include "Interpolation.h"
 
+namespace radio
+{
+
 /**
  * @brief Specifies a dimension for mappings (like time, frequency, etc.)
  *
@@ -1709,5 +1712,7 @@ public:
 	 */
 	ConstMapping* constClone() const  = 0;
 };
+
+}
 
 #endif

@@ -24,6 +24,9 @@
 #include "IRadioSignalReceiver.h"
 #include "IRadioSignalTransmitter.h"
 
+namespace radio
+{
+
 class IRadioChannel;
 
 /**
@@ -284,5 +287,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
          */
         static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
 };
+
+}
 
 #endif

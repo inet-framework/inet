@@ -23,6 +23,9 @@
 
 #include "Mapping.h"
 
+namespace radio
+{
+
 /**
  * @brief TODO: short description for this class
  *
@@ -58,5 +61,7 @@ public:
 	ConstMapping* constClone() const {
 		return new SimpleTimeConstMapping(myValue, start, stop); }
 };
+
+}
 
 #endif

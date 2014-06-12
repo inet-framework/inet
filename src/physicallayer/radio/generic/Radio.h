@@ -24,6 +24,9 @@
 #include "PhysicalLayerBase.h"
 #include "RadioFrame.h"
 
+namespace radio
+{
+
 /**
  * The standard implementation of the radio interface.
  */
@@ -163,5 +166,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
         virtual const IRadioSignalTransmission *getTransmissionInProgress() const;
         virtual const IRadioSignalTransmission *getReceptionInProgress() const;
 };
+
+}
 
 #endif

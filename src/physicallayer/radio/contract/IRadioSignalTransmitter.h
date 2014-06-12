@@ -20,6 +20,9 @@
 
 #include "IPrintableObject.h"
 
+namespace radio
+{
+
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * packets into electric signals.
@@ -40,5 +43,7 @@ class INET_API IRadioSignalTransmitter : public IPrintableObject
          */
         virtual const IRadioSignalTransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
 };
+
+}
 
 #endif

@@ -16,6 +16,8 @@
 
 #include "SUIPathLoss.h"
 
+using namespace radio;
+
 Register_Class(SUIPathLoss);
 
 SUIPathLoss::SUIPathLoss() :

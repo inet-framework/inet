@@ -28,6 +28,9 @@
 #include "IRadioBackgroundNoise.h"
 #include "MACAddress.h"
 
+namespace radio
+{
+
 /**
  * The default implementation of the radio channel interface.
  */
@@ -412,5 +415,7 @@ class INET_API RadioChannel : public cSimpleModule, public cListener, public IRa
 
         virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
+
+}
 
 #endif

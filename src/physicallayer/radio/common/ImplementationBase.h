@@ -27,6 +27,9 @@
 #include "IRadioSignalReceiver.h"
 #include "IRadioChannel.h"
 
+namespace radio
+{
+
 class INET_API RadioSignalTransmissionBase : public virtual IRadioSignalTransmission
 {
     protected:
@@ -264,5 +267,7 @@ class INET_API RadioSignalPropagationBase : public cModule, public IRadioSignalP
 
         virtual mps getPropagationSpeed() const { return propagationSpeed; }
 };
+
+}
 
 #endif

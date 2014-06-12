@@ -75,6 +75,8 @@ class RadioFrame;
 //TODO HACK, remove next line
 #include "cmessageprinter.h"
 
+using namespace radio;
+
 class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
     protected:

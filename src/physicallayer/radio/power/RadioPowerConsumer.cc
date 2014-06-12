@@ -18,6 +18,8 @@
 #include "RadioPowerConsumer.h"
 #include "ModuleAccess.h"
 
+using namespace radio;
+
 RadioPowerConsumer::RadioPowerConsumer()
 {
     powerConsumerId = 0;

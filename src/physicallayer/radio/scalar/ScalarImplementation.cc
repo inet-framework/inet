@@ -19,6 +19,8 @@
 #include "Modulation.h"
 #include "IRadioChannel.h"
 
+using namespace radio;
+
 Define_Module(ScalarRadioSignalAttenuation);
 Define_Module(ScalarRadioBackgroundNoise);
 Define_Module(ScalarRadioSignalReceiver);

@@ -23,8 +23,9 @@
 #include <algorithm>
 
 #include "INETDefs.h"
-
 #include "BerParseFile.h"
+
+using namespace radio;
 
 void BerParseFile::clearBerTable()
 {
@@ -393,5 +394,3 @@ BerParseFile::~BerParseFile()
 {
     clearBerTable();
 }
-
-

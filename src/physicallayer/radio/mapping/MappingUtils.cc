@@ -7,6 +7,7 @@
 
 #include "MappingUtils.h"
 
+using namespace radio;
 
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping):
 	MultiDimMappingIterator<Linear>(mapping) {}

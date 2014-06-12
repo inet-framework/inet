@@ -24,6 +24,8 @@
 #include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
+namespace radio
+{
 
 /**
  * \brief Model the error rate for different modulations.
@@ -74,4 +76,7 @@ private:
                        uint32_t m, uint32_t dfree,
                        uint32_t adFree, uint32_t adFreePlusOne) const;
 };
+
+}
+
 #endif /* YANS_ERROR_RATE_MODEL_H */

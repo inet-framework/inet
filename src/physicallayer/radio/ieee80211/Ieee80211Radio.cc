@@ -20,6 +20,8 @@
 #include "ScalarImplementation.h"
 #include "RadioControlInfo_m.h"
 
+using namespace radio;
+
 Define_Module(Ieee80211Radio);
 
 Ieee80211Radio::Ieee80211Radio() :

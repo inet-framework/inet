@@ -19,6 +19,8 @@
 #include "GenericImplementation.h"
 #include "IRadioChannel.h"
 
+using namespace radio;
+
 Define_Module(IdealRadioSignalAttenuation);
 Define_Module(IdealRadioSignalTransmitter);
 Define_Module(IdealRadioSignalReceiver);

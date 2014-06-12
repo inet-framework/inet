@@ -20,6 +20,9 @@
 #include <string>
 #include "IRadioSignalPathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the empirical Stanford University Interim path loss model.
  *
@@ -44,5 +47,7 @@ class INET_API SUIPathLoss : public cModule, public IRadioSignalPathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

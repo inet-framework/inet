@@ -20,6 +20,9 @@
 
 #include "Radio.h"
 
+namespace radio
+{
+
 class INET_API ScalarRadio : public Radio
 {
     protected:
@@ -31,5 +34,7 @@ class INET_API ScalarRadio : public Radio
 
         virtual void setBitrate(bps bitrate);
 };
+
+}
 
 #endif

@@ -17,6 +17,8 @@
 
 #include "Ieee80211RadioChannel.h"
 
+using namespace radio;
+
 Define_Module(Ieee80211RadioChannel);
 
 void Ieee80211RadioChannel::initialize(int stage)

@@ -23,6 +23,8 @@
 #include "yans-error-rate-model.h"
 #include "nist-error-rate-model.h"
 
+using namespace radio;
+
 Define_Module(Ieee80211ScalarRadioSignalReceiver);
 
 Ieee80211ScalarRadioSignalReceiver::~Ieee80211ScalarRadioSignalReceiver()

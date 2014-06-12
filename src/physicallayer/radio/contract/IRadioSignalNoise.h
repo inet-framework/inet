@@ -20,6 +20,9 @@
 
 #include "PhysicalLayerDefs.h"
 
+namespace radio
+{
+
 /**
  * This interface represents a meaningless radio signal.
  */
@@ -29,5 +32,7 @@ class INET_API IRadioSignalNoise : public IPrintableObject
         virtual const simtime_t getStartTime() const = 0;
         virtual const simtime_t getEndTime() const = 0;
 };
+
+}
 
 #endif

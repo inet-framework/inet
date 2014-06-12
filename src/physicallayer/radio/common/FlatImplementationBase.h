@@ -21,6 +21,9 @@
 #include "ImplementationBase.h"
 #include "IModulation.h"
 
+namespace radio
+{
+
 class INET_API FlatRadioSignalTransmissionBase : public RadioSignalTransmissionBase
 {
     protected:
@@ -111,5 +114,7 @@ class INET_API FlatRadioSignalTransmitterBase : public RadioSignalTransmitterBas
         virtual Hz getBandwidth() const { return bandwidth; }
         virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
 };
+
+}
 
 #endif

@@ -17,6 +17,8 @@
 
 #include "NakagamiFading.h"
 
+using namespace radio;
+
 Register_Class(NakagamiFading);
 
 NakagamiFading::NakagamiFading() :

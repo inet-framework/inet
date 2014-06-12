@@ -17,6 +17,8 @@
 
 #include "RicianFading.h"
 
+using namespace radio;
+
 Register_Class(RicianFading);
 
 RicianFading::RicianFading() :

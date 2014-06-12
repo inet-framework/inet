@@ -19,6 +19,8 @@
 #include "ScalarImplementation.h"
 #include "RadioControlInfo_m.h"
 
+using namespace radio;
+
 Define_Module(ScalarRadio);
 
 ScalarRadio::ScalarRadio() :

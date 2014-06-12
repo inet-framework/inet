@@ -20,6 +20,9 @@
 
 #include "FreeSpacePathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the log normal shadowing model.
  */
@@ -36,5 +39,7 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

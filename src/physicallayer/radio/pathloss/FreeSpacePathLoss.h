@@ -20,6 +20,9 @@
 
 #include "IRadioSignalPathLoss.h"
 
+namespace radio
+{
+
 /**
  * This class implements the deterministic free space path loss model.
  *
@@ -40,5 +43,7 @@ class INET_API FreeSpacePathLoss : public cModule, public IRadioSignalPathLoss
         virtual void printToStream(std::ostream &stream) const;
         virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
 };
+
+}
 
 #endif

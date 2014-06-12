@@ -29,6 +29,7 @@
 #include <gsl/gsl_sf_bessel.h>
 #endif
 
+namespace radio {
 
 #ifdef ENABLE_GSL
 typedef struct FunctionParameterType
@@ -83,5 +84,6 @@ protected:
 #endif
 };
 
+}
 
 #endif /* DSSS_ERROR_RATE_MODEL_H */

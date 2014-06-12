@@ -23,6 +23,9 @@
 #include "EulerAngles.h"
 #include "IPrintableObject.h"
 
+namespace radio
+{
+
 class IRadio;
 
 /**
@@ -88,5 +91,7 @@ class INET_API IRadioSignalTransmission : public IPrintableObject
          */
         virtual const EulerAngles getEndOrientation() const = 0;
 };
+
+}
 
 #endif

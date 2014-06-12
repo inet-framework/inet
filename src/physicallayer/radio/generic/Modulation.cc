@@ -18,6 +18,8 @@
 
 #include "Modulation.h"
 
+using namespace radio;
+
 
 double NullModulation::calculateBER(double, double, double) const
 {

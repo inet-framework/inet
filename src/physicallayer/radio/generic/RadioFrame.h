@@ -20,6 +20,9 @@
 
 #include "IRadioFrame.h"
 
+namespace radio
+{
+
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
     protected:
@@ -41,5 +44,7 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 
         virtual const IRadioSignalTransmission *getTransmission() const { return transmission; }
 };
+
+}
 
 #endif

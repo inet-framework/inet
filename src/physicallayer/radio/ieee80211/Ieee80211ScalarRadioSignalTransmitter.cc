@@ -21,6 +21,8 @@
 #include "RadioControlInfo_m.h"
 #include "Ieee80211Consts.h"
 
+using namespace radio;
+
 Define_Module(Ieee80211ScalarRadioSignalTransmitter);
 
 void Ieee80211ScalarRadioSignalTransmitter::initialize(int stage)
