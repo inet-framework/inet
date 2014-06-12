@@ -734,7 +734,7 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
 
     }
     // sort compatibleInterfaces moving the most constrained interfaces first
-    std::sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
+//    std::sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
     EV_DEBUG << "Found " << compatibleInterfaces.size() << " compatible interfaces" << endl;
 }
 
@@ -876,7 +876,9 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                 compatibleInterface->addressSpecifiedBits = 0xFFFFFFFF;
                 compatibleInterface->netmask = completeNetmask;
                 compatibleInterface->netmaskSpecifiedBits = 0xFFFFFFFF;
-                EV_DEBUG << "Selected interface address: " << IPv4Address(completeAddress) << endl;
+//                std::cout << interfaceEntry->getInterfaceModule()->getParentModule()->getParentModule()->getFullName() << ":";
+//                std::cout << interfaceEntry->getName() << "-> ";
+//                std::cout << "Selected interface address: " << IPv4Address(completeAddress) << endl;
 
                 // remove configured interface
                 unconfiguredInterfaces.erase(find(unconfiguredInterfaces, compatibleInterface));
@@ -2193,12 +2195,10 @@ bool IPv4NetworkConfigurator::getInterfaceIPv4Address(IPvXAddress &ret, Interfac
         return interfaceInfo->configure;
     }
 }
-int IPv4NetworkConfigurator::addNodeToTopology(cModule* module){
-    int nodeId = topology.addNode(new Node(module));
+void IPv4NetworkConfigurator::updateTopology(){
     computeConfiguration();
     configureAllInterfaces();
     configureAllRoutingTables();
-    return nodeId;
 }
 
 void IPv4NetworkConfigurator::removeNodeFromTopology(cModule* module){

@@ -272,6 +272,14 @@ void IPv4::handleIncomingICMP(ICMPMessage *packet)
             // ICMP errors are delivered to the appropriate higher layer protocol
             IPv4Datagram *bogusPacket = check_and_cast<IPv4Datagram *>(packet->getEncapsulatedPacket());
             int protocol = bogusPacket->getTransportProtocol();
+            if(protocol == IP_PROT_UDP){
+            	if(strcmp(getParentModule()->getParentModule()->getName(), "router") == 0){
+            		std::cout << "[IPv4] Deleting packet, router doesn't support UDP!" << std::endl;
+            		// FIXME better error handling?
+            		delete packet;
+            		return;
+            	}
+            }
             int gateindex = mapping.getOutputGateForProtocol(protocol);
             send(packet, "transportOut", gateindex);
             break;

@@ -232,7 +232,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public IPvXAddres
          */
         virtual void configureRoutingTable(IRoutingTable *routingTable);
 
-        virtual int addNodeToTopology(cModule* module);
+        virtual void updateTopology();
 
         virtual void removeNodeFromTopology(cModule* module);
 
