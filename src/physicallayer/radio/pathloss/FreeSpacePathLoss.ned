@@ -17,9 +17,9 @@
 
 package inet.physicallayer.radio.pathloss;
 
-import inet.physicallayer.radio.contract.IRadioSignalPathLoss;
+import inet.physicallayer.radio.contract.IPathLoss;
 
-module FreeSpacePathLoss like IRadioSignalPathLoss
+module FreeSpacePathLoss like IPathLoss
 {
     parameters:
         double alpha = default(2);

@@ -22,17 +22,17 @@ import inet.physicallayer.contract.IPhysicalLayer;
 
 //
 // Prototype for radio modules. Radio modules deal with the transmission
-// of frames over a wireless medium (the radio channel).
+// of frames over a wireless medium (the radio medium).
 //
 // <b>Transmission</b>
 //
 // Upper layers (wireless L2 protocols) can send frames to the radio
 // module. Frames will be encapsulated into ~IRadioFrame messages and
 // distributed to other network nodes within interference distance.
-// The ~IRadioFrame represents the signal in the radio channel, and
+// The ~IRadioFrame represents the signal in the radio medium, and
 // its fields hold properties of the transmission like the transmit power.
 //
-// The global ~IRadioChannel module keeps track of node positions,
+// The global ~IRadioMedium module keeps track of node positions,
 // and knows which nodes are within interference distance of others
 // (neighbour list). When transmitting, the radio module obtains the
 // neighbour list, and sends a copy of the ~IRadioFrame to each neighbour.

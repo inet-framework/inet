@@ -22,8 +22,8 @@ import inet.physicallayer.radio.generic.Radio;
 module IdealRadio extends Radio
 {
     parameters:
-        antennaType = default("IsotropicRadioAntenna");
-        transmitterType = default("IdealRadioSignalTransmitter");
-        receiverType = default("IdealRadioSignalReceiver");
+        antennaType = default("IsotropicAntenna");
+        transmitterType = default("IdealTransmitter");
+        receiverType = default("IdealReceiver");
         @class(Radio);
 }

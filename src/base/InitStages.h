@@ -48,7 +48,7 @@ enum InitStages
 
     /**
      * Initialization of the physical layer of protocol stacks. Radio publishes the initial RadioState;
-     * radios are registered in RadioChannel.
+     * radios are registered in RadioMedium.
      */
     INITSTAGE_PHYSICAL_LAYER = 3,
 

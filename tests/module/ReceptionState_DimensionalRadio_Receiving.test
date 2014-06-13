@@ -8,12 +8,12 @@ Transmission and reception parameters must match with ScalarRadio.
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.dimensional.DimensionalRadioChannel;
+import inet.physicallayer.radio.dimensional.DimensionalRadioMedium;
 
 network Test
 {
     submodules:
-        radioChannel: DimensionalRadioChannel;
+        radioMedium: DimensionalRadioMedium;
         configurator: IPv4NetworkConfigurator;
         host1: WirelessHost;
         host2: WirelessHost;
@@ -57,8 +57,8 @@ ned-path = .;../../../../src
 *.host1.mobility.initialX = 200m
 *.host2.mobility.initialX = 800m
 
-# radio channel
-*.radioChannel.backgroundNoise.power = -110dBm
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
 
 # nic
 *.host*.wlan[*].typename = "IdealWirelessNic"

@@ -67,7 +67,7 @@ class RIPPacket;
 
 #ifdef WITH_RADIO
 #include "RadioFrame.h"
-#include "ScalarImplementation.h"
+#include "ScalarTransmission.h"
 #else
 class RadioFrame;
 #endif
@@ -432,8 +432,8 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
 {
     std::ostringstream os;
 #ifdef WITH_RADIO
-    const IRadioSignalTransmission *transmission = packet->getTransmission();
-    const ScalarRadioSignalTransmission *scalarTransmission = dynamic_cast<const ScalarRadioSignalTransmission *>(transmission);
+    const ITransmission *transmission = packet->getTransmission();
+    const ScalarTransmission *scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission);
     os << "RADIO from " << transmission->getStartPosition();
     if (scalarTransmission)
         os << " on " << scalarTransmission->getCarrierFrequency().get()/1e6 << "MHz, ";

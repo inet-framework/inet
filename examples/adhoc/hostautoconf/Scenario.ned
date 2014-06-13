@@ -18,7 +18,7 @@
 
 package inet.examples.adhoc.hostautoconf;
 
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 
 network Scenario
@@ -27,6 +27,6 @@ network Scenario
         double hosts;
 
     submodules:
-        radioChannel: Ieee80211RadioChannel;
+        radioMedium: Ieee80211RadioMedium;
         host[hosts]: Host;
 }

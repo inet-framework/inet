@@ -19,7 +19,7 @@
 #define __INET_IRADIOFRAME_H_
 
 #include "IPhysicalLayerFrame.h"
-#include "IRadioSignalTransmission.h"
+#include "ITransmission.h"
 
 namespace radio
 {
@@ -34,25 +34,25 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
          * Returns the radio signal transmission that this radio frame represents.
          * This function never returns NULL.
          */
-        virtual const IRadioSignalTransmission *getTransmission() const = 0;
+        virtual const ITransmission *getTransmission() const = 0;
 
         /**
          * TODO: fill in the background?
          * This function may return NULL if this is not yet computed.
          */
-        // virtual const IRadioSignalArrival *getArrival() const = 0;
+        // virtual const IArrival *getArrival() const = 0;
 
         /**
          * TODO: fill in the background?
          * This function may return NULL if this is not yet computed.
          */
-        // virtual const IRadioSignalReception *getReception() const = 0;
+        // virtual const IReception *getReception() const = 0;
 
         /**
          * TODO: fill in the background?
          * This function may return NULL if this is not yet computed.
          */
-        // virtual const IRadioSignalReceptionDecision *getReceptionDecision() const = 0;
+        // virtual const IReceptionDecision *getReceptionDecision() const = 0;
 };
 
 }

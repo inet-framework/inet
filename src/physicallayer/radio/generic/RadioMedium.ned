@@ -1,0 +1,76 @@
+//
+// Copyright (C) 2013 OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
+package inet.physicallayer.radio.generic;
+
+import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
+import inet.physicallayer.radio.contract.IRadioMedium;
+import inet.physicallayer.radio.contract.IAttenuation;
+import inet.physicallayer.radio.contract.IPathLoss;
+import inet.physicallayer.radio.contract.IPropagation;
+
+module RadioMedium like IRadioMedium
+{
+    parameters:
+        // submodule type parameters
+        string propagationType;
+        string pathLossType;
+        string attenuationType;
+        string backgroundNoiseType;
+
+        // channel limit parameters
+        double alpha = default(2); // TODO: rename to maxRangeAlpha
+        double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
+        double maxTransmissionPower @unit(W) = default(0W/0);
+        double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
+        double maxAntennaGain @unit(dB) = default(0dB);
+        double minInterferenceTime @unit(s) = default(1ps);
+        double maxTransmissionDuration @unit(s) = default(10ms);
+        double maxCommunicationRange @unit(m) = default(0m/0);
+        double maxInterferenceRange @unit(m) = default(0m/0);
+
+        // filter parameters that control when radio frames are sent to receiver radios
+        string rangeFilter = default(""); // when either set to 'interferenceRange' or 'communicationRange' the radio medium doesn't send radio frames to a radio if it's outside the provided range
+        bool radioModeFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it's neither in receiver nor in transceiver mode 
+        bool listeningFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it listens on the channel in incompatible mode (e.g. different carrier frequency and bandwidth, different modulation)
+        bool macAddressFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it the destination mac address differs 
+
+        // logging parameters
+        bool recordCommunication = default(false);
+
+        @class(RadioMedium);
+        @display("i=misc/sun");
+
+    submodules:
+        propagation: <propagationType> like IPropagation {
+            parameters:
+                @display("p=100,50");
+        }
+        pathLoss: <pathLossType> like IPathLoss {
+            parameters:
+                @display("p=100,150");
+        }
+        attenuation: <attenuationType> like IAttenuation {
+            parameters:
+                @display("p=100,250");
+        }
+        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+            parameters:
+                @display("p=100,350");
+        }
+}

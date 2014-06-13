@@ -21,16 +21,16 @@ package inet.examples.wireless.nic;
 import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.contract.IRadioChannel;
+import inet.physicallayer.radio.contract.IRadioMedium;
 
 
 network TestNic
 {
     parameters:
         int numHosts;
-        string radioChannelType;
+        string radioMediumType;
     submodules:
-        radioChannel: <radioChannelType> like IRadioChannel {
+        radioMedium: <radioMediumType> like IRadioMedium {
             parameters:
                 @display("p=50,50");
         }

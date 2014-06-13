@@ -37,7 +37,7 @@ import inet.queue.IOutputQueue;
 // affected at all. There are no collisions -- a radio can simultaneously
 // receive any number of frames, and also transmit a single frame at the same time.
 //
-// This module requires an ~IdealRadioChannel instance in the network.
+// This module requires an ~IdealRadioMedium instance in the network.
 //
 module IdealWirelessNic like IWirelessNic
 {

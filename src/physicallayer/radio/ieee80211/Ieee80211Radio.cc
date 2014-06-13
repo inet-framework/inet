@@ -17,7 +17,8 @@
 
 #include "Ieee80211Radio.h"
 #include "Ieee80211Consts.h"
-#include "ScalarImplementation.h"
+#include "ScalarTransmitter.h"
+#include "ScalarReceiver.h"
 #include "RadioControlInfo_m.h"
 
 using namespace radio;
@@ -30,7 +31,7 @@ Ieee80211Radio::Ieee80211Radio() :
 {
 }
 
-Ieee80211Radio::Ieee80211Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
+Ieee80211Radio::Ieee80211Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *channel) :
     ScalarRadio(radioMode, antenna, transmitter, receiver, channel),
     channelNumber(-1)
 {
@@ -62,8 +63,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
     if (channelNumber != newChannelNumber)
     {
         Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
-        ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
-        ScalarRadioSignalReceiver *scalarReceiver = const_cast<ScalarRadioSignalReceiver *>(check_and_cast<const ScalarRadioSignalReceiver *>(receiver));
+        ScalarTransmitter *scalarTransmitter = const_cast<ScalarTransmitter *>(check_and_cast<const ScalarTransmitter *>(transmitter));
+        ScalarReceiver *scalarReceiver = const_cast<ScalarReceiver *>(check_and_cast<const ScalarReceiver *>(receiver));
         scalarTransmitter->setCarrierFrequency(carrierFrequency);
         scalarReceiver->setCarrierFrequency(carrierFrequency);
         EV << "Changing radio channel from " << channelNumber << " to " << newChannelNumber << ".\n";

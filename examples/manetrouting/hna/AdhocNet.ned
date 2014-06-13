@@ -22,7 +22,7 @@ import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.ethernet.Eth100M;
 import inet.nodes.inet.AdhocHost;
 import inet.nodes.inet.StandardHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 import inet.util.ThruputMeteringChannel;
 
 network AdhocNet
@@ -40,7 +40,7 @@ network AdhocNet
         }
 
     submodules:
-        radioChannel: Ieee80211RadioChannel {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=83,15");
         }
 

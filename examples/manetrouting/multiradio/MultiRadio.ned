@@ -18,7 +18,7 @@ package inet.examples.manetrouting.multiradio;
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 
 //
@@ -30,7 +30,7 @@ network MultiRadio
     parameters:
         int numHosts;
     submodules:
-        radioChannel: Ieee80211RadioChannel {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=83,15");
         }
         configurator: IPv4NetworkConfigurator {

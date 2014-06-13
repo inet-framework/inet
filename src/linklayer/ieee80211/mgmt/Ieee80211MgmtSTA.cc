@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211RadioChannel.h"
+#include "Ieee80211RadioMedium.h"
 #include "Ieee80211MgmtSTA.h"
 
-#include "IRadioChannel.h"
-#include "IRadioChannel.h"
+#include "IRadioMedium.h"
+#include "IRadioMedium.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
 #include "Ieee802Ctrl.h"
@@ -115,8 +115,8 @@ void Ieee80211MgmtSTA::initialize(int stage)
     }
     else if (stage == INITSTAGE_LINK_LAYER)
     {
-        Ieee80211RadioChannel *radioChannel = check_and_cast<Ieee80211RadioChannel *>(simulation.getModuleByPath("radioChannel"));
-        numChannels = radioChannel->getNumChannels();
+        Ieee80211RadioMedium *radioMedium = check_and_cast<Ieee80211RadioMedium *>(simulation.getModuleByPath("radioMedium"));
+        numChannels = radioMedium->getNumChannels();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2)
     {

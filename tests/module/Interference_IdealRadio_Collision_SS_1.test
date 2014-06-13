@@ -11,12 +11,12 @@ No signals are expected to be received.
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.ideal.IdealRadioChannel;
+import inet.physicallayer.radio.ideal.IdealRadioMedium;
 
 network Test
 {
     submodules:
-        radioChannel: IdealRadioChannel;
+        radioMedium: IdealRadioMedium;
         configurator: IPv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;

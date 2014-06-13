@@ -7,7 +7,7 @@ import inet.base.LifecycleController;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.nodes.aodv.AODVRouter;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 import inet.world.scenario.ScenarioManager;
 
 network AODVTest
@@ -15,7 +15,7 @@ network AODVTest
     parameters:
         @display("bgb=525,437");
     submodules:
-        radioChannel: Ieee80211RadioChannel {
+        radioMedium: Ieee80211RadioMedium {
             parameters:
                 @display("p=50,50");
         }
@@ -70,9 +70,9 @@ num-rngs = 3
 sim-time-limit = 100s
 
 # channel physical parameters
-*.radioChannel.carrierFrequency = 2.4GHz
-*.radioChannel.maxTransmissionPower = 2.0mW
-*.radioChannel.alpha = 2
+*.radioMedium.carrierFrequency = 2.4GHz
+*.radioMedium.maxTransmissionPower = 2.0mW
+*.radioMedium.alpha = 2
 
 # mobility
 **.mobilityType = "StationaryMobility"

@@ -11,7 +11,7 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 network Test
 {
@@ -22,7 +22,7 @@ network Test
             parameters:
                 dumpAddresses = true;
         }
-        radioChannel: Ieee80211RadioChannel;
+        radioMedium: Ieee80211RadioMedium;
         server: StandardHost;
         router: Router;
         switch: EtherSwitch;

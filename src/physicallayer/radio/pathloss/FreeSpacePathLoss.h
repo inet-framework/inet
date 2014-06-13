@@ -18,7 +18,7 @@
 #ifndef __INET_FREESPACEPATHLOSS_H__
 #define __INET_FREESPACEPATHLOSS_H__
 
-#include "IRadioSignalPathLoss.h"
+#include "IPathLoss.h"
 
 namespace radio
 {
@@ -28,7 +28,7 @@ namespace radio
  *
  * @author Oliver Graute
  */
-class INET_API FreeSpacePathLoss : public cModule, public IRadioSignalPathLoss
+class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
 {
     protected:
         double alpha;

@@ -24,9 +24,9 @@ module DimensionalRadio extends Radio
     parameters:
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        antennaType = default("IsotropicRadioAntenna");
-        transmitterType = default("DimensionalRadioSignalTransmitter");
-        receiverType = default("DimensionalRadioSignalReceiver");
+        antennaType = default("IsotropicAntenna");
+        transmitterType = default("DimensionalTransmitter");
+        receiverType = default("DimensionalReceiver");
         *.carrierFrequency = carrierFrequency;
         *.bandwidth = bandwidth;
         @class(Radio);

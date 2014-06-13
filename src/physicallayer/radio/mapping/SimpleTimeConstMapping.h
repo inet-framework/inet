@@ -21,7 +21,7 @@
 #ifndef __INET_SIMPLETIMECONSTMAPPING_H_
 #define __INET_SIMPLETIMECONSTMAPPING_H_
 
-#include "Mapping.h"
+#include "MappingBase.h"
 
 namespace radio
 {

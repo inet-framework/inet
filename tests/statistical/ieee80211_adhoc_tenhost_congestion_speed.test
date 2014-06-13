@@ -7,7 +7,7 @@ Testing TCP communication speed
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;
@@ -103,7 +103,7 @@ network Throughput
                 wlan.mac.address = "20:00:00:00:00:0"+string(index);
                 @display("p=350,350;r=,,#707070");
         }
-        radioChannel: ScalarRadioChannel {
+        radioMedium: ScalarRadioMedium {
             parameters:
                 @display("p=61,46");
         }
@@ -130,7 +130,7 @@ sim-time-limit = 50s
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
-**.radioChannel.numChannels = 1
+**.radioMedium.numChannels = 1
 
 # positions
 **.mobility.cx = 200m
@@ -140,10 +140,10 @@ sim-time-limit = 50s
 **.mobility.updateInterval = 100ms
 
 # channel physical parameters
-*.radioChannel.carrierFrequency = 2.4GHz
-*.radioChannel.pMax = 20mW
-*.radioChannel.sat = -110dBm
-*.radioChannel.alpha = 2
+*.radioMedium.carrierFrequency = 2.4GHz
+*.radioMedium.pMax = 20mW
+*.radioMedium.sat = -110dBm
+*.radioMedium.alpha = 2
 
 # access point
 

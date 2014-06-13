@@ -26,10 +26,10 @@ namespace radio
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
     protected:
-        const IRadioSignalTransmission *transmission;
+        const ITransmission *transmission;
 
     public:
-        RadioFrame(const IRadioSignalTransmission *transmission) :
+        RadioFrame(const ITransmission *transmission) :
             transmission(transmission)
         {}
 
@@ -42,7 +42,7 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 
         virtual void printToStream(std::ostream &stream) const;
 
-        virtual const IRadioSignalTransmission *getTransmission() const { return transmission; }
+        virtual const ITransmission *getTransmission() const { return transmission; }
 };
 
 }

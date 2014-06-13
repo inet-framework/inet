@@ -18,9 +18,9 @@
 package inet.physicallayer.radio.generic;
 
 import inet.physicallayer.radio.contract.IRadio;
-import inet.physicallayer.radio.contract.IRadioAntenna;
-import inet.physicallayer.radio.contract.IRadioSignalReceiver;
-import inet.physicallayer.radio.contract.IRadioSignalTransmitter;
+import inet.physicallayer.radio.contract.IAntenna;
+import inet.physicallayer.radio.contract.IReceiver;
+import inet.physicallayer.radio.contract.ITransmitter;
 import inet.power.contract.IPowerConsumer;
 
 // switchingTimes parameter should be regarded as a 5x5 matrix:
@@ -48,7 +48,7 @@ module Radio like IRadio
         string receiverType;
         string powerConsumerType = default("");
 
-        string radioChannelModule = default("radioChannel");
+        string radioMediumModule = default("radioMedium");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
 
         @class(Radio);
@@ -63,7 +63,7 @@ module Radio like IRadio
         @statistic[radioMode](title="Radio mode"; source=radioModeChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[receptionState](title="Radio reception state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
         @statistic[transmissionState](title="Radio transmission state"; source=receptionStateChanged; record=count,vector; interpolationmode=sample-hold);
-        @statistic[radioChannel](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
+        @statistic[radioMedium](title="Radio channel"; source=radioChannelChanged; record=histogram,vector; interpolationmode=sample-hold);
 
     gates:
         input upperLayerIn @labels(ILinkLayerFrame/down);
@@ -71,15 +71,15 @@ module Radio like IRadio
         input radioIn @labels(IRadioFrame);
 
     submodules:
-        antenna: <antennaType> like IRadioAntenna {
+        antenna: <antennaType> like IAntenna {
             parameters:
                 @display("p=100,50");
         }
-        transmitter: <transmitterType> like IRadioSignalTransmitter {
+        transmitter: <transmitterType> like ITransmitter {
             parameters:
                 @display("p=100,150");
         }
-        receiver: <receiverType> like IRadioSignalReceiver {
+        receiver: <receiverType> like IReceiver {
             parameters:
                 @display("p=100,250");
         }

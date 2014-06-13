@@ -25,11 +25,11 @@ module Ieee80211Radio extends ScalarRadio
         int channelNumber = default(0);
         carrierFrequency = default(2.412GHz);
         bandwidth = default(2MHz);
-        transmitterType = default("Ieee80211ScalarRadioSignalTransmitter");
+        transmitterType = default("Ieee80211ScalarTransmitter");
         transmitter.bitrate = default(11Mbps);
         transmitter.headerBitLength = default(192b);
         transmitter.power = default(20mW);
-        receiverType = default("Ieee80211ScalarRadioSignalReceiver");
+        receiverType = default("Ieee80211ScalarReceiver");
         receiver.sensitivity = default(-85dBm);
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);

@@ -64,7 +64,7 @@
 //    ~TCPSessionApp, ~TCPBasicClientApp, ~TCPGenericSrvApp, ~TCPSinkApp,
 //    ~TCPSrvHostApp, ~EtherAppCli, ~EtherAppSrv, ~PingApp, ~SimpleVoIPSender,
 //    ~SimpleVoIPReceiver etc.
-//  - wireless support: ~IRadioChannel, ~Ieee80211Nic
+//  - wireless support: ~IRadioMedium, ~Ieee80211Nic
 //  - mobility: ~MobileHost; mobility models such as ~TurtleMobility,
 //    ~BonnMotionMobility, ~ANSimMobility, ~RandomWPMobility, ~MassMobility
 //  - MPLS models: the core modules are ~MPLS, ~LIBTable, ~LDP, ~RSVP, ~TED,

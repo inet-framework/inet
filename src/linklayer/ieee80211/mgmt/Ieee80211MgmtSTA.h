@@ -90,7 +90,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     IInterfaceTable *interfaceTable;
     InterfaceEntry *myIface;
 
-    // number of channels in RadioChannel -- used if we're told to scan "all" channels
+    // number of channels in RadioMedium -- used if we're told to scan "all" channels
     int numChannels;
 
     // scanning status

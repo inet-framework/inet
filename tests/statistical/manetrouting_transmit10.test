@@ -8,7 +8,7 @@ Testing manetrouting with AODVUU routing protocol, UDP forwarding
 
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 
 // 
@@ -43,7 +43,7 @@ network Net80211_aodv_test
                 mobility.initialZ = 0m;
                 @display("i=device/pocketpc_s;r=,,#707070");
         }
-        radioChannel: ScalarRadioChannel {
+        radioMedium: ScalarRadioMedium {
             parameters:
                 @display("p=60,50;i=misc/sun");
         }
@@ -154,7 +154,7 @@ description = "Aodv Simple test"
 **.wlan*.mac.cwMinBroadcast = 31
 
 # channel physical parameters
-*.radioChannel.pMax = 2.0mW
+*.radioMedium.pMax = 2.0mW
 
 **.wlan*.radio.transmitterPower=2.0mW
 **.wlan*.radio.sensitivity=-90dBm

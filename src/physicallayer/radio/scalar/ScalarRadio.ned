@@ -24,9 +24,9 @@ module ScalarRadio extends Radio
     parameters:
         double carrierFrequency @unit(Hz);
         double bandwidth @unit(Hz);
-        antennaType = default("IsotropicRadioAntenna");
-        transmitterType = default("ScalarRadioSignalTransmitter");
-        receiverType = default("ScalarRadioSignalReceiver");
+        antennaType = default("IsotropicAntenna");
+        transmitterType = default("ScalarTransmitter");
+        receiverType = default("ScalarReceiver");
         *.carrierFrequency = carrierFrequency;
         *.bandwidth = bandwidth;
         @class(ScalarRadio);

@@ -18,7 +18,7 @@
 #define __INET_SUIPATHLOSS_H_
 
 #include <string>
-#include "IRadioSignalPathLoss.h"
+#include "IPathLoss.h"
 
 namespace radio
 {
@@ -28,7 +28,7 @@ namespace radio
  *
  * @author Konrad Polys, Krzysztof Grochla
  */
-class INET_API SUIPathLoss : public cModule, public IRadioSignalPathLoss
+class INET_API SUIPathLoss : public cModule, public IPathLoss
 {
     protected:
         /** @brief Transmitter antenna high */

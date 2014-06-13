@@ -17,9 +17,9 @@
 
 package inet.physicallayer.radio.pathloss;
 
-import inet.physicallayer.radio.contract.IRadioSignalPathLoss;
+import inet.physicallayer.radio.contract.IPathLoss;
 
-module SUIPathLoss like IRadioSignalPathLoss
+module SUIPathLoss like IPathLoss
 {
     parameters:
         @class(SUIPathLoss);

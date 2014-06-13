@@ -16,9 +16,8 @@
 //
 
 #include "Radio.h"
-#include "RadioChannel.h"
+#include "RadioMedium.h"
 #include "NodeOperations.h"
-#include "ImplementationBase.h"
 
 using namespace radio;
 
@@ -29,7 +28,7 @@ Radio::Radio() :
     antenna(NULL),
     transmitter(NULL),
     receiver(NULL),
-    channel(NULL),
+    medium(NULL),
     upperLayerOut(NULL),
     upperLayerIn(NULL),
     radioIn(NULL),
@@ -43,12 +42,12 @@ Radio::Radio() :
     endSwitchTimer(NULL)
 {}
 
-Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
+Radio::Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *medium) :
     id(nextId++),
     antenna(antenna),
     transmitter(transmitter),
     receiver(receiver),
-    channel(channel),
+    medium(medium),
     upperLayerOut(NULL),
     upperLayerIn(NULL),
     radioIn(NULL),
@@ -61,7 +60,7 @@ Radio::Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSign
     endReceptionTimer(NULL),
     endSwitchTimer(NULL)
 {
-    channel->addRadio(this);
+    medium->addRadio(this);
 }
 
 Radio::~Radio()
@@ -79,10 +78,10 @@ void Radio::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         endTransmissionTimer = new cMessage("endTransmission");
-        antenna = check_and_cast<IRadioAntenna *>(getSubmodule("antenna"));
-        transmitter = check_and_cast<IRadioSignalTransmitter *>(getSubmodule("transmitter"));
-        receiver = check_and_cast<IRadioSignalReceiver *>(getSubmodule("receiver"));
-        channel = check_and_cast<IRadioChannel *>(simulation.getModuleByPath("radioChannel"));
+        antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
+        transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
+        receiver = check_and_cast<IReceiver *>(getSubmodule("receiver"));
+        medium = check_and_cast<IRadioMedium *>(simulation.getModuleByPath("radioMedium"));
         upperLayerIn = gate("upperLayerIn");
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
@@ -93,7 +92,7 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER)
     {
-        channel->addRadio(this);
+        medium->addRadio(this);
         endSwitchTimer = new cMessage("endSwitch");
         parseRadioModeSwitchingTimes();
     }
@@ -186,7 +185,7 @@ void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
     updateTransceiverState();
 }
 
-const IRadioSignalTransmission *Radio::getTransmissionInProgress() const
+const ITransmission *Radio::getTransmissionInProgress() const
 {
     if (!endTransmissionTimer->isScheduled())
         return NULL;
@@ -194,7 +193,7 @@ const IRadioSignalTransmission *Radio::getTransmissionInProgress() const
         return static_cast<RadioFrame*>(endTransmissionTimer->getControlInfo())->getTransmission();
 }
 
-const IRadioSignalTransmission *Radio::getReceptionInProgress() const
+const ITransmission *Radio::getReceptionInProgress() const
 {
     if (!endReceptionTimer)
         return NULL;
@@ -280,7 +279,7 @@ void Radio::startTransmission(cPacket *macFrame)
 {
     if (endTransmissionTimer->isScheduled())
         throw cRuntimeError("Received frame from upper layer while already transmitting.");
-    const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(channel->transmitPacket(this, macFrame));
+    const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(medium->transmitPacket(this, macFrame));
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is started.\n";
     ASSERT(radioFrame->getDuration() != 0);
     endTransmissionTimer->setControlInfo(const_cast<RadioFrame *>(radioFrame));
@@ -299,13 +298,13 @@ void Radio::endTransmission()
 
 void Radio::startReception(RadioFrame *radioFrame)
 {
-    const IRadioSignalTransmission *transmission = radioFrame->getTransmission();
-    const IRadioSignalArrival *arrival = channel->getArrival(this, radioFrame->getTransmission());
+    const ITransmission *transmission = radioFrame->getTransmission();
+    const IArrival *arrival = medium->getArrival(this, radioFrame->getTransmission());
     cMessage *timer = new cMessage("endReception");
     timer->setControlInfo(radioFrame);
     if (arrival->getStartTime() == simTime())
     {
-        bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && channel->isReceptionAttempted(this, transmission);
+        bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && medium->isReceptionAttempted(this, transmission);
         EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
         if (isReceptionAttempted)
             endReceptionTimer = timer;
@@ -320,7 +319,7 @@ void Radio::endReception(cMessage *message)
     EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer)
     {
-        cPacket *macFrame = channel->receivePacket(this, radioFrame);
+        cPacket *macFrame = medium->receivePacket(this, radioFrame);
         EV << "Sending up " << macFrame << ".\n";
         send(macFrame, upperLayerOut);
         endReceptionTimer = NULL;
@@ -334,8 +333,8 @@ bool Radio::isListeningPossible()
     const simtime_t now = simTime();
     const Coord position = antenna->getMobility()->getCurrentPosition();
     // TODO: use 2 * minInterferenceTime for lookahead? or maybe simply use 0 duration listening?
-    const IRadioSignalListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
-    const IRadioSignalListeningDecision *listeningDecision = channel->listenOnChannel(this, listening);
+    const IListening *listening = receiver->createListening(this, now, now + 1E-12, position, position);
+    const IListeningDecision *listeningDecision = medium->listenOnMedium(this, listening);
     bool isListeningPossible = listeningDecision->isListeningPossible();
     delete listening;
     delete listeningDecision;

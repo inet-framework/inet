@@ -16,7 +16,7 @@
 //
 
 #include "ScalarRadio.h"
-#include "ScalarImplementation.h"
+#include "ScalarTransmitter.h"
 #include "RadioControlInfo_m.h"
 
 using namespace radio;
@@ -28,7 +28,7 @@ ScalarRadio::ScalarRadio() :
 {
 }
 
-ScalarRadio::ScalarRadio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel) :
+ScalarRadio::ScalarRadio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *channel) :
     Radio(radioMode, antenna, transmitter, receiver, channel)
 {
 }
@@ -49,7 +49,7 @@ void ScalarRadio::handleUpperCommand(cMessage *message)
 
 void ScalarRadio::setBitrate(bps newBitrate)
 {
-    ScalarRadioSignalTransmitter *scalarTransmitter = const_cast<ScalarRadioSignalTransmitter *>(check_and_cast<const ScalarRadioSignalTransmitter *>(transmitter));
+    ScalarTransmitter *scalarTransmitter = const_cast<ScalarTransmitter *>(check_and_cast<const ScalarTransmitter *>(transmitter));
     scalarTransmitter->setBitrate(newBitrate);
     endReceptionTimer = NULL;
 }

@@ -6,12 +6,12 @@ Carrier sense test for Ieee80211 out of range concurrent and delayed mutual tran
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.AdhocHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 network Test
 {
     submodules:
-        radioChannel: Ieee80211RadioChannel;
+        radioMedium: Ieee80211RadioMedium;
         configurator: IPv4NetworkConfigurator;
         host1: AdhocHost;
         host2: AdhocHost;

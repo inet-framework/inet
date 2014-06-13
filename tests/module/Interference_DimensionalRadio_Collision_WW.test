@@ -24,12 +24,12 @@ No signals are expected to be received.
 
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.nodes.inet.WirelessHost;
-import inet.physicallayer.radio.dimensional.DimensionalRadioChannel;
+import inet.physicallayer.radio.dimensional.DimensionalRadioMedium;
 
 network Test
 {
     submodules:
-        radioChannel: DimensionalRadioChannel;
+        radioMedium: DimensionalRadioMedium;
         configurator: IPv4NetworkConfigurator;
         hostSender1: WirelessHost;
         hostSender2: WirelessHost;
@@ -60,8 +60,8 @@ ned-path = .;../../../../src
 *.hostSender2.mobility.initialX = 800m
 *.hostReceiver.mobility.initialX = 400m
 
-# radio channel
-*.radioChannel.backgroundNoise.power = -110dBm
+# radio medium
+*.radioMedium.backgroundNoise.power = -110dBm
 
 # nic
 *.host*.wlan[*].typename = "IdealWirelessNic"

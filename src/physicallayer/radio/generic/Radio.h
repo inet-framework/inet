@@ -19,8 +19,8 @@
 #define __INET_RADIO_H_
 
 #include "IRadio.h"
-#include "IRadioChannel.h"
-#include "IRadioAntenna.h"
+#include "IRadioMedium.h"
+#include "IAntenna.h"
 #include "PhysicalLayerBase.h"
 #include "RadioFrame.h"
 
@@ -40,24 +40,24 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
          */
         const int id;
 
-        /** @name Parameters that determine the behavior of the radio channel. */
+        /** @name Parameters that determine the behavior of the radio. */
         //@{
         /**
          * The radio antenna model is never NULL.
          */
-        const IRadioAntenna *antenna;
+        const IAntenna *antenna;
         /**
          * The transmitter model is never NULL.
          */
-        const IRadioSignalTransmitter *transmitter;
+        const ITransmitter *transmitter;
         /**
          * The receiver model is never NULL.
          */
-        const IRadioSignalReceiver *receiver;
+        const IReceiver *receiver;
         /**
-         * The radio channel model is never.
+         * The radio medium model is never NULL.
          */
-        IRadioChannel *channel;
+        IRadioMedium *medium;
         /**
          * Simulation time required to switch from one radio mode to another.
          */
@@ -143,17 +143,17 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     public:
         Radio();
-        Radio(RadioMode radioMode, const IRadioAntenna *antenna, const IRadioSignalTransmitter *transmitter, const IRadioSignalReceiver *receiver, IRadioChannel *channel);
+        Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *medium);
         virtual ~Radio();
 
         virtual int getId() const { return id; }
 
         virtual void printToStream(std::ostream &stream) const;
 
-        virtual const IRadioAntenna *getAntenna() const { return antenna; }
-        virtual const IRadioSignalTransmitter *getTransmitter() const { return transmitter; }
-        virtual const IRadioSignalReceiver *getReceiver() const { return receiver; }
-        virtual const IRadioChannel *getChannel() const { return channel; }
+        virtual const IAntenna *getAntenna() const { return antenna; }
+        virtual const ITransmitter *getTransmitter() const { return transmitter; }
+        virtual const IReceiver *getReceiver() const { return receiver; }
+        virtual const IRadioMedium *getMedium() const { return medium; }
 
         virtual const cGate *getRadioGate() const { return radioIn; }
 
@@ -163,8 +163,8 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
         virtual ReceptionState getReceptionState() const { return receptionState; }
         virtual TransmissionState getTransmissionState() const { return transmissionState; }
 
-        virtual const IRadioSignalTransmission *getTransmissionInProgress() const;
-        virtual const IRadioSignalTransmission *getReceptionInProgress() const;
+        virtual const ITransmission *getTransmissionInProgress() const;
+        virtual const ITransmission *getReceptionInProgress() const;
 };
 
 }

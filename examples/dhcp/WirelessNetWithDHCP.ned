@@ -23,14 +23,14 @@ import inet.nodes.inet.Router;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.WirelessHost;
 import inet.nodes.wireless.AccessPoint;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioChannel;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 network WirelessNetWithDHCP
 {
     @display("bgb=590,407;bgl=2");
     int numHosts;
     submodules:
-        radioChannel: Ieee80211RadioChannel {
+        radioMedium: Ieee80211RadioMedium {
             @display("p=64,34");
             numChannels = 5;
         }

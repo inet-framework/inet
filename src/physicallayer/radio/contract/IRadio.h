@@ -20,20 +20,20 @@
 
 #include "IPhysicalLayer.h"
 #include "IRadioFrame.h"
-#include "IRadioAntenna.h"
-#include "IRadioSignalReceiver.h"
-#include "IRadioSignalTransmitter.h"
+#include "IAntenna.h"
+#include "IReceiver.h"
+#include "ITransmitter.h"
 
 namespace radio
 {
 
-class IRadioChannel;
+class IRadioMedium;
 
 /**
  * This interface represents a physical device that is capable of transmitting
  * and receiving radio signals. Simultaneous reception and transmission is also
  * supported. The radio has an operation mode and it provides the state of the
- * radio channel at its position.
+ * radio medium at its position.
  *
  * @author Levente Meszaros
  */
@@ -71,8 +71,8 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
         static simsignal_t transmissionStateChangedSignal;
 
         /**
-         * This signal is emitted every time the radio channel changes.
-         * The signal value is the new radio channel.
+         * This signal is emitted every time the radio medium changes.
+         * The signal value is the new radio medium.
          */
         static simsignal_t radioChannelChangedSignal;
 
@@ -125,39 +125,39 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
         /**
          * This enumeration specifies the reception state of the radio. This also
-         * determines the state of the radio channel.
+         * determines the state of the radio medium.
          */
         enum ReceptionState
         {
             /**
-             * The radio channel state is unknown, reception state is meaningless,
+             * The radio medium state is unknown, reception state is meaningless,
              * signal detection is not possible. (e.g. the radio mode is off, sleep
              * or transmitter)
              */
             RECEPTION_STATE_UNDEFINED,
 
             /**
-             * The radio channel is free, no signal is detected. (e.g. the RSSI is
+             * The radio medium is free, no signal is detected. (e.g. the RSSI is
              * below the energy detection threshold)
              */
             RECEPTION_STATE_IDLE,
 
             /**
-             * The radio channel is busy, a signal is detected but it is not strong
+             * The radio medium is busy, a signal is detected but it is not strong
              * enough to receive. (e.g. the RSSI is above the energy detection
              * threshold but below the reception threshold)
              */
             RECEPTION_STATE_BUSY,
 
             /**
-             * The radio channel is busy, a signal strong enough to evaluate is detected,
+             * The radio medium is busy, a signal strong enough to evaluate is detected,
              * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
              * above the reception threshold but the SNIR is not yet evaluated)
              */
             RECEPTION_STATE_SYNCHRONIZING,
 
             /**
-             * The radio channel is busy, a signal strong enough to receive is detected.
+             * The radio medium is busy, a signal strong enough to receive is detected.
              * (e.g. the SNIR was above the reception threshold during synchronize)
              */
             RECEPTION_STATE_RECEIVING
@@ -175,13 +175,13 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
             TRANSMISSION_STATE_UNDEFINED,
 
             /**
-             * The radio is not transmitting a signal on the radio channel. (e.g. the
+             * The radio is not transmitting a signal on the radio medium. (e.g. the
              * last transmission has been completed)
              */
             TRANSMISSION_STATE_IDLE,
 
             /**
-             * The radio channel is busy, the radio is currently transmitting a signal.
+             * The radio medium is busy, the radio is currently transmitting a signal.
              */
             TRANSMISSION_STATE_TRANSMITTING,
         };
@@ -241,35 +241,35 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
          * Returns the antenna used by the transceiver of this radio. This function
          * never returns NULL.
          */
-        virtual const IRadioAntenna *getAntenna() const = 0;
+        virtual const IAntenna *getAntenna() const = 0;
 
         /**
          * Returns the transmitter part of this radio. This function never returns NULL.
          */
-        virtual const IRadioSignalTransmitter *getTransmitter() const = 0;
+        virtual const ITransmitter *getTransmitter() const = 0;
 
         /**
          * Returns the receiver part of this radio. This function never returns NULL.
          */
-        virtual const IRadioSignalReceiver *getReceiver() const = 0;
+        virtual const IReceiver *getReceiver() const = 0;
 
         /**
-         * Returns the radio channel where this radio is transmitting and receiving
+         * Returns the radio medium where this radio is transmitting and receiving
          * radio signals. This function never returns NULL.
          */
-        virtual const IRadioChannel *getChannel() const = 0;
+        virtual const IRadioMedium *getMedium() const = 0;
 
         /**
          * Returns the ongoing transmission that the transmitter is currently
          * transmitting or NULL.
          */
-        virtual const IRadioSignalTransmission *getTransmissionInProgress() const = 0;
+        virtual const ITransmission *getTransmissionInProgress() const = 0;
 
         /**
          * Returns the ongoing reception that the receiver is currently receiving
          * or NULL.
          */
-        virtual const IRadioSignalTransmission *getReceptionInProgress() const = 0;
+        virtual const ITransmission *getReceptionInProgress() const = 0;
 
     public:
         /**
