@@ -17,7 +17,10 @@
 
 
 
-package inet.base;
+package inet.common.queue;
+
+import inet.common.IHook;
+
 
 //
 // Just lets messages through without any change or delay.

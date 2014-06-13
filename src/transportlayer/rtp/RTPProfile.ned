@@ -1,4 +1,4 @@
-package inet.transport.rtp;
+package inet.transportlayer.rtp;
 
 //
 // Generic RTP Profile. ~RTPProfile is internal to the ~RTP module;

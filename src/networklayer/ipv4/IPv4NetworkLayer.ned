@@ -19,12 +19,8 @@
 package inet.networklayer.ipv4;
 
 import inet.networklayer.arp.IARP;
-import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.ipv4.ErrorHandling;
-import inet.networklayer.ipv4.ICMP;
-import inet.networklayer.ipv4.IIGMP;
-import inet.networklayer.ipv4.IPv4;
 
 
 //
@@ -62,7 +58,7 @@ module IPv4NetworkLayer like INetworkLayer
         }
         ip: IPv4 {
             parameters:
-                useProxyARP = true; // as routes with unspecified next-hop addr are quite common 
+                useProxyARP = true; // as routes with unspecified next-hop addr are quite common
                 @display("p=85,95;q=queue");
             gates:
                 queueIn[sizeof(ifIn)];

@@ -5,7 +5,7 @@
     <at t="120s">
         <connect src-module="switch1" src-gate="ethg[1]"
                  dest-module="switch3" dest-gate="ethg[0]" 
-                 channel-type="inet.nodes.ethernet.Eth1G">
+                 channel-type="inet.node.ethernet.Eth1G">
         </connect>
     </at>
 </script>

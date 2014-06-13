@@ -18,10 +18,10 @@
 
 package inet.examples.emulation.traceroute;
 
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
-import inet.nodes.ethernet.EtherSwitch;
 
 
 network Traceroute

@@ -32,10 +32,10 @@ cmdenv-express-mode = false
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.base.LifecycleController;
-import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
+import inet.common.scenario.ScenarioManager;
 
 
 network Test

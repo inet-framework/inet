@@ -17,9 +17,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.transport.tcp;
+package inet.transportlayer.tcp;
 
-import inet.transport.ITCP;
+import inet.transportlayer.ITCP;
 
 
 //

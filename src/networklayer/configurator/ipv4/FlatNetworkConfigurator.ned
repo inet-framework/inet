@@ -16,7 +16,7 @@
 //
 
 
-package inet.networklayer.autorouting.ipv4;
+package inet.networklayer.configurator.ipv4;
 
 //
 // Configures IPv4 addresses and routing tables for a "flat" network,

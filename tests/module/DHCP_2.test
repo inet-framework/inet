@@ -4,8 +4,8 @@ Testing DHCP protocol
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 network Dhcptest

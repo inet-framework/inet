@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.queue;
+package inet.common.queue;
 
 //
 // This module implements Random Early Detection (RED).

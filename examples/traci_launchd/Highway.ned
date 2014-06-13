@@ -20,8 +20,9 @@
 
 package inet.examples.traci_launchd;
 
+import inet.mobility.group.TraCIScenarioManagerLaunchd;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.world.traci.TraCIScenarioManagerLaunchd;
+
 
 module Highway
 {

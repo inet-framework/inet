@@ -19,7 +19,7 @@
 package inet.examples.inet.routerperf;
 
 import inet.applications.generic.IIPvXTrafficGenerator;
-import inet.nodes.inet.NodeBase;
+import inet.node.inet.NodeBase;
 
 
 //

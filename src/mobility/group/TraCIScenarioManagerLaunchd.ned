@@ -18,7 +18,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package inet.world.traci;
+package inet.mobility.group;
 
 //
 // Extends the TraCIScenarioManager for use with sumo-launchd.py and SUMO.
@@ -42,7 +42,7 @@ simple TraCIScenarioManagerLaunchd
         double connectAt @unit("s") = default(0s);  // when to connect to TraCI server (must be the initial timestep of the server)
         double firstStepAt @unit("s") = default(-1s);  // when to start synchronizing with the TraCI server (-1: immediately after connecting)
         double updateInterval @unit("s") = default(1s);  // time interval of hosts' position updates
-        string moduleType = default("inet.nodes.wireless.WirelessHostSimplified");  // module type to be used in the simulation for each managed vehicle
+        string moduleType = default("inet.node.wireless.WirelessHostSimplified");  // module type to be used in the simulation for each managed vehicle
         string moduleName = default("host");  // module name to be used in the simulation for each managed vehicle
         string moduleDisplayString = default("i=misc/node2;is=vs;r=0,,#707070,1");  // module displayString to be used in the simulation for each managed vehicle
         string host = default("localhost");  // sumo-launchd.py server hostname

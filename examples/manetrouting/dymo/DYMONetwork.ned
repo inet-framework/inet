@@ -1,15 +1,15 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 package inet.examples.manetrouting.dymo;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.dymo.DYMORouter;
+import inet.node.dymo.DYMORouter;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.world.scenario.ScenarioManager;
 
 
 //

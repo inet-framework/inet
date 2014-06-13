@@ -16,28 +16,28 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.transport.sctp;
+package inet.transportlayer.sctp;
 
-import inet.transport.sctp.SCTPNatTable;
-import inet.transport.sctp.SCTPNatHook;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.StandardHost;
+
 
 //
 // \IP router.
 //
-module SCTPNatRouter extends StandardHost {
+module SCTPNatRouter extends StandardHost
+{
     parameters:
         IPForward = true;
         natHook.networkProtocolModule = default(absPath(".networkLayer.ip"));
     submodules:
         natHook: SCTPNatHook {
-        parameters:
-            @display( "p=160,132;i=block/table");
+            parameters:
+                @display( "p=160,132;i=block/table");
         }
         natTable: SCTPNatTable {
-        parameters:
-            @display( "p=60,132;i=block/table");
-    }
+            parameters:
+                @display( "p=60,132;i=block/table");
+        }
     connections:
         natHook.out --> networkLayer.transportIn++;
         natHook.in <-- networkLayer.transportOut++;

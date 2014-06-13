@@ -18,7 +18,7 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-package inet.networklayer.autorouting.generic;
+package inet.networklayer.configurator.generic;
 
 //
 //

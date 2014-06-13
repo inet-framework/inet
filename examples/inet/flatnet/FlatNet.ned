@@ -22,10 +22,10 @@
 
 package inet.examples.inet.flatnet;
 
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network FlatNet
@@ -44,7 +44,7 @@ network FlatNet
     submodules:
         configurator: IPv4NetworkConfigurator {
             parameters:
-                config=xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");
+                config = xml("<config><interface hosts='*' address='192.168.x.x' netmask='255.255.x.x'/></config>");
         }
         rte[57]: Router {
             parameters:

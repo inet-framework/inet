@@ -9,7 +9,7 @@
         nedPackages = "
                        inet.transportlayer.tcp_common
                        inet.applications.tcpapp
-                       inet.util.headerserializers.tcp
+                       inet.common.serializer.tcp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_COMMON"
@@ -70,10 +70,10 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.ipv4
-                       inet.networklayer.autorouting.ipv4
+                       inet.networklayer.configurator.ipv4
                        inet.networklayer.arp.ipv4
                        inet.node.inet
-                       inet.util.headerserializers.ipv4
+                       inet.common.serializer.ipv4
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv4"
@@ -102,11 +102,11 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.ipv6
-                       inet.networklayer.autorouting.ipv6
+                       inet.networklayer.configurator.ipv6
                        inet.networklayer.icmpv6
                        inet.networklayer.ipv6tunneling
                        inet.node.ipv6
-                       inet.util.headerserializers.ipv6
+                       inet.common.serializer.ipv6
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IPv6"
@@ -165,7 +165,7 @@
         nedPackages = "
                        inet.transportlayer.udp
                        inet.applications.udpapp
-                       inet.util.headerserializers.udp
+                       inet.common.serializer.udp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_UDP"
@@ -211,7 +211,7 @@
         nedPackages = "
                        inet.applications.sctpapp
                        inet.transportlayer.sctp
-                       inet.util.headerserializers.sctp
+                       inet.common.serializer.sctp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_SCTP"
@@ -373,7 +373,7 @@
         requires = "IPv4"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.ospfv2
+                       inet.routing.ospfv2
                        inet.node.ospfv2
                       "
         extraSourceFolders = ""
@@ -402,7 +402,7 @@
         requires = "IPv4 OSPFv2 TCP_INET"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.bgpv4
+                       inet.routing.bgpv4
                        inet.node.bgp
                       "
         extraSourceFolders = ""
@@ -431,7 +431,7 @@
         requires = "UDP IPv4 Ieee80211"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.routing.dymo
+                       inet.routing.dymo
                        inet.node.dymo
                       "
         extraSourceFolders = ""
@@ -446,7 +446,7 @@
         requires = "UDP IPv4 Ieee80211"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.routing.aodv
+                       inet.routing.aodv
                        inet.node.aodv
                       "
         extraSourceFolders = ""
@@ -461,7 +461,7 @@
         requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.routing.gpsr
+                       inet.routing.gpsr
                        inet.node.gpsr
                       "
         extraSourceFolders = ""
@@ -476,7 +476,7 @@
         requires = "UDP IPv4"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.routing.rip
+                       inet.routing.rip
                        inet.node.rip
                       "
         extraSourceFolders = ""
@@ -505,7 +505,7 @@
         requires = "IPv4 IPv6 UDP Ieee80211"
         labels = "routing manet"
         nedPackages = "
-                       inet.networklayer.manetrouting
+                       inet.routing.extras
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_MANET"
@@ -565,7 +565,6 @@
         labels = ""
         nedPackages = "
                        inet.applications.traci
-                       inet.world.traci
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TRACI"
@@ -594,10 +593,16 @@
         labels = ""
         nedPackages = "
                        inet.physicallayer.radio.common
-                       inet.physicallayer.radio.detailed
+                       inet.physicallayer.radio.antenna
+                       inet.physicallayer.radio.dimensional
+                       inet.physicallayer.radio.generic
                        inet.physicallayer.radio.ideal
+                       inet.physicallayer.radio.ieee80211
+                       inet.physicallayer.radio.mapping
+                       inet.physicallayer.radio.pathloss
                        inet.physicallayer.radio.power
-                       inet.physicallayer.radio.simplified
+                       inet.physicallayer.radio.propagation
+                       inet.physicallayer.radio.scalar
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RADIO"
@@ -734,7 +739,6 @@
         nedPackages = "
                        inet.applications.httptools
                        inet.node.httptools
-                       inet.world.httptools
                       "
         extraSourceFolders = ""
         compileFlags = ""

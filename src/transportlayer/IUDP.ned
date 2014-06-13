@@ -18,7 +18,7 @@
 
 
 
-package inet.transport;
+package inet.transportlayer;
 
 //
 // UDP protocol interface.

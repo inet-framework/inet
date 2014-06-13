@@ -17,7 +17,7 @@
 // Author: Levente Meszaros (levy@omnetpp.org)
 //
 
-package inet.status;
+package inet.common.lifecycle;
 
 //
 // Keeps track of the status of network node (up, down, etc.) for other

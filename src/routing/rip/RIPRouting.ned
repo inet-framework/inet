@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.networklayer.routing.rip;
+package inet.routing.rip;
 
 //
 // Routing Information Protocol.

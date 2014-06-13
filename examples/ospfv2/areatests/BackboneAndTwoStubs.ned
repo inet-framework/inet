@@ -2,10 +2,10 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
-import inet.world.scenario.ScenarioManager;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ospfv2.OSPFRouter;
 
 
 network OSPF_BackboneAndTwoStubsTest
@@ -56,8 +56,8 @@ network OSPF_BackboneAndTwoStubsTest
             @display("p=187,43");
         }
     connections:
-        BBR[0].ethg++  <--> C <--> Stub1.ethg[0];
-        BBR[numBBRouters-1].ethg++  <--> C <--> Stub2.ethg[0];
+        BBR[0].ethg++ <--> C <--> Stub1.ethg[0];
+        BBR[numBBRouters-1].ethg++ <--> C <--> Stub2.ethg[0];
         for i=1..numBBRouters-1 {
             BBR[i].ethg++ <--> C <--> BBR[i-1].ethg++;
         }

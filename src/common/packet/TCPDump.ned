@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
-package inet.util;
+package inet.common.packet;
 
 //
 // Provides tcpdump-like functionality: dumps packet contents on the
@@ -34,7 +34,8 @@ package inet.util;
 // see description of gates in comments. Other packets are ignored and let
 // through.
 //
-simple TCPDump {
+simple TCPDump
+{
     parameters:
         string dumpFile = default("");
         int snaplen = default(65535);

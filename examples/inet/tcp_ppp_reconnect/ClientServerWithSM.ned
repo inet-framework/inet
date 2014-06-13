@@ -18,11 +18,11 @@
 
 package inet.examples.inet.tcp_ppp_reconnect;
 
+import inet.common.misc.NetAnimTrace;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
-import inet.world.scenario.ScenarioManager;
-import inet.util.NetAnimTrace;
-import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 
 
 network ClientServerWithSM

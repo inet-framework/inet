@@ -18,9 +18,10 @@
 
 package inet.examples.inet.routerperf;
 
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+
 
 network RouterPerfNetwork
 {

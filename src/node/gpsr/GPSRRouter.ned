@@ -2,10 +2,11 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-package inet.nodes.gpsr;
+package inet.node.gpsr;
 
-import inet.networklayer.routing.gpsr.IGPSR;
-import inet.nodes.inet.WirelessHost;
+import inet.node.inet.WirelessHost;
+import inet.routing.gpsr.IGPSR;
+
 
 //
 // TODO

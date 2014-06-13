@@ -22,12 +22,13 @@ package inet.examples.traci;
 
 import inet.applications.traci.TraCIDemo;
 import inet.linklayer.ieee80211.Ieee80211Nic;
-import inet.mobility.single.TraCIMobility;
-import inet.networklayer.autorouting.ipv4.HostAutoConfigurator;
+import inet.mobility.group.TraCIMobility;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.HostAutoConfigurator;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.transport.udp.UDP;
+import inet.transportlayer.udp.UDP;
+
 
 module Car
 {

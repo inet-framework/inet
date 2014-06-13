@@ -21,13 +21,13 @@
 
 package inet.examples.inet.shutdownrestart;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.util.ThruputMeteringChannel;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 
 
 network NClients

@@ -44,10 +44,10 @@ sim-time-limit = 3s
 
 %file: test.ned
 
-import inet.base.LifecycleController;
-import inet.nodes.wireless.AccessPoint;
+import inet.common.lifecycle.LifecycleController;
+import inet.node.wireless.AccessPoint;
 import inet.physicallayer.radio.ideal.IdealRadioMedium;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 
 network Test

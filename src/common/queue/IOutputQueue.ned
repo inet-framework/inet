@@ -16,7 +16,7 @@
 //
 
 
-package inet.queue;
+package inet.common.queue;
 
 //
 // Prototype for output queues. Concrete queues can implement

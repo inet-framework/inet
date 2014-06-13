@@ -18,8 +18,8 @@
 
 package inet.examples.adhoc.idealwireless;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.radio.ideal.IdealRadioMedium;
 
 

@@ -15,10 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.manetrouting;
+package inet.routing.extras;
 
-import inet.networklayer.manetrouting.base.BaseRouting;
 import inet.networklayer.IManetRouting;
+import inet.routing.extras.base.BaseRouting;
 
 
 //
@@ -46,9 +46,9 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         string icmpModule = default("^.networkLayer.icmp");
         string arpModule = default("^.networkLayer.arp");
         int Willingness = default(3); // (0..7) The node's willingness to carry traffic on behalf of other nodes. 0:NEVER .. 7:ALWAYS (section 18.8)
-        double Hello_ival  @unit(s)= default(2s); // (s) HELLO messages' emission interval. (section 6.2)
-        double Tc_ival  @unit(s)= default(5s); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
-        double Mid_ival  @unit(s)= default(5s); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
+        double Hello_ival @unit(s) = default(2s); // (s) HELLO messages' emission interval. (section 6.2)
+        double Tc_ival @unit(s) = default(5s); // (s) Topology Control (TC) messages' emission interval. (section 9.3)
+        double Mid_ival @unit(s) = default(5s); // (s) MID (multiple interface declaration) messages' emission interval. (section 5.2) (has effect only if compiled with multiple interface support)
         int use_mac = default(0); // Determines if layer 2 notifications are enabled or not (chapter 13)
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface (EXPERIMENTAL)
         bool reduceFuncionality = default(false);
@@ -57,7 +57,7 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         int Link_quality = default(2); // Determines which heuristic (1:NONE 2:ETX 3:ML) should be used for link quality computation
         bool Fish_eye = default(false);  // Determine whether fish eye extension should be used
         int Tc_redundancy @enum(0,1,2,3) = default(1); // Determine the redundancy level of TC messages (section 15.1)
-       //  OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET               0
+        //  OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET               0
         // publish nodes in mpr sel set plus nodes in mpr set (RFC 3626)
         // OLSR_ETX_TC_REDUNDANCY_MPR_SEL_SET_PLUS_MPR_SET  1
         // publish full neighbor link set (RFC 3626)
@@ -66,12 +66,12 @@ simple OLSR_ETX extends BaseRouting like IManetRouting
         // OLSR_ETX_TC_REDUNDANCY_MPR_SET                   3
         bool Link_delay = default(true);  // Determine whether the link delay extension should be enabled
         double C_alpha = default(0.6);  // Factor that will be used to smooth link delays (0 .. 1)
-    ///
-    /// \brief Period at which a node must cite every link and every neighbor.
-    ///
-    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-    ///
-        double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+        ///
+        /// \brief Period at which a node must cite every link and every neighbor.
+        ///
+        /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+        ///
+        double OLSR_REFRESH_INTERVAL @unit("s") = default(2s);
         bool PublicRoutingTables = default(false);
 
         bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages

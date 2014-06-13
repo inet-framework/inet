@@ -18,9 +18,9 @@
 
 package inet.examples.wireless.lan80211;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 
@@ -42,7 +42,7 @@ network Lan80211
             @display("p=61,46");
         }
         configurator: IPv4NetworkConfigurator {
-            config=xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
+            config = xml("<config><interface hosts='*' address='145.236.x.x' netmask='255.255.0.0'/></config>");
             @display("p=140,50");
         }
 }

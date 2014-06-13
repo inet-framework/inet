@@ -19,11 +19,12 @@
 
 package inet.examples.diffserv.simple_;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
+
 
 //
 // This network contains a router with an 10Mbps Ethernet interface,
@@ -52,8 +53,7 @@ network DiffservNetwork
         router: Router {
             @display("p=318,108");
         }
-        client[numClients]: StandardHost {
-        }
+        client[numClients]: StandardHost;
         server: StandardHost {
             @display("p=436,108");
         }
@@ -66,7 +66,7 @@ network DiffservNetwork
     connections:
         router.pppg++ <--> dialup <--> server.pppg++;
         etherSwitch.ethg++ <--> ethernetline <--> router.ethg++;
-        for i = 0 .. numClients-1 {
+        for i=0..numClients-1 {
             client[i].ethg++ <--> ethernetline <--> etherSwitch.ethg++;
         }
 }

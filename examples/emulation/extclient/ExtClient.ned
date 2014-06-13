@@ -18,7 +18,7 @@
 
 package inet.examples.emulation.extclient;
 
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.StandardHost;
 
 
 network ExtClient

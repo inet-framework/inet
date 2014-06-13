@@ -24,8 +24,8 @@ No signals are expected to be received.
 
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
 import inet.physicallayer.radio.dimensional.DimensionalRadioMedium;
 
 network Test

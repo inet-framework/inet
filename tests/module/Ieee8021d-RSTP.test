@@ -4,11 +4,11 @@ Test RSTP treebuilding
 
 %file: test.ned
 
-import inet.nodes.ethernet.Eth1G;
-import inet.nodes.ethernet.EtherHost;
-import inet.base.LifecycleController;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.world.scenario.ScenarioManager;
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherHost;
+import inet.common.lifecycle.LifecycleController;
+import inet.node.ethernet.EtherSwitch;
+import inet.common.scenario.ScenarioManager;
 import inet.linklayer.configurator.L2NetworkConfigurator;
 import inet.linklayer.ieee8021d.tester.STPTester;
 

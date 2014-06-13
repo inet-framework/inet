@@ -18,9 +18,9 @@
 
 package inet.examples.wireless.handover;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
-import inet.nodes.wireless.AccessPoint;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
+import inet.node.wireless.AccessPoint;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 

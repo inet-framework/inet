@@ -18,12 +18,13 @@
 
 package inet.examples.manetrouting.hna;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.inet.AdhocHost;
-import inet.nodes.inet.StandardHost;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.Eth100M;
+import inet.node.inet.AdhocHost;
+import inet.node.inet.StandardHost;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.util.ThruputMeteringChannel;
+
 
 network AdhocNet
 {

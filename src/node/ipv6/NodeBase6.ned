@@ -15,8 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.ipv6;
+package inet.node.ipv6;
 
+import inet.common.packet.PcapRecorder;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
@@ -26,7 +27,6 @@ import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.ipv6.IPv6NetworkLayer;
 import inet.networklayer.ipv6.IPv6RoutingTable;
 import inet.power.contract.IPowerSource;
-import inet.util.PcapRecorder;
 
 
 //

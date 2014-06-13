@@ -54,7 +54,7 @@ import inet.applications.IUDPApp;
 //          All modules whose getNedTypeName() is listed in the given parameters will get included.
 //          The NED type name is fully qualified.
 //          See cTopology::extractByNedTypeName() function
-//          example: destaddresses = moduleListByNedType("inet.nodes.inet.StandardHost")
+//          example: destaddresses = moduleListByNedType("inet.node.inet.StandardHost")
 //
 // The peer can be UDPSink or another UDPBasicBurst.
 //

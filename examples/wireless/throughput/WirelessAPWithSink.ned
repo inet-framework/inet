@@ -18,9 +18,10 @@
 
 package inet.examples.wireless.throughput;
 
-import inet.base.Sink;
+import inet.common.queue.Sink;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.static.StationaryMobility;
+
 
 //
 // Well, this models a 802.11 Access Point with a Sink.

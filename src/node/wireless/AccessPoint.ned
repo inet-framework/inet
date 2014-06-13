@@ -13,15 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.nodes.wireless;
+package inet.node.wireless;
 
+import inet.common.lifecycle.NodeStatus;
+import inet.linklayer.IMACAddressTable;
 import inet.linklayer.IMACRelayUnit;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
-import inet.linklayer.IMACAddressTable;
 import inet.mobility.contract.IMobility;
 import inet.networklayer.common.InterfaceTable;
-import inet.status.NodeStatus;
 
 
 //

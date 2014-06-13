@@ -16,7 +16,7 @@
 //
 
 
-package inet.queue;
+package inet.common.queue;
 
 //
 // Drop-tail queue, to be used in network interfaces.

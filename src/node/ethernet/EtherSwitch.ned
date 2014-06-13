@@ -16,15 +16,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.ethernet;
+package inet.node.ethernet;
 
+import inet.common.lifecycle.NodeStatus;
+import inet.linklayer.IMACAddressTable;
 import inet.linklayer.IMACRelayUnit;
+import inet.linklayer.ISpanningTree;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.configurator.L2NodeConfigurator;
-import inet.linklayer.IMACAddressTable;
-import inet.linklayer.ISpanningTree;
 import inet.networklayer.common.InterfaceTable;
-import inet.status.NodeStatus;
 
 
 //

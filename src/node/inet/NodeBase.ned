@@ -15,8 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.inet;
+package inet.node.inet;
 
+import inet.common.lifecycle.NodeStatus;
+import inet.common.packet.PcapRecorder;
 import inet.linklayer.IExternalNic;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.IWirelessNic;
@@ -26,8 +28,6 @@ import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
 import inet.power.contract.IPowerSource;
-import inet.status.NodeStatus;
-import inet.util.PcapRecorder;
 
 
 //

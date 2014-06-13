@@ -15,13 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.inet;
+package inet.node.inet;
 
-import inet.networklayer.bgpv4.BGPRouting;
-import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.routing.rip.RIPRouting;
-import inet.transport.ITCP;
-import inet.transport.IUDP;
+import inet.routing.bgpv4.BGPRouting;
+import inet.routing.ospfv2.OSPFRouting;
+import inet.routing.rip.RIPRouting;
+import inet.transportlayer.ITCP;
+import inet.transportlayer.IUDP;
+
 
 //
 // IPv4 router that supports wireless, Ethernet, PPP and external interfaces.

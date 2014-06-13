@@ -7,10 +7,10 @@ Testing RIP routing
 %file: test.ned
 
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.rip.RIPRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RIPRouter;
+import inet.common.misc.ThruputMeteringChannel;
 
 
 network Test1

@@ -16,7 +16,7 @@
 //
 
 
-package inet.world.scenario;
+package inet.common.scenario;
 
 //
 // ~ScenarioManager is for setting up and controlling simulation experiments.

@@ -15,11 +15,11 @@
 
 package inet.examples.ethernet.arptest2;
 
-import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
 import inet.linklayer.ethernet.EtherBus;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
 
 
 network ARPTest

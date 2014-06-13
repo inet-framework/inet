@@ -16,7 +16,7 @@
 //
 
 
-package inet.transport;
+package inet.transportlayer;
 
 //
 // Interface for TCP protocol implementations. All TCP implementations should

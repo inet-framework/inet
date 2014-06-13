@@ -15,8 +15,8 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 //
 package inet.examples.manetrouting.manetMultiradio;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 

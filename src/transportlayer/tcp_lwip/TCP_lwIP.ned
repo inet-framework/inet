@@ -17,9 +17,9 @@
 //
 
 
-package inet.transport.tcp_lwip;
+package inet.transportlayer.tcp_lwip;
 
-import inet.transport.ITCP;
+import inet.transportlayer.ITCP;
 
 
 //

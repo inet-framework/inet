@@ -6,8 +6,8 @@ Transmission and reception parameters must match with DetailedRadio.
 
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
 import inet.physicallayer.radio.scalar.ScalarRadioMedium;
 
 network Test

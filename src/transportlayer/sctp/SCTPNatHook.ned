@@ -1,6 +1,6 @@
-package inet.transport.sctp;
+package inet.transportlayer.sctp;
 
-import inet.base.IHook;
+import inet.common.IHook;
 
 
 //

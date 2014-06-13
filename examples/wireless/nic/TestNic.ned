@@ -18,9 +18,9 @@
 
 package inet.examples.wireless.nic;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
 import inet.physicallayer.radio.contract.IRadioMedium;
 
 

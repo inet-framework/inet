@@ -19,13 +19,13 @@
 
 package inet.examples.voipstream.VoIPStreamLargeNet;
 
-import ned.DatarateChannel;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.linklayer.ethernet.EtherHub;
 import inet.linklayer.ethernet.EtherBus;
+import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.StandardHost;
+import ned.DatarateChannel;
 
 
 channel cable extends DatarateChannel

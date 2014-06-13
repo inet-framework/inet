@@ -17,7 +17,7 @@
 
 
 
-package inet.base;
+package inet.common.queue;
 
 //
 // Joins multiple input streams into a single output stream.

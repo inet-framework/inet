@@ -5,8 +5,8 @@ The received signal is too weak to sense at all.
 
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.WirelessHost;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.WirelessHost;
 import inet.physicallayer.radio.ideal.IdealRadioMedium;
 
 network Test

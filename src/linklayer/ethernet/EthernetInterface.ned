@@ -20,7 +20,7 @@
 
 package inet.linklayer.ethernet;
 
-import inet.base.IHook;
+import inet.common.IHook;
 import inet.linklayer.IEtherMAC;
 import inet.linklayer.ITrafficConditioner;
 import inet.linklayer.IWiredNic;
@@ -81,7 +81,7 @@ module EthernetInterface like IWiredNic
         mac.phys <--> { @display("m=s"); } <--> phys;
 
         if queueType != "" {
-            encap.lowerLayerOut --> queue.in ;
+            encap.lowerLayerOut --> queue.in;
             queue.out --> mac.upperLayerIn;
         }
 

@@ -18,7 +18,7 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-package inet.networklayer.autorouting.ipv4;
+package inet.networklayer.configurator.ipv4;
 
 //
 // This module assigns IP addresses and sets up static routing for an IPv4 network.

@@ -17,20 +17,20 @@
 
 package inet.examples.bgpv4.BGPUpdate;
 
-import inet.util.MessageChecker;
-import inet.transport.ITCP;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ospfv2.OSPFRouting;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.networklayer.common.InterfaceTable;
-import inet.networklayer.bgpv4.BGPRouting;
+import inet.common.misc.MessageChecker;
 import inet.linklayer.IWiredNic;
+import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.ipv4.IPv4NetworkLayer;
+import inet.networklayer.ipv4.IPv4RoutingTable;
+import inet.routing.bgpv4.BGPRouting;
+import inet.routing.ospfv2.OSPFRouting;
+import inet.transportlayer.ITCP;
 
 
 //
 // Example IP router with BGPv4 and OSPFv4 support.
 //
-module BGPRouter
+module BGPRouterEx
 {
     parameters:
         @node();

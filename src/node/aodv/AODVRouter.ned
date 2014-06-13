@@ -15,10 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.nodes.aodv;
+package inet.node.aodv;
 
-import inet.networklayer.routing.aodv.AODVRouting;
-import inet.nodes.inet.WirelessHost;
+import inet.node.inet.WirelessHost;
+import inet.routing.aodv.AODVRouting;
 
 
 //

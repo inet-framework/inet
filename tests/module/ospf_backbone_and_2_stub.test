@@ -6,10 +6,10 @@ Testing OSPF routing
 %file: test.ned
 
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
+import inet.common.misc.ThruputMeteringChannel;
 
 
 network Test1

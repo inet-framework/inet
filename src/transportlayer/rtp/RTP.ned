@@ -1,4 +1,4 @@
-package inet.transport.rtp;
+package inet.transportlayer.rtp;
 
 //
 // The RTP module is the center of the RTP layer of an endsystem.

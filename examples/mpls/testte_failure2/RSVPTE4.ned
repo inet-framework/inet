@@ -14,12 +14,11 @@
 
 package inet.examples.mpls.testte_failure2;
 
-import inet.base.LifecycleController;
-import inet.base.UnimplementedModule;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.RSVP_LSR;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.RSVP_LSR;
 
 
 //

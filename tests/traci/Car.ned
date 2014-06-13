@@ -22,9 +22,9 @@ package inet.tests.traci;
 
 import inet.networklayer.common.InterfaceTable;
 import inet.applications.traci.TraCITestApp;
-import inet.mobility.models.TraCIMobility;
+import inet.mobility.group.TraCIMobility;
 import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.transport.udp.UDP;
+import inet.transportlayer.udp.UDP;
 import inet.networklayer.ipv4.IPv4NetworkLayer;
 import inet.linklayer.ieee80211.Ieee80211Nic;
 

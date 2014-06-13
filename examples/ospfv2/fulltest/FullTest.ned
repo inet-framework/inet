@@ -3,11 +3,11 @@
 
 package inet.examples.ospfv2.fulltest;
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
 
 
 channel C extends ThruputMeteringChannel

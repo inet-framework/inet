@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.nodes.bgp;
+package inet.node.bgp;
 
-import inet.nodes.inet.Router;
+import inet.node.inet.Router;
 
 
 //

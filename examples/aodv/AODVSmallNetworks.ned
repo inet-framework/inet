@@ -17,12 +17,12 @@
 
 package inet.examples.aodv;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.aodv.AODVRouter;
+import inet.node.aodv.AODVRouter;
 import inet.physicallayer.radio.ideal.IdealRadioMedium;
-import inet.world.scenario.ScenarioManager;
 
 
 network SimpleRREQ

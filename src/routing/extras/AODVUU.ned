@@ -15,10 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.manetrouting;
+package inet.routing.extras;
 
-import inet.networklayer.manetrouting.base.BaseRouting;
 import inet.networklayer.IManetRouting;
+import inet.routing.extras.base.BaseRouting;
 
 
 //
@@ -61,15 +61,15 @@ simple AODVUU extends BaseRouting like IManetRouting
         volatile double unicastDelay @unit("s") = default(0s);  // a delay added to unicast messaged (i.e. data packet forwarding) (used to model processing time)
         bool UseIndex = default(false);         // use the interface index instead the ip to identify the interface
         bool useHover = default(false);
-        int  costStatic = default(1);
-        int  costMobile = default(4);
+        int costStatic = default(1);
+        int costMobile = default(4);
         bool isRoot = default(false); // Proactive RREQ
         int proactiveRreqTimeout @unit(ms) = default(5000ms);// 5 seconds
         int proactiveLifeTime @unit(ms) = default(0ms); // if zero lifetime is PATH_DISCOVERY_TIME - 2 * rreq_new_hcnt * NODE_TRAVERSAL_TIME;
         int startRreqProactive @unit(ms) = default(uniform(1000ms,2000ms));
         bool propagateProactive = default(true); // Proactive feedback
         bool checkNextHop = default(false);
-        bool PublicRoutingTables =default(false);
+        bool PublicRoutingTables = default(false);
     gates:
         input from_ip;
         output to_ip;

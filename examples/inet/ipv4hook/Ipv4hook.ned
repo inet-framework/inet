@@ -1,13 +1,13 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 package inet.examples.inet.ipv4hook;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.IPv4HookInfo;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
 

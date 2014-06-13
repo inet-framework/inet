@@ -2,10 +2,10 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-package inet.nodes.dymo;
+package inet.node.dymo;
 
-import inet.networklayer.routing.dymo.IDYMO;
-import inet.nodes.inet.WirelessHost;
+import inet.node.inet.WirelessHost;
+import inet.routing.dymo.IDYMO;
 
 
 //

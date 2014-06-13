@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.base;
+package inet.common.misc;
 
 //
 // A module that does nothing, apart from throwing a "not implemented"

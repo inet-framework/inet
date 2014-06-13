@@ -17,7 +17,8 @@
 
 package inet.networklayer.common;
 
-import inet.base.LayeredProtocolBase;
+import inet.common.LayeredProtocolBase;
+
 
 //
 // Module base for different network protocols.

@@ -3,6 +3,4 @@ src
 -inet.transportlayer.tcp_lwip
 -inet.transportlayer.tcp_nsc
 -inet.applications.voipstream
--inet.transport.tcp_lwip
--inet.transport.tcp_nsc
 -inet.examples.voipstream

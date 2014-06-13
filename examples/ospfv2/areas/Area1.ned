@@ -1,10 +1,10 @@
 
 package inet.examples.ospfv2.areas;
 
-import ned.DatarateChannel;
-import inet.nodes.ospfv2.OSPFRouter;
-import inet.nodes.inet.StandardHost;
 import inet.linklayer.ethernet.EtherHub;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
+import ned.DatarateChannel;
 
 
 module TwoNetsArea

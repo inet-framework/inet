@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.util;
+package inet.common.misc;
 
-import inet.base.IHook;
+import inet.common.IHook;
+
 
 //
 // Thruput measurement utility module.

@@ -1,4 +1,4 @@
-package inet.transport.rtp;
+package inet.transportlayer.rtp;
 
 //
 // Interface for RTP Payload Receivers.
@@ -22,7 +22,7 @@ simple RTPPayloadReceiver like IRTPPayloadReceiver
     parameters:
         string outputFileName;
         string outputLogFileName = default("outputLogLoss%d.log");
-        @signal[rcvdPkRtpTimestamp](type=simtime_t;unit=s);
+        @signal[rcvdPkRtpTimestamp](type=simtime_t; unit=s);
         @statistic[rcvdPkRtpTimestamp](title="received packet RTP timestamp"; record=vector);
 
     gates:

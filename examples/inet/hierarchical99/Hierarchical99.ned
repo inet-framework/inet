@@ -18,14 +18,14 @@
 
 package inet.examples.inet.hierarchical99;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.ethernet.Eth100M;
-import inet.nodes.ethernet.Eth10G;
-import inet.nodes.ethernet.Eth1G;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.node.ethernet.Eth100M;
+import inet.node.ethernet.Eth10G;
+import inet.node.ethernet.Eth1G;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 
 
 //

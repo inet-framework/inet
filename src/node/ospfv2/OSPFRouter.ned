@@ -16,9 +16,9 @@
 //
 
 
-package inet.nodes.ospfv2;
+package inet.node.ospfv2;
 
-import inet.nodes.inet.Router;
+import inet.node.inet.Router;
 
 
 //

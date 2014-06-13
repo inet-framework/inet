@@ -4,11 +4,13 @@
 
 package inet.examples.emulation.extserver;
 
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
 
-network extserver {
+
+network extserver
+{
     parameters:
         @display("bgb=400,200");
     submodules:
@@ -36,7 +38,8 @@ network extserver {
         router.pppg[1] <--> NormalPath <--> server.pppg[0];
 }
 
-channel NormalPath extends DatarateChannel {
+channel NormalPath extends DatarateChannel
+{
     parameters:
         datarate = 100Mbps;
         delay = 0.0565us; // 10m

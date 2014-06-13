@@ -17,19 +17,19 @@
 // @author Zoltan Bojthe
 //
 
-package inet.nodes.internetcloud;
+package inet.node.internetcloud;
 
 
+import inet.common.packet.PcapRecorder;
 import inet.linklayer.IWiredNic;
 import inet.networklayer.arp.ipv4.ARP;
-import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.common.InterfaceTable;
+import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
 import inet.networklayer.internetcloud.ICloudDelayer;
 import inet.networklayer.ipv4.ErrorHandling;
 import inet.networklayer.ipv4.ICMP;
 import inet.networklayer.ipv4.IPv4;
 import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.util.PcapRecorder;
 
 
 //

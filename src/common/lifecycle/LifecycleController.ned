@@ -14,7 +14,7 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-package inet.base;
+package inet.common.lifecycle;
 
 //
 // Manages operations like shutdown/restart, suspend/resume, crash/recover

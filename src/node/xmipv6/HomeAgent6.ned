@@ -19,9 +19,9 @@
 //
 
 
-package inet.nodes.xmipv6;
+package inet.node.xmipv6;
 
-import inet.nodes.ipv6.Router6;
+import inet.node.ipv6.Router6;
 
 
 //

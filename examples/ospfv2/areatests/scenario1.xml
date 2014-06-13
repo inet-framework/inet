@@ -6,7 +6,7 @@
     <at t="500">
         <connect src-module="Backbone.R[0]" src-gate="ethg[2]"
                  dest-module="Backbone.R[1]" dest-gate="ethg[1]"
-                 channel-type="inet.util.ThruputMeteringChannel">
+                 channel-type="inet.common.misc.ThruputMeteringChannel">
             <param name="delay" value="0.1us" />
             <param name="datarate" value="100Mbps" />
             <param name="thruputDisplayFormat" value='"#N"' />

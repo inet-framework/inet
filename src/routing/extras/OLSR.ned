@@ -15,10 +15,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.manetrouting;
+package inet.routing.extras;
 
-import inet.networklayer.manetrouting.base.BaseRouting;
 import inet.networklayer.IManetRouting;
+import inet.routing.extras.base.BaseRouting;
 
 
 //
@@ -50,12 +50,12 @@ simple OLSR extends BaseRouting like IManetRouting
         bool UseIndex = default(false); // use the interface index instead the ip to identify the interface (EXPERIMENTAL)
         bool reduceFuncionality = default(false);
 
-    ///
-    /// \brief Period at which a node must cite every link and every neighbor.
-    ///
-    /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
-    ///
-        double OLSR_REFRESH_INTERVAL @unit("s")=default(2s);
+        ///
+        /// \brief Period at which a node must cite every link and every neighbor.
+        ///
+        /// We only use this value in order to define OLSR_NEIGHB_HOLD_TIME.
+        ///
+        double OLSR_REFRESH_INTERVAL @unit("s") = default(2s);
         bool PublicRoutingTables = default(false);
 
         bool optimizedMid = default(false);// only nodes with more that a interface sends mid messages

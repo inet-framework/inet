@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.networklayer.manetrouting.dymo_fau;
+package inet.routing.extras.dymo_fau;
 
 //
 // This Queue goes between transport and network layer. It intercepts data packets for which we do not have a route for yet. Operations are supervised and controlled by the user-space module called "dymo".

@@ -19,11 +19,11 @@
 
 package inet.examples.diffserv.onedomain;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.util.ThruputMeteringChannel;
-import ned.DatarateChannel;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
+import inet.node.inet.StandardHost;
+
 
 network DiffservNetwork
 {

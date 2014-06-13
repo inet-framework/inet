@@ -2,9 +2,9 @@
 
 package inet.examples.ospfv2.areatests;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.util.ThruputMeteringChannel;
-import inet.world.scenario.ScenarioManager;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 
 network OSPF_BackboneAndOneStubTest

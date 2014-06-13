@@ -17,7 +17,7 @@
 //
 
 
-package inet.networklayer.autorouting.ipv6;
+package inet.networklayer.configurator.ipv6;
 
 //
 // Configures IPv6 addresses and routing tables for a "flat" network,

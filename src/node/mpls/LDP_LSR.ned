@@ -9,8 +9,9 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 // See the GNU Lesser General Public License for more details.
 //
-package inet.nodes.mpls;
+package inet.node.mpls;
 
+import inet.common.lifecycle.NodeStatus;
 import inet.linklayer.IWiredNic;
 import inet.linklayer.loopback.LoopbackInterface;
 import inet.networklayer.common.InterfaceTable;
@@ -21,9 +22,8 @@ import inet.networklayer.mpls.LIBTable;
 import inet.networklayer.mpls.MPLS;
 import inet.networklayer.ted.LinkStateRouting;
 import inet.networklayer.ted.TED;
-import inet.status.NodeStatus;
-import inet.transport.ITCP;
-import inet.transport.IUDP;
+import inet.transportlayer.ITCP;
+import inet.transportlayer.IUDP;
 
 
 //

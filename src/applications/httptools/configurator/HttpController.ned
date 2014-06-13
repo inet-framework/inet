@@ -29,7 +29,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.world.httptools;
+package inet.applications.httptools.configurator;
 
 //
 // HttpController

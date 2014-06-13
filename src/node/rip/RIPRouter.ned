@@ -16,9 +16,10 @@
 //
 
 
-package inet.nodes.rip;
+package inet.node.rip;
 
-import inet.nodes.inet.Router;
+import inet.node.inet.Router;
+
 
 //
 // An RIPv2 router.

@@ -1,7 +1,7 @@
 //
 // This program is property of its copyright holder. All rights reserved.
 //
-package inet.util;
+package inet.common.misc;
 
 //
 // This channels adds suport for thruput meternig to the datarate channel

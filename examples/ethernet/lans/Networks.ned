@@ -20,12 +20,12 @@
 
 package inet.examples.ethernet.lans;
 
-import ned.DatarateChannel;
-import inet.util.ThruputMeteringChannel;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.ethernet.EtherHost;
-import inet.linklayer.ethernet.EtherHub;
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherBus;
+import inet.linklayer.ethernet.EtherHub;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
+import ned.DatarateChannel;
 
 
 //

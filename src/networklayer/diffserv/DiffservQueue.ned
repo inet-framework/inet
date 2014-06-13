@@ -18,11 +18,11 @@
 
 package inet.networklayer.diffserv;
 
-import inet.base.Sink;
-import inet.queue.DropTailQueue;
-import inet.queue.IOutputQueue;
-import inet.queue.PriorityScheduler;
-import inet.queue.WRRScheduler;
+import inet.common.queue.DropTailQueue;
+import inet.common.queue.IOutputQueue;
+import inet.common.queue.PriorityScheduler;
+import inet.common.queue.Sink;
+import inet.common.queue.WRRScheduler;
 
 
 //

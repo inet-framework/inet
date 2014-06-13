@@ -17,7 +17,8 @@
 
 package inet.linklayer.common;
 
-import inet.base.LayeredProtocolBase;
+import inet.common.LayeredProtocolBase;
+
 
 //
 // Module base for different MAC protocols.

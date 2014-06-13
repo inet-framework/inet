@@ -3,10 +3,10 @@ Testing DHCP protocol
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.ethernet.EtherSwitch;
-import inet.nodes.inet.StandardHost;
-import inet.util.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.ethernet.EtherSwitch;
+import inet.node.inet.StandardHost;
+import inet.common.misc.ThruputMeteringChannel;
 
 network DhcpExample
 {

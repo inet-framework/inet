@@ -18,7 +18,7 @@
 // Authors: Levente Meszaros
 //
 
-package inet.networklayer.autorouting.ipv4;
+package inet.networklayer.configurator.ipv4;
 
 //
 // This module has one instance per network node, and it acts like a bridge

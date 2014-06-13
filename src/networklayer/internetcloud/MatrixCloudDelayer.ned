@@ -19,15 +19,13 @@
 
 package inet.networklayer.internetcloud;
 
-import inet.networklayer.internetcloud.ICloudDelayer;
-
 //
-// Delay module for ~InternetCloud. This is essentially equivalent to a full graph 
-// with edges being differently configured DatarateChannels. It delays and/or drops 
+// Delay module for ~InternetCloud. This is essentially equivalent to a full graph
+// with edges being differently configured DatarateChannels. It delays and/or drops
 // incoming packets based on rules specified in an xml configuration.
-// 
-// Rules are matched by incoming and outgoing neighbour node names, and specify 
-// delay, datarate or drop decision (all optional). Delay may be different for each 
+//
+// Rules are matched by incoming and outgoing neighbour node names, and specify
+// delay, datarate or drop decision (all optional). Delay may be different for each
 // packet, but the order of packet is preserved.
 //
 // Using the interface IDs the module will look up the names of the connected nodes
@@ -45,13 +43,13 @@ import inet.networklayer.internetcloud.ICloudDelayer;
 //    </internetCloud>
 // </pre>
 //
-// - The "delay","datarate" and "drop" attributes of <traffic> are NED expressions that 
+// - The "delay","datarate" and "drop" attributes of <traffic> are NED expressions that
 //   are evaluated for each packet. ("drop" must evaluate to boolean.)
-// - The "symmetric" attribute of <traffic> specifies whether the rule applies to 
+// - The "symmetric" attribute of <traffic> specifies whether the rule applies to
 //   both src->dest and dest->src packets.
-// - The "symmetric" attribute of <internetCloud> specifies the default value for 
+// - The "symmetric" attribute of <internetCloud> specifies the default value for
 //   the <traffic> entries.
-// 
+//
 // @see InternetCloud
 //
 simple MatrixCloudDelayer like ICloudDelayer

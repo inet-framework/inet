@@ -21,8 +21,8 @@ package inet.examples.ethernet.lans;
 
 import inet.linklayer.ethernet.EtherBus;
 import inet.linklayer.ethernet.EtherHub;
-import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 
 

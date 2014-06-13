@@ -12,10 +12,10 @@
 
 package inet.examples.mpls.net37;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.mpls.RSVP_LSR;
-import inet.util.ThruputMeteringChannel;
+import inet.common.misc.ThruputMeteringChannel;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.mpls.RSVP_LSR;
 
 
 network R37

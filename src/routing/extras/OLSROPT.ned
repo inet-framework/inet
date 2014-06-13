@@ -15,9 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.manetrouting;
+package inet.routing.extras;
 
-import inet.networklayer.manetrouting.base.BaseRouting;
 import inet.networklayer.IManetRouting;
 
 

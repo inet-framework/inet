@@ -17,9 +17,9 @@
 //
 
 
-package inet.transport.tcp_nsc;
+package inet.transportlayer.tcp_nsc;
 
-import inet.transport.ITCP;
+import inet.transportlayer.ITCP;
 
 
 //

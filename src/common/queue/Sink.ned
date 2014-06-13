@@ -17,7 +17,7 @@
 
 
 
-package inet.base;
+package inet.common.queue;
 
 //
 // Silently discards all received packets.

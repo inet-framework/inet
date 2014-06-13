@@ -23,14 +23,14 @@
 
 package inet.examples.mobileipv6;
 
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.nodes.xmipv6.WirelessHost6;
-import inet.nodes.xmipv6.HomeAgent6;
-import inet.nodes.xmipv6.CorrespondentNode6;
-import inet.nodes.wireless.AccessPoint;
-import inet.nodes.ipv6.Router6;
-import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 import inet.linklayer.ethernet.EtherHub;
+import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
+import inet.node.ipv6.Router6;
+import inet.node.wireless.AccessPoint;
+import inet.node.xmipv6.CorrespondentNode6;
+import inet.node.xmipv6.HomeAgent6;
+import inet.node.xmipv6.WirelessHost6;
+import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
 
 
 channel fiberline extends ned.DatarateChannel

@@ -15,9 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.transport.common;
+package inet.transportlayer.common;
 
-import inet.base.LayeredProtocolBase;
+import inet.common.LayeredProtocolBase;
+
 
 //
 // Module base for different transport protocols.

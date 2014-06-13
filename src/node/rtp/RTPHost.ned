@@ -1,11 +1,11 @@
 // the original file was included in the ~UDP sockets example
 
-package inet.nodes.rtp;
+package inet.node.rtp;
 
 import inet.applications.rtpapp.RTPApplication;
-import inet.nodes.inet.StandardHost;
-import inet.transport.rtp.RTCP;
-import inet.transport.rtp.RTP;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.rtp.RTCP;
+import inet.transportlayer.rtp.RTP;
 import ned.IdealChannel;
 
 

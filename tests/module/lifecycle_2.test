@@ -22,10 +22,10 @@ record-eventlog = true
 
 %file: test.ned
 
-import inet.nodes.inet.StandardHost;
-import inet.base.LifecycleController;
+import inet.node.inet.StandardHost;
+import inet.common.lifecycle.LifecycleController;
 import inet.status.NodeStatus;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 network Test
 {

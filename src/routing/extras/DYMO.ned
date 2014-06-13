@@ -17,10 +17,10 @@
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-package inet.networklayer.manetrouting;
+package inet.routing.extras;
 
-import inet.networklayer.manetrouting.base.BaseRouting;
 import inet.networklayer.IManetRouting;
+import inet.routing.extras.base.BaseRouting;
 
 
 //

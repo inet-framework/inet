@@ -18,9 +18,9 @@
 //
 
 
-package inet.util;
+package inet.common.queue;
 
-import inet.base.IHook;
+import inet.common.IHook;
 
 
 //

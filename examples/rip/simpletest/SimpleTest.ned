@@ -1,13 +1,13 @@
 
 package inet.examples.rip.simpletest;
 
+import inet.common.misc.ThruputMeteringChannel;
 import inet.linklayer.ethernet.EtherHub;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv6.FlatNetworkConfigurator6;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.rip.RIPRouter;
-import inet.util.ThruputMeteringChannel;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RIPRouter;
 
 
 network SimpleTest

@@ -16,9 +16,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.transport.sctp;
+package inet.transportlayer.sctp;
 
-import inet.transport.ISCTP;
+import inet.transportlayer.ISCTP;
 
 
 //

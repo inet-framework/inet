@@ -15,7 +15,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-package inet.applications.httptools;
+package inet.applications.httptools.server;
+
+import inet.applications.httptools.common.IHttpDirectApp;
+
 
 //
 // Demonstrates subclassing the server to create a custom site. This site is an attacker -- a puppetmaster --

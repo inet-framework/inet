@@ -43,11 +43,11 @@ cmdenv-express-mode = false
 
 
 import inet.applications.generic.IIPvXTrafficGenerator;
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.autorouting.ipv4.IPv4NodeConfigurator;
-import inet.nodes.inet.NodeBase;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NodeConfigurator;
+import inet.node.inet.NodeBase;
+import inet.common.scenario.ScenarioManager;
 
 
 module TrafGenHost extends NodeBase

@@ -159,7 +159,7 @@ void RTPProfile::createSenderModule(RTPInnerPacket *rinp)
     char moduleName[100];
 
     EV_INFO << "ProfileName: " << _profileName << " payloadType: " << payloadType<<endl;
-    const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
+    const char *pkgPrefix = "inet.transportlayer.rtp."; //FIXME hardcoded string
     sprintf(moduleName, "%sRTP%sPayload%iSender", pkgPrefix, _profileName, payloadType);
 
     cModuleType *moduleType = cModuleType::find(moduleName);
@@ -220,7 +220,7 @@ void RTPProfile::dataIn(RTPInnerPacket *rinp)
     {
         ssrcGate = newSSRCGate(ssrc);
         char payloadReceiverName[100];
-        const char *pkgPrefix = "inet.transport.rtp."; //FIXME hardcoded string
+        const char *pkgPrefix = "inet.transportlayer.rtp."; //FIXME hardcoded string
         sprintf(payloadReceiverName, "%sRTP%sPayload%iReceiver",
                 pkgPrefix, _profileName, packet->getPayloadType());
 

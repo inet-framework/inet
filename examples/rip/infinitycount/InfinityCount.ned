@@ -1,13 +1,12 @@
 //
 // This program is property of its copyright holder. All rights reserved.
-// 
+//
 
 package inet.examples.rip.infinitycount;
 
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.Router;
-import inet.nodes.inet.StandardHost;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 

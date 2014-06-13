@@ -3,12 +3,12 @@ This example tests a single route request with one intermediate node
 between the sender and the receiver.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.aodv.AODVRouter;
+import inet.node.aodv.AODVRouter;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 network AODVTest
 {

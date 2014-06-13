@@ -15,12 +15,12 @@
 
 package inet.examples.manetrouting.aodvuu;
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.common.lifecycle.LifecycleController;
+import inet.common.scenario.ScenarioManager;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
-import inet.nodes.inet.AdhocHost;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
-import inet.world.scenario.ScenarioManager;
 
 
 network AODVUUNetwork

@@ -28,9 +28,9 @@
 //
 // ----------------------------------------------------------------------------
 
-package inet.nodes.httptools;
+package inet.node.httptools;
 
-import inet.applications.httptools.IHttpDirectApp;
+import inet.applications.httptools.common.IHttpDirectApp;
 
 
 //

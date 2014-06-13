@@ -19,10 +19,10 @@
 
 package inet.linklayer.ppp;
 
-import inet.base.IHook;
+import inet.common.IHook;
+import inet.common.queue.IOutputQueue;
 import inet.linklayer.ITrafficConditioner;
 import inet.linklayer.IWiredNic;
-import inet.queue.IOutputQueue;
 
 
 //

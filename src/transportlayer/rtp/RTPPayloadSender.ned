@@ -1,4 +1,4 @@
-package inet.transport.rtp;
+package inet.transportlayer.rtp;
 
 //
 // Interface for RTP Payload Senders.

@@ -16,9 +16,9 @@
 //
 
 
-package inet.transport.tcp_common;
+package inet.transportlayer.tcp_common;
 
-import inet.transport.ITCP;
+import inet.transportlayer.ITCP;
 
 
 //

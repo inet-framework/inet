@@ -15,7 +15,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.networklayer.manetrouting.base;
+package inet.routing.extras.base;
 
 //
 // Base module for mobile routing protocols

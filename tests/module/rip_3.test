@@ -20,11 +20,11 @@ It is checked that:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
-import inet.base.LifecycleController;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.rip.RIPRouter;
-import inet.world.scenario.ScenarioManager;
+import inet.common.lifecycle.LifecycleController;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
+import inet.node.inet.StandardHost;
+import inet.node.rip.RIPRouter;
+import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
 network Test1

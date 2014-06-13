@@ -18,9 +18,10 @@
 
 
 
-package inet.transport.udp;
+package inet.transportlayer.udp;
 
-import inet.transport.IUDP;
+import inet.transportlayer.IUDP;
+
 
 //
 // UDP protocol implementation, for IPv4 and IPv6.

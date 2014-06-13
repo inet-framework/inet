@@ -20,9 +20,8 @@
 
 package inet.linklayer.loopback;
 
-import inet.base.IHook;
+import inet.common.IHook;
 import inet.linklayer.INic;
-import inet.linklayer.ITrafficConditioner;
 
 
 //
