@@ -32,7 +32,7 @@
 #include "INETDefs.h"
 #include "MobilityBase.h"
 #include "ModuleAccess.h"
-#include "world/traci/TraCIScenarioManager.h"
+#include "TraCIScenarioManager.h"
 
 /**
  * @brief

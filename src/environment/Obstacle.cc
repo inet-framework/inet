@@ -18,7 +18,7 @@
 //
 
 #include <set>
-#include "world/obstacles/Obstacle.h"
+#include "Obstacle.h"
 
 
 typedef std::pair<Coord, double> CoordFrac;

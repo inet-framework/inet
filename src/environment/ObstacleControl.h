@@ -27,8 +27,8 @@
 
 #include "ModuleAccess.h"
 #include "Coord.h"
-#include "world/obstacles/Obstacle.h"
-#include "world/annotations/AnnotationManager.h"
+#include "Obstacle.h"
+#include "AnnotationManager.h"
 
 /**
  * ObstacleControl models obstacles that block radio transmissions.

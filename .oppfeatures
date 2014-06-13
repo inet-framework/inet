@@ -7,7 +7,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.transport.tcp_common
+                       inet.transportlayer.tcp_common
                        inet.applications.tcpapp
                        inet.util.headerserializers.tcp
                       "
@@ -23,7 +23,7 @@
         requires = "TCP_common"
         labels = ""
         nedPackages = "
-                       inet.transport.tcp
+                       inet.transportlayer.tcp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_INET"
@@ -37,7 +37,7 @@
         requires = "TCP_common"
         labels = ""
         nedPackages = "
-                       inet.transport.tcp_lwip
+                       inet.transportlayer.tcp_lwip
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_LWIP"
@@ -55,7 +55,7 @@
         requires = "TCP_common"
         labels = ""
         nedPackages = "
-                       inet.transport.tcp_nsc
+                       inet.transportlayer.tcp_nsc
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_TCP_NSC"
@@ -72,7 +72,7 @@
                        inet.networklayer.ipv4
                        inet.networklayer.autorouting.ipv4
                        inet.networklayer.arp.ipv4
-                       inet.nodes.inet
+                       inet.node.inet
                        inet.util.headerserializers.ipv4
                       "
         extraSourceFolders = ""
@@ -105,7 +105,7 @@
                        inet.networklayer.autorouting.ipv6
                        inet.networklayer.icmpv6
                        inet.networklayer.ipv6tunneling
-                       inet.nodes.ipv6
+                       inet.node.ipv6
                        inet.util.headerserializers.ipv6
                       "
         extraSourceFolders = ""
@@ -135,7 +135,7 @@
         labels = "protocols"
         nedPackages = "
                        inet.networklayer.xmipv6
-                       inet.nodes.xmipv6
+                       inet.node.xmipv6
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_xMIPv6"
@@ -163,7 +163,7 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.transport.udp
+                       inet.transportlayer.udp
                        inet.applications.udpapp
                        inet.util.headerserializers.udp
                       "
@@ -180,8 +180,8 @@
         labels = ""
         nedPackages = "
                        inet.applications.rtpapp
-                       inet.transport.rtp
-                       inet.nodes.rtp
+                       inet.transportlayer.rtp
+                       inet.node.rtp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RTP"
@@ -210,7 +210,7 @@
         labels = ""
         nedPackages = "
                        inet.applications.sctpapp
-                       inet.transport.sctp
+                       inet.transportlayer.sctp
                        inet.util.headerserializers.sctp
                       "
         extraSourceFolders = ""
@@ -272,7 +272,7 @@
         nedPackages = "
                        inet.applications.ethernet
                        inet.linklayer.ethernet
-                       inet.nodes.ethernet
+                       inet.node.ethernet
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_ETHERNET"
@@ -342,7 +342,7 @@
         requires = "TCP_INET UDP IPv4"
         labels = "routing"
         nedPackages = "
-                       inet.networklayer.mpls inet.nodes.mpls
+                       inet.networklayer.mpls inet.node.mpls
                        inet.networklayer.ldp
                        inet.networklayer.rsvp_te
                        inet.networklayer.ted
@@ -374,7 +374,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.ospfv2
-                       inet.nodes.ospfv2
+                       inet.node.ospfv2
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_OSPFv2"
@@ -403,7 +403,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.bgpv4
-                       inet.nodes.bgp
+                       inet.node.bgp
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_BGPv4"
@@ -432,7 +432,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.dymo
-                       inet.nodes.dymo
+                       inet.node.dymo
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -447,7 +447,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.aodv
-                       inet.nodes.aodv
+                       inet.node.aodv
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_AODV"
@@ -462,7 +462,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.gpsr
-                       inet.nodes.gpsr
+                       inet.node.gpsr
                       "
         extraSourceFolders = ""
         compileFlags = ""
@@ -477,7 +477,7 @@
         labels = "routing"
         nedPackages = "
                        inet.networklayer.routing.rip
-                       inet.nodes.rip
+                       inet.node.rip
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RIP"
@@ -627,7 +627,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
-                       inet.nodes.wireless
+                       inet.node.wireless
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_IEEE80211"
@@ -733,7 +733,7 @@
         labels = "application http web"
         nedPackages = "
                        inet.applications.httptools
-                       inet.nodes.httptools
+                       inet.node.httptools
                        inet.world.httptools
                       "
         extraSourceFolders = ""
@@ -805,7 +805,7 @@
         labels = ""
         nedPackages = "
                        inet.networklayer.internetcloud
-                       inet.nodes.internetcloud
+                       inet.node.internetcloud
                       "
         extraSourceFolders = ""
         compileFlags = ""

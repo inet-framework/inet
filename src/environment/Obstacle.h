@@ -23,7 +23,7 @@
 
 #include <vector>
 #include "Coord.h"
-#include "world/annotations/AnnotationManager.h"
+#include "AnnotationManager.h"
 
 /**
  * stores information about an Obstacle for ObstacleControl

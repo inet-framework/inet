@@ -24,7 +24,7 @@
 #include <omnetpp.h>
 
 #include "INETDefs.h"
-#include "world/traci/TraCIScenarioManager.h"
+#include "TraCIScenarioManager.h"
 
 /**
  * @brief

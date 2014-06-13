@@ -25,7 +25,7 @@
 #include <sstream>
 
 #include "FWMath.h"  // for M_PI
-#include "mobility/single/TraCIMobility.h"
+#include "TraCIMobility.h"
 
 Define_Module(TraCIMobility);
 

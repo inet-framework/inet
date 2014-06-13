@@ -18,8 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#include "world/traci/TraCIScenarioManagerLaunchd.h"
-#include "world/traci/TraCIConstants.h"
+#include "TraCIScenarioManagerLaunchd.h"
+#include "TraCIConstants.h"
 #define CMD_FILE_SEND 0x75
 
 #include <sstream>

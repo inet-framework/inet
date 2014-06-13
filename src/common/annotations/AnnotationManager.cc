@@ -19,7 +19,7 @@
 
 #include <sstream>
 
-#include "world/annotations/AnnotationManager.h"
+#include "AnnotationManager.h"
 
 
 Define_Module(AnnotationManager);
