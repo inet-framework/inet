@@ -34,12 +34,12 @@ namespace radio
  *
  * The receiver interface supports optimistic parallel computation of reception
  * results. For this reason some functions are marked to be purely functional.
- * They are qualified with const and all of their parameters are also qualified
- * with const. Moreover they don't access any state that can change over time to
- * avoid non-deterministic behavior. These functions may be called from background
- * threads running parallel with the main simulation thread. They may also be
- * called several times due to cache invalidation before the actual result is
- * needed.
+ * They must be qualified with const and all of their parameters must also be
+ * qualified with const. Moreover they are forbidden to access any state that
+ * can change over time to avoid non-deterministic behavior. These functions may
+ * be called from background threads running parallel with the main simulation
+ * thread. They may also be called several times due to cache invalidation before
+ * the actual result is needed. This process is controlled by the radio medium.
  */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 // TODO: the reception API must be purely functional enforced by the compiler (unfortunately this is impossible in C++)
@@ -70,20 +70,31 @@ class INET_API IReceiver : public IPrintableObject
 
         /**
          * Returns the result of the listening process specifying the reception
-         * state of the receiver.
+         * state of the receiver. This function must be purely functional and
+         * support optimistic parallel computation.
          */
         virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
 
         /**
          * Returns whether the transmission can be received successfully or not.
+         * This function need not be purely functional and need not support
+         * optimistic parallel computation.
          */
         virtual bool computeIsReceptionPossible(const ITransmission *transmission) const = 0;
 
         /**
-         * Returns whether the reception is actually attempted or ignored by the
-         * receiver.
+         * Returns whether the transmission represented by the reception can be
+         * received successfully or not. This function must be purely functional
+         * and support optimistic parallel computation.
          */
-        virtual bool computeIsReceptionAttempted(const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const = 0;
+        virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
+
+        /**
+         * Returns whether the reception is actually attempted or ignored by the
+         * receiver. This function must be purely functional and support optimistic
+         * parallel computation.
+         */
+        virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const = 0;
 
         /**
          * Returns the result of the reception process specifying whether it was

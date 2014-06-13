@@ -26,9 +26,9 @@ bool ReceiverBase::computeIsReceptionPossible(const ITransmission *transmission)
     return true;
 }
 
-bool ReceiverBase::computeIsReceptionAttempted(const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
+bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
 {
-    if (!computeIsReceptionPossible(reception))
+    if (!computeIsReceptionPossible(listening, reception))
         return false;
     else if (simTime() == reception->getStartTime())
         // TODO: isn't there a better way for this optimization? see also in RadioMedium::isReceptionAttempted

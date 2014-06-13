@@ -116,6 +116,7 @@ RadioMedium::~RadioMedium()
             {
                 const ReceptionCacheEntry &cacheEntry = *jt;
                 delete cacheEntry.arrival;
+                delete cacheEntry.listening;
                 delete cacheEntry.reception;
                 delete cacheEntry.decision;
             }
@@ -261,6 +262,24 @@ void RadioMedium::removeCachedArrival(const IRadio *radio, const ITransmission *
 {
     ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
     if (cacheEntry) cacheEntry->arrival = NULL;
+}
+
+const IListening *RadioMedium::getCachedListening(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    return cacheEntry ? cacheEntry->listening : NULL;
+}
+
+void RadioMedium::setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry) cacheEntry->listening = listening;
+}
+
+void RadioMedium::removeCachedListening(const IRadio *radio, const ITransmission *transmission) const
+{
+    ReceptionCacheEntry *cacheEntry = getReceptionCacheEntry(radio, transmission);
+    if (cacheEntry) cacheEntry->listening = NULL;
 }
 
 const IReception *RadioMedium::getCachedReception(const IRadio *radio, const ITransmission *transmission) const
@@ -497,6 +516,7 @@ void RadioMedium::removeNonInterferingTransmissions()
             {
                 const ReceptionCacheEntry &cacheEntry = *jt;
                 delete cacheEntry.arrival;
+                delete cacheEntry.listening;
                 delete cacheEntry.reception;
                 delete cacheEntry.decision;
             }
@@ -601,7 +621,9 @@ void RadioMedium::addRadio(const IRadio *radio)
     {
         const ITransmission *transmission = *it;
         const IArrival *arrival = propagation->computeArrival(transmission, radio->getAntenna()->getMobility());
+        const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
         setCachedArrival(radio, transmission, arrival);
+        setCachedListening(radio, transmission, listening);
     }
     if (initialized())
         updateLimits();
@@ -636,10 +658,12 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         if (receiverRadio != transmitterRadio)
         {
             const IArrival *arrival = propagation->computeArrival(transmission, receiverRadio->getAntenna()->getMobility());
+            const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
             const simtime_t arrivalEndTime = arrival->getEndTime();
             if (arrivalEndTime > maxArrivalEndTime)
                 maxArrivalEndTime = arrivalEndTime;
             setCachedArrival(receiverRadio, transmission, arrival);
+            setCachedListening(receiverRadio, transmission, listening);
         }
     }
     getTransmissionCacheEntry(transmission)->interferenceEndTime = maxArrivalEndTime + maxTransmissionDuration;
@@ -765,9 +789,10 @@ bool RadioMedium::isPotentialReceiver(const IRadio *radio, const ITransmission *
 bool RadioMedium::isReceptionAttempted(const IRadio *radio, const ITransmission *transmission) const
 {
     const IReception *reception = getReception(radio, transmission);
+    const IListening *listening = getCachedListening(radio, transmission);
     // TODO: isn't there a better way for this optimization? see also in ReceiverBase::computeIsReceptionAttempted
     const std::vector<const IReception *> *interferingReceptions = simTime() == reception->getStartTime() ? NULL : computeInterferingReceptions(reception, const_cast<const std::vector<const ITransmission *> *>(&transmissions));
-    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(reception, interferingReceptions);
+    bool isReceptionAttempted = radio->getReceiver()->computeIsReceptionAttempted(listening, reception, interferingReceptions);
     delete interferingReceptions;
     EV_DEBUG << "Receiving " << transmission << " from medium by " << radio << " arrives as " << reception << " and results in reception is " << (isReceptionAttempted ? "attempted" : "ignored") << endl;
     return isReceptionAttempted;
@@ -788,6 +813,13 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
             const ITransmission *transmission = *it;
             const Radio *transmitterRadio = check_and_cast<const Radio *>(transmission->getTransmitter());
             ReceptionCacheEntry *receptionCacheEntry = getReceptionCacheEntry(receiverRadio, transmission);
+            if (receptionCacheEntry && signal == IRadio::listeningChangedSignal)
+            {
+                const IArrival *arrival = getArrival(receiverRadio, transmission);
+                const IListening *listening = receiverRadio->getReceiver()->createListening(receiverRadio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
+                delete getCachedListening(receiverRadio, transmission);
+                setCachedListening(receiverRadio, transmission, listening);
+            }
             if (receptionCacheEntry && !receptionCacheEntry->frame && receiverRadio != transmitterRadio && isPotentialReceiver(receiverRadio, transmission))
             {
                 const IArrival *arrival = getArrival(receiverRadio, transmission);

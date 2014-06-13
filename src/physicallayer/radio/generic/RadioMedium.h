@@ -49,6 +49,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
                  */
                 const IRadioFrame *frame;
                 const IArrival *arrival;
+                const IListening *listening;
                 const IReception *reception;
                 const IReceptionDecision *decision;
 
@@ -56,6 +57,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
                 ReceptionCacheEntry() :
                     frame(NULL),
                     arrival(NULL),
+                    listening(NULL),
                     reception(NULL),
                     decision(NULL)
                 {}
@@ -307,6 +309,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         virtual const IArrival *getCachedArrival(const IRadio *radio, const ITransmission *transmission) const;
         virtual void setCachedArrival(const IRadio *radio, const ITransmission *transmission, const IArrival *arrival) const;
         virtual void removeCachedArrival(const IRadio *radio, const ITransmission *transmission) const;
+
+        virtual const IListening *getCachedListening(const IRadio *radio, const ITransmission *transmission) const;
+        virtual void setCachedListening(const IRadio *radio, const ITransmission *transmission, const IListening *listening) const;
+        virtual void removeCachedListening(const IRadio *radio, const ITransmission *transmission) const;
 
         virtual const IReception *getCachedReception(const IRadio *radio, const ITransmission *transmission) const;
         virtual void setCachedReception(const IRadio *radio, const ITransmission *transmission, const IReception *reception) const;

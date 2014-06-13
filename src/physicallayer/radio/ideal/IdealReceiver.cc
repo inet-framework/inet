@@ -33,18 +33,18 @@ void IdealReceiver::initialize(int stage)
     }
 }
 
-bool IdealReceiver::computeIsReceptionPossible(const IReception *reception) const
+bool IdealReceiver::computeIsReceptionPossible(const IListening *listening, const IReception *reception) const
 {
     const IdealReception::Power power = check_and_cast<const IdealReception *>(reception)->getPower();
     return power == IdealReception::POWER_RECEIVABLE;
 }
 
-bool IdealReceiver::computeIsReceptionAttempted(const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
+bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const
 {
     if (ignoreInterference)
-        return computeIsReceptionPossible(reception);
+        return computeIsReceptionPossible(listening, reception);
     else
-        return ReceiverBase::computeIsReceptionAttempted(reception, interferingReceptions);
+        return ReceiverBase::computeIsReceptionAttempted(listening, reception, interferingReceptions);
 }
 
 void IdealReceiver::printToStream(std::ostream &stream) const

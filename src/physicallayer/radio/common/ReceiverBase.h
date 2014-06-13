@@ -29,14 +29,9 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
     protected:
         virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
+        virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
 
-        /**
-         * Returns whether the transmission represented by the reception can be
-         * received successfully or not. Part of the reception process, see class comment.
-         */
-        virtual bool computeIsReceptionPossible(const IReception *reception) const = 0;
-
-        virtual bool computeIsReceptionAttempted(const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
+        virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
 
     public:
         ReceiverBase() {}

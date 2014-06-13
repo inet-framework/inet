@@ -36,15 +36,16 @@ class INET_API SNIRReceiverBase : public ReceiverBase
         /**
          * Returns the physical properties of the reception including noise and
          * signal related measures, error probabilities, actual error counts, etc.
-         * Part of the reception process, see class comment.
+         * This function must be purely functional and support optimistic parallel
+         * computation.
          */
         virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
         /**
-         * Returns whether the reception is free of any errors. Part of the reception
-         * process, see class comment.
+         * Returns whether the reception is free of any errors. This function must
+         * be purely functional and support optimistic parallel computation.
          */
-        virtual bool computeIsReceptionSuccessful(const IReception *reception, const RadioReceptionIndication *indication) const;
+        virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
 
         virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const = 0;
         virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;

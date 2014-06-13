@@ -75,7 +75,7 @@ void Ieee80211ScalarReceiver::initialize(int stage)
     }
 }
 
-bool Ieee80211ScalarReceiver::computeHasBitError(double minSNIR, int bitLength, double bitrate) const
+bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const
 {
     ModulationType modeBody;
     ModulationType modeHeader;

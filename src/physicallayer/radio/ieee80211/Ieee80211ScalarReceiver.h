@@ -38,7 +38,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
     protected:
         virtual void initialize(int stage);
 
-        virtual bool computeHasBitError(double minSNIR, int bitLength, double bitrate) const;
+        virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
 
     public:
         Ieee80211ScalarReceiver() :
