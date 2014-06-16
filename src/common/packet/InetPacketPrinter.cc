@@ -18,8 +18,6 @@
 
 #include "INETDefs.h"
 
-#ifdef Register_MessagePrinter
-
 #include "Address.h"
 #include "INetworkDatagram.h"
 #include "PingPayload_m.h"
@@ -44,8 +42,8 @@ class TCPSegment;
 class UDPPacket;
 #endif
 
-//TODO HACK, remove next line
-#include "cmessageprinter.h"
+//TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
+#if OMNETPP_VERSION >= 0x0405
 
 class INET_API InetPacketPrinter : public cMessagePrinter
 {

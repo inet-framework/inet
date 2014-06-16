@@ -18,10 +18,7 @@
 
 #include "INETDefs.h"
 
-#ifdef Register_MessagePrinter
-
-//TODO HACK, remove next line
-#include "cmessageprinter.h"
+#if OMNETPP_VERSION >= 0x0405
 
 class INET_API InetPacketBytesPrinter : public cMessagePrinter
 {
