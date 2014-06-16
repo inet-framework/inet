@@ -172,6 +172,20 @@
         linkerFlags = ""
         />
     <feature
+        id="MultiNet"
+        name="Multi network layer"
+        description = "Multi network layer support, e.g. IPv4/IPv6 dual stack"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.multi
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="WiseRoute"
         name="WiseRoute"
         description = "Wiseroute is a simple loop-free routing algorithm that builds a routing tree from a central network point, designed for sensor networks and convergecast traffic."
