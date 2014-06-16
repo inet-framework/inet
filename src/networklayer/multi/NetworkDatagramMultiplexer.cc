@@ -27,8 +27,10 @@
 #include "IPv6Datagram.h"
 #endif
 
+#ifdef WITH_GENERIC
 #include "GenericNetworkProtocolControlInfo.h"
 #include "GenericDatagram.h"
+#endif
 
 Define_Module(NetworkDatagramMultiplexer);
 
@@ -58,8 +60,10 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
     else if (dynamic_cast<IPv6ControlInfo *>(controlInfo) || dynamic_cast<IPv6Datagram *>(message))
         return 1;
 #endif
+#ifdef WITH_GENERIC
     else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(controlInfo) || dynamic_cast<GenericDatagram *>(message))
         return 2;
+#endif
     else
         throw cRuntimeError("Unknown control info");
 }

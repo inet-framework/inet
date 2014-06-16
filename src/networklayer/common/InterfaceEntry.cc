@@ -27,7 +27,6 @@
 
 #include "IInterfaceTable.h"
 
-#include "GenericNetworkProtocolInterfaceData.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -36,6 +35,11 @@
 #ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
 #endif
+
+#ifdef WITH_GENERIC
+#include "GenericNetworkProtocolInterfaceData.h"
+#endif
+
 
 Register_Abstract_Class(InterfaceEntryChangeDetails);
 Register_Abstract_Class(InterfaceEntry);
@@ -211,11 +215,15 @@ void InterfaceEntry::resetInterface()
 
 void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfaceData *p)
 {
+#ifdef WITH_GENERIC
     if (genericNetworkProtocolData && genericNetworkProtocolData->ownerp == this)
         delete ipv4data;
     genericNetworkProtocolData = p;
     p->ownerp = this;
     configChanged(F_GENERIC_DATA);
+#else
+    throw cRuntimeError(this, "setGenericNetworkProtocolData(): INET was compiled without Generic Network Layer support");
+#endif
 }
 
 const Address InterfaceEntry::getNetworkAddress() const
@@ -228,8 +236,10 @@ const Address InterfaceEntry::getNetworkAddress() const
     if (ipv6data)
         return ipv6data->getPreferredAddress();
 #endif
+#ifdef WITH_GENERIC
     if (genericNetworkProtocolData)
         return genericNetworkProtocolData->getAddress();
+#endif
     return getModulePathAddress();
 }
 
@@ -322,11 +332,13 @@ void InterfaceEntry::joinMulticastGroup(const Address & address) const {
             // ipv6Data()->joinMulticastGroup(address.toIPv6());
             break;
 #endif
+#ifdef WITH_GENERIC
         case Address::MAC:
         case Address::MODULEID:
         case Address::MODULEPATH:
             getGenericNetworkProtocolData()->joinMulticastGroup(address);
             break;
+#endif
         default:
             throw cRuntimeError("Unknown address type");
     }

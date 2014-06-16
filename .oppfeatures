@@ -156,6 +156,36 @@
         linkerFlags = ""
         />
     <feature
+        id="Generic"
+        name="Generic network layer protocol"
+        description = "Basic Generic network layer support"
+        initiallyEnabled = "true"
+        requires = ""
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.generic
+                       inet.networklayer.configurator.generic
+                       inet.networklayer.arp.generic
+                      "
+        extraSourceFolders = ""
+        compileFlags = "-DWITH_GENERIC"
+        linkerFlags = ""
+        />
+    <feature
+        id="WiseRoute"
+        name="WiseRoute"
+        description = "Wiseroute is a simple loop-free routing algorithm that builds a routing tree from a central network point, designed for sensor networks and convergecast traffic."
+        initiallyEnabled = "true"
+        requires = "Generic"
+        labels = ""
+        nedPackages = "
+                       inet.networklayer.wiseroute
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="UDP"
         name="UDP protocol"
         description = "UDP protocol"

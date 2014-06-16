@@ -28,7 +28,10 @@
 #include "NotifierConsts.h"
 #include "NodeStatus.h"
 #include "NodeOperations.h"
+
+#ifdef WITH_GENERIC
 #include "GenericNetworkProtocolInterfaceData.h"
+#endif
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -125,8 +128,10 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
             InterfaceEntry *ie = idToInterface[i];
             if (ie)
             {
+#ifdef WITH_GENERIC
                 if (ie->getGenericNetworkProtocolData() && ie->getGenericNetworkProtocolData()->getAddress() == address)
                     return ie;
+#endif
                 switch (addrType)
                 {
 #ifdef WITH_IPv4

@@ -24,7 +24,6 @@
 
 #include "ModulePathAddress.h"
 #include "ModuleIdAddress.h"
-#include "GenericNetworkProtocolInterfaceData.h"
 
 #ifdef WITH_IPv4
 #include "IPv4NetworkConfigurator.h"
@@ -37,7 +36,11 @@
 #include "IPv6RoutingTable.h"
 #endif
 
+#ifdef WITH_GENERIC
+#include "GenericNetworkProtocolInterfaceData.h"
 #include "GenericRoutingTable.h"
+#endif
+
 
 Address AddressResolver::resolve(const char *s, int addrType)
 {
@@ -474,10 +477,14 @@ IPv6RoutingTable *AddressResolver::findIPv6RoutingTableOf(cModule *host)
 
 GenericRoutingTable *AddressResolver::findGenericRoutingTableOf(cModule *host)
 {
+#ifdef WITH_GENERIC
     // KLUDGE: TODO: look deeper temporarily
     GenericRoutingTable *rt = dynamic_cast<GenericRoutingTable *>(host->getSubmodule("routingTable"));
     if (!rt) rt = dynamic_cast<GenericRoutingTable *>(host->getModuleByPath(".routingTable.generic"));
     return rt;
+#else
+    return NULL;
+#endif
 }
 
 cModule *AddressResolver::findHostWithAddress(const Address & add)
