@@ -18,9 +18,6 @@
 package inet.networklayer.multi;
 
 import inet.networklayer.common.IRoutingTable;
-import inet.networklayer.generic.GenericRoutingTable;
-import inet.networklayer.ipv4.IPv4RoutingTable;
-import inet.networklayer.ipv6.IPv6RoutingTable;
 
 //
 // This module supports multiple different routing tables simultaneously.
@@ -33,18 +30,18 @@ module MultiRoutingTable like IRoutingTable
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         @display("i=block/table");
-        bool enableIPv4 = default(true);
-        bool enableIPv6 = default(true);
-        bool enableGeneric = default(true);
+        bool enableIPv4 = default(haveClass("IPv4RoutingTable"));
+        bool enableIPv6 = default(haveClass("IPv6RoutingTable"));
+        bool enableGeneric = default(haveClass("GenericRoutingTable"));
 
     submodules:
-        ipv4: IPv4RoutingTable if enableIPv4 {
+        ipv4: <"IPv4RoutingTable"> like IRoutingTable if enableIPv4 {
             @display("p=50,50;is=s");
         }
-        ipv6: IPv6RoutingTable if enableIPv6 {
+        ipv6: <"IPv6RoutingTable"> like IRoutingTable if enableIPv6 {
             @display("p=50,100;is=s");
         }
-        generic: GenericRoutingTable if enableGeneric {
+        generic: <"GenericRoutingTable"> like IRoutingTable if enableGeneric {
             @display("p=50,150;is=s");
         }
 }

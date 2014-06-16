@@ -18,9 +18,6 @@
 package inet.networklayer.multi;
 
 import inet.networklayer.contract.INetworkLayer;
-import inet.networklayer.generic.GenericNetworkLayer;
-import inet.networklayer.ipv4.IPv4NetworkLayer;
-import inet.networklayer.ipv6.IPv6NetworkLayer;
 
 //
 // This module provides network protocol specific multiplexing.
@@ -84,9 +81,9 @@ module MultiNetworkLayer like INetworkLayer
 {
     parameters:
         @display("i=block/fork");
-        bool enableIPv4 = default(true);
-        bool enableIPv6 = default(true);
-        bool enableGeneric = default(true);
+        bool enableIPv4 = default(haveClass("IPv4RoutingTable"));
+        bool enableIPv6 = default(haveClass("IPv6RoutingTable"));
+        bool enableGeneric = default(haveClass("GenericRoutingTable"));
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         string routingTableModule;
@@ -103,13 +100,13 @@ module MultiNetworkLayer like INetworkLayer
         output pingOut[] @labels(PingPayload/up);
 
     submodules:
-        ipv4: IPv4NetworkLayer if enableIPv4 {
+        ipv4: <"IPv4NetworkLayer"> like INetworkLayer if enableIPv4 {
             @display("p=100,300");
         }
-        ipv6: IPv6NetworkLayer if enableIPv6 {
+        ipv6: <"IPv6NetworkLayer"> like INetworkLayer if enableIPv6 {
             @display("p=300,300");
         }
-        generic: GenericNetworkLayer if enableGeneric {
+        generic: <"GenericNetworkLayer"> like INetworkLayer if enableGeneric {
             @display("p=500,300");
         }
         upperMultiplexer: MultiNetworkLayerUpperMultiplexer {
