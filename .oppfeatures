@@ -498,6 +498,20 @@
         linkerFlags = ""
         />
     <feature
+        id="AODV_examples"
+        name="AODV examples"
+        description = "Ad hoc On-Demand Distance Vector (AODV) Routing examples"
+        initiallyEnabled = "true"
+        requires = "AODV"
+        labels = "routing examples"
+        nedPackages = "
+                       inet.examples.aodv
+                      "
+        extraSourceFolders = ""
+        compileFlags = ""
+        linkerFlags = ""
+        />
+    <feature
         id="GPSR"
         name="GPSR"
         description = "Greedy Perimeter Stateless Routing for Wireless Networks"
