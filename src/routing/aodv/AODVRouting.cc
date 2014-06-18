@@ -17,8 +17,15 @@
 
 #include "AODVRouting.h"
 #include "IPv4Route.h"
+
+#ifdef WITH_IDEALWIRELESS
 #include "IdealMacFrame_m.h"
+#endif
+
+#ifdef WITH_IEEE80211
 #include "Ieee80211Frame_m.h"
+#endif
+
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
 #include "ModuleAccess.h"
@@ -988,7 +995,14 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         // XXX: This is a hack for supporting both IdealMac and Ieee80211Mac.
         cPacket *frame = check_and_cast<cPacket *>(obj);
         INetworkDatagram *datagram = NULL;
-        if (dynamic_cast<Ieee80211Frame *>(frame) || dynamic_cast<IdealMacFrame *>(frame))
+        if (false
+#ifdef WITH_IEEE80211
+                || dynamic_cast<Ieee80211Frame *>(frame)
+#endif
+#ifdef WITH_IDEALWIRELESS
+                || dynamic_cast<IdealMacFrame *>(frame)
+#endif
+                )
             datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
         else
             throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");

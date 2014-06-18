@@ -711,7 +711,7 @@
                        inet.linklayer.ideal
                       "
         extraSourceFolders = ""
-        compileFlags = ""
+        compileFlags = "-DWITH_IDEALWIRELESS"
         linkerFlags = ""
         />
     <feature
