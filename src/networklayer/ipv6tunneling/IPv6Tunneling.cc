@@ -44,9 +44,9 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
-#include "xMIPv6.h"
 
 #ifdef WITH_xMIPv6
+#include "xMIPv6.h"
 #include "MobilityHeader_m.h" // for HA Option header
 #endif
 
