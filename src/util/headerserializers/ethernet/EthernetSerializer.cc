@@ -67,10 +67,12 @@ int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf
             break;
 #endif
 
+#ifdef WITH_IPv4
         case ETHERTYPE_ARP:
             packetLength += ARPSerializer().serialize(check_and_cast<ARPPacket *>(encapPacket),
                                                                buf+ETHER_HDR_LEN, bufsize-ETHER_HDR_LEN);
             break;
+#endif
 
         default:
             throw cRuntimeError("EthernetSerializer: cannot serialize protocol %x", pkt->getEtherType());
@@ -104,7 +106,7 @@ void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, E
 #ifdef WITH_IPv6
         case ETHERTYPE_IPV6:
             encapPacket = new IPv6Datagram("ipv6-from-wire");
-            //IPv6Serializer().parse(buf+ETHER_HDR_LEN, bufsize-ETHER_HDR_LEN, (IPv6Datagram *)encapPacket);
+            IPv6Serializer().parse(buf+ETHER_HDR_LEN, bufsize-ETHER_HDR_LEN, (IPv6Datagram *)encapPacket);
             break;
 #endif
 
