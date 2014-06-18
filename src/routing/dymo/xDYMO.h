@@ -50,7 +50,7 @@ DYMO_NAMESPACE_BEGIN
  *  - 13.6. Message Aggregation
  *    RFC5148 add jitter to broadcasts
  */
-class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
+class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
 {
   private:
     // DYMO parameters from RFC
@@ -91,8 +91,8 @@ class INET_API xDYMO : public cSimpleModule, public ILifecycle, public cListener
     std::vector<std::pair<Address, int> > clientAddressAndPrefixLengthPairs; // 5.3.  Router Clients and Client Networks
 
   public:
-    xDYMO();
-    virtual ~xDYMO();
+    DYMO();
+    virtual ~DYMO();
 
   protected:
     // module interface

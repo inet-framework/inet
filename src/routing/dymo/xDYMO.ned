@@ -39,11 +39,11 @@ moduleinterface IDYMO
 // Module parameters are copied from the IETF draft and renamed for consistency with
 // INET naming conventions. Some parameters are not yet implemented.
 //
-simple xDYMO like IDYMO
+simple DYMO like IDYMO
 {
     parameters:
         // properties
-        @class("DYMO::xDYMO");
+        @class("DYMO::DYMO");
         @display("i=block/routing");
 
         // context parameters
@@ -116,13 +116,13 @@ module MultiDYMO like IDYMO
 
     submodules:
         // TODO: simplify names to ipv4, ipv6, generic once looking up modules support paths
-        ipv4: xDYMO if enableIPv4 {
+        ipv4: DYMO if enableIPv4 {
             @display("p=100,100");
         }
-        ipv6: xDYMO if enableIPv6 {
+        ipv6: DYMO if enableIPv6 {
             @display("p=200,100");
         }
-        generic: xDYMO if enableGeneric {
+        generic: DYMO if enableGeneric {
             @display("p=300,100");
         }
         multiplexer: NetworkDatagramMultiplexer {
