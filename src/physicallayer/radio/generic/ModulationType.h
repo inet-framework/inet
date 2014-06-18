@@ -26,6 +26,7 @@
 #include <ostream>
 #include <stdint.h>
 
+#include "INETDefs.h"
 
 enum ModulationClass {
   /** Modulation class unknown or unspecified. A WifiMode with this
