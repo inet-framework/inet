@@ -19,8 +19,15 @@
 #include "xDYMO.h"
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
+
+#ifdef WITH_IDEALWIRELESS
 #include "IdealMacFrame_m.h"
+#endif
+
+#ifdef WITH_IEEE80211
 #include "Ieee80211Frame_m.h"
+#endif
+
 #include "AddressResolver.h"
 #include "INetworkProtocolControlInfo.h"
 #include "UDPControlInfo.h"
@@ -1421,7 +1428,16 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
     if (signalID == NF_LINK_BREAK) {
         EV_WARN << "Received link break" << endl;
         cPacket *frame = check_and_cast<cPacket *>(obj);
-        if (dynamic_cast<Ieee80211Frame *>(frame) || dynamic_cast<IdealMacFrame *>(frame)) {
+
+        if (false
+#ifdef WITH_IEEE80211
+                || dynamic_cast<Ieee80211Frame *>(frame)
+#endif
+#ifdef WITH_IDEALWIRELESS
+                || dynamic_cast<IdealMacFrame *>(frame)
+#endif
+                )
+        {
             INetworkDatagram *datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
             if (datagram) {
                 // TODO: get nexthop and interface from the packet
