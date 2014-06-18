@@ -30,7 +30,7 @@
 #include "IPv4RoutingTable.h"
 #include "DYMO_Timer.h"
 
-class DYMO;
+class DYMOFau;
 
 /**
  * DYMO Route Table Entry
@@ -38,7 +38,7 @@ class DYMO;
 class DYMO_RoutingEntry
 {
   public:
-    DYMO_RoutingEntry(DYMO* dymo);
+    DYMO_RoutingEntry(DYMOFau* dymo);
     virtual ~DYMO_RoutingEntry();
 
     /**
@@ -73,7 +73,7 @@ class DYMO_RoutingEntry
     /*@}*/
 
   protected:
-    DYMO* dymo; /**< DYMO module */
+    DYMOFau* dymo; /**< DYMO module */
 
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& e);

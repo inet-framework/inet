@@ -29,7 +29,7 @@
 #include "IPv4.h"
 #include "ControlManetRouting_m.h"
 
-Define_Module( DYMO );
+Define_Module( DYMOFau );
 
 #define DYMO_PORT 653
 namespace
@@ -42,7 +42,7 @@ const int UDPPort = DYMO_PORT; //9000 /**< UDP Port to listen on (TBD) */
 const double MAXJITTER = 0.001; /**< all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01) */
 }
 
-DYMO::DYMO()
+DYMOFau::DYMOFau()
 {
     dymo_routingTable = NULL;
     timerMsg = NULL;
@@ -53,7 +53,7 @@ DYMO::DYMO()
     DYMO_INTERFACES = NULL;
 }
 
-void DYMO::initialize(int stage)
+void DYMOFau::initialize(int stage)
 {
     ManetRoutingBase::initialize(stage);
 
@@ -136,7 +136,7 @@ void DYMO::initialize(int stage)
     }
 }
 
-void DYMO::finish()
+void DYMOFau::finish()
 {
     recordScalar("totalPacketsSent", totalPacketsSent);
     recordScalar("totalBytesSent", totalBytesSent);
@@ -182,7 +182,7 @@ void DYMO::finish()
     timerMsg = NULL;
 }
 
-DYMO::~DYMO()
+DYMOFau::~DYMOFau()
 {
     delete dymo_routingTable;
 
@@ -199,13 +199,13 @@ DYMO::~DYMO()
     cancelAndDelete(timerMsg);
 }
 
-void DYMO::rescheduleTimer()
+void DYMOFau::rescheduleTimer()
 {
     if (!timerMsg->isScheduled())
         scheduleAt(simTime()+1.0, timerMsg);
 }
 
-void DYMO::handleMessage(cMessage* apMsg)
+void DYMOFau::handleMessage(cMessage* apMsg)
 {
 
     cMessage * msg_aux = NULL;
@@ -282,7 +282,7 @@ void DYMO::handleMessage(cMessage* apMsg)
     }
 }
 
-void DYMO::processPacket(const IPv4Datagram* datagram)
+void DYMOFau::processPacket(const IPv4Datagram* datagram)
 {
     Enter_Method("procces ip Packet (%s)", datagram->getName());
 
@@ -333,7 +333,7 @@ void DYMO::processPacket(const IPv4Datagram* datagram)
     queuedDataPackets->queuePacket(datagram);
 }
 
-void DYMO::handleLowerMsg(cPacket* apMsg)
+void DYMOFau::handleLowerMsg(cPacket* apMsg)
 {
     /**
      * check the type of received message
@@ -349,7 +349,7 @@ void DYMO::handleLowerMsg(cPacket* apMsg)
     else throw cRuntimeError("message is no DYMO Packet");
 }
 
-void DYMO::handleLowerRM(DYMO_RM *routingMsg)
+void DYMOFau::handleLowerRM(DYMO_RM *routingMsg)
 {
     /** message is a routing message **/
     EV_INFO << "received message is a routing message" << endl;
@@ -382,7 +382,7 @@ void DYMO::handleLowerRM(DYMO_RM *routingMsg)
     }
 }
 
-uint32_t DYMO::getNextHopAddress(DYMO_RM *routingMsg)
+uint32_t DYMOFau::getNextHopAddress(DYMO_RM *routingMsg)
 {
     if (routingMsg->getAdditionalNodes().size() > 0)
     {
@@ -394,7 +394,7 @@ uint32_t DYMO::getNextHopAddress(DYMO_RM *routingMsg)
     }
 }
 
-InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
+InterfaceEntry* DYMOFau::getNextHopInterface(DYMO_PacketBBMessage* pkt)
 {
 
     if (!pkt) throw cRuntimeError("getNextHopInterface called with NULL packet");
@@ -423,7 +423,7 @@ InterfaceEntry* DYMO::getNextHopInterface(DYMO_PacketBBMessage* pkt)
     return srcIf;
 }
 
-void DYMO::handleLowerRMForMe(DYMO_RM *routingMsg)
+void DYMOFau::handleLowerRMForMe(DYMO_RM *routingMsg)
 {
     /** current node is the target **/
     if (dynamic_cast<DYMO_RREQ*>(routingMsg))
@@ -446,7 +446,7 @@ void DYMO::handleLowerRMForMe(DYMO_RM *routingMsg)
     else throw cRuntimeError("received unknown dymo message");
 }
 
-void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
+void DYMOFau::handleLowerRMForRelay(DYMO_RM *routingMsg)
 {
     /** current node is not the message destination -> find route to destination **/
     EV_INFO << "current node is not the message destination -> find route to destination" << endl;
@@ -563,7 +563,7 @@ void DYMO::handleLowerRMForRelay(DYMO_RM *routingMsg)
     }
 }
 
-void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
+void DYMOFau::handleLowerRERR(DYMO_RERR *my_rerr)
 {
     /** message is a RERR. **/
     statsDYMORcvd++;
@@ -662,7 +662,7 @@ void DYMO::handleLowerRERR(DYMO_RERR *my_rerr)
     statsRERRFwd++;
 }
 
-void DYMO::handleLowerUERR(DYMO_UERR *my_uerr)
+void DYMOFau::handleLowerUERR(DYMO_UERR *my_uerr)
 {
     /** message is a UERR. **/
     statsDYMORcvd++;
@@ -672,7 +672,7 @@ void DYMO::handleLowerUERR(DYMO_UERR *my_uerr)
     delete my_uerr;
 }
 
-void DYMO::handleSelfMsg(cMessage* apMsg)
+void DYMOFau::handleSelfMsg(cMessage* apMsg)
 {
     EV_DEBUG << "handle self message" << endl;
     if (apMsg == timerMsg)
@@ -740,7 +740,7 @@ void DYMO::handleSelfMsg(cMessage* apMsg)
     else throw cRuntimeError("unknown message type");
 }
 
-void DYMO::sendDown(cPacket* apMsg, int destAddr)
+void DYMOFau::sendDown(cPacket* apMsg, int destAddr)
 {
     // all messages sent to a lower layer are delayed by 0..MAXJITTER seconds (draft-ietf-manet-jitter-01)
     simtime_t jitter = dblrand() * MAXJITTER;
@@ -776,7 +776,7 @@ void DYMO::sendDown(cPacket* apMsg, int destAddr)
     }
 }
 
-void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targetSeqNum, unsigned int targetDist)
+void DYMOFau::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targetSeqNum, unsigned int targetDist)
 {
     /** generate a new RREQ with the given pararmeter **/
     EV_INFO << "send a RREQ to discover route to destination node " << destAddr << endl;
@@ -813,7 +813,7 @@ void DYMO::sendRREQ(unsigned int destAddr, int msgHdrHopLimit, unsigned int targ
     statsRREQSent++;
 }
 
-void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
+void DYMOFau::sendReply(unsigned int destAddr, unsigned int tSeqNum)
 {
     /** create a new RREP and send it to given destination **/
     EV_INFO << "send a reply to destination node " << destAddr << endl;
@@ -847,7 +847,7 @@ void DYMO::sendReply(unsigned int destAddr, unsigned int tSeqNum)
     statsRREPSent++;
 }
 
-void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, const DYMO_AddressBlock& targetNode, const DYMO_RoutingEntry* routeToTargetNode)
+void DYMOFau::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, const DYMO_AddressBlock& targetNode, const DYMO_RoutingEntry* routeToTargetNode)
 {
     /** create a new RREP and send it to given destination **/
     EV_INFO << "sending a reply to OrigNode " << origNode.getAddress() << endl;
@@ -908,7 +908,7 @@ void DYMO::sendReplyAsIntermediateRouter(const DYMO_AddressBlock& origNode, cons
     statsRREPSent++;
 }
 
-void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
+void DYMOFau::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
 {
     EV_INFO << "generating an RERR" << endl;
     DYMO_RERR *rerr = new DYMO_RERR("RERR");
@@ -954,7 +954,7 @@ void DYMO::sendRERR(unsigned int targetAddr, unsigned int targetSeqNum)
     statsRERRSent++;
 }
 
-void DYMO::incSeqNum()
+void DYMOFau::incSeqNum()
 {
     if (ownSeqNum == 0xffff)
     {
@@ -966,17 +966,17 @@ void DYMO::incSeqNum()
     }
 }
 
-bool DYMO::seqNumIsFresher(unsigned int seqNumInQuestion, unsigned int referenceSeqNum)
+bool DYMOFau::seqNumIsFresher(unsigned int seqNumInQuestion, unsigned int referenceSeqNum)
 {
     return ((int16_t)referenceSeqNum - (int16_t)seqNumInQuestion < 0);
 }
 
-simtime_t DYMO::computeBackoff(simtime_t backoff_var)
+simtime_t DYMOFau::computeBackoff(simtime_t backoff_var)
 {
     return backoff_var * 2;
 }
 
-void DYMO::updateRouteLifetimes(const Address& targetAddr)
+void DYMOFau::updateRouteLifetimes(const Address& targetAddr)
 {
     DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(targetAddr.toIPv4());
     if (!entry) return;
@@ -994,7 +994,7 @@ void DYMO::updateRouteLifetimes(const Address& targetAddr)
     checkAndSendQueuedPkts(entry->routeAddress.getInt(), entry->routePrefix, (entry->routeNextHopAddress).getInt());
 }
 
-bool DYMO::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool isRREQ)
+bool DYMOFau::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool isRREQ)
 {
     //TODO: check handling of unknown SeqNum values
 
@@ -1021,7 +1021,7 @@ bool DYMO::isRBlockBetter(DYMO_RoutingEntry * entry, DYMO_AddressBlock ab, bool 
     return true;
 }
 
-void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
+void DYMOFau::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
 {
     EV_INFO << "Handling RREQ Timeouts for RREQ to " << outstandingRREQ.destAddr << endl;
 
@@ -1083,7 +1083,7 @@ void DYMO::handleRREQTimeout(DYMO_OutstandingRREQ& outstandingRREQ)
     return;
 }
 
-bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, uint32_t nextHopAddress, InterfaceEntry* nextHopInterface)
+bool DYMOFau::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ, uint32_t nextHopAddress, InterfaceEntry* nextHopInterface)
 {
     DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(IPv4Address(ab.getAddress()));
     if (entry && !isRBlockBetter(entry, ab, isRREQ)) return false;
@@ -1121,7 +1121,7 @@ bool DYMO::updateRoutesFromAddressBlock(const DYMO_AddressBlock& ab, bool isRREQ
     return true;
 }
 
-DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
+DYMO_RM* DYMOFau::updateRoutes(DYMO_RM * pkt)
 {
     EV_INFO << "starting update routes from routing blocks in the received message" << endl;
     std::vector<DYMO_AddressBlock> additional_nodes = pkt->getAdditionalNodes();
@@ -1161,7 +1161,7 @@ DYMO_RM* DYMO::updateRoutes(DYMO_RM * pkt)
     return pkt;
 }
 
-void DYMO::checkAndSendQueuedPkts(unsigned int destinationAddress, int prefix, unsigned int /*nextHopAddress*/)
+void DYMOFau::checkAndSendQueuedPkts(unsigned int destinationAddress, int prefix, unsigned int /*nextHopAddress*/)
 {
     dymo_routingTable->maintainAssociatedRoutingTable();
     queuedDataPackets->dequeuePacketsTo(IPv4Address(destinationAddress), prefix);
@@ -1171,7 +1171,7 @@ void DYMO::checkAndSendQueuedPkts(unsigned int destinationAddress, int prefix, u
     if (o) outstandingRREQList.del(o);
 }
 
-void DYMO::setMyAddr(unsigned int myAddr)
+void DYMOFau::setMyAddr(unsigned int myAddr)
 {
     // Check if this node has already participated in DYMO
     if (statsRREQSent || statsRREPSent || statsRERRSent)
@@ -1187,18 +1187,18 @@ void DYMO::setMyAddr(unsigned int myAddr)
     // TODO: if IInterfaceTable was autoconfigured, change IPv4 Address there?
 }
 
-DYMO_RoutingTable* DYMO::getDYMORoutingTable()
+DYMO_RoutingTable* DYMOFau::getDYMORoutingTable()
 {
     return dymo_routingTable;
 }
 
-cModule* DYMO::getRouterByAddress(IPv4Address address)
+cModule* DYMOFau::getRouterByAddress(IPv4Address address)
 {
     return dynamic_cast<cModule*>(simulation.getModule(address.getInt() - AUTOASSIGN_ADDRESS_BASE.getInt()));
 }
 
 /* Called for packets whose delivery fails at the link layer */
-void DYMO::packetFailed(const IPv4Datagram *dgram)
+void DYMOFau::packetFailed(const IPv4Datagram *dgram)
 {
     /* We don't care about link failures for broadcast or non-data packets */
     if (dgram->getDestAddress() == IPv4Address::ALLONES_ADDRESS || dgram->getDestAddress() == IPv4Address::LL_MANET_ROUTERS)
@@ -1223,7 +1223,7 @@ void DYMO::packetFailed(const IPv4Datagram *dgram)
     dymo_routingTable->maintainAssociatedRoutingTable();
 }
 
-void DYMO::processLinkBreak(const cObject *details)
+void DYMOFau::processLinkBreak(const cObject *details)
 {
     const IPv4Datagram *dgram = dynamic_cast<const IPv4Datagram *>(details);
     if (dgram)

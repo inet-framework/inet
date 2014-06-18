@@ -33,7 +33,7 @@
 #include "IPv4RoutingTable.h"
 #include "IPv4.h"
 
-class DYMO;
+class DYMOFau;
 enum Result {DROP, ACCEPT};
 
 

@@ -76,15 +76,15 @@ class QueueElement : public cPacket
 //===========================================================================================
 // class DYMO: implements the network layer to route incoming messages
 //===========================================================================================
-class DYMO : public ManetRoutingBase
+class DYMOFau : public ManetRoutingBase
 {
   public:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int);
     virtual void finish();
 
-    DYMO();
-    ~DYMO();
+    DYMOFau();
+    ~DYMOFau();
 
     /** @brief Function called whenever a message arrives at the module */
     void handleMessage(cMessage * msg);

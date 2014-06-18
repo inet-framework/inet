@@ -200,14 +200,14 @@
 /examples/ipv6/nclients/,            -f omnetpp.ini -c ETH -r 0
 /examples/manetrouting/fg80211/ini/, -f Mob_DSR_omnetpp.ini -c General -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMO -r 0
+/examples/manetrouting/fg80211/,     -f omnetpp.ini -c DYMOFau -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c AODVUU -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSRUU -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c OLSR_ETX -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c DSDV_2 -r 0
 /examples/manetrouting/fg80211/,     -f omnetpp.ini -c Batman -r 0
-/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMO -r 0
+/examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOFau -r 0
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DYMOUM -r 0
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c AODVUU -r 0
 /examples/manetrouting/grid_aodv/,   -f omnetpp.ini -c DSRUU -r 0
@@ -225,7 +225,7 @@
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c MultiRadio -r 0
 /examples/manetrouting/multiradio/,  -f omnetpp.ini -c SingleRadio -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOUM -r 0
-/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMO -r 0
+/examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DYMOFau -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c AODVUU -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c DSRUU -r 0
 /examples/manetrouting/net80211_aodv/, -f omnetpp.ini -c OLSR -r 0
@@ -238,7 +238,7 @@
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR -r 0
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c OLSR_ETX -r 0
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c DSDV_2 -r 0
-/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMO -r 0
+/examples/manetrouting/net80211_control/, -f omnetpp.ini -c DYMOFau -r 0
 /examples/manetrouting/net80211_control/, -f omnetpp.ini -c Batman -r 0
 /examples/mobileipv6/,               -f omnetpp.ini -c One -r 0
 /examples/mobility/,                 -f omnetpp.ini -c ANSimMobility -r 0

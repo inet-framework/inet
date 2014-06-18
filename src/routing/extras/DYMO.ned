@@ -33,10 +33,10 @@ import inet.routing.extras.base.BaseRouting;
 //  - This implementation is a bit outdated. As of 2010-09-16 the
 //    current draft number is 21
 //
-simple DYMO extends BaseRouting like IManetRouting
+simple DYMOFau extends BaseRouting like IManetRouting
 {
     parameters:
-        @class(DYMO);
+        @class(DYMOFau);
         @reactive;                             // IP module will send control messages when no route is present to the destination
 
         string interfaceTableModule;

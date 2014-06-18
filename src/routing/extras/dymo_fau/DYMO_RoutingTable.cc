@@ -24,7 +24,7 @@
 #include "DYMO.h"
 
 
-DYMO_RoutingTable::DYMO_RoutingTable(DYMO* host, const IPv4Address& myAddr)
+DYMO_RoutingTable::DYMO_RoutingTable(DYMOFau* host, const IPv4Address& myAddr)
 {
     // get our host module
     if (!host) throw cRuntimeError("No parent module found");

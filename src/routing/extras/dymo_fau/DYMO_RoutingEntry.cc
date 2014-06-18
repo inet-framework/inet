@@ -20,7 +20,7 @@
 #include "DYMO_RoutingEntry.h"
 #include "DYMO.h"
 
-DYMO_RoutingEntry::DYMO_RoutingEntry(DYMO* dymo) :
+DYMO_RoutingEntry::DYMO_RoutingEntry(DYMOFau* dymo) :
     routeNextHopInterface(NULL),
     routeAgeMin(dymo, "routeAgeMin"),
     routeAgeMax(dymo, "routeAgeMax"),
