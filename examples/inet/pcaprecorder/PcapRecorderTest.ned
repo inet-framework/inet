@@ -21,7 +21,9 @@ package inet.examples.inet.pcaprecorder;
 import ned.DatarateChannel;
 import inet.util.NetAnimTrace;
 import inet.nodes.inet.StandardHost;
+import inet.nodes.ipv6.StandardHost6;
 import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.autorouting.ipv6.FlatNetworkConfigurator6;
 import inet.util.PcapParser;
 import inet.base.Sink;
 
@@ -54,6 +56,34 @@ network PcapRecorderTest
     connections:
         client1.ethg++ <--> C <--> server.ethg++;
 }
+
+
+network PcapRecorderTestIPv6
+{
+    @display("bgb=306,193");
+    types:
+        channel C extends DatarateChannel
+        {
+            datarate = 10Mbps;
+            delay = 0.1us;
+        }
+    submodules:
+        client1: StandardHost6 {
+            parameters:
+                @display("p=164,136;i=device/pc3");
+        }
+        server: StandardHost6 {
+            parameters:
+                @display("p=260,87;i=device/pc2");
+        }
+        configurator: FlatNetworkConfigurator6 {
+            parameters:
+                @display("p=46,28");
+        }
+    connections:
+        client1.ethg++ <--> C <--> server.ethg++;
+}
+
 
 network PcapParserTest
 {
