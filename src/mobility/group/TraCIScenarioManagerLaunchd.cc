@@ -26,6 +26,8 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef WITH_TRACI
+
 #define MYDEBUG EV
 
 Define_Module(TraCIScenarioManagerLaunchd);
@@ -104,4 +106,5 @@ void TraCIScenarioManagerLaunchd::init_traci() {
     TraCIScenarioManager::init_traci();
 }
 
+#endif
 

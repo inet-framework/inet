@@ -20,6 +20,7 @@
 
 #ifndef MOBILITY_TRACI_TRACIMOBILITY_H
 #define MOBILITY_TRACI_TRACIMOBILITY_H
+
 #ifdef WITH_TRACI
 
 #include <string>

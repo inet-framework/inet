@@ -38,6 +38,8 @@
 #include "TraCIConstants.h"
 #include "TraCIMobility.h"
 
+#ifdef WITH_TRACI
+
 Define_Module(TraCIScenarioManager);
 
 TraCIScenarioManager::~TraCIScenarioManager() {
@@ -1133,4 +1135,6 @@ template<> std::string TraCIScenarioManager::TraCIBuffer::read() {
 
     return std::string(obuf, length);
 }
+
+#endif // WITH_TRACI
 

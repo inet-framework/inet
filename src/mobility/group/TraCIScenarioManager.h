@@ -33,6 +33,7 @@
 #include "Coord.h"
 #include "ModuleAccess.h"
 
+#ifdef WITH_TRACI
 /**
  * @brief
  * Creates and moves nodes controlled by a TraCI server.
@@ -344,5 +345,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
+
+#endif  // WITH_TRACI
 
 #endif

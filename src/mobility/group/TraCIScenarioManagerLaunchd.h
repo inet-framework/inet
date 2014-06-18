@@ -21,10 +21,11 @@
 #ifndef WORLD_TRACI_TRACISCENARIOMANAGERLAUNCHD_H
 #define WORLD_TRACI_TRACISCENARIOMANAGERLAUNCHD_H
 
-#include <omnetpp.h>
-
 #include "INETDefs.h"
+
 #include "TraCIScenarioManager.h"
+
+#ifdef WITH_TRACI
 
 /**
  * @brief
@@ -58,4 +59,7 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
         virtual void init_traci();
 };
 
+#endif  // WITH_TRACI
+
 #endif
+
