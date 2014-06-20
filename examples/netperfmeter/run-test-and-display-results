@@ -1,0 +1,4 @@
+#!/bin/sh
+
+./run -u Cmdenv -f omnetpp.ini && \
+grep "Total Reception Bit R" scalars.sca | grep testNetwork.serverMain
