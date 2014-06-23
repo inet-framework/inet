@@ -1,6 +1,6 @@
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 network SimpleTestNetwork
 {

@@ -2,7 +2,7 @@ import inet.nodes.ethernet.EtherSwitch;
 import ned.DatarateChannel;
 import inet.nodes.inet.StandardHost;
 import inet.nodes.inet.Router;
-import inet.networklayer.autorouting.ipv4.IPv4NetworkConfigurator;
+import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.world.scenario.ScenarioManager;
 
 network IGMPTestNetwork
