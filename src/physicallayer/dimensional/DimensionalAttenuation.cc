@@ -48,9 +48,9 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
     mps propagationSpeed = channel->getPropagation()->getPropagationSpeed();
     const ConstMapping *transmissionPower = dimensionalTransmission->getPower();
-    std::cout << "Transmission power begin " << endl;
-    transmissionPower->print(std::cout);
-    std::cout << "Transmission power end" << endl;
+    EV_DEBUG << "Transmission power begin " << endl;
+    transmissionPower->print(EV_DEBUG);
+    EV_DEBUG << "Transmission power end" << endl;
     ConstMappingIterator *it = transmissionPower->createConstIterator();
     Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, DimensionSet::timeFreqDomain, Mapping::LINEAR);
     while (true)
@@ -69,8 +69,8 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
         else
             break;
     }
-    std::cout << "Reception power begin " << endl;
-    receptionPower->print(std::cout);
-    std::cout << "Reception power end" << endl;
+    EV_DEBUG << "Reception power begin " << endl;
+    receptionPower->print(EV_DEBUG);
+    EV_DEBUG << "Reception power end" << endl;
     return new DimensionalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, dimensionalTransmission->getCarrierFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
 }

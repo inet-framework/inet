@@ -50,19 +50,10 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
     Hz carrierFrequency = bandListening->getCarrierFrequency();
     Hz bandwidth = bandListening->getBandwidth();
     ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, W(0));
-
-    // TODO: delme
-    for (std::vector<ConstMapping *>::const_iterator it = receptionPowers.begin(); it != receptionPowers.end(); it++)
-    {
-        std::cout << "Interference power begin " << *it << endl;
-        (*it)->print(std::cout);
-        std::cout << "Interference power end" << endl;
-    }
-
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
-    std::cout << "Noise power begin " << endl;
-    noisePower->print(std::cout);
-    std::cout << "Noise power end" << endl;
+    EV_DEBUG << "Noise power begin " << endl;
+    noisePower->print(EV_DEBUG);
+    EV_DEBUG << "Noise power end" << endl;
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
 
@@ -70,21 +61,20 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
 {
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
-    std::cout << "Reception power begin " << endl;
-    dimensionalReception->getPower()->print(std::cout);
-    std::cout << "Reception power end" << endl;
+    EV_DEBUG << "Reception power begin " << endl;
+    dimensionalReception->getPower()->print(EV_DEBUG);
+    EV_DEBUG << "Reception power end" << endl;
     const ConstMapping *snirMapping = MappingUtils::divide(*dimensionalReception->getPower(), *dimensionalNoise->getPower());
     const simtime_t startTime = reception->getStartTime();
     const simtime_t endTime = reception->getEndTime();
     Argument start(DimensionSet::timeFreqDomain);
     Argument end(DimensionSet::timeFreqDomain);
-    std::cout << "TIMES" << startTime << " " << endTime << endl;
     start.setTime(startTime);
     start.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
     end.setTime(endTime);
     end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    std::cout << "SNIR begin " << endl;
-    snirMapping->print(std::cout);
-    std::cout << "SNIR end" << endl;
+    EV_DEBUG << "SNIR begin " << endl;
+    snirMapping->print(EV_DEBUG);
+    EV_DEBUG << "SNIR end" << endl;
     return MappingUtils::findMin(*snirMapping, start, end);
 }
