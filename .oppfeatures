@@ -650,16 +650,16 @@
         requires = ""
         labels = ""
         nedPackages = "
-                       inet.physicallayer.radio.common
-                       inet.physicallayer.radio.antenna
-                       inet.physicallayer.radio.dimensional
-                       inet.physicallayer.radio.generic
-                       inet.physicallayer.radio.ideal
-                       inet.physicallayer.radio.mapping
-                       inet.physicallayer.radio.pathloss
-                       inet.physicallayer.radio.power
-                       inet.physicallayer.radio.propagation
-                       inet.physicallayer.radio.scalar
+                       inet.physicallayer.base
+                       inet.physicallayer.antenna
+                       inet.physicallayer.dimensional
+                       inet.physicallayer.common
+                       inet.physicallayer.ideal
+                       inet.physicallayer.mapping
+                       inet.physicallayer.pathloss
+                       inet.physicallayer.power
+                       inet.physicallayer.propagation
+                       inet.physicallayer.scalar
                       "
         extraSourceFolders = ""
         compileFlags = "-DWITH_RADIO"
@@ -689,7 +689,7 @@
         labels = "nic wireless"
         nedPackages = "
                        inet.linklayer.ieee80211
-                       inet.physicallayer.radio.ieee80211
+                       inet.physicallayer.ieee80211
                        inet.node.wireless
                       "
         extraSourceFolders = ""
