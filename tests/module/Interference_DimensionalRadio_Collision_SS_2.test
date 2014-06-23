@@ -7,21 +7,6 @@ The second signal is much stronger than the first signal.
 The radio cannot switch to receiving the second signal.
 No signals are expected to be received.
 
-%file: generic.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<root>
-    <AnalogueModels>
-        <AnalogueModel type="SimplePathlossModel">
-            <parameter name="alpha" type="double" value="2.0"/>
-            <parameter name="carrierFrequency" type="double" value="2.4e+9"/>
-        </AnalogueModel>
-    </AnalogueModels>
-    <Decider type="SNRThresholdDecider">
-        <parameter name="snrThreshold" type="double" value="10"/>
-        <parameter name="busyThreshold" type="double" value="1E-9"/>
-    </Decider>
-</root>
-
 %file: test.ned
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
