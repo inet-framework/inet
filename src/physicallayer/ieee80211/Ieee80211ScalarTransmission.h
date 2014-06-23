@@ -19,20 +19,27 @@
 #define __INET_IEEE80211SCALARTRANSMISSION_H_
 
 #include "ScalarTransmission.h"
+#include "WifiPreambleType.h"
 
 namespace physicallayer
 {
 
 class INET_API Ieee80211ScalarTransmission : public ScalarTransmission
 {
+    protected:
+        const char opMode;
+        const WifiPreamble preambleMode;
+
     public:
-        Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power) :
-            ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate, power)
+        Ieee80211ScalarTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate, W power, char opMode, WifiPreamble preambleMode) :
+            ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, payloadBitLength, carrierFrequency, bandwidth, bitrate, power),
+            opMode(opMode),
+            preambleMode(preambleMode)
         {}
 
-        virtual void printToStream(std::ostream &stream) const;
+        virtual char getOpMode() const { return opMode; }
 
-        virtual W getPower() const { return power; }
+        virtual WifiPreamble getPreambleMode() const { return preambleMode; }
 };
 
 }
