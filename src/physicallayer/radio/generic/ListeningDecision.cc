@@ -17,7 +17,7 @@
 
 #include "ListeningDecision.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void ListeningDecision::printToStream(std::ostream &stream) const
 {

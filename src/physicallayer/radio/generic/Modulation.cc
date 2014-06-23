@@ -18,7 +18,7 @@
 
 #include "Modulation.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 
 double NullModulation::calculateBER(double, double, double) const

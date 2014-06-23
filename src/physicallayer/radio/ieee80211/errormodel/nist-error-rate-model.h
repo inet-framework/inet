@@ -25,7 +25,7 @@
 #include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

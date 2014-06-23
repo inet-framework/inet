@@ -17,6 +17,6 @@
 
 #include "InterpolatingAntenna.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(InterpolatingAntenna);

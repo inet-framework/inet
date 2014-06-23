@@ -17,7 +17,7 @@
 
 #include "ListeningBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void ListeningBase::printToStream(std::ostream &stream) const
 {

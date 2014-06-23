@@ -19,7 +19,7 @@
 #include "ScalarTransmitter.h"
 #include "RadioControlInfo_m.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(ScalarRadio);
 

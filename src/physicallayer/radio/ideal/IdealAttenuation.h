@@ -20,7 +20,7 @@
 
 #include "IAttenuation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API IdealAttenuation : public cModule, public IAttenuation

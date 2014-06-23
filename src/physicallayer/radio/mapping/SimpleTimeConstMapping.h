@@ -23,7 +23,7 @@
 
 #include "MappingBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

@@ -20,7 +20,7 @@
 
 #include "AttenuationBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API DimensionalAttenuation : public AttenuationBase

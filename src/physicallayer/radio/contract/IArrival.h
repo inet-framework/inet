@@ -22,7 +22,7 @@
 #include "EulerAngles.h"
 #include "IPrintableObject.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

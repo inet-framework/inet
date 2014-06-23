@@ -20,7 +20,7 @@
 
 #include "FlatTransmissionBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ScalarTransmission : public FlatTransmissionBase

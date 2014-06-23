@@ -20,7 +20,7 @@
 
 #include "IBackgroundNoise.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNoise

@@ -23,7 +23,7 @@
 #include <vector>
 #include <math.h>
 
-namespace radio
+namespace physicallayer
 {
 
 /**

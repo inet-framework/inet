@@ -21,7 +21,7 @@
 #include "SNIRReceiverBase.h"
 #include "IModulation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API FlatReceiverBase : public SNIRReceiverBase

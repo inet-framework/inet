@@ -17,7 +17,7 @@
 
 #include "Ieee80211RadioMedium.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(Ieee80211RadioMedium);
 

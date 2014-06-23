@@ -20,7 +20,7 @@
 
 #include "FlatNoiseBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ScalarNoise : public FlatNoiseBase

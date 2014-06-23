@@ -20,7 +20,7 @@
 
 #include "PhysicalLayerDefs.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

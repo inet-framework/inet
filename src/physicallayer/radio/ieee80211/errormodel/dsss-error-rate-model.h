@@ -29,7 +29,7 @@
 #include <gsl/gsl_sf_bessel.h>
 #endif
 
-namespace radio {
+namespace physicallayer {
 
 #ifdef ENABLE_GSL
 typedef struct FunctionParameterType

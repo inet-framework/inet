@@ -20,7 +20,7 @@
 
 #include "ScalarTransmission.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API Ieee80211ScalarTransmission : public ScalarTransmission

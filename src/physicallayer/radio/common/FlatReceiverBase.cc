@@ -24,7 +24,7 @@
 #include "ListeningDecision.h"
 #include "ReceptionDecision.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void FlatReceiverBase::initialize(int stage)
 {

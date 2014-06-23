@@ -21,7 +21,7 @@
 #include "IReception.h"
 #include "RadioControlInfo_m.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

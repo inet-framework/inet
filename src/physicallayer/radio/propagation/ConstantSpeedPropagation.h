@@ -20,7 +20,7 @@
 
 #include "PropagationBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ConstantSpeedPropagation : public PropagationBase

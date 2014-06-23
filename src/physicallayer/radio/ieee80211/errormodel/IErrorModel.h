@@ -18,7 +18,7 @@
 
 #include "ModulationType.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class IErrorModel

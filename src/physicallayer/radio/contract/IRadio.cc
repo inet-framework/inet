@@ -17,7 +17,7 @@
 
 #include "IRadio.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 int IRadio::nextId = 0;
 

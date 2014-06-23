@@ -17,7 +17,7 @@
 
 #include "PropagationBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 PropagationBase::PropagationBase() :
     propagationSpeed(mps(sNaN)),

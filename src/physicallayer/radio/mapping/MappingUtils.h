@@ -21,7 +21,7 @@
 #include "INETDefs.h"
 #include "MappingBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class FilledUpMapping;

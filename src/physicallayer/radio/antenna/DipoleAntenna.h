@@ -20,7 +20,7 @@
 
 #include "AntennaBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API DipoleAntenna : public AntennaBase

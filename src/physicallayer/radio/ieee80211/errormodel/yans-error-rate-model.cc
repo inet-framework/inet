@@ -20,7 +20,7 @@
 #include "yans-error-rate-model.h"
 #include <math.h>
 
-using namespace radio;
+using namespace physicallayer;
 
 YansErrorRateModel::YansErrorRateModel()
 {}

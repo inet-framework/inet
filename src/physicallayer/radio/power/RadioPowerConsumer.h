@@ -21,7 +21,7 @@
 #include "IPowerSource.h"
 #include "IRadio.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

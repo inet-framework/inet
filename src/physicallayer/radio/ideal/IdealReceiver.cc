@@ -21,7 +21,7 @@
 #include "ListeningDecision.h"
 #include "ReceptionDecision.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(IdealReceiver);
 

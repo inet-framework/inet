@@ -18,7 +18,7 @@
 #include "SNIRReceiverBase.h"
 #include "ReceptionDecision.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void SNIRReceiverBase::initialize(int stage)
 {

@@ -18,7 +18,7 @@
 #include "AntennaBase.h"
 #include "ModuleAccess.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void AntennaBase::initialize(int stage)
 {

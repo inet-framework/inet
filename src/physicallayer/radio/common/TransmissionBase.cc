@@ -17,7 +17,7 @@
 
 #include "TransmissionBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void TransmissionBase::printToStream(std::ostream &stream) const
 {

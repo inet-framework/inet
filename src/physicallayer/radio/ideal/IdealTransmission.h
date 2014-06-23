@@ -20,7 +20,7 @@
 
 #include "TransmissionBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API IdealTransmission : public TransmissionBase

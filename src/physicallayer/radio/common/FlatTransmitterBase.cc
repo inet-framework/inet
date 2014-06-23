@@ -18,7 +18,7 @@
 #include "FlatTransmitterBase.h"
 #include "Modulation.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void FlatTransmitterBase::initialize(int stage)
 {

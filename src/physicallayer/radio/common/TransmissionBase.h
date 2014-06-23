@@ -21,7 +21,7 @@
 #include "IRadio.h"
 #include "ITransmission.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API TransmissionBase : public virtual ITransmission

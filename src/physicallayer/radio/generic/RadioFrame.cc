@@ -17,7 +17,7 @@
 
 #include "RadioFrame.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void RadioFrame::printToStream(std::ostream &stream) const
 {

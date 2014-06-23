@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

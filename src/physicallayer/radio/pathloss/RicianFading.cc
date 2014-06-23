@@ -17,7 +17,7 @@
 
 #include "RicianFading.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Register_Class(RicianFading);
 

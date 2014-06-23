@@ -21,7 +21,7 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class IRadio;

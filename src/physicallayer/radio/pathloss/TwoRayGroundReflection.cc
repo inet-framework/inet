@@ -17,7 +17,7 @@
 
 #include "TwoRayGroundReflection.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Register_Class(TwoRayGroundReflection);
 

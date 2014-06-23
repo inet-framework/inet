@@ -18,7 +18,7 @@
 #include "ImmediatePropagation.h"
 #include "Arrival.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(ImmediatePropagation);
 

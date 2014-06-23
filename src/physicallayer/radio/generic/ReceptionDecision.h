@@ -20,7 +20,7 @@
 
 #include "IReceptionDecision.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ReceptionDecision : public IReceptionDecision, public cObject

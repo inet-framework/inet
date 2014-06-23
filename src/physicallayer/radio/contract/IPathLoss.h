@@ -20,7 +20,7 @@
 
 #include "IPrintableObject.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

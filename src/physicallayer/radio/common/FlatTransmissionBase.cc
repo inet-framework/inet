@@ -17,4 +17,4 @@
 
 #include "FlatTransmissionBase.h"
 
-using namespace radio;
+using namespace physicallayer;

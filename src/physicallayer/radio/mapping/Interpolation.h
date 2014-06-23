@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <assert.h>
 
-namespace radio {
+namespace physicallayer {
 
 /**
  * @brief Represents an interpolated value of any type.

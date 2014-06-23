@@ -20,7 +20,7 @@
 
 #include "FlatReceptionBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ScalarReception : public FlatReceptionBase

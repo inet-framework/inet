@@ -28,7 +28,7 @@
 #include "IReceptionDecision.h"
 #include "IListeningDecision.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

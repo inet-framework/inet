@@ -17,7 +17,7 @@
 
 #include "MappingUtils.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping):
 	MultiDimMappingIterator<Linear>(mapping) {}

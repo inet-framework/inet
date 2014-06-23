@@ -17,4 +17,4 @@
 
 #include "Ieee80211ScalarTransmission.h"
 
-using namespace radio;
+using namespace physicallayer;

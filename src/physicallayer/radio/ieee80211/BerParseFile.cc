@@ -25,7 +25,7 @@
 #include "INETDefs.h"
 #include "BerParseFile.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void BerParseFile::clearBerTable()
 {

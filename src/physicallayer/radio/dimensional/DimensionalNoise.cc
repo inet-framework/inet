@@ -17,7 +17,7 @@
 
 #include "DimensionalNoise.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {

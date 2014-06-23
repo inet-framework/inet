@@ -19,7 +19,7 @@
 #include "IdealTransmission.h"
 #include "IMobility.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(IdealTransmitter);
 

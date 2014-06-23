@@ -19,7 +19,7 @@
 #include "RadioMedium.h"
 #include "NodeOperations.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(Radio);
 

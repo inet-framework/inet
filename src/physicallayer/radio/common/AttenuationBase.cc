@@ -17,7 +17,7 @@
 
 #include "AttenuationBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {

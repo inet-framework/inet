@@ -22,7 +22,7 @@
 #include "MappingBase.h"
 #include "MappingUtils.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API DimensionalNoise : public FlatNoiseBase

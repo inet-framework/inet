@@ -20,7 +20,7 @@
 
 #include "ReceiverBase.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API IdealReceiver : public ReceiverBase

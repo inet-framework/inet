@@ -20,7 +20,7 @@
 
 #include "nist-error-rate-model.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 NistErrorRateModel::NistErrorRateModel()
 {

@@ -20,7 +20,7 @@
 
 #include "IAntenna.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API AntennaBase : public IAntenna, public cModule

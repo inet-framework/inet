@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "MappingBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 //---Dimension implementation-----------------------------
 

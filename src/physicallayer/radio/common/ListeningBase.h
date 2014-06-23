@@ -20,7 +20,7 @@
 
 #include "IListening.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ListeningBase : public IListening

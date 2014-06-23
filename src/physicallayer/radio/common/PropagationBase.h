@@ -20,7 +20,7 @@
 
 #include "IPropagation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API PropagationBase : public cModule, public IPropagation

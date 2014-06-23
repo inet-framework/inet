@@ -17,6 +17,6 @@
 
 #include "ITransmission.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 int ITransmission::nextId = 0;

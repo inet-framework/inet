@@ -17,7 +17,7 @@
 
 #include "ScalarTransmission.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void ScalarTransmission::printToStream(std::ostream &stream) const
 {

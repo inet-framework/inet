@@ -30,7 +30,7 @@
 #include "INETDefs.h"
 #include "Interpolation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

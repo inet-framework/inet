@@ -20,7 +20,7 @@
 
 #include "ITransmitter.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API TransmitterBase : public cModule, public virtual ITransmitter

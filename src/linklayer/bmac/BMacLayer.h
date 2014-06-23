@@ -22,7 +22,7 @@
 #include "MACProtocolBase.h"
 #include "BMacFrame_m.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 /**
  * @brief Implementation of B-MAC (called also Berkeley MAC, Low Power

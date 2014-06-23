@@ -21,7 +21,7 @@
 
 #include "IModulation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

@@ -28,7 +28,7 @@
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 //TBD supportedRates!
 //TBD use command msg kinds?

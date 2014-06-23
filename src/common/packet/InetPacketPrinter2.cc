@@ -76,7 +76,7 @@ class RadioFrame;
 //TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
 #if OMNETPP_VERSION >= 0x0405
 
-using namespace radio;
+using namespace physicallayer;
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
 {

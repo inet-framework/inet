@@ -21,7 +21,7 @@
 #include "IRadio.h"
 #include "IMobility.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(DimensionalTransmitter);
 

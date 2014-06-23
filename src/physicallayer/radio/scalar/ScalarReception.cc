@@ -17,7 +17,7 @@
 
 #include "ScalarReception.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void ScalarReception::printToStream(std::ostream &stream) const
 {

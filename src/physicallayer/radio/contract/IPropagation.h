@@ -22,7 +22,7 @@
 #include "IArrival.h"
 #include "ITransmission.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

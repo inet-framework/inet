@@ -24,7 +24,7 @@
 #include "PhysicalLayerBase.h"
 #include "RadioFrame.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

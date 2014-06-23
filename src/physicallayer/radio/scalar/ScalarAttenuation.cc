@@ -20,7 +20,7 @@
 #include "ScalarReception.h"
 #include "IRadioMedium.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(ScalarAttenuation);
 

@@ -22,7 +22,7 @@
 #include "IArrival.h"
 #include "ITransmission.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API AttenuationBase : public cModule, public virtual IAttenuation

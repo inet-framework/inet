@@ -35,7 +35,7 @@
 #include "IRadio.h"
 #include "ILifecycle.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 /**
  * IEEE 802.11g with e Media Access Control Layer.

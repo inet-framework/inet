@@ -21,7 +21,7 @@
 #include "FlatReceiverBase.h"
 #include "IModulation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API DimensionalReceiver : public FlatReceiverBase

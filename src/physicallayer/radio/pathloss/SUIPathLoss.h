@@ -20,7 +20,7 @@
 #include <string>
 #include "IPathLoss.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

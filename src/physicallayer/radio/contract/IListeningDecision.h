@@ -21,7 +21,7 @@
 #include "IPrintableObject.h"
 #include "IListening.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

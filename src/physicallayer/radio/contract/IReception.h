@@ -20,7 +20,7 @@
 
 #include "ITransmission.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

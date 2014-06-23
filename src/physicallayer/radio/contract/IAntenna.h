@@ -21,7 +21,7 @@
 #include "IPrintableObject.h"
 #include "IMobility.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

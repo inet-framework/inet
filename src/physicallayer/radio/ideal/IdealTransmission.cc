@@ -17,4 +17,4 @@
 
 #include "IdealTransmission.h"
 
-using namespace radio;
+using namespace physicallayer;

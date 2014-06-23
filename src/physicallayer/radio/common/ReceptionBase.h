@@ -22,7 +22,7 @@
 #include "IReception.h"
 #include "IRadio.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ReceptionBase : public virtual IReception

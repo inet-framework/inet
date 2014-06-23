@@ -17,4 +17,4 @@
 
 #include "FlatNoiseBase.h"
 
-using namespace radio;
+using namespace physicallayer;

@@ -20,7 +20,7 @@
 
 #include "IListeningDecision.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ListeningDecision : public IListeningDecision, public cObject

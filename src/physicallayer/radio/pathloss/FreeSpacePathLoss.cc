@@ -17,7 +17,7 @@
 
 #include "FreeSpacePathLoss.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Register_Class(FreeSpacePathLoss);
 

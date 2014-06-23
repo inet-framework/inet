@@ -22,7 +22,7 @@
 #include "IListening.h"
 #include "INoise.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

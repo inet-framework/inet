@@ -18,7 +18,7 @@
 #include "RadioPowerConsumer.h"
 #include "ModuleAccess.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 RadioPowerConsumer::RadioPowerConsumer()
 {

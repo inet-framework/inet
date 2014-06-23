@@ -21,7 +21,7 @@
 #include "TransmissionBase.h"
 #include "IModulation.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API FlatTransmissionBase : public TransmissionBase

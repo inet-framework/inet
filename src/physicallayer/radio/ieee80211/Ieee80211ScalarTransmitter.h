@@ -21,7 +21,7 @@
 #include "ScalarTransmitter.h"
 #include "WifiPreambleType.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter

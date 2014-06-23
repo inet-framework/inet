@@ -17,4 +17,4 @@
 
 #include "DimensionalTransmission.h"
 
-using namespace radio;
+using namespace physicallayer;

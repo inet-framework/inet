@@ -17,7 +17,7 @@
 
 #include "DimensionalUtils.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power)
 {

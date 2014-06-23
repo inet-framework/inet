@@ -20,7 +20,7 @@
 
 #include "IArrival.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API Arrival : public virtual IArrival

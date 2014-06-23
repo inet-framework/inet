@@ -24,7 +24,7 @@
 #include "IReceiver.h"
 #include "ITransmitter.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class IRadioMedium;

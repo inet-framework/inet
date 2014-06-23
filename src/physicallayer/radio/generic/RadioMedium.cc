@@ -24,7 +24,7 @@
 #include "ModuleAccess.h"
 #include "IInterfaceTable.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(RadioMedium);
 

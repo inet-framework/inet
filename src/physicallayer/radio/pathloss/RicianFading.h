@@ -20,7 +20,7 @@
 
 #include "FreeSpacePathLoss.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

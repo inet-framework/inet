@@ -17,6 +17,6 @@
 
 #include "IsotropicAntenna.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(IsotropicAntenna);

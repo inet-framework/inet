@@ -17,4 +17,4 @@
 
 #include "FlatReceptionBase.h"
 
-using namespace radio;
+using namespace physicallayer;

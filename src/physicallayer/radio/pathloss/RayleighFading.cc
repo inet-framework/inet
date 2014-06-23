@@ -17,7 +17,7 @@
 
 #include "RayleighFading.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Register_Class(RayleighFading);
 

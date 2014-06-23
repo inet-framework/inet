@@ -18,7 +18,7 @@
 #include "MACProtocolBase.h"
 #include "LMacFrame_m.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 /**
  * @brief Implementation of L-MAC (Lightweight Medium Access Protocol for

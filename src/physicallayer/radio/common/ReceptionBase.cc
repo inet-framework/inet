@@ -17,7 +17,7 @@
 
 #include "ReceptionBase.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 void ReceptionBase::printToStream(std::ostream &stream) const
 {

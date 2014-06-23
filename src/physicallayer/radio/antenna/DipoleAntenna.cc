@@ -17,7 +17,7 @@
 
 #include "DipoleAntenna.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(DipoleAntenna);
 

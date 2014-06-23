@@ -23,7 +23,7 @@
 #include "IErrorModel.h"
 #include "BerParseFile.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API Ieee80211ScalarReceiver : public ScalarReceiver

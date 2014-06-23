@@ -17,4 +17,4 @@
 
 #include "IdealReception.h"
 
-using namespace radio;
+using namespace physicallayer;

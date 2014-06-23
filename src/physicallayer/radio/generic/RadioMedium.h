@@ -28,7 +28,7 @@
 #include "IBackgroundNoise.h"
 #include "MACAddress.h"
 
-namespace radio
+namespace physicallayer
 {
 
 /**

@@ -29,7 +29,7 @@
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
 
-using namespace radio;
+using namespace physicallayer;
 
 Define_Module(Ieee80211MgmtAP);
 Register_Class(Ieee80211MgmtAP::NotificationInfoSta);

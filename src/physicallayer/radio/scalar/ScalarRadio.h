@@ -20,7 +20,7 @@
 
 #include "Radio.h"
 
-namespace radio
+namespace physicallayer
 {
 
 class INET_API ScalarRadio : public Radio
