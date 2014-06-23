@@ -21,6 +21,10 @@ using namespace physicallayer;
 
 Define_Module(DipoleAntenna);
 
+DipoleAntenna::DipoleAntenna() :
+    AntennaBase()
+{}
+
 void DipoleAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);

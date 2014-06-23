@@ -32,17 +32,12 @@ class INET_API DipoleAntenna : public AntennaBase
         virtual void initialize(int stage);
 
     public:
-        DipoleAntenna() :
-            AntennaBase()
-        {}
+        DipoleAntenna();
 
         virtual void printToStream(std::ostream &stream) const { stream << "dipole antenna"; }
-
         virtual m getLength() const { return length; }
-
         virtual double getMaxGain() const { return 1.5; }
-
-        virtual double computeGain(EulerAngles direction) const;
+        virtual double computeGain(const EulerAngles direction) const;
 };
 
 }

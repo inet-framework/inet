@@ -19,8 +19,17 @@ package inet.physicallayer.antenna;
 
 import inet.physicallayer.contract.IAntenna;
 
+//
+// This model computes the antenna gain relative to the transmission or reception
+// direction using linear interpolation for all 3 euler angles independently of
+// each other. The gain parameters contain a sequence of angle [degree] and gain
+// [dB] pairs. The first pair must be at 0 [degree]. 
+//
 module InterpolatingAntenna like IAntenna
 {
     parameters:
+        string headingGains = default("0 0");
+        string elevationGains = default("0 0");
+        string bankGains = default("0 0");
         @class(InterpolatingAntenna);
 }

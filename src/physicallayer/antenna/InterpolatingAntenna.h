@@ -25,18 +25,23 @@ namespace physicallayer
 
 class INET_API InterpolatingAntenna : public AntennaBase
 {
+    protected:
+        double maxGain;
+        std::map<double, double> elevationGainMap;
+        std::map<double, double> headingGainMap;
+        std::map<double, double> bankGainMap;
+
+    protected:
+        virtual void initialize(int stage);
+        virtual void parseMap(std::map<double, double> &gainMap, const char *text);
+        virtual double computeGain(const std::map<double, double> &gainMap, double angle) const;
+
     public:
-        InterpolatingAntenna() :
-            AntennaBase()
-        {}
+        InterpolatingAntenna();
 
         virtual void printToStream(std::ostream &stream) const { stream << "interpolating antenna"; }
-
-        // TODO: compute max gain
-        virtual double getMaxGain() const { return 1; }
-
-        // TODO: compute antenna gain based on a linear interpolation between two elements of the antenna gain table using the antenna positions/orientations
-        virtual double computeGain(EulerAngles direction) const { return 1; }
+        virtual double getMaxGain() const { return maxGain; }
+        virtual double computeGain(const EulerAngles direction) const;
 };
 
 }

@@ -26,15 +26,11 @@ namespace physicallayer
 class INET_API IsotropicAntenna : public AntennaBase
 {
     public:
-        IsotropicAntenna() :
-            AntennaBase()
-        {}
+        IsotropicAntenna();
 
         virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
-
         virtual double getMaxGain() const { return 1; }
-
-        virtual double computeGain(EulerAngles direction) const { return 1; }
+        virtual double computeGain(const EulerAngles direction) const { return 1; }
 };
 
 }

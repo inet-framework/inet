@@ -21,6 +21,11 @@ using namespace physicallayer;
 
 Define_Module(ConstantGainAntenna);
 
+ConstantGainAntenna::ConstantGainAntenna() :
+    AntennaBase(),
+    gain(sNaN)
+{}
+
 void ConstantGainAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);

@@ -32,16 +32,11 @@ class INET_API ConstantGainAntenna : public AntennaBase
         virtual void initialize(int stage);
 
     public:
-        ConstantGainAntenna() :
-            AntennaBase(),
-            gain(sNaN)
-        {}
+        ConstantGainAntenna();
 
         virtual void printToStream(std::ostream &stream) const { stream << "constant gain antenna"; }
-
         virtual double getMaxGain() const { return gain; }
-
-        virtual double computeGain(EulerAngles direction) const { return gain; }
+        virtual double computeGain(const EulerAngles direction) const { return gain; }
 };
 
 }

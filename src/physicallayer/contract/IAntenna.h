@@ -50,7 +50,7 @@ class INET_API IAntenna : public IPrintableObject
          * direction. For receptions it determines how well the antenna converts
          * radio waves arriving from the the specified direction.
          */
-        virtual double computeGain(EulerAngles direction) const = 0;
+        virtual double computeGain(const EulerAngles direction) const = 0;
 };
 
 }
