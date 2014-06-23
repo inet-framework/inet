@@ -9,7 +9,7 @@ import inet.common.scenario.ScenarioManager;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.gpsr.GPSRRouter;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
 
 //

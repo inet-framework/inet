@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.propagation;
+package inet.physicallayer.propagation;
 
-import inet.physicallayer.radio.common.PropagationBase;
+import inet.physicallayer.base.PropagationBase;
 
 module ConstantSpeedPropagation extends PropagationBase
 {

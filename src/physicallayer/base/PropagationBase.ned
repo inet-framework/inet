@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.common;
+package inet.physicallayer.base;
 
-import inet.physicallayer.radio.contract.IPropagation;
+import inet.physicallayer.contract.IPropagation;
 
 module PropagationBase like IPropagation
 {

@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.power;
+package inet.physicallayer.power;
 
 import inet.power.contract.IPowerConsumer;
 

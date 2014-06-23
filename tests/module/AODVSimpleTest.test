@@ -7,7 +7,7 @@ import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.networklayer.ipv4.RoutingTableRecorder;
 import inet.node.aodv.AODVRouter;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 network AODVTest

@@ -20,7 +20,7 @@ package inet.examples.adhoc.idealwireless;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.radio.ideal.IdealRadioMedium;
+import inet.physicallayer.ideal.IdealRadioMedium;
 
 
 network Net

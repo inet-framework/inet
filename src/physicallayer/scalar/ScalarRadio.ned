@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.scalar;
+package inet.physicallayer.scalar;
 
-import inet.physicallayer.radio.generic.Radio;
+import inet.physicallayer.common.Radio;
 
 module ScalarRadio extends Radio
 {

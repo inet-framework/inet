@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.dimensional;
+package inet.physicallayer.dimensional;
 
-import inet.physicallayer.radio.generic.Radio;
+import inet.physicallayer.common.Radio;
 
 module DimensionalRadio extends Radio
 {

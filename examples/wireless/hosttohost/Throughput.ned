@@ -24,7 +24,7 @@ import inet.linklayer.ieee80211.Ieee80211Nic;
 import inet.mobility.single.CircleMobility;
 import inet.mobility.static.StationaryMobility;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
 
 module ThroughputClient

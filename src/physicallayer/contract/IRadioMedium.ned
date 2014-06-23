@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.contract;
+package inet.physicallayer.contract;
 
 //
 // This module interface provides an abstraction for the interface of different radio mediums.

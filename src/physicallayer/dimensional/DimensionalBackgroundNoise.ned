@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.dimensional;
+package inet.physicallayer.dimensional;
 
-import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
+import inet.physicallayer.contract.IRadioBackgroundNoise;
 
 module DimensionalBackgroundNoise like IRadioBackgroundNoise
 {

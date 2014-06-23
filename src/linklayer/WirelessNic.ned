@@ -18,7 +18,7 @@
 package inet.linklayer;
 
 import inet.linklayer.contract.IMACProtocol;
-import inet.physicallayer.radio.contract.IRadio;
+import inet.physicallayer.contract.IRadio;
 import inet.power.contract.IPowerConsumer;
 
 

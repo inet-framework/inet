@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.ideal;
+package inet.physicallayer.ideal;
 
-import inet.physicallayer.radio.generic.RadioMedium;
+import inet.physicallayer.common.RadioMedium;
 
 module IdealRadioMedium extends RadioMedium
 {

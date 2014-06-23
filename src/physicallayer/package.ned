@@ -1,2 +1,3 @@
-package inet.physicallayer.radio;
+package inet.physicallayer;
+
 @namespace(physicallayer);

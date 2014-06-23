@@ -46,7 +46,7 @@ sim-time-limit = 3s
 
 import inet.common.lifecycle.LifecycleController;
 import inet.node.wireless.AccessPoint;
-import inet.physicallayer.radio.ideal.IdealRadioMedium;
+import inet.physicallayer.ideal.IdealRadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 

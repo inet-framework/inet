@@ -21,7 +21,7 @@ package inet.examples.wireless.nic;
 import inet.common.lifecycle.LifecycleController;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.WirelessHost;
-import inet.physicallayer.radio.contract.IRadioMedium;
+import inet.physicallayer.contract.IRadioMedium;
 
 
 network TestNic

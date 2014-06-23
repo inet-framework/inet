@@ -15,12 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.generic;
+package inet.physicallayer.common;
 
-import inet.physicallayer.radio.contract.IRadio;
-import inet.physicallayer.radio.contract.IAntenna;
-import inet.physicallayer.radio.contract.IReceiver;
-import inet.physicallayer.radio.contract.ITransmitter;
+import inet.physicallayer.contract.IRadio;
+import inet.physicallayer.contract.IAntenna;
+import inet.physicallayer.contract.IReceiver;
+import inet.physicallayer.contract.ITransmitter;
 import inet.power.contract.IPowerConsumer;
 
 // switchingTimes parameter should be regarded as a 5x5 matrix:

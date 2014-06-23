@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.pathloss;
+package inet.physicallayer.pathloss;
 
-import inet.physicallayer.radio.contract.IPathLoss;
+import inet.physicallayer.contract.IPathLoss;
 
 module FreeSpacePathLoss like IPathLoss
 {

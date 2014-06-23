@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.generic;
+package inet.physicallayer.common;
 
-import inet.physicallayer.radio.contract.IRadioBackgroundNoise;
-import inet.physicallayer.radio.contract.IRadioMedium;
-import inet.physicallayer.radio.contract.IAttenuation;
-import inet.physicallayer.radio.contract.IPathLoss;
-import inet.physicallayer.radio.contract.IPropagation;
+import inet.physicallayer.contract.IRadioBackgroundNoise;
+import inet.physicallayer.contract.IRadioMedium;
+import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IPathLoss;
+import inet.physicallayer.contract.IPropagation;
 
 module RadioMedium like IRadioMedium
 {

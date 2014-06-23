@@ -20,7 +20,7 @@ package inet.examples.manetrouting.net80211_control;
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 import inet.node.inet.AdhocHost;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
 
 network Net80211_control

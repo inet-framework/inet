@@ -34,7 +34,7 @@ record-eventlog = true
 import inet.common.lifecycle.LifecycleController;
 import inet.node.inet.AdhocHost;
 import inet.status.NodeStatus;
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 import inet.common.scenario.ScenarioManager;
 
 network Test

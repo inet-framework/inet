@@ -20,7 +20,7 @@
 
 package inet.tests.traci;
 
-import inet.physicallayer.radio.ieee80211.Ieee80211RadioMedium;
+import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 import inet.mobility.group.TraCIScenarioManagerLaunchd;
 
 module Highway

@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.dimensional;
+package inet.physicallayer.dimensional;
 
-import inet.physicallayer.radio.contract.IReceiver;
+import inet.physicallayer.contract.IReceiver;
 
 module DimensionalReceiver like IReceiver
 {

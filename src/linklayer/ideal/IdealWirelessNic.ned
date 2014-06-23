@@ -22,7 +22,7 @@ package inet.linklayer.ideal;
 
 import inet.common.queue.IOutputQueue;
 import inet.linklayer.IWirelessNic;
-import inet.physicallayer.radio.contract.IRadio;
+import inet.physicallayer.contract.IRadio;
 
 
 //

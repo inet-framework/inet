@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.antenna;
+package inet.physicallayer.antenna;
 
-import inet.physicallayer.radio.contract.IAntenna;
+import inet.physicallayer.contract.IAntenna;
 
 module InterpolatingAntenna like IAntenna
 {

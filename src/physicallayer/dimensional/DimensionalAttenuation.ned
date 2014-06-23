@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.dimensional;
+package inet.physicallayer.dimensional;
 
-import inet.physicallayer.radio.contract.IAttenuation;
+import inet.physicallayer.contract.IAttenuation;
 
 module DimensionalAttenuation like IAttenuation
 {

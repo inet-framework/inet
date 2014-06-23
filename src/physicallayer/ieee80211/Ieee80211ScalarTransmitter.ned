@@ -15,9 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.radio.ieee80211;
+package inet.physicallayer.ieee80211;
 
-import inet.physicallayer.radio.scalar.ScalarTransmitter;
+import inet.physicallayer.scalar.ScalarTransmitter;
 
 module Ieee80211ScalarTransmitter extends ScalarTransmitter
 {
