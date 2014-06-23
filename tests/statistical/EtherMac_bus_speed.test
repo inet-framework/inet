@@ -15,7 +15,7 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.linklayer.ethernet.EtherBus;
-import inet.nodes.ethernet.EtherHost;
+import inet.node.ethernet.EtherHost;
 import ned.DatarateChannel;
 
 module EtherHostQ extends EtherHost

@@ -8,7 +8,7 @@ Testing TCP communication speed
 %file: test.ned
 
 import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
-import inet.nodes.wireless.AccessPoint;
+import inet.node.wireless.AccessPoint;
 import inet.mobility.models.StationaryMobility;
 import inet.mobility.models.CircleMobility;
 import inet.linklayer.ieee80211.Ieee80211Nic;

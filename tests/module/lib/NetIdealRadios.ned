@@ -1,6 +1,6 @@
 
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.ideal.IdealRadioMedium;
 
 

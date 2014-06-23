@@ -1,5 +1,5 @@
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 network SCTPFeatureTest

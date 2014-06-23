@@ -18,7 +18,7 @@ run each stage one after the other.
 
 import inet.base.LifecycleController;
 import inet.status.NodeStatus;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 network Test
 {

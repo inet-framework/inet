@@ -18,7 +18,7 @@
 
 import ned.DatarateChannel;
 import inet.util.NetAnimTrace;
-import inet.nodes.inet.StandardHost;
+import inet.node.inet.StandardHost;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
 
 

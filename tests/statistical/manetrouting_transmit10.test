@@ -7,7 +7,7 @@ Testing manetrouting with AODVUU routing protocol, UDP forwarding
 %file: test.ned
 
 import inet.networklayer.autorouting.ipv4.FlatNetworkConfigurator;
-import inet.nodes.inet.AdhocHost;
+import inet.node.inet.AdhocHost;
 import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
 

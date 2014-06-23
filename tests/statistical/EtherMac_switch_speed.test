@@ -18,8 +18,8 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import ned.DatarateChannel;
-import inet.nodes.ethernet.EtherHost;
-import inet.nodes.ethernet.EtherSwitch;
+import inet.node.ethernet.EtherHost;
+import inet.node.ethernet.EtherSwitch;
 
 module EtherHostQ extends EtherHost
 {

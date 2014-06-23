@@ -15,8 +15,8 @@ checks:
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 import inet.linklayer.ethernet.EtherBus;
-import inet.nodes.ethernet.EtherHost;
-import inet.world.scenario.ScenarioManager;
+import inet.node.ethernet.EtherHost;
+import inet.common.scenario.ScenarioManager;
 import ned.DatarateChannel;
 
 module EtherHostQ extends EtherHost

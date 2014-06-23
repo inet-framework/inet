@@ -1,6 +1,6 @@
 // package module_.lib;
 
-import inet.transport.ITCP;
+import inet.transportlayer.ITCP;
 
 
 network TcpTestNet1

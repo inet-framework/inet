@@ -1,7 +1,7 @@
-import inet.nodes.inet.StandardHost;
-import inet.nodes.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
-import inet.transport.sctp.SCTPNatRouter;
+import inet.transportlayer.sctp.SCTPNatRouter;
 
 
 network multinat

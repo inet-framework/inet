@@ -9,10 +9,10 @@ Testing OSPF routing
 
 import inet.linklayer.ethernet.EtherHub;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.nodes.inet.StandardHost;
-import inet.nodes.ospfv2.OSPFRouter;
+import inet.node.inet.StandardHost;
+import inet.node.ospfv2.OSPFRouter;
 import inet.util.ThruputMeteringChannel;
-import inet.world.scenario.ScenarioManager;
+import inet.common.scenario.ScenarioManager;
 
 
 network Test1

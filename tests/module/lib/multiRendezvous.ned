@@ -1,6 +1,6 @@
-import inet.nodes.inet.StandardHost;
-import inet.transport.sctp.SCTPNatRouter;
-import inet.nodes.inet.Router;
+import inet.node.inet.StandardHost;
+import inet.transportlayer.sctp.SCTPNatRouter;
+import inet.node.inet.Router;
 import ned.DatarateChannel;
 
 network multiRendezvous {
