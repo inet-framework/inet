@@ -65,12 +65,7 @@ bool FlatReceiverBase::computeIsReceptionPossible(const ITransmission *transmiss
 {
     // TODO: check if modulation matches?
     const FlatTransmissionBase *flatTransmission = check_and_cast<const FlatTransmissionBase *>(transmission);
-    if (carrierFrequency == flatTransmission->getCarrierFrequency() && bandwidth == flatTransmission->getBandwidth())
-        return true;
-    else if (areOverlappingBands(carrierFrequency, bandwidth, flatTransmission->getCarrierFrequency(), flatTransmission->getBandwidth()))
-        throw cRuntimeError("Overlapping bands are not supported");
-    else
-        return false;
+    return carrierFrequency == flatTransmission->getCarrierFrequency() && bandwidth == flatTransmission->getBandwidth();
 }
 
 // TODO: this is not purely functional, see interface comment
@@ -78,12 +73,8 @@ bool FlatReceiverBase::computeIsReceptionPossible(const IListening *listening, c
 {
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
-    if (carrierFrequency == flatReception->getCarrierFrequency() && bandwidth == flatReception->getBandwidth())
-        return flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime()) >= sensitivity;
-    else if (areOverlappingBands(carrierFrequency, bandwidth, flatReception->getCarrierFrequency(), flatReception->getBandwidth()))
-        throw cRuntimeError("Overlapping bands are not supported");
-    else
-        return false;
+    return bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth() &&
+           flatReception->computeMinPower(reception->getStartTime(), reception->getEndTime()) >= sensitivity;
 }
 
 const IListeningDecision *FlatReceiverBase::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
@@ -122,8 +113,6 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
     const FlatReceptionBase *flatReception = check_and_cast<const FlatReceptionBase *>(reception);
     if (bandListening->getCarrierFrequency() == flatReception->getCarrierFrequency() && bandListening->getBandwidth() == flatReception->getBandwidth())
         return SNIRReceiverBase::computeReceptionDecision(listening, reception, interferingReceptions, backgroundNoise);
-    else if (areOverlappingBands(bandListening->getCarrierFrequency(), bandListening->getBandwidth(), flatReception->getCarrierFrequency(), flatReception->getBandwidth()))
-        throw cRuntimeError("Overlapping bands are not supported");
     else
         return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
