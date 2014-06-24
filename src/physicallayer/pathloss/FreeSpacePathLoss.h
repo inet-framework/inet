@@ -41,7 +41,7 @@ class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
     public:
         FreeSpacePathLoss();
         virtual void printToStream(std::ostream &stream) const;
-        virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
+        virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
 };
 
 }

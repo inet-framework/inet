@@ -43,9 +43,9 @@ void NakagamiFading::printToStream(std::ostream &stream) const
            << "shape factor = " << shapeFactor;
 }
 
-double NakagamiFading::computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const
+double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
-    m waveLength = propagationSpeed / carrierFrequency;
+    m waveLength = propagationSpeed / frequency;
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     return gamma_d(shapeFactor, freeSpacePathLoss / 1000.0 / shapeFactor) * 1000.0;
 }

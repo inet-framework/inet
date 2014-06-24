@@ -35,7 +35,7 @@ class INET_API IPathLoss : public IPrintableObject
          * frequency and distance. The value is in the range [0, 1] where 1 means
          * no loss at all and 0 means all power is lost.
          */
-        virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const = 0;
+        virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const = 0;
 };
 
 }

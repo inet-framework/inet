@@ -43,11 +43,11 @@ void LogNormalShadowing::printToStream(std::ostream &stream) const
            << "sigma = " << sigma;
 }
 
-double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const
+double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
     m d0 = m(1.0);
     // reference path loss
-    double freeSpacePathLoss = computeFreeSpacePathLoss(propagationSpeed / carrierFrequency, d0, alpha, systemLoss);
+    double freeSpacePathLoss = computeFreeSpacePathLoss(propagationSpeed / frequency, d0, alpha, systemLoss);
     double PL_d0_db = 10.0 * log10(1 / freeSpacePathLoss);
     // path loss at distance d + normal distribution with sigma standard deviation
     double PL_db = PL_d0_db + 10 * alpha * log10(unit(distance / d0).get()) + normal(0.0, sigma);

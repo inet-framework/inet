@@ -28,9 +28,9 @@ void RayleighFading::printToStream(std::ostream &stream) const
            << "system loss = " << systemLoss;
 }
 
-double RayleighFading::computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const
+double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
-    m waveLength = propagationSpeed / carrierFrequency;
+    m waveLength = propagationSpeed / frequency;
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     double x = normal(0, 1);
     double y = normal(0, 1);

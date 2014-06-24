@@ -46,9 +46,9 @@ void TwoRayGroundReflection::printToStream(std::ostream &stream) const
            << "receiver antenna high = " << hr;
 }
 
-double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const
+double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
-    m waveLength = propagationSpeed / carrierFrequency;
+    m waveLength = propagationSpeed / frequency;
     /**
      * At the cross over distance two ray model and free space model predict the same power
      *

@@ -52,8 +52,8 @@ double FreeSpacePathLoss::computeFreeSpacePathLoss(m waveLength, m distance, dou
     return distance.get() == 0.0 ? 1.0 : raisedRatio / (16.0 * M_PI * M_PI * systemLoss);
 }
 
-double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const
+double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const
 {
-    m waveLength = propagationSpeed / carrierFrequency;
+    m waveLength = propagationSpeed / frequency;
     return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
 }

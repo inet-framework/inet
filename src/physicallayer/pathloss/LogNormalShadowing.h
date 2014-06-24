@@ -37,7 +37,7 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
     public:
         LogNormalShadowing();
         virtual void printToStream(std::ostream &stream) const;
-        virtual double computePathLoss(mps propagationSpeed, Hz carrierFrequency, m distance) const;
+        virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
 };
 
 }
