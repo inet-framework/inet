@@ -18,9 +18,9 @@ package inet.physicallayer.radio.generic;
 module NeighborListCache like INeighborCache
 {
     parameters:
-        double range @unit(m) = default(250m);
-        double refillPeriod @unit(s) = default(1s);
-        double maxSpeed @unit(mps) = default(8mps);
+        double range @unit(m);
+        double refillPeriod @unit(s);
+        double maxSpeed @unit(mps);
         @class(NeighborListCache);
 }
 

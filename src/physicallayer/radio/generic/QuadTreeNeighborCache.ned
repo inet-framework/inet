@@ -18,15 +18,15 @@ package inet.physicallayer.radio.generic;
 module QuadTreeNeighborCache like INeighborCache
 {
     parameters:
-        int maxNumOfPointsPerQuadrant = default(2);
-        double range @unit(m) = default(250m);
-        double refillPeriod @unit(s) = default(1s);
-        double maxSpeed @unit(mps) = default(8mps);
-        double constraintAreaMaxX @unit(m) = default(600m); // max x position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxY @unit(m) = default(600m); // max y position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMinX @unit(m) = default(0m); // min x position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinY @unit(m) = default(0m); // min y position of the constraint area, unconstrained by default (negative infinity)
-        bool strictQueries = default(false);
-        bool isStaticNetwork = default(false);
+        int maxNumOfPointsPerQuadrant;
+        double range @unit(m);
+        double refillPeriod @unit(s);
+        double maxSpeed @unit(mps);
+        double constraintAreaMaxX @unit(m); // max x position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxY @unit(m); // max y position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinY @unit(m); // min y position of the constraint area, unconstrained by default (negative infinity)
+        bool strictQueries;
+        bool isStaticNetwork;
         @class(QuadTreeNeighborCache);
 }
