@@ -827,7 +827,9 @@ namespace units
         typedef compose<W,pow<A,-1> > V;
         typedef compose<C,pow<V,-1> > F;
         typedef compose<V,pow<A,-1> > Ohm;
+        typedef compose<Ohm, m> Ohmm;
         typedef compose<A,pow<V,-1> > S;
+        typedef compose<S,pow<m,-1> > Spm;
         typedef compose<V,s> Wb;
         typedef compose<Wb,pow<m,-2> > T;
         typedef compose<Wb,pow<A,-1> > H;
@@ -949,6 +951,7 @@ namespace units
         typedef compose<mile, pow<hour,-1> > mph;
         typedef compose<km, pow<hour,-1> > kph;
         typedef compose<m, pow<s,-1> > mps;
+        typedef compose<s, pow<m,-1> > spm;
         typedef compose<nautical_mile, pow<hour,-1> > knot;
         typedef scale<mps, 100, 34029> mach;
 
@@ -1040,7 +1043,9 @@ namespace units
         typedef value<double, units::V> V;
         typedef value<double, units::F> F;
         typedef value<double, units::Ohm> Ohm;
+        typedef value<double, units::Ohmm> Ohmm;
         typedef value<double, units::S> S;
+        typedef value<double, units::S> Spm;
         typedef value<double, units::Wb> Wb;
         typedef value<double, units::T> T;
         typedef value<double, units::H> H;
@@ -1099,6 +1104,7 @@ namespace units
         typedef value<double, units::mph> mph;
         typedef value<double, units::kph> kph;
         typedef value<double, units::mps> mps;
+        typedef value<double, units::spm> spm;
         typedef value<double, units::knot> knot;
         typedef value<double, units::mach> mach;
 
@@ -1134,7 +1140,7 @@ namespace units
         const value<double, units::F> F (96485.3399);
         const value<double, units::unit> alpha (7.2973525376e-3);
         const value<double, units::unit> inv_alpha (137.035999679);
-        const value<double, compose<units::N, pow<units::A,-2> > > u0 (12.566370614);
+        const value<double, compose<units::N, pow<units::A,-2> > > u0 (12.566370614e-7);
         const value<double, units::Wb> phi0 (2.067833667e-15);    // ??
         const value<double, compose<units::J, compose<pow<units::mol,-1>, pow<units::kg,-1> > > > R (8.314472);
         const value<double, compose< pow<units::m,3>, compose<pow<units::kg,-1>, pow<units::s,-2> > > > G (6.67428e-11);
