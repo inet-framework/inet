@@ -108,7 +108,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
                 virtual void removeRadio(const IRadio *radio) = 0;
 
-                virtual void sendToNeighbors(const IRadio *transmitter, const IRadioFrame *frame) = 0;
+                virtual void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame) = 0;
         };
 
     protected:
