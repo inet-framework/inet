@@ -209,7 +209,7 @@ void TraCITestApp::handlePositionUpdate() {
 
     if (testNumber == testCounter++) {
         if (t == 30) {
-            bool r = traci->getManager()->commandAddVehicle("testVehicle0", "vtype0", "route0", "25_0", 0, 70);
+            bool r = traci->getManager()->commandAddVehicle("testVehicle0", "vtype0", "route0");
             assertTrue("(commandAddVehicle) command reports success", r);
         }
         if (t == 31) {
