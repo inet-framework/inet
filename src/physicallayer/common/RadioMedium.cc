@@ -133,7 +133,7 @@ void RadioMedium::initialize(int stage)
     {
         // initialize parameters
         propagation = check_and_cast<IPropagation *>(getSubmodule("propagation"));
-        pathLoss = new FreeSpacePathLoss();
+        pathLoss = check_and_cast<IPathLoss *>(getSubmodule("pathLoss"));
         attenuation = check_and_cast<IAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IBackgroundNoise *>(getSubmodule("backgroundNoise"));
         const char *rangeFilterString = par("rangeFilter");
