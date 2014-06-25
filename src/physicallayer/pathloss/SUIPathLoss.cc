@@ -18,7 +18,7 @@
 
 using namespace physicallayer;
 
-Register_Class(SUIPathLoss);
+Define_Module(SUIPathLoss);
 
 SUIPathLoss::SUIPathLoss() :
     ht(m(0)),

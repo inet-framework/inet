@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(TwoRayGroundReflection);
+Define_Module(TwoRayGroundReflection);
 
 TwoRayGroundReflection::TwoRayGroundReflection() :
     ht(m(0)),

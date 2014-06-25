@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(RicianFading);
+Define_Module(RicianFading);
 
 RicianFading::RicianFading() :
     k(1)

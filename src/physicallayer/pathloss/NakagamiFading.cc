@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(NakagamiFading);
+Define_Module(NakagamiFading);
 
 NakagamiFading::NakagamiFading() :
     shapeFactor(1)

@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(FreeSpacePathLoss);
+Define_Module(FreeSpacePathLoss);
 
 FreeSpacePathLoss::FreeSpacePathLoss() :
     alpha(2.0),

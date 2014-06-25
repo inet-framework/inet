@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(RayleighFading);
+Define_Module(RayleighFading);
 
 void RayleighFading::printToStream(std::ostream &stream) const
 {

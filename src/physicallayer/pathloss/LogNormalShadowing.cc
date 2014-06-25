@@ -19,7 +19,7 @@
 
 using namespace physicallayer;
 
-Register_Class(LogNormalShadowing);
+Define_Module(LogNormalShadowing);
 
 LogNormalShadowing::LogNormalShadowing() :
     sigma(1)
