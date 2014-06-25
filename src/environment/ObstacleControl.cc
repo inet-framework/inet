@@ -26,14 +26,8 @@
 
 Define_Module(ObstacleControl);
 
-ObstacleControl::ObstacleControl()
-{
-    obstaclesXml = NULL;
-    annotations = NULL;
-    annotationGroup = NULL;
-}
-
 ObstacleControl::~ObstacleControl() {
+
 }
 
 void ObstacleControl::initialize(int stage)
@@ -99,24 +93,97 @@ void ObstacleControl::addFromXml(cXMLElement* xml) {
         ASSERT(e->getAttribute("shape"));
         std::string shape = e->getAttribute("shape");
 
-        double attenuationPerWall = 50; /**< in dB */
-        double attenuationPerMeter = 1; /**< in dB / m */
-        if (type == "building") { attenuationPerWall = 50; attenuationPerMeter = 1; }
-        else throw cRuntimeError("unknown obstacle type: %s", type.c_str());
-        Obstacle obs(id, attenuationPerWall, attenuationPerMeter);
-        std::vector<Coord> sh;
-        cStringTokenizer st(shape.c_str());
-        while (st.hasMoreTokens()) {
-            std::string xy = st.nextToken();
-            std::vector<double> xya = cStringTokenizer(xy.c_str(), ",").asDoubleVector();
-            ASSERT(xya.size() == 2);
-            sh.push_back(Coord(xya[0], xya[1]));
+        if (type == "building") {
+            double attenuationPerWall = 50; /**< in dB */
+            double attenuationPerMeter = 1; /**< in dB / m */
+            if (e->getAttribute("attenuationPerWall"))
+            {
+                std::string attenuation = e->getAttribute("attenuationPerWall");
+                std::istringstream i(attenuation);
+                if (!(i >> attenuationPerWall))
+                    error("attenuationPerWall error");
+            }
+
+            if (e->getAttribute("attenuationPerMeter"))
+            {
+                std::string attenuation = e->getAttribute("attenuationPerMeter");
+                std::istringstream i(attenuation);
+                if (!(i >> attenuationPerMeter))
+                    error("attenuationPerMeter error");
+            }
+
+            Obstacle obs(id, attenuationPerWall, attenuationPerMeter);
+            std::vector<Coord> sh;
+            cStringTokenizer st(shape.c_str());
+            while (st.hasMoreTokens()) {
+                std::string xy = st.nextToken();
+                std::vector<double> xya = cStringTokenizer(xy.c_str(), ",").asDoubleVector();
+                ASSERT(xya.size() == 2);
+                sh.push_back(Coord(xya[0], xya[1]));
+            }
+            obs.setShape(sh);
+            add(obs);
         }
-        obs.setShape(sh);
-        add(obs);
+        else
+        {
+            Obstacle::Type tp;
+            double mean;
+            double deviation;
 
+            if (type == "probability")
+            {
+                if (e->getAttribute("lossProbability"))
+                {
+                    std::string probability = e->getAttribute("lossProbability");
+                    std::istringstream i(probability);
+                    if (!(i >> mean))
+                        error("lossProbability error");
+                }
+                tp = Obstacle::probability;
+            }
+            else if (type == "probabilityDistribution")
+            {
+                if (e->getAttribute("mean"))
+                {
+                    std::string meanString = e->getAttribute("mean");
+                    std::istringstream i(meanString);
+                    if (!(i >> mean))
+                        error("mean error");
+                }
+                if (e->getAttribute("deviation"))
+                {
+                    std::string dev = e->getAttribute("deviation");
+                    std::istringstream i(dev);
+                    if (!(i >> deviation))
+                        error("deviation error");
+                }
+                if (e->getAttribute("distribution"))
+                {
+                    std::string distrib = e->getAttribute("distribution");
+                    if (distrib == "lognormal")
+                        type = Obstacle::lognormalDist;
+                    else if (distrib == "normal")
+                        type = Obstacle::normalDist;
+                    else if (distrib == "exponential")
+                        type = Obstacle::exponentialDist;
+                    else
+                        error("distribution type error");
+                }
+            }
+            else error("unknown obstacle type: %s", type.c_str());
+            Obstacle obs(id, mean, deviation, tp);
+            std::vector<Coord> sh;
+            cStringTokenizer st(shape.c_str());
+            while (st.hasMoreTokens()) {
+                std::string xy = st.nextToken();
+                std::vector<double> xya = cStringTokenizer(xy.c_str(), ",").asDoubleVector();
+                ASSERT(xya.size() == 2);
+                sh.push_back(Coord(xya[0], xya[1]));
+            }
+            obs.setShape(sh);
+            add(obs);
+        }
     }
-
 }
 
 void ObstacleControl::add(Obstacle obstacle) {
