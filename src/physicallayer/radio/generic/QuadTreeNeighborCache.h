@@ -19,66 +19,54 @@
 #define QUADTREENEIGHBORCACHE_H_
 
 #include "RadioMedium.h"
+#include "QuadTree.h"
 
 namespace physicallayer {
 
-// It is a Quadtree implementation for efficient (in a static network)
-// orthogonal range queries.
-
-class QuadTreeNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule
+class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighborCache
 {
     public:
         typedef std::vector<const IRadio *> Radios;
-        struct QuadTreeNode
-        {
-            Coord boundaryMin;
-            Coord boundaryMax;
-            Radios points;
-            QuadTreeNode *quadrants[4];
-            QuadTreeNode *parent;
-        };
+        typedef QuadTree::QuadTreeVisitor QuadTreeVisitor;
+
     protected:
-        std::map<const IRadio *, Coord> lastPosition; // the radio position when we inserted to the QuadTree
-        unsigned int maxNumOfPointsPerQuadrant;
-        QuadTreeNode *rootNode;
+        class QuadTreeNeighborCacheVisitor : public QuadTree::QuadTreeVisitor
+        {
+            protected:
+                RadioMedium *radioMedium;
+                IRadio *transmitter;
+                const IRadioFrame *frame;
+            public:
+                void visitor(const cObject *radio);
+                QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
+                    radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
+        };
+
+    protected:
+        QuadTree *quadTree;
+        Radios radios;
         cMessage *rebuildQuadTreeTimer;
         RadioMedium *radioMedium;
         Coord constraintAreaMax, constraintAreaMin;
-        Radios radios;
+        unsigned int maxNumOfPointsPerQuadrant;
         double range;
         double rebuildPeriod;
         double maxSpeed;
-        bool strictQueries;
-        bool isStaticNetwork;
+
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
         virtual void handleMessage(cMessage *msg);
-        bool addPointToQuadTree(QuadTreeNode *rootNode, const IRadio *radio);
-        bool removeQuadTreePoint(QuadTreeNode *rootNode, const IRadio *radio);
-        QuadTreeNode *searchRadioQuadrant(QuadTreeNode *rootNode, Coord lastPos);
-        unsigned int whichQuadrant(QuadTreeNode *node, Coord radioPos) const;
-        bool hasChild(QuadTreeNode *node) const;
-        void setBoundary(QuadTreeNode *node);
-        void splitPoints(QuadTreeNode *node);
-        void setToLeaf(QuadTreeNode *node);
-        QuadTreeNode *createQuadTree();
-        void fillQuadTreeWithRadios(QuadTreeNode *rootNode);
-        void rangeQuery(QuadTreeNode *rootNode, const IRadio *transmitter, Coord minRectangleBoundary, Coord maxRectangleBoundary, Radios& neighbors);
-        void strictRangeQuery(QuadTreeNode *rootNode, const IRadio *transmitter, Coord transmitterPos, double range, Coord minRectangleBoundary, Coord maxRectangleBoundary, Radios& neighbors);
-        void deleteTree(QuadTreeNode *rootNode);
-        bool isInRectangleRange(Coord pointCoord, Coord rectangleBoundaryMin, Coord rectangleBoundaryMax) const;
-        bool doesIntersectWithQuadrant(QuadTreeNode *quadrant, Coord rectangleBoundaryMin, Coord rectangleBoundaryMax) const;
-        void tryToJoinChildQuadrants(QuadTreeNode *node);
-        void moveQuadTreePoint(const IRadio *radio);
+        void fillQuadTreeWithRadios();
+
     public:
         void addRadio(const IRadio *radio);
         void removeRadio(const IRadio *radio);
         void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
-        QuadTreeNeighborCache() : rootNode(NULL), rebuildQuadTreeTimer(NULL), radioMedium(NULL) {};
+        QuadTreeNeighborCache();
         ~QuadTreeNeighborCache();
 };
 
-} /* namespace radio */
+} /* namespace physicallayer */
 
 #endif /* QUADTREENEIGHBORCACHE_H_ */

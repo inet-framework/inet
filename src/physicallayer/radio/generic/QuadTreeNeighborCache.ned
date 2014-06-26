@@ -26,7 +26,5 @@ module QuadTreeNeighborCache like INeighborCache
         double constraintAreaMaxY @unit(m); // max y position of the constraint area, unconstrained by default (positive infinity)
         double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m); // min y position of the constraint area, unconstrained by default (negative infinity)
-        bool strictQueries;
-        bool isStaticNetwork;
         @class(QuadTreeNeighborCache);
 }
