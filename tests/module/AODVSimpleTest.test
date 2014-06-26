@@ -72,7 +72,6 @@ sim-time-limit = 100s
 # channel physical parameters
 *.radioMedium.carrierFrequency = 2.4GHz
 *.radioMedium.maxTransmissionPower = 2.0mW
-*.radioMedium.alpha = 2
 
 # mobility
 **.mobilityType = "StationaryMobility"

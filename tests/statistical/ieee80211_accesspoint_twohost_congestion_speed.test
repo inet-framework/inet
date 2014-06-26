@@ -152,9 +152,7 @@ sim-time-limit = 50s
 
 # channel physical parameters
 *.radioMedium.carrierFrequency = 2.4GHz
-*.radioMedium.pMax = 20mW
-*.radioMedium.sat = -110dBm
-*.radioMedium.alpha = 2
+*.radioMedium.maxTransmissionPower = 20mW
 
 # access point
 **.ap.wlan*.mac.address = "10:00:00:00:00:00"
