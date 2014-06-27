@@ -20,8 +20,26 @@
 Define_Module(PhysicalEnvironment);
 
 PhysicalEnvironment::PhysicalEnvironment() :
-    temperature(K(293)),
-    pressure(Pa(101325)),
-    relativeHumidity(percent(60))
+    temperature(sNaN),
+    pressure(sNaN),
+    relativeHumidity(sNaN),
+    spaceMin(Coord(sNaN, sNaN, sNaN)),
+    spaceMax(Coord(sNaN, sNaN, sNaN))
 {
+}
+
+void PhysicalEnvironment::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        temperature = K(par("temperature"));
+        pressure = Pa(par("pressure"));
+        relativeHumidity = percent(par("relativeHumidity"));
+        spaceMin.x = par("spaceMinX");
+        spaceMin.y = par("spaceMinY");
+        spaceMin.z = par("spaceMinZ");
+        spaceMax.x = par("spaceMaxX");
+        spaceMax.y = par("spaceMaxY");
+        spaceMax.z = par("spaceMaxZ");
+    }
 }

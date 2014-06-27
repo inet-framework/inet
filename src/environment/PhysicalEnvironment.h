@@ -26,7 +26,12 @@ class INET_API PhysicalEnvironment : public cSimpleModule
         K temperature;
         Pa pressure;
         percent relativeHumidity;
+        Coord spaceMin;
+        Coord spaceMax;
         std::vector<PhysicalObject *> objects;
+
+    protected:
+        void initialize(int stage);
 
     public:
         PhysicalEnvironment();
@@ -34,6 +39,8 @@ class INET_API PhysicalEnvironment : public cSimpleModule
         virtual K getTemperature() const { return temperature; }
         virtual Pa getPressure() const { return pressure; }
         virtual percent getRelativeHumidity() const { return relativeHumidity; }
+        virtual const Coord getSpaceMin() { return spaceMin; }
+        virtual const Coord getSpaceMax() { return spaceMax; }
         virtual const std::vector<PhysicalObject *> &getObjects() { return objects; }
 };
 
