@@ -36,6 +36,7 @@ module RadioMedium like IRadioMedium
 
         // channel limit parameters
         double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
+        double maxSpeed @unit(mps) = default(0mps/0);
         double maxTransmissionPower @unit(W) = default(0W/0);
         double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W
         double minReceptionPower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W

@@ -135,6 +135,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          */
         const IBackgroundNoise *backgroundNoise;
         /**
+         * The maximum speed among the radios is in the range [0, +infinity) or
+         * NaN if unspecified.
+         */
+        mps maxSpeed;
+        /**
          * The maximum transmission power among the radio transmitters is in the
          * range [0, +infinity) or NaN if unspecified.
          */
@@ -344,6 +349,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
         /** @name Limits */
         //@{
+        virtual mps computeMaxSpeed() const;
+
         virtual W computeMaxTransmissionPower() const;
         virtual W computeMinInterferencePower() const;
         virtual W computeMinReceptionPower() const;

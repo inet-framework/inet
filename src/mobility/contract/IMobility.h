@@ -46,6 +46,9 @@ class INET_API IMobility
   public:
     virtual ~IMobility() {}
 
+    /** @brief Returns the maximum possible speed at any future time. */
+    virtual double getMaxSpeed() = 0;
+
     /** @brief Returns the current position at the current simulation time. */
     virtual Coord getCurrentPosition() = 0;
 

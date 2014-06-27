@@ -34,6 +34,7 @@ RadioMedium::RadioMedium() :
     pathLoss(NULL),
     attenuation(NULL),
     backgroundNoise(NULL),
+    maxSpeed(mps(sNaN)),
     maxTransmissionPower(W(sNaN)),
     minInterferencePower(W(sNaN)),
     minReceptionPower(W(sNaN)),
@@ -341,6 +342,14 @@ inline double maxIgnoreNaN(double a, double b)
     else return b;
 }
 
+mps RadioMedium::computeMaxSpeed() const
+{
+    mps maxSpeed = mps(par("maxSpeed"));
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        maxSpeed = maxIgnoreNaN(maxSpeed, mps((*it)->getAntenna()->getMobility()->getMaxSpeed()));
+    return maxSpeed;
+}
+
 W RadioMedium::computeMaxTransmissionPower() const
 {
     W maxTransmissionPower = W(par("maxTransmissionPower"));
@@ -402,6 +411,7 @@ const simtime_t RadioMedium::computeMaxTransmissionDuration() const
 
 void RadioMedium::updateLimits()
 {
+    maxSpeed = computeMaxSpeed();
     maxTransmissionPower = computeMaxTransmissionPower();
     minInterferencePower = computeMinInterferencePower();
     minReceptionPower = computeMinReceptionPower();
