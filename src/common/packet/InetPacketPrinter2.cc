@@ -68,7 +68,7 @@ class RIPPacket;
 #include "RadioFrame.h"
 #include "ScalarTransmission.h"
 #else
-namespace radio {
+namespace physicallayer {
 class RadioFrame;
 }
 #endif
