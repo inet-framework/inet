@@ -16,7 +16,12 @@
 //
 
 #include "Material.h"
+#include "FWMath.h"
 
+Material Material::vacuum(Ohmm(sNaN), 1, 1);
+Material Material::air(Ohmm(sNaN), 1.00058986, 1.00000037);
+Material Material::copper(Ohmm(1.68), sNaN, sNaN);
+Material Material::aluminium(Ohmm(2.65), sNaN, sNaN);
 Material Material::wood(Ohmm(1E+15), 5, 1.00000043);
 Material Material::concrete(Ohmm(1E+2), 4.5, 1);
 Material Material::glass(Ohmm(1E+12), 7, 1);

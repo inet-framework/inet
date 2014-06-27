@@ -18,32 +18,27 @@
 #ifndef __INET_MATERIAL_H_
 #define __INET_MATERIAL_H_
 
-#include <limits>
 #include "INETDefs.h"
 #include "Units.h"
 
 using namespace units::values;
 using namespace units::constants;
 
-// TODO: merge
-#define sNaN std::numeric_limits<double>::signaling_NaN()
-
 class INET_API Material
 {
+    public:
+        static Material vacuum;
+        static Material air;
+        static Material copper;
+        static Material aluminium;
+        static Material wood;
+        static Material concrete;
+        static Material glass;
+
     protected:
         Ohmm resistivity;
         double relativePermittivity;
         double relativePermeability;
-
-//        double reflectionLossPerWall;
-//        double dielectricLossPerMeter;
-//        double attenuationPerWall; /**< in dB. Consumer Wi-Fi vs. an exterior wall will give approx. 50 dB */
-//        double attenuationPerMeter; /**< in dB / m. Consumer Wi-Fi vs. an interior hollow wall will give approx. 5 dB */
-
-    public:
-        static Material wood;
-        static Material concrete;
-        static Material glass;
 
     public:
         Material(Ohmm resistivity, double relativePermittivity, double relativePermeability);
