@@ -20,12 +20,15 @@
 
 #include "LineSegment.h"
 
+/**
+ * This class represents a 3 dimensional shape.
+ */
 class INET_API Shape
 {
     public:
         Shape();
 
-        virtual bool isIntersectingLineSegment(const LineSegment& lineSegment) const = 0;
+        virtual bool isIntersecting(const LineSegment& lineSegment) const = 0;
         virtual double computeIntersectionDistance(const LineSegment& lineSegment) const = 0;
 };
 

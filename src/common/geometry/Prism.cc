@@ -21,12 +21,12 @@ Prism::Prism()
 {
 }
 
-bool Prism::isIntersectingLineSegment(const Coord p1, const Coord p2)  const
+bool Prism::isIntersecting(const LineSegment& lineSegment) const
 {
     throw cRuntimeError("Unimplemented");
 }
 
-double Prism::computeIntersectionDistance(const Coord p1, const Coord p2) const
+double Prism::computeIntersectionDistance(const LineSegment& lineSegment) const
 {
     throw cRuntimeError("Unimplemented");
 }

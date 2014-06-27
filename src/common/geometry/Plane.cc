@@ -25,6 +25,7 @@ Plane::Plane(const Coord& basePoint, const Coord& normalVector) :
 
 Coord Plane::computeIntersection(const LineSegment& lineSegment)
 {
+    // NOTE: based on http://paulbourke.net/geometry/pointlineplane/
     const Coord& point1 = lineSegment.getPoint1();
     const Coord& point2 = lineSegment.getPoint2();
     double denominator = normalVector * (point2 - point1);
@@ -34,7 +35,7 @@ Coord Plane::computeIntersection(const LineSegment& lineSegment)
     {
         double numerator = normalVector * (basePoint - point1);
         double q = numerator / denominator;
-        if (q < 0 || q > 0)
+        if (q < 0 || q > 1)
             return Coord(qNaN, qNaN, qNaN);
         else
             return point1 * (1 - q) + point2 * q;

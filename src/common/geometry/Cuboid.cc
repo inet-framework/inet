@@ -24,7 +24,7 @@ Cuboid::Cuboid(const Coord& min, const Coord& max) :
 {
 }
 
-bool Cuboid::isIntersectingLineSegment(const LineSegment& lineSegment) const
+bool Cuboid::isIntersecting(const LineSegment& lineSegment) const
 {
     Coord xMin = Plane(min, Coord(1, 0, 0)).computeIntersection(lineSegment);
     if (!xMin.isUnspecified() && isInsideY(xMin) && isInsideZ(xMin))
@@ -69,5 +69,5 @@ double Cuboid::computeIntersectionDistance(const LineSegment& lineSegment) const
     Coord zMax = Plane(max, Coord(0, 0, -1)).computeIntersection(lineSegment);
     if (!zMax.isUnspecified() && isInsideX(zMax) && isInsideY(zMax))
         points[i++ % 2] = zMax;
-    return points[0].distance(points[2]);
+    return points[0].distance(points[1]);
 }

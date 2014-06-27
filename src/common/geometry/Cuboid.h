@@ -20,6 +20,9 @@
 
 #include "Shape.h"
 
+/**
+ * This class represents a 3 dimensional shape with 6 faces aligned to axes.
+ */
 class INET_API Cuboid : public Shape
 {
     protected:
@@ -34,7 +37,10 @@ class INET_API Cuboid : public Shape
     public:
         Cuboid(const Coord& min, const Coord& max);
 
-        virtual bool isIntersectingLineSegment(const LineSegment& lineSegment) const;
+        const Coord &getMin() const { return min; }
+        const Coord &getMax() const { return max; }
+
+        virtual bool isIntersecting(const LineSegment& lineSegment) const;
         virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
 };
 

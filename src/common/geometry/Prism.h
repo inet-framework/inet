@@ -21,6 +21,10 @@
 #include "Shape.h"
 #include "Polygon.h"
 
+/**
+ * This class represents 3 dimensional prism shape with a base face aligned to
+ * the X and Y axes.
+ */
 class INET_API Prism : public Shape
 {
     protected:
@@ -30,8 +34,8 @@ class INET_API Prism : public Shape
     public:
         Prism();
 
-        virtual bool isIntersectingLineSegment(const Coord p1, const Coord p2) const;
-        virtual double computeIntersectionDistance(const Coord p1, const Coord p2) const;
+        virtual bool isIntersecting(const LineSegment& lineSegment) const;
+        virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
 };
 
 #endif

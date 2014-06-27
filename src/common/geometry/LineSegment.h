@@ -20,7 +20,9 @@
 
 #include "Coord.h"
 
-// TODO: line segment plane intersection: http://paulbourke.net/geometry/pointlineplane/
+/**
+ * This class represents a 3 dimensional line segment between two points.
+ */
 class INET_API LineSegment
 {
     protected:

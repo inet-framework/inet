@@ -20,6 +20,9 @@
 
 #include "LineSegment.h"
 
+/**
+ * This class represents a 2 dimensional plane in the 3 dimensional space.
+ */
 class INET_API Plane
 {
     protected:
