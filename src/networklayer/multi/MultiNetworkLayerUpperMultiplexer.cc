@@ -20,9 +20,33 @@
 #include "IPv6ControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MultiNetworkLayerUpperMultiplexer);
+
+void MultiNetworkLayerUpperMultiplexer::initialize()
+{
+    int transportUpperInGateSize = gateSize("transportUpperIn");
+    int transportUpperOutGateSize = gateSize("transportUpperOut");
+    if (transportUpperInGateSize != transportUpperOutGateSize)
+        throw cRuntimeError("Connection error: transportUpperIn[] and transportUpperOut[] gate size differ");
+    int transportLowerInGateSize = gateSize("transportLowerIn");
+    int transportLowerOutGateSize = gateSize("transportLowerOut");
+    if (transportLowerInGateSize != transportLowerOutGateSize)
+        throw cRuntimeError("Connection error: transportLowerIn[] and transportLowerOut[] gate size differ");
+    if (transportUpperInGateSize * getProtocolCount() != transportLowerOutGateSize)
+        throw cRuntimeError("Connection error: transportUpperIn[] / transportLowerOut[] gate size ratio not correct");
+    int pingUpperInGateSize = gateSize("pingUpperIn");
+    int pingUpperOutGateSize = gateSize("pingUpperOut");
+    if (pingUpperInGateSize != pingUpperOutGateSize)
+        throw cRuntimeError("Connection error: pingUpperIn[] and pingUpperOut[] gate size differ");
+    int pingLowerInGateSize = gateSize("pingLowerIn");
+    int pingLowerOutGateSize = gateSize("pingLowerOut");
+    if (pingLowerInGateSize != pingLowerOutGateSize)
+        throw cRuntimeError("Connection error: pingLowerIn[] and pingLowerOut[] gate size differ");
+    if (pingUpperInGateSize * getProtocolCount() != pingLowerOutGateSize)
+        throw cRuntimeError("Connection error: pingUpperIn[] / pingLowerOut[] gate size ratio not correct");
+}
 
 void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
 {
@@ -33,7 +57,7 @@ void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
             send(message, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
         else {
             // sending down commands
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < getProtocolCount(); i++) {
                 cMessage * duplicate = message->dup();
                 cObject * controlInfo = message->getControlInfo();
                 if (controlInfo)
@@ -72,3 +96,6 @@ int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message)
     else
         throw cRuntimeError("Unknown control info");
 }
+
+} // namespace inet
+

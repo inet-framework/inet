@@ -28,6 +28,7 @@ class MultiNetworkLayerUpperMultiplexer : public cSimpleModule {
     virtual ~MultiNetworkLayerUpperMultiplexer() { }
 
   protected:
+    virtual void initialize();
     virtual void handleMessage(cMessage * message);
     int getProtocolCount();
     int getProtocolIndex(cMessage * message);

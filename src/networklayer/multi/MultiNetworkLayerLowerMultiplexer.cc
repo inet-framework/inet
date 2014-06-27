@@ -30,7 +30,7 @@
 #include "GenericDatagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
@@ -56,7 +56,7 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
     // TODO: handle the case when some network protocols are disabled
     if (false) ;
 #ifdef WITH_IPv4
-    if (dynamic_cast<IPv4Datagram *>(message) || dynamic_cast<ARPPacket *>(message))
+    else if (dynamic_cast<IPv4Datagram *>(message) || dynamic_cast<ARPPacket *>(message))
         return 0;
 #endif
 #ifdef WITH_IPv6
@@ -70,3 +70,6 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
     else
         throw cRuntimeError("Unknown message");
 }
+
+} // namespace inet
+
