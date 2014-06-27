@@ -29,7 +29,7 @@ namespace physicallayer
 {
 
 /**
- * @brief TODO: short description for this class
+ * @brief A simple constant mapping for one value over time.
  *
  * @ingroup mapping
  */

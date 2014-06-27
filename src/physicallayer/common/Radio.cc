@@ -45,27 +45,6 @@ Radio::Radio() :
     endSwitchTimer(NULL)
 {}
 
-Radio::Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *medium) :
-    id(nextId++),
-    antenna(antenna),
-    transmitter(transmitter),
-    receiver(receiver),
-    medium(medium),
-    upperLayerOut(NULL),
-    upperLayerIn(NULL),
-    radioIn(NULL),
-    radioMode(RADIO_MODE_OFF),
-    nextRadioMode(RADIO_MODE_OFF),
-    previousRadioMode(RADIO_MODE_OFF),
-    receptionState(RECEPTION_STATE_UNDEFINED),
-    transmissionState(TRANSMISSION_STATE_UNDEFINED),
-    endTransmissionTimer(NULL),
-    endReceptionTimer(NULL),
-    endSwitchTimer(NULL)
-{
-    medium->addRadio(this);
-}
-
 Radio::~Radio()
 {
     delete antenna;

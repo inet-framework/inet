@@ -39,11 +39,6 @@ class INET_API Ieee80211RadioMedium : public RadioMedium
             numChannels(-1)
         {}
 
-        Ieee80211RadioMedium(const IPropagation *propagation, const IAttenuation *attenuation, const IBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange, int numChannels) :
-            RadioMedium(propagation, attenuation, backgroundNoise, minInterferenceTime, maxTransmissionDuration, maxCommunicationRange, maxInterferenceRange),
-            numChannels(numChannels)
-        {}
-
         virtual int getNumChannels() const { return numChannels; }
 };
 

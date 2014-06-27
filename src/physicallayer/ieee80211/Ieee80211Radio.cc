@@ -33,12 +33,6 @@ Ieee80211Radio::Ieee80211Radio() :
 {
 }
 
-Ieee80211Radio::Ieee80211Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *channel) :
-    ScalarRadio(radioMode, antenna, transmitter, receiver, channel),
-    channelNumber(-1)
-{
-}
-
 void Ieee80211Radio::initialize(int stage)
 {
     ScalarRadio::initialize(stage);

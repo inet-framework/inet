@@ -36,18 +36,17 @@ namespace physicallayer
  *
  * The receiver interface supports optimistic parallel computation of reception
  * results. For this reason some functions are marked to be purely functional.
- * They must be qualified with const and all of their parameters must also be
- * qualified with const. Moreover they are forbidden to access any state that
- * can change over time to avoid non-deterministic behavior. These functions may
- * be called from background threads running parallel with the main simulation
+ * Unfortunately this cannot be enforced by the compiler in C++. We really need
+ * to be very careful regarding this, because it's pretty easy to break the purely
+ * functional API just be reading a non-const member variable. As a rule of thumb
+ * these functions must be qualified with const and all of their parameters must
+ * also be qualified with const. Moreover they are forbidden to access any state
+ * that can change over time to avoid non-deterministic behavior. These functions
+ * may be called from background threads running parallel with the main simulation
  * thread. They may also be called several times due to cache invalidation before
  * the actual result is needed. This process is controlled by the radio medium.
  */
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
-// TODO: the reception API must be purely functional enforced by the compiler (unfortunately this is impossible in C++)
-// TODO: so we need to be very careful, because it's pretty easy to break the purely function API just be reading a non-const member
-// TODO: it's probably better to split this interface and all other interfaces into two, one with state that changes over time
-// TDOO: and another with purely function API qualified with const functions and members variables
 class INET_API IReceiver : public IPrintableObject
 {
     public:

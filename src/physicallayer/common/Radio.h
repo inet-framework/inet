@@ -158,7 +158,6 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
     public:
         Radio();
-        Radio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *medium);
         virtual ~Radio();
 
         virtual int getId() const { return id; }

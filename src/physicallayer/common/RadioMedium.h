@@ -196,7 +196,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          * True means the radio medium doesn't send radio frames to a radio if
          * it the destination mac address differs.
          */
-        // TODO: complete implementation
         bool macAddressFilter;
         /**
          * Records all transmissions and receptions into a separate trace file.
@@ -411,7 +410,6 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     public:
         RadioMedium();
-        RadioMedium(const IPropagation *propagation, const IAttenuation *attenuation, const IBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange);
         virtual ~RadioMedium();
 
         virtual void printToStream(std::ostream &stream) const { stream << "Radio medium"; }

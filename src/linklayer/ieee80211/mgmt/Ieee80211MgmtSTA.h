@@ -110,7 +110,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     AssociatedAPInfo assocAP;
 
   public:
-    Ieee80211MgmtSTA() : interfaceTable(NULL), host(NULL), myIface(NULL), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(NULL) {}
+    Ieee80211MgmtSTA() : host(NULL), interfaceTable(NULL), myIface(NULL), numChannels(-1), isScanning(false), isAssociated(false), assocTimeoutMsg(NULL) {}
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

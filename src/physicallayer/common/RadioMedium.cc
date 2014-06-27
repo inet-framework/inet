@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ObstacleLoss.h" // TODO: delme
 #include "Radio.h"
 #include "RadioMedium.h"
 #include "RadioControlInfo_m.h"
@@ -65,44 +64,8 @@ RadioMedium::RadioMedium() :
 {
 }
 
-RadioMedium::RadioMedium(const IPropagation *propagation, const IAttenuation *attenuation, const IBackgroundNoise *backgroundNoise, const simtime_t minInterferenceTime, const simtime_t maxTransmissionDuration, m maxCommunicationRange, m maxInterferenceRange) :
-    propagation(propagation),
-    pathLoss(NULL),
-    attenuation(attenuation),
-    backgroundNoise(backgroundNoise),
-    maxTransmissionPower(W(sNaN)),
-    minInterferencePower(W(sNaN)),
-    minReceptionPower(W(sNaN)),
-    maxAntennaGain(sNaN),
-    minInterferenceTime(minInterferenceTime),
-    maxTransmissionDuration(maxTransmissionDuration),
-    maxCommunicationRange(m(maxCommunicationRange)),
-    maxInterferenceRange(m(maxInterferenceRange)),
-    rangeFilter(RANGE_FILTER_ANYWHERE),
-    radioModeFilter(false),
-    listeningFilter(false),
-    macAddressFilter(false),
-    recordCommunicationLog(false),
-    leaveCommunicationTrail(false),
-    removeNonInterferingTransmissionsTimer(NULL),
-    baseRadioId(0),
-    baseTransmissionId(0),
-    neighborCache(NULL),
-    transmissionCount(0),
-    sendCount(0),
-    receptionComputationCount(0),
-    receptionDecisionComputationCount(0),
-    listeningDecisionComputationCount(0),
-    cacheReceptionGetCount(0),
-    cacheReceptionHitCount(0),
-    cacheDecisionGetCount(0),
-    cacheDecisionHitCount(0)
-{
-}
-
 RadioMedium::~RadioMedium()
 {
-    delete obstacleLoss;
     delete backgroundNoise;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;

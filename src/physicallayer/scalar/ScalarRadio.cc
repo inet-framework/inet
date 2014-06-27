@@ -30,11 +30,6 @@ ScalarRadio::ScalarRadio() :
 {
 }
 
-ScalarRadio::ScalarRadio(RadioMode radioMode, const IAntenna *antenna, const ITransmitter *transmitter, const IReceiver *receiver, IRadioMedium *channel) :
-    Radio(radioMode, antenna, transmitter, receiver, channel)
-{
-}
-
 void ScalarRadio::handleUpperCommand(cMessage *message)
 {
     if (message->getKind() == RADIO_C_CONFIGURE)
