@@ -31,9 +31,12 @@
 class Obstacle {
     public:
         typedef std::vector<Coord> Coords;
+        enum Type{building,probability,lognormalDist,normalDist,exponentialDist};
 
         Obstacle(std::string id, double attenuationPerWall, double attenuationPerMeter);
+        Obstacle(std::string id, double mean, double deviation, Type t);
 
+        void setType(Type t) {type = t;}
         void setShape(Coords shape);
         const Coords& getShape() const;
         const Coord getBboxP1() const;
@@ -44,7 +47,11 @@ class Obstacle {
         AnnotationManager::Annotation* visualRepresentation;
 
     protected:
+
         std::string id;
+        Type type;
+        double mean;
+        double deviation; // standard deviation
         double attenuationPerWall; /**< in dB. Consumer Wi-Fi vs. an exterior wall will give approx. 50 dB */
         double attenuationPerMeter; /**< in dB / m. Consumer Wi-Fi vs. an interior hollow wall will give approx. 5 dB */
         Coords coords;

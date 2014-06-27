@@ -32,6 +32,7 @@
 #include "INETDefs.h"
 #include "Coord.h"
 #include "ModuleAccess.h"
+#include "TraCIColor.h"
 
 #ifdef WITH_TRACI
 /**
@@ -54,16 +55,6 @@
 class INET_API TraCIScenarioManager : public cSimpleModule
 {
     public:
-        /**
-         * TraCI compatible color container
-         */
-        struct Color {
-            Color(uint8_t red, uint8_t green, uint8_t blue, uint8_t alpha) : red(red), green(green), blue(blue), alpha(alpha) {}
-            uint8_t red;
-            uint8_t green;
-            uint8_t blue;
-            uint8_t alpha;
-        };
 
         enum VehicleSignal {
             VEH_SIGNAL_UNDEF = -1,
@@ -84,12 +75,22 @@ class INET_API TraCIScenarioManager : public cSimpleModule
             VEH_SIGNAL_EMERGENCY_YELLOW = 8192
         };
 
+        enum DepartDefs
+        {
+            DEPART_NOW = 2, DEPART_LANE_BEST_FREE = 5, DEPART_POS_BASE = 4, DEPART_SPEED_MAX = 3
+        };
+
         ~TraCIScenarioManager();
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual int numInitStages() const { return std::max(cSimpleModule::numInitStages(), 2); }
         virtual void initialize(int stage);
         virtual void finish();
         virtual void handleMessage(cMessage *msg);
         virtual void handleSelfMsg(cMessage *msg);
+
+        bool isConnected() const
+        {
+            return (socketPtr);
+        }
 
         std::pair<uint32_t, std::string> commandGetVersion();
         void commandSetSpeedMode(std::string nodeId, int32_t bitset);
@@ -112,7 +113,11 @@ class INET_API TraCIScenarioManager : public cSimpleModule
         std::string commandGetPolygonTypeId(std::string polyId);
         std::list<Coord> commandGetPolygonShape(std::string polyId);
         void commandSetPolygonShape(std::string polyId, std::list<Coord> points);
-        void commandAddPolygon(std::string polyId, std::string polyType, const Color& color, bool filled, int32_t layer, std::list<Coord> points);
+        void commandAddPolygon(std::string polyId, std::string polyType, const TraCIColor& color, bool filled,
+                int32_t layer, std::list<Coord> points);
+        void commandRemovePolygon(std::string polyId, int32_t layer);
+        void commandAddPoi(std::string poiId, std::string poiType, const TraCIColor& color, int32_t layer, Coord pos);
+        void commandRemovePoi(std::string poiId, int32_t layer);
         std::list<std::string> commandGetLaneIds();
         std::list<Coord> commandGetLaneShape(std::string laneId);
         std::string commandGetLaneEdgeId(std::string laneId);
@@ -121,7 +126,9 @@ class INET_API TraCIScenarioManager : public cSimpleModule
         double commandGetLaneMeanSpeed(std::string laneId);
         std::list<std::string> commandGetJunctionIds();
         Coord commandGetJunctionPosition(std::string junctionId);
-        bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, float emitPosition, float emitSpeed);
+        bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId,
+                simtime_t emitTime_st = -DEPART_NOW, double emitPosition = -DEPART_POS_BASE, double emitSpeed =
+                        -DEPART_SPEED_MAX, int8_t emitLane = -DEPART_LANE_BEST_FREE);
 
         const std::map<std::string, cModule*>& getManagedHosts() {
             return hosts;
@@ -344,8 +351,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 };
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
+template<> void TraCIScenarioManager::TraCIBuffer::write(TraCIScenarioManager::TraCICoord inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
-
+template<> TraCIScenarioManager::TraCICoord TraCIScenarioManager::TraCIBuffer::read();
 #endif  // WITH_TRACI
-
 #endif

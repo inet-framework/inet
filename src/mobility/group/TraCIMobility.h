@@ -20,7 +20,6 @@
 
 #ifndef MOBILITY_TRACI_TRACIMOBILITY_H
 #define MOBILITY_TRACI_TRACIMOBILITY_H
-
 #ifdef WITH_TRACI
 
 #include <string>
@@ -154,8 +153,14 @@ class INET_API TraCIMobility : public MobilityBase
         void commandSetPolygonShape(std::string polyId, std::list<Coord> points) {
             getManager()->commandSetPolygonShape(polyId, points);
         }
-        bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId, std::string laneId, double emitPosition, double emitSpeed) {
-            return getManager()->commandAddVehicle(vehicleId, vehicleTypeId, routeId, laneId, emitPosition, emitSpeed);
+        bool commandAddVehicle(std::string vehicleId, std::string vehicleTypeId, std::string routeId,
+                simtime_t emitTime_st = -TraCIScenarioManager::DEPART_NOW, double emitPosition =
+                        -TraCIScenarioManager::DEPART_POS_BASE, double emitSpeed =
+                        -TraCIScenarioManager::DEPART_SPEED_MAX, int8_t emitLane =
+                        -TraCIScenarioManager::DEPART_LANE_BEST_FREE)
+        {
+            return getManager()->commandAddVehicle(vehicleId, vehicleTypeId, routeId, emitTime_st, emitPosition,
+                    emitSpeed, emitLane);
         }
 
     protected:
@@ -195,6 +200,13 @@ class INET_API TraCIMobility : public MobilityBase
          */
         double calculateCO2emission(double v, double a) const;
 };
+
+class TraCIMobilityAccess : public ModuleAccess<TraCIMobility>
+{
+    public:
+        TraCIMobilityAccess() : ModuleAccess<TraCIMobility>("mobility") {};
+};
+
 
 #endif
 #endif
