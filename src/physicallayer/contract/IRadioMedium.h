@@ -15,14 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IRadioMedium_H_
-#define __INET_IRadioMedium_H_
+#ifndef __INET_IRADIOMEDIUM_H_
+#define __INET_IRADIOMEDIUM_H_
 
 #include "IRadio.h"
 #include "IRadioFrame.h"
 #include "IArrival.h"
 #include "IPropagation.h"
 #include "IPathLoss.h"
+#include "IObstacleLoss.h"
 #include "IAttenuation.h"
 #include "IBackgroundNoise.h"
 #include "IReceptionDecision.h"
@@ -72,6 +73,12 @@ class INET_API IRadioMedium : public IPrintableObject
          * function never returns NULL.
          */
         virtual const IPathLoss *getPathLoss() const = 0;
+
+        /**
+         * Returns the radio signal path loss model of this radio medium. This
+         * function may return NULL.
+         */
+        virtual const IObstacleLoss *getObstacleLoss() const = 0;
 
         /**
          * Returns the radio signal attenuation model of this radio medium. This

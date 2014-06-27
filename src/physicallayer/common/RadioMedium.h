@@ -122,11 +122,15 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          */
         const IPathLoss *pathLoss;
         /**
+         * The obstacle loss model of transmissions or NULL if unused.
+         */
+        const IObstacleLoss *obstacleLoss;
+        /**
          * The attenuation model of transmissions is never NULL.
          */
         const IAttenuation *attenuation;
         /**
-         * The radio medium background noise model or NULL if unspecified.
+         * The background noise model or NULL if unused.
          */
         const IBackgroundNoise *backgroundNoise;
         /**
@@ -407,6 +411,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
         virtual const IPropagation *getPropagation() const { return propagation; }
         virtual const IPathLoss *getPathLoss() const { return pathLoss; }
+        virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }
         virtual const IAttenuation *getAttenuation() const { return attenuation; }
         virtual const IBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
 

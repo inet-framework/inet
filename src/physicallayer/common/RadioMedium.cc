@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "FreeSpacePathLoss.h"
+#include "ObstacleLoss.h" // TODO: delme
 #include "Radio.h"
 #include "RadioMedium.h"
 #include "RadioControlInfo_m.h"
@@ -100,9 +100,6 @@ RadioMedium::RadioMedium(const IPropagation *propagation, const IAttenuation *at
 
 RadioMedium::~RadioMedium()
 {
-    delete propagation;
-    delete pathLoss;
-    delete attenuation;
     delete backgroundNoise;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;
@@ -136,6 +133,7 @@ void RadioMedium::initialize(int stage)
         // initialize parameters
         propagation = check_and_cast<IPropagation *>(getSubmodule("propagation"));
         pathLoss = check_and_cast<IPathLoss *>(getSubmodule("pathLoss"));
+        obstacleLoss = new ObstacleLoss(); // TODO: dynamic_cast<IObstacleLoss *>(getSubmodule("obstacleLoss"));
         attenuation = check_and_cast<IAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IBackgroundNoise *>(getSubmodule("backgroundNoise"));
         const char *rangeFilterString = par("rangeFilter");
