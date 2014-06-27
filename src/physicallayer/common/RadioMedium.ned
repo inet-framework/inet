@@ -17,11 +17,12 @@
 
 package inet.physicallayer.common;
 
-import inet.physicallayer.contract.IRadioBackgroundNoise;
-import inet.physicallayer.contract.IRadioMedium;
 import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IObstacleLoss;
 import inet.physicallayer.contract.IPathLoss;
 import inet.physicallayer.contract.IPropagation;
+import inet.physicallayer.contract.IRadioBackgroundNoise;
+import inet.physicallayer.contract.IRadioMedium;
 
 module RadioMedium like IRadioMedium
 {
@@ -29,8 +30,9 @@ module RadioMedium like IRadioMedium
         // submodule type parameters
         string propagationType;
         string pathLossType;
+        string obstacleLossType = default("");
         string attenuationType;
-        string backgroundNoiseType;
+        string backgroundNoiseType = default("");
 
         // channel limit parameters
         double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
@@ -51,7 +53,7 @@ module RadioMedium like IRadioMedium
 
         // logging parameters
         bool recordCommunicationLog = default(false);
-        bool leaveCommunicationTrail = default(true);
+        bool leaveCommunicationTrail = default(false);
 
         @class(RadioMedium);
         @display("i=misc/sun");
@@ -65,12 +67,16 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,150");
         }
-        attenuation: <attenuationType> like IAttenuation {
+        obstacleLoss: <obstacleLossType> like IObstacleLoss if obstacleLossType != "" {
             parameters:
                 @display("p=100,250");
         }
-        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+        attenuation: <attenuationType> like IAttenuation {
             parameters:
                 @display("p=100,350");
+        }
+        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+            parameters:
+                @display("p=100,450");
         }
 }

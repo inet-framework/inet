@@ -59,9 +59,10 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     {
         const Argument& position = it->getPosition();
         Hz carrierFrequency = Hz(position.getArgValue(Dimension::frequency));
-        double pathLossFactor = channel->getPathLoss()->computePathLoss(propagationSpeed, carrierFrequency, distance);
+        double pathLoss = channel->getPathLoss()->computePathLoss(propagationSpeed, carrierFrequency, distance);
+        double obstacleLoss = channel->getObstacleLoss() ? channel->getObstacleLoss()->computeObstacleLoss(carrierFrequency, transmission->getStartPosition(), receptionStartPosition) : 1;
         W frequencyTransmissionPower = W(it->getValue());
-        W frequencyReceptionPower = frequencyTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLossFactor);
+        W frequencyReceptionPower = frequencyTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
         Argument receptionPosition = position;
         double alpha = (position.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
         receptionPosition.setTime(receptionStartTime + alpha * (receptionEndTime - receptionStartTime).dbl());

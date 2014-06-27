@@ -21,14 +21,17 @@
 #include "Shape.h"
 #include "Material.h"
 
-class INET_API PhysicalObject : public cSimpleModule
+/**
+ * This class represents a physical object, a rigid body and its physical properties.
+ */
+class INET_API PhysicalObject
 {
     protected:
-        Shape *shape;
-        Material *material;
+        const Shape *shape;
+        const Material *material;
 
     public:
-        PhysicalObject();
+        PhysicalObject(const Shape *shape, const Material *material);
 
         virtual const Shape *getShape() const { return shape; }
         virtual const Material *getMaterial() const { return material; }

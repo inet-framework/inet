@@ -22,7 +22,8 @@ using namespace physicallayer;
 
 Define_Module(ObstacleLoss);
 
-ObstacleLoss::ObstacleLoss()
+ObstacleLoss::ObstacleLoss() :
+    environment(NULL)
 {
 }
 

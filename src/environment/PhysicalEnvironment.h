@@ -20,7 +20,10 @@
 
 #include "PhysicalObject.h"
 
-class INET_API PhysicalEnvironment : public cSimpleModule
+/**
+ * This class represents the physical environment specifying certain physical properties.
+ */
+class INET_API PhysicalEnvironment : public cModule
 {
     protected:
         K temperature;
@@ -31,7 +34,11 @@ class INET_API PhysicalEnvironment : public cSimpleModule
         std::vector<PhysicalObject *> objects;
 
     protected:
-        void initialize(int stage);
+        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+        virtual void initialize(int stage);
+
+        virtual void createRandomObjects();
+        virtual void updateCanvas();
 
     public:
         PhysicalEnvironment();

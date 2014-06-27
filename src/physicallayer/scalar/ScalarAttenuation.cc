@@ -46,9 +46,10 @@ const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadi
     double transmitterAntennaGain = transmitterAntenna->computeGain(transmissionAntennaDirection);
     double receiverAntennaGain = receiverAntenna->computeGain(receptionAntennaDirection);
     m distance = m(receptionStartPosition.distance(transmission->getStartPosition()));
-    double pathLossFactor = channel->getPathLoss()->computePathLoss(channel->getPropagation()->getPropagationSpeed(), scalarTransmission->getCarrierFrequency(), distance);
+    double pathLoss = channel->getPathLoss()->computePathLoss(channel->getPropagation()->getPropagationSpeed(), scalarTransmission->getCarrierFrequency(), distance);
+    double obstacleLoss = channel->getObstacleLoss() ? channel->getObstacleLoss()->computeObstacleLoss(scalarTransmission->getCarrierFrequency(), transmission->getStartPosition(), receptionStartPosition) : 1;
     W transmissionPower = scalarTransmission->getPower();
-    W receptionPower = transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLossFactor);
+    W receptionPower = transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
     return new ScalarReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth(), receptionPower);
 }
 

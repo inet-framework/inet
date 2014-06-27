@@ -16,6 +16,8 @@
 //
 
 #include "PhysicalEnvironment.h"
+#include "Cuboid.h"
+#include "Material.h"
 
 Define_Module(PhysicalEnvironment);
 
@@ -41,5 +43,51 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
+    }
+    else if (stage == INITSTAGE_LAST)
+    {
+        createRandomObjects();
+        updateCanvas();
+    }
+}
+
+void PhysicalEnvironment::createRandomObjects()
+{
+    for (int i = 0; i < 10; i++)
+    {
+        Coord size(uniform(10, 100), uniform(10, 100), 0);
+        Coord min;
+        min.x = uniform(spaceMin.x, spaceMax.x - size.x);
+        min.y = uniform(spaceMin.y, spaceMax.y - size.y);
+        min.z = uniform(spaceMin.z, spaceMax.z - size.z);
+        Coord max = min + size;
+        PhysicalObject *object = new PhysicalObject(new Cuboid(min, max), &Material::concrete);
+        objects.push_back(object);
+    }
+//    PhysicalObject *object = new PhysicalObject(new Cuboid(Coord(0, 200, 0), Coord(600, 210, 0)), &Material::concrete);
+//    objects.push_back(object);
+}
+
+void PhysicalEnvironment::updateCanvas()
+{
+    cCanvas *canvas = getParentModule()->getCanvas();
+    cLayer *layer = canvas->getDefaultLayer();
+    for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
+    {
+        PhysicalObject *object = *it;
+        const Shape *shape = object->getShape();
+        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
+        if (cuboid)
+        {
+            const Coord& min = cuboid->getMin();
+            const Coord& max = cuboid->getMax();
+            cRectangleFigure *figure = new cRectangleFigure(NULL);
+            figure->setFilled(true);
+            figure->setP1(cFigure::Point(min.x, min.y));
+            figure->setP2(cFigure::Point(max.x, max.y));
+            layer->addChild(figure);
+        }
+        else
+            throw cRuntimeError("Unknown shape");
     }
 }
