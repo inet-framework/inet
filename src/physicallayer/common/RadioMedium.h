@@ -19,6 +19,7 @@
 #define __INET_RADIOMEDIUM_H_
 
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <fstream>
 #include "IRadioMedium.h"
@@ -198,10 +199,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         // TODO: complete implementation
         bool macAddressFilter;
         /**
-         * Record all transmissions and receptions into a separate trace file.
+         * Records all transmissions and receptions into a separate trace file.
          * The file is at ${resultdir}/${configname}-${runnumber}.tlog
          */
-        bool recordCommunication;
+        bool recordCommunicationLog;
+        /**
+         * Leaves graphical trail of successful communication between radios.
+         */
+        bool leaveCommunicationTrail;
         //@}
 
         /** @name Timer */
@@ -256,6 +261,12 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          * The output file where communication log is written to.
          */
         std::ofstream communicationLog;
+#if OMNETPP_VERSION >= 0x0500
+        /**
+         * The list of trail figures representing successful communication.
+         */
+        std::deque<cFigure *> communicationTrail;
+#endif
         //@}
 
         /** @name Statistics */

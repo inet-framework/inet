@@ -50,7 +50,8 @@ module RadioMedium like IRadioMedium
         bool macAddressFilter = default(false); // when enabled the radio medium doesn't send radio frames to a radio if it the destination mac address differs 
 
         // logging parameters
-        bool recordCommunication = default(false);
+        bool recordCommunicationLog = default(false);
+        bool leaveCommunicationTrail = default(true);
 
         @class(RadioMedium);
         @display("i=misc/sun");

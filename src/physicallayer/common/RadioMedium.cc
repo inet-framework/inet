@@ -47,7 +47,8 @@ RadioMedium::RadioMedium() :
     radioModeFilter(false),
     listeningFilter(false),
     macAddressFilter(false),
-    recordCommunication(false),
+    recordCommunicationLog(false),
+    leaveCommunicationTrail(false),
     removeNonInterferingTransmissionsTimer(NULL),
     baseRadioId(0),
     baseTransmissionId(0),
@@ -81,7 +82,8 @@ RadioMedium::RadioMedium(const IPropagation *propagation, const IAttenuation *at
     radioModeFilter(false),
     listeningFilter(false),
     macAddressFilter(false),
-    recordCommunication(false),
+    recordCommunicationLog(false),
+    leaveCommunicationTrail(false),
     removeNonInterferingTransmissionsTimer(NULL),
     baseRadioId(0),
     baseTransmissionId(0),
@@ -122,7 +124,7 @@ RadioMedium::~RadioMedium()
             delete receptionCacheEntries;
         }
     }
-    if (recordCommunication)
+    if (recordCommunicationLog)
         communicationLog.close();
 }
 
@@ -151,9 +153,10 @@ void RadioMedium::initialize(int stage)
         // initialize timers
         removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissions");
         // initialize logging
-        recordCommunication = par("recordCommunication");
-        if (recordCommunication)
+        recordCommunicationLog = par("recordCommunicationLog");
+        if (recordCommunicationLog)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
+        leaveCommunicationTrail = par("leaveCommunicationTrail");
         // TODO: create cache based on parameter?
         // e.g. neighborCache = new XXXNeighborCache();
     }
@@ -715,7 +718,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     radioFrame->setName(macFrame->getName());
     radioFrame->setDuration(transmission->getEndTime() - transmission->getStartTime());
     radioFrame->encapsulate(macFrame);
-    if (recordCommunication) {
+    if (recordCommunicationLog) {
         const Radio *transmitterRadio = check_and_cast<const Radio *>(radio);
         communicationLog << "T " << transmitterRadio->getFullPath() << " " << transmitterRadio->getId() << " "
                          << "M " << radioFrame->getName() << " " << transmission->getId() << " "
@@ -734,7 +737,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     const IArrival *arrival = getArrival(radio, transmission);
     const IListening *listening = radio->getReceiver()->createListening(radio, arrival->getStartTime(), arrival->getEndTime(), arrival->getStartPosition(), arrival->getEndPosition());
     const IReceptionDecision *decision = receiveFromMedium(radio, listening, transmission);
-    if (recordCommunication) {
+    if (recordCommunicationLog) {
         const IReception *reception = decision->getReception();
         communicationLog << "R " << check_and_cast<const Radio *>(radio)->getFullPath() << " " << reception->getReceiver()->getId() << " "
                          << "M " << check_and_cast<const RadioFrame *>(radioFrame)->getName() << " " << transmission->getId() << " "
@@ -746,6 +749,25 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<RadioReceptionIndication *>(decision->getIndication()));
     delete listening;
+#if OMNETPP_VERSION >= 0x0500
+    if (leaveCommunicationTrail && decision->isReceptionSuccessful())
+    {
+        cLayer *layer = getParentModule()->getCanvas()->getDefaultLayer();
+        cLineFigure *communicationLine = new cLineFigure();
+        Coord transmissionStartPosition = transmission->getStartPosition();
+        Coord receptionStartPosition = decision->getReception()->getStartPosition();
+        communicationLine->setStart(cFigure::Point(transmissionStartPosition.x, transmissionStartPosition.y));
+        communicationLine->setEnd(cFigure::Point(receptionStartPosition.x, receptionStartPosition.y));
+        communicationLine->setEndArrowHead(cFigure::ARROW_BARBED);
+        communicationTrail.push_back(communicationLine);
+        if (communicationTrail.size() > 100)
+        {
+            layer->removeChild(communicationTrail.front());
+            communicationTrail.pop_front();
+        }
+        layer->addChild(communicationLine);
+    }
+#endif
     return macFrame;
 }
 
