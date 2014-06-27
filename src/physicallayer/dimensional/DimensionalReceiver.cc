@@ -52,7 +52,7 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
     ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, W(0));
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_DEBUG << "Noise power begin " << endl;
-    noisePower->print(EV_DEBUG);
+    noisePower->print(EVSTREAM);
     EV_DEBUG << "Noise power end" << endl;
     return new DimensionalNoise(listening->getStartTime(), listening->getEndTime(), carrierFrequency, bandwidth, noisePower);
 }
@@ -62,7 +62,7 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
     const DimensionalNoise *dimensionalNoise = check_and_cast<const DimensionalNoise *>(noise);
     const DimensionalReception *dimensionalReception = check_and_cast<const DimensionalReception *>(reception);
     EV_DEBUG << "Reception power begin " << endl;
-    dimensionalReception->getPower()->print(EV_DEBUG);
+    dimensionalReception->getPower()->print(EVSTREAM);
     EV_DEBUG << "Reception power end" << endl;
     const ConstMapping *snirMapping = MappingUtils::divide(*dimensionalReception->getPower(), *dimensionalNoise->getPower());
     const simtime_t startTime = reception->getStartTime();
@@ -74,7 +74,7 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
     end.setTime(endTime);
     end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
     EV_DEBUG << "SNIR begin " << endl;
-    snirMapping->print(EV_DEBUG);
+    snirMapping->print(EVSTREAM);
     EV_DEBUG << "SNIR end" << endl;
     return MappingUtils::findMin(*snirMapping, start, end);
 }
