@@ -43,8 +43,9 @@ void ObstacleLoss::printToStream(std::ostream &stream) const
 double ObstacleLoss::computeObstacleLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const
 {
     const Material *material = object->getMaterial();
+    const LineSegment lineSegment(transmissionPosition, receptionPosition);
     double lossTangent = material->getDielectricLossTangent(frequency);
-    m distance = m(object->getShape()->computeIntersectionDistance(transmissionPosition, receptionPosition));
+    m distance = m(object->getShape()->computeIntersectionDistance(lineSegment));
     mps propagationSpeed = material->getPropagationSpeed();
     return std::exp(-atan(lossTangent) * unit(2 * M_PI * frequency * distance / propagationSpeed).get());
 }
@@ -53,10 +54,11 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
 {
     double totalLoss = 1;
     const std::vector<PhysicalObject *> &objects = environment->getObjects();
+    const LineSegment lineSegment(transmissionPosition, receptionPosition);
     for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
     {
         const PhysicalObject *object = *it;
-        if (object->getShape()->isIntersectingLineSegment(transmissionPosition, receptionPosition))
+        if (object->getShape()->isIntersectingLineSegment(lineSegment))
             totalLoss *= computeObstacleLoss(object, frequency, transmissionPosition, receptionPosition);
     }
     return totalLoss;

@@ -24,11 +24,14 @@
 class INET_API LineSegment
 {
     protected:
-        Coord p1;
-        Coord p2;
+        Coord point1;
+        Coord point2;
 
     public:
-        LineSegment(const Coord p1, const Coord p2);
+        LineSegment(const Coord& point1, const Coord& point2);
+
+        const Coord& getPoint1() const { return point1; }
+        const Coord& getPoint2() const { return point2; }
 };
 
 #endif

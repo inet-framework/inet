@@ -17,8 +17,8 @@
 
 #include "LineSegment.h"
 
-LineSegment::LineSegment(const Coord p1, const Coord p2) :
-    p1(p1),
-    p2(p2)
+LineSegment::LineSegment(const Coord& point1, const Coord& point2) :
+    point1(point1),
+    point2(point2)
 {
 }

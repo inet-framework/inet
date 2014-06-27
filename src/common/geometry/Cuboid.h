@@ -26,11 +26,16 @@ class INET_API Cuboid : public Shape
         Coord min;
         Coord max;
 
-    public:
-        Cuboid();
+    protected:
+        bool isInsideX(const Coord& point) const { return min.x <= point.x && point.x <= max.x; }
+        bool isInsideY(const Coord& point) const { return min.y <= point.y && point.y <= max.y; }
+        bool isInsideZ(const Coord& point) const { return min.z <= point.z && point.z <= max.z; }
 
-        virtual bool isIntersectingLineSegment(const Coord p1, const Coord p2) const;
-        virtual double computeIntersectionDistance(const Coord p1, const Coord p2) const;
+    public:
+        Cuboid(const Coord& min, const Coord& max);
+
+        virtual bool isIntersectingLineSegment(const LineSegment& lineSegment) const;
+        virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
 };
 
 #endif

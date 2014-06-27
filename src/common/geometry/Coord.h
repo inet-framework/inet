@@ -226,6 +226,13 @@ public:
     }
 
     /**
+     * Returns true if this coordinate is unspecified.
+     */
+    bool isUnspecified() const {
+        return isNaN(x) && isNaN(y) && isNaN(z);
+    }
+
+    /**
      * @brief Returns the minimal coordinates.
      */
     Coord min(const Coord& a) {

@@ -15,18 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SHAPE_H_
-#define __INET_SHAPE_H_
+#include "Plane.h"
 
-#include "LineSegment.h"
-
-class INET_API Shape
+Plane::Plane(const Coord& basePoint, const Coord& normalVector) :
+    basePoint(basePoint),
+    normalVector(normalVector)
 {
-    public:
-        Shape();
+}
 
-        virtual bool isIntersectingLineSegment(const LineSegment& lineSegment) const = 0;
-        virtual double computeIntersectionDistance(const LineSegment& lineSegment) const = 0;
-};
-
-#endif
+Coord Plane::computeIntersection(const LineSegment& lineSegment)
+{
+    const Coord& point1 = lineSegment.getPoint1();
+    const Coord& point2 = lineSegment.getPoint2();
+    double denominator = normalVector * (point2 - point1);
+    if (denominator == 0)
+        return Coord(qNaN, qNaN, qNaN);
+    else
+    {
+        double numerator = normalVector * (basePoint - point1);
+        double q = numerator / denominator;
+        if (q < 0 || q > 0)
+            return Coord(qNaN, qNaN, qNaN);
+        else
+            return point1 * (1 - q) + point2 * q;
+    }
+}
