@@ -724,7 +724,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<RadioReceptionIndication *>(decision->getIndication()));
     delete listening;
-#if OMNETPP_VERSION >= 0x0500
+#ifdef __CCANVAS_H
     if (leaveCommunicationTrail && decision->isReceptionSuccessful())
     {
         cLayer *layer = getParentModule()->getCanvas()->getDefaultLayer();

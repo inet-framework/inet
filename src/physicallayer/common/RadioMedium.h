@@ -265,7 +265,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          * The output file where communication log is written to.
          */
         std::ofstream communicationLog;
-#if OMNETPP_VERSION >= 0x0500
+#ifdef __CCANVAS_H
         /**
          * The list of trail figures representing successful communication.
          */

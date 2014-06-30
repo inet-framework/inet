@@ -128,6 +128,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement* xml) {
         else
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
         // color
+#ifdef __CCANVAS_H
         cFigure::Color color;
         const char *colorAttribute = e->getAttribute("color");
         if (colorAttribute)
@@ -141,12 +142,16 @@ void PhysicalEnvironment::parseObjects(cXMLElement* xml) {
                 color.blue = atoi(tokenizer.nextToken());
         }
         PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, color);
+#else
+        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material);
+#endif
         objects.push_back(object);
     }
 }
 
 void PhysicalEnvironment::updateCanvas()
 {
+#ifdef __CCANVAS_H
     cCanvas *canvas = getParentModule()->getCanvas();
     cLayer *layer = canvas->getDefaultLayer();
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
@@ -180,6 +185,7 @@ void PhysicalEnvironment::updateCanvas()
         }
         throw cRuntimeError("Unknown shape");
     }
+#endif
 }
 
 } // namespace inet

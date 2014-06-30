@@ -19,13 +19,19 @@
 
 namespace inet {
 
-PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material, const cFigure::Color &color) :
+PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
+#ifdef __CCANVAS_H
+        , const cFigure::Color &color
+#endif
+        ) :
     id(id),
     position(position),
     orientation(orientation),
     shape(shape),
-    material(material),
-    color(color)
+    material(material)
+#ifdef __CCANVAS_H
+    ,color(color)
+#endif
 {
 }
 
