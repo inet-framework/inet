@@ -20,6 +20,8 @@
 
 #include "Coord.h"
 
+namespace inet {
+
 class INET_API Polygon
 {
     protected:
@@ -28,5 +30,7 @@ class INET_API Polygon
     public:
         Polygon();
 };
+
+} // namespace inet
 
 #endif

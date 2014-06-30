@@ -18,6 +18,8 @@
 #include "Cuboid.h"
 #include "Plane.h"
 
+namespace inet {
+
 Cuboid::Cuboid(const Coord& size) :
     size(size)
 {
@@ -57,3 +59,5 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
         return true;
     }
 }
+
+} // namespace inet

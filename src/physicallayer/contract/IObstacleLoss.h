@@ -21,6 +21,8 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -32,5 +34,7 @@ class INET_API IObstacleLoss : public IPrintableObject
 };
 
 }
+
+} // namespace inet
 
 #endif

@@ -18,6 +18,8 @@
 #include "Sphere.h"
 #include "Plane.h"
 
+namespace inet {
+
 Sphere::Sphere(double radius) :
     radius(radius)
 {
@@ -51,3 +53,5 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     else
         return false;
 }
+
+} // namespace inet

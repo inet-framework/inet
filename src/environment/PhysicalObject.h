@@ -22,6 +22,8 @@
 #include "EulerAngles.h"
 #include "Material.h"
 
+namespace inet {
+
 /**
  * This class represents a physical object, a rigid body and its physical properties.
  * The object can change its position and orientation over time.
@@ -52,5 +54,7 @@ class INET_API PhysicalObject
         virtual const Material *getMaterial() const { return material; }
         virtual const cFigure::Color& getColor() const { return color; }
 };
+
+} // namespace inet
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "PhysicalObject.h"
 
+namespace inet {
+
 /**
  * This class represents the physical environment specifying certain physical properties.
  */
@@ -52,5 +54,7 @@ class INET_API PhysicalEnvironment : public cModule
         virtual const Coord getSpaceMax() { return spaceMax; }
         virtual const std::vector<PhysicalObject *> &getObjects() { return objects; }
 };
+
+} // namespace inet
 
 #endif

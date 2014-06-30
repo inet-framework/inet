@@ -21,6 +21,8 @@
 #include "IObstacleLoss.h"
 #include "PhysicalEnvironment.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -44,5 +46,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 };
 
 }
+
+} // namespace inet
 
 #endif

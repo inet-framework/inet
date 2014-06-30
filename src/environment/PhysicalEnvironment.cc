@@ -20,6 +20,8 @@
 #include "Sphere.h"
 #include "Material.h"
 
+namespace inet {
+
 Define_Module(PhysicalEnvironment);
 
 PhysicalEnvironment::PhysicalEnvironment() :
@@ -179,3 +181,5 @@ void PhysicalEnvironment::updateCanvas()
         throw cRuntimeError("Unknown shape");
     }
 }
+
+} // namespace inet

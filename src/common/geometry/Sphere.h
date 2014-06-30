@@ -20,6 +20,8 @@
 
 #include "Shape.h"
 
+namespace inet {
+
 /**
  * This class represents a 3 dimensional sphere shape. The coordinate system
  * origin is in the center of the sphere.
@@ -37,5 +39,7 @@ class INET_API Sphere : public Shape
 
         virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
 };
+
+} // namespace inet
 
 #endif
