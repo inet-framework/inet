@@ -22,6 +22,8 @@
 #include <set>
 #include <vector>
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -68,4 +70,7 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
 };
 
 }
+
+} // namespace inet
+
 #endif /* NEIGHBORLISTCACHE_H_ */
