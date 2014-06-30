@@ -20,8 +20,6 @@
 
 namespace inet {
 
-static double const NaN = 0.0 / 0.0;
-
 std::vector<Address> PositionTable::getAddresses() const {
     std::vector<Address> addresses;
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
@@ -74,7 +72,4 @@ simtime_t PositionTable::getOldestPosition() const {
     return oldestPosition;
 }
 
-
 } // namespace inet
-
-

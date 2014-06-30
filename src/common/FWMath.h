@@ -24,7 +24,8 @@
 // Support functions for mathematical operations
 //
 
-#include <math.h>
+#include <cmath>
+#include <limits>
 #include "INETDefs.h"
 
 namespace inet {
@@ -89,6 +90,10 @@ namespace inet {
 #define EPSILON 0.001
 #endif
 
+#define qNaN std::numeric_limits<double>::quiet_NaN()
+#define sNaN std::numeric_limits<double>::signaling_NaN()
+#define NaN qNaN
+#define isNaN(X) std::isnan(X)
 
 /**
  * @brief Support functions for mathematical operations.

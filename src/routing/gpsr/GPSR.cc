@@ -27,14 +27,9 @@ namespace inet {
 
 Define_Module(GPSR);
 
-// TODO: use some header?
-static double const NaN = 0.0 / 0.0;
-
 static inline double determinant(double a1, double a2, double b1, double b2) {
     return a1 * b2 - a2 * b1;
 }
-
-static inline bool isNaN(double d) { return d != d;}
 
 // KLUDGE: implement position registry protocol
 PositionTable GPSR::globalPositionTable;
