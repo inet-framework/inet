@@ -21,6 +21,8 @@
 #include "MassMobility.h"
 #include "FWMath.h"
 
+using namespace inet;
+
 
 Define_Module(MassMobility);
 

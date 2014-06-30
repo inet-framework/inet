@@ -31,6 +31,8 @@
 #include "aodv-uu/defs_aodv.h"
 #include "aodv-uu/list.h"
 
+namespace inet {
+
 /* Verdicts for queued packets: */
 enum
 {
@@ -70,6 +72,8 @@ struct packet_queue
 };
 
 #endif
+
+} //namespace
 
 #endif              /* NS_NO_GLOBALS */
 

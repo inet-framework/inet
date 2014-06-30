@@ -27,6 +27,8 @@
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
+using namespace inet;
+
 using std::cout;
 
 Define_Module(PingApp);

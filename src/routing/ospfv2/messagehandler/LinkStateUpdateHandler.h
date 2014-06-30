@@ -21,6 +21,8 @@
 #include "IMessageHandler.h"
 #include "OSPFcommon.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class LinkStateUpdateHandler : public IMessageHandler
@@ -47,6 +49,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_LINKSTATEUPDATEHANDLER_H
 

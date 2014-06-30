@@ -33,6 +33,8 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
+using namespace inet;
+
 //
 // helper functions
 //

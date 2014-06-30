@@ -16,14 +16,19 @@
 //
 
 
+
+cplusplus {{
+#include "IPv4Address.h"
+#include "MACAddress.h"
+}}
+
+namespace inet;
+
 class noncobject IPv4Address;
 
 class noncobject MACAddress;
 
 cplusplus {{
-#include "IPv4Address.h"
-#include "MACAddress.h"
-
 // ARP header length for IPv4 (4-byte addresses) and 802 LANs (6-byte MAC addrs)
 #define ARP_HEADER_BYTES   28
 }}

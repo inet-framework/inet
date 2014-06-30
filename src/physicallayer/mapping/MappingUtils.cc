@@ -17,6 +17,8 @@
 
 #include "MappingUtils.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping):

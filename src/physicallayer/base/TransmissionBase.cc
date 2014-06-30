@@ -17,6 +17,8 @@
 
 #include "TransmissionBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void TransmissionBase::printToStream(std::ostream &stream) const

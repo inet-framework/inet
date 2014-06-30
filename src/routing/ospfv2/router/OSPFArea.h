@@ -27,6 +27,8 @@
 #include "OSPFRoutingTableEntry.h"
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 
 namespace OSPF {
 
@@ -150,6 +152,9 @@ inline std::ostream& operator<<(std::ostream& ostr, OSPF::Area& area)
     ostr << area.detailedInfo();
     return ostr;
 }
+
+} //namespace
+
 
 #endif // __INET_OSPFAREA_H
 

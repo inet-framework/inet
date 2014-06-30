@@ -184,6 +184,7 @@ void verbose_usage(void)
 }
 #endif
 
+using namespace inet;
 
 BatmanIf *Batman::is_batman_if(InterfaceEntry *dev)
 {

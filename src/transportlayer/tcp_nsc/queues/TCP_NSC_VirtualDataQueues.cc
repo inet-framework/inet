@@ -23,6 +23,8 @@
 #include "TCP_NSC_Connection.h"
 #include "TCPSerializer.h"
 
+using namespace inet;
+
 
 Register_Class(TCP_NSC_VirtualDataSendQueue);
 

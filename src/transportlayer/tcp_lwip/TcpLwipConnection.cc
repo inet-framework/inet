@@ -29,6 +29,8 @@
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
 
+using namespace inet;
+
 
 TcpLwipConnection::Stats::Stats()
 :

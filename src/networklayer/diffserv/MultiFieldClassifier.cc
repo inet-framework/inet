@@ -39,6 +39,8 @@
 #include "MultiFieldClassifier.h"
 #include "DiffservUtil.h"
 
+using namespace inet;
+
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4

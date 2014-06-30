@@ -17,4 +17,6 @@
 
 #include "FlatTransmissionBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;

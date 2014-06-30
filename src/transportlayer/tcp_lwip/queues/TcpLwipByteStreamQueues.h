@@ -25,6 +25,8 @@
 #include "ByteArrayBuffer.h"
 #include "TcpLwipQueues.h"
 
+namespace inet {
+
 
 /**
  * Send queue that manages "data stream", that is, actual bytes.
@@ -108,5 +110,8 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     /// store bytes
     ByteArrayBuffer byteArrayBufferM;
 };
+
+} //namespace
+
 
 #endif // __INET_TCPLWIP_DATASTREAMQUEUES_H

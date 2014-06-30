@@ -17,4 +17,6 @@
 
 #include "FlatNoiseBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;

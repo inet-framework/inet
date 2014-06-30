@@ -23,6 +23,8 @@
 #include "IInterfaceTable.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 
 Define_Module(EtherEncap);
 

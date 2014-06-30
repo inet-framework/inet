@@ -23,6 +23,8 @@
 #include "IErrorModel.h"
 #include "BerParseFile.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -54,5 +56,8 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 };
 
 }
+
+} //namespace
+
 
 #endif

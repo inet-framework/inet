@@ -22,6 +22,8 @@
 #include "INETDefs.h"
 #include "IPassiveQueue.h"
 
+namespace inet {
+
 /**
  * Base class for packet schedulers.
  *
@@ -67,5 +69,8 @@ class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, publi
       virtual void addListener(IPassiveQueueListener *listener);
       virtual void removeListener(IPassiveQueueListener *listener);
 };
+
+} //namespace
+
 
 #endif /* SCHEDULERBASE_H_ */

@@ -27,6 +27,8 @@
 #include "IInterfaceTable.h"
 #include "TED.h"
 
+namespace inet {
+
 #define PSB_REFRESH_INTERVAL    5.0
 #define RSB_REFRESH_INTERVAL    6.0
 
@@ -2266,3 +2268,5 @@ bool RSVP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     }
     return true;
 }
+
+} // namespace

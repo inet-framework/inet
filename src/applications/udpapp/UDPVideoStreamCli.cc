@@ -22,6 +22,8 @@
 #include "UDPControlInfo_m.h"
 #include "AddressResolver.h"
 
+using namespace inet;
+
 
 Define_Module(UDPVideoStreamCli);
 

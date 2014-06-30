@@ -24,6 +24,8 @@
 #include "AddressResolver.h"
 #include "IIPv4RoutingTable.h"
 
+using namespace inet;
+
 
 Define_Module(NetworkInfo);
 

@@ -40,6 +40,8 @@
 #include "lwip/ip_addr.h"
 #include "lwip/lwip_ip.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -72,5 +74,8 @@ err_t ip_frag(struct pbuf *p, struct netif *netif, struct ip_addr *dest);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_IP_FRAG_H__ */

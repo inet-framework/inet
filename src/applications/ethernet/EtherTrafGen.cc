@@ -25,6 +25,8 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(EtherTrafGen);
 
 simsignal_t EtherTrafGen::sentPkSignal = registerSignal("sentPk");

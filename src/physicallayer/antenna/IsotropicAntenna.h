@@ -20,6 +20,8 @@
 
 #include "AntennaBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -34,5 +36,8 @@ class INET_API IsotropicAntenna : public AntennaBase
 };
 
 }
+
+} //namespace
+
 
 #endif

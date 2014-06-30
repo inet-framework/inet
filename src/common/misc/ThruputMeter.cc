@@ -18,6 +18,8 @@
 
 #include "ThruputMeter.h"
 
+using namespace inet;
+
 Define_Module(ThruputMeter);
 
 

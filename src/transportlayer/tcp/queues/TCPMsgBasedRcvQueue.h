@@ -26,6 +26,8 @@
 #include "TCPSegment.h"
 #include "TCPVirtualDataRcvQueue.h"
 
+namespace inet {
+
 /**
  * @see TCPMsgBasedSendQueue
  */
@@ -72,5 +74,8 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual cPacket *extractBytesUpTo(uint32 seq);
 };
+
+} //namespace
+
 
 #endif

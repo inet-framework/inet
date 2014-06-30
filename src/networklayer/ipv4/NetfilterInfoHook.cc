@@ -22,6 +22,9 @@
 #include "INetfilter.h"
 #include "INetworkDatagram.h"
 
+
+namespace inet {
+
 class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHook
 {
   protected:
@@ -128,3 +131,6 @@ void NetfilterInfoHook::finish()
 {
     netfilter->unregisterHook(0, this);
 }
+
+} // namespace inet
+

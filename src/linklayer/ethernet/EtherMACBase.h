@@ -28,6 +28,8 @@
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 // Forward declarations:
 class EtherFrame;
 class EtherTraffic;
@@ -240,6 +242,9 @@ class INET_API EtherMACBase : public MACBase
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj);
     virtual void refreshConnection();
 };
+
+} //namespace
+
 
 #endif
 

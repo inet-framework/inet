@@ -34,6 +34,8 @@
 #include "ModuleAccess.h"
 #include "TED.h"
 
+namespace inet {
+
 Define_Module(LDP);
 
 
@@ -1324,4 +1326,5 @@ void LDP::announceLinkChange(int tedlinkindex)
     emit(NF_TED_CHANGED, &d);
 }
 
+} // namespace inet
 

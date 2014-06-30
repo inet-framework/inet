@@ -11,6 +11,8 @@
 
 #include "aodv_msg_struct_m.h"
 
+namespace inet {
+
 // this structures are a redifinition of def.h struct for omnet
 
 typedef struct
@@ -244,5 +246,8 @@ struct RREQ : public AODV_msg
 };
 
 #define RREQ_SIZE 24
+} //namespace
+
+
 #endif
 

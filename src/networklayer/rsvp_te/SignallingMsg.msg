@@ -36,6 +36,7 @@ cplusplus {{
 #define PATH_RETRY                  5
 }}
 
+namespace inet;
 
 class noncobject IPv4Address;
 

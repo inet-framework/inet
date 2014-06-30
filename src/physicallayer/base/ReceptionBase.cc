@@ -17,6 +17,8 @@
 
 #include "ReceptionBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void ReceptionBase::printToStream(std::ostream &stream) const

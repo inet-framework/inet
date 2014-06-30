@@ -29,6 +29,8 @@
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 
+using namespace inet;
+
 //
 // Constants
 //

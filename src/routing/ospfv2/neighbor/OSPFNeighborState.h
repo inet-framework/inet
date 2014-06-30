@@ -20,6 +20,8 @@
 
 #include "OSPFNeighbor.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class NeighborState {
@@ -34,6 +36,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_OSPFNEIGHBORSTATE_H
 

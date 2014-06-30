@@ -28,6 +28,8 @@
 #include "OSPFPacket_m.h"
 #include "OSPFRouter.h"
 
+namespace inet {
+
 
 /**
  * Configuration reader for the OSPF module.
@@ -107,6 +109,9 @@ class INET_API OSPFConfigReader
     bool loadConfigFromXML(cXMLElement *asConfig, OSPF::Router *ospfRouter);
 
 };
+
+} //namespace
+
 
 #endif
 

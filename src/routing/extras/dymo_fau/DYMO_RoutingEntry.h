@@ -30,6 +30,8 @@
 #include "IPv4RoutingTable.h"
 #include "DYMO_Timer.h"
 
+namespace inet {
+
 class DYMOFau;
 
 /**
@@ -79,5 +81,7 @@ class DYMO_RoutingEntry
     friend std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& e);
     bool hasActiveTimer() { return routeAgeMin.isActive() || routeAgeMax.isActive() || routeNew.isActive() || routeUsed.isActive() || routeDelete.isActive(); }
 };
+
+} //namespace
 
 #endif

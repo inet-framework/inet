@@ -30,6 +30,8 @@
 
 #include "OLSR_repositories.h"
 
+namespace inet {
+
 /// This class encapsulates all data structures needed for maintaining internal state of an OLSR node.
 class OLSR_state : public cObject
 {
@@ -103,5 +105,8 @@ class OLSR_state : public cObject
     OLSR_state(OLSR_state *);
     virtual OLSR_state * dup() {return new OLSR_state(this);}
 };
+
+} //namespace
+
 
 #endif

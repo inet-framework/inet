@@ -22,6 +22,8 @@
 #include "NodeStatus.h"
 #include "UDPSocket.h"
 
+using namespace inet;
+
 Define_Module(TraCIDemo);
 
 simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");

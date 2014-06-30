@@ -27,8 +27,10 @@
 #include <netinet/in.h>
 #else
 #include "compatibility.h"
+
 #endif
 #ifndef OMNETPP
+namespace inet {
 /* HELLO message */
 typedef struct      // FIXME: adjust byte ordering
 {
@@ -42,15 +44,15 @@ typedef struct      // FIXME: adjust byte ordering
 } HELLO;
 
 #define HELLO_BASIC_SIZE    sizeof(HELLO)
+} // namespace
 
 #endif
-
 
 
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
+//namespace inet {
 /* Start sending of HELLO messages */
 void hello_init(void);
 
@@ -70,6 +72,9 @@ void hello_process(HELLO *hello,struct in_addr ip_src, u_int32_t ifindex);
 /* Return a random jitter */
 long hello_jitter(void);
 
+//} //namespace
 #endif  /* NS_NO_DECLARATIONS */
+
+
 
 #endif  /* __DYMO_HELLO_H__ */

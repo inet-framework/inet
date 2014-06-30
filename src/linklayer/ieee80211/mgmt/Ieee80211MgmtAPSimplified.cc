@@ -23,6 +23,8 @@
 #include "EtherFrame.h"
 #endif
 
+using namespace inet;
+
 
 Define_Module(Ieee80211MgmtAPSimplified);
 

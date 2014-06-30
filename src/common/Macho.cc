@@ -22,6 +22,7 @@ using namespace Macho;
 #ifdef MACHO_TRACE
 
 #include <iostream>
+
 void MACHO_TRC1(const char * msg)
 {
     std::cout << msg << std::endl;

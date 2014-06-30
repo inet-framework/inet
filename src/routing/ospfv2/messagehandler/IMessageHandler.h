@@ -20,6 +20,8 @@
 
 #include "OSPFPacket_m.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class Router;
@@ -39,5 +41,8 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_IMESSAGEHANDLER_H

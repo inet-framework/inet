@@ -21,6 +21,8 @@ cplusplus {{
 #include "Address.h"
 }}
 
+namespace inet;
+
 class noncobject Address;
 
 

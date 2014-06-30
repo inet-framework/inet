@@ -19,6 +19,8 @@
 #include "TCPSegment.h"
 #include "AddressResolver.h"
 
+namespace inet {
+
 
 /**
  * Sends fabricated TCP packets.
@@ -37,6 +39,9 @@ class INET_API TCPSpoof : public cSimpleModule
   protected:
     static simsignal_t sentPkSignal;
 };
+
+} //namespace
+
 
 #endif
 

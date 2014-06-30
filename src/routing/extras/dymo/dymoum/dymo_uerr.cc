@@ -32,6 +32,8 @@
 
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 UERR *NS_CLASS uerr_create(struct in_addr target_addr,
                            struct in_addr uelem_target_addr,
                            struct in_addr uerr_node_addr,

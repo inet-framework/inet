@@ -24,6 +24,8 @@
 
 #include "MovingMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Linear movement model. See NED file for more info.
@@ -50,5 +52,8 @@ class INET_API LinearMobility : public MovingMobilityBase
   public:
     LinearMobility();
 };
+
+} //namespace
+
 
 #endif

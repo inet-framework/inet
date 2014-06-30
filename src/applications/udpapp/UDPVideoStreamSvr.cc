@@ -20,6 +20,8 @@
 
 #include "UDPControlInfo_m.h"
 
+using namespace inet;
+
 
 Define_Module(UDPVideoStreamSvr);
 

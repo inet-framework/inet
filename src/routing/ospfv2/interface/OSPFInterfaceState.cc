@@ -27,6 +27,8 @@
 #include "OSPFInterfaceStateNotDesignatedRouter.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 void OSPF::InterfaceState::changeState(OSPF::Interface* intf, OSPF::InterfaceState* newState, OSPF::InterfaceState* currentState)
 {

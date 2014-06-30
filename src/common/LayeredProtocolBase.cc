@@ -16,6 +16,8 @@
 
 #include "LayeredProtocolBase.h"
 
+using namespace inet;
+
 simsignal_t LayeredProtocolBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t LayeredProtocolBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 simsignal_t LayeredProtocolBase::packetFromUpperDroppedSignal = registerSignal("packetFromUpperDropped");

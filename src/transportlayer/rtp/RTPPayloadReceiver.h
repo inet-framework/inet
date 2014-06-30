@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 //Forward declarations
 class RTPPacket;
@@ -94,5 +96,8 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
      */
     static simsignal_t _rcvdPkRtpTimestampSignal;
 };
+
+} //namespace
+
 
 #endif

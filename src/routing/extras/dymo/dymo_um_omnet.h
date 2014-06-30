@@ -65,8 +65,10 @@
 
 #include <map>
 
+namespace inet {
 /* Forward declaration needed to be able to reference the class */
 class DYMOUM;
+} //namespace
 
 /* Global definitions and lib functions */
 
@@ -112,7 +114,7 @@ class DYMOUM;
 #define ntohs(x) x
 
 
-
+namespace inet {
 /* The AODV-UU routing agent class */
 class DYMOUM : public ManetRoutingBase
 {
@@ -391,5 +393,6 @@ class DYMOUM : public ManetRoutingBase
     int totalRerrRec;
 #endif
 };
+} //namespace
 
 #endif /* _DYMO_UM_OMNET_H */

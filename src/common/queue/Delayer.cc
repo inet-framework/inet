@@ -20,6 +20,8 @@
 
 #include "Delayer.h"
 
+using namespace inet;
+
 Define_Module(Delayer);
 
 simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");

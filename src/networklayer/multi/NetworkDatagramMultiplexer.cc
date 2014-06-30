@@ -32,6 +32,8 @@
 #include "GenericDatagram.h"
 #endif
 
+using namespace inet;
+
 Define_Module(NetworkDatagramMultiplexer);
 
 void NetworkDatagramMultiplexer::handleMessage(cMessage * message)

@@ -40,6 +40,8 @@
 #include "OLSROPT.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
 /// Port Number

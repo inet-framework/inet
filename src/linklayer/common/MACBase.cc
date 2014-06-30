@@ -28,6 +28,8 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 
 MACBase::MACBase()
 {

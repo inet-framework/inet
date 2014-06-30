@@ -20,6 +20,8 @@
 #include "ModuleAccess.h"
 #include "RSVP.h"
 
+using namespace inet;
+
 Define_Module(SimpleClassifier);
 
 

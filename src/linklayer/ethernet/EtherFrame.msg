@@ -22,6 +22,7 @@ cplusplus {{
 #include "Ieee802Ctrl_m.h" // for enums
 }}
 
+namespace inet;
 
 class noncobject MACAddress;
 

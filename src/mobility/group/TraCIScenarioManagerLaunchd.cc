@@ -28,6 +28,8 @@
 
 #ifdef WITH_TRACI
 
+using namespace inet;
+
 #define MYDEBUG EV
 
 Define_Module(TraCIScenarioManagerLaunchd);

@@ -22,6 +22,8 @@
 #include "OSPFNeighbor.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::HelloHandler::HelloHandler(OSPF::Router* containingRouter) :
     OSPF::IMessageHandler(containingRouter)

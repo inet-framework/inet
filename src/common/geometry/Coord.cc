@@ -20,6 +20,8 @@
 #include "assert.h"
 #include "Coord.h"
 
+using namespace inet;
+
 const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
 
 /**

@@ -23,6 +23,8 @@
 
 #include "HttpNodeBase.h"
 
+namespace inet {
+
 #define MSGKIND_START_SESSION    0
 #define MSGKIND_NEXT_MESSAGE     1
 #define MSGKIND_SCRIPT_EVENT     2
@@ -151,6 +153,9 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         HttpBrowserBase();
         virtual ~HttpBrowserBase();
 };
+
+} //namespace
+
 
 #endif
 

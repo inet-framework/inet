@@ -19,6 +19,8 @@
 #include "OSPFRouter.h"
 #include <memory.h>
 
+using namespace inet;
+
 OSPF::Area::Area(IInterfaceTable* ift, OSPF::AreaID id) :
     ift(ift),
     areaID(id),

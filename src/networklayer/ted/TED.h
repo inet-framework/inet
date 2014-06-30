@@ -21,6 +21,8 @@
 #include "IntServ.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 class IIPv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
@@ -115,6 +117,9 @@ class TED : public cSimpleModule, public ILifecycle
 };
 
 std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info);
+
+} //namespace
+
 
 #endif
 

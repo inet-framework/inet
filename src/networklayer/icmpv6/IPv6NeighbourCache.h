@@ -27,6 +27,8 @@
 #include "IPv6Address.h"
 #include "MACAddress.h"
 
+namespace inet {
+
 
 /**
  * IPv6 Neighbour Cache (RFC 2461 Neighbor Discovery for IPv6).
@@ -211,5 +213,8 @@ class INET_API IPv6NeighbourCache
     /** Returns the name of the given state as string */
     static const char *stateName(ReachabilityState state);
 };
+
+} //namespace
+
 
 #endif

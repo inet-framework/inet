@@ -20,6 +20,8 @@
 
 #include "DropTailQueue.h"
 
+using namespace inet;
+
 
 Define_Module(DropTailQueue);
 

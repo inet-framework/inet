@@ -25,6 +25,7 @@ cplusplus {{
 #define IPv6_FRAGMENT_HEADER_LENGTH 8
 }}
 
+namespace inet;
 
 class noncobject IPv6Address;
 

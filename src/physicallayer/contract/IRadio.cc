@@ -17,7 +17,8 @@
 
 #include "IRadio.h"
 
-using namespace physicallayer;
+namespace inet {
+namespace physicallayer {
 
 int IRadio::nextId = 0;
 
@@ -31,7 +32,7 @@ cEnum *IRadio::radioModeEnum = NULL;
 cEnum *IRadio::receptionStateEnum = NULL;
 cEnum *IRadio::transmissionStateEnum = NULL;
 
-Register_Enum(RadioMode,
+Register_Enum(inet::radio::RadioMode,
               (IRadio::RADIO_MODE_OFF,
                IRadio::RADIO_MODE_SLEEP,
                IRadio::RADIO_MODE_RECEIVER,
@@ -39,14 +40,14 @@ Register_Enum(RadioMode,
                IRadio::RADIO_MODE_TRANSCEIVER,
                IRadio::RADIO_MODE_SWITCHING));
 
-Register_Enum(ReceptionState,
+Register_Enum(inet::radio::ReceptionState,
               (IRadio::RECEPTION_STATE_UNDEFINED,
                IRadio::RECEPTION_STATE_IDLE,
                IRadio::RECEPTION_STATE_BUSY,
                IRadio::RECEPTION_STATE_SYNCHRONIZING,
                IRadio::RECEPTION_STATE_RECEIVING));
 
-Register_Enum(TransmissionState,
+Register_Enum(inet::radio::TransmissionState,
               (IRadio::TRANSMISSION_STATE_UNDEFINED,
                IRadio::TRANSMISSION_STATE_IDLE,
                IRadio::TRANSMISSION_STATE_TRANSMITTING));
@@ -54,20 +55,24 @@ Register_Enum(TransmissionState,
 const char *IRadio::getRadioModeName(RadioMode radioMode)
 {
     if (!radioModeEnum)
-        radioModeEnum = cEnum::get("RadioMode");
+        radioModeEnum = cEnum::get("inet::radio::RadioMode");
     return radioModeEnum->getStringFor(radioMode) + 11;
 }
 
 const char *IRadio::getRadioReceptionStateName(ReceptionState receptionState)
 {
     if (!receptionStateEnum)
-        receptionStateEnum = cEnum::get("ReceptionState");
+        receptionStateEnum = cEnum::get("inet::radio::ReceptionState");
     return receptionStateEnum->getStringFor(receptionState) + 16;
 }
 
 const char *IRadio::getRadioTransmissionStateName(TransmissionState transmissionState)
 {
     if (!transmissionStateEnum)
-        transmissionStateEnum = cEnum::get("TransmissionState");
+        transmissionStateEnum = cEnum::get("inet::radio::TransmissionState");
     return transmissionStateEnum->getStringFor(transmissionState) + 19;
 }
+
+} // namespace physicallayer
+} // namespace inet
+

@@ -19,6 +19,7 @@
 
 #include "TCPSocket.h"
 
+namespace inet {
 
 /**
  * TCP client application for testing the TCP model.
@@ -198,3 +199,6 @@ void TcpTestClient::finish()
 {
     EV << getFullPath() << ": received " << rcvdBytes << " bytes in " << rcvdPackets << " packets\n";
 }
+
+} // namespace inet
+

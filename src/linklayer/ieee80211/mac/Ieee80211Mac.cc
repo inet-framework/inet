@@ -27,13 +27,15 @@
 #include "opp_utils.h"
 #include "ModuleAccess.h"
 
+namespace inet {
+
 // TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
 // TODO: control frames must send before
 
 Define_Module(Ieee80211Mac);
 
 // don't forget to keep synchronized the C++ enum and the runtime enum definition
-Register_Enum(Ieee80211Mac,
+Register_Enum(inet::Ieee80211Mac,
               (Ieee80211Mac::IDLE,
                Ieee80211Mac::DEFER,
                Ieee80211Mac::WAITAIFS,
@@ -328,7 +330,7 @@ void Ieee80211Mac::initialize(int stage)
         timeStampLastMessageReceived = SIMTIME_ZERO;
 
         stateVector.setName("State");
-        stateVector.setEnum("Ieee80211Mac");
+        stateVector.setEnum("inet::Ieee80211Mac");
         for (int i=0; i<numCategories(); i++)
         {
             EdcaOutVector outVectors;
@@ -2828,3 +2830,6 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     return ret;
 }
+
+} // namespace inet
+

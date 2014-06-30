@@ -20,6 +20,8 @@
 
 #include "FreeSpacePathLoss.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -42,5 +44,8 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 };
 
 }
+
+} //namespace
+
 
 #endif

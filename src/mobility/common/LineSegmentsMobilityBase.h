@@ -23,6 +23,8 @@
 
 #include "MovingMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Base class for mobility models where movement consists of
@@ -56,5 +58,8 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
   public:
     LineSegmentsMobilityBase();
 };
+
+} //namespace
+
 
 #endif

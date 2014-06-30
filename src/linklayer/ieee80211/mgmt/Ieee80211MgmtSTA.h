@@ -24,6 +24,8 @@
 #include "Ieee80211Primitives_m.h"
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 
 class InterfaceEntry;
 
@@ -206,6 +208,9 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl);
     //@}
 };
+
+} //namespace
+
 
 #endif
 

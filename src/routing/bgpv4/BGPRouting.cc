@@ -21,6 +21,8 @@
 #include "OSPFRouting.h"
 #include "BGPSession.h"
 
+using namespace inet;
+
 Define_Module(BGPRouting);
 
 BGPRouting::~BGPRouting(void)

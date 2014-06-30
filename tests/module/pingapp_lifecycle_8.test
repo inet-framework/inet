@@ -55,7 +55,7 @@ Sending ping request #2 to lower layer\.
 \*\* Event #\d+  T=3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <at> command\.\.\.
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test\.host
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test\.host
 Test\.host shutting down
 .*
 Test\.host shut down

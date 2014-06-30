@@ -20,6 +20,8 @@
 
 #include "OSPFInterfaceState.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class InterfaceStateDesignatedRouter : public InterfaceState
@@ -30,6 +32,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_OSPFINTERFACESTATEDESIGNATEDROUTER_H
 

@@ -57,6 +57,7 @@
 #else
 #if defined(__linux)
 #include <bits/byteswap.h>
+
 #define htole16(x) __bswap_16(x)
 #define htole32(x) __bswap_32(x)
 #else

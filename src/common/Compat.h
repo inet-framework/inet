@@ -21,6 +21,8 @@
 #include <iostream>
 #include <omnetpp.h>
 
+namespace inet {
+
 
 #if OMNETPP_VERSION < 0x500
 #  define EV_FATAL  EV << "FATAL: "
@@ -126,6 +128,9 @@ T check_and_cast_nullable(P *p)
 }
 
 #endif  // OMNETPP_VERSION < 0x0500
+
+} //namespace
+
 
 #endif  // __INET_COMPAT_H_
 

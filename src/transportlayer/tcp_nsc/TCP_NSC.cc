@@ -55,6 +55,8 @@
 
 #include <sim_errno.h>
 
+namespace inet {
+
 
 Define_Module(TCP_NSC);
 
@@ -1140,5 +1142,7 @@ bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
+}
+
 }
 

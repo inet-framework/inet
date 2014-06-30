@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * signals for NotificationBoard
@@ -132,6 +134,9 @@ const char *notificationCategoryName(simsignal_t signalID);
  * Utility function
  */
 void printNotificationBanner(simsignal_t signalID, const cObject *obj);
+
+} //namespace
+
 
 #endif
 

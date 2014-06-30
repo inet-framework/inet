@@ -26,6 +26,8 @@
 
 #include "reports_m.h"
 
+namespace inet {
+
 
 /**
  * The class SenderReport represents an RTP sender report as contained
@@ -76,5 +78,8 @@ class ReceptionReport : public ReceptionReport_Base
      */
     virtual void dump(std::ostream& os) const;
 };
+
+} //namespace
+
 
 #endif

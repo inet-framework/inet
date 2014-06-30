@@ -13,6 +13,8 @@
 #include "IAddressType.h"
 #include "MACAddress.h"
 
+using namespace inet;
+
 using std::make_pair;
 using std::endl;
 

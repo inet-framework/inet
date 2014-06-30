@@ -41,6 +41,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+using namespace inet;
+
 Define_Module( InterfaceTable );
 
 #define INTERFACEIDS_START  100

@@ -26,6 +26,8 @@
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
 
+using namespace inet;
+
 
 Define_Module(PPP);
 

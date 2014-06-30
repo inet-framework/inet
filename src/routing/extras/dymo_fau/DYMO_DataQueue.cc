@@ -24,6 +24,9 @@
 #include "IPv4ControlInfo.h"
 #include "IPv4.h"
 
+
+namespace inet {
+
 std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o)
 {
     os << "[ ";
@@ -146,4 +149,6 @@ std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o)
     os << o.info();
     return os;
 }
+
+} // namespace inet
 

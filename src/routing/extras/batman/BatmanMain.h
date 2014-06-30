@@ -11,6 +11,8 @@
 #include "ManetRoutingBase.h"
 #include "batman.h"
 
+namespace inet {
+
 class Batman : public ManetRoutingBase
 {
   private:
@@ -168,6 +170,9 @@ class Batman : public ManetRoutingBase
 
     virtual bool getDestAddress(cPacket *, Address &) {return false;};
 };
+
+
+} //namespace
 
 
 #endif  // __INET_BATMANMAIN_H

@@ -20,6 +20,8 @@
 
 #include "IMessageHandler.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class DatabaseDescriptionHandler : public IMessageHandler {
@@ -33,6 +35,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_DATABASEDESCRIPTIONHANDLER_H
 

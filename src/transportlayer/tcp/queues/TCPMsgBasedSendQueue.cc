@@ -20,6 +20,8 @@
 
 #include "TCPSegment.h"
 
+using namespace inet;
+
 Register_Class(TCPMsgBasedSendQueue);
 
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()

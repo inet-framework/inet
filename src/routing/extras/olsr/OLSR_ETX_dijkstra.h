@@ -35,6 +35,8 @@
 #include <set>
 #include <map>
 
+namespace inet {
+
 typedef struct edge
 {
     nsaddr_t last_node_; // last node to reach node X
@@ -94,5 +96,8 @@ class Dijkstra : public cOwnedObject
     inline std::set<nsaddr_t> * all_nodes() { return all_nodes_; }
     inline hop& D(const nsaddr_t &node) { return dijkstraMap[node]; }
 };
+
+} //namespace
+
 
 #endif

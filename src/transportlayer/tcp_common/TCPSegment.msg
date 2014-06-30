@@ -21,7 +21,11 @@ cplusplus {{
 #include <iostream>
 #include "INETDefs.h"
 #include "ByteArray.h"
+}}
 
+namespace inet;
+
+cplusplus {{
     // default TCP header length: 20 bytes
     #define TCP_HEADER_OCTETS  20    // without options
 

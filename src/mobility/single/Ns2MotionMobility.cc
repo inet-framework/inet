@@ -29,6 +29,8 @@
 #include <cstdlib>
 #endif
 
+using namespace inet;
+
 
 Define_Module(Ns2MotionMobility);
 

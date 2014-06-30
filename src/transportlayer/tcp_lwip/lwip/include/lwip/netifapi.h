@@ -37,6 +37,8 @@
 #include "lwip/dhcp.h"
 #include "lwip/autoip.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -101,5 +103,8 @@ err_t netifapi_netif_common    ( struct netif *netif,
 #endif
 
 #endif /* LWIP_NETIF_API */
+
+} //namespace
+
 
 #endif /* __LWIP_NETIFAPI_H__ */

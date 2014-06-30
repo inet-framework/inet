@@ -27,6 +27,8 @@
 #include "Address.h"
 #include "Address.h"
 
+namespace inet {
+
 // Forward declarations:
 class IInterfaceTable;
 class InterfaceEntry;
@@ -200,6 +202,9 @@ class INET_API AddressResolver
     virtual cModule *findHostWithAddress(const Address &addr);
     //@}
 };
+
+
+} //namespace
 
 
 #endif

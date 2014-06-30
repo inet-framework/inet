@@ -52,6 +52,8 @@ static struct lc_graph LC;
 #define LC_GARBAGE_COLLECT_INTERVAL 5 * 1000000 /* 5 Seconds */
 #endif              /* LC_TIMER */
 
+namespace inet {
+
 struct lc_node
 {
     dsr_list_t l;
@@ -840,3 +842,5 @@ void __exit NSCLASS lc_cleanup(void)
     proc_net_remove(LC_PROC_NAME);
 #endif
 }
+
+} // namespace

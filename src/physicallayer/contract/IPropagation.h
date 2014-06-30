@@ -22,6 +22,8 @@
 #include "IArrival.h"
 #include "ITransmission.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -48,5 +50,8 @@ class INET_API IPropagation : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

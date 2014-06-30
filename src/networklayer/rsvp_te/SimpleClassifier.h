@@ -28,6 +28,8 @@
 #include "LIBTable.h"
 #include "IntServ.h"
 
+namespace inet {
+
 class RSVP;
 
 /**
@@ -77,6 +79,9 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
     virtual void readItemFromXML(const cXMLElement *fec);
     std::vector<FECEntry>::iterator findFEC(int fecid);
 };
+
+} //namespace
+
 
 #endif
 

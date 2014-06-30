@@ -21,6 +21,8 @@
 #include <omnetpp.h>
 #include "compatibility_dsr.h"
 
+namespace inet {
+
 class DSRPkt;
 class EtxCost;
 #undef NS2
@@ -161,5 +163,8 @@ char *dsr_pkt_alloc_opts(struct dsr_pkt *dp, int len);
 char *dsr_pkt_alloc_opts_expand(struct dsr_pkt *dp, int len);
 void dsr_pkt_free(struct dsr_pkt *dp);
 int dsr_pkt_free_opts(struct dsr_pkt *dp);
+
+} //namespace
+
 
 #endif              /* _DSR_PKT_H */

@@ -38,6 +38,8 @@
 #include <OLSRpkt_m.h>
 #include <assert.h>
 
+namespace inet {
+
 
 #ifndef CURRENT_TIME_OWER
 #define CURRENT_TIME_OWER   SIMTIME_DBL(simTime())
@@ -574,5 +576,8 @@ typedef std::vector<OLSR_ETX_nb2hop_tuple*>    nb2hopset_t;  ///< 2-hop Neighbor
 
 typedef std::vector<OLSR_ETX_topology_tuple*>  topologyset_t;  ///< Topology Set type.
 */
+
+} //namespace
+
 
 #endif

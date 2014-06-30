@@ -20,6 +20,8 @@
 #include "WifiMode.h"
 #include "Ieee80211DataRate.h"
 
+using namespace inet;
+
 
 ModulationType
 WifiModulationType::GetDsssRate1Mbps()

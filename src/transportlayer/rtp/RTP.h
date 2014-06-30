@@ -27,6 +27,8 @@
 #include "RTPInterfacePacket_m.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 /**
  * An RTP is the center of the RTP layer of an endsystem.
  * It creates the profile module, sends and receives RTP data packets
@@ -206,5 +208,8 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     //statistics:
     static simsignal_t rcvdPkSignal;
 };
+
+} //namespace
+
 
 #endif

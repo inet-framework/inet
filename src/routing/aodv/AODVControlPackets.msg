@@ -20,6 +20,8 @@ cplusplus {{
 #include "simtime_t.h"
 }}
 
+namespace inet;
+
 class noncobject Address;
 
 //

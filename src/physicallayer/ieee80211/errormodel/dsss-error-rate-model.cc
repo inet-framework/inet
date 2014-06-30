@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 #include "dsss-error-rate-model.h"
 
+using namespace inet;
 using namespace physicallayer;
 
 #ifndef ENABLE_GSL
@@ -36,6 +37,7 @@ const double DsssErrorRateModel::spectralEfficiency2bit=22000000.0 / 1000000.0/2
 const double DsssErrorRateModel::spectralEfficiency1bit=2000000.0 / 1000000.0; // 1 bit per symbol with 1 MSPS
 const double DsssErrorRateModel::spectralEfficiency2bit=2000000.0 / 1000000.0/2.0; // 2 bits per symbol, 1 MSPS
 #endif
+
 
 double
 DsssErrorRateModel::DqpskFunction(double x)

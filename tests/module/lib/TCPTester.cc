@@ -23,6 +23,8 @@
 #include "IPSocket.h"
 #include "IPv4ControlInfo.h"
 
+namespace inet {
+
 TCPTesterBase::TCPTesterBase() : cSimpleModule()
 {
 }
@@ -309,4 +311,6 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         send(seg, fromA ? "out2" : "out1");
     }
 }
+
+} // namespace inet
 

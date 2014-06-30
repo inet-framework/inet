@@ -4,6 +4,8 @@
 #include "TCP.h"
 #include "TCPWestwood.h"
 
+using namespace inet;
+
 
 Register_Class(TCPWestwood);
 

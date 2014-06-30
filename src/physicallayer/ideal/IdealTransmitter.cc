@@ -19,6 +19,8 @@
 #include "IdealTransmission.h"
 #include "IMobility.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(IdealTransmitter);

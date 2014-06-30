@@ -7,6 +7,8 @@
 
 #include "AdaptiveProbabilisticBroadcast.h"
 
+using namespace inet;
+
 using std::map;
 using std::pair;
 using std::make_pair;

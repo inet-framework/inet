@@ -18,6 +18,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 class INET_API Join : public cSimpleModule
 {
   protected:
@@ -39,5 +41,5 @@ void Join::handleMessage(cMessage *msg)
     send(msg, outg);
 }
 
-
+} // namespace inet
 

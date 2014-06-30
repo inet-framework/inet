@@ -20,6 +20,8 @@
 
 #include "FlatTransmissionBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API ScalarTransmission : public FlatTransmissionBase
 };
 
 }
+
+} //namespace
+
 
 #endif

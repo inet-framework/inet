@@ -18,6 +18,8 @@
 #include "TCPNoCongestionControl.h"
 #include "TCP.h"
 
+using namespace inet;
+
 Register_Class(TCPNoCongestionControl);
 
 TCPNoCongestionControl::TCPNoCongestionControl() : TCPBaseAlg(),

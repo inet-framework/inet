@@ -15,6 +15,8 @@
 
 #include <LinearRotatingMobilityBase.h>
 
+using namespace inet;
+
 LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 {
     targetOrientation = EulerAngles::IDENTITY;

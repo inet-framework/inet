@@ -22,6 +22,8 @@
 
 #include "WifiMode.h"
 
+using namespace inet;
+
 
 /* Bit rates for 802.11b/g/a/p.
  * Must be ordered by mode, bitrate.

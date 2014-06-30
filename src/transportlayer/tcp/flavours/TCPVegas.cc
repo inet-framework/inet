@@ -4,6 +4,8 @@
 #include "TCP.h"
 #include "TCPVegas.h"
 
+using namespace inet;
+
 
 Register_Class(TCPVegas);
 

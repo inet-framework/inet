@@ -61,6 +61,8 @@ int debug = 0;
 struct timer rt_log_timer;
 #endif
 
+using namespace inet;
+
 void NS_CLASS log_init()
 {
 #ifndef _WIN32

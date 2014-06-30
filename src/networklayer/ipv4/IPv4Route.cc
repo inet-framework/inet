@@ -29,6 +29,8 @@
 #include "AODVRouteData.h"
 #endif
 
+using namespace inet;
+
 Register_Class(IPv4Route);
 Register_Class(IPv4MulticastRoute);
 

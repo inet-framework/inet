@@ -24,6 +24,8 @@
 #include "Address.h"
 #include "SCTP.h"
 
+namespace inet {
+
 
 class SCTPDataVariables;
 class SCTPAssociation;
@@ -103,5 +105,8 @@ class INET_API SCTPQueue : public cObject
   private:
      PayloadQueue::iterator GetChunkFastIterator;
 };
+
+} //namespace
+
 
 #endif

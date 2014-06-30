@@ -19,6 +19,8 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
+
 //
 // Determines the packet type.
 //

@@ -22,6 +22,8 @@
 #include "INETDefs.h"
 #include "IQueueAccess.h"
 
+namespace inet {
+
 /**
  * Base class for algorithmic droppers (RED, DropTail, etc.).
  */
@@ -44,5 +46,8 @@ class INET_API AlgorithmicDropperBase : public cSimpleModule, public IQueueAcces
       virtual int getLength() const;
       virtual int getByteLength() const;
 };
+
+} //namespace
+
 
 #endif

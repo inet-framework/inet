@@ -18,6 +18,8 @@
 
 #include "TCPVirtualDataSendQueue.h"
 
+using namespace inet;
+
 Register_Class(TCPVirtualDataSendQueue);
 
 TCPVirtualDataSendQueue::TCPVirtualDataSendQueue() : TCPSendQueue()

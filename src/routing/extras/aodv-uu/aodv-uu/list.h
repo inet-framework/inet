@@ -16,13 +16,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *****************************************************************************/
 #ifndef _LIST_AODV_H
 #define _LIST_AODV_H
 #define NS_PORT
 #define OMNETPP
+
+namespace inet {
 
 /* Simple linked list inspired from the Linux kernel list implementation */
 typedef struct list_t
@@ -67,4 +69,8 @@ list_t* list_first(list_t*);
 int list_unattached(list_t*);
 
 #endif
+
+} // namespace inet
+
 #endif
+

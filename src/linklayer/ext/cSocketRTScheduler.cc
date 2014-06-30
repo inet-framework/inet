@@ -38,6 +38,8 @@ std::vector<pcap_t *>cSocketRTScheduler::pds;
 std::vector<int32>cSocketRTScheduler::datalinks;
 std::vector<int32>cSocketRTScheduler::headerLengths;
 #endif
+
+using namespace inet;
 timeval cSocketRTScheduler::baseTime;
 
 Register_Class(cSocketRTScheduler);

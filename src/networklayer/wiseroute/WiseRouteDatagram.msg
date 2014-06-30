@@ -19,6 +19,8 @@ cplusplus {{
    #include "NetworkDatagramBase_m.h"
 }}
 
+namespace inet;
+
 class noncobject Address;
 class NetworkDatagramBase;
 

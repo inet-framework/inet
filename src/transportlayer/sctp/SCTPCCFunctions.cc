@@ -18,6 +18,8 @@
 
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 #ifdef _MSC_VER
 inline double rint(double x) {return floor(x+.5);}
 #endif

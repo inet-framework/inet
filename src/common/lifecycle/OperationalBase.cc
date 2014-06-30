@@ -22,6 +22,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 OperationalBase::OperationalBase() :
     isOperational(false)
 {

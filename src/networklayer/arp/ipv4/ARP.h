@@ -29,6 +29,8 @@
 #include "MACAddress.h"
 #include "ModuleAccess.h"
 
+namespace inet {
+
 // Forward declarations:
 class ARPPacket;
 class IInterfaceTable;
@@ -121,6 +123,9 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual void dumpARPPacket(ARPPacket *arp);
     virtual void updateDisplayString();
 };
+
+} //namespace
+
 
 #endif
 

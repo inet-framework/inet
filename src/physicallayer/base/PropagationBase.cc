@@ -17,6 +17,8 @@
 
 #include "PropagationBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 PropagationBase::PropagationBase() :

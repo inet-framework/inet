@@ -25,6 +25,8 @@
 
 #include "DYMO_Timeout_m.h"
 
+namespace inet {
+
 //===========================================================================================
 // FIXME obsolete
 // simple, OMNeT++-aware timer class.
@@ -81,6 +83,9 @@ class DYMO_Timer : public cObject
 };
 
 std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
+
+} //namespace
+
 
 #endif
 

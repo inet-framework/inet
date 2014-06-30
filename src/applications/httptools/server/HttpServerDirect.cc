@@ -17,6 +17,8 @@
 
 #include "HttpServerDirect.h"
 
+using namespace inet;
+
 Define_Module(HttpServerDirect);
 
 

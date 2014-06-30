@@ -26,6 +26,8 @@
 #include "OSPFNeighborStateDown.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long OSPF::Neighbor::ddSequenceNumberInitSeed = 0;

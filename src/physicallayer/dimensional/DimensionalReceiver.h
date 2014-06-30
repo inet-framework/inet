@@ -21,6 +21,8 @@
 #include "FlatReceiverBase.h"
 #include "IModulation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -39,5 +41,8 @@ class INET_API DimensionalReceiver : public FlatReceiverBase
 };
 
 }
+
+} //namespace
+
 
 #endif

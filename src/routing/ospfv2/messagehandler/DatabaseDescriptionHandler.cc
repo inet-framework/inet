@@ -23,6 +23,8 @@
 #include "OSPFNeighbor.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::DatabaseDescriptionHandler::DatabaseDescriptionHandler(OSPF::Router* containingRouter) :
     OSPF::IMessageHandler(containingRouter)

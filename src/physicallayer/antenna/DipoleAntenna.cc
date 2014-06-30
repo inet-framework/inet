@@ -17,6 +17,8 @@
 
 #include "DipoleAntenna.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(DipoleAntenna);

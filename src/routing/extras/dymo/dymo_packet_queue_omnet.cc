@@ -23,6 +23,8 @@
 #include "dymo_um_omnet.h"
 #include "Ieee802Ctrl.h"
 
+namespace inet {
+
 //#define GARBAGE_COLLECT
 #ifndef DYMO_USE_STL
 void NS_CLASS packet_queue_init(void)
@@ -485,3 +487,4 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
     return count;
 }
 #endif
+} // namespace

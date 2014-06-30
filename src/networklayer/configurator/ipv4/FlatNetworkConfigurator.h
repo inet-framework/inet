@@ -22,6 +22,8 @@
 
 #include "IPv4Address.h"
 
+namespace inet {
+
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
@@ -59,6 +61,9 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
 
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
+
+} //namespace
+
 
 #endif
 

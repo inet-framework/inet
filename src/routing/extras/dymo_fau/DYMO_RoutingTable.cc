@@ -23,6 +23,8 @@
 #include "DYMO_RoutingTable.h"
 #include "DYMO.h"
 
+using namespace inet;
+
 
 DYMO_RoutingTable::DYMO_RoutingTable(DYMOFau* host, const IPv4Address& myAddr)
 {

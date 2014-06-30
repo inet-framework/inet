@@ -20,6 +20,8 @@
 
 #include "EtherFrame.h"
 
+using namespace inet;
+
 
 Define_Module(EtherFrameClassifier);
 

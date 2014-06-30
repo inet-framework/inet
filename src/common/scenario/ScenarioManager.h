@@ -22,6 +22,8 @@
 
 #include "IScriptable.h"
 
+namespace inet {
+
 
 /**
  * Scenario Manager (experimental) which executes a script specified in XML.
@@ -71,5 +73,8 @@ class INET_API ScenarioManager : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void updateDisplayString();
 };
+
+} //namespace
+
 
 #endif

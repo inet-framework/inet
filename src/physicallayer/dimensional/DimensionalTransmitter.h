@@ -20,6 +20,8 @@
 
 #include "FlatTransmitterBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -36,5 +38,8 @@ class INET_API DimensionalTransmitter : public FlatTransmitterBase
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -21,6 +21,8 @@
 #include "INETDefs.h"
 #include "IPProtocolId_m.h"
 
+namespace inet {
+
 /**
  * TODO
  */
@@ -46,5 +48,8 @@ class IPSocket {
      */
     void registerProtocol(int protocol);
 };
+
+} //namespace
+
 
 #endif

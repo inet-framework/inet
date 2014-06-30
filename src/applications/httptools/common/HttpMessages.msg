@@ -66,6 +66,8 @@
 //
 
 
+namespace inet;
+
 //
 // Base class for HTTP messages
 //

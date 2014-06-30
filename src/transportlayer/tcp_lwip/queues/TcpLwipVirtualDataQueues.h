@@ -24,6 +24,8 @@
 
 #include "TcpLwipQueues.h"
 
+namespace inet {
+
 
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
@@ -103,5 +105,8 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
+} //namespace
+
 
 #endif

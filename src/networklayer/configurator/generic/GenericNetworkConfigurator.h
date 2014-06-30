@@ -28,7 +28,9 @@
 #include "GenericRoutingTable.h"
 #include "Address.h"
 
-namespace inet { class PatternMatcher; }
+namespace inet {
+
+class PatternMatcher;
 
 /**
  * This module configures generic routing tables for a network.
@@ -163,5 +165,8 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
         virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
 };
+
+} //namespace
+
 
 #endif

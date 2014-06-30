@@ -21,6 +21,8 @@
 #include "ScalarReceiver.h"
 #include "RadioControlInfo_m.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(Ieee80211Radio);

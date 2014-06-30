@@ -78,7 +78,7 @@ ned-path = .;../../../../src
 %contains: results/General-0.elog
  - Passing up contained packet `ping0' to higher layer
 %contains: results/General-0.elog
- - Sending datagram (IPv4Datagram)ping0-reply with destination = 10.0.0.2
+ - Sending datagram (inet::IPv4Datagram)ping0-reply with destination = 10.0.0.2
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

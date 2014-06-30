@@ -27,6 +27,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 #define LS_INFINITY   1e16
 
 Define_Module(TED);
@@ -532,3 +534,4 @@ bool TED::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     }
     return true;
 }
+} // namespace

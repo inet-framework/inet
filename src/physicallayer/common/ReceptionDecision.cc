@@ -17,6 +17,8 @@
 
 #include "ReceptionDecision.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void ReceptionDecision::printToStream(std::ostream &stream) const

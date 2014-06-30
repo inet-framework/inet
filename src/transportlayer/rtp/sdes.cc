@@ -20,6 +20,8 @@
 
 #include "sdes.h"
 
+using namespace inet;
+
 
 Register_Class(SDESItem);
 

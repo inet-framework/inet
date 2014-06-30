@@ -4,6 +4,8 @@
 
 #include "FWMath.h"
 
+namespace inet {
+
 class EulerAngles
 {
     public:
@@ -37,5 +39,8 @@ inline std::ostream& operator<<(std::ostream& os, const EulerAngles& a)
 {
     return os << "(" << a.alpha << ", " << a.beta << ", " << a.gamma << ")";
 }
+
+} //namespace
+
 
 #endif /* EULERALNGLES_H_ */

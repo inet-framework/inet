@@ -20,6 +20,8 @@
 
 #include "IReceptionDecision.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -67,5 +69,8 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 };
 
 }
+
+} //namespace
+
 
 #endif

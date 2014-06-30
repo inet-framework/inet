@@ -33,6 +33,8 @@
 #include "IPv4RoutingTable.h"
 #include "IPv4.h"
 
+namespace inet {
+
 class DYMOFau;
 enum Result {DROP, ACCEPT};
 
@@ -85,6 +87,8 @@ class DYMO_DataQueue : public cObject
   public:
     friend std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o);
 };
+
+} //namespace
 
 #endif
 

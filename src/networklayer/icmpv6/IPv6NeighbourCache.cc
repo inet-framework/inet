@@ -19,6 +19,8 @@
 
 #include "IPv6NeighbourCache.h"
 
+using namespace inet;
+
 void IPv6NeighbourCache::DefaultRouterList::add(Neighbour &router)
 {
     ASSERT(router.isRouter);

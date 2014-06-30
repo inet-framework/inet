@@ -23,6 +23,8 @@
 #include "INETDefs.h"
 #include "LineSegmentsMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Tractor movement model. See NED file for more info.
@@ -54,5 +56,8 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
   public:
     TractorMobility();
 };
+
+} //namespace
+
 
 #endif

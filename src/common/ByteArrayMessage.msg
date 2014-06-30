@@ -19,6 +19,8 @@ cplusplus {{
 #include "ByteArray.h"
 }}
 
+namespace inet;
+
 class noncobject ByteArray;
 
 //

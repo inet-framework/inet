@@ -21,6 +21,8 @@
 #include <string>
 #include "HttpServer.h"
 
+namespace inet {
+
 /**
  * An evil attacker server demonstration - type B.
  *
@@ -47,5 +49,8 @@ class INET_API HttpServerEvilB : public HttpServer
         virtual void initialize(int stage);
         virtual std::string generateBody();
 };
+
+} //namespace
+
 
 #endif

@@ -19,6 +19,8 @@
 
 #include "TCPVirtualDataRcvQueue.h"
 
+using namespace inet;
+
 
 Register_Class(TCPVirtualDataRcvQueue);
 

@@ -26,6 +26,8 @@
 #include "IPv4Address.h"
 #include "sdes.h"
 
+namespace inet {
+
 
 //Forward declarations:
 class ReceptionReport;
@@ -193,5 +195,8 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     int _silentIntervals;
 };
+
+} //namespace
+
 
 #endif

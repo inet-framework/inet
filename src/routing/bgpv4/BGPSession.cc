@@ -19,6 +19,8 @@
 #include "BGPRouting.h"
 #include "BGPFSM.h"
 
+using namespace inet;
+
 BGPSession::BGPSession(BGPRouting& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(0), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(0)

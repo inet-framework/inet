@@ -20,6 +20,8 @@
 
 #include "OSPFInterface.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class InterfaceState {
@@ -35,6 +37,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_OSPFINTERFACESTATE_H
 

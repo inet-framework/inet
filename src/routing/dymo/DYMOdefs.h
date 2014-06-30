@@ -5,6 +5,7 @@
 #ifndef __INET_DYMODEFS_H_
 #define __INET_DYMODEFS_H_
 
+namespace inet {
 #define DYMO_NAMESPACE_BEGIN namespace DYMO {
 #define DYMO_NAMESPACE_END }
 
@@ -29,5 +30,7 @@ enum DYMORouteState {
 };
 
 DYMO_NAMESPACE_END
+
+} // namespace
 
 #endif

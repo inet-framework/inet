@@ -18,6 +18,8 @@
 
 #include "DYMO_TokenBucket.h"
 
+using namespace inet;
+
 DYMO_TokenBucket::DYMO_TokenBucket(double tokensPerTick, double maxTokens, simtime_t currentTime) : tokensPerTick(tokensPerTick), maxTokens(maxTokens), availableTokens(maxTokens), lastUpdate(currentTime)
 {
 }

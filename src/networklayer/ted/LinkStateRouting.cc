@@ -26,6 +26,8 @@
 #include "IInterfaceTable.h"
 #include "TED.h"
 
+using namespace inet;
+
 Define_Module(LinkStateRouting);
 
 LinkStateRouting::LinkStateRouting()

@@ -20,6 +20,8 @@
 
 #include "ReceptionBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -47,5 +49,8 @@ class INET_API IdealReception : public ReceptionBase
 };
 
 }
+
+} //namespace
+
 
 #endif

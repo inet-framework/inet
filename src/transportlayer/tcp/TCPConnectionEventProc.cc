@@ -25,6 +25,8 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
+using namespace inet;
+
 
 //
 // Event processing code

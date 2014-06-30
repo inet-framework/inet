@@ -100,6 +100,8 @@ struct pppoetag {
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
+
+namespace inet {
 #endif
 
 
@@ -157,5 +159,8 @@ err_t pppoe_xmit(struct pppoe_softc *sc, struct pbuf *pb);
 extern int pppoe_hdrlen;
 
 #endif /* PPPOE_SUPPORT */
+
+} //namespace
+
 
 #endif /* PPP_OE_H */

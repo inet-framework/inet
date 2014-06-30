@@ -21,6 +21,11 @@
 
 #include "UDPControlInfo_m.h"
 
+namespace inet {
+
+} //namespace
+
+
 #endif
 
 

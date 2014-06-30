@@ -17,4 +17,6 @@
 
 #include "NoiseBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;

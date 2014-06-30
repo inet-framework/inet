@@ -27,6 +27,8 @@
 #include "DYMO_RoutingEntry.h"
 #include "IIPv4RoutingTable.h"
 
+namespace inet {
+
 /**
   * class describes the functionality of the routing table
 **/
@@ -78,5 +80,8 @@ class DYMO_RoutingTable : public cObject
     friend std::ostream& operator<<(std::ostream& os, const DYMO_RoutingTable& o);
 
 };
+
+} //namespace
+
 
 #endif

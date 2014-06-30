@@ -27,7 +27,12 @@
 #include "DYMO_RM_m.h"
 #include "DYMO_RERR_m.h"
 
+namespace inet {
+
 std::ostream& operator<<(std::ostream& os, const std::vector<DYMO_AddressBlock>& abs);
 std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab);
+
+} //namespace
+
 
 #endif

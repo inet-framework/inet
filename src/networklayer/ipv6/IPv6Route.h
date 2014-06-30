@@ -25,6 +25,8 @@
 #include "IRoute.h"
 #include "IPv6Address.h"
 
+namespace inet {
+
 class InterfaceEntry;
 class IPv6RoutingTable;
 
@@ -125,5 +127,8 @@ class INET_API IPv6Route : public cObject, public IRoute
     virtual cObject *getProtocolData() const { return _protocolData; }
     virtual void setProtocolData(cObject *protocolData) { _protocolData = protocolData; }
 };
+
+} //namespace
+
 
 #endif

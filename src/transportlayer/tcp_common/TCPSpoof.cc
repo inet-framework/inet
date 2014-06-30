@@ -18,6 +18,8 @@
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
 
+using namespace inet;
+
 Define_Module(TCPSpoof);
 
 simsignal_t TCPSpoof::sentPkSignal = registerSignal("sentPk");

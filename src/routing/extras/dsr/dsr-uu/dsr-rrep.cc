@@ -46,6 +46,8 @@ static TBL(grat_rrep_tbl, GRAT_RREP_TBL_MAX_LEN);
 DSRUUTimer grat_rrep_tbl_timer;
 #endif
 
+using namespace inet;
+
 struct grat_rrep_entry
 {
     dsr_list_t l;

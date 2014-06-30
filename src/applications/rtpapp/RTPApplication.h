@@ -21,6 +21,8 @@
 #include "IPv4Address.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 {
     protected:
@@ -58,5 +60,8 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
     public:
         RTPApplication();
 };
+
+} //namespace
+
 
 #endif

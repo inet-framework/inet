@@ -17,14 +17,18 @@
 //
 
 
+cplusplus {{
+#include "IPv4Address.h"
+#include "IPProtocolId_m.h"
+}}
+
+namespace inet;
+
 class noncobject IPv4Address;
 
 enum IPProtocolId;
 
 cplusplus {{
-#include "IPv4Address.h"
-#include "IPProtocolId_m.h"
-
 // default IPv4 header length: 20 bytes
 const int IP_HEADER_BYTES = 20;
 

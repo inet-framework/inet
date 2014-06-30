@@ -5,9 +5,10 @@ Tests InterpolatingAntenna for a simple configuration.
 %file: test.cc
 #include "IAntenna.h"
 
-using namespace physicallayer;
-
 namespace InterpolatingAntenna {
+
+using namespace inet;
+using namespace inet::physicallayer;
 
 class AntennaTest : public cSimpleModule
 {
@@ -44,6 +45,7 @@ import inet.physicallayer.ieee80211.Ieee80211RadioMedium;
 
 simple AntennaTest
 {
+//    @class(::inet::physicallayer::InterpolatingAntenna::AntennaTest);
 }
 
 network Test

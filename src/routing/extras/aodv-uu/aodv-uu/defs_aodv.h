@@ -49,6 +49,7 @@
 
 #ifndef NS_PORT
 #include "timer_queue_aodv.h"
+
 #endif
 
 #ifdef NS_PORT
@@ -97,6 +98,8 @@ using std::max;
 #if !defined(IFNAMSIZ)
 #define IFNAMSIZ 16
 #endif
+
+namespace inet {
 
 /* Data for a network device */
 struct dev_info
@@ -263,5 +266,8 @@ typedef AODV_msg hdr_aodvuu;    // Name convention for headers
 typedef void (*callback_func_t) (int);
 extern int attach_callback_func(int fd, callback_func_t func);
 #endif
+
+} //namespace
+
 
 #endif              /* DEFS_H */

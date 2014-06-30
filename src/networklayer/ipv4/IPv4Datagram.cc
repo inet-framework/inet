@@ -18,5 +18,7 @@
 
 #include "IPv4Datagram.h"
 
+using namespace inet;
+
 Register_Class(IPv4Datagram);
 

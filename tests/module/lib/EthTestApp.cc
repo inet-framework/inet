@@ -22,6 +22,7 @@
 #include "EtherFrame_m.h"
 #include "MACAddress.h"
 
+namespace inet {
 
 class INET_API EthTestApp : public cSimpleModule
 {
@@ -110,4 +111,5 @@ void EthTestApp::finish()
 {
 }
 
+} // namespace inet
 

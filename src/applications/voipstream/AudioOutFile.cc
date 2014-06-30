@@ -25,6 +25,8 @@
 
 #include "INETEndians.h"
 
+using namespace inet;
+
 extern "C" {
 #include <libavutil/audioconvert.h>
 }

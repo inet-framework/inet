@@ -32,6 +32,8 @@
 #include "IIPv4RoutingTable.h"
 #include "IPv4RoutingTable.h"
 
+namespace inet {
+
 using namespace std;
 
 /**
@@ -89,5 +91,8 @@ class INET_API DSDVIPv4Route : public IPv4Route
         void setSequencenumber(int i) {sequencenumber = i;}
         unsigned int getSequencenumber() const {return sequencenumber;}
 };
+
+} //namespace
+
 
 #endif

@@ -19,6 +19,8 @@
 
 #include "RandomWPMobility.h"
 
+using namespace inet;
+
 
 Define_Module(RandomWPMobility);
 

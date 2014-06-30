@@ -26,6 +26,8 @@
 
 #include <set>
 
+namespace inet {
+
 class IInterfaceTable;
 class IIPv4RoutingTable;
 
@@ -211,5 +213,8 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     virtual void processV2Report(InterfaceEntry *ie, IGMPMessage *msg);
     virtual void processLeave(InterfaceEntry *ie, IGMPMessage *msg);
 };
+
+} //namespace
+
 
 #endif

@@ -18,6 +18,8 @@
 #include "SCTPCommand_m.h"
 #include "SCTPSocket.h"
 
+namespace inet {
+
 
 /**
  * Accepts any number of incoming connections, and sends back whatever
@@ -132,6 +134,9 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void addressAddedArrived(int32 assocId, Address localAddr, Address remoteAddr);
     void setStatusString(const char *s);
 };
+
+} //namespace
+
 
 #endif
 

@@ -22,6 +22,7 @@ cplusplus {{
 #include "MACAddress.h"
 }}
 
+namespace inet;
 
 packet ICMPv6Message;
 

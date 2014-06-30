@@ -38,6 +38,8 @@
 static DLIST_HEAD(TQ);
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 #if defined(OMNETPP) && defined(TIMERMAPLIST)
 
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)

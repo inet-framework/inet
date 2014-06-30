@@ -23,6 +23,8 @@
 
 #include "MappingBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -63,5 +65,8 @@ public:
 };
 
 }
+
+} //namespace
+
 
 #endif

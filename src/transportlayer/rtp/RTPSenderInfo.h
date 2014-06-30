@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * The class RTPSenderInfo is used by an RTP end system for storing information
@@ -135,5 +137,8 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      */
     uint32 _bytesSent;
 };
+
+} //namespace
+
 
 #endif

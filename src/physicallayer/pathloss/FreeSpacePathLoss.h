@@ -20,6 +20,8 @@
 
 #include "IPathLoss.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -45,5 +47,8 @@ class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
 };
 
 }
+
+} //namespace
+
 
 #endif

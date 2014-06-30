@@ -21,6 +21,8 @@
 #include <list>
 #include "TCPSendQueue.h"
 
+namespace inet {
+
 /**
  * Send queue that manages messages.
  *
@@ -86,5 +88,8 @@ class INET_API TCPMsgBasedSendQueue : public TCPSendQueue
      */
     virtual void discardUpTo(uint32 seqNum);
 };
+
+} //namespace
+
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "IBackgroundNoise.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -44,5 +46,8 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 };
 
 }
+
+} //namespace
+
 
 #endif

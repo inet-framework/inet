@@ -18,6 +18,8 @@
 
 #include "RTPPacket.h"
 
+using namespace inet;
+
 
 Register_Class(RTPPacket);
 

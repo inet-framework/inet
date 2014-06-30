@@ -23,6 +23,8 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 
+namespace inet {
+
 
 /**
  * Retransmission data for SACK.
@@ -178,5 +180,8 @@ class INET_API TCPSACKRexmitQueue
      */
     bool checkQueue() const;
 };
+
+} //namespace
+
 
 #endif

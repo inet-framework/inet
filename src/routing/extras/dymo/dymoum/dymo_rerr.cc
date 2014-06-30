@@ -33,6 +33,8 @@
 
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 
 RERR *NS_CLASS rerr_create(struct rerr_block *blocks, int nblocks, int ttl)
 {

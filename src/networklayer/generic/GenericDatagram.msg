@@ -15,13 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject Address;
-enum IPProtocolId;
-
 cplusplus {{
 #include "Address.h"
 #include "IPProtocolId_m.h"
 }}
+
+namespace inet;
+
+class noncobject Address;
+enum IPProtocolId;
+
 
 //
 // Represents a generic network datagram with generic network addresses. 

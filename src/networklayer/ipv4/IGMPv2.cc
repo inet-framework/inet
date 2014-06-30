@@ -26,6 +26,8 @@
 
 #include <algorithm>
 
+using namespace inet;
+
 Define_Module(IGMPv2);
 
 // RFC 2236, Section 6: Host State Diagram

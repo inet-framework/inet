@@ -43,6 +43,8 @@
 
 #include "UDPControlInfo_m.h"
 
+using namespace inet;
+
 
 void SCTPAssociation::calculateRcvBuffer()
 {

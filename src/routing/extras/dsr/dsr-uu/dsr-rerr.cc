@@ -28,6 +28,8 @@
 #include "link-cache.h"
 #include "maint-buf.h"
 
+using namespace inet;
+
 static struct dsr_rerr_opt *dsr_rerr_opt_add(char *buf, int len,
         int err_type,
         struct in_addr err_src,

@@ -17,6 +17,8 @@
 
 #include "ModuleIdAddress.h"
 
+using namespace inet;
+
 bool ModuleIdAddress::tryParse(const char *addr)
 {
     char * endp;

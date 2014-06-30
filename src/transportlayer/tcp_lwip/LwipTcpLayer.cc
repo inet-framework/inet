@@ -25,6 +25,8 @@
 #include "Address.h"
 #include "LwipTcpStackIf.h"
 
+using namespace inet;
+
 
 LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     stackIf(stackIfP),

@@ -26,6 +26,8 @@
 #include "IPv4Route.h"  // not strictly required, but most clients will need it anyway
 #include "IRoutingTable.h"
 
+namespace inet {
+
 
 /**
  * A C++ interface to abstract the functionality of IIPv4RoutingTable.
@@ -240,6 +242,9 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     virtual void multicastRouteChanged(IPv4MulticastRoute *entry, int fieldCode) = 0;
     //@}
 };
+
+} //namespace
+
 
 #endif
 

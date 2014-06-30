@@ -34,6 +34,8 @@
 #include <OLSR_ETX_repositories.h>
 #include <OLSR_state.h>
 
+namespace inet {
+
 /// This class encapsulates all data structures needed for maintaining internal state of an OLSR_ETX node.
 class OLSR_ETX_state : public OLSR_state
 {
@@ -43,5 +45,8 @@ class OLSR_ETX_state : public OLSR_state
     OLSR_ETX_link_tuple*  find_best_sym_link_tuple(const nsaddr_t &main_addr, double now);
     OLSR_ETX_state();
 };
+
+} //namespace
+
 
 #endif

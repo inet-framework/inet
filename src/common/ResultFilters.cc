@@ -23,6 +23,8 @@
 #include "Coord.h"
 #include "IMobility.h"
 
+using namespace inet;
+
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
 void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)

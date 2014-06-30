@@ -24,6 +24,8 @@
 #include "BatmanMain.h"
 #include "IPv4InterfaceData.h"
 
+using namespace inet;
+
 NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Address &neigh, BatmanIf *if_incoming)
 {
     return new NeighNode(orig_node, orig_neigh_node, neigh, if_incoming, num_words, global_win_size);

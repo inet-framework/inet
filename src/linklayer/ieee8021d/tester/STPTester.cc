@@ -21,6 +21,8 @@
 #include "Ieee8021dInterfaceData.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 Define_Module(STPTester);
 
 STPTester::STPTester()

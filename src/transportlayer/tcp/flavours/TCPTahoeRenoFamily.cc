@@ -18,6 +18,8 @@
 #include "TCPTahoeRenoFamily.h"
 #include "TCP.h"
 
+using namespace inet;
+
 
 
 TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()

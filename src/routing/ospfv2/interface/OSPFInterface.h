@@ -29,6 +29,8 @@
 #include "OSPFTimer.h"
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class InterfaceState;
@@ -172,6 +174,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_OSPFINTERFACE_H
 

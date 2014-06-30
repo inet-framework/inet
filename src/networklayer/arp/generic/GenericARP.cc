@@ -24,6 +24,8 @@
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 Define_Module(GenericARP);
 
 MACAddress GenericARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)

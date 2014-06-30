@@ -43,6 +43,8 @@
 #include "lwip/sys.h"
 #include "lwip/netif.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -136,6 +138,9 @@ struct tcpip_msg {
 }
 #endif
 
+} //namespace
+
 #endif /* !NO_SYS */
+
 
 #endif /* __LWIP_TCPIP_H__ */

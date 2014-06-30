@@ -25,6 +25,8 @@
 #include "OSPFNeighborStateInit.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {

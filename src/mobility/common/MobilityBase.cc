@@ -24,6 +24,8 @@
 #include "MobilityBase.h"
 #include "FWMath.h"
 
+using namespace inet;
+
 Register_Abstract_Class(MobilityBase);
 
 static bool parseIntTo(const char *s, double& destValue)

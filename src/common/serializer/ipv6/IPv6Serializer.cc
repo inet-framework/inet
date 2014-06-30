@@ -58,6 +58,7 @@ namespace INET6Fw // load headers into a namespace, to avoid conflicts with plat
 
 
 using namespace INET6Fw;
+using namespace inet;
 
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {

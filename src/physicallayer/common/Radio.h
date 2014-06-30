@@ -24,6 +24,8 @@
 #include "PhysicalLayerBase.h"
 #include "RadioFrame.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -168,5 +170,8 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -22,6 +22,8 @@
 #include "ModuleIdAddressType.h"
 #include "ModulePathAddressType.h"
 
+using namespace inet;
+
 #define RESERVED_IPV6_ADDRESS_RANGE 0x8000 // IETF reserved address range 8000::/16 (extended)
 
 uint64 Address::get(AddressType type) const

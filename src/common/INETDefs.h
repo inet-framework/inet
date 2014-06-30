@@ -39,6 +39,8 @@
 
 #include "InitStages.h"
 
+namespace inet {
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
@@ -65,5 +67,47 @@ T *__checknull(T *p, const char *expr, const char *file, int line)
 
 
 #define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
+
+/*
+template<typename T, typename A>
+inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec )
+{
+    out << '{';
+    for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
+    {
+        if (it != vec.begin())
+            out << ",";
+        out << *it;
+    }
+    out << '}';
+    return out;
+}
+*/
+
+/**
+ * Shortcut to cObjectFactory::createOneIfClassIsKnown().
+ */
+inline cObject *createOneIfClassIsKnown(const char *classname) {
+    cObject *ret = cObjectFactory::createOneIfClassIsKnown(classname);
+    if (!ret)
+    {
+        char buf[200];  //FIXME
+        snprintf(buf, 200, "inet::%s", classname);
+        ret = cObjectFactory::createOneIfClassIsKnown(buf);
+    }
+    return ret;
+}
+
+inline cObject *createOne(const char *classname) {
+    cObject *ret = createOneIfClassIsKnown(classname);
+    if (!ret)
+        throw cRuntimeError("Class [inet::]\"%s\" not found -- perhaps its code was not linked in, "
+                            "or the class wasn't registered with Register_Class(), or in the case of "
+                            "modules and channels, with Define_Module()/Define_Channel()", classname);
+    return ret;
+}
+
+} //namespace
+
 
 #endif  // __INET_INETDEFS_H

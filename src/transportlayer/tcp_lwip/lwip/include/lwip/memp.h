@@ -48,6 +48,9 @@ extern "C" {
 #endif
 
 /* Create the list of all memory pools managed by memp. MEMP_MAX represents a NULL pool at the end */
+
+namespace inet {
+
 typedef enum {
 #define LWIP_MEMPOOL(name,num,size,desc)  MEMP_##name,
 #include "lwip/memp_std.h"
@@ -87,9 +90,13 @@ typedef enum {
 extern const u16_t memp_sizes[MEMP_MAX];
 #endif /* MEMP_MEM_MALLOC || MEM_USE_POOLS */
 
+} // namespace inet
+
 #if MEMP_MEM_MALLOC
 
 #include "mem.h"
+
+namespace inet {
 
 inline void memp_init() {}
 inline void* memp_malloc(memp_t type) { return mem_malloc(memp_sizes[type]); }
@@ -100,7 +107,11 @@ inline void memp_free(memp_t type, void * mem) { mem_free(mem); }
 #define memp_free(type, mem)  mem_free(mem)
 */
 
+} // namespace inet
+
 #else /* MEMP_MEM_MALLOC */
+
+namespace inet {
 
 #if MEM_USE_POOLS
 /** This structure is used to save the pool one element came from. */
@@ -120,6 +131,8 @@ void *memp_malloc(memp_t type);
 #endif
 void  memp_free(memp_t type, void *mem);
 
+// namespace inet
+
 #endif /* MEMP_MEM_MALLOC */
 
 #ifdef __cplusplus
@@ -127,3 +140,4 @@ void  memp_free(memp_t type, void *mem);
 #endif
 
 #endif /* __LWIP_MEMP_H__ */
+

@@ -220,6 +220,7 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 #include "ModuleAccess.h"
 #include "RoutingTableRecorder.h"
 
+namespace inet {
 
 Define_Module(RoutingTableRecorder);
 
@@ -369,5 +370,6 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //    fflush(routingLogFile);
 //}
 
+} // namespace
 
 #endif /*OMNETPP_VERSION*/

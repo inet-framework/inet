@@ -65,6 +65,8 @@
 #include "lwip/snmp.h"
 #include "arch/perf.h"
 
+using namespace inet;
+
 /* These variables are global to all functions involved in the input
    processing of TCP segments. They are set by the tcp_input()
    function. */

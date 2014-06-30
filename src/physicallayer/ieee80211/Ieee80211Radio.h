@@ -20,6 +20,8 @@
 
 #include "ScalarRadio.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -41,5 +43,8 @@ class INET_API Ieee80211Radio : public ScalarRadio
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -43,6 +43,8 @@
 #include <FWMath.h>
 #include "MoBANLocal.h"
 
+using namespace inet;
+
 Define_Module(MoBANLocal);
 
 MoBANLocal::MoBANLocal()

@@ -5,6 +5,8 @@
 #include "FWMath.h"
 #include "EulerAngles.h"
 
+namespace inet {
+
 class Quaternion
 {
     public:
@@ -67,5 +69,8 @@ class Quaternion
 
         Coord& getAxis() {return d;}        // forgat‡si tengely
 };
+
+} //namespace
+
 
 #endif /* QUATERNION_H_ */

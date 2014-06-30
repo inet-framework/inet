@@ -24,6 +24,8 @@
 #include "InterfaceEntry.h"
 #include "MACAddress.h"
 
+namespace inet {
+
 #undef ALTERNATE  // conflicts with <windows.h>
 
 
@@ -178,5 +180,8 @@ class Ieee8021dInterfaceData : public InterfaceProtocolData
 
         void setNextUpgrade(simtime_t nextUpgrade) {portData.nextUpgrade = nextUpgrade;}
 };
+
+} //namespace
+
 
 #endif

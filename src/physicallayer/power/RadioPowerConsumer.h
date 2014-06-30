@@ -21,6 +21,8 @@
 #include "IPowerSource.h"
 #include "IRadio.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -64,5 +66,8 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 };
 
 }
+
+} //namespace
+
 
 #endif

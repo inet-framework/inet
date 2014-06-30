@@ -20,6 +20,8 @@
 #include "IPv6ControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
+using namespace inet;
+
 Define_Module(MultiNetworkLayerUpperMultiplexer);
 
 void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)

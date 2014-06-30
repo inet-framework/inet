@@ -20,6 +20,8 @@
 #include "yans-error-rate-model.h"
 #include <math.h>
 
+using namespace inet;
+
 using namespace physicallayer;
 
 YansErrorRateModel::YansErrorRateModel()

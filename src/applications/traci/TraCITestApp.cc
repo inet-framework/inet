@@ -23,6 +23,8 @@
 #include "NodeStatus.h"
 #include <cmath>
 
+using namespace inet;
+
 Define_Module(TraCITestApp);
 
 simsignal_t TraCITestApp::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");

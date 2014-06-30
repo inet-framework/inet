@@ -42,6 +42,8 @@
 
 #include "lwip/inet.h"
 #include "lwip/pbuf.h"
+
+namespace inet {
 #if LWIP_DHCP
 struct dhcp;
 #endif
@@ -259,5 +261,8 @@ void netif_poll(struct netif *netif);
 void netif_poll_all(void);
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
+
+} //namespace
+
 
 #endif /* __LWIP_NETIF_H__ */

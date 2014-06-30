@@ -27,6 +27,8 @@
 #include "OSPFNeighborStateTwoWay.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 void OSPF::NeighborStateExchangeStart::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {

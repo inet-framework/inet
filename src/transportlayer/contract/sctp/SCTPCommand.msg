@@ -21,11 +21,13 @@ cplusplus {{
 
 #include "Address.h"
 #include "SCTPCommand.h"
-
-typedef std::vector<Address> AddressVector;
 }}
 
+namespace inet;
 
+cplusplus {{
+typedef std::vector<Address> AddressVector;
+}}
 
 class noncobject Address;
 

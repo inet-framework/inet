@@ -18,6 +18,8 @@
 
 #include "ThresholdDropper.h"
 
+using namespace inet;
+
 Define_Module(ThresholdDropper);
 
 void ThresholdDropper::initialize()

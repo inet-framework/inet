@@ -43,6 +43,8 @@
 #include "lwip/ip_addr.h"
 #include "lwip/err.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -217,6 +219,9 @@ err_t             netconn_gethostbyname(const char *name, struct ip_addr *addr);
 }
 #endif
 
+} //namespace
+
 #endif /* LWIP_NETCONN */
+
 
 #endif /* __LWIP_API_H__ */

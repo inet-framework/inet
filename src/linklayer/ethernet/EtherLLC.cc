@@ -23,6 +23,8 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
+using namespace inet;
+
 Define_Module(EtherLLC);
 
 simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");

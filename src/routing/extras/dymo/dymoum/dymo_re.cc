@@ -42,6 +42,8 @@
 extern int no_path_acc, s_bit;
 #endif  /* NS_PORT */
 
+namespace inet {
+
 RE *NS_CLASS re_create_rreq(struct in_addr target_addr,
                             u_int32_t target_seqnum,
                             struct in_addr re_node_addr,
@@ -1248,5 +1250,6 @@ void NS_CLASS re_answer(RE *re,u_int32_t ifindex)
     re_send_rrep(rrep_dest);
 #endif
     re_send_rrep(rrep_src);
+}
 }
 #endif

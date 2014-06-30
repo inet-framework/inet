@@ -18,6 +18,8 @@
 
 #include "LSA.h"
 
+using namespace inet;
+
 
 bool OSPF::SummaryLSA::update(const OSPFSummaryLSA* lsa)
 {

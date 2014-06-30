@@ -22,6 +22,8 @@
 
 #include <stdexcept>
 
+namespace inet {
+
 class DYMO_AddressBlock
 {
   protected:
@@ -141,6 +143,9 @@ class DYMO_AddressBlock
     }
 
 };
+
+} //namespace
+
 
 #endif
 

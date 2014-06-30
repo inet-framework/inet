@@ -15,6 +15,8 @@
 
 #include <RotatingMobilityBase.h>
 
+using namespace inet;
+
 RotatingMobilityBase::RotatingMobilityBase()
 {
     rotateTimer = NULL;

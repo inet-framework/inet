@@ -26,6 +26,8 @@
 #include "NodeStatus.h"
 #include "Ieee8021dBPDU_m.h"
 
+namespace inet {
+
 //
 // This module forward frames (~EtherFrame) based on their destination MAC addresses to appropriate ports.
 // See the NED definition for details.
@@ -97,5 +99,8 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
         virtual InterfaceEntry * chooseInterface();
         virtual void finish();
 };
+
+} //namespace
+
 
 #endif

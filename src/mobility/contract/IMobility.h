@@ -28,6 +28,8 @@
 #include "Coord.h"
 #include "EulerAngles.h"
 
+namespace inet {
+
 
 /**
  * @brief Abstract base class defining the public interface that must be provided by all mobility modules.
@@ -62,5 +64,8 @@ class INET_API IMobility
     /** @brief Returns the current angular acceleration at the current simulation time. */
     // virtual Orientation getCurrentAngularAcceleration() = 0;
 };
+
+} //namespace
+
 
 #endif

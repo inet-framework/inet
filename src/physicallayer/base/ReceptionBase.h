@@ -22,6 +22,8 @@
 #include "IReception.h"
 #include "IRadio.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -65,5 +67,8 @@ class INET_API ReceptionBase : public virtual IReception
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -40,6 +40,8 @@
 
 #ifdef WITH_TRACI
 
+using namespace inet;
+
 Define_Module(TraCIScenarioManager);
 
 TraCIScenarioManager::~TraCIScenarioManager() {

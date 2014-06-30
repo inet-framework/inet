@@ -25,6 +25,8 @@
 
 #include "TCPBaseAlg.h"
 
+namespace inet {
+
 class TCPSegmentTransmitInfoList
 {
   public:
@@ -57,6 +59,9 @@ class TCPSegmentTransmitInfoList
 
     void clearTo(uint32_t endseg);
 };
+
+} //namespace
+
 
 #endif
 

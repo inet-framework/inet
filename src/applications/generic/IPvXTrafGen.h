@@ -29,6 +29,8 @@
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 /**
  * IP traffic generator application. See NED for more info.
  */
@@ -80,6 +82,9 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     IPvXTrafGen();
     virtual ~IPvXTrafGen();
 };
+
+} //namespace
+
 
 #endif
 

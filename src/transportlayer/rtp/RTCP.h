@@ -25,6 +25,8 @@
 #include "IPv4Address.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 
 //Forward declarations:
 class RTCPByePacket;
@@ -244,5 +246,8 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     //statistics
     static simsignal_t rcvdPkSignal;
 };
+
+} //namespace
+
 
 #endif

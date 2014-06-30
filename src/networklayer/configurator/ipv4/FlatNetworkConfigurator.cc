@@ -23,6 +23,8 @@
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
 
+using namespace inet;
+
 typedef cTopology WeightedTopology;
 
 

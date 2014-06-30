@@ -20,6 +20,8 @@
 
 #include "IPrintableObject.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -34,5 +36,8 @@ class INET_API INoise : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

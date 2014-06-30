@@ -22,6 +22,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 // Direction of frame travel on bus; also used as selfmessage kind
 #define UPSTREAM        0
 #define DOWNSTREAM      1
@@ -69,6 +71,9 @@ class INET_API EtherBus : public cSimpleModule, cListener
 
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
+
+} //namespace
+
 
 #endif
 

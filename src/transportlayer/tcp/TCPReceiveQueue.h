@@ -23,6 +23,8 @@
 
 #include "TCPConnection.h"
 
+namespace inet {
+
 
 class TCPSegment;
 class TCPCommand;
@@ -121,5 +123,8 @@ class INET_API TCPReceiveQueue : public cObject
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32 getFirstSeqNo() = 0;
 };
+
+} //namespace
+
 
 #endif

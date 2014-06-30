@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * A cDatarateChannel extended with throughput calculation. Values
  * get displayed on the link, using the connection's "t=" display
@@ -108,5 +110,8 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
      */
     virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
 };
+
+} //namespace
+
 
 #endif

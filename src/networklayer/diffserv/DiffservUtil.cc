@@ -113,7 +113,7 @@ int parseProtocol(const char *attrValue, const char *attrName)
     if (isdigit(*attrValue))
         return parseIntAttribute(attrValue, attrName);
     if (!protocolEnum)
-        protocolEnum = cEnum::get("IPProtocolId");
+        protocolEnum = cEnum::get("inet::IPProtocolId");
     char name[20];
     strcpy(name, "IP_PROT_");
     char *dest;
@@ -136,7 +136,7 @@ int parseDSCP(const char *attrValue, const char *attrName)
         return dscp;
     }
     if (!dscpEnum)
-        dscpEnum = cEnum::get("DSCP");
+        dscpEnum = cEnum::get("inet::DSCP");
     char name[20];
     strcpy(name, "DSCP_");
     const char *src;
@@ -171,7 +171,7 @@ void parseDSCPs(const char *attrValue, const char *attrName, std::vector<int> &r
 std::string dscpToString(int dscp)
 {
     if (!dscpEnum)
-        dscpEnum = cEnum::get("DSCP");
+        dscpEnum = cEnum::get("inet::DSCP");
     const char *name = dscpEnum->getStringFor(dscp);
     if (name)
     {

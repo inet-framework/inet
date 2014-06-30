@@ -18,6 +18,8 @@
 
 #include "PositionTable.h"
 
+using namespace inet;
+
 static double const NaN = 0.0 / 0.0;
 
 std::vector<Address> PositionTable::getAddresses() const {

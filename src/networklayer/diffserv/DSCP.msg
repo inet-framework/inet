@@ -21,6 +21,8 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
+
 //
 // DiffServ code points.
 //

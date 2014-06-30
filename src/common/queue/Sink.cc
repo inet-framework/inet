@@ -17,6 +17,8 @@
 
 #include "Sink.h"
 
+using namespace inet;
+
 
 Define_Module(Sink);
 

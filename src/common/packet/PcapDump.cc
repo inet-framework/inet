@@ -40,6 +40,8 @@
 #include "IPv6Serializer.h"
 #endif
 
+using namespace inet;
+
 
 #define MAXBUFLENGTH 65536
 

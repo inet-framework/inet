@@ -18,6 +18,8 @@
 
 #include "StationaryMobility.h"
 
+using namespace inet;
+
 
 Define_Module(StationaryMobility);
 

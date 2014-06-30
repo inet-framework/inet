@@ -26,6 +26,8 @@
 #include "MACBase.h"
 #include "TxNotifDetails.h"
 
+namespace inet {
+
 class InterfaceEntry;
 class IPassiveQueue;
 
@@ -58,5 +60,8 @@ class INET_API Loopback : public MACBase
     virtual void handleMessage(cMessage *msg);
     virtual void updateDisplayString();
 };
+
+} //namespace
+
 
 #endif

@@ -24,6 +24,8 @@
 #include "INETDefs.h"
 #include "SCTPMessage_m.h"
 
+namespace inet {
+
 /**
  * Represents a SCTP Message. More info in the SCTPMessage.msg file
  * (and the documentation generated from it).
@@ -207,4 +209,7 @@ class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
         */
         virtual cPacket* removeAsconfResponse();
 };
+} //namespace
+
+
 #endif

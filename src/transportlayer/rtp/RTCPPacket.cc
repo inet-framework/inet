@@ -3,6 +3,8 @@
 
 #include "RTCPPacket.h"
 
+using namespace inet;
+
 
 Register_Class(RTCPPacket);
 

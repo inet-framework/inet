@@ -20,6 +20,8 @@ simple TestApp
 namespace diffserv_dscpmarker_1
 {
 
+using namespace inet;
+
 class INET_API TestApp : public cSimpleModule
 {
     std::ofstream out;

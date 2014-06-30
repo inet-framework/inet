@@ -19,6 +19,8 @@
 
 #include "Ieee8021dInterfaceData.h"
 
+using namespace inet;
+
 Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
     priority = 0;

@@ -24,6 +24,8 @@
 
 #include "StationaryMobility.h"
 
+namespace inet {
+
 
 /**
  * @brief Mobility model which places all hosts at constant distances
@@ -41,5 +43,8 @@ class INET_API StaticGridMobility : public StationaryMobility
   public:
     StaticGridMobility() {};
 };
+
+} //namespace
+
 
 #endif

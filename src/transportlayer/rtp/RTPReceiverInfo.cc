@@ -21,6 +21,8 @@
 #include "reports.h"
 #include "RTPPacket.h"
 
+using namespace inet;
+
 
 Register_Class(RTPReceiverInfo);
 

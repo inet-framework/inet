@@ -26,6 +26,8 @@
 #define stdstringValue()  s
 #endif
 
+using namespace inet;
+
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
     return classes.getInstance()->lookup(argv[0].stringValue()) != NULL;

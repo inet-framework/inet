@@ -4,4 +4,6 @@
 
 #include <Quaternion.h>
 
+using namespace inet;
+
 const Quaternion Quaternion::IDENTITY = Quaternion();

@@ -22,10 +22,10 @@
 
 #include "INETDefs.h"
 
+namespace inet {
 
+namespace OPP_Global {
 
-namespace OPP_Global
-{
   /**
    *  Converts an integer to string.
    */
@@ -62,7 +62,10 @@ namespace OPP_Global
    * The limit is 1024 chars.
    */
   std::string vstringf(const char *fmt, va_list& args);
-}
+
+} // namespace OPP_Global
+
+} // namespace inet
 
 #endif
 

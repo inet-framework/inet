@@ -32,6 +32,8 @@
 #include "Address.h"
 #include "WiseRouteDatagram.h"
 
+namespace inet {
+
 /**
  * @brief Wiseroute is a simple loop-free routing algorithm that
  * builds a routing tree from a central network point. It is especially
@@ -225,5 +227,8 @@ protected:
      */
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+
+} //namespace
+
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "PropagationBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -34,5 +36,8 @@ class INET_API ImmediatePropagation : public PropagationBase
 };
 
 }
+
+} //namespace
+
 
 #endif

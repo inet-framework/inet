@@ -25,6 +25,8 @@
 #include "Ieee80211Primitives_m.h"
 #include "InterfaceTable.h"
 
+namespace inet {
+
 
 /**
  * Used in 802.11 infrastructure mode: in a station (STA), this module
@@ -101,6 +103,9 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     // utility method, for debugging
     virtual void dumpAPList(Ieee80211Prim_ScanConfirm *resp);
 };
+
+} //namespace
+
 
 #endif
 

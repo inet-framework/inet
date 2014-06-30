@@ -33,6 +33,8 @@
 #include "IPv6Tunneling.h"
 #include "MobilityHeader.h" // for HAOpt & RH2
 
+namespace inet {
+
 // Foreign declarations:
 class BindingCache;
 class BindingUpdate;
@@ -560,6 +562,9 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     void handleTokenExpiry(cMessage* msg);
 };
+
+} //namespace
+
 
 #endif //__XMIPV6_H__
 

@@ -18,6 +18,8 @@
 
 #include "TCPIPchecksum.h"
 
+using namespace inet;
+
 //#if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 //#include <netinet/in.h>  // htonl, ntohl, ...
 //#endif

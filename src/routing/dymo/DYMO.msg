@@ -21,13 +21,13 @@ cplusplus {{
 #include "DYMOdefs.h"
 }}
 
-class noncobject Address;
+namespace inet::DYMO;
+
+class noncobject inet::Address;
 
 class noncobject DYMOSequenceNumber;
 
 class noncobject DYMOMetricType;
-
-namespace DYMO;
 
 //
 // classes

@@ -28,6 +28,8 @@
 #include "IPassiveQueue.h"
 #include "opp_utils.h"
 
+using namespace inet;
+
 
 Define_Module(IdealMac);
 

@@ -24,6 +24,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 class SCTPConnectInfo;
 
 /**
@@ -124,6 +126,9 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         SCTPPeer();
         ~SCTPPeer();
 };
+
+} //namespace
+
 
 #endif
 

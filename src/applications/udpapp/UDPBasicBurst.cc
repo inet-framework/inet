@@ -26,9 +26,11 @@
 #include "ModuleAccess.h"
 
 
+namespace inet {
+
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("ChooseDestAddrMode");
-    if (!e) enums.getInstance()->add(e = new cEnum("ChooseDestAddrMode"));
+    cEnum *e = cEnum::find("inet::ChooseDestAddrMode");
+    if (!e) enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
     e->insert(UDPBasicBurst::ONCE, "once");
     e->insert(UDPBasicBurst::PER_BURST, "perBurst");
     e->insert(UDPBasicBurst::PER_SEND, "perSend");
@@ -85,7 +87,7 @@ void UDPBasicBurst::initialize(int stage)
 
         destAddrRNG = par("destAddrRNG");
         const char *addrModeStr = par("chooseDestAddrMode").stringValue();
-        int addrMode = cEnum::get("ChooseDestAddrMode")->lookup(addrModeStr);
+        int addrMode = cEnum::get("inet::ChooseDestAddrMode")->lookup(addrModeStr);
         if (addrMode == -1)
             throw cRuntimeError("Invalid chooseDestAddrMode: '%s'", addrModeStr);
         chooseDestAddrMode = (ChooseDestAddrMode)addrMode;
@@ -356,4 +358,6 @@ void UDPBasicBurst::handleNodeCrash()
         cancelEvent(timerNext);
     activeBurst = false;
 }
+
+} // namespace inet
 

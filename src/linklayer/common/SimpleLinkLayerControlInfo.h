@@ -22,6 +22,8 @@
 #include "IMACProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo_m.h"
 
+namespace inet {
+
 /**
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
@@ -42,5 +44,8 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
     virtual int getInterfaceId() const { return SimpleLinkLayerControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { SimpleLinkLayerControlInfo_Base::setInterfaceId(interfaceId); }
 };
+
+} //namespace
+
 
 #endif

@@ -17,6 +17,8 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "FindModule.h"
 
+using namespace inet;
+
 Define_Module( LMacLayer )
 
 #define myId (getParentModule()->getParentModule()->getIndex())

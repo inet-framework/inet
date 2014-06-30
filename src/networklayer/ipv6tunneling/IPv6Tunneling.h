@@ -32,6 +32,8 @@
 #include "IPv6Address.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 // Foreign declarations:
 class IInterfaceTable;
 class IPv6Datagram;
@@ -265,5 +267,8 @@ class INET_API IPv6Tunneling : public cSimpleModule, public ILifecycle
          */
         inline void resetVIfIndex() { if ( tunnels.size() == 0 ) vIfIndexTop = INT_MAX; };
 };
+
+} //namespace
+
 
 #endif

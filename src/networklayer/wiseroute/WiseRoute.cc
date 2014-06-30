@@ -37,6 +37,8 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 
+using namespace inet;
+
 using std::make_pair;
 
 Define_Module(WiseRoute);

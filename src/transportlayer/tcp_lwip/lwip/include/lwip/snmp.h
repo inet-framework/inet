@@ -37,6 +37,8 @@
 #include "lwip/netif.h"
 #include "lwip/lwip_udp.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -360,5 +362,8 @@ void snmp_get_snmpenableauthentraps(u8_t *value);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_SNMP_H__ */

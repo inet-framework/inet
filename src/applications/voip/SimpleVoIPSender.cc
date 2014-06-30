@@ -23,6 +23,8 @@
 #include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
+using namespace inet;
+
 Define_Module(SimpleVoIPSender);
 
 SimpleVoIPSender::SimpleVoIPSender()

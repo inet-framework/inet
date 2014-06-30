@@ -20,6 +20,8 @@
 
 #include "IArrival.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -63,5 +65,8 @@ class INET_API Arrival : public virtual IArrival
 };
 
 }
+
+} //namespace
+
 
 #endif

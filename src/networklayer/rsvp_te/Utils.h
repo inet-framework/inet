@@ -21,11 +21,13 @@
 
 #include "IntServ.h"
 
-EroVector routeToEro(IPAddressVector rro);
-std::string vectorToString(IPAddressVector vec);
-std::string vectorToString(IPAddressVector vec, const char *delim);
-std::string vectorToString(EroVector vec);
-std::string vectorToString(EroVector vec, const char *delim);
+namespace inet {
+
+EroVector routeToEro(const IPAddressVector& rro);
+std::string vectorToString(const IPAddressVector& vec);
+std::string vectorToString(const IPAddressVector& vec, const char *delim);
+std::string vectorToString(const EroVector& vec);
+std::string vectorToString(const EroVector& vec, const char *delim);
 
 /**
  * TODO documentation
@@ -58,6 +60,9 @@ int find(const EroVector& ERO, IPv4Address node);
 cModule *getPayloadOwner(cPacket *msg);
 
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
+
+
+} //namespace
 
 
 #endif

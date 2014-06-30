@@ -42,6 +42,8 @@ extern "C" {
 
 #include <stddef.h> /* for size_t */
 
+namespace inet {
+
 typedef size_t mem_size_t;
 
 /* aliases for C library malloc() */
@@ -103,5 +105,8 @@ void  mem_free(void *mem);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_MEM_H__ */

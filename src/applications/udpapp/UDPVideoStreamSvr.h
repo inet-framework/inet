@@ -26,6 +26,8 @@
 #include "ApplicationBase.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 
 /**
  * Stream VBR video streams to clients.
@@ -84,5 +86,8 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     UDPVideoStreamSvr();
     virtual ~UDPVideoStreamSvr();
 };
+
+} //namespace
+
 
 #endif

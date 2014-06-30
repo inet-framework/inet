@@ -17,6 +17,8 @@
 
 #include "EtherHub.h"
 
+using namespace inet;
+
 
 Define_Module(EtherHub);
 

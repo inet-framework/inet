@@ -36,6 +36,8 @@
 
 #include "lwip/netif.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -46,6 +48,9 @@ void slipif_poll(struct netif *netif);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif
 

@@ -21,6 +21,8 @@
 
 #include "BonnMotionFileCache.h"
 
+using namespace inet;
+
 
 const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
 {

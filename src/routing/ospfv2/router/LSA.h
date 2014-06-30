@@ -25,6 +25,8 @@
 #include "OSPFcommon.h"
 #include "OSPFPacket_m.h"
 
+namespace inet {
+
 
 namespace OSPF {
 
@@ -198,6 +200,9 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
+
+} //namespace
+
 
 #endif // __LSA_HPP__
 

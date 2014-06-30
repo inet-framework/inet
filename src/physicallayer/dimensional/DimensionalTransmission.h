@@ -22,6 +22,8 @@
 #include "MappingBase.h"
 #include "MappingUtils.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -41,5 +43,8 @@ class INET_API DimensionalTransmission : public FlatTransmissionBase
 };
 
 }
+
+} //namespace
+
 
 #endif

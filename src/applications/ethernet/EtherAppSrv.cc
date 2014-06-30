@@ -26,6 +26,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 Define_Module(EtherAppSrv);
 
 simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");

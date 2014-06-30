@@ -17,6 +17,8 @@
 
 #include "ScalarReception.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void ScalarReception::printToStream(std::ostream &stream) const

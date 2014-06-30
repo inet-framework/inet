@@ -21,6 +21,8 @@
 #include "IPrintableObject.h"
 #include "IMobility.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -54,5 +56,8 @@ class INET_API IAntenna : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

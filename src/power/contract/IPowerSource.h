@@ -20,6 +20,8 @@
 
 #include "IPowerConsumer.h"
 
+namespace inet {
+
 /**
  * This purely virtual interface provides an abstraction for different power sources.
  *
@@ -74,5 +76,8 @@ class INET_API IPowerSource
      */
     virtual void setPowerConsumption(int id, double consumedPower) = 0;
 };
+
+} //namespace
+
 
 #endif

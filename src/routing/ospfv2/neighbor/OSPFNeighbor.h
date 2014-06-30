@@ -25,6 +25,8 @@
 #include "OSPFPacket_m.h"
 #include "OSPFTimer.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class NeighborState;
@@ -210,6 +212,9 @@ inline bool operator!=(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPack
 {
     return (!(leftID == rightID));
 }
+
+} //namespace
+
 
 #endif // __INET_OSPFNEIGHBOR_H
 

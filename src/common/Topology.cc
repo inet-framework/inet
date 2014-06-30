@@ -26,6 +26,8 @@
 #include "PatternMatcher.h"
 #include "stlutils.h"
 
+using namespace inet;
+
 
 Register_Class(Topology);
 

@@ -14,6 +14,8 @@
 
 #include "ByteArrayMessage.h"
 
+using namespace inet;
+
 
 void ByteArrayMessage::setDataFromBuffer(const void *ptr, unsigned int length)
 {

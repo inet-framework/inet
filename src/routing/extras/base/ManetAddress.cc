@@ -18,6 +18,8 @@
 
 #include "ManetAddress.h"
 
+using namespace inet;
+
 
 void ManetNetworkAddress::set(IPv4Address addr, short unsigned int masklen)
 {

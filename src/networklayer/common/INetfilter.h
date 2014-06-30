@@ -22,6 +22,8 @@
 #include "InterfaceEntry.h"
 #include "INetworkDatagram.h"
 
+namespace inet {
+
 /**
  * TODO
  */
@@ -99,5 +101,8 @@ class INET_API INetfilter {
      */
     virtual void reinjectQueuedDatagram(const INetworkDatagram * datagram) = 0;
 };
+
+} //namespace
+
 
 #endif

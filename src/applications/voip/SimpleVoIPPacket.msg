@@ -16,6 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+namespace inet;
+
 //
 // Represents a voice packet used by SimpleVoIPSender / SimpleVoIPReceiver 
 //

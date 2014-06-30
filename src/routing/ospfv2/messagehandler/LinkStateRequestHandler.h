@@ -20,6 +20,8 @@
 
 #include "IMessageHandler.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class LinkStateRequestHandler : public IMessageHandler {
@@ -30,6 +32,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_LINKSTATEREQUESTHANDLER_H
 

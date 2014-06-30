@@ -42,6 +42,8 @@
 
 #include "arch/cc.h"
 
+namespace inet {
+
 /** Temporary: define format string for size_t if not defined in cc.h */
 #ifndef SZT_F
 #define SZT_F U32_F
@@ -229,5 +231,8 @@ extern int errno;
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_ARCH_H__ */

@@ -25,6 +25,8 @@
 
 #include "FWMath.h"
 
+namespace inet {
+
 
 /**
  * @brief Class for storing 3D coordinates.
@@ -253,5 +255,8 @@ inline std::string Coord::info() const {
     os << *this;
     return os.str();
 }
+
+} //namespace
+
 
 #endif

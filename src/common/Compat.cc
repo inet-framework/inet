@@ -22,6 +22,8 @@
 cLogStream cLogStream::globalStream;
 #endif
 
+using namespace inet;
+
 #ifdef _MSC_VER
 
 //

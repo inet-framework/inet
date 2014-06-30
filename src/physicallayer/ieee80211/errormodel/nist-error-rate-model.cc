@@ -20,6 +20,8 @@
 
 #include "nist-error-rate-model.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 NistErrorRateModel::NistErrorRateModel()

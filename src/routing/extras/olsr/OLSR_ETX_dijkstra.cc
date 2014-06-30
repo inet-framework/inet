@@ -29,6 +29,8 @@
 #include <OLSR_ETX_dijkstra.h>
 #include <OLSR_ETX.h>
 
+using namespace inet;
+
 
 Dijkstra::Dijkstra()
 {

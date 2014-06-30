@@ -21,6 +21,11 @@ cplusplus {{
 #include <iostream>
 #include "IPv6Address.h"
 #include "IPProtocolId_m.h"
+}}
+
+namespace inet;
+
+cplusplus {{
 class IPv6ExtensionHeader;
 typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);

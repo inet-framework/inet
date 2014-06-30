@@ -20,6 +20,8 @@
 
 #include "GaussMarkovMobility.h"
 
+using namespace inet;
+
 
 Define_Module(GaussMarkovMobility);
 

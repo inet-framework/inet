@@ -17,6 +17,8 @@
 
 #include "MessageChecker.h"
 
+using namespace inet;
+
 Define_Module(MessageChecker);
 
 

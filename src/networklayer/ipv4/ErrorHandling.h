@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * Error Handling: print out received error
@@ -40,6 +42,9 @@ class INET_API ErrorHandling: public cSimpleModule
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
+
+} //namespace
+
 
 #endif
 

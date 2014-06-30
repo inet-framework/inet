@@ -24,6 +24,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 class SCTPAssociation;
 
 /**
@@ -113,5 +115,8 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         SCTPClient();
         virtual ~SCTPClient();
 };
+
+} //namespace
+
 
 #endif

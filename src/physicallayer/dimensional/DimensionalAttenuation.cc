@@ -20,6 +20,8 @@
 #include "DimensionalReception.h"
 #include "IRadioMedium.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(DimensionalAttenuation);

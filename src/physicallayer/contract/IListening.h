@@ -21,6 +21,8 @@
 #include "Coord.h"
 #include "IPrintableObject.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -42,5 +44,8 @@ class INET_API IListening : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

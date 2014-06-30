@@ -62,6 +62,8 @@
 
 #include <string.h>
 
+using namespace inet;
+
 static
 const char *tcp_state_str[] = {
   "CLOSED",

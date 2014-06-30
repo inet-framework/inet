@@ -50,6 +50,8 @@
 #include "INETDefs.h"
 #include "Coord.h"
 
+namespace inet {
+
 
 /**
  * @brief Class to provide spatial and temporal correlation in the posture selection process of the MoBAN mobility model.
@@ -201,5 +203,8 @@ class INET_API PostureTransition {
     /** @brief Gets a time and location, and returns the corresponding Markov transition matrix. */
     double** getMatrix(simtime_t, Coord);
 };
+
+} //namespace
+
 
 #endif

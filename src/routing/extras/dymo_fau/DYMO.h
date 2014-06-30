@@ -45,6 +45,8 @@
 #include "DYMO_Timeout_m.h"
 #include "DYMO_TokenBucket.h"
 
+namespace inet {
+
 //===========================================================================================
 // class QueueElement: defines a data type for all queued data messages
 //===========================================================================================
@@ -269,6 +271,9 @@ class DYMOFau : public ManetRoutingBase
     void packetFailed(const IPv4Datagram *dgram);
     void rescheduleTimer();
 };
+
+} //namespace
+
 
 #endif
 

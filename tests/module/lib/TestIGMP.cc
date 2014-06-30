@@ -9,6 +9,8 @@
 #include "IIPv4RoutingTable.h"
 #include "IGMPv2.h"
 
+namespace inet {
+
 enum StateKind
 {
     HOST_GROUP_STATE = 0x01,
@@ -340,3 +342,4 @@ void TestIGMP::dumpMulticastGroups(const char* name, const char *ifname, IPv4Add
   out << ">\n";
 }
 
+} // namespace inet

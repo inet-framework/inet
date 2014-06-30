@@ -20,8 +20,11 @@
 cplusplus {{
 #include "Ieee80211MgmtFrames_m.h"
 }}
-
 class noncobject MACAddress;
+
+namespace inet;
+
+
 
 class noncobject Ieee80211SupportedRatesElement;
 

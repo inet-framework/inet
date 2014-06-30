@@ -19,6 +19,8 @@
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 
+using namespace inet;
+
 void SCTPAssociation::retransmitReset()
 {
     SCTPMessage *sctpmsg = new SCTPMessage();

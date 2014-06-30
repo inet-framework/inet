@@ -26,6 +26,8 @@
 #include "ModuleIdAddress.h"
 #include "ModulePathAddress.h"
 
+namespace inet {
+
 class IAddressType;
 
 /**
@@ -107,5 +109,8 @@ inline std::ostream& operator<<(std::ostream& os, const Address& address)
 {
     return os << address.str();
 }
+
+} //namespace
+
 
 #endif

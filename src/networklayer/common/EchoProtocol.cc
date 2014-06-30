@@ -21,6 +21,8 @@
 #include "INetworkProtocolControlInfo.h"
 #include "PingPayload_m.h"
 
+using namespace inet;
+
 Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)

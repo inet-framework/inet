@@ -52,6 +52,8 @@
 #include "lwip/udp.h"
 #include "netif/etharp.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -112,5 +114,8 @@ void autoip_network_changed(struct netif *netif);
 #endif
 
 #endif /* LWIP_AUTOIP */
+
+} //namespace
+
 
 #endif /* __LWIP_AUTOIP_H__ */

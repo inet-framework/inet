@@ -24,6 +24,8 @@ const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPath
 }}
 
 
+namespace inet;
+
 class BGPHeader;
 
 class noncobject BGPUpdatePathAttributesOrigin;

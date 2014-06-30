@@ -20,4 +20,6 @@
 
 #include "INETDefs.h"
 
+using namespace inet;
+
 // nothing to see here, please move along

@@ -20,6 +20,8 @@
 
 #include "ListeningBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -32,5 +34,8 @@ class INET_API IdealListening : public ListeningBase
 };
 
 }
+
+} //namespace
+
 
 #endif

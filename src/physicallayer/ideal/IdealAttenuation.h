@@ -20,6 +20,8 @@
 
 #include "IAttenuation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -31,5 +33,8 @@ class INET_API IdealAttenuation : public cModule, public IAttenuation
 };
 
 }
+
+} //namespace
+
 
 #endif

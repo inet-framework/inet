@@ -29,6 +29,8 @@
 #include "IPv6InterfaceData.h"
 #include "NodeOperations.h"
 
+namespace inet {
+
 Define_Module(IPv6RoutingTable);
 
 std::ostream& operator<<(std::ostream& os, const IPv6Route& e)
@@ -964,4 +966,6 @@ bool IPv6RoutingTable::handleOperationStage(LifecycleOperation *operation, int s
                 removeRoute(routeList[0]);
     }
     return true;
+}
+
 }

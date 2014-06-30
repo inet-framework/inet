@@ -81,9 +81,9 @@ module MultiNetworkLayer like INetworkLayer
 {
     parameters:
         @display("i=block/fork");
-        bool enableIPv4 = default(haveClass("IPv4RoutingTable"));
-        bool enableIPv6 = default(haveClass("IPv6RoutingTable"));
-        bool enableGeneric = default(haveClass("GenericRoutingTable"));
+        bool enableIPv4 = default(haveClass("inet::IPv4RoutingTable"));
+        bool enableIPv6 = default(haveClass("inet::IPv6RoutingTable"));
+        bool enableGeneric = default(haveClass("inet::GenericRoutingTable"));
         string interfaceTableModule;
         *.interfaceTableModule = default(absPath(interfaceTableModule));
         string routingTableModule;

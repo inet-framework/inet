@@ -49,6 +49,8 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 
 Define_Module(TCP_lwIP);
 
@@ -784,4 +786,6 @@ bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, ID
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+} // namespace inet
 

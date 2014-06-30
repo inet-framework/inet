@@ -25,6 +25,8 @@
 #include "Address.h"
 #include "Coord.h"
 
+namespace inet {
+
 /**
  * This class provides a mapping between node addresses and their positions.
  */
@@ -50,5 +52,8 @@ class INET_API PositionTable {
 
         simtime_t getOldestPosition() const;
 };
+
+} //namespace
+
 
 #endif

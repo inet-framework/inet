@@ -24,7 +24,10 @@ typedef int (*xmit_fct_t) (struct dsr_pkt *);
 #endif
 #else
 #include "dsr-uu-omnetpp.h"
+
+namespace inet {
 typedef void (DSRUU::*xmit_fct_t) (struct dsr_pkt *);
+} // namespace
 #endif /* OMNETPP */
 
 #endif              /* NO_GLOBALS */
@@ -45,5 +48,6 @@ void send_buf_cleanup(void);
 void send_buf_timeout(unsigned long data);
 
 #endif              /* NO_DECLS */
+
 
 #endif              /* _SEND_BUF_H */

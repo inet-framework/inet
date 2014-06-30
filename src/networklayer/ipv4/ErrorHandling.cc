@@ -24,6 +24,8 @@
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
 
+using namespace inet;
+
 
 Define_Module(ErrorHandling);
 

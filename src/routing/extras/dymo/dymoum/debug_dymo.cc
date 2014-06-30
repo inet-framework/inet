@@ -38,6 +38,8 @@
 extern int debug, daemonize;
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS dlog_init()
 {
 #ifndef NS_PORT

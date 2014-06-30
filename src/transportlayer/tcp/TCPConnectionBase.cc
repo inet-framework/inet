@@ -28,6 +28,8 @@
 #include "TCPAlgorithm.h"
 #include "TCPSACKRexmitQueue.h"
 
+using namespace inet;
+
 
 TCPStateVariables::TCPStateVariables()
 {

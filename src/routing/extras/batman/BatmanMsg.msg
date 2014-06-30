@@ -33,6 +33,7 @@ cplusplus {{
 
 }}
 
+namespace inet;
 
 class noncobject IPv4Address;
 class noncobject Address;

@@ -29,7 +29,6 @@ extern atomic_t num_pkts;
 #include <netinet/in.h>
 #endif              /* __KERNEL__ */
 
-
 #ifdef DEBUG
 #undef DEBUG
 #define DEBUG_PROC
@@ -98,4 +97,6 @@ void __exit dbg_cleanup(void);
 #endif
 
 #endif
+
+
 #endif              /* _DEBUG_H */

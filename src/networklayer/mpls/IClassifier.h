@@ -20,6 +20,8 @@
 #include "IPv4Datagram.h"
 #include "LIBTable.h"
 
+namespace inet {
+
 /**
  * This is an abstract interface for packet classifiers in MPLS ingress routers.
  * The MPLS module holds a pointer to an IClassifier object, and uses it to
@@ -48,5 +50,8 @@ class INET_API IClassifier
      */
      virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
 };
+
+} //namespace
+
 
 #endif

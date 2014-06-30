@@ -51,6 +51,8 @@ void route_delete_timeout(void *arg);
 
 #endif
 
+using namespace inet;
+
 /* These are timeout functions which are called when timers expire... */
 
 void NS_CLASS route_discovery_timeout(void *arg)

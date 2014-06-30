@@ -33,6 +33,8 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 HttpBrowserBase::HttpBrowserBase()
 {
     m_bDisplayMessage = true;

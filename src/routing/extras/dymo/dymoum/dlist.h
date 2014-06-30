@@ -23,6 +23,8 @@
 
 #include "defs_dymo.h"
 
+namespace inet {
+
 /* Doubly linked list based on the Linux kernel implementation */
 
 #define DLIST_SUCCESS   0
@@ -126,5 +128,8 @@ static inline int dlist_empty(const struct dlist_head *head)
 #define dlist_for_each_safe(pos, n, head) \
         for (pos = (head)->next, n = pos->next; pos != (head); \
                 pos = n, n = pos->next)
+
+} //namespace
+
 
 #endif  /* __DLIST_H__ */

@@ -29,6 +29,8 @@
 #include "PatternMatcher.h"
 #include "Topology.h"
 
+namespace inet {
+
 
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
@@ -140,5 +142,8 @@ public:
      */
     virtual void configureInterface(InterfaceEntry * interfaceEntry);
 };
+
+} //namespace
+
 
 #endif

@@ -19,6 +19,7 @@ simple TestApp
 #include "IPv6Datagram.h"
 #include "UDPPacket.h"
 
+using namespace inet;
 namespace diffserv_mfclassifier_1
 {
 

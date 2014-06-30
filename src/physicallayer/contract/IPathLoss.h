@@ -20,6 +20,8 @@
 
 #include "IPrintableObject.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -39,5 +41,8 @@ class INET_API IPathLoss : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

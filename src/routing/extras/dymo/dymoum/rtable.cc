@@ -44,6 +44,8 @@
 #include <arpa/inet.h>
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 #ifndef MAPROUTINGTABLE
 
 void NS_CLASS rtable_init()

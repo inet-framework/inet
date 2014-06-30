@@ -31,6 +31,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * TCP/UDP port numbers
@@ -349,6 +351,9 @@ inline void doUnpacking(cCommBuffer *buf, IPv4Address& addr)
 {
     int32 d; buf->unpack(d); addr.set(d);
 }
+
+} //namespace
+
 
 #endif
 

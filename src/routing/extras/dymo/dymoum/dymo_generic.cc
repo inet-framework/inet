@@ -41,6 +41,8 @@
 #endif
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS generic_process_message(DYMO_element *e,struct in_addr src, u_int32_t ifindex)
 {
     // Generic preprocessing

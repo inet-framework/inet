@@ -32,6 +32,8 @@
 #include "DYMORouteData.h"
 #include "DYMO_m.h"
 
+namespace inet {
+
 DYMO_NAMESPACE_BEGIN
 
 /**
@@ -222,5 +224,8 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
 };
 
 DYMO_NAMESPACE_END
+
+} //namespace
+
 
 #endif

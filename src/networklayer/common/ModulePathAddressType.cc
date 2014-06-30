@@ -17,4 +17,6 @@
 
 #include "ModulePathAddressType.h"
 
+using namespace inet;
+
 ModulePathAddressType ModulePathAddressType::INSTANCE;

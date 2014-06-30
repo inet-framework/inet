@@ -47,6 +47,8 @@ static struct timer hello_timer;
 
 #endif
 
+using namespace inet;
+
 /* #define DEBUG_HELLO */
 
 

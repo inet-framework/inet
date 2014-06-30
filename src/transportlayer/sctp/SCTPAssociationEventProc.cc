@@ -23,6 +23,8 @@
 #include "SCTPCommand_m.h"
 #include "SCTPAlgorithm.h"
 
+using namespace inet;
+
 //
 // Event processing code
 //

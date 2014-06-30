@@ -35,6 +35,8 @@
 #include "ModuleAccess.h"
 #include "TraCIScenarioManager.h"
 
+namespace inet {
+
 /**
  * @brief
  * Used in modules created by the TraCIScenarioManager.
@@ -197,5 +199,8 @@ class INET_API TraCIMobility : public MobilityBase
 };
 
 #endif
+} //namespace
+
+
 #endif
 

@@ -28,6 +28,8 @@
 #include "neigh.h"
 #include "maint-buf.h"
 
+using namespace inet;
+
 struct dsr_ack_opt *dsr_ack_opt_add(char *buf, int len, struct in_addr src,
                                     struct in_addr dst, unsigned short id)
 {

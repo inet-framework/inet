@@ -48,6 +48,8 @@
 #include "LineSegmentsMobilityBase.h"
 #include "MoBANCoordinator.h"
 
+namespace inet {
+
 
 /**
  * @brief This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN.
@@ -97,5 +99,8 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
 
     void setMoBANParameters(Coord referencePoint, double radius, double speed);
 };
+
+} //namespace
+
 
 #endif

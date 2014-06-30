@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * Abstract base class for single-server queues. Contains special
@@ -101,6 +103,9 @@ class INET_API AbstractQueue : public cSimpleModule
     //@}
 
 };
+
+} //namespace
+
 
 #endif
 

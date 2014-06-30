@@ -11,8 +11,10 @@
 #include "dsr.h"
 #include "dsr-srt.h"
 
+
 #ifndef NO_GLOBALS
 
+namespace inet {
 struct dsr_rrep_opt
 {
     u_int8_t type;
@@ -35,6 +37,8 @@ struct dsr_rrep_opt
  * the last source route hop (which is the destination) */
 #define DSR_RREP_ADDRS_LEN(rrep_opt) (rrep_opt->length - 1 - sizeof(struct in_addr))
 
+} //namespace
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS
@@ -49,5 +53,6 @@ int grat_rrep_tbl_init(void);
 void grat_rrep_tbl_cleanup(void);
 
 #endif              /* NO_DECLS */
+
 
 #endif              /* _DSR_RREP */

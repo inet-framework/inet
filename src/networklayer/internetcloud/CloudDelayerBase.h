@@ -25,6 +25,8 @@
 
 #include "INetfilter.h"
 
+namespace inet {
+
 //forward declarations:
 class IPv4;
 
@@ -54,6 +56,9 @@ class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
   protected:
     IPv4 *ipv4Layer;
 };
+
+} //namespace
+
 
 #endif  // __INET_INTERNETCLOUD_CLOUDDELAYERBASE_H
 

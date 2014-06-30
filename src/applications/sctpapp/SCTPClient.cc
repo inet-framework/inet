@@ -25,6 +25,8 @@
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
 
+using namespace inet;
+
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1

@@ -38,6 +38,8 @@
 
 #include "Address.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 //extern "C" {
 #endif
@@ -68,6 +70,7 @@ struct ip_addr2 {
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
+
 #endif
 
 struct netif;
@@ -174,4 +177,7 @@ u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 //}
 #endif
 
+} //namespace
+
 #endif /* __LWIP_IP_ADDR_H__ */
+

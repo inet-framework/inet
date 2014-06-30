@@ -5,6 +5,7 @@ Tests UDPSocket::bind() can not be called more than once on a socket.
 #include "UDPSocket.h"
 #include "UDPControlInfo_m.h"
 
+using namespace inet;
 namespace UDPSocket_2 {
 
 class TestApp : public cSimpleModule
@@ -50,7 +51,7 @@ cmdenv-module-messages = true
 %exitcode: 1
 
 %contains-regex: stdout
-<!> Error in module \(UDP\) SimpleTestNetwork.client.udp .* bind: socket is already bound
+<!> Error in module \(inet::UDP\) SimpleTestNetwork\.client\.udp \(id=\d+\) at event \#\d+, t=0: bind: socket is already bound \(sockId=\d+\).
 %#--------------------------------------------------------------------------------------------------------------
 %# %not-contains: stdout
 %# undisposed object:

@@ -27,6 +27,8 @@
 
 #ifdef WITH_TRACI
 
+namespace inet {
+
 /**
  * @brief
  * Extends the TraCIScenarioManager for use with sumo-launchd.py and SUMO.
@@ -58,6 +60,8 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
 
         virtual void init_traci();
 };
+
+} //namespace
 
 #endif  // WITH_TRACI
 

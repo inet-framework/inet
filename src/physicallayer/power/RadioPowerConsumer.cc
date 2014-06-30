@@ -18,6 +18,8 @@
 #include "RadioPowerConsumer.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 RadioPowerConsumer::RadioPowerConsumer()

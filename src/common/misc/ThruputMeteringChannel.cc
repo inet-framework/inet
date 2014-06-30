@@ -17,6 +17,8 @@
 
 #include "ThruputMeteringChannel.h"
 
+using namespace inet;
+
 Register_Class(ThruputMeteringChannel);
 
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)

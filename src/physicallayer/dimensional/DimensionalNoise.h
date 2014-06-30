@@ -22,6 +22,8 @@
 #include "MappingBase.h"
 #include "MappingUtils.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -43,5 +45,8 @@ class INET_API DimensionalNoise : public FlatNoiseBase
 };
 
 }
+
+} //namespace
+
 
 #endif

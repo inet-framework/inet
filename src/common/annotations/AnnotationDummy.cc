@@ -19,6 +19,8 @@
 
 #include "AnnotationDummy.h"
 
+using namespace inet;
+
 Define_Module(AnnotationDummy);
 
 AnnotationDummy::~AnnotationDummy()

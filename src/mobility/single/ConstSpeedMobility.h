@@ -25,6 +25,8 @@
 
 #include "LineSegmentsMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Moves along a line with constant speed to a randomly chosen target.
@@ -51,5 +53,8 @@ class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
   public:
     ConstSpeedMobility();
 };
+
+} //namespace
+
 
 #endif

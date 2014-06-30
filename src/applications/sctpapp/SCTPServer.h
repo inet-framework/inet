@@ -25,6 +25,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 /**
  * Implements the SCTPServer simple module. See the NED file for more info.
  */
@@ -101,6 +103,9 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
        virtual ~SCTPServer();
        SCTPServer();
 };
+} //namespace
+
+
 #endif
 
 

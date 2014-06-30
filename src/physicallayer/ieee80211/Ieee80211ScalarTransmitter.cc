@@ -24,6 +24,8 @@
 #include "RadioControlInfo_m.h"
 #include "Ieee80211Consts.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(Ieee80211ScalarTransmitter);

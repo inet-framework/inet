@@ -22,7 +22,11 @@ cplusplus {{
 #include "OLSR_ETX_parameter.h"
 #include "Address.h"
 #include <string.h>
+}}
 
+namespace inet;
+
+cplusplus {{
 #ifndef nsaddr_t
 typedef Address nsaddr_t;
 #endif

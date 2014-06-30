@@ -33,6 +33,8 @@
 #include "debug_dsr.h"
 #include "send-buf.h"
 
+using namespace inet;
+
 int NSCLASS dsr_recv(struct dsr_pkt *dp)
 {
     int i = 0, action;

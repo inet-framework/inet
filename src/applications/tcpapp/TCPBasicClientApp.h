@@ -24,6 +24,8 @@
 #include "NodeStatus.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 /**
  * An example request-reply based client application.
  */
@@ -54,5 +56,8 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     TCPBasicClientApp();
     virtual ~TCPBasicClientApp();
 };
+
+} //namespace
+
 
 #endif

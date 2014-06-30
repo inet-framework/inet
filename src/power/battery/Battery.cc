@@ -20,6 +20,8 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(Battery);
 
 Battery::Battery()

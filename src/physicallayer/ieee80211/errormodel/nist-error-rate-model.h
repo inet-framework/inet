@@ -25,6 +25,8 @@
 #include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -61,5 +63,8 @@ private:
 };
 
 }
+
+} //namespace
+
 
 #endif /* NIST_ERROR_RATE_MODEL_H */

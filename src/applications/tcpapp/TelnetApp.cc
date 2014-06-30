@@ -23,6 +23,8 @@
 #include "NodeOperations.h"
 #include "GenericAppMsg_m.h"
 
+using namespace inet;
+
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
 #define MSGKIND_CLOSE    2

@@ -22,7 +22,7 @@ cplusplus {{
 #define ETHERAPP_SRV_SAP  0xf1
 }}
 
-
+namespace inet;
 
 //
 // Request packet sent by ~EtherAppCli. Contains the number of bytes to be

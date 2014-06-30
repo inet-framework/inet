@@ -29,6 +29,8 @@
 #include "RIPPacket_m.h"
 #include "RIPRouting.h"
 
+namespace inet {
+
 Define_Module(RIPRouting);
 
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
@@ -654,7 +656,7 @@ void RIPRouting::sendRoutes(const Address &address, int port, const RIPInterface
 {
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
-    int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMTU() - 40/*IPv6_HEADER_BYTES*/ - UDP_HEADER_BYTES - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
+    int maxEntries = mode == RIPv2 ? 25 : (ripInterface.ie->getMTU() - 40/*IPv6_HEADER_BYTES*/ - 8 /*UDP_HEADER_BYTES*/ - RIP_HEADER_SIZE) / RIP_RTE_SIZE;
 
     RIPPacket *packet = new RIPPacket("RIP response");
     packet->setCommand(RIP_RESPONSE);
@@ -1210,3 +1212,5 @@ bool RIPRouting::isLocalInterfaceRoute(const IRoute *route)
     InterfaceEntry *ie = dynamic_cast<InterfaceEntry*>(route->getSource());
     return ie && !ie->isLoopback();
 }
+
+} // namespace

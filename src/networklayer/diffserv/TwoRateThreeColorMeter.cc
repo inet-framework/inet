@@ -20,6 +20,8 @@
 #include "DiffservUtil.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 using namespace DiffservUtil;
 
 Define_Module(TwoRateThreeColorMeter);

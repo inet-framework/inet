@@ -19,6 +19,8 @@
 #include "LineSegmentsMobilityBase.h"
 #include "FWMath.h"
 
+using namespace inet;
+
 
 LineSegmentsMobilityBase::LineSegmentsMobilityBase()
 {

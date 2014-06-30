@@ -27,6 +27,8 @@
 
 #include "ICMPMessage.h"
 
+namespace inet {
+
 class IPv4Datagram;
 class IPv4ControlInfo;
 class PingPayload;
@@ -77,6 +79,9 @@ class INET_API ICMP : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+
+} //namespace
+
 
 #endif
 

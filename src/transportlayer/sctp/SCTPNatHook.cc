@@ -5,6 +5,8 @@
 #include "IPv4InterfaceData.h"
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 Define_Module(SCTPNatHook);
 
 SCTPNatHook::SCTPNatHook()

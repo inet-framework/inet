@@ -20,6 +20,8 @@
 #include "SCTPQueue.h"
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 Register_Class(SCTPQueue);
 
 

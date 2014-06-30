@@ -24,6 +24,11 @@
 //
 cplusplus {{
 #include "INETDefs.h"
+}}
+
+namespace inet;
+
+cplusplus {{
 const int PPP_OVERHEAD_BYTES = 7;
 }}
 

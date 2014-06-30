@@ -54,6 +54,8 @@ static struct path_table PCH;
 #define INT_MAX 2147483640L   /* Max for 32-bit integer */
 #endif
 
+using namespace inet;
+
 /* LC_TIMER */
 
 struct node_cache

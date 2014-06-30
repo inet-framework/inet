@@ -20,6 +20,8 @@
 
 #include "ILifecycle.h"
 
+namespace inet {
+
 class INET_API OperationalBase : public cSimpleModule, public ILifecycle
 {
   protected:
@@ -49,5 +51,8 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
   public:
     OperationalBase();
 };
+
+} //namespace
+
 
 #endif

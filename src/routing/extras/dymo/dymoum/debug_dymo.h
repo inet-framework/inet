@@ -43,11 +43,11 @@
 #include <arpa/inet.h>
 #else
 #include "compatibility.h"
+
 #endif
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
 /* Open DYMOUM log */
 void dlog_init();
 
@@ -64,7 +64,7 @@ const char *ip2str(Address &ipaddr);
 #else
 char *ip2str(u_int32_t ipaddr);
 #endif
-
 #endif  /* NS_NO_DECLARATIONS */
+
 
 #endif  /* __DEBUG_H__ */

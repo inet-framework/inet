@@ -20,6 +20,8 @@
 
 #include "INoise.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API NoiseBase : public INoise
 };
 
 }
+
+} //namespace
+
 
 #endif

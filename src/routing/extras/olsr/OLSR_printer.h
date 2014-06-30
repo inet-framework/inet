@@ -34,6 +34,8 @@
 #include <packet.h>
 #include <ip.h>
 #include <trace.h>
+
+namespace inet {
 #endif
 
 /// Encapsulates all printing functions for OLSR data structures and messages.
@@ -60,5 +62,8 @@ class OLSR_printer
     static void print_ip_hdr(FILE*, struct hdr_ip*);
 #endif
 };
+
+} //namespace
+
 
 #endif

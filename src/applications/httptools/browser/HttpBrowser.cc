@@ -17,6 +17,8 @@
 
 #include "HttpBrowser.h"
 
+using namespace inet;
+
 Define_Module(HttpBrowser);
 
 HttpBrowser::HttpBrowser()

@@ -32,7 +32,9 @@
 #include <netinet/in.h>
 #else
 #include "compatibility.h"
+
 #endif
+namespace inet {
 
 #ifndef OMNETPP
 #define ROUTE_TIMEOUT       3000
@@ -60,11 +62,11 @@ typedef struct rt_entry
     uint32_t    cost; // without the last node
     uint8_t     rt_hopfix;
 } rtable_entry_t;
-
+} // namespace
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
+//namespace inet{
 /* Routing table */
 rtable_entry_t rtable;
 
@@ -114,7 +116,11 @@ int rtable_expire_timeout(rtable_entry_t *entry);
 /* Expire all entries which use the given next hop and interface */
 int rtable_expire_timeout_all(struct in_addr nxthop_addr, u_int32_t ifindex);
 
+//} //namespace
+
 #endif  /* NS_NO_DECLARATIONS */
+
+
 
 #endif  /* __RTABLE_H__ */
 

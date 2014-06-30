@@ -16,6 +16,8 @@
 //
 #include "HttpRandom.h"
 
+using namespace inet;
+
 std::string rdObject::typeStr()
 {
     switch (m_type)

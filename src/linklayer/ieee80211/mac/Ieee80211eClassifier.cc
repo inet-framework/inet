@@ -36,6 +36,8 @@
   #include "TCPSegment.h"
 #endif
 
+using namespace inet;
+
 Register_Class(Ieee80211eClassifier);
 
 Ieee80211eClassifier::Ieee80211eClassifier()

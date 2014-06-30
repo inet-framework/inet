@@ -25,6 +25,8 @@
 
 #include "Address.h"
 
+namespace inet {
+
 
 class SCTPStatusInfo;
 class SCTP;
@@ -282,6 +284,9 @@ class  INET_API SCTPSocket
 
     void setState(int state) {sockstate = state; };
 };
+
+} //namespace
+
 
 #endif
 

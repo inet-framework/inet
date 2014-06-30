@@ -21,6 +21,8 @@
 #include "SNIRReceiverBase.h"
 #include "IModulation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -71,5 +73,8 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
 };
 
 }
+
+} //namespace
+
 
 #endif

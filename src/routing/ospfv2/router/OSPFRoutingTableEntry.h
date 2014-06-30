@@ -29,6 +29,8 @@
 #include "OSPFcommon.h"
 #include "OSPFPacket_m.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class RoutingTableEntry : public IPv4Route
@@ -93,6 +95,9 @@ public:
 
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry);
+
+} //namespace
+
 
 #endif // __INET_OSPFROUTINGTABLEENTRY_H
 

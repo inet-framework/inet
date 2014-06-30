@@ -36,6 +36,8 @@ To add new streamSchedulers
 #include <list>
 #include <math.h>
 
+using namespace inet;
+
 void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
     uint32 i;

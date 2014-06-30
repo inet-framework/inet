@@ -31,6 +31,8 @@
 #include "UDPPacket.h"
 #include "GPSR_m.h"
 
+namespace inet {
+
 /**
  * This class implements the Greedy Perimeter Stateless Routing for Wireless Networks.
  * The implementation supports both GG and RNG planarization algorithms.
@@ -149,5 +151,8 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         // notification
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+
+} //namespace
+
 
 #endif

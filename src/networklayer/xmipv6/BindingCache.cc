@@ -23,6 +23,8 @@
 
 #include "BindingCache.h"
 
+namespace inet {
+
 
 Define_Module(BindingCache);
 
@@ -143,3 +145,4 @@ int BindingCache::generateKey(int homeToken, int careOfToken, const IPv6Address&
     return homeToken + careOfToken;
 }
 
+} // namespace

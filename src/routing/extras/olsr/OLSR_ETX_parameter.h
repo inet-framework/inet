@@ -31,6 +31,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 #define OLSR_ETX_CAPPROBE_PACKET_SIZE 1000
 #define CAPPROBE_MAX_ARRAY              16
 
@@ -98,5 +100,8 @@ class OLSR_ETX_parameter : public cObject
     inline double&  c_alpha() { return c_alpha_; }
 
 };
+
+} //namespace
+
 
 #endif

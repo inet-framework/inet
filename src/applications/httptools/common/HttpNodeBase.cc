@@ -17,6 +17,8 @@
 
 #include "HttpNodeBase.h"
 
+using namespace inet;
+
 HttpNodeBase::HttpNodeBase()
 {
     m_bDisplayMessage = false;

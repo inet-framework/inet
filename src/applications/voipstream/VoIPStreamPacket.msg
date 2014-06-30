@@ -24,6 +24,8 @@ cplusplus {{
 #include "ByteArrayMessage.h"
 }};
 
+namespace inet;
+
 class ByteArrayMessage;
 
 //

@@ -18,6 +18,8 @@
 #include "HttpBrowserDirect.h"
 #include "HttpServerBase.h"
 
+using namespace inet;
+
 Define_Module(HttpBrowserDirect);
 
 

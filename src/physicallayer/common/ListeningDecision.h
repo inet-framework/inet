@@ -20,6 +20,8 @@
 
 #include "IListeningDecision.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -43,5 +45,8 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
 };
 
 }
+
+} //namespace
+
 
 #endif

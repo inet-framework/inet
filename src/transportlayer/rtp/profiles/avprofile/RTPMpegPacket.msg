@@ -29,6 +29,9 @@
 // @see ~RTPAVProfilePayload32Sender
 // @see ~RTPAVProfilePayload32Receiver
 //
+
+namespace inet;
+
 packet RTPMpegPacket
 {
     int headerLength = 4;

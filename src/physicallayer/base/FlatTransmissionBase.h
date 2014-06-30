@@ -21,6 +21,8 @@
 #include "TransmissionBase.h"
 #include "IModulation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -54,5 +56,8 @@ class INET_API FlatTransmissionBase : public TransmissionBase
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -20,6 +20,8 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 HttpServerBase::HttpServerBase()
 {
     rdReplyDelay = NULL;

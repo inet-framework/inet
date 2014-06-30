@@ -22,6 +22,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * Configures IPv6 addresses and routing tables for a "flat" network,
@@ -44,6 +46,9 @@ class INET_API FlatNetworkConfigurator6 : public cSimpleModule
     virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
     virtual bool isIPNode(cTopology::Node *node);
 };
+
+} //namespace
+
 
 #endif
 

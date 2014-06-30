@@ -44,6 +44,8 @@
 #include "lwip/igmp.h"
 #include "lwip/api.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,6 +159,9 @@ void netconn_free(struct netconn *conn);
 }
 #endif
 
+} //namespace
+
 #endif /* LWIP_NETCONN */
+
 
 #endif /* __LWIP_API_MSG_H__ */

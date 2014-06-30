@@ -25,6 +25,8 @@
 #include "TcpLwipQueues.h"
 #include "TCPSegment.h"
 
+namespace inet {
+
 
 /**
  * Send queue that manages "objects".
@@ -197,5 +199,8 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
+} //namespace
+
 
 #endif

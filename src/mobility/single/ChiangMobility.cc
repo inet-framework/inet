@@ -20,6 +20,8 @@
 
 #include "ChiangMobility.h"
 
+using namespace inet;
+
 
 Define_Module(ChiangMobility);
 

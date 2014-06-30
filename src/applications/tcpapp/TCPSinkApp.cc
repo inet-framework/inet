@@ -23,6 +23,8 @@
 #include "NodeStatus.h"
 #include "TCPSocket.h"
 
+using namespace inet;
+
 
 Define_Module(TCPSinkApp);
 

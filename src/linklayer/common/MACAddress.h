@@ -23,6 +23,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 #define MAC_ADDRESS_SIZE 6
 #define MAC_ADDRESS_MASK 0xffffffffffffULL
@@ -209,5 +211,8 @@ inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
 {
     return os << mac.str();
 }
+
+} //namespace
+
 
 #endif

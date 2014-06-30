@@ -19,6 +19,8 @@
 
 #include "TCPSACKRexmitQueue.h"
 
+using namespace inet;
+
 
 TCPSACKRexmitQueue::TCPSACKRexmitQueue()
 {

@@ -33,6 +33,8 @@
 #include "IPv6FragBuf.h"
 #include "ProtocolMap.h"
 
+namespace inet {
+
 class ICMPv6Message;
 
 /**
@@ -231,6 +233,9 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     bool processExtensionHeaders(IPv6Datagram* datagram);
 #endif /* WITH_xMIPv6 */
 };
+
+} //namespace
+
 
 #endif
 

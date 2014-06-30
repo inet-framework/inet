@@ -32,10 +32,13 @@
 
 #endif /*omnetpp*/
 
-#include "dsr-pkt.h"
-#include "timer.h"
+#include "dsr-uu/dsr-pkt.h"
+#include "dsr-uu/timer.h"
+
 
 #ifndef NO_GLOBALS
+
+namespace inet {
 
 #define DSR_BROADCAST ((unsigned int) 0xffffffff)
 
@@ -271,6 +274,8 @@ int do_mackill(char *mac);
 
 #endif
 
+} //namespace
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS
@@ -307,5 +312,7 @@ static inline usecs_t confval_to_usecs(enum confval cv)
 }
 #endif
 #endif              /* NO_DECLS */
+
+
 
 #endif              /* _DSR_H */

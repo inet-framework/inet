@@ -17,6 +17,8 @@
 
 #include "IRoute.h"
 
+using namespace inet;
+
 const char *IRoute::sourceTypeName(SourceType sourceType)
 {
     switch (sourceType)

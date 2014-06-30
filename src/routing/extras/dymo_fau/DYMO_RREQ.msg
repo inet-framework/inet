@@ -21,6 +21,7 @@ cplusplus {{
 #include "DYMO_RM_m.h"
 }}
 
+namespace inet;
 
 class DYMO_RM;
 

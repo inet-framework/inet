@@ -40,6 +40,9 @@
 #include "lwip/err.h"
 #include "lwip/netif.h"
 
+
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -146,6 +149,7 @@ PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
 #endif
+
 /*
 #define IPH_V(hdr)  (ntohs((hdr)->_v_hl_tos) >> 12)
 #define IPH_HL(hdr) ((ntohs((hdr)->_v_hl_tos) >> 8) & 0x0f)
@@ -212,6 +216,9 @@ void ip_debug_print(struct pbuf *p);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_IP_H__ */
 

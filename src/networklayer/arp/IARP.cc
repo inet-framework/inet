@@ -17,6 +17,8 @@
 
 #include "IARP.h"
 
+using namespace inet;
+
 Register_Abstract_Class(IARP::Notification);
 
 const simsignal_t IARP::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");

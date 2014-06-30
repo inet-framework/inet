@@ -17,6 +17,8 @@
 
 #include "TCPSocket.h"
 
+using namespace inet;
+
 
 TCPSocket::TCPSocket()
 {

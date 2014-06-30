@@ -17,6 +17,8 @@
 
 #include "ScenarioManager.h"
 
+using namespace inet;
+
 Define_Module(ScenarioManager);
 
 

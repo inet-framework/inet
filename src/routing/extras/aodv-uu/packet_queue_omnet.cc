@@ -24,6 +24,8 @@
 #include "IPv4Datagram.h"
 #include "Ieee802Ctrl.h"
 
+namespace inet {
+
 #define GARBAGE_COLLECT
 
 #ifndef AODV_USE_STL
@@ -486,3 +488,6 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 }
 
 #endif
+
+}
+

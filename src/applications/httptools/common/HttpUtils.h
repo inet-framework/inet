@@ -31,6 +31,8 @@
 
 #include "HttpMessages_m.h"  // for HttpContentType
 
+namespace inet {
+
 
 std::string trimLeft(std::string str);
 std::string trimRight(std::string str);
@@ -49,5 +51,8 @@ double safeatof(const char* strval, double defaultVal = 0.0);
 int safeatoi(const char* strval, int defaultVal = 0);
 int safeatobool(const char* strval, bool defaultVal = false);
 std::vector<std::string> splitFile(std::string fileName);
+
+} //namespace
+
 
 #endif

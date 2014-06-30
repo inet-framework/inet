@@ -17,6 +17,8 @@
 
 #include "HttpServerEvilA.h"
 
+using namespace inet;
+
 Define_Module(HttpServerEvilA);
 
 void HttpServerEvilA::initialize(int stage)

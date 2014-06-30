@@ -38,7 +38,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 
 using namespace INETFw;
-
+using namespace inet;
 
 int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
 {

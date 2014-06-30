@@ -18,6 +18,7 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
+namespace inet;
 
 class RSVPMessage;
 

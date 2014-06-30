@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -32,6 +32,7 @@
 #include "defs_aodv.h"
 #include "aodv_rerr.h"
 #include "params.h"
+
 
 #ifndef OMNETPP
 #define IPHDR_SIZE sizeof(struct iphdr)
@@ -72,5 +73,6 @@ void recvAODVUUPacket(Packet * p);
 #endif              /* NS_PORT */
 
 #endif              /* NS_NO_DECLARATIONS */
+
 
 #endif              /* AODV_SOCKET_H */

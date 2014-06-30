@@ -47,6 +47,8 @@
 #include "IPv6Datagram.h"
 #endif
 
+using namespace inet;
+
 
 PacketDump::PacketDump()
 {

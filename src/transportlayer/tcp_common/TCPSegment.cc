@@ -18,6 +18,8 @@
 
 #include "TCPSegment.h"
 
+using namespace inet;
+
 
 Register_Class(Sack);
 

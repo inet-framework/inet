@@ -32,6 +32,8 @@
 
 #include "dsr-pkt_omnet.h"
 
+using namespace inet;
+
 void ManetNetfilterHook::initHook(cModule* _module)
 {
     module = _module;

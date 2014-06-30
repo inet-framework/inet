@@ -23,6 +23,8 @@
 #include "NodeStatus.h"
 #include "UDPControlInfo_m.h"
 
+using namespace inet;
+
 extern "C" {
 #include <libavutil/opt.h>
 }

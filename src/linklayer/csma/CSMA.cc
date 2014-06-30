@@ -36,6 +36,8 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "CSMAFrame_m.h"
 
+using namespace inet;
+
 Define_Module(CSMA);
 
 void CSMA::initialize(int stage) {

@@ -13,9 +13,11 @@
 #endif
 
 #include "dsr.h"
+#include "dsr-uu/timer.h"
 
 #ifndef NO_GLOBALS
 
+namespace inet {
 struct neighbor_info
 {
     struct sockaddr hw_addr;
@@ -23,7 +25,7 @@ struct neighbor_info
     usecs_t rtt, rto;       /* RTT and Round Trip Timeout */
     struct timeval last_ack_req;
 };
-
+} //namespace
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS

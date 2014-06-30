@@ -29,7 +29,10 @@
 #include "IPv4.h"
 #include "ControlManetRouting_m.h"
 
+using namespace inet;
+
 Define_Module( DYMOFau );
+
 
 #define DYMO_PORT 653
 namespace

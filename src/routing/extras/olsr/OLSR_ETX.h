@@ -40,6 +40,8 @@
 #include "OLSR_ETX_repositories.h"
 #include "OLSR_ETX_parameter.h"
 
+namespace inet {
+
 #define OLSR_ETX_C OLSR_C
 
 
@@ -253,5 +255,8 @@ class OLSR_ETX : public OLSR
         static int node_id(const nsaddr_t&);
 
 };
+
+} //namespace
+
 
 #endif

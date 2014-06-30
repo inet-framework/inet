@@ -9,6 +9,8 @@
 #include "IRoute.h"
 #include "DYMOdefs.h"
 
+namespace inet {
+
 DYMO_NAMESPACE_BEGIN
 
 /**
@@ -43,5 +45,8 @@ class INET_API DYMORouteData : public cObject {
 };
 
 DYMO_NAMESPACE_END
+
+} //namespace
+
 
 #endif

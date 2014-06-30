@@ -23,6 +23,8 @@
 
 #include "MovingMobilityBase.h"
 
+using namespace inet;
+
 
 MovingMobilityBase::MovingMobilityBase()
 {

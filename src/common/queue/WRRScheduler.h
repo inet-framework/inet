@@ -22,6 +22,8 @@
 #include "INETDefs.h"
 #include "SchedulerBase.h"
 
+namespace inet {
+
 /**
  * This module implements a Weighted Round Robin Scheduler.
  */
@@ -38,5 +40,8 @@ class WRRScheduler : public SchedulerBase
     virtual void initialize();
     virtual bool schedulePacket();
 };
+
+} //namespace
+
 
 #endif

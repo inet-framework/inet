@@ -29,6 +29,8 @@
 #include <OLSR_ETX_state.h>
 #include <OLSR_ETX.h>
 
+using namespace inet;
+
 OLSR_ETX_state::OLSR_ETX_state()
 {
     parameter = &(dynamic_cast<OLSR_ETX*>(getOwner())->parameter_);

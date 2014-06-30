@@ -17,6 +17,8 @@
 
 #include "DimensionalUtils.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power)

@@ -30,6 +30,8 @@
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 
 Define_Module(RTCP);
 
@@ -587,3 +589,4 @@ bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     return true;
 }
 
+} // namespace

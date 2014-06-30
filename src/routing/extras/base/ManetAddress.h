@@ -25,6 +25,8 @@
 #include "Address.h"
 #include "MACAddress.h"
 
+namespace inet {
+
 /*
  * Stores an IPv4, IPv6 or an MACAddress address with prefix. This class should be used in
  * manetrouting, to guarantee IPv4/IPv6/MACAddress transparency.
@@ -86,6 +88,9 @@ inline std::ostream& operator<<(std::ostream& os, const ManetNetworkAddress& add
 {
     return os << addr.str();
 }
+
+
+} //namespace
 
 
 #endif  // __INET_MANETADDRESS_H

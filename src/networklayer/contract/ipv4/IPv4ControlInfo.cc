@@ -21,6 +21,8 @@
 #include "IPv4Datagram.h"
 #endif
 
+using namespace inet;
+
 IPv4ControlInfo::~IPv4ControlInfo()
 {
     clean();

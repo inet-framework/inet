@@ -1,8 +1,10 @@
-class noncobject MACAddress;
-
 cplusplus {{
     #include "MACAddress.h"
 }}
+
+namespace inet;
+
+class noncobject MACAddress;
 
 class SimpleLinkLayerControlInfo
 {

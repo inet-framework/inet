@@ -31,8 +31,8 @@
 #define LOG_INFO 0
 #else
 #include <syslog.h>
-#endif
 
+#endif
 
 #ifndef NS_PORT
 extern int debug;
@@ -79,6 +79,7 @@ const char *state_to_str(u_int8_t state);
 #endif
 
 #endif              /* NS_NO_GLOBALS */
+
 
 #endif              /* _DEBUG_H */
 

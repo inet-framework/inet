@@ -28,6 +28,8 @@
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
 
+using namespace inet;
+
 
 
 SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation* assoc, const IRoutingTable* rt)

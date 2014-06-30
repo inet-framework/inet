@@ -17,6 +17,8 @@
 
 #include "HttpServer.h"
 
+using namespace inet;
+
 Define_Module(HttpServer);
 
 void HttpServer::initialize(int stage)

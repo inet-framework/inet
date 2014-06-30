@@ -23,7 +23,11 @@
 cplusplus {{
 #include "ModulationType.h"
 }}
+
+namespace inet;
+
 class noncobject ModulationType;
+
 class Radio80211aControlInfo
 {
     double snr;

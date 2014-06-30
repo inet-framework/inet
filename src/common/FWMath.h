@@ -27,6 +27,8 @@
 #include <math.h>
 #include "INETDefs.h"
 
+namespace inet {
+
 /* Windows math.h doesn't define the the following variables: */
 #ifndef M_E
 #define M_E         2.7182818284590452354
@@ -187,5 +189,8 @@ class INET_API FWMath {
    */
   static double rad2deg(double rad) { return rad * 180 / M_PI; }
 };
+
+} //namespace
+
 
 #endif

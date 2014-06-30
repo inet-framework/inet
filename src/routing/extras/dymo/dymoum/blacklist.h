@@ -33,6 +33,8 @@
 #include "compatibility.h"
 #endif
 
+namespace inet {
+
 /* Here we maintain a list of those next hops which didn't reply with a unicast
    packet when S-bit was enabled in a RREP. We won't forward RREQs which come
    from these nodes. */
@@ -45,11 +47,11 @@ typedef struct blacklist
     struct in_addr  addr;
     struct timer    timer;
 } blacklist_t;
-
+} // namespace
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
+//namespace inet {
 /* Add a new entry to the list */
 blacklist_t *blacklist_add(struct in_addr addr);
 
@@ -61,6 +63,9 @@ blacklist_t *blacklist_find(struct in_addr addr);
 
 void blacklist_erase();
 
+//} //namespace
 #endif  /* NS_NO_DECLARATIONS */
+
+
 
 #endif  /* __BLACKLIST_H__ */

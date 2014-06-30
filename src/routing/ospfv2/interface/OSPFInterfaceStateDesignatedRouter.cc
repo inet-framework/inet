@@ -24,6 +24,8 @@
 #include "OSPFInterfaceStateLoopback.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

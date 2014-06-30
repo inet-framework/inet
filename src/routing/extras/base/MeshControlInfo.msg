@@ -21,6 +21,7 @@ cplusplus {{
 #include "Ieee802Ctrl.h"
 }}
 
+namespace inet;
 
 class noncobject Ieee802Ctrl;
 class noncobject Address;

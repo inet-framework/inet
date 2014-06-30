@@ -18,6 +18,8 @@
 
 #include "SCTPSendStream.h"
 
+using namespace inet;
+
 
 SCTPSendStream::SCTPSendStream(const uint16 id)
 {

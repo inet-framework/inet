@@ -35,6 +35,11 @@
 #include "RTCPPacket2.h"
 #include "RTCPPacket3.h"
 
+namespace inet {
+
+} //namespace
+
+
 #endif
 
 

@@ -15,6 +15,8 @@
 #include "ProbabilisticBroadcastDatagram.h"
 #include "Address.h"
 
+namespace inet {
+
 /**
  * @brief This class offers a data dissemination service using
  *        probabilistic broadcast. Each packet which arrives from
@@ -227,5 +229,8 @@ protected:
 
     Address myNetwAddr;
 };
+
+} //namespace
+
 
 #endif

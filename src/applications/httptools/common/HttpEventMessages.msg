@@ -16,6 +16,8 @@
 //
 
 
+namespace inet;
+
 //
 // Server status update event
 //

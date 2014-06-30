@@ -15,11 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject Address;
-
 cplusplus {{
    #include "Address.h"
 }}
+
+namespace inet;
+
+class noncobject Address;
+
 
 packet NetworkDatagramBase
 {

@@ -17,6 +17,8 @@
 
 #include "FreeSpacePathLoss.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(FreeSpacePathLoss);

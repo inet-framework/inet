@@ -25,6 +25,8 @@
 
 #include "IPv6InterfaceData.h"
 
+namespace inet {
+
 // secret key used in RR by CN
 #define KCN    1
 
@@ -430,3 +432,4 @@ void BindingUpdateList::resetBindingCacheEntry(BindingUpdateListEntry& entry)
     entry.tokenC = 0;*/
 }
 
+} // namespace

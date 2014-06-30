@@ -40,6 +40,8 @@
 #include "Ieee802Ctrl.h"
 #include "aodv_uu_omnet.h"
 
+namespace inet {
+
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
@@ -1597,5 +1599,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifa
 void NS_CLASS actualizeTablesWithCollaborative(const Address &dest)
 {
    return;
+}
+
 }
 

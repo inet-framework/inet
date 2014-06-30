@@ -19,6 +19,8 @@
 #include "IPProtocolId_m.h"
 #include "NetworkProtocolCommand_m.h"
 
+using namespace inet;
+
 void IPSocket::registerProtocol(int protocol)
 {
     if (gateToIP && gateToIP->isConnected()) {

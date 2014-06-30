@@ -31,11 +31,11 @@
 #include <sys/types.h>
 #else
 #include "compatibility.h"
-#endif
 
+#endif
+namespace inet {
 /* Here we maintain a list of those RREQs which haven't been answered with a
    RREP yet */
-
 typedef struct pending_rreq
 {
     dlist_head_t    list_head;
@@ -44,11 +44,11 @@ typedef struct pending_rreq
     u_int8_t    tries;
     struct timer    timer;
 } pending_rreq_t;
-
+} // namespace
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
+//namespace inet {
 /* Add a new entry to the list */
 pending_rreq_t *pending_rreq_add(struct in_addr dest_addr, u_int32_t seqnum);
 
@@ -57,7 +57,8 @@ int pending_rreq_remove(pending_rreq_t *entry);
 
 /* Find an entry in the list with the given destination address */
 pending_rreq_t *pending_rreq_find(struct in_addr dest_addr);
-
+//} //namespace
 #endif  /* NS_NO_DECLARATIONS */
+
 
 #endif  /* __PENDING_RREQ_H__ */

@@ -28,6 +28,8 @@
 #include "AddressResolver.h"
 #include "SCTPNatTable.h"
 
+using namespace inet;
+
 
 Define_Module(SCTPNatServer);
 

@@ -17,6 +17,8 @@
 
 #include "ScalarTransmission.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void ScalarTransmission::printToStream(std::ostream &stream) const

@@ -24,6 +24,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 Define_Module(RSTP);
 
 RSTP::RSTP()

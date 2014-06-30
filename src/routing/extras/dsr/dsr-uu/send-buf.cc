@@ -42,6 +42,8 @@ static DSRUUTimer send_buf_timer;
 static int send_buf_print(struct tbl *t, char *buffer);
 #endif
 
+namespace inet {
+
 struct send_buf_entry
 {
     dsr_list_t l;
@@ -374,3 +376,5 @@ void __exit NSCLASS send_buf_cleanup(void)
     proc_net_remove(SEND_BUF_PROC_FS_NAME);
 #endif
 }
+
+} // namespace

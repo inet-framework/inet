@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 // Foreign declarations:
 class IPv4Datagram;
 class IPv6Datagram;
@@ -118,6 +120,9 @@ class INET_API PacketDump
         void udpDump(bool l2r, const char *label, UDPPacket* udppkt, const std::string& srcAddr,
                 const std::string& destAddr, const char *comment);
 };
+
+} //namespace
+
 
 #endif // __INET_PACKETDUMP_H
 

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -26,6 +26,8 @@
 #ifndef NS_NO_GLOBALS
 #include "defs_aodv.h"
 #include "list.h"
+
+namespace inet {
 
 typedef struct rt_table rt_table_t;
 
@@ -119,6 +121,9 @@ struct routing_table
     list_t tbl[RT_TABLESIZE];
 };
 void precursor_list_destroy(rt_table_t * rt);
+
+} //namespace inet
+
 #endif              /* NS_NO_GLOBALS */
 
 
@@ -157,5 +162,6 @@ rt_table_t * modifyAODVTables(struct in_addr,
 #endif
 
 #endif              /* NS_NO_DECLARATIONS */
+
 
 #endif              /* ROUTING_TABLE_H */

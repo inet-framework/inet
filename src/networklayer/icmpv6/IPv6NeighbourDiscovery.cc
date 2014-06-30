@@ -31,6 +31,8 @@
 #include "xMIPv6.h"
 #endif /* WITH_xMIPv6 */
 
+using namespace inet;
+
 #define MK_ASSIGN_LINKLOCAL_ADDRESS 0
 #define MK_SEND_PERIODIC_RTRADV 1
 #define MK_SEND_SOL_RTRADV 2

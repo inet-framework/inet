@@ -21,6 +21,8 @@
 
 #include "IPv6RoutingTable.h"
 
+using namespace inet;
+
 
 Register_Abstract_Class(IPv6Route);
 

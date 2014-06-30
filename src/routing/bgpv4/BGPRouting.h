@@ -31,6 +31,8 @@
 #include "BGPUpdate.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 class BGPSession;
 
 
@@ -146,6 +148,9 @@ private:
     static const int  BGP_TCP_CONNECT_OPEN_RCV = 74;
     static const int  BGP_TCP_KEEP_ALIVE_RCV = 75;
 };
+
+} //namespace
+
 
 #endif
 

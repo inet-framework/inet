@@ -45,6 +45,8 @@ extern "C" {
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
@@ -114,5 +116,8 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     static simsignal_t connStateSignal;
     static simsignal_t delaySignal;
 };
+
+} //namespace
+
 
 #endif // VOIPSTREAM_VOIPSTREAMRECEIVER_H

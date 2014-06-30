@@ -22,6 +22,8 @@
 
 #include "Ieee80211MgmtAPBase.h"
 
+namespace inet {
+
 
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
@@ -63,5 +65,8 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
     //@}
 };
+
+} //namespace
+
 
 #endif

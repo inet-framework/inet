@@ -20,6 +20,8 @@
 
 #include "MACAddress.h"
 
+namespace inet {
+
 class INET_API IMACProtocolControlInfo {
   public:
     virtual ~IMACProtocolControlInfo() { }
@@ -30,5 +32,8 @@ class INET_API IMACProtocolControlInfo {
     virtual int getInterfaceId() const = 0;
     virtual void setInterfaceId(int interfaceId) = 0;
 };
+
+} //namespace
+
 
 #endif

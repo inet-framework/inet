@@ -22,6 +22,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 /**
  * Accepts any number of incoming connections, and discards whatever arrives
  * on them.
@@ -41,5 +43,8 @@ class INET_API TCPSinkApp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
+
+} //namespace
+
 
 #endif

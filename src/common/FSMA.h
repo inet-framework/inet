@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /*
     This is an alternative FSM implementation.
 
@@ -144,6 +146,9 @@
 #if OMNETPP_VERSION < 0x500
 #define E_INFLOOP eINFLOOP
 #endif
+
+} //namespace
+
 
 #endif
 

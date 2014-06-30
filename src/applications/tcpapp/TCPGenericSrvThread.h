@@ -22,6 +22,8 @@
 
 #include "TCPSrvHostApp.h"
 
+namespace inet {
+
 
 /**
  * Example server thread, to be used with TCPSrvHostApp.
@@ -35,6 +37,9 @@ class INET_API TCPGenericSrvThread : public TCPServerThreadBase
     virtual void dataArrived(cMessage *msg, bool urgent);
     virtual void timerExpired(cMessage *timer);
 };
+
+} //namespace
+
 
 #endif
 

@@ -57,6 +57,8 @@ static void dymo_socket_read(int fd);
 
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS dymo_socket_init()
 {
 #ifndef NS_PORT

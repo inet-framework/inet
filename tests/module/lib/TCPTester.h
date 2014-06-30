@@ -26,6 +26,7 @@
 #include "TCPSegment.h"
 #include "PacketDump.h"
 
+namespace inet {
 
 /**
  * Base class for TCP testing modules.
@@ -102,6 +103,8 @@ class INET_API TCPRandomTester : public TCPTesterBase
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
+
+} // namespace inet
 
 #endif
 

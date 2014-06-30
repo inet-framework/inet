@@ -44,6 +44,9 @@
 #include "lwip/netif.h"
 #include "lwip/ip.h"
 
+
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -187,6 +190,9 @@ extern const struct eth_addr ethbroadcast, ethzero;
 }
 #endif
 
+} //namespace
+
 #endif /* LWIP_ARP */
+
 
 #endif /* __NETIF_ARP_H__ */

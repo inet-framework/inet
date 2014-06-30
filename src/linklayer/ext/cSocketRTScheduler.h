@@ -36,6 +36,8 @@
 #endif
 #include "ExtFrame_m.h"
 
+namespace inet {
+
 class cSocketRTScheduler : public cScheduler
 {
     protected:
@@ -110,6 +112,9 @@ class cSocketRTScheduler : public cScheduler
          */
         void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
+
+} //namespace
+
 
 #endif
 

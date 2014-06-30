@@ -17,4 +17,6 @@
 
 #include "DimensionalTransmission.h"
 
+using namespace inet;
+
 using namespace physicallayer;

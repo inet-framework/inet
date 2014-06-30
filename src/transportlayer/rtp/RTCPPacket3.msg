@@ -13,15 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-//
-// TODO generated message class
-//
-
 cplusplus {{
 #include "RTCPPacket2.h"
 #include "reports.h"
 #include "sdes.h"
 }}
+
+namespace inet;
 
 class noncobject SenderReport;
 packet RTCPReceiverReportPacket;

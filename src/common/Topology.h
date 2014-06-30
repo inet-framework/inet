@@ -22,6 +22,8 @@
 #include <vector>
 #include "INETDefs.h"
 
+namespace inet {
+
 // not all compilers define INFINITY (gcc does)
 #ifndef INFINITY
 #define INFINITY HUGE_VAL
@@ -578,5 +580,8 @@ class INET_API Topology : public cOwnedObject
      */
     virtual Link *createLink() { return new Link(); }
 };
+
+} //namespace
+
 
 #endif

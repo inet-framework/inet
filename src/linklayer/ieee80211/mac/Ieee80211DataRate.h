@@ -5,6 +5,8 @@
 
 #include "ModulationType.h"
 
+namespace inet {
+
 
 struct Ieee80211DescriptorData
 {
@@ -28,5 +30,8 @@ class Ieee80211Descriptor
     static const Ieee80211DescriptorData& getDescriptor(int idx);
     static int size() { return descriptorSize; }
 };
+
+} //namespace
+
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "RadioMedium.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -46,5 +48,8 @@ class INET_API Ieee80211RadioMedium : public RadioMedium
 };
 
 }
+
+} //namespace
+
 
 #endif

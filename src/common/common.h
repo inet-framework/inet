@@ -22,7 +22,12 @@
 
 #include <string>
 
+namespace inet {
+
 std::string intToString(int i);
+
+} //namespace
+
 
 #endif
 

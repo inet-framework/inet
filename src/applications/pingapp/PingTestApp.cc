@@ -37,6 +37,8 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 using std::cout;
 
 Define_Module(PingTestApp);

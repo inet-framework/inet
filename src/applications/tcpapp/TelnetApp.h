@@ -22,6 +22,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
@@ -50,6 +52,9 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     TelnetApp();
     virtual ~TelnetApp();
 };
+
+} //namespace
+
 
 #endif
 

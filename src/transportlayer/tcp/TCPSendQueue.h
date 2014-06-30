@@ -23,6 +23,8 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 
+namespace inet {
+
 
 /**
  * Abstract base class for TCP send queues. In fact a single object
@@ -154,5 +156,8 @@ class INET_API TCPSendQueue : public cObject
     virtual void discardUpTo(uint32 seqNum) = 0;
 
 };
+
+} //namespace
+
 
 #endif

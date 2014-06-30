@@ -35,6 +35,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+using namespace inet;
+
 
 void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables* chunk)
 {

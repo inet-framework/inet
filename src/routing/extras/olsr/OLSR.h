@@ -44,6 +44,8 @@
 
 #include <assert.h>
 
+namespace inet {
+
 
 
 
@@ -553,5 +555,8 @@ class OLSR : public ManetRoutingBase
     virtual int  getRouteGroup(const Address&, std::vector<Address> &, Address&, bool &, int group = 0);
     virtual bool getNextHopGroup(const Address&, Address &add, int &iface, Address&, bool &, int group = 0);
 };
+
+} //namespace
+
 
 #endif

@@ -30,6 +30,8 @@
 
 #include "HttpController.h"
 
+using namespace inet;
+
 Define_Module(HttpController);
 
 

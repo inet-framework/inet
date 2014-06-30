@@ -27,6 +27,8 @@
 #include "IInterfaceTable.h"
 #include "IPv4Address.h"
 
+using namespace inet;
+
 Define_Module(HostAutoConfigurator);
 
 

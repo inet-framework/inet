@@ -22,6 +22,8 @@
 #include "OSPFInterface.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
 {

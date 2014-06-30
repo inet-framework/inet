@@ -22,6 +22,8 @@
 #include "IListening.h"
 #include "INoise.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -35,5 +37,8 @@ class INET_API IBackgroundNoise : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -24,6 +24,8 @@
 #include "RTPPayloadReceiver.h"
 #include "RTPPayloadSender.h"
 
+using namespace inet;
+
 
 Define_Module(RTPProfile);
 

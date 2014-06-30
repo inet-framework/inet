@@ -18,6 +18,8 @@
 #include "FlatTransmitterBase.h"
 #include "Modulation.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void FlatTransmitterBase::initialize(int stage)

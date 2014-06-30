@@ -19,6 +19,9 @@ cplusplus {{
 const int BGP_HEADER_OCTETS = 19;
 }}
 
+
+namespace inet;
+
 //
 // BGPv4 message types
 //

@@ -23,6 +23,8 @@
 #include "ProtocolMap.h"
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 class INET_API NetworkProtocolBase : public LayeredProtocolBase
 {
   protected:
@@ -46,5 +48,8 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
     virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
 };
+
+} //namespace
+
 
 #endif

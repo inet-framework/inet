@@ -26,6 +26,8 @@
 #include "ILifecycle.h"
 #include "UDPControlInfo.h"
 
+namespace inet {
+
 class IInterfaceTable;
 class IPv4ControlInfo;
 class IPv6ControlInfo;
@@ -181,6 +183,9 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
 };
+
+} //namespace
+
 
 #endif
 

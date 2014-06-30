@@ -17,6 +17,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
 
 //
 // Class that carries raw bytes.

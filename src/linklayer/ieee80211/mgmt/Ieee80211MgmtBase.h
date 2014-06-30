@@ -26,6 +26,8 @@
 #include "Ieee80211MgmtFrames_m.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 
 /**
  * Abstract base class for 802.11 infrastructure mode management components.
@@ -119,5 +121,8 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     //@}
 };
+
+} //namespace
+
 
 #endif

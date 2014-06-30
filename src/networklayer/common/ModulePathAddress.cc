@@ -21,6 +21,8 @@
 #include "ModuleAccess.h"
 #include "AddressResolver.h"
 
+using namespace inet;
+
 
 namespace {
     // copied the cModule::getModuleByRelativePath(), but returns NULL instead throw cRuntimeError

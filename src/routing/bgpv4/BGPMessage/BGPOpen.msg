@@ -23,6 +23,8 @@ const int BGP_OPEN_OCTETS = 10;
 }}
 
 
+namespace inet;
+
 class BGPHeader;
 
 class noncobject IPv4Address;

@@ -24,6 +24,8 @@
 #include "InterfaceTable.h"
 #include "Ieee8021dInterfaceData.h"
 
+namespace inet {
+
 /**
  * Base class for STP and RSTP.
  */
@@ -92,4 +94,7 @@ protected:
      */
     virtual InterfaceEntry * chooseInterface();
 };
+} //namespace
+
+
 #endif

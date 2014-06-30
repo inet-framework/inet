@@ -20,6 +20,8 @@
 
 #include "FlatReceptionBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API ScalarReception : public FlatReceptionBase
 };
 
 }
+
+} //namespace
+
 
 #endif

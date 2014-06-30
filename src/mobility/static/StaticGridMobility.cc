@@ -20,6 +20,8 @@
 
 #include "StaticGridMobility.h"
 
+using namespace inet;
+
 
 Define_Module(StaticGridMobility);
 

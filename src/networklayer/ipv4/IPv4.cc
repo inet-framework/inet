@@ -37,6 +37,8 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(IPv4);
 
 //TODO TRANSLATE

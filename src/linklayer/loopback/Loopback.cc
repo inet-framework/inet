@@ -27,6 +27,8 @@
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
 
+using namespace inet;
+
 
 Define_Module(Loopback);
 

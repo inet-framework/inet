@@ -19,6 +19,8 @@
 
 #include "common.h"
 
+using namespace inet;
+
 std::string intToString(int i)
 {
     std::ostringstream stream;

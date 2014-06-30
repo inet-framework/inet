@@ -17,6 +17,8 @@
 
 #include "EtherBus.h"
 
+using namespace inet;
+
 Define_Module(EtherBus);
 
 inline std::ostream& operator<<(std::ostream& os, cMessage *msg)

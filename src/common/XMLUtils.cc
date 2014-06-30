@@ -2,6 +2,8 @@
 #include "XMLUtils.h"
 #include "AddressResolver.h"
 
+namespace inet {
+
 const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
@@ -166,4 +168,4 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
     const char *attrStr = getRequiredAttribute(*node, attrName);
     return parseBool(attrStr);
 }
-
+} // namespace

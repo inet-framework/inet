@@ -24,6 +24,8 @@
 #include "RTPMpegPacket_m.h"
 #include "RTPPacket.h"
 
+using namespace inet;
+
 
 Define_Module(RTPAVProfilePayload32Sender);
 

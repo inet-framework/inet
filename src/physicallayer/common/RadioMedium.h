@@ -28,6 +28,8 @@
 #include "IBackgroundNoise.h"
 #include "MACAddress.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -422,5 +424,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 };
 
 }
+
+} //namespace
+
 
 #endif

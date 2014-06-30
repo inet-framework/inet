@@ -25,6 +25,8 @@
 #include "LifecycleOperation.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 #define MAX_REPLY_CHUNK_SIZE   1497
 
 
@@ -56,5 +58,8 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
     void registerDSAP(int dsap);
     void sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap);
 };
+
+} //namespace
+
 
 #endif

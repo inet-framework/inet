@@ -44,6 +44,7 @@
 #include "LocatorNotificationInfo_m.h"
 #endif
 
+namespace inet {
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
@@ -65,6 +66,7 @@ int DYMOUM::totalRrepAckRec = 0;
 int DYMOUM::totalRerrSend = 0;
 int DYMOUM::totalRerrRec = 0;
 #endif
+
 
 std::map<Address,u_int32_t *> DYMOUM::mapSeqNum;
 
@@ -1834,3 +1836,4 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
 #endif
 }
 
+} // namespace

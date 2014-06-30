@@ -16,16 +16,16 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-enum IPProtocolId;
-
-class noncobject Address;
-
 cplusplus {{
 #include "Address.h"
 #include "IPProtocolId_m.h"
 }}
 
+namespace inet;
+
+enum IPProtocolId;
+
+class noncobject Address;
 
 //
 // Control information for sending/receiving packets over the generic network protocol.

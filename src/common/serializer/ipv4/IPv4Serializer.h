@@ -20,6 +20,8 @@
 
 #include "IPv4Datagram.h"
 
+namespace inet {
+
 
 /**
  * Converts between IPv4Datagram and binary (network byte order) IPv4 header.
@@ -44,6 +46,9 @@ class IPv4Serializer
          */
         void parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest);
 };
+
+} //namespace
+
 
 #endif
 

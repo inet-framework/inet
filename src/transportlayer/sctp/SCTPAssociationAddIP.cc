@@ -20,6 +20,8 @@
 #include "SCTPAssociation.h"
 #include "common.h"
 
+using namespace inet;
+
 void SCTPAssociation::sendAsconf(const char* type, const bool remote)
 {
     SCTPAuthenticationChunk* authChunk;

@@ -22,6 +22,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * This class can be used as a meter in an ITrafficConditioner.
  * It marks the packets based on two rates, Peak Information Rate (PIR)
@@ -59,5 +61,8 @@ class INET_API TwoRateThreeColorMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+
+} //namespace
+
 
 #endif

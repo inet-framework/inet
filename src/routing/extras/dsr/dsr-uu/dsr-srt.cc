@@ -28,6 +28,8 @@
 #include "dsr-rrep.h"
 #include "debug_dsr.h"
 
+namespace inet {
+
 struct in_addr dsr_srt_next_hop(struct dsr_srt *srt, int sleft)
 {
     int n = srt->laddrs / sizeof(struct in_addr);
@@ -1085,3 +1087,6 @@ int NSCLASS dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt)
 
     return DSR_PKT_FORWARD;
 }
+
+
+} // namespace

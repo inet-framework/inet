@@ -20,6 +20,8 @@
 
 #include "OSPFNeighborState.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class NeighborStateLoading : public NeighborState
@@ -30,6 +32,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_OSPFNEIGHBORSTATELOADING_H
 

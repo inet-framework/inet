@@ -20,6 +20,8 @@
 
 #include "IRadioFrame.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -46,5 +48,8 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 };
 
 }
+
+} //namespace
+
 
 #endif

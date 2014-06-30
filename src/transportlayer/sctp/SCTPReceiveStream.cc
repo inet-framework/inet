@@ -19,6 +19,8 @@
 #include "SCTPReceiveStream.h"
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 
 SCTPReceiveStream::SCTPReceiveStream()
 {

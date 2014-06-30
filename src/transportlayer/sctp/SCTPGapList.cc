@@ -19,6 +19,8 @@
 #include "SCTPGapList.h"
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 // ###### Constructor #######################################################
 SCTPSimpleGapList::SCTPSimpleGapList()
 {

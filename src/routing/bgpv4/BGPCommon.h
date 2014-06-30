@@ -22,6 +22,8 @@
 //#include "TCPSocket.h"
 #include "InterfaceEntry.h"
 
+namespace inet {
+
 //Forward declarations:
 class TCPSocket;
 
@@ -71,6 +73,9 @@ struct SessionInfo{
 };
 
 } // namespace BGP
+
+} //namespace
+
 
 #endif
 

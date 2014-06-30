@@ -29,6 +29,8 @@
 #include "UDPSocket.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 /**
  * Implements a DHCP client. See NED file for more details.
  */
@@ -184,5 +186,8 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
         virtual ~DHCPClient();
 
 };
+
+} //namespace
+
 
 #endif

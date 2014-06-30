@@ -25,9 +25,12 @@
 #define __LITTLE_ENDIAN_BITFIELD 1234
 #endif
 
-#include "dsr.h"
+#include "dsr-uu/dsr.h"
+
 
 #ifndef NO_GLOBALS
+
+namespace inet {
 
 /* Generic header for all options */
 struct dsr_opt
@@ -119,6 +122,8 @@ struct iphdr *dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
                            int protocol, int ttl);
 #endif
 
+} //namespace
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS
@@ -127,5 +132,7 @@ int dsr_opt_remove(struct dsr_pkt *dp);
 int dsr_opt_recv(struct dsr_pkt *dp);
 
 #endif              /* NO_DECLS */
+
+
 
 #endif

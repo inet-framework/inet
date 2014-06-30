@@ -19,6 +19,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 enum messageKind
 {
     MPLS_KIND,
@@ -44,6 +46,9 @@ const int LDP_KIND = 10;
 const int HOW_KIND = 50;
 
 };
+
+} //namespace
+
 
 #endif
 

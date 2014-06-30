@@ -21,6 +21,8 @@
 #include "ModuleAccess.h"
 #include "UDPControlInfo_m.h"
 
+using namespace inet;
+
 
 Define_Module(UDPEchoApp);
 

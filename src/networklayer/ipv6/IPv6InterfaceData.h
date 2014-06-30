@@ -28,6 +28,8 @@
 #include "IPv6Address.h"
 #include "InterfaceEntry.h"
 
+namespace inet {
+
 //Forward declarations:
 #ifdef WITH_xMIPv6
 class IPv6RoutingTable;
@@ -788,6 +790,9 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
     IPv6RoutingTable* rt6; // A pointer variable, specifically used to access the type of node (MN, HA, Router, CN). Used in info(). (Zarrar Yousaf 20.07.07)
 #endif /* WITH_xMIPv6 */
 };
+
+} //namespace
+
 
 #endif
 

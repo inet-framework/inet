@@ -30,6 +30,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 
 simsignal_t ARP::sentReqSignal = registerSignal("sentReq");
 simsignal_t ARP::sentReplySignal = registerSignal("sentReply");

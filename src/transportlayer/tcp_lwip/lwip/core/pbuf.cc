@@ -105,6 +105,10 @@
 
 #if PBUF_POOL_FREE_OOSEQ
 #include "lwip/tcpip.h"
+
+namespace inet
+{
+
 #define PBUF_POOL_IS_EMPTY() pbuf_pool_is_empty()
 static u8_t pbuf_free_ooseq_queued;
 /**
@@ -158,8 +162,14 @@ pbuf_pool_is_empty(void)
     }
   }
 }
+
+
+} // namespace inet
+
 #endif /* PBUF_POOL_FREE_OOSEQ */
 #endif /* !TCP_QUEUE_OOSEQ || NO_SYS */
+
+namespace inet {
 
 /**
  * Allocates a pbuf of the given type (possibly a chain for PBUF_POOL type).
@@ -941,3 +951,6 @@ pbuf_coalesce(struct pbuf *p, pbuf_layer layer)
   pbuf_free(p);
   return q;
 }
+
+} // namespace inet
+

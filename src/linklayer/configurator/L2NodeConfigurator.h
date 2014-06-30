@@ -22,6 +22,8 @@
 #include "IInterfaceTable.h"
 #include "L2NetworkConfigurator.h"
 
+namespace inet {
+
 /**
  * Configures L2 data of a node. See the NED definition for details.
  */
@@ -49,5 +51,8 @@ class L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cList
         // cListener:
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+
+} //namespace
+
 
 #endif

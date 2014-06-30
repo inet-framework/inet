@@ -27,6 +27,8 @@
 #include "FWMath.h"  // for M_PI
 #include "TraCIMobility.h"
 
+using namespace inet;
+
 Define_Module(TraCIMobility);
 
 namespace {

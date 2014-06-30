@@ -18,6 +18,8 @@
 #include "NodeStatus.h"
 #include "NodeOperations.h"
 
+using namespace inet;
+
 Define_Module(L2NodeConfigurator);
 
 L2NodeConfigurator::L2NodeConfigurator()

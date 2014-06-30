@@ -33,6 +33,8 @@
 #include "MACProtocolBase.h"
 #include "CSMAFrame_m.h"
 
+namespace inet {
+
 using namespace physicallayer;
 
 /**
@@ -343,5 +345,8 @@ private:
     CSMA& operator=(const CSMA&);
 
 };
+
+} //namespace
+
 
 #endif

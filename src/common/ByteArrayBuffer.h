@@ -17,6 +17,8 @@
 
 #include "ByteArray.h"
 
+namespace inet {
+
 /**
  * Buffer that carries BytesArrays.
  */
@@ -76,5 +78,8 @@ class ByteArrayBuffer : public cObject
      */
     virtual unsigned int drop(unsigned int lengthP);
 };
+
+} //namespace
+
 
 #endif //  __INET_BYTEARRAYBUFFER_H

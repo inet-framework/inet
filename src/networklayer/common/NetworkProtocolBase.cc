@@ -18,6 +18,8 @@
 #include "ModuleAccess.h"
 #include "NetworkProtocolCommand_m.h"
 
+using namespace inet;
+
 NetworkProtocolBase::NetworkProtocolBase() :
     interfaceTable(NULL)
 {

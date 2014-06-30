@@ -44,6 +44,8 @@
 
 #include "Posture.h"
 
+using namespace inet;
+
 Posture::Posture(unsigned int ID, unsigned int num)
 {
     postureID = ID;

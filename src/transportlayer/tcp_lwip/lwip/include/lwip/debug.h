@@ -34,6 +34,8 @@
 
 #include "lwip/arch.h"
 
+namespace inet {
+
 /** lower two bits indicate debug level
  * - 0 all
  * - 1 warning
@@ -93,6 +95,9 @@
 #else  /* LWIP_DEBUG */
 #define LWIP_DEBUGF(debug, message)
 #endif /* LWIP_DEBUG */
+
+} //namespace
+
 
 #endif /* __LWIP_DEBUG_H__ */
 

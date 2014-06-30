@@ -51,6 +51,9 @@ extern "C" {
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/bpstruct.h"
 #endif
+
+namespace inet {
+
 PACK_STRUCT_BEGIN
 struct udp_hdr {
   PACK_STRUCT_FIELD(u16_t src);
@@ -59,13 +62,19 @@ struct udp_hdr {
   PACK_STRUCT_FIELD(u16_t chksum);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
+
+} // namespace inet
+
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
+
 #endif
 
 #define UDP_FLAGS_NOCHKSUM 0x01U
 #define UDP_FLAGS_UDPLITE  0x02U
 #define UDP_FLAGS_CONNECTED  0x04U
+
+namespace inet {
 
 struct udp_pcb {
 /* Common members of all PCB types */
@@ -144,6 +153,8 @@ void udp_debug_print(struct udp_hdr *udphdr);
 #define udp_debug_print(udphdr)
 #endif
 
+} // namespace inet
+
 #ifdef __cplusplus
 }
 #endif
@@ -151,3 +162,4 @@ void udp_debug_print(struct udp_hdr *udphdr);
 #endif /* LWIP_UDP */
 
 #endif /* __LWIP_UDP_H__ */
+

@@ -16,15 +16,19 @@
 //
 
 
+cplusplus {{
+#include "IPv6Address.h"
+#include "IPProtocolId_m.h"
+}}
+
+namespace inet;
+
 enum IPProtocolId;
 
 class noncobject IPv6Address;
 class noncobject IPv6ExtensionHeaderPtr;
 
 cplusplus {{
-#include "IPv6Address.h"
-#include "IPProtocolId_m.h"
-
 class IPv6ExtensionHeader;
 typedef IPv6ExtensionHeader *IPv6ExtensionHeaderPtr;
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh);

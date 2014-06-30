@@ -19,6 +19,7 @@
 #include "IPv6Datagram.h"
 #include "IPv6ExtensionHeaders.h"
 
+namespace inet {
 
 Register_Class(IPv6Datagram);
 
@@ -213,3 +214,11 @@ void IPv6Datagram::clean()
         delete eh; // delete the header
     }
 }
+
+std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader& h)
+{
+    out << "{type:" << h.getExtensionType() << ",length:" << h.getByteLength() << "}";
+    return out;
+}
+
+} // namespace inet

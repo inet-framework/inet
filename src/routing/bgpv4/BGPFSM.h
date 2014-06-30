@@ -21,6 +21,8 @@
 #include <iostream>
 #include "Macho.h"
 
+namespace inet {
+
 class BGPSession;
 
 namespace BGPFSM {
@@ -219,6 +221,9 @@ private:
 };
 
 } // namespace BGPFSM
+
+} //namespace
+
 
 #endif
 

@@ -42,9 +42,14 @@ extern "C" {
 
 /* For a totally minimal and standalone system, we provide null
    definitions of the sys_ functions. */
+
+namespace inet {
+
 typedef u8_t sys_sem_t;
 typedef u8_t sys_mbox_t;
 struct sys_timeo {u8_t dummy;};
+
+} // namespace inet
 
 #define sys_init()
 #define sys_timeout(m,h,a)
@@ -76,6 +81,8 @@ struct sys_timeo {u8_t dummy;};
 
 #include "lwip/err.h"
 #include "arch/sys_arch.h"
+
+namespace inet {
 
 typedef void (* sys_timeout_handler)(void *arg);
 
@@ -138,7 +145,11 @@ void sys_mbox_fetch(sys_mbox_t mbox, void **msg);
 /* Thread functions. */
 sys_thread_t sys_thread_new(char *name, void (* thread)(void *arg), void *arg, int stacksize, int prio);
 
+} // namespace inet
+
 #endif /* NO_SYS */
+
+namespace inet {
 
 /** Returns the current time in milliseconds. */
 u32_t sys_now(void);
@@ -239,5 +250,8 @@ void sys_arch_unprotect(sys_prot_t pval);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_SYS_H__ */

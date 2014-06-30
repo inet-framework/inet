@@ -20,6 +20,8 @@
 
 #include "FlatNoiseBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -41,5 +43,8 @@ class INET_API ScalarNoise : public FlatNoiseBase
 };
 
 }
+
+} //namespace
+
 
 #endif

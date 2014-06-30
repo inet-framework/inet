@@ -21,6 +21,8 @@
 
 #include "FIFOQueue.h"
 
+using namespace inet;
+
 
 Define_Module(FIFOQueue);
 

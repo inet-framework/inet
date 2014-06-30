@@ -38,6 +38,8 @@
 #include <math.h>
 #include <platdep/intxtypes.h>
 
+namespace inet {
+
 
 class SCTPMessage;
 class SCTPCommand;
@@ -1355,5 +1357,8 @@ class INET_API SCTPAssociation : public cObject
             return (false);
         }
 };
+
+} //namespace
+
 
 #endif

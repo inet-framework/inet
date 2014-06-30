@@ -28,6 +28,8 @@
 #include "OSPFInterface.h"
 #include "OSPFTimer.h"
 
+namespace inet {
+
 namespace OSPF {
 
 class MessageHandler : public IMessageHandler {
@@ -64,6 +66,9 @@ public:
 };
 
 } // namespace OSPF
+
+} //namespace
+
 
 #endif // __INET_MESSAGEHANDLER_H
 

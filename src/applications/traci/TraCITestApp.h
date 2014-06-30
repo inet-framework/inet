@@ -27,6 +27,8 @@
 #include "LifecycleOperation.h"
 #include "TraCIMobility.h"
 
+namespace inet {
+
 /**
  * FIXME
  */
@@ -60,5 +62,8 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
     public:
         TraCITestApp() { traci = NULL; }
 };
+
+} //namespace
+
 
 #endif

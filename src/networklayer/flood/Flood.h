@@ -29,6 +29,8 @@
 #include "Address.h"
 #include "FloodDatagram.h"
 
+namespace inet {
+
 /**
  * @brief A simple flooding protocol
  *
@@ -151,5 +153,8 @@ protected:
      */
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+
+} //namespace
+
 
 #endif

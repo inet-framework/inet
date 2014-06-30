@@ -25,6 +25,8 @@
 
 #include "defs_aodv.h"
 
+namespace inet {
+
 #define K_PARAM   5
 
 /* Dynamic configuration values. Default numbers are for HELLO messages. */
@@ -69,5 +71,8 @@ extern int active_route_timeout;
 extern int ttl_start;
 extern int delete_period;
 #endif
+
+} //namespace
+
 
 #endif              /* _PARAMS_H */

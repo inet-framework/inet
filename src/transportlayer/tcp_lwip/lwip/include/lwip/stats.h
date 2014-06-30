@@ -37,6 +37,8 @@
 #include "lwip/mem.h"
 #include "lwip/memp.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -279,5 +281,8 @@ void stats_display_sys(struct stats_sys *sys);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_STATS_H__ */

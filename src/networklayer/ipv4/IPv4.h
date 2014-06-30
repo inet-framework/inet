@@ -31,6 +31,8 @@
 #include "ProtocolMap.h"
 #include "QueueBase.h"
 
+namespace inet {
+
 
 class ARPPacket;
 class ICMPMessage;
@@ -307,5 +309,8 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void start();
     virtual void flush();
 };
+
+} //namespace
+
 
 #endif

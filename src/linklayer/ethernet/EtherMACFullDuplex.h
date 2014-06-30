@@ -22,6 +22,8 @@
 
 #include "EtherMACBase.h"
 
+namespace inet {
+
 /**
  * A simplified version of EtherMAC. Since modern Ethernets typically
  * operate over duplex links where's no contention, the original CSMA/CD
@@ -63,6 +65,9 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     // statistics
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
 };
+
+} //namespace
+
 
 #endif
 

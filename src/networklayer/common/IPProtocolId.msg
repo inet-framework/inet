@@ -21,7 +21,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
-
+namespace inet;
 
 //
 // Protocol field: taken from RFC 1700.

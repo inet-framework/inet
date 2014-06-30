@@ -24,6 +24,8 @@
 
 #include "LineSegmentsMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * Random Waypoint mobility model. See NED file for more info.
@@ -52,5 +54,8 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
   public:
     RandomWPMobility();
 };
+
+} //namespace
+
 
 #endif

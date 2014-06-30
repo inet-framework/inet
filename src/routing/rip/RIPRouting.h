@@ -25,6 +25,8 @@
 #include "ILifecycle.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 #define RIP_INFINITE_METRIC 16
 
 struct RIPRoute : public cObject
@@ -213,5 +215,8 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
 
     virtual void sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface);
 };
+
+} //namespace
+
 
 #endif

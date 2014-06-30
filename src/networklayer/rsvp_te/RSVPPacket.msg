@@ -26,6 +26,7 @@ cplusplus {{
 #define HELLO_MESSAGE   7
 }}
 
+namespace inet;
 
 struct SessionObj_t;
 

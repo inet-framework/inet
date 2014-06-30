@@ -25,6 +25,8 @@
 #include "IPv4InterfaceData.h"
 #include "ManetAddress.h"
 
+using namespace inet;
+
 
 int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, const Address & destAdd, int32_t send_sock, BatmanIf *batman_if)
 {

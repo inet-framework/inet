@@ -21,7 +21,7 @@ cplusplus {{
 #include "Address.h"
 }}
 
-
+namespace inet;
 
 enum ManetControlType
 {

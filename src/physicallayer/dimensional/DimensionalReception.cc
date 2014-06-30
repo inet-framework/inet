@@ -17,6 +17,8 @@
 
 #include "DimensionalReception.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) const

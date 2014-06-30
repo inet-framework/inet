@@ -21,7 +21,10 @@
 
 #include "InspectorHelpers.h"
 
+
 using namespace std;
+
+namespace inet {
 
 ostream& operator<<(ostream& os, const std::vector<DYMO_AddressBlock>& abs)
 {
@@ -71,4 +74,6 @@ std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab)
     os << "}";
     return os;
 }
+
+} // namespace inet
 

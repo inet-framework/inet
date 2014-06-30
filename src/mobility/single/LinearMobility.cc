@@ -20,6 +20,8 @@
 #include "LinearMobility.h"
 #include "FWMath.h"
 
+using namespace inet;
+
 
 Define_Module(LinearMobility);
 

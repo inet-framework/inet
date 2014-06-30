@@ -38,28 +38,28 @@ cmdenv-express-mode=false
 # logfile-*.txt are same!!!
 
 %contains: logfile-0.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-1.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-2.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %contains: logfile-3.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
-#2:10000000896000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
-#4:20000000896000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:800000
+#2:10000000896000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000896000 (100 byte) discard:0, delay:0, duration:800000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:800000
+#4:20000000896000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000896000 (100 byte) discard:0, delay:0, duration:800000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout

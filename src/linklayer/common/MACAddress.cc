@@ -21,6 +21,8 @@
 #include "InterfaceToken.h"
 #include "IPv4Address.h"
 
+using namespace inet;
+
 unsigned int MACAddress::autoAddressCtr;
 bool MACAddress::simulationLifetimeListenerAdded;
 

@@ -24,6 +24,8 @@
 #include "TCPAppBase.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 /**
  * Single-connection TCP application.
  */
@@ -73,5 +75,8 @@ class INET_API TCPSessionApp : public TCPAppBase
     TCPSessionApp();
     virtual ~TCPSessionApp();
 };
+
+} //namespace
+
 
 #endif

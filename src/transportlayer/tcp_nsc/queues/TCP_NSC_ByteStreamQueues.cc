@@ -25,6 +25,8 @@
 #include "TCPSerializer.h"
 #include "TCPSegment.h"
 
+using namespace inet;
+
 
 Register_Class(TCP_NSC_ByteStreamSendQueue);
 

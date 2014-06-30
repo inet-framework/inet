@@ -13,6 +13,8 @@
 #include "ProbabilisticBroadcast.h"
 #include "Address.h"
 
+namespace inet {
+
 /**
  * @brief This class extends ProbabilisticBroadcast by adding
  *        an algorithm which adapts broadcasting parameters
@@ -52,5 +54,8 @@ protected:
     cOutVector  bvec;
     NeighborMap neighMap;
 };
+
+} //namespace
+
 
 #endif

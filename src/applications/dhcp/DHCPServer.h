@@ -31,6 +31,8 @@
 #include "ARP.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 /**
  * Implements a DHCP server. See NED file for more details.
  */
@@ -125,6 +127,9 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
         virtual ~DHCPServer();
 
 };
+
+} //namespace
+
 
 #endif
 

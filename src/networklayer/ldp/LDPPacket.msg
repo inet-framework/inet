@@ -22,6 +22,7 @@ cplusplus {{
 #define LDP_HEADER_BYTES  (LDP_BASEHEADER_BYTES+20)
 }}
 
+namespace inet;
 
 class noncobject IPv4Address;
 

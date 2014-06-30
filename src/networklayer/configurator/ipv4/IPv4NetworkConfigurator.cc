@@ -28,6 +28,8 @@
 #include "ModuleAccess.h"
 #include "XMLUtils.h"
 
+using namespace inet;
+
 Define_Module(IPv4NetworkConfigurator);
 
 #define ADDRLEN_BITS 32

@@ -49,6 +49,8 @@ static void printTQ(list_t * l);
 #endif
 #endif              /* NS_PORT */
 
+using namespace inet;
+
 
 #ifdef AODV_USE_STL
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)

@@ -46,6 +46,8 @@
 #include "OLSR_ETX.h"
 #include "OLSR_ETX_dijkstra.h"
 
+using namespace inet;
+
 
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8

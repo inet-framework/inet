@@ -24,6 +24,8 @@
 #include "LifecycleOperation.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 // Forward declarations:
 class EtherFrameWithLLC;
 
@@ -75,5 +77,8 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
   public:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
+
+} //namespace
+
 
 #endif

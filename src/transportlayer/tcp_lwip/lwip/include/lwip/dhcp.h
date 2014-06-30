@@ -110,6 +110,8 @@ struct dhcp_msg
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
 #  include "arch/epstruct.h"
+
+namespace inet {
 #endif
 
 /** start DHCP configuration */
@@ -242,5 +244,8 @@ void dhcp_fine_tmr(void);
 #endif
 
 #endif /* LWIP_DHCP */
+
+} //namespace
+
 
 #endif /*__LWIP_DHCP_H__*/

@@ -20,6 +20,8 @@
 #include "FWMath.h"
 #include "TractorMobility.h"
 
+using namespace inet;
+
 
 Define_Module(TractorMobility);
 

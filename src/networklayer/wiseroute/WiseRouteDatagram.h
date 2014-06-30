@@ -22,6 +22,8 @@
 #include "INetworkDatagram.h"
 #include "WiseRouteDatagram_m.h"
 
+namespace inet {
+
 /**
  * Represents an WiseRoute datagram. More info in the WiseRouteDatagram.msg file
  * (and the documentation generated from it).
@@ -42,5 +44,8 @@ class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetwor
     virtual int getTransportProtocol() const { return WiseRouteDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
 };
+
+} //namespace
+
 
 #endif

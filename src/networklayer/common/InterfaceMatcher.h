@@ -22,7 +22,9 @@
 #include "INETDefs.h"
 #include "InterfaceEntry.h"
 
-namespace inet { class PatternMatcher; }
+namespace inet {
+
+class PatternMatcher;
 
 /**
  * Utility class for configuring interfaces.
@@ -77,5 +79,8 @@ class INET_API InterfaceMatcher
         bool linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher &hostMatcher) const;
         void collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes, cModule *exludedNode) const;
 };
+
+} //namespace
+
 
 #endif /* INTERFACEMATCHER_H_ */

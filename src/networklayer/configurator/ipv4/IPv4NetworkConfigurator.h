@@ -32,6 +32,8 @@
 #include "IPv4InterfaceData.h"
 #include "PatternMatcher.h"
 
+namespace inet {
+
 
 /**
  * This module provides the global static configuration for the IPv4RoutingTable and
@@ -345,5 +347,8 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         // address resolver interface
         bool getInterfaceIPv4Address(Address &ret, InterfaceEntry * interfaceEntry, bool netmask);
 };
+
+} //namespace
+
 
 #endif

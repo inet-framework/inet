@@ -32,6 +32,8 @@
 #include "UDPSocket.h"
 #include "IIPv4RoutingTable.h"
 
+using namespace inet;
+
 Define_Module(RTP);
 
 simsignal_t RTP::rcvdPkSignal = registerSignal("rcvdPk");

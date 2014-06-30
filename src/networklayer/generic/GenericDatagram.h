@@ -24,6 +24,8 @@
 #include "GenericDatagram_m.h"
 #include "IPProtocolId_m.h"
 
+namespace inet {
+
 /**
  * Represents a generic datagram. More info in the GenericDatagram.msg file
  * (and the documentation generated from it).
@@ -43,5 +45,8 @@ class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDat
     virtual int getTransportProtocol() const {return GenericDatagram_Base::getTransportProtocol();}
     virtual void setTransportProtocol(int protocol) {GenericDatagram_Base::setTransportProtocol(protocol);}
 };
+
+} //namespace
+
 
 #endif

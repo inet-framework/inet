@@ -30,6 +30,8 @@
 #include "GenericDatagram.h"
 #endif
 
+using namespace inet;
+
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
 void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message)

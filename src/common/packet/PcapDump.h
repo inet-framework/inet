@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 // Foreign declarations:
 class IPv4Datagram;
 class IPv6Datagram;
@@ -76,6 +78,9 @@ class PcapDump
          */
         void closePcap();
 };
+
+
+} //namespace
 
 
 #endif // __INET_PCAPDUMP_H

@@ -39,6 +39,8 @@
 #include "BehaviorAggregateClassifier.h"
 #include "DiffservUtil.h"
 
+using namespace inet;
+
 using namespace DiffservUtil;
 
 Define_Module(BehaviorAggregateClassifier);

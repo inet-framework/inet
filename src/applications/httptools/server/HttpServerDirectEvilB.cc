@@ -17,6 +17,8 @@
 
 #include "HttpServerDirectEvilB.h"
 
+using namespace inet;
+
 Define_Module(HttpServerDirectEvilB);
 
 void HttpServerDirectEvilB::initialize(int stage)

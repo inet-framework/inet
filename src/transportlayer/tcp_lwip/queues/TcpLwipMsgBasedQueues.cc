@@ -24,6 +24,8 @@
 #include "TCPSerializer.h"
 #include "TCP_lwIP.h"
 
+using namespace inet;
+
 
 Register_Class(TcpLwipMsgBasedSendQueue);
 

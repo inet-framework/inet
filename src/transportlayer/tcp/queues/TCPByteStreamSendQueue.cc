@@ -21,6 +21,8 @@
 #include "ByteArrayMessage.h"
 #include "TCPSegment.h"
 
+using namespace inet;
+
 Register_Class(TCPByteStreamSendQueue);
 
 TCPByteStreamSendQueue::TCPByteStreamSendQueue() : TCPSendQueue()

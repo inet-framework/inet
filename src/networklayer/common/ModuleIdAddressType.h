@@ -23,6 +23,8 @@
 #include "ModuleIdAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
+namespace inet {
+
 class INET_API ModuleIdAddressType : public IAddressType
 {
     public:
@@ -40,5 +42,8 @@ class INET_API ModuleIdAddressType : public IAddressType
         virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModuleIdAddress(); } // TODO constant
 };
+
+} //namespace
+
 
 #endif

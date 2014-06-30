@@ -17,6 +17,8 @@
 #include "MACProtocolBase.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
     upperLayerOutGateId(-1),

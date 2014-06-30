@@ -19,6 +19,8 @@
 
 #include "LinearNodeDistributionMobility.h"
 
+using namespace inet;
+
 
 Define_Module(LinearNodeDistributionMobility);
 

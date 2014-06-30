@@ -17,6 +17,8 @@
 
 #include "ListeningDecision.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void ListeningDecision::printToStream(std::ostream &stream) const

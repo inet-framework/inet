@@ -20,6 +20,8 @@
 
 #include "ListeningBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -41,5 +43,8 @@ class INET_API BandListening : public ListeningBase
 };
 
 }
+
+} //namespace
+
 
 #endif

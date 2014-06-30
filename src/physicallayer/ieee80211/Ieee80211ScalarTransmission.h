@@ -21,6 +21,7 @@
 #include "ScalarTransmission.h"
 #include "WifiPreambleType.h"
 
+namespace inet {
 namespace physicallayer
 {
 
@@ -43,5 +44,7 @@ class INET_API Ieee80211ScalarTransmission : public ScalarTransmission
 };
 
 }
+
+} // namespace inet
 
 #endif

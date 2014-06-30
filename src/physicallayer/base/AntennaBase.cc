@@ -18,6 +18,8 @@
 #include "AntennaBase.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void AntennaBase::initialize(int stage)

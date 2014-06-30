@@ -4,5 +4,10 @@
 
 #include "EtherFrame_m.h"
 
+namespace inet {
+
+
+} //namespace
+
 
 #endif // __INET_ETHERFRAME_H_

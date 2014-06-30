@@ -8,6 +8,8 @@
 #include "UDPPacket_m.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 Define_Module(Batman);
 
 std::ostream& operator<<(std::ostream& os, const OrigNode& e)

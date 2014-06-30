@@ -13,10 +13,6 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-//
-// TODO generated message class
-//
-
 cplusplus {{
 #include "RTCPPacket1.h"
 #include "reports.h"
@@ -24,6 +20,9 @@ cplusplus {{
 }}
 
 class cArray;
+
+namespace inet;
+
 packet RTCPPacket;
 
 packet RTCPReceiverReportPacket extends RTCPPacket

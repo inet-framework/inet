@@ -29,6 +29,8 @@
 #include "Ieee8021dInterfaceData.h"
 #include "STPBase.h"
 
+namespace inet {
+
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
@@ -175,5 +177,8 @@ protected:
      */
     virtual void flushOtherPorts(unsigned int portNum);
 };
+
+} //namespace
+
 
 #endif

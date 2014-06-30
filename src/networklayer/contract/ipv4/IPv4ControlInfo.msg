@@ -16,19 +16,18 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
-enum IPProtocolId;
-
-class noncobject IPv4Address;
-class noncobject MACAddress;
-
 cplusplus {{
 #include "IPv4Address.h"
 #include "IPProtocolId_m.h"
 #include "MACAddress.h"
 }}
 
+namespace inet;
 
+enum IPProtocolId;
+
+class noncobject IPv4Address;
+class noncobject MACAddress;
 
 //
 // Control information for sending/receiving packets over IPv4.

@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * A module that just deletes every packet it receives, and collects
  * basic statistics (packet count, bit count, packet rate, bit rate).
@@ -40,6 +42,9 @@ class INET_API Sink : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };
+
+} //namespace
+
 
 #endif
 

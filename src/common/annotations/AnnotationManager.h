@@ -28,6 +28,8 @@
 #include "ModuleAccess.h"
 #include "Coord.h"
 
+namespace inet {
+
 /**
  * manages annotations on the OMNeT++ canvas.
  */
@@ -120,6 +122,9 @@ class INET_API AnnotationManager : public cSimpleModule
     Annotations annotations;
     Groups groups;
 };
+
+} //namespace
+
 
 #endif
 

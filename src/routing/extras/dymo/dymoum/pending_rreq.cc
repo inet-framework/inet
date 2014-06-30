@@ -38,6 +38,8 @@
 static DLIST_HEAD(PENDING_RREQ);
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 #ifdef MAPROUTINGTABLE
 pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t seqnum)
 {

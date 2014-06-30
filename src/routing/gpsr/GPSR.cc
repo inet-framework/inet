@@ -23,6 +23,8 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
+namespace inet {
+
 Define_Module(GPSR);
 
 // TODO: use some header?
@@ -644,3 +646,5 @@ void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
         // TODO: shall we remove the neighbor?
     }
 }
+
+} // namespace

@@ -29,6 +29,8 @@
 #include "PatternMatcher.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(GenericNetworkConfigurator);
 
 inline bool isEmpty(const char *s) {return !s || !s[0];}

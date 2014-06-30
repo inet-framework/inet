@@ -25,6 +25,8 @@
 #include "Topology.h"
 #include "STP.h"
 
+namespace inet {
+
 /**
  * Utility class for testing the STP protocol. First, it extracts the network
  * topology (network nodes marked with the @node NED property), regarding the
@@ -74,5 +76,8 @@ class INET_API STPTester : public cSimpleModule
         int getNumOfNodes();
         int getNumOfVisitedNodes();
 };
+
+} //namespace
+
 
 #endif

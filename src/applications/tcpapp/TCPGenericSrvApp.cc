@@ -24,6 +24,8 @@
 #include "TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
 
+using namespace inet;
+
 
 Define_Module(TCPGenericSrvApp);
 
@@ -161,7 +163,7 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
     else
     {
         // some indication -- ignore
-        EV_WARN << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << "(" << cEnum::get("TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
+        EV_WARN << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
         delete msg;
     }
 

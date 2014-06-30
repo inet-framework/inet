@@ -45,6 +45,8 @@
 #include "lwipopts.h"
 #include "lwip/debug.h"
 
+namespace inet {
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -1836,5 +1838,8 @@
 #ifndef DNS_DEBUG
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_OPT_H__ */

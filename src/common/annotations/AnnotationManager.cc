@@ -21,6 +21,8 @@
 
 #include "AnnotationManager.h"
 
+using namespace inet;
+
 
 Define_Module(AnnotationManager);
 

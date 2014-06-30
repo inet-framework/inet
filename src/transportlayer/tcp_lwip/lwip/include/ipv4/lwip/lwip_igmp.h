@@ -42,6 +42,8 @@
 
 #if LWIP_IGMP /* don't build if not configured for use in lwipopts.h */
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -157,6 +159,9 @@ void   igmp_send( struct igmp_group *group, u8_t type);
 }
 #endif
 
+} //namespace
+
 #endif /* LWIP_IGMP */
+
 
 #endif /* __LWIP_IGMP_H__ */

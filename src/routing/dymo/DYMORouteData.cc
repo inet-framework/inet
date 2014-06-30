@@ -4,6 +4,8 @@
 
 #include "DYMORouteData.h"
 
+namespace inet {
+
 DYMO_NAMESPACE_BEGIN
 
 DYMORouteData::DYMORouteData() {
@@ -15,3 +17,5 @@ DYMORouteData::DYMORouteData() {
 }
 
 DYMO_NAMESPACE_END
+
+} // namespace

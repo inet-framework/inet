@@ -20,6 +20,8 @@
 
 #include "MACAddress.h"
 
+namespace inet {
+
 /**
  * This purely virtual interface provides an abstraction for different link layer frames.
  */
@@ -32,5 +34,8 @@ class INET_API IMACFrame
     virtual MACAddress getDestinationAddress() const = 0;
     virtual void setDestinationAddress(const MACAddress & address) = 0;
 };
+
+} //namespace
+
 
 #endif

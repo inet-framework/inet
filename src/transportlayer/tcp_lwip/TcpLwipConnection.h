@@ -27,6 +27,8 @@
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
 
+namespace inet {
+
 // forward declarations:
 class TCP_lwIP;
 class TCPConnectInfo;
@@ -117,6 +119,9 @@ class INET_API TcpLwipConnection
 
     Stats *statsM;
 };
+
+} //namespace
+
 
 #endif
 

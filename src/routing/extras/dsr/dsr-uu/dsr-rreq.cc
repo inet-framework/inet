@@ -48,6 +48,8 @@ static unsigned int rreq_seqno;
 #define MAXTTL 255
 #endif
 
+namespace inet {
+
 #define STATE_IDLE          0
 #define STATE_IN_ROUTE_DISC 1
 
@@ -990,4 +992,7 @@ void NSCLASS rreq_timer_test(cMessage *msg)
             return;
     }
 }
+
+} // namespace
+
 #endif

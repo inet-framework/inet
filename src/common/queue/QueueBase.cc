@@ -18,6 +18,8 @@
 
 #include "QueueBase.h"
 
+using namespace inet;
+
 
 void QueueBase::initialize()
 {

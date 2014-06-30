@@ -21,6 +21,8 @@
 
 #include "IGMPMessage_m.h"
 
+namespace inet {
+
 
 /**
  * Converts between IGMPMessage and binary (network byte order) IGMP header.
@@ -41,6 +43,9 @@ class IGMPSerializer
          */
         void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
 };
+
+} //namespace
+
 
 #endif
 

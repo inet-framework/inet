@@ -20,6 +20,8 @@
 
 #include "BGPUpdate_m.h"
 
+namespace inet {
+
 class BGPUpdateMessage : public BGPUpdateMessage_Base
 {
 protected:
@@ -31,6 +33,9 @@ public:
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
     void setNLRI(const BGPUpdateNLRI& NLRI_var);
 };
+
+} //namespace
+
 
 #endif
 

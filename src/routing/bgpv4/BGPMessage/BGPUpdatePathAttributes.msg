@@ -20,6 +20,8 @@ cplusplus {{
 #include "BGPASPathSegment_m.h"
 }}
 
+namespace inet;
+
 class noncobject IPv4Address;
 class noncobject BGPASPathSegment;
 

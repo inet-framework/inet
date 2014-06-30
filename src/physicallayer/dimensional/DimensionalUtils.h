@@ -21,6 +21,8 @@
 #include "PhysicalLayerDefs.h"
 #include "MappingUtils.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -31,5 +33,8 @@ class INET_API DimensionalUtils
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -17,6 +17,8 @@
 
 #include "ApplicationBase.h"
 
+using namespace inet;
+
 ApplicationBase::ApplicationBase()
 {
 }

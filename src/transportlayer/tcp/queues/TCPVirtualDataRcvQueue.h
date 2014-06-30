@@ -27,6 +27,8 @@
 #include "TCPSegment.h"
 #include "TCPReceiveQueue.h"
 
+namespace inet {
+
 
 /**
  * Receive queue that manages "virtual bytes", that is, byte counts only.
@@ -129,5 +131,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 
     virtual uint32 getFirstSeqNo();
 };
+
+} //namespace
+
 
 #endif

@@ -19,6 +19,8 @@
 #include "ANSimMobility.h"
 #include "FWMath.h"
 
+using namespace inet;
+
 
 Define_Module(ANSimMobility);
 

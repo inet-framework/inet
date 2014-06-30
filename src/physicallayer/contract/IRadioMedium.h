@@ -28,6 +28,8 @@
 #include "IReceptionDecision.h"
 #include "IListeningDecision.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -115,5 +117,8 @@ class INET_API IRadioMedium : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -32,6 +32,8 @@
 #include "ICMPMessage_m.h"
 #include "ModuleAccess.h"
 
+namespace inet {
+
 unsigned int DSRUU::confvals[CONFVAL_MAX];
 //simtime_t DSRUU::current_time;
 struct dsr_pkt * DSRUU::lifoDsrPkt;
@@ -1064,3 +1066,4 @@ bool DSRUU::proccesICMP(cMessage *msg)
     return true;
  }
 
+} // namespace

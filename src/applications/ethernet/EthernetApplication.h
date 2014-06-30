@@ -16,6 +16,8 @@
 #include "INETDefs.h"
 #include "MACAddress.h"
 
+namespace inet {
+
 #define MAX_REPLY_CHUNK_SIZE   1497
 
 
@@ -68,6 +70,9 @@ class INET_API EthernetApplication : public cSimpleModule
     virtual void receivePacket(cMessage *msg);
 
 };
+
+} //namespace
+
 
 #endif
 

@@ -29,6 +29,8 @@
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 
+using namespace inet;
+
 Define_Module(DHCPServer);
 
 DHCPServer::DHCPServer()

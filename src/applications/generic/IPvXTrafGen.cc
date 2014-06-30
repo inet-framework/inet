@@ -26,6 +26,8 @@
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
+using namespace inet;
+
 
 Define_Module(IPvXTrafGen);
 

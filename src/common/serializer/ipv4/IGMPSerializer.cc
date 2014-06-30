@@ -17,6 +17,7 @@
 
 #include <platdep/sockets.h>
 #include "headers/defs.h"
+
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
@@ -35,7 +36,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 
 using namespace INETFw;
-
+using namespace inet;
 
 int IGMPSerializer::serialize(const IGMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
 {

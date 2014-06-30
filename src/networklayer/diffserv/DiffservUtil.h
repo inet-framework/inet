@@ -23,6 +23,8 @@
 #include "INETDefs.h"
 #include "IInterfaceTable.h"
 
+using namespace inet;
+
 namespace DiffservUtil
 {
     // colors for naming the output of meters
@@ -113,4 +115,6 @@ namespace DiffservUtil
      */
     void setColor(cPacket *packet, int color);
 }
+
+
 #endif

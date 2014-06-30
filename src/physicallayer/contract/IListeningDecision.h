@@ -21,6 +21,8 @@
 #include "IPrintableObject.h"
 #include "IListening.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -38,5 +40,8 @@ class INET_API IListeningDecision : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

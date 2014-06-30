@@ -18,6 +18,8 @@
 #include <assert.h>
 #include "MappingBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 //---Dimension implementation-----------------------------

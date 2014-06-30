@@ -25,6 +25,8 @@
 
 using namespace std;
 
+namespace inet {
+
 class MeterTestApp : public cSimpleModule
 {
     int numPackets;
@@ -96,3 +98,6 @@ void MeterTestApp::handleMessage(cMessage *msg)
       delete msg;
     }
 }
+
+} // namespace inet
+

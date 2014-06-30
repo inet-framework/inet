@@ -34,6 +34,8 @@
 #include <dlfcn.h>
 #include <netinet/in.h>
 
+using namespace inet;
+
 
 struct nsc_iphdr
 {

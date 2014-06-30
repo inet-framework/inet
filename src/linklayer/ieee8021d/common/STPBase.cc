@@ -21,6 +21,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 static const char *ENABLED_LINK_COLOR = "#000000";
 static const char *DISABLED_LINK_COLOR = "#bbbbbb";
 static const char *ROOT_SWITCH_COLOR = "#a5ffff";

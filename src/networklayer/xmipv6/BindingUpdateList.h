@@ -28,6 +28,8 @@
 
 #include "IPv6Address.h"
 
+namespace inet {
+
 // Foreign declarations:
 class InterfaceEntry;
 
@@ -282,6 +284,9 @@ class INET_API BindingUpdateList : public cSimpleModule
      */
     virtual void resetBindingCacheEntry(BindingUpdateListEntry& entry);
 };
+
+} //namespace
+
 
 #endif
 

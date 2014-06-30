@@ -19,6 +19,8 @@
 #include "Ieee80211MgmtAdhoc.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 
 Define_Module(Ieee80211MgmtAdhoc);
 

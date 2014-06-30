@@ -20,6 +20,8 @@
 
 #include "PropagationBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 };
 
 }
+
+} //namespace
+
 
 #endif

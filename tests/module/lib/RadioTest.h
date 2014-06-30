@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 class INET_API RadioTest : public cSimpleModule
 {
   public:
@@ -28,5 +30,7 @@ class INET_API RadioTest : public cSimpleModule
   protected:
     virtual void initialize(int stage);
 };
+
+} // namespace inet
 
 #endif

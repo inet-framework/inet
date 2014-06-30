@@ -30,6 +30,8 @@
 #include "NodeStatus.h"
 #include "STPBase.h"
 
+namespace inet {
+
 /**
  * Implements the Spanning Tree Protocol. See the NED file for details.
  */
@@ -250,5 +252,8 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
 
     return os;
 }
+
+} //namespace
+
 
 #endif

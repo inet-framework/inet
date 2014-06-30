@@ -20,6 +20,8 @@
 
 #include "AttenuationBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -31,5 +33,8 @@ class INET_API ScalarAttenuation : public AttenuationBase
 };
 
 }
+
+} //namespace
+
 
 #endif

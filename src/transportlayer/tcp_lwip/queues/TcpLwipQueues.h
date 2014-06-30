@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 // forward declarations:
 class TcpLwipConnection;
 class TCPSegment;
@@ -211,5 +213,8 @@ class INET_API TcpLwipReceiveQueue : public cObject
   protected:
     TcpLwipConnection *connM;
 };
+
+} //namespace
+
 
 #endif

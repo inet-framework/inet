@@ -8,6 +8,8 @@
 //#endif
 #include <omnetpp.h>
 
+namespace inet {
+
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;
 #endif
@@ -94,5 +96,8 @@ struct iphdr
     u_int32_t daddr;
     /*The options start here. */
 };
+
+} //namespace
+
 
 #endif              /* _DSR_H */

@@ -23,6 +23,8 @@
 #include "INetworkProtocolControlInfo.h"
 #include "InterfaceEntry.h"
 
+namespace inet {
+
 /**
  * This class provides the abstract interface for different address types.
  */
@@ -43,5 +45,8 @@ class INET_API IAddressType
          */
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
 };
+
+} //namespace
+
 
 #endif

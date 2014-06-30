@@ -22,6 +22,8 @@
 
 #include "IPv4.h"
 
+using namespace inet;
+
 Define_Module(CloudDelayerBase);
 
 #define SRCPAR "incomingInterfaceID"

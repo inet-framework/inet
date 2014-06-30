@@ -35,6 +35,8 @@
 #include "IPv6RoutingTable.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 
 #define MK_SEND_PERIODIC_BU            1
 // 18.09.07 - CB

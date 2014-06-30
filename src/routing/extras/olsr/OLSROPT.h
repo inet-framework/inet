@@ -33,6 +33,8 @@
 #define __OLSROPT_omnet_h__
 #include "OLSR.h"
 
+namespace inet {
+
 
 class OLSROPT : public OLSR
 {
@@ -63,5 +65,8 @@ class OLSROPT : public OLSR
     virtual void nb_loss(OLSR_link_tuple* tuple);
 
 };
+
+} //namespace
+
 
 #endif

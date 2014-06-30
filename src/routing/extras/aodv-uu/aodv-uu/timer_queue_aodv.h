@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *****************************************************************************/
 #ifndef _TIMER_QUEUE_H
@@ -30,6 +30,8 @@
 
 #include "defs_aodv.h"
 #include "list.h"
+
+namespace inet {
 
 #ifdef NS_PORT
 typedef void (AODVUU::*timeout_func_t) (void *);
@@ -84,6 +86,9 @@ static inline int timeval_add_msec(struct timeval *t, unsigned long msec)
 
     return 0;
 }
+
+} //namespace
+
 #endif              /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
@@ -115,5 +120,6 @@ void NS_CLASS printTQ();
 #endif              /* NS_PORT */
 
 #endif              /* NS_NO_DECLARATIONS */
+
 
 #endif              /* TIMER_QUEUE_H */

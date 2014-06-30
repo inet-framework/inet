@@ -21,6 +21,8 @@
 #include "IRadio.h"
 #include "ITransmission.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -68,5 +70,8 @@ class INET_API TransmissionBase : public virtual ITransmission
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -26,6 +26,8 @@
 #include "IPv6ErrorHandling.h"
 #include "IPv6Datagram.h"
 
+using namespace inet;
+
 Define_Module(IPv6ErrorHandling);
 
 void IPv6ErrorHandling::initialize()
@@ -76,7 +78,7 @@ void IPv6ErrorHandling::handleMessage(cMessage *msg)
             break;
         }
         default:
-            cEnum *e = cEnum::get("ICMPv6Type");
+            cEnum *e = cEnum::get("inet::ICMPv6Type");
             const char *str = e->getStringFor(type);
             if (str)
                 EV_ERROR << " " << str << endl;

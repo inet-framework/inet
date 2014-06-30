@@ -30,6 +30,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 //#define STATIC_BLOCK
 #define STATIC_BLOCK_SIZE 600
 // this structures are a redifinition of def.h struct for omnet
@@ -201,6 +203,9 @@ struct Dymo_HELLO : public DYMO_element
 {
     explicit Dymo_HELLO(const char *name = "HELLO_DymoMsg") : DYMO_element(name) {}
 };
+
+
+} //namespace
 
 
 #endif

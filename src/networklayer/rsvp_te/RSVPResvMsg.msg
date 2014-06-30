@@ -19,6 +19,7 @@ cplusplus {{
 #include "RSVPPacket.h"
 }}
 
+namespace inet;
 
 struct RsvpHopObj_t;
 

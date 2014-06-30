@@ -28,6 +28,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 enum ModulationClass {
   /** Modulation class unknown or unspecified. A WifiMode with this
   WifiModulationClass has not been properly initialised. */
@@ -174,5 +176,12 @@ private:
 
 bool operator==(const ModulationType &a, const ModulationType &b);
 
+inline std::ostream& operator<<(std::ostream& out, const ModulationType& m)
+{
+    //FIXME TODO implements operator<<
+    return out;
+}
+
+} //namespace
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "OSPFInterfaceStateDown.h"
 
+using namespace inet;
+
 
 void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

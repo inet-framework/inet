@@ -24,6 +24,8 @@
 #include "ReassemblyBuffer.h"
 #include "IPv6Address.h"
 
+namespace inet {
+
 class ICMPv6;
 class IPv6Datagram;
 class IPv6FragmentHeader;
@@ -102,6 +104,9 @@ class INET_API IPv6FragBuf
      */
     void purgeStaleFragments(simtime_t lastupdate);
 };
+
+} //namespace
+
 
 #endif
 

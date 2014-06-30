@@ -29,6 +29,7 @@
 #else
 #include <netinet/in.h>
 #include <sys/types.h>
+
 #endif
 #define ICMP_ECHOREPLY_SIZE 8
 #define ICMP_SEND_BUF_SIZE  4096

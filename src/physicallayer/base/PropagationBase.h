@@ -20,6 +20,8 @@
 
 #include "IPropagation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API PropagationBase : public cModule, public IPropagation
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -27,6 +27,8 @@
 #include "Ieee802Ctrl.h"
 #include "IPSocket.h"
 
+using namespace inet;
+
 Define_Module(GenericNetworkProtocol);
 
 void GenericNetworkProtocol::initialize()

@@ -15,6 +15,8 @@
 
 #include "ByteArray.h"
 
+using namespace inet;
+
 
 void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 {

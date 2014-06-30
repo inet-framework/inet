@@ -40,6 +40,8 @@
 #include <vector>
 #include <set>
 
+namespace inet {
+
 class ManetRoutingBase;
 
 class IARP;
@@ -405,5 +407,8 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
 };
 
 #define interface80211ptr getInterfaceWlanByAddress()
+} //namespace
+
+
 #endif
 

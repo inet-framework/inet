@@ -18,6 +18,8 @@
 #include "IPSocket.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 #define NOforwardHello
 
 Define_Module(DSDV_2);

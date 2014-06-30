@@ -40,6 +40,8 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
 
 

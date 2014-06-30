@@ -18,6 +18,8 @@
 
 #include "RSVPPathMsg_m.h"
 
+namespace inet {
+
 
 /**
  * RSVP PATH message
@@ -89,6 +91,9 @@ class RSVPPathError : public RSVPPathError_Base
     inline SenderTspecObj_t& getSenderTspec() {return getSender_descriptor().Sender_Tspec_Object;}
     inline void setSenderTspec(const SenderTspecObj_t& s) {getSender_descriptor().Sender_Tspec_Object = s;}
 };
+
+} //namespace
+
 
 #endif
 

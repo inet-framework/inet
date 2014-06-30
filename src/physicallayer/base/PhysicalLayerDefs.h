@@ -22,6 +22,8 @@
 #include "FWMath.h"
 #include "Units.h"
 
+namespace inet {
+
 #define qNaN std::numeric_limits<double>::quiet_NaN()
 #define sNaN std::numeric_limits<double>::signaling_NaN()
 #define NaN qNaN
@@ -30,5 +32,8 @@
 #define NEGATIVE_INFINITY -std::numeric_limits<double>::infinity()
 
 using namespace units::values;
+
+} //namespace
+
 
 #endif

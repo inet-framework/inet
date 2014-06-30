@@ -23,6 +23,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * This class provides network addresses using the module path to interface modules.
  * The module path address supports unspecified, broadcast and multicast addresses too.
@@ -65,5 +67,8 @@ class INET_API ModulePathAddress
 
         std::string str() const;
 };
+
+} //namespace
+
 
 #endif

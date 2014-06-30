@@ -18,6 +18,8 @@
 
 #include "RTPAVProfile.h"
 
+using namespace inet;
+
 
 Define_Module(RTPAVProfile);
 

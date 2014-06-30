@@ -18,6 +18,8 @@
 #include "DumbTCP.h"
 #include "TCP.h"
 
+using namespace inet;
+
 Register_Class(DumbTCP);
 
 

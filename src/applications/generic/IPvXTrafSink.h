@@ -26,6 +26,8 @@
 #include "Address.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 
 /**
  * Consumes and prints packets received from the IP module. See NED for more info.
@@ -46,6 +48,9 @@ class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
+
+} //namespace
+
 
 #endif
 

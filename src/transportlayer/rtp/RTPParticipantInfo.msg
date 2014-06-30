@@ -22,6 +22,8 @@ cplusplus {{
 #include "IPv4Address.h"
 }}
 
+namespace inet;
+
 class noncobject IPv4Address;
 
 ///**

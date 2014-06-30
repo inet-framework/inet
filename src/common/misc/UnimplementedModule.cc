@@ -17,6 +17,8 @@
 
 #include "UnimplementedModule.h"
 
+using namespace inet;
+
 Define_Module(UnimplementedModule);
 
 

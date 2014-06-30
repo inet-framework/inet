@@ -20,11 +20,16 @@
 
 #include "IMACProtocolControlInfo.h"
 
+namespace inet {
+
 class INET_API IMACProtocol {
   public:
     virtual ~IMACProtocol() { }
 
 //    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
+
+} //namespace
+
 
 #endif

@@ -20,6 +20,8 @@
 
 #include "AntennaBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -41,5 +43,8 @@ class INET_API DipoleAntenna : public AntennaBase
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -26,6 +26,8 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(EtherAppCli);
 
 simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");

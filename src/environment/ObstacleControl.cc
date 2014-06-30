@@ -23,6 +23,8 @@
 
 #include "ObstacleControl.h"
 
+using namespace inet;
+
 
 Define_Module(ObstacleControl);
 

@@ -34,6 +34,8 @@
 
 #include "lwip/opt.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -99,5 +101,8 @@ u32_t ntohl(u32_t x);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_INET_H__ */

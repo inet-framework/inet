@@ -30,6 +30,7 @@
 #ifndef NS_PORT
 #include <net/if.h>
 #include <netinet/in.h>
+
 #define NS_CLASS
 #define NS_STATIC   static
 #define NS_INLINE   inline
@@ -75,6 +76,8 @@
 #define DEV_IFINDEX(n) (this_host.devs[n])
 #define DEV_NR(n) (this_host.devs[n])
 #endif
+
+namespace inet {
 /* Data for a network device */
 struct dev_info
 {
@@ -96,7 +99,7 @@ struct host_info
     int         nif;        /* Number of interfaces to broadcast on */
     struct dev_info devs[DYMO_MAX_NR_INTERFACES];
 };
-
+} //namespace
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
@@ -158,5 +161,6 @@ static inline struct dev_info *devfromicmpsock(int icmp_sock)
 }
 
 #endif  /* NS_PORT */
+
 
 #endif  /* __DEFS_H__ */

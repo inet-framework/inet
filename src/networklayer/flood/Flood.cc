@@ -26,6 +26,8 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 
+using namespace inet;
+
 using std::endl;
 
 Define_Module(Flood);

@@ -20,7 +20,7 @@ cplusplus {{
 #include "Address.h"
 }}
 
-
+namespace inet;
 
 cplusplus {{
 typedef cPacket *cPacketPtr;

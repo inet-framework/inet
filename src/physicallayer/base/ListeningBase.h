@@ -20,6 +20,8 @@
 
 #include "IListening.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -53,5 +55,8 @@ class INET_API ListeningBase : public IListening
 };
 
 }
+
+} //namespace
+
 
 #endif

@@ -22,6 +22,8 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
+using namespace inet;
+
 
 Define_Module(TCPSessionApp);
 

@@ -18,6 +18,9 @@
 #include "lwip/opt.h"
 #include "lwip/lwip_tcp.h"
 
+
+namespace inet {
+
 //forward declarations:
 class Address;
 struct pbuf;
@@ -62,3 +65,6 @@ class LwipTcpStackIf
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
             const void *dataptr, int len) = 0;
 };
+
+} // namespae inet
+

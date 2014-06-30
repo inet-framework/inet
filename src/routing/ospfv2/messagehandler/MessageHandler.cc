@@ -21,6 +21,8 @@
 #include "ICMPMessage.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, cSimpleModule* containingModule) :
     OSPF::IMessageHandler(containingRouter),

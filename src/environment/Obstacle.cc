@@ -20,6 +20,8 @@
 #include <set>
 #include "Obstacle.h"
 
+using namespace inet;
+
 
 typedef std::pair<Coord, double> CoordFrac;
 

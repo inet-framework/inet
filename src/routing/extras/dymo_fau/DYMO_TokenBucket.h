@@ -40,6 +40,8 @@
 #include "DYMO_DataQueue.h"
 #include "DYMO_Timeout_m.h"
 
+namespace inet {
+
 //===========================================================================================
 // class DYMO_TokenBucket: Simple rate limiting mechanism
 //===========================================================================================
@@ -58,6 +60,9 @@ class DYMO_TokenBucket
     simtime_t lastUpdate;
 
 };
+
+} //namespace
+
 
 #endif
 

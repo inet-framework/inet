@@ -18,6 +18,8 @@
 
 #include "RotatingMobilityBase.h"
 
+namespace inet {
+
 class LinearRotatingMobilityBase : public RotatingMobilityBase
 {
   protected:
@@ -42,5 +44,8 @@ class LinearRotatingMobilityBase : public RotatingMobilityBase
   public:
     LinearRotatingMobilityBase();
 };
+
+} //namespace
+
 
 #endif /* LINEARROTATINGMOBILITYBASE_H_ */

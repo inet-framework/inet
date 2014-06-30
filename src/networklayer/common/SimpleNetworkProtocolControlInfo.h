@@ -22,6 +22,8 @@
 #include "SimpleNetworkProtocolControlInfo_m.h"
 #include "INetworkProtocolControlInfo.h"
 
+namespace inet {
+
 class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
 {
   private:
@@ -44,5 +46,8 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     virtual short getHopLimit() const { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
+
+} //namespace
+
 
 #endif

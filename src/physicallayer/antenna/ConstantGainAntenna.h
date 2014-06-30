@@ -20,6 +20,8 @@
 
 #include "AntennaBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API ConstantGainAntenna : public AntennaBase
 };
 
 }
+
+} //namespace
+
 
 #endif

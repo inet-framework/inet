@@ -20,6 +20,8 @@
 
 #include "Address.h"
 
+namespace inet {
+
 class INET_API INetworkProtocolControlInfo {
   public:
     virtual ~INetworkProtocolControlInfo() { }
@@ -34,5 +36,8 @@ class INET_API INetworkProtocolControlInfo {
     virtual short getHopLimit() const = 0;
     virtual void setHopLimit(short hopLimit) = 0;
 };
+
+} //namespace
+
 
 #endif

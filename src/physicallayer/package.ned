@@ -1,3 +1,3 @@
 package inet.physicallayer;
 
-@namespace(physicallayer);
+@namespace(inet::physicallayer);

@@ -42,6 +42,8 @@
 #endif
 
 
+using namespace inet;
+
 Address AddressResolver::resolve(const char *s, int addrType)
 {
     Address addr;

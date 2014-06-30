@@ -22,6 +22,8 @@
 #include "EulerAngles.h"
 #include "IPrintableObject.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -48,5 +50,8 @@ class INET_API IArrival : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

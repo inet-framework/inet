@@ -5,6 +5,8 @@
 #include "dymo_msg_struct.h"
 #include "IPv4Address.h"
 
+using namespace inet;
+
 
 #define DYMO_RE_TYPE    1
 #define DYMO_RERR_TYPE  2

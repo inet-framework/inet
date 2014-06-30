@@ -40,6 +40,7 @@
 #include "GenericNetworkProtocolInterfaceData.h"
 #endif
 
+using namespace inet;
 
 Register_Abstract_Class(InterfaceEntryChangeDetails);
 Register_Abstract_Class(InterfaceEntry);

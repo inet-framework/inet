@@ -25,6 +25,8 @@
 #include "IReceptionDecision.h"
 #include "RadioControlInfo_m.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -105,5 +107,8 @@ class INET_API IReceiver : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

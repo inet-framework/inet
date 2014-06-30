@@ -18,6 +18,8 @@
 #include "BGPFSM.h"
 #include "BGPSession.h"
 
+using namespace inet;
+
 using namespace BGPFSM;
 
 //TopState

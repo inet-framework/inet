@@ -20,6 +20,8 @@
 #include "MACAddress.h"
 #include "IMACAddressTable.h"
 
+namespace inet {
+
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
  */
@@ -35,6 +37,7 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
                 AddressEntry(unsigned int vid, int portno, simtime_t insertionTime) :
                         vid(vid), portno(portno), insertionTime(insertionTime) { }
         };
+
         friend std::ostream& operator<<(std::ostream& os, const AddressEntry& entry);
 
         struct MAC_compare
@@ -130,5 +133,8 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
         virtual void setAgingTime(simtime_t agingTime);
         virtual void resetDefaultAging();
 };
+
+} //namespace
+
 
 #endif

@@ -24,6 +24,11 @@ cplusplus {{
 #include <vector>
 #include <sys/types.h>
 #include "InspectorHelpers.h"
+}}
+
+namespace inet;
+
+cplusplus {{
 typedef std::vector<DYMO_AddressBlock> VectorOfDYMOAddressBlocks;
 }}
 

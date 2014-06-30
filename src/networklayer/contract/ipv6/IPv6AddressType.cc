@@ -21,6 +21,8 @@
 #include "IPv6InterfaceData.h"
 #endif
 
+using namespace inet;
+
 IPv6AddressType IPv6AddressType::INSTANCE;
 
 const IPv6Address IPv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");

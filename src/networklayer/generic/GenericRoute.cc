@@ -18,6 +18,8 @@
 #include "GenericRoute.h"
 #include "GenericRoutingTable.h"
 
+using namespace inet;
+
 std::string GenericRoute::info() const
 {
     return ""; //TODO

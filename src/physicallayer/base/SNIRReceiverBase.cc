@@ -18,6 +18,8 @@
 #include "SNIRReceiverBase.h"
 #include "ReceptionDecision.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 void SNIRReceiverBase::initialize(int stage)

@@ -21,6 +21,8 @@
 #include "TCPSocketMap.h"
 #include "HttpServerBase.h"
 
+namespace inet {
+
 /**
  * HttpServerDirect module.
  *
@@ -52,6 +54,9 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         virtual void socketClosed(int connId, void *yourPtr);
         virtual void socketFailure(int connId, void *yourPtr, int code);
 };
+
+} //namespace
+
 
 #endif
 

@@ -21,6 +21,8 @@
 #include "AddressResolver.h"
 #include "LifecycleOperation.h"
 
+using namespace inet;
+
 Define_Module(LifecycleController);
 
 

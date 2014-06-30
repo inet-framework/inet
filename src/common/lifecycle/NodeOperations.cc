@@ -20,6 +20,8 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Register_Class(NodeStartOperation);
 Register_Class(NodeShutdownOperation);
 Register_Class(NodeCrashOperation);

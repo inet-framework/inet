@@ -24,6 +24,8 @@
 #include "INETDefs.h"
 #include "RTPParticipantInfo.h"
 
+namespace inet {
+
 /**
  * This class, a subclass of RTPParticipantInfo, is used for storing information
  * about other RTP endsystems.
@@ -207,5 +209,8 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
 
     FILE * packetSequenceLostLogFile;
 };
+
+} //namespace
+
 
 #endif

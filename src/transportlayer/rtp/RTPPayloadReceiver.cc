@@ -23,6 +23,8 @@
 #include "RTPInnerPacket.h"
 #include "RTPPacket.h"
 
+using namespace inet;
+
 
 Define_Module(RTPPayloadReceiver);
 

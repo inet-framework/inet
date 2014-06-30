@@ -28,6 +28,8 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/mathematics.h>
+
+namespace inet {
 };
 
 /**
@@ -52,6 +54,9 @@ class AudioOutFile
     AVStream *audio_st;
     AVFormatContext *oc;
 };
+
+
+} //namespace
 
 
 #endif // VOIPSTREAM_AUDIOOUTFILE_H

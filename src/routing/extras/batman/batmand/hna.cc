@@ -84,6 +84,8 @@ void hna_init(void)
 }
 #endif
 
+using namespace inet;
+
 /* this function can be called when the daemon starts or at runtime */
 void Batman::hna_local_task_add_ip(const Address &ip_addr, uint16_t netmask, uint8_t route_action)
 {

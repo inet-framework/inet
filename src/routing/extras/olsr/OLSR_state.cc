@@ -29,6 +29,8 @@
 #include "OLSR_state.h"
 #include "OLSR.h"
 
+using namespace inet;
+
 /********** MPR Selector Set Manipulation **********/
 
 OLSR_mprsel_tuple*

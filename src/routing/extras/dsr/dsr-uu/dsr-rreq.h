@@ -18,6 +18,8 @@
 
 #ifndef NO_GLOBALS
 
+namespace inet {
+
 struct dsr_rreq_opt
 {
     u_int8_t type;
@@ -31,6 +33,9 @@ struct dsr_rreq_opt
 #define DSR_RREQ_OPT_LEN (DSR_RREQ_HDR_LEN - 2)
 #define DSR_RREQ_TOT_LEN IP_HDR_LEN + sizeof(struct dsr_opt_hdr) + sizeof(struct dsr_rreq_opt)
 #define DSR_RREQ_ADDRS_LEN(rreq_opt) (rreq_opt->length - 6)
+
+
+} //namespace
 
 #endif              /* NO_GLOBALS */
 
@@ -55,5 +60,6 @@ void rreq_timer_test(cMessage *);
 #endif
 
 #endif              /* NO_DECLS */
+
 
 #endif              /* _DSR_RREQ */

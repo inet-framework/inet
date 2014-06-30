@@ -19,9 +19,10 @@
 
 cplusplus {{
 #include "INETDefs.h"
-
 #include "MACAddress.h"
 }}
+
+namespace inet;
 
 class noncobject MACAddress;
 

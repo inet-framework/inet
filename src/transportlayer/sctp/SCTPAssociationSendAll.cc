@@ -24,6 +24,8 @@
 #include <assert.h>
 #include <algorithm>
 
+using namespace inet;
+
 
 void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables* chunk,
                                                               SCTPPathVariables* path)

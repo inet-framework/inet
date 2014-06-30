@@ -17,6 +17,8 @@
 
 #include "ScalarNoise.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

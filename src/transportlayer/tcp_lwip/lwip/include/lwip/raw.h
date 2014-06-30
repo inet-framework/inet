@@ -41,6 +41,8 @@
 #include "lwip/ip.h"
 #include "lwip/ip_addr.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -92,6 +94,9 @@ u8_t             raw_input      (struct pbuf *p, struct netif *inp);
 }
 #endif
 
+} //namespace
+
 #endif /* LWIP_RAW */
 
 #endif /* __LWIP_RAW_H__ */
+

@@ -21,6 +21,8 @@
 
 #include "IModulation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -65,5 +67,8 @@ class INET_API QAM256Modulation : public IModulation
 };
 
 }
+
+} //namespace
+
 
 #endif

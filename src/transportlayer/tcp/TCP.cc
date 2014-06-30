@@ -44,6 +44,8 @@
 #include "TCPVirtualDataRcvQueue.h"
 #include "TCPVirtualDataSendQueue.h"
 
+using namespace inet;
+
 
 Define_Module(TCP);
 

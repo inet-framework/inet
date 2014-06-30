@@ -38,6 +38,8 @@
 
 #include "Address.h"
 
+namespace inet {
+
 typedef Address nsaddr_t;
 
 //#ifndef nsaddr_t
@@ -331,5 +333,8 @@ typedef std::vector<OLSR_nb2hop_tuple*>     nb2hopset_t;    ///< 2-hop Neighbor 
 typedef std::vector<OLSR_topology_tuple*>   topologyset_t;  ///< Topology Set type.
 typedef std::vector<OLSR_dup_tuple*>        dupset_t;   ///< Duplicate Set type.
 typedef std::vector<OLSR_iface_assoc_tuple*>    ifaceassocset_t; ///< Interface Association Set type.
+
+} //namespace
+
 
 #endif

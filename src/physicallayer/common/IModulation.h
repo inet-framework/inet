@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -35,6 +37,9 @@ class INET_API IModulation
 };
 
 }
+
+} //namespace
+
 
 #endif
 

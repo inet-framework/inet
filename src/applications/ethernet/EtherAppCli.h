@@ -24,6 +24,8 @@
 #include "NodeStatus.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 
 /**
  * Simple traffic generator for the Ethernet model.
@@ -78,5 +80,8 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
     virtual ~EtherAppCli();
 
 };
+
+} //namespace
+
 
 #endif

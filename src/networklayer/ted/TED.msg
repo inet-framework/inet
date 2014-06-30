@@ -15,7 +15,11 @@
 
 cplusplus {{
 #include "IPv4Address.h"
+}}
 
+namespace inet;
+
+cplusplus {{
 #define LINK_STATE_MESSAGE      1
 
 typedef std::vector<struct TELinkStateInfo> TELinkStateInfoVector;

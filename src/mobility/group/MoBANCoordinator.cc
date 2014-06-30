@@ -47,6 +47,8 @@
 #include "MoBANCoordinator.h"
 #include "MoBANLocal.h"
 
+using namespace inet;
+
 Define_Module(MoBANCoordinator);
 
 void MoBANCoordinator::initialize(int stage)

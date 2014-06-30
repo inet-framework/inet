@@ -22,6 +22,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 //Forward declarations:
 class RTPInnerPacket;
@@ -213,5 +215,8 @@ class INET_API RTPProfile : public cSimpleModule
      */
     bool _autoOutputFileNames;
 };
+
+} //namespace
+
 
 #endif

@@ -41,6 +41,8 @@
 extern int llfeedback;
 #endif              /* NS_PORT */
 
+using namespace inet;
+
 
 /* Add/Update neighbor from a non HELLO AODV control message... */
 void NS_CLASS neighbor_add(AODV_msg * aodv_msg, struct in_addr source,

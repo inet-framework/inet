@@ -22,6 +22,8 @@
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 
+namespace inet {
+
 class PingPayload;
 
 #define PING_HISTORY_SIZE 10 // how many ping request's send time is stored
@@ -89,3 +91,4 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
          PingApp();
          virtual ~PingApp();
 };
+}

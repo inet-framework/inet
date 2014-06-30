@@ -20,5 +20,10 @@
 
 #include "BGPKeepAlive_m.h"
 
+namespace inet {
+
+} //namespace
+
+
 #endif
 

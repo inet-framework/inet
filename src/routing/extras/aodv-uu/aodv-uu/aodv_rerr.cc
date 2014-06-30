@@ -40,6 +40,8 @@
 #include "params.h"
 #endif
 
+using namespace inet;
+
 RERR *NS_CLASS rerr_create(u_int8_t flags,struct in_addr dest_addr,
                            u_int32_t dest_seqno)
 

@@ -25,6 +25,8 @@
 
 #include "IPassiveQueue.h"
 
+namespace inet {
+
 
 /**
  * Abstract base class for passive queues. Implements IPassiveQueue.
@@ -111,5 +113,8 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      */
     virtual void removeListener(IPassiveQueueListener *listener);
 };
+
+} //namespace
+
 
 #endif

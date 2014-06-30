@@ -25,6 +25,8 @@
 #include "IPv6InterfaceData.h"
 #include "IPv6RoutingTable.h"
 
+using namespace inet;
+
 // FIXME UPDATE DOCU!!!!!!!
 
 Define_Module(FlatNetworkConfigurator6);

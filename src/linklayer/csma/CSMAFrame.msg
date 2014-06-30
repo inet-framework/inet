@@ -23,6 +23,8 @@ cplusplus {{
     #include "MACFrameBase_m.h"
 }}
 
+namespace inet;
+
 class MACFrameBase;
 
 //

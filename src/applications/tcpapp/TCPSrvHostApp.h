@@ -24,6 +24,8 @@
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
+namespace inet {
+
 //forward declaration:
 class TCPServerThreadBase;
 
@@ -141,5 +143,8 @@ class INET_API TCPServerThreadBase : public cObject, public TCPSocket::CallbackI
      */
     virtual void statusArrived(TCPStatusInfo *status) {delete status;}
 };
+
+} //namespace
+
 
 #endif

@@ -19,6 +19,8 @@ cplusplus {{
 #include "PhysicalLayerDefs.h"
 }}
 
+namespace inet;
+
 class noncobject bps;
 class noncobject W;
 

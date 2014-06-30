@@ -21,6 +21,8 @@
 
 #include "AbstractQueue.h"
 
+namespace inet {
+
 
 /**
  * Queue with constant processing time.
@@ -40,6 +42,9 @@ class INET_API QueueBase : public AbstractQueue
     virtual cPacket *arrivalWhenIdle(cPacket *msg);
     virtual simtime_t startService(cPacket *msg);
 };
+
+} //namespace
+
 
 #endif
 

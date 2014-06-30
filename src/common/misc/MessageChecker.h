@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 #define BUFSIZE 4096
 
 class INET_API MessageChecker : public cSimpleModule
@@ -50,6 +52,9 @@ protected:
     unsigned                    forwardedMsg;   /// Number of received and forwarded messages
     unsigned                    checkedMsg;     /// Number of checked messages
 };
+
+} //namespace
+
 
 #endif
 

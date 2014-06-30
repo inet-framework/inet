@@ -28,6 +28,8 @@
 #include "NodeOperations.h"
 #include "opp_utils.h"
 
+using namespace inet;
+
 
 const double EtherMACBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 

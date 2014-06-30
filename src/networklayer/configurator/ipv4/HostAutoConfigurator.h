@@ -22,6 +22,8 @@
 #include <omnetpp.h>
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * HostAutoConfigurator automatically assigns IP addresses and sets up routing table.
  *
@@ -39,6 +41,9 @@ class INET_API HostAutoConfigurator : public cSimpleModule
     protected:
         void setupNetworkLayer();
 };
+
+} //namespace
+
 
 #endif
 

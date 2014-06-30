@@ -19,6 +19,8 @@
 
 #include "TCPSocketMap.h"
 
+using namespace inet;
+
 
 TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
 {

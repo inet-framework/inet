@@ -19,6 +19,7 @@ simple TestApp
 
 namespace diffserv_baclassifier_1
 {
+using namespace inet;
 
 class INET_API TestApp : public cSimpleModule
 {
@@ -47,7 +48,7 @@ void TestApp::initialize()
       datagram->setDiffServCodePoint(i);
       send(datagram, "out");
     }
-    
+
     // send 64 IPv6 datagram
     for (int i = 0; i < 64; i++)
     {

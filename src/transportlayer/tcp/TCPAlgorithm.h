@@ -24,6 +24,8 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 
+namespace inet {
+
 
 
 /**
@@ -184,5 +186,8 @@ class INET_API TCPAlgorithm : public cObject
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
 
 };
+
+} //namespace
+
 
 #endif

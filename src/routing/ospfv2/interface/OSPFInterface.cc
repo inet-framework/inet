@@ -27,6 +27,8 @@
 #include "OSPFInterfaceStateDown.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
     interfaceType(ifType),

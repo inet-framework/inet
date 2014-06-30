@@ -22,6 +22,8 @@
 
 #include "TCPSegmentTransmitInfoList.h"
 
+using namespace inet;
+
 
 void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
 {

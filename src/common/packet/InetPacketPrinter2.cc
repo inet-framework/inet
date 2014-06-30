@@ -68,14 +68,13 @@ class RIPPacket;
 #include "RadioFrame.h"
 #include "ScalarTransmission.h"
 #else
-namespace physicallayer {
-class RadioFrame;
-}
+namespace inet { namespace physicallayer { class RadioFrame; } }
 #endif
 
 //TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
 #if OMNETPP_VERSION >= 0x0405
 
+namespace inet {
 using namespace physicallayer;
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
@@ -445,6 +444,8 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
     os << "duration=" << SIMTIME_DBL(packet->getDuration())*1000 << "ms";
 #endif
     return os.str();
+}
+
 }
 
 #endif // Register_MessagePrinter

@@ -26,6 +26,8 @@
 #include "IPv4Address.h"
 #include "AddressResolver.h"
 
+namespace inet {
+
 
 // global constants
 #define LS_REFRESH_TIME                     1800
@@ -228,6 +230,9 @@ inline char hexPairToByte(char upperHex, char lowerHex)
 {
     return ((hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex)));
 }
+
+} //namespace
+
 
 #endif // __COMMON_HPP__
 

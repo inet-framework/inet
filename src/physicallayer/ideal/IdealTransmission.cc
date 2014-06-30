@@ -17,4 +17,6 @@
 
 #include "IdealTransmission.h"
 
+using namespace inet;
+
 using namespace physicallayer;

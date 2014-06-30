@@ -24,6 +24,8 @@
 #include "INetworkDatagram.h"
 #include "IPv6Datagram_m.h"
 
+namespace inet {
+
 /**
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
@@ -134,5 +136,10 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     virtual int getTransportProtocol() const {return IPv6Datagram_Base::getTransportProtocol();}
     virtual void setTransportProtocol(int protocol) {IPv6Datagram_Base::setTransportProtocol(protocol);}
 };
+
+std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);
+
+} //namespace
+
 
 #endif

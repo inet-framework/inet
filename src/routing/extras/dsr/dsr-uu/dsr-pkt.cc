@@ -25,6 +25,8 @@
 #include "dsr-opt.h"
 #include "dsr.h"
 
+namespace inet {
+
 char *dsr_pkt_alloc_opts(struct dsr_pkt *dp, int len)
 {
     if (!dp)
@@ -470,5 +472,7 @@ void dsr_pkt_free(dsr_pkt *dp)
     return;
 
 }
+
+} // namespace
 
 #endif

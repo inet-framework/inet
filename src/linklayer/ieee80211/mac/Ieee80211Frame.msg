@@ -24,8 +24,12 @@ cplusplus {{
 #include "Ieee802Ctrl_m.h" // for ~EtherType
 }}
 
-enum EtherType;
 class noncobject MACAddress;
+
+namespace inet;
+
+enum EtherType;
+
 
 //
 // 802.11 frame type constants (type+subtype), for the "type" field of

@@ -25,6 +25,8 @@
 #include "Coord.h"
 #include "AnnotationManager.h"
 
+namespace inet {
+
 /**
  * stores information about an Obstacle for ObstacleControl
  */
@@ -51,5 +53,8 @@ class Obstacle {
         Coord bboxP1;
         Coord bboxP2;
 };
+
+} //namespace
+
 
 #endif

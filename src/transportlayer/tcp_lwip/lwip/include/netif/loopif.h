@@ -36,6 +36,8 @@
 #include "lwip/netif.h"
 #include "lwip/err.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,5 +51,8 @@ err_t loopif_init(struct netif *netif);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __NETIF_LOOPIF_H__ */

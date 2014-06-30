@@ -21,6 +21,8 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
 
+using namespace inet;
+
 Define_Module(BMacLayer)
 
 void BMacLayer::initialize(int stage)

@@ -11,14 +11,13 @@
 #ifndef _DSR_PATH_CACHE_H
 #define _DSR_PATH_CACHE_H
 
-#include "tbl.h"
-#include "timer.h"
-
+#include "dsr-uu/tbl.h"
+#include "dsr-uu/timer.h"
 
 #ifndef NO_GLOBALS
 
 #define MAX_TABLE_HASH 64
-
+namespace inet {
 struct path_table
 {
     struct tbl hash[MAX_TABLE_HASH];
@@ -27,7 +26,7 @@ struct path_table
     rwlock_t lock;
 #endif
 };
-
+} //namespace
 #define VALID 0
 #define GET_HASH(s,dest) &((s)->hash[dest%MAX_TABLE_HASH])
 

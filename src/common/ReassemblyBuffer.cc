@@ -23,6 +23,8 @@
 
 #include "ReassemblyBuffer.h"
 
+using namespace inet;
+
 
 ReassemblyBuffer::ReassemblyBuffer()
 {

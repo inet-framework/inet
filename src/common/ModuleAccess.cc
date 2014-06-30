@@ -18,6 +18,8 @@
 
 #include "ModuleAccess.h"
 
+namespace inet {
+
 inline bool _isNetworkNode(cModule *mod)
 {
     cProperties *props = mod->getProperties();
@@ -100,4 +102,4 @@ cModule *findModuleUnderContainingNode(cModule *from)
     }
     return NULL;
 }
-
+} // namespace

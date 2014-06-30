@@ -15,6 +15,8 @@
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 
 Define_Module (EthernetApplication);
 simsignal_t EthernetApplication::sentPkSignal = SIMSIGNAL_NULL;

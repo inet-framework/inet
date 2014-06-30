@@ -21,6 +21,8 @@
 #include "debug_dsr.h"
 #include "timer.h"
 
+using namespace inet;
+
 #define NEIGH_TBL_MAX_LEN 50
 
 /* We calculate RTO in milliseconds */

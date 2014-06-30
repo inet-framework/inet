@@ -25,6 +25,8 @@
 #include "MACAddress.h"
 #include "MACProtocolBase.h"
 
+namespace inet {
+
 using namespace physicallayer;
 
 class IdealMacFrame;
@@ -93,5 +95,8 @@ class INET_API IdealMac : public MACProtocolBase
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 };
+
+} //namespace
+
 
 #endif

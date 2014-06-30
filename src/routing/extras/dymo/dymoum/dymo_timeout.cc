@@ -40,6 +40,8 @@
 extern int reissue_rreq;
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS route_valid_timeout(void *arg)
 {
     rtable_entry_t *entry = (rtable_entry_t *) arg;

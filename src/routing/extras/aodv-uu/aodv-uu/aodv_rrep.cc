@@ -47,6 +47,8 @@ extern int unidir_hack, optimized_hellos, llfeedback;
 
 #endif
 
+using namespace inet;
+
 
 RREP *NS_CLASS rrep_create(u_int8_t flags,
                            u_int8_t prefix,

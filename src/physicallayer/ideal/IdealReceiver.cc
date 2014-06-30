@@ -21,6 +21,8 @@
 #include "ListeningDecision.h"
 #include "ReceptionDecision.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(IdealReceiver);

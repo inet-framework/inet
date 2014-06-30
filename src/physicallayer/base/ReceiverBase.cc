@@ -19,6 +19,8 @@
 #include "IRadio.h"
 #include "IRadioMedium.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 bool ReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const

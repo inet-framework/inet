@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -81,10 +81,10 @@ typedef struct
 
 #endif
 
-
 #endif              /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
+
 RREP *rrep_create(u_int8_t flags,
                   u_int8_t prefix,
                   u_int8_t hcnt,
@@ -102,6 +102,7 @@ void rrep_process(RREP * rrep, int rreplen, struct in_addr ip_src,
                   struct in_addr ip_dst, int ip_ttl, unsigned int ifindex);
 void rrep_ack_process(RREP_ack * rrep_ack, int rreplen, struct in_addr ip_src,
                       struct in_addr ip_dst);
+
 #endif              /* NS_NO_DECLARATIONS */
 
 #endif              /* AODV_RREP_H */

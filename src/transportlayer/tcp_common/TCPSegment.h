@@ -23,6 +23,8 @@
 #include "INETDefs.h"
 #include "TCPSegment_m.h"
 
+namespace inet {
+
 
 /** @name Comparing sequence numbers */
 //@{
@@ -130,5 +132,8 @@ class INET_API TCPSegment : public TCPSegment_Base
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
+
+} //namespace
+
 
 #endif

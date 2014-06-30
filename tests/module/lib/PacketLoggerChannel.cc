@@ -24,6 +24,7 @@
 #include "EtherFrame_m.h"
 #include "MACAddress.h"
 
+namespace inet {
 
 class INET_API PacketLoggerChannel : public cDatarateChannel
 {
@@ -79,4 +80,6 @@ void PacketLoggerChannel::finish()
     EV << "PacketLogger finish()\n";
     logfile.close();
 }
+
+} // namespace inet
 

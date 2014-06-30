@@ -22,6 +22,8 @@ cplusplus {{
 #include "GPSRDefs.h"
 }}
 
+namespace inet;
+
 class noncobject Address;
 
 class noncobject Coord;

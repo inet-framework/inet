@@ -20,6 +20,8 @@
 
 #include "HttpUtils.h"
 
+namespace inet{
+
 inline bool isnotspace(int c) {return !isspace(c);}
 
 std::string trimLeft(std::string s)
@@ -241,4 +243,4 @@ std::vector<std::string> splitFile(std::string fileName)
     res.push_back(ext);
     return res;
 }
-
+}

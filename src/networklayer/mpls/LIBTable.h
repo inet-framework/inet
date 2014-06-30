@@ -25,6 +25,8 @@
 #include "IPv4Address.h"
 #include "IPv4Datagram.h"
 
+namespace inet {
+
 // label operations
 #define PUSH_OPER              0
 #define SWAP_OPER              1
@@ -89,6 +91,9 @@ class INET_API LIBTable: public cSimpleModule
 
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib);
 std::ostream & operator<<(std::ostream & os, const LabelOpVector& label);
+
+} //namespace
+
 
 #endif
 

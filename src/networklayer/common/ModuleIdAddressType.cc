@@ -17,4 +17,6 @@
 
 #include "ModuleIdAddressType.h"
 
+using namespace inet;
+
 ModuleIdAddressType ModuleIdAddressType::INSTANCE;

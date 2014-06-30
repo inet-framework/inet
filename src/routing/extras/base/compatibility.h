@@ -9,6 +9,8 @@
 #include <omnetpp.h>
 #include "Address.h"
 
+namespace inet {
+
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;
 #endif
@@ -69,5 +71,8 @@ struct Sockaddr
 
 #define in_addr In_addr
 #define sockaddr Sockaddr
+
+} //namespace
+
 
 #endif              /* _DSR_H */

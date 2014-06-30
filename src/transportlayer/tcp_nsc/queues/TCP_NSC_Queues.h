@@ -23,6 +23,8 @@
 
 #include "TCPSegment.h"
 
+namespace inet {
+
 // forward declarations:
 class TCP_NSC_Connection;
 
@@ -224,5 +226,8 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
   protected:
     TCP_NSC_Connection *connM;
 };
+
+} //namespace
+
 
 #endif

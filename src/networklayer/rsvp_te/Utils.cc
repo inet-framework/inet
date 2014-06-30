@@ -15,13 +15,14 @@
 #include "Utils.h"
 #include "IntServ.h"
 
+namespace inet {
 
-std::string vectorToString(IPAddressVector vec)
+std::string vectorToString(const IPAddressVector& vec)
 {
     return vectorToString(vec, ", ");
 }
 
-std::string vectorToString(IPAddressVector vec, const char *delim)
+std::string vectorToString(const IPAddressVector& vec, const char *delim)
 {
     std::ostringstream stream;
     for (unsigned int i = 0; i < vec.size(); i++)
@@ -35,12 +36,12 @@ std::string vectorToString(IPAddressVector vec, const char *delim)
     return str;
 }
 
-std::string vectorToString(EroVector vec)
+std::string vectorToString(const EroVector& vec)
 {
     return vectorToString(vec, ", ");
 }
 
-std::string vectorToString(EroVector vec, const char *delim)
+std::string vectorToString(const EroVector& vec, const char *delim)
 {
     std::ostringstream stream;
     for (unsigned int i = 0; i < vec.size(); i++)
@@ -55,7 +56,7 @@ std::string vectorToString(EroVector vec, const char *delim)
     return str;
 }
 
-EroVector routeToEro(IPAddressVector rro)
+EroVector routeToEro(const IPAddressVector& rro)
 {
     EroVector ero;
 
@@ -148,5 +149,5 @@ void prepend(EroVector& dest, const EroVector& src, bool reverse)
 }
 */
 
-
+} // namespace inet
 

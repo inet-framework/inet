@@ -22,6 +22,8 @@
 #include "NotifierConsts.h"
 #include "opp_utils.h"
 
+using namespace inet;
+
 Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP  1

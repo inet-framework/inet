@@ -19,6 +19,8 @@ cplusplus {{
 #include "NetworkDatagramBase_m.h"
 }}
 
+namespace inet;
+
 class NetworkDatagramBase;
 
 packet FloodDatagram extends NetworkDatagramBase

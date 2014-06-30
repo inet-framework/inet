@@ -18,6 +18,8 @@
 
 #include "INETDefs.h"
 
+using namespace inet;
+
 #if OMNETPP_VERSION >= 0x0405
 
 class INET_API InetPacketBytesPrinter : public cMessagePrinter

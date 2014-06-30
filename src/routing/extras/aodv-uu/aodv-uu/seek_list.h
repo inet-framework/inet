@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -27,6 +27,8 @@
 #include "defs_aodv.h"
 #include "timer_queue_aodv.h"
 #include "list.h"
+
+namespace inet {
 
 #define IP_DATA_MAX_LEN 60 + 8  /* Max IP header + 64 bits of data */
 
@@ -48,6 +50,9 @@ typedef struct seek_list
     int ttl;
     struct timer seek_timer;
 } seek_list_t;
+
+} //namespace
+
 #endif              /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
@@ -63,5 +68,6 @@ void seek_list_print();
 #endif
 #endif              /* NS_PORT */
 #endif              /* NS_NO_DECLARATIONS */
+
 
 #endif              /* SEEK_LIST_H */

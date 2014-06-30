@@ -18,6 +18,8 @@
 
 #include "ModulationType.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -30,5 +32,8 @@ class IErrorModel
 };
 
 }
+
+} //namespace
+
 
 #endif /* IERRORMODEL_H_ */

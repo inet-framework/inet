@@ -41,6 +41,8 @@ static DSRUUTimer ack_timer;
 #include "dsr-uu-omnetpp.h"
 #endif /* omnetpp */
 
+using namespace inet;
+
 struct maint_entry
 {
     dsr_list_t l;

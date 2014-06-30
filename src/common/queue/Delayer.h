@@ -24,6 +24,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * Delayer module.
@@ -43,5 +45,8 @@ class INET_API Delayer : public cSimpleModule
     static simsignal_t sentPkSignal;
     static simsignal_t delaySignal;
 };
+
+} //namespace
+
 
 #endif

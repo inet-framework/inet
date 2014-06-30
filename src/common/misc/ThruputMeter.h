@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * Measures and records network thruput
@@ -60,6 +62,9 @@ class INET_API ThruputMeter : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 };
+
+} //namespace
+
 
 #endif
 

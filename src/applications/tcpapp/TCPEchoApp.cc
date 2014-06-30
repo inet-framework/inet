@@ -23,6 +23,8 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
+using namespace inet;
+
 Define_Module(TCPEchoApp);
 
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");

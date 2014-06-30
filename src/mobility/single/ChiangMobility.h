@@ -23,6 +23,8 @@
 
 #include "LineSegmentsMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Chiang's random walk movement model. See NED file for more info.
@@ -55,5 +57,8 @@ class INET_API ChiangMobility : public LineSegmentsMobilityBase
   public:
     ChiangMobility();
 };
+
+} //namespace
+
 
 #endif

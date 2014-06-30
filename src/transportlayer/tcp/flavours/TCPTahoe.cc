@@ -19,6 +19,8 @@
 #include "TCPTahoe.h"
 #include "TCP.h"
 
+using namespace inet;
+
 
 Register_Class(TCPTahoe);
 

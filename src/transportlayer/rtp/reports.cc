@@ -18,6 +18,8 @@
 
 #include "reports.h"
 
+using namespace inet;
+
 
 //
 // SenderReport

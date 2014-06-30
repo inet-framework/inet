@@ -24,6 +24,8 @@
 #include "IReceiver.h"
 #include "ITransmitter.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -289,5 +291,8 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

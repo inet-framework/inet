@@ -23,6 +23,8 @@
 #include "SCTPAssociation.h"
 #include "SCTPQueue.h"
 
+namespace inet {
+
 
 
 /**
@@ -78,6 +80,9 @@ class INET_API SCTPAlgorithm : public cObject
     virtual void dataSent(uint32 fromseq) = 0;
 
 };
+
+} //namespace
+
 
 #endif
 

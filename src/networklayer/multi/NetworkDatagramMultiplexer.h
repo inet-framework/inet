@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * This class provides network datagram multiplexing based on the the datagram
  * runtime type or on the type of attached control info.
@@ -33,5 +35,8 @@ class NetworkDatagramMultiplexer : public cSimpleModule {
     virtual void handleMessage(cMessage * message);
     int getProtocolIndex(cMessage * message);
 };
+
+} //namespace
+
 
 #endif

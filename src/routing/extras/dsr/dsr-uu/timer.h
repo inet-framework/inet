@@ -17,6 +17,8 @@
 #include <omnetpp.h>
 #endif
 
+namespace inet {
+
 typedef unsigned long usecs_t;
 
 #ifndef OMNETPP
@@ -256,4 +258,7 @@ static inline int timeval_add_usecs(struct timeval *tv, usecs_t usecs)
 
     return 0;
 }
+} //namespace
+
+
 #endif              /* _TIMER_H */

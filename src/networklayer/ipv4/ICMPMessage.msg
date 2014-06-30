@@ -21,6 +21,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
 
 //
 // Not the real ICMP codes; here it's set up so that codes above 128 are

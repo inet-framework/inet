@@ -18,6 +18,8 @@
 #include "WRRScheduler.h"
 #include "opp_utils.h"
 
+using namespace inet;
+
 Define_Module(WRRScheduler);
 
 WRRScheduler::~WRRScheduler()

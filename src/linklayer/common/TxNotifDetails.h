@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 // Forward declarations:
 class InterfaceEntry;
@@ -45,6 +47,9 @@ class TxNotifDetails : public cObject
     void setPacket(cPacket *m) {msg = m;}
     void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
 };
+
+} //namespace
+
 
 #endif
 

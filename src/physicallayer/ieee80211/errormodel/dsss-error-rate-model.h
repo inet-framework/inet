@@ -27,8 +27,9 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_sf_bessel.h>
-#endif
 
+#endif
+namespace inet {
 namespace physicallayer {
 
 #ifdef ENABLE_GSL
@@ -85,5 +86,7 @@ protected:
 };
 
 }
+
+} // namespace
 
 #endif /* DSSS_ERROR_RATE_MODEL_H */

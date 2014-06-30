@@ -21,6 +21,8 @@
 #include "OperationalBase.h"
 #include "NodeOperations.h"
 
+namespace inet {
+
 class INET_API ApplicationBase : public OperationalBase
 {
   public:
@@ -31,5 +33,8 @@ class INET_API ApplicationBase : public OperationalBase
     virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_APPLICATION_LAYER; }
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
 };
+
+} //namespace
+
 
 #endif

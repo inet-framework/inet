@@ -18,6 +18,8 @@
 
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule, IInterfaceTable* ift, IIPv4RoutingTable* rt) :
     ift(ift),

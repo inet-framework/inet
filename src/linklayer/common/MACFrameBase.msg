@@ -19,6 +19,8 @@ cplusplus {{
    #include "MACAddress.h"
 }}
 
+namespace inet;
+
 class noncobject MACAddress;
 
 packet MACFrameBase

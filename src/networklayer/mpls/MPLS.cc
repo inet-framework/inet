@@ -27,6 +27,8 @@
 // FIXME temporary fix
 #include "LDP.h"
 #include "TCPSegment.h"
+
+using namespace inet;
 #define ICMP_TRAFFIC    6
 
 

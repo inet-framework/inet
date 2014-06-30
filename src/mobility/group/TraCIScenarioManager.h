@@ -34,6 +34,9 @@
 #include "ModuleAccess.h"
 
 #ifdef WITH_TRACI
+
+namespace inet {
+
 /**
  * @brief
  * Creates and moves nodes controlled by a TraCI server.
@@ -345,6 +348,8 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
+
+} //namespace
 
 #endif  // WITH_TRACI
 

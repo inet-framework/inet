@@ -20,6 +20,8 @@
 
 #include "ProtocolMap.h"
 
+using namespace inet;
+
 
 void ProtocolMapping::parseProtocolMapping(const char *s)
 {

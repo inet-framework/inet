@@ -21,6 +21,8 @@
 #include "INETDefs.h"
 #include "TCPSocket.h"
 
+namespace inet {
+
 /**
  * Base class for clients app for TCP-based request-reply protocols or apps.
  * Handles a single session (and TCP connection) at a time.
@@ -66,5 +68,8 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     virtual void socketFailure(int connId, void *yourPtr, int code);
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
 };
+
+} //namespace
+
 
 #endif

@@ -28,6 +28,8 @@
 #include "NotifierConsts.h"
 #include "SCTPAssociation.h"
 
+using namespace inet;
+
 uint32 SCTPNatTable::nextEntryNumber = 0;
 
 

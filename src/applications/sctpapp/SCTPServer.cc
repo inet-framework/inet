@@ -30,6 +30,8 @@
 #include "SCTPSocket.h"
 #include "AddressResolver.h"
 
+using namespace inet;
+
 
 Define_Module(SCTPServer);
 

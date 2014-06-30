@@ -37,6 +37,8 @@
 #include "lwip/pbuf.h"
 #include "lwip/ip_addr.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -55,6 +57,9 @@ u16_t inet_chksum_pseudo_partial(struct pbuf *p,
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_INET_H__ */
 

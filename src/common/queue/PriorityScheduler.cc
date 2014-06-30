@@ -18,6 +18,8 @@
 
 #include "PriorityScheduler.h"
 
+using namespace inet;
+
 Define_Module(PriorityScheduler);
 
 bool PriorityScheduler::schedulePacket()

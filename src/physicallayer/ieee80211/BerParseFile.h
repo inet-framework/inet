@@ -23,6 +23,8 @@
 #include <vector>
 #include <math.h>
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -80,6 +82,9 @@ class BerParseFile
 };
 
 }
+
+} //namespace
+
 
 #endif
 

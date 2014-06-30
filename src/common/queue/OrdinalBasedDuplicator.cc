@@ -17,6 +17,8 @@
 
 #include "OrdinalBasedDuplicator.h"
 
+using namespace inet;
+
 Define_Module(OrdinalBasedDuplicator);
 
 simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = registerSignal("rcvdPk");

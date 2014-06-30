@@ -17,4 +17,6 @@
 
 #include "FlatReceptionBase.h"
 
+using namespace inet;
+
 using namespace physicallayer;

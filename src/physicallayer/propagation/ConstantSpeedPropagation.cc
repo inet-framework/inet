@@ -18,6 +18,8 @@
 #include "ConstantSpeedPropagation.h"
 #include "Arrival.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 Define_Module(ConstantSpeedPropagation);

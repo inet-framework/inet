@@ -184,7 +184,8 @@ class INET_API PatternMatcher
 
 };
 
-}; /*namespace*/
+} //namespace
+
 
 #endif
 

@@ -23,6 +23,8 @@
 #include "INetworkDatagram.h"
 #include "IPv4Datagram_m.h"
 
+namespace inet {
+
 /**
  * Represents an IPv4 datagram. More info in the IPv4Datagram.msg file
  * (and the documentation generated from it).
@@ -63,5 +65,8 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     virtual int getTransportProtocol() const {return IPv4Datagram_Base::getTransportProtocol();}
     virtual void setTransportProtocol(int protocol) {IPv4Datagram_Base::setTransportProtocol(protocol);}
 };
+
+} //namespace
+
 
 #endif

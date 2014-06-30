@@ -21,6 +21,8 @@
 #include "IPv4RoutingTable.h"
 #include "BGPCommon.h"
 
+namespace inet {
+
 namespace BGP {
 
 class INET_API RoutingTableEntry : public IPv4Route
@@ -90,6 +92,9 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
     }
     return out;
 }
+
+} //namespace
+
 
 #endif
 

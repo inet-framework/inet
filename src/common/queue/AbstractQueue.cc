@@ -20,6 +20,8 @@
 
 #include "AbstractQueue.h"
 
+using namespace inet;
+
 
 AbstractQueue::AbstractQueue()
 {

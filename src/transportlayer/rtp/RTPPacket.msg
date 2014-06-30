@@ -21,6 +21,8 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
+
 enum RTPPacketEnums
 {
     RTPPACKET_FIX_HEADERLENGTH = 12;

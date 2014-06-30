@@ -23,6 +23,8 @@
 
 #include "MovingMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Circle movement model. See NED file for more info.
@@ -60,5 +62,8 @@ class INET_API CircleMobility : public MovingMobilityBase
   public:
     CircleMobility();
 };
+
+} //namespace
+
 
 #endif

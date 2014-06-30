@@ -23,6 +23,8 @@
 #include "OSPFNeighbor.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 class LSAProcessingMarker
 {

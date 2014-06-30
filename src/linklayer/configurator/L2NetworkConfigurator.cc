@@ -28,6 +28,8 @@
 #include "ModuleAccess.h"
 #include "stlutils.h"
 
+using namespace inet;
+
 Define_Module(L2NetworkConfigurator);
 
 #define T(CODE)  {long startTime = clock(); CODE; printElapsedTime(#CODE, startTime);}

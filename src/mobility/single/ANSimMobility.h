@@ -23,6 +23,8 @@
 
 #include "LineSegmentsMobilityBase.h"
 
+namespace inet {
+
 
 /**
  * @brief Uses the \<position_change> elements of the ANSim tool's trace file.
@@ -63,5 +65,8 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
   public:
     ANSimMobility();
 };
+
+} //namespace
+
 
 #endif

@@ -21,6 +21,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
 
 //
 // Represents an UDP packet, to be used with the ~UDP module.

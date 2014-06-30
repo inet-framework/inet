@@ -20,6 +20,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 
 /**
  * An "interface token" as defined in RFC 1971 (IPv6 Stateless Autoconfiguration).
@@ -45,6 +47,9 @@ class INET_API InterfaceToken
     uint32 low() const {return _low;}
     uint32 normal() const {return _normal;}
 };
+
+} //namespace
+
 
 #endif // __INET_INTERFACETOKEN_H
 

@@ -24,6 +24,8 @@
 #include "PassiveQueueBase.h"
 #include "IQueueAccess.h"
 
+namespace inet {
+
 /**
  * Passive FIFO Queue with unlimited buffer space.
  */
@@ -56,5 +58,8 @@ class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
 
     virtual int getByteLength() const { return byteLength; }
 };
+
+} //namespace
+
 
 #endif

@@ -10,6 +10,8 @@
 #include "IPv4RoutingTable.h"
 #include "ProtocolMap.h"
 
+using namespace inet;
+
 
 
 Register_Class(AODV_msg);

@@ -16,12 +16,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject IPv4Address;
-
 cplusplus {{
 #include "INETDefs.h"
 #include "IPv4Address.h"
 }}
+
+namespace inet;
+
+class noncobject IPv4Address;
 
 enum IGMPType
 {

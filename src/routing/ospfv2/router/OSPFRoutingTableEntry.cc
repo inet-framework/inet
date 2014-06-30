@@ -18,6 +18,7 @@
 
 #include "OSPFRoutingTableEntry.h"
 
+namespace inet {
 
 OSPF::RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
@@ -162,4 +163,6 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
 
     return out;
 }
+
+} // namespace inet
 

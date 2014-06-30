@@ -26,6 +26,8 @@
 #include "OSPFInterfaceStateWaiting.h"
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
 {

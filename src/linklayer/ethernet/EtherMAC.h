@@ -22,6 +22,8 @@
 
 #include "EtherMACBase.h"
 
+namespace inet {
+
 
 class EtherJam;
 class EtherPauseFrame;
@@ -115,6 +117,9 @@ class INET_API EtherMAC : public EtherMACBase
 
     virtual void printState();
 };
+
+} //namespace
+
 
 #endif
 

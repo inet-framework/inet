@@ -22,6 +22,8 @@
 #include "ITransmission.h"
 #include "IReception.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -42,5 +44,8 @@ class INET_API IAttenuation : public IPrintableObject
 };
 
 }
+
+} //namespace
+
 
 #endif

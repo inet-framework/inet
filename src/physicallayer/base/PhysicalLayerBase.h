@@ -22,6 +22,8 @@
 #include "NodeOperations.h"
 #include "IPhysicalLayer.h"
 
+namespace inet {
+
 class INET_API PhysicalLayerBase : public OperationalBase, public IPhysicalLayer
 {
     public:
@@ -32,5 +34,8 @@ class INET_API PhysicalLayerBase : public OperationalBase, public IPhysicalLayer
         virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_PHYSICAL_LAYER; }
         virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
 };
+
+} //namespace
+
 
 #endif

@@ -24,6 +24,8 @@
 #include <vector>
 #include <set>
 
+namespace inet {
+
 
 class IPv4;
 class IInterfaceTable;
@@ -82,5 +84,8 @@ class INET_API ManetNetfilterHook : public INetfilter::IHook
     virtual IHook::Result datagramLocalInHook(INetworkDatagram* datagram, const InterfaceEntry* inIE);
     virtual IHook::Result datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, Address& nextHopAddr);
 };
+
+} //namespace
+
 
 #endif

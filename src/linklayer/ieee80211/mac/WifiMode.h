@@ -23,6 +23,8 @@
 #include "WifiPreambleType.h"
 #include "ModulationType.h"
 
+namespace inet {
+
 class WifiModulationType
 {
 public:
@@ -75,5 +77,8 @@ public:
   static simtime_t get_aPHY_RX_START_Delay(ModulationType payloadMode, WifiPreamble preamble);
   static ModulationType getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble);
 };
+} //namespace
+
+
 #endif
 

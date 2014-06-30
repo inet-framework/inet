@@ -45,6 +45,8 @@ static void icmp_socket_read(int fd);
 
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS icmp_socket_init(void)
 {
 #ifndef NS_PORT

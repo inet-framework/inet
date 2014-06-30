@@ -20,6 +20,8 @@
 
 #include "IAntenna.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -40,5 +42,8 @@ class INET_API AntennaBase : public IAntenna, public cModule
 };
 
 }
+
+} //namespace
+
 
 #endif

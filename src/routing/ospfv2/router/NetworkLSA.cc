@@ -17,6 +17,8 @@
 
 #include "LSA.h"
 
+using namespace inet;
+
 bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
 {
     bool different = differsFrom(lsa);

@@ -25,6 +25,8 @@
 #include "GenericRoute.h"
 #include "IRoutingTable.h"
 
+namespace inet {
+
 class IInterfaceTable;
 
 
@@ -227,6 +229,9 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 
         virtual IRoute *createRoute();
 };
+
+
+} //namespace
 
 
 #endif

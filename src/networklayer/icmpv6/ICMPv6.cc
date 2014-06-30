@@ -32,6 +32,8 @@
 
 #include "PingPayload_m.h"
 
+using namespace inet;
+
 
 Define_Module(ICMPv6);
 

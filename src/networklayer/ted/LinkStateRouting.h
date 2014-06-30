@@ -20,6 +20,8 @@
 #include "LinkStatePacket_m.h"
 #include "IntServ.h"
 
+namespace inet {
+
 
 #define TED_TRAFFIC         1
 
@@ -80,6 +82,9 @@ class LinkStateRouting : public cSimpleModule, public cListener
     virtual void sendToIP(LinkStateMsg *msg, IPv4Address destAddr);
 
 };
+
+} //namespace
+
 
 #endif
 

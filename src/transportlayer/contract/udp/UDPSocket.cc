@@ -21,6 +21,8 @@
 #include "IPv4InterfaceData.h"
 #endif
 
+using namespace inet;
+
 UDPSocket::UDPSocket()
 {
     // don't allow user-specified sockIds because they may conflict with

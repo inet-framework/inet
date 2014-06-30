@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -76,6 +76,7 @@ typedef struct
 #define RERR_UDEST_NEXT(udest) ((RERR_udest *)((char *)udest + RERR_UDEST_SIZE))
 
 #endif       /* OMNET++ */
+
 #endif              /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
@@ -85,6 +86,8 @@ void rerr_add_udest(RERR * rerr,struct in_addr udest, u_int32_t udest_seqno);
 void rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
                   struct in_addr ip_dst);
 #endif              /* NS_NO_DECLARATIONS */
+
+
 
 #endif              /* AODV_RERR_H */
 

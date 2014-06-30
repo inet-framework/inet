@@ -25,6 +25,8 @@
 #include "UDPControlInfo.h"
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 class UDPDataIndication;
 
 /**
@@ -268,6 +270,9 @@ class INET_API UDPSocket
     static std::string getReceivedPacketInfo(cPacket *pk);
     //@}
 };
+
+} //namespace
+
 
 #endif
 

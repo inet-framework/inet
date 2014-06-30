@@ -27,6 +27,8 @@
 #include "ApplicationBase.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 
 /**
  * UDP application. See NED for more info.
@@ -77,6 +79,9 @@ class INET_API UDPBasicApp : public ApplicationBase
     UDPBasicApp();
     ~UDPBasicApp();
 };
+
+} //namespace
+
 
 #endif
 

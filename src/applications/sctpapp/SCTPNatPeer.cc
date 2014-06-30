@@ -25,6 +25,8 @@
 #include "AddressResolver.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
 #define MSGKIND_ABORT    2

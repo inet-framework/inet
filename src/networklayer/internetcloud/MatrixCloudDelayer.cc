@@ -24,6 +24,8 @@
 #include "XMLUtils.h"
 #include "IInterfaceTable.h"
 
+using namespace inet;
+
 Define_Module(MatrixCloudDelayer);
 
 namespace {

@@ -21,6 +21,8 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
+namespace inet;
+
 //
 // Messages of type ~RTPSenderStatusMessage are used to send information
 // from an rtp sender module to the application. Within this class a status

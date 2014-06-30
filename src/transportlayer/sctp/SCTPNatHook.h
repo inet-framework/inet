@@ -5,6 +5,8 @@
 #include "SCTPNatTable.h"
 #include "INETDefs.h"
 
+namespace inet {
+
 class IPv4;
 
 class INET_API SCTPNatHook : public cSimpleModule, INetfilter::IHook
@@ -30,5 +32,8 @@ class INET_API SCTPNatHook : public cSimpleModule, INetfilter::IHook
       IHook::Result datagramLocalInHook(INetworkDatagram* datagram, const InterfaceEntry* inIE);
       IHook::Result datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, Address& nextHopAddr);
 };
+
+} //namespace
+
 
 #endif

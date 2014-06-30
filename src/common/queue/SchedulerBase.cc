@@ -20,6 +20,8 @@
 
 #include "SchedulerBase.h"
 
+using namespace inet;
+
 SchedulerBase::SchedulerBase()
     : packetsRequestedFromUs(0), packetsToBeRequestedFromInputs(0), outGate(NULL)
 {

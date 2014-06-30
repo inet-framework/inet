@@ -28,6 +28,8 @@
 #include "dsr-srt.h"
 #include "dsr-ack.h"
 
+namespace inet {
+
 struct dsr_opt_hdr *dsr_opt_hdr_add(char *buf, unsigned int len,
                                     unsigned int protocol)
 {
@@ -318,3 +320,6 @@ int NSCLASS dsr_opt_recv(struct dsr_pkt *dp)
     }
     return action;
 }
+
+} // namespace inet
+

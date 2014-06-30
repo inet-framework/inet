@@ -23,6 +23,8 @@
 
 #include "MobilityBase.h"
 
+namespace inet {
+
 
 /**
  * This mobility module does not move at all; it can be used for standalone stationary nodes.
@@ -49,5 +51,8 @@ class INET_API StationaryMobility : public MobilityBase
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
 };
+
+} //namespace
+
 
 #endif

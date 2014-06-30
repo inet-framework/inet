@@ -35,6 +35,8 @@
 #include "IRadio.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 using namespace physicallayer;
 
 /**
@@ -668,6 +670,9 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual State getState() {return static_cast<State>(fsm.getState());}
     virtual unsigned int getQueueSize() {return transmissionQueueSize();}
 };
+
+} //namespace
+
 
 #endif
 

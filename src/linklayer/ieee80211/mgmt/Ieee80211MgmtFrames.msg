@@ -21,11 +21,16 @@
 cplusplus {{
 #include "MACAddress.h"
 #include "Ieee80211Frame_m.h"
+}}
+class noncobject MACAddress;
+namespace inet;
+
+cplusplus {{
 #define PREQElemLen 11
 #define PERRElemLen 13
 }}
 
-class noncobject MACAddress;
+
 
 packet Ieee80211ManagementFrame;
 

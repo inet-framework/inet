@@ -36,6 +36,8 @@
 #include "lwip/opt.h"
 #include "lwip/err.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -116,5 +118,8 @@ struct pbuf *pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_PBUF_H__ */

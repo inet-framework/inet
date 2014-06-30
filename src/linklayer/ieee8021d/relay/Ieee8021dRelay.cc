@@ -21,6 +21,8 @@
 #include "Ieee8021dInterfaceData.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 Define_Module(Ieee8021dRelay);
 
 Ieee8021dRelay::Ieee8021dRelay()

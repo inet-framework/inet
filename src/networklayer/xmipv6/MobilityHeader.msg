@@ -28,6 +28,7 @@ cplusplus {{
 #include "IPv6ExtensionHeaders.h" // 17.10.07 - CB
 }}
 
+namespace inet;
 
 class noncobject IPv6Address;
 

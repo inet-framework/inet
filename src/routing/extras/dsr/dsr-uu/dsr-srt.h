@@ -8,8 +8,10 @@
 #ifndef _DSR_SRT_H
 #define _DSR_SRT_H
 
-#include "dsr.h"
-#include "debug_dsr.h"
+#include "dsr-uu/dsr.h"
+#include "dsr-uu/debug_dsr.h"
+#include "dsr-uu-omnetpp.h"
+
 
 #ifdef NS2
 #ifndef OMNETPP
@@ -17,8 +19,9 @@
 #endif
 #endif
 
-#ifndef NO_GLOBALS
 
+#ifndef NO_GLOBALS
+namespace inet {
 /* Source route options header */
 /* TODO: This header is not byte order correct... is there a simple way to fix
  * it? */
@@ -108,6 +111,8 @@ void dsr_srt_del(struct dsr_srt *srt);
 struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2); int dsr_srt_check_duplicate(struct dsr_srt *srt);
 struct dsr_srt *dsr_srt_new_split(struct dsr_srt *srt, struct in_addr addr);
 
+} //namespace
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS
@@ -116,5 +121,6 @@ int dsr_srt_add(struct dsr_pkt *dp);
 int dsr_srt_opt_recv(struct dsr_pkt *dp, struct dsr_srt_opt *srt_opt);
 
 #endif              /* NO_DECLS */
+
 
 #endif              /* _DSR_SRT_H */

@@ -23,6 +23,8 @@
 #include "Ieee802Ctrl.h"
 #include "InterfaceEntry.h"
 
+using namespace inet;
+
 Define_Module(STP);
 
 const double STP::tickInterval = 1;

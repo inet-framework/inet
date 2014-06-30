@@ -38,6 +38,8 @@
 #include "Ieee80211MgmtAP.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 

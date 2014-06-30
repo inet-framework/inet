@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *
  *****************************************************************************/
@@ -38,6 +38,7 @@
 #include "defs_aodv.h"
 #include "seek_list.h"
 #include "routing_table.h"
+
 
 /* RREQ Flags: */
 #define RREQ_JOIN          0x1
@@ -75,6 +76,11 @@ typedef struct
 
 #define RREQ_SIZE sizeof(RREQ)
 #endif
+
+#ifdef OMNETPP
+namespace inet {
+#endif
+
 /* A data structure to buffer information about received RREQ's */
 struct rreq_record
 {
@@ -90,6 +96,10 @@ struct blacklist
     struct in_addr dest_addr;
     struct timer bl_timer;
 };
+#ifdef OMNETPP
+} // namespace inet
+#endif
+
 #endif              /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
@@ -120,3 +130,4 @@ struct blacklist *rreq_blacklist_find(struct in_addr dest_addr);
 #endif              /* NS_NO_DECLARATIONS */
 
 #endif              /* AODV_RREQ_H */
+

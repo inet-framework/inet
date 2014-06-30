@@ -20,6 +20,8 @@
 #include "DYMO_RoutingEntry.h"
 #include "DYMO.h"
 
+namespace inet {
+
 DYMO_RoutingEntry::DYMO_RoutingEntry(DYMOFau* dymo) :
     routeNextHopInterface(NULL),
     routeAgeMin(dymo, "routeAgeMin"),
@@ -69,3 +71,4 @@ std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& o)
 
     return os;
 };
+}

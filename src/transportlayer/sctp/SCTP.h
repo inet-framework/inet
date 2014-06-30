@@ -32,6 +32,8 @@
 #include "IInterfaceTable.h"
 #include "IIPv4RoutingTable.h"
 
+namespace inet {
+
 #define SCTP_UDP_PORT  9899
 
 class SCTPAssociation;
@@ -254,5 +256,8 @@ class INET_API SCTP : public cSimpleModule
 
         void bindPortForUDP();
 };
+
+} //namespace
+
 
 #endif

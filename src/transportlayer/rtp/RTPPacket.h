@@ -22,6 +22,8 @@
 
 #include "RTPPacket_m.h"
 
+namespace inet {
+
 /**
  * This class represents an RTP data packet.
  * Real data can either be encapsulated or simulated by
@@ -61,5 +63,8 @@ class RTPPacket : public RTPPacket_Base
     virtual int getPayloadLength() const;
     virtual void setPayloadLength(int x) { throw cRuntimeError("Don't use SetPayloadLength()"); }
 };
+
+} //namespace
+
 
 #endif

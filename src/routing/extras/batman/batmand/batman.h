@@ -16,6 +16,8 @@
 #include "ManetRoutingBase.h"
 #include "BatmanMsg.h"
 
+namespace inet {
+
 #define TYPE_OF_WORD uint64_t /* you should choose something big, if you don't want to waste cpu */
 #define WORD_BIT_SIZE  (sizeof(TYPE_OF_WORD)*8)
 
@@ -230,6 +232,9 @@ inline bool operator==(const HnaGlobalEntry& a, const HnaGlobalEntry& b)
 {
     return (a.addr==b.addr && a.netmask==b.netmask);
 }
+
+
+} //namespace
 
 
 #endif /* __BATMANDATA_H__ */

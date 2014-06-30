@@ -17,6 +17,8 @@
 
 #include "DimensionalNoise.h"
 
+using namespace inet;
+
 using namespace physicallayer;
 
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const

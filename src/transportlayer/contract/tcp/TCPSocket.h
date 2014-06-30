@@ -24,6 +24,8 @@
 #include "TCPCommand_m.h"
 #include "Address.h"
 
+namespace inet {
+
 class TCPStatusInfo;
 
 
@@ -404,6 +406,9 @@ class INET_API TCPSocket
     void processMessage(cMessage *msg);
     //@}
 };
+
+} //namespace
+
 
 #endif
 

@@ -21,12 +21,16 @@
 
 #include "SCTPCommand_m.h"
 
+
 #ifdef WITH_SCTP
-#include "SCTP.h"
+#include "sctp/SCTP.h"
 #else
 //#define sctpEV3 (!SCTP::testing==true)?std::cerr:std::cerr
 #define sctpEV3 EV
 #endif
+
+
+namespace inet {
 
 static inline int32_t getNewAssocId()
 {
@@ -36,7 +40,6 @@ static inline int32_t getNewAssocId()
     return -1;
 #endif
 }
-
 
 SCTPSocket::SCTPSocket(bool type)
 {
@@ -486,3 +489,5 @@ void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
     msg->setControlInfo(cmd);
     sendToSCTP(msg);
 }
+
+} // namespace

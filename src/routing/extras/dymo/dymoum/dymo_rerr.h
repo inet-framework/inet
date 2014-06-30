@@ -30,7 +30,6 @@
 #ifndef OMNETPP
 #include <sys/types.h>
 #endif
-
 #ifndef OMNETPP
 /* Blocks contained within a RERR message */
 struct rerr_block
@@ -63,7 +62,7 @@ typedef struct      // FIXME: adjust byte ordering
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-
+//namespace inet {
 /* Create a RERR given an array of blocks (previously created), the number of
    those blocks and the TTL of the message */
 RERR *rerr_create(struct rerr_block *blocks, int nblocks, int ttl);
@@ -93,7 +92,12 @@ void rerr_forward(RERR *rerr,struct in_addr dest_addr);
 void rerr_send(struct in_addr addr, int ttl, rtable_entry_t *entry,struct in_addr dest_addr);
 #endif
 
+//} // namespace
+
 #endif  /* NS_NO_DECLARATIONS */
+
+
+
 
 #endif  /* __DYMO_RERR_H__ */
 

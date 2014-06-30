@@ -21,6 +21,8 @@
 
 #include "INETDefs.h"
 
+namespace inet {
+
 /**
  * This class defines that interface of the queues that
  * algorithmic droppers use.
@@ -40,5 +42,8 @@ class INET_API IQueueAccess
          */
         virtual int getByteLength() const = 0;
 };
+
+} //namespace
+
 
 #endif

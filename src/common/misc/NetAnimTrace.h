@@ -21,6 +21,8 @@
 #include <fstream>
 #include "INETDefs.h"
 
+namespace inet {
+
 
 
 /**
@@ -45,6 +47,9 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     virtual void addNode(cModule *mod);
     virtual void addLink(cGate *gate);
 };
+
+} //namespace
+
 
 #endif  // header guard
 

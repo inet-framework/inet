@@ -25,6 +25,8 @@
 
 #include "RTCPPacket3_m.h"
 
+namespace inet {
+
 
 class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
@@ -35,5 +37,8 @@ class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
     virtual RTCPSenderReportPacket *dup() const {return new RTCPSenderReportPacket(*this);}
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
+
+} //namespace
+
 
 #endif // _RTCPPACKET3_M_H_

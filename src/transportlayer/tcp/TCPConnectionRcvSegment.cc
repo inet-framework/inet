@@ -27,6 +27,8 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
+using namespace inet;
+
 bool TCPConnection::tryFastRoute(TCPSegment *tcpseg)
 {
     // fast route processing not yet implemented

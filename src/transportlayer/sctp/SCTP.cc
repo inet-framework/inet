@@ -32,6 +32,8 @@
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 
+using namespace inet;
+
 Define_Module(SCTP);
 
 int32 SCTP::nextAssocId = 0;

@@ -18,6 +18,8 @@
 
 #include "AlgorithmicDropperBase.h"
 
+using namespace inet;
+
 void AlgorithmicDropperBase::initialize()
 {
     numGates = gateSize("out");

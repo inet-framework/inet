@@ -23,6 +23,8 @@
 
 #include "IInterfaceTable.h"
 
+namespace inet {
+
 
 Register_Abstract_Class(IPv6MulticastGroupInfo);
 
@@ -650,3 +652,5 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
         this->assignAddress(hoa, false, SIMTIME_ZERO, SIMTIME_ZERO, true);
 }
 #endif /* WITH_xMIPv6 */
+
+} // namespace

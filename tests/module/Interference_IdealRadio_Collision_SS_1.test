@@ -75,7 +75,7 @@ ned-path = .;../../../../src
 %contains: results/General-0.elog
  - Changing radio reception state from IDLE to RECEIVING.
 %contains: results/General-0.elog
- - Received (IdealMacFrame)ping0 contains bit errors or collision, dropping it
+ - Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
 %not-contains: results/General-0.elog
  - Passing up contained packet `ping0' to higher layer
 %#--------------------------------------------------------------------------------------------------------------

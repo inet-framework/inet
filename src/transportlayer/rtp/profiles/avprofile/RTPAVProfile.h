@@ -20,6 +20,7 @@
 
 #include "RTPProfile.h"
 
+namespace inet {
 
 /**
  * The class RTPAVProfile is a subclass of RTPProfile. It does not extend
@@ -37,3 +38,5 @@ class INET_API RTPAVProfile : public RTPProfile
      */
     virtual void initialize();
 };
+
+} // namespace

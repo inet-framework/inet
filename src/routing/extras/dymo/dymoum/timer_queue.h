@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #endif
 
+namespace inet {
 
 
 typedef void (NS_CLASS*timeout_func_t) (void *);
@@ -69,9 +70,11 @@ NS_STATIC NS_INLINE long timeval_diff(struct timeval *t1, struct timeval *t2)
     }
     return -1;
 }
+} //namespace
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
+//namespace inet{
 /* This should be called for every newly allocated timer */
 int timer_init(struct timer *t, timeout_func_t f, void *data);
 
@@ -96,6 +99,10 @@ void timer_timeout(struct timeval *now);
    queue */
 struct timeval *timer_age_queue();
 
+//} //namespace
+
 #endif  /* NS_NO_DECLARATIONS */
+
+
 
 #endif  /* __TIMER_QUEUE_H__ */

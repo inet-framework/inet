@@ -19,6 +19,8 @@
 #include "Ieee80211MgmtSTASimplified.h"
 #include "Ieee802Ctrl.h"
 
+using namespace inet;
+
 
 Define_Module(Ieee80211MgmtSTASimplified);
 

@@ -27,6 +27,8 @@
 #include "BGPRouting.h"
 #include "BGPFSM.h"
 
+namespace inet {
+
 class  INET_API BGPSession : public cObject
 {
 public:
@@ -107,6 +109,9 @@ private:
     friend struct BGPFSM::OpenConfirm;
     friend struct BGPFSM::Established;
 };
+
+} //namespace
+
 
 #endif
 

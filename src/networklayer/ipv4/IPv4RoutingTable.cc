@@ -34,6 +34,8 @@
 #include "opp_utils.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 using namespace OPP_Global;
 
 Define_Module(IPv4RoutingTable);

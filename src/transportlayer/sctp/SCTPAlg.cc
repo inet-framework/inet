@@ -19,6 +19,8 @@
 #include "SCTPAlg.h"
 #include "SCTP.h"
 
+using namespace inet;
+
 Register_Class(SCTPAlg);
 
 

@@ -17,6 +17,8 @@
 
 #include "BGPUpdate.h"
 
+using namespace inet;
+
 Register_Class(BGPUpdateMessage)
 
 void BGPUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)

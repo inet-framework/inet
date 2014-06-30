@@ -18,6 +18,8 @@
 
 #include "MPLSPacket.h"
 
+using namespace inet;
+
 // constructors
 MPLSPacket::MPLSPacket(const char *name) : cPacket(name)
 {

@@ -165,6 +165,8 @@ class DSRUU:public Tap, public Agent
 #undef _DEBUG_H
 #include "debug_dsr.h"
 
+namespace inet {
+
 #undef NO_GLOBALS
 
     struct in_addr my_addr()
@@ -209,5 +211,8 @@ class DSRUU:public Tap, public Agent
     /* The link cache */
     struct lc_graph LC;
 };
+
+} //namespace
+
 
 #endif              /* _DSR_NS_AGENT_H */

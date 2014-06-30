@@ -94,17 +94,17 @@ Generating packet `req-\d+-\d+'
 %contains-regex: stdout
 \*\* Event #\d+  T=2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeStartOperation on Test\.sender\[0\]
+Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] starting up
-Doing stage 1/8 of operation NodeStartOperation on Test\.sender\[0\]
-Doing stage 2/8 of operation NodeStartOperation on Test\.sender\[0\]
-Doing stage 3/8 of operation NodeStartOperation on Test\.sender\[0\]
-Doing stage 4/8 of operation NodeStartOperation on Test\.sender\[0\]
-Doing stage 5/8 of operation NodeStartOperation on Test\.sender\[0\]
-Doing stage 6/8 of operation NodeStartOperation on Test\.sender\[0\]
+Doing stage 1/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
+Doing stage 2/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
+Doing stage 3/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
+Doing stage 4/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
+Doing stage 5/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
+Doing stage 6/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Starting application
 Test\.sender\[0\]\.srv registering DSAP 241
-Doing stage 7/8 of operation NodeStartOperation on Test\.sender\[0\]
+Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[0\]
 Test\.sender\[0\] started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
@@ -168,16 +168,16 @@ Generating packet `req-\d+-14'
 %contains-regex: stdout
 \*\* Event #\d+  T=9   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[0\]
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[0\]
 Test\.sender\[0\] shutting down
-Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
 Stop the application
-Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[0\]
-Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[0\]
-Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[0\]
-Doing stage 5/8 of operation NodeShutdownOperation on Test\.sender\[0\]
-Doing stage 6/8 of operation NodeShutdownOperation on Test\.sender\[0\]
-Doing stage 7/8 of operation NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
+Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[0\]
 Test\.sender\[0\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
@@ -223,16 +223,16 @@ Generating packet `req-\d+-8'
 %contains-regex: stdout
 \*\* Event #\d+  T=5\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[1\]
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
-Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Stop the application
-Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 7/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains-regex: stdout
@@ -242,17 +242,17 @@ Generating packet `req-\d+-\d+'
 %contains-regex: stdout
 \*\* Event #\d+  T=6\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeStartOperation on Test\.sender\[1\]
+Doing stage 0/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test\.sender\[1\] starting up
-Doing stage 1/8 of operation NodeStartOperation on Test\.sender\[1\]
-Doing stage 2/8 of operation NodeStartOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation NodeStartOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation NodeStartOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation NodeStartOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation NodeStartOperation on Test\.sender\[1\]
+Doing stage 1/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
+Doing stage 2/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
+Doing stage 3/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
+Doing stage 4/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
+Doing stage 5/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
+Doing stage 6/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Starting application
 Test\.sender\[1\]\.srv registering DSAP 241
-Doing stage 7/8 of operation NodeStartOperation on Test\.sender\[1\]
+Doing stage 7/8 of operation inet::NodeStartOperation on Test\.sender\[1\]
 Test.sender\[1\] started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
@@ -284,16 +284,16 @@ Generating packet `req-\d+-14'
 %contains-regex: stdout
 \*\* Event #\d+  T=9\.1   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test.sender\[1\]
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.sender\[1\]
 Test\.sender\[1\] shutting down
-Doing stage 1/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Stop the application
-Doing stage 2/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 3/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 4/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 5/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 6/8 of operation NodeShutdownOperation on Test\.sender\[1\]
-Doing stage 7/8 of operation NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
+Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.sender\[1\]
 Test\.sender\[1\] shut down
 %#--------------------------------------------------------------------------------------------------------------
 %#--------------------------------------------------------------------------------------------------------------
@@ -302,33 +302,33 @@ Test\.sender\[1\] shut down
 %contains-regex: stdout
 \*\* Event #\d+  T=1\.7   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeStartOperation on Test\.recip
+Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
-Doing stage 1/8 of operation NodeStartOperation on Test\.recip
-Doing stage 2/8 of operation NodeStartOperation on Test\.recip
-Doing stage 3/8 of operation NodeStartOperation on Test\.recip
-Doing stage 4/8 of operation NodeStartOperation on Test\.recip
-Doing stage 5/8 of operation NodeStartOperation on Test\.recip
-Doing stage 6/8 of operation NodeStartOperation on Test\.recip
+Doing stage 1/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 2/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 3/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 4/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 5/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 6/8 of operation inet::NodeStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
-Doing stage 7/8 of operation NodeStartOperation on Test\.recip
+Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  T=3\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test.recip
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.recip
 Test\.recip shutting down
-Doing stage 1/8 of operation NodeShutdownOperation on Test\.recip
+Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.recip
 Stop the application
-Doing stage 2/8 of operation NodeShutdownOperation on Test\.recip
-Doing stage 3/8 of operation NodeShutdownOperation on Test\.recip
-Doing stage 4/8 of operation NodeShutdownOperation on Test\.recip
-Doing stage 5/8 of operation NodeShutdownOperation on Test\.recip
-Doing stage 6/8 of operation NodeShutdownOperation on Test\.recip
-Doing stage 7/8 of operation NodeShutdownOperation on Test\.recip
+Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.recip
+Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.recip
+Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.recip
+Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.recip
+Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.recip
+Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.recip
 Test\.recip shut down
 \*\* Event #\d+  T=
 
@@ -336,17 +336,17 @@ Test\.recip shut down
 %contains-regex: stdout
 \*\* Event #\d+  T=4\.2   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeStartOperation on Test\.recip
+Doing stage 0/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip starting up
-Doing stage 1/8 of operation NodeStartOperation on Test\.recip
-Doing stage 2/8 of operation NodeStartOperation on Test\.recip
-Doing stage 3/8 of operation NodeStartOperation on Test\.recip
-Doing stage 4/8 of operation NodeStartOperation on Test\.recip
-Doing stage 5/8 of operation NodeStartOperation on Test\.recip
-Doing stage 6/8 of operation NodeStartOperation on Test\.recip
+Doing stage 1/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 2/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 3/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 4/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 5/8 of operation inet::NodeStartOperation on Test\.recip
+Doing stage 6/8 of operation inet::NodeStartOperation on Test\.recip
 Starting application
 Test\.recip\.srv registering DSAP 241
-Doing stage 7/8 of operation NodeStartOperation on Test\.recip
+Doing stage 7/8 of operation inet::NodeStartOperation on Test\.recip
 Test\.recip started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
@@ -356,30 +356,30 @@ Test\.recip started
 %contains-regex: stdout
 \*\* Event #\d+  T=7\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeShutdownOperation on Test.switch
+Doing stage 0/8 of operation inet::NodeShutdownOperation on Test.switch
 Test\.switch shutting down
-Doing stage 1/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 2/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 3/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 4/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 5/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 6/8 of operation NodeShutdownOperation on Test\.switch
-Doing stage 7/8 of operation NodeShutdownOperation on Test\.switch
+Doing stage 1/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 2/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 3/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 4/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 5/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 6/8 of operation inet::NodeShutdownOperation on Test\.switch
+Doing stage 7/8 of operation inet::NodeShutdownOperation on Test\.switch
 Test\.switch shut down
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------
 %contains-regex: stdout
 \*\* Event #\d+  T=8\.3   Test\.scenarioManager \(ScenarioManager, id=\d+\)
 processing <tell> command\.\.\.
-Doing stage 0/8 of operation NodeStartOperation on Test\.switch
+Doing stage 0/8 of operation inet::NodeStartOperation on Test\.switch
 Test\.switch starting up
-Doing stage 1/8 of operation NodeStartOperation on Test\.switch
-Doing stage 2/8 of operation NodeStartOperation on Test\.switch
-Doing stage 3/8 of operation NodeStartOperation on Test\.switch
-Doing stage 4/8 of operation NodeStartOperation on Test\.switch
-Doing stage 5/8 of operation NodeStartOperation on Test\.switch
-Doing stage 6/8 of operation NodeStartOperation on Test\.switch
-Doing stage 7/8 of operation NodeStartOperation on Test\.switch
+Doing stage 1/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 2/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 3/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 4/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 5/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 6/8 of operation inet::NodeStartOperation on Test\.switch
+Doing stage 7/8 of operation inet::NodeStartOperation on Test\.switch
 Test\.switch started
 \*\* Event #\d+  T=
 %#--------------------------------------------------------------------------------------------------------------

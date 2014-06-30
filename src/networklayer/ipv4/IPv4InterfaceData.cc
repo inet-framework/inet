@@ -26,6 +26,8 @@
 #include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
 
+using namespace inet;
+
 
 Register_Abstract_Class(IPv4MulticastGroupInfo);
 Register_Abstract_Class(IPv4MulticastGroupSourceInfo);

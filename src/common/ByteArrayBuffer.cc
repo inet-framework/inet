@@ -14,6 +14,8 @@
 
 #include "ByteArrayBuffer.h"
 
+using namespace inet;
+
 ByteArrayBuffer::ByteArrayBuffer()
  :
     dataLengthM(0)

@@ -20,6 +20,8 @@
 
 #include "OSPFRouter.h"
 
+using namespace inet;
+
 
 OSPF::LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(OSPF::Router* containingRouter) :
     OSPF::IMessageHandler(containingRouter)

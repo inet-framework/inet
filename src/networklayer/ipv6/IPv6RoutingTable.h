@@ -27,6 +27,8 @@
 #include "IPv6Address.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 class IInterfaceTable;
 class InterfaceEntry;
 class IPv6RoutingTable;
@@ -394,5 +396,8 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) {return false; /*TODO: deleteMulticastRoute(entry);*/}
     virtual IRoute *createRoute() { return new IPv6Route(IPv6Address(), 0, IRoute::MANUAL); }
 };
+
+} //namespace
+
 
 #endif

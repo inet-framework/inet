@@ -26,6 +26,8 @@
 
 #include "DYMO_Timer.h"
 
+namespace inet {
+
 
 class DYMO_OutstandingRREQ
 {
@@ -81,5 +83,8 @@ class DYMO_OutstandingRREQList : public cObject
     friend std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQList& o);
 
 };
+
+} //namespace
+
 
 #endif

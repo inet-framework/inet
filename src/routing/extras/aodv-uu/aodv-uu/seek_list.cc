@@ -52,6 +52,9 @@ static LIST(seekhead);
 void seek_list_print();
 #endif
 #endif              /* NS_PORT */
+
+namespace inet {
+
 #ifndef AODV_USE_STL
 seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
                                        u_int32_t dest_seqno,
@@ -127,7 +130,7 @@ void NS_CLASS seek_list_print()
 }
 #endif
 #else
-seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
+seek_list_t * NS_CLASS seek_list_insert(struct in_addr dest_addr,
                                        u_int32_t dest_seqno,
                                        int ttl, u_int8_t flags,
                                        struct ip_data *ipd)
@@ -199,5 +202,8 @@ void NS_CLASS seek_list_print()
                       entry->dest_seqno, entry->reqs, entry->ttl);    }
 }
 #endif
+
 #endif
+
+} // namespace inet
 

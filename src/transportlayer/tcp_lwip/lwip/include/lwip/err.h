@@ -35,6 +35,8 @@
 #include "lwip/opt.h"
 #include "lwip/arch.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,5 +85,8 @@ extern const char *lwip_strerr(err_t err);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_ERR_H__ */

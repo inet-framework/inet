@@ -35,6 +35,8 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
+namespace inet {
+
 DYMO_NAMESPACE_BEGIN
 
 Define_Module(DYMO);
@@ -1458,3 +1460,5 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 }
 
 DYMO_NAMESPACE_END
+
+} // namespace

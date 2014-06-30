@@ -22,6 +22,8 @@
 #include "TCPCommand_m.h"
 #include "TCPSegment.h"
 
+using namespace inet;
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 

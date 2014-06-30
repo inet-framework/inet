@@ -17,6 +17,8 @@
 
 #include "PowerSourceBase.h"
 
+using namespace inet;
+
 IPowerConsumer *PowerSourceBase::getPowerConsumer(int index)
 {
     return powerConsumers[index].powerConsumer;

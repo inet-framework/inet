@@ -20,6 +20,8 @@
 
 #include "ITransmitter.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -30,5 +32,8 @@ class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 };
 
 }
+
+} //namespace
+
 
 #endif

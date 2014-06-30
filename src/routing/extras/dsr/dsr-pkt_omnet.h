@@ -17,6 +17,7 @@
 #include "dsr-uu/dsr-opt.h"
 
 
+
 #ifdef MobilityFramework
 #include <NetwPkt_m.h>
 #ifndef IPv4Address
@@ -43,7 +44,7 @@
 
 #endif
 
-
+namespace inet {
 
 class EtxCost
 {
@@ -144,6 +145,9 @@ class DSRPktExt: public IPv4Datagram
     virtual DSRPktExt *dup() const {return new DSRPktExt(*this);}
 
 };
+
+
+} //namespace
 
 
 #endif              /* _DSR_PKT_H */

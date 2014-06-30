@@ -30,6 +30,8 @@
 #include "INETDefs.h"
 #include "Interpolation.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -1731,5 +1733,8 @@ public:
 };
 
 }
+
+} //namespace
+
 
 #endif

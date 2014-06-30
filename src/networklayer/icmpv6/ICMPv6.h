@@ -25,6 +25,8 @@
 #include "ICMPv6Message_m.h"
 #include "ILifecycle.h"
 
+namespace inet {
+
 
 //foreign declarations:
 class IPv6Address;
@@ -115,6 +117,9 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
     typedef std::map<long,int> PingMap;
     PingMap pingMap;
 };
+
+
+} //namespace
 
 
 #endif

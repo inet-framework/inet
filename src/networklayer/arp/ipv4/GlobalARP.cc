@@ -30,6 +30,8 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
+using namespace inet;
+
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {

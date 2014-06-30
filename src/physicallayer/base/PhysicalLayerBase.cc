@@ -16,3 +16,5 @@
 //
 
 #include "PhysicalLayerBase.h"
+
+using namespace inet;

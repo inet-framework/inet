@@ -21,6 +21,8 @@
 #include "RTPInterfacePacket_m.h"
 #include "RTPInnerPacket.h"
 
+using namespace inet;
+
 
 Define_Module(RTPPayloadSender);
 

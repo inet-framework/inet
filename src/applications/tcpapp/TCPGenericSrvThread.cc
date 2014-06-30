@@ -19,6 +19,8 @@
 
 #include "GenericAppMsg_m.h"
 
+using namespace inet;
+
 
 Register_Class(TCPGenericSrvThread);
 

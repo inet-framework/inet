@@ -20,6 +20,8 @@
 
 #include "IPv6Datagram.h"
 
+namespace inet {
+
 
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
@@ -40,6 +42,9 @@ class IPv6Serializer
          */
         void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
 };
+
+} //namespace
+
 
 #endif
 

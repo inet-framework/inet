@@ -24,6 +24,8 @@
 #include "BatmanMain.h"
 #include "IPv4InterfaceData.h"
 
+using namespace inet;
+
 
 void Batman::schedule_own_packet(BatmanIf *batman_if)
 {

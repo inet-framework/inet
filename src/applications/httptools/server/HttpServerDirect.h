@@ -20,6 +20,8 @@
 
 #include "HttpServerBase.h"
 
+namespace inet {
+
 /**
  * Server module for direct message passing.
  *
@@ -41,6 +43,9 @@ class INET_API HttpServerDirect : public HttpServerBase
         virtual void finish();
         virtual void handleMessage(cMessage *msg);
 };
+
+} //namespace
+
 
 #endif
 

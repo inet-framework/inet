@@ -25,6 +25,8 @@
 
 #include "RTCPPacket1_m.h"
 
+namespace inet {
+
 
 class RTCPPacket : public RTCPPacket_Base
 {
@@ -53,5 +55,8 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base
     void addRTCPPacket(RTCPPacket *rtcpPacket);
 };
+
+} //namespace
+
 
 #endif // __INET_RTCPPACKET1_H_

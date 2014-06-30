@@ -81,6 +81,8 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
 
 #include "IIPv4RoutingTable.h"
 
+namespace inet {
+
 /**
  * Records routing table changes into a file.
   *
@@ -104,6 +106,7 @@ class INET_API RoutingTableRecorder : public cSimpleModule
     virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
     virtual void recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID);
 };
+} //namespace
 
 #endif /*OMNETPP_VERSION*/
 

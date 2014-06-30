@@ -23,6 +23,8 @@
 #include "dsr-pkt_omnet.h"
 #include "IPv4ControlInfo.h"
 
+namespace inet {
+
 
 
 #define DSR_RREQ_HDR_LEN sizeof(struct dsr_rreq_opt)
@@ -554,3 +556,5 @@ EtxList * DSRPktExt::delExtension(int len)
     setBitLength(getBitLength()-(len*8*8));
     return extension;
 }
+
+} // namespace

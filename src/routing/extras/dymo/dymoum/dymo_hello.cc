@@ -38,6 +38,8 @@ static struct timer hello_timer;
 extern int hello_ival;
 #endif  /* NS_PORT */
 
+using namespace inet;
+
 void NS_CLASS hello_init(void)
 {
     if (hello_timer.used || hello_ival <= 0)

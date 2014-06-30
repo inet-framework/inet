@@ -26,6 +26,8 @@
 #include "IPv4Datagram.h"
 #endif
 
+using namespace inet;
+
 //----
 
 Define_Module(TCPDump);

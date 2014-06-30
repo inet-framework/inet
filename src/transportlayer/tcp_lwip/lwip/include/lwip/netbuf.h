@@ -36,6 +36,8 @@
 #include "lwip/pbuf.h"
 #include "lwip/ip_addr.h"
 
+namespace inet {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -82,5 +84,8 @@ void              netbuf_first    (struct netbuf *buf);
 #ifdef __cplusplus
 }
 #endif
+
+} //namespace
+
 
 #endif /* __LWIP_NETBUF_H__ */

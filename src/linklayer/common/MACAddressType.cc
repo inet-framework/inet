@@ -17,4 +17,6 @@
 
 #include "MACAddressType.h"
 
+using namespace inet;
+
 MACAddressType MACAddressType::INSTANCE;

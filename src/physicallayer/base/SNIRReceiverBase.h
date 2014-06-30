@@ -20,6 +20,8 @@
 
 #include "ReceiverBase.h"
 
+namespace inet {
+
 namespace physicallayer
 {
 
@@ -61,5 +63,8 @@ class INET_API SNIRReceiverBase : public ReceiverBase
 };
 
 }
+
+} //namespace
+
 
 #endif

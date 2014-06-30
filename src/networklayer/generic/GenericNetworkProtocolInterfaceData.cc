@@ -21,6 +21,8 @@
 
 #include "GenericNetworkProtocolInterfaceData.h"
 
+using namespace inet;
+
 
 std::string GenericNetworkProtocolInterfaceData::info() const
 {

@@ -23,9 +23,11 @@
 
 #ifndef NS_NO_GLOBALS
 #include "defs_dymo.h"
+
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
+//namespace inet {
 
 /* Handler function called when a routing table entry becomes invalid */
 void route_valid_timeout(void *arg);
@@ -43,6 +45,9 @@ void blacklist_timeout(void *arg);
 /* Handler function called when an entry in the neighbor list expired */
 void nb_timeout(void *arg);
 
+//} //namespace
 #endif  /* NS_NO_DECLARATIONS */
+
+
 
 #endif  /* __DYMO_TIMEOUT_H__ */

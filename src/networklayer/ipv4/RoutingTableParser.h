@@ -34,6 +34,8 @@
 
 #include "IPv4RoutingTable.h"
 
+namespace inet {
+
 /**
  * Parses a routing table file into a routing table.
  */
@@ -98,6 +100,9 @@ class INET_API RoutingTableParser
     static int strcpyword(char *dest, const char *src);
 
 };
+
+
+} //namespace
 
 
 #endif

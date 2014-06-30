@@ -20,6 +20,8 @@
 #include "TCP.h"
 #include "TCPSACKRexmitQueue.h"
 
+using namespace inet;
+
 
 //
 // Some constants below. MIN_REXMIT_TIMEOUT is the minimum allowed retransmit

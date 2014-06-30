@@ -25,6 +25,8 @@
 
 using namespace std;
 
+namespace inet {
+
 struct DestFilter
 {
     vector<Address> destAddresses;
@@ -160,4 +162,6 @@ void RoutingTableLogger::dumpRoutes(cModule *node, IRoutingTable *rt, DestFilter
         }
     }
 }
+
+} // namespace inet
 

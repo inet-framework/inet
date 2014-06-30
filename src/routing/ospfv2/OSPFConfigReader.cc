@@ -35,6 +35,8 @@
 #include "XMLUtils.h"
 #include "ModuleAccess.h"
 
+using namespace inet;
+
 
 OSPFConfigReader::OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift) : ospfModule(ospfModule), ift(ift)
 {

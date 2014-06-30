@@ -22,6 +22,8 @@
 
 #include "BatmanMain.h"
 
+using namespace inet;
+
 
 /* clear the bits */
 void Batman::bit_init(std::vector<TYPE_OF_WORD> &seq_bits) {

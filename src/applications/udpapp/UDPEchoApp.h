@@ -24,6 +24,8 @@
 #include "ApplicationBase.h"
 #include "UDPSocket.h"
 
+namespace inet {
+
 /**
  * UDP application. See NED for more info.
  */
@@ -45,6 +47,9 @@ class UDPEchoApp : public ApplicationBase
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
 };
+
+} //namespace
+
 
 #endif
 

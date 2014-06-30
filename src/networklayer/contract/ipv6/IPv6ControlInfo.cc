@@ -21,6 +21,8 @@
 #include "IPv6Datagram.h"
 #endif
 
+using namespace inet;
+
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
 #ifdef WITH_IPv6

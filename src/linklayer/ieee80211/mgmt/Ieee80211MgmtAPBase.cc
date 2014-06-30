@@ -23,6 +23,8 @@
 #include "EtherFrame.h"
 #endif
 
+using namespace inet;
+
 
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
