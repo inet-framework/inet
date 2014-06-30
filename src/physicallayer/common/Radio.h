@@ -64,6 +64,14 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
          * Simulation time required to switch from one radio mode to another.
          */
         simtime_t switchingTimes[RADIO_MODE_SWITCHING][RADIO_MODE_SWITCHING];
+        /**
+         * Displays a circle around the host submodule representing the communication range.
+         */
+        bool displayCommunicationRange;
+        /**
+         * Displays a circle around the host submodule representing the interference range.
+         */
+        bool displayInterferenceRange;
         //@}
 
         /** Gates */
@@ -127,6 +135,10 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
 
+        virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
+        virtual m computeMaxCommunicationRange() const;
+        virtual m computeMaxInterferenceRange() const;
+
         virtual void handleMessageWhenDown(cMessage *message);
         virtual void handleMessageWhenUp(cMessage *message);
         virtual void handleSelfMessage(cMessage *message);
@@ -142,6 +154,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
         virtual bool isListeningPossible();
         virtual void updateTransceiverState();
+        virtual void updateDisplayString();
 
     public:
         Radio();

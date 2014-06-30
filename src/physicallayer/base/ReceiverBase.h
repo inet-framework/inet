@@ -38,8 +38,8 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
     public:
         ReceiverBase() {}
 
-        virtual W getMinInterferencePower() const { return W(0); }
-        virtual W getMinReceptionPower() const { return W(0); }
+        virtual W getMinInterferencePower() const { return W(qNaN); }
+        virtual W getMinReceptionPower() const { return W(qNaN); }
 };
 
 }

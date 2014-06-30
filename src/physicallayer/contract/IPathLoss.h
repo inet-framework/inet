@@ -38,6 +38,12 @@ class INET_API IPathLoss : public IPrintableObject
          * no loss at all and 0 means all power is lost.
          */
         virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const = 0;
+
+        /**
+         * Returns the range for the given loss factor. The value is in the range
+         * [0, +infinity) or NaN if unspecified.
+         */
+        virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const = 0;
 };
 
 }

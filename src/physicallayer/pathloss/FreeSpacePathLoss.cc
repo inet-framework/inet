@@ -60,7 +60,10 @@ double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m 
     return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
 }
 
+m FreeSpacePathLoss::computeRange(mps propagationSpeed, Hz frequency, double loss) const
+{
+    m waveLength = propagationSpeed / frequency;
+    return waveLength / pow(loss * 16.0 * M_PI * M_PI * systemLoss, 1.0 / alpha);
+}
 
 } // namespace inet
-
-

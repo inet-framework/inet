@@ -54,13 +54,13 @@ class INET_API IReceiver : public IPrintableObject
         /**
          * Returns the minimum interference power below which receptions are to
          * be ignored while computing the interference. Returns a value in the
-         * range [0, +infinity] or NaN if unspecified.
+         * range [0, +infinity) or NaN if unspecified.
          */
         virtual W getMinInterferencePower() const = 0;
 
         /**
          * Returns the minimum reception power below which successful reception
-         * is definitely not possible. Returns a value in the range [0, +infinity]
+         * is definitely not possible. Returns a value in the range [0, +infinity)
          * or NaN if unspecified.
          */
         virtual W getMinReceptionPower() const = 0;

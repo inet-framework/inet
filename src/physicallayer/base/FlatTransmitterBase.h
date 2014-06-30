@@ -49,6 +49,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
             power(W(sNaN))
         {}
 
+        virtual W getMaxPower() const { return power; }
         virtual const IModulation *getModulation() const { return modulation; }
 
         virtual int getHeaderBitLength() const { return headerBitLength; }

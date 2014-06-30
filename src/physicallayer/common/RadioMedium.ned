@@ -33,7 +33,6 @@ module RadioMedium like IRadioMedium
         string backgroundNoiseType;
 
         // channel limit parameters
-        double alpha = default(2); // TODO: rename to maxRangeAlpha
         double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
         double maxTransmissionPower @unit(W) = default(0W/0);
         double minInterferencePower @unit(dBm) = default(0dBm/0); // TODO: @unit(W) + dBm/dBW <--> W

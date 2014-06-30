@@ -410,11 +410,9 @@ double RadioMedium::computeMaxAntennaGain() const
 
 m RadioMedium::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
 {
-    double alpha = par("alpha");
     Hz carrierFrequency = Hz(par("carrierFrequency"));
-    m waveLength = mps(SPEED_OF_LIGHT) / carrierFrequency;
-    double minFactor = (minReceptionPower / maxAntennaGain / maxAntennaGain / maxTransmissionPower).get();
-    return waveLength / pow(minFactor * 16.0 * M_PI * M_PI, 1.0 / alpha);
+    double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
+    return pathLoss->computeRange(propagation->getPropagationSpeed(), carrierFrequency, loss);
 }
 
 m RadioMedium::computeMaxCommunicationRange() const

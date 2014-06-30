@@ -131,21 +131,21 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         const IBackgroundNoise *backgroundNoise;
         /**
          * The maximum transmission power among the radio transmitters is in the
-         * range [0, +infinity] or NaN if unspecified.
+         * range [0, +infinity) or NaN if unspecified.
          */
         W maxTransmissionPower;
         /**
          * The minimum interference power among the radio receivers is in the
-         * range [0, +infinity] or NaN if unspecified.
+         * range [0, +infinity) or NaN if unspecified.
          */
         W minInterferencePower;
         /**
          * The minimum reception power among the radio receivers is in the range
-         * [0, +infinity] or NaN if unspecified.
+         * [0, +infinity) or NaN if unspecified.
          */
         W minReceptionPower;
         /**
-         * The maximum gain among the radio antennas is in the range [1, +infinity].
+         * The maximum gain among the radio antennas is in the range [1, +infinity).
          */
         double maxAntennaGain;
         /**
@@ -161,13 +161,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         simtime_t maxTransmissionDuration;
         /**
          * The maximum communication range where a transmission can still be
-         * potentially successfully received is in the range [0, +infinity] or
+         * potentially successfully received is in the range [0, +infinity) or
          * NaN if unspecified.
          */
         m maxCommunicationRange;
         /**
          * The maximum interference range where a transmission is still considered
-         * to some effect on other transmissions is in the range [0, +infinity]
+         * to some effect on other transmissions is in the range [0, +infinity)
          * or NaN if unspecified.
          */
         m maxInterferenceRange;
@@ -400,6 +400,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         virtual ~RadioMedium();
 
         virtual void printToStream(std::ostream &stream) const { stream << "Radio medium"; }
+
+        virtual W getMinInterferencePower() const { return minInterferencePower; }
+        virtual W getMinReceptionPower() const { return minReceptionPower; }
+        virtual double getMaxAntennaGain() const { return maxAntennaGain; }
 
         virtual const IPropagation *getPropagation() const { return propagation; }
         virtual const IPathLoss *getPathLoss() const { return pathLoss; }

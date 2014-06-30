@@ -44,6 +44,24 @@ class INET_API IRadioMedium : public IPrintableObject
 {
     public:
         /**
+         * Returns the minimum interference power among the radio receivers is
+         * in the range [0, +infinity) or NaN if unspecified.
+         */
+        virtual W getMinInterferencePower() const = 0;
+
+        /**
+         * Returns the minimum reception power among the radio receivers is in
+         * the range [0, +infinity) or NaN if unspecified.
+         */
+        virtual W getMinReceptionPower() const = 0;
+
+        /**
+         * Returns the maximum antenna gain among the radio antennas. The value
+         * is in the range [1, +infinity) or NaN if unspecified.
+         */
+        virtual double getMaxAntennaGain() const = 0;
+
+        /**
          * Returns the radio signal propagation model of this radio medium. This
          * function never returns NULL.
          */

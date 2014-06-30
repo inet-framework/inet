@@ -18,6 +18,7 @@
 #include "Radio.h"
 #include "RadioMedium.h"
 #include "NodeOperations.h"
+#include "ModuleAccess.h"
 
 namespace inet {
 
@@ -88,6 +89,8 @@ void Radio::initialize(int stage)
         upperLayerOut = gate("upperLayerOut");
         radioIn = gate("radioIn");
         radioIn->setDeliverOnReceptionStart(true);
+        displayCommunicationRange = par("displayCommunicationRange");
+        displayInterferenceRange = par("displayInterferenceRange");
         WATCH(radioMode);
         WATCH(receptionState);
         WATCH(transmissionState);
@@ -100,8 +103,28 @@ void Radio::initialize(int stage)
     }
     else if (stage == INITSTAGE_LAST)
     {
+        updateDisplayString();
         EV_DEBUG << "Radio initialized with " << antenna << ", " << transmitter << ", " << receiver << endl;
     }
+}
+
+m Radio::computeMaxRange(W maxTransmissionPower, W minReceptionPower) const
+{
+    // TODO: retrieve carrier frequency from the transmitter?
+    Hz carrierFrequency = Hz(check_and_cast<cModule *>(medium)->par("carrierFrequency"));
+    double maxAntennaGain = medium->getMaxAntennaGain();
+    double loss = unit(minReceptionPower / maxTransmissionPower).get() / maxAntennaGain / maxAntennaGain;
+    return medium->getPathLoss()->computeRange(medium->getPropagation()->getPropagationSpeed(), carrierFrequency, loss);
+}
+
+m Radio::computeMaxCommunicationRange() const
+{
+    return computeMaxRange(transmitter->getMaxPower(), medium->getMinReceptionPower());
+}
+
+m Radio::computeMaxInterferenceRange() const
+{
+    return computeMaxRange(transmitter->getMaxPower(), medium->getMinInterferencePower());
 }
 
 void Radio::printToStream(std::ostream &stream) const
@@ -379,7 +402,36 @@ void Radio::updateTransceiverState()
     }
 }
 
+void Radio::updateDisplayString()
+{
+    // draw the interference area and sensitivity area
+    // according pathloss propagation only
+    // we use the radio channel method to calculate interference distance
+    // it should be the methods provided by propagation models, but to
+    // avoid a big modification, we reuse those methods.
+    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange))
+    {
+        cModule *host = findContainingNode(this);
+        cDisplayString& displayString = host->getDisplayString();
+        if (displayInterferenceRange)
+        {
+            char tag[32];
+            sprintf(tag, "r%i1", getId());
+            displayString.removeTag(tag);
+            displayString.insertTag(tag);
+            displayString.setTagArg(tag, 0, computeMaxInterferenceRange().get());
+            displayString.setTagArg(tag, 2, "gray");
+        }
+        if (displayCommunicationRange)
+        {
+            char tag[32];
+            sprintf(tag, "r%i2", getId());
+            displayString.removeTag(tag);
+            displayString.insertTag(tag);
+            displayString.setTagArg(tag, 0, computeMaxCommunicationRange().get());
+            displayString.setTagArg(tag, 2, "blue");
+        }
+    }
+}
 
 } // namespace inet
-
-

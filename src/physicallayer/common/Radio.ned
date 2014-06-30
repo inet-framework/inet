@@ -50,6 +50,8 @@ module Radio like IRadio
 
         string radioMediumModule = default("radioMedium");
         string switchingTimes = default("ms 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0");
+        bool displayCommunicationRange = default(true);
+        bool displayInterferenceRange = default(true);
 
         @class(Radio);
         @display("i=block/wrxtx");
