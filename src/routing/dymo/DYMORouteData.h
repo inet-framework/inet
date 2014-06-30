@@ -11,7 +11,7 @@
 
 namespace inet {
 
-DYMO_NAMESPACE_BEGIN
+namespace DYMO {
 
 /**
  * DYMO specific extra route data attached to routes in the routing table.
@@ -44,7 +44,7 @@ class INET_API DYMORouteData : public cObject {
     void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
 };
 
-DYMO_NAMESPACE_END
+} // namespace DYMO
 
 } //namespace
 

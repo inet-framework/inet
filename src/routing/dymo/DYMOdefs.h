@@ -6,10 +6,7 @@
 #define __INET_DYMODEFS_H_
 
 namespace inet {
-#define DYMO_NAMESPACE_BEGIN namespace DYMO {
-#define DYMO_NAMESPACE_END }
-
-DYMO_NAMESPACE_BEGIN
+namespace DYMO {
 
 // TODO: use generic MANET port
 #define DYMO_UDP_PORT 269
@@ -29,7 +26,7 @@ enum DYMORouteState {
     TIMED
 };
 
-DYMO_NAMESPACE_END
+} // namespace DYMO
 
 } // namespace
 

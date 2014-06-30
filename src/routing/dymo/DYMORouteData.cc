@@ -6,7 +6,7 @@
 
 namespace inet {
 
-DYMO_NAMESPACE_BEGIN
+namespace DYMO {
 
 DYMORouteData::DYMORouteData() {
     isBroken = false;
@@ -16,6 +16,6 @@ DYMORouteData::DYMORouteData() {
     metricType = HOP_COUNT;
 }
 
-DYMO_NAMESPACE_END
+} // namespace DYMO
 
 } // namespace
