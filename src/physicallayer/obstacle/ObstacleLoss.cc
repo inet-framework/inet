@@ -58,7 +58,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
     for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
     {
         const PhysicalObject *object = *it;
-        if (object->getShape()->isIntersectingLineSegment(lineSegment))
+        if (object->getShape()->isIntersecting(lineSegment))
             totalLoss *= computeObstacleLoss(object, frequency, transmissionPosition, receptionPosition);
     }
     return totalLoss;

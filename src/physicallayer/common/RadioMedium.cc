@@ -102,6 +102,7 @@ RadioMedium::RadioMedium(const IPropagation *propagation, const IAttenuation *at
 
 RadioMedium::~RadioMedium()
 {
+    delete obstacleLoss;
     delete backgroundNoise;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;

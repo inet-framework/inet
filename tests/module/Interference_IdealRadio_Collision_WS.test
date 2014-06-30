@@ -72,13 +72,13 @@ ned-path = .;../../../../src
 *.hostSender*.pingApp[0].startTime = 0s
 
 %contains: results/General-0.elog
- - Changing radio reception state from IDLE to BUSY.
+Changing radio reception state from IDLE to BUSY.
 %contains: results/General-0.elog
- - Changing radio reception state from BUSY to RECEIVING.
+Changing radio reception state from BUSY to RECEIVING.
 %contains: results/General-0.elog
- - Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
+Received (inet::IdealMacFrame)ping0 contains bit errors or collision, dropping it
 %not-contains: results/General-0.elog
- - Passing up contained packet `ping0' to higher layer
+Passing up contained packet `ping0' to higher layer
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

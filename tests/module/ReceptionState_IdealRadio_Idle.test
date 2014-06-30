@@ -61,9 +61,9 @@ ned-path = .;../../../../src
 *.host1.pingApp[0].startTime = 0s
 
 %not-contains: results/General-0.elog
- - Changing radio reception state from IDLE to BUSY.
+Changing radio reception state from IDLE to BUSY.
 %not-contains: results/General-0.elog
- - Changing radio reception state from IDLE to RECEIVING.
+Changing radio reception state from IDLE to RECEIVING.
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
 undisposed object:

@@ -74,11 +74,11 @@ ned-path = .;../../../../src
 *.hostSender*.pingApp[0].startTime = 0s
 
 %contains: results/General-0.elog
- - Changing radio reception state from IDLE to BUSY.
+Changing radio reception state from IDLE to BUSY.
 %contains: results/General-0.elog
- - Changing radio reception state from BUSY to RECEIVING.
+Changing radio reception state from BUSY to RECEIVING.
 %contains: results/General-0.elog
- - Passing up contained packet `ping0' to higher layer
+Passing up contained packet `ping0' to higher layer
 %contains: results/General-0.elog
 Sending datagram (inet::IPv4Datagram)ping0-reply with destination = 10.0.0.2
 %#--------------------------------------------------------------------------------------------------------------
