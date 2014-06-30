@@ -29,8 +29,8 @@
 #include "OSPFInterface.h"
 #include "OSPFRoutingTableEntry.h"
 
-namespace inet {
 
+namespace inet {
 
 /**
  * All OSPF classes are in this namespace.
@@ -373,8 +373,7 @@ private:
 };
 
 } // namespace OSPF
-
-} //namespace
-
+} // namespace inet
 
 #endif // __INET_OSPFROUTER_H
+

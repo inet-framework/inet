@@ -18,7 +18,7 @@
 #include "ConstantSpeedPropagation.h"
 #include "Arrival.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -74,3 +74,8 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
     const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
     return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
 }
+
+
+} // namespace inet
+
+

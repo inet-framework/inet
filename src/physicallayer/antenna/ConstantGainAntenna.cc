@@ -17,7 +17,7 @@
 
 #include "ConstantGainAntenna.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -34,3 +34,8 @@ void ConstantGainAntenna::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
         gain = FWMath::dB2fraction(par("gain"));
 }
+
+
+} // namespace inet
+
+

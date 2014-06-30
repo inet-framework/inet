@@ -17,7 +17,7 @@
 
 #include "OrdinalBasedDropper.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(OrdinalBasedDropper);
 
@@ -102,3 +102,8 @@ void OrdinalBasedDropper::parseVector(const char *vector)
 void OrdinalBasedDropper::finish()
 {
 }
+
+
+} // namespace inet
+
+

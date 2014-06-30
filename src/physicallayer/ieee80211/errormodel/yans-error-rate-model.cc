@@ -20,7 +20,7 @@
 #include "yans-error-rate-model.h"
 #include <math.h>
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -292,4 +292,9 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
     }
   return 0;
 }
+
+
+
+} // namespace inet
+
 

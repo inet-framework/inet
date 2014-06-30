@@ -40,7 +40,7 @@
 #include "params.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 RERR *NS_CLASS rerr_create(u_int8_t flags,struct in_addr dest_addr,
                            u_int32_t dest_seqno)
@@ -298,4 +298,9 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
         }
     }
 }
+
+
+
+} // namespace inet
+
 

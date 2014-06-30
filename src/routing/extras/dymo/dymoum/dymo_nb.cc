@@ -38,7 +38,7 @@ static DLIST_HEAD(NBLIST);
 extern int hello_ival;
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 #ifdef MAPROUTINGTABLE
 nb_t *NS_CLASS nb_insert(struct in_addr nb_addr, u_int32_t ifindex)
@@ -159,3 +159,8 @@ nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
     return NULL;
 }
 #endif
+
+
+} // namespace inet
+
+

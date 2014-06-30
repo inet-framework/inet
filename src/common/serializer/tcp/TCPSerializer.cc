@@ -26,7 +26,7 @@
 #include "TCPIPchecksum.h"
 #include "TCPSegment.h"
 
-using namespace inet;
+namespace inet {
 
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
@@ -274,3 +274,8 @@ uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
 
     return (uint16_t)~sum;
 }
+
+
+} // namespace inet
+
+

@@ -23,7 +23,7 @@
 #include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(SimpleVoIPSender);
 
@@ -168,4 +168,9 @@ void SimpleVoIPSender::sendVoIPPacket()
     if (packetID < talkspurtNumPackets)
         scheduleAt(simTime() + packetizationInterval, selfSender);
 }
+
+
+
+} // namespace inet
+
 

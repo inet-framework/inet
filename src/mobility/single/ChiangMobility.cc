@@ -20,7 +20,7 @@
 
 #include "ChiangMobility.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ChiangMobility);
@@ -91,3 +91,8 @@ void ChiangMobility::move()
     Coord dummyPosition;
     handleIfOutside(REFLECT, dummyPosition, lastSpeed, dummyAngle);
 }
+
+
+} // namespace inet
+
+

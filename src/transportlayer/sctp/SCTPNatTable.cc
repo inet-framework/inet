@@ -28,7 +28,7 @@
 #include "NotifierConsts.h"
 #include "SCTPAssociation.h"
 
-using namespace inet;
+namespace inet {
 
 uint32 SCTPNatTable::nextEntryNumber = 0;
 
@@ -156,3 +156,8 @@ SCTPNatEntry::~SCTPNatEntry()
 {
 
 }
+
+
+} // namespace inet
+
+

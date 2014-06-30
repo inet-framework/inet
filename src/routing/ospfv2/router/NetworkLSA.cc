@@ -17,7 +17,7 @@
 
 #include "LSA.h"
 
-using namespace inet;
+namespace inet {
 
 bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
 {
@@ -58,3 +58,8 @@ bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA* networkLSA) const
 
     return (differentHeader || differentBody);
 }
+
+
+} // namespace inet
+
+

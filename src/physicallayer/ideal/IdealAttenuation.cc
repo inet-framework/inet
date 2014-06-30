@@ -21,7 +21,7 @@
 #include "IArrival.h"
 #include "IRadioMedium.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -50,3 +50,8 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
         power = IdealReception::POWER_UNDETECTABLE;
     return new IdealReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
 }
+
+
+} // namespace inet
+
+

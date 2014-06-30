@@ -18,7 +18,7 @@
 
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(RTPPacket);
@@ -51,3 +51,8 @@ int RTPPacket::getPayloadLength() const
 {
     return (getByteLength() - getHeaderLength());
 }
+
+
+} // namespace inet
+
+

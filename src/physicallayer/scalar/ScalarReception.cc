@@ -17,7 +17,7 @@
 
 #include "ScalarReception.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -26,3 +26,8 @@ void ScalarReception::printToStream(std::ostream &stream) const
     ReceptionBase::printToStream(stream);
     stream << ", power = " << power << ", carrier frequency = " << carrierFrequency << ", bandwidth = " << bandwidth;
 }
+
+
+} // namespace inet
+
+

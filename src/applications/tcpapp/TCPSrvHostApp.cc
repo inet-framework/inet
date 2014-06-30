@@ -21,7 +21,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TCPSrvHostApp);
 
@@ -105,4 +105,9 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     updateDisplay();
 }
+
+
+
+} // namespace inet
+
 

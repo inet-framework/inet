@@ -22,7 +22,7 @@
 #include "NodeStatus.h"
 #include "RTPInterfacePacket_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(RTPApplication)
 
@@ -272,4 +272,9 @@ bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int sta
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+
+
+} // namespace inet
+
 

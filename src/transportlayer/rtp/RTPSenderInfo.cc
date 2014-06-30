@@ -21,7 +21,7 @@
 #include "reports.h"
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(RTPSenderInfo);
@@ -131,3 +131,8 @@ bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 {
     return false;
 }
+
+
+} // namespace inet
+
+

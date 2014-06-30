@@ -15,7 +15,7 @@
 
 #include "ByteArray.h"
 
-using namespace inet;
+namespace inet {
 
 
 void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
@@ -87,3 +87,8 @@ void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
         data_arraysize = nlength;
     }
 }
+
+
+} // namespace inet
+
+

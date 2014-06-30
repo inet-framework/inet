@@ -25,11 +25,11 @@
 
 #include "INETEndians.h"
 
-using namespace inet;
-
 extern "C" {
 #include <libavutil/audioconvert.h>
 }
+
+namespace inet {
 
 
 void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits)
@@ -190,3 +190,8 @@ AudioOutFile::~AudioOutFile()
 {
     close();
 }
+
+
+} // namespace inet
+
+

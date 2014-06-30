@@ -17,7 +17,7 @@
 
 #include "IRoute.h"
 
-using namespace inet;
+namespace inet {
 
 const char *IRoute::sourceTypeName(SourceType sourceType)
 {
@@ -50,3 +50,8 @@ const char *IMulticastRoute::sourceTypeName(SourceType sourceType)
         default:           return "???";
     }
 }
+
+
+} // namespace inet
+
+

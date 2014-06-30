@@ -21,7 +21,7 @@
 #include "RTPInterfacePacket_m.h"
 #include "RTPInnerPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RTPPayloadSender);
@@ -219,3 +219,8 @@ bool RTPPayloadSender::sendPacket()
     throw cRuntimeError("sendPacket() not implemented");
     return false;
 }
+
+
+} // namespace inet
+
+

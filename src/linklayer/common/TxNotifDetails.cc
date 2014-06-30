@@ -18,6 +18,11 @@
 
 #include "TxNotifDetails.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(TxNotifDetails);
+
+
+} // namespace inet
+
+

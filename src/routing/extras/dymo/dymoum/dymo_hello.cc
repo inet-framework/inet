@@ -38,7 +38,7 @@ static struct timer hello_timer;
 extern int hello_ival;
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS hello_init(void)
 {
@@ -154,4 +154,9 @@ long NS_CLASS hello_jitter(void)
     return -jitter;
 #endif
 }
+
+
+
+} // namespace inet
+
 

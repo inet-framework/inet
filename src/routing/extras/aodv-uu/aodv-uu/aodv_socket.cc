@@ -49,7 +49,7 @@
 
 #endif              /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 
 #ifndef NS_PORT
@@ -707,4 +707,9 @@ void aodv_socket_cleanup(void)
     }
 #endif              /* NS_PORT */
 }
+
+
+
+} // namespace inet
+
 

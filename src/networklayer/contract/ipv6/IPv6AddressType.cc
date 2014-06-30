@@ -21,7 +21,7 @@
 #include "IPv6InterfaceData.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 IPv6AddressType IPv6AddressType::INSTANCE;
 
@@ -35,3 +35,8 @@ Address IPv6AddressType::getLinkLocalAddress(const InterfaceEntry *ie) const
 #endif
     return IPv6Address::UNSPECIFIED_ADDRESS;
 }
+
+
+} // namespace inet
+
+

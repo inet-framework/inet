@@ -24,7 +24,7 @@
 #include "RTPMpegPacket_m.h"
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RTPAVProfilePayload32Sender);
@@ -169,3 +169,8 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     }
     EV_TRACE << "sendPacket() Exit"<< endl;
 }
+
+
+} // namespace inet
+
+

@@ -17,7 +17,7 @@
 
 #include "RicianFading.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -55,3 +55,8 @@ double RicianFading::computePathLoss(mps propagationSpeed, Hz frequency, m dista
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     return rr * freeSpacePathLoss;
 }
+
+
+} // namespace inet
+
+

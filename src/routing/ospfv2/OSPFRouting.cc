@@ -30,7 +30,7 @@
 #include "IPSocket.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(OSPFRouting);
 
@@ -157,4 +157,9 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
     }
     return false;
 }
+
+
+
+} // namespace inet
+
 

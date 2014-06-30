@@ -38,7 +38,7 @@
 extern int debug, daemonize;
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS dlog_init()
 {
@@ -104,3 +104,8 @@ return Address::getInstance().print_nodeaddr(ipaddr);
 #endif
 }
 #endif
+
+
+} // namespace inet
+
+

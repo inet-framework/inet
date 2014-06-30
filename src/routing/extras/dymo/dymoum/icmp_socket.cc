@@ -45,7 +45,7 @@ static void icmp_socket_read(int fd);
 
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS icmp_socket_init(void)
 {
@@ -278,3 +278,8 @@ static void icmp_socket_read(int fd)
          dev->ifname, ip2str(sender_addr.sin_addr.s_addr));
 }
 #endif  /* NS_PORT */
+
+
+} // namespace inet
+
+

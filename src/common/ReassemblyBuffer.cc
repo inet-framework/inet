@@ -23,7 +23,7 @@
 
 #include "ReassemblyBuffer.h"
 
-using namespace inet;
+namespace inet {
 
 
 ReassemblyBuffer::ReassemblyBuffer()
@@ -128,4 +128,9 @@ void ReassemblyBuffer::mergeFragments()
     }
     while (oncemore);
 }
+
+
+
+} // namespace inet
+
 

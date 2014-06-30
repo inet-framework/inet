@@ -19,7 +19,7 @@
 #include "IRadio.h"
 #include "IRadioMedium.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -60,3 +60,8 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         return true;
     }
 }
+
+
+} // namespace inet
+
+

@@ -21,7 +21,7 @@
 #include "DimensionalUtils.h"
 #include "BandListening.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -80,3 +80,8 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
     EV_DEBUG << "SNIR end" << endl;
     return MappingUtils::findMin(*snirMapping, start, end);
 }
+
+
+} // namespace inet
+
+

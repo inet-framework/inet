@@ -27,7 +27,7 @@
 #include "Ieee802Ctrl.h"
 #include "IPSocket.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(GenericNetworkProtocol);
 
@@ -625,3 +625,8 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDa
     }
     return IHook::ACCEPT;
 }
+
+
+} // namespace inet
+
+

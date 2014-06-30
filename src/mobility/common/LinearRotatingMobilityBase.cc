@@ -15,7 +15,7 @@
 
 #include <LinearRotatingMobilityBase.h>
 
-using namespace inet;
+namespace inet {
 
 LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 {
@@ -53,3 +53,8 @@ EulerAngles LinearRotatingMobilityBase::slerp(EulerAngles from, EulerAngles to, 
 {
     return from + (to - from) * delta;
 }
+
+
+} // namespace inet
+
+

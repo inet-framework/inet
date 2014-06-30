@@ -20,7 +20,7 @@
 
 #include "nist-error-rate-model.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -223,4 +223,9 @@ double NistErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, 
     }
     return 0;
 }
+
+
+
+} // namespace inet
+
 

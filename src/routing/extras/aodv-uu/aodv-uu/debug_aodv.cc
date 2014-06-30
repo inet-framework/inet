@@ -61,7 +61,7 @@ int debug = 0;
 struct timer rt_log_timer;
 #endif
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS log_init()
 {
@@ -654,4 +654,9 @@ char *NS_CLASS ip_to_str(struct in_addr addr)
     index %= 64;
     return str;
 }
+
+
+
+} // namespace inet
+
 

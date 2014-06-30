@@ -26,7 +26,7 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"
 
-using namespace inet;
+namespace inet {
 
 using std::endl;
 
@@ -305,3 +305,8 @@ cObject* Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDest
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
+
+} // namespace inet
+
+

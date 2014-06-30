@@ -17,7 +17,7 @@
 
 #include "ReceptionBase.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -25,3 +25,8 @@ void ReceptionBase::printToStream(std::ostream &stream) const
 {
     stream << "reception, transmission id = " << transmission->getId() << ", receiver id = " << receiver->getId();
 }
+
+
+} // namespace inet
+
+

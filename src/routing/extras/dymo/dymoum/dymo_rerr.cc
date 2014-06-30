@@ -33,7 +33,7 @@
 
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 
 RERR *NS_CLASS rerr_create(struct rerr_block *blocks, int nblocks, int ttl)
@@ -330,4 +330,9 @@ void NS_CLASS rerr_forward(RERR *rerr,struct in_addr dest_addr)
 
 }
 #endif
+
+
+
+} // namespace inet
+
 

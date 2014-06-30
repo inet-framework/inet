@@ -26,7 +26,7 @@
 #include "RTPMpegPacket_m.h"
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RTPAVProfilePayload32Receiver);
@@ -155,3 +155,8 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
         }
     }
 }
+
+
+} // namespace inet
+
+

@@ -27,7 +27,7 @@
 #include "FWMath.h"  // for M_PI
 #include "TraCIMobility.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TraCIMobility);
 
@@ -315,3 +315,8 @@ double TraCIMobility::calculateCO2emission(double v, double a) const {
 }
 
 #endif
+
+
+} // namespace inet
+
+

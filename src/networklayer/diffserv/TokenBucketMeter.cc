@@ -20,7 +20,7 @@
 #include "DiffservUtil.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace DiffservUtil;
 
@@ -104,3 +104,8 @@ int TokenBucketMeter::meterPacket(cPacket *packet)
     setColor(packet, newColor);
     return newColor;
 }
+
+
+} // namespace inet
+
+

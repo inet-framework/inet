@@ -20,7 +20,7 @@
 
 #include "Delayer.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(Delayer);
 
@@ -49,3 +49,8 @@ void Delayer::handleMessage(cMessage *msg)
         scheduleAt(simTime() + delay, msg);
     }
 }
+
+
+} // namespace inet
+
+

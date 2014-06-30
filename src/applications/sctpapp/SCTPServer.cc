@@ -30,7 +30,7 @@
 #include "SCTPSocket.h"
 #include "AddressResolver.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(SCTPServer);
@@ -576,3 +576,8 @@ SCTPServer::SCTPServer()
     delayFirstReadTimer = NULL;
     delayTimer = NULL;
 }
+
+
+} // namespace inet
+
+

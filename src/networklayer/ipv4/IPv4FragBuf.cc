@@ -24,7 +24,7 @@
 #include "ICMP.h"
 #include "IPv4Datagram.h"
 
-using namespace inet;
+namespace inet {
 
 
 IPv4FragBuf::IPv4FragBuf()
@@ -144,4 +144,9 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
         }
     }
 }
+
+
+
+} // namespace inet
+
 

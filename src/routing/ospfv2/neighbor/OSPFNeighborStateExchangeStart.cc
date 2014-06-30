@@ -27,7 +27,7 @@
 #include "OSPFNeighborStateTwoWay.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 void OSPF::NeighborStateExchangeStart::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
 {
@@ -73,3 +73,8 @@ void OSPF::NeighborStateExchangeStart::processEvent(OSPF::Neighbor* neighbor, OS
         changeState(neighbor, new OSPF::NeighborStateExchange, this);
     }
 }
+
+
+} // namespace inet
+
+

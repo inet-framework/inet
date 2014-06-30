@@ -21,7 +21,7 @@
 #include "ICMPMessage.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 OSPF::MessageHandler::MessageHandler(OSPF::Router* containingRouter, cSimpleModule* containingModule) :
@@ -515,4 +515,9 @@ void OSPF::MessageHandler::printLinkStateAcknowledgementPacket(const OSPFLinkSta
         EV_DETAIL << "    " << ackPacket->getLsaHeaders(i) << "\n";
     }
 }
+
+
+
+} // namespace inet
+
 

@@ -18,7 +18,7 @@
 #include "RadioPowerConsumer.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -108,3 +108,8 @@ double RadioPowerConsumer::getPowerConsumption()
     }
     return powerConsumption;
 }
+
+
+} // namespace inet
+
+

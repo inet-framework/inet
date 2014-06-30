@@ -40,7 +40,7 @@
 #include "IPv6Serializer.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 #define MAXBUFLENGTH 65536
@@ -166,4 +166,9 @@ void PcapDump::closePcap()
         dumpfile = NULL;
     }
 }
+
+
+
+} // namespace inet
+
 

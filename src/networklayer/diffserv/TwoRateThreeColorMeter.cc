@@ -20,7 +20,7 @@
 #include "DiffservUtil.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace DiffservUtil;
 
@@ -120,3 +120,8 @@ int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
     setColor(packet, newColor);
     return newColor;
 }
+
+
+} // namespace inet
+
+

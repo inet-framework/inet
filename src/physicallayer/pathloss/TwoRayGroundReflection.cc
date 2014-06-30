@@ -17,7 +17,7 @@
 
 #include "TwoRayGroundReflection.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -74,3 +74,8 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
          */
         return unit((ht * ht * hr * hr) / (distance * distance * distance * distance * systemLoss)).get();
 }
+
+
+} // namespace inet
+
+

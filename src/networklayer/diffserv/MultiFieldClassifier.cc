@@ -39,7 +39,7 @@
 #include "MultiFieldClassifier.h"
 #include "DiffservUtil.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace DiffservUtil;
 
@@ -298,5 +298,10 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
         }
     }
 }
+
+
+
+
+} // namespace inet
 
 

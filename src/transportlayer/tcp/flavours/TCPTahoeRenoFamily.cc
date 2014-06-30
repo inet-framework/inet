@@ -18,7 +18,7 @@
 #include "TCPTahoeRenoFamily.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 
 
@@ -49,3 +49,8 @@ TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
         state((TCPTahoeRenoFamilyStateVariables *&)TCPAlgorithm::state)
 {
 }
+
+
+} // namespace inet
+
+

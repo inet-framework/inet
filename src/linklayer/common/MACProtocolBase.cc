@@ -17,7 +17,7 @@
 #include "MACProtocolBase.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
@@ -73,3 +73,8 @@ bool MACProtocolBase::isLowerMessage(cMessage* message)
 {
     return message->getArrivalGateId() == lowerLayerInGateId;
 }
+
+
+} // namespace inet
+
+

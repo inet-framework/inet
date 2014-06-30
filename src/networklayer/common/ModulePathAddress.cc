@@ -21,7 +21,7 @@
 #include "ModuleAccess.h"
 #include "AddressResolver.h"
 
-using namespace inet;
+namespace inet {
 
 
 namespace {
@@ -74,4 +74,9 @@ std::string ModulePathAddress::str() const
     std::string fullPath = module->getFullPath();
     return strchr(fullPath.c_str(), '.') + 1;
 }
+
+
+
+} // namespace inet
+
 

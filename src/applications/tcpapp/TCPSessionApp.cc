@@ -22,7 +22,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(TCPSessionApp);
@@ -274,4 +274,9 @@ void TCPSessionApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+
+
+
+} // namespace inet
+
 

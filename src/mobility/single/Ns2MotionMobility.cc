@@ -29,7 +29,7 @@
 #include <cstdlib>
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(Ns2MotionMobility);
@@ -210,3 +210,8 @@ void Ns2MotionMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
+
+} // namespace inet
+
+

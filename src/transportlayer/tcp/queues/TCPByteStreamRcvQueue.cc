@@ -25,7 +25,7 @@
 #include "TCPCommand_m.h"
 #include "TCPSegment.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(TCPByteStreamRcvQueue);
 
@@ -127,4 +127,9 @@ TCPVirtualDataRcvQueue::Region* TCPByteStreamRcvQueue::createRegionFromSegment(T
 
     return region;
 }
+
+
+
+} // namespace inet
+
 

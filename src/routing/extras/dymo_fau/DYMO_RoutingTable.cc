@@ -23,7 +23,7 @@
 #include "DYMO_RoutingTable.h"
 #include "DYMO.h"
 
-using namespace inet;
+namespace inet {
 
 
 DYMO_RoutingTable::DYMO_RoutingTable(DYMOFau* host, const IPv4Address& myAddr)
@@ -243,4 +243,9 @@ std::ostream& operator<<(std::ostream& os, const DYMO_RoutingTable& o)
     os << o.info();
     return os;
 }
+
+
+
+} // namespace inet
+
 

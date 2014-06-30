@@ -19,7 +19,7 @@
 
 #include "TCPVirtualDataRcvQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPVirtualDataRcvQueue);
@@ -283,3 +283,8 @@ uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
         return rcv_nxt;
     return seqMin(regionList.front()->getBegin(), rcv_nxt);
 }
+
+
+} // namespace inet
+
+

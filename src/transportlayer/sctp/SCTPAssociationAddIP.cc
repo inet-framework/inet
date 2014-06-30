@@ -20,7 +20,7 @@
 #include "SCTPAssociation.h"
 #include "common.h"
 
-using namespace inet;
+namespace inet {
 
 void SCTPAssociation::sendAsconf(const char* type, const bool remote)
 {
@@ -316,3 +316,8 @@ SCTPSuccessIndication* SCTPAssociation::createSuccessIndication(const uint32 cor
     success->setBitLength(SCTP_ADD_IP_PARAMETER_LENGTH*8);
     return success;
 }
+
+
+} // namespace inet
+
+

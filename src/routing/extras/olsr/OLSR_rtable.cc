@@ -30,7 +30,7 @@
 #include "OLSR_rtable.h"
 #include "OLSR_repositories.h"
 
-using namespace inet;
+namespace inet {
 
 ///
 /// \brief Creates a new empty routing table.
@@ -225,3 +225,8 @@ std::string OLSR_rtable::detailedInfo()
     }
     return out.str();
 }
+
+
+} // namespace inet
+
+

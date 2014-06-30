@@ -32,7 +32,7 @@
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(SCTP);
 
@@ -942,3 +942,8 @@ void SCTP::finish()
         recordScalar("RTXMethod", (double)par("RTXMethod"));
     }
 }
+
+
+} // namespace inet
+
+

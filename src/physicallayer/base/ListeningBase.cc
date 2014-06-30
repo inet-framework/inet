@@ -17,7 +17,7 @@
 
 #include "ListeningBase.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -25,3 +25,8 @@ void ListeningBase::printToStream(std::ostream &stream) const
 {
     stream << "listening";
 }
+
+
+} // namespace inet
+
+

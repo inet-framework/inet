@@ -29,7 +29,7 @@
 #include "IPv4.h"
 #include "ControlManetRouting_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module( DYMOFau );
 
@@ -1232,4 +1232,9 @@ void DYMOFau::processLinkBreak(const cObject *details)
     if (dgram)
         packetFailed(dgram);
 }
+
+
+
+} // namespace inet
+
 

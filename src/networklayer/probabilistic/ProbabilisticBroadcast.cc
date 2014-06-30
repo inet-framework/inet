@@ -13,7 +13,7 @@
 #include "IAddressType.h"
 #include "MACAddress.h"
 
-using namespace inet;
+namespace inet {
 
 using std::make_pair;
 using std::endl;
@@ -358,3 +358,8 @@ cObject* ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const 
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
+
+} // namespace inet
+
+

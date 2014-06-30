@@ -26,7 +26,7 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EtherAppCli);
 
@@ -240,4 +240,9 @@ void EtherAppCli::finish()
     cancelAndDelete(timerMsg);
     timerMsg = NULL;
 }
+
+
+
+} // namespace inet
+
 

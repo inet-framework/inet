@@ -21,7 +21,7 @@
 #include "AddressResolver.h"
 #include "LifecycleOperation.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(LifecycleController);
 
@@ -156,3 +156,8 @@ void LifecycleController::moduleOperationStageCompleted(Callback *callback)
         resumeOperation(operation);
     }
 }
+
+
+} // namespace inet
+
+

@@ -24,7 +24,7 @@
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(GenericARP);
 
@@ -92,4 +92,9 @@ MACAddress GenericARP::mapMulticastAddress(Address addr)
     // macAddr.setAddressByte(5, addr.getDByte(3));
     return macAddr;
 }
+
+
+
+} // namespace inet
+
 

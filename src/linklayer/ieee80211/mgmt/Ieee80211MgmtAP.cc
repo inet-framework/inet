@@ -29,7 +29,7 @@
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -445,4 +445,9 @@ void Ieee80211MgmtAP::stop()
     staList.clear();
     Ieee80211MgmtAPBase::stop();
 }
+
+
+
+} // namespace inet
+
 

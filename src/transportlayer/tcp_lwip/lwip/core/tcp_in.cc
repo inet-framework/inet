@@ -65,7 +65,7 @@
 #include "lwip/snmp.h"
 #include "arch/perf.h"
 
-using namespace inet;
+namespace inet {
 
 /* These variables are global to all functions involved in the input
    processing of TCP segments. They are set by the tcp_input()
@@ -1510,3 +1510,8 @@ tcp_parseopt(struct tcp_pcb *pcb)
 }
 
 #endif /* LWIP_TCP */
+
+
+} // namespace inet
+
+

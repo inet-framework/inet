@@ -20,7 +20,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MACRelayUnit);
 
@@ -164,3 +164,8 @@ void MACRelayUnit::finish()
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("discarded frames", numDiscardedFrames);
 }
+
+
+} // namespace inet
+
+

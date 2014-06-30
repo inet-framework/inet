@@ -28,7 +28,7 @@
 #include "Radio80211aControlInfo_m.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -885,4 +885,9 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
     //XXX where to get this from?
     //ap->rxPower = ...
 }
+
+
+
+} // namespace inet
+
 

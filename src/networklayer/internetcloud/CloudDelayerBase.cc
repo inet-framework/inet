@@ -22,7 +22,7 @@
 
 #include "IPv4.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(CloudDelayerBase);
 
@@ -119,4 +119,9 @@ INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagra
 {
     return INetfilter::IHook::ACCEPT;
 }
+
+
+
+} // namespace inet
+
 

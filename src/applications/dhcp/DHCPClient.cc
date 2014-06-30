@@ -24,7 +24,7 @@
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(DHCPClient);
 
@@ -771,4 +771,9 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+
+
+} // namespace inet
+
 

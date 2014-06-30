@@ -17,7 +17,7 @@
 
 #include "PowerSourceBase.h"
 
-using namespace inet;
+namespace inet {
 
 IPowerConsumer *PowerSourceBase::getPowerConsumer(int index)
 {
@@ -43,3 +43,8 @@ void PowerSourceBase::setPowerConsumption(int id, double consumedPower)
     powerConsumers[id].consumedPower = consumedPower;
     emit(powerConsumptionChangedSignal, getResidualCapacity());
 }
+
+
+} // namespace inet
+
+

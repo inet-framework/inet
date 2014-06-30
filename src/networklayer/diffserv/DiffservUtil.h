@@ -23,10 +23,9 @@
 #include "INETDefs.h"
 #include "IInterfaceTable.h"
 
-using namespace inet;
+namespace inet {
+namespace DiffservUtil {
 
-namespace DiffservUtil
-{
     // colors for naming the output of meters
     enum Color {GREEN, YELLOW, RED};
 
@@ -116,5 +115,6 @@ namespace DiffservUtil
     void setColor(cPacket *packet, int color);
 }
 
+} // namespace inet
 
 #endif

@@ -21,7 +21,7 @@
 #include "IRadio.h"
 #include "IMobility.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -48,3 +48,8 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
     const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
 }
+
+
+} // namespace inet
+
+

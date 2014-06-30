@@ -40,7 +40,7 @@
 
 #ifdef WITH_TRACI
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TraCIScenarioManager);
 
@@ -1139,4 +1139,9 @@ template<> std::string TraCIScenarioManager::TraCIBuffer::read() {
 }
 
 #endif // WITH_TRACI
+
+
+
+} // namespace inet
+
 

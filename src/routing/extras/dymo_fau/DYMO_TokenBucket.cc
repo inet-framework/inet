@@ -18,7 +18,7 @@
 
 #include "DYMO_TokenBucket.h"
 
-using namespace inet;
+namespace inet {
 
 DYMO_TokenBucket::DYMO_TokenBucket(double tokensPerTick, double maxTokens, simtime_t currentTime) : tokensPerTick(tokensPerTick), maxTokens(maxTokens), availableTokens(maxTokens), lastUpdate(currentTime)
 {
@@ -40,3 +40,8 @@ bool DYMO_TokenBucket::consumeTokens(double tokens, simtime_t currentTime)
     availableTokens -= tokens;
     return true;
 }
+
+
+} // namespace inet
+
+

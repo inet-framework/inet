@@ -22,7 +22,7 @@
 #include "INETDefs.h"
 #include "dsss-error-rate-model.h"
 
-using namespace inet;
+namespace inet {
 using namespace physicallayer;
 
 #ifndef ENABLE_GSL
@@ -172,4 +172,9 @@ double DsssErrorRateModel::SymbolErrorProb256Cck(double e1)
 }
 
 #endif
+
+
+
+} // namespace inet
+
 

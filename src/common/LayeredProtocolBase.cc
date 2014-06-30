@@ -16,7 +16,7 @@
 
 #include "LayeredProtocolBase.h"
 
-using namespace inet;
+namespace inet {
 
 simsignal_t LayeredProtocolBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t LayeredProtocolBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
@@ -68,3 +68,8 @@ void LayeredProtocolBase::handleLowerCommand(cMessage* message)
 {
     throw cRuntimeError("Lower command '%s' is not handled.", message->getName());
 }
+
+
+} // namespace inet
+
+

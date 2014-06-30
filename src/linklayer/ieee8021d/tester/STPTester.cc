@@ -21,7 +21,7 @@
 #include "Ieee8021dInterfaceData.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(STPTester);
 
@@ -170,3 +170,8 @@ bool STPTester::isForwarding(Topology::Node * node, unsigned int portNum)
 
     return portData->isForwarding();
 }
+
+
+} // namespace inet
+
+

@@ -27,7 +27,7 @@
 #include "IInterfaceTable.h"
 #include "IPv4Address.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(HostAutoConfigurator);
 
@@ -106,4 +106,9 @@ void HostAutoConfigurator::setupNetworkLayer()
         }
     }
 }
+
+
+
+} // namespace inet
+
 

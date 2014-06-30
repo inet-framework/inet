@@ -24,7 +24,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = registerSignal("dataQueueLen");
 
@@ -281,4 +281,9 @@ void Ieee80211MgmtBase::stop()
     mgmtQueue.clear();
     isOperational = false;
 }
+
+
+
+} // namespace inet
+
 

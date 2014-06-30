@@ -23,7 +23,7 @@
 #include "NodeStatus.h"
 #include "TCPSocket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(TCPSinkApp);
@@ -91,4 +91,9 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 void TCPSinkApp::finish()
 {
 }
+
+
+
+} // namespace inet
+
 

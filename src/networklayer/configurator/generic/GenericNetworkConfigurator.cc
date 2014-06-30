@@ -29,7 +29,7 @@
 #include "PatternMatcher.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(GenericNetworkConfigurator);
 
@@ -529,3 +529,8 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
     // print some timing information
     printTimeSpentUsingDuration("calculateShortestPaths", calculateShortestPathsDuration);
 }
+
+
+} // namespace inet
+
+

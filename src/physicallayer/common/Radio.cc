@@ -19,7 +19,7 @@
 #include "RadioMedium.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -378,3 +378,8 @@ void Radio::updateTransceiverState()
         emit(transmissionStateChangedSignal, newRadioTransmissionState);
     }
 }
+
+
+} // namespace inet
+
+

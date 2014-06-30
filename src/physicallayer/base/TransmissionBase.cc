@@ -17,7 +17,7 @@
 
 #include "TransmissionBase.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -25,3 +25,8 @@ void TransmissionBase::printToStream(std::ostream &stream) const
 {
     stream << "transmission, id = " << id << ", transmitter id = " << transmitter->getId();
 }
+
+
+} // namespace inet
+
+

@@ -41,7 +41,7 @@ static DSRUUTimer ack_timer;
 #include "dsr-uu-omnetpp.h"
 #endif /* omnetpp */
 
-using namespace inet;
+namespace inet {
 
 struct maint_entry
 {
@@ -870,3 +870,8 @@ void NSCLASS maint_buf_cleanup(void)
     proc_net_remove(MAINT_BUF_PROC_FS_NAME);
 #endif
 }
+
+
+} // namespace inet
+
+

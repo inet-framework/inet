@@ -21,7 +21,7 @@
 #include "OSPFRouting.h"
 #include "BGPSession.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(BGPRouting);
 
@@ -883,4 +883,9 @@ BGP::SessionID BGPRouting::findNextSession(BGP::type type, bool startSession)
     }
     return sessionID;
 }
+
+
+
+} // namespace inet
+
 

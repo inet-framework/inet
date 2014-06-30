@@ -17,6 +17,11 @@
 
 #include "ModuleIdAddressType.h"
 
-using namespace inet;
+namespace inet {
 
 ModuleIdAddressType ModuleIdAddressType::INSTANCE;
+
+
+} // namespace inet
+
+

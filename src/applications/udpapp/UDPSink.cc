@@ -22,7 +22,7 @@
 #include "ModuleAccess.h"
 #include "UDPControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(UDPSink);
@@ -171,4 +171,9 @@ void UDPSink::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+
+
+
+} // namespace inet
+
 

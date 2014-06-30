@@ -23,7 +23,7 @@
 #include "Ieee802Ctrl.h"
 #include "InterfaceEntry.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(STP);
 
@@ -733,3 +733,8 @@ void STP::initInterfacedata(unsigned int portNum)
     ifd->setPortNum(-1);
     ifd->setLostBPDU(0);
 }
+
+
+} // namespace inet
+
+

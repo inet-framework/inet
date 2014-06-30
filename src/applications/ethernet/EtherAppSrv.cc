@@ -26,7 +26,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EtherAppSrv);
 
@@ -167,4 +167,9 @@ bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage,
 void EtherAppSrv::finish()
 {
 }
+
+
+
+} // namespace inet
+
 

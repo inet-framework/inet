@@ -14,7 +14,7 @@
 
 #include "ByteArrayBuffer.h"
 
-using namespace inet;
+namespace inet {
 
 ByteArrayBuffer::ByteArrayBuffer()
  :
@@ -113,4 +113,9 @@ void ByteArrayBuffer::clear()
         dataListM.pop_front();
     }
 }
+
+
+
+} // namespace inet
+
 

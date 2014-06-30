@@ -26,7 +26,7 @@
 #include "IPv4Datagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 //----
 
@@ -96,4 +96,9 @@ void TCPDump::finish()
     tcpdump.dump("", "tcpdump finished");
     pcapDump.closePcap();
 }
+
+
+
+} // namespace inet
+
 

@@ -31,7 +31,7 @@
 #include "xMIPv6.h"
 #endif /* WITH_xMIPv6 */
 
-using namespace inet;
+namespace inet {
 
 #define MK_ASSIGN_LINKLOCAL_ADDRESS 0
 #define MK_SEND_PERIODIC_RTRADV 1
@@ -2728,4 +2728,9 @@ bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule* module)
             (module->getSubmodule("wlan", 0) || module->getSubmodule("wlan")));
 }
 #endif /* WITH_xMIPv6 */
+
+
+
+} // namespace inet
+
 

@@ -18,7 +18,7 @@
 
 #include "AlgorithmicDropperBase.h"
 
-using namespace inet;
+namespace inet {
 
 void AlgorithmicDropperBase::initialize()
 {
@@ -73,3 +73,8 @@ int AlgorithmicDropperBase::getByteLength() const
         len += (*it)->getByteLength();
     return len;
 }
+
+
+} // namespace inet
+
+

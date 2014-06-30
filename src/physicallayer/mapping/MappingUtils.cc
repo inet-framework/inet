@@ -17,7 +17,7 @@
 
 #include "MappingUtils.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -467,3 +467,8 @@ LinearIntplMappingIterator::~LinearIntplMappingIterator() {
 	if(rightIt)
 		delete rightIt;
 }
+
+
+} // namespace inet
+
+

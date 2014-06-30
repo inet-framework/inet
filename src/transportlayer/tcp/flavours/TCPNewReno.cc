@@ -19,7 +19,7 @@
 #include "TCPNewReno.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPNewReno);
@@ -369,3 +369,8 @@ void TCPNewReno::receivedDuplicateAck()
         }
     }
 }
+
+
+} // namespace inet
+
+

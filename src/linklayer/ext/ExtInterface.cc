@@ -33,7 +33,7 @@
 #include "IPv4Serializer.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ExtInterface);
@@ -223,4 +223,9 @@ void ExtInterface::clearQueue()
 {
     // does not have a queue, do nothing
 }
+
+
+
+} // namespace inet
+
 

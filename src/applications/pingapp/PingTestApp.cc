@@ -37,7 +37,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 using std::cout;
 
@@ -350,4 +350,9 @@ void PingTestApp::finish()
         cout << "--------------------------------------------------------" << endl;
     }
 }
+
+
+
+} // namespace inet
+
 

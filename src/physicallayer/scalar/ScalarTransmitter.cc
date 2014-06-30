@@ -20,7 +20,7 @@
 #include "RadioControlInfo_m.h"
 #include "IMobility.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -50,3 +50,8 @@ const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmi
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
+
+
+} // namespace inet
+
+

@@ -24,7 +24,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(RSTP);
 
@@ -974,3 +974,8 @@ void RSTP::stop()
     cancelEvent(helloTimer);
     cancelEvent(upgradeTimer);
 }
+
+
+} // namespace inet
+
+

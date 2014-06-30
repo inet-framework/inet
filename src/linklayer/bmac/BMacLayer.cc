@@ -21,7 +21,7 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "BMacLayer.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(BMacLayer)
 
@@ -794,3 +794,8 @@ cObject* BMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pS
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
+
+} // namespace inet
+
+

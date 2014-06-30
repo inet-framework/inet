@@ -21,7 +21,7 @@
 #include "debug_dsr.h"
 #include "timer.h"
 
-using namespace inet;
+namespace inet {
 
 #define NEIGH_TBL_MAX_LEN 50
 
@@ -371,3 +371,8 @@ void __exit NSCLASS neigh_tbl_cleanup(void)
     proc_net_remove(NEIGH_TBL_PROC_NAME);
 #endif
 }
+
+
+} // namespace inet
+
+

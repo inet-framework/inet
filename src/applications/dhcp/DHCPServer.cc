@@ -29,7 +29,7 @@
 #include "NodeStatus.h"
 #include "NotifierConsts.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(DHCPServer);
 
@@ -537,3 +537,8 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+
+} // namespace inet
+
+

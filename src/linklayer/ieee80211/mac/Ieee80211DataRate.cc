@@ -22,7 +22,7 @@
 
 #include "WifiMode.h"
 
-using namespace inet;
+namespace inet {
 
 
 /* Bit rates for 802.11b/g/a/p.
@@ -206,5 +206,10 @@ const Ieee80211DescriptorData& Ieee80211Descriptor::getDescriptor(int idx)
 
     return data[idx];
 }
+
+
+
+
+} // namespace inet
 
 

@@ -18,7 +18,7 @@
 
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 OSPF::Router::Router(OSPF::RouterID id, cSimpleModule* containingModule, IInterfaceTable* ift, IIPv4RoutingTable* rt) :
@@ -1425,3 +1425,8 @@ void OSPF::Router::removeExternalRoute(IPv4Address networkAddress)
         externalRoutes.erase(externalIt);
     }
 }
+
+
+} // namespace inet
+
+

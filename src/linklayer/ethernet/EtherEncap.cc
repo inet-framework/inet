@@ -23,7 +23,7 @@
 #include "IInterfaceTable.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(EtherEncap);
@@ -190,4 +190,9 @@ void EtherEncap::handleSendPause(cMessage *msg)
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
 }
+
+
+
+} // namespace inet
+
 

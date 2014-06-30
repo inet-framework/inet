@@ -49,7 +49,7 @@ static void printTQ(list_t * l);
 #endif
 #endif              /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 
 #ifdef AODV_USE_STL
@@ -401,3 +401,8 @@ void NS_CLASS printTQ(list_t * l)
 }
 #endif
 #endif
+
+
+} // namespace inet
+
+

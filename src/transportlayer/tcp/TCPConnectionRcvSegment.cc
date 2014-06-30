@@ -27,7 +27,7 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
-using namespace inet;
+namespace inet {
 
 bool TCPConnection::tryFastRoute(TCPSegment *tcpseg)
 {
@@ -1435,3 +1435,8 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
 //    and for any outstanding calls, delete the TCB, enter the CLOSED
 //    state and return.
 //"
+
+
+} // namespace inet
+
+

@@ -30,7 +30,7 @@
 #include "IPv6Datagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 //----
@@ -187,4 +187,9 @@ void PcapRecorder::finish()
      packetDumper.dump("", "pcapRecorder finished");
      pcapDumper.closePcap();
 }
+
+
+
+} // namespace inet
+
 

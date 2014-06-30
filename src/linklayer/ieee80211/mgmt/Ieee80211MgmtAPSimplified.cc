@@ -23,7 +23,7 @@
 #include "EtherFrame.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(Ieee80211MgmtAPSimplified);
@@ -123,4 +123,9 @@ void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseF
 {
     dropManagementFrame(frame);
 }
+
+
+
+} // namespace inet
+
 

@@ -20,7 +20,7 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(NodeStartOperation);
 Register_Class(NodeShutdownOperation);
@@ -35,4 +35,9 @@ void NodeOperation::initialize(cModule *module, StringMap& params)
 
     LifecycleOperation::initialize(module, params);
 }
+
+
+
+} // namespace inet
+
 

@@ -25,7 +25,7 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EtherTrafGen);
 
@@ -216,4 +216,9 @@ void EtherTrafGen::finish()
     cancelAndDelete(timerMsg);
     timerMsg = NULL;
 }
+
+
+
+} // namespace inet
+
 

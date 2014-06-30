@@ -28,7 +28,7 @@
 #include "neigh.h"
 #include "maint-buf.h"
 
-using namespace inet;
+namespace inet {
 
 struct dsr_ack_opt *dsr_ack_opt_add(char *buf, int len, struct in_addr src,
                                     struct in_addr dst, unsigned short id)
@@ -471,3 +471,8 @@ int NSCLASS dsr_ack_opt_recv(struct dsr_ack_opt *ack)
 
     return DSR_PKT_NONE;
 }
+
+
+} // namespace inet
+
+

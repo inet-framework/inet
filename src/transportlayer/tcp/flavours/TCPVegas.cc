@@ -4,7 +4,7 @@
 #include "TCP.h"
 #include "TCPVegas.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPVegas);
@@ -387,4 +387,9 @@ void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 
     state->regions.set(fromseq, toseq, simTime());
 }
+
+
+
+} // namespace inet
+
 

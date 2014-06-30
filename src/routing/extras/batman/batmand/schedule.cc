@@ -24,7 +24,7 @@
 #include "BatmanMain.h"
 #include "IPv4InterfaceData.h"
 
-using namespace inet;
+namespace inet {
 
 
 void Batman::schedule_own_packet(BatmanIf *batman_if)
@@ -315,5 +315,10 @@ packet_free:    //list_del((struct list_head *)&forw_list, forw_pos, &forw_list)
         delete forw_node;
     }
 }
+
+
+
+
+} // namespace inet
 
 

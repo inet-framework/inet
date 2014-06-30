@@ -28,7 +28,7 @@
 #include "IPassiveQueue.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(IdealMac);
@@ -321,4 +321,9 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     delete frame;
     return packet;
 }
+
+
+
+} // namespace inet
+
 

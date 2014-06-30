@@ -17,7 +17,7 @@
 
 #include "ListeningDecision.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -25,3 +25,8 @@ void ListeningDecision::printToStream(std::ostream &stream) const
 {
     stream << "listening decision, " << (isListeningPossible_ ? "possible" : "impossible");
 }
+
+
+} // namespace inet
+
+

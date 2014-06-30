@@ -66,7 +66,7 @@ extern int rreq_gratuitous, expanding_ring_search;
 extern int internet_gw_mode;
 #endif
 
-using namespace inet;
+namespace inet {
 
 RREQ *NS_CLASS rreq_create(u_int8_t flags,struct in_addr dest_addr,
                            u_int32_t dest_seqno, struct in_addr orig_addr)
@@ -1082,4 +1082,9 @@ void NS_CLASS rreq_blacklist_timeout(void *arg)
     free(bl);
 }
 #endif
+
+
+
+} // namespace inet
+
 

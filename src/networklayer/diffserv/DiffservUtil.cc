@@ -33,10 +33,10 @@
 #include "DiffservUtil.h"
 #include "DSCP_m.h"
 
-using namespace OPP_Global;
+namespace inet {
+namespace DiffservUtil {
 
-namespace DiffservUtil
-{
+using namespace OPP_Global;
 
 // cached enums
 cEnum *dscpEnum = NULL;
@@ -244,3 +244,5 @@ void setColor(cPacket *packet, int color)
 }
 
 }
+} // namespace inet
+

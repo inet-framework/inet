@@ -20,7 +20,7 @@
 
 #include "StaticGridMobility.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(StaticGridMobility);
@@ -49,4 +49,9 @@ void StaticGridMobility::setInitialPosition()
     recordScalar("y", lastPosition.y);
     recordScalar("z", lastPosition.z);
 }
+
+
+
+} // namespace inet
+
 

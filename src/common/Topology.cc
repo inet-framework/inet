@@ -26,7 +26,7 @@
 #include "PatternMatcher.h"
 #include "stlutils.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(Topology);
@@ -467,4 +467,9 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
         }
     }
 }
+
+
+
+} // namespace inet
+
 

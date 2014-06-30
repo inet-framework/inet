@@ -18,7 +18,7 @@
 
 #include "ManetAddress.h"
 
-using namespace inet;
+namespace inet {
 
 
 void ManetNetworkAddress::set(IPv4Address addr, short unsigned int masklen)
@@ -109,4 +109,9 @@ bool ManetNetworkAddress::contains(const ManetNetworkAddress& other) const
     }
     return false;
 }
+
+
+
+} // namespace inet
+
 

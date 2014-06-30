@@ -15,7 +15,7 @@
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module (EthernetApplication);
@@ -172,4 +172,9 @@ void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& des
 void EthernetApplication::finish()
 {
 }
+
+
+
+} // namespace inet
+
 

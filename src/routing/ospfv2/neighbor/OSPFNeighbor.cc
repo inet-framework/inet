@@ -26,7 +26,7 @@
 #include "OSPFNeighborStateDown.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 // FIXME!!! Should come from a global unique number generator module.
@@ -735,3 +735,8 @@ void OSPF::Neighbor::deleteLastSentDDPacket()
         lastTransmittedDDPacket = NULL;
     }
 }
+
+
+} // namespace inet
+
+

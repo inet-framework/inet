@@ -40,7 +40,7 @@
 extern int reissue_rreq;
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS route_valid_timeout(void *arg)
 {
@@ -155,3 +155,8 @@ void NS_CLASS nb_timeout(void *arg)
     rtable_expire_timeout_all(nb->nb_addr, nb->ifindex);
     nb_remove(nb);
 }
+
+
+} // namespace inet
+
+

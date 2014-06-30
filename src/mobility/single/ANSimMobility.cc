@@ -19,7 +19,7 @@
 #include "ANSimMobility.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ANSimMobility);
@@ -132,3 +132,8 @@ void ANSimMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
+
+} // namespace inet
+
+

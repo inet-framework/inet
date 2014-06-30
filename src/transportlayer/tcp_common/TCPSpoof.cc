@@ -18,7 +18,7 @@
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TCPSpoof);
 
@@ -83,5 +83,10 @@ unsigned long TCPSpoof::chooseInitialSeqNum()
     // choose an initial send sequence number in the same way as TCP does
     return (unsigned long)SIMTIME_DBL(fmod(simTime()*250000.0, 1.0+(double)(unsigned)0xffffffffUL)) & 0xffffffffUL;
 }
+
+
+
+
+} // namespace inet
 
 

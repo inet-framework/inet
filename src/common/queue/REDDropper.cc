@@ -19,7 +19,7 @@
 #include "REDDropper.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(REDDropper);
 
@@ -100,3 +100,8 @@ bool REDDropper::shouldDrop(cPacket *packet)
 
     return false;
 }
+
+
+} // namespace inet
+
+

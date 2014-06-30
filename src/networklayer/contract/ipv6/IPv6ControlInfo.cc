@@ -21,7 +21,7 @@
 #include "IPv6Datagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
@@ -148,3 +148,8 @@ IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
 #endif
 }
+
+
+} // namespace inet
+
+

@@ -19,7 +19,7 @@
 #include "LineSegmentsMobilityBase.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 LineSegmentsMobilityBase::LineSegmentsMobilityBase()
@@ -54,3 +54,8 @@ void LineSegmentsMobilityBase::move()
         lastPosition += lastSpeed * (now - lastUpdate).dbl();
     }
 }
+
+
+} // namespace inet
+
+

@@ -35,7 +35,7 @@
 #include "IPv6InterfaceData.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables* chunk)
@@ -3341,3 +3341,8 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
 
     statisticsPeerRwnd->record(state->peerRwnd);
 }
+
+
+} // namespace inet
+
+

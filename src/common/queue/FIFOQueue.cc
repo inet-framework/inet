@@ -21,7 +21,7 @@
 
 #include "FIFOQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(FIFOQueue);
@@ -64,4 +64,9 @@ bool FIFOQueue::isEmpty()
 {
     return queue.empty();
 }
+
+
+
+} // namespace inet
+
 

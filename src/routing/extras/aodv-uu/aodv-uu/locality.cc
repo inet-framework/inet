@@ -40,7 +40,7 @@ extern int h_errno;
 extern int gw_prefix;
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
@@ -128,4 +128,9 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
 #endif
     return HOST_UNKNOWN;
 }
+
+
+
+} // namespace inet
+
 

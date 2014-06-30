@@ -18,7 +18,7 @@
 #include "ModuleAccess.h"
 #include "NetworkProtocolCommand_m.h"
 
-using namespace inet;
+namespace inet {
 
 NetworkProtocolBase::NetworkProtocolBase() :
     interfaceTable(NULL)
@@ -85,3 +85,8 @@ bool NetworkProtocolBase::isLowerMessage(cMessage* message)
 {
     return message->getArrivalGate()->isName("lowerLayerIn");
 }
+
+
+} // namespace inet
+
+

@@ -17,7 +17,7 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "FindModule.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module( LMacLayer )
 
@@ -757,3 +757,8 @@ cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pS
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
+
+} // namespace inet
+
+

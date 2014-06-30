@@ -18,7 +18,7 @@
 
 #include "Modulation.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -44,5 +44,10 @@ double QAM256Modulation::calculateBER(double snir, double bandwidth, double bitr
 }
 
 
+
+
+
+
+} // namespace inet
 
 

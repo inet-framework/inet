@@ -17,7 +17,7 @@
 
 #include "DimensionalUtils.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -37,3 +37,8 @@ ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, con
     powerMapping->setValue(position, power.get());
     return powerMapping;
 }
+
+
+} // namespace inet
+
+

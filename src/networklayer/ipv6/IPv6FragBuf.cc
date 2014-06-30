@@ -27,7 +27,7 @@
 #include "IPv6Datagram.h"
 #include "IPv6ExtensionHeaders.h"
 
-using namespace inet;
+namespace inet {
 
 
 IPv6FragBuf::IPv6FragBuf()
@@ -175,4 +175,9 @@ void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
         }
     }
 }
+
+
+
+} // namespace inet
+
 

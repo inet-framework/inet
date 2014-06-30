@@ -22,7 +22,7 @@
 cLogStream cLogStream::globalStream;
 #endif
 
-using namespace inet;
+namespace inet {
 
 #ifdef _MSC_VER
 
@@ -63,3 +63,8 @@ double INET_API erfc(double x)
 }
 
 #endif
+
+
+} // namespace inet
+
+

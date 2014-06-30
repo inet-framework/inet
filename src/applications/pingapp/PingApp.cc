@@ -27,7 +27,7 @@
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
-using namespace inet;
+namespace inet {
 
 using std::cout;
 
@@ -352,3 +352,8 @@ void PingApp::finish()
         cout << "--------------------------------------------------------" << endl;
     }
 }
+
+
+} // namespace inet
+
+

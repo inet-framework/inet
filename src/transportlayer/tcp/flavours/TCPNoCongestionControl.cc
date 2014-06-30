@@ -18,7 +18,7 @@
 #include "TCPNoCongestionControl.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(TCPNoCongestionControl);
 
@@ -53,3 +53,8 @@ void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
     // ack may have freed up some room in the window, try sending
     sendData(false);
 }
+
+
+} // namespace inet
+
+

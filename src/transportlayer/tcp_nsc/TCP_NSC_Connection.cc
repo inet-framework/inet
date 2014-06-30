@@ -34,7 +34,7 @@
 #include <dlfcn.h>
 #include <netinet/in.h>
 
-using namespace inet;
+namespace inet {
 
 
 struct nsc_iphdr
@@ -223,4 +223,9 @@ void TCP_NSC_Connection::abort()
     sendQueueM->dequeueTcpLayerMsg(sendQueueM->getBytesAvailable());
     close();
 }
+
+
+
+} // namespace inet
+
 

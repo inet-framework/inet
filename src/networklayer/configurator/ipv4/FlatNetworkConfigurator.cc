@@ -23,7 +23,7 @@
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
 
-using namespace inet;
+namespace inet {
 
 typedef cTopology WeightedTopology;
 
@@ -226,4 +226,9 @@ void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& 
     sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
     getDisplayString().setTagArg("t", 0, buf);
 }
+
+
+
+} // namespace inet
+
 

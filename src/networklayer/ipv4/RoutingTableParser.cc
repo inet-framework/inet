@@ -29,7 +29,7 @@
 #include "IInterfaceTable.h"
 #include "IPv4InterfaceData.h"
 
-using namespace inet;
+namespace inet {
 
 //
 // Constants
@@ -374,3 +374,8 @@ void RoutingTableParser::parseRouting(char *routeFile)
         rt->addRoute(e);
     }
 }
+
+
+} // namespace inet
+
+

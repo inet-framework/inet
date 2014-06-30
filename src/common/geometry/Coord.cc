@@ -20,7 +20,7 @@
 #include "assert.h"
 #include "Coord.h"
 
-using namespace inet;
+namespace inet {
 
 const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
 
@@ -49,3 +49,8 @@ double Coord::sqrTorusDist(const Coord& b, const Coord& size) const {
     double zDist = dist(z, b.z, size.z);
     return xDist * xDist + yDist * yDist + zDist * zDist;
 }
+
+
+} // namespace inet
+
+

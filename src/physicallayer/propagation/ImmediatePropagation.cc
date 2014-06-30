@@ -18,7 +18,7 @@
 #include "ImmediatePropagation.h"
 #include "Arrival.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -40,3 +40,8 @@ void ImmediatePropagation::printToStream(std::ostream &stream) const
 {
     stream << "immediate radio signal propagation, theoretical propagation speed = " << propagationSpeed;
 }
+
+
+} // namespace inet
+
+

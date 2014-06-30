@@ -21,7 +21,7 @@
 #include "INetworkProtocolControlInfo.h"
 #include "PingPayload_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EchoProtocol);
 
@@ -109,3 +109,8 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     request->setControlInfo(controlInfo);
     send(request, "sendOut");
 }
+
+
+} // namespace inet
+
+

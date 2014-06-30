@@ -21,7 +21,7 @@
 #include "IPv4InterfaceData.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 UDPSocket::UDPSocket()
 {
@@ -340,4 +340,9 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     os << " TTL=" << ttl << " ToS=" << tos << " on ifID=" << interfaceID;
     return os.str();
 }
+
+
+
+} // namespace inet
+
 

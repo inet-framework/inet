@@ -25,7 +25,7 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
-using namespace inet;
+namespace inet {
 
 
 //
@@ -303,3 +303,8 @@ void TCPConnection::process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *t
     delete msg;
     delete tcpCommand;
 }
+
+
+} // namespace inet
+
+

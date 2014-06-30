@@ -21,6 +21,11 @@
 
 #include "IMobility.h"
 
-using namespace inet;
+namespace inet {
 
 simsignal_t IMobility::mobilityStateChangedSignal = cComponent::registerSignal("mobilityStateChanged");
+
+
+} // namespace inet
+
+

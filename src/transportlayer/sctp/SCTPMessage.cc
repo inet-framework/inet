@@ -20,7 +20,7 @@
 #include "SCTPMessage.h"
 #include "SCTPAssociation.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(SCTPMessage);
@@ -387,4 +387,9 @@ cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
     this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
     return msg;
 }
+
+
+
+} // namespace inet
+
 

@@ -24,7 +24,7 @@
 #include "OSPFInterfaceStateLoopback.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
@@ -56,4 +56,9 @@ void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, O
         intf->sendDelayedAcknowledgements();
     }
 }
+
+
+
+} // namespace inet
+
 

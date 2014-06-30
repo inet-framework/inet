@@ -25,7 +25,7 @@
 #include "AddressResolver.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -953,3 +953,8 @@ void SCTPNatPeer::finish()
     sentPacketsPerAssoc.clear();
     rcvdBytesPerAssoc.clear();
 }
+
+
+} // namespace inet
+
+

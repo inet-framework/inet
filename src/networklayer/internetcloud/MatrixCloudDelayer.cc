@@ -24,7 +24,7 @@
 #include "XMLUtils.h"
 #include "IInterfaceTable.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MatrixCloudDelayer);
 
@@ -247,4 +247,9 @@ std::string MatrixCloudDelayer::getPathOfConnectedNodeOnIfaceID(int id)
 
     return connNode->getFullPath();
 }
+
+
+
+} // namespace inet
+
 

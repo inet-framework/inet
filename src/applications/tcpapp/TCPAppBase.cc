@@ -19,7 +19,7 @@
 
 #include "AddressResolver.h"
 
-using namespace inet;
+namespace inet {
 
 simsignal_t TCPAppBase::connectSignal = registerSignal("connect");
 simsignal_t TCPAppBase::rcvdPkSignal = registerSignal("rcvdPk");
@@ -164,4 +164,9 @@ void TCPAppBase::finish()
     EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
+
+
+
+} // namespace inet
+
 

@@ -28,7 +28,7 @@
 #include "ModuleAccess.h"
 #include "XMLUtils.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(IPv4NetworkConfigurator);
 
@@ -2201,3 +2201,8 @@ bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address &ret, InterfaceEnt
         return interfaceInfo->configure;
     }
 }
+
+
+} // namespace inet
+
+

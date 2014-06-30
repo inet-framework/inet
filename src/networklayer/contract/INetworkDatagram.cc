@@ -18,7 +18,12 @@
 
 #include "INetworkDatagram.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Abstract_Class(INetworkDatagram);
+
+
+
+} // namespace inet
+
 

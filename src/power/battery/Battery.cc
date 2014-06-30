@@ -20,7 +20,7 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(Battery);
 
@@ -96,3 +96,8 @@ void Battery::scheduleDepletedTimer()
     if (totalConsumedPower > 0)
         scheduleAt(simTime() + residualCapacity / totalConsumedPower, depletedTimer);
 }
+
+
+} // namespace inet
+
+

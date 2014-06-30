@@ -18,7 +18,7 @@
 
 #include "PositionTable.h"
 
-using namespace inet;
+namespace inet {
 
 static double const NaN = 0.0 / 0.0;
 
@@ -73,3 +73,8 @@ simtime_t PositionTable::getOldestPosition() const {
     }
     return oldestPosition;
 }
+
+
+} // namespace inet
+
+

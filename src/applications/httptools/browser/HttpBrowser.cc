@@ -17,7 +17,7 @@
 
 #include "HttpBrowser.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(HttpBrowser);
 
@@ -308,5 +308,10 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
     // Issue a connect to the socket for the specified module and port.
     socket->connect(AddressResolver().resolve(moduleName), connectPort);
 }
+
+
+
+
+} // namespace inet
 
 

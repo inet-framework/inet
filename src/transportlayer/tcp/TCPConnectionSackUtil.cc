@@ -29,7 +29,7 @@
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
 
-using namespace inet;
+namespace inet {
 
 //
 // helper functions for SACK
@@ -700,3 +700,8 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 
     return *tcpseg;
 }
+
+
+} // namespace inet
+
+

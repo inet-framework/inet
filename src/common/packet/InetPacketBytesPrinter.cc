@@ -18,7 +18,7 @@
 
 #include "INETDefs.h"
 
-using namespace inet;
+namespace inet {
 
 #if OMNETPP_VERSION >= 0x0405
 
@@ -61,3 +61,8 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
 }
 
 #endif // Register_MessagePrinter
+
+
+} // namespace inet
+
+

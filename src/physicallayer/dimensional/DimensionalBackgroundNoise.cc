@@ -20,7 +20,7 @@
 #include "DimensionalUtils.h"
 #include "BandListening.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -45,3 +45,8 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
     const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerMapping);
 }
+
+
+} // namespace inet
+
+

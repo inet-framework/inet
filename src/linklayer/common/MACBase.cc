@@ -28,7 +28,7 @@
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 
 MACBase::MACBase()
@@ -130,3 +130,8 @@ void MACBase::handleMessageWhenDown(cMessage *msg)
         delete msg;
     }
 }
+
+
+} // namespace inet
+
+

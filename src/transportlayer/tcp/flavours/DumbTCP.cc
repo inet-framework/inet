@@ -18,7 +18,7 @@
 #include "DumbTCP.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(DumbTCP);
 
@@ -135,3 +135,8 @@ void DumbTCP::restartRexmitTimer()
 void DumbTCP::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
 }
+
+
+} // namespace inet
+
+

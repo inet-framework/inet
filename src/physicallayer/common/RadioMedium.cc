@@ -24,7 +24,7 @@
 #include "ModuleAccess.h"
 #include "IInterfaceTable.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -847,3 +847,8 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
         }
     }
 }
+
+
+} // namespace inet
+
+

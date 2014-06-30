@@ -33,7 +33,7 @@
 #include "debug_dsr.h"
 #include "send-buf.h"
 
-using namespace inet;
+namespace inet {
 
 int NSCLASS dsr_recv(struct dsr_pkt *dp)
 {
@@ -191,3 +191,8 @@ void NSCLASS dsr_start_xmit(struct dsr_pkt *dp)
 out:
     dsr_pkt_free(dp);
 }
+
+
+} // namespace inet
+
+

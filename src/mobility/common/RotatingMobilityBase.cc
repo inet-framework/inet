@@ -15,7 +15,7 @@
 
 #include <RotatingMobilityBase.h>
 
-using namespace inet;
+namespace inet {
 
 RotatingMobilityBase::RotatingMobilityBase()
 {
@@ -94,3 +94,8 @@ EulerAngles RotatingMobilityBase::getCurrentAngularSpeed()
     rotateAndUpdate();
     return lastAngularSpeed;
 }
+
+
+} // namespace inet
+
+

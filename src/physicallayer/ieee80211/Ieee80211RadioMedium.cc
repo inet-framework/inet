@@ -17,7 +17,7 @@
 
 #include "Ieee80211RadioMedium.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -31,3 +31,8 @@ void Ieee80211RadioMedium::initialize(int stage)
         numChannels = par("numChannels");
     }
 }
+
+
+} // namespace inet
+
+

@@ -19,7 +19,7 @@
 #include "Ieee80211MgmtSTASimplified.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(Ieee80211MgmtSTASimplified);
@@ -154,5 +154,10 @@ void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponse
 {
     dropManagementFrame(frame);
 }
+
+
+
+
+} // namespace inet
 
 

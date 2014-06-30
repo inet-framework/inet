@@ -10,7 +10,7 @@
 #include "IPv4RoutingTable.h"
 #include "ProtocolMap.h"
 
-using namespace inet;
+namespace inet {
 
 
 
@@ -297,5 +297,10 @@ std::string RREQ::detailedInfo() const
     out <<" hops :"<< hops << "\n";
     return out.str();
 }
+
+
+
+
+} // namespace inet
 
 

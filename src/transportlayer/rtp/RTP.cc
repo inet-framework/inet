@@ -32,7 +32,7 @@
 #include "UDPSocket.h"
 #include "IIPv4RoutingTable.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(RTP);
 
@@ -431,4 +431,9 @@ bool RTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+
+
+} // namespace inet
+
 

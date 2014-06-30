@@ -28,7 +28,7 @@
 
 #ifdef WITH_TRACI
 
-using namespace inet;
+namespace inet {
 
 #define MYDEBUG EV
 
@@ -109,4 +109,9 @@ void TraCIScenarioManagerLaunchd::init_traci() {
 }
 
 #endif
+
+
+
+} // namespace inet
+
 

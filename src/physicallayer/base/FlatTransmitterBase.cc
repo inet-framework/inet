@@ -18,7 +18,7 @@
 #include "FlatTransmitterBase.h"
 #include "Modulation.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -45,3 +45,8 @@ void FlatTransmitterBase::initialize(int stage)
         power = W(par("power"));
     }
 }
+
+
+} // namespace inet
+
+

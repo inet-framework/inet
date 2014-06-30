@@ -24,7 +24,7 @@
 #include "TCPCommand_m.h"
 #include "GenericAppMsg_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(TCPGenericSrvApp);
@@ -180,4 +180,9 @@ void TCPGenericSrvApp::finish()
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
+
+
+
+} // namespace inet
+
 

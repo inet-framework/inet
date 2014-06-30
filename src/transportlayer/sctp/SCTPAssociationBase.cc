@@ -28,7 +28,7 @@
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
 
-using namespace inet;
+namespace inet {
 
 
 
@@ -1433,3 +1433,8 @@ void SCTPAssociation::removePath()
         sctpPathMap.erase(pathIterator);
     }
 }
+
+
+} // namespace inet
+
+

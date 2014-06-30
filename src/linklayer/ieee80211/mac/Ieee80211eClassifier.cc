@@ -36,7 +36,7 @@
   #include "TCPSegment.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 Register_Class(Ieee80211eClassifier);
 
@@ -114,4 +114,9 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 
     return defaultAC;
 }
+
+
+
+} // namespace inet
+
 

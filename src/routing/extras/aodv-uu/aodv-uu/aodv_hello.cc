@@ -47,7 +47,7 @@ static struct timer hello_timer;
 
 #endif
 
-using namespace inet;
+namespace inet {
 
 /* #define DEBUG_HELLO */
 
@@ -428,4 +428,9 @@ NS_INLINE void NS_CLASS hello_update_timeout(rt_table_t * rt,
     timer_set_timeout(&rt->hello_timer, time + HELLO_DELAY);
     memcpy(&rt->last_hello_time, now, sizeof(struct timeval));
 }
+
+
+
+} // namespace inet
+
 

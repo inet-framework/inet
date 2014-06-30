@@ -30,7 +30,7 @@
 
 #include "HttpController.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(HttpController);
 
@@ -532,3 +532,8 @@ HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
     while (en->activationTime>simTime());
     return en;
 }
+
+
+} // namespace inet
+
+

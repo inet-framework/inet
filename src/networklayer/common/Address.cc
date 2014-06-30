@@ -22,7 +22,7 @@
 #include "ModuleIdAddressType.h"
 #include "ModulePathAddressType.h"
 
-using namespace inet;
+namespace inet {
 
 #define RESERVED_IPV6_ADDRESS_RANGE 0x8000 // IETF reserved address range 8000::/16 (extended)
 
@@ -332,4 +332,9 @@ const char *Address::getTypeName(AddressType t)
     }
 #undef CASE
 }
+
+
+
+} // namespace inet
+
 

@@ -184,7 +184,7 @@ void verbose_usage(void)
 }
 #endif
 
-using namespace inet;
+namespace inet {
 
 BatmanIf *Batman::is_batman_if(InterfaceEntry *dev)
 {
@@ -928,5 +928,10 @@ void Batman::parseIncomingPacket(Address neigh, BatmanIf *if_incoming, BatmanPac
         delete next_packet;
     }
 }
+
+
+
+
+} // namespace inet
 
 

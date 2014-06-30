@@ -28,7 +28,7 @@
 #include "LDP.h"
 #include "TCPSegment.h"
 
-using namespace inet;
+namespace inet {
 #define ICMP_TRAFFIC    6
 
 
@@ -287,3 +287,8 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
     }
 }
+
+
+} // namespace inet
+
+

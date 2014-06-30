@@ -38,7 +38,7 @@
 #include "Ieee80211MgmtAP.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
@@ -1468,3 +1468,8 @@ std::string ManetRoutingBase::convertAddressToString(const Address& add)
 {
     return add.str();
 }
+
+
+} // namespace inet
+
+

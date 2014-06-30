@@ -41,7 +41,7 @@
 extern int llfeedback;
 #endif              /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 
 /* Add/Update neighbor from a non HELLO AODV control message... */
@@ -406,4 +406,9 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
     }
 }
 #endif
+
+
+
+} // namespace inet
+
 

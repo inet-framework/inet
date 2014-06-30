@@ -48,7 +48,7 @@
 #include <FWMath.h>
 #include <assert.h>
 
-using namespace inet;
+namespace inet {
 
 /**
  * Constructor function of the class. It sets the value for t he number of posture. It also suppose the first given transition matrix as default.
@@ -602,3 +602,8 @@ double** PostureTransition::extractMatrixFromSteadyState(double* vec)
 
     return mat;
 }
+
+
+} // namespace inet
+
+

@@ -23,7 +23,7 @@
 #include "NodeStatus.h"
 #include <cmath>
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TraCITestApp);
 
@@ -224,4 +224,9 @@ void TraCITestApp::handlePositionUpdate() {
         }
     }
 }
+
+
+
+} // namespace inet
+
 

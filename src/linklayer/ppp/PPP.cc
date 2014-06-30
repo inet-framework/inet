@@ -26,7 +26,7 @@
 #include "NotifierConsts.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(PPP);
@@ -502,4 +502,9 @@ void PPP::clearQueue()
         txQueue.clear();
     }
 }
+
+
+
+} // namespace inet
+
 

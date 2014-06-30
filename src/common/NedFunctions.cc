@@ -26,7 +26,7 @@
 #define stdstringValue()  s
 #endif
 
-using namespace inet;
+namespace inet {
 
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
@@ -128,4 +128,9 @@ Define_NED_Function2(nedf_absPath,
         "string",
         "Returns absolute path of given module"
 );
+
+
+
+} // namespace inet
+
 

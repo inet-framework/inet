@@ -20,7 +20,7 @@
 
 #include "sdes.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(SDESItem);
@@ -204,3 +204,8 @@ int SDESChunk::getLength() const
 {
     return _length;
 }
+
+
+} // namespace inet
+
+

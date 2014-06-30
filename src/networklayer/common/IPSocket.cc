@@ -19,7 +19,7 @@
 #include "IPProtocolId_m.h"
 #include "NetworkProtocolCommand_m.h"
 
-using namespace inet;
+namespace inet {
 
 void IPSocket::registerProtocol(int protocol)
 {
@@ -37,3 +37,8 @@ void IPSocket::sendToIP(cMessage * message)
 
     check_and_cast<cSimpleModule *>(gateToIP->getOwnerModule())->send(message, gateToIP);
 }
+
+
+} // namespace inet
+
+

@@ -19,7 +19,7 @@
 #include "SCTPAlg.h"
 #include "SCTP.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(SCTPAlg);
 
@@ -88,3 +88,8 @@ void SCTPAlg::sackSent()
 void SCTPAlg::dataSent(uint32)
 {
 }
+
+
+} // namespace inet
+
+

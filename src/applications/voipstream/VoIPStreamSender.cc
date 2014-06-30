@@ -23,7 +23,7 @@
 #include "NodeStatus.h"
 #include "UDPControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 extern "C" {
 #include <libavutil/opt.h>
@@ -552,4 +552,9 @@ void VoIPStreamSender::readFrame()
         }
     }
 }
+
+
+
+} // namespace inet
+
 

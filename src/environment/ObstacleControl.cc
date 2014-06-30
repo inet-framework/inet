@@ -23,7 +23,7 @@
 
 #include "ObstacleControl.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ObstacleControl);
@@ -218,3 +218,8 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 
     return pSend;
 }
+
+
+} // namespace inet
+
+

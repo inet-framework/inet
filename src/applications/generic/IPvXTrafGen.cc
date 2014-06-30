@@ -26,7 +26,7 @@
 #include "IAddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(IPvXTrafGen);
@@ -239,4 +239,9 @@ void IPvXTrafGen::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
+
+
+
+} // namespace inet
+
 

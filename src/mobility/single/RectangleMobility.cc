@@ -19,7 +19,7 @@
 #include "RectangleMobility.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RectangleMobility);
@@ -106,3 +106,8 @@ void RectangleMobility::move()
         lastPosition.y = constraintAreaMax.y - d + corner3;
     }
 }
+
+
+} // namespace inet
+
+

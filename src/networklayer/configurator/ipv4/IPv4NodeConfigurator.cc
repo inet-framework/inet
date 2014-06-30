@@ -23,7 +23,7 @@
 #include "NodeStatus.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(IPv4NodeConfigurator);
@@ -128,3 +128,8 @@ void IPv4NodeConfigurator::configureNode()
     if (par("configureRoutingTable").boolValue())
         networkConfigurator->configureRoutingTable(routingTable);
 }
+
+
+} // namespace inet
+
+

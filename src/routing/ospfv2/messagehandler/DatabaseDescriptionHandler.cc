@@ -23,7 +23,7 @@
 #include "OSPFNeighbor.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 OSPF::DatabaseDescriptionHandler::DatabaseDescriptionHandler(OSPF::Router* containingRouter) :
@@ -243,3 +243,8 @@ bool OSPF::DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPa
     }
     return true;
 }
+
+
+} // namespace inet
+
+

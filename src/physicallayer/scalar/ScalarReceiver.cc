@@ -20,7 +20,7 @@
 #include "ScalarNoise.h"
 #include "BandListening.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -96,3 +96,8 @@ double ScalarReceiver::computeMinSNIR(const IReception *reception, const INoise 
     const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
     return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
+
+
+} // namespace inet
+
+

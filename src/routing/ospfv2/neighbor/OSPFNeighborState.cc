@@ -22,7 +22,7 @@
 #include "OSPFInterface.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
@@ -86,3 +86,8 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
     }
 }
+
+
+} // namespace inet
+
+

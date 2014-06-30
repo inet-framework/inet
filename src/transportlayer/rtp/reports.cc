@@ -18,7 +18,7 @@
 
 #include "reports.h"
 
-using namespace inet;
+namespace inet {
 
 
 //
@@ -69,3 +69,8 @@ void ReceptionReport::dump(std::ostream& os) const
     os << "  lastSR = " << lastSR_var << endl;
     os << "  delaySinceLastSR = " << delaySinceLastSR_var << endl;
 }
+
+
+} // namespace inet
+
+

@@ -29,7 +29,7 @@
 #include <OLSR_ETX_dijkstra.h>
 #include <OLSR_ETX.h>
 
-using namespace inet;
+namespace inet {
 
 
 Dijkstra::Dijkstra()
@@ -347,4 +347,9 @@ Dijkstra::~Dijkstra()
     if (all_nodes_)
         delete all_nodes_;
 }
+
+
+
+} // namespace inet
+
 

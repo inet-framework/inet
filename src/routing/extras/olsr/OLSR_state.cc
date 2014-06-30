@@ -29,7 +29,7 @@
 #include "OLSR_state.h"
 #include "OLSR.h"
 
-using namespace inet;
+namespace inet {
 
 /********** MPR Selector Set Manipulation **********/
 
@@ -552,4 +552,9 @@ OLSR_state::~OLSR_state()
 {
     clear_all();
 }
+
+
+
+} // namespace inet
+
 

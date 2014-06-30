@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <algorithm>
 
-using namespace inet;
+namespace inet {
 
 
 void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables* chunk,
@@ -1422,3 +1422,8 @@ uint32 SCTPAssociation::getAllTransQ()
     }
     return sum;
 }
+
+
+} // namespace inet
+
+

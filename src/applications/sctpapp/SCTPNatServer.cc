@@ -28,7 +28,7 @@
 #include "AddressResolver.h"
 #include "SCTPNatTable.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(SCTPNatServer);
@@ -508,3 +508,8 @@ void SCTPNatServer::finish()
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 }
+
+
+} // namespace inet
+
+

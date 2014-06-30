@@ -24,7 +24,7 @@
 #include "TCPSerializer.h"
 #include "TCP_lwIP.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TcpLwipMsgBasedSendQueue);
@@ -337,4 +337,9 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 {
     // nothing to do
 }
+
+
+
+} // namespace inet
+
 

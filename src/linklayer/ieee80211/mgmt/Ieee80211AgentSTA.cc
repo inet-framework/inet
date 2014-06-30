@@ -22,7 +22,7 @@
 #include "NotifierConsts.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(Ieee80211AgentSTA);
 
@@ -348,4 +348,9 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
         // we are happy!
     }
 }
+
+
+
+} // namespace inet
+
 

@@ -25,7 +25,7 @@
 #include "OSPFNeighborStateInit.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::NeighborStateAttempt::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
@@ -51,3 +51,8 @@ void OSPF::NeighborStateAttempt::processEvent(OSPF::Neighbor* neighbor, OSPF::Ne
         changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
 }
+
+
+} // namespace inet
+
+

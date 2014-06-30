@@ -17,4 +17,9 @@
 
 #include "IPowerConsumer.h"
 
-using namespace inet;
+namespace inet {
+
+
+} // namespace inet
+
+

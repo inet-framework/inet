@@ -20,7 +20,7 @@
 #include "TCP.h"
 #include "TCPSACKRexmitQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 //
@@ -703,3 +703,8 @@ void TCPBaseAlg::restartRexmitTimer()
 
     startRexmitTimer();
 }
+
+
+} // namespace inet
+
+

@@ -18,7 +18,7 @@
 #include "GenericRoute.h"
 #include "GenericRoutingTable.h"
 
-using namespace inet;
+namespace inet {
 
 std::string GenericRoute::info() const
 {
@@ -75,3 +75,8 @@ bool GenericMulticastRoute::removeChild(InterfaceEntry *ie)
 }
 
 #endif /*0*/
+
+
+} // namespace inet
+
+

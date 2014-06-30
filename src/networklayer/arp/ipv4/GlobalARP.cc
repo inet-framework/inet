@@ -30,7 +30,7 @@
 #include "NodeOperations.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
@@ -282,4 +282,9 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
         entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
     }
 }
+
+
+
+} // namespace inet
+
 

@@ -18,7 +18,7 @@
 #include "WRRScheduler.h"
 #include "opp_utils.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(WRRScheduler);
 
@@ -83,3 +83,8 @@ bool WRRScheduler::schedulePacket()
 
     return packetRequested;
 }
+
+
+} // namespace inet
+
+

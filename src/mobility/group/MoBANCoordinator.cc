@@ -47,7 +47,7 @@
 #include "MoBANCoordinator.h"
 #include "MoBANLocal.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MoBANCoordinator);
 
@@ -701,3 +701,8 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
         }
     }
 }
+
+
+} // namespace inet
+
+

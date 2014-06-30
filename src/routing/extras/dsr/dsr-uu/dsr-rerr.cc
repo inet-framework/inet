@@ -28,7 +28,7 @@
 #include "link-cache.h"
 #include "maint-buf.h"
 
-using namespace inet;
+namespace inet {
 
 static struct dsr_rerr_opt *dsr_rerr_opt_add(char *buf, int len,
         int err_type,
@@ -269,3 +269,8 @@ int NSCLASS dsr_rerr_opt_recv(struct dsr_pkt *dp, struct dsr_rerr_opt *rerr_opt)
 
     return 0;
 }
+
+
+} // namespace inet
+
+

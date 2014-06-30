@@ -25,7 +25,7 @@
 #include "IPv6InterfaceData.h"
 #include "IPv6RoutingTable.h"
 
-using namespace inet;
+namespace inet {
 
 // FIXME UPDATE DOCU!!!!!!!
 
@@ -278,4 +278,9 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
     // update display string
     setDisplayString(numIPNodes, topo.getNumNodes()-numIPNodes);
 }
+
+
+
+} // namespace inet
+
 

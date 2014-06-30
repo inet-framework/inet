@@ -42,7 +42,7 @@
 #endif
 
 
-using namespace inet;
+namespace inet {
 
 Address AddressResolver::resolve(const char *s, int addrType)
 {
@@ -531,3 +531,8 @@ cModule *AddressResolver::findHostWithAddress(const Address & add)
     }
     return NULL;
 }
+
+
+} // namespace inet
+
+

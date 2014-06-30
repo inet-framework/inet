@@ -41,7 +41,7 @@
 #include "IPv6InterfaceData.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 Define_Module( InterfaceTable );
 
@@ -557,3 +557,8 @@ MulticastGroupList InterfaceTable::collectMulticastGroups()
     }
     return mglist;
 }
+
+
+} // namespace inet
+
+

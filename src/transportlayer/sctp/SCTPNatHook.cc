@@ -5,7 +5,7 @@
 #include "IPv4InterfaceData.h"
 #include "SCTPAssociation.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(SCTPNatHook);
 
@@ -326,3 +326,8 @@ void SCTPNatHook::finish()
     delete natTable;
     std::cout<<getFullPath()<<": Natted packets: "<<nattedPackets<<"\n";
 }
+
+
+} // namespace inet
+
+

@@ -38,7 +38,7 @@
 static DLIST_HEAD(TQ);
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 #if defined(OMNETPP) && defined(TIMERMAPLIST)
 
@@ -344,3 +344,8 @@ struct timeval *NS_CLASS timer_age_queue()
     return (&remaining);
 }
 #endif
+
+
+} // namespace inet
+
+

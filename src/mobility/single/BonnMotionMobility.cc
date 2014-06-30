@@ -20,7 +20,7 @@
 #include "BonnMotionFileCache.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(BonnMotionMobility);
@@ -90,3 +90,8 @@ void BonnMotionMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
+
+} // namespace inet
+
+

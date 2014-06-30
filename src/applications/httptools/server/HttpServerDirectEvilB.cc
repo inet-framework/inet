@@ -17,7 +17,7 @@
 
 #include "HttpServerDirectEvilB.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(HttpServerDirectEvilB);
 
@@ -53,3 +53,8 @@ std::string HttpServerDirectEvilB::generateBody()
 
     return result;
 }
+
+
+} // namespace inet
+
+

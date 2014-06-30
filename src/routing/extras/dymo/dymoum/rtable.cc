@@ -44,7 +44,7 @@
 #include <arpa/inet.h>
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 #ifndef MAPROUTINGTABLE
 
@@ -681,4 +681,9 @@ int NS_CLASS rtable_expire_timeout_all(struct in_addr nxthop_addr, u_int32_t ifi
     return count;
 }
 #endif
+
+
+
+} // namespace inet
+
 

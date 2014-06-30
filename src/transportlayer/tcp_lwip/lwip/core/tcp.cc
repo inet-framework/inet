@@ -62,7 +62,7 @@
 
 #include <string.h>
 
-using namespace inet;
+namespace inet {
 
 static
 const char *tcp_state_str[] = {
@@ -1489,3 +1489,8 @@ tcp_pcbs_sane()
 #endif /* TCP_DEBUG */
 
 #endif /* LWIP_TCP */
+
+
+} // namespace inet
+
+

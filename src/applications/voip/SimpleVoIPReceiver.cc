@@ -22,7 +22,7 @@
 #include "NodeStatus.h"
 #include "SimpleVoIPPacket_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(SimpleVoIPReceiver);
 
@@ -351,4 +351,9 @@ void SimpleVoIPReceiver::finish()
     if (currentTalkspurt.isActive())
         evaluateTalkspurt(true);
 }
+
+
+
+} // namespace inet
+
 

@@ -21,7 +21,7 @@
 #include "IPv4Datagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 IPv4ControlInfo::~IPv4ControlInfo()
 {
@@ -90,4 +90,9 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     throw cRuntimeError(this, "INET was compiled without IPv4 support");
 #endif
 }
+
+
+
+} // namespace inet
+
 

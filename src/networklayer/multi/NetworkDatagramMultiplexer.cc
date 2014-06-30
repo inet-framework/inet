@@ -32,7 +32,7 @@
 #include "GenericDatagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 Define_Module(NetworkDatagramMultiplexer);
 
@@ -69,3 +69,8 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
     else
         throw cRuntimeError("Unknown control info");
 }
+
+
+} // namespace inet
+
+

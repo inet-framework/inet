@@ -18,7 +18,7 @@
 #include "IPSocket.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 #define NOforwardHello
 
@@ -432,5 +432,10 @@ void DSDV_2::handleMessage(cMessage *msg)
     }
 }
 
+
+
+
+
+} // namespace inet
 
 

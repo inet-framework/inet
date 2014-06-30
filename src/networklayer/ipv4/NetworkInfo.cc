@@ -24,7 +24,7 @@
 #include "AddressResolver.h"
 #include "IIPv4RoutingTable.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(NetworkInfo);
@@ -142,3 +142,8 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     s << endl;
     s.close();
 }
+
+
+} // namespace inet
+
+

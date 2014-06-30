@@ -43,7 +43,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 
 using namespace INETFw;
-using namespace inet;
+namespace inet {
 
 unsigned char SCTPSerializer::keyVector[512];
 unsigned int  SCTPSerializer::sizeKeyVector = 0;
@@ -2208,5 +2208,10 @@ void SCTPSerializer::calculateSharedKey()
             sharedKey[i+sizePeerKeyVector] = keyVector[i];
     }
 }
+
+
+
+
+} // namespace inet
 
 

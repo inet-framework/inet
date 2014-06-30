@@ -20,7 +20,7 @@
 #include "TCPReno.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPReno);
@@ -336,3 +336,8 @@ void TCPReno::receivedDuplicateAck()
         sendData(false);
     }
 }
+
+
+} // namespace inet
+
+

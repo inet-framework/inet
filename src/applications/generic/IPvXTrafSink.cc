@@ -25,7 +25,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(IPvXTrafSink);
 
@@ -108,4 +108,9 @@ void IPvXTrafSink::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
+
+
+
+} // namespace inet
+
 

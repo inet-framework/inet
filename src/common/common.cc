@@ -19,7 +19,7 @@
 
 #include "common.h"
 
-using namespace inet;
+namespace inet {
 
 std::string intToString(int i)
 {
@@ -28,4 +28,9 @@ std::string intToString(int i)
     std::string str(stream.str());
     return str;
 }
+
+
+
+} // namespace inet
+
 

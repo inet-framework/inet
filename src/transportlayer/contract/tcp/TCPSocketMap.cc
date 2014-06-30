@@ -19,7 +19,7 @@
 
 #include "TCPSocketMap.h"
 
-using namespace inet;
+namespace inet {
 
 
 TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
@@ -54,3 +54,8 @@ void TCPSocketMap::deleteSockets()
        delete i->second;
     socketMap.clear();
 }
+
+
+} // namespace inet
+
+

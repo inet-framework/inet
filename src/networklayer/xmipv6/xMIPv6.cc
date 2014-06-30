@@ -35,7 +35,7 @@
 #include "IPv6RoutingTable.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 
 #define MK_SEND_PERIODIC_BU            1
@@ -2863,4 +2863,9 @@ void xMIPv6::handleTokenExpiry(cMessage* msg)
 
     //delete msg;
 }
+
+
+
+} // namespace inet
+
 

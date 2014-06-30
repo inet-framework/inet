@@ -20,7 +20,7 @@
 #include "ScalarReception.h"
 #include "IRadioMedium.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -51,3 +51,8 @@ const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadi
     W receptionPower = transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLossFactor);
     return new ScalarReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth(), receptionPower);
 }
+
+
+} // namespace inet
+
+

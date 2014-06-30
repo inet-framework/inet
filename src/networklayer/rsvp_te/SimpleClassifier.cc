@@ -20,7 +20,7 @@
 #include "ModuleAccess.h"
 #include "RSVP.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(SimpleClassifier);
 
@@ -235,3 +235,8 @@ std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FECEntry& fec
     os << "    inLabel:" << fec.inLabel;
     return os;
 }
+
+
+} // namespace inet
+
+

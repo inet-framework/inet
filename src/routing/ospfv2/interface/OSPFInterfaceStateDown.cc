@@ -26,7 +26,7 @@
 #include "OSPFInterfaceStateWaiting.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
@@ -77,4 +77,9 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
 }
+
+
+
+} // namespace inet
+
 

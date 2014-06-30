@@ -21,7 +21,7 @@
 #include "ConstSpeedMobility.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ConstSpeedMobility);
@@ -51,3 +51,8 @@ void ConstSpeedMobility::setTargetPosition()
     double distance = positionDelta.length();
     nextChange = simTime() + distance / speed;
 }
+
+
+} // namespace inet
+
+

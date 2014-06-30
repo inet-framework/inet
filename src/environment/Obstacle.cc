@@ -20,7 +20,7 @@
 #include <set>
 #include "Obstacle.h"
 
-using namespace inet;
+namespace inet {
 
 
 typedef std::pair<Coord, double> CoordFrac;
@@ -241,3 +241,8 @@ double Obstacle::calculateReceivedPower(double pSend, double carrierFrequency, c
     double attenuation = (attenuationPerWall * numWalls) + (attenuationPerMeter * fractionInObstacle * totalDistance);
     return pSend * pow(10.0, -attenuation/10.0);
 }
+
+
+} // namespace inet
+
+

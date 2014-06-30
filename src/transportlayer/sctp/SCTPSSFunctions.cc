@@ -36,7 +36,7 @@ To add new streamSchedulers
 #include <list>
 #include <math.h>
 
-using namespace inet;
+namespace inet {
 
 void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
@@ -524,3 +524,8 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables* path, boo
             << " of " << workingPaths << ")" << endl;
     return sid;
 }
+
+
+} // namespace inet
+
+

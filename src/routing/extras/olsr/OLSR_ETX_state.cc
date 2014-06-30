@@ -29,7 +29,7 @@
 #include <OLSR_ETX_state.h>
 #include <OLSR_ETX.h>
 
-using namespace inet;
+namespace inet {
 
 OLSR_ETX_state::OLSR_ETX_state()
 {
@@ -90,3 +90,8 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
     }
     return best;
 }
+
+
+} // namespace inet
+
+

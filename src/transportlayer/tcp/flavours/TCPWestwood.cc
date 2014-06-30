@@ -4,7 +4,7 @@
 #include "TCP.h"
 #include "TCPWestwood.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPWestwood);
@@ -306,4 +306,9 @@ void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 
     state->regions.set(fromseq, toseq, simTime());
 }
+
+
+
+} // namespace inet
+
 

@@ -17,7 +17,7 @@
 
 #include "UnimplementedModule.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(UnimplementedModule);
 
@@ -26,3 +26,8 @@ void UnimplementedModule::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("Unimplemented module");
 }
+
+
+} // namespace inet
+
+

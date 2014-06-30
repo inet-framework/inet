@@ -19,7 +19,7 @@
 #include "ScalarTransmitter.h"
 #include "RadioControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -55,3 +55,8 @@ void ScalarRadio::setBitrate(bps newBitrate)
     scalarTransmitter->setBitrate(newBitrate);
     endReceptionTimer = NULL;
 }
+
+
+} // namespace inet
+
+

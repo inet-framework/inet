@@ -57,7 +57,7 @@ static void dymo_socket_read(int fd);
 
 #endif  /* NS_PORT */
 
-using namespace inet;
+namespace inet {
 
 void NS_CLASS dymo_socket_init()
 {
@@ -469,4 +469,9 @@ static void dymo_socket_read(int fd)
     generic_process_message(msg, sender_addr.sin_addr, dev->ifindex);
 }
 #endif  /* NS_PORT */
+
+
+
+} // namespace inet
+
 

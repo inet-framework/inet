@@ -25,7 +25,7 @@
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TcpLwipByteStreamSendQueue);
@@ -181,3 +181,8 @@ void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP
 {
     // nothing to do
 }
+
+
+} // namespace inet
+
+

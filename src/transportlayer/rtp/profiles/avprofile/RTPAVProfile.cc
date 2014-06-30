@@ -18,7 +18,7 @@
 
 #include "RTPAVProfile.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RTPAVProfile);
@@ -31,3 +31,8 @@ void RTPAVProfile::initialize()
     _rtcpPercentage = 5;
     _preferredPort = 5005;
 }
+
+
+} // namespace inet
+
+

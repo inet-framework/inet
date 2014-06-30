@@ -17,7 +17,7 @@
 
 #include "ReceptionDecision.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -27,3 +27,8 @@ void ReceptionDecision::printToStream(std::ostream &stream) const
     stream << ", " << (isReceptionSuccessful_ ? "successful" : "unsuccessful");
     stream << ", indication = " << indication;
 }
+
+
+} // namespace inet
+
+

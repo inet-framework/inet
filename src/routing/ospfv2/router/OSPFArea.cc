@@ -19,7 +19,7 @@
 #include "OSPFRouter.h"
 #include <memory.h>
 
-using namespace inet;
+namespace inet {
 
 OSPF::Area::Area(IInterfaceTable* ift, OSPF::AreaID id) :
     ift(ift),
@@ -2451,3 +2451,8 @@ void OSPF::Area::recheckSummaryLSAs(std::vector<OSPF::RoutingTableEntry*>& newRo
         }
     }
 }
+
+
+} // namespace inet
+
+

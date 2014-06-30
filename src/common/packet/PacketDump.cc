@@ -47,7 +47,7 @@
 #include "IPv6Datagram.h"
 #endif
 
-using namespace inet;
+namespace inet {
 
 
 PacketDump::PacketDump()
@@ -705,4 +705,9 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
 
     out << endl;
 }
+
+
+
+} // namespace inet
+
 

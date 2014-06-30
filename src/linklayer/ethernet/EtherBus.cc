@@ -17,7 +17,7 @@
 
 #include "EtherBus.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EtherBus);
 
@@ -288,4 +288,9 @@ void EtherBus::finish()
     if (t > 0)
         recordScalar("messages/sec", numMessages / t);
 }
+
+
+
+} // namespace inet
+
 

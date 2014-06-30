@@ -21,7 +21,7 @@
 #include "IMobility.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(NetAnimTrace);
@@ -226,4 +226,9 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
         throw cRuntimeError("Invalid layout `%s' in `p' tag of display string", layout);
     }
 }
+
+
+
+} // namespace inet
+
 

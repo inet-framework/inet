@@ -17,7 +17,7 @@
 
 #include "ModuleIdAddress.h"
 
-using namespace inet;
+namespace inet {
 
 bool ModuleIdAddress::tryParse(const char *addr)
 {
@@ -25,3 +25,8 @@ bool ModuleIdAddress::tryParse(const char *addr)
     id = strtol(addr, &endp, 10);
     return *endp == 0;
 }
+
+
+} // namespace inet
+
+

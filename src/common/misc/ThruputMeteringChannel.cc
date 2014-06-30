@@ -17,7 +17,7 @@
 
 #include "ThruputMeteringChannel.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(ThruputMeteringChannel);
 
@@ -159,4 +159,9 @@ void ThruputMeteringChannel::updateDisplay()
     // display label
     getSourceGate()->getDisplayString().setTagArg("t", 0, buf);
 }
+
+
+
+} // namespace inet
+
 

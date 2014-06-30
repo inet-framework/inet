@@ -17,7 +17,7 @@
 
 #include "NakagamiFading.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -51,3 +51,8 @@ double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
     double freeSpacePathLoss = computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
     return gamma_d(shapeFactor, freeSpacePathLoss / 1000.0 / shapeFactor) * 1000.0;
 }
+
+
+} // namespace inet
+
+

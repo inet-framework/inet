@@ -20,7 +20,7 @@
 
 #include "DropTailQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(DropTailQueue);
@@ -79,4 +79,9 @@ bool DropTailQueue::isEmpty()
 {
     return queue.empty();
 }
+
+
+
+} // namespace inet
+
 

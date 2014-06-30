@@ -22,7 +22,7 @@
 #include "UDPControlInfo_m.h"
 #include "AddressResolver.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(UDPVideoStreamCli);
@@ -114,4 +114,9 @@ void UDPVideoStreamCli::handleNodeCrash()
 {
     cancelEvent(selfMsg);
 }
+
+
+
+} // namespace inet
+
 

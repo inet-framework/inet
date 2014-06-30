@@ -43,7 +43,7 @@
 
 #include "UDPControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 void SCTPAssociation::calculateRcvBuffer()
@@ -2846,4 +2846,9 @@ void SCTPAssociation::putInTransmissionQ(const uint32 tsn, SCTPDataVariables* ch
         }
     }
 }
+
+
+
+} // namespace inet
+
 

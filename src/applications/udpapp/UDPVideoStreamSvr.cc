@@ -20,7 +20,7 @@
 
 #include "UDPControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(UDPVideoStreamSvr);
@@ -176,4 +176,9 @@ void UDPVideoStreamSvr::handleNodeCrash()
 {
     clearStreams();
 }
+
+
+
+} // namespace inet
+
 

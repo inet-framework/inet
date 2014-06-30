@@ -19,7 +19,7 @@
 
 #include "PassiveQueueBase.h"
 
-using namespace inet;
+namespace inet {
 
 simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
@@ -134,4 +134,9 @@ void PassiveQueueBase::notifyListeners()
     for (std::list<IPassiveQueueListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it)
         (*it)->packetEnqueued(this);
 }
+
+
+
+} // namespace inet
+
 

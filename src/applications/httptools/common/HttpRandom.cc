@@ -16,7 +16,7 @@
 //
 #include "HttpRandom.h"
 
-using namespace inet;
+namespace inet {
 
 std::string rdObject::typeStr()
 {
@@ -344,4 +344,9 @@ rdObject* rdObjectFactory::create(cXMLAttributeMap attributes)
             return NULL;
     }
 }
+
+
+
+} // namespace inet
+
 

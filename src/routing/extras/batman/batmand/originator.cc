@@ -24,7 +24,7 @@
 #include "BatmanMain.h"
 #include "IPv4InterfaceData.h"
 
-using namespace inet;
+namespace inet {
 
 NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Address &neigh, BatmanIf *if_incoming)
 {
@@ -462,5 +462,10 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Addres
     owner_node = origNode;
     origNode->neigh_list.push_back(this);
 }
+
+
+
+
+} // namespace inet
 
 

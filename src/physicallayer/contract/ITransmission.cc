@@ -17,8 +17,13 @@
 
 #include "ITransmission.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
 int ITransmission::nextId = 0;
+
+
+} // namespace inet
+
+

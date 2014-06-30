@@ -26,7 +26,7 @@
 #include "IPv6ErrorHandling.h"
 #include "IPv6Datagram.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(IPv6ErrorHandling);
 
@@ -136,4 +136,9 @@ void IPv6ErrorHandling::displayType4Msg(int code)
         default: EV_ERROR << "Unknown Error Code!\n"; break;
     }
 }
+
+
+
+} // namespace inet
+
 

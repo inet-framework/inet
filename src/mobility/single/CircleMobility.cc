@@ -19,7 +19,7 @@
 #include "CircleMobility.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(CircleMobility);
@@ -74,3 +74,8 @@ void CircleMobility::move()
     Coord dummyCoord; double dummyAngle;
     handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
 }
+
+
+} // namespace inet
+
+

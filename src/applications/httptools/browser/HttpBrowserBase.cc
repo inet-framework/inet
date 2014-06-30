@@ -33,7 +33,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 HttpBrowserBase::HttpBrowserBase()
 {
@@ -611,3 +611,8 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
         scheduleAt(be.time, eventTimer);
     }
 }
+
+
+} // namespace inet
+
+

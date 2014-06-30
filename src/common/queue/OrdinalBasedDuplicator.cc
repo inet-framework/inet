@@ -17,7 +17,7 @@
 
 #include "OrdinalBasedDuplicator.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(OrdinalBasedDuplicator);
 
@@ -104,3 +104,8 @@ void OrdinalBasedDuplicator::parseVector(const char *vector)
 void OrdinalBasedDuplicator::finish()
 {
 }
+
+
+} // namespace inet
+
+

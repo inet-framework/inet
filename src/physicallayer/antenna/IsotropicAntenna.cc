@@ -17,7 +17,7 @@
 
 #include "IsotropicAntenna.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -26,3 +26,8 @@ Define_Module(IsotropicAntenna);
 IsotropicAntenna::IsotropicAntenna() :
     AntennaBase()
 {}
+
+
+} // namespace inet
+
+

@@ -32,7 +32,7 @@
 
 #include "dsr-pkt_omnet.h"
 
-using namespace inet;
+namespace inet {
 
 void ManetNetfilterHook::initHook(cModule* _module)
 {
@@ -168,4 +168,9 @@ bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const
 
     return (rt->findBestMatchingRoute(destAddr) == NULL);
 }
+
+
+
+} // namespace inet
+
 

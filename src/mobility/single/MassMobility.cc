@@ -21,7 +21,7 @@
 #include "MassMobility.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(MassMobility);
@@ -82,3 +82,8 @@ void MassMobility::move()
         handleIfOutside(REFLECT, lastPosition, lastSpeed, dummyAngle);
     }
 }
+
+
+} // namespace inet
+
+

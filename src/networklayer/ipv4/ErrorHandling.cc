@@ -24,7 +24,7 @@
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ErrorHandling);
@@ -77,4 +77,9 @@ void ErrorHandling::handleMessage(cMessage *msg)
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
+
+
+
+} // namespace inet
+
 

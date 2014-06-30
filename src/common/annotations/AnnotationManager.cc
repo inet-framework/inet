@@ -21,7 +21,7 @@
 
 #include "AnnotationManager.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(AnnotationManager);
@@ -325,3 +325,8 @@ void AnnotationManager::hideAll(Group* group)
         if ((!group) || ((*i)->group == group)) hide(*i);
     }
 }
+
+
+} // namespace inet
+
+

@@ -17,7 +17,7 @@
 
 #include "TCPSocket.h"
 
-using namespace inet;
+namespace inet {
 
 
 TCPSocket::TCPSocket()
@@ -361,4 +361,9 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
 
     dataTransferMode = x;
 }
+
+
+
+} // namespace inet
+
 

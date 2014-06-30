@@ -17,6 +17,11 @@
 
 #include "MACAddressType.h"
 
-using namespace inet;
+namespace inet {
 
 MACAddressType MACAddressType::INSTANCE;
+
+
+} // namespace inet
+
+

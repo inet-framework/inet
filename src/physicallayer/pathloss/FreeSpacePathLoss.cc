@@ -17,7 +17,7 @@
 
 #include "FreeSpacePathLoss.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -59,3 +59,8 @@ double FreeSpacePathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m 
     m waveLength = propagationSpeed / frequency;
     return computeFreeSpacePathLoss(waveLength, distance, alpha, systemLoss);
 }
+
+
+} // namespace inet
+
+

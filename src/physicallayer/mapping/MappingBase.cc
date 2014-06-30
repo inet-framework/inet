@@ -18,7 +18,7 @@
 #include <assert.h>
 #include "MappingBase.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -434,3 +434,8 @@ void SimpleConstMapping::initializeArguments(const Argument& min,
 	else
 		createKeyEntries(min, max, interval, dimIt, pos);
 }
+
+
+} // namespace inet
+
+

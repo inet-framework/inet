@@ -5,7 +5,7 @@
 #include "dymo_msg_struct.h"
 #include "IPv4Address.h"
 
-using namespace inet;
+namespace inet {
 
 
 #define DYMO_RE_TYPE    1
@@ -359,4 +359,9 @@ std::string DYMO_element::detailedInfo() const
 
     return out.str();
 }
+
+
+
+} // namespace inet
+
 

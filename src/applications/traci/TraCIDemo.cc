@@ -22,7 +22,7 @@
 #include "NodeStatus.h"
 #include "UDPSocket.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(TraCIDemo);
 
@@ -95,3 +95,8 @@ void TraCIDemo::handlePositionUpdate() {
         if (!sentMessage) sendMessage();
     }
 }
+
+
+} // namespace inet
+
+

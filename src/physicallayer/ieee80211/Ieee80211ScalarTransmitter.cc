@@ -24,7 +24,7 @@
 #include "RadioControlInfo_m.h"
 #include "Ieee80211Consts.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -72,3 +72,8 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, opMode, preambleMode);
 }
+
+
+} // namespace inet
+
+

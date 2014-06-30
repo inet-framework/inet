@@ -28,7 +28,7 @@
 #include "ModuleAccess.h"
 #include "stlutils.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(L2NetworkConfigurator);
 
@@ -340,3 +340,8 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
 
     return false;
 }
+
+
+} // namespace inet
+
+

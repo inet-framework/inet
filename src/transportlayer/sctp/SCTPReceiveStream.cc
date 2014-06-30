@@ -19,7 +19,7 @@
 #include "SCTPReceiveStream.h"
 #include "SCTPAssociation.h"
 
-using namespace inet;
+namespace inet {
 
 
 SCTPReceiveStream::SCTPReceiveStream()
@@ -166,3 +166,8 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
 
     return delivery;
 }
+
+
+} // namespace inet
+
+

@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-using namespace inet;
+namespace inet {
 
 Define_Module(IGMPv2);
 
@@ -891,3 +891,8 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 
     delete msg;
 }
+
+
+} // namespace inet
+
+

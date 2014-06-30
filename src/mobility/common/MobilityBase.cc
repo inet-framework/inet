@@ -24,7 +24,7 @@
 #include "MobilityBase.h"
 #include "FWMath.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Abstract_Class(MobilityBase);
 
@@ -265,3 +265,8 @@ void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, C
         default:            throw cRuntimeError("Invalid outside policy=%d in module", policy, getFullPath().c_str());
     }
 }
+
+
+} // namespace inet
+
+

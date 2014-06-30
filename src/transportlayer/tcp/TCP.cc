@@ -44,7 +44,7 @@
 #include "TCPVirtualDataRcvQueue.h"
 #include "TCPVirtualDataSendQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(TCP);
@@ -535,4 +535,9 @@ void TCP::reset()
     usedEphemeralPorts.clear();
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 }
+
+
+
+} // namespace inet
+
 

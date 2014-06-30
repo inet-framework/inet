@@ -23,7 +23,7 @@
 #include "Coord.h"
 #include "IMobility.h"
 
-using namespace inet;
+namespace inet {
 
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
@@ -87,3 +87,8 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
     if (dynamic_cast<Coord *>(object))
         fire(this, t, ((Coord *)object)->z);
 }
+
+
+} // namespace inet
+
+

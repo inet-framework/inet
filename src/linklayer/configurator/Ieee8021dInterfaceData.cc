@@ -19,7 +19,7 @@
 
 #include "Ieee8021dInterfaceData.h"
 
-using namespace inet;
+namespace inet {
 
 Ieee8021dInterfaceData::PortInfo::PortInfo()
 {
@@ -86,3 +86,8 @@ const char *Ieee8021dInterfaceData::getStateName(PortState state)
         default: throw cRuntimeError("Unknown port state %d", state);
     }
 }
+
+
+} // namespace inet
+
+

@@ -21,7 +21,7 @@
 #include "ScalarReceiver.h"
 #include "RadioControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -76,3 +76,8 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
         emit(listeningChangedSignal, 0);
     }
 }
+
+
+} // namespace inet
+
+

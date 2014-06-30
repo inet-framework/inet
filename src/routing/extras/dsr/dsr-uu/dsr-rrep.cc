@@ -46,7 +46,7 @@ static TBL(grat_rrep_tbl, GRAT_RREP_TBL_MAX_LEN);
 DSRUUTimer grat_rrep_tbl_timer;
 #endif
 
-using namespace inet;
+namespace inet {
 
 struct grat_rrep_entry
 {
@@ -420,3 +420,8 @@ void __exit NSCLASS grat_rrep_tbl_cleanup(void)
     proc_net_remove(GRAT_RREP_TBL_PROC_NAME);
 #endif
 }
+
+
+} // namespace inet
+
+

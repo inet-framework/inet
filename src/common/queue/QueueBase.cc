@@ -18,7 +18,7 @@
 
 #include "QueueBase.h"
 
-using namespace inet;
+namespace inet {
 
 
 void QueueBase::initialize()
@@ -41,4 +41,9 @@ simtime_t QueueBase::startService(cPacket *msg)
 {
     return delay;
 }
+
+
+
+} // namespace inet
+
 

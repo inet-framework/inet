@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-using namespace inet;
+namespace inet {
 
 #define MSGKIND_CONNECT  0
 #define MSGKIND_SEND     1
@@ -787,4 +787,9 @@ void SCTPPeer::finish()
     EV_INFO << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
 
 }
+
+
+
+} // namespace inet
+
 

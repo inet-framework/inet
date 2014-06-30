@@ -8,7 +8,7 @@
 #include "UDPPacket_m.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(Batman);
 
@@ -481,5 +481,10 @@ BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
     }
     return pkt;
 }
+
+
+
+
+} // namespace inet
 
 

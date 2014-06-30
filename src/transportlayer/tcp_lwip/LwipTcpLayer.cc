@@ -25,7 +25,7 @@
 #include "Address.h"
 #include "LwipTcpStackIf.h"
 
-using namespace inet;
+namespace inet {
 
 
 LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
@@ -116,7 +116,7 @@ void LwipTcpLayer::memp_free(memp_t type, void *ptr)
     if ((ptr != NULL) && ((type == MEMP_TCP_PCB) || (type == MEMP_TCP_PCB_LISTEN)))
         stackIf.lwip_free_pcb_event((LwipTcpLayer::tcp_pcb*)ptr);
 
-    ::memp_free(type, ptr);
+    inet::memp_free(type, ptr);
 }
 
 void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(
@@ -124,4 +124,9 @@ void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(
 {
     stackIf.notifyAboutIncomingSegmentProcessing(pcb, seqNo, dataptr, len);
 }
+
+
+
+} // namespace inet
+
 

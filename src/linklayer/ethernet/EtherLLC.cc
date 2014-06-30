@@ -23,7 +23,7 @@
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(EtherLLC);
 
@@ -307,4 +307,9 @@ void EtherLLC::stop()
     dsapsRegistered = dsapToPort.size();
     isUp = false;
 }
+
+
+
+} // namespace inet
+
 

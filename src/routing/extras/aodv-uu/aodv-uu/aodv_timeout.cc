@@ -51,7 +51,7 @@ void route_delete_timeout(void *arg);
 
 #endif
 
-using namespace inet;
+namespace inet {
 
 /* These are timeout functions which are called when timers expire... */
 
@@ -362,3 +362,8 @@ void NS_CLASS packet_queue_timeout(void *arg)
     timer_set_timeout(&PQ.garbage_collect_timer, GARBAGE_COLLECT_TIME);
 }
 #endif
+
+
+} // namespace inet
+
+

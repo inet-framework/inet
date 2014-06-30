@@ -18,7 +18,7 @@
 
 #include "MPLSPacket.h"
 
-using namespace inet;
+namespace inet {
 
 // constructors
 MPLSPacket::MPLSPacket(const char *name) : cPacket(name)
@@ -47,4 +47,9 @@ std::string MPLSPacket::info() const
         out << labels[i] << (i==0?"":" ");
     return out.str();
 }
+
+
+
+} // namespace inet
+
 

@@ -42,7 +42,7 @@
 #include "OLSR.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
@@ -3103,4 +3103,9 @@ Address OLSR::getIfaceAddressFromIndex(int index)
     else
         return Address(entry->ipv4Data()->getIPAddress());
 }
+
+
+
+} // namespace inet
+
 

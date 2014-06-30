@@ -22,7 +22,7 @@
 
 #include "BatmanMain.h"
 
-using namespace inet;
+namespace inet {
 
 
 void Batman::ring_buffer_set(std::vector<uint8_t> &tq_recv, uint8_t &tq_index, uint8_t value)
@@ -48,3 +48,8 @@ uint8_t Batman::ring_buffer_avg(std::vector<uint8_t> &tq_recv)
 
     return (uint8_t)(sum / count);
 }
+
+
+} // namespace inet
+
+

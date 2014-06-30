@@ -17,7 +17,7 @@
 
 #include "Sink.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(Sink);
@@ -54,5 +54,10 @@ void Sink::finish()
     recordScalar("throughput", throughput);
     recordScalar("packetPerSec", packetPerSec);
 }
+
+
+
+
+} // namespace inet
 
 

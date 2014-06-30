@@ -21,7 +21,7 @@
 #include "InterfaceToken.h"
 #include "IPv4Address.h"
 
-using namespace inet;
+namespace inet {
 
 unsigned int MACAddress::autoAddressCtr;
 bool MACAddress::simulationLifetimeListenerAdded;
@@ -164,3 +164,8 @@ MACAddress MACAddress::makeMulticastAddress(IPv4Address addr)
     macAddr.setAddressByte(5, addr.getDByte(3));
     return macAddr;
 }
+
+
+} // namespace inet
+
+

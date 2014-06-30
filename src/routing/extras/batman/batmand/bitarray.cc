@@ -22,7 +22,7 @@
 
 #include "BatmanMain.h"
 
-using namespace inet;
+namespace inet {
 
 
 /* clear the bits */
@@ -177,4 +177,9 @@ uint8_t Batman::bit_count(int32_t to_count)
 
     return(hamming);
 }
+
+
+
+} // namespace inet
+
 

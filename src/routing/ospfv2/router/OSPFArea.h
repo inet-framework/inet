@@ -27,15 +27,15 @@
 #include "OSPFRoutingTableEntry.h"
 #include "IInterfaceTable.h"
 
+
 namespace inet {
-
-
 namespace OSPF {
 
 class Router;
 
-class Area : public cObject {
-private:
+class Area : public cObject
+{
+  private:
     IInterfaceTable*                                        ift;
     AreaID                                                  areaID;
     std::map<IPv4AddressRange, bool>                        advertiseAddressRanges;
@@ -145,15 +145,15 @@ private:
                                                                 const OSPF::RoutingTableEntry& borderRouterEntry) const;
 };
 
-} // namespace OSPF
-
-inline std::ostream& operator<<(std::ostream& ostr, OSPF::Area& area)
+inline std::ostream& operator<<(std::ostream& ostr, Area& area)
 {
     ostr << area.detailedInfo();
     return ostr;
 }
 
-} //namespace
+} // namespace OSPF
+
+} //namespace inet
 
 
 #endif // __INET_OSPFAREA_H

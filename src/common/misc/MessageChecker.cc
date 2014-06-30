@@ -17,7 +17,7 @@
 
 #include "MessageChecker.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(MessageChecker);
 
@@ -251,4 +251,9 @@ void MessageChecker::finish()
     if (m_iterChk != m_checkingInfo.end())
         throw cRuntimeError("Several message(s) have to be checked");
 }
+
+
+
+} // namespace inet
+
 

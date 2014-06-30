@@ -20,7 +20,7 @@
 #include "WifiMode.h"
 #include "Ieee80211DataRate.h"
 
-using namespace inet;
+namespace inet {
 
 
 ModulationType
@@ -831,4 +831,9 @@ WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble
         return SIMTIME_ZERO;
     }
 }
+
+
+
+} // namespace inet
+
 

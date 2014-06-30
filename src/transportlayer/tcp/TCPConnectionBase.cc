@@ -28,7 +28,7 @@
 #include "TCPAlgorithm.h"
 #include "TCPSACKRexmitQueue.h"
 
-using namespace inet;
+namespace inet {
 
 
 TCPStateVariables::TCPStateVariables()
@@ -616,3 +616,8 @@ void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
             break;
     }
 }
+
+
+} // namespace inet
+
+

@@ -18,7 +18,7 @@
 
 #include "PriorityScheduler.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(PriorityScheduler);
 
@@ -35,3 +35,8 @@ bool PriorityScheduler::schedulePacket()
     }
     return false;
 }
+
+
+} // namespace inet
+
+

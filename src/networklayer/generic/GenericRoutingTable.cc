@@ -26,7 +26,7 @@
 #include "NotifierConsts.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 
 
@@ -423,5 +423,10 @@ IRoute* GenericRoutingTable::createRoute()
 {
     return new GenericRoute();
 }
+
+
+
+
+} // namespace inet
 
 

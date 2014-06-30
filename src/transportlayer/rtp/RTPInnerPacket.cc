@@ -20,7 +20,7 @@
 
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(RTPInnerPacket);
@@ -162,3 +162,8 @@ void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPv4Address address, int po
     port_var = port;
     encapsulate(packet);
 }
+
+
+} // namespace inet
+
+

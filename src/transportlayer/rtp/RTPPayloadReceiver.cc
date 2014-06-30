@@ -23,7 +23,7 @@
 #include "RTPInnerPacket.h"
 #include "RTPPacket.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(RTPPayloadReceiver);
@@ -77,3 +77,8 @@ void RTPPayloadReceiver::closeOutputFile()
     _outputFileStream.close();
     _outputLogLoss.close();
 }
+
+
+} // namespace inet
+
+

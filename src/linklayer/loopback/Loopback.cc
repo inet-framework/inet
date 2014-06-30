@@ -27,7 +27,7 @@
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(Loopback);
@@ -141,4 +141,9 @@ void Loopback::updateDisplayString()
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
+
+
+
+} // namespace inet
+
 

@@ -20,7 +20,7 @@
 #include "FWMath.h"
 #include "TractorMobility.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(TractorMobility);
@@ -81,3 +81,8 @@ void TractorMobility::setTargetPosition()
     targetPosition = lastPosition + positionDelta;
     nextChange = simTime() + positionDelta.length() / speed;
 }
+
+
+} // namespace inet
+
+

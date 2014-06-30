@@ -40,7 +40,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 #define FRAGMENT_TIMEOUT 60   // 60 sec, from IPv6 RFC
 
@@ -1082,3 +1082,8 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(INetworkDatagram* datagram,
     }
     return INetfilter::IHook::ACCEPT;
 }
+
+
+} // namespace inet
+
+

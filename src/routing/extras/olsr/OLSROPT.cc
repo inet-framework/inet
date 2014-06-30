@@ -40,7 +40,7 @@
 #include "OLSROPT.h"
 #include "Ieee802Ctrl.h"
 
-using namespace inet;
+namespace inet {
 
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
@@ -533,4 +533,9 @@ OLSROPT::nb_loss(OLSR_link_tuple* tuple)
     mpr_computation();
     rtable_computation();
 }
+
+
+
+} // namespace inet
+
 

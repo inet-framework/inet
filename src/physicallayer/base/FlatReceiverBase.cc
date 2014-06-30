@@ -24,7 +24,7 @@
 #include "ListeningDecision.h"
 #include "ReceptionDecision.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -118,3 +118,8 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
     else
         return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
+
+
+} // namespace inet
+
+

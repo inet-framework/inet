@@ -19,7 +19,7 @@
 #include "TCPTahoe.h"
 #include "TCP.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCPTahoe);
@@ -147,3 +147,8 @@ void TCPTahoe::receivedDuplicateAck()
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
 }
+
+
+} // namespace inet
+
+

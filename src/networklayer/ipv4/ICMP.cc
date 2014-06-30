@@ -30,7 +30,7 @@
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(ICMP);
 
@@ -297,4 +297,9 @@ void ICMP::sendToIP(ICMPMessage *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     send(msg, "sendOut");
 }
+
+
+
+} // namespace inet
+
 

@@ -17,6 +17,11 @@
 
 #include "BandListening.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
+
+
+} // namespace inet
+
+

@@ -23,7 +23,7 @@
 #include "OSPFInterfaceStateLoopback.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
@@ -62,4 +62,9 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
         intf->sendDelayedAcknowledgements();
     }
 }
+
+
+
+} // namespace inet
+
 

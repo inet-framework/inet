@@ -21,7 +21,7 @@
 #include "ListeningDecision.h"
 #include "ReceptionDecision.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -94,3 +94,8 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
     else
         return new ReceptionDecision(reception, indication, false, false, false);
 }
+
+
+} // namespace inet
+
+

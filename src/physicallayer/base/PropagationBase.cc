@@ -17,7 +17,7 @@
 
 #include "PropagationBase.h"
 
-using namespace inet;
+namespace inet {
 
 using namespace physicallayer;
 
@@ -37,3 +37,8 @@ void PropagationBase::finish()
     EV_INFO << "Radio signal arrival computation count = " << arrivalComputationCount << endl;
     recordScalar("Radio signal arrival computation count", arrivalComputationCount);
 }
+
+
+} // namespace inet
+
+

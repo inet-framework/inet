@@ -17,7 +17,7 @@
 
 #include "HttpServerEvilA.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(HttpServerEvilA);
 
@@ -51,3 +51,8 @@ std::string HttpServerEvilA::generateBody()
 
     return result;
 }
+
+
+} // namespace inet
+
+

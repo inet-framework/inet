@@ -46,7 +46,7 @@
 #include "OLSR_ETX.h"
 #include "OLSR_ETX_dijkstra.h"
 
-using namespace inet;
+namespace inet {
 
 
 /// Length (in bytes) of UDP header.
@@ -2776,5 +2776,10 @@ bool OLSR_ETX::getNextHop(const Address &dest, Address &add, int &iface, double 
         cost = rt_entry->quality;
     return true;
 }
+
+
+
+
+} // namespace inet
 
 

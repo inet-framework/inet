@@ -19,7 +19,7 @@
 #include "BGPRouting.h"
 #include "BGPFSM.h"
 
-using namespace inet;
+namespace inet {
 
 BGPSession::BGPSession(BGPRouting& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(0), _connectRetryCounter(0)
@@ -147,4 +147,9 @@ void BGPSession::getStatistics(unsigned int* statTab)
     statTab[4] += _updateMsgSent;
     statTab[5] += _updateMsgRcv;
 }
+
+
+
+} // namespace inet
+
 

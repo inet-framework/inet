@@ -25,7 +25,7 @@
 #include "TCPSerializer.h"
 #include "TCPSegment.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Class(TCP_NSC_ByteStreamSendQueue);
@@ -171,4 +171,9 @@ void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
+
+
+
+} // namespace inet
+
 

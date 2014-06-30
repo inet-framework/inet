@@ -23,7 +23,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(VoIPStreamReceiver);
@@ -257,4 +257,9 @@ void VoIPStreamReceiver::finish()
     EV_TRACE << "Sink finish()" << endl;
     closeConnection();
 }
+
+
+
+} // namespace inet
+
 

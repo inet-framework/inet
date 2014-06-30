@@ -17,7 +17,7 @@
 
 #include "EtherHub.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(EtherHub);
@@ -200,4 +200,9 @@ void EtherHub::finish()
     if (t > 0)
         recordScalar("messages/sec", numMessages / t);
 }
+
+
+
+} // namespace inet
+
 

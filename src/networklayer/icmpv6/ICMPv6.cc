@@ -32,7 +32,7 @@
 
 #include "PingPayload_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(ICMPv6);
@@ -342,4 +342,9 @@ bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDon
     //pingMap.clear();
     throw cRuntimeError("Lifecycle operation support not implemented");
 }
+
+
+
+} // namespace inet
+
 

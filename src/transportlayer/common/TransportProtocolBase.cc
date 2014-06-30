@@ -17,4 +17,9 @@
 
 #include "TransportProtocolBase.h"
 
-using namespace inet;
+namespace inet {
+
+
+} // namespace inet
+
+

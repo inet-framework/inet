@@ -20,7 +20,7 @@
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 
-using namespace inet;
+namespace inet {
 
 HttpServerBase::HttpServerBase()
 {
@@ -567,5 +567,10 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     htmlfilestream.close();
     return body;
 }
+
+
+
+
+} // namespace inet
 
 

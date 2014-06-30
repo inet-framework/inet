@@ -29,7 +29,7 @@
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
 
-using namespace inet;
+namespace inet {
 
 
 TcpLwipConnection::Stats::Stats()
@@ -349,4 +349,9 @@ void TcpLwipConnection::do_SEND()
         onCloseM = false;
     }
 }
+
+
+
+} // namespace inet
+
 

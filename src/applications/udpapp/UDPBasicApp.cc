@@ -24,7 +24,7 @@
 #include "NodeOperations.h"
 #include "UDPControlInfo_m.h"
 
-using namespace inet;
+namespace inet {
 
 
 Define_Module(UDPBasicApp);
@@ -254,4 +254,9 @@ void UDPBasicApp::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+
+
+
+} // namespace inet
+
 

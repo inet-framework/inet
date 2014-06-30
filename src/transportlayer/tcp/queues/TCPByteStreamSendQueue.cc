@@ -21,7 +21,7 @@
 #include "ByteArrayMessage.h"
 #include "TCPSegment.h"
 
-using namespace inet;
+namespace inet {
 
 Register_Class(TCPByteStreamSendQueue);
 
@@ -100,3 +100,8 @@ void TCPByteStreamSendQueue::discardUpTo(uint32 seqNum)
     dataBuffer.drop(seqNum - begin);
     begin = seqNum;
 }
+
+
+} // namespace inet
+
+

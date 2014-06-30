@@ -28,7 +28,7 @@
 
 #include "IPv4Address.h"
 
-using namespace inet;
+namespace inet {
 
 /**
  * Buffer length needed to hold an IPv4 address in string form (dotted decimal notation)
@@ -277,4 +277,9 @@ IPv4Address IPv4Address::makeBroadcastAddress(IPv4Address netmask) const
    IPv4Address br(getInt() | ~(netmask.getInt()));
    return br;
 }
+
+
+
+} // namespace inet
+
 

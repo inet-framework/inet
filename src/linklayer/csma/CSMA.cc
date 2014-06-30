@@ -36,7 +36,7 @@
 #include "SimpleLinkLayerControlInfo.h"
 #include "CSMAFrame_m.h"
 
-using namespace inet;
+namespace inet {
 
 Define_Module(CSMA);
 
@@ -887,3 +887,8 @@ cObject* CSMA::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAdd
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
+
+} // namespace inet
+
+

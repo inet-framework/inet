@@ -25,7 +25,7 @@
 #include "OSPFNeighborStateInit.h"
 #include "OSPFRouter.h"
 
-using namespace inet;
+namespace inet {
 
 
 void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
@@ -52,3 +52,8 @@ void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neigh
         messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
     }
 }
+
+
+} // namespace inet
+
+

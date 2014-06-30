@@ -39,7 +39,7 @@ std::vector<int32>cSocketRTScheduler::datalinks;
 std::vector<int32>cSocketRTScheduler::headerLengths;
 #endif
 
-using namespace inet;
+namespace inet {
 timeval cSocketRTScheduler::baseTime;
 
 Register_Class(cSocketRTScheduler);
@@ -344,3 +344,8 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
     else
         EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
 }
+
+
+} // namespace inet
+
+

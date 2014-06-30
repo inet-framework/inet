@@ -26,7 +26,7 @@
 #include "IPv4InterfaceData.h"
 #include "IInterfaceTable.h"
 
-using namespace inet;
+namespace inet {
 
 
 Register_Abstract_Class(IPv4MulticastGroupInfo);
@@ -519,4 +519,9 @@ bool IPv4InterfaceData::removeHostGroupData(IPv4Address multicastAddress)
         }
     return false;
 }
+
+
+
+} // namespace inet
+
 
