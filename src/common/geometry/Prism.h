@@ -22,8 +22,8 @@
 #include "Polygon.h"
 
 /**
- * This class represents 3 dimensional prism shape with a base face aligned to
- * the X and Y axes.
+ * This class represents 3 dimensional prism with a polygon base face.
+ * The coordinate system origin is at the first point on the base face.
  */
 class INET_API Prism : public Shape
 {

@@ -24,6 +24,9 @@
 namespace physicallayer
 {
 
+// TODO: add reflection from walls
+// TODO: allow dB attenuation per meter/per wall
+// TODO: fix problem when one end is in the obstacle
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
     protected:
@@ -31,7 +34,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 
     protected:
         virtual void initialize(int stage);
-        virtual double computeObstacleLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
+        virtual double computeDielectricLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
 
     public:
         ObstacleLoss();

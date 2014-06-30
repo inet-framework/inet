@@ -23,6 +23,7 @@
 /**
  * This class represents the physical environment specifying certain physical properties.
  */
+// TODO: add loading objects from XML file
 class INET_API PhysicalEnvironment : public cModule
 {
     protected:
@@ -31,13 +32,14 @@ class INET_API PhysicalEnvironment : public cModule
         percent relativeHumidity;
         Coord spaceMin;
         Coord spaceMax;
+        const char *viewAngle;
         std::vector<PhysicalObject *> objects;
 
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
         virtual void initialize(int stage);
 
-        virtual void createRandomObjects();
+        virtual void parseObjects(cXMLElement* xml);
         virtual void updateCanvas();
 
     public:

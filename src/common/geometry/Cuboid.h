@@ -21,27 +21,27 @@
 #include "Shape.h"
 
 /**
- * This class represents a 3 dimensional shape with 6 faces aligned to axes.
+ * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
+ * The coordinate system origin is in the center of the cuboid and the faces
+ * are parallel to the axes.
  */
 class INET_API Cuboid : public Shape
 {
     protected:
-        Coord min;
-        Coord max;
+        Coord size;
 
     protected:
-        bool isInsideX(const Coord& point) const { return min.x <= point.x && point.x <= max.x; }
-        bool isInsideY(const Coord& point) const { return min.y <= point.y && point.y <= max.y; }
-        bool isInsideZ(const Coord& point) const { return min.z <= point.z && point.z <= max.z; }
+        bool isInsideX(const Coord& point) const { return -size.x / 2 <= point.x && point.x <= size.x / 2; }
+        bool isInsideY(const Coord& point) const { return -size.x / 2 <= point.y && point.y <= size.y / 2; }
+        bool isInsideZ(const Coord& point) const { return -size.x / 2 <= point.z && point.z <= size.z / 2; }
 
     public:
-        Cuboid(const Coord& min, const Coord& max);
+        Cuboid(const Coord& size);
 
-        const Coord &getMin() const { return min; }
-        const Coord &getMax() const { return max; }
+        const Coord &getSize() const { return size; }
+        void setSize(const Coord& size) { this->size = size; }
 
-        virtual bool isIntersecting(const LineSegment& lineSegment) const;
-        virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
+        virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
 };
 
 #endif

@@ -17,6 +17,7 @@
 
 #include "PhysicalEnvironment.h"
 #include "Cuboid.h"
+#include "Sphere.h"
 #include "Material.h"
 
 Define_Module(PhysicalEnvironment);
@@ -43,29 +44,103 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
+        viewAngle = par("viewAngle");
+        parseObjects(par("objects"));
     }
     else if (stage == INITSTAGE_LAST)
     {
-        createRandomObjects();
         updateCanvas();
     }
 }
 
-void PhysicalEnvironment::createRandomObjects()
-{
-    for (int i = 0; i < 10; i++)
-    {
-        Coord size(uniform(10, 100), uniform(10, 100), 0);
-        Coord min;
-        min.x = uniform(spaceMin.x, spaceMax.x - size.x);
-        min.y = uniform(spaceMin.y, spaceMax.y - size.y);
-        min.z = uniform(spaceMin.z, spaceMax.z - size.z);
-        Coord max = min + size;
-        PhysicalObject *object = new PhysicalObject(new Cuboid(min, max), &Material::concrete);
+void PhysicalEnvironment::parseObjects(cXMLElement* xml) {
+    std::string rootTag = xml->getTagName();
+    cXMLElementList list = xml->getChildren();
+    // TODO: move parsers to the appropriate classes
+    for (cXMLElementList::const_iterator i = list.begin(); i != list.end(); ++i) {
+        cXMLElement* e = *i;
+        std::string tag = e->getTagName();
+        // id
+        const char *idAttribute = e->getAttribute("id");
+        int id = -1;
+        if (idAttribute)
+            id = atoi(idAttribute);
+        // position
+        Coord position;
+        const char *positionAttribute = e->getAttribute("position");
+        if (positionAttribute)
+        {
+            cStringTokenizer tokenizer(positionAttribute);
+            if (tokenizer.hasMoreTokens())
+                position.x = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                position.y = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                position.z = atof(tokenizer.nextToken());
+        }
+        // orientation
+        EulerAngles orientation;
+        const char *orientationAttribute = e->getAttribute("orientation");
+        if (orientationAttribute)
+        {
+            cStringTokenizer tokenizer(orientationAttribute);
+            if (tokenizer.hasMoreTokens())
+                orientation.alpha = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                orientation.beta = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                orientation.gamma = atof(tokenizer.nextToken());
+        }
+        // shape
+        Shape *shape;
+        const char *shapeAttribute = e->getAttribute("shape");
+        cStringTokenizer shapeTokenizer(shapeAttribute);
+        const char *shapeType = shapeTokenizer.nextToken();
+        if (!strcmp(shapeType, "cuboid"))
+        {
+            Coord size;
+            if (shapeTokenizer.hasMoreTokens())
+                size.x = atof(shapeTokenizer.nextToken());
+            if (shapeTokenizer.hasMoreTokens())
+                size.y = atof(shapeTokenizer.nextToken());
+            if (shapeTokenizer.hasMoreTokens())
+                size.z = atof(shapeTokenizer.nextToken());
+            shape = new Cuboid(size);
+        }
+        else if (!strcmp(shapeType, "sphere"))
+        {
+            double radius = 0;
+            if (shapeTokenizer.hasMoreTokens())
+                radius = atof(shapeTokenizer.nextToken());
+            shape = new Sphere(radius);
+        }
+        else
+            throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
+        // material
+        Material *material;
+        const char *materialAttribute = e->getAttribute("material");
+        if (!strcmp(materialAttribute, "brick"))
+            material = &Material::brick;
+        else if (!strcmp(materialAttribute, "concrete"))
+            material = &Material::concrete;
+        else
+            throw cRuntimeError("Unknown material '%s'", materialAttribute);
+        // color
+        cFigure::Color color;
+        const char *colorAttribute = e->getAttribute("color");
+        if (colorAttribute)
+        {
+            cStringTokenizer tokenizer(colorAttribute);
+            if (tokenizer.hasMoreTokens())
+                color.red = atoi(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                color.green = atoi(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                color.blue = atoi(tokenizer.nextToken());
+        }
+        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, color);
         objects.push_back(object);
     }
-//    PhysicalObject *object = new PhysicalObject(new Cuboid(Coord(0, 200, 0), Coord(600, 210, 0)), &Material::concrete);
-//    objects.push_back(object);
 }
 
 void PhysicalEnvironment::updateCanvas()
@@ -76,18 +151,31 @@ void PhysicalEnvironment::updateCanvas()
     {
         PhysicalObject *object = *it;
         const Shape *shape = object->getShape();
+        const Coord &position = object->getPosition();
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid)
         {
-            const Coord& min = cuboid->getMin();
-            const Coord& max = cuboid->getMax();
+            const Coord& size = cuboid->getSize();
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(cFigure::Point(min.x, min.y));
-            figure->setP2(cFigure::Point(max.x, max.y));
+            figure->setP1(cFigure::Point(position.x - size.x / 2, position.y - size.y / 2));
+            figure->setP2(cFigure::Point(position.x + size.x / 2, position.y + size.y / 2));
+            figure->setFillColor(object->getColor());
             layer->addChild(figure);
+            continue;
         }
-        else
-            throw cRuntimeError("Unknown shape");
+        const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
+        if (sphere)
+        {
+            double radius = sphere->getRadius();
+            cOvalFigure *figure = new cOvalFigure(NULL);
+            figure->setFilled(true);
+            figure->setP1(cFigure::Point(position.x - radius, position.y - radius));
+            figure->setP2(cFigure::Point(position.x + radius, position.y + radius));
+            figure->setFillColor(object->getColor());
+            layer->addChild(figure);
+            continue;
+        }
+        throw cRuntimeError("Unknown shape");
     }
 }

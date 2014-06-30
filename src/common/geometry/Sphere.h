@@ -15,19 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "PhysicalObject.h"
+#ifndef __INET_SPHERE_H_
+#define __INET_SPHERE_H_
 
-PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material, const cFigure::Color &color) :
-    id(id),
-    position(position),
-    orientation(orientation),
-    shape(shape),
-    material(material),
-    color(color)
-{
-}
+#include "Shape.h"
 
-PhysicalObject::~PhysicalObject()
+/**
+ * This class represents a 3 dimensional sphere shape. The coordinate system
+ * origin is in the center of the sphere.
+ */
+class INET_API Sphere : public Shape
 {
-    delete shape;
-}
+    protected:
+        double radius;
+
+    public:
+        Sphere(double radius);
+
+        const double getRadius() const { return radius; }
+        void setRadius(double radius) { this->radius = radius; }
+
+        virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
+};
+
+#endif

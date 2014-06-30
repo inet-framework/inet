@@ -32,6 +32,7 @@ class INET_API Material
         static Material copper;
         static Material aluminium;
         static Material wood;
+        static Material brick;
         static Material concrete;
         static Material glass;
 

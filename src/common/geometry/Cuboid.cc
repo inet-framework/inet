@@ -18,39 +18,17 @@
 #include "Cuboid.h"
 #include "Plane.h"
 
-Cuboid::Cuboid(const Coord& min, const Coord& max) :
-    min(min),
-    max(max)
+Cuboid::Cuboid(const Coord& size) :
+    size(size)
 {
 }
 
-bool Cuboid::isIntersecting(const LineSegment& lineSegment) const
-{
-    Coord xMin = Plane(min, Coord(1, 0, 0)).computeIntersection(lineSegment);
-    if (!xMin.isUnspecified() && isInsideY(xMin) && isInsideZ(xMin))
-        return true;
-    Coord xMax = Plane(max, Coord(-1, 0, 0)).computeIntersection(lineSegment);
-    if (!xMax.isUnspecified() && isInsideY(xMax) && isInsideZ(xMax))
-        return true;
-    Coord yMin = Plane(min, Coord(0, 1, 0)).computeIntersection(lineSegment);
-    if (!yMin.isUnspecified() && isInsideX(yMin) && isInsideZ(yMin))
-        return true;
-    Coord yMax = Plane(max, Coord(0, -1, 0)).computeIntersection(lineSegment);
-    if (!yMax.isUnspecified() && isInsideX(yMax) && isInsideZ(yMax))
-        return true;
-    Coord zMin = Plane(min, Coord(0, 0, 1)).computeIntersection(lineSegment);
-    if (!zMin.isUnspecified() && isInsideX(zMin) && isInsideY(zMin))
-        return true;
-    Coord zMax = Plane(max, Coord(0, 0, -1)).computeIntersection(lineSegment);
-    if (!zMax.isUnspecified() && isInsideX(zMax) && isInsideY(zMax))
-        return true;
-    return false;
-}
-
-double Cuboid::computeIntersectionDistance(const LineSegment& lineSegment) const
+bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const
 {
     int i = 0;
     Coord points[2];
+    Coord min = size / -2;
+    Coord max = size / 2;
     Coord xMin = Plane(min, Coord(1, 0, 0)).computeIntersection(lineSegment);
     if (!xMin.isUnspecified() && isInsideY(xMin) && isInsideZ(xMin))
         points[i++ % 2] = xMin;
@@ -69,5 +47,13 @@ double Cuboid::computeIntersectionDistance(const LineSegment& lineSegment) const
     Coord zMax = Plane(max, Coord(0, 0, -1)).computeIntersection(lineSegment);
     if (!zMax.isUnspecified() && isInsideX(zMax) && isInsideY(zMax))
         points[i++ % 2] = zMax;
-    return points[0].distance(points[1]);
+    // TODO: complete for other cases, e.g. when there's only 1 real intersection point
+    if (i == 0)
+        return false;
+    else
+    {
+        intersection1 = points[0];
+        intersection2 = points[1];
+        return true;
+    }
 }
