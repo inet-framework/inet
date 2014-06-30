@@ -6,11 +6,11 @@
 /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping1 -r 0,                  100s,            dd66-46b3
 # /examples/adhoc/ieee80211/,          -f omnetpp.ini -c Ping2 -r 0,                  100s,         0000-0000   # [Config Ping2]    # interactive config, needed a *.numHosts parameter
 
-/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,           bb7c-71c5
-/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,           e780-7a04
-/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,           b880-70ec
-/examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,           4229-2930
-/examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,           f1bc-a755
+/examples/aodv/,                     -f omnetpp.ini -c IPv4SlowMobility -r 0,          50s,           30a2-da81
+/examples/aodv/,                     -f omnetpp.ini -c IPv4ModerateFastMobility -r 0,  50s,           070d-0cda
+/examples/aodv/,                     -f omnetpp.ini -c IPv4FastMobility -r 0,          50s,           ba9f-8146
+/examples/aodv/,                     -f omnetpp.ini -c Static -r 0,                    50s,           b768-52e8
+/examples/aodv/,                     -f omnetpp.ini -c Dynamic -r 0,                   60s,           b47c-2cdf
 
 /examples/bgpv4/BGP2RoutersInAS/,    -f omnetpp.ini -c config1 -r 0,                1000s,           4528-9d89
 /examples/bgpv4/BGP3Routers/,        -f omnetpp.ini -c config1 -r 0,                1000s,           93be-495b
