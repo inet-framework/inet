@@ -20,7 +20,7 @@
 
 #include "RadioMedium.h"
 
-namespace radio {
+namespace physicallayer {
 
 // It is a Quadtree implementation for efficient (in a static network)
 // orthogonal range queries.

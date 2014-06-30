@@ -19,7 +19,7 @@
 #define GRIDNEIGHBORCACHE_H_
 
 #include "RadioMedium.h"
-namespace radio
+namespace physicallayer
 {
 
 class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule

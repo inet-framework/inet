@@ -22,7 +22,7 @@
 #include <set>
 #include <vector>
 
-namespace radio
+namespace physicallayer
 {
 
 class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModule

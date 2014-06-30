@@ -16,7 +16,7 @@
 //
 
 #include "QuadTreeNeighborCache.h"
-using namespace radio;
+using namespace physicallayer;
 Define_Module(QuadTreeNeighborCache);
 
 void QuadTreeNeighborCache::addRadio(const IRadio* radio)
@@ -173,7 +173,7 @@ unsigned int QuadTreeNeighborCache::whichQuadrant(QuadTreeNode *node, Coord radi
     return 100;
 }
 
-void radio::QuadTreeNeighborCache::setBoundary(QuadTreeNode *node)
+void QuadTreeNeighborCache::setBoundary(QuadTreeNode *node)
 {
     // We just divide a rectangle into four smaller congruent rectangle
 
@@ -292,7 +292,7 @@ void QuadTreeNeighborCache::strictRangeQuery(QuadTreeNode *rootNode, const IRadi
     }
 }
 
-void radio::QuadTreeNeighborCache::deleteTree(QuadTreeNode *rootNode)
+void QuadTreeNeighborCache::deleteTree(QuadTreeNode *rootNode)
 {
     if (rootNode == NULL)
         return;
@@ -366,7 +366,7 @@ bool QuadTreeNeighborCache::hasChild(QuadTreeNode* node) const
     return node->quadrants[0] != NULL;
 }
 
-void radio::QuadTreeNeighborCache::tryToJoinChildQuadrants(QuadTreeNode* node)
+void QuadTreeNeighborCache::tryToJoinChildQuadrants(QuadTreeNode* node)
 {
     if (node == NULL)
         return;

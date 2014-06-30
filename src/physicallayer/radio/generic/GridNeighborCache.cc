@@ -16,7 +16,7 @@
 //
 
 #include "GridNeighborCache.h"
-using namespace radio;
+using namespace physicallayer;
 Define_Module(GridNeighborCache);
 
 void GridNeighborCache::initialize(int stage)
