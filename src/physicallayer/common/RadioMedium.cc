@@ -103,6 +103,7 @@ void RadioMedium::initialize(int stage)
         obstacleLoss = dynamic_cast<IObstacleLoss *>(getSubmodule("obstacleLoss"));
         attenuation = check_and_cast<IAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IBackgroundNoise *>(getSubmodule("backgroundNoise"));
+        neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));
         const char *rangeFilterString = par("rangeFilter");
         if (!strcmp(rangeFilterString, ""))
             rangeFilter = RANGE_FILTER_ANYWHERE;

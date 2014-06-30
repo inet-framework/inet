@@ -33,6 +33,7 @@ module RadioMedium like IRadioMedium
         string obstacleLossType = default("");
         string attenuationType;
         string backgroundNoiseType = default("");
+        string neighborCacheType;
 
         // channel limit parameters
         double carrierFrequency @unit(Hz) = default(0Hz/0); // TODO: rename to maxRangeCarrierFrequency
@@ -57,7 +58,7 @@ module RadioMedium like IRadioMedium
         bool leaveCommunicationTrail = default(false);
 
         @class(RadioMedium);
-        @display("i=misc/sun");
+        @display("i=misc/sun;bgb=209,496");
 
     submodules:
         propagation: <propagationType> like IPropagation {
@@ -79,5 +80,9 @@ module RadioMedium like IRadioMedium
         backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
             parameters:
                 @display("p=100,450");
+        }
+        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+            parameters:
+                @display("p=100,441");
         }
 }
