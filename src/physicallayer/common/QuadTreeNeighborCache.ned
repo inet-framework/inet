@@ -13,14 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.radio.generic;
+package inet.physicallayer.common;
 
-module NeighborListCache like INeighborCache
+module QuadTreeNeighborCache like INeighborCache
 {
     parameters:
+        int maxNumOfPointsPerQuadrant;
         double range @unit(m);
         double refillPeriod @unit(s);
         double maxSpeed @unit(mps);
-        @class(NeighborListCache);
+        double constraintAreaMaxX @unit(m); // max x position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMaxY @unit(m); // max y position of the constraint area, unconstrained by default (positive infinity)
+        double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
+        double constraintAreaMinY @unit(m); // min y position of the constraint area, unconstrained by default (negative infinity)
+        @class(QuadTreeNeighborCache);
 }
-

@@ -13,11 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.radio.generic;
+package inet.physicallayer.common;
 
-moduleinterface INeighborCache
+module NeighborListCache like INeighborCache
 {
     parameters:
+        double range @unit(m);
         double refillPeriod @unit(s);
         double maxSpeed @unit(mps);
+        @class(NeighborListCache);
 }
+
