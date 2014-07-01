@@ -22,6 +22,7 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
+#include <deque>
 #include "INETDefs.h"
 #include "ModuleAccess.h"
 #include "Coord.h"
@@ -65,7 +66,6 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     };
 
   protected:
-
     /** @brief Pointer to visual representation module, to speed up repeated access. */
     cModule *visualRepresentation;
 

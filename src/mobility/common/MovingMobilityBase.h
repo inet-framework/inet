@@ -61,6 +61,16 @@ class INET_API MovingMobilityBase : public MobilityBase
      * The -1 value turns off sending a self message for the next mobility state change. */
     simtime_t nextChange;
 
+    /** @brief Draw the path on the canvas. */
+    bool leaveMovementTrail;
+
+#ifdef __CCANVAS_H
+    /**
+     * The list of trail figures representing the movement.
+     */
+    std::deque<cFigure *> movementTrail;
+#endif // ifdef __CCANVAS_H
+
   protected:
     MovingMobilityBase();
 
@@ -77,6 +87,8 @@ class INET_API MovingMobilityBase : public MobilityBase
 
     /** @brief Moves and notifies listeners. */
     void moveAndUpdate();
+
+    void updateVisualRepresentation();
 
     /** @brief Moves according to the mobility model to the current simulation time.
      *

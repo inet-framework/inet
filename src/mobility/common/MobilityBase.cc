@@ -47,13 +47,13 @@ static bool isFiniteNumber(double value)
     return value <= DBL_MAX && value >= -DBL_MAX;
 }
 
-MobilityBase::MobilityBase()
+MobilityBase::MobilityBase() :
+    visualRepresentation(NULL),
+    constraintAreaMin(Coord::ZERO),
+    constraintAreaMax(Coord::ZERO),
+    lastPosition(Coord::ZERO),
+    lastOrientation(EulerAngles::IDENTITY)
 {
-    visualRepresentation = NULL;
-    constraintAreaMin = Coord::ZERO;
-    constraintAreaMax = Coord::ZERO;
-    lastPosition = Coord::ZERO;
-    lastOrientation = EulerAngles::IDENTITY;
 }
 
 void MobilityBase::initialize(int stage)
