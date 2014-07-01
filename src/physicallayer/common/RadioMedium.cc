@@ -119,8 +119,6 @@ void RadioMedium::initialize(int stage)
         if (recordCommunicationLog)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
         leaveCommunicationTrail = par("leaveCommunicationTrail");
-        // TODO: create cache based on parameter?
-        // e.g. neighborCache = new XXXNeighborCache();
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         updateLimits();
@@ -722,17 +720,20 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
 #ifdef __CCANVAS_H
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
         cLayer *layer = getParentModule()->getCanvas()->getDefaultLayer();
+        if (communicationTrail.size() > 100) {
+            cFigure *front = communicationTrail.front();
+            communicationTrail.pop_front();
+            layer->removeChild(front);
+            delete front;
+        }
         cLineFigure *communicationLine = new cLineFigure();
         Coord transmissionStartPosition = transmission->getStartPosition();
         Coord receptionStartPosition = decision->getReception()->getStartPosition();
         communicationLine->setStart(cFigure::Point(transmissionStartPosition.x, transmissionStartPosition.y));
+        communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEnd(cFigure::Point(receptionStartPosition.x, receptionStartPosition.y));
         communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
         communicationTrail.push_back(communicationLine);
-        if (communicationTrail.size() > 100) {
-            layer->removeChild(communicationTrail.front());
-            communicationTrail.pop_front();
-        }
         layer->addChild(communicationLine);
     }
 #endif // ifdef __CCANVAS_H
