@@ -35,7 +35,7 @@
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
 
-#include "headers/tcp.h"
+#include "headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"

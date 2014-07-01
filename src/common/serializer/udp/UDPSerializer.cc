@@ -24,7 +24,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/bsdint.h"
 #include "headers/in.h"
 #include "headers/in_systm.h"
-#include "headers/udp.h"
+#include "headers/udphdr.h"
 };
 
 #include "UDPSerializer.h"

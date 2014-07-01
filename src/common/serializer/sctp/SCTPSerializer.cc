@@ -26,7 +26,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "headers/in.h"
 #include "headers/in_systm.h"
 #include "headers/ip.h"
-#include "headers/sctp.h"
+#include "headers/sctphdr.h"
 };
 
 #include "SCTPSerializer.h"

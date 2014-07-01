@@ -35,7 +35,7 @@
 #include "INetworkProtocolControlInfo.h"
 #include "IPv6ControlInfo.h"
 
-#include "headers/tcp.h"
+#include "headers/tcphdr.h"
 #include "TCPCommand_m.h"
 #include "TCPIPchecksum.h"
 #include "TCP_NSC_Queues.h"

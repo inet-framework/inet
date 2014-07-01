@@ -24,7 +24,7 @@
 
 #include "headers/defs.h"
 
-#include "headers/tcp.h"
+#include "headers/tcphdr.h"
 
 namespace inet {
 

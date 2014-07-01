@@ -22,7 +22,7 @@
 
 #include "headers/defs.h"   // for endian macros
 #include <sim_interface.h> // NSC header
-#include "headers/tcp.h"
+#include "headers/tcphdr.h"
 #include "TCP_NSC.h"
 #include "TCP_NSC_Queues.h"
 #include "TCPCommand_m.h"

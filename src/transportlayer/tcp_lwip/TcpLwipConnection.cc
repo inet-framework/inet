@@ -20,7 +20,7 @@
 #include "TcpLwipConnection.h"
 
 #include "headers/defs.h"   // for endian macros
-#include "headers/tcp.h"
+#include "headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
 #include "TCP_lwIP.h"
 #include "TCPCommand_m.h"

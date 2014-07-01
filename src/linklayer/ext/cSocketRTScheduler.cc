@@ -23,7 +23,7 @@
 
 #include "cSocketRTScheduler.h"
 
-#include <headers/ethernet.h>
+#include "headers/ethernethdr.h"
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
