@@ -21,8 +21,6 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
-
-
 Define_Module(UDPVideoStreamSvr);
 
 simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = registerSignal("reqStreamBytes");
@@ -41,7 +39,7 @@ UDPVideoStreamSvr::UDPVideoStreamSvr()
 
 UDPVideoStreamSvr::~UDPVideoStreamSvr()
 {
-    for(VideoStreamMap::iterator it = streams.begin(); it  != streams.end(); ++it)
+    for (VideoStreamMap::iterator it = streams.begin(); it != streams.end(); ++it)
         cancelAndDelete(it->second.timer);
 }
 
@@ -49,8 +47,7 @@ void UDPVideoStreamSvr::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         sendInterval = &par("sendInterval");
         packetLen = &par("packetLen");
         videoSize = &par("videoSize");
@@ -70,23 +67,19 @@ void UDPVideoStreamSvr::finish()
 
 void UDPVideoStreamSvr::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         // timer for a particular video stream expired, send packet
         sendStreamData(msg);
     }
-    else if (msg->getKind() == UDP_I_DATA)
-    {
+    else if (msg->getKind() == UDP_I_DATA) {
         // start streaming
         processStreamRequest(msg);
     }
-    else if (msg->getKind() == UDP_I_ERROR)
-    {
+    else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 }
@@ -138,13 +131,11 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
     numPkSent++;
 
     // reschedule timer if there's bytes left to send
-    if (d->bytesLeft > 0)
-    {
+    if (d->bytesLeft > 0) {
         simtime_t interval = (*sendInterval);
-        scheduleAt(simTime()+interval, timer);
+        scheduleAt(simTime() + interval, timer);
     }
-    else
-    {
+    else {
         streams.erase(it);
         delete timer;
     }
@@ -152,7 +143,7 @@ void UDPVideoStreamSvr::sendStreamData(cMessage *timer)
 
 void UDPVideoStreamSvr::clearStreams()
 {
-    for(VideoStreamMap::iterator it = streams.begin(); it  != streams.end(); ++it)
+    for (VideoStreamMap::iterator it = streams.begin(); it != streams.end(); ++it)
         cancelAndDelete(it->second.timer);
     streams.clear();
 }
@@ -176,9 +167,5 @@ void UDPVideoStreamSvr::handleNodeCrash()
 {
     clearStreams();
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -24,28 +24,26 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
-
 /**
  * Retransmission data for SACK.
  */
 class INET_API TCPSACKRexmitQueue
 {
   public:
-    TCPConnection *conn;  // the connection that owns this queue
+    TCPConnection *conn;    // the connection that owns this queue
 
     struct Region
     {
         uint32 beginSeqNum;
         uint32 endSeqNum;
-        bool sacked;      // indicates whether region has already been sacked by data receiver
-        bool rexmitted;   // indicates whether region has already been retransmitted by data sender
+        bool sacked;    // indicates whether region has already been sacked by data receiver
+        bool rexmitted;    // indicates whether region has already been retransmitted by data sender
     };
 
     typedef std::list<Region> RexmitQueue;
-    RexmitQueue rexmitQueue; // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
+    RexmitQueue rexmitQueue;    // rexmitQueue is ordered by seqnum, and doesn't have overlapped Regions
 
-    uint32 begin;  // 1st sequence number stored
+    uint32 begin;    // 1st sequence number stored
     uint32 end;    // last sequence number stored + 1
 
   public:
@@ -62,7 +60,7 @@ class INET_API TCPSACKRexmitQueue
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn)  {conn = _conn;}
+    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first
@@ -172,7 +170,7 @@ class INET_API TCPSACKRexmitQueue
      * Returns nothing but checks length, sacked bit and rexmitted bit of a given
      * SACK block starting at seqNum.
      */
-    virtual void checkSackBlock(uint32 seqNum, uint32 &length, bool &sacked, bool &rexmitted) const;
+    virtual void checkSackBlock(uint32 seqNum, uint32& length, bool& sacked, bool& rexmitted) const;
 
   protected:
     /*
@@ -180,8 +178,7 @@ class INET_API TCPSACKRexmitQueue
      */
     bool checkQueue() const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPSACKREXMITQUEUE_H
 
-
-#endif

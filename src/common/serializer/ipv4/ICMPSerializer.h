@@ -22,30 +22,26 @@
 #include "ICMPMessage_m.h"
 
 namespace inet {
-
-
 /**
  * Converts between ICMPMessage and binary (network byte order) ICMP header.
  */
 class ICMPSerializer
 {
-    public:
-        ICMPSerializer() {}
+  public:
+    ICMPSerializer() {}
 
-        /**
-         * Serializes an ICMPMessage for transmission on the wire.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
+    /**
+     * Serializes an ICMPMessage for transmission on the wire.
+     * Returns the length of data written into buffer.
+     */
+    int serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
 
-        /**
-         * Puts a packet sniffed from the wire into an ICMPMessage.
-         */
-        void parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
+    /**
+     * Puts a packet sniffed from the wire into an ICMPMessage.
+     */
+    void parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ICMPSERIALIZER_H
 

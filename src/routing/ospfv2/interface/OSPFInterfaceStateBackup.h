@@ -21,20 +21,15 @@
 #include "OSPFInterfaceState.h"
 
 namespace inet {
-
 namespace OSPF {
-
 class InterfaceStateBackup : public InterfaceState
 {
-public:
-    virtual void processEvent(Interface* intf, Interface::InterfaceEventType event);
+  public:
+    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event);
     virtual Interface::InterfaceStateType getState() const { return Interface::BACKUP_STATE; }
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_OSPFINTERFACESTATEBACKUP_H
 

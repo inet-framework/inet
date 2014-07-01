@@ -26,42 +26,38 @@
 #include "TraCIMobility.h"
 
 namespace inet {
-
 /**
  * Small IVC Demo
  * Documentation for these modules is at http://veins.car2x.org/
  */
 class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 {
-    protected:
-        // state
-        TraCIMobility* traci;
-        UDPSocket socket;
-        bool sentMessage;
-        static simsignal_t mobilityStateChangedSignal;
+  protected:
+    // state
+    TraCIMobility *traci;
+    UDPSocket socket;
+    bool sentMessage;
+    static simsignal_t mobilityStateChangedSignal;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage* msg);
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-        void setupLowerLayer();
-        virtual void handleSelfMsg(cMessage* apMsg);
-        virtual void handleLowerMsg(cMessage* apMsg);
+    void setupLowerLayer();
+    virtual void handleSelfMsg(cMessage *apMsg);
+    virtual void handleLowerMsg(cMessage *apMsg);
 
-        virtual void sendMessage();
-        virtual void handlePositionUpdate();
+    virtual void sendMessage();
+    virtual void handlePositionUpdate();
 
-    public:
-        TraCIDemo() { traci = NULL; }
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-
+  public:
+    TraCIDemo() { traci = NULL; }
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TRACIDEMO_H
 

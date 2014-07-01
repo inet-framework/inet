@@ -19,14 +19,11 @@
 #ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 #define __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 
-
 #include "INETDefs.h"
 
 #include "TCP_NSC_Queues.h"
 
 namespace inet {
-
-
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  */
@@ -47,13 +44,13 @@ class INET_API TCP_NSC_VirtualDataSendQueue : public TCP_NSC_SendQueue
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) const;
+    virtual int getBytesForTcpLayer(void *bufferP, int bufferLengthP) const;
 
     virtual void dequeueTcpLayerMsg(int msgLengthP);
 
     virtual unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment* createSegmentWithBytes(const void* tcpDataP, int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP);
 
     virtual void discardUpTo(uint32 seqNumP);
 
@@ -81,9 +78,9 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
 
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP);
 
-    virtual void enqueueNscData(void* dataP, int dataLengthP);
+    virtual void enqueueNscData(void *dataP, int dataLengthP);
 
-    virtual cPacket* extractBytesUpTo();
+    virtual cPacket *extractBytesUpTo();
 
     virtual uint32 getAmountOfBufferedBytes() const;
 
@@ -96,8 +93,7 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H
 
-
-#endif

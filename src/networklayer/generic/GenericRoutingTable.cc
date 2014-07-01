@@ -27,9 +27,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
-
-
 Define_Module(GenericRoutingTable);
 
 GenericRoutingTable::GenericRoutingTable()
@@ -39,9 +36,9 @@ GenericRoutingTable::GenericRoutingTable()
 
 GenericRoutingTable::~GenericRoutingTable()
 {
-    for (unsigned int i=0; i<routes.size(); i++)
+    for (unsigned int i = 0; i < routes.size(); i++)
         delete routes[i];
-    for (unsigned int i=0; i<multicastRoutes.size(); i++)
+    for (unsigned int i = 0; i < multicastRoutes.size(); i++)
         delete multicastRoutes[i];
 }
 
@@ -49,12 +46,11 @@ void GenericRoutingTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // get a pointer to the IInterfaceTable
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-        const char * addressTypeString = par("addressType");
+        const char *addressTypeString = par("addressType");
         if (!strcmp(addressTypeString, "mac"))
             addressType = Address::MAC;
         else if (!strcmp(addressTypeString, "modulepath"))
@@ -79,12 +75,11 @@ void GenericRoutingTable::initialize(int stage)
         host->subscribe(NF_INTERFACE_CONFIG_CHANGED, this);
         host->subscribe(NF_INTERFACE_IPv4CONFIG_CHANGED, this);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // At this point, all L2 modules have registered themselves (added their
         // interface entries). Create the per-interface IPv4 data structures.
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
-        for (int i=0; i<interfaceTable->getNumInterfaces(); ++i)
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); ++i)
             configureInterface(interfaceTable->getInterface(i));
         configureLoopback();
 
@@ -100,8 +95,7 @@ void GenericRoutingTable::initialize(int stage)
 //        if (strcmp(routerIdStr, "") && strcmp(routerIdStr, "auto"))
 //            routerId = IPv4Address(routerIdStr);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER_3) {
         // routerID selection must be after network autoconfiguration assigned interface addresses
         configureRouterId();
 
@@ -124,28 +118,24 @@ void GenericRoutingTable::receiveSignal(cComponent *source, simsignal_t signalID
 
 void GenericRoutingTable::routeChanged(GenericRoute *entry, int fieldCode)
 {
-    if (fieldCode==IRoute::F_DESTINATION || fieldCode==IRoute::F_PREFIX_LENGTH || fieldCode==IRoute::F_METRIC) // our data structures depend on these fields
-    {
+    if (fieldCode == IRoute::F_DESTINATION || fieldCode == IRoute::F_PREFIX_LENGTH || fieldCode == IRoute::F_METRIC) {    // our data structures depend on these fields
         entry = internalRemoveRoute(entry);
-        ASSERT(entry != NULL);  // failure means inconsistency: route was not found in this routing table
+        ASSERT(entry != NULL);    // failure means inconsistency: route was not found in this routing table
         internalAddRoute(entry);
 
         //invalidateCache();
         updateDisplayString();
     }
-    emit(NF_ROUTE_CHANGED, entry); // TODO include fieldCode in the notification
+    emit(NF_ROUTE_CHANGED, entry);    // TODO include fieldCode in the notification
 }
 
 void GenericRoutingTable::configureRouterId()
 {
-    if (routerId.isUnspecified())  // not yet configured
-    {
+    if (routerId.isUnspecified()) {    // not yet configured
         const char *routerIdStr = par("routerId").stringValue();
-        if (!strcmp(routerIdStr, "auto"))  // non-"auto" cases already handled in earlier stage
-        {
+        if (!strcmp(routerIdStr, "auto")) {    // non-"auto" cases already handled in earlier stage
             // choose highest interface address as routerId
-            for (int i=0; i<ift->getNumInterfaces(); ++i)
-            {
+            for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
                     Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
@@ -169,7 +159,7 @@ void GenericRoutingTable::configureRouterId()
 
 void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
 {
-    int metric = (int) (ceil(2e9 / ie->getDatarate()));  // use OSPF cost as default
+    int metric = (int)(ceil(2e9 / ie->getDatarate()));    // use OSPF cost as default
     int interfaceModuleId = ie->getInterfaceModule() ? ie->getInterfaceModule()->getParentModule()->getId() : -1;
     // mac
     GenericNetworkProtocolInterfaceData *d = new GenericNetworkProtocolInterfaceData();
@@ -196,7 +186,6 @@ void GenericRoutingTable::configureLoopback()
 //    d->setMetric(1);
 //    ie->setIPv4Data(d);
 }
-
 
 void GenericRoutingTable::updateDisplayString()
 {
@@ -246,8 +235,7 @@ bool GenericRoutingTable::isLocalAddress(const Address& dest) const
     //TODO: Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // collect interface addresses if not yet done
-    for (int i=0; i<ift->getNumInterfaces(); i++)
-    {
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
         Address interfaceAddr = ift->getInterface(i)->getGenericNetworkProtocolData()->getAddress();
         if (interfaceAddr == dest)
             return true;
@@ -255,11 +243,10 @@ bool GenericRoutingTable::isLocalAddress(const Address& dest) const
     return false;
 }
 
-InterfaceEntry* GenericRoutingTable::getInterfaceByAddress(const Address& address) const
+InterfaceEntry *GenericRoutingTable::getInterfaceByAddress(const Address& address) const
 {
     // collect interface addresses if not yet done
-    for (int i=0; i<ift->getNumInterfaces(); i++)
-    {
+    for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
         Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
         if (interfaceAddr == address)
@@ -268,18 +255,16 @@ InterfaceEntry* GenericRoutingTable::getInterfaceByAddress(const Address& addres
     return NULL;
 }
 
-GenericRoute* GenericRoutingTable::findBestMatchingRoute(const Address& dest) const
+GenericRoute *GenericRoutingTable::findBestMatchingRoute(const Address& dest) const
 {
     //TODO Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     // find best match (one with longest prefix)
     // default route has zero prefix length, so (if exists) it'll be selected as last resort
     GenericRoute *bestRoute = NULL;
-    for (RouteVector::const_iterator i=routes.begin(); i!=routes.end(); ++i)
-    {
+    for (RouteVector::const_iterator i = routes.begin(); i != routes.end(); ++i) {
         GenericRoute *e = *i;
-        if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength()))
-        {
+        if (dest.matches(e->getDestinationAsGeneric(), e->getPrefixLength())) {
             bestRoute = const_cast<GenericRoute *>(e);
             break;
         }
@@ -287,7 +272,7 @@ GenericRoute* GenericRoutingTable::findBestMatchingRoute(const Address& dest) co
     return bestRoute;
 }
 
-InterfaceEntry* GenericRoutingTable::getOutputInterfaceForDestination(const Address& dest) const
+InterfaceEntry *GenericRoutingTable::getOutputInterfaceForDestination(const Address& dest) const
 {
     //TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
@@ -305,12 +290,12 @@ Address GenericRoutingTable::getNextHopForDestination(const Address& dest) const
 
 bool GenericRoutingTable::isLocalMulticastAddress(const Address& dest) const
 {
-    return dest.isMulticast(); //TODO
+    return dest.isMulticast();    //TODO
 }
 
-IMulticastRoute* GenericRoutingTable::findBestMatchingMulticastRoute(const Address& origin, const Address& group) const
+IMulticastRoute *GenericRoutingTable::findBestMatchingMulticastRoute(const Address& origin, const Address& group) const
 {
-    return NULL; //TODO
+    return NULL;    //TODO
 }
 
 int GenericRoutingTable::getNumRoutes() const
@@ -318,25 +303,25 @@ int GenericRoutingTable::getNumRoutes() const
     return routes.size();
 }
 
-IRoute* GenericRoutingTable::getRoute(int k) const
+IRoute *GenericRoutingTable::getRoute(int k) const
 {
     ASSERT(k >= 0 && (unsigned int)k < routes.size());
     return routes[k];
 }
 
-IRoute* GenericRoutingTable::getDefaultRoute() const
+IRoute *GenericRoutingTable::getDefaultRoute() const
 {
     // if there is a default route entry, it is the last valid entry
-    for (RouteVector::const_reverse_iterator i=routes.rbegin(); i!=routes.rend() && (*i)->getPrefixLength() == 0; ++i)
+    for (RouteVector::const_reverse_iterator i = routes.rbegin(); i != routes.rend() && (*i)->getPrefixLength() == 0; ++i)
         return *i;
     return NULL;
 }
 
-void GenericRoutingTable::addRoute(IRoute* route)
+void GenericRoutingTable::addRoute(IRoute *route)
 {
     Enter_Method("addRoute(...)");
 
-    GenericRoute* entry = dynamic_cast<GenericRoute*>(route);
+    GenericRoute *entry = dynamic_cast<GenericRoute *>(route);
 
     // check that the interface exists
     if (!entry->getInterface())
@@ -348,13 +333,12 @@ void GenericRoutingTable::addRoute(IRoute* route)
     emit(NF_ROUTE_ADDED, entry);
 }
 
-IRoute* GenericRoutingTable::removeRoute(IRoute* route)
+IRoute *GenericRoutingTable::removeRoute(IRoute *route)
 {
     Enter_Method("removeRoute(...)");
 
-    GenericRoute* entry = internalRemoveRoute(check_and_cast<GenericRoute*>(route));
-    if (entry)
-    {
+    GenericRoute *entry = internalRemoveRoute(check_and_cast<GenericRoute *>(route));
+    if (entry) {
         updateDisplayString();
         emit(NF_ROUTE_DELETED, entry);
     }
@@ -362,7 +346,7 @@ IRoute* GenericRoutingTable::removeRoute(IRoute* route)
     return entry;
 }
 
-bool GenericRoutingTable::deleteRoute(IRoute* entry)
+bool GenericRoutingTable::deleteRoute(IRoute *entry)
 {
     IRoute *route = removeRoute(entry);
     delete route;
@@ -384,8 +368,7 @@ void GenericRoutingTable::internalAddRoute(GenericRoute *route)
 GenericRoute *GenericRoutingTable::internalRemoveRoute(GenericRoute *route)
 {
     RouteVector::iterator i = std::find(routes.begin(), routes.end(), route);
-    if (i!=routes.end())
-    {
+    if (i != routes.end()) {
         ASSERT(route->getRoutingTableAsGeneric() == this);
         routes.erase(i);
         route->setRoutingTable(NULL);
@@ -396,37 +379,32 @@ GenericRoute *GenericRoutingTable::internalRemoveRoute(GenericRoute *route)
 
 int GenericRoutingTable::getNumMulticastRoutes() const
 {
-    return 0; //TODO
+    return 0;    //TODO
 }
 
-IMulticastRoute* GenericRoutingTable::getMulticastRoute(int k) const
+IMulticastRoute *GenericRoutingTable::getMulticastRoute(int k) const
 {
-    return NULL; //TODO
+    return NULL;    //TODO
 }
 
-void GenericRoutingTable::addMulticastRoute(IMulticastRoute* entry)
+void GenericRoutingTable::addMulticastRoute(IMulticastRoute *entry)
 {
     //TODO
 }
 
-IMulticastRoute* GenericRoutingTable::removeMulticastRoute(IMulticastRoute* entry)
+IMulticastRoute *GenericRoutingTable::removeMulticastRoute(IMulticastRoute *entry)
 {
-    return NULL; //TODO
+    return NULL;    //TODO
 }
 
-bool GenericRoutingTable::deleteMulticastRoute(IMulticastRoute* entry)
+bool GenericRoutingTable::deleteMulticastRoute(IMulticastRoute *entry)
 {
-    return false; //TODO
+    return false;    //TODO
 }
 
-IRoute* GenericRoutingTable::createRoute()
+IRoute *GenericRoutingTable::createRoute()
 {
     return new GenericRoute();
 }
-
-
-
-
-}
-
+} // namespace inet
 

@@ -25,7 +25,6 @@
 #include "TCPSendQueue.h"
 
 namespace inet {
-
 /**
  * Send queue that manages messages.
  *
@@ -35,7 +34,7 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 {
   protected:
     ByteArrayBuffer dataBuffer;
-    uint32 begin;  // 1st sequence number stored
+    uint32 begin;    // 1st sequence number stored
     uint32 end;    // last sequence number stored +1
 
   public:
@@ -63,8 +62,7 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 
     virtual void discardUpTo(uint32 seqNum);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPBYTESTREAMSENDQUEUE_H
 
-
-#endif

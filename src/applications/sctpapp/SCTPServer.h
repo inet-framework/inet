@@ -26,86 +26,83 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 /**
  * Implements the SCTPServer simple module. See the NED file for more info.
  */
 class INET_API SCTPServer : public cSimpleModule, public ILifecycle
 {
-    protected:
-        struct ServerAssocStat
-        {
-            simtime_t start;
-            simtime_t stop;
-            simtime_t lifeTime;
-            unsigned long int rcvdBytes;
-            unsigned long int sentPackets;
-            unsigned long int rcvdPackets;
-            bool abortSent;
-            bool peerClosed;
-        };
-        typedef std::map<int,ServerAssocStat> ServerAssocStatMap;
-        typedef std::map<int,cOutVector*> BytesPerAssoc;
-        typedef std::map<int,cOutVector*> EndToEndDelay;
-
-        // parameters
-        int inboundStreams;
-        int outboundStreams;
-        int queueSize;
-        double delay;
-        double delayFirstRead;
-        bool finishEndsSimulation;
-        bool echo;
-        bool ordered;
-
-        // state
-        SCTPSocket *socket;
-        cMessage *timeoutMsg;
-        cMessage *delayTimer;
-        cMessage *delayFirstReadTimer;
-        int lastStream;
-        int assocId;
-        bool readInt;
-        bool schedule;
-        bool firstData;
-        bool shutdownReceived;
+  protected:
+    struct ServerAssocStat
+    {
+        simtime_t start;
+        simtime_t stop;
+        simtime_t lifeTime;
+        unsigned long int rcvdBytes;
+        unsigned long int sentPackets;
+        unsigned long int rcvdPackets;
         bool abortSent;
-        EndToEndDelay endToEndDelay;
+        bool peerClosed;
+    };
+    typedef std::map<int, ServerAssocStat> ServerAssocStatMap;
+    typedef std::map<int, cOutVector *> BytesPerAssoc;
+    typedef std::map<int, cOutVector *> EndToEndDelay;
 
-        // statistics
-        int numSessions;
-        int count;
-        int notificationsReceived;
-        unsigned long int bytesSent;
-        unsigned long int packetsSent;
-        unsigned long int packetsRcvd;
-        unsigned long int numRequestsToSend; // requests to send in this session
-        BytesPerAssoc bytesPerAssoc;
-        ServerAssocStatMap serverAssocStatMap;
+    // parameters
+    int inboundStreams;
+    int outboundStreams;
+    int queueSize;
+    double delay;
+    double delayFirstRead;
+    bool finishEndsSimulation;
+    bool echo;
+    bool ordered;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg);
-        virtual void finish();
-        void handleTimer(cMessage *msg);
-        void sendOrSchedule(cPacket *msg);
+    // state
+    SCTPSocket *socket;
+    cMessage *timeoutMsg;
+    cMessage *delayTimer;
+    cMessage *delayFirstReadTimer;
+    int lastStream;
+    int assocId;
+    bool readInt;
+    bool schedule;
+    bool firstData;
+    bool shutdownReceived;
+    bool abortSent;
+    EndToEndDelay endToEndDelay;
 
-        cPacket* makeAbortNotification(SCTPCommand* msg);
-        cPacket* makeReceiveRequest(cPacket* msg);
-        cPacket* makeDefaultReceive();
-        void generateAndSend();
+    // statistics
+    int numSessions;
+    int count;
+    int notificationsReceived;
+    unsigned long int bytesSent;
+    unsigned long int packetsSent;
+    unsigned long int packetsRcvd;
+    unsigned long int numRequestsToSend;    // requests to send in this session
+    BytesPerAssoc bytesPerAssoc;
+    ServerAssocStatMap serverAssocStatMap;
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+    void handleTimer(cMessage *msg);
+    void sendOrSchedule(cPacket *msg);
 
-    public:
-       virtual ~SCTPServer();
-       SCTPServer();
+    cPacket *makeAbortNotification(SCTPCommand *msg);
+    cPacket *makeReceiveRequest(cPacket *msg);
+    cPacket *makeDefaultReceive();
+    void generateAndSend();
+
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+
+  public:
+    virtual ~SCTPServer();
+    SCTPServer();
 };
-}
+} // namespace inet
 
-
-#endif
-
+#endif // ifndef __INET_SCTPSERVER_H
 

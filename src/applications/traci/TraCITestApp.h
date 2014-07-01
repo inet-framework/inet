@@ -28,42 +28,40 @@
 #include "TraCIMobility.h"
 
 namespace inet {
-
 /**
  * FIXME
  */
 class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycle
 {
+  protected:
+    // parameter
+    int testNumber;
 
-    protected:
-        // parameter
-        int testNumber;
+    // state
+    TraCIMobility *traci;
+    std::set<std::string> visitedEdges;    // set of edges this vehicle visited
+    bool hasStopped;    // true if at some point in time this vehicle travelled at negligible speed
+    static simsignal_t mobilityStateChangedSignal;
 
-        // state
-        TraCIMobility* traci;
-        std::set<std::string> visitedEdges; // set of edges this vehicle visited
-        bool hasStopped; // true if at some point in time this vehicle travelled at negligible speed
-        static simsignal_t mobilityStateChangedSignal;
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void finish();
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void finish();
+    void handleSelfMsg(cMessage *msg);
+    void handleLowerMsg(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-        void handleSelfMsg(cMessage* msg);
-        void handleLowerMsg(cMessage* msg);
-        virtual void handleMessage(cMessage* msg);
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    void handlePositionUpdate();
 
-        void handlePositionUpdate();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
-    public:
-        TraCITestApp() { traci = NULL; }
+  public:
+    TraCITestApp() { traci = NULL; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TRACITESTAPP_H
 
-
-#endif

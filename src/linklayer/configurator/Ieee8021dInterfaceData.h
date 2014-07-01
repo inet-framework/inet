@@ -25,163 +25,160 @@
 #include "MACAddress.h"
 
 namespace inet {
-
-#undef ALTERNATE  // conflicts with <windows.h>
-
+#undef ALTERNATE    // conflicts with <windows.h>
 
 /**
  * Per-interface data needed by the STP and RSTP protocols.
  */
 class Ieee8021dInterfaceData : public InterfaceProtocolData
 {
-    public:
-        enum PortRole {ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT};
+  public:
+    enum PortRole { ALTERNATE, NOTASSIGNED, DISABLED, DESIGNATED, BACKUP, ROOT };
 
-        enum PortState {DISCARDING, LEARNING, FORWARDING};
+    enum PortState { DISCARDING, LEARNING, FORWARDING };
 
-        class PortInfo
-        {
-            public:
-                /* The following values have same meaning in both STP and RSTP.
-                 * See Ieee8021dBDPU for more info.
-                 */
-                unsigned int priority;
-                unsigned int linkCost;
-                bool edge;
+    class PortInfo
+    {
+      public:
+        /* The following values have same meaning in both STP and RSTP.
+         * See Ieee8021dBDPU for more info.
+         */
+        unsigned int priority;
+        unsigned int linkCost;
+        bool edge;
 
-                PortState state;
-                PortRole role;
+        PortState state;
+        PortRole role;
 
-                unsigned int rootPriority;
-                MACAddress rootAddress;
-                unsigned int rootPathCost;
-                unsigned int bridgePriority;
-                MACAddress bridgeAddress;
-                unsigned int portPriority;
-                unsigned int portNum;       // The number of the switch port (i.e. EtherSwitch ethg[] gate index).
+        unsigned int rootPriority;
+        MACAddress rootAddress;
+        unsigned int rootPathCost;
+        unsigned int bridgePriority;
+        MACAddress bridgeAddress;
+        unsigned int portPriority;
+        unsigned int portNum;    // The number of the switch port (i.e. EtherSwitch ethg[] gate index).
 
+        simtime_t age;    // This parameter is conveyed to enable a switch to discard information whose age exceeds Max Age. (STP,RSTP)
+        simtime_t maxAge;
 
-                simtime_t age;              // This parameter is conveyed to enable a switch to discard information whose age exceeds Max Age. (STP,RSTP)
-                simtime_t maxAge;
+        simtime_t fdWhile;    // Forward delay timer (see fwdDelay). (STP,RSTP)
+        simtime_t fwdDelay;    // The time spent by a Port in the Listening State and the Learning State before moving to the Learning or For-
+                               // warding State, respectively. (STP,RSTP)
 
-                simtime_t fdWhile;          // Forward delay timer (see fwdDelay). (STP,RSTP)
-                simtime_t fwdDelay;         // The time spent by a Port in the Listening State and the Learning State before moving to the Learning or For-
-                                            // warding State, respectively. (STP,RSTP)
+        simtime_t helloTime;    // The time interval between the generation of Configuration BPDUs by the Root. (STP)
+                                // The interval between periodic transmissions of Configuration Messages by Designated Ports. (RSTP)
 
-                simtime_t helloTime;        // The time interval between the generation of Configuration BPDUs by the Root. (STP)
-                                            // The interval between periodic transmissions of Configuration Messages by Designated Ports. (RSTP)
+        simtime_t TCWhile;    // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
 
-                simtime_t TCWhile;          // The Topology Change timer. TCN Messages are sent while this timer is running. (RSTP)
+        unsigned int lostBPDU;
+        simtime_t nextUpgrade;
 
-                unsigned int lostBPDU;
-                simtime_t nextUpgrade;
-            public:
-                PortInfo();
-        };
+      public:
+        PortInfo();
+    };
 
-    protected:
-        PortInfo portData;
+  protected:
+    PortInfo portData;
 
-    public:
-        Ieee8021dInterfaceData();
+  public:
+    Ieee8021dInterfaceData();
 
-        virtual std::string info() const;
-        virtual std::string detailedInfo() const;
+    virtual std::string info() const;
+    virtual std::string detailedInfo() const;
 
-        bool isLearning() {return portData.state == LEARNING || portData.state == FORWARDING;}
+    bool isLearning() { return portData.state == LEARNING || portData.state == FORWARDING; }
 
-        bool isForwarding() {return portData.state == FORWARDING;}
+    bool isForwarding() { return portData.state == FORWARDING; }
 
-        simtime_t getAge() const {return portData.age;}
+    simtime_t getAge() const { return portData.age; }
 
-        void setAge(simtime_t age) {portData.age = age;}
+    void setAge(simtime_t age) { portData.age = age; }
 
-        const MACAddress& getBridgeAddress() const {return portData.bridgeAddress;}
+    const MACAddress& getBridgeAddress() const { return portData.bridgeAddress; }
 
-        void setBridgeAddress(const MACAddress& bridgeAddress) {portData.bridgeAddress = bridgeAddress;}
+    void setBridgeAddress(const MACAddress& bridgeAddress) { portData.bridgeAddress = bridgeAddress; }
 
-        unsigned int getBridgePriority() const {return portData.bridgePriority;}
+    unsigned int getBridgePriority() const { return portData.bridgePriority; }
 
-        void setBridgePriority(unsigned int bridgePriority) {portData.bridgePriority = bridgePriority;}
+    void setBridgePriority(unsigned int bridgePriority) { portData.bridgePriority = bridgePriority; }
 
-        simtime_t getFdWhile() const {return portData.fdWhile;}
+    simtime_t getFdWhile() const { return portData.fdWhile; }
 
-        void setFdWhile(simtime_t fdWhile) {portData.fdWhile = fdWhile;}
+    void setFdWhile(simtime_t fdWhile) { portData.fdWhile = fdWhile; }
 
-        simtime_t getFwdDelay() const {return portData.fwdDelay;}
+    simtime_t getFwdDelay() const { return portData.fwdDelay; }
 
-        void setFwdDelay(simtime_t fwdDelay) {portData.fwdDelay = fwdDelay;}
+    void setFwdDelay(simtime_t fwdDelay) { portData.fwdDelay = fwdDelay; }
 
-        simtime_t getHelloTime() const {return portData.helloTime;}
+    simtime_t getHelloTime() const { return portData.helloTime; }
 
-        void setHelloTime(simtime_t helloTime) {portData.helloTime = helloTime;}
+    void setHelloTime(simtime_t helloTime) { portData.helloTime = helloTime; }
 
-        unsigned int getLinkCost() const {return portData.linkCost;}
+    unsigned int getLinkCost() const { return portData.linkCost; }
 
-        void setLinkCost(unsigned int linkCost) {portData.linkCost = linkCost;}
+    void setLinkCost(unsigned int linkCost) { portData.linkCost = linkCost; }
 
-        simtime_t getMaxAge() const {return portData.maxAge;}
+    simtime_t getMaxAge() const { return portData.maxAge; }
 
-        void setMaxAge(simtime_t maxAge) {portData.maxAge = maxAge;}
+    void setMaxAge(simtime_t maxAge) { portData.maxAge = maxAge; }
 
-        unsigned int getPortNum() const {return portData.portNum;}
+    unsigned int getPortNum() const { return portData.portNum; }
 
-        void setPortNum(unsigned int portNum) {portData.portNum = portNum;}
+    void setPortNum(unsigned int portNum) { portData.portNum = portNum; }
 
-        unsigned int getPortPriority() const {return portData.portPriority;}
+    unsigned int getPortPriority() const { return portData.portPriority; }
 
-        void setPortPriority(unsigned int portPriority) {portData.portPriority = portPriority;}
+    void setPortPriority(unsigned int portPriority) { portData.portPriority = portPriority; }
 
-        unsigned int getPriority() const {return portData.priority;}
+    unsigned int getPriority() const { return portData.priority; }
 
-        void setPriority(unsigned int priority) {portData.priority = priority;}
+    void setPriority(unsigned int priority) { portData.priority = priority; }
 
-        PortRole getRole() const {return portData.role;}
+    PortRole getRole() const { return portData.role; }
 
-        void setRole(PortRole role) {portData.role = role;}
+    void setRole(PortRole role) { portData.role = role; }
 
-        const MACAddress& getRootAddress() const {return portData.rootAddress;}
+    const MACAddress& getRootAddress() const { return portData.rootAddress; }
 
-        void setRootAddress(const MACAddress& rootAddress) {portData.rootAddress = rootAddress;}
+    void setRootAddress(const MACAddress& rootAddress) { portData.rootAddress = rootAddress; }
 
-        unsigned int getRootPathCost() const {return portData.rootPathCost;}
+    unsigned int getRootPathCost() const { return portData.rootPathCost; }
 
-        void setRootPathCost(unsigned int rootPathCost) {portData.rootPathCost = rootPathCost;}
+    void setRootPathCost(unsigned int rootPathCost) { portData.rootPathCost = rootPathCost; }
 
-        unsigned int getRootPriority() const {return portData.rootPriority;}
+    unsigned int getRootPriority() const { return portData.rootPriority; }
 
-        void setRootPriority(unsigned int rootPriority) {portData.rootPriority = rootPriority;}
+    void setRootPriority(unsigned int rootPriority) { portData.rootPriority = rootPriority; }
 
-        PortState getState() const {return portData.state;}
+    PortState getState() const { return portData.state; }
 
-        void setState(PortState state) {portData.state = state;}
+    void setState(PortState state) { portData.state = state; }
 
-        bool isEdge() const {return portData.edge;}
+    bool isEdge() const { return portData.edge; }
 
-        void setEdge(bool edge) {portData.edge = edge;}
+    void setEdge(bool edge) { portData.edge = edge; }
 
-        simtime_t getTCWhile() const {return portData.TCWhile;}
+    simtime_t getTCWhile() const { return portData.TCWhile; }
 
-        void setTCWhile(simtime_t TCWhile) {portData.TCWhile = TCWhile;}
+    void setTCWhile(simtime_t TCWhile) { portData.TCWhile = TCWhile; }
 
-        unsigned int getLostBPDU() const {return portData.lostBPDU;}
+    unsigned int getLostBPDU() const { return portData.lostBPDU; }
 
-        void setLostBPDU(unsigned int lostBPDU) {portData.lostBPDU = lostBPDU;}
+    void setLostBPDU(unsigned int lostBPDU) { portData.lostBPDU = lostBPDU; }
 
-        const char *getRoleName() const {return getRoleName(getRole());}
+    const char *getRoleName() const { return getRoleName(getRole()); }
 
-        const char *getStateName() const {return getStateName(getState());}
+    const char *getStateName() const { return getStateName(getState()); }
 
-        static const char *getRoleName(PortRole role);
+    static const char *getRoleName(PortRole role);
 
-        static const char *getStateName(PortState state);
+    static const char *getStateName(PortState state);
 
-        simtime_t getNextUpgrade() const {return portData.nextUpgrade;}
+    simtime_t getNextUpgrade() const { return portData.nextUpgrade; }
 
-        void setNextUpgrade(simtime_t nextUpgrade) {portData.nextUpgrade = nextUpgrade;}
+    void setNextUpgrade(simtime_t nextUpgrade) { portData.nextUpgrade = nextUpgrade; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IEEE8021DINTERFACEDATA_H
 
-
-#endif

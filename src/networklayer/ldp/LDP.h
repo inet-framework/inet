@@ -16,7 +16,6 @@
 #ifndef __INET_LDP_H
 #define __INET_LDP_H
 
-
 #include <string>
 #include <iostream>
 #include <vector>
@@ -32,24 +31,21 @@
 #include "NodeStatus.h"
 
 namespace inet {
+#define LDP_PORT             646
 
-#define LDP_PORT  646
-
-#define LDP_TRAFFIC         4       // session (TCP) traffic
-#define LDP_HELLO_TRAFFIC   5       // discovery (UDP) traffic
-#define LDP_USER_TRAFFIC    100     // label switched user traffic
-
+#define LDP_TRAFFIC          4       // session (TCP) traffic
+#define LDP_HELLO_TRAFFIC    5       // discovery (UDP) traffic
+#define LDP_USER_TRAFFIC     100     // label switched user traffic
 
 class IInterfaceTable;
 class IIPv4RoutingTable;
 class LIBTable;
 class TED;
 
-
 /**
  * LDP (rfc 3036) protocol implementation.
  */
-class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, public IClassifier, public cListener, public ILifecycle
+class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, public IClassifier, public cListener, public ILifecycle
 {
   public:
 
@@ -69,7 +65,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     };
     typedef std::vector<fec_t> FecVector;
 
-
     struct fec_bind_t
     {
         int fecid;
@@ -78,7 +73,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
         int label;
     };
     typedef std::vector<fec_bind_t> FecBindVector;
-
 
     struct pending_req_t
     {
@@ -89,9 +83,9 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
 
     struct peer_info
     {
-        IPv4Address peerIP;   // IPv4 address of LDP peer
+        IPv4Address peerIP;    // IPv4 address of LDP peer
         bool activeRole;    // we're in active or passive role in this session
-        TCPSocket *socket;  // TCP socket
+        TCPSocket *socket;    // TCP socket
         std::string linkInterface;
         cMessage *timeout;
     };
@@ -123,10 +117,10 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     LIBTable *lt;
     TED *tedmod;
 
-    UDPSocket udpSocket; // for receiving Hello
-    std::vector<UDPSocket> udpSockets;  // for sending Hello, one socket for each multicast interface
-    TCPSocket serverSocket;  // for listening on LDP_PORT
-    TCPSocketMap socketMap;  // holds TCP connections with peers
+    UDPSocket udpSocket;    // for receiving Hello
+    std::vector<UDPSocket> udpSockets;    // for sending Hello, one socket for each multicast interface
+    TCPSocket serverSocket;    // for listening on LDP_PORT
+    TCPSocketMap socketMap;    // holds TCP connections with peers
 
     // hello timeout message
     cMessage *sendHelloMsg;
@@ -160,7 +154,6 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual TCPSocket *findPeerSocket(IPv4Address peerAddr);
 
     virtual void sendToPeer(IPv4Address dest, cMessage *msg);
-
 
     //bool matches(const FEC_TLV& a, const FEC_TLV& b);
 
@@ -202,7 +195,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual void processLABEL_REQUEST(LDPLabelRequest *packet);
     virtual void processLABEL_RELEASE(LDPLabelMapping *packet);
     virtual void processLABEL_WITHDRAW(LDPLabelMapping *packet);
-    virtual void processNOTIFICATION(LDPNotify* packet);
+    virtual void processNOTIFICATION(LDPNotify *packet);
 
     /** @name TCPSocket::CallbackInterface callback methods */
     //@{
@@ -211,7 +204,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual void socketPeerClosed(int connId, void *yourPtr);
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
-    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
+    virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
     //@}
 
     // IClassifier
@@ -220,10 +213,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_LDP_H
 

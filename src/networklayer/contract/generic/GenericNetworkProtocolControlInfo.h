@@ -23,31 +23,29 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
-
 class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
 {
   private:
-    void copy(const GenericNetworkProtocolControlInfo& other) { }
+    void copy(const GenericNetworkProtocolControlInfo& other) {}
 
   public:
     GenericNetworkProtocolControlInfo() : GenericNetworkProtocolControlInfo_Base() {}
-    GenericNetworkProtocolControlInfo(const GenericNetworkProtocolControlInfo& other) : GenericNetworkProtocolControlInfo_Base(other) {copy(other);}
-    GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) {if (this==&other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this;}
-    virtual GenericNetworkProtocolControlInfo *dup() const {return new GenericNetworkProtocolControlInfo(*this);}
+    GenericNetworkProtocolControlInfo(const GenericNetworkProtocolControlInfo& other) : GenericNetworkProtocolControlInfo_Base(other) { copy(other); }
+    GenericNetworkProtocolControlInfo& operator=(const GenericNetworkProtocolControlInfo& other) { if (this == &other) return *this; GenericNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
+    virtual GenericNetworkProtocolControlInfo *dup() const { return new GenericNetworkProtocolControlInfo(*this); }
 
     virtual short getTransportProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const Address & address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
+    virtual void setSourceAddress(const Address& address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
     virtual Address getDestinationAddress() const { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const Address & address) { GenericNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
+    virtual void setDestinationAddress(const Address& address) { GenericNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
     virtual int getInterfaceId() const { return GenericNetworkProtocolControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { GenericNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
-
-#endif

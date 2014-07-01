@@ -17,14 +17,11 @@
 // @author Zoltan Bojthe
 //
 
-
-#include <algorithm>   // min,max
+#include <algorithm>    // min,max
 
 #include "TCPSegmentTransmitInfoList.h"
 
 namespace inet {
-
-
 void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
 {
     ASSERT(seqLess(beg, end));
@@ -34,20 +31,17 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
         regions.push_back(Item(beg, end, sentTime, sentTime, 1));
     else if (end == regions.front().beg)
         regions.push_front(Item(beg, end, sentTime, sentTime, 1));
-    else
-    {
+    else {
         TCPSegmentTransmitInfoItems::iterator i = regions.begin();
         while (seqLE(i->end, beg))
             ++i;
 
         ASSERT(seqLE(i->beg, beg));
-        if (beg != i->beg)
-        {
+        if (beg != i->beg) {
             regions.insert(i, Item(i->beg, beg, i->firstSentTime, i->lastSentTime, i->transmitCount));
             i->beg = beg;
         }
-        while (i != regions.end() && seqLE(i->end, end))
-        {
+        while (i != regions.end() && seqLE(i->end, end)) {
             ASSERT(beg == i->beg);
             if (i->firstSentTime > sentTime)
                 i->firstSentTime = sentTime;
@@ -58,10 +52,8 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
             ++i;
         }
 
-        if (beg != end)
-        {
-            if (i != regions.end())
-            {
+        if (beg != end) {
+            if (i != regions.end()) {
                 ASSERT(beg == i->beg);
                 simtime_t firstSent = std::min(i->firstSentTime, sentTime);
                 simtime_t lastSent = std::max(i->lastSentTime, sentTime);
@@ -80,8 +72,7 @@ void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentT
 
 const TCPSegmentTransmitInfoList::Item *TCPSegmentTransmitInfoList::get(uint32_t seq) const
 {
-    for (TCPSegmentTransmitInfoItems::const_iterator i = regions.begin(); i != regions.end(); ++i)
-    {
+    for (TCPSegmentTransmitInfoItems::const_iterator i = regions.begin(); i != regions.end(); ++i) {
         if (seqLess(seq, i->beg))
             break;
         if (seqLE(i->beg, seq) && seqLess(seq, i->end))
@@ -97,9 +88,5 @@ void TCPSegmentTransmitInfoList::clearTo(uint32_t endseq)
     if (!regions.empty() && seqLess(regions.front().beg, endseq))
         regions.front().beg = endseq;
 }
-
-
-
-}
-
+} // namespace inet
 

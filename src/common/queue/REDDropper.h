@@ -23,7 +23,6 @@
 #include "AlgorithmicDropperBase.h"
 
 namespace inet {
-
 /**
  * Implementation of Random Early Detection (RED).
  */
@@ -39,13 +38,13 @@ class REDDropper : public AlgorithmicDropperBase
 
   public:
     REDDropper() : wq(0), minths(NULL), maxths(NULL), maxps(NULL), avg(0.0) {}
+
   protected:
     virtual ~REDDropper();
     virtual void initialize();
     virtual bool shouldDrop(cPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_REDDROPPER_H
 
-
-#endif

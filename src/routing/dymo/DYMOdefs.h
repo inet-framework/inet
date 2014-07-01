@@ -7,15 +7,14 @@
 
 namespace inet {
 namespace DYMO {
-
 // TODO: use generic MANET port
-#define DYMO_UDP_PORT 269
+#define DYMO_UDP_PORT    269
 
 typedef uint32_t DYMOSequenceNumber;
 
 // TODO: metric types are defined in a separate [RFC 6551]
 enum DYMOMetricType {
-    HOP_COUNT = 3, // Hop Count has Metric Type assignment 3
+    HOP_COUNT = 3,    // Hop Count has Metric Type assignment 3
 };
 
 enum DYMORouteState {
@@ -25,9 +24,8 @@ enum DYMORouteState {
     BROKEN,
     TIMED
 };
+} // namespace DYMO
+} // namespace inet
 
-}
+#endif // ifndef __INET_DYMODEFS_H
 
-}
-
-#endif

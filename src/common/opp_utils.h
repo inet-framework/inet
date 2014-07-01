@@ -23,49 +23,45 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 namespace OPP_Global {
+/**
+ *  Converts an integer to string.
+ */
+std::string ltostr(long i);    //XXX make an ultostr as well, to be consistent with atoul
 
-  /**
-   *  Converts an integer to string.
-   */
-  std::string ltostr(long i);          //XXX make an ultostr as well, to be consistent with atoul
+/**
+ *  Converts a double to string
+ */
+std::string dtostr(double d);
 
-  /**
-   *  Converts a double to string
-   */
-  std::string dtostr(double d);
+/**
+ *  Converts string to double
+ */
+double atod(const char *s);
 
-  /**
-   *  Converts string to double
-   */
-  double atod(const char *s);
+/**
+ *  Converts string to unsigned long
+ */
+unsigned long atoul(const char *s);
 
-  /**
-   *  Converts string to unsigned long
-   */
-  unsigned long atoul(const char *s);
+/**
+ * Removes non-alphanumeric characters from the given string.
+ */
+std::string stripnonalnum(const char *s);
 
-  /**
-   * Removes non-alphanumeric characters from the given string.
-   */
-  std::string stripnonalnum(const char *s);
+/**
+ * Accepts a printf-like argument list, and returns the result in a string.
+ * The limit is 1024 chars.
+ */
+std::string stringf(const char *fmt, ...);
 
-  /**
-   * Accepts a printf-like argument list, and returns the result in a string.
-   * The limit is 1024 chars.
-   */
-  std::string stringf(const char *fmt, ...);
+/**
+ * Accepts a vprintf-like argument list, and returns the result in a string.
+ * The limit is 1024 chars.
+ */
+std::string vstringf(const char *fmt, va_list& args);
+} // namespace OPP_Global
+} // namespace inet
 
-  /**
-   * Accepts a vprintf-like argument list, and returns the result in a string.
-   * The limit is 1024 chars.
-   */
-  std::string vstringf(const char *fmt, va_list& args);
-
-}
-
-}
-
-#endif
+#endif // ifndef __INET_OPP_UTILS_H
 

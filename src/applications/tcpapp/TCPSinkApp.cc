@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPSinkApp.h"
 
 #include "AddressResolver.h"
@@ -24,8 +23,6 @@
 #include "TCPSocket.h"
 
 namespace inet {
-
-
 Define_Module(TCPSinkApp);
 
 simsignal_t TCPSinkApp::rcvdPkSignal = registerSignal("rcvdPk");
@@ -34,13 +31,11 @@ void TCPSinkApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         bytesRcvd = 0;
         WATCH(bytesRcvd);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -59,30 +54,26 @@ void TCPSinkApp::initialize(int stage)
 
 void TCPSinkApp::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == TCP_I_PEER_CLOSED)
-    {
+    if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we close too
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
         send(msg, "tcpOut");
     }
-    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
-    {
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         cPacket *pk = PK(msg);
         long packetLength = pk->getByteLength();
         bytesRcvd += packetLength;
         emit(rcvdPkSignal, pk);
         delete msg;
 
-        if (ev.isGUI())
-        {
+        if (ev.isGUI()) {
             char buf[32];
             sprintf(buf, "rcvd: %ld bytes", bytesRcvd);
             getDisplayString().setTagArg("t", 0, buf);
         }
     }
-    else
-    {
+    else {
         // must be data or some kind of indication -- can be dropped
         delete msg;
     }
@@ -91,9 +82,5 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 void TCPSinkApp::finish()
 {
 }
-
-
-
-}
-
+} // namespace inet
 

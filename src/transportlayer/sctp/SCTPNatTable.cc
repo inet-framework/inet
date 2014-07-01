@@ -16,7 +16,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,62 +28,57 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
-
 uint32 SCTPNatTable::nextEntryNumber = 0;
 
-
-Define_Module( SCTPNatTable );
-
+Define_Module(SCTPNatTable);
 
 SCTPNatTable::SCTPNatTable()
 {
-
 }
 
 SCTPNatTable::~SCTPNatTable()
 {
-    for (uint32 i=0; i<natEntries.size(); i++)
+    for (uint32 i = 0; i < natEntries.size(); i++)
         delete natEntries[i];
 }
 
-SCTPNatEntry* SCTPNatTable::findNatEntry(Address srcAddr, uint16 srcPrt, Address destAddr, uint16 destPrt, uint32 globalVtag)
+SCTPNatEntry *SCTPNatTable::findNatEntry(Address srcAddr, uint16 srcPrt, Address destAddr, uint16 destPrt, uint32 globalVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-        if ((*i)->getLocalAddress()==srcAddr && (*i)->getLocalPort()==srcPrt &&
-                (*i)->getGlobalAddress()==destAddr && (*i)->getGlobalPort()==destPrt && (*i)->getGlobalVTag()==globalVtag)
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i)
+        if ((*i)->getLocalAddress() == srcAddr && (*i)->getLocalPort() == srcPrt &&
+            (*i)->getGlobalAddress() == destAddr && (*i)->getGlobalPort() == destPrt && (*i)->getGlobalVTag() == globalVtag)
         {
             return *i;
         }
     return NULL;
 }
 
-SCTPNatEntry* SCTPNatTable::getEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
+SCTPNatEntry *SCTPNatTable::getEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-        if ((*i)->getGlobalAddress()==globalAddr && (*i)->getGlobalPort()==globalPrt &&
-                (*i)->getNattedAddress()==nattedAddr && (*i)->getNattedPort()==nattedPrt &&
-                (*i)->getLocalVTag()==localVtag)
-            //  (*i)->getGlobalVTag()==localVtag)
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i)
+        if ((*i)->getGlobalAddress() == globalAddr && (*i)->getGlobalPort() == globalPrt &&
+            (*i)->getNattedAddress() == nattedAddr && (*i)->getNattedPort() == nattedPrt &&
+            (*i)->getLocalVTag() == localVtag)
+        //  (*i)->getGlobalVTag()==localVtag)
         {
             return *i;
         }
     return NULL;
 }
 
-SCTPNatEntry* SCTPNatTable::getSpecialEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt)
+SCTPNatEntry *SCTPNatTable::getSpecialEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
 
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-    {
-        if ((*i)->getGlobalAddress()==globalAddr && (*i)->getGlobalPort()==globalPrt &&
-                (*i)->getNattedAddress()==nattedAddr && (*i)->getNattedPort()==nattedPrt &&
-                (*i)->getGlobalVTag()==0)
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i) {
+        if ((*i)->getGlobalAddress() == globalAddr && (*i)->getGlobalPort() == globalPrt &&
+            (*i)->getNattedAddress() == nattedAddr && (*i)->getNattedPort() == nattedPrt &&
+            (*i)->getGlobalVTag() == 0)
         {
             return *i;
         }
@@ -92,40 +86,40 @@ SCTPNatEntry* SCTPNatTable::getSpecialEntry(Address globalAddr, uint16 globalPrt
     return NULL;
 }
 
-SCTPNatEntry* SCTPNatTable::getLocalInitEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt)
+SCTPNatEntry *SCTPNatTable::getLocalInitEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-        if ((*i)->getGlobalAddress()==globalAddr && (*i)->getGlobalPort()==localPrt &&
-                (*i)->getLocalPort()==globalPrt)
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i)
+        if ((*i)->getGlobalAddress() == globalAddr && (*i)->getGlobalPort() == localPrt &&
+            (*i)->getLocalPort() == globalPrt)
         {
             return *i;
         }
     return NULL;
 }
 
-SCTPNatEntry* SCTPNatTable::getLocalEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
+SCTPNatEntry *SCTPNatTable::getLocalEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-        if ((*i)->getGlobalAddress()==globalAddr && (*i)->getGlobalPort()==localPrt &&
-                (*i)->getLocalPort()==globalPrt && (*i)->getLocalVTag()==localVtag)
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i)
+        if ((*i)->getGlobalAddress() == globalAddr && (*i)->getGlobalPort() == localPrt &&
+            (*i)->getLocalPort() == globalPrt && (*i)->getLocalVTag() == localVtag)
         {
             return *i;
         }
     return NULL;
 }
 
-void SCTPNatTable::removeEntry(SCTPNatEntry* entry)
+void SCTPNatTable::removeEntry(SCTPNatEntry *entry)
 {
     Enter_Method_Silent();
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-        if (((*i)->getGlobalAddress()==entry->getGlobalAddress() && (*i)->getGlobalPort()==entry->getGlobalPort() &&
-                (*i)->getLocalPort()==entry->getLocalPort() && (*i)->getLocalVTag()==entry->getLocalVTag())
-                || (((*i)->getLocalAddress()==entry->getGlobalAddress() && (*i)->getLocalPort()==entry->getGlobalPort() &&
-                        (*i)->getGlobalPort()==entry->getLocalPort() && (*i)->getGlobalVTag()==entry->getLocalVTag())))
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i)
+        if (((*i)->getGlobalAddress() == entry->getGlobalAddress() && (*i)->getGlobalPort() == entry->getGlobalPort() &&
+             (*i)->getLocalPort() == entry->getLocalPort() && (*i)->getLocalVTag() == entry->getLocalVTag())
+            || (((*i)->getLocalAddress() == entry->getGlobalAddress() && (*i)->getLocalPort() == entry->getGlobalPort() &&
+                 (*i)->getGlobalPort() == entry->getLocalPort() && (*i)->getGlobalVTag() == entry->getLocalVTag())))
         {
             natEntries.erase(i);
             return;
@@ -134,8 +128,7 @@ void SCTPNatTable::removeEntry(SCTPNatEntry* entry)
 
 void SCTPNatTable::printNatTable()
 {
-    for (SCTPNatEntryTable::iterator i=natEntries.begin(); i!=natEntries.end(); ++i)
-    {
+    for (SCTPNatEntryTable::iterator i = natEntries.begin(); i != natEntries.end(); ++i) {
         EV << "localAddr:" << (*i)->getLocalAddress() << "  globalAddr:" << (*i)->getGlobalAddress() << "  localPort:" << (*i)->getLocalPort() << "  globalPort:" << (*i)->getGlobalPort() << "  nattedAddr:" << (*i)->getNattedAddress() << "  nattedPort:" << (*i)->getNattedPort() << "  localVtag:" << (*i)->getLocalVTag() << "  globalVtag:" << (*i)->getGlobalVTag() << "\n";
     }
 }
@@ -154,10 +147,6 @@ SCTPNatEntry::SCTPNatEntry()
 
 SCTPNatEntry::~SCTPNatEntry()
 {
-
 }
-
-
-}
-
+} // namespace inet
 

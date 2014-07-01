@@ -16,14 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_VOIPSTREAMRECEIVER_H
 #define __INET_VOIPSTREAMRECEIVER_H
 
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
-#endif
-
+#endif // ifndef HAVE_FFMPEG
 
 #define __STDC_CONSTANT_MACROS
 
@@ -46,7 +44,6 @@ extern "C" {
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
 {
   public:
@@ -116,8 +113,7 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     static simsignal_t connStateSignal;
     static simsignal_t delaySignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_VOIPSTREAMRECEIVER_H
 
-
-#endif

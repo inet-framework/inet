@@ -4,17 +4,16 @@
     begin                : Sat Oct 20 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPINNERPACKET_H
 #define __INET_RTPINNERPACKET_H
@@ -22,8 +21,6 @@
 #include "RTPInnerPacket_m.h"
 
 namespace inet {
-
-
 /**
  * This class is used for communication between submodules of the RTP layer module.
  */
@@ -32,11 +29,11 @@ class RTPInnerPacket : public RTPInnerPacket_Base
   public:
     RTPInnerPacket(const char *name = NULL, int kind = 0) : RTPInnerPacket_Base(name, kind) {}
     RTPInnerPacket(const RTPInnerPacket& other) : RTPInnerPacket_Base(other) {}
-    RTPInnerPacket& operator=(const RTPInnerPacket& other) {RTPInnerPacket_Base::operator=(other); return *this;}
-    virtual RTPInnerPacket *dup() const {return new RTPInnerPacket(*this);}
+    RTPInnerPacket& operator=(const RTPInnerPacket& other) { RTPInnerPacket_Base::operator=(other); return *this; }
+    virtual RTPInnerPacket *dup() const { return new RTPInnerPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTPInnerPacket_Base
-     /**
+    /**
      * Writes a short info about this RTPInnerPacket into the given string.
      */
     virtual std::string info() const;
@@ -114,10 +111,8 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      * Returns the maximum transmission unit stored in this RTPInnerPacket.
      */
     virtual int getMTU() const { return getMtu(); }
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPINNERPACKET_H
 
-
-#endif

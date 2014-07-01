@@ -19,17 +19,14 @@
 #include "HttpServerBase.h"
 
 namespace inet {
-
 Define_Module(HttpBrowserDirect);
-
 
 void HttpBrowserDirect::initialize(int stage)
 {
     EV_DEBUG << "Initializing HTTP direct browser component - stage " << stage << endl;
     HttpBrowserBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // linkSpeed is used to model transmission delay.
         linkSpeed = par("linkSpeed");
     }
@@ -55,13 +52,11 @@ void HttpBrowserDirect::sendRequestToServer(BrowseEvent be)
 
 void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
 {
-    HttpServerBase *serverModule = dynamic_cast<HttpServerBase*>(controller->getServerModule(request->targetUrl()));
-    if (serverModule == NULL)
-    {
+    HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getServerModule(request->targetUrl()));
+    if (serverModule == NULL) {
         EV_ERROR << "Failed to get server module for " << request->targetUrl() << endl;
     }
-    else
-    {
+    else {
         EV_DEBUG << "Sending request to " << serverModule->getHostName() << endl;
         sendDirectToModule(serverModule, request, 0.0, rdProcessingDelay);
     }
@@ -69,13 +64,11 @@ void HttpBrowserDirect::sendRequestToServer(HttpRequestMessage *request)
 
 void HttpBrowserDirect::sendRequestToRandomServer()
 {
-    HttpServerBase *serverModule = dynamic_cast<HttpServerBase*>(controller->getAnyServerModule());
-    if (serverModule == NULL)
-    {
+    HttpServerBase *serverModule = dynamic_cast<HttpServerBase *>(controller->getAnyServerModule());
+    if (serverModule == NULL) {
         EV_ERROR << "Failed to get a random server module" << endl;
     }
-    else
-    {
+    else {
         EV_DEBUG << "Sending request randomly to " << serverModule->getHostName() << endl;
         sendDirectToModule(serverModule, generateRandomPageRequest(serverModule->getHostName()), 0.0, rdProcessingDelay);
     }
@@ -83,22 +76,16 @@ void HttpBrowserDirect::sendRequestToRandomServer()
 
 void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue queue)
 {
-    HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase*>(controller->getServerModule(www.c_str()));
+    HttpNodeBase *serverModule = dynamic_cast<HttpNodeBase *>(controller->getServerModule(www.c_str()));
     if (serverModule == NULL)
         EV_ERROR << "Failed to get server module " << www << endl;
-    else
-    {
-        while (!queue.empty())
-        {
+    else {
+        while (!queue.empty()) {
             HttpRequestMessage *msg = queue.back();
             queue.pop_back();
             sendDirectToModule(serverModule, msg, 0.0, rdProcessingDelay);
         }
     }
 }
-
-
-
-}
-
+} // namespace inet
 

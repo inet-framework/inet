@@ -21,41 +21,38 @@
 #ifndef __INET_PCAPRECORDER_H
 #define __INET_PCAPRECORDER_H
 
-
 #include "INETDefs.h"
 
 #include "PacketDump.h"
 #include "PcapDump.h"
 
 namespace inet {
-
-
 /**
  * Dumps every packet using the PcapDump and PacketDump classes
  */
 class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
-    protected:
-        typedef std::map<simsignal_t,bool> SignalList;
-        SignalList signalList;
-        PacketDump packetDumper;
-        PcapDump pcapDumper;
-        unsigned int snaplen;
-        unsigned long first, last, space;
-        bool dumpBadFrames;
-    public:
-        PcapRecorder();
-        ~PcapRecorder();
-    protected:
-        virtual void initialize();
-        virtual void handleMessage(cMessage *msg);
-        virtual void finish();
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        virtual void recordPacket(cPacket *msg, bool l2r);
+  protected:
+    typedef std::map<simsignal_t, bool> SignalList;
+    SignalList signalList;
+    PacketDump packetDumper;
+    PcapDump pcapDumper;
+    unsigned int snaplen;
+    unsigned long first, last, space;
+    bool dumpBadFrames;
+
+  public:
+    PcapRecorder();
+    ~PcapRecorder();
+
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual void recordPacket(cPacket *msg, bool l2r);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_PCAPRECORDER_H
 

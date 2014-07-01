@@ -24,7 +24,6 @@
 #include <cmath>
 
 namespace inet {
-
 Define_Module(TraCITestApp);
 
 simsignal_t TraCITestApp::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -33,8 +32,7 @@ void TraCITestApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         testNumber = par("testNumber");
 
         traci = getModuleFromPar<TraCIMobility>(par("mobilityModule"), this);
@@ -45,8 +43,7 @@ void TraCITestApp::initialize(int stage)
 
         EV_DEBUG << "TraCITestApp initialized with testNumber=" << testNumber << std::endl;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -55,48 +52,60 @@ void TraCITestApp::initialize(int stage)
     }
 }
 
-void TraCITestApp::finish() {
+void TraCITestApp::finish()
+{
 }
 
-void TraCITestApp::handleSelfMsg(cMessage *msg) {
+void TraCITestApp::handleSelfMsg(cMessage *msg)
+{
 }
 
-void TraCITestApp::handleLowerMsg(cMessage* msg) {
+void TraCITestApp::handleLowerMsg(cMessage *msg)
+{
     delete msg;
 }
 
-void TraCITestApp::handleMessage(cMessage* msg) {
+void TraCITestApp::handleMessage(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         handleSelfMsg(msg);
-    } else {
+    }
+    else {
         handleLowerMsg(msg);
     }
 }
 
-
-void TraCITestApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+void TraCITestApp::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
     if (signalID == mobilityStateChangedSignal) {
         handlePositionUpdate();
     }
 }
 
 namespace {
-    void assertTrue(std::string msg, bool b) {
-        std::cout << (b?"Passed":"FAILED") << ": " << msg << std::endl;
-    }
-
-    template<class T> void assertClose(std::string msg, T target, T actual) {
-        assertTrue(msg, std::fabs(target - actual) <= 0.0000001);
-    }
-    template<class T> void assertEqual(std::string msg, T target, T actual) {
-        assertTrue(msg, target == actual);
-    }
-    void assertEqual(std::string msg, std::string target, std::string actual) {
-        assertTrue(msg, target == actual);
-    }
+void assertTrue(std::string msg, bool b)
+{
+    std::cout << (b ? "Passed" : "FAILED") << ": " << msg << std::endl;
 }
 
-void TraCITestApp::handlePositionUpdate() {
+template<class T> void assertClose(std::string msg, T target, T actual)
+{
+    assertTrue(msg, std::fabs(target - actual) <= 0.0000001);
+}
+
+template<class T> void assertEqual(std::string msg, T target, T actual)
+{
+    assertTrue(msg, target == actual);
+}
+
+void assertEqual(std::string msg, std::string target, std::string actual)
+{
+    assertTrue(msg, target == actual);
+}
+} // namespace {
+
+void TraCITestApp::handlePositionUpdate()
+{
     const simtime_t t = simTime();
     const std::string roadId = traci->getRoadId();
     visitedEdges.insert(roadId);
@@ -146,8 +155,8 @@ void TraCITestApp::handlePositionUpdate() {
 
     if (testNumber == testCounter++) {
         if (t == 1) {
-            assertClose("(commandDistanceRequest, air)", 859.4556417, traci->commandDistanceRequest(Coord(25,7030), Coord(883,6980), false));
-            assertClose("(commandDistanceRequest, driving)", 845.93, traci->commandDistanceRequest(Coord(25,7030), Coord(883,6980), true));
+            assertClose("(commandDistanceRequest, air)", 859.4556417, traci->commandDistanceRequest(Coord(25, 7030), Coord(883, 6980), false));
+            assertClose("(commandDistanceRequest, driving)", 845.93, traci->commandDistanceRequest(Coord(25, 7030), Coord(883, 6980), true));
         }
     }
 
@@ -215,18 +224,14 @@ void TraCITestApp::handlePositionUpdate() {
             assertTrue("(commandAddVehicle) command reports success", r);
         }
         if (t == 31) {
-            std::map<std::string, cModule*>::const_iterator i = traci->getManager()->getManagedHosts().find("testVehicle0");
+            std::map<std::string, cModule *>::const_iterator i = traci->getManager()->getManagedHosts().find("testVehicle0");
             bool r = (i != traci->getManager()->getManagedHosts().end());
             assertTrue("(commandAddVehicle) vehicle now driving", r);
-            cModule* mod = i->second;
-            TraCIMobility* traci2 = check_and_cast<TraCIMobility*>(findModuleWhereverInNode("mobility", mod));
+            cModule *mod = i->second;
+            TraCIMobility *traci2 = check_and_cast<TraCIMobility *>(findModuleWhereverInNode("mobility", mod));
             assertTrue("(commandAddVehicle) vehicle driving at speed", traci2->getSpeed() > 25);
         }
     }
 }
-
-
-
-}
-
+} // namespace inet
 

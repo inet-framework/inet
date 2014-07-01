@@ -21,20 +21,15 @@
 #include "AttenuationBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ScalarAttenuation : public AttenuationBase
 {
-    public:
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar attenuation"; }
-        virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+  public:
+    virtual void printToStream(std::ostream& stream) const { stream << "scalar attenuation"; }
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCALARATTENUATION_H
 
-}
-
-
-#endif

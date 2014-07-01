@@ -22,10 +22,7 @@
 #include "IListening.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents the result of a receiver's listening process.
  *
@@ -33,15 +30,13 @@ namespace physicallayer
  */
 class INET_API IListeningDecision : public IPrintableObject
 {
-    public:
-        virtual const IListening *getListening() const = 0;
+  public:
+    virtual const IListening *getListening() const = 0;
 
-        virtual bool isListeningPossible() const = 0;
+    virtual bool isListeningPossible() const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ILISTENINGDECISION_H
 
-}
-
-
-#endif

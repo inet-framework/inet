@@ -23,86 +23,86 @@
 #include "INetworkDatagram.h"
 
 namespace inet {
-
 /**
  * TODO
  */
-class INET_API INetfilter {
+class INET_API INetfilter
+{
   public:
     /**
      * TODO
      */
-    class INET_API IHook {
-        public:
-            enum Type {
-                PREROUTING,
-                LOCALIN,
-                FORWARD,
-                POSTROUTING,
-                LOCALOUT
-            };
+    class INET_API IHook
+    {
+      public:
+        enum Type {
+            PREROUTING,
+            LOCALIN,
+            FORWARD,
+            POSTROUTING,
+            LOCALOUT
+        };
 
-            enum Result {
-                ACCEPT, /**< allow datagram to pass to next hook */
-                DROP,   /**< do not allow datagram to pass to next hook, delete it */
-                QUEUE,  /**< queue datagram for later re-injection */
-                STOLEN  /**< do not allow datagram to pass to next hook, but do not delete it */
-            };
+        enum Result {
+            ACCEPT,    /**< allow datagram to pass to next hook */
+            DROP,    /**< do not allow datagram to pass to next hook, delete it */
+            QUEUE,    /**< queue datagram for later re-injection */
+            STOLEN    /**< do not allow datagram to pass to next hook, but do not delete it */
+        };
 
-            virtual ~IHook() {};
+        virtual ~IHook() {};
 
-            /**
-             * TODO
-             * nextHopAddress ignored when outputInterfaceEntry is NULL
-             */
-            virtual Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) = 0;
+        /**
+         * TODO
+         * nextHopAddress ignored when outputInterfaceEntry is NULL
+         */
+        virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) = 0;
 
-            /**
-             * TODO
-             */
-            virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) = 0;
+        /**
+         * TODO
+         */
+        virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) = 0;
 
-            /**
-             * TODO
-             */
-            virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) = 0;
+        /**
+         * TODO
+         */
+        virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) = 0;
 
-            /**
-             * TODO
-             */
-            virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry) = 0;
+        /**
+         * TODO
+         */
+        virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) = 0;
 
-            /**
-             * TODO
-             * nextHopAddress ignored when outputInterfaceEntry is NULL
-             */
-            virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress) = 0;
+        /**
+         * TODO
+         * nextHopAddress ignored when outputInterfaceEntry is NULL
+         */
+        virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) = 0;
     };
 
-    virtual ~INetfilter() { }
+    virtual ~INetfilter() {}
 
     /**
      * TODO
      */
-    virtual void registerHook(int priority, IHook * hook) = 0;
+    virtual void registerHook(int priority, IHook *hook) = 0;
 
     /**
      * TODO
      */
-    virtual void unregisterHook(int priority, IHook * hook) = 0;
+    virtual void unregisterHook(int priority, IHook *hook) = 0;
 
     /**
      * TODO
      */
-    virtual void dropQueuedDatagram(const INetworkDatagram * daragram) = 0;
+    virtual void dropQueuedDatagram(const INetworkDatagram *daragram) = 0;
 
     /**
      * TODO
      */
-    virtual void reinjectQueuedDatagram(const INetworkDatagram * datagram) = 0;
+    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_INETFILTER_H
 
-
-#endif

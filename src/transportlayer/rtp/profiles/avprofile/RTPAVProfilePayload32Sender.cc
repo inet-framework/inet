@@ -4,17 +4,16 @@
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include <fstream>
 #include <string.h>
@@ -25,10 +24,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
-
-
 Define_Module(RTPAVProfilePayload32Sender);
-
 
 void RTPAVProfilePayload32Sender::initialize()
 {
@@ -40,7 +36,7 @@ void RTPAVProfilePayload32Sender::initialize()
 
 void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
 {
-    EV_TRACE << "initializeSenderModule Enter"<<endl;
+    EV_TRACE << "initializeSenderModule Enter" << endl;
     char line[100];
     char unit[100];
     char description[100];
@@ -76,7 +72,7 @@ void RTPAVProfilePayload32Sender::initializeSenderModule(RTPInnerPacket *rinpIn)
 
 bool RTPAVProfilePayload32Sender::sendPacket()
 {
-    EV_TRACE << "sendPacket() "<< endl;
+    EV_TRACE << "sendPacket() " << endl;
     // read next frame line
     int bits;
     char unit[100];
@@ -91,21 +87,32 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
     for (ptr = description; *ptr == ' '; ptr++)
         ;
-    switch (*ptr)
-    {
-        case 'I': pictureType = 1; break;
-        case 'P': pictureType = 2; break;
-        case 'B': pictureType = 3; break;
-        case 'D': pictureType = 4; break;
-        default: pictureType = 0; break;
+    switch (*ptr) {
+        case 'I':
+            pictureType = 1;
+            break;
+
+        case 'P':
+            pictureType = 2;
+            break;
+
+        case 'B':
+            pictureType = 3;
+            break;
+
+        case 'D':
+            pictureType = 4;
+            break;
+
+        default:
+            pictureType = 0;
+            break;
     }
 
     int bytesRemaining = bits / 8;
 
-    if (!_inputFileStream.eof())
-    {
-        while (bytesRemaining > 0)
-        {
+    if (!_inputFileStream.eof()) {
+        while (bytesRemaining > 0) {
             RTPPacket *rtpPacket = new RTPPacket("RTPPacket");
             RTPMpegPacket *mpegPacket = new RTPMpegPacket("MpegPacket");
 
@@ -115,8 +122,7 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             // the maximum number of real data bytes
             int maxDataSize = _mtu - rtpPacket->getBitLength() - mpegPacket->getBitLength();
 
-            if (bytesRemaining > maxDataSize)
-            {
+            if (bytesRemaining > maxDataSize) {
                 // we do not know where slices in the
                 // mpeg picture begin
                 // so we simulate by assuming a slice
@@ -125,13 +131,11 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 
                 mpegPacket->addBitLength(slicedDataSize);
 
-
                 rtpPacket->encapsulate(mpegPacket);
 
                 bytesRemaining = bytesRemaining - slicedDataSize;
             }
-            else
-            {
+            else {
                 mpegPacket->addBitLength(bytesRemaining);
                 rtpPacket->encapsulate(mpegPacket);
                 // set marker because this is
@@ -144,13 +148,10 @@ bool RTPAVProfilePayload32Sender::sendPacket()
             rtpPacket->setSequenceNumber(_sequenceNumber);
             _sequenceNumber++;
 
-
             rtpPacket->setTimeStamp(_timeStampBase + (_initialDelay + (1 / _framesPerSecond) * (double)_frameNumber) * _clockRate);
             rtpPacket->setSsrc(_ssrc);
 
-
             RTPInnerPacket *rinpOut = new RTPInnerPacket("dataOut()");
-
 
             rinpOut->setDataOutPkt(rtpPacket);
 
@@ -162,15 +163,11 @@ bool RTPAVProfilePayload32Sender::sendPacket()
         scheduleAt(simTime() + 1.0 / _framesPerSecond, _reminderMessage);
         return true;
     }
-    else
-    {
-        std::cout <<"LastSequenceNumber "<< _sequenceNumber << endl;
+    else {
+        std::cout << "LastSequenceNumber " << _sequenceNumber << endl;
         return false;
     }
-    EV_TRACE << "sendPacket() Exit"<< endl;
+    EV_TRACE << "sendPacket() Exit" << endl;
 }
-
-
-}
-
+} // namespace inet
 

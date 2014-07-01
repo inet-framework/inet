@@ -18,7 +18,7 @@
 #include <platdep/sockets.h>
 #include "headers/defs.h"
 
-namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
+namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
 #include "headers/in.h"
@@ -32,71 +32,67 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
+#include <netinet/in.h>    // htonl, ntohl, ...
+#endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 using namespace INETFw;
 namespace inet {
-
-
 int ICMPSerializer::serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
 {
-    struct icmp *icmp = (struct icmp *) (buf);
+    struct icmp *icmp = (struct icmp *)(buf);
     int packetLength;
 
     packetLength = ICMP_MINLEN;
 
-    switch (pkt->getType())
-    {
-        case ICMP_ECHO_REQUEST:
-        {
-            PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedPacket());
+    switch (pkt->getType()) {
+        case ICMP_ECHO_REQUEST: {
+            PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_ECHO;
             icmp->icmp_code = 0;
             icmp->icmp_id = htons(pp->getOriginatorId());
             icmp->icmp_seq = htons(pp->getSeqNo());
             unsigned int datalen = (pp->getByteLength() - 4);
-            for (unsigned int i=0; i < datalen; i++)
+            for (unsigned int i = 0; i < datalen; i++)
                 if (i < pp->getDataArraySize()) {
                     icmp->icmp_data[i] = pp->getData(i);
-                } else {
+                }
+                else {
                     icmp->icmp_data[i] = 'a';
                 }
             packetLength += datalen;
             break;
         }
-        case ICMP_ECHO_REPLY:
-        {
-            PingPayload *pp = check_and_cast<PingPayload* >(pkt->getEncapsulatedPacket());
+
+        case ICMP_ECHO_REPLY: {
+            PingPayload *pp = check_and_cast<PingPayload *>(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_ECHOREPLY;
             icmp->icmp_code = 0;
             icmp->icmp_id = htons(pp->getOriginatorId());
             icmp->icmp_seq = htons(pp->getSeqNo());
             unsigned int datalen = pp->getDataArraySize();
-            for (unsigned int i=0; i < datalen; i++)
+            for (unsigned int i = 0; i < datalen; i++)
                 icmp->icmp_data[i] = pp->getData(i);
             packetLength += datalen;
             break;
         }
-        case ICMP_DESTINATION_UNREACHABLE:
-        {
-            IPv4Datagram *ip = check_and_cast<IPv4Datagram* >(pkt->getEncapsulatedPacket());
+
+        case ICMP_DESTINATION_UNREACHABLE: {
+            IPv4Datagram *ip = check_and_cast<IPv4Datagram *>(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_UNREACH;
             icmp->icmp_code = pkt->getCode();
             packetLength += IPv4Serializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
             break;
         }
-        case ICMP_TIME_EXCEEDED:
-        {
-            IPv4Datagram *ip = check_and_cast<IPv4Datagram* >(pkt->getEncapsulatedPacket());
+
+        case ICMP_TIME_EXCEEDED: {
+            IPv4Datagram *ip = check_and_cast<IPv4Datagram *>(pkt->getEncapsulatedPacket());
             icmp->icmp_type = ICMP_TIMXCEED;
             icmp->icmp_code = ICMP_TIMXCEED_INTRANS;
             packetLength += IPv4Serializer().serialize(ip, (unsigned char *)icmp->icmp_data, bufsize - ICMP_MINLEN);
             break;
         }
-        default:
-        {
+
+        default: {
             packetLength = 0;
             EV << "Can not serialize ICMP packet: type " << pkt->getType() << " not supported.";
             break;
@@ -108,12 +104,10 @@ int ICMPSerializer::serialize(const ICMPMessage *pkt, unsigned char *buf, unsign
 
 void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt)
 {
-    struct icmp *icmp = (struct icmp*) buf;
+    struct icmp *icmp = (struct icmp *)buf;
 
-    switch (icmp->icmp_type)
-    {
-        case ICMP_ECHO:
-        {
+    switch (icmp->icmp_type) {
+        case ICMP_ECHO: {
             PingPayload *pp;
             char name[32];
 
@@ -126,14 +120,14 @@ void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPM
             pp->setSeqNo(ntohs(icmp->icmp_seq));
             pp->setByteLength(bufsize - 4);
             pp->setDataArraySize(bufsize - ICMP_MINLEN);
-            for (unsigned int i=0; i<bufsize - ICMP_MINLEN; i++)
+            for (unsigned int i = 0; i < bufsize - ICMP_MINLEN; i++)
                 pp->setData(i, icmp->icmp_data[i]);
             pkt->encapsulate(pp);
             pkt->setName(pp->getName());
             break;
         }
-        case ICMP_ECHOREPLY:
-        {
+
+        case ICMP_ECHOREPLY: {
             PingPayload *pp;
             char name[32];
 
@@ -146,21 +140,18 @@ void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPM
             pp->setSeqNo(ntohs(icmp->icmp_seq));
             pp->setByteLength(bufsize - 4);
             pp->setDataArraySize(bufsize - ICMP_MINLEN);
-            for (unsigned int i=0; i<bufsize - ICMP_MINLEN; i++)
+            for (unsigned int i = 0; i < bufsize - ICMP_MINLEN; i++)
                 pp->setData(i, icmp->icmp_data[i]);
             pkt->encapsulate(pp);
             pkt->setName(pp->getName());
             break;
         }
-        default:
-        {
+
+        default: {
             EV << "Can not create ICMP packet: type " << icmp->icmp_type << " not supported.";
             break;
         }
     }
 }
-
-
-}
-
+} // namespace inet
 

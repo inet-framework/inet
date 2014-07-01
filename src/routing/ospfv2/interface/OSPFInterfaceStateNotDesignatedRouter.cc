@@ -24,9 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
@@ -42,16 +40,18 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
-        } else {    // OSPF::Interface::NBMA
+        }
+        else {    // OSPF::Interface::NBMA
             if (intf->getRouterPriority() > 0) {
                 unsigned long neighborCount = intf->getNeighborCount();
                 for (unsigned long i = 0; i < neighborCount; i++) {
-                    const OSPF::Neighbor* neighbor = intf->getNeighbor(i);
+                    const OSPF::Neighbor *neighbor = intf->getNeighbor(i);
                     if (neighbor->getPriority() > 0) {
                         intf->sendHelloPacket(neighbor->getAddress());
                     }
                 }
-            } else {
+            }
+            else {
                 intf->sendHelloPacket(intf->getDesignatedRouter().ipInterfaceAddress);
                 intf->sendHelloPacket(intf->getBackupDesignatedRouter().ipInterfaceAddress);
             }
@@ -62,9 +62,5 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
         intf->sendDelayedAcknowledgements();
     }
 }
-
-
-
-}
-
+} // namespace inet
 

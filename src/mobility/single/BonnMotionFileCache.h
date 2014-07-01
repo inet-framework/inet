@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_BONNMOTIONFILECACHE_H
 #define __INET_BONNMOTIONFILECACHE_H
 
@@ -25,8 +24,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-
 class BonnMotionFileCache;
 
 /**
@@ -37,14 +34,15 @@ class INET_API BonnMotionFile
 {
   public:
     typedef std::vector<double> Line;
+
   protected:
     friend class BonnMotionFileCache;
     typedef std::list<Line> LineList;
     LineList lines;
+
   public:
     const Line *getLine(int nodeId) const;
 };
-
 
 /**
  * Singleton object to read and store BonnMotion files. Used within
@@ -57,7 +55,7 @@ class INET_API BonnMotionFile
 class INET_API BonnMotionFileCache
 {
   protected:
-    typedef std::map<std::string,BonnMotionFile> BMFileMap;
+    typedef std::map<std::string, BonnMotionFile> BMFileMap;
     BMFileMap cache;
     static BonnMotionFileCache *inst;
     void parseFile(const char *filename, BonnMotionFile& bmFile);
@@ -80,8 +78,7 @@ class INET_API BonnMotionFileCache
      */
     virtual const BonnMotionFile *getFile(const char *filename);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_BONNMOTIONFILECACHE_H
 
-
-#endif

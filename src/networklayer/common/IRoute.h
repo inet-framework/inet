@@ -23,7 +23,6 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
-
 class IRoutingTable;
 
 /**
@@ -34,39 +33,37 @@ class IRoutingTable;
  */
 class INET_API IRoute
 {
-    public:
-        /** Specifies where the route comes from */
-        enum SourceType
-        {
-            MANUAL,               ///< manually added static route
-            IFACENETMASK,         ///< comes from an interface's netmask
-            ROUTER_ADVERTISEMENT, ///< on-link prefix, from Router Advertisement
-            OWN_ADV_PREFIX,       ///< on routers: on-link prefix that the router **itself** advertises on the link
-            ICMP_REDIRECT,        ///< ICMP redirect message
-            RIP,          ///< managed by the given routing protocol
-            OSPF,         ///< managed by the given routing protocol
-            BGP,          ///< managed by the given routing protocol
-            ZEBRA,        ///< managed by the Quagga/Zebra based model
-            MANET,        ///< managed by manet, search exact address
-            MANET2,       ///< managed by manet, search approximate address
-            DYMO,         ///< managed by DYMO routing
-            AODV,         ///< managed by AODV routing
-        };
+  public:
+    /** Specifies where the route comes from */
+    enum SourceType {
+        MANUAL,    ///< manually added static route
+        IFACENETMASK,    ///< comes from an interface's netmask
+        ROUTER_ADVERTISEMENT,    ///< on-link prefix, from Router Advertisement
+        OWN_ADV_PREFIX,    ///< on routers: on-link prefix that the router **itself** advertises on the link
+        ICMP_REDIRECT,    ///< ICMP redirect message
+        RIP,    ///< managed by the given routing protocol
+        OSPF,    ///< managed by the given routing protocol
+        BGP,    ///< managed by the given routing protocol
+        ZEBRA,    ///< managed by the Quagga/Zebra based model
+        MANET,    ///< managed by manet, search exact address
+        MANET2,    ///< managed by manet, search approximate address
+        DYMO,    ///< managed by DYMO routing
+        AODV,    ///< managed by AODV routing
+    };
 
-        /** Field codes for NB_ROUTE_CHANGED notifications */
-        enum ChangeCodes
-        {
-            F_DESTINATION,
-            F_PREFIX_LENGTH,
-            F_NEXTHOP,
-            F_IFACE,
-            F_SOURCE,
-            F_TYPE,
-            F_ADMINDIST,
-            F_METRIC,
-            F_EXPIRYTIME,
-            F_LAST
-        };
+    /** Field codes for NB_ROUTE_CHANGED notifications */
+    enum ChangeCodes {
+        F_DESTINATION,
+        F_PREFIX_LENGTH,
+        F_NEXTHOP,
+        F_IFACE,
+        F_SOURCE,
+        F_TYPE,
+        F_ADMINDIST,
+        F_METRIC,
+        F_EXPIRYTIME,
+        F_LAST
+    };
 
 //TODO maybe:
 //    virtual std::string info() const;
@@ -76,48 +73,48 @@ class INET_API IRoute
 //    bool operator!=(const IGenericRoute& route) const { return !equals(route); }
 //    bool equals(const IGenericRoute& route) const;
 
-        virtual ~IRoute() {}
+    virtual ~IRoute() {}
 
-        /** The routing table in which this route is inserted, or NULL. */
-        virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
+    /** The routing table in which this route is inserted, or NULL. */
+    virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
-        virtual void setDestination(const Address& dest) = 0;
-        virtual void setPrefixLength(int l) = 0;
-        virtual void setNextHop(const Address& nextHop) = 0;
-        virtual void setInterface(InterfaceEntry *ie) = 0;
-        virtual void setSource(cObject *source) = 0;
-        virtual void setSourceType(SourceType type) = 0;
-        virtual void setMetric(int metric) = 0;  //XXX double?
+    virtual void setDestination(const Address& dest) = 0;
+    virtual void setPrefixLength(int l) = 0;
+    virtual void setNextHop(const Address& nextHop) = 0;
+    virtual void setInterface(InterfaceEntry *ie) = 0;
+    virtual void setSource(cObject *source) = 0;
+    virtual void setSourceType(SourceType type) = 0;
+    virtual void setMetric(int metric) = 0;    //XXX double?
 
-        /** Destination address prefix to match */
-        virtual Address getDestinationAsGeneric() const = 0;
+    /** Destination address prefix to match */
+    virtual Address getDestinationAsGeneric() const = 0;
 
-        /** Represents length of prefix to match */
-        virtual int getPrefixLength() const = 0;
+    /** Represents length of prefix to match */
+    virtual int getPrefixLength() const = 0;
 
-        /** Next hop address */
-        virtual Address getNextHopAsGeneric() const = 0;
+    /** Next hop address */
+    virtual Address getNextHopAsGeneric() const = 0;
 
-        /** Next hop interface */
-        virtual InterfaceEntry *getInterface() const = 0;
+    /** Next hop interface */
+    virtual InterfaceEntry *getInterface() const = 0;
 
-        /** Source of route */
-        virtual cObject *getSource() const = 0;
+    /** Source of route */
+    virtual cObject *getSource() const = 0;
 
-        /** Source type of the route */
-        virtual SourceType getSourceType() const = 0;
+    /** Source type of the route */
+    virtual SourceType getSourceType() const = 0;
 
-        /** Cost to reach the destination */
-        virtual int getMetric() const = 0;
+    /** Cost to reach the destination */
+    virtual int getMetric() const = 0;
 
-        virtual cObject *getProtocolData() const = 0;
-        virtual void setProtocolData(cObject *protocolData) = 0;
+    virtual cObject *getProtocolData() const = 0;
+    virtual void setProtocolData(cObject *protocolData) = 0;
 
-        static const char *sourceTypeName(SourceType sourceType);
+    static const char *sourceTypeName(SourceType sourceType);
 };
 
 // TODO: move into info()?
-inline std::ostream& operator<<(std::ostream& out, const IRoute * route)
+inline std::ostream& operator<<(std::ostream& out, const IRoute *route)
 {
     out << "destination = " << route->getDestinationAsGeneric();
     out << ", prefixLength = " << route->getPrefixLength();
@@ -152,18 +149,18 @@ class INET_API IMulticastRoute
 {
   public:
     /** Specifies where the route comes from */
-    enum SourceType
-    {
-        MANUAL,       ///< manually added static route
-        DVMRP,        ///< managed by DVMRP router
-        PIM_DM,       ///< managed by PIM-DM router
-        PIM_SM,       ///< managed by PIM-SM router
+    enum SourceType {
+        MANUAL,    ///< manually added static route
+        DVMRP,    ///< managed by DVMRP router
+        PIM_DM,    ///< managed by PIM-DM router
+        PIM_SM,    ///< managed by PIM-SM router
     };
 
     class InInterface
     {
       protected:
         InterfaceEntry *ie;
+
       public:
         InInterface(InterfaceEntry *ie) : ie(ie) { ASSERT(ie); }
         virtual ~InInterface() {}
@@ -175,7 +172,8 @@ class INET_API IMulticastRoute
     {
       protected:
         const InterfaceEntry *ie;
-        bool _isLeaf;        // for TRPB support
+        bool _isLeaf;    // for TRPB support
+
       public:
         OutInterface(const InterfaceEntry *ie, bool isLeaf = false) : ie(ie), _isLeaf(isLeaf) { ASSERT(ie); }
         virtual ~OutInterface() {}
@@ -187,8 +185,7 @@ class INET_API IMulticastRoute
         virtual bool isEnabled() { return true; }
     };
 
-    typedef std::vector<OutInterface*> OutInterfaceVector;
-
+    typedef std::vector<OutInterface *> OutInterfaceVector;
 
 //TODO maybe:
 //    virtual std::string info() const;
@@ -227,7 +224,7 @@ class INET_API IMulticastRoute
     /** Multicast group address */
     virtual Address getMulticastGroupAsGeneric() const = 0;
 
-   /** Source of route */
+    /** Source of route */
     virtual cObject *getSource() const = 0;
 
     /** Source type of the route */
@@ -238,8 +235,7 @@ class INET_API IMulticastRoute
 
     static const char *sourceTypeName(SourceType sourceType);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IROUTE_H
 
-
-#endif

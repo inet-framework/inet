@@ -16,10 +16,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "TcpLwipConnection.h"
 
-#include "headers/defs.h"   // for endian macros
+#include "headers/defs.h"    // for endian macros
 #include "headers/tcphdr.h"
 #include "lwip/lwip_tcp.h"
 #include "TCP_lwIP.h"
@@ -30,10 +29,8 @@
 #include "TCPSerializer.h"
 
 namespace inet {
-
-
 TcpLwipConnection::Stats::Stats()
-:
+    :
     sndWndVector("send window"),
     sndSeqVector("sent seq"),
     sndAckVector("sent ack"),
@@ -48,7 +45,7 @@ TcpLwipConnection::Stats::~Stats()
 {
 }
 
-void TcpLwipConnection::Stats::recordSend(const TCPSegment &tcpsegP)
+void TcpLwipConnection::Stats::recordSend(const TCPSegment& tcpsegP)
 {
     sndWndVector.record(tcpsegP.getWindow());
     sndSeqVector.record(tcpsegP.getSequenceNo());
@@ -57,7 +54,7 @@ void TcpLwipConnection::Stats::recordSend(const TCPSegment &tcpsegP)
         sndAckVector.record(tcpsegP.getAckNo());
 }
 
-void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
+void TcpLwipConnection::Stats::recordReceive(const TCPSegment& tcpsegP)
 {
     rcvWndVector.record(tcpsegP.getWindow());
     rcvSeqVector.record(tcpsegP.getSequenceNo());
@@ -66,8 +63,7 @@ void TcpLwipConnection::Stats::recordReceive(const TCPSegment &tcpsegP)
         rcvAckVector.record(tcpsegP.getAckNo());
 }
 
-
-TcpLwipConnection::TcpLwipConnection(TCP_lwIP &tcpLwipP, int connIdP, int gateIndexP,
+TcpLwipConnection::TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIndexP,
         TCPDataTransferMode dataTransferModeP)
     :
     connIdM(connIdP),
@@ -93,7 +89,7 @@ TcpLwipConnection::TcpLwipConnection(TCP_lwIP &tcpLwipP, int connIdP, int gateIn
         statsM = new Stats();
 }
 
-TcpLwipConnection::TcpLwipConnection(TcpLwipConnection &connP, int connIdP,
+TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP,
         LwipTcpLayer::tcp_pcb *pcbP)
     :
     connIdM(connIdP),
@@ -149,11 +145,11 @@ void TcpLwipConnection::sendEstablishedMsg()
 
 const char *TcpLwipConnection::indicationName(int code)
 {
-#define CASE(x) case x: s=#x+6; break
+#define CASE(x)    case x: \
+        s = #x + 6; break
     const char *s = "unknown";
 
-    switch (code)
-    {
+    switch (code) {
         CASE(TCP_I_DATA);
         CASE(TCP_I_URGENT_DATA);
         CASE(TCP_I_ESTABLISHED);
@@ -181,7 +177,7 @@ void TcpLwipConnection::sendIndicationToApp(int code)
     tcpLwipM.send(msg, "appOut", appGateIndexM);
 }
 
-void TcpLwipConnection::fillStatusInfo(TCPStatusInfo &statusInfo)
+void TcpLwipConnection::fillStatusInfo(TCPStatusInfo& statusInfo)
 {
 //TODO    statusInfo.setState(fsm.getState());
 //TODO    statusInfo.setStateName(stateName(fsm.getState()));
@@ -215,7 +211,7 @@ void TcpLwipConnection::listen(Address& localAddr, unsigned short localPort)
     // it works; does it actually accept a connection as well? It
     // shouldn't, as there is a tcp_accept
     LwipTcpLayer::tcp_pcb *pcb = pcbM;
-    pcbM = NULL; // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
+    pcbM = NULL;    // unlink old pcb from this, otherwise lwip_free_pcb_event destroy this conn.
     pcbM = tcpLwipM.getLwipTcpLayer()->tcp_listen(pcb);
     totalSentM = 0;
 }
@@ -237,8 +233,7 @@ void TcpLwipConnection::close()
 {
     onCloseM = true;
 
-    if (0 == sendQueueM->getBytesAvailable())
-    {
+    if (0 == sendQueueM->getBytesAvailable()) {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
     }
@@ -269,22 +264,19 @@ int TcpLwipConnection::send_data(void *data, int datalen)
     int written = 0;
 
     if (datalen > 0xFFFF)
-      datalen = 0xFFFF; // tcp_write() length argument is uint16_t
+        datalen = 0xFFFF; // tcp_write() length argument is uint16_t
 
     u32_t ss = pcbM->snd_lbb;
     error = tcpLwipM.getLwipTcpLayer()->tcp_write(pcbM, data, datalen, 1);
 
-    if (error == ERR_OK)
-    {
+    if (error == ERR_OK) {
         written = datalen;
     }
-    else if (error == ERR_MEM)
-    {
+    else if (error == ERR_MEM) {
         // Chances are that datalen is too large to fit in the send
         // buffer. If it is really large (larger than a typical MSS,
         // say), we should try segmenting the data ourselves.
-        while (1)
-        {
+        while (1) {
             u16_t snd_buf = pcbM->snd_buf;
             if (0 == snd_buf)
                 break;
@@ -293,7 +285,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
                 break;
 
             error = tcpLwipM.getLwipTcpLayer()->tcp_write(
-                    pcbM, ((const char *)data) + written, snd_buf, 1);
+                        pcbM, ((const char *)data) + written, snd_buf, 1);
 
             if (error != ERR_OK)
                 break;
@@ -303,8 +295,7 @@ int TcpLwipConnection::send_data(void *data, int datalen)
         }
     }
 
-    if (written > 0)
-    {
+    if (written > 0) {
         ASSERT(pcbM->snd_lbb - ss == (u32_t)written);
         return written;
     }
@@ -318,17 +309,14 @@ void TcpLwipConnection::do_SEND()
     int bytes;
     int allsent = 0;
 
-    while (0 != (bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer))))
-    {
+    while (0 != (bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer)))) {
         int sent = send_data(buffer, bytes);
 
-        if (sent > 0)
-        {
+        if (sent > 0) {
             sendQueueM->dequeueTcpLayerMsg(sent);
             allsent += sent;
         }
-        else
-        {
+        else {
             if (sent != ERR_MEM)
                 EV_ERROR << "TCP_lwIP connection: " << connIdM << ": Error do sending, err is " << sent << endl;
             break;
@@ -336,22 +324,17 @@ void TcpLwipConnection::do_SEND()
     }
 
     totalSentM += allsent;
-    EV_DETAIL << "do_SEND(): " << connIdM <<
-            " send:" << allsent <<
-            ", unsent:" << sendQueueM->getBytesAvailable() <<
-            ", total sent:" << totalSentM <<
-            ", all bytes:" << totalSentM+sendQueueM->getBytesAvailable() <<
-            endl;
+    EV_DETAIL << "do_SEND(): " << connIdM
+              << " send:" << allsent
+              << ", unsent:" << sendQueueM->getBytesAvailable()
+              << ", total sent:" << totalSentM
+              << ", all bytes:" << totalSentM + sendQueueM->getBytesAvailable()
+              << endl;
 
-    if (onCloseM && (0 == sendQueueM->getBytesAvailable()))
-    {
+    if (onCloseM && (0 == sendQueueM->getBytesAvailable())) {
         tcpLwipM.getLwipTcpLayer()->tcp_close(pcbM);
         onCloseM = false;
     }
 }
-
-
-
-}
-
+} // namespace inet
 

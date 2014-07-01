@@ -23,25 +23,25 @@
 #include "SchedulerBase.h"
 
 namespace inet {
-
 /**
  * This module implements a Weighted Round Robin Scheduler.
  */
 class WRRScheduler : public SchedulerBase
 {
   protected:
-    int numInputs; // number of input gates
-    int *weights;  // array of weights (has numInputs elements)
-    int *buckets;  // array of tokens in buckets (has numInputs elements)
+    int numInputs;    // number of input gates
+    int *weights;    // array of weights (has numInputs elements)
+    int *buckets;    // array of tokens in buckets (has numInputs elements)
+
   public:
     WRRScheduler() : numInputs(0), weights(NULL), buckets(NULL) {}
+
   protected:
     virtual ~WRRScheduler();
     virtual void initialize();
     virtual bool schedulePacket();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_WRRSCHEDULER_H
 
-
-#endif

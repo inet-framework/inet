@@ -18,11 +18,10 @@
 #include "PhysicalObject.h"
 
 namespace inet {
-
 PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
 #ifdef __CCANVAS_H
-        , const cFigure::Color &color
-#endif
+        , const cFigure::Color& color
+#endif // ifdef __CCANVAS_H
         ) :
     id(id),
     position(position),
@@ -30,8 +29,8 @@ PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles&
     shape(shape),
     material(material)
 #ifdef __CCANVAS_H
-    ,color(color)
-#endif
+    , color(color)
+#endif // ifdef __CCANVAS_H
 {
 }
 
@@ -39,5 +38,5 @@ PhysicalObject::~PhysicalObject()
 {
     delete shape;
 }
+} // namespace inet
 
-}

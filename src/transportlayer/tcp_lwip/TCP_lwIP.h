@@ -17,7 +17,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_TCP_LWIP_H
 #define __INET_TCP_LWIP_H
 
@@ -32,7 +31,6 @@
 #include "LwipTcpStackIf.h"
 
 namespace inet {
-
 // forward declarations:
 class TCPOpenCommand;
 class TCPSendCommand;
@@ -69,26 +67,26 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     virtual err_t lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
             LwipTcpLayer::lwip_event event, struct pbuf *p, u16_t size, err_t err);
 
-    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb);
+    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb);
 
-    virtual netif* ip_route(Address const & ipAddr);
+    virtual netif *ip_route(Address const& ipAddr);
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
             const void *dataptr, int len);
 
     // internal event functions:
 
-    err_t tcp_event_accept(TcpLwipConnection &conn, LwipTcpLayer::tcp_pcb *pcb, err_t err);
+    err_t tcp_event_accept(TcpLwipConnection& conn, LwipTcpLayer::tcp_pcb *pcb, err_t err);
 
-    err_t tcp_event_sent(TcpLwipConnection &conn, u16_t size);
+    err_t tcp_event_sent(TcpLwipConnection& conn, u16_t size);
 
-    err_t tcp_event_recv(TcpLwipConnection &conn, struct pbuf *p, err_t err);
+    err_t tcp_event_recv(TcpLwipConnection& conn, struct pbuf *p, err_t err);
 
-    err_t tcp_event_conn(TcpLwipConnection &conn, err_t err);
+    err_t tcp_event_conn(TcpLwipConnection& conn, err_t err);
 
-    err_t tcp_event_poll(TcpLwipConnection &conn);
+    err_t tcp_event_poll(TcpLwipConnection& conn);
 
-    err_t tcp_event_err(TcpLwipConnection &conn, err_t err);
+    err_t tcp_event_err(TcpLwipConnection& conn, err_t err);
 
     // internal utility functions:
 
@@ -100,11 +98,11 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
 
     virtual void updateDisplayString();
 
-    void removeConnection(TcpLwipConnection &conn);
+    void removeConnection(TcpLwipConnection& conn);
     void printConnBrief(TcpLwipConnection& connP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(TCPSegment* tcpsegP);
+    void handleIpInputMessage(TCPSegment *tcpsegP);
 
     // to be refined...
 
@@ -120,26 +118,26 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     void process_STATUS(TcpLwipConnection& connP, TCPCommand *tcpCommandP, cMessage *msgP);
 
     // send a connection established msg to application layer
-    void sendEstablishedMsg(TcpLwipConnection &connP);
+    void sendEstablishedMsg(TcpLwipConnection& connP);
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   public:
-    LwipTcpLayer * getLwipTcpLayer() { return pLwipTcpLayerM; }
+    LwipTcpLayer *getLwipTcpLayer() { return pLwipTcpLayerM; }
 
     /**
      * To be called from TcpLwipConnection: create a new send queue.
      */
-    virtual TcpLwipSendQueue* createSendQueue(TCPDataTransferMode transferModeP);
+    virtual TcpLwipSendQueue *createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TcpLwipConnection: create a new receive queue.
      */
-    virtual TcpLwipReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
+    virtual TcpLwipReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
 
   protected:
-    typedef std::map<int,TcpLwipConnection*> TcpAppConnMap; // connId-to-TcpLwipConnection
+    typedef std::map<int, TcpLwipConnection *> TcpAppConnMap;    // connId-to-TcpLwipConnection
 
     // Maps:
     TcpAppConnMap tcpAppConnMapM;
@@ -151,16 +149,14 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     struct netif netIf;
 
   public:
-    bool recordStatisticsM;  // output vectors on/off
+    bool recordStatisticsM;    // output vectors on/off
 
   protected:
     LwipTcpLayer *pLwipTcpLayerM;
     bool isAliveM;
     TCPSegment *pCurTcpSegM;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TCP_LWIP_H
 

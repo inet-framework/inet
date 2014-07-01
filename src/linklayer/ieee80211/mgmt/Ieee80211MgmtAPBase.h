@@ -23,7 +23,6 @@
 #include "Ieee80211MgmtBase.h"
 
 namespace inet {
-
 class EtherFrame;
 
 /**
@@ -36,7 +35,8 @@ class EtherFrame;
 class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
 {
   public:
-    typedef enum { ENCAP_DECAP_TRUE = 1, ENCAP_DECAP_FALSE, ENCAP_DECAP_ETH} EncapDecap;
+    typedef enum { ENCAP_DECAP_TRUE = 1, ENCAP_DECAP_FALSE, ENCAP_DECAP_ETH } EncapDecap;
+
   protected:
     bool isConnectedToHL;
     EncapDecap encapDecap;
@@ -78,9 +78,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      */
     virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IEEE80211MGMTAPBASE_H
 

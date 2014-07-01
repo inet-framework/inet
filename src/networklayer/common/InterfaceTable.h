@@ -27,7 +27,6 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 /**
  * Represents the interface table. This object has one instance per host
  * or router. It has methods to manage the interface table,
@@ -69,7 +68,7 @@ namespace inet {
 class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, protected cListener, public ILifecycle
 {
   protected:
-    cModule *host; // cached pointer
+    cModule *host;    // cached pointer
 
     // primary storage for interfaces: vector indexed by id; may contain NULLs;
     // slots are never reused to ensure id uniqueness
@@ -77,8 +76,8 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     InterfaceVector idToInterface;
 
     // fields to support getNumInterfaces() and getInterface(pos)
-    int tmpNumInterfaces; // caches number of non-NULL elements of idToInterface; -1 if invalid
-    InterfaceEntry **tmpInterfaceList; // caches non-NULL elements of idToInterface; NULL if invalid
+    int tmpNumInterfaces;    // caches number of non-NULL elements of idToInterface; -1 if invalid
+    InterfaceEntry **tmpInterfaceList;    // caches non-NULL elements of idToInterface; NULL if invalid
 
   protected:
     // displays summary above the icon
@@ -101,7 +100,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
   public:
     InterfaceTable();
     virtual ~InterfaceTable();
-    virtual std::string getFullPath() const {return cSimpleModule::getFullPath();}
+    virtual std::string getFullPath() const { return cSimpleModule::getFullPath(); }
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -133,7 +132,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      * Checks if the address is on the network of one of the interfaces,
      * but not local.
      */
-    virtual bool isNeighborAddress(const Address &address) const;
+    virtual bool isNeighborAddress(const Address& address) const;
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
@@ -236,8 +235,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      */
     virtual MulticastGroupList collectMulticastGroups();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_INTERFACETABLE_H
 
-
-#endif

@@ -15,26 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "EtherFrameClassifier.h"
 
 #include "EtherFrame.h"
 
 namespace inet {
-
-
 Define_Module(EtherFrameClassifier);
 
 void EtherFrameClassifier::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<EtherPauseFrame*>(msg) != NULL)
+    if (dynamic_cast<EtherPauseFrame *>(msg) != NULL)
         send(msg, "pauseOut");
     else
         send(msg, "defaultOut");
 }
-
-
-
-}
-
+} // namespace inet
 

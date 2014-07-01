@@ -26,7 +26,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
 /**
  * A "Realtime" VideoStream client application.
  *
@@ -62,9 +61,7 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     UDPVideoStreamCli() { selfMsg = NULL; }
     virtual ~UDPVideoStreamCli() { cancelAndDelete(selfMsg); }
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPVIDEOSTREAMCLI_H
 

@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_GENERICARP_H
 #define __INET_GENERICARP_H
@@ -27,7 +27,6 @@
 #include "IARP.h"
 
 namespace inet {
-
 class IInterfaceTable;
 
 /**
@@ -41,9 +40,10 @@ class INET_API GenericARP : public cSimpleModule, public IARP
 {
   private:
     IInterfaceTable *ift;
+
   public:
-    GenericARP() { }
-    virtual ~GenericARP() { }
+    GenericARP() {}
+    virtual ~GenericARP() {}
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie);
@@ -57,9 +57,7 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     MACAddress mapMulticastAddress(Address addr);
     void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_GENERICARP_H
 

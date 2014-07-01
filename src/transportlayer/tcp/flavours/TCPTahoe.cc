@@ -15,18 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>   // min,max
+#include <algorithm>    // min,max
 #include "TCPTahoe.h"
 #include "TCP.h"
 
 namespace inet {
-
-
 Register_Class(TCPTahoe);
 
-
 TCPTahoe::TCPTahoe() : TCPTahoeRenoFamily(),
-        state((TCPTahoeStateVariables *&)TCPAlgorithm::state)
+    state((TCPTahoeStateVariables *&)TCPAlgorithm::state)
 {
 }
 
@@ -34,7 +31,7 @@ void TCPTahoe::recalculateSlowStartThreshold()
 {
     // set ssthresh to flight size / 2, but at least 2 MSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
@@ -57,7 +54,7 @@ void TCPTahoe::processRexmitTimer(TCPEventCode& event)
         cwndVector->record(state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
-          << ", ssthresh=" << state->ssthresh << "\n";
+            << ", ssthresh=" << state->ssthresh << "\n";
 
     state->afterRto = true;
 
@@ -72,8 +69,7 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
     //
     // Perform slow start and congestion avoidance.
     //
-    if (state->snd_cwnd < state->ssthresh)
-    {
+    if (state->snd_cwnd < state->ssthresh) {
         EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
 
         // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
@@ -93,8 +89,7 @@ void TCPTahoe::receivedDataAck(uint32 firstSeqAcked)
 
         EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
     }
-    else
-    {
+    else {
         // perform Congestion Avoidance (RFC 2581)
         int incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
@@ -125,8 +120,7 @@ void TCPTahoe::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
-    {
+    if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         EV_DETAIL << "Tahoe on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Slow Start:\n";
 
         // enter Slow Start
@@ -147,8 +141,5 @@ void TCPTahoe::receivedDuplicateAck()
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
     }
 }
-
-
-}
-
+} // namespace inet
 

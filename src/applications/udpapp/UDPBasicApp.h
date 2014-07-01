@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_UDPBASICAPP_H
 #define __INET_UDPBASICAPP_H
 
@@ -28,8 +27,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
-
 /**
  * UDP application. See NED for more info.
  */
@@ -79,9 +76,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     UDPBasicApp();
     ~UDPBasicApp();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPBASICAPP_H
 

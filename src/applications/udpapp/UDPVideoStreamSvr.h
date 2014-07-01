@@ -27,8 +27,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
-
 /**
  * Stream VBR video streams to clients.
  *
@@ -41,14 +39,15 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
   public:
     struct VideoStreamData
     {
-        cMessage *timer;          // self timer msg
-        Address clientAddr;       // client address
-        int clientPort;           // client UDP port
-        long videoSize;           // total size of video
-        long bytesLeft;           // bytes left to transmit
-        long numPkSent;           // number of packets sent
+        cMessage *timer;    // self timer msg
+        Address clientAddr;    // client address
+        int clientPort;    // client UDP port
+        long videoSize;    // total size of video
+        long bytesLeft;    // bytes left to transmit
+        long numPkSent;    // number of packets sent
         VideoStreamData() { timer = NULL; clientPort = 0; videoSize = bytesLeft = 0; numPkSent = 0; }
     };
+
   protected:
     typedef std::map<long int, VideoStreamData> VideoStreamMap;
 
@@ -63,9 +62,9 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     cPar *videoSize;
 
     // statistics
-    unsigned int numStreams;  // number of video streams served
-    unsigned long numPkSent;  // total number of packets sent
-    static simsignal_t reqStreamBytesSignal;  // length of video streams served
+    unsigned int numStreams;    // number of video streams served
+    unsigned long numPkSent;    // total number of packets sent
+    static simsignal_t reqStreamBytesSignal;    // length of video streams served
     static simsignal_t sentPkSignal;
 
     virtual void processStreamRequest(cMessage *msg);
@@ -74,7 +73,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void finish();
-    virtual void handleMessageWhenUp(cMessage* msg);
+    virtual void handleMessageWhenUp(cMessage *msg);
 
     virtual void clearStreams();
 
@@ -86,8 +85,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     UDPVideoStreamSvr();
     virtual ~UDPVideoStreamSvr();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_UDPVIDEOSTREAMSVR_H
 
-
-#endif

@@ -25,7 +25,6 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 /**
  * Single-connection TCP application.
  */
@@ -37,7 +36,7 @@ class INET_API TCPSessionApp : public TCPAppBase
     {
         simtime_t tSend;
         long numBytes;
-        Command(simtime_t t, long n) {tSend=t; numBytes=n;}
+        Command(simtime_t t, long n) { tSend = t; numBytes = n; }
     };
     typedef std::vector<Command> CommandVector;
     CommandVector commands;
@@ -75,8 +74,7 @@ class INET_API TCPSessionApp : public TCPAppBase
     TCPSessionApp();
     virtual ~TCPSessionApp();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPSESSIONAPP_H
 
-
-#endif

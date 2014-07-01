@@ -25,37 +25,34 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 void FlatReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         energyDetection = mW(FWMath::dBm2mW(par("energyDetection")));
         sensitivity = mW(FWMath::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL")==0)
+        if (strcmp(modulationName, "NULL") == 0)
             modulation = new NullModulation();
-        else if (strcmp(modulationName, "BPSK")==0)
+        else if (strcmp(modulationName, "BPSK") == 0)
             modulation = new BPSKModulation();
-        else if (strcmp(modulationName, "16-QAM")==0)
+        else if (strcmp(modulationName, "16-QAM") == 0)
             modulation = new QAM16Modulation();
-        else if (strcmp(modulationName, "256-QAM")==0)
+        else if (strcmp(modulationName, "256-QAM") == 0)
             modulation = new QAM256Modulation();
         else
             throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
     }
 }
 
-void FlatReceiverBase::printToStream(std::ostream &stream) const
+void FlatReceiverBase::printToStream(std::ostream& stream) const
 {
     stream << "Flat receiver, "
            << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " <<  sensitivity;
+           << "sensitivity = " << sensitivity;
 }
 
 const IListening *FlatReceiverBase::createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const
@@ -95,8 +92,7 @@ bool FlatReceiverBase::computeHasBitError(const IListening *listening, double mi
     double ber = modulation->calculateBER(minSNIR, bandwidth.get(), bitrate);
     if (ber == 0.0)
         return false;
-    else
-    {
+    else {
         double pErrorless = pow(1.0 - ber, bitLength);
         return dblrand() > pErrorless;
     }
@@ -118,10 +114,6 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
     else
         return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

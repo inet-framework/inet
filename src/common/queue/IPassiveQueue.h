@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IPASSIVEQUEUE_H
 #define __INET_IPASSIVEQUEUE_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 class IPassiveQueueListener;
 
 /**
@@ -80,20 +78,18 @@ class INET_API IPassiveQueue
  */
 class INET_API IPassiveQueueListener
 {
-    public:
+  public:
 
-      virtual ~IPassiveQueueListener() {};
+    virtual ~IPassiveQueueListener() {};
 
-      /**
-       * A packet arrived and it was added to the queue (the queue length
-       * increased by one). Therefore a subsequent requestPacket() call
-       * can deliver a packet immediately.
-       */
-      virtual void packetEnqueued(IPassiveQueue *queue) = 0;
+    /**
+     * A packet arrived and it was added to the queue (the queue length
+     * increased by one). Therefore a subsequent requestPacket() call
+     * can deliver a packet immediately.
+     */
+    virtual void packetEnqueued(IPassiveQueue *queue) = 0;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPASSIVEQUEUE_H
 

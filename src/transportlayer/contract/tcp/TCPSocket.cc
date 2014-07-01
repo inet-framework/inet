@@ -18,8 +18,6 @@
 #include "TCPSocket.h"
 
 namespace inet {
-
-
 TCPSocket::TCPSocket()
 {
     // don't allow user-specified connIds because they may conflict with
@@ -51,8 +49,7 @@ TCPSocket::TCPSocket(cMessage *msg)
     dataTransferMode = TCP_TRANSFER_UNDEFINED;    // FIXME set dataTransferMode
     gateToTcp = NULL;
 
-    if (msg->getKind() == TCP_I_ESTABLISHED)
-    {
+    if (msg->getKind() == TCP_I_ESTABLISHED) {
         // management of stockstate is left to processMessage() so we always
         // set it to CONNECTED in the ctor, whatever TCP_I_xxx arrives.
         // However, for convenience we extract TCPConnectInfo already here, so that
@@ -68,10 +65,10 @@ TCPSocket::TCPSocket(cMessage *msg)
 
 const char *TCPSocket::stateName(int state)
 {
-#define CASE(x) case x: s=#x; break
+#define CASE(x)    case x: \
+        s = #x; break
     const char *s = "unknown";
-    switch (state)
-    {
+    switch (state) {
         CASE(NOT_BOUND);
         CASE(BOUND);
         CASE(LISTENING);
@@ -96,10 +93,10 @@ void TCPSocket::sendToTCP(cMessage *msg)
 
 void TCPSocket::bind(int lPort)
 {
-    if (sockstate!=NOT_BOUND)
+    if (sockstate != NOT_BOUND)
         throw cRuntimeError("TCPSocket::bind(): socket already bound");
 
-    if (lPort<0 || lPort>65535)
+    if (lPort < 0 || lPort > 65535)
         throw cRuntimeError("TCPSocket::bind(): invalid port number %d", lPort);
 
     localPrt = lPort;
@@ -122,9 +119,9 @@ void TCPSocket::bind(Address lAddr, int lPort)
 
 void TCPSocket::listen(bool fork)
 {
-    if (sockstate!=BOUND)
-        throw cRuntimeError(sockstate==NOT_BOUND ? "TCPSocket: must call bind() before listen()"
-                                       : "TCPSocket::listen(): connect() or listen() already called");
+    if (sockstate != BOUND)
+        throw cRuntimeError(sockstate == NOT_BOUND ? "TCPSocket: must call bind() before listen()"
+                : "TCPSocket::listen(): connect() or listen() already called");
 
     cMessage *msg = new cMessage("PassiveOPEN", TCP_C_OPEN_PASSIVE);
 
@@ -144,7 +141,7 @@ void TCPSocket::listen(bool fork)
 void TCPSocket::connect(Address remoteAddress, int remotePort)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
-        throw cRuntimeError( "TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
+        throw cRuntimeError("TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
 
     if (remotePort < 0 || remotePort > 65535)
         throw cRuntimeError("TCPSocket::connect(): invalid remote port number %d", remotePort);
@@ -195,8 +192,7 @@ void TCPSocket::close()
 
 void TCPSocket::abort()
 {
-    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR)
-    {
+    if (sockstate != NOT_BOUND && sockstate != BOUND && sockstate != CLOSED && sockstate != SOCKERROR) {
         cMessage *msg = new cMessage("ABORT", TCP_C_ABORT);
         TCPCommand *cmd = new TCPCommand();
         cmd->setConnId(connId);
@@ -247,88 +243,87 @@ void TCPSocket::processMessage(cMessage *msg)
     TCPStatusInfo *status;
     TCPConnectInfo *connectInfo;
 
-    switch (msg->getKind())
-    {
+    switch (msg->getKind()) {
         case TCP_I_DATA:
-             if (cb)
-                 cb->socketDataArrived(connId, yourPtr, PK(msg), false);
-             else
-                 delete msg;
+            if (cb)
+                cb->socketDataArrived(connId, yourPtr, PK(msg), false);
+            else
+                delete msg;
 
-             break;
+            break;
 
         case TCP_I_URGENT_DATA:
-             if (cb)
-                 cb->socketDataArrived(connId, yourPtr, PK(msg), true);
-             else
-                 delete msg;
+            if (cb)
+                cb->socketDataArrived(connId, yourPtr, PK(msg), true);
+            else
+                delete msg;
 
-             break;
+            break;
 
         case TCP_I_ESTABLISHED:
-             // Note: this code is only for sockets doing active open, and nonforking
-             // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
-             // carries a new connId which won't match the connId of this TCPSocket,
-             // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
-             // want to create a new TCPSocket object via new TCPSocket(msg).
-             sockstate = CONNECTED;
-             connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
-             localAddr = connectInfo->getLocalAddr();
-             remoteAddr = connectInfo->getRemoteAddr();
-             localPrt = connectInfo->getLocalPort();
-             remotePrt = connectInfo->getRemotePort();
-             delete msg;
+            // Note: this code is only for sockets doing active open, and nonforking
+            // listening sockets. For a forking listening sockets, TCP_I_ESTABLISHED
+            // carries a new connId which won't match the connId of this TCPSocket,
+            // so you won't get here. Rather, when you see TCP_I_ESTABLISHED, you'll
+            // want to create a new TCPSocket object via new TCPSocket(msg).
+            sockstate = CONNECTED;
+            connectInfo = dynamic_cast<TCPConnectInfo *>(msg->getControlInfo());
+            localAddr = connectInfo->getLocalAddr();
+            remoteAddr = connectInfo->getRemoteAddr();
+            localPrt = connectInfo->getLocalPort();
+            remotePrt = connectInfo->getRemotePort();
+            delete msg;
 
-             if (cb)
-                 cb->socketEstablished(connId, yourPtr);
+            if (cb)
+                cb->socketEstablished(connId, yourPtr);
 
-             break;
+            break;
 
         case TCP_I_PEER_CLOSED:
-             sockstate = PEER_CLOSED;
-             delete msg;
+            sockstate = PEER_CLOSED;
+            delete msg;
 
-             if (cb)
-                 cb->socketPeerClosed(connId, yourPtr);
+            if (cb)
+                cb->socketPeerClosed(connId, yourPtr);
 
-             break;
+            break;
 
         case TCP_I_CLOSED:
-             sockstate = CLOSED;
-             delete msg;
+            sockstate = CLOSED;
+            delete msg;
 
-             if (cb)
-                 cb->socketClosed(connId, yourPtr);
+            if (cb)
+                cb->socketClosed(connId, yourPtr);
 
-             break;
+            break;
 
         case TCP_I_CONNECTION_REFUSED:
         case TCP_I_CONNECTION_RESET:
         case TCP_I_TIMED_OUT:
-             sockstate = SOCKERROR;
+            sockstate = SOCKERROR;
 
-             if (cb)
-                 cb->socketFailure(connId, yourPtr, msg->getKind());
+            if (cb)
+                cb->socketFailure(connId, yourPtr, msg->getKind());
 
-             delete msg;
-             break;
+            delete msg;
+            break;
 
         case TCP_I_STATUS:
-             status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
-             delete msg;
+            status = check_and_cast<TCPStatusInfo *>(msg->removeControlInfo());
+            delete msg;
 
-             if (cb)
-                 cb->socketStatusArrived(connId, yourPtr, status);
+            if (cb)
+                cb->socketStatusArrived(connId, yourPtr, status);
 
-             break;
+            break;
 
         default:
-             throw cRuntimeError("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
-                     msg->getKind());
+            throw cRuntimeError("TCPSocket: invalid msg kind %d, one of the TCP_I_xxx constants expected",
+                msg->getKind());
     }
 }
 
-TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char * transferMode)
+TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char *transferMode)
 {
     if (0 == transferMode || 0 == transferMode[0])
         return TCP_TRANSFER_UNDEFINED;
@@ -345,7 +340,7 @@ TCPDataTransferMode TCPSocket::convertStringToDataTransferMode(const char * tran
     return TCP_TRANSFER_UNDEFINED;
 }
 
-void TCPSocket::readDataTransferModePar(cComponent &component)
+void TCPSocket::readDataTransferModePar(cComponent& component)
 {
     const char *transferMode = component.par("dataTransferMode");
 
@@ -361,9 +356,5 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
 
     dataTransferMode = x;
 }
-
-
-
-}
-
+} // namespace inet
 

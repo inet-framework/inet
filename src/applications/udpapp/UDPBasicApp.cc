@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "UDPBasicApp.h"
 
 #include "AddressResolver.h"
@@ -25,8 +24,6 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
-
-
 Define_Module(UDPBasicApp);
 
 simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
@@ -46,8 +43,7 @@ void UDPBasicApp::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numSent = 0;
         numReceived = 0;
         WATCH(numSent);
@@ -81,8 +77,7 @@ void UDPBasicApp::setSocketOptions()
         socket.setTypeOfService(typeOfService);
 
     const char *multicastInterface = par("multicastInterface");
-    if (multicastInterface[0])
-    {
+    if (multicastInterface[0]) {
         IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         InterfaceEntry *ie = ift->getInterfaceByName(multicastInterface);
         if (!ie)
@@ -95,9 +90,8 @@ void UDPBasicApp::setSocketOptions()
         socket.setBroadcast(true);
 
     bool joinLocalMulticastGroups = par("joinLocalMulticastGroups");
-    if (joinLocalMulticastGroups)
-    {
-        MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
+    if (joinLocalMulticastGroups) {
+        MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
         socket.joinLocalMulticastGroups(mgl);
     }
 }
@@ -105,8 +99,7 @@ void UDPBasicApp::setSocketOptions()
 Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
-    if (destAddresses[k].isLinkLocal()) // KLUDGE for IPv6
-    {
+    if (destAddresses[k].isLinkLocal()) {    // KLUDGE for IPv6
         const char *destAddrs = par("destAddresses");
         cStringTokenizer tokenizer(destAddrs);
         const char *token = NULL;
@@ -151,15 +144,12 @@ void UDPBasicApp::processStart()
             destAddresses.push_back(result);
     }
 
-    if (!destAddresses.empty())
-    {
+    if (!destAddresses.empty()) {
         selfMsg->setKind(SEND);
         processSend();
     }
-    else
-    {
-        if (stopTime >= SIMTIME_ZERO)
-        {
+    else {
+        if (stopTime >= SIMTIME_ZERO) {
             selfMsg->setKind(STOP);
             scheduleAt(stopTime, selfMsg);
         }
@@ -170,13 +160,11 @@ void UDPBasicApp::processSend()
 {
     sendPacket();
     simtime_t d = simTime() + par("sendInterval").doubleValue();
-    if (stopTime < SIMTIME_ZERO || d < stopTime)
-    {
+    if (stopTime < SIMTIME_ZERO || d < stopTime) {
         selfMsg->setKind(SEND);
         scheduleAt(d, selfMsg);
     }
-    else
-    {
+    else {
         selfMsg->setKind(STOP);
         scheduleAt(stopTime, selfMsg);
     }
@@ -189,33 +177,38 @@ void UDPBasicApp::processStop()
 
 void UDPBasicApp::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         ASSERT(msg == selfMsg);
         switch (selfMsg->getKind()) {
-            case START: processStart(); break;
-            case SEND:  processSend(); break;
-            case STOP:  processStop(); break;
-            default: throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
+            case START:
+                processStart();
+                break;
+
+            case SEND:
+                processSend();
+                break;
+
+            case STOP:
+                processStop();
+                break;
+
+            default:
+                throw cRuntimeError("Invalid kind %d in self message", (int)selfMsg->getKind());
         }
     }
-    else if (msg->getKind() == UDP_I_DATA)
-    {
+    else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
         processPacket(PK(msg));
     }
-    else if (msg->getKind() == UDP_I_ERROR)
-    {
+    else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
         getDisplayString().setTagArg("t", 0, buf);
@@ -233,8 +226,7 @@ void UDPBasicApp::processPacket(cPacket *pk)
 bool UDPBasicApp::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
-    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
-    {
+    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         selfMsg->setKind(START);
         scheduleAt(start, selfMsg);
     }
@@ -254,9 +246,5 @@ void UDPBasicApp::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -21,7 +21,6 @@
 #include "LIBTable.h"
 
 namespace inet {
-
 /**
  * This is an abstract interface for packet classifiers in MPLS ingress routers.
  * The MPLS module holds a pointer to an IClassifier object, and uses it to
@@ -48,10 +47,9 @@ class INET_API IClassifier
      * The color parameter (which can be set to an arbitrary value) will
      * only be used for the NAM trace if one will be recorded.
      */
-     virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
+    virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ICLASSIFIER_H
 
-
-#endif

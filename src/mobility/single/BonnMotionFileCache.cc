@@ -15,22 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include <fstream>
 #include <sstream>
 
 #include "BonnMotionFileCache.h"
 
 namespace inet {
-
-
 const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
 {
     LineList::const_iterator it = lines.begin();
-    for (int i=0; i<nodeId && it!=lines.end(); i++) it++;
-    return (it==lines.end()) ? NULL : &(*it);
+    for (int i = 0; i < nodeId && it != lines.end(); i++)
+        it++;
+    return (it == lines.end()) ? NULL : &(*it);
 }
-
 
 BonnMotionFileCache *BonnMotionFileCache::inst;
 
@@ -43,8 +40,7 @@ BonnMotionFileCache *BonnMotionFileCache::getInstance()
 
 void BonnMotionFileCache::deleteInstance()
 {
-    if (inst)
-    {
+    if (inst) {
         delete inst;
         inst = NULL;
     }
@@ -54,7 +50,7 @@ const BonnMotionFile *BonnMotionFileCache::getFile(const char *filename)
 {
     // if found, return it from cache
     BMFileMap::iterator it = cache.find(std::string(filename));
-    if (it!=cache.end())
+    if (it != cache.end())
         return &(it->second);
 
     // load and store in cache
@@ -70,8 +66,7 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
         throw cRuntimeError("Cannot open file '%s'", filename);
 
     std::string line;
-    while (std::getline(in, line))
-    {
+    while (std::getline(in, line)) {
         bmFile.lines.push_back(BonnMotionFile::Line());
         BonnMotionFile::Line& vec = bmFile.lines.back();
 
@@ -82,8 +77,5 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
     }
     in.close();
 }
-
-
-}
-
+} // namespace inet
 

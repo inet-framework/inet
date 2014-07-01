@@ -6,9 +6,8 @@
 #include "IPv4Address.h"
 
 namespace inet {
-
-const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name);
-const cXMLElement* getUniqueChildIfExists(const cXMLElement *node, const char *name);
+const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name);
+const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *name);
 
 void checkTags(const cXMLElement *node, const char *allowed);
 
@@ -16,8 +15,8 @@ bool getParameterBoolValue(const cXMLElement *ptr, const char *name, bool def);
 bool getParameterBoolValue(const cXMLElement *ptr, const char *name);
 int getParameterIntValue(const cXMLElement *ptr, const char *name);
 int getParameterIntValue(const cXMLElement *ptr, const char *name, int def);
-const char* getParameterStrValue(const cXMLElement *ptr, const char *name);
-const char* getParameterStrValue(const cXMLElement *ptr, const char *name, const char *def);
+const char *getParameterStrValue(const cXMLElement *ptr, const char *name);
+const char *getParameterStrValue(const cXMLElement *ptr, const char *name, const char *def);
 IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name);
 IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name, IPv4Address def);
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name);
@@ -28,8 +27,7 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName, bool d
 bool getAttributeBoolValue(const cXMLElement *node, const char *attrName);
 
 bool parseBool(const char *text);
+} // namespace inet
 
-}
+#endif // ifndef __INET_XMLUTILS_H
 
-
-#endif

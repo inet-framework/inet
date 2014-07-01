@@ -19,15 +19,12 @@
 #ifndef __INET_TCPLWIPMSGBASEDQUEUES_H
 #define __INET_TCPLWIPMSGBASEDQUEUES_H
 
-
 #include "INETDefs.h"
 
 #include "TcpLwipQueues.h"
 #include "TCPSegment.h"
 
 namespace inet {
-
-
 /**
  * Send queue that manages "objects".
  */
@@ -44,7 +41,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
 
     PayloadQueue payloadQueueM;
 
-    uint32 beginM;  // 1st sequence number stored
+    uint32 beginM;    // 1st sequence number stored
     uint32 endM;    // last sequence number stored +1
     bool isValidSeqNoM;
     unsigned long int unsentTcpLayerBytesM;
@@ -82,7 +79,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      *
      * called before called socket->send_data()
      */
-    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
 
     /**
      * Remove msgLengthP bytes from TCP Layer queue
@@ -108,7 +105,7 @@ class INET_API TcpLwipMsgBasedSendQueue : public TcpLwipSendQueue
      * @param tcpDataP: the tcp segment (with tcp header) created by LWIP
      * @param tcpLenthP: the length of tcp segment.
      */
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -125,9 +122,9 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
   protected:
     struct PayloadItem
     {
-        uint32  seqNo;
+        uint32 seqNo;
         cPacket *packet;
-        PayloadItem(uint32  _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
+        PayloadItem(uint32 _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
     };
     typedef std::list<PayloadItem> PayloadList;
     PayloadList payloadListM;
@@ -154,14 +151,14 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
      * called back from lwip::tcp_input()
      */
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void* bufferP, size_t bufferLengthP);
+            const void *bufferP, size_t bufferLengthP);
 
     /**
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successful
      */
-    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -199,8 +196,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPLWIPMSGBASEDQUEUES_H
 
-
-#endif

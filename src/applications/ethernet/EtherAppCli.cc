@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -27,7 +27,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 Define_Module(EtherAppCli);
 
 simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
@@ -51,8 +50,7 @@ void EtherAppCli::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
         sendInterval = &par("sendInterval");
@@ -73,8 +71,7 @@ void EtherAppCli::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
 
@@ -89,10 +86,8 @@ void EtherAppCli::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
-    if (msg->isSelfMessage())
-    {
-        if (msg->getKind() == START)
-        {
+    if (msg->isSelfMessage()) {
+        if (msg->getKind() == START) {
             bool registerSAP = par("registerSAP");
             if (registerSAP)
                 registerDSAP(localSAP);
@@ -106,7 +101,7 @@ void EtherAppCli::handleMessage(cMessage *msg)
         scheduleNextPacket(false);
     }
     else
-        receivePacket(check_and_cast<cPacket*>(msg));
+        receivePacket(check_and_cast<cPacket *>(msg));
 }
 
 bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -124,7 +119,8 @@ bool EtherAppCli::handleOperationStage(LifecycleOperation *operation, int stage,
         if (stage == NodeCrashOperation::STAGE_CRASH)
             cancelNextPacket();
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -142,13 +138,11 @@ void EtherAppCli::scheduleNextPacket(bool start)
 {
     simtime_t cur = simTime();
     simtime_t next;
-    if (start)
-    {
+    if (start) {
         next = cur <= startTime ? startTime : cur;
         timerMsg->setKind(START);
     }
-    else
-    {
+    else {
         next = cur + sendInterval->doubleValue();
         timerMsg->setKind(NEXT);
     }
@@ -166,11 +160,9 @@ MACAddress EtherAppCli::resolveDestMACAddress()
 {
     MACAddress destMACAddress;
     const char *destAddress = par("destAddress");
-    if (destAddress[0])
-    {
+    if (destAddress[0]) {
         // try as mac address first, then as a module
-        if (!destMACAddress.tryParse(destAddress))
-        {
+        if (!destMACAddress.tryParse(destAddress)) {
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
@@ -240,9 +232,5 @@ void EtherAppCli::finish()
     cancelAndDelete(timerMsg);
     timerMsg = NULL;
 }
-
-
-
-}
-
+} // namespace inet
 

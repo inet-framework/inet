@@ -24,26 +24,24 @@
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
-
 class INET_API ModulePathAddressType : public IAddressType
 {
-    public:
-        static ModulePathAddressType INSTANCE;
+  public:
+    static ModulePathAddressType INSTANCE;
 
-    public:
-        ModulePathAddressType() { }
-        virtual ~ModulePathAddressType() { }
+  public:
+    ModulePathAddressType() {}
+    virtual ~ModulePathAddressType() {}
 
-        virtual int getMaxPrefixLength() const { return 0; } // TODO: support address prefixes
-        virtual Address getUnspecifiedAddress() const { return ModulePathAddress(); }
-        virtual Address getBroadcastAddress() const { return ModulePathAddress(-1); }
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModulePathAddress(-109); } // TODO: constant
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModulePathAddress(-9); } // TODO: constant
-        virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
-        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModulePathAddress(); } // TODO constant
+    virtual int getMaxPrefixLength() const { return 0; }    // TODO: support address prefixes
+    virtual Address getUnspecifiedAddress() const { return ModulePathAddress(); }
+    virtual Address getBroadcastAddress() const { return ModulePathAddress(-1); }
+    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModulePathAddress(-109); }    // TODO: constant
+    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModulePathAddress(-9); }    // TODO: constant
+    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
+    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModulePathAddress(); }    // TODO constant
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MODULEPATHADDRESSTYPE_H
 
-
-#endif

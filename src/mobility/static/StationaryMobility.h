@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_STATIONARYMOBILITY_H
 #define __INET_STATIONARYMOBILITY_H
 
@@ -24,8 +23,6 @@
 #include "MobilityBase.h"
 
 namespace inet {
-
-
 /**
  * This mobility module does not move at all; it can be used for standalone stationary nodes.
  *
@@ -39,8 +36,8 @@ class INET_API StationaryMobility : public MobilityBase
     virtual void handleSelfMessage(cMessage *message);
 
   public:
-    StationaryMobility() {
-
+    StationaryMobility()
+    {
     }
 
     StationaryMobility(Coord position) { lastPosition = position; }
@@ -51,8 +48,7 @@ class INET_API StationaryMobility : public MobilityBase
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_STATIONARYMOBILITY_H
 
-
-#endif

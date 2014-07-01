@@ -19,7 +19,6 @@
 #ifndef __INET_TCPSERIALIZER_H
 #define __INET_TCPSERIALIZER_H
 
-
 #include "Address.h"
 
 #include "headers/defs.h"
@@ -27,7 +26,6 @@
 #include "headers/tcphdr.h"
 
 namespace inet {
-
 //forward declarations:
 class TCPSegment;
 
@@ -36,43 +34,42 @@ class TCPSegment;
  */
 class TCPSerializer
 {
-    public:
-        TCPSerializer() {}
+  public:
+    TCPSerializer() {}
 
-        /**
-         * Serializes a TCPSegment for transmission on the wire.
-         * The checksum is NOT filled in.
-         * Returns the length of data written into buffer.
-         * TODO msg why not a const reference?
-         */
-        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
+    /**
+     * Serializes a TCPSegment for transmission on the wire.
+     * The checksum is NOT filled in.
+     * Returns the length of data written into buffer.
+     * TODO msg why not a const reference?
+     */
+    int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
 
-        /**
-         * Serializes a TCPSegment for transmission on the wire.
-         * The checksum is NOT filled in. (The kernel does that when sending
-         * the frame over a raw socket.)
-         * Returns the length of data written into buffer.
-         * TODO msg why not a const reference?
-         * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
-         */
-        int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
-                const Address &srcIp, const Address &destIp);
+    /**
+     * Serializes a TCPSegment for transmission on the wire.
+     * The checksum is NOT filled in. (The kernel does that when sending
+     * the frame over a raw socket.)
+     * Returns the length of data written into buffer.
+     * TODO msg why not a const reference?
+     * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
+     */
+    int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
+            const Address& srcIp, const Address& destIp);
 
-        /**
-         * Puts a packet sniffed from the wire into a TCPSegment.
-         * TODO dest why not reference?
-         */
-        void parse(const unsigned char *srcbuf, unsigned int bufsize, TCPSegment *dest,
-                bool withBytes);
+    /**
+     * Puts a packet sniffed from the wire into a TCPSegment.
+     * TODO dest why not reference?
+     */
+    void parse(const unsigned char *srcbuf, unsigned int bufsize, TCPSegment *dest,
+            bool withBytes);
 
-        /**
-         * Calculate checksum with pseudo header.
-         */
-        static uint16_t checksum(const void *addr, unsigned int count,
-                const Address &srcIp, const Address &destIp);
+    /**
+     * Calculate checksum with pseudo header.
+     */
+    static uint16_t checksum(const void *addr, unsigned int count,
+            const Address& srcIp, const Address& destIp);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPSERIALIZER_H
 
-
-#endif

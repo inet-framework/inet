@@ -21,29 +21,24 @@
 #include "ScalarRadio.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API Ieee80211Radio : public ScalarRadio
 {
-    protected:
-        int channelNumber;
+  protected:
+    int channelNumber;
 
-    protected:
-        void initialize(int stage);
+  protected:
+    void initialize(int stage);
 
-        void handleUpperCommand(cMessage *message);
+    void handleUpperCommand(cMessage *message);
 
-    public:
-        Ieee80211Radio();
+  public:
+    Ieee80211Radio();
 
-        virtual void setChannelNumber(int newChannelNumber);
+    virtual void setChannelNumber(int newChannelNumber);
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IEEE80211RADIO_H
 
-}
-
-
-#endif

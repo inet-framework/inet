@@ -21,10 +21,9 @@
 #ifndef __INET_EXTINTERFACE_H
 #define __INET_EXTINTERFACE_H
 
-
 #ifndef MAX_MTU_SIZE
-#define MAX_MTU_SIZE 4000
-#endif
+#define MAX_MTU_SIZE    4000
+#endif // ifndef MAX_MTU_SIZE
 
 #include "INETDefs.h"
 
@@ -33,10 +32,8 @@
 #include "cSocketRTScheduler.h"
 
 namespace inet {
-
 // Forward declarations:
 class InterfaceEntry;
-
 
 /**
  * Implements an interface that corresponds to a real interface
@@ -51,7 +48,7 @@ class ExtInterface : public MACBase
 {
   protected:
     bool connected;
-    uint8 buffer[1<<16];
+    uint8 buffer[1 << 16];
     const char *device;
 
     // statistics
@@ -71,7 +68,7 @@ class ExtInterface : public MACBase
     InterfaceEntry *createInterfaceEntry();
     virtual void flushQueue();
     virtual void clearQueue();
-    virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("upperLayerIn");}
+    virtual bool isUpperMsg(cMessage *msg) { return msg->arrivedOn("upperLayerIn"); }
 
   private:
     const char *tag_color;
@@ -84,10 +81,7 @@ class ExtInterface : public MACBase
 
     virtual void finish();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_EXTINTERFACE_H
 

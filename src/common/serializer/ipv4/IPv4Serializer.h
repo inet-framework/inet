@@ -21,34 +21,30 @@
 #include "IPv4Datagram.h"
 
 namespace inet {
-
-
 /**
  * Converts between IPv4Datagram and binary (network byte order) IPv4 header.
  */
 class IPv4Serializer
 {
-    public:
-        IPv4Serializer() {}
+  public:
+    IPv4Serializer() {}
 
-        /**
-         * Serializes an IPv4Datagram for transmission on the wire.
-         * The checksum is set to 0 when hasCalcChkSum is false. (The kernel does that when sending
-         * the frame over a raw socket.)
-         * When hasCalcChkSum is true, then calculating checksum.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum = false);
+    /**
+     * Serializes an IPv4Datagram for transmission on the wire.
+     * The checksum is set to 0 when hasCalcChkSum is false. (The kernel does that when sending
+     * the frame over a raw socket.)
+     * When hasCalcChkSum is true, then calculating checksum.
+     * Returns the length of data written into buffer.
+     */
+    int serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum = false);
 
-        /**
-         * Puts a packet sniffed from the wire into an IPv4Datagram. Does NOT
-         * verify the checksum.
-         */
-        void parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest);
+    /**
+     * Puts a packet sniffed from the wire into an IPv4Datagram. Does NOT
+     * verify the checksum.
+     */
+    void parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPV4SERIALIZER_H
 

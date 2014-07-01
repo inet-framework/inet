@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 
-#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER  /* cEventlogListener is only supported from 5.0 */
+#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
 #include <map>
 #include "IIPv4RoutingTable.h"
@@ -28,7 +28,7 @@
 
 /**
  * Records interface table and routing table changes into the eventlog.
-  *
+ *
  * @see IPv4RoutingTable, IPv4Route
  */
 class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEventlogManager::cEventlogListener
@@ -75,27 +75,27 @@ class INET_API RoutingTableRecorder : public cSimpleModule, public cIndexedEvent
     virtual void recordRoute(cModule *host, const IRoute *route, simsignal_t signalID);
 };
 
-
 #else /*OMNETPP_VERSION*/
-
 
 #include "IIPv4RoutingTable.h"
 
 namespace inet {
-
 /**
  * Records routing table changes into a file.
-  *
+ *
  * @see IPv4RoutingTable, IPv4Route
  */
 class INET_API RoutingTableRecorder : public cSimpleModule
 {
     friend class RoutingTableRecorderListener;
+
   private:
     FILE *routingLogFile;
+
   public:
     RoutingTableRecorder();
     virtual ~RoutingTableRecorder();
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
@@ -106,9 +106,9 @@ class INET_API RoutingTableRecorder : public cSimpleModule
     virtual void recordInterfaceChange(cModule *host, const InterfaceEntry *ie, simsignal_t signalID);
     virtual void recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID);
 };
-}
+} // namespace inet
 
 #endif /*OMNETPP_VERSION*/
 
-#endif
+#endif // ifndef __INET_ROUTINGTABLERECORDER_H
 

@@ -21,10 +21,7 @@
 #include "ITransmission.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents the reception of a transmission at a receiver. There's
  * one instance per transmission of this interface for each receiver.
@@ -33,59 +30,57 @@ namespace physicallayer
  */
 class INET_API IReception : public IPrintableObject
 {
-    public:
-        /**
-         * Returns the receiver that received the corresponding transmission
-         * from the radio medium. This function never returns NULL.
-         */
-        virtual const IRadio *getReceiver() const = 0;
+  public:
+    /**
+     * Returns the receiver that received the corresponding transmission
+     * from the radio medium. This function never returns NULL.
+     */
+    virtual const IRadio *getReceiver() const = 0;
 
-        /**
-         * Returns the transmission that corresponds to this reception at the
-         * receiver. This function never returns NULL.
-         */
-        virtual const ITransmission *getTransmission() const = 0;
+    /**
+     * Returns the transmission that corresponds to this reception at the
+     * receiver. This function never returns NULL.
+     */
+    virtual const ITransmission *getTransmission() const = 0;
 
-        /**
-         * Returns the time when the receiver started to receive the corresponding
-         * transmission. It is the start of the first bit's reception.
-         */
-        virtual const simtime_t getStartTime() const = 0;
+    /**
+     * Returns the time when the receiver started to receive the corresponding
+     * transmission. It is the start of the first bit's reception.
+     */
+    virtual const simtime_t getStartTime() const = 0;
 
-        /**
-         * Returns the time when the receiver ended to receive the corresponding
-         * transmission. It is the end of the last bit's reception.
-         */
-        virtual const simtime_t getEndTime() const = 0;
+    /**
+     * Returns the time when the receiver ended to receive the corresponding
+     * transmission. It is the end of the last bit's reception.
+     */
+    virtual const simtime_t getEndTime() const = 0;
 
-        /**
-         * Returns the antenna's position when the receiver started to receive
-         * the corresponding transmission.
-         */
-        virtual const Coord getStartPosition() const = 0;
+    /**
+     * Returns the antenna's position when the receiver started to receive
+     * the corresponding transmission.
+     */
+    virtual const Coord getStartPosition() const = 0;
 
-        /**
-         * Returns the antenna's position when the receiver ended to receive the
-         * corresponding transmission.
-         */
-        virtual const Coord getEndPosition() const = 0;
+    /**
+     * Returns the antenna's position when the receiver ended to receive the
+     * corresponding transmission.
+     */
+    virtual const Coord getEndPosition() const = 0;
 
-        /**
-         * Returns the antenna's orientation when the receiver started to receive
-         * the corresponding transmission.
-         */
-        virtual const EulerAngles getStartOrientation() const = 0;
+    /**
+     * Returns the antenna's orientation when the receiver started to receive
+     * the corresponding transmission.
+     */
+    virtual const EulerAngles getStartOrientation() const = 0;
 
-        /**
-         * Returns the antenna's orientation when the receiver ended to receive
-         * the corresponding transmission.
-         */
-        virtual const EulerAngles getEndOrientation() const = 0;
+    /**
+     * Returns the antenna's orientation when the receiver ended to receive
+     * the corresponding transmission.
+     */
+    virtual const EulerAngles getEndOrientation() const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IRECEPTION_H
 
-}
-
-
-#endif

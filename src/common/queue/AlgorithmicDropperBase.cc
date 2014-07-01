@@ -19,17 +19,15 @@
 #include "AlgorithmicDropperBase.h"
 
 namespace inet {
-
 void AlgorithmicDropperBase::initialize()
 {
     numGates = gateSize("out");
-    for (int i = 0; i < numGates; ++i)
-    {
+    for (int i = 0; i < numGates; ++i) {
         cGate *outGate = gate("out", i);
         cGate *connectedGate = outGate->getPathEndGate();
         if (!connectedGate)
             throw cRuntimeError("ThresholdDropper out gate %d is not connected", i);
-        IQueueAccess *outModule = dynamic_cast<IQueueAccess*>(connectedGate->getOwnerModule());
+        IQueueAccess *outModule = dynamic_cast<IQueueAccess *>(connectedGate->getOwnerModule());
         if (!outModule)
             throw cRuntimeError("ThresholdDropper out gate %d should be connected a simple module implementing IQueueAccess", i);
         outQueues.push_back(outModule);
@@ -39,7 +37,7 @@ void AlgorithmicDropperBase::initialize()
 
 void AlgorithmicDropperBase::handleMessage(cMessage *msg)
 {
-    cPacket *packet = check_and_cast<cPacket*>(msg);
+    cPacket *packet = check_and_cast<cPacket *>(msg);
     if (shouldDrop(packet))
         dropPacket(packet);
     else
@@ -61,7 +59,7 @@ void AlgorithmicDropperBase::sendOut(cPacket *packet)
 int AlgorithmicDropperBase::getLength() const
 {
     int len = 0;
-    for (std::set<IQueueAccess*>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
+    for (std::set<IQueueAccess *>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
         len += (*it)->getLength();
     return len;
 }
@@ -69,12 +67,9 @@ int AlgorithmicDropperBase::getLength() const
 int AlgorithmicDropperBase::getByteLength() const
 {
     int len = 0;
-    for (std::set<IQueueAccess*>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
+    for (std::set<IQueueAccess *>::const_iterator it = outQueueSet.begin(); it != outQueueSet.end(); ++it)
         len += (*it)->getByteLength();
     return len;
 }
-
-
-}
-
+} // namespace inet
 

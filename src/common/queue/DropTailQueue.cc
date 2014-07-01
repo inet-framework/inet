@@ -15,14 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "DropTailQueue.h"
 
 namespace inet {
-
-
 Define_Module(DropTailQueue);
 
 simsignal_t DropTailQueue::queueLengthSignal = registerSignal("queueLength");
@@ -44,13 +41,11 @@ void DropTailQueue::initialize()
 
 cMessage *DropTailQueue::enqueue(cMessage *msg)
 {
-    if (frameCapacity && queue.length() >= frameCapacity)
-    {
+    if (frameCapacity && queue.length() >= frameCapacity) {
         EV << "Queue full, dropping packet.\n";
         return msg;
     }
-    else
-    {
+    else {
         queue.insert(msg);
         emit(queueLengthSignal, queue.length());
         return NULL;
@@ -79,9 +74,5 @@ bool DropTailQueue::isEmpty()
 {
     return queue.empty();
 }
-
-
-
-}
-
+} // namespace inet
 

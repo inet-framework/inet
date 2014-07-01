@@ -21,54 +21,49 @@
 #include "PhysicalLayerDefs.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This purely virtual interface provides an abstraction for printable objects.
  */
 class INET_API IPrintableObject
 {
-    public:
-        virtual ~IPrintableObject() {}
+  public:
+    virtual ~IPrintableObject() {}
 
-        /**
-         * Prints this object to the provided output stream.
-         *
-         * Function calls to operator<< with pointers or references either const
-         * or not are all forwarded to this function.
-         */
-        virtual void printToStream(std::ostream &stream) const = 0;
+    /**
+     * Prints this object to the provided output stream.
+     *
+     * Function calls to operator<< with pointers or references either const
+     * or not are all forwarded to this function.
+     */
+    virtual void printToStream(std::ostream& stream) const = 0;
 };
 
-inline std::ostream &operator<<(std::ostream &stream, IPrintableObject *object)
+inline std::ostream& operator<<(std::ostream& stream, IPrintableObject *object)
 {
     object->printToStream(stream);
     return stream;
 };
 
-inline std::ostream &operator<<(std::ostream &stream, IPrintableObject &object)
+inline std::ostream& operator<<(std::ostream& stream, IPrintableObject& object)
 {
     object.printToStream(stream);
     return stream;
 };
 
-inline std::ostream &operator<<(std::ostream &stream, const IPrintableObject *object)
+inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject *object)
 {
     object->printToStream(stream);
     return stream;
 };
 
-inline std::ostream &operator<<(std::ostream &stream, const IPrintableObject &object)
+inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& object)
 {
     object.printToStream(stream);
     return stream;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPRINTABLEOBJECT_H
 
-}
-
-
-#endif

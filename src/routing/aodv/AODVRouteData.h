@@ -23,7 +23,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 class INET_API AODVRouteData : public cObject
 {
   protected:
@@ -66,9 +65,7 @@ class INET_API AODVRouteData : public cObject
 };
 
 std::ostream& operator<<(std::ostream& out, const AODVRouteData *data);
+} // namespace inet
 
-}
-
-
-#endif // ifndef AODVROUTEDATA_H_
+#endif    // ifndef AODVROUTEDATA_H_
 

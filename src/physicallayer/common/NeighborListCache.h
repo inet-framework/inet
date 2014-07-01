@@ -23,54 +23,50 @@
 #include <vector>
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
-    public:
-        struct RadioEntry
+  public:
+    struct RadioEntry
+    {
+        RadioEntry(const IRadio *radio) : radio(radio) {};
+        const IRadio *radio;
+        std::vector<const IRadio *> neighborVector;
+        bool operator==(RadioEntry *rhs) const
         {
-            RadioEntry(const IRadio *radio) : radio(radio) {};
-            const IRadio *radio;
-            std::vector<const IRadio *> neighborVector;
-            bool operator==(RadioEntry* rhs) const
-            {
-                return this->radio->getId() == rhs->radio->getId();
-            }
-        };
-        typedef std::vector<RadioEntry *> RadioEntries;
-        typedef std::vector<const IRadio *> Radios;
-        typedef std::map<const IRadio *, RadioEntry *> RadioEntryCache;
+            return this->radio->getId() == rhs->radio->getId();
+        }
+    };
+    typedef std::vector<RadioEntry *> RadioEntries;
+    typedef std::vector<const IRadio *> Radios;
+    typedef std::map<const IRadio *, RadioEntry *> RadioEntryCache;
 
-    protected:
-        RadioMedium *radioMedium;
-        RadioEntries radios;
-        cMessage *updateNeighborListsTimer;
-        RadioEntryCache radioToEntry;
-        double updatePeriod;
-        double range;
-        double maxSpeed;
+  protected:
+    RadioMedium *radioMedium;
+    RadioEntries radios;
+    cMessage *updateNeighborListsTimer;
+    RadioEntryCache radioToEntry;
+    double updatePeriod;
+    double range;
+    double maxSpeed;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
-        void updateNeighborList(RadioEntry* radioEntry);
-        void updateNeighborLists();
-        void removeRadioFromNeighborLists(const IRadio *radio);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
+    void updateNeighborList(RadioEntry *radioEntry);
+    void updateNeighborLists();
+    void removeRadioFromNeighborLists(const IRadio *radio);
 
-    public:
-        void addRadio(const IRadio *radio);
-        void removeRadio(const IRadio *radio);
-        void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
-        NeighborListCache() : radioMedium(NULL), updateNeighborListsTimer(NULL){};
-        ~NeighborListCache();
+  public:
+    void addRadio(const IRadio *radio);
+    void removeRadio(const IRadio *radio);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+    NeighborListCache() : radioMedium(NULL), updateNeighborListsTimer(NULL) {};
+    ~NeighborListCache();
 };
-
-}
-
-}
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* NEIGHBORLISTCACHE_H_ */
+

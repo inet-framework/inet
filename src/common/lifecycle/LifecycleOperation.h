@@ -20,7 +20,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 class LifecycleController;
 class IDoneCallback;
 
@@ -32,62 +31,60 @@ class IDoneCallback;
  */
 class INET_API LifecycleOperation : public cObject, public noncopyable
 {
-    public:
-        friend class LifecycleController;
-        typedef std::map<std::string,std::string> StringMap;
+  public:
+    friend class LifecycleController;
+    typedef std::map<std::string, std::string> StringMap;
 
-        enum Kind {
-            UP, ///< Start, boot, resume, recover, interface up, etc.
-            DOWN, ///< Shutdown, suspend, stop, crash, interface down, etc.
-            MOMENTARY ///< Some kind of incident, e.g. corruption of a memory cell
-        };
+    enum Kind {
+        UP,    ///< Start, boot, resume, recover, interface up, etc.
+        DOWN,    ///< Shutdown, suspend, stop, crash, interface down, etc.
+        MOMENTARY    ///< Some kind of incident, e.g. corruption of a memory cell
+    };
 
-    private:
-        cModule *rootModule;
-        int currentStage;
-        std::vector<IDoneCallback*> pendingList;
-        bool insideInitiateOperation;
-        IDoneCallback *operationCompletionCallback;
+  private:
+    cModule *rootModule;
+    int currentStage;
+    std::vector<IDoneCallback *> pendingList;
+    bool insideInitiateOperation;
+    IDoneCallback *operationCompletionCallback;
 
-    public:
-        LifecycleOperation() :
-            rootModule(NULL), currentStage(0), insideInitiateOperation(false), operationCompletionCallback(NULL) {}
+  public:
+    LifecycleOperation() :
+        rootModule(NULL), currentStage(0), insideInitiateOperation(false), operationCompletionCallback(NULL) {}
 
-        /**
-         * Initialize the operation using the parameters provided in the
-         * string map. The implementation should destructively modify the map,
-         * removing from it the parameters it understands. Ideally, the map should
-         * be empty when this method returns; if it is not, the caller should
-         * treat that as an error, and report the remaining parameters as
-         * unrecognized by the operation.
-         */
-        virtual void initialize(cModule *module, StringMap& params) {rootModule = module;}
+    /**
+     * Initialize the operation using the parameters provided in the
+     * string map. The implementation should destructively modify the map,
+     * removing from it the parameters it understands. Ideally, the map should
+     * be empty when this method returns; if it is not, the caller should
+     * treat that as an error, and report the remaining parameters as
+     * unrecognized by the operation.
+     */
+    virtual void initialize(cModule *module, StringMap& params) { rootModule = module; }
 
-        /**
-         * Returns the "kind" or "direction" of the operation. This attribute is
-         * provided for convenience, it is not used by the lifecycle infrastructure
-         * itself.
-         */
-        virtual Kind getKind() const = 0;  //TODO not sure this is actually useful
+    /**
+     * Returns the "kind" or "direction" of the operation. This attribute is
+     * provided for convenience, it is not used by the lifecycle infrastructure
+     * itself.
+     */
+    virtual Kind getKind() const = 0;    //TODO not sure this is actually useful
 
-        /**
-         * Returns the module the operation is initiated on.
-         */
-        cModule *getRootModule() const {return rootModule;}
+    /**
+     * Returns the module the operation is initiated on.
+     */
+    cModule *getRootModule() const { return rootModule; }
 
-        /**
-         * Returns the number of stages required by this operation.
-         */
-        virtual int getNumStages() const = 0;
+    /**
+     * Returns the number of stages required by this operation.
+     */
+    virtual int getNumStages() const = 0;
 
-        /**
-         * Returns the current stage, an integer in 0..numStages-1.
-         */
-        int getCurrentStage() const {return currentStage;}
+    /**
+     * Returns the current stage, an integer in 0..numStages-1.
+     */
+    int getCurrentStage() const { return currentStage; }
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_LIFECYCLEOPERATION_H
 

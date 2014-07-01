@@ -19,7 +19,6 @@
 
 namespace inet {
 namespace physicallayer {
-
 int IRadio::nextId = 0;
 
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
@@ -33,24 +32,24 @@ cEnum *IRadio::receptionStateEnum = NULL;
 cEnum *IRadio::transmissionStateEnum = NULL;
 
 Register_Enum(inet::radio::RadioMode,
-              (IRadio::RADIO_MODE_OFF,
-               IRadio::RADIO_MODE_SLEEP,
-               IRadio::RADIO_MODE_RECEIVER,
-               IRadio::RADIO_MODE_TRANSMITTER,
-               IRadio::RADIO_MODE_TRANSCEIVER,
-               IRadio::RADIO_MODE_SWITCHING));
+        (IRadio::RADIO_MODE_OFF,
+         IRadio::RADIO_MODE_SLEEP,
+         IRadio::RADIO_MODE_RECEIVER,
+         IRadio::RADIO_MODE_TRANSMITTER,
+         IRadio::RADIO_MODE_TRANSCEIVER,
+         IRadio::RADIO_MODE_SWITCHING));
 
 Register_Enum(inet::radio::ReceptionState,
-              (IRadio::RECEPTION_STATE_UNDEFINED,
-               IRadio::RECEPTION_STATE_IDLE,
-               IRadio::RECEPTION_STATE_BUSY,
-               IRadio::RECEPTION_STATE_SYNCHRONIZING,
-               IRadio::RECEPTION_STATE_RECEIVING));
+        (IRadio::RECEPTION_STATE_UNDEFINED,
+         IRadio::RECEPTION_STATE_IDLE,
+         IRadio::RECEPTION_STATE_BUSY,
+         IRadio::RECEPTION_STATE_SYNCHRONIZING,
+         IRadio::RECEPTION_STATE_RECEIVING));
 
 Register_Enum(inet::radio::TransmissionState,
-              (IRadio::TRANSMISSION_STATE_UNDEFINED,
-               IRadio::TRANSMISSION_STATE_IDLE,
-               IRadio::TRANSMISSION_STATE_TRANSMITTING));
+        (IRadio::TRANSMISSION_STATE_UNDEFINED,
+         IRadio::TRANSMISSION_STATE_IDLE,
+         IRadio::TRANSMISSION_STATE_TRANSMITTING));
 
 const char *IRadio::getRadioModeName(RadioMode radioMode)
 {
@@ -72,7 +71,6 @@ const char *IRadio::getRadioTransmissionStateName(TransmissionState transmission
         transmissionStateEnum = cEnum::get("inet::radio::TransmissionState");
     return transmissionStateEnum->getStringFor(transmissionState) + 19;
 }
-
-}
-}
+} // namespace physicallayer
+} // namespace inet
 

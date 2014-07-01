@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_UDPECHOAPP_H
 #define __INET_UDPECHOAPP_H
 
@@ -25,7 +24,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
 /**
  * UDP application. See NED for more info.
  */
@@ -33,7 +31,7 @@ class UDPEchoApp : public ApplicationBase
 {
   protected:
     UDPSocket socket;
-    int numEchoed;  // just for WATCH
+    int numEchoed;    // just for WATCH
     static simsignal_t pkSignal;
 
   protected:
@@ -47,9 +45,7 @@ class UDPEchoApp : public ApplicationBase
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPECHOAPP_H
 

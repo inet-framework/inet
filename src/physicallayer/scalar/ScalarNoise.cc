@@ -18,25 +18,18 @@
 #include "ScalarNoise.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
     W noisePower = W(0);
     W maxNoisePower = W(0);
-    for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++)
-    {
+    for (std::map<simtime_t, W>::const_iterator it = powerChanges->begin(); it != powerChanges->end(); it++) {
         noisePower += it->second;
         if (noisePower > maxNoisePower && startTime <= it->first && it->first <= endTime)
             maxNoisePower = noisePower;
     }
     return maxNoisePower;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

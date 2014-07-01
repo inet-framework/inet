@@ -15,22 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Ieee80211MgmtSTASimplified.h"
 #include "Ieee802Ctrl.h"
 
 namespace inet {
-
-
 Define_Module(Ieee80211MgmtSTASimplified);
-
 
 void Ieee80211MgmtSTASimplified::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         accessPointAddress.setAddress(par("accessPointAddress").stringValue());
         receiveSequence = 0;
     }
@@ -43,8 +38,7 @@ void Ieee80211MgmtSTASimplified::handleTimer(cMessage *msg)
 
 void Ieee80211MgmtSTASimplified::handleUpperMessage(cPacket *msg)
 {
-    if (accessPointAddress.isUnspecified())
-    {
+    if (accessPointAddress.isUnspecified()) {
         EV << "STA is not associated with an access point, discarding packet " << msg << "\n";
         delete msg;
         return;
@@ -154,10 +148,5 @@ void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponse
 {
     dropManagementFrame(frame);
 }
-
-
-
-
-}
-
+} // namespace inet
 

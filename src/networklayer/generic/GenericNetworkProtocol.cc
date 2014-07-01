@@ -28,7 +28,6 @@
 #include "IPSocket.h"
 
 namespace inet {
-
 Define_Module(GenericNetworkProtocol);
 
 void GenericNetworkProtocol::initialize()
@@ -39,7 +38,7 @@ void GenericNetworkProtocol::initialize()
     routingTable = getModuleFromPar<GenericRoutingTable>(par("routingTableModule"), this);
     arp = getModuleFromPar<IARP>(par("arpModule"), this);
 
-    queueOutBaseGateId = gateSize("queueOut")==0 ? -1 : gate("queueOut", 0)->getId();
+    queueOutBaseGateId = gateSize("queueOut") == 0 ? -1 : gate("queueOut", 0)->getId();
     defaultHopLimit = par("hopLimit");
     numLocalDeliver = numDropped = numUnroutable = numForwarded = 0;
 
@@ -52,17 +51,21 @@ void GenericNetworkProtocol::initialize()
 void GenericNetworkProtocol::updateDisplayString()
 {
     char buf[80] = "";
-    if (numForwarded>0) sprintf(buf+strlen(buf), "fwd:%d ", numForwarded);
-    if (numLocalDeliver>0) sprintf(buf+strlen(buf), "up:%d ", numLocalDeliver);
-    if (numDropped>0) sprintf(buf+strlen(buf), "DROP:%d ", numDropped);
-    if (numUnroutable>0) sprintf(buf+strlen(buf), "UNROUTABLE:%d ", numUnroutable);
-    getDisplayString().setTagArg("t",0,buf);
+    if (numForwarded > 0)
+        sprintf(buf + strlen(buf), "fwd:%d ", numForwarded);
+    if (numLocalDeliver > 0)
+        sprintf(buf + strlen(buf), "up:%d ", numLocalDeliver);
+    if (numDropped > 0)
+        sprintf(buf + strlen(buf), "DROP:%d ", numDropped);
+    if (numUnroutable > 0)
+        sprintf(buf + strlen(buf), "UNROUTABLE:%d ", numUnroutable);
+    getDisplayString().setTagArg("t", 0, buf);
 }
 
 void GenericNetworkProtocol::handleMessage(cMessage *msg)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand*>(msg)) {
-        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
+    if (dynamic_cast<RegisterTransportProtocolCommand *>(msg)) {
+        RegisterTransportProtocolCommand *command = check_and_cast<RegisterTransportProtocolCommand *>(msg);
         mapping.addProtocolMapping(command->getProtocol(), msg->getArrivalGate()->getIndex());
         delete msg;
     }
@@ -98,7 +101,7 @@ void GenericNetworkProtocol::handlePacketFromNetwork(GenericDatagram *datagram)
     delete datagram->removeControlInfo();
 
     // hop counter decrement; FIXME but not if it will be locally delivered
-    datagram->setHopLimit(datagram->getHopLimit()-1);
+    datagram->setHopLimit(datagram->getHopLimit() - 1);
 
     Address nextHop;
     const InterfaceEntry *inIE = getSourceInterfaceFrom(datagram);
@@ -112,15 +115,14 @@ void GenericNetworkProtocol::handlePacketFromNetwork(GenericDatagram *datagram)
 void GenericNetworkProtocol::handleMessageFromHL(cPacket *msg)
 {
     // if no interface exists, do not send datagram
-    if (interfaceTable->getNumInterfaces() == 0)
-    {
+    if (interfaceTable->getNumInterfaces() == 0) {
         EV_INFO << "No interfaces exist, dropping packet\n";
         delete msg;
         return;
     }
 
     // encapsulate and send
-    const InterfaceEntry *destIE; // will be filled in by encapsulate()
+    const InterfaceEntry *destIE;    // will be filled in by encapsulate()
     GenericDatagram *datagram = encapsulate(msg, destIE);
 
     Address nextHop;
@@ -130,7 +132,7 @@ void GenericNetworkProtocol::handleMessageFromHL(cPacket *msg)
     datagramLocalOut(datagram, destIE, nextHop);
 }
 
-void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const InterfaceEntry *destIE, const Address & requestedNextHop, bool fromHL)
+void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const InterfaceEntry *destIE, const Address& requestedNextHop, bool fromHL)
 {
     // TBD add option handling code here
 
@@ -139,8 +141,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     EV_INFO << "Routing datagram `" << datagram->getName() << "' with dest=" << destAddr << ": ";
 
     // check for local delivery
-    if (routingTable->isLocalAddress(destAddr))
-    {
+    if (routingTable->isLocalAddress(destAddr)) {
         EV_INFO << "local delivery\n";
         if (datagram->getSourceAddress().isUnspecified())
             datagram->setSourceAddress(destAddr); // allows two apps on the same host to communicate
@@ -154,8 +155,7 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     }
 
     // if datagram arrived from input gate and Generic_FORWARD is off, delete datagram
-    if (!fromHL && !routingTable->isForwardingEnabled())
-    {
+    if (!fromHL && !routingTable->isForwardingEnabled()) {
         EV_INFO << "forwarding off, dropping packet\n";
         numDropped++;
         delete datagram;
@@ -165,20 +165,17 @@ void GenericNetworkProtocol::routePacket(GenericDatagram *datagram, const Interf
     // if output port was explicitly requested, use that, otherwise use GenericNetworkProtocol routing
     // TODO: see IPv4, using destIE here leaves nextHope unspecified
     Address nextHop;
-    if (destIE && !requestedNextHop.isUnspecified())
-    {
+    if (destIE && !requestedNextHop.isUnspecified()) {
         EV_DETAIL << "using manually specified output interface " << destIE->getName() << "\n";
         nextHop = requestedNextHop;
     }
-    else
-    {
+    else {
         // use GenericNetworkProtocol routing (lookup in routing table)
         const GenericRoute *re = routingTable->findBestMatchingRoute(destAddr);
 
         // error handling: destination address does not exist in routing table:
         // throw packet away and continue
-        if (re==NULL)
-        {
+        if (re == NULL) {
             EV_INFO << "unroutable, discarding packet\n";
             numUnroutable++;
             delete datagram;
@@ -205,8 +202,7 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
 {
     Address destAddr = datagram->getDestinationAddress();
     // if received from the network...
-    if (fromIE!=NULL)
-    {
+    if (fromIE != NULL) {
         // check for local delivery
         if (routingTable->isLocalMulticastAddress(destAddr))
             sendDatagramToHL(datagram);
@@ -227,8 +223,8 @@ void GenericNetworkProtocol::routeMulticastPacket(GenericDatagram *datagram, con
     }
     else {
         //TODO
-        for (int i=0; i<interfaceTable->getNumInterfaces(); ++i) {
-            const InterfaceEntry * destIE = interfaceTable->getInterface(i);
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); ++i) {
+            const InterfaceEntry *destIE = interfaceTable->getInterface(i);
             if (!destIE->isLoopback())
                 sendDatagramToOutput(datagram->dup(), destIE, datagram->getDestinationAddress());
         }
@@ -353,9 +349,9 @@ cPacket *GenericNetworkProtocol::decapsulate(GenericDatagram *datagram)
     return packet;
 }
 
-GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *&destIE)
+GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, const InterfaceEntry *& destIE)
 {
-    GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo*>(transportPacket->removeControlInfo());
+    GenericNetworkProtocolControlInfo *controlInfo = check_and_cast<GenericNetworkProtocolControlInfo *>(transportPacket->removeControlInfo());
     GenericDatagram *datagram = new GenericDatagram(transportPacket->getName());
 //    datagram->setByteLength(HEADER_BYTES); //TODO parameter
     datagram->encapsulate(transportPacket);
@@ -371,12 +367,11 @@ GenericDatagram *GenericNetworkProtocol::encapsulate(cPacket *transportPacket, c
 
     // when source address was given, use it; otherwise it'll get the address
     // of the outgoing interface after routing
-    if (!src.isUnspecified())
-    {
+    if (!src.isUnspecified()) {
         // if interface parameter does not match existing interface, do not send datagram
-        if (routingTable->getInterfaceByAddress(src)==NULL)
+        if (routingTable->getInterfaceByAddress(src) == NULL)
             throw cRuntimeError("Wrong source address %s in (%s)%s: no interface with such address",
-                      src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
+                    src.str().c_str(), transportPacket->getClassName(), transportPacket->getFullName());
         datagram->setSourceAddress(src);
     }
 
@@ -403,11 +398,9 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     int protocol = datagram->getTransportProtocol();
     int gateIndex = mapping.findOutputGateForProtocol(protocol);
     // check if the transportOut port are connected, otherwise discard the packet
-    if (gateIndex >= 0)
-    {
-        cGate* outGate = gate("transportOut", gateIndex);
-        if (outGate->isPathOK())
-        {
+    if (gateIndex >= 0) {
+        cGate *outGate = gate("transportOut", gateIndex);
+        if (outGate->isPathOK()) {
             // decapsulate and send on appropriate output gate
             cPacket *packet = decapsulate(datagram);
             delete datagram;
@@ -420,7 +413,7 @@ void GenericNetworkProtocol::sendDatagramToHL(GenericDatagram *datagram)
     delete datagram;
 }
 
-void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const Address & nextHop)
+void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, const InterfaceEntry *ie, const Address& nextHop)
 {
     if (datagram->getByteLength() > ie->getMTU())
         throw cRuntimeError("datagram too large"); //TODO refine
@@ -428,12 +421,11 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     // hop counter check
     if (datagram->getHopLimit() <= 0) {
         EV_INFO << "datagram hopLimit reached zero, discarding\n";
-        delete datagram;  //TODO stats counter???
+        delete datagram;    //TODO stats counter???
         return;
     }
 
-    if (!ie->isBroadcast())
-    {
+    if (!ie->isBroadcast()) {
         EV_DETAIL << "output interface " << ie->getName() << " is not broadcast, skipping ARP\n";
         send(datagram, queueOutBaseGateId + ie->getNetworkLayerGateIndex());
         return;
@@ -445,16 +437,14 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
 
     // send out datagram to NIC, with control info attached
     MACAddress nextHopMAC = arp->resolveL3Address(nextHop, ie);
-    if (nextHopMAC == MACAddress::UNSPECIFIED_ADDRESS)
-    {
+    if (nextHopMAC == MACAddress::UNSPECIFIED_ADDRESS) {
         throw cRuntimeError("ARP couldn't resolve the '%s' address", nextHop.str().c_str());
     }
-    else
-    {
+    else {
         // add control info with MAC address
         Ieee802Ctrl *controlInfo = new Ieee802Ctrl();
         controlInfo->setDest(nextHopMAC);
-        controlInfo->setEtherType(ETHERTYPE_IPv4); // TODO:
+        controlInfo->setEtherType(ETHERTYPE_IPv4);    // TODO:
         datagram->setControlInfo(controlInfo);
 
         // send out
@@ -462,7 +452,7 @@ void GenericNetworkProtocol::sendDatagramToOutput(GenericDatagram *datagram, con
     }
 }
 
-void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry * destIE, const Address & nextHop)
+void GenericNetworkProtocol::datagramPreRouting(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *destIE, const Address& nextHop)
 {
     // route packet
     if (!datagram->getDestinationAddress().isMulticast())
@@ -471,12 +461,12 @@ void GenericNetworkProtocol::datagramPreRouting(GenericDatagram* datagram, const
         routeMulticastPacket(datagram, destIE, inIE);
 }
 
-void GenericNetworkProtocol::datagramLocalIn(GenericDatagram* datagram, const InterfaceEntry * inIE)
+void GenericNetworkProtocol::datagramLocalIn(GenericDatagram *datagram, const InterfaceEntry *inIE)
 {
     sendDatagramToHL(datagram);
 }
 
-void GenericNetworkProtocol::datagramLocalOut(GenericDatagram* datagram, const InterfaceEntry * destIE, const Address & nextHop)
+void GenericNetworkProtocol::datagramLocalOut(GenericDatagram *datagram, const InterfaceEntry *destIE, const Address& nextHop)
 {
     // route packet
     if (!datagram->getDestinationAddress().isMulticast())
@@ -485,16 +475,16 @@ void GenericNetworkProtocol::datagramLocalOut(GenericDatagram* datagram, const I
         routeMulticastPacket(datagram, destIE, NULL);
 }
 
-void GenericNetworkProtocol::registerHook(int priority, IHook* hook)
+void GenericNetworkProtocol::registerHook(int priority, IHook *hook)
 {
     Enter_Method("registerHook()");
-    hooks.insert(std::pair<int, IHook*>(priority, hook));
+    hooks.insert(std::pair<int, IHook *>(priority, hook));
 }
 
-void GenericNetworkProtocol::unregisterHook(int priority, IHook* hook)
+void GenericNetworkProtocol::unregisterHook(int priority, IHook *hook)
 {
     Enter_Method("unregisterHook()");
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         if ((iter->first == priority) && (iter->second == hook)) {
             hooks.erase(iter);
             return;
@@ -502,7 +492,7 @@ void GenericNetworkProtocol::unregisterHook(int priority, IHook* hook)
     }
 }
 
-void GenericNetworkProtocol::dropQueuedDatagram(const INetworkDatagram * datagram)
+void GenericNetworkProtocol::dropQueuedDatagram(const INetworkDatagram *datagram)
 {
     Enter_Method("dropDatagram()");
     for (std::list<QueuedDatagramForHook>::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
@@ -514,27 +504,29 @@ void GenericNetworkProtocol::dropQueuedDatagram(const INetworkDatagram * datagra
     }
 }
 
-void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram* datagram)
+void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram *datagram)
 {
-
     Enter_Method("reinjectDatagram()");
     for (std::list<QueuedDatagramForHook>::iterator iter = queuedDatagramsForHooks.begin(); iter != queuedDatagramsForHooks.end(); iter++) {
         if (iter->datagram == datagram) {
-            GenericDatagram* datagram = iter->datagram;
-            const InterfaceEntry * inIE = iter->inIE;
-            const InterfaceEntry * outIE = iter->outIE;
-            const Address & nextHop = iter->nextHop;
+            GenericDatagram *datagram = iter->datagram;
+            const InterfaceEntry *inIE = iter->inIE;
+            const InterfaceEntry *outIE = iter->outIE;
+            const Address& nextHop = iter->nextHop;
             INetfilter::IHook::Type hookType = iter->hookType;
             switch (hookType) {
                 case INetfilter::IHook::PREROUTING:
                     datagramPreRouting(datagram, inIE, outIE, nextHop);
                     break;
+
                 case INetfilter::IHook::LOCALIN:
                     datagramLocalIn(datagram, inIE);
                     break;
+
                 case INetfilter::IHook::LOCALOUT:
                     datagramLocalOut(datagram, outIE, nextHop);
                     break;
+
                 default:
                     throw cRuntimeError("Re-injection of datagram queued for this hook not implemented");
                     break;
@@ -545,88 +537,135 @@ void GenericNetworkProtocol::reinjectQueuedDatagram(const INetworkDatagram* data
     }
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry *& outIE, Address & nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramPreRoutingHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHop)
 {
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHop);
-        switch(r)
-        {
-            case IHook::ACCEPT: break;   // continue iteration
-            case IHook::DROP:   delete datagram; return r;
-            case IHook::QUEUE:  queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, NULL, nextHop, INetfilter::IHook::PREROUTING)); return r;
-            case IHook::STOLEN: return r;
-            default: throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
+        switch (r) {
+            case IHook::ACCEPT:
+                break;    // continue iteration
+
+            case IHook::DROP:
+                delete datagram;
+                return r;
+
+            case IHook::QUEUE:
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, NULL, nextHop, INetfilter::IHook::PREROUTING));
+                return r;
+
+            case IHook::STOLEN:
+                return r;
+
+            default:
+                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry *& outIE, Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramForwardHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHop)
 {
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHop);
-        switch(r)
-        {
-            case IHook::ACCEPT: break;   // continue iteration
-            case IHook::DROP:   delete datagram; return r;
-            case IHook::QUEUE:  queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::FORWARD)); return r;
-            case IHook::STOLEN: return r;
-            default: throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
+        switch (r) {
+            case IHook::ACCEPT:
+                break;    // continue iteration
+
+            case IHook::DROP:
+                delete datagram;
+                return r;
+
+            case IHook::QUEUE:
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::FORWARD));
+                return r;
+
+            case IHook::STOLEN:
+                return r;
+
+            default:
+                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(GenericDatagram* datagram, const InterfaceEntry * inIE, const InterfaceEntry *& outIE, Address& nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramPostRoutingHook(GenericDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHop)
 {
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHop);
-        switch(r)
-        {
-            case IHook::ACCEPT: break;   // continue iteration
-            case IHook::DROP:   delete datagram; return r;
-            case IHook::QUEUE:  queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::POSTROUTING)); return r;
-            case IHook::STOLEN: return r;
-            default: throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
+        switch (r) {
+            case IHook::ACCEPT:
+                break;    // continue iteration
+
+            case IHook::DROP:
+                delete datagram;
+                return r;
+
+            case IHook::QUEUE:
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, outIE, nextHop, INetfilter::IHook::POSTROUTING));
+                return r;
+
+            case IHook::STOLEN:
+                return r;
+
+            default:
+                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(GenericDatagram* datagram, const InterfaceEntry * inIE)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalInHook(GenericDatagram *datagram, const InterfaceEntry *inIE)
 {
     Address address;
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalInHook(datagram, inIE);
-        switch(r)
-        {
-            case IHook::ACCEPT: break;   // continue iteration
-            case IHook::DROP:   delete datagram; return r;
-            case IHook::QUEUE:  queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, NULL, address, INetfilter::IHook::LOCALIN)); return r;
-            case IHook::STOLEN: return r;
-            default: throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
+        switch (r) {
+            case IHook::ACCEPT:
+                break;    // continue iteration
+
+            case IHook::DROP:
+                delete datagram;
+                return r;
+
+            case IHook::QUEUE:
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, inIE, NULL, address, INetfilter::IHook::LOCALIN));
+                return r;
+
+            case IHook::STOLEN:
+                return r;
+
+            default:
+                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
     return IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDatagram* datagram, const InterfaceEntry *& outIE, Address & nextHop)
+INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHop)
 {
-    for (std::multimap<int, IHook*>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
+    for (std::multimap<int, IHook *>::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHop);
-        switch(r)
-        {
-            case IHook::ACCEPT: break;   // continue iteration
-            case IHook::DROP:   delete datagram; return r;
-            case IHook::QUEUE:  queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, NULL, outIE, nextHop, INetfilter::IHook::LOCALOUT)); return r;
-            case IHook::STOLEN: return r;
-            default: throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
+        switch (r) {
+            case IHook::ACCEPT:
+                break;    // continue iteration
+
+            case IHook::DROP:
+                delete datagram;
+                return r;
+
+            case IHook::QUEUE:
+                queuedDatagramsForHooks.push_back(QueuedDatagramForHook(datagram, NULL, outIE, nextHop, INetfilter::IHook::LOCALOUT));
+                return r;
+
+            case IHook::STOLEN:
+                return r;
+
+            default:
+                throw cRuntimeError("Unknown Hook::Result value: %d", (int)r);
         }
     }
     return IHook::ACCEPT;
 }
-
-
-}
-
+} // namespace inet
 

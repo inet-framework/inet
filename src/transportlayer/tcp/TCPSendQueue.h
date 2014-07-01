@@ -24,8 +24,6 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
-
 /**
  * Abstract base class for TCP send queues. In fact a single object
  * represents both the send queue and the retransmission queue
@@ -81,13 +79,13 @@ namespace inet {
 class INET_API TCPSendQueue : public cObject
 {
   protected:
-    TCPConnection *conn; // the connection that owns this queue
+    TCPConnection *conn;    // the connection that owns this queue
 
   public:
     /**
      * Ctor.
      */
-    TCPSendQueue()  {conn = NULL;}
+    TCPSendQueue() { conn = NULL; }
 
     /**
      * Virtual dtor.
@@ -97,7 +95,7 @@ class INET_API TCPSendQueue : public cObject
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn)  {conn = _conn;}
+    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
 
     /**
      * Initialize the object. The startSeq parameter tells what sequence number the first
@@ -137,7 +135,7 @@ class INET_API TCPSendQueue : public cObject
     inline ulong getBytesAvailable(uint32 fromSeq)
     {
         uint32 bufEndSeq = getBufferEndSeq();
-        return seqLess(fromSeq, bufEndSeq) ? bufEndSeq-fromSeq : 0;
+        return seqLess(fromSeq, bufEndSeq) ? bufEndSeq - fromSeq : 0;
     }
 
     /**
@@ -154,10 +152,8 @@ class INET_API TCPSendQueue : public cObject
      * transmitted and ACKed, so they can be removed from the queue.
      */
     virtual void discardUpTo(uint32 seqNum) = 0;
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPSENDQUEUE_H
 
-
-#endif

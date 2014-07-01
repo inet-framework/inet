@@ -21,19 +21,18 @@
 #include "Address.h"
 
 namespace inet {
-
-class INetworkDatagram {
+class INetworkDatagram
+{
   public:
-    virtual ~INetworkDatagram() { }
+    virtual ~INetworkDatagram() {}
     virtual Address getSourceAddress() const = 0;
-    virtual void setSourceAddress(const Address & address) = 0;
+    virtual void setSourceAddress(const Address& address) = 0;
     virtual Address getDestinationAddress() const = 0;
-    virtual void setDestinationAddress(const Address & address) = 0;
+    virtual void setDestinationAddress(const Address& address) = 0;
     virtual int getTransportProtocol() const = 0;
     virtual void setTransportProtocol(int protocol) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_INETWORKDATAGRAM_H
 
-
-#endif

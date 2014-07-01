@@ -28,8 +28,6 @@
 #include "NotifierConsts.h"
 
 namespace inet {
-
-
 Define_Module(Loopback);
 
 simsignal_t Loopback::packetSentToUpperSignal = registerSignal("packetSentToUpper");
@@ -48,21 +46,17 @@ void Loopback::initialize(int stage)
     MACBase::initialize(stage);
 
     // all initialization is done in the first stage
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numSent = numRcvdOK = 0;
         WATCH(numSent);
         WATCH(numRcvdOK);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         // register our interface entry in IInterfaceTable
         registerInterface();
     }
-
     // update display string when addresses have been autoconfigured etc.
-    else if (stage == INITSTAGE_LAST)
-    {
+    else if (stage == INITSTAGE_LAST) {
         updateDisplayString();
     }
 }
@@ -87,8 +81,7 @@ InterfaceEntry *Loopback::createInterfaceEntry()
 
 void Loopback::handleMessage(cMessage *msg)
 {
-    if (!isOperational)
-    {
+    if (!isOperational) {
         handleMessageWhenDown(msg);
         return;
     }
@@ -124,26 +117,20 @@ bool Loopback::isUpperMsg(cMessage *msg)
 
 void Loopback::updateDisplayString()
 {
-    if (ev.isDisabled())
-    {
+    if (ev.isDisabled()) {
         // speed up things
         getDisplayString().setTagArg("t", 0, "");
     }
-    else
-    {
+    else {
         /* TBD find solution for displaying IPv4 address without dependence on IPv4 or IPv6
                 IPv4Address addr = interfaceEntry->ipv4Data()->getIPAddress();
                 sprintf(buf, "%s / %s\nrcv:%ld snt:%ld", addr.isUnspecified()?"-":addr.str().c_str(), datarateText, numRcvdOK, numSent);
-        */
+         */
         char buf[80];
         sprintf(buf, "rcv:%ld snt:%ld", numRcvdOK, numSent);
 
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
-
-
-
-}
-
+} // namespace inet
 

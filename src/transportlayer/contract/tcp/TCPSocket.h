@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TCPSOCKET_H
 #define __INET_TCPSOCKET_H
 
@@ -25,9 +24,7 @@
 #include "Address.h"
 
 namespace inet {
-
 class TCPStatusInfo;
-
 
 /**
  * TCPSocket is a convenience class, to make it easier to manage TCP connections
@@ -143,10 +140,10 @@ class INET_API TCPSocket
         virtual void socketPeerClosed(int connId, void *yourPtr) {}
         virtual void socketClosed(int connId, void *yourPtr) {}
         virtual void socketFailure(int connId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
+        virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) { delete status; }
     };
 
-    enum State {NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR};
+    enum State { NOT_BOUND, BOUND, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, CLOSED, SOCKERROR };
 
   protected:
     int connId;
@@ -195,14 +192,14 @@ class INET_API TCPSocket
      * to identify the connection when it receives a command from the application
      * (or TCPSocket).
      */
-    int getConnectionId() const  {return connId;}
+    int getConnectionId() const { return connId; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from TCP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState()   {return sockstate;}
+    int getState() { return sockstate; }
 
     /**
      * Returns name of socket state code returned by getState().
@@ -211,10 +208,10 @@ class INET_API TCPSocket
 
     /** @name Getter functions */
     //@{
-    Address getLocalAddress() {return localAddr;}
-    int getLocalPort() {return localPrt;}
-    Address getRemoteAddress() {return remoteAddr;}
-    int getRemotePort() {return remotePrt;}
+    Address getLocalAddress() { return localAddr; }
+    int getLocalPort() { return localPrt; }
+    Address getRemoteAddress() { return remoteAddr; }
+    int getRemotePort() { return remotePrt; }
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -224,7 +221,7 @@ class INET_API TCPSocket
      * Sets the gate on which to send to TCP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("tcpOut"));</tt>
      */
-    void setOutputGate(cGate *toTcp)  {gateToTcp = toTcp;}
+    void setOutputGate(cGate *toTcp) { gateToTcp = toTcp; }
 
     /**
      * Bind the socket to a local port number.
@@ -241,19 +238,19 @@ class INET_API TCPSocket
      * Returns the current dataTransferMode parameter.
      * @see TCPCommand
      */
-    TCPDataTransferMode getDataTransferMode() const {return dataTransferMode;}
+    TCPDataTransferMode getDataTransferMode() const { return dataTransferMode; }
 
     /**
      * Returns the current tcpAlgorithmClass parameter.
      */
-    const char *getTCPAlgorithmClass() const {return tcpAlgorithmClass.c_str();}
+    const char *getTCPAlgorithmClass() const { return tcpAlgorithmClass.c_str(); }
 
     /**
      * Convert a string to TCPDataTransferMode enum.
      * Returns TCP_TRANSFER_UNDEFINED when string has an invalid value
      * Generate runtime error, when string is NULL;
      */
-    static TCPDataTransferMode convertStringToDataTransferMode(const char * transferMode);
+    static TCPDataTransferMode convertStringToDataTransferMode(const char *transferMode);
 
     /**
      * Sets the dataTransferMode parameter of the subsequent connect() or listen() calls.
@@ -266,7 +263,7 @@ class INET_API TCPSocket
      *
      * Generate runtime error when parameter is missing or value is invalid.
      */
-    void readDataTransferModePar(cComponent &component);
+    void readDataTransferModePar(cComponent& component);
 
     /**
      * Sets the tcpAlgorithmClass parameter of the next connect() or listen() call.
@@ -285,7 +282,7 @@ class INET_API TCPSocket
      * class can also be useful, and TCPSrvHostApp shows how to put it all
      * together. See also TCPOpenCommand documentation (neddoc) for more info.
      */
-    void listen()  {listen(true);}
+    void listen() { listen(true); }
 
     /**
      * Initiates passive OPEN to create a non-forking listening connection.
@@ -294,7 +291,7 @@ class INET_API TCPSocket
      *
      * See TCPOpenCommand documentation (neddoc) for more info.
      */
-    void listenOnce()  {listen(false);}
+    void listenOnce() { listen(false); }
 
     /**
      * Active OPEN to the given remote socket.
@@ -406,10 +403,7 @@ class INET_API TCPSocket
     void processMessage(cMessage *msg);
     //@}
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_TCPSOCKET_H
 

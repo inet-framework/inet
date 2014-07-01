@@ -15,15 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "CircleMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(CircleMobility);
-
 
 CircleMobility::CircleMobility()
 {
@@ -42,8 +38,7 @@ void CircleMobility::initialize(int stage)
     MovingMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing CircleMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         cx = par("cx");
         cy = par("cy");
         cz = par("cz");
@@ -71,11 +66,9 @@ void CircleMobility::move()
     lastSpeed.y = -cos(angle) * speed;
     lastSpeed.z = 0;
     // do something if we reach the wall
-    Coord dummyCoord; double dummyAngle;
+    Coord dummyCoord;
+    double dummyAngle;
     handleIfOutside(REFLECT, dummyCoord, dummyCoord, dummyAngle);
 }
-
-
-}
-
+} // namespace inet
 

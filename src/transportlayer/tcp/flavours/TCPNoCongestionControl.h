@@ -23,13 +23,10 @@
 #include "TCPBaseAlg.h"
 
 namespace inet {
-
-
 /**
  * State variables for TCPNoCongestionControl.
  */
 typedef TCPBaseAlgStateVariables TCPNoCongestionControlStateVariables;
-
 
 /**
  * TCP with no congestion control (i.e. congestion window kept very large).
@@ -38,10 +35,11 @@ typedef TCPBaseAlgStateVariables TCPNoCongestionControlStateVariables;
 class INET_API TCPNoCongestionControl : public TCPBaseAlg
 {
   protected:
-    TCPNoCongestionControlStateVariables *&state; // alias to TCLAlgorithm's 'state'
+    TCPNoCongestionControlStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPNoCongestionControlStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() {
+    virtual TCPStateVariables *createStateVariables()
+    {
         return new TCPNoCongestionControlStateVariables();
     }
 
@@ -58,8 +56,7 @@ class INET_API TCPNoCongestionControl : public TCPBaseAlg
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32 firstSeqAcked);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPNOCONGESTIONCONTROL_H
 
-
-#endif

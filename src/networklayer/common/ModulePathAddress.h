@@ -24,7 +24,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * This class provides network addresses using the module path to interface modules.
  * The module path address supports unspecified, broadcast and multicast addresses too.
@@ -32,43 +31,43 @@ namespace inet {
  */
 class INET_API ModulePathAddress
 {
-    private:
-        int id;
-    public:
-        ModulePathAddress() : id(0) { }
-        ModulePathAddress(int id) : id(id) { }
+  private:
+    int id;
 
-        int getId() const { return id; }
-        bool tryParse(const char *addr);
+  public:
+    ModulePathAddress() : id(0) {}
+    ModulePathAddress(int id) : id(id) {}
 
-        bool isUnspecified() const { return id == 0; }
-        bool isUnicast() const { return id > 0; }
-        bool isMulticast() const { return id < -1; }
-        bool isBroadcast() const { return id == -1; }
+    int getId() const { return id; }
+    bool tryParse(const char *addr);
 
-        /**
-         * Returns equals(addr).
-         */
-        bool operator==(const ModulePathAddress& addr1) const { return id == addr1.id; }
+    bool isUnspecified() const { return id == 0; }
+    bool isUnicast() const { return id > 0; }
+    bool isMulticast() const { return id < -1; }
+    bool isBroadcast() const { return id == -1; }
 
-        /**
-         * Returns !equals(addr).
-         */
-        bool operator!=(const ModulePathAddress& addr1) const { return id != addr1.id; }
+    /**
+     * Returns equals(addr).
+     */
+    bool operator==(const ModulePathAddress& addr1) const { return id == addr1.id; }
 
-        /**
-         * Compares two addresses.
-         */
-        bool operator<(const ModulePathAddress& addr1) const { return id < addr1.id; }
-        bool operator<=(const ModulePathAddress& addr1) const { return id <= addr1.id; }
-        bool operator>(const ModulePathAddress& addr1) const { return id > addr1.id; }
-        bool operator>=(const ModulePathAddress& addr1) const { return id >= addr1.id; }
-        static bool maskedAddrAreEqual(const ModulePathAddress& addr1, const ModulePathAddress& addr2, int prefixLength) { return addr1.id == addr2.id; }
+    /**
+     * Returns !equals(addr).
+     */
+    bool operator!=(const ModulePathAddress& addr1) const { return id != addr1.id; }
 
-        std::string str() const;
+    /**
+     * Compares two addresses.
+     */
+    bool operator<(const ModulePathAddress& addr1) const { return id < addr1.id; }
+    bool operator<=(const ModulePathAddress& addr1) const { return id <= addr1.id; }
+    bool operator>(const ModulePathAddress& addr1) const { return id > addr1.id; }
+    bool operator>=(const ModulePathAddress& addr1) const { return id >= addr1.id; }
+    static bool maskedAddrAreEqual(const ModulePathAddress& addr1, const ModulePathAddress& addr2, int prefixLength) { return addr1.id == addr2.id; }
+
+    std::string str() const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MODULEPATHADDRESS_H
 
-
-#endif

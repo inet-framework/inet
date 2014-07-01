@@ -39,12 +39,10 @@
  *
  **************************************************************************/
 
-
 #include <FWMath.h>
 #include "MoBANLocal.h"
 
 namespace inet {
-
 Define_Module(MoBANLocal);
 
 MoBANLocal::MoBANLocal()
@@ -60,8 +58,7 @@ void MoBANLocal::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MoBANLocal stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         WATCH_PTR(coordinator);
         WATCH(referencePosition);
         WATCH(radius);
@@ -78,14 +75,12 @@ void MoBANLocal::setInitialPosition()
 
 void MoBANLocal::setTargetPosition()
 {
-    if (speed != 0)
-    {
+    if (speed != 0) {
         // find a uniformly random position within a sphere around the reference point
         double x = uniform(-radius, radius);
         double y = uniform(-radius, radius);
         double z = uniform(-radius, radius);
-        while (x * x + y * y + z * z > radius * radius)
-        {
+        while (x * x + y * y + z * z > radius * radius) {
             x = uniform(-radius, radius);
             y = uniform(-radius, radius);
             z = uniform(-radius, radius);
@@ -104,8 +99,7 @@ void MoBANLocal::setTargetPosition()
 
 void MoBANLocal::updateVisualRepresentation()
 {
-    if (ev.isGUI() && visualRepresentation)
-    {
+    if (ev.isGUI() && visualRepresentation) {
         Coord coordinatorPosition = coordinator->getCurrentPosition();
         visualRepresentation->getDisplayString().setTagArg("p", 0, lastPosition.x + coordinatorPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, lastPosition.y + coordinatorPosition.y);
@@ -132,8 +126,5 @@ Coord MoBANLocal::getCurrentSpeed()
 {
     return LineSegmentsMobilityBase::getCurrentSpeed() + coordinator->getCurrentSpeed();
 }
-
-
-}
-
+} // namespace inet
 

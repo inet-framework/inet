@@ -19,16 +19,13 @@
 #include "TCP.h"
 
 namespace inet {
-
 Register_Class(DumbTCP);
 
-
 // just a dummy value
-#define REXMIT_TIMEOUT 2
-
+#define REXMIT_TIMEOUT    2
 
 DumbTCP::DumbTCP() : TCPAlgorithm(),
-        state((DumbTCPStateVariables *&)TCPAlgorithm::state)
+    state((DumbTCPStateVariables *&)TCPAlgorithm::state)
 {
     rexmitTimer = NULL;
 }
@@ -50,8 +47,7 @@ void DumbTCP::initialize()
 
 void DumbTCP::established(bool active)
 {
-    if (active)
-    {
+    if (active) {
         // finish connection setup with ACK (possibly piggybacked on data)
         EV_INFO << "Completing connection setup by sending ACK (possibly piggybacked on data)\n";
 
@@ -135,8 +131,5 @@ void DumbTCP::restartRexmitTimer()
 void DumbTCP::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
 }
-
-
-}
-
+} // namespace inet
 

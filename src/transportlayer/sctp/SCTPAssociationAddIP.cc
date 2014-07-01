@@ -21,13 +21,12 @@
 #include "common.h"
 
 namespace inet {
-
-void SCTPAssociation::sendAsconf(const char* type, const bool remote)
+void SCTPAssociation::sendAsconf(const char *type, const bool remote)
 {
-    SCTPAuthenticationChunk* authChunk;
-    bool                     nat = false;
-    Address              targetAddr = remoteAddr;
-    uint16                   chunkLength = 0;
+    SCTPAuthenticationChunk *authChunk;
+    bool nat = false;
+    Address targetAddr = remoteAddr;
+    uint16 chunkLength = 0;
 
     if (state->asconfOutstanding == false) {
         EV_DEBUG << "sendAsconf\n";
@@ -40,7 +39,7 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         asconfChunk->setSerialNumber(state->asconfSn);
         chunkLength = SCTP_ADD_IP_CHUNK_LENGTH;
         EV_INFO << "localAddr=" << localAddr << ", remoteAddr=" << remoteAddr << "\n";
-        if (getAddressLevel(localAddr)==3 && getAddressLevel(remoteAddr)==4 && (bool)sctpMain->par("natFriendly")) {
+        if (getAddressLevel(localAddr) == 3 && getAddressLevel(remoteAddr) == 4 && (bool)sctpMain->par("natFriendly")) {
             asconfChunk->setAddressParam(Address("0.0.0.0"));
             asconfChunk->setPeerVTag(peerVTag);
             nat = true;
@@ -52,32 +51,29 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         if (localAddr.getType() == Address::IPv6) {
             chunkLength += 20;
         }
-        else if (localAddr.getType() == Address::IPv4){
+        else if (localAddr.getType() == Address::IPv4) {
             chunkLength += 8;
         }
         else
             throw cRuntimeError("Unknown address type");
 
         asconfChunk->setByteLength(chunkLength);
-        
+
         char typecopy[128];
         strcpy(typecopy, type);
-        char* token;
-        token = strtok((char*)typecopy, ",");
-        while (token != NULL)
-        {
-            switch (atoi(token))
-            {
-                case ADD_IP_ADDRESS:
-                {
-                    SCTPAddIPParameter* ipParam;
+        char *token;
+        token = strtok((char *)typecopy, ",");
+        while (token != NULL) {
+            switch (atoi(token)) {
+                case ADD_IP_ADDRESS: {
+                    SCTPAddIPParameter *ipParam;
                     ipParam = new SCTPAddIPParameter("AddIP");
                     chunkLength += SCTP_ADD_IP_PARAMETER_LENGTH;
                     ipParam->setParameterType(ADD_IP_ADDRESS);
                     ipParam->setRequestCorrelationId(++state->corrIdNum);
                     if (nat) {
                         ipParam->setAddressParam(Address("0.0.0.0"));
-                        sctpMain->addLocalAddressToAllRemoteAddresses(this, AddressResolver().resolve(sctpMain->par("addAddress"), 1), (std::vector<Address>) remoteAddressList);
+                        sctpMain->addLocalAddressToAllRemoteAddresses(this, AddressResolver().resolve(sctpMain->par("addAddress"), 1), (std::vector<Address>)remoteAddressList);
                         state->localAddresses.push_back(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                         if (remote)
                             targetAddr = remoteAddr;
@@ -89,20 +85,20 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     }
                     if (ipParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
-                        ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+20)*8);
+                        ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 20) * 8);
                     }
                     else if (ipParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
-                        ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+8)*8);
+                        ipParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 8) * 8);
                     }
                     else
                         throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(ipParam);
                     break;
                 }
-                case DELETE_IP_ADDRESS:
-                {
-                    SCTPDeleteIPParameter* delParam;
+
+                case DELETE_IP_ADDRESS: {
+                    SCTPDeleteIPParameter *delParam;
                     delParam = new SCTPDeleteIPParameter("DeleteIP");
                     chunkLength += SCTP_ADD_IP_PARAMETER_LENGTH;
                     delParam->setParameterType(DELETE_IP_ADDRESS);
@@ -110,20 +106,20 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     delParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     if (delParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
-                        delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+20)*8);
+                        delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 20) * 8);
                     }
                     else if (delParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
-                        delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH+8)*8);
+                        delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 8) * 8);
                     }
                     else
                         throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(delParam);
                     break;
                 }
-                case SET_PRIMARY_ADDRESS:
-                {
-                    SCTPSetPrimaryIPParameter* priParam;
+
+                case SET_PRIMARY_ADDRESS: {
+                    SCTPSetPrimaryIPParameter *priParam;
                     priParam = new SCTPSetPrimaryIPParameter("SetPrimary");
                     chunkLength += SCTP_ADD_IP_PARAMETER_LENGTH;
                     priParam->setParameterType(SET_PRIMARY_ADDRESS);
@@ -134,18 +130,20 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
                     }
                     if (priParam->getAddressParam().getType() == Address::IPv6) {
                         chunkLength += 20;
-                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+20));
+                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH + 20));
                     }
                     else if (priParam->getAddressParam().getType() == Address::IPv4) {
                         chunkLength += 8;
-                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH+8));
+                        priParam->setByteLength((SCTP_ADD_IP_PARAMETER_LENGTH + 8));
                     }
                     else
                         throw cRuntimeError("Unknown address type");
                     asconfChunk->addAsconfParam(priParam);
                     break;
                 }
-                default: printf("type %d not known\n", atoi(token));
+
+                default:
+                    printf("type %d not known\n", atoi(token));
                     break;
             }
             token = strtok(NULL, ",");
@@ -160,7 +158,7 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
         }
         sctpAsconf->addChunk(asconfChunk);
 
-        state->asconfChunk = check_and_cast<SCTPAsconfChunk*>(asconfChunk->dup());
+        state->asconfChunk = check_and_cast<SCTPAsconfChunk *>(asconfChunk->dup());
         state->asconfChunk->setName("STATE-ASCONF");
 
         sendToIP(sctpAsconf, targetAddr);
@@ -168,19 +166,18 @@ void SCTPAssociation::sendAsconf(const char* type, const bool remote)
     }
 }
 
-
 void SCTPAssociation::retransmitAsconf()
 {
-    SCTPMessage* sctpmsg = new SCTPMessage();
+    SCTPMessage *sctpmsg = new SCTPMessage();
     sctpmsg->setByteLength(SCTP_COMMON_HEADER);
 
-    SCTPAsconfChunk* sctpasconf = new SCTPAsconfChunk("ASCONF-RTX");
+    SCTPAsconfChunk *sctpasconf = new SCTPAsconfChunk("ASCONF-RTX");
     sctpasconf = check_and_cast<SCTPAsconfChunk *>(state->asconfChunk->dup());
     sctpasconf->setChunkType(ASCONF);
     sctpasconf->setByteLength(state->asconfChunk->getByteLength());
 
     if (state->auth && state->peerAuth) {
-        SCTPAuthenticationChunk* authChunk = createAuthChunk();
+        SCTPAuthenticationChunk *authChunk = createAuthChunk();
         sctpmsg->addChunk(authChunk);
         SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
         it->second.numAuthChunksSent++;
@@ -192,17 +189,17 @@ void SCTPAssociation::retransmitAsconf()
 
 void SCTPAssociation::sendAsconfAck(const uint32 serialNumber)
 {
-    SCTPMessage* sctpAsconfAck = new SCTPMessage("ASCONF_ACK");
+    SCTPMessage *sctpAsconfAck = new SCTPMessage("ASCONF_ACK");
     sctpAsconfAck->setByteLength(SCTP_COMMON_HEADER);
     sctpAsconfAck->setSrcPort(localPort);
     sctpAsconfAck->setDestPort(remotePort);
 
-    SCTPAsconfAckChunk* asconfAckChunk = new SCTPAsconfAckChunk("ASCONF_ACK");
+    SCTPAsconfAckChunk *asconfAckChunk = new SCTPAsconfAckChunk("ASCONF_ACK");
     asconfAckChunk->setChunkType(ASCONF_ACK);
     asconfAckChunk->setSerialNumber(serialNumber);
     asconfAckChunk->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
     if (state->auth && state->peerAuth) {
-        SCTPAuthenticationChunk* authChunk = createAuthChunk();
+        SCTPAuthenticationChunk *authChunk = createAuthChunk();
         sctpAsconfAck->addChunk(authChunk);
         SCTP::AssocStatMap::iterator it = sctpMain->assocStatMap.find(assocId);
         it->second.numAuthChunksSent++;
@@ -211,7 +208,7 @@ void SCTPAssociation::sendAsconfAck(const uint32 serialNumber)
     sendToIP(sctpAsconfAck, remoteAddr);
 }
 
-SCTPAsconfAckChunk* SCTPAssociation::createAsconfAckChunk(const uint32 serialNumber)
+SCTPAsconfAckChunk *SCTPAssociation::createAsconfAckChunk(const uint32 serialNumber)
 {
     SCTPAsconfAckChunk *asconfAckChunk = new SCTPAsconfAckChunk("ASCONF_ACK");
     asconfAckChunk->setChunkType(ASCONF_ACK);
@@ -220,19 +217,19 @@ SCTPAsconfAckChunk* SCTPAssociation::createAsconfAckChunk(const uint32 serialNum
     return asconfAckChunk;
 }
 
-SCTPAuthenticationChunk* SCTPAssociation::createAuthChunk()
+SCTPAuthenticationChunk *SCTPAssociation::createAuthChunk()
 {
-    SCTPAuthenticationChunk* authChunk = new SCTPAuthenticationChunk("AUTH");
+    SCTPAuthenticationChunk *authChunk = new SCTPAuthenticationChunk("AUTH");
 
     authChunk->setChunkType(AUTH);
     authChunk->setSharedKey(0);
     authChunk->setHMacIdentifier(1);
     authChunk->setHMacOk(true);
     authChunk->setHMACArraySize(SHA_LENGTH);
-    for (int32 i=0; i<SHA_LENGTH; i++) {
+    for (int32 i = 0; i < SHA_LENGTH; i++) {
         authChunk->setHMAC(i, 0);
     }
-    authChunk->setBitLength((SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH)*8);
+    authChunk->setBitLength((SCTP_AUTH_CHUNK_LENGTH + SHA_LENGTH) * 8);
     return authChunk;
 }
 
@@ -246,25 +243,25 @@ bool SCTPAssociation::compareRandom()
     if (sizeKeyVector != sizePeerKeyVector) {
         if (sizePeerKeyVector > sizeKeyVector) {
             size = sizeKeyVector;
-            for (i=sizePeerKeyVector-1; i>sizeKeyVector; i--) {
-                if (state->peerKeyVector[i]!=0)
+            for (i = sizePeerKeyVector - 1; i > sizeKeyVector; i--) {
+                if (state->peerKeyVector[i] != 0)
                     return false;
             }
         }
         else {
             size = sizePeerKeyVector;
-            for (i=sizeKeyVector-1; i>sizePeerKeyVector; i--) {
-                if (state->keyVector[i]!=0)
+            for (i = sizeKeyVector - 1; i > sizePeerKeyVector; i--) {
+                if (state->keyVector[i] != 0)
                     return true;
             }
         }
     }
     else
         size = sizeKeyVector;
-    for (i=size-1; i>0; i--) {
-        if (state->keyVector[i]<state->peerKeyVector[i])
+    for (i = size - 1; i > 0; i--) {
+        if (state->keyVector[i] < state->peerKeyVector[i])
             return false;
-        if (state->keyVector[i]>state->peerKeyVector[i])
+        if (state->keyVector[i] > state->peerKeyVector[i])
             return true;
     }
     return true;
@@ -274,23 +271,23 @@ void SCTPAssociation::calculateAssocSharedKey()
 {
     const bool peerFirst = compareRandom();
     if (peerFirst == true) {
-        for (uint32 i=0; i<state->sizeKeyVector; i++)
+        for (uint32 i = 0; i < state->sizeKeyVector; i++)
             state->sharedKey[i] = state->keyVector[i];
-        for (uint32 i=0; i<state->sizePeerKeyVector; i++)
-            state->sharedKey[i+state->sizeKeyVector] = state->peerKeyVector[i];
+        for (uint32 i = 0; i < state->sizePeerKeyVector; i++)
+            state->sharedKey[i + state->sizeKeyVector] = state->peerKeyVector[i];
     }
     else {
-        for (uint32 i=0; i<state->sizePeerKeyVector; i++)
+        for (uint32 i = 0; i < state->sizePeerKeyVector; i++)
             state->sharedKey[i] = state->peerKeyVector[i];
-        for (uint32 i=0; i<state->sizeKeyVector; i++)
-            state->sharedKey[i+state->sizePeerKeyVector] = state->keyVector[i];
+        for (uint32 i = 0; i < state->sizeKeyVector; i++)
+            state->sharedKey[i + state->sizePeerKeyVector] = state->keyVector[i];
     }
 }
 
 bool SCTPAssociation::typeInChunkList(const uint16 type)
 {
-    for (std::vector<uint16>::iterator i=state->peerChunkList.begin(); i!=state->peerChunkList.end(); i++) {
-        if ((*i)==type) {
+    for (std::vector<uint16>::iterator i = state->peerChunkList.begin(); i != state->peerChunkList.end(); i++) {
+        if ((*i) == type) {
             return true;
         }
     }
@@ -299,25 +296,22 @@ bool SCTPAssociation::typeInChunkList(const uint16 type)
 
 bool SCTPAssociation::typeInOwnChunkList(const uint16 type)
 {
-    for (std::vector<uint16>::iterator i=state->chunkList.begin(); i!=state->chunkList.end(); i++) {
-        if ((*i)==type) {
+    for (std::vector<uint16>::iterator i = state->chunkList.begin(); i != state->chunkList.end(); i++) {
+        if ((*i) == type) {
             return true;
         }
     }
     return false;
 }
 
-SCTPSuccessIndication* SCTPAssociation::createSuccessIndication(const uint32 correlationId)
+SCTPSuccessIndication *SCTPAssociation::createSuccessIndication(const uint32 correlationId)
 {
-    SCTPSuccessIndication* success = new SCTPSuccessIndication("Success");
+    SCTPSuccessIndication *success = new SCTPSuccessIndication("Success");
 
     success->setParameterType(SUCCESS_INDICATION);
     success->setResponseCorrelationId(correlationId);
-    success->setBitLength(SCTP_ADD_IP_PARAMETER_LENGTH*8);
+    success->setBitLength(SCTP_ADD_IP_PARAMETER_LENGTH * 8);
     return success;
 }
-
-
-}
-
+} // namespace inet
 

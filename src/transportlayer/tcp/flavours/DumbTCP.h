@@ -23,8 +23,6 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
-
-
 /**
  * State variables for DumbTCP.
  */
@@ -33,7 +31,6 @@ class INET_API DumbTCPStateVariables : public TCPStateVariables
   public:
     //...
 };
-
 
 /**
  * A very-very basic TCPAlgorithm implementation, with hardcoded
@@ -45,13 +42,14 @@ class INET_API DumbTCPStateVariables : public TCPStateVariables
 class INET_API DumbTCP : public TCPAlgorithm
 {
   protected:
-    DumbTCPStateVariables *&state; // alias to TCLAlgorithm's 'state'
+    DumbTCPStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
-    cMessage *rexmitTimer;  // retransmission timer
+    cMessage *rexmitTimer;    // retransmission timer
 
   protected:
     /** Creates and returns a DumbTCPStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() {
+    virtual TCPStateVariables *createStateVariables()
+    {
         return new DumbTCPStateVariables();
     }
 
@@ -90,10 +88,8 @@ class INET_API DumbTCP : public TCPAlgorithm
     virtual void restartRexmitTimer();
 
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_DUMBTCP_H
 
-
-#endif

@@ -22,9 +22,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-
-
 /**
  * Records a NetAnim trace. See NED file for more information.
  *
@@ -36,6 +33,7 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     static simsignal_t messageSentSignal;
     static simsignal_t mobilityStateChangedSignal;
     std::ofstream f;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -47,10 +45,7 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     virtual void addNode(cModule *mod);
     virtual void addLink(cGate *gate);
 };
+} // namespace inet
 
-}
-
-
-#endif  // header guard
-
+#endif    // header guard
 

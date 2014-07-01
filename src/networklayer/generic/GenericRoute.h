@@ -23,8 +23,6 @@
 #include "IRoute.h"
 
 namespace inet {
-
-
 class InterfaceEntry;
 class IRoutingTable;
 class GenericRoutingTable;
@@ -34,146 +32,147 @@ class GenericRoutingTable;
  */
 class INET_API GenericRoute : public cObject, public IRoute
 {
-    private:
-        GenericRoutingTable *owner;
-        int prefixLength;
-        Address destination;
-        Address nextHop;
-        InterfaceEntry *interface;
-        SourceType sourceType;
-        cObject *source;
-        cObject *protocolData;
-        int metric;
+  private:
+    GenericRoutingTable *owner;
+    int prefixLength;
+    Address destination;
+    Address nextHop;
+    InterfaceEntry *interface;
+    SourceType sourceType;
+    cObject *source;
+    cObject *protocolData;
+    int metric;
 
-    protected:
-      void changed(int fieldCode);
+  protected:
+    void changed(int fieldCode);
 
-    public:
-        GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), sourceType(IRoute::MANUAL),
-                            source(NULL), protocolData(NULL), metric(0) {}
-        virtual ~GenericRoute() {}
+  public:
+    GenericRoute() : owner(NULL), prefixLength(0), interface(NULL), sourceType(IRoute::MANUAL),
+        source(NULL), protocolData(NULL), metric(0) {}
+    virtual ~GenericRoute() {}
 
-        virtual std::string info() const;
-        virtual std::string detailedInfo() const;
+    virtual std::string info() const;
+    virtual std::string detailedInfo() const;
 
-        bool equals(const IRoute& route) const;
+    bool equals(const IRoute& route) const;
 
-        virtual void setRoutingTable(GenericRoutingTable *owner) {this->owner = owner;}
-        virtual void setDestination(const Address& dest) {if (destination!=dest) {this->destination = dest; changed(F_DESTINATION);}}
-        virtual void setPrefixLength(int l) {if (prefixLength!=l) {this->prefixLength = l; changed(F_PREFIX_LENGTH);}}
-        virtual void setNextHop(const Address& nextHop) {if (this->nextHop!=nextHop) {this->nextHop = nextHop;changed(F_NEXTHOP);}}
-        virtual void setInterface(InterfaceEntry *ie) {if (interface!=ie) {this->interface = ie; changed(F_IFACE);}}
-        virtual void setSourceType(SourceType sourceType)  {if (this->sourceType!=sourceType) {this->sourceType = sourceType; changed(F_TYPE);}}
-        virtual void setSource(cObject *source) {if (this->source!=source) {this->source = source; changed(F_SOURCE);}}
-        virtual void setMetric(int metric) {if (this->metric!=metric) {this->metric = metric; changed(F_METRIC);}}
-        virtual void setProtocolData(cObject *protocolData) {this->protocolData = protocolData;}
+    virtual void setRoutingTable(GenericRoutingTable *owner) { this->owner = owner; }
+    virtual void setDestination(const Address& dest) { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
+    virtual void setPrefixLength(int l) { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
+    virtual void setNextHop(const Address& nextHop) { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
+    virtual void setInterface(InterfaceEntry *ie) { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
+    virtual void setSourceType(SourceType sourceType) { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
+    virtual void setSource(cObject *source) { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
+    virtual void setMetric(int metric) { if (this->metric != metric) { this->metric = metric; changed(F_METRIC); } }
+    virtual void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
 
-        /** The routing table in which this route is inserted, or NULL. */
-        virtual IRoutingTable *getRoutingTableAsGeneric() const;
+    /** The routing table in which this route is inserted, or NULL. */
+    virtual IRoutingTable *getRoutingTableAsGeneric() const;
 
-        /** Destination address prefix to match */
-        virtual Address getDestinationAsGeneric() const {return destination;}
+    /** Destination address prefix to match */
+    virtual Address getDestinationAsGeneric() const { return destination; }
 
-        /** Represents length of prefix to match */
-        virtual int getPrefixLength() const {return prefixLength;}
+    /** Represents length of prefix to match */
+    virtual int getPrefixLength() const { return prefixLength; }
 
-        /** Next hop address */
-        virtual Address getNextHopAsGeneric() const {return nextHop;}
+    /** Next hop address */
+    virtual Address getNextHopAsGeneric() const { return nextHop; }
 
-        /** Next hop interface */
-        virtual InterfaceEntry *getInterface() const {return interface;}
+    /** Next hop interface */
+    virtual InterfaceEntry *getInterface() const { return interface; }
 
-        /** Source type of the route */
-        SourceType getSourceType() const {return sourceType;}
+    /** Source type of the route */
+    SourceType getSourceType() const { return sourceType; }
 
-        /** Source of route */
-        virtual cObject *getSource() const {return source;}
+    /** Source of route */
+    virtual cObject *getSource() const { return source; }
 
-        /** Cost to reach the destination */
-        virtual int getMetric() const {return metric;}
+    /** Cost to reach the destination */
+    virtual int getMetric() const { return metric; }
 
-        virtual cObject *getProtocolData() const {return protocolData;}
+    virtual cObject *getProtocolData() const { return protocolData; }
 };
 
-class GenericMulticastRoute  { };
+class GenericMulticastRoute
+{
+};
 
-#if 0 /*FIXME TODO!!!! */
+#if 0    /*FIXME TODO!!!! */
 /**
  * TODO
  */
 class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastRoute
 {
-    private:
-        struct Child { InterfaceEntry *ie; bool isLeaf; };
-    private:
-        IRoutingTable *owner;
-        bool enabled;
-        int prefixLength;
-        Address origin;
-        Address multicastGroup;
-        InterfaceEntry *parent;
-        std::vector<Child> children;
-        cObject *source;
-        //XXX cObject *protocolData;
-        int metric;
+  private:
+    struct Child { InterfaceEntry *ie; bool isLeaf; };
 
-    public:
-        GenericMulticastRoute() {} //TODO
-        virtual ~GenericMulticastRoute() {}
+  private:
+    IRoutingTable *owner;
+    bool enabled;
+    int prefixLength;
+    Address origin;
+    Address multicastGroup;
+    InterfaceEntry *parent;
+    std::vector<Child> children;
+    cObject *source;
+    //XXX cObject *protocolData;
+    int metric;
 
-        virtual std::string info() const;
-        virtual std::string detailedInfo() const;
+  public:
+    GenericMulticastRoute() {}    //TODO
+    virtual ~GenericMulticastRoute() {}
 
-        virtual void setEnabled(bool enabled) {this->enabled = enabled;}
-        virtual void setOrigin(const Address& origin) {this->origin = origin;}
-        virtual void setPrefixLength(int len) {this->prefixLength = len;}
-        virtual void setMulticastGroup(const Address& group) {this->multicastGroup = group;}
-        virtual void setParent(InterfaceEntry *ie) {this->parent = ie;}
-        virtual bool addChild(InterfaceEntry *ie, bool isLeaf);
-        virtual bool removeChild(InterfaceEntry *ie);
-        virtual void setSource(cObject *source) {this->source = source;}
-        virtual void setMetric(int metric) {this->metric = metric;}
+    virtual std::string info() const;
+    virtual std::string detailedInfo() const;
 
-        /** The routing table in which this route is inserted, or NULL. */
-        virtual IRoutingTable *getRoutingTableAsGeneric() {return owner;}
+    virtual void setEnabled(bool enabled) { this->enabled = enabled; }
+    virtual void setOrigin(const Address& origin) { this->origin = origin; }
+    virtual void setPrefixLength(int len) { this->prefixLength = len; }
+    virtual void setMulticastGroup(const Address& group) { this->multicastGroup = group; }
+    virtual void setParent(InterfaceEntry *ie) { this->parent = ie; }
+    virtual bool addChild(InterfaceEntry *ie, bool isLeaf);
+    virtual bool removeChild(InterfaceEntry *ie);
+    virtual void setSource(cObject *source) { this->source = source; }
+    virtual void setMetric(int metric) { this->metric = metric; }
 
-        /** Disabled entries are ignored by routing until the became enabled again. */
-        virtual bool isEnabled() const {return enabled;}
+    /** The routing table in which this route is inserted, or NULL. */
+    virtual IRoutingTable *getRoutingTableAsGeneric() { return owner; }
 
-        /** Expired entries are ignored by routing, and may be periodically purged. */
-        virtual bool isExpired() const {return false;}  //XXX
+    /** Disabled entries are ignored by routing until the became enabled again. */
+    virtual bool isEnabled() const { return enabled; }
 
-        /** Source address prefix to match */
-        virtual Address getOrigin() const {return origin;}
+    /** Expired entries are ignored by routing, and may be periodically purged. */
+    virtual bool isExpired() const { return false; }    //XXX
 
-        /** Prefix length to match */
-        virtual int getPrefixLength() const {return prefixLength;}
+    /** Source address prefix to match */
+    virtual Address getOrigin() const { return origin; }
 
-        /** Multicast group address */
-        virtual Address getMulticastGroup() const {return multicastGroup;}
+    /** Prefix length to match */
+    virtual int getPrefixLength() const { return prefixLength; }
 
-        /** Parent interface */
-        virtual InterfaceEntry *getParent() const {return parent;}
+    /** Multicast group address */
+    virtual Address getMulticastGroup() const { return multicastGroup; }
 
-        /** Child interfaces */
-        virtual int getNumChildren() const {return children.size();}
+    /** Parent interface */
+    virtual InterfaceEntry *getParent() const { return parent; }
 
-        /** Returns the ith child interface */
-        virtual InterfaceEntry *getChild(int i) const {return X;}  //TODO
+    /** Child interfaces */
+    virtual int getNumChildren() const { return children.size(); }
 
-        /** Returns true if the ith child interface is a leaf */
-        virtual bool getChildIsLeaf(int i) const {return X;} //TODO
+    /** Returns the ith child interface */
+    virtual InterfaceEntry *getChild(int i) const { return X; }    //TODO
 
-        /** Source of route */
-        virtual cObject *getSource() const {return source;}
+    /** Returns true if the ith child interface is a leaf */
+    virtual bool getChildIsLeaf(int i) const { return X; }    //TODO
 
-        /** Cost to reach the destination */
-        virtual int getMetric() const {return metric;}
+    /** Source of route */
+    virtual cObject *getSource() const { return source; }
+
+    /** Cost to reach the destination */
+    virtual int getMetric() const { return metric; }
 };
 #endif /*0*/
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_GENERICROUTE_H
 

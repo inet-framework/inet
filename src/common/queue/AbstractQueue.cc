@@ -15,14 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "AbstractQueue.h"
 
 namespace inet {
-
-
 AbstractQueue::AbstractQueue()
 {
     msgServiced = NULL;
@@ -44,44 +41,37 @@ void AbstractQueue::initialize()
 
 void AbstractQueue::handleMessage(cMessage *msg)
 {
-    if (msg==endServiceMsg)
-    {
+    if (msg == endServiceMsg) {
         doEndService();
     }
-    else if (!msgServiced)
-    {
-        cPacket *msg2 = arrivalWhenIdle( PK(msg) );
-        if (msg2)
-        {
+    else if (!msgServiced) {
+        cPacket *msg2 = arrivalWhenIdle(PK(msg));
+        if (msg2) {
             msgServiced = msg2;
             doStartService();
         }
-
     }
-    else
-    {
-        arrival( PK(msg) );
+    else {
+        arrival(PK(msg));
     }
 }
 
 void AbstractQueue::doStartService()
 {
-    simtime_t serviceTime = startService( msgServiced );
+    simtime_t serviceTime = startService(msgServiced);
     if (serviceTime != SIMTIME_ZERO)
-        scheduleAt( simTime()+serviceTime, endServiceMsg );
+        scheduleAt(simTime() + serviceTime, endServiceMsg);
     else
         doEndService();
 }
 
 void AbstractQueue::doEndService()
 {
-    endService( msgServiced );
-    if (queue.empty())
-    {
+    endService(msgServiced);
+    if (queue.empty()) {
         msgServiced = NULL;
     }
-    else
-    {
+    else {
         msgServiced = queue.pop();
         doStartService();
     }
@@ -91,16 +81,12 @@ cPacket *AbstractQueue::cancelService()
 {
     if (!msgServiced)
         return NULL;
-    else
-    {
+    else {
         cancelEvent(endServiceMsg);
         cPacket *ret = msgServiced;
         msgServiced = NULL;
         return ret;
     }
 }
-
-
-}
-
+} // namespace inet
 

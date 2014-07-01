@@ -15,8 +15,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
-
+ */
 
 #include "GlobalARP.h"
 
@@ -31,8 +30,6 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
-
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 {
     out << "(" << msg->getClassName() << ")" << msg->getFullName();
@@ -41,7 +38,7 @@ static std::ostream& operator<<(std::ostream& out, cMessage *msg)
 
 static std::ostream& operator<<(std::ostream& out, const GlobalARP::ARPCacheEntry& e)
 {
-    out << "MAC:" << e.macAddress << "  age:" << floor(simTime()-e.lastUpdate) << "s";
+    out << "MAC:" << e.macAddress << "  age:" << floor(simTime() - e.lastUpdate) << "s";
     return out;
 }
 
@@ -52,8 +49,7 @@ Define_Module(GlobalARP);
 
 GlobalARP::GlobalARP()
 {
-    if (++globalArpCacheRefCnt == 1)
-    {
+    if (++globalArpCacheRefCnt == 1) {
         if (!globalArpCache.empty())
             throw cRuntimeError("Global ARP cache not empty, model error in previous run?");
     }
@@ -66,20 +62,17 @@ void GlobalARP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         WATCH_PTRMAP(globalArpCache);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_3)  // IP addresses should be available
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER_3) {    // IP addresses should be available
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
 
         isUp = isNodeUp();
 
         // register our addresses in the global cache
-        for (int i=0; i<ift->getNumInterfaces(); i++)
-        {
+        for (int i = 0; i < ift->getNumInterfaces(); i++) {
             InterfaceEntry *ie = ift->getInterface(i);
             if (ie->isLoopback())
                 continue;
@@ -99,7 +92,7 @@ void GlobalARP::initialize(int stage)
 
             ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(nextHopAddr, entry));
             ASSERT(where->second == entry);
-            entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+            entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
         }
         cModule *host = findContainingNode(this);
         if (host != NULL)
@@ -115,10 +108,8 @@ GlobalARP::~GlobalARP()
 {
     --globalArpCacheRefCnt;
     // delete my entries from the globalArpCache
-    for (ARPCache::iterator it = globalArpCache.begin(); it != globalArpCache.end(); )
-    {
-        if (it->second->owner == this)
-        {
+    for (ARPCache::iterator it = globalArpCache.begin(); it != globalArpCache.end(); ) {
+        if (it->second->owner == this) {
             ARPCache::iterator cur = it++;
             delete cur->second;
             globalArpCache.erase(cur);
@@ -130,8 +121,7 @@ GlobalARP::~GlobalARP()
 
 void GlobalARP::handleMessage(cMessage *msg)
 {
-    if (!isUp)
-    {
+    if (!isUp) {
         handleMessageWhenDown(msg);
         return;
     }
@@ -162,23 +152,19 @@ bool GlobalARP::handleOperationStage(LifecycleOperation *operation, int stage, I
 {
     Enter_Method_Silent();
 
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_NETWORK_LAYER)
             start();
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_NETWORK_LAYER)
             stop();
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
             stop();
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
     return true;
@@ -234,6 +220,7 @@ Address GlobalARP::getL3AddressFor(const MACAddress& macAddr) const
         if (it->second->macAddress == macAddr && it->first.getType() == Address::IPv4)
             return it->first.toIPv4();
 
+
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
 
@@ -241,50 +228,41 @@ void GlobalARP::receiveSignal(cComponent *source, simsignal_t signalID, cObject 
 {
     Enter_Method_Silent();
     // host associated. Link is up. Change the state to init.
-    if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
-    {
+    if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED) {
         const InterfaceEntryChangeDetails *iecd = check_and_cast<const InterfaceEntryChangeDetails *>(obj);
         InterfaceEntry *ie = iecd->getInterfaceEntry();
         // rebuild the arp cache
         if (ie->isLoopback())
             return;
         ARPCache::iterator it;
-        for (it=globalArpCache.begin(); it!=globalArpCache.end(); ++it)
-        {
+        for (it = globalArpCache.begin(); it != globalArpCache.end(); ++it) {
             if (it->second->ie == ie)
                 break;
         }
         ARPCacheEntry *entry = NULL;
-        if (it == globalArpCache.end())
-        {
+        if (it == globalArpCache.end()) {
             if (!ie->ipv4Data() || ie->ipv4Data()->getIPAddress().isUnspecified())
                 return; // if the address is not defined it isn't included in the global cache
             entry = new ARPCacheEntry();
             entry->owner = this;
             entry->ie = ie;
         }
-        else
-        {
+        else {
             // actualize
             entry = it->second;
             ASSERT(entry->owner == this);
             globalArpCache.erase(it);
-            if (!ie->ipv4Data() || ie->ipv4Data()->getIPAddress().isUnspecified())
-            {
+            if (!ie->ipv4Data() || ie->ipv4Data()->getIPAddress().isUnspecified()) {
                 delete entry;
-                return; // if the address is not defined it isn't included in the global cache
+                return;    // if the address is not defined it isn't included in the global cache
             }
         }
         entry->macAddress = ie->getMacAddress();
         IPv4Address ipAddr = ie->ipv4Data()->getIPAddress();
-        ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(),std::make_pair(ipAddr, entry));
+        ARPCache::iterator where = globalArpCache.insert(globalArpCache.begin(), std::make_pair(ipAddr, entry));
         ASSERT(where->second == entry);
-        entry->myIter = where; // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
+        entry->myIter = where;    // note: "inserting a new element into a map does not invalidate iterators that point to existing elements"
     }
 }
-
-
-
-}
-
+} // namespace inet
 

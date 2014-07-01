@@ -22,32 +22,27 @@
 #include "WifiPreambleType.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 {
-    protected:
-        char opMode;
-        WifiPreamble preambleMode;
+  protected:
+    char opMode;
+    WifiPreamble preambleMode;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        Ieee80211ScalarTransmitter() :
-            ScalarTransmitter(),
-            opMode('\0'),
-            preambleMode((WifiPreamble)-1)
-        {}
+  public:
+    Ieee80211ScalarTransmitter() :
+        ScalarTransmitter(),
+        opMode('\0'),
+        preambleMode((WifiPreamble) - 1)
+    {}
 
-        virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IEEE80211SCALARTRANSMITTER_H
 
-}
-
-
-#endif

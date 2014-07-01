@@ -21,60 +21,55 @@
 #include "RadioMedium.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
-    public:
-        typedef std::vector<const IRadio *> Radios;
-        typedef std::vector<Radios > RadioGrid;
+  public:
+    typedef std::vector<const IRadio *> Radios;
+    typedef std::vector<Radios> RadioGrid;
 
-    protected:
-        RadioGrid grid;
-        Radios radios;
-        RadioMedium *radioChannel;
+  protected:
+    RadioGrid grid;
+    Radios radios;
+    RadioMedium *radioChannel;
 
-        unsigned int numberOfCells;
-        Coord constraintAreaMin, constraintAreaMax;
-        double range;
-        double maxSpeed;
-        cMessage *refillCellsTimer;
-        double refillPeriod;
-        bool useMaxDimension;
+    unsigned int numberOfCells;
+    Coord constraintAreaMin, constraintAreaMax;
+    double range;
+    double maxSpeed;
+    cMessage *refillCellsTimer;
+    double refillPeriod;
+    bool useMaxDimension;
 
-        Coord splittingUnits;
-        Coord sideLengths;
-        int dimension[3];
+    Coord splittingUnits;
+    Coord sideLengths;
+    int dimension[3];
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
 
-        void fillCubeVector();
-        void init();
-        Coord calculateSideLength();
-        void calculateDimension(int *dim);
-        unsigned int calculateNumberOfCells();
-        unsigned int posToCubeId(Coord pos);
+    void fillCubeVector();
+    void init();
+    Coord calculateSideLength();
+    void calculateDimension(int *dim);
+    unsigned int calculateNumberOfCells();
+    unsigned int posToCubeId(Coord pos);
 
-        unsigned int rowmajorIndex(unsigned int xIndex, unsigned int yIndex, unsigned int zIndex);
-        Coord decodeRowmajorIndex(unsigned int ind);
+    unsigned int rowmajorIndex(unsigned int xIndex, unsigned int yIndex, unsigned int zIndex);
+    Coord decodeRowmajorIndex(unsigned int ind);
 
-    public:
-        void addRadio(const IRadio *radio);
-        void removeRadio(const IRadio *radio);
-        void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+  public:
+    void addRadio(const IRadio *radio);
+    void removeRadio(const IRadio *radio);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
 
-        GridNeighborCache() : refillCellsTimer(NULL) {};
-        virtual ~GridNeighborCache();
-
+    GridNeighborCache() : refillCellsTimer(NULL) {};
+    virtual ~GridNeighborCache();
 };
-
-}
-
-}
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* GRIDNEIGHBORCACHE_H_ */
+

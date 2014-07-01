@@ -20,11 +20,11 @@
 
 #ifdef WITH_IDEALWIRELESS
 #include "IdealMacFrame_m.h"
-#endif
+#endif // ifdef WITH_IDEALWIRELESS
 
 #ifdef WITH_IEEE80211
 #include "Ieee80211Frame_m.h"
-#endif
+#endif // ifdef WITH_IEEE80211
 
 #include "IPSocket.h"
 #include "UDPControlInfo.h"
@@ -32,7 +32,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Define_Module(AODVRouting);
 
 void AODVRouting::initialize(int stage)
@@ -999,12 +998,12 @@ void AODVRouting::receiveSignal(cComponent *source, simsignal_t signalID, cObjec
         INetworkDatagram *datagram = NULL;
         if (false
 #ifdef WITH_IEEE80211
-                || dynamic_cast<Ieee80211Frame *>(frame)
-#endif
+            || dynamic_cast<Ieee80211Frame *>(frame)
+#endif // ifdef WITH_IEEE80211
 #ifdef WITH_IDEALWIRELESS
-                || dynamic_cast<IdealMacFrame *>(frame)
-#endif
-                )
+            || dynamic_cast<IdealMacFrame *>(frame)
+#endif // ifdef WITH_IDEALWIRELESS
+            )
             datagram = dynamic_cast<INetworkDatagram *>(frame->getEncapsulatedPacket());
         else
             throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
@@ -1677,9 +1676,5 @@ AODVRouting::~AODVRouting()
     delete rrepAckTimer;
     delete blacklistTimer;
 }
-
-
-
-}
-
+} // namespace inet
 

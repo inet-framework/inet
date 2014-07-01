@@ -21,23 +21,18 @@
 #include "PropagationBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ImmediatePropagation : public PropagationBase
 {
-    public:
-        ImmediatePropagation();
+  public:
+    ImmediatePropagation();
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
+    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IMMEDIATEPROPAGATION_H
 
-}
-
-
-#endif

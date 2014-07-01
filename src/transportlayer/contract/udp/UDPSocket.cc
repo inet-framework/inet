@@ -19,10 +19,9 @@
 #include "UDPControlInfo.h"
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 namespace inet {
-
 UDPSocket::UDPSocket()
 {
     // don't allow user-specified sockIds because they may conflict with
@@ -51,7 +50,7 @@ void UDPSocket::bind(int localPort)
 
 void UDPSocket::bind(Address localAddr, int localPort)
 {
-    if (localPort<-1 || localPort>65535)  // -1: ephemeral port
+    if (localPort < -1 || localPort > 65535) // -1: ephemeral port
         throw cRuntimeError("UDPSocket::bind(): invalid port number %d", localPort);
 
     UDPBindCommand *ctrl = new UDPBindCommand();
@@ -67,7 +66,7 @@ void UDPSocket::connect(Address addr, int port)
 {
     if (addr.isUnspecified())
         throw cRuntimeError("UDPSocket::connect(): unspecified remote address");
-    if (port<=0 || port>65535)
+    if (port <= 0 || port > 65535)
         throw cRuntimeError("UDPSocket::connect(): invalid remote port number %d", port);
 
     UDPConnectCommand *ctrl = new UDPConnectCommand();
@@ -86,14 +85,14 @@ void UDPSocket::sendTo(cPacket *pk, Address destAddr, int destPort, const SendOp
     ctrl->setSockId(sockId);
     ctrl->setDestAddr(destAddr);
     ctrl->setDestPort(destPort);
-    if (options)
-    {
+    if (options) {
         ctrl->setSrcAddr(options->srcAddr);
         ctrl->setInterfaceId(options->outInterfaceId);
     }
     pk->setControlInfo(ctrl);
     sendToUDP(pk);
 }
+
 void UDPSocket::send(cPacket *pk)
 {
     pk->setKind(UDP_C_DATA);
@@ -187,16 +186,13 @@ void UDPSocket::joinMulticastGroup(const Address& multicastAddr, int interfaceId
 
 void UDPSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
 {
-
-    if (mgl.size() > 0)
-    {
+    if (mgl.size() > 0) {
         UDPJoinMulticastGroupsCommand *ctrl = new UDPJoinMulticastGroupsCommand();
         ctrl->setSockId(sockId);
         ctrl->setMulticastAddrArraySize(mgl.size());
         ctrl->setInterfaceIdArraySize(mgl.size());
 
-        for (unsigned int j = 0; j < mgl.size(); ++j)
-        {
+        for (unsigned int j = 0; j < mgl.size(); ++j) {
             ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
             ctrl->setInterfaceId(j, mgl[j].interfaceId);
         }
@@ -206,7 +202,6 @@ void UDPSocket::joinLocalMulticastGroups(MulticastGroupList mgl)
         sendToUDP(msg);
     }
 }
-
 
 void UDPSocket::leaveMulticastGroup(const Address& multicastAddr)
 {
@@ -221,15 +216,12 @@ void UDPSocket::leaveMulticastGroup(const Address& multicastAddr)
 
 void UDPSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
 {
-
-    if (mgl.size() > 0)
-    {
+    if (mgl.size() > 0) {
         UDPLeaveMulticastGroupsCommand *ctrl = new UDPLeaveMulticastGroupsCommand();
         ctrl->setSockId(sockId);
         ctrl->setMulticastAddrArraySize(mgl.size());
 
-        for (unsigned int j = 0; j < mgl.size(); ++j)
-        {
+        for (unsigned int j = 0; j < mgl.size(); ++j) {
             ctrl->setMulticastAddr(j, mgl[j].multicastAddr);
         }
 
@@ -239,7 +231,7 @@ void UDPSocket::leaveLocalMulticastGroups(MulticastGroupList mgl)
     }
 }
 
-void UDPSocket::blockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+void UDPSocket::blockMulticastSources(int interfaceId, const Address& multicastAddr, const std::vector<Address>& sourceList)
 {
     cMessage *msg = new cMessage("BlockMulticastSources", UDP_C_SETOPTION);
     UDPBlockMulticastSourcesCommand *ctrl = new UDPBlockMulticastSourcesCommand();
@@ -253,7 +245,7 @@ void UDPSocket::blockMulticastSources(int interfaceId, const Address &multicastA
     sendToUDP(msg);
 }
 
-void UDPSocket::unblockMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+void UDPSocket::unblockMulticastSources(int interfaceId, const Address& multicastAddr, const std::vector<Address>& sourceList)
 {
     cMessage *msg = new cMessage("UnblockMulticastSources", UDP_C_SETOPTION);
     UDPUnblockMulticastSourcesCommand *ctrl = new UDPUnblockMulticastSourcesCommand();
@@ -267,7 +259,7 @@ void UDPSocket::unblockMulticastSources(int interfaceId, const Address &multicas
     sendToUDP(msg);
 }
 
-void UDPSocket::joinMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+void UDPSocket::joinMulticastSources(int interfaceId, const Address& multicastAddr, const std::vector<Address>& sourceList)
 {
     cMessage *msg = new cMessage("JoinMulticastSources", UDP_C_SETOPTION);
     UDPJoinMulticastSourcesCommand *ctrl = new UDPJoinMulticastSourcesCommand();
@@ -281,7 +273,7 @@ void UDPSocket::joinMulticastSources(int interfaceId, const Address &multicastAd
     sendToUDP(msg);
 }
 
-void UDPSocket::leaveMulticastSources(int interfaceId, const Address &multicastAddr, const std::vector<Address> &sourceList)
+void UDPSocket::leaveMulticastSources(int interfaceId, const Address& multicastAddr, const std::vector<Address>& sourceList)
 {
     cMessage *msg = new cMessage("LeaveMulticastSources", UDP_C_SETOPTION);
     UDPLeaveMulticastSourcesCommand *ctrl = new UDPLeaveMulticastSourcesCommand();
@@ -295,8 +287,8 @@ void UDPSocket::leaveMulticastSources(int interfaceId, const Address &multicastA
     sendToUDP(msg);
 }
 
-void UDPSocket::setMulticastSourceFilter(int interfaceId, const Address &multicastAddr,
-                                         UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList)
+void UDPSocket::setMulticastSourceFilter(int interfaceId, const Address& multicastAddr,
+        UDPSourceFilterMode filterMode, const std::vector<Address>& sourceList)
 {
     cMessage *msg = new cMessage("SetMulticastSourceFilter", UDP_C_SETOPTION);
     UDPSetMulticastSourceFilterCommand *ctrl = new UDPSetMulticastSourceFilterCommand();
@@ -314,7 +306,7 @@ void UDPSocket::setMulticastSourceFilter(int interfaceId, const Address &multica
 bool UDPSocket::belongsToSocket(cMessage *msg)
 {
     return dynamic_cast<UDPControlInfo *>(msg->getControlInfo()) &&
-           ((UDPControlInfo *)(msg->getControlInfo()))->getSockId()==sockId;
+           ((UDPControlInfo *)(msg->getControlInfo()))->getSockId() == sockId;
 }
 
 bool UDPSocket::belongsToAnyUDPSocket(cMessage *msg)
@@ -340,9 +332,5 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     os << " TTL=" << ttl << " ToS=" << tos << " on ifID=" << interfaceID;
     return os.str();
 }
-
-
-
-}
-
+} // namespace inet
 

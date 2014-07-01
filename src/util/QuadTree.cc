@@ -18,14 +18,12 @@
 #include "QuadTree.h"
 
 namespace inet {
-
 bool QuadTree::insert(const cObject *point, Coord pos)
 {
     if (!isInRectangleRange(pos))
         return false;
 
-    if (points.size() < quadrantCapacity && !hasChild())
-    {
+    if (points.size() < quadrantCapacity && !hasChild()) {
         (*lastPosition)[point] = pos;
         points.push_back(point);
         return true;
@@ -41,6 +39,7 @@ bool QuadTree::insert(const cObject *point, Coord pos)
         if (quadrants[i]->insert(point, pos))
             return true;
 
+
     throw cRuntimeError("QuadTree insertion failed for object: %s with position: (%f, %f, %f)", point->getFullName(), pos.x, pos.y, pos.z);
     return false;
 }
@@ -50,6 +49,7 @@ unsigned int QuadTree::whichQuadrant(Coord pos) const
     for (unsigned int i = 0; i < 4; i++)
         if (quadrants[i]->isInRectangleRange(pos))
             return i;
+
     throw cRuntimeError("QuadTree failed to determine to which quadrant point (%f, %f, %f) belongs to", pos.x, pos.y, pos.z);
     return 19920213;
 }
@@ -81,7 +81,7 @@ void QuadTree::setBoundary(Coord *minBoundaries, Coord *maxBoundaries)
 
 void QuadTree::splitPoints()
 {
-    Coord minBoundaries[4],  maxBoundaries[4];
+    Coord minBoundaries[4], maxBoundaries[4];
     setBoundary(minBoundaries, maxBoundaries);
 
     // We make four new quadrants
@@ -90,9 +90,8 @@ void QuadTree::splitPoints()
 
     // The node is not a leaf anymore
     // so we have to split its point
-    for (unsigned int i = 0; i < points.size(); i++)
-    {
-        std::map<const cObject*, Coord>::iterator it = lastPosition->find(points[i]);
+    for (unsigned int i = 0; i < points.size(); i++) {
+        std::map<const cObject *, Coord>::iterator it = lastPosition->find(points[i]);
         Coord pos;
         if (it != lastPosition->end())
             pos = it->second;
@@ -115,7 +114,6 @@ void QuadTree::setToLeaf()
         quadrants[i] = NULL;
 }
 
-
 void QuadTree::rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
 {
     // If our rectangle intersects with a quadrant then we insert its objects to the
@@ -124,24 +122,23 @@ void QuadTree::rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
     if (!hasChild() && doesIntersectWithQuadrant(pos, range))
         for (unsigned int i = 0; i < points.size(); i++)
             visitor->visitor(points[i]);
+
     else if (hasChild())
         for (unsigned int i = 0; i < 4; i++)
             quadrants[i]->rangeQuery(pos, range, visitor);
+
 }
 
 void QuadTree::strictRangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
 {
-    if (!hasChild() && doesIntersectWithQuadrant(pos, range))
-    {
-        for (unsigned int i = 0; i < points.size(); i++)
-        {
+    if (!hasChild() && doesIntersectWithQuadrant(pos, range)) {
+        for (unsigned int i = 0; i < points.size(); i++) {
             Coord otherPos = (*lastPosition)[points[i]];
             if (pos.sqrdist(otherPos) <= range * range)
                 visitor->visitor(points[i]);
         }
     }
-    else if (hasChild())
-    {
+    else if (hasChild()) {
         for (unsigned int i = 0; i < 4; i++)
             quadrants[i]->strictRangeQuery(pos, range, visitor);
     }
@@ -164,8 +161,8 @@ bool QuadTree::doesIntersectWithQuadrant(Coord pos, double range) const
     maxRectangleBoundary.x += range;
     maxRectangleBoundary.y += range;
 
-    return !( (minRectangleBoundary.x > boundaryMax.x) || (maxRectangleBoundary.x < boundaryMin.x) ||
-            (minRectangleBoundary.y > boundaryMax.y) || (maxRectangleBoundary.y < boundaryMin.y) );
+    return !((minRectangleBoundary.x > boundaryMax.x) || (maxRectangleBoundary.x < boundaryMin.x) ||
+             (minRectangleBoundary.y > boundaryMax.y) || (maxRectangleBoundary.y < boundaryMin.y));
 }
 
 bool QuadTree::remove(const cObject *point)
@@ -177,7 +174,7 @@ bool QuadTree::remove(const cObject *point)
     // the whole QuadTree and check each node's vector one by one.
 
     Coord lastPos;
-    std::map<const cObject*, Coord>::iterator lastIt = lastPosition->find(point);
+    std::map<const cObject *, Coord>::iterator lastIt = lastPosition->find(point);
     if (lastIt != lastPosition->end())
         lastPos = lastIt->second;
     else
@@ -191,8 +188,7 @@ bool QuadTree::remove(const cObject *point)
     Points::iterator it = find(quadrant->points.begin(), quadrant->points.end(), point);
 
     // If we find the object then we erase it from the quadrant's vector and lastPosition map
-    if (it != quadrant->points.end())
-    {
+    if (it != quadrant->points.end()) {
         lastPosition->erase(lastIt);
         quadrant->points.erase(it);
     }
@@ -214,11 +210,11 @@ QuadTree *QuadTree::searchQuadrant(Coord lastPos)
     if (!hasChild() && isInRectangleRange(lastPos))
         return this;
 
-    else if (hasChild())
-    {
+    else if (hasChild()) {
         for (int i = 0; i < 4; i++)
             if (quadrants[i]->isInRectangleRange(lastPos))
                 return quadrants[i]->searchQuadrant(lastPos);
+
 
         return NULL;
     }
@@ -235,8 +231,7 @@ void QuadTree::tryToJoinChildQuadrants()
 {
     unsigned int quadrantSum = 0;
 
-    for (unsigned int i = 0; i < 4; i++)
-    {
+    for (unsigned int i = 0; i < 4; i++) {
         // We surely can't join quadrants if one quadrant has another
         // subquadrants
 
@@ -250,11 +245,9 @@ void QuadTree::tryToJoinChildQuadrants()
     // than quadrantCapacity objects then we can
     // join these quadrants
 
-    if (quadrantSum <= quadrantCapacity)
-    {
+    if (quadrantSum <= quadrantCapacity) {
         // Copy the points to the parent node
-        for (unsigned int i = 0; i < 4; i++)
-        {
+        for (unsigned int i = 0; i < 4; i++) {
             QuadTree *quadrant = quadrants[i];
             for (unsigned int j = 0; j < quadrant->points.size(); j++)
                 points.push_back(quadrant->points[j]);
@@ -272,7 +265,7 @@ void QuadTree::tryToJoinChildQuadrants()
     }
 }
 
-bool QuadTree::move(const cObject* point, Coord newPos)
+bool QuadTree::move(const cObject *point, Coord newPos)
 {
     QuadTree *quadrant = searchQuadrant(newPos);
 
@@ -289,7 +282,7 @@ bool QuadTree::move(const cObject* point, Coord newPos)
 
     if (it != quadrant->points.end())
         return true;
-    else  // Otherwise, we remove the object and insert it again
+    else // Otherwise, we remove the object and insert it again
         return remove(point) && insert(point, newPos);
 }
 
@@ -306,7 +299,7 @@ QuadTree::QuadTree(Coord boundaryMin, Coord boundaryMax, unsigned int quadrantCa
     // node. Each subtree inherits this pointer and use its global
     // information
     if (parent == NULL)
-        lastPosition = new std::map<const cObject*, Coord>;
+        lastPosition = new std::map<const cObject *, Coord>;
     else
         lastPosition = parent->lastPosition;
 }
@@ -321,5 +314,5 @@ QuadTree::~QuadTree()
     if (parent == NULL)
         delete lastPosition;
 }
+} // namespace inet
 
-}

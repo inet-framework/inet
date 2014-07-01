@@ -18,9 +18,7 @@
 #include "AttenuationBase.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {
     const Coord transmissionStartPosition = transmission->getStartPosition();
@@ -32,10 +30,6 @@ EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *t
     double elevation = atan2(z, transmissionStartDirection.length());
     return EulerAngles(heading, elevation, 0);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

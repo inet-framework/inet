@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "VoIPStreamSender.h"
 
 #include "ModuleAccess.h"
@@ -24,13 +23,11 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
-
 extern "C" {
 #include <libavutil/opt.h>
 }
 
 Define_Module(VoIPStreamSender);
-
 
 simsignal_t VoIPStreamSender::sentPkSignal = registerSignal("sentPk");
 
@@ -62,7 +59,7 @@ VoIPStreamSender::Buffer::Buffer() :
 
 VoIPStreamSender::Buffer::~Buffer()
 {
-    delete [] samples;
+    delete[] samples;
 }
 
 void VoIPStreamSender::Buffer::clear(int framesize)
@@ -76,8 +73,7 @@ void VoIPStreamSender::Buffer::clear(int framesize)
 
 void VoIPStreamSender::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         voipHeaderSize = par("voipHeaderSize");
         voipSilenceThreshold = par("voipSilenceThreshold");
         sampleRate = par("sampleRate");
@@ -100,8 +96,7 @@ void VoIPStreamSender::initialize(int stage)
         localPort = par("localPort");
         destPort = par("destPort");
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -142,33 +137,27 @@ void VoIPStreamSender::initialize(int stage)
 
 void VoIPStreamSender::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         VoIPStreamPacket *packet;
 
-        if (msg == timer)
-        {
+        if (msg == timer) {
             packet = generatePacket();
 
-            if (!packet)
-            {
-                if (repeatCount > 1)
-                {
+            if (!packet) {
+                if (repeatCount > 1) {
                     repeatCount--;
                     av_seek_frame(pFormatCtx, streamIndex, 0, 0);
                     packet = generatePacket();
                 }
             }
 
-            if (packet)
-            {
+            if (packet) {
                 // reschedule trigger message
                 scheduleAt(simTime() + packetTimeLength, packet);
                 scheduleAt(simTime() + packetTimeLength, msg);
             }
         }
-        else
-        {
+        else {
             packet = check_and_cast<VoIPStreamPacket *>(msg);
             emit(sentPkSignal, packet);
             socket.sendTo(packet, destAddress, destPort);
@@ -183,14 +172,13 @@ void VoIPStreamSender::finish()
     av_free_packet(&packet);
     outFile.close();
 
-    if (pReSampleCtx)
-    {
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+    if (pReSampleCtx) {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         avresample_close(pReSampleCtx);
         avresample_free(&pReSampleCtx);
-#else
+#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         audio_resample_close(pReSampleCtx);
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         pReSampleCtx = NULL;
     }
 
@@ -212,10 +200,8 @@ void VoIPStreamSender::openSoundFile(const char *name)
 
     //get stream number
     streamIndex = -1;
-    for (unsigned int j = 0; j < pFormatCtx->nb_streams; j++)
-    {
-        if (pFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
-        {
+    for (unsigned int j = 0; j < pFormatCtx->nb_streams; j++) {
+        if (pFormatCtx->streams[j]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             streamIndex = j;
             break;
         }
@@ -249,50 +235,56 @@ void VoIPStreamSender::openSoundFile(const char *name)
     if (!pCodecEncoder)
         throw cRuntimeError("Codec '%s' not found!", codec);
 
-    pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt; // FIXME hack!
+    pEncoderCtx->sample_fmt = pCodecCtx->sample_fmt;    // FIXME hack!
 
     if (avcodec_open2(pEncoderCtx, pCodecEncoder, NULL) < 0)
         throw cRuntimeError("could not open %s encoding codec!", codec);
 
     if (pCodecCtx->sample_rate == sampleRate
-            && pCodecCtx->sample_fmt == pEncoderCtx->sample_fmt
-            && pCodecCtx->channels == 1)
+        && pCodecCtx->sample_fmt == pEncoderCtx->sample_fmt
+        && pCodecCtx->channels == 1)
     {
         pReSampleCtx = NULL;
     }
-    else
-    {
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+    else {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         pReSampleCtx = avresample_alloc_context();
         if (!pReSampleCtx)
             throw cRuntimeError("error in av_audio_resample_init()");
 
         int inChannelLayout = pCodecCtx->channel_layout == 0 ? av_get_default_channel_layout(pCodecCtx->channels) : pCodecCtx->channel_layout;
-        if (av_opt_set_int(pReSampleCtx, "in_channel_layout",   inChannelLayout,           0))  throw cRuntimeError("error in option setting of 'in_channel_layout'");
-        if (av_opt_set_int(pReSampleCtx, "in_sample_fmt",       pCodecCtx->sample_fmt,     0))  throw cRuntimeError("error in option setting of 'in_sample_fmt'");
-        if (av_opt_set_int(pReSampleCtx, "in_sample_rate",      pCodecCtx->sample_rate,    0))  throw cRuntimeError("error in option setting of 'in_sample_rate'");
-        if (av_opt_set_int(pReSampleCtx, "out_channel_layout",  AV_CH_LAYOUT_MONO,         0))  throw cRuntimeError("error in option setting of 'out_channel_layout'");
-        if (av_opt_set_int(pReSampleCtx, "out_sample_fmt",      pEncoderCtx->sample_fmt,   0))  throw cRuntimeError("error in option setting of 'out_sample_fmt'");
-        if (av_opt_set_int(pReSampleCtx, "out_sample_rate",     sampleRate,                0))  throw cRuntimeError("error in option setting of 'out_sample_rate'");
-        if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP,        0))  throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
+        if (av_opt_set_int(pReSampleCtx, "in_channel_layout", inChannelLayout, 0))
+            throw cRuntimeError("error in option setting of 'in_channel_layout'");
+        if (av_opt_set_int(pReSampleCtx, "in_sample_fmt", pCodecCtx->sample_fmt, 0))
+            throw cRuntimeError("error in option setting of 'in_sample_fmt'");
+        if (av_opt_set_int(pReSampleCtx, "in_sample_rate", pCodecCtx->sample_rate, 0))
+            throw cRuntimeError("error in option setting of 'in_sample_rate'");
+        if (av_opt_set_int(pReSampleCtx, "out_channel_layout", AV_CH_LAYOUT_MONO, 0))
+            throw cRuntimeError("error in option setting of 'out_channel_layout'");
+        if (av_opt_set_int(pReSampleCtx, "out_sample_fmt", pEncoderCtx->sample_fmt, 0))
+            throw cRuntimeError("error in option setting of 'out_sample_fmt'");
+        if (av_opt_set_int(pReSampleCtx, "out_sample_rate", sampleRate, 0))
+            throw cRuntimeError("error in option setting of 'out_sample_rate'");
+        if (av_opt_set_int(pReSampleCtx, "internal_sample_fmt", AV_SAMPLE_FMT_FLTP, 0))
+            throw cRuntimeError("error in option setting of 'internal_sample_fmt'");
 
         ret = avresample_open(pReSampleCtx);
         if (ret < 0)
             throw cRuntimeError("Error opening context");
-#else
+#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         pReSampleCtx = av_audio_resample_init(1, pCodecCtx->channels, sampleRate, pCodecCtx->sample_rate,
-                pEncoderCtx->sample_fmt, pCodecCtx->sample_fmt, 16, 10, 0, 0.8);
-                // parameters copied from the implementation of deprecated audio_resample_init()
+                    pEncoderCtx->sample_fmt, pCodecCtx->sample_fmt, 16, 10, 0, 0.8);
+        // parameters copied from the implementation of deprecated audio_resample_init()
         // begin HACK
         long int sec = 2;
         short int *inb = new short int[sec * pCodecCtx->channels * pCodecCtx->sample_rate * av_get_bits_per_sample_format(pCodecCtx->sample_fmt) / (8 * sizeof(short int))];
-        short int *outb = new short int[sec * sampleRate * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / (8 * sizeof(short int))+16];
+        short int *outb = new short int[sec * sampleRate * av_get_bits_per_sample_format(pEncoderCtx->sample_fmt) / (8 * sizeof(short int)) + 16];
         int decoded = audio_resample(pReSampleCtx, outb, inb, sec * pCodecCtx->sample_rate);
         EV_DEBUG << "decoded:" << decoded << endl;
-        delete [] inb;
-        delete [] outb;
+        delete[] inb;
+        delete[] outb;
         // end HACK
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     }
 
     if (traceFileName && *traceFileName)
@@ -301,7 +293,7 @@ void VoIPStreamSender::openSoundFile(const char *name)
     sampleBuffer.clear(samplesPerPacket * av_get_bytes_per_sample(pEncoderCtx->sample_fmt));
 }
 
-VoIPStreamPacket* VoIPStreamSender::generatePacket()
+VoIPStreamPacket *VoIPStreamSender::generatePacket()
 {
     readFrame();
 
@@ -322,20 +314,20 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
 
     frame->nb_samples = samples;
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = pEncoderCtx->sample_rate;
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 
-    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, pEncoderCtx->sample_fmt,
-            (const uint8_t*)(sampleBuffer.readPtr()), inBytes, 1);
+    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, pEncoderCtx->sample_fmt,
+                (const uint8_t *)(sampleBuffer.readPtr()), inBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
     // The bitsPerOutSample is not 0 when codec is PCM.
     int gotPacket;
     ret = avcodec_encode_audio2(pEncoderCtx, &opacket, frame, &gotPacket);
-    if(ret < 0 || gotPacket != 1)
+    if (ret < 0 || gotPacket != 1)
         throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
 
     if (outFile.isOpen())
@@ -344,14 +336,12 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
 
     vp->setDataFromBuffer(opacket.data, opacket.size);
 
-    if (isSilent)
-    {
+    if (isSilent) {
         vp->setName("SILENCE");
         vp->setType(SILENCE);
         vp->setByteLength(voipSilencePacketSize);
     }
-    else
-    {
+    else {
         vp->setName("VOICE");
         vp->setType(VOICE);
         vp->setByteLength(voipHeaderSize + opacket.size);
@@ -368,26 +358,23 @@ VoIPStreamPacket* VoIPStreamSender::generatePacket()
     pktID++;
 
     av_free_packet(&opacket);
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     avcodec_free_frame(&frame);
-#else
+#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     av_freep(&frame);
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     return vp;
 }
 
-bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int samples)
+bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples)
 {
     int max = 0;
     int i;
 
-    switch (sampleFormat)
-    {
-    case AV_SAMPLE_FMT_U8:
-        {
+    switch (sampleFormat) {
+        case AV_SAMPLE_FMT_U8: {
             uint8_t *buf = (uint8_t *)_buf;
-            for (i=0; i<samples; ++i)
-            {
+            for (i = 0; i < samples; ++i) {
                 int s = abs(int(buf[i]) - 0x80);
                 if (s > max)
                     max = s;
@@ -395,11 +382,9 @@ bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int
         }
         break;
 
-    case AV_SAMPLE_FMT_S16:
-        {
+        case AV_SAMPLE_FMT_S16: {
             int16_t *buf = (int16_t *)_buf;
-            for (i=0; i<samples; ++i)
-            {
+            for (i = 0; i < samples; ++i) {
                 int s = abs(buf[i]);
                 if (s > max)
                     max = s;
@@ -407,12 +392,10 @@ bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int
         }
         break;
 
-    case AV_SAMPLE_FMT_S32:
-        {
+        case AV_SAMPLE_FMT_S32: {
             int32_t *buf = (int32_t *)_buf;
 
-            for (i=0; i<samples; ++i)
-            {
+            for (i = 0; i < samples; ++i) {
                 int s = abs(buf[i]);
 
                 if (s > max)
@@ -421,8 +404,8 @@ bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int
         }
         break;
 
-    default:
-        throw cRuntimeError("Invalid sampleFormat: %d", sampleFormat);
+        default:
+            throw cRuntimeError("Invalid sampleFormat: %d", sampleFormat);
     }
 
     return max < voipSilenceThreshold;
@@ -430,10 +413,9 @@ bool VoIPStreamSender::checkSilence(AVSampleFormat sampleFormat, void* _buf, int
 
 void VoIPStreamSender::Buffer::align()
 {
-    if (readOffset)
-    {
+    if (readOffset) {
         if (length())
-            memcpy(samples, samples+readOffset, length());
+            memcpy(samples, samples + readOffset, length());
         writeOffset -= readOffset;
         readOffset = 0;
     }
@@ -448,8 +430,7 @@ void VoIPStreamSender::readFrame()
 
     sampleBuffer.align();
 
-    while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample)
-    {
+    while (sampleBuffer.length() < samplesPerPacket * inBytesPerSample) {
         //read one frame
         int err = av_read_frame(pFormatCtx, &packet);
         if (err < 0)
@@ -469,9 +450,8 @@ void VoIPStreamSender::readFrame()
         avpkt.data = packet.data;
         avpkt.size = packet.size;
 
-        while (avpkt.size > 0)
-        {
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+        while (avpkt.size > 0) {
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
             // decode audio and save the decoded samples in our buffer
             AVFrame *frame = avcodec_alloc_frame();
             int gotFrame;
@@ -482,33 +462,33 @@ void VoIPStreamSender::readFrame()
             avpkt.data += decoded;
             avpkt.size -= decoded;
 
-            if (!pReSampleCtx)
-            {
+            if (!pReSampleCtx) {
                 // copy frame to sampleBuffer
                 int dataSize = av_samples_get_buffer_size(NULL, pCodecCtx->channels, frame->nb_samples, pCodecCtx->sample_fmt, 1);
                 memcpy(sampleBuffer.writePtr(), frame->data[0], dataSize);
                 sampleBuffer.notifyWrote(dataSize);
             }
-            else
-            {
+            else {
                 uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
 
                 uint8_t **in_data = frame->extended_data;
                 int in_linesize = frame->linesize[0];
                 int in_nb_samples = frame->nb_samples;
 
-                uint8_t *out_data[AVRESAMPLE_MAX_CHANNELS] = { 0 };
+                uint8_t *out_data[AVRESAMPLE_MAX_CHANNELS] = {
+                    0
+                };
                 int maxOutSamples = sampleBuffer.availableSpace() / outBytesPerSample;
                 int out_linesize;
                 int ret;
                 ret = av_samples_fill_arrays(out_data, &out_linesize, tmpSamples,
-                        1, maxOutSamples,
-                        pEncoderCtx->sample_fmt, 0);
+                            1, maxOutSamples,
+                            pEncoderCtx->sample_fmt, 0);
                 if (ret < 0)
                     throw cRuntimeError("failed out_data fill arrays");
 
                 decoded = avresample_convert(pReSampleCtx, out_data, out_linesize, decoded,
-                        in_data, in_linesize, in_nb_samples);
+                            in_data, in_linesize, in_nb_samples);
                 if (!decoded)
                     throw cRuntimeError("audio_resample() returns error");
 //                if (avresample_get_delay(pReSampleCtx) > 0)
@@ -517,15 +497,15 @@ void VoIPStreamSender::readFrame()
 //                    throw cRuntimeError("%d samples available for output\n", avresample_available(pReSampleCtx));
                 memcpy(sampleBuffer.writePtr(), out_data[0], decoded * outBytesPerSample);
                 sampleBuffer.notifyWrote(decoded * outBytesPerSample);
-                delete [] tmpSamples;
+                delete[] tmpSamples;
             }
             avcodec_free_frame(&frame);
-#else
+#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
             uint8_t *tmpSamples = new uint8_t[Buffer::BUFSIZE];
 
             int16_t *rbuf, *nbuf;
-            nbuf = (int16_t*)(sampleBuffer.writePtr());
-            rbuf = (pReSampleCtx) ? (int16_t*)tmpSamples : nbuf;
+            nbuf = (int16_t *)(sampleBuffer.writePtr());
+            rbuf = (pReSampleCtx) ? (int16_t *)tmpSamples : nbuf;
 
             int frame_size = (pReSampleCtx) ? Buffer::BUFSIZE : sampleBuffer.availableSpace();
             memset(rbuf, 0, frame_size);
@@ -547,14 +527,10 @@ void VoIPStreamSender::readFrame()
                 decoded = audio_resample(pReSampleCtx, nbuf, rbuf, decoded);
 
             sampleBuffer.notifyWrote(decoded * inBytesPerSample);
-            delete [] tmpSamples;
-#endif
+            delete[] tmpSamples;
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
         }
     }
 }
-
-
-
-}
-
+} // namespace inet
 

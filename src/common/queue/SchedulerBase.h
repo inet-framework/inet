@@ -23,7 +23,6 @@
 #include "IPassiveQueue.h"
 
 namespace inet {
-
 /**
  * Base class for packet schedulers.
  *
@@ -39,38 +38,37 @@ namespace inet {
  */
 class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, public IPassiveQueueListener
 {
-    protected:
-        // state
-        int packetsRequestedFromUs;
-        int packetsToBeRequestedFromInputs;
-        std::vector<IPassiveQueue*> inputQueues;
-        cGate *outGate;
-        std::list<IPassiveQueueListener*> listeners;
+  protected:
+    // state
+    int packetsRequestedFromUs;
+    int packetsToBeRequestedFromInputs;
+    std::vector<IPassiveQueue *> inputQueues;
+    cGate *outGate;
+    std::list<IPassiveQueueListener *> listeners;
 
-    public:
-        SchedulerBase();
-        virtual ~SchedulerBase();
+  public:
+    SchedulerBase();
+    virtual ~SchedulerBase();
 
-    protected:
-      virtual void initialize();
-      virtual void finalize();
-      virtual void handleMessage(cMessage *msg);
-      virtual void sendOut(cMessage *msg);
-      virtual void notifyListeners();
-      virtual bool schedulePacket() = 0;
+  protected:
+    virtual void initialize();
+    virtual void finalize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void sendOut(cMessage *msg);
+    virtual void notifyListeners();
+    virtual bool schedulePacket() = 0;
 
-    public:
-      virtual void requestPacket();
-      virtual int getNumPendingRequests() { return packetsRequestedFromUs; }
-      virtual bool isEmpty();
-      virtual void clear();
-      virtual cMessage *pop();
-      virtual void packetEnqueued(IPassiveQueue *inputQueue);
-      virtual void addListener(IPassiveQueueListener *listener);
-      virtual void removeListener(IPassiveQueueListener *listener);
+  public:
+    virtual void requestPacket();
+    virtual int getNumPendingRequests() { return packetsRequestedFromUs; }
+    virtual bool isEmpty();
+    virtual void clear();
+    virtual cMessage *pop();
+    virtual void packetEnqueued(IPassiveQueue *inputQueue);
+    virtual void addListener(IPassiveQueueListener *listener);
+    virtual void removeListener(IPassiveQueueListener *listener);
 };
-
-}
-
+} // namespace inet
 
 #endif /* SCHEDULERBASE_H_ */
+

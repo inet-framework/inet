@@ -20,10 +20,7 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
-
-
 Register_Class(TCPGenericSrvThread);
-
 
 void TCPGenericSrvThread::established()
 {
@@ -36,27 +33,25 @@ void TCPGenericSrvThread::dataArrived(cMessage *msg, bool)
 
     if (!appmsg)
         throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
-                  "probably wrong client app, or wrong setting of TCP's "
-                  "dataTransferMode parameters "
-                  "(try \"object\")",
-                  msg->getClassName(), msg->getName());
+                            "probably wrong client app, or wrong setting of TCP's "
+                            "dataTransferMode parameters "
+                            "(try \"object\")",
+                msg->getClassName(), msg->getName());
 
     if (appmsg->getReplyDelay() > 0)
         throw cRuntimeError("Cannot process (%s)%s: %s class doesn't support replyDelay field"
-                  " of GenericAppMsg, try to use TCPGenericSrvApp instead",
-                  msg->getClassName(), msg->getName(), getClassName());
+                            " of GenericAppMsg, try to use TCPGenericSrvApp instead",
+                msg->getClassName(), msg->getName(), getClassName());
 
     // process message: send back requested number of bytes, then close
     // connection if that was requested too
     long requestedBytes = appmsg->getExpectedReplyLength();
     bool doClose = appmsg->getServerClose();
 
-    if (requestedBytes == 0)
-    {
+    if (requestedBytes == 0) {
         delete appmsg;
     }
-    else
-    {
+    else {
         appmsg->setByteLength(requestedBytes);
         delete appmsg->removeControlInfo();
         getSocket()->send(appmsg);
@@ -70,9 +65,5 @@ void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }
-
-
-
-}
-
+} // namespace inet
 

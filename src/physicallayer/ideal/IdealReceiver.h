@@ -21,34 +21,29 @@
 #include "ReceiverBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealReceiver : public ReceiverBase
 {
-    protected:
-        bool ignoreInterference;
+  protected:
+    bool ignoreInterference;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-        virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
+  protected:
+    virtual void initialize(int stage);
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
 
-    public:
-        IdealReceiver() :
-            ignoreInterference(false)
-        {}
+  public:
+    IdealReceiver() :
+        ignoreInterference(false)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
-        virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
-        virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
-        virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual void printToStream(std::ostream& stream) const;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALRECEIVER_H
 
-}
-
-
-#endif

@@ -22,9 +22,7 @@
 #include "INetfilter.h"
 #include "INetworkDatagram.h"
 
-
 namespace inet {
-
 class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHook
 {
   protected:
@@ -38,31 +36,30 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
 
   public:
     /**
-    * called before a packet arriving from the network is routed
-    */
-    virtual Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+     * called before a packet arriving from the network is routed
+     */
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
-    * called before a packet arriving from the network is delivered via the network
-    */
-    virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+     * called before a packet arriving from the network is delivered via the network
+     */
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
-    * called before a packet is delivered via the network
-    */
-    virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+     * called before a packet is delivered via the network
+     */
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
-    * called before a packet arriving from the network is delivered locally
-    */
-    virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry* inIE);
+     * called before a packet arriving from the network is delivered locally
+     */
+    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
 
     /**
-    * called before a packet arriving locally is delivered
-    */
-    virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry*& outIE, Address& nextHopAddr);
+     * called before a packet arriving locally is delivered
+     */
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr);
 };
-
 
 Define_Module(NetfilterInfoHook);
 
@@ -70,9 +67,8 @@ void NetfilterInfoHook::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER)
-    {
-        netfilter = check_and_cast<INetfilter*>(findModuleWhereverInNode("ip", this));
+    if (stage == INITSTAGE_NETWORK_LAYER) {
+        netfilter = check_and_cast<INetfilter *>(findModuleWhereverInNode("ip", this));
         netfilter->registerHook(0, this);
     }
 }
@@ -82,48 +78,47 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not receive messages");
 }
 
-
-INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
-       << " inIE=" << (inIE ? inIE->getName() : "NULL")
-       << endl;
+            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-       << " inIE=" << (inIE ? inIE->getName() : "NULL")
-       << " outIE=" << (outIE ? outIE->getName() : "NULL")
-       << " nextHop=" << nextHopAddr
-       << endl;
+            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << " nextHop=" << nextHopAddr
+            << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
-       << " inIE=" << (inIE ? inIE->getName() : "NULL")
-       << " outIE=" << (outIE ? outIE->getName() : "NULL")
-       << " nextHop=" << nextHopAddr
-       << endl;
+            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << " nextHop=" << nextHopAddr
+            << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry* inIE)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL IN: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-       << " inIE=" << (inIE ? inIE->getName() : "NULL")
-       << endl;
+            << " inIE=" << (inIE ? inIE->getName() : "NULL")
+            << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << dynamic_cast<cObject *>(datagram)->getName()
-       << " outIE=" << (outIE ? outIE->getName() : "NULL")
-       << endl;
+            << " outIE=" << (outIE ? outIE->getName() : "NULL")
+            << endl;
     return INetfilter::IHook::ACCEPT;
 }
 
@@ -131,6 +126,5 @@ void NetfilterInfoHook::finish()
 {
     netfilter->unregisterHook(0, this);
 }
-
-}
+} // namespace inet
 

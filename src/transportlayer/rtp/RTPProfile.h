@@ -4,30 +4,25 @@
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
 
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPPROFILE_H
 #define __INET_RTPPROFILE_H
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
-
 //Forward declarations:
 class RTPInnerPacket;
-
 
 /**
  * The class RTPProfile is a module which handles RTPPayloadSender and
@@ -47,17 +42,18 @@ class INET_API RTPProfile : public cSimpleModule
     // and the gate which leads to the RTPPayloadReceiver module.
     // Note: in the original, this used to be a hundred lines, as RTPSSRCGate.cc/h,
     // but even this class is an overkill --Andras
-    class SSRCGate : public cNamedObject  //FIXME why is it a namedObject?
+    class SSRCGate : public cNamedObject    //FIXME why is it a namedObject?
     {
       protected:
         uint32 ssrc;
         int gateId;
+
       public:
-        SSRCGate(uint32 ssrc = 0) {this->ssrc = ssrc; gateId = 0;}
-        uint32 getSsrc() {return ssrc;}
-        void setSSRC(uint32 ssrc) {this->ssrc = ssrc;}
-        int getGateId() {return gateId;}
-        void setGateId(int gateId) {this->gateId = gateId;}
+        SSRCGate(uint32 ssrc = 0) { this->ssrc = ssrc; gateId = 0; }
+        uint32 getSsrc() { return ssrc; }
+        void setSSRC(uint32 ssrc) { this->ssrc = ssrc; }
+        int getGateId() { return gateId; }
+        void setGateId(int gateId) { this->gateId = gateId; }
     };
 
   public:
@@ -215,8 +211,7 @@ class INET_API RTPProfile : public cSimpleModule
      */
     bool _autoOutputFileNames;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPPROFILE_H
 
-
-#endif

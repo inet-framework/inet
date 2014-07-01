@@ -15,18 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>   // min,max
+#include <algorithm>    // min,max
 #include "TCPNewReno.h"
 #include "TCP.h"
 
 namespace inet {
-
-
 Register_Class(TCPNewReno);
 
-
 TCPNewReno::TCPNewReno() : TCPTahoeRenoFamily(),
-        state((TCPNewRenoStateVariables *&)TCPAlgorithm::state)
+    state((TCPNewRenoStateVariables *&)TCPAlgorithm::state)
 {
 }
 
@@ -44,7 +41,7 @@ void TCPNewReno::recalculateSlowStartThreshold()
 
     // set ssthresh to flight size / 2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
@@ -91,7 +88,7 @@ void TCPNewReno::processRexmitTimer(TCPEventCode& event)
         cwndVector->record(state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
-          << ", ssthresh=" << state->ssthresh << "\n";
+            << ", ssthresh=" << state->ssthresh << "\n";
     state->afterRto = true;
     conn->retransmitOneSegment(true);
 }
@@ -123,10 +120,8 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
     // limit the number of data packets that can be sent in response to
     // a single acknowledgement; this is known as "maxburst_" in the NS
     // simulator.  Exit the Fast Recovery procedure."
-    if (state->lossRecovery)
-    {
-        if (seqGE(state->snd_una - 1, state->recover))
-        {
+    if (state->lossRecovery) {
+        if (seqGE(state->snd_una - 1, state->recover)) {
             // Exit Fast Recovery: deflating cwnd
             //
             // option (1): set cwnd to min (ssthresh, FlightSize + SMSS)
@@ -144,8 +139,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             state->firstPartialACK = false;
             EV_INFO << "Loss Recovery terminated.\n";
         }
-        else
-        {
+        else {
             // RFC 3782, page 5:
             // "Partial acknowledgements:
             // If this ACK does *not* acknowledge all of the data up to and
@@ -181,8 +175,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             EV_INFO << "Fast Recovery: deflating cwnd by amount of new data acknowledged, new cwnd=" << state->snd_cwnd << "\n";
 
             // if the partial ACK acknowledges at least one SMSS of new data, then add back SMSS bytes to the cwnd
-            if (state->snd_una - firstSeqAcked >= state->snd_mss)
-            {
+            if (state->snd_una - firstSeqAcked >= state->snd_mss) {
                 state->snd_cwnd += state->snd_mss;
 
                 if (cwndVector)
@@ -195,10 +188,8 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             sendData(false);
 
             // reset REXMIT timer for the first partial ACK that arrives during Fast Recovery
-            if (state->lossRecovery)
-            {
-                if (!state->firstPartialACK)
-                {
+            if (state->lossRecovery) {
+                if (!state->firstPartialACK) {
                     state->firstPartialACK = true;
                     EV_DETAIL << "First partial ACK arrived during recovery, restarting REXMIT timer.\n";
                     restartRexmitTimer();
@@ -206,13 +197,11 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
             }
         }
     }
-    else
-    {
+    else {
         //
         // Perform slow start and congestion avoidance.
         //
-        if (state->snd_cwnd < state->ssthresh)
-        {
+        if (state->snd_cwnd < state->ssthresh) {
             EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by SMSS bytes to ";
 
             // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
@@ -235,8 +224,7 @@ void TCPNewReno::receivedDataAck(uint32 firstSeqAcked)
 
             EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
         }
-        else
-        {
+        else {
             // perform Congestion Avoidance (RFC 2581)
             uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
@@ -276,10 +264,8 @@ void TCPNewReno::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
-    {
-        if (!state->lossRecovery)
-        {
+    if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
+        if (!state->lossRecovery) {
             // RFC 3782, page 4:
             // "1) Three duplicate ACKs:
             // When the third duplicate ACK is received and the sender is not
@@ -293,8 +279,7 @@ void TCPNewReno::receivedDuplicateAck()
             // contains the sequence number that the sender next expects to receive,
             // the acknowledgement "ack_number" covers more than "recover" when:
             //      ack_number - 1 > recover;"
-            if (state->snd_una - 1 > state->recover)
-            {
+            if (state->snd_una - 1 > state->recover) {
                 EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
 
                 // RFC 3782, page 4:
@@ -330,8 +315,7 @@ void TCPNewReno::receivedDuplicateAck()
                 // receiver's advertised window."
                 sendData(false);
             }
-            else
-            {
+            else {
                 EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): not invoking Fast Retransmit and Fast Recovery\n";
 
                 // RFC 3782, page 4:
@@ -344,10 +328,8 @@ void TCPNewReno::receivedDuplicateAck()
         }
         EV_INFO << "NewReno on dupAcks == DUPTHRESH(=3): TCP is already in Fast Recovery procedure\n";
     }
-    else if (state->dupacks > DUPTHRESH) // DUPTHRESH = 3
-    {
-        if (state->lossRecovery)
-        {
+    else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
+        if (state->lossRecovery) {
             // RFC 3782, page 4:
             // "3) Fast Recovery:
             // For each additional duplicate ACK received while in Fast
@@ -369,8 +351,5 @@ void TCPNewReno::receivedDuplicateAck()
         }
     }
 }
-
-
-}
-
+} // namespace inet
 

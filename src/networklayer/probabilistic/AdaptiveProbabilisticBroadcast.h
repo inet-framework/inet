@@ -14,7 +14,6 @@
 #include "Address.h"
 
 namespace inet {
-
 /**
  * @brief This class extends ProbabilisticBroadcast by adding
  *        an algorithm which adapts broadcasting parameters
@@ -25,7 +24,7 @@ namespace inet {
  **/
 class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
 {
-public:
+  public:
     AdaptiveProbabilisticBroadcast()
         : ProbabilisticBroadcast()
         , timeInNeighboursTable()
@@ -36,26 +35,25 @@ public:
     /** @brief Initialization of the module and some variables*/
     virtual void initialize(int);
 
-protected:
-    typedef std::map<Address, cMessage*> NeighborMap;
+  protected:
+    typedef std::map<Address, cMessage *> NeighborMap;
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket* msg);
+    virtual void handleLowerPacket(cPacket *msg);
 
     /** @brief Handle self messages */
-    virtual void handleSelfMessage(cMessage* msg);
+    virtual void handleSelfMessage(cMessage *msg);
 
-    void updateNeighMap(ProbabilisticBroadcastDatagram* m);
+    void updateNeighMap(ProbabilisticBroadcastDatagram *m);
 
     void updateBeta();
 
     //read from omnetpp.ini
-    simtime_t   timeInNeighboursTable; ///< @brief Default ttl for NeighborTable entries in seconds
-    cOutVector  bvec;
+    simtime_t timeInNeighboursTable;    ///< @brief Default ttl for NeighborTable entries in seconds
+    cOutVector bvec;
     NeighborMap neighMap;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ADAPTIVEPROBABILISTICBROADCAST_H
 
-
-#endif

@@ -30,11 +30,10 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 Define_Module(GenericNetworkConfigurator);
 
-inline bool isEmpty(const char *s) {return !s || !s[0];}
-inline bool isNotEmpty(const char *s) {return s && s[0];}
+inline bool isEmpty(const char *s) { return !s || !s[0]; }
+inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 static void printTimeSpentUsingDuration(const char *name, long duration)
 {
@@ -46,14 +45,12 @@ static void printElapsedTime(const char *name, long startTime)
     printTimeSpentUsingDuration(name, clock() - startTime);
 }
 
-
-#define T(CODE)  {long startTime=clock(); CODE; printElapsedTime(#CODE, startTime);}
+#define T(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
 void GenericNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         long initializeStartTime = clock();
 
         GenericTopology topology;
@@ -76,6 +73,7 @@ void GenericNetworkConfigurator::initialize(int stage)
         printElapsedTime("initialize", initializeStartTime);
     }
 }
+
 #undef T
 
 void GenericNetworkConfigurator::extractTopology(GenericTopology& topology)
@@ -85,8 +83,7 @@ void GenericNetworkConfigurator::extractTopology(GenericTopology& topology)
     extractWirelessTopology(topology);
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++)
-    {
+    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++) {
         LinkInfo *linkInfo = topology.linkInfos[linkIndex];
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
     }
@@ -102,6 +99,7 @@ Topology::LinkOut *GenericNetworkConfigurator::findLinkOut(Node *node, int gateI
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
+
     return NULL;
 }
 
@@ -110,6 +108,7 @@ GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::findInter
     for (int i = 0; i < (int)node->interfaceInfos.size(); i++)
         if (node->interfaceInfos.at(i)->interfaceEntry == ie)
             return node->interfaceInfos.at(i);
+
     return NULL;
 }
 
@@ -120,8 +119,7 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
         node->module = module;
@@ -133,18 +131,14 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
 
     // extract links and interfaces
     std::set<InterfaceEntry *> interfacesSeen;
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
         IInterfaceTable *interfaceTable = AddressResolver().findInterfaceTableOf(module);
-        if (interfaceTable)
-        {
-            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
-            {
+        if (interfaceTable) {
+            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *ie = interfaceTable->getInterface(j);
-                if (!ie->isLoopback() && interfacesSeen.count(ie) == 0 && !isWirelessInterface(ie))
-                {
+                if (!ie->isLoopback() && interfacesSeen.count(ie) == 0 && !isWirelessInterface(ie)) {
                     // create a new network link
                     LinkInfo *linkInfo = new LinkInfo(false);
                     topology.linkInfos.push_back(linkInfo);
@@ -156,8 +150,7 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
 
                     // visit neighbor (and potentially the whole LAN, recursively)
                     Topology::LinkOut *linkOut = findLinkOut((Node *)topology.getNode(i), ie->getNodeOutputGateId());
-                    if (linkOut)
-                    {
+                    if (linkOut) {
                         std::vector<Node *> empty;
                         extractWiredNeighbors(linkOut, linkInfo, interfacesSeen, empty);
                     }
@@ -167,11 +160,9 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
     }
 
     // annotate links with interfaces
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        for (int j = 0; j < node->getNumOutLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumOutLinks(); j++) {
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             Link *link = (Link *)linkOut;
             Node *localNode = (Node *)linkOut->getLocalNode();
@@ -184,7 +175,7 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
     }
 }
 
-void GenericNetworkConfigurator::extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void GenericNetworkConfigurator::extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
     if (transmissionChannel)
@@ -194,26 +185,21 @@ void GenericNetworkConfigurator::extractWiredNeighbors(Topology::LinkOut *linkOu
     cModule *neighborModule = neighborNode->getModule();
     int neighborInputGateId = linkOut->getRemoteGateId();
     IInterfaceTable *neighborInterfaceTable = AddressResolver().findInterfaceTableOf(neighborModule);
-    if (neighborInterfaceTable)
-    {
+    if (neighborInterfaceTable) {
         // neighbor is a host or router, just add the interface
         InterfaceEntry *neighborInterfaceEntry = neighborInterfaceTable->getInterfaceByNodeInputGateId(neighborInputGateId);
-        if (interfacesSeen.count(neighborInterfaceEntry) == 0)
-        {
+        if (interfacesSeen.count(neighborInterfaceEntry) == 0) {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(neighborNode, linkInfo, neighborInterfaceEntry);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
             interfacesSeen.insert(neighborInterfaceEntry);
         }
     }
-    else
-    {
+    else {
         // assume that neighbor is an L2 or L1 device (bus/hub/switch/bridge/access point/etc); visit all its output links
         Node *deviceNode = (Node *)linkOut->getRemoteNode();
-        if (!contains(deviceNodesVisited, deviceNode))
-        {
+        if (!contains(deviceNodesVisited, deviceNode)) {
             deviceNodesVisited.push_back(deviceNode);
-            for (int i = 0; i < deviceNode->getNumOutLinks(); i++)
-            {
+            for (int i = 0; i < deviceNode->getNumOutLinks(); i++) {
                 Topology::LinkOut *deviceLinkOut = deviceNode->getLinkOut(i);
                 extractWiredNeighbors(deviceLinkOut, linkInfo, interfacesSeen, deviceNodesVisited);
             }
@@ -225,7 +211,7 @@ double GenericNetworkConfigurator::getChannelWeight(cChannel *transmissionChanne
 {
     //TODO shouldn't we use interface metric here?
     double datarate = transmissionChannel->getNominalDatarate();
-    return datarate > 0 ? 1 / datarate : 1.0;  //TODO why 1.0 if there's no datarate?
+    return datarate > 0 ? 1 / datarate : 1.0;    //TODO why 1.0 if there's no datarate?
 }
 
 /**
@@ -235,26 +221,21 @@ double GenericNetworkConfigurator::getChannelWeight(cChannel *transmissionChanne
  */
 void GenericNetworkConfigurator::extractWirelessTopology(GenericTopology& topology)
 {
-    std::map<std::string, LinkInfo *> wirelessIdToLinkInfoMap;  // wireless LANs by name
+    std::map<std::string, LinkInfo *> wirelessIdToLinkInfoMap;    // wireless LANs by name
 
     // iterate through all wireless interfaces and determine the wireless id.
-    for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++)
-    {
+    for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++) {
         Node *node = (Node *)topology.getNode(nodeIndex);
         cModule *module = node->getModule();
         IInterfaceTable *interfaceTable = AddressResolver().findInterfaceTableOf(module);
-        if (interfaceTable)
-        {
-            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
-            {
+        if (interfaceTable) {
+            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *ie = interfaceTable->getInterface(j);
-                if (!ie->isLoopback() && isWirelessInterface(ie))
-                {
+                if (!ie->isLoopback() && isWirelessInterface(ie)) {
                     const char *wirelessId = getWirelessId(ie);
                     EV_DEBUG << "Interface " << ie->getFullPath() << " has wireless id " << wirelessId << endl;
                     LinkInfo *linkInfo = wirelessIdToLinkInfoMap[wirelessId];
-                    if (!linkInfo)
-                    {
+                    if (!linkInfo) {
                         linkInfo = new LinkInfo(true);
                         topology.linkInfos.push_back(linkInfo);
                         wirelessIdToLinkInfoMap[wirelessId] = linkInfo;
@@ -267,14 +248,11 @@ void GenericNetworkConfigurator::extractWirelessTopology(GenericTopology& topolo
     }
 
     // add links between all pairs of wireless interfaces (full graph)
-    for (std::map<std::string, LinkInfo *>::iterator it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++)
-    {
+    for (std::map<std::string, LinkInfo *>::iterator it = wirelessIdToLinkInfoMap.begin(); it != wirelessIdToLinkInfoMap.end(); it++) {
         LinkInfo *linkInfo = it->second;
-        for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
-        {
+        for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = linkInfo->interfaceInfos.at(i);
-            for (int j = i + 1; j < (int)linkInfo->interfaceInfos.size(); j++)
-            {
+            for (int j = i + 1; j < (int)linkInfo->interfaceInfos.size(); j++) {
                 InterfaceInfo *interfaceInfoJ = linkInfo->interfaceInfos.at(j);
                 Link *link = new Link();
                 link->sourceInterfaceInfo = interfaceInfoI;
@@ -302,13 +280,11 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElement *root = par("config").xmlValue();
     cXMLElementList wirelessElements = root->getChildrenByTagName("wireless");
-    for (int i = 0; i < (int)wirelessElements.size(); i++)
-    {
+    for (int i = 0; i < (int)wirelessElements.size(); i++) {
         cXMLElement *wirelessElement = wirelessElements[i];
-        const char *hostAttr = wirelessElement->getAttribute("hosts");  // "host* router[0..3]"
-        const char *interfaceAttr = wirelessElement->getAttribute("interfaces"); // i.e. interface names, like "eth* ppp0"
-        try
-        {
+        const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
+        const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
+        try {
             // parse host/interface expressions
             Matcher hostMatcher(hostAttr);
             Matcher interfaceMatcher(interfaceAttr);
@@ -317,12 +293,11 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
                 (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
             {
-                const char *idAttr = wirelessElement->getAttribute("id");  // identifier of wireless connection
+                const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
@@ -332,8 +307,7 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
     if (!module)
         module = hostModule;
     cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
-    if (mgmtModule)
-    {
+    if (mgmtModule) {
         if (mgmtModule->hasPar("ssid"))
             return mgmtModule->par("ssid");
         else if (mgmtModule->hasPar("accessPointAddress"))
@@ -351,8 +325,7 @@ const char *GenericNetworkConfigurator::getWirelessId(InterfaceEntry *interfaceE
 GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = NULL;
-    for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++)
-    {
+    for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         GenericRoutingTable *routingTable = interfaceInfo->node->routingTable;
@@ -363,11 +336,11 @@ GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::determine
             if (!interfaceTable->getInterface(i)->isLoopback())
                 numInterfaces++;
 
-        if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled())
-        {
+
+        if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
-                return NULL;  // we already found one gateway, this makes it ambiguous! report "no gateway"
+                return NULL; // we already found one gateway, this makes it ambiguous! report "no gateway"
             else
                 gatewayInterfaceInfo = interfaceInfo; // remember gateway
         }
@@ -375,7 +348,7 @@ GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::determine
     return gatewayInterfaceInfo;
 }
 
-GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::createInterfaceInfo(Node *node, LinkInfo* linkInfo, InterfaceEntry *ie)
+GenericNetworkConfigurator::InterfaceInfo *GenericNetworkConfigurator::createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *ie)
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(node, linkInfo, ie);
     GenericNetworkProtocolInterfaceData *genericData = ie->getGenericNetworkProtocolData();
@@ -408,24 +381,22 @@ bool GenericNetworkConfigurator::Matcher::matches(const char *s)
     for (int i = 0; i < (int)matchers.size(); i++)
         if (matchers[i]->matches(s))
             return true;
+
     return false;
 }
 
 void GenericNetworkConfigurator::dumpTopology(GenericTopology& topology)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         EV_INFO << "Node " << node->module->getFullPath() << endl;
-        for (int j = 0; j < node->getNumOutLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumOutLinks(); j++) {
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             ASSERT(linkOut->getLocalNode() == node);
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
             EV_INFO << "     -> " << remoteNode->module->getFullPath() << " " << linkOut->getWeight() << endl;
         }
-        for (int j = 0; j < node->getNumInLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumInLinks(); j++) {
             Topology::LinkIn *linkIn = node->getLinkIn(j);
             ASSERT(linkIn->getLocalNode() == node);
             Node *remoteNode = (Node *)linkIn->getRemoteNode();
@@ -436,11 +407,9 @@ void GenericNetworkConfigurator::dumpTopology(GenericTopology& topology)
 
 void GenericNetworkConfigurator::dumpRoutes(GenericTopology& topology)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable)
-        {
+        if (node->routingTable) {
             EV_INFO << "Node " << node->module->getFullPath() << endl;
             // TODO: node->routingTable->printRoutingTable();
             if (node->routingTable->getNumMulticastRoutes() > 0)
@@ -455,8 +424,7 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
 
     // TODO: it should be configurable (via xml?) which nodes need static routes filled in automatically
     // add static routes for all routing tables
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         // extract source
         Node *sourceNode = (Node *)topology.getNode(i);
         if (!sourceNode->interfaceTable)
@@ -473,8 +441,7 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
         calculateShortestPathsDuration += clock() - begin;
 
         // add a route to all destinations in the network
-        for (int j = 0; j < topology.getNumNodes(); j++)
-        {
+        for (int j = 0; j < topology.getNumNodes(); j++) {
             if (i == j)
                 continue;
 
@@ -492,8 +459,7 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
             Node *node = destinationNode;
             Link *link = NULL;
             InterfaceEntry *nextHopInterfaceEntry = NULL;
-            while (node != sourceNode)
-            {
+            while (node != sourceNode) {
                 link = (Link *)node->getPath(0);
                 if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
                     nextHopInterfaceEntry = link->sourceInterfaceInfo->interfaceEntry;
@@ -504,14 +470,12 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
             InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
 
             // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
-            for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++)
-            {
+            for (int j = 0; j < destinationInterfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
                 if (!destinationInterfaceEntry->getGenericNetworkProtocolData())
                     continue;
                 Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
-                if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData())
-                {
+                if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData()) {
                     GenericRoute *route = new GenericRoute();
                     Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                     route->setSourceType(IRoute::MANUAL);
@@ -529,8 +493,5 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
     // print some timing information
     printTimeSpentUsingDuration("calculateShortestPaths", calculateShortestPathsDuration);
 }
-
-
-}
-
+} // namespace inet
 

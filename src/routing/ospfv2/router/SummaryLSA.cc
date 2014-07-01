@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LSA.h"
 
 namespace inet {
-
-
-bool OSPF::SummaryLSA::update(const OSPFSummaryLSA* lsa)
+bool OSPF::SummaryLSA::update(const OSPFSummaryLSA *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -29,12 +26,13 @@ bool OSPF::SummaryLSA::update(const OSPFSummaryLSA* lsa)
     if (different) {
         clearNextHops();
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
-bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA* summaryLSA) const
+bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA *summaryLSA) const
 {
     const OSPFLSAHeader& lsaHeader = summaryLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
@@ -63,10 +61,7 @@ bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA* summaryLSA) const
         }
     }
 
-    return (differentHeader || differentBody);
+    return differentHeader || differentBody;
 }
-
-
-}
-
+} // namespace inet
 

@@ -18,19 +18,13 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
-
-void ReceptionDecision::printToStream(std::ostream &stream) const
+void ReceptionDecision::printToStream(std::ostream& stream) const
 {
     stream << "reception decision, " << (isReceptionPossible_ ? "possible" : "impossible");
     stream << ", " << (isReceptionSuccessful_ ? "successful" : "unsuccessful");
     stream << ", indication = " << indication;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IPV6_H
 #define __INET_IPV6_H
 
@@ -34,7 +33,6 @@
 #include "ProtocolMap.h"
 
 namespace inet {
-
 class ICMPv6Message;
 
 /**
@@ -44,17 +42,18 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
 {
   public:
     /**
-    * Represents an IPv4Datagram, queued by a Hook
-    */
-    class QueuedDatagramForHook {
+     * Represents an IPv4Datagram, queued by a Hook
+     */
+    class QueuedDatagramForHook
+    {
       public:
-        QueuedDatagramForHook(IPv6Datagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry* outIE, const IPv6Address& nextHopAddr, IHook::Type hookType) :
-              datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
+        QueuedDatagramForHook(IPv6Datagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv6Address& nextHopAddr, IHook::Type hookType) :
+            datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
-        IPv6Datagram* datagram;
-        const InterfaceEntry* inIE;
-        const InterfaceEntry* outIE;
+        IPv6Datagram *datagram;
+        const InterfaceEntry *inIE;
+        const InterfaceEntry *outIE;
         IPv6Address nextHopAddr;
         const IHook::Type hookType;
     };
@@ -65,13 +64,13 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     IPv6NeighbourDiscovery *nd;
     ICMPv6 *icmp;
 
-    IPv6Tunneling* tunneling;
+    IPv6Tunneling *tunneling;
 
     // working vars
-    unsigned int curFragmentId; // counter, used to assign unique fragmentIds to datagrams
-    IPv6FragBuf fragbuf;  // fragmentation reassembly buffer
-    simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
-    ProtocolMapping mapping; // where to send packets after decapsulation
+    unsigned int curFragmentId;    // counter, used to assign unique fragmentIds to datagrams
+    IPv6FragBuf fragbuf;    // fragmentation reassembly buffer
+    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
+    ProtocolMapping mapping;    // where to send packets after decapsulation
 
     // statistics
     int numMulticast;
@@ -87,7 +86,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     class ScheduledDatagram : public cPacket
     {
       public:
-        IPv6Datagram* datagram;
+        IPv6Datagram *datagram;
         const InterfaceEntry *ie;
         MACAddress macAddr;
         bool fromHL;
@@ -95,7 +94,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
 #endif /* WITH_xMIPv6 */
 
     // netfilter hook variables
-    typedef std::multimap<int, IHook*> HookList;
+    typedef std::multimap<int, IHook *> HookList;
     HookList hooks;
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
@@ -119,7 +118,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * Invokes encapsulate(), then routePacket().
      */
     virtual void handleMessageFromHL(cPacket *msg);
-    virtual void datagramLocalOut(IPv6Datagram* datagram, const InterfaceEntry* destIE, IPv6Address requestedNextHopAddress);
+    virtual void datagramLocalOut(IPv6Datagram *datagram, const InterfaceEntry *destIE, IPv6Address requestedNextHopAddress);
 
     /**
      * Handle incoming ICMP messages.
@@ -143,7 +142,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * Performs fragmentation if needed, and sends the original datagram or the fragments
      * through the specified interface.
      */
-    virtual void fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress &nextHopAddr, bool fromHL);
+    virtual void fragmentAndSend(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& nextHopAddr, bool fromHL);
     /**
      * Perform reassembly of fragmented datagrams, then send them up to the
      * higher layers using sendToHL().
@@ -161,40 +160,41 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
     virtual void sendDatagramToOutput(IPv6Datagram *datagram, const InterfaceEntry *destIE, const MACAddress& macAddr);
 
     // NetFilter functions:
+
   protected:
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(INetworkDatagram* datagram, const InterfaceEntry* inIE);
+    IHook::Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
 
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
   public:
     IPv6() {}
 
     // Netfilter:
-    virtual void registerHook(int priority, IHook * hook);
-    virtual void unregisterHook(int priority, IHook * hook);
-    virtual void dropQueuedDatagram(const INetworkDatagram * daragram);
-    virtual void reinjectQueuedDatagram(const INetworkDatagram * datagram);
+    virtual void registerHook(int priority, IHook *hook);
+    virtual void unregisterHook(int priority, IHook *hook);
+    virtual void dropQueuedDatagram(const INetworkDatagram *daragram);
+    virtual void reinjectQueuedDatagram(const INetworkDatagram *datagram);
 
   protected:
     /**
@@ -221,7 +221,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * The nextHop and interfaceId are output parameter.
      */
     bool determineOutputInterface(const IPv6Address& destAddress, IPv6Address& nextHop, int& interfaceId,
-            IPv6Datagram* datagram, bool fromHL);
+            IPv6Datagram *datagram, bool fromHL);
 
 #ifdef WITH_xMIPv6
     /**
@@ -230,12 +230,10 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
      * and the packet has to be dropped or if the datagram has been forwarded to another
      * module for further processing.
      */
-    bool processExtensionHeaders(IPv6Datagram* datagram);
+    bool processExtensionHeaders(IPv6Datagram *datagram);
 #endif /* WITH_xMIPv6 */
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPV6_H
 

@@ -22,15 +22,12 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(IdealReceiver);
 
 void IdealReceiver::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         ignoreInterference = par("ignoreInterference");
     }
 }
@@ -49,7 +46,7 @@ bool IdealReceiver::computeIsReceptionAttempted(const IListening *listening, con
         return ReceiverBase::computeIsReceptionAttempted(listening, reception, interferingReceptions);
 }
 
-void IdealReceiver::printToStream(std::ostream &stream) const
+void IdealReceiver::printToStream(std::ostream& stream) const
 {
     stream << "ideal receiver, " << (ignoreInterference ? "ignore interference" : "compute interference");
 }
@@ -61,8 +58,7 @@ const IListening *IdealReceiver::createListening(const IRadio *radio, const simt
 
 const IListeningDecision *IdealReceiver::computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const
 {
-    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
-    {
+    for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
         const IReception *interferingReception = *it;
         IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
         if (interferingPower != IdealReception::POWER_UNDETECTABLE)
@@ -75,14 +71,11 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
 {
     const IdealReception::Power power = check_and_cast<const IdealReception *>(reception)->getPower();
     RadioReceptionIndication *indication = new RadioReceptionIndication();
-    if (power == IdealReception::POWER_RECEIVABLE)
-    {
+    if (power == IdealReception::POWER_RECEIVABLE) {
         if (ignoreInterference)
             return new ReceptionDecision(reception, indication, true, true, true);
-        else
-        {
-            for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++)
-            {
+        else {
+            for (std::vector<const IReception *>::const_iterator it = interferingReceptions->begin(); it != interferingReceptions->end(); it++) {
                 const IReception *interferingReception = *it;
                 IdealReception::Power interferingPower = check_and_cast<const IdealReception *>(interferingReception)->getPower();
                 if (interferingPower == IdealReception::POWER_RECEIVABLE || interferingPower == IdealReception::POWER_INTERFERING)
@@ -94,10 +87,6 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
     else
         return new ReceptionDecision(reception, indication, false, false, false);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

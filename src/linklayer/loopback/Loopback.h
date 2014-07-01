@@ -20,14 +20,12 @@
 #ifndef __INET_LOOPBACK_H
 #define __INET_LOOPBACK_H
 
-
 #include "INETDefs.h"
 
 #include "MACBase.h"
 #include "TxNotifDetails.h"
 
 namespace inet {
-
 class InterfaceEntry;
 class IPassiveQueue;
 
@@ -60,8 +58,7 @@ class INET_API Loopback : public MACBase
     virtual void handleMessage(cMessage *msg);
     virtual void updateDisplayString();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LOOPBACK_H
 
-
-#endif

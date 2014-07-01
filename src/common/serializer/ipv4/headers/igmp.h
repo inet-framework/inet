@@ -48,46 +48,47 @@
 /*
  * IGMP packet format.
  */
-struct igmp {
-    u_char        igmp_type;    /* version & type of IGMP message  */
-    u_char        igmp_code;    /* subtype for routing msgs        */
-    u_short        igmp_cksum;    /* IP-style checksum               */
-    struct in_addr    igmp_group;    /* group address being reported    */
-};                    /*  (zero for queries)             */
+struct igmp
+{
+    u_char igmp_type;    /* version & type of IGMP message  */
+    u_char igmp_code;    /* subtype for routing msgs        */
+    u_short igmp_cksum;    /* IP-style checksum               */
+    struct in_addr igmp_group;    /* group address being reported    */
+};    /*  (zero for queries)             */
 
-#define IGMP_MINLEN             8
+#define IGMP_MINLEN    8
 
 /*
  * Message types, including version number.
  */
 //A FIXME the following line conflicts with enum in IGMPMessage.msg, resolve!
 // #define IGMP_MEMBERSHIP_QUERY       0x11    /* membership query         */
-#define IGMP_V1_MEMBERSHIP_REPORT    0x12    /* Ver. 1 membership report */
-#define IGMP_V2_MEMBERSHIP_REPORT    0x16    /* Ver. 2 membership report */
-#define IGMP_V2_LEAVE_GROUP        0x17    /* Leave-group message        */
+#define IGMP_V1_MEMBERSHIP_REPORT          0x12    /* Ver. 1 membership report */
+#define IGMP_V2_MEMBERSHIP_REPORT          0x16    /* Ver. 2 membership report */
+#define IGMP_V2_LEAVE_GROUP                0x17    /* Leave-group message        */
 
-#define IGMP_DVMRP            0x13    /* DVMRP routing message    */
-#define IGMP_PIM            0x14    /* PIM routing message        */
+#define IGMP_DVMRP                         0x13    /* DVMRP routing message    */
+#define IGMP_PIM                           0x14    /* PIM routing message        */
 
-#define IGMP_MTRACE_RESP        0x1e  /* traceroute resp.(to sender)*/
-#define IGMP_MTRACE            0x1f  /* mcast traceroute messages  */
+#define IGMP_MTRACE_RESP                   0x1e  /* traceroute resp.(to sender)*/
+#define IGMP_MTRACE                        0x1f  /* mcast traceroute messages  */
 
-#define IGMP_MAX_HOST_REPORT_DELAY   10    /* max delay for response to     */
-                       /*  query (in seconds) according */
-                       /*  to RFC1112                   */
+#define IGMP_MAX_HOST_REPORT_DELAY         10    /* max delay for response to     */
+/*  query (in seconds) according */
+/*  to RFC1112                   */
 
-
-#define IGMP_TIMER_SCALE     10        /* denotes that the igmp code field */
-                    /* specifies time in 10th of seconds*/
+#define IGMP_TIMER_SCALE                   10        /* denotes that the igmp code field */
+/* specifies time in 10th of seconds*/
 
 /*
  * The following four defininitions are for backwards compatibility.
  * They should be removed as soon as all applications are updated to
  * use the new constant names.
  */
-#define IGMP_HOST_MEMBERSHIP_QUERY    IGMP_MEMBERSHIP_QUERY
-#define IGMP_HOST_MEMBERSHIP_REPORT    IGMP_V1_MEMBERSHIP_REPORT
+#define IGMP_HOST_MEMBERSHIP_QUERY         IGMP_MEMBERSHIP_QUERY
+#define IGMP_HOST_MEMBERSHIP_REPORT        IGMP_V1_MEMBERSHIP_REPORT
 #define IGMP_HOST_NEW_MEMBERSHIP_REPORT    IGMP_V2_MEMBERSHIP_REPORT
-#define IGMP_HOST_LEAVE_MESSAGE        IGMP_V2_LEAVE_GROUP
+#define IGMP_HOST_LEAVE_MESSAGE            IGMP_V2_LEAVE_GROUP
 
 #endif /* _NETINET_IGMP_H_ */
+

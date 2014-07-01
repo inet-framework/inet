@@ -23,8 +23,6 @@
 #include "TCPBaseAlg.h"
 
 namespace inet {
-
-
 /**
  * State variables for TCPTahoeRenoFamily.
  */
@@ -35,9 +33,8 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    uint32 ssthresh;  ///< slow start threshold
+    uint32 ssthresh;    ///< slow start threshold
 };
-
 
 /**
  * Provides utility functions to implement TCPTahoe, TCPReno and TCPNewReno.
@@ -46,14 +43,13 @@ class INET_API TCPTahoeRenoFamilyStateVariables : public TCPBaseAlgStateVariable
 class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
 {
   protected:
-    TCPTahoeRenoFamilyStateVariables *&state; // alias to TCPAlgorithm's 'state'
+    TCPTahoeRenoFamilyStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
   public:
     /** Ctor */
     TCPTahoeRenoFamily();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPTAHOERENOFAMILY_H
 
-
-#endif

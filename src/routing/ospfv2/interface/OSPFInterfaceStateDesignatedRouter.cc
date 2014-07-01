@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFInterfaceStateDesignatedRouter.h"
 
 #include "MessageHandler.h"
@@ -25,9 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
@@ -43,7 +40,8 @@ void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, O
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
-        } else {    // OSPF::Interface::NBMA
+        }
+        else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
             int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
@@ -56,9 +54,5 @@ void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, O
         intf->sendDelayedAcknowledgements();
     }
 }
-
-
-
-}
-
+} // namespace inet
 

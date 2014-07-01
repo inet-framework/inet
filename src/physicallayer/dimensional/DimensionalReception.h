@@ -23,30 +23,25 @@
 #include "MappingUtils.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DimensionalReception : public FlatReceptionBase
 {
-    protected:
-        const ConstMapping *power;
+  protected:
+    const ConstMapping *power;
 
-    public:
-        DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-            FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
-            power(power)
-        {}
+  public:
+    DimensionalReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
+        FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
+        power(power)
+    {}
 
-        virtual ~DimensionalReception() { delete power; }
+    virtual ~DimensionalReception() { delete power; }
 
-        virtual const ConstMapping *getPower() const { return power; }
-        virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
+    virtual const ConstMapping *getPower() const { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIMENSIONALRECEPTION_H
 
-}
-
-
-#endif

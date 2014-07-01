@@ -17,11 +17,9 @@
 // @author: Zoltan Bojthe
 //
 
-
 #include "Delayer.h"
 
 namespace inet {
-
 Define_Module(Delayer);
 
 simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");
@@ -35,13 +33,11 @@ void Delayer::initialize()
 
 void Delayer::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         emit(sentPkSignal, msg);
         send(msg, "out");
     }
-    else
-    {
+    else {
         emit(rcvdPkSignal, msg);
 
         simtime_t delay = delayPar->doubleValue();
@@ -49,8 +45,5 @@ void Delayer::handleMessage(cMessage *msg)
         scheduleAt(simTime() + delay, msg);
     }
 }
-
-
-}
-
+} // namespace inet
 

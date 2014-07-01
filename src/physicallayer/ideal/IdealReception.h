@@ -21,36 +21,30 @@
 #include "ReceptionBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealReception : public ReceptionBase
 {
-    public:
-        enum Power
-        {
-            POWER_RECEIVABLE,
-            POWER_INTERFERING,
-            POWER_DETECTABLE,
-            POWER_UNDETECTABLE
-        };
+  public:
+    enum Power {
+        POWER_RECEIVABLE,
+        POWER_INTERFERING,
+        POWER_DETECTABLE,
+        POWER_UNDETECTABLE
+    };
 
-    protected:
-        const Power power;
+  protected:
+    const Power power;
 
-    public:
-        IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
-            ReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-            power(power)
-        {}
+  public:
+    IdealReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const Power power) :
+        ReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+        power(power)
+    {}
 
-        virtual Power getPower() const { return power; }
+    virtual Power getPower() const { return power; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALRECEPTION_H
 
-}
-
-
-#endif

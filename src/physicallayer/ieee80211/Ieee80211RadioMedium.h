@@ -21,30 +21,25 @@
 #include "RadioMedium.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API Ieee80211RadioMedium : public RadioMedium
 {
-    protected:
-        int numChannels;
+  protected:
+    int numChannels;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        Ieee80211RadioMedium() :
-            RadioMedium(),
-            numChannels(-1)
-        {}
+  public:
+    Ieee80211RadioMedium() :
+        RadioMedium(),
+        numChannels(-1)
+    {}
 
-        virtual int getNumChannels() const { return numChannels; }
+    virtual int getNumChannels() const { return numChannels; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IEEE80211RADIOMEDIUM_H
 
-}
-
-
-#endif

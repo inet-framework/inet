@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "Address.h"
@@ -25,25 +24,24 @@
 #ifdef WITH_IPv4
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
-#else
+#else // ifdef WITH_IPv4
 class ICMPMessage;
 class IPv4Datagram;
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
-#else
+#else // ifdef WITH_TCP_COMMON
 class TCPSegment;
-#endif
+#endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
 #include "UDPPacket.h"
-#else
+#else // ifdef WITH_UDP
 class UDPPacket;
-#endif
+#endif // ifdef WITH_UDP
 
 namespace inet {
-
 //TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
 #if OMNETPP_VERSION >= 0x0405
 
@@ -84,26 +82,26 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
                     os << (ipv4dgram->getMoreFragments() ? "" : "last ")
                        << "fragment with offset=" << ipv4dgram->getFragmentOffset() << " of ";
             }
-#endif
+#endif // ifdef WITH_IPv4
         }
 #ifdef WITH_TCP_COMMON
         else if (dynamic_cast<TCPSegment *>(pk)) {
             printTCPPacket(os, srcAddr, destAddr, static_cast<TCPSegment *>(pk));
             return;
         }
-#endif
+#endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
         else if (dynamic_cast<UDPPacket *>(pk)) {
             printUDPPacket(os, srcAddr, destAddr, static_cast<UDPPacket *>(pk));
             return;
         }
-#endif
+#endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
         else if (dynamic_cast<ICMPMessage *>(pk)) {
             printICMPPacket(os, srcAddr, destAddr, static_cast<ICMPMessage *>(pk));
             return;
         }
-#endif
+#endif // ifdef WITH_IPv4
     }
     os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
@@ -114,17 +112,37 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Addres
     os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";
     // flags
     bool flags = false;
-    if (tcpSeg->getUrgBit()) { flags = true; os << "U "; }
-    if (tcpSeg->getAckBit()) { flags = true; os << "A "; }
-    if (tcpSeg->getPshBit()) { flags = true; os << "P "; }
-    if (tcpSeg->getRstBit()) { flags = true; os << "R "; }
-    if (tcpSeg->getSynBit()) { flags = true; os << "S "; }
-    if (tcpSeg->getFinBit()) { flags = true; os << "F "; }
-    if (!flags) { os << ". "; }
+    if (tcpSeg->getUrgBit()) {
+        flags = true;
+        os << "U ";
+    }
+    if (tcpSeg->getAckBit()) {
+        flags = true;
+        os << "A ";
+    }
+    if (tcpSeg->getPshBit()) {
+        flags = true;
+        os << "P ";
+    }
+    if (tcpSeg->getRstBit()) {
+        flags = true;
+        os << "R ";
+    }
+    if (tcpSeg->getSynBit()) {
+        flags = true;
+        os << "S ";
+    }
+    if (tcpSeg->getFinBit()) {
+        flags = true;
+        os << "F ";
+    }
+    if (!flags) {
+        os << ". ";
+    }
 
     // data-seqno
-    if (tcpSeg->getPayloadLength()>0 || tcpSeg->getSynBit()) {
-        os << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo()+tcpSeg->getPayloadLength();
+    if (tcpSeg->getPayloadLength() > 0 || tcpSeg->getSynBit()) {
+        os << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo() + tcpSeg->getPayloadLength();
         os << "(" << tcpSeg->getPayloadLength() << ") ";
     }
 
@@ -138,9 +156,9 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Addres
     // urgent
     if (tcpSeg->getUrgBit())
         os << "urg " << tcpSeg->getUrgentPointer() << " ";
-#else
+#else // ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << ".? > " << destAddr << ".?";
-#endif
+#endif // ifdef WITH_TCP_COMMON
 }
 
 void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Address destAddr, UDPPacket *udpPacket) const
@@ -148,47 +166,44 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Addres
 #ifdef WITH_UDP
     os << " UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
        << ": (" << udpPacket->getByteLength() << ")";
-#else
+#else // ifdef WITH_UDP
     os << " UDP: " << srcAddr << ".? > " << destAddr << ".?";
-#endif
+#endif // ifdef WITH_UDP
 }
 
 void InetPacketPrinter::printICMPPacket(std::ostream& os, Address srcAddr, Address destAddr, ICMPMessage *packet) const
 {
 #ifdef WITH_IPv4
     switch (packet->getType()) {
-        case ICMP_ECHO_REQUEST:
-        {
+        case ICMP_ECHO_REQUEST: {
             PingPayload *payload = check_and_cast<PingPayload *>(packet->getEncapsulatedPacket());
             os << "ping " << srcAddr << " to " << destAddr
-               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" <<payload->getSeqNo();
+               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" << payload->getSeqNo();
             break;
         }
-        case ICMP_ECHO_REPLY:
-        {
+
+        case ICMP_ECHO_REPLY: {
             PingPayload *payload = check_and_cast<PingPayload *>(packet->getEncapsulatedPacket());
             os << "pong " << srcAddr << " to " << destAddr
-               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" <<payload->getSeqNo();
+               << " (" << packet->getByteLength() << " bytes) id=" << payload->getId() << " seq=" << payload->getSeqNo();
             break;
         }
+
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
                << " origin: ";
             printMessage(os, packet->getEncapsulatedPacket());
             break;
+
         default:
             os << "ICMP " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode();
             break;
     }
-#else
+#else // ifdef WITH_IPv4
     os << " ICMP: " << srcAddr << " > " << destAddr;
-#endif
+#endif // ifdef WITH_IPv4
 }
 
-#endif // Register_MessagePrinter
-
-
-
-}
-
+#endif    // Register_MessagePrinter
+} // namespace inet
 

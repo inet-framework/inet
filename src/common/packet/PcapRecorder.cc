@@ -19,20 +19,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "PcapRecorder.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "IPv6Datagram.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 namespace inet {
-
-
 //----
 
 Define_Module(PcapRecorder);
@@ -47,7 +44,7 @@ PcapRecorder::PcapRecorder() : cSimpleModule(), pcapDumper()
 
 void PcapRecorder::initialize()
 {
-    const char* file = par("pcapFile");
+    const char *file = par("pcapFile");
     snaplen = this->par("snaplen");
     dumpBadFrames = par("dumpBadFrames").boolValue();
     packetDumper.setVerbose(par("verbose").boolValue());
@@ -68,11 +65,10 @@ void PcapRecorder::initialize()
             signalList[registerSignal(signalTokenizer.nextToken())] = false;
     }
 
-    const char* moduleNames = par("moduleNamePatterns");
+    const char *moduleNames = par("moduleNamePatterns");
     cStringTokenizer moduleTokenizer(moduleNames);
 
-    while (moduleTokenizer.hasMoreTokens())
-    {
+    while (moduleTokenizer.hasMoreTokens()) {
         bool found = false;
         std::string mname(moduleTokenizer.nextToken());
         bool isAllIndex = (mname.length() > 3) && mname.rfind("[*]") == mname.length() - 3;
@@ -80,17 +76,13 @@ void PcapRecorder::initialize()
         if (isAllIndex)
             mname.replace(mname.length() - 3, 3, "");
 
-        for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++)
-        {
+        for (cModule::SubmoduleIterator i(getParentModule()); !i.end(); i++) {
             cModule *submod = i();
-            if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str()))
-            {
+            if (0 == strcmp(isAllIndex ? submod->getName() : submod->getFullName(), mname.c_str())) {
                 found = true;
 
-                for (SignalList::iterator s = signalList.begin(); s != signalList.end(); s++)
-                {
-                    if (!submod->isSubscribed(s->first, this))
-                    {
+                for (SignalList::iterator s = signalList.begin(); s != signalList.end(); s++) {
+                    if (!submod->isSubscribed(s->first, this)) {
                         submod->subscribe(s->first, this);
                         EV << "PcapRecorder " << getFullPath() << " subscribed to "
                            << submod->getFullPath() << ":" << getSignalName(s->first) << endl;
@@ -99,10 +91,9 @@ void PcapRecorder::initialize()
             }
         }
 
-        if (!found)
-        {
+        if (!found) {
             EV << "The module " << mname << (isAllIndex ? "[*]" : "")
-                    << " not found for PcapRecorder " << getFullPath() << endl;
+               << " not found for PcapRecorder " << getFullPath() << endl;
         }
     }
 
@@ -120,8 +111,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
     Enter_Method_Silent();
     cPacket *packet = dynamic_cast<cPacket *>(obj);
 
-    if (packet)
-    {
+    if (packet) {
         SignalList::const_iterator i = signalList.find(signalID);
         bool l2r = (i != signalList.end()) ? i->second : true;
         recordPacket(packet, l2r);
@@ -130,8 +120,7 @@ void PcapRecorder::receiveSignal(cComponent *source, simsignal_t signalID, cObje
 
 void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 {
-    if (!ev.isDisabled())
-    {
+    if (!ev.isDisabled()) {
         EV << "PcapRecorder::recordPacket(" << msg->getFullPath() << ", " << l2r << ")\n";
         packetDumper.dumpPacket(l2r, msg);
     }
@@ -144,52 +133,45 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 
 #ifdef WITH_IPv4
     IPv4Datagram *ip4Packet = NULL;
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     IPv6Datagram *ip6Packet = NULL;
-#endif
-    while (msg)
-    {
+#endif // ifdef WITH_IPv6
+    while (msg) {
         if (msg->hasBitError())
             hasBitError = true;
 #ifdef WITH_IPv4
         if (NULL != (ip4Packet = dynamic_cast<IPv4Datagram *>(msg))) {
             break;
         }
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         if (NULL != (ip6Packet = dynamic_cast<IPv6Datagram *>(msg))) {
             break;
         }
-#endif
+#endif // ifdef WITH_IPv6
 
         msg = msg->getEncapsulatedPacket();
     }
-#endif
+#endif // if defined(WITH_IPv4) || defined(WITH_IPv6)
 #ifdef WITH_IPv4
-    if (ip4Packet && (dumpBadFrames || !hasBitError))
-    {
+    if (ip4Packet && (dumpBadFrames || !hasBitError)) {
         const simtime_t stime = simulation.getSimTime();
         pcapDumper.writeFrame(stime, ip4Packet);
     }
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-    if (ip6Packet && (dumpBadFrames || !hasBitError))
-    {
+    if (ip6Packet && (dumpBadFrames || !hasBitError)) {
         const simtime_t stime = simulation.getSimTime();
         pcapDumper.writeIPv6Frame(stime, ip6Packet);
     }
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 void PcapRecorder::finish()
 {
-     packetDumper.dump("", "pcapRecorder finished");
-     pcapDumper.closePcap();
+    packetDumper.dump("", "pcapRecorder finished");
+    pcapDumper.closePcap();
 }
-
-
-
-}
-
+} // namespace inet
 

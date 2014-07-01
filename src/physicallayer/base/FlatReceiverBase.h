@@ -22,61 +22,56 @@
 #include "IModulation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API FlatReceiverBase : public SNIRReceiverBase
 {
-    protected:
-        const IModulation *modulation;
-        W energyDetection;
-        W sensitivity;
-        Hz carrierFrequency;
-        Hz bandwidth;
+  protected:
+    const IModulation *modulation;
+    W energyDetection;
+    W sensitivity;
+    Hz carrierFrequency;
+    Hz bandwidth;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-        virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
-        virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
-        virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const;
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
 
-        virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
+    virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
 
-    public:
-        FlatReceiverBase() :
-            SNIRReceiverBase(),
-            modulation(NULL),
-            energyDetection(W(sNaN)),
-            sensitivity(W(sNaN)),
-            carrierFrequency(Hz(sNaN)),
-            bandwidth(Hz(sNaN))
-        {}
+  public:
+    FlatReceiverBase() :
+        SNIRReceiverBase(),
+        modulation(NULL),
+        energyDetection(W(sNaN)),
+        sensitivity(W(sNaN)),
+        carrierFrequency(Hz(sNaN)),
+        bandwidth(Hz(sNaN))
+    {}
 
-        virtual ~FlatReceiverBase() { delete modulation; }
+    virtual ~FlatReceiverBase() { delete modulation; }
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual W getMinReceptionPower() const { return sensitivity; }
+    virtual W getMinReceptionPower() const { return sensitivity; }
 
-        virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const;
 
-        virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
-        virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
-        virtual const IModulation *getModulation() const { return modulation; }
+    virtual const IModulation *getModulation() const { return modulation; }
 
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
 
-        virtual Hz getBandwidth() const { return bandwidth; }
-        virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
+    virtual Hz getBandwidth() const { return bandwidth; }
+    virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLATRECEIVERBASE_H
 
-}
-
-
-#endif

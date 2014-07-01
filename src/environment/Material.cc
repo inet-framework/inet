@@ -49,3 +49,4 @@ mps Material::getPropagationSpeed() const
 {
     return mps(SPEED_OF_LIGHT) / getRefractiveIndex();
 }
+

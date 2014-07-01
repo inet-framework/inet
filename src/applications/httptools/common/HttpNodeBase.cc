@@ -18,7 +18,6 @@
 #include "HttpNodeBase.h"
 
 namespace inet {
-
 HttpNodeBase::HttpNodeBase()
 {
     m_bDisplayMessage = false;
@@ -29,7 +28,7 @@ void HttpNodeBase::sendDirectToModule(HttpNodeBase *receiver, cPacket *pckt, sim
 {
     if (pckt == NULL)
         return;
-    simtime_t delay = constdelay+transmissionDelay(pckt);
+    simtime_t delay = constdelay + transmissionDelay(pckt);
     if (rdDelay != NULL)
         delay += rdDelay->draw();
     EV_DEBUG << "Sending " << pckt->getName() << " direct to " << receiver->getParentModule()->getName() << " with a delay of " << delay << " s\n";
@@ -40,10 +39,10 @@ double HttpNodeBase::transmissionDelay(cPacket *pckt)
 {
     if (linkSpeed == 0)
         return 0.0; // No delay if link speed unspecified
-    return pckt->getBitLength()/((double)linkSpeed);  // The link speed is in bit/s
+    return pckt->getBitLength() / ((double)linkSpeed);    // The link speed is in bit/s
 }
 
-void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
+void HttpNodeBase::logRequest(const HttpRequestMessage *httpRequest)
 {
     if (!enableLogging)
         return;
@@ -55,7 +54,7 @@ void HttpNodeBase::logRequest(const HttpRequestMessage* httpRequest)
         EV_INFO << "Request:\n" << formatHttpRequestLong(httpRequest);
 }
 
-void HttpNodeBase::logResponse(const HttpReplyMessage* httpResponse)
+void HttpNodeBase::logResponse(const HttpReplyMessage *httpResponse)
 {
     if (!enableLogging)
         return;
@@ -88,42 +87,42 @@ void HttpNodeBase::logEntry(std::string line)
     outfile.close();
 }
 
-std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage* httpRequest)
+std::string HttpNodeBase::formatHttpRequestShort(const HttpRequestMessage *httpRequest)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
     cModule *originator = httpRequest->getSenderModule();
-    if (originator!=NULL && originator->getParentModule()!=NULL)
+    if (originator != NULL && originator->getParentModule() != NULL)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";
     str << "REQ;" << httpRequest->originatorUrl() << ";" << httpRequest->targetUrl() << ";";
     str << httpRequest->protocol() << ";" << httpRequest->keepAlive() << ";" << httpRequest->serial() << ";";
-    str << httpRequest->heading() << ";" << httpRequest->badRequest() << ";;"; // Skip the response specific fields
+    str << httpRequest->heading() << ";" << httpRequest->badRequest() << ";;";    // Skip the response specific fields
 
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage* httpResponse)
+std::string HttpNodeBase::formatHttpResponseShort(const HttpReplyMessage *httpResponse)
 {
     std::ostringstream str;
 
     std::string originatorStr = "";
     cModule *originator = httpResponse->getSenderModule();
-    if (originator!=NULL && originator->getParentModule()!=NULL)
+    if (originator != NULL && originator->getParentModule() != NULL)
         originatorStr = originator->getParentModule()->getFullName();
 
     str << originatorStr << ";";
     str << "RESP;" << httpResponse->originatorUrl() << ";" << httpResponse->targetUrl() << ";";
     str << httpResponse->protocol() << ";" << httpResponse->keepAlive() << ";" << httpResponse->serial() << ";";
-    str << httpResponse->heading() << ";;"; // Skip the request specific fields
+    str << httpResponse->heading() << ";;";    // Skip the request specific fields
     str << httpResponse->result() << ";" << httpResponse->contentType();
 
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage* httpRequest)
+std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage *httpRequest)
 {
     std::ostringstream str;
 
@@ -131,11 +130,18 @@ std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage* httpRe
     str << "Target URL:" << httpRequest->targetUrl() << "  Originator URL:" << httpRequest->originatorUrl() << endl;
 
     str << "PROTOCOL:";
-    switch (httpRequest->protocol())  // MIGRATE40: kvj
-    {
-        case 10: str << "HTTP/1.0"; break;
-        case 11: str << "HTTP/1.1"; break;
-        default: str << "UNKNOWN"; break;
+    switch (httpRequest->protocol()) {    // MIGRATE40: kvj
+        case 10:
+            str << "HTTP/1.0";
+            break;
+
+        case 11:
+            str << "HTTP/1.1";
+            break;
+
+        default:
+            str << "UNKNOWN";
+            break;
     }
     str << "  ";
 
@@ -148,7 +154,7 @@ std::string HttpNodeBase::formatHttpRequestLong(const HttpRequestMessage* httpRe
     return str.str();
 }
 
-std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage* httpResponse)
+std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage *httpResponse)
 {
     std::ostringstream str;
 
@@ -157,11 +163,18 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage* httpRes
     str << "Target URL:" << httpResponse->targetUrl() << "  Originator URL:" << httpResponse->originatorUrl() << endl;
 
     str << "PROTOCOL:";
-    switch (httpResponse->protocol())
-    {
-        case 10: str << "HTTP/1.0"; break;
-        case 11: str << "HTTP/1.1"; break;
-        default: str << "UNKNOWN"; break;
+    switch (httpResponse->protocol()) {
+        case 10:
+            str << "HTTP/1.0";
+            break;
+
+        case 11:
+            str << "HTTP/1.1";
+            break;
+
+        default:
+            str << "UNKNOWN";
+            break;
     }
     str << "  ";
 
@@ -172,25 +185,31 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage* httpRes
     str << "RESPONSE: " << httpResponse->heading() << endl;
 
     str << "CONTENT-TYPE:";
-    switch (httpResponse->contentType())
-    {
-        case CT_HTML: str << "HTML DOC"; break;
-        case CT_TEXT: str << "Text/HTML RES"; break;
-        case CT_IMAGE: str << "IMG RES"; break;
-        default: str << "UNKNOWN"; break;
+    switch (httpResponse->contentType()) {
+        case CT_HTML:
+            str << "HTML DOC";
+            break;
+
+        case CT_TEXT:
+            str << "Text/HTML RES";
+            break;
+
+        case CT_IMAGE:
+            str << "IMG RES";
+            break;
+
+        default:
+            str << "UNKNOWN";
+            break;
     }
     str << endl;
 
-    if (m_bDisplayResponseContent)
-    {
+    if (m_bDisplayResponseContent) {
         str << "CONTENT:" << endl;
         str << httpResponse->payload() << endl;
     }
 
     return str.str();
 }
-
-
-}
-
+} // namespace inet
 

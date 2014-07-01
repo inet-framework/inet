@@ -16,7 +16,6 @@
 #include "IntServ.h"
 
 namespace inet {
-
 std::string vectorToString(const IPAddressVector& vec)
 {
     return vectorToString(vec, ", ");
@@ -25,8 +24,7 @@ std::string vectorToString(const IPAddressVector& vec)
 std::string vectorToString(const IPAddressVector& vec, const char *delim)
 {
     std::ostringstream stream;
-    for (unsigned int i = 0; i < vec.size(); i++)
-    {
+    for (unsigned int i = 0; i < vec.size(); i++) {
         stream << vec[i];
         if (i < vec.size() - 1)
             stream << delim;
@@ -44,8 +42,7 @@ std::string vectorToString(const EroVector& vec)
 std::string vectorToString(const EroVector& vec, const char *delim)
 {
     std::ostringstream stream;
-    for (unsigned int i = 0; i < vec.size(); i++)
-    {
+    for (unsigned int i = 0; i < vec.size(); i++) {
         stream << vec[i].node;
 
         if (i < vec.size() - 1)
@@ -60,8 +57,7 @@ EroVector routeToEro(const IPAddressVector& rro)
 {
     EroVector ero;
 
-    for (unsigned int i = 0; i < rro.size(); i++)
-    {
+    for (unsigned int i = 0; i < rro.size(); i++) {
         EroObj_t hop;
         hop.L = false;
         hop.node = rro[i];
@@ -71,17 +67,15 @@ EroVector routeToEro(const IPAddressVector& rro)
     return ero;
 }
 
-
 void removeDuplicates(std::vector<int>& vec)
 {
-    for (unsigned int i = 0; i < vec.size(); i++)
-    {
+    for (unsigned int i = 0; i < vec.size(); i++) {
         unsigned int j;
         for (j = 0; j < i; j++)
             if (vec[j] == vec[i])
                 break;
-        if (j < i)
-        {
+
+        if (j < i) {
             vec.erase(vec.begin() + i);
             --i;
         }
@@ -93,8 +87,9 @@ int find(const EroVector& ERO, IPv4Address node)
     for (unsigned int i = 0; i < ERO.size(); i++)
         if (ERO[i].node == node)
             return i;
+
     ASSERT(false);
-    return -1; // to prevent warning
+    return -1;    // to prevent warning
 }
 
 bool find(std::vector<int>& vec, int value)
@@ -102,6 +97,7 @@ bool find(std::vector<int>& vec, int value)
     for (unsigned int i = 0; i < vec.size(); i++)
         if (vec[i] == value)
             return true;
+
     return false;
 }
 
@@ -110,6 +106,7 @@ bool find(const IPAddressVector& vec, IPv4Address addr)
     for (unsigned int i = 0; i < vec.size(); i++)
         if (vec[i] == addr)
             return true;
+
     return false;
 }
 
@@ -131,8 +128,8 @@ cModule *getPayloadOwner(cPacket *msg)
 }
 
 /*
-void prepend(EroVector& dest, const EroVector& src, bool reverse)
-{
+   void prepend(EroVector& dest, const EroVector& src, bool reverse)
+   {
     ASSERT(dest.size() > 0);
     ASSERT(src.size() > 0);
 
@@ -146,8 +143,7 @@ void prepend(EroVector& dest, const EroVector& src, bool reverse)
 
         dest.insert(dest.begin(), src[n]);
     }
-}
-*/
-
-}
+   }
+ */
+} // namespace inet
 

@@ -14,11 +14,10 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_IARP_H
 #define __INET_IARP_H
-
 
 #include "INETDefs.h"
 
@@ -28,7 +27,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 class InterfaceEntry;
 
 /**
@@ -46,9 +44,10 @@ class INET_API IARP
         Address l3Address;
         MACAddress macAddress;
         const InterfaceEntry *ie;
+
       public:
         Notification(Address l3Address, MACAddress macAddress, const InterfaceEntry *ie)
-                : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
+            : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
     };
 
     /** @brief Signals used to publish ARP state changes. */
@@ -74,8 +73,7 @@ class INET_API IARP
      */
     virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IARP_H
 
-
-#endif

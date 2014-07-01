@@ -21,50 +21,45 @@
 #include "ReceiverBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API SNIRReceiverBase : public ReceiverBase
 {
-    protected:
-        double snirThreshold;
+  protected:
+    double snirThreshold;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-        virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
+    virtual bool areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const;
 
-        /**
-         * Returns the physical properties of the reception including noise and
-         * signal related measures, error probabilities, actual error counts, etc.
-         * This function must be purely functional and support optimistic parallel
-         * computation.
-         */
-        virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    /**
+     * Returns the physical properties of the reception including noise and
+     * signal related measures, error probabilities, actual error counts, etc.
+     * This function must be purely functional and support optimistic parallel
+     * computation.
+     */
+    virtual const RadioReceptionIndication *computeReceptionIndication(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 
-        /**
-         * Returns whether the reception is free of any errors. This function must
-         * be purely functional and support optimistic parallel computation.
-         */
-        virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
+    /**
+     * Returns whether the reception is free of any errors. This function must
+     * be purely functional and support optimistic parallel computation.
+     */
+    virtual bool computeIsReceptionSuccessful(const IListening *listening, const IReception *reception, const RadioReceptionIndication *indication) const;
 
-        virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const = 0;
-        virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;
+    virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const = 0;
+    virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const = 0;
 
-    public:
-        SNIRReceiverBase() :
-            ReceiverBase(),
-            snirThreshold(sNaN)
-        {}
+  public:
+    SNIRReceiverBase() :
+        ReceiverBase(),
+        snirThreshold(sNaN)
+    {}
 
-        virtual double getSNIRThreshold() const { return snirThreshold; }
-        virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
+    virtual double getSNIRThreshold() const { return snirThreshold; }
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SNIRRECEIVERBASE_H
 
-}
-
-
-#endif

@@ -4,32 +4,27 @@
     begin                : Wed Nov 28 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPPAYLOADSENDER_H
 #define __INET_RTPPAYLOADSENDER_H
-
 
 #include <fstream>
 
 #include "INETDefs.h"
 
 namespace inet {
-
-
 //Forward declarations:
 class RTPInnerPacket;
-
 
 /**
  * The class RTPPayloadSender is the base class for all modules creating
@@ -57,14 +52,14 @@ class INET_API RTPPayloadSender : public cSimpleModule
      */
     virtual void initialize();
 
-    virtual void handleMessage(cMessage * msg);
+    virtual void handleMessage(cMessage *msg);
 
     /**
      * A sender module's transmission can be in different states.
      */
     enum SenderStatus {
-        STOPPED, //< No transmission.
-        PLAYING  ///< Data is being sent.
+        STOPPED,    //< No transmission.
+        PLAYING    ///< Data is being sent.
     };
 
     /**
@@ -106,7 +101,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
      * Starts transmission from the current file position and plays until given
      * byte position (excluding file header) is reached.
      * Implementation in sender modules is optional.
-    */
+     */
     virtual void playUntilByte(int position);
 
     /**
@@ -154,7 +149,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
     /**
      * The input file stream for the data file.
      */
-    std::ifstream  _inputFileStream;
+    std::ifstream _inputFileStream;
 
     /**
      * The maximum size of an RTPPacket.
@@ -204,14 +199,13 @@ class INET_API RTPPayloadSender : public cSimpleModule
     SenderStatus _status;
 
     /**
-    A self message used as timer for the moment the next packet must be sent.
-    It's a member variable because when playing gets paused or stopped the timer
-    must be cancelled.
-    */
+       A self message used as timer for the moment the next packet must be sent.
+       It's a member variable because when playing gets paused or stopped the timer
+       must be cancelled.
+     */
     cMessage *_reminderMessage;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPPAYLOADSENDER_H
 
-
-#endif

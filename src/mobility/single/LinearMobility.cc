@@ -16,15 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LinearMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(LinearMobility);
-
 
 LinearMobility::LinearMobility()
 {
@@ -38,8 +34,7 @@ void LinearMobility::initialize(int stage)
     MovingMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing LinearMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
         angle = fmod((double)par("angle"), 360);
         acceleration = par("acceleration");
@@ -61,14 +56,10 @@ void LinearMobility::move()
 
     // accelerate
     speed += acceleration * elapsedTime;
-    if (speed <= 0)
-    {
+    if (speed <= 0) {
         speed = 0;
         stationary = true;
     }
 }
-
-
-}
-
+} // namespace inet
 

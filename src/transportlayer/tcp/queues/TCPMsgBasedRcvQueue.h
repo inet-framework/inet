@@ -27,7 +27,6 @@
 #include "TCPVirtualDataRcvQueue.h"
 
 namespace inet {
-
 /**
  * @see TCPMsgBasedSendQueue
  */
@@ -36,9 +35,9 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
   protected:
     struct PayloadItem
     {
-        uint32  seqNo;
+        uint32 seqNo;
         cPacket *packet;
-        PayloadItem(uint32  _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
+        PayloadItem(uint32 _seqNo, cPacket *_packet) : seqNo(_seqNo), packet(_packet) {}
     };
     typedef std::list<PayloadItem> PayloadList;
     PayloadList payloadList;    // sorted list, used the sequence number comparators
@@ -74,8 +73,7 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual cPacket *extractBytesUpTo(uint32 seq);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPMSGBASEDRCVQUEUE_H
 
-
-#endif

@@ -3,21 +3,19 @@
                              -------------------
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTCP_H
 #define __INET_RTCP_H
-
 
 #include "INETDefs.h"
 
@@ -26,8 +24,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
-
 //Forward declarations:
 class RTCPByePacket;
 class RTCPCompoundPacket;
@@ -38,7 +34,6 @@ class RTPInnerPacket;
 class RTPPacket;
 class RTPParticipantInfo;
 class RTPSenderInfo;
-
 
 /**
  * The class RTCP is responsible for creating, receiving and
@@ -103,7 +98,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
      * Makes the rtcp module send an RTCPByePacket in the next
      * RTCPCompoundPacket to tell other participants in the RTP
      * session that this end system leaves.
-    */
+     */
     virtual void handleLeaveSession(RTPInnerPacket *rinp);
 
     /**
@@ -152,12 +147,9 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
      * Extracts information of a received RTCPCompoundPacket.
      */
     virtual void processIncomingRTCPPacket(RTCPCompoundPacket *packet, IPv4Address address, int port);
-    void processIncomingRTCPSenderReportPacket(
-            RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port);
-    void processIncomingRTCPReceiverReportPacket(
-            RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port);
-    void processIncomingRTCPSDESPacket(
-            RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime);
+    void processIncomingRTCPSenderReportPacket(RTCPSenderReportPacket *rtcpSenderReportPacket, IPv4Address address, int port);
+    void processIncomingRTCPReceiverReportPacket(RTCPReceiverReportPacket *rtcpReceiverReportPacket, IPv4Address address, int port);
+    void processIncomingRTCPSDESPacket(RTCPSDESPacket *rtcpSDESPacket, IPv4Address address, int port, simtime_t arrivalTime);
     void processIncomingRTCPByePacket(RTCPByePacket *rtcpByePacket, IPv4Address address, int port);
 
     /**
@@ -165,7 +157,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
      * about the RTP end system with this ssrc identifier.
      * Returns NULL if this end system is unknown.
      */
-    virtual RTPParticipantInfo* findParticipantInfo(uint32 ssrc);
+    virtual RTPParticipantInfo *findParticipantInfo(uint32 ssrc);
 
     /**
      * Recalculates the average size of an RTCPCompoundPacket when
@@ -246,8 +238,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     //statistics
     static simsignal_t rcvdPkSignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTCP_H
 
-
-#endif

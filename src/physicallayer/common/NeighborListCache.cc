@@ -18,30 +18,26 @@
 #include "NeighborListCache.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(NeighborListCache);
 
 void NeighborListCache::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // TODO: NED parameter?
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
         updatePeriod = par("refillPeriod");
         maxSpeed = par("maxSpeed");
         range = par("range");
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) // TODO: is it the correct stage to do this?
-    {
+    else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
         updateNeighborLists();
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
         scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
     }
 }
 
-void NeighborListCache::sendToNeighbors(IRadio* transmitter, const IRadioFrame* frame)
+void NeighborListCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame)
 {
     RadioEntryCache::iterator it = radioToEntry.find(transmitter);
     if (it == radioToEntry.end())
@@ -54,7 +50,7 @@ void NeighborListCache::sendToNeighbors(IRadio* transmitter, const IRadioFrame* 
         radioMedium->sendToRadio(transmitter, neighborVector[i], frame);
 }
 
-void NeighborListCache::handleMessage(cMessage* msg)
+void NeighborListCache::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
         throw cRuntimeError("This module only handles self messages");
@@ -64,20 +60,19 @@ void NeighborListCache::handleMessage(cMessage* msg)
     scheduleAt(simTime() + updatePeriod, msg);
 }
 
-void NeighborListCache::updateNeighborList(RadioEntry* radioEntry)
+void NeighborListCache::updateNeighborList(RadioEntry *radioEntry)
 {
     IMobility *radioMobility = radioEntry->radio->getAntenna()->getMobility();
     Coord radioPosition = radioMobility->getCurrentPosition();
-    double radius =  maxSpeed * updatePeriod + range;
+    double radius = maxSpeed * updatePeriod + range;
     radioEntry->neighborVector.clear();
 
-    for (unsigned int i = 0; i < radios.size(); i++)
-    {
+    for (unsigned int i = 0; i < radios.size(); i++) {
         const IRadio *otherRadio = radios[i]->radio;
         Coord otherEntryPosition = otherRadio->getAntenna()->getMobility()->getCurrentPosition();
 
         if (otherRadio->getId() != radioEntry->radio->getId() &&
-                otherEntryPosition.sqrdist(radioPosition) <= radius * radius)
+            otherEntryPosition.sqrdist(radioPosition) <= radius * radius)
             radioEntry->neighborVector.push_back(otherRadio);
     }
 }
@@ -93,13 +88,11 @@ void NeighborListCache::addRadio(const IRadio *radio)
 void NeighborListCache::removeRadio(const IRadio *radio)
 {
     RadioEntries::iterator it = find(radios.begin(), radios.end(), radioToEntry[radio]);
-    if (it != radios.end())
-    {
+    if (it != radios.end()) {
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
     }
-    else
-    {
+    else {
         // TODO: is it an error?
     }
 }
@@ -111,10 +104,9 @@ void NeighborListCache::updateNeighborLists()
         updateNeighborList(radios[i]);
 }
 
-void NeighborListCache::removeRadioFromNeighborLists(const IRadio* radio)
+void NeighborListCache::removeRadioFromNeighborLists(const IRadio *radio)
 {
-    for (unsigned int i = 0; i < radios.size(); i++)
-    {
+    for (unsigned int i = 0; i < radios.size(); i++) {
         Radios neighborVector = radios[i]->neighborVector;
         Radios::iterator it = find(neighborVector.begin(), neighborVector.end(), radio);
         if (it != neighborVector.end())
@@ -129,7 +121,6 @@ NeighborListCache::~NeighborListCache()
 
     cancelAndDelete(updateNeighborListsTimer);
 }
+} // namespace physicallayer
+} // namespace inet
 
-}
-
-}

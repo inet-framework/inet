@@ -17,7 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 //  Cleanup and rewrite: Andras Varga, 2004
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
@@ -30,12 +29,11 @@
 #include "ICMPv6Message_m.h"
 
 namespace inet {
-
 /**
  * Error Handling: print out received error for IPv6
  */
 // FIXME is such thing needed at all???
-class INET_API IPv6ErrorHandling: public cSimpleModule
+class INET_API IPv6ErrorHandling : public cSimpleModule
 {
   protected:
     virtual void initialize();
@@ -47,8 +45,7 @@ class INET_API IPv6ErrorHandling: public cSimpleModule
     virtual void displayType3Msg(int code);
     virtual void displayType4Msg(int code);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV6ERRORHANDLING_H
 
-
-#endif

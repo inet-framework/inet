@@ -19,24 +19,18 @@
 #include "PriorityScheduler.h"
 
 namespace inet {
-
 Define_Module(PriorityScheduler);
 
 bool PriorityScheduler::schedulePacket()
 {
-    for (std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
-    {
+    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it) {
         IPassiveQueue *inputQueue = *it;
-        if (!inputQueue->isEmpty())
-        {
+        if (!inputQueue->isEmpty()) {
             inputQueue->requestPacket();
             return true;
         }
     }
     return false;
 }
-
-
-}
-
+} // namespace inet
 

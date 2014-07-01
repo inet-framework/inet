@@ -21,36 +21,31 @@
 #include "TransmitterBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealTransmitter : public TransmitterBase
 {
-    protected:
-        bps bitrate;
-        m maxCommunicationRange;
-        m maxInterferenceRange;
-        m maxDetectionRange;
+  protected:
+    bps bitrate;
+    m maxCommunicationRange;
+    m maxInterferenceRange;
+    m maxDetectionRange;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        IdealTransmitter() :
-            bitrate(sNaN),
-            maxCommunicationRange(sNaN),
-            maxInterferenceRange(sNaN),
-            maxDetectionRange(sNaN)
-        {}
+  public:
+    IdealTransmitter() :
+        bitrate(sNaN),
+        maxCommunicationRange(sNaN),
+        maxInterferenceRange(sNaN),
+        maxDetectionRange(sNaN)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
-        virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual void printToStream(std::ostream& stream) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALTRANSMITTER_H
 
-}
-
-
-#endif

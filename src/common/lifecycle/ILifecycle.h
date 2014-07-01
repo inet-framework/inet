@@ -20,7 +20,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 class LifecycleOperation;
 
 /**
@@ -30,9 +29,9 @@ class LifecycleOperation;
  */
 class INET_API IDoneCallback
 {
-    public:
-        virtual ~IDoneCallback() {}
-        virtual void invoke() = 0;
+  public:
+    virtual ~IDoneCallback() {}
+    virtual void invoke() = 0;
 };
 
 /**
@@ -43,23 +42,21 @@ class INET_API IDoneCallback
  */
 class INET_API ILifecycle
 {
-    public:
-        virtual ~ILifecycle() {}
+  public:
+    virtual ~ILifecycle() {}
 
-        /**
-         * Perform one stage of a lifecycle operation. Processing may be done
-         * entirely within this method, or may be a longer process that involves
-         * nonzero simulation time or several events, and is triggered by this
-         * method call.
-         *
-         * Return value: true = "done"; false = "not yet done, will invoke
-         * doneCallback when done"
-         */
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) = 0;
+    /**
+     * Perform one stage of a lifecycle operation. Processing may be done
+     * entirely within this method, or may be a longer process that involves
+     * nonzero simulation time or several events, and is triggered by this
+     * method call.
+     *
+     * Return value: true = "done"; false = "not yet done, will invoke
+     * doneCallback when done"
+     */
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) = 0;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ILIFECYCLE_H
 

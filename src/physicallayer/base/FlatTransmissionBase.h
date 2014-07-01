@@ -22,42 +22,37 @@
 #include "IModulation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API FlatTransmissionBase : public TransmissionBase
 {
-    protected:
-        const IModulation *modulation;
-        const int headerBitLength;
-        const int payloadBitLength;
-        const Hz carrierFrequency;
-        const Hz bandwidth;
-        const bps bitrate;
+  protected:
+    const IModulation *modulation;
+    const int headerBitLength;
+    const int payloadBitLength;
+    const Hz carrierFrequency;
+    const Hz bandwidth;
+    const bps bitrate;
 
-    public:
-        FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
-            TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-            modulation(modulation),
-            headerBitLength(headerBitLength),
-            payloadBitLength(payloadBitLength),
-            carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth),
-            bitrate(bitrate)
-        {}
+  public:
+    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
+        TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+        modulation(modulation),
+        headerBitLength(headerBitLength),
+        payloadBitLength(payloadBitLength),
+        carrierFrequency(carrierFrequency),
+        bandwidth(bandwidth),
+        bitrate(bitrate)
+    {}
 
-        virtual const IModulation *getModulation() const { return modulation; }
-        virtual int getHeaderBitLength() const { return headerBitLength; }
-        virtual int getPayloadBitLength() const { return payloadBitLength; }
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual Hz getBandwidth() const { return bandwidth; }
-        virtual bps getBitrate() const { return bitrate; }
+    virtual const IModulation *getModulation() const { return modulation; }
+    virtual int getHeaderBitLength() const { return headerBitLength; }
+    virtual int getPayloadBitLength() const { return payloadBitLength; }
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual Hz getBandwidth() const { return bandwidth; }
+    virtual bps getBitrate() const { return bitrate; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLATTRANSMISSIONBASE_H
 
-}
-
-
-#endif

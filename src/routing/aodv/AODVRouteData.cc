@@ -18,8 +18,7 @@
 #include "AODVRouteData.h"
 
 namespace inet {
-
-std::ostream & operator<<(std::ostream& out, const AODVRouteData *data)
+std::ostream& operator<<(std::ostream& out, const AODVRouteData *data)
 {
     out << " isActive = " << data->isActive()
         << ", hasValidDestNum = " << data->hasValidDestNum()
@@ -37,6 +36,5 @@ std::ostream & operator<<(std::ostream& out, const AODVRouteData *data)
     }
     return out;
 };
-
-}
+} // namespace inet
 

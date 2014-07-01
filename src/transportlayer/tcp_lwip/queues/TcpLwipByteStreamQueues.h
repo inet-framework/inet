@@ -19,15 +19,12 @@
 #ifndef __INET_TCPLWIPBYTESTREAMQUEUES_H
 #define __INET_TCPLWIPBYTESTREAMQUEUES_H
 
-
 #include "INETDefs.h"
 
 #include "ByteArrayBuffer.h"
 #include "TcpLwipQueues.h"
 
 namespace inet {
-
-
 /**
  * Send queue that manages "data stream", that is, actual bytes.
  */
@@ -48,13 +45,13 @@ class INET_API TcpLwipByteStreamSendQueue : public TcpLwipSendQueue
 
     virtual void enqueueAppData(cPacket *msgP);
 
-    virtual unsigned int getBytesForTcpLayer(void* bufferP, unsigned int bufferLengthP) const;
+    virtual unsigned int getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const;
 
     virtual void dequeueTcpLayerMsg(unsigned int msgLengthP);
 
     unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
     virtual void discardAckedBytes(unsigned long bytesP);
 
@@ -83,16 +80,16 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
 
     // see TcpLwipReceiveQueue
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void* bufferP, size_t bufferLengthP);
+            const void *bufferP, size_t bufferLengthP);
 
     // see TcpLwipReceiveQueue
-    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
 
     // see TcpLwipReceiveQueue
     virtual unsigned long getExtractableBytesUpTo() const;
 
     // see TcpLwipReceiveQueue
-    virtual cPacket* extractBytesUpTo();
+    virtual cPacket *extractBytesUpTo();
 
     // see TcpLwipReceiveQueue
     virtual uint32 getAmountOfBufferedBytes() const;
@@ -110,8 +107,7 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     /// store bytes
     ByteArrayBuffer byteArrayBufferM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPLWIPBYTESTREAMQUEUES_H
 
-
-#endif

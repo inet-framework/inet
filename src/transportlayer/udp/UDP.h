@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_UDP_H
 #define __INET_UDP_H
 
@@ -27,7 +26,6 @@
 #include "UDPControlInfo.h"
 
 namespace inet {
-
 class IInterfaceTable;
 class IPv4ControlInfo;
 class IPv6ControlInfo;
@@ -52,7 +50,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     struct MulticastMembership
     {
         Address multicastAddress;
-        int interfaceId;  // -1 = all
+        int interfaceId;    // -1 = all
         UDPSourceFilterMode filterMode;
         std::vector<Address> sourceList;
 
@@ -61,7 +59,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
 
     // For a given multicastAddress and interfaceId there is at most one membership record.
     // Records are ordered first by multicastAddress, then by interfaceId (-1 interfaceId is the last)
-    typedef std::vector<MulticastMembership*> MulticastMembershipTable;
+    typedef std::vector<MulticastMembership *> MulticastMembershipTable;
 
     struct SockDesc
     {
@@ -82,15 +80,15 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
         unsigned char typeOfService;
         MulticastMembershipTable multicastMembershipTable;
 
-        MulticastMembershipTable::iterator findFirstMulticastMembership(const Address &multicastAddress);
-        MulticastMembership *findMulticastMembership(const Address &multicastAddress, int interfaceId);
+        MulticastMembershipTable::iterator findFirstMulticastMembership(const Address& multicastAddress);
+        MulticastMembership *findMulticastMembership(const Address& multicastAddress, int interfaceId);
         void addMulticastMembership(MulticastMembership *membership);
         void deleteMulticastMembership(MulticastMembership *membership);
     };
 
-    typedef std::list<SockDesc *> SockDescList;   // might contain duplicated local addresses if their reuseAddr flag is set
-    typedef std::map<int,SockDesc *> SocketsByIdMap;
-    typedef std::map<int,SockDescList> SocketsByPortMap;
+    typedef std::list<SockDesc *> SockDescList;    // might contain duplicated local addresses if their reuseAddr flag is set
+    typedef std::map<int, SockDesc *> SocketsByIdMap;
+    typedef std::map<int, SockDescList> SocketsByPortMap;
 
   protected:
     // sockets
@@ -137,11 +135,11 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void setReuseAddress(SockDesc *sd, bool reuseAddr);
     virtual void joinMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses, const std::vector<int> interfaceIds);
     virtual void leaveMulticastGroups(SockDesc *sd, const std::vector<Address>& multicastAddresses);
-    virtual void blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
-    virtual void unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
-    virtual void joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
-    virtual void leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address> &sourceList);
-    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<Address> &sourceList);
+    virtual void blockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address>& sourceList);
+    virtual void unblockMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address>& sourceList);
+    virtual void joinMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address>& sourceList);
+    virtual void leaveMulticastSources(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, const std::vector<Address>& sourceList);
+    virtual void setMulticastSourceFilter(SockDesc *sd, InterfaceEntry *ie, Address multicastAddress, UDPSourceFilterMode filterMode, const std::vector<Address>& sourceList);
 
     virtual void addMulticastAddressToInterface(InterfaceEntry *ie, const Address& multicastAddr);
 
@@ -149,7 +147,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual ushort getEphemeralPort();
 
     virtual SockDesc *findSocketForUnicastPacket(const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort);
-    virtual std::vector<SockDesc*> findSocketsForMcastBcastPacket(const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
+    virtual std::vector<SockDesc *> findSocketsForMcastBcastPacket(const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort, bool isMulticast, bool isBroadcast);
     virtual SockDesc *findFirstSocketByLocalAddress(const Address& localAddr, ushort localPort);
     virtual void sendUp(cPacket *payload, SockDesc *sd, const Address& srcAddr, ushort srcPort, const Address& destAddr, ushort destPort, int interfaceId, int ttl, unsigned char tos);
     virtual void sendDown(cPacket *appData, const Address& srcAddr, ushort srcPort, const Address& destAddr, ushort destPort, int interfaceId, bool multicastLoop, int ttl, unsigned char tos);
@@ -157,7 +155,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void sendUpErrorIndication(SockDesc *sd, const Address& localAddr, ushort localPort, const Address& remoteAddr, ushort remotePort);
 
     // process an ICMP error packet
-    virtual void processICMPError(cPacket *icmpErrorMsg); // TODO use ICMPMessage
+    virtual void processICMPError(cPacket *icmpErrorMsg);    // TODO use ICMPMessage
 
     // process UDP packets coming from IP
     virtual void processUDPPacket(UDPPacket *udpPacket);
@@ -183,9 +181,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDP_H
 

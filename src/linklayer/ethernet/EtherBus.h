@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ETHERBUS_H
 #define __INET_ETHERBUS_H
@@ -23,10 +23,9 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 // Direction of frame travel on bus; also used as selfmessage kind
-#define UPSTREAM        0
-#define DOWNSTREAM      1
+#define UPSTREAM      0
+#define DOWNSTREAM    1
 
 /**
  * Implements the shared coaxial cable in classic Ethernet. See the NED file
@@ -41,23 +40,23 @@ class INET_API EtherBus : public cSimpleModule, cListener
      */
     struct BusTap
     {
-        int id;                         // which tap is this
-        double position;                // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
-        simtime_t propagationDelay[2];  // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
+        int id;    // which tap is this
+        double position;    // Physical location of where each entity is connected to on the bus, (physical location of the tap on the bus)
+        simtime_t propagationDelay[2];    // Propagation delays to the adjacent tap points on the bus: 0:upstream, 1:downstream
     };
 
     // configuration
-    double  propagationSpeed;  // propagation speed of electrical signals through copper
-    BusTap *tap;   // array of BusTaps: physical locations taps where that connect stations to the bus
-    int numTaps;   // number of tap points on the bus
-    int inputGateBaseId;  // gate id of ethg$i[0]
-    int outputGateBaseId; // gate id of ethg$o[0]
+    double propagationSpeed;    // propagation speed of electrical signals through copper
+    BusTap *tap;    // array of BusTaps: physical locations taps where that connect stations to the bus
+    int numTaps;    // number of tap points on the bus
+    int inputGateBaseId;    // gate id of ethg$i[0]
+    int outputGateBaseId;    // gate id of ethg$o[0]
 
     // state
     bool dataratesDiffer;
 
     // statistics
-    long numMessages;  // number of messages handled
+    long numMessages;    // number of messages handled
 
   public:
     EtherBus();
@@ -71,10 +70,7 @@ class INET_API EtherBus : public cSimpleModule, cListener
 
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_ETHERBUS_H
 

@@ -22,16 +22,14 @@
 #include "IMobility.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(DimensionalTransmitter);
 
-void DimensionalTransmitter::printToStream(std::ostream &stream) const
+void DimensionalTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "dimensional transmitter, "
            << "bitrate = " << bitrate << ", "
-           << "power = " <<  power << ", "
+           << "power = " << power << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth;
 }
@@ -48,10 +46,6 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
     const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

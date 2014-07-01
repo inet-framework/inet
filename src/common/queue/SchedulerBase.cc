@@ -21,7 +21,6 @@
 #include "SchedulerBase.h"
 
 namespace inet {
-
 SchedulerBase::SchedulerBase()
     : packetsRequestedFromUs(0), packetsToBeRequestedFromInputs(0), outGate(NULL)
 {
@@ -34,13 +33,12 @@ SchedulerBase::~SchedulerBase()
 void SchedulerBase::initialize()
 {
     int numInputs = gateSize("in");
-    for (int i = 0; i < numInputs; ++i)
-    {
+    for (int i = 0; i < numInputs; ++i) {
         cGate *inGate = isGateVector("in") ? gate("in", i) : gate("in");
         cGate *connectedGate = inGate->getPathStartGate();
         if (!connectedGate)
             throw cRuntimeError("Scheduler input gate %d is not connected", i);
-        IPassiveQueue *inputModule = dynamic_cast<IPassiveQueue*>(connectedGate->getOwnerModule());
+        IPassiveQueue *inputModule = dynamic_cast<IPassiveQueue *>(connectedGate->getOwnerModule());
         if (!inputModule)
             throw cRuntimeError("Scheduler input gate %d should be connected to an IPassiveQueue", i);
         inputModule->addListener(this);
@@ -54,7 +52,7 @@ void SchedulerBase::initialize()
 
 void SchedulerBase::finalize()
 {
-    for(std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
+    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
         (*it)->removeListener(this);
 }
 
@@ -69,8 +67,7 @@ void SchedulerBase::packetEnqueued(IPassiveQueue *inputQueue)
 {
     Enter_Method("packetEnqueued(...)");
 
-    if (packetsToBeRequestedFromInputs > 0)
-    {
+    if (packetsToBeRequestedFromInputs > 0) {
         bool success = schedulePacket();
         if (success)
             packetsToBeRequestedFromInputs--;
@@ -97,15 +94,16 @@ void SchedulerBase::sendOut(cMessage *msg)
 
 bool SchedulerBase::isEmpty()
 {
-    for (std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
+    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
         if (!(*it)->isEmpty())
             return false;
+
     return true;
 }
 
 void SchedulerBase::clear()
 {
-    for (std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
+    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
         (*it)->clear();
 
     packetsRequestedFromUs = 0;
@@ -114,33 +112,31 @@ void SchedulerBase::clear()
 
 cMessage *SchedulerBase::pop()
 {
-    for (std::vector<IPassiveQueue*>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
+    for (std::vector<IPassiveQueue *>::iterator it = inputQueues.begin(); it != inputQueues.end(); ++it)
         if (!(*it)->isEmpty())
             return (*it)->pop();
+
     return NULL;
 }
 
 void SchedulerBase::addListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
     if (it == listeners.end())
         listeners.push_back(listener);
 }
 
 void SchedulerBase::removeListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
     if (it != listeners.end())
         listeners.erase(it);
 }
 
 void SchedulerBase::notifyListeners()
 {
-    for (std::list<IPassiveQueueListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it)
+    for (std::list<IPassiveQueueListener *>::iterator it = listeners.begin(); it != listeners.end(); ++it)
         (*it)->packetEnqueued(this);
 }
-
-
-}
-
+} // namespace inet
 

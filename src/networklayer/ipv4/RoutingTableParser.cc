@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include <stdio.h>
@@ -30,20 +29,19 @@
 #include "IPv4InterfaceData.h"
 
 namespace inet {
-
 //
 // Constants
 //
-const int MAX_FILESIZE = 10000; // TBD lift hardcoded limit
+const int MAX_FILESIZE = 10000;    // TBD lift hardcoded limit
 const int MAX_ENTRY_STRING_SIZE = 500;
 
 //
 // Tokens that mark the route file.
 //
-const char  *IFCONFIG_START_TOKEN = "ifconfig:",
-            *IFCONFIG_END_TOKEN = "ifconfigend.",
-            *ROUTE_START_TOKEN = "route:",
-            *ROUTE_END_TOKEN = "routeend.";
+const char *IFCONFIG_START_TOKEN = "ifconfig:",
+*IFCONFIG_END_TOKEN = "ifconfigend.",
+*ROUTE_START_TOKEN = "route:",
+*ROUTE_END_TOKEN = "routeend.";
 
 RoutingTableParser::RoutingTableParser(IInterfaceTable *i, IIPv4RoutingTable *r)
 {
@@ -51,27 +49,25 @@ RoutingTableParser::RoutingTableParser(IInterfaceTable *i, IIPv4RoutingTable *r)
     rt = r;
 }
 
-
 int RoutingTableParser::streq(const char *str1, const char *str2)
 {
-    return (strncmp(str1, str2, strlen(str2)) == 0);
+    return strncmp(str1, str2, strlen(str2)) == 0;
 }
-
 
 int RoutingTableParser::strcpyword(char *dest, const char *src)
 {
     int i;
-    for (i = 0; !isspace(dest[i] = src[i]); i++);
+    for (i = 0; !isspace(dest[i] = src[i]); i++)
+        ;
     dest[i] = '\0';
     return i;
 }
 
-
-void RoutingTableParser::skipBlanks(char *str, int &charptr)
+void RoutingTableParser::skipBlanks(char *str, int& charptr)
 {
-    for (; isspace(str[charptr]); charptr++);
+    for ( ; isspace(str[charptr]); charptr++)
+        ;
 }
-
 
 int RoutingTableParser::readRoutingTableFromFile(const char *filename)
 {
@@ -88,41 +84,42 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     // read the whole into the file[] char-array
     for (charpointer = 0;
          (file[charpointer] = getc(fp)) != EOF;
-         charpointer++);
+         charpointer++)
+        ;
 
     charpointer++;
-    for (; charpointer < MAX_FILESIZE; charpointer++)
+    for ( ; charpointer < MAX_FILESIZE; charpointer++)
         file[charpointer] = '\0';
     //    file[++charpointer] = '\0';
 
     fclose(fp);
 
-
     // copy file into specialized, filtered char arrays
     for (charpointer = 0;
          (charpointer < MAX_FILESIZE) && (file[charpointer] != EOF);
-         charpointer++) {
+         charpointer++)
+    {
         // check for tokens at beginning of file or line
         if (charpointer == 0 || file[charpointer - 1] == '\n') {
             // copy into ifconfig filtered chararray
             if (streq(file + charpointer, IFCONFIG_START_TOKEN)) {
                 ifconfigFile = createFilteredFile(file,
-                                                  charpointer,
-                                                  IFCONFIG_END_TOKEN);
+                            charpointer,
+                            IFCONFIG_END_TOKEN);
                 //PRINTF("Filtered File 1 created:\n%s\n", ifconfigFile);
             }
 
             // copy into route filtered chararray
             if (streq(file + charpointer, ROUTE_START_TOKEN)) {
                 routeFile = createFilteredFile(file,
-                                               charpointer,
-                                               ROUTE_END_TOKEN);
+                            charpointer,
+                            ROUTE_END_TOKEN);
                 //PRINTF("Filtered File 2 created:\n%s\n", routeFile);
             }
         }
     }
 
-    delete [] file;
+    delete[] file;
 
     // parse filtered files
     if (ifconfigFile)
@@ -130,14 +127,13 @@ int RoutingTableParser::readRoutingTableFromFile(const char *filename)
     if (routeFile)
         parseRouting(routeFile);
 
-    delete [] ifconfigFile;
-    delete [] routeFile;
+    delete[] ifconfigFile;
+    delete[] routeFile;
 
     return 0;
-
 }
 
-char *RoutingTableParser::createFilteredFile(char *file, int &charpointer, const char *endtoken)
+char *RoutingTableParser::createFilteredFile(char *file, int& charpointer, const char *endtoken)
 {
     int i = 0;
     char *filterFile = new char[MAX_FILESIZE];
@@ -145,8 +141,9 @@ char *RoutingTableParser::createFilteredFile(char *file, int &charpointer, const
 
     while (true) {
         // skip blank lines and comments
-        while ( !isalnum(file[charpointer]) && !isspace(file[charpointer]) ) {
-            while (file[charpointer++] != '\n');
+        while (!isalnum(file[charpointer]) && !isspace(file[charpointer])) {
+            while (file[charpointer++] != '\n')
+                ;
         }
 
         // check for endtoken:
@@ -156,12 +153,12 @@ char *RoutingTableParser::createFilteredFile(char *file, int &charpointer, const
         }
 
         // copy whole line to filterFile
-        while ((filterFile[i++] = file[charpointer++]) != '\n');
+        while ((filterFile[i++] = file[charpointer++]) != '\n')
+            ;
     }
 
     return filterFile;
 }
-
 
 void RoutingTableParser::parseInterfaces(char *ifconfigFile)
 {
@@ -170,8 +167,7 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
     InterfaceEntry *ie = NULL;
 
     // parsing of entries in interface definition
-    while (ifconfigFile[charpointer] != '\0')
-    {
+    while (ifconfigFile[charpointer] != '\0') {
         // name entry
         if (streq(ifconfigFile + charpointer, "name:")) {
             // find existing interface with this name
@@ -264,9 +260,8 @@ void RoutingTableParser::parseInterfaces(char *ifconfigFile)
     }
 }
 
-
 char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
-                                     int& charpointer, char *destStr)
+        int& charpointer, char *destStr)
 {
     int temp = 0;
 
@@ -280,13 +275,12 @@ char *RoutingTableParser::parseEntry(char *ifconfigFile, const char *tokenStr,
     return destStr;
 }
 
-
 void RoutingTableParser::parseMulticastGroups(char *groupStr, InterfaceEntry *itf)
 {
     // Parse string (IPv4 addresses separated by colons)
     cStringTokenizer tokenizer(groupStr, ":");
     const char *token;
-    while ((token = tokenizer.nextToken())!=NULL)
+    while ((token = tokenizer.nextToken()) != NULL)
         itf->ipv4Data()->joinMulticastGroup(IPv4Address(token));
 }
 
@@ -296,14 +290,12 @@ void RoutingTableParser::parseRouting(char *routeFile)
 
     int pos = strlen(ROUTE_START_TOKEN);
     skipBlanks(routeFile, pos);
-    while (routeFile[pos] != '\0')
-    {
+    while (routeFile[pos] != '\0') {
         // 1st entry: Host
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
         IPv4Route *e = new IPv4Route();
-        if (strcmp(str, "default:"))
-        {
+        if (strcmp(str, "default:")) {
             // if entry is not the default entry
             if (!IPv4Address::isWellFormed(str))
                 throw cRuntimeError("Syntax error in routing file: `%s' on 1st column should be `default:' or a valid IPv4 address", str);
@@ -314,12 +306,10 @@ void RoutingTableParser::parseRouting(char *routeFile)
         // 2nd entry: Gateway
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
-        if (!strcmp(str, "*") || !strcmp(str, "0.0.0.0"))
-        {
+        if (!strcmp(str, "*") || !strcmp(str, "0.0.0.0")) {
             e->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
         }
-        else
-        {
+        else {
             if (!IPv4Address::isWellFormed(str))
                 throw cRuntimeError("Syntax error in routing file: `%s' on 2nd column should be `*' or a valid IPv4 address", str);
 
@@ -338,13 +328,14 @@ void RoutingTableParser::parseRouting(char *routeFile)
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
         // parse flag-String to set flags
-        for (int i = 0; str[i]; i++)
-        {
+        for (int i = 0; str[i]; i++) {
             if (str[i] == 'H') {
                 // e->setType(IPv4Route::DIRECT);
-            } else if (str[i] == 'G') {
+            }
+            else if (str[i] == 'G') {
                 // e->setType(IPv4Route::REMOTE);
-            } else {
+            }
+            else {
                 throw cRuntimeError("Syntax error in routing file: 4th column should be `G' or `H' not `%s'", str);
             }
         }
@@ -353,7 +344,7 @@ void RoutingTableParser::parseRouting(char *routeFile)
         pos += strcpyword(str, routeFile + pos);
         skipBlanks(routeFile, pos);
         int metric = atoi(str);
-        if (metric==0 && str[0]!='0')
+        if (metric == 0 && str[0] != '0')
             throw cRuntimeError("Syntax error in routing file: 5th column should be numeric not `%s'", str);
 
         e->setMetric(metric);
@@ -374,8 +365,5 @@ void RoutingTableParser::parseRouting(char *routeFile)
         rt->addRoute(e);
     }
 }
-
-
-}
-
+} // namespace inet
 

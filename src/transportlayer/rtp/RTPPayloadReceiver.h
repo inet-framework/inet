@@ -4,32 +4,27 @@
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz, Ahmed Ayadi
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPPAYLOADRECEIVER_H
 #define __INET_RTPPAYLOADRECEIVER_H
-
 
 #include <fstream>
 
 #include "INETDefs.h"
 
 namespace inet {
-
-
 //Forward declarations
 class RTPPacket;
-
 
 /**
  * The class RTPPayloadReceiver acts as a base class for modules
@@ -76,7 +71,7 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
     virtual void closeOutputFile();
 
   protected:
-   /**
+    /**
      * The output file stream.
      */
     std::ofstream _outputFileStream;
@@ -96,8 +91,7 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
      */
     static simsignal_t _rcvdPkRtpTimestampSignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPPAYLOADRECEIVER_H
 
-
-#endif

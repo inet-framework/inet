@@ -19,35 +19,32 @@
 #ifndef __INET_TCPIPCHECKSUM_H
 #define __INET_TCPIPCHECKSUM_H
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Calculates checksum.
  */
 class TCPIPchecksum
 {
-    public:
-        TCPIPchecksum() {}
+  public:
+    TCPIPchecksum() {}
 
-        /*
-         * calculate the 16 bit one's complement of the one's
-         * complement sum of all 16 bit words in the header and text.  If a
-         * segment contains an odd number of header and text octets to be
-         * checksummed, the last octet is padded on the right with zeros to
-         * form a 16 bit word for checksum purposes
-        */
-        static uint16_t checksum(const void *addr, unsigned int count)
-        {
-            return ~ _checksum(addr, count);
-        }
+    /*
+     * calculate the 16 bit one's complement of the one's
+     * complement sum of all 16 bit words in the header and text.  If a
+     * segment contains an odd number of header and text octets to be
+     * checksummed, the last octet is padded on the right with zeros to
+     * form a 16 bit word for checksum purposes
+     */
+    static uint16_t checksum(const void *addr, unsigned int count)
+    {
+        return ~_checksum(addr, count);
+    }
 
-        static uint16_t _checksum(const void *addr, unsigned int count);
+    static uint16_t _checksum(const void *addr, unsigned int count);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPIPCHECKSUM_H
 
-
-#endif

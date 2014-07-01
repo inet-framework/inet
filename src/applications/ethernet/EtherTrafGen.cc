@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -26,7 +26,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 Define_Module(EtherTrafGen);
 
 simsignal_t EtherTrafGen::sentPkSignal = registerSignal("sentPk");
@@ -50,8 +49,7 @@ void EtherTrafGen::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         sendInterval = &par("sendInterval");
         numPacketsPerBurst = &par("numPacketsPerBurst");
         packetLength = &par("packetLength");
@@ -70,8 +68,7 @@ void EtherTrafGen::initialize(int stage)
         if (stopTime >= SIMTIME_ZERO && stopTime < startTime)
             throw cRuntimeError("Invalid startTime/stopTime parameters");
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (isGenerator())
             timerMsg = new cMessage("generateNextPacket");
 
@@ -85,10 +82,8 @@ void EtherTrafGen::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
-    if (msg->isSelfMessage())
-    {
-        if (msg->getKind() == START)
-        {
+    if (msg->isSelfMessage()) {
+        if (msg->getKind() == START) {
             destMACAddress = resolveDestMACAddress();
             // if no dest address given, nothing to do
             if (destMACAddress.isUnspecified())
@@ -98,7 +93,7 @@ void EtherTrafGen::handleMessage(cMessage *msg)
         scheduleNextPacket(simTime());
     }
     else
-        receivePacket(check_and_cast<cPacket*>(msg));
+        receivePacket(check_and_cast<cPacket *>(msg));
 }
 
 bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
@@ -116,7 +111,8 @@ bool EtherTrafGen::handleOperationStage(LifecycleOperation *operation, int stage
         if (stage == NodeCrashOperation::STAGE_CRASH)
             cancelNextPacket();
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -133,13 +129,11 @@ bool EtherTrafGen::isGenerator()
 void EtherTrafGen::scheduleNextPacket(simtime_t previous)
 {
     simtime_t next;
-    if (previous == -1)
-    {
+    if (previous == -1) {
         next = simTime() <= startTime ? startTime : simTime();
         timerMsg->setKind(START);
     }
-    else
-    {
+    else {
         next = previous + sendInterval->doubleValue();
         timerMsg->setKind(NEXT);
     }
@@ -156,11 +150,9 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
 {
     MACAddress destMACAddress;
     const char *destAddress = par("destAddress");
-    if (destAddress[0])
-    {
+    if (destAddress[0]) {
         // try as mac address first, then as a module
-        if (!destMACAddress.tryParse(destAddress))
-        {
+        if (!destMACAddress.tryParse(destAddress)) {
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 throw cRuntimeError("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
@@ -178,8 +170,7 @@ MACAddress EtherTrafGen::resolveDestMACAddress()
 void EtherTrafGen::sendBurstPackets()
 {
     int n = numPacketsPerBurst->longValue();
-    for (int i = 0; i < n; i++)
-    {
+    for (int i = 0; i < n; i++) {
         seqNum++;
 
         char msgname[40];
@@ -216,9 +207,5 @@ void EtherTrafGen::finish()
     cancelAndDelete(timerMsg);
     timerMsg = NULL;
 }
-
-
-
-}
-
+} // namespace inet
 

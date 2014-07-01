@@ -15,15 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "RectangleMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(RectangleMobility);
-
 
 RectangleMobility::RectangleMobility()
 {
@@ -37,8 +33,7 @@ void RectangleMobility::initialize(int stage)
     MovingMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing RectangleMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
         stationary = (speed == 0);
 
@@ -81,33 +76,26 @@ void RectangleMobility::move()
     while (d >= corner4)
         d -= corner4;
 
-    if (d < corner1)
-    {
+    if (d < corner1) {
         // top side
         lastPosition.x = constraintAreaMin.x + d;
         lastPosition.y = constraintAreaMin.y;
     }
-    else if (d < corner2)
-    {
+    else if (d < corner2) {
         // right side
         lastPosition.x = constraintAreaMax.x;
         lastPosition.y = constraintAreaMin.y + d - corner1;
     }
-    else if (d < corner3)
-    {
+    else if (d < corner3) {
         // bottom side
         lastPosition.x = constraintAreaMax.x - d + corner2;
         lastPosition.y = constraintAreaMax.y;
     }
-    else
-    {
+    else {
         // left side
         lastPosition.x = constraintAreaMin.x;
         lastPosition.y = constraintAreaMax.y - d + corner3;
     }
 }
-
-
-}
-
+} // namespace inet
 

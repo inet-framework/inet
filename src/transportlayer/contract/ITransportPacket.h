@@ -21,13 +21,15 @@
 /**
  * This interface provides an abstraction for different transport layer packets.
  */
-class ITransportPacket {
+class ITransportPacket
+{
   public:
-    virtual ~ITransportPacket() { }
+    virtual ~ITransportPacket() {}
     virtual unsigned int getSourcePort() const = 0;
     virtual void setSourcePort(unsigned int port) = 0;
     virtual unsigned int getDestinationPort() const = 0;
     virtual void setDestinationPort(unsigned int port) = 0;
 };
 
-#endif
+#endif // ifndef __INET_ITRANSPORTPACKET_H
+

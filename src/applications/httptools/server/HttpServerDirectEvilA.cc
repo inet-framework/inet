@@ -18,14 +18,12 @@
 #include "HttpServerDirectEvilA.h"
 
 namespace inet {
-
 Define_Module(HttpServerDirectEvilA);
 
 void HttpServerDirectEvilA::initialize(int stage)
 {
     HttpServerDirect::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         badLow = par("minBadRequests");
         badHigh = par("maxBadRequests");
 
@@ -36,22 +34,18 @@ void HttpServerDirectEvilA::initialize(int stage)
 
 std::string HttpServerDirectEvilA::generateBody()
 {
-    int numImages = badLow+(int)uniform(0, badHigh-badLow);
+    int numImages = badLow + (int)uniform(0, badHigh - badLow);
     double rndDelay;
     std::string result;
 
     char tempBuf[128];
-    for (int i=0; i<numImages; i++)
-    {
-        rndDelay = 10.0+uniform(0, 2.0);
+    for (int i = 0; i < numImages; i++) {
+        rndDelay = 10.0 + uniform(0, 2.0);
         sprintf(tempBuf, "IMG%.4d.jpg;%s;%f\n", i, "www.good.com", rndDelay);
         result.append(tempBuf);
     }
 
     return result;
 }
-
-
-}
-
+} // namespace inet
 

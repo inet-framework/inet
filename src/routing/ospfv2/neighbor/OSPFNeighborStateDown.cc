@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFNeighborStateDown.h"
 
 #include "MessageHandler.h"
@@ -26,12 +25,10 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if (event == OSPF::Neighbor::START) {
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         int ttl = (neighbor->getInterface()->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
 
         messageHandler->clearTimer(neighbor->getPollTimer());
@@ -40,7 +37,7 @@ void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neigh
         changeState(neighbor, new OSPF::NeighborStateAttempt, this);
     }
     if (event == OSPF::Neighbor::HELLO_RECEIVED) {
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getPollTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
         changeState(neighbor, new OSPF::NeighborStateInit, this);
@@ -48,12 +45,9 @@ void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neigh
     if (event == OSPF::Neighbor::POLL_TIMER) {
         int ttl = (neighbor->getInterface()->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
         neighbor->getInterface()->sendHelloPacket(neighbor->getAddress(), ttl);
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
     }
 }
-
-
-}
-
+} // namespace inet
 

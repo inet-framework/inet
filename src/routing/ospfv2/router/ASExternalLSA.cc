@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LSA.h"
 
 namespace inet {
-
-
-bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA* lsa)
+bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -29,12 +26,13 @@ bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA* lsa)
     if (different) {
         clearNextHops();
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
-bool OSPF::ASExternalLSA::differsFrom(const OSPFASExternalLSA* asExternalLSA) const
+bool OSPF::ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) const
 {
     const OSPFLSAHeader& lsaHeader = asExternalLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
@@ -74,10 +72,7 @@ bool OSPF::ASExternalLSA::differsFrom(const OSPFASExternalLSA* asExternalLSA) co
         }
     }
 
-    return (differentHeader || differentBody);
+    return differentHeader || differentBody;
 }
-
-
-}
-
+} // namespace inet
 

@@ -39,7 +39,7 @@
 
 #ifdef s_addr
 #undef s_addr
-#endif
+#endif // ifdef s_addr
 
 /*
  * Constants and structures defined by the internet system,
@@ -49,15 +49,17 @@
 /*...*/
 
 /* from sys/types.h --A */
-typedef u_int32_t   in_addr_t;  /* base type for internet address */
+typedef u_int32_t in_addr_t;    /* base type for internet address */
 
 /*
  * Internet address (a structure for historical reasons)
  */
-struct in_addr {
-        in_addr_t s_addr;
+struct in_addr
+{
+    in_addr_t s_addr;
 };
 
 /*...*/
 
-#endif
+#endif // ifndef __INET_IN_H
+

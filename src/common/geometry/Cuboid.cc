@@ -19,7 +19,6 @@
 #include "Plane.h"
 
 namespace inet {
-
 Cuboid::Cuboid(const Coord& size) :
     size(size)
 {
@@ -52,12 +51,11 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     // TODO: complete for other cases, e.g. when there's only 1 real intersection point
     if (i == 0)
         return false;
-    else
-    {
+    else {
         intersection1 = points[0];
         intersection2 = points[1];
         return true;
     }
 }
+} // namespace inet
 
-}

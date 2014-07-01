@@ -24,27 +24,25 @@
 #include "IPv4ControlInfo.h"
 
 namespace inet {
-
 class INET_API IPv4AddressType : public IAddressType
 {
-    public:
-        static IPv4AddressType INSTANCE;
-        static const IPv4Address ALL_RIP_ROUTERS_MCAST;
+  public:
+    static IPv4AddressType INSTANCE;
+    static const IPv4Address ALL_RIP_ROUTERS_MCAST;
 
-    public:
-        IPv4AddressType() { }
-        virtual ~IPv4AddressType() { }
+  public:
+    IPv4AddressType() {}
+    virtual ~IPv4AddressType() {}
 
-        virtual int getMaxPrefixLength() const { return 32; }
-        virtual Address getUnspecifiedAddress() const { return IPv4Address::UNSPECIFIED_ADDRESS; }
-        virtual Address getBroadcastAddress() const { return IPv4Address::ALLONES_ADDRESS; }
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
-        virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
-        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
+    virtual int getMaxPrefixLength() const { return 32; }
+    virtual Address getUnspecifiedAddress() const { return IPv4Address::UNSPECIFIED_ADDRESS; }
+    virtual Address getBroadcastAddress() const { return IPv4Address::ALLONES_ADDRESS; }
+    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
+    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
+    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
+    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV4ADDRESSTYPE_H
 
-
-#endif

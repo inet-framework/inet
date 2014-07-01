@@ -19,7 +19,6 @@
 #include "NetworkProtocolCommand_m.h"
 
 namespace inet {
-
 NetworkProtocolBase::NetworkProtocolBase() :
     interfaceTable(NULL)
 {
@@ -32,11 +31,10 @@ void NetworkProtocolBase::initialize(int stage)
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 }
 
-void NetworkProtocolBase::handleUpperCommand(cMessage* message)
+void NetworkProtocolBase::handleUpperCommand(cMessage *message)
 {
-    if (dynamic_cast<RegisterTransportProtocolCommand*>(message))
-    {
-        RegisterTransportProtocolCommand * command = check_and_cast<RegisterTransportProtocolCommand *>(message);
+    if (dynamic_cast<RegisterTransportProtocolCommand *>(message)) {
+        RegisterTransportProtocolCommand *command = check_and_cast<RegisterTransportProtocolCommand *>(message);
         protocolMapping.addProtocolMapping(command->getProtocol(), message->getArrivalGate()->getIndex());
         delete message;
     }
@@ -44,30 +42,26 @@ void NetworkProtocolBase::handleUpperCommand(cMessage* message)
         LayeredProtocolBase::handleUpperCommand(message);
 }
 
-void NetworkProtocolBase::sendUp(cMessage* message, int transportProtocol)
+void NetworkProtocolBase::sendUp(cMessage *message, int transportProtocol)
 {
     if (message->isPacket())
         emit(packetSentToUpperSignal, message);
     send(message, "upperLayerOut", protocolMapping.getOutputGateForProtocol(transportProtocol));
 }
 
-void NetworkProtocolBase::sendDown(cMessage* message, int interfaceId)
+void NetworkProtocolBase::sendDown(cMessage *message, int interfaceId)
 {
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
-    if (interfaceId != -1)
-    {
+    if (interfaceId != -1) {
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceById(interfaceId);
         send(message, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
     }
-    else
-    {
-        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
-        {
+    else {
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-            if (interfaceEntry && !interfaceEntry->isLoopback())
-            {
-                cMessage* duplicate = message->dup();
+            if (interfaceEntry && !interfaceEntry->isLoopback()) {
+                cMessage *duplicate = message->dup();
                 duplicate->setControlInfo(message->getControlInfo()->dup());
                 send(duplicate, "lowerLayerOut", interfaceEntry->getNetworkLayerGateIndex());
             }
@@ -76,17 +70,14 @@ void NetworkProtocolBase::sendDown(cMessage* message, int interfaceId)
     }
 }
 
-bool NetworkProtocolBase::isUpperMessage(cMessage* message)
+bool NetworkProtocolBase::isUpperMessage(cMessage *message)
 {
     return message->getArrivalGate()->isName("upperLayerIn");
 }
 
-bool NetworkProtocolBase::isLowerMessage(cMessage* message)
+bool NetworkProtocolBase::isLowerMessage(cMessage *message)
 {
     return message->getArrivalGate()->isName("lowerLayerIn");
 }
-
-
-}
-
+} // namespace inet
 

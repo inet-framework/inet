@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_CIRCLEMOBILITY_H
 #define __INET_CIRCLEMOBILITY_H
 
@@ -24,8 +23,6 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Circle movement model. See NED file for more info.
  *
@@ -62,8 +59,7 @@ class INET_API CircleMobility : public MovingMobilityBase
   public:
     CircleMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_CIRCLEMOBILITY_H
 
-
-#endif

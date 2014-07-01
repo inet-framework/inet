@@ -21,17 +21,15 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Filter that expects a cMessage and outputs its age in seconds
  * (t - msg->getCreationTime()).
  */
 class INET_API MessageAgeFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
-
 
 /**
  * Filter that expects a cMessage and outputs its age from the timestamp field
@@ -39,8 +37,8 @@ class INET_API MessageAgeFilter : public cObjectResultFilter
  */
 class INET_API MessageTSAgeFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
 /**
@@ -48,8 +46,8 @@ class INET_API MessageTSAgeFilter : public cObjectResultFilter
  */
 class INET_API MobilityPosFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
 /**
@@ -57,8 +55,8 @@ class INET_API MobilityPosFilter : public cObjectResultFilter
  */
 class INET_API XCoordFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
 /**
@@ -66,8 +64,8 @@ class INET_API XCoordFilter : public cObjectResultFilter
  */
 class INET_API YCoordFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
 
 /**
@@ -75,12 +73,10 @@ class INET_API YCoordFilter : public cObjectResultFilter
  */
 class INET_API ZCoordFilter : public cObjectResultFilter
 {
-    public:
-        virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
+  public:
+    virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
+} // namespace inet
 
+#endif // ifndef __INET_RESULTFILTERS_H
 
-}
-
-
-#endif

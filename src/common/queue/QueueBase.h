@@ -15,15 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_QUEUEBASE_H
 #define __INET_QUEUEBASE_H
 
 #include "AbstractQueue.h"
 
 namespace inet {
-
-
 /**
  * Queue with constant processing time.
  * Leaves the endService(cMessage *msg) method of AbstractQueue undefined.
@@ -42,9 +39,7 @@ class INET_API QueueBase : public AbstractQueue
     virtual cPacket *arrivalWhenIdle(cPacket *msg);
     virtual simtime_t startService(cPacket *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_QUEUEBASE_H
 

@@ -19,33 +19,31 @@
 #ifndef __INET_SCTPCOMMAND_H
 #define __INET_SCTPCOMMAND_H
 
-
 //
 // SCTP command codes, sent by the application to SCTP. These constants
 // should be set as message kind on a message sent to the SCTP entity.
 //
 // @see SCTPCommand, SCTPOpenCommand, SCTP
 //
-enum SctpCommandCode
-{
-    SCTP_C_ASSOCIATE            = 1,    // active open (must carry SCTPOpenCommand)
-    SCTP_C_OPEN_PASSIVE         = 2,    // passive open (must carry SCTPOpenCommand)
-    SCTP_C_SEND                 = 3,    // send data (set on data packet)
-    SCTP_C_CLOSE                = 5,    // shutdown the association
-    SCTP_C_ABORT                = 6,    // abort connection
-    SCTP_C_STATUS               = 7,    // request status info (SCTP_I_STATUS) from SCTP
-    SCTP_C_RECEIVE              = 8,    // data receive request
-    SCTP_C_SEND_ORDERED         = 9,    // send data ordered
-    SCTP_C_SEND_UNORDERED       = 10,   // send data unordered
-    SCTP_C_PRIMARY              = 11,   // set primary path
-    SCTP_C_QUEUE_BYTES_LIMIT    = 12,   // set send queue limit (in bytes)
-    SCTP_C_QUEUE_MSGS_LIMIT     = 13,   // set send queue limit (in messages)
-    SCTP_C_SHUTDOWN             = 14,
-    SCTP_C_NO_OUTSTANDING       = 15,
-    SCTP_C_STREAM_RESET         = 16,   // send StreamResetChunk
-    SCTP_C_NAT_INFO             = 18,
-    SCTP_C_SEND_ASCONF          = 19,
-    SCTP_C_SET_STREAM_PRIO      = 20
+enum SctpCommandCode {
+    SCTP_C_ASSOCIATE = 1,    // active open (must carry SCTPOpenCommand)
+    SCTP_C_OPEN_PASSIVE = 2,    // passive open (must carry SCTPOpenCommand)
+    SCTP_C_SEND = 3,    // send data (set on data packet)
+    SCTP_C_CLOSE = 5,    // shutdown the association
+    SCTP_C_ABORT = 6,    // abort connection
+    SCTP_C_STATUS = 7,    // request status info (SCTP_I_STATUS) from SCTP
+    SCTP_C_RECEIVE = 8,    // data receive request
+    SCTP_C_SEND_ORDERED = 9,    // send data ordered
+    SCTP_C_SEND_UNORDERED = 10,    // send data unordered
+    SCTP_C_PRIMARY = 11,    // set primary path
+    SCTP_C_QUEUE_BYTES_LIMIT = 12,    // set send queue limit (in bytes)
+    SCTP_C_QUEUE_MSGS_LIMIT = 13,    // set send queue limit (in messages)
+    SCTP_C_SHUTDOWN = 14,
+    SCTP_C_NO_OUTSTANDING = 15,
+    SCTP_C_STREAM_RESET = 16,    // send StreamResetChunk
+    SCTP_C_NAT_INFO = 18,
+    SCTP_C_SEND_ASCONF = 19,
+    SCTP_C_SET_STREAM_PRIO = 20
 };
 
 //
@@ -54,36 +52,33 @@ enum SctpCommandCode
 //
 // @see SCTPCommand, SCTPStatusInfo, SCTP
 //
-enum SctpStatusInd
-{
-    SCTP_I_DATA                 = 1,    // data packet (set on data packet)
-    SCTP_I_DATA_NOTIFICATION    = 2,    // data arrived notification
-    SCTP_I_ESTABLISHED          = 3,    // connection established
-    SCTP_I_PEER_CLOSED          = 4,    // FIN received from remote SCTP
-    SCTP_I_CLOSED               = 5,    // connection closed normally (via FIN exchange)
-    SCTP_I_CONNECTION_REFUSED   = 6,    // connection refused
-    SCTP_I_CONNECTION_RESET     = 7,    // connection reset
-    SCTP_I_TIMED_OUT            = 8,    // conn-estab timer went off, or max retransm. count reached
-    SCTP_I_STATUS               = 9,    // status info (will carry SCTPStatusInfo)
-    SCTP_I_ABORT                = 10,   // association was aborted by the peer
-    SCTP_I_CONN_LOST            = 11,   // association had too many retransmissions FIXME
-    SCTP_I_SEND_MSG             = 12,
-    SCTP_I_SHUTDOWN_RECEIVED    = 13,
-    SCTP_I_SENDQUEUE_FULL       = 14,
-    SCTP_I_SENDQUEUE_ABATED     = 15,
-    SCTP_I_ABANDONED            = 16,
+enum SctpStatusInd {
+    SCTP_I_DATA = 1,    // data packet (set on data packet)
+    SCTP_I_DATA_NOTIFICATION = 2,    // data arrived notification
+    SCTP_I_ESTABLISHED = 3,    // connection established
+    SCTP_I_PEER_CLOSED = 4,    // FIN received from remote SCTP
+    SCTP_I_CLOSED = 5,    // connection closed normally (via FIN exchange)
+    SCTP_I_CONNECTION_REFUSED = 6,    // connection refused
+    SCTP_I_CONNECTION_RESET = 7,    // connection reset
+    SCTP_I_TIMED_OUT = 8,    // conn-estab timer went off, or max retransm. count reached
+    SCTP_I_STATUS = 9,    // status info (will carry SCTPStatusInfo)
+    SCTP_I_ABORT = 10,    // association was aborted by the peer
+    SCTP_I_CONN_LOST = 11,    // association had too many retransmissions FIXME
+    SCTP_I_SEND_MSG = 12,
+    SCTP_I_SHUTDOWN_RECEIVED = 13,
+    SCTP_I_SENDQUEUE_FULL = 14,
+    SCTP_I_SENDQUEUE_ABATED = 15,
+    SCTP_I_ABANDONED = 16,
     SCTP_I_SEND_STREAMS_RESETTED = 17,
     SCTP_I_RCV_STREAMS_RESETTED = 18,
     SCTP_I_RESET_REQUEST_FAILED = 19,
-    SCTP_I_ADDRESS_ADDED = 20 // used for AddIP and multihomed NAT
+    SCTP_I_ADDRESS_ADDED = 20    // used for AddIP and multihomed NAT
 };
 
-enum SCTPFlags
-{
+enum SCTPFlags {
     COMPLETE_MESG_UNORDERED = 1,
-    COMPLETE_MESG_ORDERED   = 0
+    COMPLETE_MESG_ORDERED = 0
 };
 
-#endif
-
+#endif // ifndef __INET_SCTPCOMMAND_H
 

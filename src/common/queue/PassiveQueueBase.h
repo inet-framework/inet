@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_PASSIVEQUEUEBASE_H
 #define __INET_PASSIVEQUEUEBASE_H
 
@@ -26,8 +25,6 @@
 #include "IPassiveQueue.h"
 
 namespace inet {
-
-
 /**
  * Abstract base class for passive queues. Implements IPassiveQueue.
  * Enqueue/dequeue have to be implemented in virtual functions in
@@ -37,7 +34,7 @@ namespace inet {
 class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
 {
   protected:
-    std::list<IPassiveQueueListener*> listeners;
+    std::list<IPassiveQueueListener *> listeners;
 
     // state
     int packetRequested;
@@ -80,7 +77,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      */
     virtual void sendOut(cMessage *msg) = 0;
 
-   public:
+  public:
     /**
      * The queue should send a packet whenever this method is invoked.
      * If the queue is currently empty, it should send a packet when
@@ -113,8 +110,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
      */
     virtual void removeListener(IPassiveQueueListener *listener);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PASSIVEQUEUEBASE_H
 
-
-#endif

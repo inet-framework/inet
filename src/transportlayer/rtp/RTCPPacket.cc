@@ -4,10 +4,7 @@
 #include "RTCPPacket.h"
 
 namespace inet {
-
-
 Register_Class(RTCPPacket);
-
 
 Register_Class(RTCPCompoundPacket);
 
@@ -20,11 +17,10 @@ void RTCPCompoundPacket::addRTCPPacket(RTCPPacket *rtcpPacket)
     addByteLength(rtcpPacket->getByteLength());
 };
 
-
 Register_Class(RTCPReceiverReportPacket);
 
 RTCPReceiverReportPacket::RTCPReceiverReportPacket(const char *name, int kind)
-  : RTCPReceiverReportPacket_Base(name, kind)
+    : RTCPReceiverReportPacket_Base(name, kind)
 {
     receptionReports_var.setName("ReceptionReports");
     // an empty rtcp receiver report packet is 4 bytes
@@ -40,21 +36,19 @@ void RTCPReceiverReportPacket::addReceptionReport(ReceptionReport *report)
     addByteLength(24);
 };
 
-
 Register_Class(RTCPSenderReportPacket);
 
 RTCPSenderReportPacket::RTCPSenderReportPacket(const char *name, int kind)
-  : RTCPSenderReportPacket_Base(name, kind)
+    : RTCPSenderReportPacket_Base(name, kind)
 {
     // a sender report is 20 bytes long
     addByteLength(20);
 };
 
-
 Register_Class(RTCPSDESPacket);
 
 RTCPSDESPacket::RTCPSDESPacket(const char *name, int kind)
-  : RTCPSDESPacket_Base(name, kind)
+    : RTCPSDESPacket_Base(name, kind)
 {
     sdesChunks_var.setName("SDESChunks");
     // no addByteLength() needed, sdes chunks
@@ -71,17 +65,13 @@ void RTCPSDESPacket::addSDESChunk(SDESChunk *sdesChunk)
     addByteLength(sdesChunk->getLength());
 };
 
-
 Register_Class(RTCPByePacket);
 
 RTCPByePacket::RTCPByePacket(const char *name, int kind)
-  : RTCPByePacket_Base(name, kind)
+    : RTCPByePacket_Base(name, kind)
 {
     // space for the ssrc identifier
     addByteLength(4);
 };
-
-
-}
-
+} // namespace inet
 

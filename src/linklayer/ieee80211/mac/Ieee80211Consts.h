@@ -19,11 +19,11 @@
 #define __INET_IEEE80211CONSTS_H
 
 // frame lengths in bits
-const unsigned int LENGTH_RTS = 160; //bits
-const unsigned int LENGTH_CTS = 112; //bits
-const unsigned int LENGTH_ACK = 112; //bits
-const unsigned int LENGTH_MGMT = 28 * 8; //bits
-const unsigned int LENGTH_DATAHDR = 34 * 8; //bits
+const unsigned int LENGTH_RTS = 160;    //bits
+const unsigned int LENGTH_CTS = 112;    //bits
+const unsigned int LENGTH_ACK = 112;    //bits
+const unsigned int LENGTH_MGMT = 28 * 8;    //bits
+const unsigned int LENGTH_DATAHDR = 34 * 8;    //bits
 
 const unsigned int SNAP_HEADER_BYTES = 8;
 
@@ -33,7 +33,7 @@ const unsigned int SNAP_HEADER_BYTES = 8;
 const_simtime_t ST = 20E-6;
 const_simtime_t SIFS = 10E-6;
 const_simtime_t DIFS = 2 * ST + SIFS;
-const_simtime_t MAX_PROPAGATION_DELAY = 2E-6;  // 300 meters at the speed of light
+const_simtime_t MAX_PROPAGATION_DELAY = 2E-6;    // 300 meters at the speed of light
 
 const int RETRY_LIMIT = 7;
 
@@ -49,22 +49,22 @@ const double BANDWIDTH = 2E+6;
 
 /** @brief Center frequencies for 802.11b */
 const double CENTER_FREQUENCIES[] = {
--1, //channel 0 does not exist
-        2.412e9, // 1
-        2.417e9, // 2
-        2.422e9, // 3
-        2.427e9, // 4
-        2.432e9, // 5
-        2.437e9, // 6
-        2.442e9, // 7
-        2.447e9, // 8
-        2.452e9, // 9
-        2.457e9, // 10
-        2.462e9, // 11
-        2.467e9, // 12
-        2.472e9, // 13
-        2.484e9, // 14
-        };
+    -1,    //channel 0 does not exist
+    2.412e9,    // 1
+    2.417e9,    // 2
+    2.422e9,    // 3
+    2.427e9,    // 4
+    2.432e9,    // 5
+    2.437e9,    // 6
+    2.442e9,    // 7
+    2.447e9,    // 8
+    2.452e9,    // 9
+    2.457e9,    // 10
+    2.462e9,    // 11
+    2.467e9,    // 12
+    2.472e9,    // 13
+    2.484e9,    // 14
+};
 
 /** @brief duration of the PHY header
  *
@@ -78,5 +78,5 @@ const double RED_PHY_HEADER_DURATION = 0.000020;
 /* @brief Length of PLCP header and preamble */
 const double PHY_HEADER_LENGTH = 192;
 
-#endif
+#endif // ifndef __INET_IEEE80211CONSTS_H
 

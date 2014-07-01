@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * A cDatarateChannel extended with throughput calculation. Values
  * get displayed on the link, using the connection's "t=" display
@@ -49,15 +48,15 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
 {
   protected:
     // configuration
-    const char *fmt;      // display format
-    unsigned int batchSize; // number of packets in a batch
-    simtime_t maxInterval; // max length of measurement interval (measurement ends
-                        // if either batchSize or maxInterval is reached, whichever
-                        // is reached first)
+    const char *fmt;    // display format
+    unsigned int batchSize;    // number of packets in a batch
+    simtime_t maxInterval;    // max length of measurement interval (measurement ends
+                              // if either batchSize or maxInterval is reached, whichever
+                              // is reached first)
 
     // global statistics
     long numPackets;
-    double numBits; // double to avoid overflow
+    double numBits;    // double to avoid overflow
 
     // current measurement interval
     simtime_t intvlStartTime;
@@ -110,8 +109,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
      */
     virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_THRUPUTMETERINGCHANNEL_H
 
-
-#endif

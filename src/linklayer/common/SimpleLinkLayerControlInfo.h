@@ -23,7 +23,6 @@
 #include "SimpleLinkLayerControlInfo_m.h"
 
 namespace inet {
-
 /**
  * Represents a SimpleLinkLayer control info. More info in the SimpleLinkLayerControlInfo.msg file
  * (and the documentation generated from it).
@@ -33,19 +32,18 @@ class INET_API SimpleLinkLayerControlInfo : public SimpleLinkLayerControlInfo_Ba
   public:
     SimpleLinkLayerControlInfo() : SimpleLinkLayerControlInfo_Base() {}
     SimpleLinkLayerControlInfo(const SimpleLinkLayerControlInfo& other) : SimpleLinkLayerControlInfo_Base(other) {}
-    SimpleLinkLayerControlInfo& operator=(const SimpleLinkLayerControlInfo& other) {SimpleLinkLayerControlInfo_Base::operator=(other); return *this;}
+    SimpleLinkLayerControlInfo& operator=(const SimpleLinkLayerControlInfo& other) { SimpleLinkLayerControlInfo_Base::operator=(other); return *this; }
 
-    virtual SimpleLinkLayerControlInfo *dup() const {return new SimpleLinkLayerControlInfo(*this);}
+    virtual SimpleLinkLayerControlInfo *dup() const { return new SimpleLinkLayerControlInfo(*this); }
 
     virtual MACAddress getSourceAddress() const { return getSrc(); }
-    virtual void setSourceAddress(const MACAddress & address) { setSrc(address); }
+    virtual void setSourceAddress(const MACAddress& address) { setSrc(address); }
     virtual MACAddress getDestinationAddress() const { return getDest(); }
-    virtual void setDestinationAddress(const MACAddress & address) { setDest(address); };
+    virtual void setDestinationAddress(const MACAddress& address) { setDest(address); };
     virtual int getInterfaceId() const { return SimpleLinkLayerControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { SimpleLinkLayerControlInfo_Base::setInterfaceId(interfaceId); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SIMPLELINKLAYERCONTROLINFO_H
 
-
-#endif

@@ -21,23 +21,22 @@
 #include "Address.h"
 
 namespace inet {
-
-class INET_API INetworkProtocolControlInfo {
+class INET_API INetworkProtocolControlInfo
+{
   public:
-    virtual ~INetworkProtocolControlInfo() { }
+    virtual ~INetworkProtocolControlInfo() {}
     virtual short getTransportProtocol() const = 0;
     virtual void setTransportProtocol(short Transportprotocol) = 0;
     virtual Address getSourceAddress() const = 0;
-    virtual void setSourceAddress(const Address & address) = 0;
+    virtual void setSourceAddress(const Address& address) = 0;
     virtual Address getDestinationAddress() const = 0;
-    virtual void setDestinationAddress(const Address & address) = 0;
+    virtual void setDestinationAddress(const Address& address) = 0;
     virtual int getInterfaceId() const = 0;
     virtual void setInterfaceId(int interfaceId) = 0;
     virtual short getHopLimit() const = 0;
     virtual void setHopLimit(short hopLimit) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_INETWORKPROTOCOLCONTROLINFO_H
 
-
-#endif

@@ -23,7 +23,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * HostAutoConfigurator automatically assigns IP addresses and sets up routing table.
  *
@@ -31,19 +30,17 @@ namespace inet {
  */
 class INET_API HostAutoConfigurator : public cSimpleModule
 {
-    public:
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
+  public:
+    virtual void initialize(int stage);
+    virtual void finish();
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-        virtual void handleMessage(cMessage *msg);
+    virtual void handleMessage(cMessage *msg);
 
-    protected:
-        void setupNetworkLayer();
+  protected:
+    void setupNetworkLayer();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_HOSTAUTOCONFIGURATOR_H
 

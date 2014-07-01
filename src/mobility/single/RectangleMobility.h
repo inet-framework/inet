@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_RECTANGLEMOBILITY_H
 #define __INET_RECTANGLEMOBILITY_H
 
@@ -24,8 +23,6 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Rectangle movement model. See NED file for more info.
  *
@@ -36,10 +33,10 @@ class INET_API RectangleMobility : public MovingMobilityBase
 {
   protected:
     // configuration
-    double speed;          ///< speed of the host
+    double speed;    ///< speed of the host
 
     // state
-    double d;  ///< distance from (x1,y1), measured clockwise on the perimeter
+    double d;    ///< distance from (x1,y1), measured clockwise on the perimeter
     double corner1, corner2, corner3, corner4;
 
   protected:
@@ -60,8 +57,7 @@ class INET_API RectangleMobility : public MovingMobilityBase
   public:
     RectangleMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RECTANGLEMOBILITY_H
 
-
-#endif

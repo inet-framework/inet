@@ -4,17 +4,16 @@
     begin                : Tue Oct 23 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_SDES_H
 #define __INET_SDES_H
@@ -22,7 +21,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * The class SDESItem is used for storing a source description item
  * (type of description, description string) for an RTP end system.
@@ -35,8 +33,7 @@ class INET_API SDESItem : public cObject
      * as defined in the RFC. In this implementation only SDES_UNDEF
      * and SDES_CNAME are usable.
      */
-    enum SDES_ITEM_TYPE
-    {
+    enum SDES_ITEM_TYPE {
         SDES_UNDEF = 0,
         SDES_CNAME = 1,
         SDES_NAME = 2,
@@ -106,7 +103,7 @@ class INET_API SDESItem : public cObject
 
   private:
     void copy(const SDESItem& other);
-    void clean() {}     //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
+    void clean() {}    //FIXME The `_content' sometimes allocated, sometimes not allocated pointer.
 
   protected:
     /**
@@ -124,7 +121,6 @@ class INET_API SDESItem : public cObject
      */
     const char *_content;
 };
-
 
 /**
  * The class SDESChunk is used for storing SDESItem objects
@@ -203,8 +199,7 @@ class INET_API SDESChunk : public cArray
      */
     int _length;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SDES_H
 
-
-#endif

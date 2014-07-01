@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "IPvXTrafGen.h"
 
 #include "AddressResolver.h"
@@ -26,7 +25,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Define_Module(IPvXTrafSink);
 
 simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
@@ -35,13 +33,11 @@ void IPvXTrafSink::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numReceived = 0;
         WATCH(numReceived);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         int protocol = par("protocol");
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(protocol);
@@ -53,16 +49,14 @@ void IPvXTrafSink::initialize(int stage)
 
 void IPvXTrafSink::handleMessage(cMessage *msg)
 {
-    if (!isOperational)
-    {
+    if (!isOperational) {
         EV_ERROR << "Module is down, received " << msg->getName() << " message dropped\n";
         delete msg;
         return;
     }
     processPacket(check_and_cast<cPacket *>(msg));
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[32];
         sprintf(buf, "rcvd: %d pks", numReceived);
         getDisplayString().setTagArg("t", 0, buf);
@@ -72,10 +66,14 @@ void IPvXTrafSink::handleMessage(cMessage *msg)
 bool IPvXTrafSink::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation)) isOperational = true;
-    else if (dynamic_cast<NodeShutdownOperation *>(operation)) isOperational = false;
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) isOperational = false;
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    if (dynamic_cast<NodeStartOperation *>(operation))
+        isOperational = true;
+    else if (dynamic_cast<NodeShutdownOperation *>(operation))
+        isOperational = false;
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+        isOperational = false;
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -86,8 +84,7 @@ void IPvXTrafSink::printPacket(cPacket *msg)
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
 
-    if (ctrl != NULL)
-    {
+    if (ctrl != NULL) {
         src = ctrl->getSourceAddress();
         dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();
@@ -108,9 +105,5 @@ void IPvXTrafSink::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
-
-
-
-}
-
+} // namespace inet
 

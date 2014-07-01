@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "ThruputMeter.h"
 
 namespace inet {
-
 Define_Module(ThruputMeter);
-
 
 void ThruputMeter::initialize()
 {
@@ -58,7 +55,7 @@ void ThruputMeter::updateStats(simtime_t now, unsigned long bits)
     numBits += bits;
 
     // packet should be counted to new interval
-    if (intvlNumPackets >= batchSize || now-intvlStartTime >= maxInterval)
+    if (intvlNumPackets >= batchSize || now - intvlStartTime >= maxInterval)
         beginNewInterval(now);
 
     intvlNumPackets++;
@@ -71,14 +68,14 @@ void ThruputMeter::beginNewInterval(simtime_t now)
     simtime_t duration = now - intvlStartTime;
 
     // record measurements
-    double bitpersec = intvlNumBits/duration.dbl();
-    double pkpersec = intvlNumPackets/duration.dbl();
+    double bitpersec = intvlNumBits / duration.dbl();
+    double pkpersec = intvlNumPackets / duration.dbl();
 
     bitpersecVector.recordWithTimestamp(intvlStartTime, bitpersec);
     pkpersecVector.recordWithTimestamp(intvlStartTime, pkpersec);
 
     // restart counters
-    intvlStartTime = now;  // FIXME this should be *beginning* of tx of this packet, not end!
+    intvlStartTime = now;    // FIXME this should be *beginning* of tx of this packet, not end!
     intvlNumPackets = intvlNumBits = 0;
 }
 
@@ -90,13 +87,8 @@ void ThruputMeter::finish()
     recordScalar("total packets", numPackets);
     recordScalar("total bits", numBits);
 
-    recordScalar("avg throughput (bit/s)", numBits/duration.dbl());
-    recordScalar("avg packets/s", numPackets/duration.dbl());
+    recordScalar("avg throughput (bit/s)", numBits / duration.dbl());
+    recordScalar("avg packets/s", numPackets / duration.dbl());
 }
-
-
-
-
-}
-
+} // namespace inet
 

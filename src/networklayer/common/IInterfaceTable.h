@@ -21,17 +21,16 @@
 #include "INETDefs.h"
 
 #include "Address.h"
-#include "InterfaceEntry.h"  // not strictly required, but clients will need it anyway
+#include "InterfaceEntry.h"    // not strictly required, but clients will need it anyway
 
 namespace inet {
-
 struct MulticastGroup
-    {
-        Address multicastAddr;
-        int interfaceId;
+{
+    Address multicastAddr;
+    int interfaceId;
 
-        MulticastGroup(Address multicastAddr, int interfaceId) : multicastAddr(multicastAddr), interfaceId(interfaceId) {}
-    };
+    MulticastGroup(Address multicastAddr, int interfaceId) : multicastAddr(multicastAddr), interfaceId(interfaceId) {}
+};
 
 typedef std::vector<MulticastGroup> MulticastGroupList;
 
@@ -45,7 +44,7 @@ typedef std::vector<MulticastGroup> MulticastGroupList;
  */
 class INET_API IInterfaceTable
 {
-    friend class InterfaceEntry;  // so that it can call interfaceChanged()
+    friend class InterfaceEntry;    // so that it can call interfaceChanged()
 
   protected:
     // called from InterfaceEntry
@@ -171,9 +170,7 @@ class INET_API IInterfaceTable
      */
     virtual MulticastGroupList collectMulticastGroups() = 0;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IINTERFACETABLE_H
 

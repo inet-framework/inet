@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include <vector>
 
 #include "LinkStateRequestHandler.h"
@@ -24,14 +23,12 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router* containingRouter) :
+OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router *containingRouter) :
     OSPF::IMessageHandler(containingRouter)
 {
 }
 
-void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Interface *intf, OSPF::Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
@@ -41,11 +38,11 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
         (neighborState == OSPF::Neighbor::LOADING_STATE) ||
         (neighborState == OSPF::Neighbor::FULL_STATE))
     {
-        OSPFLinkStateRequestPacket* lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket*> (packet);
+        OSPFLinkStateRequestPacket *lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket *>(packet);
 
         unsigned long requestCount = lsRequestPacket->getRequestsArraySize();
         bool error = false;
-        std::vector<OSPFLSA*> lsas;
+        std::vector<OSPFLSA *> lsas;
 
         EV_INFO << "  Processing packet contents:\n";
 
@@ -54,18 +51,19 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
             OSPF::LSAKeyType lsaKey;
 
             EV_INFO << "    LSARequest: type=" << request.lsType
-               << ", LSID=" << request.linkStateID
-               << ", advertisingRouter=" << request.advertisingRouter
-               << "\n";
+                    << ", LSID=" << request.linkStateID
+                    << ", advertisingRouter=" << request.advertisingRouter
+                    << "\n";
 
             lsaKey.linkStateID = request.linkStateID;
             lsaKey.advertisingRouter = request.advertisingRouter;
 
-            OSPFLSA* lsaInDatabase = router->findLSA(static_cast<LSAType> (request.lsType), lsaKey, intf->getArea()->getAreaID());
+            OSPFLSA *lsaInDatabase = router->findLSA(static_cast<LSAType>(request.lsType), lsaKey, intf->getArea()->getAreaID());
 
             if (lsaInDatabase != NULL) {
                 lsas.push_back(lsaInDatabase);
-            } else {
+            }
+            else {
                 error = true;
                 neighbor->processEvent(OSPF::Neighbor::BAD_LINK_STATE_REQUEST);
                 break;
@@ -75,10 +73,10 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
         if (!error) {
             int updatesCount = lsas.size();
             int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-            OSPF::MessageHandler* messageHandler = router->getMessageHandler();
+            OSPF::MessageHandler *messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
-                OSPFLinkStateUpdatePacket* updatePacket = intf->createUpdatePacket(lsas[j]);
+                OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != NULL) {
                     if (intf->getType() == OSPF::Interface::BROADCAST) {
                         if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
@@ -86,25 +84,24 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
                             (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
                         {
                             messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
-                        } else {
+                        }
+                        else {
                             messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_DESIGNATED_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         }
-                    } else {
+                    }
+                    else {
                         if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
                             messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
-                        } else {
+                        }
+                        else {
                             messageHandler->sendPacket(updatePacket, neighbor->getAddress(), intf->getIfIndex(), ttl);
                         }
                     }
-
                 }
             }
             // These update packets should not be placed on retransmission lists
         }
     }
 }
-
-
-}
-
+} // namespace inet
 

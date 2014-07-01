@@ -15,14 +15,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_HTTPBROWSERDIRECT_H
 #define __INET_HTTPBROWSERDIRECT_H
 
 #include "HttpBrowserBase.h"
 
 namespace inet {
-
 /**
  * A simulated browser module for OMNeT++ simulations.
  *
@@ -36,21 +34,18 @@ namespace inet {
  */
 class INET_API HttpBrowserDirect : public HttpBrowserBase
 {
-    protected:
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg);
-        int numInitStages() const { return NUM_INIT_STAGES; }
+  protected:
+    virtual void initialize(int stage);
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
+    int numInitStages() const { return NUM_INIT_STAGES; }
 
-        virtual void sendRequestToServer(BrowseEvent be);
-        virtual void sendRequestToServer(HttpRequestMessage *request);
-        virtual void sendRequestToRandomServer();
-        virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
+    virtual void sendRequestToServer(BrowseEvent be);
+    virtual void sendRequestToServer(HttpRequestMessage *request);
+    virtual void sendRequestToRandomServer();
+    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_HTTPBROWSERDIRECT_H
 

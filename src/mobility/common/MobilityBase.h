@@ -19,7 +19,6 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
@@ -30,7 +29,6 @@
 #include "IMobility.h"
 
 namespace inet {
-
 /**
  * @brief Abstract base class for mobility modules.
  *
@@ -59,16 +57,16 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
      * @see handleIfOutside()
      */
     enum BorderPolicy {
-        REFLECT,       ///< reflect off the wall
-        WRAP,          ///< reappear at the opposite edge (torus)
-        PLACERANDOMLY, ///< placed at a randomly chosen position within the constraint area
-        RAISEERROR     ///< stop the simulation with error
+        REFLECT,    ///< reflect off the wall
+        WRAP,    ///< reappear at the opposite edge (torus)
+        PLACERANDOMLY,    ///< placed at a randomly chosen position within the constraint area
+        RAISEERROR    ///< stop the simulation with error
     };
 
   protected:
 
     /** @brief Pointer to visual representation module, to speed up repeated access. */
-    cModule* visualRepresentation;
+    cModule *visualRepresentation;
 
     /** @brief 3 dimensional position and size of the constraint area (in meters). */
     Coord constraintAreaMin, constraintAreaMax;
@@ -163,8 +161,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Returns the current angular speed at the current simulation time. */
     virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::IDENTITY; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MOBILITYBASE_H
 
-
-#endif

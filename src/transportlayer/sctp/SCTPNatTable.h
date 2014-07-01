@@ -25,8 +25,6 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
-
-
 class INET_API SCTPNatEntry : public cPolymorphic
 {
   protected:
@@ -44,33 +42,32 @@ class INET_API SCTPNatEntry : public cPolymorphic
     SCTPNatEntry();
     ~SCTPNatEntry();
 
-    cMessage* NatTimer;
-    void setLocalAddress(Address addr) {localAddress = addr;};
-    void setGlobalAddress(Address addr) {globalAddress = addr;};
-    void setNattedAddress(Address addr) {nattedAddress = addr;};
-    void setLocalPort(uint16 port) {localPort = port;};
-    void setGlobalPort(uint16 port) {globalPort = port;};
-    void setNattedPort(uint16 port) {nattedPort = port;};
-    void setGlobalVTag(uint32 tag) {globalVtag = tag;};
-    void setLocalVTag(uint32 tag) {localVtag = tag;};
-    void setEntryNumber(uint32 number) {entryNumber = number;};
+    cMessage *NatTimer;
+    void setLocalAddress(Address addr) { localAddress = addr; };
+    void setGlobalAddress(Address addr) { globalAddress = addr; };
+    void setNattedAddress(Address addr) { nattedAddress = addr; };
+    void setLocalPort(uint16 port) { localPort = port; };
+    void setGlobalPort(uint16 port) { globalPort = port; };
+    void setNattedPort(uint16 port) { nattedPort = port; };
+    void setGlobalVTag(uint32 tag) { globalVtag = tag; };
+    void setLocalVTag(uint32 tag) { localVtag = tag; };
+    void setEntryNumber(uint32 number) { entryNumber = number; };
 
-    Address getLocalAddress() {return localAddress;};
-    Address getGlobalAddress() {return globalAddress;};
-    Address getNattedAddress() {return nattedAddress;};
-    uint16 getLocalPort() {return localPort;};
-    uint16 getGlobalPort() {return globalPort;};
-    uint16 getNattedPort() {return nattedPort;};
-    uint32 getGlobalVTag() {return globalVtag;};
-    uint32 getLocalVTag() {return localVtag;};
+    Address getLocalAddress() { return localAddress; };
+    Address getGlobalAddress() { return globalAddress; };
+    Address getNattedAddress() { return nattedAddress; };
+    uint16 getLocalPort() { return localPort; };
+    uint16 getGlobalPort() { return globalPort; };
+    uint16 getNattedPort() { return nattedPort; };
+    uint32 getGlobalVTag() { return globalVtag; };
+    uint32 getLocalVTag() { return localVtag; };
 };
-
 
 class INET_API SCTPNatTable : public cSimpleModule
 {
   public:
 
-    typedef std::vector<SCTPNatEntry*> SCTPNatEntryTable;
+    typedef std::vector<SCTPNatEntry *> SCTPNatEntryTable;
 
     SCTPNatEntryTable natEntries;
 
@@ -82,24 +79,23 @@ class INET_API SCTPNatTable : public cSimpleModule
 
     //void addNatEntry(SCTPNatEntry* entry);
 
-    SCTPNatEntry* findNatEntry(Address srcAddr, uint16 srcPrt, Address destAddr, uint16 destPrt, uint32 globalVtag);
+    SCTPNatEntry *findNatEntry(Address srcAddr, uint16 srcPrt, Address destAddr, uint16 destPrt, uint32 globalVtag);
 
-    SCTPNatEntry* getEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt, uint32 localVtag);
+    SCTPNatEntry *getEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt, uint32 localVtag);
 
-    SCTPNatEntry* getSpecialEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt);
+    SCTPNatEntry *getSpecialEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt);
 
-    SCTPNatEntry* getLocalInitEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt);
+    SCTPNatEntry *getLocalInitEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt);
 
-    SCTPNatEntry* getLocalEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag);
+    SCTPNatEntry *getLocalEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag);
 
-    void removeEntry(SCTPNatEntry* entry);
+    void removeEntry(SCTPNatEntry *entry);
 
     void printNatTable();
 
-    static uint32 getNextEntryNumber() {return nextEntryNumber++;};
+    static uint32 getNextEntryNumber() { return nextEntryNumber++; };
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPNATTABLE_H
 
-
-#endif

@@ -25,15 +25,13 @@
 #ifdef _WIN32
 # include <io.h>
 # include <stdio.h>
-#else
+#else // ifdef _WIN32
 # include <unistd.h>
-#endif
+#endif // ifdef _WIN32
 
-#include "HttpMessages_m.h"  // for HttpContentType
+#include "HttpMessages_m.h"    // for HttpContentType
 
 namespace inet {
-
-
 std::string trimLeft(std::string str);
 std::string trimRight(std::string str);
 std::string trimLeft(std::string str, std::string delim);
@@ -47,12 +45,11 @@ HttpContentType getResourceCategory(std::vector<std::string> res);
 HttpContentType getResourceCategory(std::string resourceExt);
 std::string htmlErrFromCode(int code);
 
-double safeatof(const char* strval, double defaultVal = 0.0);
-int safeatoi(const char* strval, int defaultVal = 0);
-int safeatobool(const char* strval, bool defaultVal = false);
+double safeatof(const char *strval, double defaultVal = 0.0);
+int safeatoi(const char *strval, int defaultVal = 0);
+int safeatobool(const char *strval, bool defaultVal = false);
 std::vector<std::string> splitFile(std::string fileName);
+} // namespace inet
 
-}
+#endif // ifndef __INET_HTTPUTILS_H
 
-
-#endif

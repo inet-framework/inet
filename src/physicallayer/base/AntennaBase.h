@@ -21,29 +21,24 @@
 #include "IAntenna.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API AntennaBase : public IAntenna, public cModule
 {
-    protected:
-        IMobility *mobility;
+  protected:
+    IMobility *mobility;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        AntennaBase() :
-            mobility(NULL)
-        {}
+  public:
+    AntennaBase() :
+        mobility(NULL)
+    {}
 
-        virtual IMobility *getMobility() const { return mobility; }
+    virtual IMobility *getMobility() const { return mobility; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ANTENNABASE_H
 
-}
-
-
-#endif

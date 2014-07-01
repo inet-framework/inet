@@ -19,7 +19,6 @@
 #include "ThresholdDropper.h"
 
 namespace inet {
-
 Define_Module(ThresholdDropper);
 
 void ThresholdDropper::initialize()
@@ -38,8 +37,5 @@ bool ThresholdDropper::shouldDrop(cPacket *packet)
         return true;
     return false;
 }
-
-
-}
-
+} // namespace inet
 

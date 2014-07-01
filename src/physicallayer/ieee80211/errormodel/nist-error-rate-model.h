@@ -17,8 +17,8 @@
  *
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
-#ifndef __INET_NIST-ERROR-RATE-MODEL_H
-#define __INET_NIST-ERROR-RATE-MODEL_H
+#ifndef __INET_NIST - ERROR - RATE - MODEL_H
+#define __INET_NIST    -ERROR - RATE - MODEL_H
 
 //#include <stdint.h>
 #include "WifiMode.h"
@@ -26,10 +26,7 @@
 #include "dsss-error-rate-model.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * \ingroup wifi
  *
@@ -40,31 +37,29 @@ namespace physicallayer
  */
 class NistErrorRateModel : public IErrorModel
 {
-public:
+  public:
 
-  NistErrorRateModel();
-  virtual ~NistErrorRateModel();
-  virtual double GetChunkSuccessRate (ModulationType mode, double snr, uint32_t nbits) const;
+    NistErrorRateModel();
+    virtual ~NistErrorRateModel();
+    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
 
-private:
-  double CalculatePe (double p, uint32_t bValue) const;
-  double GetBpskBer (double snr) const;
-  double GetQpskBer (double snr) const;
-  double Get16QamBer (double snr) const;
-  double Get64QamBer (double snr) const;
-  double GetFecBpskBer (double snr, double nbits,
-                        uint32_t bValue) const;
-  double GetFecQpskBer (double snr, double nbits,
-                        uint32_t bValue) const;
-  double GetFec16QamBer (double snr, uint32_t nbits,
-                         uint32_t bValue) const;
-  double GetFec64QamBer (double snr, uint32_t nbits,
-                         uint32_t bValue) const;
+  private:
+    double CalculatePe(double p, uint32_t bValue) const;
+    double GetBpskBer(double snr) const;
+    double GetQpskBer(double snr) const;
+    double Get16QamBer(double snr) const;
+    double Get64QamBer(double snr) const;
+    double GetFecBpskBer(double snr, double nbits,
+            uint32_t bValue) const;
+    double GetFecQpskBer(double snr, double nbits,
+            uint32_t bValue) const;
+    double GetFec16QamBer(double snr, uint32_t nbits,
+            uint32_t bValue) const;
+    double GetFec64QamBer(double snr, uint32_t nbits,
+            uint32_t bValue) const;
 };
-
-}
-
-}
-
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* NIST_ERROR_RATE_MODEL_H */
+

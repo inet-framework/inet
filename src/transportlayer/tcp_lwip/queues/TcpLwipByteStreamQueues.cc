@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TcpLwipByteStreamQueues.h"
 
 #include "ByteArrayMessage.h"
@@ -26,12 +25,9 @@
 #include "TCPSerializer.h"
 
 namespace inet {
-
-
 Register_Class(TcpLwipByteStreamSendQueue);
 
 Register_Class(TcpLwipByteStreamReceiveQueue);
-
 
 TcpLwipByteStreamSendQueue::TcpLwipByteStreamSendQueue()
 {
@@ -60,8 +56,7 @@ void TcpLwipByteStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-unsigned int TcpLwipByteStreamSendQueue::getBytesForTcpLayer(
-        void* bufferP, unsigned int bufferLengthP) const
+unsigned int TcpLwipByteStreamSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -78,8 +73,7 @@ unsigned long TcpLwipByteStreamSendQueue::getBytesAvailable() const
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment* TcpLwipByteStreamSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, unsigned int tcpLengthP)
+TCPSegment *TcpLwipByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -92,9 +86,9 @@ TCPSegment* TcpLwipByteStreamSendQueue::createSegmentWithBytes(
 
     sprintf(msgname, "%.10s%s%s%s(l=%lu,%u bytes)",
             "tcpseg",
-            tcpseg->getSynBit() ? " SYN":"",
-            tcpseg->getFinBit() ? " FIN":"",
-            (tcpseg->getAckBit() && 0 == numBytes) ? " ACK":"",
+            tcpseg->getSynBit() ? " SYN" : "",
+            tcpseg->getFinBit() ? " FIN" : "",
+            (tcpseg->getAckBit() && 0 == numBytes) ? " ACK" : "",
             (unsigned long)numBytes,
             tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);
@@ -124,14 +118,13 @@ void TcpLwipByteStreamReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(
-        TCPSegment *tcpsegP, uint32 seqno, const void* bufferP, size_t bufferLengthP)
+void TcpLwipByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqno, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
 }
 
-void TcpLwipByteStreamReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
+void TcpLwipByteStreamReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
 {
     byteArrayBufferM.push(dataP, dataLengthP);
 }
@@ -141,15 +134,14 @@ unsigned long TcpLwipByteStreamReceiveQueue::getExtractableBytesUpTo() const
     return byteArrayBufferM.getLength();
 }
 
-cPacket* TcpLwipByteStreamReceiveQueue::extractBytesUpTo()
+cPacket *TcpLwipByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     ByteArrayMessage *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
-    if (bytesInQueue)
-    {
+    if (bytesInQueue) {
         dataMsg = new ByteArrayMessage("DATA");
         dataMsg->setKind(TCP_I_DATA);
         unsigned int extractBytes = bytesInQueue;
@@ -181,8 +173,5 @@ void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP
 {
     // nothing to do
 }
-
-
-}
-
+} // namespace inet
 

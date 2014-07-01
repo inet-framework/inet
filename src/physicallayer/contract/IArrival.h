@@ -23,10 +23,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents the space and time coordinates of a transmission
  * arriving at a receiver.
@@ -35,23 +32,21 @@ namespace physicallayer
  */
 class INET_API IArrival : public IPrintableObject
 {
-    public:
-        virtual const simtime_t getStartPropagationTime() const = 0;
-        virtual const simtime_t getEndPropagationTime() const = 0;
+  public:
+    virtual const simtime_t getStartPropagationTime() const = 0;
+    virtual const simtime_t getEndPropagationTime() const = 0;
 
-        virtual const simtime_t getStartTime() const = 0;
-        virtual const simtime_t getEndTime() const = 0;
+    virtual const simtime_t getStartTime() const = 0;
+    virtual const simtime_t getEndTime() const = 0;
 
-        virtual const Coord getStartPosition() const = 0;
-        virtual const Coord getEndPosition() const = 0;
+    virtual const Coord getStartPosition() const = 0;
+    virtual const Coord getEndPosition() const = 0;
 
-        virtual const EulerAngles getStartOrientation() const = 0;
-        virtual const EulerAngles getEndOrientation() const = 0;
+    virtual const EulerAngles getStartOrientation() const = 0;
+    virtual const EulerAngles getEndOrientation() const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IARRIVAL_H
 
-}
-
-
-#endif

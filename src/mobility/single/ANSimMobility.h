@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ANSIMMOBILITY_H
 #define __INET_ANSIMMOBILITY_H
 
@@ -24,8 +23,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Uses the \<position_change> elements of the ANSim tool's trace file.
  * See NED file for more info.
@@ -37,9 +34,9 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
 {
   protected:
     // config
-    int nodeId; ///< we'll have to compare this to the \<node_id> elements
+    int nodeId;    ///< we'll have to compare this to the \<node_id> elements
     // state
-    cXMLElement *nextPositionChange; ///< points to the next \<position_change> element
+    cXMLElement *nextPositionChange;    ///< points to the next \<position_change> element
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -65,8 +62,7 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
   public:
     ANSimMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ANSIMMOBILITY_H
 
-
-#endif

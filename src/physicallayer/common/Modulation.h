@@ -22,17 +22,14 @@
 #include "IModulation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * Ideal modulation which returns zero bit error rate, regardless of the parameters.
  */
 class INET_API NullModulation : public IModulation
 {
   public:
-    virtual const char *getName() {return "no bit errors";}
+    virtual const char *getName() { return "no bit errors"; }
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
 
@@ -42,7 +39,7 @@ class INET_API NullModulation : public IModulation
 class INET_API BPSKModulation : public IModulation
 {
   public:
-    virtual const char *getName() {return "BPSK";}
+    virtual const char *getName() { return "BPSK"; }
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
 
@@ -52,7 +49,7 @@ class INET_API BPSKModulation : public IModulation
 class INET_API QAM16Modulation : public IModulation
 {
   public:
-    virtual const char *getName() {return "16-QAM";}
+    virtual const char *getName() { return "16-QAM"; }
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
 
@@ -62,13 +59,11 @@ class INET_API QAM16Modulation : public IModulation
 class INET_API QAM256Modulation : public IModulation
 {
   public:
-    virtual const char *getName() {return "256-QAM";}
+    virtual const char *getName() { return "256-QAM"; }
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_MODULATION_H
 
-}
-
-
-#endif

@@ -19,20 +19,22 @@
 #include "PositionTable.h"
 
 namespace inet {
-
-std::vector<Address> PositionTable::getAddresses() const {
+std::vector<Address> PositionTable::getAddresses() const
+{
     std::vector<Address> addresses;
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
         addresses.push_back(it->first);
     return addresses;
 }
 
-bool PositionTable::hasPosition(const Address & address) const {
+bool PositionTable::hasPosition(const Address& address) const
+{
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     return it != addressToPositionMap.end();
 }
 
-Coord PositionTable::getPosition(const Address & address) const {
+Coord PositionTable::getPosition(const Address& address) const
+{
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     if (it == addressToPositionMap.end())
         return Coord(NaN, NaN, NaN);
@@ -40,36 +42,42 @@ Coord PositionTable::getPosition(const Address & address) const {
         return it->second.second;
 }
 
-void PositionTable::setPosition(const Address & address, const Coord & coord) {
+void PositionTable::setPosition(const Address& address, const Coord& coord)
+{
     ASSERT(!address.isUnspecified());
     addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
 }
 
-void PositionTable::removePosition(const Address & address) {
+void PositionTable::removePosition(const Address& address)
+{
     AddressToPositionMap::iterator it = addressToPositionMap.find(address);
     addressToPositionMap.erase(it);
 }
 
-void PositionTable::removeOldPositions(simtime_t timestamp) {
-    for (AddressToPositionMap::iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end();)
+void PositionTable::removeOldPositions(simtime_t timestamp)
+{
+    for (AddressToPositionMap::iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); )
         if (it->second.first <= timestamp)
             addressToPositionMap.erase(it++);
         else
             it++;
+
 }
 
-void PositionTable::clear() {
+void PositionTable::clear()
+{
     addressToPositionMap.clear();
 }
 
-simtime_t PositionTable::getOldestPosition() const {
+simtime_t PositionTable::getOldestPosition() const
+{
     simtime_t oldestPosition = SimTime::getMaxTime();
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++) {
-        const simtime_t & time = it->second.first;
+        const simtime_t& time = it->second.first;
         if (time < oldestPosition)
             oldestPosition = time;
     }
     return oldestPosition;
 }
+} // namespace inet
 
-}

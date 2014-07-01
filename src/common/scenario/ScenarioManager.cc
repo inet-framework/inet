@@ -18,9 +18,7 @@
 #include "ScenarioManager.h"
 
 namespace inet {
-
 Define_Module(ScenarioManager);
-
 
 void ScenarioManager::initialize()
 {
@@ -30,8 +28,7 @@ void ScenarioManager::initialize()
     WATCH(numChanges);
     WATCH(numDone);
 
-    for (cXMLElement *node=script->getFirstChild(); node; node = node->getNextSibling())
-    {
+    for (cXMLElement *node = script->getFirstChild(); node; node = node->getNextSibling()) {
         // check attr t is present
         const char *tAttr = node->getAttribute("t");
         if (!tAttr)
@@ -52,7 +49,7 @@ void ScenarioManager::initialize()
 
 void ScenarioManager::handleMessage(cMessage *msg)
 {
-    cXMLElement *node = (cXMLElement *) msg->getContextPointer();
+    cXMLElement *node = (cXMLElement *)msg->getContextPointer();
     delete msg;
 
     processCommand(node);
@@ -86,16 +83,14 @@ void ScenarioManager::processCommand(cXMLElement *node)
 static bool parseIndexedName(const char *s, std::string& name, int& index)
 {
     const char *b;
-    if ((b = strchr(s, '['))==NULL || s[strlen(s)-1]!=']')
-    {
+    if ((b = strchr(s, '[')) == NULL || s[strlen(s) - 1] != ']') {
         name = s;
         index = -1;
         return false;
     }
-    else
-    {
-        name.assign(s, b-s);
-        index = atoi(b+1);
+    else {
+        name.assign(s, b - s);
+        index = atoi(b + 1);
         return true;
     }
 }
@@ -105,7 +100,7 @@ const char *ScenarioManager::getRequiredAttribute(cXMLElement *node, const char 
     const char *s = node->getAttribute(attr);
     if (!s)
         throw cRuntimeError("required attribute %s of <%s> missing at %s",
-              attr, node->getTagName(), node->getSourceLocation());
+                attr, node->getTagName(), node->getSourceLocation());
     return s;
 }
 
@@ -133,7 +128,7 @@ cGate *ScenarioManager::getRequiredGate(cXMLElement *node, const char *modAttr, 
 
 void ScenarioManager::processAtCommand(cXMLElement *node)
 {
-    for (cXMLElement *child=node->getFirstChild(); child; child=child->getNextSibling())
+    for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling())
         processCommand(child);
 }
 
@@ -145,9 +140,9 @@ void ScenarioManager::processModuleSpecificCommand(cXMLElement *node)
     // see if it supports the IScriptable interface
     IScriptable *scriptable = dynamic_cast<IScriptable *>(mod);
     if (!scriptable)
-        throw cRuntimeError("<%s> not understood: it is not a built-in command of %s, and module class %s "  //TODO be more specific
-              "is not scriptable (does not subclass from IScriptable) at %s",
-              node->getTagName(), getClassName(), mod->getClassName(), node->getSourceLocation());
+        throw cRuntimeError("<%s> not understood: it is not a built-in command of %s, and module class %s "    //TODO be more specific
+                            "is not scriptable (does not subclass from IScriptable) at %s",
+                node->getTagName(), getClassName(), mod->getClassName(), node->getSourceLocation());
 
     // ok, trust it to process this command
     scriptable->processCommand(*node);
@@ -161,7 +156,7 @@ void ScenarioManager::processSetParamCommand(cXMLElement *node)
     const char *valueAttr = getRequiredAttribute(node, "value");
 
     EV << "Setting " << mod->getFullPath() << "." << parAttr << " = " << valueAttr << "\n";
-    bubble((std::string("setting: ")+mod->getFullPath()+"."+parAttr+" = "+valueAttr).c_str());
+    bubble((std::string("setting: ") + mod->getFullPath() + "." + parAttr + " = " + valueAttr).c_str());
 
     // set the parameter to the given value
     cPar& param = mod->par(parAttr);
@@ -177,7 +172,7 @@ void ScenarioManager::processSetChannelAttrCommand(cXMLElement *node)
 
     EV << "Setting channel attribute: " << attrAttr << " = " << valueAttr
        << " of gate " << g->getFullPath() << "\n";
-    bubble((std::string("setting channel attr: ")+attrAttr+" = "+valueAttr).c_str());
+    bubble((std::string("setting channel attr: ") + attrAttr + " = " + valueAttr).c_str());
 
     // make sure gate is connected at all
     if (!g->getNextGate())
@@ -203,20 +198,18 @@ void ScenarioManager::processDeleteModuleCommand(cXMLElement *node)
     // FIXME finish and test
 }
 
-void ScenarioManager::createConnection(cXMLElementList &paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
+void ScenarioManager::createConnection(cXMLElementList& paramList, cChannelType *channelType, cGate *srcGate, cGate *destGate)
 {
     if (!channelType)
         srcGate->connectTo(destGate);
-    else
-    {
+    else {
         cChannel *channel = channelType->create("channel");
 
         // set parameters:
-        for (cXMLElementList::iterator i = paramList.begin(); i != paramList.end(); i++)
-        {
+        for (cXMLElementList::iterator i = paramList.begin(); i != paramList.end(); i++) {
             cXMLElement *child = *i;
-            const char* name = getRequiredAttribute(child, "name");
-            const char* value = getRequiredAttribute(child, "value");
+            const char *name = getRequiredAttribute(child, "name");
+            const char *value = getRequiredAttribute(child, "value");
             channel->par(name).parse(value);
         }
 
@@ -256,16 +249,15 @@ void ScenarioManager::processConnectCommand(cXMLElement *node)
         paramList = node->getChildrenByTagName("param");
 
     srcGate = isSrcGateInOut ?
-            srcMod->gateHalf(srcGateName.c_str(), cGate::OUTPUT, srcGateIndex) :
-            srcMod->gate(srcGateName.c_str(), srcGateIndex);
+        srcMod->gateHalf(srcGateName.c_str(), cGate::OUTPUT, srcGateIndex) :
+        srcMod->gate(srcGateName.c_str(), srcGateIndex);
     destGate = isDestGateInOut ?
-            destMod->gateHalf(destGateName.c_str(), cGate::INPUT, destGateIndex) :
-            destMod->gate(destGateName.c_str(), destGateIndex);
+        destMod->gateHalf(destGateName.c_str(), cGate::INPUT, destGateIndex) :
+        destMod->gate(destGateName.c_str(), destGateIndex);
 
     createConnection(paramList, channelType, srcGate, destGate);
 
-    if (isSrcGateInOut && isDestGateInOut)
-    {
+    if (isSrcGateInOut && isDestGateInOut) {
         destGate = srcMod->gateHalf(srcGateName.c_str(), cGate::INPUT, srcGateIndex);
         srcGate = destMod->gateHalf(destGateName.c_str(), cGate::OUTPUT, destGateIndex);
 
@@ -289,8 +281,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
     if (srcGateType == cGate::INPUT)
         throw cRuntimeError("The src-gate must be inout or output gate at %s", node->getSourceLocation());
 
-    if (srcGateType == cGate::INOUT)
-    {
+    if (srcGateType == cGate::INOUT) {
         cGate *g;
 
         srcGate = srcMod->gateHalf(srcGateName.c_str(), cGate::OUTPUT, srcGateIndex);
@@ -313,8 +304,7 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
 
         g->disconnect();
     }
-    else
-    {
+    else {
         srcGate = srcMod->gate(srcGateName.c_str(), srcGateIndex);
         cGate *g = srcGate->getNextGate();
         if (g && g->getOwnerModule()->getParentModule() == parentMod)
@@ -325,12 +315,8 @@ void ScenarioManager::processDisconnectCommand(cXMLElement *node)
 void ScenarioManager::updateDisplayString()
 {
     char buf[80];
-    sprintf(buf, "total %d changes, %d left", numChanges, numChanges-numDone);
+    sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);
     getDisplayString().setTagArg("t", 0, buf);
 }
-
-
-
-}
-
+} // namespace inet
 

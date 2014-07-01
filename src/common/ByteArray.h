@@ -19,7 +19,6 @@
 #include "ByteArray_m.h"
 
 namespace inet {
-
 /**
  * Class that carries raw bytes.
  */
@@ -34,17 +33,17 @@ class ByteArray : public ByteArray_Base
     /**
      * Copy constructor
      */
-    ByteArray(const ByteArray& other) : ByteArray_Base(other) { }
+    ByteArray(const ByteArray& other) : ByteArray_Base(other) {}
 
     /**
      * operator =
      */
-    ByteArray& operator=(const ByteArray& other) {ByteArray_Base::operator=(other); return *this;}
+    ByteArray& operator=(const ByteArray& other) { ByteArray_Base::operator=(other); return *this; }
 
     /**
      * Creates and returns an exact copy of this object.
      */
-    virtual ByteArray *dup() const {return new ByteArray(*this);}
+    virtual ByteArray *dup() const { return new ByteArray(*this); }
 
     /**
      * Copy data from buffer
@@ -92,8 +91,7 @@ class ByteArray : public ByteArray_Base
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_BYTEARRAY_H
 
-
-#endif

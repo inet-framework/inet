@@ -21,29 +21,24 @@
 #include "INoise.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API NoiseBase : public INoise
 {
-    protected:
-        const simtime_t startTime;
-        const simtime_t endTime;
+  protected:
+    const simtime_t startTime;
+    const simtime_t endTime;
 
-    public:
-        NoiseBase(simtime_t startTime, simtime_t endTime) :
-            startTime(startTime),
-            endTime(endTime)
-        {}
+  public:
+    NoiseBase(simtime_t startTime, simtime_t endTime) :
+        startTime(startTime),
+        endTime(endTime)
+    {}
 
-        virtual const simtime_t getStartTime() const { return startTime; }
-        virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const { return startTime; }
+    virtual const simtime_t getEndTime() const { return endTime; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_NOISEBASE_H
 
-}
-
-
-#endif

@@ -18,23 +18,20 @@
 #include "HttpServer.h"
 
 namespace inet {
-
 Define_Module(HttpServer);
 
 void HttpServer::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numBroken = 0;
         socketsOpened = 0;
 
         WATCH(numBroken);
         WATCH(socketsOpened);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         EV_DEBUG << "Initializing server component (sockets version)" << endl;
 
         int port = par("port");
@@ -64,16 +61,13 @@ void HttpServer::finish()
 
 void HttpServer::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         // Self messages not used at the moment
     }
-    else
-    {
+    else {
         EV_DEBUG << "Handle inbound message " << msg->getName() << " of kind " << msg->getKind() << endl;
         TCPSocket *socket = sockCollection.findSocketFor(msg);
-        if (!socket)
-        {
+        if (!socket) {
             EV_DEBUG << "No socket found for the message. Create a new one" << endl;
             // new connection -- create new socket object and server process
             socket = new TCPSocket(msg);
@@ -96,39 +90,35 @@ void HttpServer::socketEstablished(int connId, void *yourPtr)
 
 void HttpServer::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket*)yourPtr;
+    TCPSocket *socket = (TCPSocket *)yourPtr;
 
     // Should be a HttpReplyMessage
     EV_DEBUG << "Socket data arrived on connection " << connId << ". Message=" << msg->getName() << ", kind=" << msg->getKind() << endl;
 
     // call the message handler to process the message.
     cMessage *reply = handleReceivedMessage(msg);
-    if (reply!=NULL)
-    {
-        socket->send(reply); // Send to socket if the reply is non-zero.
+    if (reply != NULL) {
+        socket->send(reply);    // Send to socket if the reply is non-zero.
     }
-    delete msg; // Delete the received message here. Must not be deleted in the handler!
+    delete msg;    // Delete the received message here. Must not be deleted in the handler!
 }
 
 void HttpServer::socketPeerClosed(int connId, void *yourPtr)
 {
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket*)yourPtr;
+    TCPSocket *socket = (TCPSocket *)yourPtr;
 
     // close the connection (if not already closed)
-    if (socket->getState()==TCPSocket::PEER_CLOSED)
-    {
+    if (socket->getState() == TCPSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
-        socket->close();  // Call the close method to properly dispose of the socket.
+        socket->close();    // Call the close method to properly dispose of the socket.
     }
 }
 
@@ -136,13 +126,12 @@ void HttpServer::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
     // Cleanup
-    TCPSocket *socket = (TCPSocket*)yourPtr;
+    TCPSocket *socket = (TCPSocket *)yourPtr;
     sockCollection.removeSocket(socket);
     delete socket;
 }
@@ -154,28 +143,20 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 
     EV_INFO << "connection closed. Connection id " << connId << endl;
 
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "Socket establish failure. Null pointer" << endl;
         return;
     }
-    TCPSocket *socket = (TCPSocket*)yourPtr;
+    TCPSocket *socket = (TCPSocket *)yourPtr;
 
-    if (code==TCP_I_CONNECTION_RESET)
+    if (code == TCP_I_CONNECTION_RESET)
         EV_WARN << "Connection reset!\n";
-    else if (code==TCP_I_CONNECTION_REFUSED)
+    else if (code == TCP_I_CONNECTION_REFUSED)
         EV_WARN << "Connection refused!\n";
 
     // Cleanup
     sockCollection.removeSocket(socket);
     delete socket;
 }
-
-
-
-
-
-
-}
-
+} // namespace inet
 

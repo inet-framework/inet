@@ -21,33 +21,28 @@
 #include "TransmissionBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealTransmission : public TransmissionBase
 {
-    protected:
-        const m maxCommunicationRange;
-        const m maxInterferenceRange;
-        const m maxDetectionRange;
+  protected:
+    const m maxCommunicationRange;
+    const m maxInterferenceRange;
+    const m maxDetectionRange;
 
-    public:
-        IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
-            TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-            maxCommunicationRange(maxCommunicationRange),
-            maxInterferenceRange(maxInterferenceRange),
-            maxDetectionRange(maxDetectionRange)
-        {}
+  public:
+    IdealTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, m maxCommunicationRange, m maxInterferenceRange, m maxDetectionRange) :
+        TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+        maxCommunicationRange(maxCommunicationRange),
+        maxInterferenceRange(maxInterferenceRange),
+        maxDetectionRange(maxDetectionRange)
+    {}
 
-        virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
-        virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
-        virtual m getMaxDetectionRange() const { return maxDetectionRange; }
+    virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
+    virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
+    virtual m getMaxDetectionRange() const { return maxDetectionRange; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALTRANSMISSION_H
 
-}
-
-
-#endif

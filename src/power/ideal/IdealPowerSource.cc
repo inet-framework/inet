@@ -18,10 +18,6 @@
 #include "IdealPowerSource.h"
 
 namespace inet {
-
 Define_Module(IdealPowerSource);
-
-
-}
-
+} // namespace inet
 

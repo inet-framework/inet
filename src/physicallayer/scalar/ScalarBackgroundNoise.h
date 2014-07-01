@@ -21,33 +21,28 @@
 #include "IBackgroundNoise.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 {
-    protected:
-        W power;
+  protected:
+    W power;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        ScalarBackgroundNoise() :
-            power(W(sNaN))
-        {}
+  public:
+    ScalarBackgroundNoise() :
+        power(W(sNaN))
+    {}
 
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar background noise"; }
+    virtual void printToStream(std::ostream& stream) const { stream << "scalar background noise"; }
 
-        virtual W getPower() const { return power; }
+    virtual W getPower() const { return power; }
 
-        virtual const INoise *computeNoise(const IListening *listening) const;
+    virtual const INoise *computeNoise(const IListening *listening) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCALARBACKGROUNDNOISE_H
 
-}
-
-
-#endif

@@ -26,7 +26,6 @@
 #include "Address.h"
 
 namespace inet {
-
 /**
  * Generic network protocol specific data for an InterfaceEntry, stores generic network address.
  *
@@ -35,15 +34,15 @@ namespace inet {
 class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolData
 {
   protected:
-    Address inetAddr;  ///< address of interface
-    int metric;        ///< link "cost"; see e.g. MS KB article Q299540  //TODO needed???
+    Address inetAddr;    ///< address of interface
+    int metric;    ///< link "cost"; see e.g. MS KB article Q299540  //TODO needed???
 
   public:
     // field ids for change notifications
-    enum {F_ADDRESS, F_METRIC};
+    enum { F_ADDRESS, F_METRIC };
 
   protected:
-    void changed1(int fieldId) {changed(NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED, fieldId);}
+    void changed1(int fieldId) { changed(NF_INTERFACE_GENERICNETWORKPROTOCOLCONFIG_CHANGED, fieldId); }
 
   private:
     // copying not supported: following are private and also left undefined
@@ -57,21 +56,19 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
     /** @name Getters */
     //@{
-    Address getAddress() const {return inetAddr;}
-    int getMetric() const  {return metric;}
+    Address getAddress() const { return inetAddr; }
+    int getMetric() const { return metric; }
     //@}
 
     /** @name Setters */
     //@{
-    virtual void setAddress(Address a) {inetAddr = a; changed1(F_ADDRESS);}
-    virtual void setMetric(int m) {metric = m; changed1(F_METRIC);}
+    virtual void setAddress(Address a) { inetAddr = a; changed1(F_ADDRESS); }
+    virtual void setMetric(int m) { metric = m; changed1(F_METRIC); }
     //@}
 
-    virtual void joinMulticastGroup(Address address) { }
+    virtual void joinMulticastGroup(Address address) {}
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
 

@@ -21,9 +21,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(Radio);
 
 Radio::Radio() :
@@ -57,8 +55,7 @@ Radio::~Radio()
 void Radio::initialize(int stage)
 {
     PhysicalLayerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         endTransmissionTimer = new cMessage("endTransmission");
         antenna = check_and_cast<IAntenna *>(getSubmodule("antenna"));
         transmitter = check_and_cast<ITransmitter *>(getSubmodule("transmitter"));
@@ -74,14 +71,12 @@ void Radio::initialize(int stage)
         WATCH(receptionState);
         WATCH(transmissionState);
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER)
-    {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         medium->addRadio(this);
         endSwitchTimer = new cMessage("endSwitch");
         parseRadioModeSwitchingTimes();
     }
-    else if (stage == INITSTAGE_LAST)
-    {
+    else if (stage == INITSTAGE_LAST) {
         updateDisplayString();
         EV_DEBUG << "Radio initialized with " << antenna << ", " << transmitter << ", " << receiver << endl;
     }
@@ -106,7 +101,7 @@ m Radio::computeMaxInterferenceRange() const
     return computeMaxRange(transmitter->getMaxPower(), medium->getMinInterferencePower());
 }
 
-void Radio::printToStream(std::ostream &stream) const
+void Radio::printToStream(std::ostream& stream) const
 {
     stream << (cSimpleModule *)this;
 }
@@ -120,8 +115,7 @@ void Radio::setRadioMode(RadioMode newRadioMode)
         throw cRuntimeError("Cannot switch manually to RADIO_MODE_SWITCHING");
     else if (radioMode == RADIO_MODE_SWITCHING || endSwitchTimer->isScheduled())
         throw cRuntimeError("Cannot switch to a new radio mode while another switch is in progress");
-    else if (newRadioMode != radioMode && newRadioMode != nextRadioMode)
-    {
+    else if (newRadioMode != radioMode && newRadioMode != nextRadioMode) {
         simtime_t switchingTime = switchingTimes[radioMode][newRadioMode];
         if (switchingTime != 0)
             startRadioModeSwitch(newRadioMode, switchingTime);
@@ -135,26 +129,25 @@ void Radio::parseRadioModeSwitchingTimes()
     const char *times = par("switchingTimes");
 
     char prefix[3];
-    unsigned int count = sscanf(times,"%s",prefix);
+    unsigned int count = sscanf(times, "%s", prefix);
 
     if (count > 2)
         throw cRuntimeError("Metric prefix should be no more than two characters long");
 
     double metric = 1;
 
-    if (strcmp("s",prefix) == 0)
+    if (strcmp("s", prefix) == 0)
         metric = 1;
-    else if (strcmp("ms",prefix) == 0)
+    else if (strcmp("ms", prefix) == 0)
         metric = 0.001;
-    else if (strcmp("ns",prefix) == 0)
+    else if (strcmp("ns", prefix) == 0)
         metric = 0.000000001;
     else
         throw cRuntimeError("Undefined or missed metric prefix for switchingTimes parameter");
 
     cStringTokenizer tok(times + count + 1);
     unsigned int idx = 0;
-    while (tok.hasMoreTokens())
-    {
+    while (tok.hasMoreTokens()) {
         switchingTimes[idx / RADIO_MODE_SWITCHING][idx % RADIO_MODE_SWITCHING] = atof(tok.nextToken()) * metric;
         idx++;
     }
@@ -175,12 +168,10 @@ void Radio::startRadioModeSwitch(RadioMode newRadioMode, simtime_t switchingTime
 void Radio::completeRadioModeSwitch(RadioMode newRadioMode)
 {
     EV_DETAIL << "Radio mode changed from " << getRadioModeName(previousRadioMode) << " to " << getRadioModeName(newRadioMode) << endl;
-    if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
-    {
+    if (newRadioMode != IRadio::RADIO_MODE_RECEIVER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
         endReceptionTimer = NULL;
     }
-    else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER)
-    {
+    else if (newRadioMode != IRadio::RADIO_MODE_TRANSMITTER && newRadioMode != IRadio::RADIO_MODE_TRANSCEIVER) {
         if (endTransmissionTimer->isScheduled())
             throw cRuntimeError("Aborting ongoing transmissions is not supported");
     }
@@ -194,7 +185,7 @@ const ITransmission *Radio::getTransmissionInProgress() const
     if (!endTransmissionTimer->isScheduled())
         return NULL;
     else
-        return static_cast<RadioFrame*>(endTransmissionTimer->getControlInfo())->getTransmission();
+        return static_cast<RadioFrame *>(endTransmissionTimer->getControlInfo())->getTransmission();
 }
 
 const ITransmission *Radio::getReceptionInProgress() const
@@ -202,7 +193,7 @@ const ITransmission *Radio::getReceptionInProgress() const
     if (!endReceptionTimer)
         return NULL;
     else
-        return static_cast<RadioFrame*>(endReceptionTimer->getControlInfo())->getTransmission();
+        return static_cast<RadioFrame *>(endReceptionTimer->getControlInfo())->getTransmission();
 }
 
 void Radio::handleMessageWhenDown(cMessage *message)
@@ -217,24 +208,21 @@ void Radio::handleMessageWhenUp(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
-    else if (message->getArrivalGate() == upperLayerIn)
-    {
+    else if (message->getArrivalGate() == upperLayerIn) {
         if (!message->isPacket())
             handleUpperCommand(message);
         else if (radioMode == RADIO_MODE_TRANSMITTER || radioMode == RADIO_MODE_TRANSCEIVER)
             startTransmission(check_and_cast<cPacket *>(message));
-        else
-        {
+        else {
             EV << "Radio is not in transmitter or transceiver mode, dropping frame.\n";
             delete message;
         }
     }
-    else if (message->getArrivalGate() == radioIn)
-    {
+    else if (message->getArrivalGate() == radioIn) {
         if (!message->isPacket())
             handleLowerCommand(message);
         else
-            startReception(check_and_cast<RadioFrame*>(message));
+            startReception(check_and_cast<RadioFrame *>(message));
     }
     else
         throw cRuntimeError("Unknown arrival gate '%s'.", message->getArrivalGate()->getFullName());
@@ -294,7 +282,7 @@ void Radio::startTransmission(cPacket *macFrame)
 
 void Radio::endTransmission()
 {
-    RadioFrame *radioFrame = static_cast<RadioFrame*>(endTransmissionTimer->removeControlInfo());
+    RadioFrame *radioFrame = static_cast<RadioFrame *>(endTransmissionTimer->removeControlInfo());
     EV << "Transmission of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
     updateTransceiverState();
     delete radioFrame;
@@ -306,8 +294,7 @@ void Radio::startReception(RadioFrame *radioFrame)
     const IArrival *arrival = medium->getArrival(this, radioFrame->getTransmission());
     cMessage *timer = new cMessage("endReception");
     timer->setControlInfo(radioFrame);
-    if (arrival->getStartTime() == simTime())
-    {
+    if (arrival->getStartTime() == simTime()) {
         bool isReceptionAttempted = (radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && medium->isReceptionAttempted(this, transmission);
         EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << transmission << " is " << (isReceptionAttempted ? "attempted" : "ignored") << ".\n";
         if (isReceptionAttempted)
@@ -321,8 +308,7 @@ void Radio::endReception(cMessage *message)
 {
     RadioFrame *radioFrame = static_cast<RadioFrame *>(message->getControlInfo());
     EV << "Reception of " << (IRadioFrame *)radioFrame << " as " << radioFrame->getTransmission() << " is completed.\n";
-    if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer)
-    {
+    if ((radioMode == RADIO_MODE_RECEIVER || radioMode == RADIO_MODE_TRANSCEIVER) && message == endReceptionTimer) {
         cPacket *macFrame = medium->receivePacket(this, radioFrame);
         EV << "Sending up " << macFrame << ".\n";
         send(macFrame, upperLayerOut);
@@ -359,8 +345,7 @@ void Radio::updateTransceiverState()
         newRadioReceptionState = RECEPTION_STATE_BUSY;
     else
         newRadioReceptionState = RECEPTION_STATE_IDLE;
-    if (receptionState != newRadioReceptionState)
-    {
+    if (receptionState != newRadioReceptionState) {
         EV << "Changing radio reception state from " << getRadioReceptionStateName(receptionState) << " to " << getRadioReceptionStateName(newRadioReceptionState) << ".\n";
         receptionState = newRadioReceptionState;
         emit(receptionStateChangedSignal, newRadioReceptionState);
@@ -373,8 +358,7 @@ void Radio::updateTransceiverState()
         newRadioTransmissionState = TRANSMISSION_STATE_TRANSMITTING;
     else
         newRadioTransmissionState = TRANSMISSION_STATE_IDLE;
-    if (transmissionState != newRadioTransmissionState)
-    {
+    if (transmissionState != newRadioTransmissionState) {
         EV << "Changing radio transmission state from " << getRadioTransmissionStateName(transmissionState) << " to " << getRadioTransmissionStateName(newRadioTransmissionState) << ".\n";
         transmissionState = newRadioTransmissionState;
         emit(transmissionStateChangedSignal, newRadioTransmissionState);
@@ -388,12 +372,10 @@ void Radio::updateDisplayString()
     // we use the radio channel method to calculate interference distance
     // it should be the methods provided by propagation models, but to
     // avoid a big modification, we reuse those methods.
-    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange))
-    {
+    if (ev.isGUI() && (displayInterferenceRange || displayCommunicationRange)) {
         cModule *host = findContainingNode(this);
         cDisplayString& displayString = host->getDisplayString();
-        if (displayInterferenceRange)
-        {
+        if (displayInterferenceRange) {
             char tag[32];
             sprintf(tag, "r%i1", getId());
             displayString.removeTag(tag);
@@ -401,8 +383,7 @@ void Radio::updateDisplayString()
             displayString.setTagArg(tag, 0, computeMaxInterferenceRange().get());
             displayString.setTagArg(tag, 2, "gray");
         }
-        if (displayCommunicationRange)
-        {
+        if (displayCommunicationRange) {
             char tag[32];
             sprintf(tag, "r%i2", getId());
             displayString.removeTag(tag);
@@ -412,7 +393,6 @@ void Radio::updateDisplayString()
         }
     }
 }
+} // namespace physicallayer
+} // namespace inet
 
-}
-
-}

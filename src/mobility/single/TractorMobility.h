@@ -24,8 +24,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Tractor movement model. See NED file for more info.
  *
@@ -36,9 +34,9 @@ namespace inet {
 class INET_API TractorMobility : public LineSegmentsMobilityBase
 {
   protected:
-    double speed; //< speed along the trajectory
-    double x1, y1, x2, y2; ///< rectangle bounds of the field
-    int rowCount; ///< the number of rows that the tractor must take
+    double speed;    //< speed along the trajectory
+    double x1, y1, x2, y2;    ///< rectangle bounds of the field
+    int rowCount;    ///< the number of rows that the tractor must take
     int step;
 
   protected:
@@ -56,8 +54,7 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
   public:
     TractorMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TRACTORMOBILITY_H
 
-
-#endif

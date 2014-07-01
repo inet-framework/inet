@@ -1,14 +1,12 @@
 #ifndef __INET_TCPWESTWOOD_H
 #define __INET_TCPWESTWOOD_H
 
-
 #include "INETDefs.h"
 
 #include "TCPBaseAlg.h"
 #include "TCPSegmentTransmitInfoList.h"
 
 namespace inet {
-
 /**
  * State variables for TCPWestwood.
  */
@@ -20,12 +18,12 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
     virtual std::string info() const;
     virtual std::string detailedInfo() const;
 
-    uint32 ssthresh; ///< slow start threshold
+    uint32 ssthresh;    ///< slow start threshold
 
-    simtime_t w_RTTmin; // min RTT
-    double w_a; // threshold reduction factor for ssthresh calculation
+    simtime_t w_RTTmin;    // min RTT
+    double w_a;    // threshold reduction factor for ssthresh calculation
 
-    simtime_t w_lastAckTime; // last received ack time
+    simtime_t w_lastAckTime;    // last received ack time
 
     double w_bwe;
     double w_sample_bwe;
@@ -36,7 +34,7 @@ class INET_API TCPWestwoodStateVariables : public TCPBaseAlgStateVariables
 class INET_API TCPWestwood : public TCPBaseAlg
 {
   protected:
-    TCPWestwoodStateVariables *&state; // alias to TCLAlgorithm's 'state'
+    TCPWestwoodStateVariables *& state;    // alias to TCLAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
     virtual TCPStateVariables *createStateVariables()
@@ -68,9 +66,7 @@ class INET_API TCPWestwood : public TCPBaseAlg
 
     virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TCPWESTWOOD_H
 

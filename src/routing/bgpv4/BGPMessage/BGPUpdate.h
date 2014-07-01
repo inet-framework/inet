@@ -21,21 +21,19 @@
 #include "BGPUpdate_m.h"
 
 namespace inet {
-
 class BGPUpdateMessage : public BGPUpdateMessage_Base
 {
-protected:
+  protected:
     unsigned short computePathAttributesBytes(const BGPUpdatePathAttributeList& pathAttrs);
-public:
+
+  public:
     BGPUpdateMessage(const char *name = NULL, int kind = 0) : BGPUpdateMessage_Base(name, kind) {}
-    virtual BGPUpdateMessage *dup() const {return new BGPUpdateMessage(*this);}
+    virtual BGPUpdateMessage *dup() const { return new BGPUpdateMessage(*this); }
     void setWithdrawnRoutesArraySize(unsigned int size);
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
     void setNLRI(const BGPUpdateNLRI& NLRI_var);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_BGPUPDATE_H
 

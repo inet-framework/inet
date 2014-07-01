@@ -20,26 +20,25 @@
 #ifdef WITH_IPv4
 #include "IPv4ControlInfo.h"
 #include "IPv4Datagram.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "IPv6ControlInfo.h"
 #include "IPv6Datagram.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
 #include "GenericNetworkProtocolControlInfo.h"
 #include "GenericDatagram.h"
-#endif
+#endif // ifdef WITH_GENERIC
 
 namespace inet {
-
 Define_Module(NetworkDatagramMultiplexer);
 
-void NetworkDatagramMultiplexer::handleMessage(cMessage * message)
+void NetworkDatagramMultiplexer::handleMessage(cMessage *message)
 {
-    cGate * arrivalGate = message->getArrivalGate();
-    const char * arrivalGateName = arrivalGate->getBaseName();
+    cGate *arrivalGate = message->getArrivalGate();
+    const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "upperIn"))
         send(message, "lowerOut", getProtocolIndex(message));
     else if (!strcmp(arrivalGateName, "lowerIn"))
@@ -48,29 +47,27 @@ void NetworkDatagramMultiplexer::handleMessage(cMessage * message)
         throw cRuntimeError("Unknown arrival gate");
 }
 
-int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
+int NetworkDatagramMultiplexer::getProtocolIndex(cMessage *message)
 {
-    cPacket * packet = check_and_cast<cPacket *>(message);
-    cObject * controlInfo = packet->getControlInfo();
+    cPacket *packet = check_and_cast<cPacket *>(message);
+    cObject *controlInfo = packet->getControlInfo();
     // TODO: handle the case when some network protocols are disabled
-    if (false) ;
+    if (false)
+        ;
 #ifdef WITH_IPv4
     else if (dynamic_cast<IPv4ControlInfo *>(controlInfo) || dynamic_cast<IPv4Datagram *>(message))
         return 0;
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     else if (dynamic_cast<IPv6ControlInfo *>(controlInfo) || dynamic_cast<IPv6Datagram *>(message))
         return 1;
-#endif
+#endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
     else if (dynamic_cast<GenericNetworkProtocolControlInfo *>(controlInfo) || dynamic_cast<GenericDatagram *>(message))
         return 2;
-#endif
+#endif // ifdef WITH_GENERIC
     else
         throw cRuntimeError("Unknown control info");
 }
-
-
-}
-
+} // namespace inet
 

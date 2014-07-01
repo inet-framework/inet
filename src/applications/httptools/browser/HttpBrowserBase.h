@@ -15,7 +15,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_HTTPBROWSERBASE_H
 #define __INET_HTTPBROWSERBASE_H
 
@@ -24,13 +23,12 @@
 #include "HttpNodeBase.h"
 
 namespace inet {
+#define MSGKIND_START_SESSION     0
+#define MSGKIND_NEXT_MESSAGE      1
+#define MSGKIND_SCRIPT_EVENT      2
+#define MSGKIND_ACTIVITY_START    3
 
-#define MSGKIND_START_SESSION    0
-#define MSGKIND_NEXT_MESSAGE     1
-#define MSGKIND_SCRIPT_EVENT     2
-#define MSGKIND_ACTIVITY_START   3
-
-#define MAX_URL_LENGTH 2048 // The maximum allowed URL string length.
+#define MAX_URL_LENGTH            2048 // The maximum allowed URL string length.
 
 /**
  * A simulated browser module for OMNeT++ simulations. A part of HttpTools.
@@ -62,101 +60,98 @@ namespace inet {
  */
 class INET_API HttpBrowserBase : public HttpNodeBase
 {
-    protected:
-        /*
-         * Browse event item. Used in scripted mode.
-         */
-        struct BrowseEvent
-        {
-            simtime_t time;              // Event triggering time
-            std::string wwwhost;         // Host to contact
-            std::string resourceName;    // The resource to request
-            HttpNodeBase *serverModule;  // Reference to the omnet server object. Resolved at parse time.
-        };
+  protected:
+    /*
+     * Browse event item. Used in scripted mode.
+     */
+    struct BrowseEvent
+    {
+        simtime_t time;    // Event triggering time
+        std::string wwwhost;    // Host to contact
+        std::string resourceName;    // The resource to request
+        HttpNodeBase *serverModule;    // Reference to the omnet server object. Resolved at parse time.
+    };
 
-        /*
-         * Browse events queue. Used in scripted mode.
-         */
-        typedef std::deque<BrowseEvent> BrowseEventsList;
+    /*
+     * Browse events queue. Used in scripted mode.
+     */
+    typedef std::deque<BrowseEvent> BrowseEventsList;
 
-        /*
-         * A list of HTTP requests to send.
-         */
-        typedef std::deque<HttpRequestMessage*> HttpRequestQueue;
+    /*
+     * A list of HTTP requests to send.
+     */
+    typedef std::deque<HttpRequestMessage *> HttpRequestQueue;
 
-        cMessage *eventTimer;           // The timer object used to trigger browsing events
-        HttpController *controller;     // Reference to the central controller object
+    cMessage *eventTimer;    // The timer object used to trigger browsing events
+    HttpController *controller;    // Reference to the central controller object
 
-        bool scriptedMode;              // Set to true if a script file is defined
-        BrowseEventsList browseEvents;  // Queue of browse events used in scripted mode
+    bool scriptedMode;    // Set to true if a script file is defined
+    BrowseEventsList browseEvents;    // Queue of browse events used in scripted mode
 
-        /* The current session parameters */
-        int reqInCurSession;            // The number of requests made so far in the current session
-        int reqNoInCurSession;          // The total number of requests to be made in the current session
-        double activityPeriodLength;    // The length of the currently active activity period
-        simtime_t acitivityPeriodEnd;   // The end in simulation time of the current activity period
+    /* The current session parameters */
+    int reqInCurSession;    // The number of requests made so far in the current session
+    int reqNoInCurSession;    // The total number of requests to be made in the current session
+    double activityPeriodLength;    // The length of the currently active activity period
+    simtime_t acitivityPeriodEnd;    // The end in simulation time of the current activity period
 
-        /* The random objects */
-        rdObject *rdProcessingDelay;
-        rdObject *rdActivityLength;
-        rdObject *rdInterRequestInterval;
-        rdObject *rdInterSessionInterval;
-        rdObject *rdRequestSize;
-        rdObject *rdReqInSession;
+    /* The random objects */
+    rdObject *rdProcessingDelay;
+    rdObject *rdActivityLength;
+    rdObject *rdInterRequestInterval;
+    rdObject *rdInterSessionInterval;
+    rdObject *rdRequestSize;
+    rdObject *rdReqInSession;
 
-        long htmlRequested;
-        long htmlReceived;
-        long htmlErrorsReceived;
-        long imgResourcesRequested;
-        long imgResourcesReceived;
-        long textResourcesRequested;
-        long textResourcesReceived;
-        long messagesInCurrentSession;
-        long sessionCount;
-        long connectionsCount;
+    long htmlRequested;
+    long htmlReceived;
+    long htmlErrorsReceived;
+    long imgResourcesRequested;
+    long imgResourcesReceived;
+    long textResourcesRequested;
+    long textResourcesReceived;
+    long messagesInCurrentSession;
+    long sessionCount;
+    long connectionsCount;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg) = 0;
-        void handleDataMessage(cMessage *msg);
-        void handleSelfMessages(cMessage *msg);
-        void handleSelfActivityStart();
-        void handleSelfStartSession();
-        void handleSelfNextMessage();
-        void handleSelfScriptedEvent();
-        void handleSelfDelayedRequestMessage(cMessage *msg);
-        void scheduleNextBrowseEvent();
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg) = 0;
+    void handleDataMessage(cMessage *msg);
+    void handleSelfMessages(cMessage *msg);
+    void handleSelfActivityStart();
+    void handleSelfStartSession();
+    void handleSelfNextMessage();
+    void handleSelfScriptedEvent();
+    void handleSelfDelayedRequestMessage(cMessage *msg);
+    void scheduleNextBrowseEvent();
 
-        /*
-         * Pure virtual methods to communicate with the server. Must be implemented in derived classes
-         */
-        virtual void sendRequestToServer(BrowseEvent be) = 0;
-        virtual void sendRequestToServer(HttpRequestMessage *request) = 0;
-        virtual void sendRequestToRandomServer() = 0;
-        virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) = 0;
+    /*
+     * Pure virtual methods to communicate with the server. Must be implemented in derived classes
+     */
+    virtual void sendRequestToServer(BrowseEvent be) = 0;
+    virtual void sendRequestToServer(HttpRequestMessage *request) = 0;
+    virtual void sendRequestToRandomServer() = 0;
+    virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue) = 0;
 
-        /*
-         * Methods for generating HTML page requests and resource requests
-         */
-        HttpRequestMessage* generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
-        HttpRequestMessage* generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
-        HttpRequestMessage* generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
+    /*
+     * Methods for generating HTML page requests and resource requests
+     */
+    HttpRequestMessage *generatePageRequest(std::string www, std::string page, bool bad = false, int size = 0);
+    HttpRequestMessage *generateRandomPageRequest(std::string www, bool bad = false, int size = 0);
+    HttpRequestMessage *generateResourceRequest(std::string www, std::string resource = "", int serial = 0, bool bad = false, int size = 0);
 
-        /*
-         * Read scripted events from file. Triggered if the script file parameter is specified in the initialization file.
-         */
-        void readScriptedEvents(const char* filename);
+    /*
+     * Read scripted events from file. Triggered if the script file parameter is specified in the initialization file.
+     */
+    void readScriptedEvents(const char *filename);
 
-    public:
-        HttpBrowserBase();
-        virtual ~HttpBrowserBase();
+  public:
+    HttpBrowserBase();
+    virtual ~HttpBrowserBase();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_HTTPBROWSERBASE_H
 

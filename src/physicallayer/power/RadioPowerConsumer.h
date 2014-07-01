@@ -22,10 +22,7 @@
 #include "IRadio.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This is radio power consumer model.
  *
@@ -64,10 +61,8 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 
     virtual void initialize(int stage);
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_RADIOPOWERCONSUMER_H
 
-}
-
-
-#endif

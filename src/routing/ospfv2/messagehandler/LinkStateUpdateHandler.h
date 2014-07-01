@@ -22,13 +22,12 @@
 #include "OSPFcommon.h"
 
 namespace inet {
-
 namespace OSPF {
-
 class LinkStateUpdateHandler : public IMessageHandler
 {
-private:
-    struct AcknowledgementFlags {
+  private:
+    struct AcknowledgementFlags
+    {
         bool floodedBackOut;
         bool lsaIsNewer;
         bool lsaIsDuplicate;
@@ -38,20 +37,17 @@ private:
         bool anyNeighborInExchangeOrLoadingState;
     };
 
-private:
-    bool validateLSChecksum(OSPFLSA* lsa) { return true; }   // not implemented
-    void acknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface* intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
+  private:
+    bool validateLSChecksum(OSPFLSA *lsa) { return true; }    // not implemented
+    void acknowledgeLSA(OSPFLSAHeader& lsaHeader, Interface *intf, AcknowledgementFlags acknowledgementFlags, RouterID lsaSource);
 
-public:
-    LinkStateUpdateHandler(Router* containingRouter);
+  public:
+    LinkStateUpdateHandler(Router *containingRouter);
 
-    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_LINKSTATEUPDATEHANDLER_H
 

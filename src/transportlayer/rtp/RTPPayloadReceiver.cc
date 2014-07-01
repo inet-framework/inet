@@ -4,17 +4,16 @@
     begin                : Fri Nov 2 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include <fstream>
 
@@ -24,10 +23,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
-
-
 Define_Module(RTPPayloadReceiver);
-
 
 simsignal_t RTPPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
 
@@ -49,14 +45,12 @@ void RTPPayloadReceiver::initialize()
 void RTPPayloadReceiver::handleMessage(cMessage *msg)
 {
     RTPInnerPacket *rinp = check_and_cast<RTPInnerPacket *>(msg);
-    if (rinp->getType() == RTP_INP_DATA_IN)
-    {
+    if (rinp->getType() == RTP_INP_DATA_IN) {
         RTPPacket *packet = check_and_cast<RTPPacket *>(rinp->decapsulate());
         processPacket(packet);
         delete rinp;
     }
-    else
-    {
+    else {
         throw cRuntimeError("RTPInnerPacket of wrong type received");
         delete rinp;
     }
@@ -77,8 +71,5 @@ void RTPPayloadReceiver::closeOutputFile()
     _outputFileStream.close();
     _outputLogLoss.close();
 }
-
-
-}
-
+} // namespace inet
 

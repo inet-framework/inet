@@ -27,26 +27,25 @@
 
 #if OMNETPP_VERSION < 0x0403
 #  error At least OMNeT++/OMNEST version 4.3 required
-#endif
+#endif // if OMNETPP_VERSION < 0x0403
 
 #if defined(INET_EXPORT)
-#  define INET_API OPP_DLLEXPORT
+#  define INET_API    OPP_DLLEXPORT
 #elif defined(INET_IMPORT)
-#  define INET_API OPP_DLLIMPORT
-#else
+#  define INET_API    OPP_DLLIMPORT
+#else // if defined(INET_EXPORT)
 #  define INET_API
-#endif
+#endif // if defined(INET_EXPORT)
 
 #include "InitStages.h"
 
 namespace inet {
-
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
 // used at several places as
-#define SPEED_OF_LIGHT 299792458.0
+#define SPEED_OF_LIGHT    299792458.0
 
 //
 // Macro to protect expressions like gate("out")->getToGate()->getToGate()
@@ -56,22 +55,22 @@ typedef unsigned long ulong;
 // which is uglier but doesn't crash, just stops with a nice
 // error message if something goes wrong.
 //
-template <class T>
+template<class T>
 T *__checknull(T *p, const char *expr, const char *file, int line)
 {
     if (!p)
         throw cRuntimeError("Expression %s returned NULL at %s:%d", expr, file, line);
     return p;
 }
-#define CHK(x) __checknull((x), #x, __FILE__, __LINE__)
 
+#define CHK(x)     __checknull((x), #x, __FILE__, __LINE__)
 
-#define PK(msg)  check_and_cast<cPacket *>(msg)    /*XXX temp def*/
+#define PK(msg)    check_and_cast<cPacket *>(msg)    /*XXX temp def*/
 
 /*
-template<typename T, typename A>
-inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec )
-{
+   template<typename T, typename A>
+   inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec )
+   {
     out << '{';
     for(typename std::vector<T,A>::const_iterator it = vec.begin(); it != vec.end(); ++it)
     {
@@ -81,24 +80,25 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec )
     }
     out << '}';
     return out;
-}
-*/
+   }
+ */
 
 /**
  * Shortcut to cObjectFactory::createOneIfClassIsKnown().
  */
-inline cObject *createOneIfClassIsKnown(const char *classname) {
+inline cObject *createOneIfClassIsKnown(const char *classname)
+{
     cObject *ret = cObjectFactory::createOneIfClassIsKnown(classname);
-    if (!ret)
-    {
-        char buf[200];  //FIXME
+    if (!ret) {
+        char buf[200];    //FIXME
         snprintf(buf, 200, "inet::%s", classname);
         ret = cObjectFactory::createOneIfClassIsKnown(buf);
     }
     return ret;
 }
 
-inline cObject *createOne(const char *classname) {
+inline cObject *createOne(const char *classname)
+{
     cObject *ret = createOneIfClassIsKnown(classname);
     if (!ret)
         throw cRuntimeError("Class [inet::]\"%s\" not found -- perhaps its code was not linked in, "
@@ -106,8 +106,7 @@ inline cObject *createOne(const char *classname) {
                             "modules and channels, with Define_Module()/Define_Channel()", classname);
     return ret;
 }
+} // namespace inet
 
-}
+#endif // ifndef __INET_INETDEFS_H
 
-
-#endif

@@ -17,7 +17,6 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #ifndef __INET_COORD_H
 #define __INET_COORD_H
 
@@ -26,8 +25,6 @@
 #include "FWMath.h"
 
 namespace inet {
-
-
 /**
  * @brief Class for storing 3D coordinates.
  *
@@ -38,11 +35,11 @@ namespace inet {
  */
 class INET_API Coord : public cObject
 {
-public:
+  public:
     /** @brief Constant with all values set to 0. */
     static const Coord ZERO;
 
-public:
+  public:
     /** @name x, y and z coordinate of the position. */
     /*@{*/
     double x;
@@ -50,10 +47,10 @@ public:
     double z;
     /*@}*/
 
-private:
-  void copy(const Coord& other) { x = other.x; y = other.y; z = other.z; }
+  private:
+    void copy(const Coord& other) { x = other.x; y = other.y; z = other.z; }
 
-public:
+  public:
     /** @brief Default constructor. */
     Coord()
         : x(0.0), y(0.0), z(0.0) {}
@@ -70,28 +67,32 @@ public:
     std::string info() const;
 
     /** @brief Adds two coordinate vectors. */
-    friend Coord operator+(const Coord& a, const Coord& b) {
+    friend Coord operator+(const Coord& a, const Coord& b)
+    {
         Coord tmp(a);
         tmp += b;
         return tmp;
     }
 
     /** @brief Subtracts two coordinate vectors. */
-    friend Coord operator-(const Coord& a, const Coord& b) {
+    friend Coord operator-(const Coord& a, const Coord& b)
+    {
         Coord tmp(a);
         tmp -= b;
         return tmp;
     }
 
     /** @brief Multiplies a coordinate vector by a real number. */
-    friend Coord operator*(const Coord& a, double f) {
+    friend Coord operator*(const Coord& a, double f)
+    {
         Coord tmp(a);
         tmp *= f;
         return tmp;
     }
 
     /** @brief Divides a coordinate vector by a real number. */
-    friend Coord operator/(const Coord& a, double f) {
+    friend Coord operator/(const Coord& a, double f)
+    {
         Coord tmp(a);
         tmp /= f;
         return tmp;
@@ -100,7 +101,8 @@ public:
     /**
      * @brief Multiplies this coordinate vector by a real number.
      */
-    Coord& operator*=(double f) {
+    Coord& operator*=(double f)
+    {
         x *= f;
         y *= f;
         z *= f;
@@ -110,7 +112,8 @@ public:
     /**
      * @brief Divides this coordinate vector by a real number.
      */
-    Coord& operator/=(double f) {
+    Coord& operator/=(double f)
+    {
         x /= f;
         y /= f;
         z /= f;
@@ -120,7 +123,8 @@ public:
     /**
      * @brief Adds coordinate vector 'a' to this.
      */
-    Coord& operator+=(const Coord& a) {
+    Coord& operator+=(const Coord& a)
+    {
         x += a.x;
         y += a.y;
         z += a.z;
@@ -130,15 +134,17 @@ public:
     /**
      * @brief Dot product
      */
-    float operator*(const Coord& v) {
-        return (x * v.x + y * v.y + z * v.z);
+    float operator*(const Coord& v)
+    {
+        return x * v.x + y * v.y + z * v.z;
     }
 
     /**
      * @brief Cross product
      */
-    Coord operator%(const Coord& v) {
-        return Coord(y*v.z-z*v.y, z*v.x - x*v.z, x*v.y - y*v.x);
+    Coord operator%(const Coord& v)
+    {
+        return Coord(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
     }
 
     /**
@@ -146,7 +152,8 @@ public:
      *
      * This operator can change the dimension of the coordinate.
      */
-    Coord& operator=(const Coord& other) {
+    Coord& operator=(const Coord& other)
+    {
         if (this == &other)
             return *this;
         cObject::operator=(other);
@@ -157,7 +164,8 @@ public:
     /**
      * @brief Subtracts coordinate vector 'a' from this.
      */
-    Coord& operator-=(const Coord& a) {
+    Coord& operator-=(const Coord& a)
+    {
         x -= a.x;
         y -= a.y;
         z -= a.z;
@@ -170,7 +178,8 @@ public:
      * Because coordinates are of type double, this is done through the
      * FWMath::close function.
      */
-    friend bool operator==(const Coord& a, const Coord& b) {
+    friend bool operator==(const Coord& a, const Coord& b)
+    {
         // FIXME: this implementation is not transitive
         return FWMath::close(a.x, b.x) && FWMath::close(a.y, b.y) && FWMath::close(a.z, b.z);
     }
@@ -180,12 +189,13 @@ public:
      *
      * Negation of the operator==.
      */
-    friend bool operator!=(const Coord& a, const Coord& b) { return !(a==b); }
+    friend bool operator!=(const Coord& a, const Coord& b) { return !(a == b); }
 
     /**
      * @brief Returns the distance to Coord 'a'.
      */
-    double distance(const Coord& a) const {
+    double distance(const Coord& a) const
+    {
         Coord dist(*this - a);
         return dist.length();
     }
@@ -193,7 +203,8 @@ public:
     /**
      * @brief Returns distance^2 to Coord 'a' (omits calling square root).
      */
-    double sqrdist(const Coord& a) const {
+    double sqrdist(const Coord& a) const
+    {
         Coord dist(*this - a);
         return dist.squareLength();
     }
@@ -219,51 +230,54 @@ public:
      * @param lowerBound The upper bound of the rectangle.
      * @param upperBound The lower bound of the rectangle.
      */
-    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const {
-        return  lowerBound.x <= x && x <= upperBound.x &&
-                lowerBound.y <= y && y <= upperBound.y &&
-                lowerBound.z <= z && z <= upperBound.z;
+    bool isInBoundary(const Coord& lowerBound, const Coord& upperBound) const
+    {
+        return lowerBound.x <= x && x <= upperBound.x &&
+               lowerBound.y <= y && y <= upperBound.y &&
+               lowerBound.z <= z && z <= upperBound.z;
     }
 
     /**
      * Returns true if this coordinate is unspecified.
      */
-    bool isUnspecified() const {
+    bool isUnspecified() const
+    {
         return isNaN(x) && isNaN(y) && isNaN(z);
     }
 
     /**
      * @brief Returns the minimal coordinates.
      */
-    Coord min(const Coord& a) {
+    Coord min(const Coord& a)
+    {
         return Coord(this->x < a.x ? this->x : a.x,
-                     this->y < a.y ? this->y : a.y,
-                     this->z < a.z ? this->z : a.z);
+                this->y < a.y ? this->y : a.y,
+                this->z < a.z ? this->z : a.z);
     }
 
     /**
      * @brief Returns the maximal coordinates.
      */
-    Coord max(const Coord& a) {
+    Coord max(const Coord& a)
+    {
         return Coord(this->x > a.x ? this->x : a.x,
-                     this->y > a.y ? this->y : a.y,
-                     this->z > a.z ? this->z : a.z);
+                this->y > a.y ? this->y : a.y,
+                this->z > a.z ? this->z : a.z);
     }
 };
-
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)
 {
     return os << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
 }
 
-inline std::string Coord::info() const {
+inline std::string Coord::info() const
+{
     std::stringstream os;
     os << *this;
     return os.str();
 }
+} // namespace inet
 
-}
+#endif // ifndef __INET_COORD_H
 
-
-#endif

@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #ifndef __INET_STATICGRIDMOBILITY_H
 #define __INET_STATICGRIDMOBILITY_H
 
@@ -25,8 +24,6 @@
 #include "StationaryMobility.h"
 
 namespace inet {
-
-
 /**
  * @brief Mobility model which places all hosts at constant distances
  *  within the simulation area (resulting in a regular grid).
@@ -43,8 +40,7 @@ class INET_API StaticGridMobility : public StationaryMobility
   public:
     StaticGridMobility() {};
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_STATICGRIDMOBILITY_H
 
-
-#endif

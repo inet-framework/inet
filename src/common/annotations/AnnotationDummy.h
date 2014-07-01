@@ -23,7 +23,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * AnnotationDummy is just a workaround to visualize annotations
  *
@@ -36,8 +35,7 @@ class INET_API AnnotationDummy : public cSimpleModule
 
   protected:
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ANNOTATIONDUMMY_H
 
-
-#endif

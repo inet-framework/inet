@@ -24,36 +24,34 @@
 #include "ARP.h"
 
 namespace inet {
-
 /**
  * Describes a DHCP lease.
  */
 class DHCPLease
 {
-    public:
-        long xid;
-        IPv4Address ip;
-        MACAddress mac;
-        IPv4Address gateway;
-        IPv4Address subnetMask;
-        IPv4Address dns;
-        IPv4Address ntp;
-        IPv4Address serverId;
-        std::string hostName;
-        simtime_t leaseTime;
-        simtime_t renewalTime;
-        simtime_t rebindTime;
-        bool leased;
+  public:
+    long xid;
+    IPv4Address ip;
+    MACAddress mac;
+    IPv4Address gateway;
+    IPv4Address subnetMask;
+    IPv4Address dns;
+    IPv4Address ntp;
+    IPv4Address serverId;
+    std::string hostName;
+    simtime_t leaseTime;
+    simtime_t renewalTime;
+    simtime_t rebindTime;
+    bool leased;
 };
 
-inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
+inline std::ostream& operator<<(std::ostream& os, DHCPLease obj)
 {
     os << " IP: " << obj.ip << " with subnet mask: " << obj.subnetMask
-            << " to " << obj.mac;
+       << " to " << obj.mac;
     return os;
 }
+} // namespace inet
 
-}
+#endif // ifndef __INET_DHCPLEASE_H
 
-
-#endif

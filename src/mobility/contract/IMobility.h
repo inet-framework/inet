@@ -19,7 +19,6 @@
  * part of:     framework implementation developed by tkn
  *************************************************************************/
 
-
 #ifndef __INET_IMOBILITY_H
 #define __INET_IMOBILITY_H
 
@@ -29,8 +28,6 @@
 #include "EulerAngles.h"
 
 namespace inet {
-
-
 /**
  * @brief Abstract base class defining the public interface that must be provided by all mobility modules.
  *
@@ -67,8 +64,7 @@ class INET_API IMobility
     /** @brief Returns the current angular acceleration at the current simulation time. */
     // virtual Orientation getCurrentAngularAcceleration() = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IMOBILITY_H
 
-
-#endif

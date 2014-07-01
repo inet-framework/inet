@@ -21,32 +21,27 @@
 #include "NoiseBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API FlatNoiseBase : public NoiseBase
 {
-    protected:
-        const Hz carrierFrequency;
-        const Hz bandwidth;
+  protected:
+    const Hz carrierFrequency;
+    const Hz bandwidth;
 
-    public:
-        FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
-            NoiseBase(startTime, endTime),
-            carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth)
-        {}
+  public:
+    FlatNoiseBase(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth) :
+        NoiseBase(startTime, endTime),
+        carrierFrequency(carrierFrequency),
+        bandwidth(bandwidth)
+    {}
 
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual Hz getBandwidth() const { return bandwidth; }
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual Hz getBandwidth() const { return bandwidth; }
 
-        virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
+    virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLATNOISEBASE_H
 
-}
-
-
-#endif

@@ -18,7 +18,7 @@
 #include <platdep/sockets.h>
 #include "headers/defs.h"
 
-namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
+namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
 #include "headers/in.h"
@@ -31,22 +31,19 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
+#include <netinet/in.h>    // htonl, ntohl, ...
+#endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 using namespace INETFw;
 namespace inet {
-
 int IGMPSerializer::serialize(const IGMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
 {
-    struct igmp *igmp = (struct igmp *) (buf);
+    struct igmp *igmp = (struct igmp *)(buf);
     int packetLength;
 
     packetLength = IGMP_MINLEN;
 
-    switch (pkt->getType())
-    {
+    switch (pkt->getType()) {
         case IGMP_V1_MEMBERSHIP_REPORT:
         case IGMP_V2_MEMBERSHIP_REPORT:
         case IGMP_V2_LEAVE_GROUP:
@@ -56,6 +53,7 @@ int IGMPSerializer::serialize(const IGMPMessage *pkt, unsigned char *buf, unsign
             igmp->igmp_cksum = 0;
             igmp->igmp_group.s_addr = htonl(pkt->getGroupAddress().getInt());
             break;
+
         default:
             packetLength = 0;
             EV << "Can not serialize IGMP packet: type " << pkt->getType() << " not supported.";
@@ -67,10 +65,9 @@ int IGMPSerializer::serialize(const IGMPMessage *pkt, unsigned char *buf, unsign
 
 void IGMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt)
 {
-    struct igmp *igmp = (struct igmp*) buf;
+    struct igmp *igmp = (struct igmp *)buf;
 
-    switch (igmp->igmp_type)
-    {
+    switch (igmp->igmp_type) {
         case IGMP_V1_MEMBERSHIP_REPORT:
         case IGMP_V2_MEMBERSHIP_REPORT:
         case IGMP_V2_LEAVE_GROUP:
@@ -79,13 +76,11 @@ void IGMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IGMPM
             pkt->setMaxRespTime(igmp->igmp_code);
             pkt->setGroupAddress(IPv4Address(ntohl(igmp->igmp_group.s_addr)));
             break;
+
         default:
             EV << "Can not create IGMP packet: type " << igmp->igmp_type << " not supported.";
             break;
     }
 }
-
-
-}
-
+} // namespace inet
 

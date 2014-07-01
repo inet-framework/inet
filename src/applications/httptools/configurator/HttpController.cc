@@ -31,9 +31,7 @@
 #include "HttpController.h"
 
 namespace inet {
-
 Define_Module(HttpController);
-
 
 void HttpController::initialize(int stage)
 {
@@ -41,12 +39,11 @@ void HttpController::initialize(int stage)
 
     EV_DEBUG << "Initializing stage " << stage << endl;
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         EV_INFO << "Initializing HTTP controller. First stage" << endl;
 
         cXMLElement *rootelement = par("config").xmlValue();
-        if (rootelement==NULL)
+        if (rootelement == NULL)
             throw cRuntimeError("Configuration file is not defined");
 
         cXMLAttributeMap attributes;
@@ -54,35 +51,34 @@ void HttpController::initialize(int stage)
         // Initialize the random object for random site selection
         rdObjectFactory rdFactory;
         element = rootelement->getFirstChildWithTag("serverPopularityDistribution");
-        if (element==NULL)
+        if (element == NULL)
             throw cRuntimeError("Server popularity distribution parameter undefined in XML configuration");
         attributes = element->getAttributes();
         rdServerSelection = rdFactory.create(attributes);
-        if (rdServerSelection==NULL)
+        if (rdServerSelection == NULL)
             throw cRuntimeError("Server popularity distribution random object could not be created");
         EV_INFO << "Using " << rdServerSelection->typeStr() << " for server popularity distribution." << endl;
 
-        pspecial = 0.0; // No special events by default
+        pspecial = 0.0;    // No special events by default
         totalLookups = 0;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // Two stages are required to finalize the initialization of the random object for the site selection
         // once the final number of web sites is known.
 
         EV_INFO << "Initializing HTTP controller. Second stage" << endl;
         EV_INFO << "Registered servers are " << webSiteList.size() << endl;
         // Finish initialization of the probability distribution objects which depend on the number of servers.
-        if (rdServerSelection->getType()==dt_uniform)
-            ((rdUniform*)rdServerSelection)->setEnd(webSiteList.size());
-        else if (rdServerSelection->getType()==dt_zipf)
-            ((rdZipf*)rdServerSelection)->setN(webSiteList.size());
+        if (rdServerSelection->getType() == dt_uniform)
+            ((rdUniform *)rdServerSelection)->setEnd(webSiteList.size());
+        else if (rdServerSelection->getType() == dt_zipf)
+            ((rdZipf *)rdServerSelection)->setN(webSiteList.size());
 
         EV_DEBUG << "Server selection probability distribution: " << rdServerSelection->toString() << endl;
 
-        std::string optionsfile = (const char*)par("events");
-        std::string optionssection = (const char*)par("eventsSection");
-        if (optionsfile.size()!=0)
+        std::string optionsfile = (const char *)par("events");
+        std::string optionssection = (const char *)par("eventsSection");
+        if (optionsfile.size() != 0)
             parseOptionsFile(optionsfile, optionssection);
     }
 }
@@ -92,9 +88,8 @@ void HttpController::finish()
     EV_INFO << "Invoking finish on the controller. Total lookups " << totalLookups << endl;
 
     WebServerEntry *en;
-    std::map<std::string,WebServerEntry*>::const_iterator iter;
-    for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
-    {
+    std::map<std::string, WebServerEntry *>::const_iterator iter;
+    for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter) {
         en = (*iter).second;
         EV_INFO << "Server " << (*iter).first << ": Access count " << en->accessCount << endl;
     }
@@ -106,20 +101,18 @@ void HttpController::finish()
 
 void HttpController::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
-        HttpServerStatusUpdateMsg* statusMsg = check_and_cast<HttpServerStatusUpdateMsg*>(msg);
+    if (msg->isSelfMessage()) {
+        HttpServerStatusUpdateMsg *statusMsg = check_and_cast<HttpServerStatusUpdateMsg *>(msg);
         EV_DEBUG << "Handling a status change message @T=" << simTime() << " for www " << statusMsg->www() << endl;
         setSpecialStatus(statusMsg->www(), (ServerStatus)statusMsg->eventKind(), statusMsg->pvalue(), statusMsg->pamortize());
         delete statusMsg;
     }
-    else
-    {
+    else {
         delete msg;
     }
 }
 
-void HttpController::registerServer(const char* objectName, const char* wwwName, int port, int rank, simtime_t activationTime)
+void HttpController::registerServer(const char *objectName, const char *wwwName, int port, int rank, simtime_t activationTime)
 {
     Enter_Method_Silent();
 
@@ -150,42 +143,35 @@ void HttpController::registerServer(const char* objectName, const char* wwwName,
     webSiteList[en->name] = en;
 
     int pos;
-    std::vector<WebServerEntry*>::iterator begin = pickList.begin();
-    if (rank==INSERT_RANDOM )
-    {
-        if (pickList.size()==0)
-        {
+    std::vector<WebServerEntry *>::iterator begin = pickList.begin();
+    if (rank == INSERT_RANDOM) {
+        if (pickList.size() == 0) {
             pickList.push_back(en);
         }
-        else
-        {
-            pos = (int)uniform(0, pickList.size()-1);
-            pickList.insert(begin+pos, en);
+        else {
+            pos = (int)uniform(0, pickList.size() - 1);
+            pickList.insert(begin + pos, en);
         }
     }
-    else if (rank==INSERT_MIDDLE)
-    {
-        pos = pickList.size()/2;
-        pickList.insert(begin+pos, en);
+    else if (rank == INSERT_MIDDLE) {
+        pos = pickList.size() / 2;
+        pickList.insert(begin + pos, en);
     }
-    else if (rank==INSERT_END || rank>=(int)pickList.size())
-    {
+    else if (rank == INSERT_END || rank >= (int)pickList.size()) {
         pickList.push_back(en);
     }
-    else
-    {
-        pickList.insert(begin+rank, en);
+    else {
+        pickList.insert(begin + rank, en);
     }
 }
 
-cModule* HttpController::getServerModule(const char* wwwName)
+cModule *HttpController::getServerModule(const char *wwwName)
 {
     Enter_Method_Silent();
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) // The www name is not in the map
-    {
+    if (webSiteList.find(serverUrl) == webSiteList.end()) {    // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return NULL;
     }
@@ -201,18 +187,16 @@ cModule* HttpController::getServerModule(const char* wwwName)
     return en->module;
 }
 
-cModule* HttpController::getAnyServerModule()
+cModule *HttpController::getAnyServerModule()
 {
     Enter_Method_Silent();
 
-    if (webSiteList.size() == 0)
-    {
+    if (webSiteList.size() == 0) {
         EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return NULL;
     }
 
-    if (pickList.size()==0)
-    {
+    if (pickList.size() == 0) {
         EV_ERROR << "No modules currently in the picklist. Cannot select a random module" << endl;
         return NULL;
     }
@@ -228,14 +212,13 @@ cModule* HttpController::getAnyServerModule()
     return en->module;
 }
 
-int HttpController::getServerInfo(const char* wwwName, char* module, int &port)
+int HttpController::getServerInfo(const char *wwwName, char *module, int& port)
 {
     Enter_Method_Silent();
 
     std::string serverUrl = extractServerName(wwwName);
 
-    if (webSiteList.find(serverUrl) == webSiteList.end()) // The www name is not in the map
-    {
+    if (webSiteList.find(serverUrl) == webSiteList.end()) {    // The www name is not in the map
         EV_ERROR << "Could not find module name for " << wwwName << endl;
         return -1;
     }
@@ -252,18 +235,16 @@ int HttpController::getServerInfo(const char* wwwName, char* module, int &port)
     return 0;
 }
 
-int HttpController::getAnyServerInfo(char* wwwName, char* module, int &port)
+int HttpController::getAnyServerInfo(char *wwwName, char *module, int& port)
 {
     Enter_Method_Silent();
 
-    if (webSiteList.size() == 0)
-    {
+    if (webSiteList.size() == 0) {
         EV_WARN << "No modules registered. Cannot select a random module" << endl;
         return -1;
     }
 
-    if (pickList.size()==0)
-    {
+    if (pickList.size() == 0) {
         EV_ERROR << "No modules currently in the picklist. Cannot select a random module" << endl;
         return -2;
     }
@@ -283,30 +264,27 @@ int HttpController::getAnyServerInfo(char* wwwName, char* module, int &port)
     return 0;
 }
 
-cModule* HttpController::getTcpApp(std::string node)
+cModule *HttpController::getTcpApp(std::string node)
 {
     int pos = node.find("[");
     int rpos = node.rfind("]");
-    cModule * receiverModule = NULL;
-    if (pos > -1 && rpos > -1)
-    {
-        std::string id = node.substr(pos+1, pos-rpos-1);
+    cModule *receiverModule = NULL;
+    if (pos > -1 && rpos > -1) {
+        std::string id = node.substr(pos + 1, pos - rpos - 1);
         std::string name = node.substr(0, pos);
         int numid = atoi(id.c_str());
         receiverModule = simulation.getSystemModule()->getSubmodule(name.c_str(), numid);
     }
-    else
-    {
+    else {
         receiverModule = simulation.getSystemModule()->getSubmodule(node.c_str());
     }
 
-    return receiverModule->getSubmodule("tcpApp", 0); // TODO: CHECK INDEX
+    return receiverModule->getSubmodule("tcpApp", 0);    // TODO: CHECK INDEX
 }
 
-void HttpController::setSpecialStatus(const char* www, ServerStatus status, double p, double amortize)
+void HttpController::setSpecialStatus(const char *www, ServerStatus status, double p, double amortize)
 {
-    if (webSiteList.find(www) == webSiteList.end()) // The www name is not in the map
-    {
+    if (webSiteList.find(www) == webSiteList.end()) {    // The www name is not in the map
         EV_ERROR << "Could not find module name for " << www << ". Cannot set special status" << endl;
         return;
     }
@@ -325,16 +303,15 @@ void HttpController::setSpecialStatus(const char* www, ServerStatus status, doub
     pspecial += p;
 }
 
-void HttpController::cancelSpecialStatus(const char* www)
+void HttpController::cancelSpecialStatus(const char *www)
 {
-    if (specialList.size()==0) return;
+    if (specialList.size() == 0)
+        return;
     WebServerEntry *en;
-    std::list<WebServerEntry*>::iterator i;
-    for (i=specialList.begin(); i!=specialList.end(); i++)
-    {
+    std::list<WebServerEntry *>::iterator i;
+    for (i = specialList.begin(); i != specialList.end(); i++) {
         en = (*i);
-        if (strcmp(en->name.c_str(), www) == 0)
-        {
+        if (strcmp(en->name.c_str(), www) == 0) {
             pspecial -= en->pvalue;
             en->statusSetTime = simTime();
             en->serverStatus = SS_NORMAL;
@@ -345,50 +322,45 @@ void HttpController::cancelSpecialStatus(const char* www)
             break;
         }
     }
-    if (pspecial<0.0) pspecial = 0.0;
-    if (specialList.size()==0) pspecial = 0.0;
+    if (pspecial < 0.0)
+        pspecial = 0.0;
+    if (specialList.size() == 0)
+        pspecial = 0.0;
     EV_DEBUG << "Size of special list is now " << specialList.size() << endl;
 }
 
-HttpController::WebServerEntry* HttpController::selectFromSpecialList()
+HttpController::WebServerEntry *HttpController::selectFromSpecialList()
 {
-    if (specialList.size()==0)
-    {
+    if (specialList.size() == 0) {
         EV_ERROR << "No entries in special list. Cannot select server with special probability" << endl;
         return NULL;
     }
 
     WebServerEntry *en = NULL;
 
-    if (specialList.size()==1)
-    {
+    if (specialList.size() == 1) {
         en = specialList.front();
     }
-    else
-    {
+    else {
         double p = uniform(0, 1);
         double pcumulative = 0.0;
-        std::list<WebServerEntry*>::iterator i;
-        for (i=specialList.begin(); i!=specialList.end(); i++)
-        {
+        std::list<WebServerEntry *>::iterator i;
+        for (i = specialList.begin(); i != specialList.end(); i++) {
             en = (*i);
             pcumulative += en->pvalue;
-            if (pcumulative/pspecial > p)
+            if (pcumulative / pspecial > p)
                 break;
         }
     }
 
-    if (en->pamortize > 0.0)
-    {
-        double newp = en->pvalue-en->pamortize;
-        if (newp > 0.0)
-        {
+    if (en->pamortize > 0.0) {
+        double newp = en->pvalue - en->pamortize;
+        if (newp > 0.0) {
             en->pvalue = newp;
             pspecial -= en->pamortize;
             EV_DEBUG << "Amortizing special probability for " << en->name << ". Now at " << en->pvalue << endl;
         }
-        else
-        {
+        else {
             pspecial -= en->pvalue;
             en->pvalue = 0.0;
             cancelSpecialStatus(en->name.c_str());
@@ -403,9 +375,8 @@ std::string HttpController::listRegisteredServers()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    std::map<std::string,WebServerEntry*>::const_iterator iter;
-    for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter)
-    {
+    std::map<std::string, WebServerEntry *>::const_iterator iter;
+    for (iter = webSiteList.begin(); iter != webSiteList.end(); ++iter) {
         en = (*iter).second;
         str << (*iter).first << ";" << en->host << ";" << en->port << endl;
     }
@@ -416,9 +387,8 @@ std::string HttpController::listSpecials()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    std::list<WebServerEntry*>::iterator i;
-    for (i=specialList.begin(); i!=specialList.end(); i++)
-    {
+    std::list<WebServerEntry *>::iterator i;
+    for (i = specialList.begin(); i != specialList.end(); i++) {
         en = (*i);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
@@ -430,9 +400,8 @@ std::string HttpController::listPickOrder()
 {
     std::ostringstream str;
     WebServerEntry *en;
-    std::vector<WebServerEntry*>::iterator i;
-    for (i=pickList.begin(); i!=pickList.end(); i++)
-    {
+    std::vector<WebServerEntry *>::iterator i;
+    for (i = pickList.begin(); i != pickList.end(); i++) {
         en = (*i);
         str << en->name << ";" << en->host << ";" << en->port << ";" << en->serverStatus
             << ";" << en->pvalue << ";" << en->pamortize << endl;
@@ -448,7 +417,7 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     if (!tracefilestream.is_open())
         throw cRuntimeError("Could not open events file %s", file.c_str());
 
-    if (section.size()==0)
+    if (section.size() == 0)
         bSectionFound = true; // Grab first section
 
     double pval;
@@ -457,40 +426,33 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
     std::string line;
     int linecount = 0;
     HttpServerStatusUpdateMsg *statusChange;
-    while (!std::getline(tracefilestream, line).eof())
-    {
+    while (!std::getline(tracefilestream, line).eof()) {
         linecount++;
-        if (line.empty() || line[0]=='#')
+        if (line.empty() || line[0] == '#')
             continue;
-        if (line[0]=='[')
-        {
+        if (line[0] == '[') {
             // Section
             bSectionFound = false;
-            std::string sectionsub = line.substr(1, line.size()-2);
-            bSectionFound = sectionsub==section;
+            std::string sectionsub = line.substr(1, line.size() - 2);
+            bSectionFound = sectionsub == section;
         }
-        else
-        {
-            if (bSectionFound)
-            {
+        else {
+            if (bSectionFound) {
                 // Format: {time};{www name};{event kind};{p value};{amortization factor}
                 // Event kind is not used at the present
 
                 cStringTokenizer tokenizer = cStringTokenizer(line.c_str(), ";");
                 std::vector<std::string> res = tokenizer.asVector();
-                if (res.size()!=5)
+                if (res.size() != 5)
                     throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
-                try
-                {
+                try {
                     activationtime = (simtime_t)atof(res[0].c_str());
                     pval = atof(res[3].c_str());
                     amortizeval = atof(res[4].c_str());
                 }
-                catch (...)
-                {
+                catch (...) {
                     throw cRuntimeError("Invalid format of event config line in '%s' Line: '%s'", file.c_str(), line.c_str());
                 }
-
                 EV_DEBUG << "Scheduling a status change for " << res[1] << " @ T=" << activationtime << ". Parameters: " << line << endl;
                 statusChange = new HttpServerStatusUpdateMsg();
                 statusChange->setWww(res[1].c_str());
@@ -498,28 +460,24 @@ void HttpController::parseOptionsFile(std::string file, std::string section)
                 statusChange->setPvalue(pval);
                 statusChange->setPamortize(amortizeval);
                 scheduleAt(activationtime, statusChange);
-
             }
         }
     }
     tracefilestream.close();
 }
 
-HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
+HttpController::WebServerEntry *HttpController::__getRandomServerInfo()
 {
-    WebServerEntry* en;
+    WebServerEntry *en;
     int selected = 0;
     // @todo Reimplement! This is a ugly hack to enable easy activation of servers - can lead to problems if no servers active!!!
-    do
-    {
-        if (pspecial>0.0 && bernoulli(pspecial))
-        {
+    do {
+        if (pspecial > 0.0 && bernoulli(pspecial)) {
             // Pick from the special list. Each node can have different probabilities
             en = selectFromSpecialList();
             EV_DEBUG << "Selecting from special list. Got node " << en->name << endl;
         }
-        else
-        {
+        else {
             // Pick from the probability distribution which applies to the general population.
             selected = (int)rdServerSelection->draw();
             en = pickList[selected];
@@ -528,12 +486,8 @@ HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
             EV_DEBUG << "Selecting from normal list. Got node " << en->name << endl;
         }
         EV_DEBUG << "Activation time of the node is " << en->activationTime << " and the current time is " << simTime() << endl;
-    }
-    while (en->activationTime>simTime());
+    } while (en->activationTime > simTime());
     return en;
 }
-
-
-}
-
+} // namespace inet
 

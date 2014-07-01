@@ -25,15 +25,13 @@
 #include "RTCPPacket2_m.h"
 
 namespace inet {
-
-
 class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 {
   public:
     RTCPReceiverReportPacket(const char *name = NULL, int kind = 0);
     RTCPReceiverReportPacket(const RTCPReceiverReportPacket& other) : RTCPReceiverReportPacket_Base(other) {}
-    RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& other) {RTCPReceiverReportPacket_Base::operator=(other); return *this;}
-    virtual RTCPReceiverReportPacket *dup() const {return new RTCPReceiverReportPacket(*this);}
+    RTCPReceiverReportPacket& operator=(const RTCPReceiverReportPacket& other) { RTCPReceiverReportPacket_Base::operator=(other); return *this; }
+    virtual RTCPReceiverReportPacket *dup() const { return new RTCPReceiverReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPReceiverReportPacket_Base
     /**
      * Adds a receiver report to this receiver report packet.
@@ -46,8 +44,8 @@ class RTCPSDESPacket : public RTCPSDESPacket_Base
   public:
     RTCPSDESPacket(const char *name = NULL, int kind = 0);
     RTCPSDESPacket(const RTCPSDESPacket& other) : RTCPSDESPacket_Base(other) {}
-    RTCPSDESPacket& operator=(const RTCPSDESPacket& other) {RTCPSDESPacket_Base::operator=(other); return *this;}
-    virtual RTCPSDESPacket *dup() const {return new RTCPSDESPacket(*this);}
+    RTCPSDESPacket& operator=(const RTCPSDESPacket& other) { RTCPSDESPacket_Base::operator=(other); return *this; }
+    virtual RTCPSDESPacket *dup() const { return new RTCPSDESPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSDESPacket_Base
     void addSDESChunk(SDESChunk *sdesChunk);
 };
@@ -57,12 +55,11 @@ class RTCPByePacket : public RTCPByePacket_Base
   public:
     RTCPByePacket(const char *name = NULL, int kind = 0);
     RTCPByePacket(const RTCPByePacket& other) : RTCPByePacket_Base(other) {}
-    RTCPByePacket& operator=(const RTCPByePacket& other) {RTCPByePacket_Base::operator=(other); return *this;}
-    virtual RTCPByePacket *dup() const {return new RTCPByePacket(*this);}
+    RTCPByePacket& operator=(const RTCPByePacket& other) { RTCPByePacket_Base::operator=(other); return *this; }
+    virtual RTCPByePacket *dup() const { return new RTCPByePacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPByePacket_Base
 };
+} // namespace inet
 
-}
+#endif    // __INET_RTCPPACKET2_H_
 
-
-#endif // __INET_RTCPPACKET2_H_

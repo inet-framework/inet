@@ -17,7 +17,6 @@
 #include "LayeredProtocolBase.h"
 
 namespace inet {
-
 simsignal_t LayeredProtocolBase::packetSentToUpperSignal = registerSignal("packetSentToUpper");
 simsignal_t LayeredProtocolBase::packetReceivedFromUpperSignal = registerSignal("packetReceivedFromUpper");
 simsignal_t LayeredProtocolBase::packetFromUpperDroppedSignal = registerSignal("packetFromUpperDropped");
@@ -26,26 +25,22 @@ simsignal_t LayeredProtocolBase::packetSentToLowerSignal = registerSignal("packe
 simsignal_t LayeredProtocolBase::packetReceivedFromLowerSignal = registerSignal("packetReceivedFromLower");
 simsignal_t LayeredProtocolBase::packetFromLowerDroppedSignal = registerSignal("packetFromLowerDropped");
 
-void LayeredProtocolBase::handleMessageWhenUp(cMessage* message)
+void LayeredProtocolBase::handleMessageWhenUp(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
-    else if (isUpperMessage(message))
-    {
+    else if (isUpperMessage(message)) {
         if (!message->isPacket())
             handleUpperCommand(message);
-        else
-        {
+        else {
             emit(packetReceivedFromUpperSignal, message);
             handleUpperPacket(PK(message));
         }
     }
-    else if (isLowerMessage(message))
-    {
+    else if (isLowerMessage(message)) {
         if (!message->isPacket())
             handleLowerCommand(message);
-        else
-        {
+        else {
             emit(packetReceivedFromLowerSignal, message);
             handleLowerPacket(PK(message));
         }
@@ -54,22 +49,19 @@ void LayeredProtocolBase::handleMessageWhenUp(cMessage* message)
         throw cRuntimeError("Message '%s' received on unexpected gate '%s'", message->getName(), message->getArrivalGate()->getFullName());
 }
 
-void LayeredProtocolBase::handleSelfMessage(cMessage* message)
+void LayeredProtocolBase::handleSelfMessage(cMessage *message)
 {
     throw cRuntimeError("Self message '%s' is not handled.", message->getName());
 }
 
-void LayeredProtocolBase::handleUpperCommand(cMessage* message)
+void LayeredProtocolBase::handleUpperCommand(cMessage *message)
 {
     throw cRuntimeError("Upper command '%s' is not handled.", message->getName());
 }
 
-void LayeredProtocolBase::handleLowerCommand(cMessage* message)
+void LayeredProtocolBase::handleLowerCommand(cMessage *message)
 {
     throw cRuntimeError("Lower command '%s' is not handled.", message->getName());
 }
-
-
-}
-
+} // namespace inet
 

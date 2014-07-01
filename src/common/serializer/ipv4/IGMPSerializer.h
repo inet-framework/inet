@@ -22,30 +22,26 @@
 #include "IGMPMessage_m.h"
 
 namespace inet {
-
-
 /**
  * Converts between IGMPMessage and binary (network byte order) IGMP header.
  */
 class IGMPSerializer
 {
-    public:
-        IGMPSerializer() {}
+  public:
+    IGMPSerializer() {}
 
-        /**
-         * Serializes an IGMPMessage for transmission on the wire.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(const IGMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
+    /**
+     * Serializes an IGMPMessage for transmission on the wire.
+     * Returns the length of data written into buffer.
+     */
+    int serialize(const IGMPMessage *pkt, unsigned char *buf, unsigned int bufsize);
 
-        /**
-         * Puts a packet sniffed from the wire into an IGMPMessage.
-         */
-        void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
+    /**
+     * Puts a packet sniffed from the wire into an IGMPMessage.
+     */
+    void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IGMPSERIALIZER_H
 

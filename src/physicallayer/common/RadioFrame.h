@@ -21,35 +21,30 @@
 #include "IRadioFrame.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
-    protected:
-        const ITransmission *transmission;
+  protected:
+    const ITransmission *transmission;
 
-    public:
-        RadioFrame(const ITransmission *transmission) :
-            transmission(transmission)
-        {}
+  public:
+    RadioFrame(const ITransmission *transmission) :
+        transmission(transmission)
+    {}
 
-        RadioFrame(const RadioFrame &other) :
-            cPacket(other),
-            transmission(other.transmission)
-        {}
+    RadioFrame(const RadioFrame& other) :
+        cPacket(other),
+        transmission(other.transmission)
+    {}
 
-        virtual RadioFrame *dup() const {return new RadioFrame(*this);}
+    virtual RadioFrame *dup() const { return new RadioFrame(*this); }
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const ITransmission *getTransmission() const { return transmission; }
+    virtual const ITransmission *getTransmission() const { return transmission; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_RADIOFRAME_H
 
-}
-
-
-#endif

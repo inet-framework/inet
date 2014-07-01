@@ -13,19 +13,15 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "IARP.h"
 
 namespace inet {
-
 Register_Abstract_Class(IARP::Notification);
 
 const simsignal_t IARP::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
 const simsignal_t IARP::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
 const simsignal_t IARP::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");
-
-
-}
-
+} // namespace inet
 

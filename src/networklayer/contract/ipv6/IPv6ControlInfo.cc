@@ -19,28 +19,27 @@
 
 #ifdef WITH_IPv6
 #include "IPv6Datagram.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 namespace inet {
-
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
 #ifdef WITH_IPv6
     dgram = other.dgram;
-    if (dgram)
-    {
+    if (dgram) {
         dgram = dgram->dup();
         take(dgram);
     }
 
-    for (ExtensionHeaders::const_iterator i=other.extensionHeaders.begin(); i!=other.extensionHeaders.end(); i++)
+    for (ExtensionHeaders::const_iterator i = other.extensionHeaders.begin(); i != other.extensionHeaders.end(); i++)
         extensionHeaders.push_back((*i)->dup());
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 IPv6ControlInfo& IPv6ControlInfo::operator=(const IPv6ControlInfo& other)
 {
-    if (this==&other) return *this;
+    if (this == &other)
+        return *this;
     clean();
     IPv6ControlInfo_Base::operator=(other);
     copy(other);
@@ -52,13 +51,12 @@ void IPv6ControlInfo::clean()
 #ifdef WITH_IPv6
     dropAndDelete(dgram);
 
-    while ( ! extensionHeaders.empty() )
-    {
-        IPv6ExtensionHeader* eh = extensionHeaders.back();
+    while (!extensionHeaders.empty()) {
+        IPv6ExtensionHeader *eh = extensionHeaders.back();
         extensionHeaders.pop_back();
         delete eh;
     }
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 IPv6ControlInfo::~IPv6ControlInfo()
@@ -74,9 +72,9 @@ void IPv6ControlInfo::setOrigDatagram(IPv6Datagram *d)
 
     dgram = d;
     take(dgram);
-#else
+#else // ifdef WITH_IPv6
     throw cRuntimeError("INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
@@ -84,16 +82,16 @@ IPv6Datagram *IPv6ControlInfo::removeOrigDatagram()
 #ifdef WITH_IPv6
     if (!dgram)
         throw cRuntimeError(this, "IPv6ControlInfo::removeOrigDatagram(): no datagram attached "
-                  "(already removed, or maybe this IPv6ControlInfo does not come "
-                  "from the IPv6 module?)");
+                                  "(already removed, or maybe this IPv6ControlInfo does not come "
+                                  "from the IPv6 module?)");
 
     IPv6Datagram *ret = dgram;
     drop(dgram);
     dgram = NULL;
     return ret;
-#else
+#else // ifdef WITH_IPv6
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 unsigned int IPv6ControlInfo::getExtensionHeaderArraySize() const
@@ -108,7 +106,7 @@ void IPv6ControlInfo::setExtensionHeaderArraySize(unsigned int size)
 
 IPv6ExtensionHeaderPtr& IPv6ControlInfo::getExtensionHeader(unsigned int k)
 {
-    ASSERT(k>=0 && k<extensionHeaders.size());
+    ASSERT(k >= 0 && k < extensionHeaders.size());
     return extensionHeaders[k];
 }
 
@@ -117,39 +115,35 @@ void IPv6ControlInfo::setExtensionHeader(unsigned int k, const IPv6ExtensionHead
     throw cRuntimeError(this, "setExtensionHeader() not supported, use addExtensionHeader()");
 }
 
-void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader* eh, int atPos)
+void IPv6ControlInfo::addExtensionHeader(IPv6ExtensionHeader *eh, int atPos)
 {
 #ifdef WITH_IPv6
     ASSERT(eh);
-    if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size())
-    {
+    if (atPos < 0 || (ExtensionHeaders::size_type)atPos >= extensionHeaders.size()) {
         extensionHeaders.push_back(eh);
         return;
     }
 
     // insert at position atPos, shift up the rest of the array
-    extensionHeaders.insert(extensionHeaders.begin()+atPos, eh);
-#else
+    extensionHeaders.insert(extensionHeaders.begin() + atPos, eh);
+#else // ifdef WITH_IPv6
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
 }
 
-IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
+IPv6ExtensionHeader *IPv6ControlInfo::removeFirstExtensionHeader()
 {
     if (extensionHeaders.empty())
         return NULL;
 
 #ifdef WITH_IPv6
     ExtensionHeaders::iterator first = extensionHeaders.begin();
-    IPv6ExtensionHeader* ret = *first;
+    IPv6ExtensionHeader *ret = *first;
     extensionHeaders.erase(first);
     return ret;
-#else
+#else // ifdef WITH_IPv6
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
 }
-
-
-}
-
+} // namespace inet
 

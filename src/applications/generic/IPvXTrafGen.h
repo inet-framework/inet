@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IPVXTRAFGEN_H
 #define __INET_IPVXTRAFGEN_H
 
@@ -30,14 +29,13 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 /**
  * IP traffic generator application. See NED for more info.
  */
 class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
 {
   protected:
-    enum Kinds {START=100, NEXT};
+    enum Kinds { START = 100, NEXT };
 
     // parameters: see the NED files for more info
     simtime_t startTime;
@@ -82,9 +80,7 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     IPvXTrafGen();
     virtual ~IPvXTrafGen();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPVXTRAFGEN_H
 

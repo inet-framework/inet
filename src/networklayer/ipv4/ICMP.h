@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ICMP_H
 #define __INET_ICMP_H
 
@@ -28,7 +27,6 @@
 #include "ICMPMessage.h"
 
 namespace inet {
-
 class IPv4Datagram;
 class IPv4ControlInfo;
 class PingPayload;
@@ -41,7 +39,7 @@ class PingPayload;
 class INET_API ICMP : public cSimpleModule
 {
   protected:
-    typedef std::map<long,int> PingMap;
+    typedef std::map<long, int> PingMap;
     PingMap pingMap;
 
   protected:
@@ -79,9 +77,7 @@ class INET_API ICMP : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ICMP_H
 

@@ -22,9 +22,7 @@
 #include "IRadioMedium.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(IdealAttenuation);
 
 const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
@@ -50,10 +48,6 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
         power = IdealReception::POWER_UNDETECTABLE;
     return new IdealReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, power);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

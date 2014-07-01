@@ -16,25 +16,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TOKENBUCKETMETER_H
 #define __INET_TOKENBUCKETMETER_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Simple token bucket meter.
  */
 class INET_API TokenBucketMeter : public cSimpleModule
 {
   protected:
-    double CIR; // Commited Information Rate (bits/sec)
+    double CIR;    // Commited Information Rate (bits/sec)
     long CBS;    // Committed Burst Size (in bits)
     bool colorAwareMode;
 
-    long Tc; // token bucket for committed burst
+    long Tc;    // token bucket for committed burst
     simtime_t lastUpdateTime;
 
     int numRcvd;
@@ -52,8 +50,7 @@ class INET_API TokenBucketMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TOKENBUCKETMETER_H
 
-
-#endif

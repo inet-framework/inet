@@ -19,25 +19,22 @@
 #include "Modulation.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 void FlatTransmitterBase::initialize(int stage)
 {
     TransmitterBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         headerBitLength = par("headerBitLength");
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL")==0)
+        if (strcmp(modulationName, "NULL") == 0)
             modulation = new NullModulation();
-        else if (strcmp(modulationName, "BPSK")==0)
+        else if (strcmp(modulationName, "BPSK") == 0)
             modulation = new BPSKModulation();
-        else if (strcmp(modulationName, "16-QAM")==0)
+        else if (strcmp(modulationName, "16-QAM") == 0)
             modulation = new QAM16Modulation();
-        else if (strcmp(modulationName, "256-QAM")==0)
+        else if (strcmp(modulationName, "256-QAM") == 0)
             modulation = new QAM256Modulation();
         else
             throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
@@ -45,10 +42,6 @@ void FlatTransmitterBase::initialize(int stage)
         power = W(par("power"));
     }
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

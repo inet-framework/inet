@@ -20,7 +20,6 @@
 #include "opp_utils.h"
 
 namespace inet {
-
 Define_Module(REDDropper);
 
 REDDropper::~REDDropper()
@@ -45,14 +44,13 @@ void REDDropper::initialize()
     cStringTokenizer minthTokens(par("minths"));
     cStringTokenizer maxthTokens(par("maxths"));
     cStringTokenizer maxpTokens(par("maxps"));
-    for (int i = 0; i < numGates; ++i)
-    {
+    for (int i = 0; i < numGates; ++i) {
         minths[i] = minthTokens.hasMoreTokens() ? OPP_Global::atod(minthTokens.nextToken()) :
-                   (i > 0 ? minths[i-1] : 5.0);
+            (i > 0 ? minths[i - 1] : 5.0);
         maxths[i] = maxthTokens.hasMoreTokens() ? OPP_Global::atod(maxthTokens.nextToken()) :
-                   (i > 0 ? maxths[i-1] : 50.0);
+            (i > 0 ? maxths[i - 1] : 50.0);
         maxps[i] = maxpTokens.hasMoreTokens() ? OPP_Global::atod(maxpTokens.nextToken()) :
-                   (i > 0 ? maxps[i-1] : 0.02);
+            (i > 0 ? maxps[i - 1] : 0.02);
 
         if (minths[i] < 0.0)
             throw cRuntimeError("minth parameter must not be negative");
@@ -75,33 +73,26 @@ bool REDDropper::shouldDrop(cPacket *packet)
 
     int queueLength = getLength();
 
-    avg = (1-wq)*avg + wq*queueLength;
+    avg = (1 - wq) * avg + wq * queueLength;
 
-    if (minth<=avg && avg<maxth)
-    {
-        double pb = maxp*(avg-minth) / (maxth-minth);
+    if (minth <= avg && avg < maxth) {
+        double pb = maxp * (avg - minth) / (maxth - minth);
         //double pa = pb / (1-count*pb);
-        if (dblrand() < pb)
-        {
+        if (dblrand() < pb) {
             EV << "Random early packet drop (avg queue len=" << avg << ", pa=" << pb << ")\n";
             return true;
         }
     }
-    else if (avg >= maxth)
-    {
+    else if (avg >= maxth) {
         EV << "Avg queue len " << avg << " >= maxth, dropping packet.\n";
         return true;
     }
-    else if (queueLength >= maxth)  // maxth is also the "hard" limit
-    {
+    else if (queueLength >= maxth) {    // maxth is also the "hard" limit
         EV << "Queue len " << queueLength << " >= maxth, dropping packet.\n";
         return true;
     }
 
     return false;
 }
-
-
-}
-
+} // namespace inet
 

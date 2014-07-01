@@ -21,23 +21,19 @@
 #include "IMessageHandler.h"
 
 namespace inet {
-
 namespace OSPF {
+class DatabaseDescriptionHandler : public IMessageHandler
+{
+  private:
+    bool processDDPacket(OSPFDatabaseDescriptionPacket *ddPacket, Interface *intf, Neighbor *neighbor, bool inExchangeStart);
 
-class DatabaseDescriptionHandler : public IMessageHandler {
-private:
-    bool processDDPacket(OSPFDatabaseDescriptionPacket* ddPacket, Interface* intf, Neighbor* neighbor, bool inExchangeStart);
+  public:
+    DatabaseDescriptionHandler(Router *containingRouter);
 
-public:
-    DatabaseDescriptionHandler(Router* containingRouter);
-
-    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_DATABASEDESCRIPTIONHANDLER_H
 

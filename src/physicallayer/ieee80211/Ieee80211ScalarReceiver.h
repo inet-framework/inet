@@ -24,40 +24,35 @@
 #include "BerParseFile.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 {
-    protected:
-        char opMode;
-        WifiPreamble preambleMode;
-        IErrorModel *errorModel;
-        bool autoHeaderSize;
-        BerParseFile *parseTable;
+  protected:
+    char opMode;
+    WifiPreamble preambleMode;
+    IErrorModel *errorModel;
+    bool autoHeaderSize;
+    BerParseFile *parseTable;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-        virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
+    virtual bool computeHasBitError(const IListening *listening, double minSNIR, int bitLength, double bitrate) const;
 
-    public:
-        Ieee80211ScalarReceiver() :
-            ScalarReceiver(),
-            opMode('\0'),
-            preambleMode((WifiPreamble)-1),
-            errorModel(NULL),
-            autoHeaderSize(false),
-            parseTable(NULL)
-        {}
+  public:
+    Ieee80211ScalarReceiver() :
+        ScalarReceiver(),
+        opMode('\0'),
+        preambleMode((WifiPreamble) - 1),
+        errorModel(NULL),
+        autoHeaderSize(false),
+        parseTable(NULL)
+    {}
 
-        virtual ~Ieee80211ScalarReceiver();
+    virtual ~Ieee80211ScalarReceiver();
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IEEE80211SCALARRECEIVER_H
 
-}
-
-
-#endif

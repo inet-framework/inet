@@ -21,7 +21,6 @@
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
-
 Define_Module(MultiNetworkLayerUpperMultiplexer);
 
 void MultiNetworkLayerUpperMultiplexer::initialize()
@@ -48,18 +47,18 @@ void MultiNetworkLayerUpperMultiplexer::initialize()
         throw cRuntimeError("Connection error: pingUpperIn[] / pingLowerOut[] gate size ratio not correct");
 }
 
-void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage * message)
+void MultiNetworkLayerUpperMultiplexer::handleMessage(cMessage *message)
 {
-    cGate * arrivalGate = message->getArrivalGate();
-    const char * arrivalGateName = arrivalGate->getBaseName();
+    cGate *arrivalGate = message->getArrivalGate();
+    const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "transportUpperIn")) {
         if (dynamic_cast<cPacket *>(message))
             send(message, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + getProtocolIndex(message));
         else {
             // sending down commands
             for (int i = 0; i < getProtocolCount(); i++) {
-                cMessage * duplicate = message->dup();
-                cObject * controlInfo = message->getControlInfo();
+                cMessage *duplicate = message->dup();
+                cObject *controlInfo = message->getControlInfo();
                 if (controlInfo)
                     duplicate->setControlInfo(controlInfo->dup());
                 send(duplicate, "transportLowerOut", getProtocolCount() * arrivalGate->getIndex() + i);
@@ -82,10 +81,10 @@ int MultiNetworkLayerUpperMultiplexer::getProtocolCount()
     return 3;
 }
 
-int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message)
+int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage *message)
 {
-    cPacket * packet = check_and_cast<cPacket *>(message);
-    cObject * controlInfo = packet->getControlInfo();
+    cPacket *packet = check_and_cast<cPacket *>(message);
+    cObject *controlInfo = packet->getControlInfo();
     // TODO: handle the case when some network protocols are disabled
     if (dynamic_cast<IPv4ControlInfo *>(controlInfo))
         return 0;
@@ -96,6 +95,5 @@ int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message)
     else
         throw cRuntimeError("Unknown control info");
 }
-
-}
+} // namespace inet
 

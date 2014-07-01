@@ -28,24 +28,23 @@
 #include "IPv4Address.h"
 
 namespace inet {
-
 Define_Module(HostAutoConfigurator);
-
 
 void HostAutoConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER_2)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER_2) {
         setupNetworkLayer();
     }
 }
 
-void HostAutoConfigurator::finish() {
+void HostAutoConfigurator::finish()
+{
 }
 
-void HostAutoConfigurator::handleMessage(cMessage* apMsg) {
+void HostAutoConfigurator::handleMessage(cMessage *apMsg)
+{
 }
 
 void HostAutoConfigurator::setupNetworkLayer()
@@ -63,23 +62,27 @@ void HostAutoConfigurator::setupNetworkLayer()
         throw cRuntimeError("Generated IP address is out of specified address range");
 
     // get our host module
-    cModule* host = getParentModule();
-    if (!host) throw cRuntimeError("No parent module found");
+    cModule *host = getParentModule();
+    if (!host)
+        throw cRuntimeError("No parent module found");
 
     // get our routing table
-    IIPv4RoutingTable* routingTable = AddressResolver().routingTableOf(host);
-    if (!routingTable) throw cRuntimeError("No routing table found");
+    IIPv4RoutingTable *routingTable = AddressResolver().routingTableOf(host);
+    if (!routingTable)
+        throw cRuntimeError("No routing table found");
 
     // get our interface table
     IInterfaceTable *ift = AddressResolver().interfaceTableOf(host);
-    if (!ift) throw cRuntimeError("No interface table found");
+    if (!ift)
+        throw cRuntimeError("No interface table found");
 
     // look at all interface table entries
     cStringTokenizer interfaceTokenizer(interfaces.c_str());
     const char *ifname;
     while ((ifname = interfaceTokenizer.nextToken()) != NULL) {
-        InterfaceEntry* ie = ift->getInterfaceByName(ifname);
-        if (!ie) throw cRuntimeError("No such interface '%s'", ifname);
+        InterfaceEntry *ie = ift->getInterfaceByName(ifname);
+        if (!ie)
+            throw cRuntimeError("No such interface '%s'", ifname);
 
         // assign IP Address to all connected interfaces
         if (ie->isLoopback()) {
@@ -106,9 +109,5 @@ void HostAutoConfigurator::setupNetworkLayer()
         }
     }
 }
-
-
-
-}
-
+} // namespace inet
 

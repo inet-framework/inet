@@ -28,7 +28,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Glob-style pattern matching class, adopted to special OMNeT++ requirements.
  * One instance represents a pattern to match.
@@ -79,34 +78,35 @@ class INET_API PatternMatcher
 {
   private:
     enum ElemType {
-      LITERALSTRING = 0,
-      ANYCHAR,
-      COMMONCHAR, // any char except "."
-      SET,
-      NEGSET,
-      NUMRANGE,
-      ANYSEQ,     // "**": sequence of any chars
-      COMMONSEQ,  // "*": seq of any chars except "."
-      END
+        LITERALSTRING = 0,
+        ANYCHAR,
+        COMMONCHAR,    // any char except "."
+        SET,
+        NEGSET,
+        NUMRANGE,
+        ANYSEQ,    // "**": sequence of any chars
+        COMMONSEQ,    // "*": seq of any chars except "."
+        END
     };
 
-    struct Elem {
-      ElemType type;
-      std::string literalstring; // if type==LITERALSTRING
-      std::string setchars; // SET/NEGSET: character pairs (0,1),(2,3) etc denote char ranges
-      long fromnum, tonum; // NUMRANGE; -1 means "unset"
+    struct Elem
+    {
+        ElemType type;
+        std::string literalstring;    // if type==LITERALSTRING
+        std::string setchars;    // SET/NEGSET: character pairs (0,1),(2,3) etc denote char ranges
+        long fromnum, tonum;    // NUMRANGE; -1 means "unset"
     };
 
     std::vector<Elem> pattern;
     bool iscasesensitive;
 
-    std::string rest; // used to pass return value from doMatch() to patternPrefixMatches()
+    std::string rest;    // used to pass return value from doMatch() to patternPrefixMatches()
 
   private:
-    void parseSet(const char *&s, Elem& e);
-    void parseNumRange(const char *&s, Elem& e);
-    void parseLiteralString(const char *&s, Elem& e);
-    bool parseNumRange(const char *&str, char closingchar, long& lo, long& up);
+    void parseSet(const char *& s, Elem& e);
+    void parseNumRange(const char *& s, Elem& e);
+    void parseLiteralString(const char *& s, Elem& e);
+    bool parseNumRange(const char *& str, char closingchar, long& lo, long& up);
     std::string debugStrFrom(int from);
     bool isInSet(char c, const char *set);
     // match line from pattern[patternpos]; with last string literal, ignore last suffixlen of pattern
@@ -167,13 +167,13 @@ class INET_API PatternMatcher
      * Returns the internal representation of the pattern as a string.
      * May be useful for debugging purposes.
      */
-    std::string debugStr()  {return debugStrFrom(0);}
+    std::string debugStr() { return debugStrFrom(0); }
 
     /**
      * Prints the internal representation of the pattern on the standard output.
      * May be useful for debugging purposes.
      */
-    void dump()  {printf("%s", debugStr().c_str());}
+    void dump() { printf("%s", debugStr().c_str()); }
 
     /**
      * Utility function to determine whether a given string contains wildcards.
@@ -181,12 +181,8 @@ class INET_API PatternMatcher
      * PatternMatcher.
      */
     static bool containsWildcards(const char *pattern);
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_PATTERNMATCHER_H
 

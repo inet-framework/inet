@@ -21,15 +21,12 @@
 #include "IntServ.h"
 
 namespace inet {
-
-
-#define TED_TRAFFIC         1
+#define TED_TRAFFIC    1
 
 class TED;
 class IIPv4RoutingTable;
 class IInterfaceTable;
 class InterfaceEntry;
-
 
 /**
  * Implements a minimalistic link state routing protocol that employs flooding.
@@ -61,7 +58,7 @@ class LinkStateRouting : public cSimpleModule, public cListener
     cMessage *announceMsg;
     IPv4Address routerId;
 
-    IPAddressVector peerIfAddrs; // addresses of interfaces towards neighbouring routers
+    IPAddressVector peerIfAddrs;    // addresses of interfaces towards neighbouring routers
 
   public:
     LinkStateRouting();
@@ -72,20 +69,16 @@ class LinkStateRouting : public cSimpleModule, public cListener
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg);
 
-    virtual void processLINK_STATE_MESSAGE(LinkStateMsg* msg, IPv4Address sender);
+    virtual void processLINK_STATE_MESSAGE(LinkStateMsg *msg, IPv4Address sender);
 
     // cListener method
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
     virtual void sendToPeers(const std::vector<TELinkStateInfo>& list, bool req, IPv4Address exceptPeer);
-    virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo> & list, bool req);
+    virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo>& list, bool req);
     virtual void sendToIP(LinkStateMsg *msg, IPv4Address destAddr);
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_LINKSTATEROUTING_H
 

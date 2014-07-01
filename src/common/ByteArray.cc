@@ -16,13 +16,10 @@
 #include "ByteArray.h"
 
 namespace inet {
-
-
 void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 {
-    if (length != data_arraysize)
-    {
-        delete [] data_var;
+    if (length != data_arraysize) {
+        delete[] data_var;
         data_var = length ? new char[length] : NULL;
         data_arraysize = length;
     }
@@ -32,8 +29,8 @@ void ByteArray::setDataFromBuffer(const void *ptr, unsigned int length)
 
 void ByteArray::setDataFromByteArray(const ByteArray& other, unsigned int srcOffs, unsigned int length)
 {
-    ASSERT(srcOffs+length <= other.data_arraysize);
-    setDataFromBuffer(other.data_var+srcOffs, length);
+    ASSERT(srcOffs + length <= other.data_arraysize);
+    setDataFromBuffer(other.data_var + srcOffs, length);
 }
 
 void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
@@ -46,7 +43,7 @@ void ByteArray::addDataFromBuffer(const void *ptr, unsigned int length)
     if (data_arraysize)
         memcpy(ndata_var, data_var, data_arraysize);
     memcpy(ndata_var + data_arraysize, ptr, length);
-    delete [] data_var;
+    delete[] data_var;
     data_var = ndata_var;
     data_arraysize = nlength;
 }
@@ -58,13 +55,13 @@ unsigned int ByteArray::copyDataToBuffer(void *ptr, unsigned int length, unsigne
 
     if (srcOffs + length > data_arraysize)
         length = data_arraysize - srcOffs;
-    memcpy(ptr, data_var+srcOffs, length);
+    memcpy(ptr, data_var + srcOffs, length);
     return length;
 }
 
 void ByteArray::assignBuffer(void *ptr, unsigned int length)
 {
-    delete [] data_var;
+    delete[] data_var;
     data_var = (char *)ptr;
     data_arraysize = length;
 }
@@ -73,22 +70,17 @@ void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
 {
     ASSERT(data_arraysize >= (truncleft + truncright));
 
-    if ((truncleft || truncright))
-    {
+    if ((truncleft || truncright)) {
         unsigned int nlength = data_arraysize - (truncleft + truncright);
         char *ndata_var = NULL;
-        if (nlength)
-        {
+        if (nlength) {
             ndata_var = new char[nlength];
-            memcpy(ndata_var, data_var+truncleft, nlength);
+            memcpy(ndata_var, data_var + truncleft, nlength);
         }
-        delete [] data_var;
+        delete[] data_var;
         data_var = ndata_var;
         data_arraysize = nlength;
     }
 }
-
-
-}
-
+} // namespace inet
 

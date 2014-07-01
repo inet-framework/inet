@@ -21,29 +21,24 @@
 #include "AntennaBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ConstantGainAntenna : public AntennaBase
 {
-    protected:
-        double gain;
+  protected:
+    double gain;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        ConstantGainAntenna();
+  public:
+    ConstantGainAntenna();
 
-        virtual void printToStream(std::ostream &stream) const { stream << "constant gain antenna"; }
-        virtual double getMaxGain() const { return gain; }
-        virtual double computeGain(const EulerAngles direction) const { return gain; }
+    virtual void printToStream(std::ostream& stream) const { stream << "constant gain antenna"; }
+    virtual double getMaxGain() const { return gain; }
+    virtual double computeGain(const EulerAngles direction) const { return gain; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_CONSTANTGAINANTENNA_H
 
-}
-
-
-#endif

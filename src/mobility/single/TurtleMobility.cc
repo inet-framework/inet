@@ -15,15 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TurtleMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(TurtleMobility);
-
 
 TurtleMobility::TurtleMobility()
 {
@@ -38,8 +34,7 @@ void TurtleMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing TurtleMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         WATCH(speed);
         WATCH(angle);
         WATCH(borderPolicy);
@@ -88,15 +83,12 @@ void TurtleMobility::resumeScript()
 {
     simtime_t now = simTime();
 
-    while (nextChange == now)
-    {
-        if (nextStatement != NULL)
-        {
+    while (nextChange == now) {
+        if (nextStatement != NULL) {
             executeStatement(nextStatement);
             gotoNextStatement();
         }
-        else
-        {
+        else {
             nextChange = -1;
             stationary = true;
             targetPosition = lastPosition;
@@ -111,14 +103,12 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
     EV_DEBUG << "doing <" << tag << ">\n";
 
-    if (!strcmp(tag, "repeat"))
-    {
+    if (!strcmp(tag, "repeat")) {
         const char *nAttr = stmt->getAttribute("n");
-        long n = -1;  // infinity -- that's the default
+        long n = -1;    // infinity -- that's the default
 
-        if (nAttr)
-        {
-            n = (long) getValue(nAttr);
+        if (nAttr) {
+            n = (long)getValue(nAttr);
 
             if (n < 0)
                 throw cRuntimeError("<repeat>: negative repeat count at %s", stmt->getSourceLocation());
@@ -126,8 +116,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         loopVars.push(n);
     }
-    else if (!strcmp(tag, "set"))
-    {
+    else if (!strcmp(tag, "set")) {
         const char *speedAttr = stmt->getAttribute("speed");
         const char *angleAttr = stmt->getAttribute("angle");
         const char *xAttr = stmt->getAttribute("x");
@@ -149,8 +138,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (speed <= 0)
             throw cRuntimeError("<set>: speed is negative or zero at %s", stmt->getSourceLocation());
 
-        if (bpAttr)
-        {
+        if (bpAttr) {
             if (!strcmp(bpAttr, "reflect"))
                 borderPolicy = REFLECT;
             else if (!strcmp(bpAttr, "wrap"))
@@ -161,12 +149,11 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
                 borderPolicy = RAISEERROR;
             else
                 throw cRuntimeError("<set>: value for attribute borderPolicy is invalid, should be "
-                      "'reflect', 'wrap', 'placerandomly' or 'error' at %s",
-                      stmt->getSourceLocation());
+                                    "'reflect', 'wrap', 'placerandomly' or 'error' at %s",
+                        stmt->getSourceLocation());
         }
     }
-    else if (!strcmp(tag, "forward"))
-    {
+    else if (!strcmp(tag, "forward")) {
         const char *dAttr = stmt->getAttribute("d");
         const char *tAttr = stmt->getAttribute("t");
 
@@ -175,21 +162,18 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         double d, t;
 
-        if (tAttr && dAttr)
-        {
+        if (tAttr && dAttr) {
             // cover distance d in time t (current speed is ignored)
             d = getValue(dAttr);
             t = getValue(tAttr);
         }
-        else if (dAttr)
-        {
+        else if (dAttr) {
             // travel distance d at current speed
             d = getValue(dAttr);
             t = d / speed;
         }
-        else // tAttr only
-        {
-            // travel for time t at current speed
+        else {    // tAttr only
+                  // travel for time t at current speed
             t = getValue(tAttr);
             d = speed * t;
         }
@@ -205,8 +189,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         targetPosition.y += d * sin(PI * angle / 180);
         nextChange += t;
     }
-    else if (!strcmp(tag, "turn"))
-    {
+    else if (!strcmp(tag, "turn")) {
         const char *angleAttr = stmt->getAttribute("angle");
 
         if (!angleAttr)
@@ -214,8 +197,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         angle += getValue(angleAttr);
     }
-    else if (!strcmp(tag, "wait"))
-    {
+    else if (!strcmp(tag, "wait")) {
         const char *tAttr = stmt->getAttribute("t");
 
         if (!tAttr)
@@ -226,10 +208,9 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
         if (t < 0)
             throw cRuntimeError("<wait>: time (attribute t) is negative (%g) at %s", t, stmt->getSourceLocation());
 
-        nextChange += t;  // targetPosition is unchanged
+        nextChange += t;    // targetPosition is unchanged
     }
-    else if (!strcmp(tag, "moveto"))
-    {
+    else if (!strcmp(tag, "moveto")) {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *tAttr = stmt->getAttribute("t");
@@ -249,8 +230,7 @@ void TurtleMobility::executeStatement(cXMLElement *stmt)
 
         nextChange += t;
     }
-    else if (!strcmp(tag, "moveby"))
-    {
+    else if (!strcmp(tag, "moveby")) {
         const char *xAttr = stmt->getAttribute("x");
         const char *yAttr = stmt->getAttribute("y");
         const char *tAttr = stmt->getAttribute("t");
@@ -276,8 +256,7 @@ double TurtleMobility::getValue(const char *s)
 {
     // first, textually replace $MAXX and $MAXY with their actual values
     std::string str;
-    if (strchr(s, '$'))
-    {
+    if (strchr(s, '$')) {
         char strMinX[32], strMinY[32];
         char strMaxX[32], strMaxY[32];
         sprintf(strMinX, "%g", constraintAreaMin.x);
@@ -289,16 +268,16 @@ double TurtleMobility::getValue(const char *s)
         std::string::size_type pos;
 
         while ((pos = str.find("$MINX")) != std::string::npos)
-            str.replace(pos, sizeof("$MINX")-1, strMinX);
+            str.replace(pos, sizeof("$MINX") - 1, strMinX);
 
         while ((pos = str.find("$MINY")) != std::string::npos)
-            str.replace(pos, sizeof("$MINY")-1, strMinY);
+            str.replace(pos, sizeof("$MINY") - 1, strMinY);
 
         while ((pos = str.find("$MAXX")) != std::string::npos)
-            str.replace(pos, sizeof("$MAXX")-1, strMaxX);
+            str.replace(pos, sizeof("$MAXX") - 1, strMaxX);
 
         while ((pos = str.find("$MAXY")) != std::string::npos)
-            str.replace(pos, sizeof("$MAXY")-1, strMaxY);
+            str.replace(pos, sizeof("$MAXY") - 1, strMaxY);
 
         s = str.c_str();
     }
@@ -319,51 +298,41 @@ void TurtleMobility::gotoNextStatement()
 {
     // "statement either doesn't have a child, or it's a <repeat> and loop count is already pushed on the stack"
     ASSERT(!nextStatement->getFirstChild() || (!strcmp(nextStatement->getTagName(), "repeat")
-            && !loopVars.empty()));
+                                               && !loopVars.empty()));
 
-    if (nextStatement->getFirstChild() && (loopVars.top() != 0 || (loopVars.pop(), false)))   // !=0: positive or -1
-    {
+    if (nextStatement->getFirstChild() && (loopVars.top() != 0 || (loopVars.pop(), false))) {    // !=0: positive or -1
         // statement must be a <repeat> if it has children; repeat count>0 must be
         // on the stack; let's start doing the body.
         nextStatement = nextStatement->getFirstChild();
     }
-    else if (!nextStatement->getNextSibling())
-    {
+    else if (!nextStatement->getNextSibling()) {
         // no sibling -- either end of <repeat> body, or end of script
-        ASSERT(nextStatement->getParentNode()==turtleScript ? loopVars.empty() : !loopVars.empty());
+        ASSERT(nextStatement->getParentNode() == turtleScript ? loopVars.empty() : !loopVars.empty());
 
-        if (!loopVars.empty())
-        {
+        if (!loopVars.empty()) {
             // decrement and check loop counter
-            if (loopVars.top() != -1)  // -1 means infinity
+            if (loopVars.top() != -1) // -1 means infinity
                 loopVars.top()--;
 
-            if (loopVars.top() != 0)  // positive or -1
-            {
+            if (loopVars.top() != 0) {    // positive or -1
                 // go to beginning of <repeat> block again
                 nextStatement = nextStatement->getParentNode()->getFirstChild();
             }
-            else
-            {
+            else {
                 // end of loop -- locate next statement after the <repeat>
                 nextStatement = nextStatement->getParentNode();
                 gotoNextStatement();
             }
         }
-        else
-        {
+        else {
             // end of script
             nextStatement = NULL;
         }
     }
-    else
-    {
+    else {
         // go to next statement (must exist -- see "if" above)
         nextStatement = nextStatement->getNextSibling();
     }
 }
-
-
-}
-
+} // namespace inet
 

@@ -21,7 +21,6 @@
 #include "OperationalBase.h"
 
 namespace inet {
-
 class INET_API LayeredProtocolBase : public OperationalBase
 {
   public:
@@ -34,20 +33,19 @@ class INET_API LayeredProtocolBase : public OperationalBase
     static simsignal_t packetFromLowerDroppedSignal;
 
   protected:
-    virtual void handleMessageWhenUp(cMessage* message);
-    virtual void handleSelfMessage(cMessage* message);
+    virtual void handleMessageWhenUp(cMessage *message);
+    virtual void handleSelfMessage(cMessage *message);
 
-    virtual void handleUpperCommand(cMessage* message);
-    virtual void handleLowerCommand(cMessage* message);
+    virtual void handleUpperCommand(cMessage *message);
+    virtual void handleLowerCommand(cMessage *message);
 
-    virtual void handleUpperPacket(cPacket* packet) = 0;
-    virtual void handleLowerPacket(cPacket* packet) = 0;
+    virtual void handleUpperPacket(cPacket *packet) = 0;
+    virtual void handleLowerPacket(cPacket *packet) = 0;
 
-    virtual bool isUpperMessage(cMessage* message) = 0;
-    virtual bool isLowerMessage(cMessage* message) = 0;
+    virtual bool isUpperMessage(cMessage *message) = 0;
+    virtual bool isLowerMessage(cMessage *message) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LAYEREDPROTOCOLBASE_H
 
-
-#endif

@@ -20,14 +20,13 @@
 #include "SCTPSocket.h"
 
 namespace inet {
-
-
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
  */
 
-typedef struct natInfo {
+typedef struct natInfo
+{
     bool multi;
     uint32 peer1;
     Address peer1Address1;
@@ -42,7 +41,7 @@ typedef struct natInfo {
     uint32 peer2Port;
     int32 peer2Gate;
 } NatInfo;
-typedef std::vector<NatInfo*> NatVector;
+typedef std::vector<NatInfo *> NatVector;
 
 class INET_API SCTPNatServer : public cSimpleModule
 {
@@ -55,7 +54,7 @@ class INET_API SCTPNatServer : public cSimpleModule
     int32 packetsSent;
     int32 packetsRcvd;
     int32 numSessions;
-    int32 numRequestsToSend; // requests to send in this session
+    int32 numRequestsToSend;    // requests to send in this session
     bool ordered;
     int32 outboundStreams;
     int32 inboundStreams;
@@ -64,11 +63,13 @@ class INET_API SCTPNatServer : public cSimpleModule
     static NatVector natVector;
 
     int32 ssn;
+
   public:
-    struct pathStatus {
+    struct pathStatus
+    {
         bool active;
         bool primaryPath;
-        Address  pid;
+        Address pid;
     };
 
     void initialize();
@@ -76,13 +77,10 @@ class INET_API SCTPNatServer : public cSimpleModule
     void finish();
     void handleTimer(cMessage *msg);
     void generateAndSend();
-    void sendInfo(NatInfo* info);
+    void sendInfo(NatInfo *info);
     void printNatVector();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_SCTPNATSERVER_H
 

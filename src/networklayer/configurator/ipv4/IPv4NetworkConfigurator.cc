@@ -29,14 +29,13 @@
 #include "XMLUtils.h"
 
 namespace inet {
-
 Define_Module(IPv4NetworkConfigurator);
 
-#define ADDRLEN_BITS 32
-#define T(CODE)  {long startTime=clock(); CODE; printElapsedTime(#CODE, startTime);}
+#define ADDRLEN_BITS    32
+#define T(CODE)         { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
 
-inline bool isEmpty(const char *s) {return !s || !s[0];}
-inline bool isNotEmpty(const char *s) {return s && s[0];}
+inline bool isEmpty(const char *s) { return !s || !s[0]; }
+inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 static void printElapsedTime(const char *name, long startTime)
 {
@@ -82,8 +81,7 @@ void IPv4NetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         assignAddressesParameter = par("assignAddresses");
         assignDisjunctSubnetAddressesParameter = par("assignDisjunctSubnetAddresses");
         addStaticRoutesParameter = par("addStaticRoutes");
@@ -166,7 +164,7 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceEntry *interfaceEntry)
     ensureConfigurationComputed(topology);
     std::map<InterfaceEntry *, InterfaceInfo *>::iterator it = topology.interfaceInfos.find(interfaceEntry);
     if (it != topology.interfaceInfos.end()) {
-        InterfaceInfo * interfaceInfo = it->second;
+        InterfaceInfo *interfaceInfo = it->second;
         if (interfaceInfo->configure)
             configureInterface(interfaceInfo);
     }
@@ -199,8 +197,10 @@ void IPv4NetworkConfigurator::configureInterface(InterfaceInfo *interfaceInfo)
     EV_DETAIL << "Configuring network interface " << interfaceInfo->getFullPath() << ".\n";
     InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
     IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
-    if (interfaceInfo->mtu != -1) interfaceEntry->setMtu(interfaceInfo->mtu);
-    if (interfaceInfo->metric != -1) interfaceData->setMetric(interfaceInfo->metric);
+    if (interfaceInfo->mtu != -1)
+        interfaceEntry->setMtu(interfaceInfo->mtu);
+    if (interfaceInfo->metric != -1)
+        interfaceData->setMetric(interfaceInfo->metric);
     if (assignAddressesParameter) {
         interfaceData->setIPAddress(IPv4Address(interfaceInfo->address));
         interfaceData->setNetmask(IPv4Address(interfaceInfo->netmask));
@@ -248,8 +248,7 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
     EV_DEBUG << "Topology found " << topology.getNumNodes() << " nodes\n";
 
     // extract nodes, fill in interfaceTable and routingTable members in node
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
         node->module = module;
@@ -261,17 +260,13 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
 
     // extract links and interfaces
     std::set<InterfaceEntry *> interfacesSeen;
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable && !isBridgeNode(node))
-        {
-            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
-            {
+        if (interfaceTable && !isBridgeNode(node)) {
+            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
-                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0)
-                {
+                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
                     // create a new network link
                     LinkInfo *linkInfo = new LinkInfo();
                     topology.linkInfos.push_back(linkInfo);
@@ -282,17 +277,14 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
                     interfacesSeen.insert(interfaceEntry);
 
                     // visit neighbors (and potentially the whole LAN, recursively)
-                    if (isWirelessInterface(interfaceEntry))
-                    {
+                    if (isWirelessInterface(interfaceEntry)) {
                         std::vector<Node *> empty;
                         const char *wirelessId = getWirelessId(interfaceEntry);
                         extractWirelessNeighbors(topology, wirelessId, linkInfo, interfacesSeen, empty);
                     }
-                    else
-                    {
+                    else {
                         Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
-                        if (linkOut)
-                        {
+                        if (linkOut) {
                             std::vector<Node *> empty;
                             extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, empty);
                         }
@@ -303,11 +295,9 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
     }
 
     // annotate links with interfaces
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        for (int j = 0; j < node->getNumOutLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumOutLinks(); j++) {
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             Link *link = (Link *)linkOut;
             Node *localNode = (Node *)linkOut->getLocalNode();
@@ -321,15 +311,12 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
 
     // collect wireless LAN interface infos into a map
     std::map<std::string, std::vector<InterfaceInfo *> > wirelessIdToInterfaceInfosMap;
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
         LinkInfo *linkInfo = topology.linkInfos.at(i);
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos.at(j);
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
-            if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry))
-            {
+            if (!interfaceEntry->isLoopback() && isWirelessInterface(interfaceEntry)) {
                 const char *wirelessId = getWirelessId(interfaceEntry);
                 wirelessIdToInterfaceInfosMap[wirelessId].push_back(interfaceInfo);
             }
@@ -337,23 +324,20 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
     }
 
     // add extra links between all pairs of wireless interfaces within a LAN (full graph)
-    for (std::map<std::string, std::vector<InterfaceInfo *> >::iterator it = wirelessIdToInterfaceInfosMap.begin(); it != wirelessIdToInterfaceInfosMap.end(); it++)
-    {
-        std::vector<InterfaceInfo *> &interfaceInfos = it->second;
-        for (int i = 0; i < (int)interfaceInfos.size(); i++)
-        {
+    for (std::map<std::string, std::vector<InterfaceInfo *> >::iterator it = wirelessIdToInterfaceInfosMap.begin(); it != wirelessIdToInterfaceInfosMap.end(); it++) {
+        std::vector<InterfaceInfo *>& interfaceInfos = it->second;
+        for (int i = 0; i < (int)interfaceInfos.size(); i++) {
             InterfaceInfo *interfaceInfoI = interfaceInfos.at(i);
-            for (int j = i + 1; j < (int)interfaceInfos.size(); j++)
-            {
+            for (int j = i + 1; j < (int)interfaceInfos.size(); j++) {
                 // assume bidirectional links
                 InterfaceInfo *interfaceInfoJ = interfaceInfos.at(j);
                 Link *link = new Link();
                 link->sourceInterfaceInfo = interfaceInfoI;
                 link->destinationInterfaceInfo = interfaceInfoJ;
-                link->setWeight(1); // TODO: use datarate
+                link->setWeight(1);    // TODO: use datarate
                 topology.addLink(link, interfaceInfoI->node, interfaceInfoJ->node);
                 link = new Link();
-                link->setWeight(1); // TODO: use datarate
+                link->setWeight(1);    // TODO: use datarate
                 link->sourceInterfaceInfo = interfaceInfoJ;
                 link->destinationInterfaceInfo = interfaceInfoI;
                 topology.addLink(link, interfaceInfoJ->node, interfaceInfoI->node);
@@ -362,14 +346,13 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
     }
 
     // determine gatewayInterfaceInfo for all linkInfos
-    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++)
-    {
+    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++) {
         LinkInfo *linkInfo = topology.linkInfos[linkIndex];
         linkInfo->gatewayInterfaceInfo = determineGatewayForLink(linkInfo);
     }
 }
 
-void IPv4NetworkConfigurator::extractWiredNeighbors(IPv4Topology& topology, Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void IPv4NetworkConfigurator::extractWiredNeighbors(IPv4Topology& topology, Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     cChannel *transmissionChannel = linkOut->getLocalGate()->getTransmissionChannel();
     if (transmissionChannel)
@@ -378,49 +361,39 @@ void IPv4NetworkConfigurator::extractWiredNeighbors(IPv4Topology& topology, Topo
     Node *node = (Node *)linkOut->getRemoteNode();
     int inputGateId = linkOut->getRemoteGateId();
     IInterfaceTable *interfaceTable = node->interfaceTable;
-    if (!isBridgeNode(node))
-    {
+    if (!isBridgeNode(node)) {
         InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByNodeInputGateId(inputGateId);
         if (!interfaceEntry) {
             // no such interface (node is probably down); we should probably get the information from our (future) internal database
         }
-        else if (interfacesSeen.count(interfaceEntry) == 0)
-        {
+        else if (interfacesSeen.count(interfaceEntry) == 0) {
             InterfaceInfo *neighborInterfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
             linkInfo->interfaceInfos.push_back(neighborInterfaceInfo);
             interfacesSeen.insert(interfaceEntry);
         }
     }
-    else
-    {
+    else {
         if (!contains(deviceNodesVisited, node))
             extractDeviceNeighbors(topology, node, linkInfo, interfacesSeen, deviceNodesVisited);
     }
 }
 
-void IPv4NetworkConfigurator::extractWirelessNeighbors(IPv4Topology& topology, const char *wirelessId, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void IPv4NetworkConfigurator::extractWirelessNeighbors(IPv4Topology& topology, const char *wirelessId, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
-    for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++)
-    {
+    for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++) {
         Node *node = (Node *)topology.getNode(nodeIndex);
         IInterfaceTable *interfaceTable = node->interfaceTable;
-        if (interfaceTable)
-        {
-            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++)
-            {
+        if (interfaceTable) {
+            for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *interfaceEntry = interfaceTable->getInterface(j);
-                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0 && isWirelessInterface(interfaceEntry))
-                {
-                    if (!strcmp(getWirelessId(interfaceEntry), wirelessId))
-                    {
-                        if (!isBridgeNode(node))
-                        {
+                if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0 && isWirelessInterface(interfaceEntry)) {
+                    if (!strcmp(getWirelessId(interfaceEntry), wirelessId)) {
+                        if (!isBridgeNode(node)) {
                             InterfaceInfo *interfaceInfo = createInterfaceInfo(topology, node, linkInfo, interfaceEntry);
                             linkInfo->interfaceInfos.push_back(interfaceInfo);
                             interfacesSeen.insert(interfaceEntry);
                         }
-                        else
-                        {
+                        else {
                             if (!contains(deviceNodesVisited, node))
                                 extractDeviceNeighbors(topology, node, linkInfo, interfacesSeen, deviceNodesVisited);
                         }
@@ -431,22 +404,18 @@ void IPv4NetworkConfigurator::extractWirelessNeighbors(IPv4Topology& topology, c
     }
 }
 
-void IPv4NetworkConfigurator::extractDeviceNeighbors(IPv4Topology& topology, Node *node, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
+void IPv4NetworkConfigurator::extractDeviceNeighbors(IPv4Topology& topology, Node *node, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& deviceNodesVisited)
 {
     deviceNodesVisited.push_back(node);
     IInterfaceTable *interfaceTable = node->interfaceTable;
-    if (interfaceTable)
-    {
+    if (interfaceTable) {
         // switch and access point
-        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++)
-        {
+        for (int i = 0; i < interfaceTable->getNumInterfaces(); i++) {
             InterfaceEntry *interfaceEntry = interfaceTable->getInterface(i);
-            if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0)
-            {
+            if (!interfaceEntry->isLoopback() && interfacesSeen.count(interfaceEntry) == 0) {
                 if (isWirelessInterface(interfaceEntry))
                     extractWirelessNeighbors(topology, getWirelessId(interfaceEntry), linkInfo, interfacesSeen, deviceNodesVisited);
-                else
-                {
+                else {
                     Topology::LinkOut *linkOut = findLinkOut(node, interfaceEntry->getNodeOutputGateId());
                     if (linkOut)
                         extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
@@ -454,11 +423,9 @@ void IPv4NetworkConfigurator::extractDeviceNeighbors(IPv4Topology& topology, Nod
             }
         }
     }
-    else
-    {
+    else {
         // hub and bus
-        for (int i = 0; i < node->getNumOutLinks(); i++)
-        {
+        for (int i = 0; i < node->getNumOutLinks(); i++) {
             Topology::LinkOut *linkOut = node->getLinkOut(i);
             extractWiredNeighbors(topology, linkOut, linkInfo, interfacesSeen, deviceNodesVisited);
         }
@@ -482,6 +449,7 @@ Topology::LinkOut *IPv4NetworkConfigurator::findLinkOut(Node *node, int gateId)
     for (int i = 0; i < node->getNumOutLinks(); i++)
         if (node->getLinkOut(i)->getLocalGateId() == gateId)
             return node->getLinkOut(i);
+
     return NULL;
 }
 
@@ -490,6 +458,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceIn
     for (int i = 0; i < (int)node->interfaceInfos.size(); i++)
         if (node->interfaceInfos.at(i)->interfaceEntry == interfaceEntry)
             return node->interfaceInfos.at(i);
+
     return NULL;
 }
 
@@ -497,7 +466,7 @@ double IPv4NetworkConfigurator::getChannelWeight(cChannel *transmissionChannel)
 {
     //TODO shouldn't we use interface metric here?
     double datarate = transmissionChannel->getNominalDatarate();
-    return datarate > 0 ? 1 / datarate : 1.0;  //TODO why 1.0 if there's no datarate?
+    return datarate > 0 ? 1 / datarate : 1.0;    //TODO why 1.0 if there's no datarate?
 }
 
 /**
@@ -512,13 +481,11 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
     cXMLElementList wirelessElements = configuration->getChildrenByTagName("wireless");
-    for (int i = 0; i < (int)wirelessElements.size(); i++)
-    {
+    for (int i = 0; i < (int)wirelessElements.size(); i++) {
         cXMLElement *wirelessElement = wirelessElements[i];
-        const char *hostAttr = wirelessElement->getAttribute("hosts");  // "host* router[0..3]"
-        const char *interfaceAttr = wirelessElement->getAttribute("interfaces"); // i.e. interface names, like "eth* ppp0"
-        try
-        {
+        const char *hostAttr = wirelessElement->getAttribute("hosts");    // "host* router[0..3]"
+        const char *interfaceAttr = wirelessElement->getAttribute("interfaces");    // i.e. interface names, like "eth* ppp0"
+        try {
             // parse host/interface expressions
             Matcher hostMatcher(hostAttr);
             Matcher interfaceMatcher(interfaceAttr);
@@ -527,12 +494,11 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
             if ((hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
                 (interfaceMatcher.matchesAny() || interfaceMatcher.matches(interfaceEntry->getFullName())))
             {
-                const char *idAttr = wirelessElement->getAttribute("id");  // identifier of wireless connection
+                const char *idAttr = wirelessElement->getAttribute("id");    // identifier of wireless connection
                 return idAttr ? idAttr : wirelessElement->getSourceLocation();
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <wireless> element at %s: %s", wirelessElement->getSourceLocation(), e.what());
         }
     }
@@ -542,8 +508,7 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
     if (!module)
         module = hostModule;
     cSimpleModule *mgmtModule = ModuleAccess<cSimpleModule>("mgmt").getIfExists(module);
-    if (mgmtModule)
-    {
+    if (mgmtModule) {
         if (mgmtModule->hasPar("ssid"))
             return mgmtModule->par("ssid");
         else if (mgmtModule->hasPar("accessPointAddress"))
@@ -561,8 +526,7 @@ const char *IPv4NetworkConfigurator::getWirelessId(InterfaceEntry *interfaceEntr
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::determineGatewayForLink(LinkInfo *linkInfo)
 {
     InterfaceInfo *gatewayInterfaceInfo = NULL;
-    for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++)
-    {
+    for (int interfaceIndex = 0; interfaceIndex < (int)linkInfo->interfaceInfos.size(); interfaceIndex++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[interfaceIndex];
         IInterfaceTable *interfaceTable = interfaceInfo->node->interfaceTable;
         IIPv4RoutingTable *routingTable = interfaceInfo->node->routingTable;
@@ -573,11 +537,11 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::determineGatewa
             if (!interfaceTable->getInterface(i)->isLoopback())
                 numInterfaces++;
 
-        if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled())
-        {
+
+        if (numInterfaces > 1 && routingTable && routingTable->isForwardingEnabled()) {
             // node has at least one more interface, supposedly connecting to another link
             if (gatewayInterfaceInfo)
-                return NULL;  // we already found one gateway, this makes it ambiguous! report "no gateway"
+                return NULL; // we already found one gateway, this makes it ambiguous! report "no gateway"
             else
                 gatewayInterfaceInfo = interfaceInfo; // remember gateway
         }
@@ -602,8 +566,7 @@ inline int getRepresentationBitCount(uint32 count)
  */
 static int getMostSignificantBitIndex(uint32 value, int bitValue, int defaultIndex)
 {
-    for (int bitIndex = sizeof(value) * 8 - 1; bitIndex >= 0; bitIndex--)
-    {
+    for (int bitIndex = sizeof(value) * 8 - 1; bitIndex >= 0; bitIndex--) {
         uint32 mask = (uint32)1 << bitIndex;
         if ((value & mask) == ((uint32)bitValue << bitIndex))
             return bitIndex;
@@ -617,8 +580,7 @@ static int getMostSignificantBitIndex(uint32 value, int bitValue, int defaultInd
  */
 static int getLeastSignificantBitIndex(uint32 value, int bitValue, int defaultIndex)
 {
-    for (int bitIndex = 0; bitIndex < ADDRLEN_BITS; bitIndex++)
-    {
+    for (int bitIndex = 0; bitIndex < ADDRLEN_BITS; bitIndex++) {
         uint32 mask = (uint32)1 << bitIndex;
         if ((value & mask) == ((uint32)bitValue << bitIndex))
             return bitIndex;
@@ -633,11 +595,9 @@ static uint32 getPackedBits(uint32 value, uint32 valueMask)
 {
     uint32 packedValue = 0;
     int packedValueIndex = 0;
-    for (int valueIndex = 0; valueIndex < ADDRLEN_BITS; valueIndex++)
-    {
+    for (int valueIndex = 0; valueIndex < ADDRLEN_BITS; valueIndex++) {
         uint32 valueBitMask = (uint32)1 << valueIndex;
-        if ((valueMask & valueBitMask) != 0)
-        {
+        if ((valueMask & valueBitMask) != 0) {
             if ((value & valueBitMask) != 0)
                 packedValue |= (uint32)1 << packedValueIndex;
             packedValueIndex++;
@@ -652,11 +612,9 @@ static uint32 getPackedBits(uint32 value, uint32 valueMask)
 static uint32 setPackedBits(uint32 value, uint32 valueMask, uint32 packedValue)
 {
     int packedValueIndex = 0;
-    for (int valueIndex = 0; valueIndex < ADDRLEN_BITS; valueIndex++)
-    {
+    for (int valueIndex = 0; valueIndex < ADDRLEN_BITS; valueIndex++) {
         uint32 valueBitMask = (uint32)1 << valueIndex;
-        if ((valueMask & valueBitMask) != 0)
-        {
+        if ((valueMask & valueBitMask) != 0) {
             uint32 newValueBitMask = (uint32)1 << packedValueIndex;
             if ((packedValue & newValueBitMask) != 0)
                 value |= valueBitMask;
@@ -682,8 +640,8 @@ bool IPv4NetworkConfigurator::compareInterfaceInfos(InterfaceInfo *i, InterfaceI
  * | 1 | X | 1 | 1 |
  * | ? | 0 | 1 | ? |
  */
-void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<InterfaceInfo *>& interfaces, /*in*/
-        std::vector<IPv4NetworkConfigurator::InterfaceInfo *>& compatibleInterfaces, /*out, and the rest too*/
+void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<InterfaceInfo *>& interfaces,    /*in*/
+        std::vector<IPv4NetworkConfigurator::InterfaceInfo *>& compatibleInterfaces,    /*out, and the rest too*/
         uint32& mergedAddress, uint32& mergedAddressSpecifiedBits, uint32& mergedAddressIncompatibleBits,
         uint32& mergedNetmask, uint32& mergedNetmaskSpecifiedBits, uint32& mergedNetmaskIncompatibleBits)
 {
@@ -691,8 +649,7 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
     mergedAddress = mergedAddressSpecifiedBits = mergedAddressIncompatibleBits = 0;
     mergedNetmask = mergedNetmaskSpecifiedBits = mergedNetmaskIncompatibleBits = 0;
 
-    for (int interfaceIndex = 0; interfaceIndex < (int)interfaces.size(); interfaceIndex++)
-    {
+    for (int interfaceIndex = 0; interfaceIndex < (int)interfaces.size(); interfaceIndex++) {
         IPv4NetworkConfigurator::InterfaceInfo *candidateInterface = interfaces[interfaceIndex];
         InterfaceEntry *ie = candidateInterface->interfaceEntry;
 
@@ -738,7 +695,6 @@ void IPv4NetworkConfigurator::collectCompatibleInterfaces(const std::vector<Inte
         compatibleInterfaces.push_back(candidateInterface);
         EV_DEBUG << "Merged address specification: " << IPv4Address(mergedAddress) << " / " << IPv4Address(mergedAddressSpecifiedBits) << " / " << IPv4Address(mergedAddressIncompatibleBits) << endl;
         EV_DEBUG << "Merged netmask specification: " << IPv4Address(mergedNetmask) << " / " << IPv4Address(mergedNetmaskSpecifiedBits) << " / " << IPv4Address(mergedNetmaskIncompatibleBits) << endl;
-
     }
     // sort compatibleInterfaces moving the most constrained interfaces first
     std::sort(compatibleInterfaces.begin(), compatibleInterfaces.end(), compareInterfaceInfos);
@@ -754,8 +710,7 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
     std::map<uint32, InterfaceEntry *> assignedAddressToInterfaceEntryMap;
 
     // iterate through all links and process them separately one by one
-    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++)
-    {
+    for (int linkIndex = 0; linkIndex < (int)topology.linkInfos.size(); linkIndex++) {
         LinkInfo *selectedLink = topology.linkInfos[linkIndex];
 
         std::vector<InterfaceInfo *> unconfiguredInterfaces;
@@ -763,23 +718,22 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
             unconfiguredInterfaces.push_back(*it);
         // repeat until all interfaces of the selected link become configured
         // and assign addresses to groups of interfaces having compatible address and netmask specifications
-        while (unconfiguredInterfaces.size() != 0)
-        {
+        while (unconfiguredInterfaces.size() != 0) {
             // STEP 1.
-            uint32 mergedAddress;                 // compatible bits of the merged address (both 0 and 1 are address bits)
+            uint32 mergedAddress;    // compatible bits of the merged address (both 0 and 1 are address bits)
             uint32 mergedAddressSpecifiedBits;    // mask for the valid compatible bits of the merged address (0 means unspecified, 1 means specified)
-            uint32 mergedAddressIncompatibleBits; // incompatible bits of the merged address (0 means compatible, 1 means incompatible)
-            uint32 mergedNetmask;                 // compatible bits of the merged netmask (both 0 and 1 are netmask bits)
+            uint32 mergedAddressIncompatibleBits;    // incompatible bits of the merged address (0 means compatible, 1 means incompatible)
+            uint32 mergedNetmask;    // compatible bits of the merged netmask (both 0 and 1 are netmask bits)
             uint32 mergedNetmaskSpecifiedBits;    // mask for the compatible bits of the merged netmask (0 means unspecified, 1 means specified)
-            uint32 mergedNetmaskIncompatibleBits; // incompatible bits of the merged netmask (0 means compatible, 1 means incompatible)
-            std::vector<InterfaceInfo *> compatibleInterfaces; // the list of compatible interfaces
+            uint32 mergedNetmaskIncompatibleBits;    // incompatible bits of the merged netmask (0 means compatible, 1 means incompatible)
+            std::vector<InterfaceInfo *> compatibleInterfaces;    // the list of compatible interfaces
             collectCompatibleInterfaces(unconfiguredInterfaces, compatibleInterfaces, mergedAddress, mergedAddressSpecifiedBits, mergedAddressIncompatibleBits, mergedNetmask, mergedNetmaskSpecifiedBits, mergedNetmaskIncompatibleBits);
 
             // STEP 2.
             // determine the valid range of netmask length by searching from left to right the last 1 and the first 0 bits
             // also consider the incompatible bits of the address to limit the range of valid netmasks accordingly
-            int minimumNetmaskLength = bitSize - getLeastSignificantBitIndex(mergedNetmask & mergedNetmaskSpecifiedBits, 1, bitSize); // 0 means 0.0.0.0, bitSize means 255.255.255.255
-            int maximumNetmaskLength = bitSize - 1 - getMostSignificantBitIndex(~mergedNetmask & mergedNetmaskSpecifiedBits, 1, -1); // 0 means 0.0.0.0, bitSize means 255.255.255.255
+            int minimumNetmaskLength = bitSize - getLeastSignificantBitIndex(mergedNetmask & mergedNetmaskSpecifiedBits, 1, bitSize);    // 0 means 0.0.0.0, bitSize means 255.255.255.255
+            int maximumNetmaskLength = bitSize - 1 - getMostSignificantBitIndex(~mergedNetmask & mergedNetmaskSpecifiedBits, 1, -1);    // 0 means 0.0.0.0, bitSize means 255.255.255.255
             maximumNetmaskLength = std::min(maximumNetmaskLength, bitSize - 1 - getMostSignificantBitIndex(mergedAddressIncompatibleBits, 1, -1));
 
             // make sure there are enough bits to configure a unique address for all interface
@@ -792,23 +746,20 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
             // STEP 3.
             // determine network address and network netmask by iterating through valid netmasks from longest to shortest
             int netmaskLength = -1;
-            uint32 networkAddress = 0; // network part of the addresses  (e.g. 10.1.1.0)
-            uint32 networkNetmask = 0; // netmask for the network (e.g. 255.255.255.0)
-            for (netmaskLength = maximumNetmaskLength; netmaskLength >= minimumNetmaskLength; netmaskLength--)
-            {
+            uint32 networkAddress = 0;    // network part of the addresses  (e.g. 10.1.1.0)
+            uint32 networkNetmask = 0;    // netmask for the network (e.g. 255.255.255.0)
+            for (netmaskLength = maximumNetmaskLength; netmaskLength >= minimumNetmaskLength; netmaskLength--) {
                 networkNetmask = (((uint32)1 << netmaskLength) - (uint32)1) << (bitSize - netmaskLength);
                 EV_DEBUG << "Trying network netmask: " << IPv4Address(networkNetmask) << " : " << netmaskLength << endl;
                 networkAddress = mergedAddress & mergedAddressSpecifiedBits & networkNetmask;
-                uint32 networkAddressUnspecifiedBits = ~mergedAddressSpecifiedBits & networkNetmask; // 1 means the network address unspecified
+                uint32 networkAddressUnspecifiedBits = ~mergedAddressSpecifiedBits & networkNetmask;    // 1 means the network address unspecified
                 uint32 networkAddressUnspecifiedPartMaximum = 0;
-                for (int i = 0; i < (int)assignedNetworkAddresses.size(); i++)
-                {
+                for (int i = 0; i < (int)assignedNetworkAddresses.size(); i++) {
                     uint32 assignedNetworkAddress = assignedNetworkAddresses[i];
                     uint32 assignedNetworkNetmask = assignedNetworkNetmasks[i];
                     uint32 assignedNetworkAddressMaximum = assignedNetworkAddress | ~assignedNetworkNetmask;
                     EV_DEBUG << "Checking against assigned network address " << IPv4Address(assignedNetworkAddress) << endl;
-                    if ((assignedNetworkAddress & ~networkAddressUnspecifiedBits) == (networkAddress & ~networkAddressUnspecifiedBits))
-                    {
+                    if ((assignedNetworkAddress & ~networkAddressUnspecifiedBits) == (networkAddress & ~networkAddressUnspecifiedBits)) {
                         uint32 assignedAddressUnspecifiedPart = getPackedBits(assignedNetworkAddressMaximum, networkAddressUnspecifiedBits);
                         if (assignedAddressUnspecifiedPart > networkAddressUnspecifiedPartMaximum)
                             networkAddressUnspecifiedPartMaximum = assignedAddressUnspecifiedPart;
@@ -818,8 +769,7 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                 EV_DEBUG << "Counting from: " << networkAddressUnspecifiedPartMaximum + (uint32)1 << " to: " << networkAddressUnspecifiedPartLimit << endl;
 
                 // we start with +1 so that the network address will be more likely different
-                for (uint32 networkAddressUnspecifiedPart = networkAddressUnspecifiedPartMaximum; networkAddressUnspecifiedPart <= networkAddressUnspecifiedPartLimit; networkAddressUnspecifiedPart++)
-                {
+                for (uint32 networkAddressUnspecifiedPart = networkAddressUnspecifiedPartMaximum; networkAddressUnspecifiedPart <= networkAddressUnspecifiedPartLimit; networkAddressUnspecifiedPart++) {
                     networkAddress = setPackedBits(networkAddress, networkAddressUnspecifiedBits, networkAddressUnspecifiedPart);
                     EV_DEBUG << "Trying network address: " << IPv4Address(networkAddress) << endl;
 
@@ -828,6 +778,7 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                     for (int i = 0; i < (int)assignedInterfaceAddresses.size(); i++)
                         if ((assignedInterfaceAddresses[i] & networkNetmask) == networkAddress)
                             interfaceCount++;
+
                     if (assignDisjunctSubnetAddressesParameter && interfaceCount != 0)
                         continue;
                     EV_DEBUG << "Matching interface count: " << interfaceCount << endl;
@@ -837,29 +788,26 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
                         goto found;
                 }
             }
-            found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
+          found: if (netmaskLength < minimumNetmaskLength || netmaskLength > maximumNetmaskLength)
                 throw cRuntimeError("Failed to find address prefix (using %s with specified bits %s) and netmask (length from %d bits to %d bits) for interface %s and %d other interface(s). Please refine your parameters and try again!",
-                    IPv4Address(mergedAddress).str().c_str(), IPv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
-                    compatibleInterfaces[0]->interfaceEntry->getFullPath().c_str(), compatibleInterfaces.size() - 1);
+                        IPv4Address(mergedAddress).str().c_str(), IPv4Address(mergedAddressSpecifiedBits).str().c_str(), minimumNetmaskLength, maximumNetmaskLength,
+                        compatibleInterfaces[0]->interfaceEntry->getFullPath().c_str(), compatibleInterfaces.size() - 1);
             EV_DEBUG << "Selected netmask length: " << netmaskLength << endl;
             EV_DEBUG << "Selected network address: " << IPv4Address(networkAddress) << endl;
             EV_DEBUG << "Selected network netmask: " << IPv4Address(networkNetmask) << endl;
 
             // STEP 4.
             // determine the complete IP address for all compatible interfaces
-            for (int interfaceIndex = 0; interfaceIndex < (int)compatibleInterfaces.size(); interfaceIndex++)
-            {
+            for (int interfaceIndex = 0; interfaceIndex < (int)compatibleInterfaces.size(); interfaceIndex++) {
                 InterfaceInfo *compatibleInterface = compatibleInterfaces[interfaceIndex];
                 InterfaceEntry *interfaceEntry = compatibleInterface->interfaceEntry;
                 uint32 interfaceAddress = compatibleInterface->address & ~networkNetmask;
                 uint32 interfaceAddressSpecifiedBits = compatibleInterface->addressSpecifiedBits;
-                uint32 interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask; // 1 means the interface address is unspecified
+                uint32 interfaceAddressUnspecifiedBits = ~interfaceAddressSpecifiedBits & ~networkNetmask;    // 1 means the interface address is unspecified
                 uint32 interfaceAddressUnspecifiedPartMaximum = 0;
-                for (int i = 0; i < (int)assignedInterfaceAddresses.size(); i++)
-                {
+                for (int i = 0; i < (int)assignedInterfaceAddresses.size(); i++) {
                     uint32 otherInterfaceAddress = assignedInterfaceAddresses[i];
-                    if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits))
-                    {
+                    if ((otherInterfaceAddress & ~interfaceAddressUnspecifiedBits) == ((networkAddress | interfaceAddress) & ~interfaceAddressUnspecifiedBits)) {
                         uint32 otherInterfaceAddressUnspecifiedPart = getPackedBits(otherInterfaceAddress, interfaceAddressUnspecifiedBits);
                         if (otherInterfaceAddressUnspecifiedPart > interfaceAddressUnspecifiedPartMaximum)
                             interfaceAddressUnspecifiedPartMaximum = otherInterfaceAddressUnspecifiedPart;
@@ -896,16 +844,14 @@ void IPv4NetworkConfigurator::assignAddresses(IPv4Topology& topology)
     }
 }
 
-IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::createInterfaceInfo(IPv4Topology& topology, Node *node, LinkInfo* linkInfo, InterfaceEntry *ie)
+IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::createInterfaceInfo(IPv4Topology& topology, Node *node, LinkInfo *linkInfo, InterfaceEntry *ie)
 {
     InterfaceInfo *interfaceInfo = new InterfaceInfo(node, linkInfo, ie);
     IPv4InterfaceData *ipv4Data = ie->ipv4Data();
-    if (ipv4Data)
-    {
+    if (ipv4Data) {
         IPv4Address address = ipv4Data->getIPAddress();
         IPv4Address netmask = ipv4Data->getNetmask();
-        if (!address.isUnspecified())
-        {
+        if (!address.isUnspecified()) {
             interfaceInfo->address = address.getInt();
             interfaceInfo->addressSpecifiedBits = 0xFFFFFFFF;
             interfaceInfo->netmask = netmask.getInt();
@@ -940,6 +886,7 @@ bool IPv4NetworkConfigurator::Matcher::matches(const char *s)
     for (int i = 0; i < (int)matchers.size(); i++)
         if (matchers[i]->matches(s))
             return true;
+
     return false;
 }
 
@@ -949,11 +896,10 @@ IPv4NetworkConfigurator::InterfaceMatcher::InterfaceMatcher(const char *pattern)
     if (matchesany)
         return;
     cStringTokenizer tokenizer(pattern);
-    while (tokenizer.hasMoreTokens())
-    {
+    while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
         if (*token == '>')
-            towardsMatchers.push_back(new inet::PatternMatcher(token+1, true, true, true));
+            towardsMatchers.push_back(new inet::PatternMatcher(token + 1, true, true, true));
         else
             nameMatchers.push_back(new inet::PatternMatcher(token, true, true, true));
     }
@@ -977,20 +923,21 @@ bool IPv4NetworkConfigurator::InterfaceMatcher::matches(InterfaceInfo *interface
         if (nameMatchers[i]->matches(interfaceName))
             return true;
 
+
     LinkInfo *linkInfo = interfaceInfo->linkInfo;
     cModule *ownerModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
-    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
         InterfaceInfo *candidateInfo = linkInfo->interfaceInfos[i];
         cModule *candidateModule = candidateInfo->interfaceEntry->getInterfaceTable()->getHostModule();
         if (candidateModule == ownerModule)
             continue;
         std::string candidateFullPath = candidateModule->getFullPath();
-        std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.')+1);
+        std::string candidateShortenedFullPath = candidateFullPath.substr(candidateFullPath.find('.') + 1);
         for (int j = 0; j < (int)towardsMatchers.size(); j++)
             if (towardsMatchers[j]->matches(candidateShortenedFullPath.c_str()) ||
-                    towardsMatchers[j]->matches(candidateFullPath.c_str()))
+                towardsMatchers[j]->matches(candidateFullPath.c_str()))
                 return true;
+
     }
     return false;
 }
@@ -999,9 +946,9 @@ inline bool strToBool(const char *str, bool defaultValue)
 {
     if (!str || !str[0])
         return defaultValue;
-    if (strcmp(str,"true")==0)
+    if (strcmp(str, "true") == 0)
         return true;
-    if (strcmp(str,"false")==0)
+    if (strcmp(str, "false") == 0)
         return false;
     throw cRuntimeError("Invalid boolean XML attribute:'%s'", str);
 }
@@ -1011,33 +958,30 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
     std::set<InterfaceInfo *> interfacesSeen;
     cXMLElementList interfaceElements = configuration->getChildrenByTagName("interface");
 
-    for (int i = 0; i < (int)interfaceElements.size(); i++)
-    {
+    for (int i = 0; i < (int)interfaceElements.size(); i++) {
         cXMLElement *interfaceElement = interfaceElements[i];
-        const char *hostAttr = interfaceElement->getAttribute("hosts");  // "host* router[0..3]"
-        const char *interfaceAttr = interfaceElement->getAttribute("names"); // i.e. interface names, like "eth* ppp0"
+        const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
+        const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
 
         // TODO: "switch" egyebkent sztem nem muxik most, de kellene!
-        const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
-        const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
-        const char *addressAttr = interfaceElement->getAttribute("address"); // "10.0.x.x"
-        const char *netmaskAttr = interfaceElement->getAttribute("netmask"); // "255.255.x.x"
-        const char *mtuAttr = interfaceElement->getAttribute("mtu"); // integer
-        const char *metricAttr = interfaceElement->getAttribute("metric"); // integer
-        const char *groupsAttr = interfaceElement->getAttribute("groups"); // list of multicast addresses
+        const char *towardsAttr = interfaceElement->getAttribute("towards");    // neighbor host names, like "ap switch"
+        const char *amongAttr = interfaceElement->getAttribute("among");    // neighbor host names, like "host[*] router1"
+        const char *addressAttr = interfaceElement->getAttribute("address");    // "10.0.x.x"
+        const char *netmaskAttr = interfaceElement->getAttribute("netmask");    // "255.255.x.x"
+        const char *mtuAttr = interfaceElement->getAttribute("mtu");    // integer
+        const char *metricAttr = interfaceElement->getAttribute("metric");    // integer
+        const char *groupsAttr = interfaceElement->getAttribute("groups");    // list of multicast addresses
         bool addStaticRouteAttr = getAttributeBoolValue(interfaceElement, "add-static-route", true);
         bool addDefaultRouteAttr = getAttributeBoolValue(interfaceElement, "add-default-route", true);
         bool addSubnetRouteAttr = getAttributeBoolValue(interfaceElement, "add-subnet-route", true);
 
-        if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
-        {
+        if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
             towardsAttr = hostAttr = amongAttr;
         }
 
-        try
-        {
+        try {
             // parse host/interface/towards expressions
             Matcher hostMatcher(hostAttr);
             Matcher interfaceMatcher(interfaceAttr);
@@ -1054,14 +998,11 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                 parseAddressAndSpecifiedBits(netmaskAttr, netmask, netmaskSpecifiedBits);
 
             // configure address/netmask constraints on matching interfaces
-            for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-            {
+            for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
                 LinkInfo *linkInfo = topology.linkInfos[i];
-                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-                {
+                for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
                     InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                    if (interfacesSeen.count(interfaceInfo) == 0)
-                    {
+                    if (interfacesSeen.count(interfaceInfo) == 0) {
                         cModule *hostModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
                         std::string hostFullPath = hostModule->getFullPath();
                         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
@@ -1075,12 +1016,10 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
 
                             // unicast address constraints
                             interfaceInfo->configure = haveAddressConstraint;
-                            if (interfaceInfo->configure)
-                            {
+                            if (interfaceInfo->configure) {
                                 interfaceInfo->address = address;
                                 interfaceInfo->addressSpecifiedBits = addressSpecifiedBits;
-                                if (haveNetmaskConstraint)
-                                {
+                                if (haveNetmaskConstraint) {
                                     interfaceInfo->netmask = netmask;
                                     interfaceInfo->netmaskSpecifiedBits = netmaskSpecifiedBits;
                                 }
@@ -1100,8 +1039,7 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                                 interfaceInfo->metric = atoi(metricAttr);
 
                             // groups
-                            if (isNotEmpty(groupsAttr))
-                            {
+                            if (isNotEmpty(groupsAttr)) {
                                 cStringTokenizer tokenizer(groupsAttr);
                                 while (tokenizer.hasMoreTokens())
                                     interfaceInfo->multicastGroups.push_back(IPv4Address(tokenizer.nextToken()));
@@ -1113,8 +1051,7 @@ void IPv4NetworkConfigurator::readInterfaceConfiguration(IPv4Topology& topology)
                 }
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(), e.what());
         }
     }
@@ -1126,14 +1063,13 @@ void IPv4NetworkConfigurator::parseAddressAndSpecifiedBits(const char *addressAt
     std::string address;
     std::string specifiedBits;
     cStringTokenizer tokenizer(addressAttr, ".");
-    while (tokenizer.hasMoreTokens())
-    {
+    while (tokenizer.hasMoreTokens()) {
         std::string token = tokenizer.nextToken();
-        address += (token == "x") ? "0." : (token+".");
+        address += (token == "x") ? "0." : (token + ".");
         specifiedBits += (token == "x") ? "0." : "255.";
     }
-    address = address.substr(0, address.size()-1);
-    specifiedBits = specifiedBits.substr(0, specifiedBits.size()-1);
+    address = address.substr(0, address.size() - 1);
+    specifiedBits = specifiedBits.substr(0, specifiedBits.size() - 1);
 
     if (!IPv4Address::isWellFormed(address.c_str()) || !IPv4Address::isWellFormed(specifiedBits.c_str()))
         throw cRuntimeError("Malformed IPv4 address or netmask constraint '%s'", addressAttr);
@@ -1144,8 +1080,7 @@ void IPv4NetworkConfigurator::parseAddressAndSpecifiedBits(const char *addressAt
 
 bool IPv4NetworkConfigurator::linkContainsMatchingHostExcept(LinkInfo *linkInfo, Matcher *hostMatcher, cModule *exceptModule)
 {
-    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[i];
         cModule *hostModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
         if (hostModule == exceptModule)
@@ -1160,19 +1095,16 @@ bool IPv4NetworkConfigurator::linkContainsMatchingHostExcept(LinkInfo *linkInfo,
 
 void IPv4NetworkConfigurator::dumpTopology(IPv4Topology& topology)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         EV_INFO << "Node " << node->module->getFullPath() << endl;
-        for (int j = 0; j < node->getNumOutLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumOutLinks(); j++) {
             Topology::LinkOut *linkOut = node->getLinkOut(j);
             ASSERT(linkOut->getLocalNode() == node);
             Node *remoteNode = (Node *)linkOut->getRemoteNode();
             EV_INFO << "     -> " << remoteNode->module->getFullPath() << " " << linkOut->getWeight() << endl;
         }
-        for (int j = 0; j < node->getNumInLinks(); j++)
-        {
+        for (int j = 0; j < node->getNumInLinks(); j++) {
             Topology::LinkIn *linkIn = node->getLinkIn(j);
             ASSERT(linkIn->getLocalNode() == node);
             Node *remoteNode = (Node *)linkIn->getRemoteNode();
@@ -1183,12 +1115,10 @@ void IPv4NetworkConfigurator::dumpTopology(IPv4Topology& topology)
 
 void IPv4NetworkConfigurator::dumpLinks(IPv4Topology& topology)
 {
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
         EV_INFO << "Link " << i << endl;
         LinkInfo *linkInfo = topology.linkInfos[i];
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
             EV_INFO << "     " << interfaceInfo->interfaceEntry->getFullPath() << endl;
         }
@@ -1197,12 +1127,10 @@ void IPv4NetworkConfigurator::dumpLinks(IPv4Topology& topology)
 
 void IPv4NetworkConfigurator::dumpAddresses(IPv4Topology& topology)
 {
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
         EV_INFO << "Link " << i << endl;
-        LinkInfo* linkInfo = topology.linkInfos[i];
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+        LinkInfo *linkInfo = topology.linkInfos[i];
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceEntry *interfaceEntry = linkInfo->interfaceInfos[j]->interfaceEntry;
             cModule *host = dynamic_cast<cModule *>(interfaceEntry->getInterfaceTable())->getParentModule();
             EV_INFO << "    " << host->getFullName() << " / " << interfaceEntry->info() << endl;
@@ -1212,11 +1140,9 @@ void IPv4NetworkConfigurator::dumpAddresses(IPv4Topology& topology)
 
 void IPv4NetworkConfigurator::dumpRoutes(IPv4Topology& topology)
 {
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
-        if (node->routingTable)
-        {
+        if (node->routingTable) {
             EV_INFO << "Node " << node->module->getFullPath() << endl;
             node->routingTable->printRoutingTable();
             if (node->routingTable->getNumMulticastRoutes() > 0)
@@ -1234,41 +1160,36 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
     fprintf(f, "<config>\n");
 
     // interfaces
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
-        LinkInfo* linkInfo = topology.linkInfos[i];
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
+        LinkInfo *linkInfo = topology.linkInfos[i];
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
             std::stringstream stream;
-            stream << "   <interface hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" names=\"" << interfaceEntry->getName() <<
-                      "\" address=\"" << interfaceData->getIPAddress() << "\" netmask=\"" << interfaceData->getNetmask() <<
-                      "\" metric=\"" << interfaceData->getMetric() <<
-                      "\"/>" << endl;
+            stream << "   <interface hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" names=\"" << interfaceEntry->getName()
+                   << "\" address=\"" << interfaceData->getIPAddress() << "\" netmask=\"" << interfaceData->getNetmask()
+                   << "\" metric=\"" << interfaceData->getMetric()
+                   << "\"/>" << endl;
             fprintf(f, "%s", stream.str().c_str());
         }
     }
 
     // multicast groups
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
-        LinkInfo* linkInfo = topology.linkInfos[i];
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
+        LinkInfo *linkInfo = topology.linkInfos[i];
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
             InterfaceEntry *interfaceEntry = interfaceInfo->interfaceEntry;
             IPv4InterfaceData *interfaceData = interfaceEntry->ipv4Data();
             int numOfMulticastGroups = interfaceData->getNumOfJoinedMulticastGroups();
-            if (numOfMulticastGroups > 0)
-            {
+            if (numOfMulticastGroups > 0) {
                 std::stringstream stream;
                 stream << "   <multicast-group hosts=\"" << interfaceInfo->node->module->getFullPath() << "\" interfaces=\"" << interfaceEntry->getName() << "\" address=\"";
-                for (int k = 0 ; k < numOfMulticastGroups; k++)
-                {
+                for (int k = 0; k < numOfMulticastGroups; k++) {
                     IPv4Address address = interfaceData->getJoinedMulticastGroup(k);
-                    if (k) stream << " ";
+                    if (k)
+                        stream << " ";
                     stream << address.str();
                 }
                 stream << "\"/>" << endl;
@@ -1278,27 +1199,23 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
     }
 
     // wireless links
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
         bool hasWireless = false;
-        LinkInfo* linkInfo = topology.linkInfos[i];
-        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-        {
+        LinkInfo *linkInfo = topology.linkInfos[i];
+        for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
             InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
             if (isWirelessInterface(interfaceInfo->interfaceEntry))
                 hasWireless = true;
         }
-        if (hasWireless)
-        {
+        if (hasWireless) {
             bool first = true;
             std::stringstream stream;
             stream << "   <wireless interfaces=\"";
-            for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
-            {
-                if (!first) stream << " ";
+            for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++) {
+                if (!first)
+                    stream << " ";
                 InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[j];
-                if (isWirelessInterface(interfaceInfo->interfaceEntry))
-                {
+                if (isWirelessInterface(interfaceInfo->interfaceEntry)) {
                     stream << interfaceInfo->node->module->getFullPath() << "%" << interfaceInfo->interfaceEntry->getName();
                     first = false;
                 }
@@ -1308,24 +1225,32 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
         }
     }
 
-
     // routes
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IIPv4RoutingTable *routingTable = node->routingTable;
-        if (routingTable)
-        {
-            for (int j = 0; j < routingTable->getNumRoutes(); j++)
-            {
+        if (routingTable) {
+            for (int j = 0; j < routingTable->getNumRoutes(); j++) {
                 IPv4Route *route = routingTable->getRoute(j);
                 std::stringstream stream;
                 IPv4Address netmask = route->getNetmask();
                 IPv4Address gateway = route->getGateway();
                 stream << "   <route hosts=\"" << node->module->getFullPath();
-                stream << "\" destination=\""; if (route->getDestination().isUnspecified()) stream << "*"; else stream << route->getDestination();
-                stream << "\" netmask=\""; if (route->getNetmask().isUnspecified()) stream << "*"; else stream << route->getNetmask();
-                stream << "\" gateway=\""; if (route->getGateway().isUnspecified()) stream << "*"; else stream << route->getGateway();
+                stream << "\" destination=\"";
+                if (route->getDestination().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getDestination();
+                stream << "\" netmask=\"";
+                if (route->getNetmask().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getNetmask();
+                stream << "\" gateway=\"";
+                if (route->getGateway().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getGateway();
                 stream << "\" interface=\"" << route->getInterfaceName() << "\" metric=\"" << route->getMetric() << "\"/>" << endl;
                 fprintf(f, "%s", stream.str().c_str());
             }
@@ -1333,25 +1258,35 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
     }
 
     // multicast routes
-    for (int i = 0; i < topology.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         IIPv4RoutingTable *routingTable = node->routingTable;
-        if (routingTable)
-        {
-            for (int j = 0; j < routingTable->getNumMulticastRoutes(); j++)
-            {
+        if (routingTable) {
+            for (int j = 0; j < routingTable->getNumMulticastRoutes(); j++) {
                 IPv4MulticastRoute *route = routingTable->getMulticastRoute(j);
                 std::stringstream stream;
                 stream << "   <multicast-route hosts=\"" << node->module->getFullPath();
-                stream << "\" source=\""; if (route->getOrigin().isUnspecified()) stream << "*"; else stream << route->getOrigin();
-                stream << "\" netmask=\""; if (route->getOriginNetmask().isUnspecified()) stream << "*"; else stream << route->getOriginNetmask();
-                stream << "\" groups=\""; if (route->getMulticastGroup().isUnspecified()) stream << "*"; else stream << route->getMulticastGroup();
-                if (route->getInInterface()) stream << "\" parent=\"" << route->getInInterface()->getInterface()->getName();
+                stream << "\" source=\"";
+                if (route->getOrigin().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getOrigin();
+                stream << "\" netmask=\"";
+                if (route->getOriginNetmask().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getOriginNetmask();
+                stream << "\" groups=\"";
+                if (route->getMulticastGroup().isUnspecified())
+                    stream << "*";
+                else
+                    stream << route->getMulticastGroup();
+                if (route->getInInterface())
+                    stream << "\" parent=\"" << route->getInInterface()->getInterface()->getName();
                 stream << "\" children=\"";
-                for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++)
-                {
-                    if (k) stream << " ";
+                for (unsigned int k = 0; k < route->getNumOutInterfaces(); k++) {
+                    if (k)
+                        stream << " ";
                     stream << route->getOutInterface(k)->getInterface()->getName();
                 }
                 stream << "\" metric=\"" << route->getMetric() << "\"/>" << endl;
@@ -1368,24 +1303,21 @@ void IPv4NetworkConfigurator::dumpConfig(IPv4Topology& topology)
 void IPv4NetworkConfigurator::readMulticastGroupConfiguration(IPv4Topology& topology)
 {
     cXMLElementList multicastGroupElements = configuration->getChildrenByTagName("multicast-group");
-    for (int i = 0; i < (int)multicastGroupElements.size(); i++)
-    {
+    for (int i = 0; i < (int)multicastGroupElements.size(); i++) {
         cXMLElement *multicastGroupElement = multicastGroupElements[i];
         const char *hostAttr = multicastGroupElement->getAttribute("hosts");
         const char *interfaceAttr = multicastGroupElement->getAttribute("interfaces");
         const char *addressAttr = multicastGroupElement->getAttribute("address");
-        const char *towardsAttr = multicastGroupElement->getAttribute("towards"); // neighbor host names, like "ap switch"
+        const char *towardsAttr = multicastGroupElement->getAttribute("towards");    // neighbor host names, like "ap switch"
         const char *amongAttr = multicastGroupElement->getAttribute("among");
 
-        if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
-        {
+        if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", multicastGroupElement->getSourceLocation());
             towardsAttr = hostAttr = amongAttr;
         }
 
-        try
-        {
+        try {
             Matcher hostMatcher(hostAttr);
             Matcher interfaceMatcher(interfaceAttr);
             Matcher towardsMatcher(towardsAttr);
@@ -1393,19 +1325,16 @@ void IPv4NetworkConfigurator::readMulticastGroupConfiguration(IPv4Topology& topo
             // parse group addresses
             std::vector<IPv4Address> multicastGroups;
             cStringTokenizer tokenizer(addressAttr);
-            while (tokenizer.hasMoreTokens())
-            {
+            while (tokenizer.hasMoreTokens()) {
                 IPv4Address addr = IPv4Address(tokenizer.nextToken());
                 if (!addr.isMulticast())
                     throw cRuntimeError("Non-multicast address %s found in the multicast-group element", addr.str().c_str());
                 multicastGroups.push_back(addr);
             }
 
-            for (int j = 0; j < (int)topology.linkInfos.size(); j++)
-            {
+            for (int j = 0; j < (int)topology.linkInfos.size(); j++) {
                 LinkInfo *linkInfo = topology.linkInfos[j];
-                for (int k = 0; k < (int)linkInfo->interfaceInfos.size(); k++)
-                {
+                for (int k = 0; k < (int)linkInfo->interfaceInfos.size(); k++) {
                     InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[k];
                     cModule *hostModule = interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule();
                     std::string hostFullPath = hostModule->getFullPath();
@@ -1421,8 +1350,7 @@ void IPv4NetworkConfigurator::readMulticastGroupConfiguration(IPv4Topology& topo
                 }
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <multicast-group> element at %s: %s", multicastGroupElement->getSourceLocation(), e.what());
         }
     }
@@ -1439,27 +1367,24 @@ const char *IPv4NetworkConfigurator::getMandatoryAttribute(cXMLElement *element,
 void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topology)
 {
     cXMLElementList routeElements = configuration->getChildrenByTagName("route");
-    for (int i = 0; i < (int)routeElements.size(); i++)
-    {
+    for (int i = 0; i < (int)routeElements.size(); i++) {
         cXMLElement *routeElement = routeElements[i];
         const char *hostAttr = getMandatoryAttribute(routeElement, "hosts");
-        const char *destinationAttr = getMandatoryAttribute(routeElement, "destination"); // destination address  (AddressResolver syntax)
-        const char *netmaskAttr = routeElement->getAttribute("netmask"); // default: 255.255.255.255; alternative notation: "/23"
-        const char *gatewayAttr = routeElement->getAttribute("gateway"); // next hop address (AddressResolver syntax)
-        const char *interfaceAttr = routeElement->getAttribute("interface"); // output interface name
+        const char *destinationAttr = getMandatoryAttribute(routeElement, "destination");    // destination address  (AddressResolver syntax)
+        const char *netmaskAttr = routeElement->getAttribute("netmask");    // default: 255.255.255.255; alternative notation: "/23"
+        const char *gatewayAttr = routeElement->getAttribute("gateway");    // next hop address (AddressResolver syntax)
+        const char *interfaceAttr = routeElement->getAttribute("interface");    // output interface name
         const char *metricAttr = routeElement->getAttribute("metric");
 
-        try
-        {
+        try {
             // parse and check the attributes
             IPv4Address destination;
             if (!isEmpty(destinationAttr) && strcmp(destinationAttr, "*"))
                 destination = resolve(destinationAttr, AddressResolver::ADDR_IPv4).toIPv4();
             IPv4Address netmask;
-            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*"))
-            {
+            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
-                    netmask = IPv4Address::makeNetmask(atoi(netmaskAttr+1));
+                    netmask = IPv4Address::makeNetmask(atoi(netmaskAttr + 1));
                 else
                     netmask = IPv4Address(netmaskAttr);
             }
@@ -1470,15 +1395,12 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
 
             // find matching host(s), and add the route
             Matcher atMatcher(hostAttr);
-            for (int i = 0; i < topology.getNumNodes(); i++)
-            {
+            for (int i = 0; i < topology.getNumNodes(); i++) {
                 Node *node = (Node *)topology.getNode(i);
-                if (node->routingTable)
-                {
+                if (node->routingTable) {
                     std::string hostFullPath = node->module->getFullPath();
                     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
-                    if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str()))
-                    {
+                    if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
                         // determine the gateway (its address towards this node!) and the output interface for the route (must be done per node)
                         InterfaceEntry *ie;
                         IPv4Address gateway;
@@ -1489,7 +1411,7 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
                         route->setSourceType(IRoute::MANUAL);
                         route->setDestination(destination);
                         route->setNetmask(netmask);
-                        route->setGateway(gateway); // may be unspecified
+                        route->setGateway(gateway);    // may be unspecified
                         route->setInterface(ie);
                         if (isNotEmpty(metricAttr))
                             route->setMetric(atoi(metricAttr));
@@ -1498,8 +1420,7 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
                 }
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <route> element at %s: %s", routeElement->getSourceLocation(), e.what());
         }
     }
@@ -1508,28 +1429,25 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
 void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology& topology)
 {
     cXMLElementList routeElements = configuration->getChildrenByTagName("multicast-route");
-    for (unsigned int i = 0; i < routeElements.size(); i++)
-    {
+    for (unsigned int i = 0; i < routeElements.size(); i++) {
         cXMLElement *routeElement = routeElements[i];
         const char *hostAttr = routeElement->getAttribute("hosts");
-        const char *sourceAttr = routeElement->getAttribute("source"); // source address  (AddressResolver syntax)
-        const char *netmaskAttr = routeElement->getAttribute("netmask"); // default: 255.255.255.255; alternative notation: "/23"
-        const char *groupsAttr = routeElement->getAttribute("groups"); // addresses of the multicast groups, default: 0.0.0.0, matching all groups
-        const char *parentAttr = routeElement->getAttribute("parent"); // name of expected input interface
-        const char *childrenAttr = routeElement->getAttribute("children"); // names of output interfaces
+        const char *sourceAttr = routeElement->getAttribute("source");    // source address  (AddressResolver syntax)
+        const char *netmaskAttr = routeElement->getAttribute("netmask");    // default: 255.255.255.255; alternative notation: "/23"
+        const char *groupsAttr = routeElement->getAttribute("groups");    // addresses of the multicast groups, default: 0.0.0.0, matching all groups
+        const char *parentAttr = routeElement->getAttribute("parent");    // name of expected input interface
+        const char *childrenAttr = routeElement->getAttribute("children");    // names of output interfaces
         const char *metricAttr = routeElement->getAttribute("metric");
 
-        try
-        {
+        try {
             // parse and check the attributes
             IPv4Address source;
             if (!isEmpty(sourceAttr) && strcmp(sourceAttr, "*"))
                 source = resolve(sourceAttr, AddressResolver::ADDR_IPv4).toIPv4();
             IPv4Address netmask;
-            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*"))
-            {
+            if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
-                    netmask = IPv4Address::makeNetmask(atoi(netmaskAttr+1));
+                    netmask = IPv4Address::makeNetmask(atoi(netmaskAttr + 1));
                 else
                     netmask = IPv4Address(netmaskAttr);
             }
@@ -1540,11 +1458,9 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
             std::vector<IPv4Address> groups;
             if (isEmpty(groupsAttr))
                 groups.push_back(IPv4Address::UNSPECIFIED_ADDRESS);
-            else
-            {
+            else {
                 cStringTokenizer tokenizer(groupsAttr);
-                while (tokenizer.hasMoreTokens())
-                {
+                while (tokenizer.hasMoreTokens()) {
                     IPv4Address group = IPv4Address(tokenizer.nextToken());
                     if (!group.isMulticast())
                         throw cRuntimeError("Address '%s' in groups attribute is not multicast.", group.str().c_str());
@@ -1555,18 +1471,14 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
             // find matching host(s), and add the route
             Matcher atMatcher(hostAttr);
             InterfaceMatcher childrenMatcher(childrenAttr);
-            for (int i = 0; i < topology.getNumNodes(); i++)
-            {
+            for (int i = 0; i < topology.getNumNodes(); i++) {
                 Node *node = (Node *)topology.getNode(i);
-                if (node->routingTable && node->routingTable->isMulticastForwardingEnabled())
-                {
+                if (node->routingTable && node->routingTable->isMulticastForwardingEnabled()) {
                     std::string hostFullPath = node->module->getFullPath();
                     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
-                    if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str()))
-                    {
+                    if (atMatcher.matches(hostShortenedFullPath.c_str()) || atMatcher.matches(hostFullPath.c_str())) {
                         InterfaceEntry *parent = NULL;
-                        if (!isEmpty(parentAttr))
-                        {
+                        if (!isEmpty(parentAttr)) {
                             parent = node->interfaceTable->getInterfaceByName(parentAttr);
                             if (!parent)
                                 throw cRuntimeError("Parent interface '%s' not found.", parentAttr);
@@ -1574,17 +1486,15 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                                 throw cRuntimeError("Parent interface '%s' is not multicast.", parentAttr);
                         }
 
-                        std::vector<InterfaceEntry*> children;
-                        for (int j = 0; j < (int)node->interfaceInfos.size(); ++j)
-                        {
+                        std::vector<InterfaceEntry *> children;
+                        for (int j = 0; j < (int)node->interfaceInfos.size(); ++j) {
                             InterfaceInfo *interfaceInfo = node->interfaceInfos[j];
                             InterfaceEntry *ie = interfaceInfo->interfaceEntry;
                             if (ie != parent && ie->isMulticast() && childrenMatcher.matches(interfaceInfo))
                                 children.push_back(ie);
                         }
 
-                        for (int j = 0; j < (int)groups.size(); ++j)
-                        {
+                        for (int j = 0; j < (int)groups.size(); ++j) {
                             // create and add route
                             IPv4MulticastRoute *route = new IPv4MulticastRoute();
                             route->setSourceType(IMulticastRoute::MANUAL);
@@ -1595,30 +1505,27 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
                             if (isNotEmpty(metricAttr))
                                 route->setMetric(atoi(metricAttr));
                             for (int k = 0; k < (int)children.size(); ++k)
-                                route->addOutInterface(new IPv4MulticastRoute::OutInterface(children[k], false/*TODO:isLeaf*/));
+                                route->addOutInterface(new IPv4MulticastRoute::OutInterface(children[k], false    /*TODO:isLeaf*/));
                             node->staticMulticastRoutes.push_back(route);
                         }
                     }
                 }
             }
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <multicast-route> element at %s: %s", routeElement->getSourceLocation(), e.what());
         }
     }
 }
 
 void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char *interfaceAttr, const char *gatewayAttr,
-        InterfaceEntry *&outIE, IPv4Address& outGateway, IPv4Topology& topology)
+        InterfaceEntry *& outIE, IPv4Address& outGateway, IPv4Topology& topology)
 {
     // resolve interface name
-    if (isEmpty(interfaceAttr))
-    {
+    if (isEmpty(interfaceAttr)) {
         outIE = NULL;
     }
-    else
-    {
+    else {
         outIE = node->interfaceTable->getInterfaceByName(interfaceAttr);
         if (!outIE)
             throw cRuntimeError("Host/router %s has no interface named \"%s\"",
@@ -1626,36 +1533,31 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     }
 
     // if gateway is not specified, we are done
-    if (isEmpty(gatewayAttr) || !strcmp(gatewayAttr, "*"))
-    {
+    if (isEmpty(gatewayAttr) || !strcmp(gatewayAttr, "*")) {
         outGateway = IPv4Address();
-        return; // outInterface also already done -- we're done
+        return;    // outInterface also already done -- we're done
     }
 
-    ASSERT(isNotEmpty(gatewayAttr)); // see "if" above
+    ASSERT(isNotEmpty(gatewayAttr));    // see "if" above
 
     // check syntax of gatewayAttr, and obtain an initial value
     outGateway = resolve(gatewayAttr, AddressResolver::ADDR_IPv4).toIPv4();
 
     IPv4Address gatewayAddressOnCommonLink;
 
-    if (!outIE)
-    {
+    if (!outIE) {
         // interface is not specified explicitly -- we must deduce it from the gateway.
         // It is expected that the gateway is on the same link with the configured node,
         // and then we pick the interface which connects to that link.
 
         // loop through all links, and find the one that contains both the
         // configured node and the gateway
-        for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-        {
+        for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
             LinkInfo *linkInfo = topology.linkInfos[i];
             InterfaceInfo *gatewayInterfaceOnLink = findInterfaceOnLinkByNodeAddress(linkInfo, outGateway);
-            if (gatewayInterfaceOnLink)
-            {
+            if (gatewayInterfaceOnLink) {
                 InterfaceInfo *nodeInterfaceOnLink = findInterfaceOnLinkByNode(linkInfo, node->module);
-                if (nodeInterfaceOnLink)
-                {
+                if (nodeInterfaceOnLink) {
                     outIE = nodeInterfaceOnLink->interfaceEntry;
                     gatewayAddressOnCommonLink = gatewayInterfaceOnLink->getAddress();
                     break;
@@ -1696,8 +1598,7 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
 
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOnLinkByNode(LinkInfo *linkInfo, cModule *node)
 {
-    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[i];
         if (interfaceInfo->interfaceEntry->getInterfaceTable()->getHostModule() == node)
             return interfaceInfo;
@@ -1707,8 +1608,7 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOn
 
 IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOnLinkByNodeAddress(LinkInfo *linkInfo, IPv4Address address)
 {
-    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)linkInfo->interfaceInfos.size(); i++) {
         // if the interface has this address, found
         InterfaceInfo *interfaceInfo = linkInfo->interfaceInfos[i];
         if (interfaceInfo->address == address.getInt())
@@ -1719,18 +1619,19 @@ IPv4NetworkConfigurator::InterfaceInfo *IPv4NetworkConfigurator::findInterfaceOn
         for (int j = 0; j < (int)node->interfaceInfos.size(); j++)
             if (node->interfaceInfos[j]->getAddress() == address)
                 return interfaceInfo;
+
     }
     return NULL;
 }
 
 IPv4NetworkConfigurator::LinkInfo *IPv4NetworkConfigurator::findLinkOfInterface(IPv4Topology& topology, InterfaceEntry *ie)
 {
-    for (int i = 0; i < (int)topology.linkInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)topology.linkInfos.size(); i++) {
         LinkInfo *linkInfo = topology.linkInfos[i];
         for (int j = 0; j < (int)linkInfo->interfaceInfos.size(); j++)
             if (linkInfo->interfaceInfos[j]->interfaceEntry == ie)
                 return linkInfo;
+
     }
     return NULL;
 }
@@ -1740,6 +1641,7 @@ bool IPv4NetworkConfigurator::containsRoute(const std::vector<IPv4Route *>& rout
     for (int i = 0; i < (int)routes.size(); i++)
         if (*routes.at(i) == *route)
             return true;
+
     return false;
 }
 
@@ -1757,43 +1659,39 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
         topology.calculateUnweightedSingleShortestPathsTo(sourceNode);
 
         // check if adding the default routes would be ok (this is an optimization)
-        if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo)
-        {
-          if (sourceNode->interfaceInfos[0]->addDefaultRoute)
-          {
-            InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
-            InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
-            InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
-            //InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
+        if (addDefaultRoutesParameter && sourceNode->interfaceInfos.size() == 1 && sourceNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo) {
+            if (sourceNode->interfaceInfos[0]->addDefaultRoute) {
+                InterfaceInfo *sourceInterfaceInfo = sourceNode->interfaceInfos[0];
+                InterfaceEntry *sourceInterfaceEntry = sourceInterfaceInfo->interfaceEntry;
+                InterfaceInfo *gatewayInterfaceInfo = sourceInterfaceInfo->linkInfo->gatewayInterfaceInfo;
+                //InterfaceEntry *gatewayInterfaceEntry = gatewayInterfaceInfo->interfaceEntry;
 
-            // add a network route for the local network using ARP
-            IPv4Route *route = new IPv4Route();
-            route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
-            route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setNetmask(sourceInterfaceInfo->getNetmask());
-            route->setInterface(sourceInterfaceEntry);
-            route->setSourceType(IPv4Route::MANUAL);
-            sourceNode->staticRoutes.push_back(route);
+                // add a network route for the local network using ARP
+                IPv4Route *route = new IPv4Route();
+                route->setDestination(sourceInterfaceInfo->getAddress().doAnd(sourceInterfaceInfo->getNetmask()));
+                route->setGateway(IPv4Address::UNSPECIFIED_ADDRESS);
+                route->setNetmask(sourceInterfaceInfo->getNetmask());
+                route->setInterface(sourceInterfaceEntry);
+                route->setSourceType(IPv4Route::MANUAL);
+                sourceNode->staticRoutes.push_back(route);
 
-            // add a default route towards the only one gateway
-            route = new IPv4Route();
-            IPv4Address gateway = gatewayInterfaceInfo->getAddress();
-            route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
-            route->setGateway(gateway);
-            route->setInterface(sourceInterfaceEntry);
-            route->setSourceType(IPv4Route::MANUAL);
-            sourceNode->staticRoutes.push_back(route);
+                // add a default route towards the only one gateway
+                route = new IPv4Route();
+                IPv4Address gateway = gatewayInterfaceInfo->getAddress();
+                route->setDestination(IPv4Address::UNSPECIFIED_ADDRESS);
+                route->setNetmask(IPv4Address::UNSPECIFIED_ADDRESS);
+                route->setGateway(gateway);
+                route->setInterface(sourceInterfaceEntry);
+                route->setSourceType(IPv4Route::MANUAL);
+                sourceNode->staticRoutes.push_back(route);
 
-            // skip building and optimizing the whole routing table
-            EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
-          }
+                // skip building and optimizing the whole routing table
+                EV_DEBUG << "Adding default routes to " << sourceNode->getModule()->getFullPath() << ", node has only one (non-loopback) interface\n";
+            }
         }
-        else
-        {
+        else {
             // add a route to all destinations in the network
-            for (int j = 0; j < topology.getNumNodes(); j++)
-            {
+            for (int j = 0; j < topology.getNumNodes(); j++) {
                 // extract destination
                 Node *destinationNode = (Node *)topology.getNode(j);
                 if (sourceNode == destinationNode)
@@ -1808,8 +1706,7 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                 Node *node = destinationNode;
                 Link *link = NULL;
                 InterfaceInfo *nextHopInterfaceInfo = NULL;
-                while (node != sourceNode)
-                {
+                while (node != sourceNode) {
                     link = (Link *)node->getPath(0);
                     if (node->interfaceTable && node != sourceNode && link->sourceInterfaceInfo)
                         nextHopInterfaceInfo = link->sourceInterfaceInfo;
@@ -1817,29 +1714,25 @@ void IPv4NetworkConfigurator::addStaticRoutes(IPv4Topology& topology)
                 }
 
                 // determine source interface
-                if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute)
-                {
+                if (link->destinationInterfaceInfo && link->destinationInterfaceInfo->addStaticRoute) {
                     InterfaceEntry *sourceInterfaceEntry = link->destinationInterfaceInfo->interfaceEntry;
 
                     // add the same routes for all destination interfaces (IP packets are accepted from any interface at the destination)
-                    for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++)
-                    {
+                    for (int j = 0; j < (int)destinationNode->interfaceInfos.size(); j++) {
                         InterfaceInfo *destinationInterfaceInfo = destinationNode->interfaceInfos[j];
                         InterfaceEntry *destinationInterfaceEntry = destinationInterfaceInfo->interfaceEntry;
                         IPv4Address destinationAddress = destinationInterfaceInfo->getAddress();
                         IPv4Address destinationNetmask = destinationInterfaceInfo->getNetmask();
-                        if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified())
-                        {
+                        if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified()) {
                             IPv4Route *route = new IPv4Route();
                             IPv4Address gatewayAddress = nextHopInterfaceInfo->getAddress();
                             if (addSubnetRoutesParameter && destinationNode->interfaceInfos.size() == 1 && destinationNode->interfaceInfos[0]->linkInfo->gatewayInterfaceInfo
-                                    && destinationNode->interfaceInfos[0]->addSubnetRoute)
+                                && destinationNode->interfaceInfos[0]->addSubnetRoute)
                             {
                                 route->setDestination(destinationAddress.doAnd(destinationNetmask));
                                 route->setNetmask(destinationNetmask);
                             }
-                            else
-                            {
+                            else {
                                 route->setDestination(destinationAddress);
                                 route->setNetmask(IPv4Address::ALLONES_ADDRESS);
                             }
@@ -1883,6 +1776,7 @@ int IPv4NetworkConfigurator::findRouteIndexWithSameColor(const std::vector<IPv4R
     for (int i = 0; i < (int)routes.size(); i++)
         if (routesHaveSameColor(routes[i], route))
             return i;
+
     return -1;
 }
 
@@ -1892,7 +1786,7 @@ int IPv4NetworkConfigurator::findRouteIndexWithSameColor(const std::vector<IPv4R
 bool IPv4NetworkConfigurator::routesCanBeSwapped(RouteInfo *routeInfo1, RouteInfo *routeInfo2)
 {
     if (routeInfo1->color == routeInfo2->color)
-        return true;  // these two routes send the packet in the same direction (same gw/iface), doesn't matter which one we use -> can be swapped
+        return true; // these two routes send the packet in the same direction (same gw/iface), doesn't matter which one we use -> can be swapped
     else {
         // unrelated routes can also be swapped
         uint32 netmask = routeInfo1->netmask & routeInfo2->netmask;
@@ -1912,6 +1806,7 @@ bool IPv4NetworkConfigurator::routesCanBeNeighbors(const std::vector<RouteInfo *
     for (int index = begin + 1; index < end; index++)
         if (!routesCanBeSwapped(beginRouteInfo, routeInfos.at(index)))
             return false;
+
     return true;
 }
 
@@ -1935,6 +1830,7 @@ bool IPv4NetworkConfigurator::interruptsAnyOriginalRoute(const RoutingTableInfo&
         for (int i = 0; i < (int)originalRouteInfos.size(); i++)
             if (interruptsOriginalRoute(routingTableInfo, begin, end, originalRouteInfos.at(i)))
                 return true;
+
     return false;
 }
 
@@ -1944,8 +1840,7 @@ bool IPv4NetworkConfigurator::interruptsAnyOriginalRoute(const RoutingTableInfo&
  */
 bool IPv4NetworkConfigurator::interruptsSubsequentOriginalRoutes(const RoutingTableInfo& routingTableInfo, int index)
 {
-    for (int i = index + 1; i < (int)routingTableInfo.routeInfos.size(); i++)
-    {
+    for (int i = index + 1; i < (int)routingTableInfo.routeInfos.size(); i++) {
         IPv4NetworkConfigurator::RouteInfo *routeInfo = routingTableInfo.routeInfos.at(i);
         if (interruptsAnyOriginalRoute(routingTableInfo, index, index + 1, routeInfo->originalRouteInfos))
             return true;
@@ -1959,8 +1854,7 @@ bool IPv4NetworkConfigurator::interruptsSubsequentOriginalRoutes(const RoutingTa
 void IPv4NetworkConfigurator::checkOriginalRoutes(const RoutingTableInfo& routingTableInfo, const std::vector<RouteInfo *>& originalRouteInfos)
 {
     // assert that all original routes are routed with the same color
-    for (int i = 0; i < (int)originalRouteInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)originalRouteInfos.size(); i++) {
         IPv4NetworkConfigurator::RouteInfo *originalRouteInfo = originalRouteInfos.at(i);
         IPv4NetworkConfigurator::RouteInfo *matchingRouteInfo = routingTableInfo.findBestMatchingRouteInfo(originalRouteInfo->destination);
         if (!(matchingRouteInfo && matchingRouteInfo->color == originalRouteInfo->color))
@@ -1975,8 +1869,7 @@ void IPv4NetworkConfigurator::findLongestCommonDestinationPrefix(uint32 destinat
 {
     netmaskOut = 0;
     destinationOut = 0;
-    for (int bitIndex = 31; bitIndex >= 0; bitIndex--)
-    {
+    for (int bitIndex = 31; bitIndex >= 0; bitIndex--) {
         uint32 mask = 1 << bitIndex;
         if ((destination1 & mask) == (destination2 & mask) &&
             (netmask1 & mask) != 0 && (netmask2 & mask) != 0)
@@ -1994,8 +1887,7 @@ void IPv4NetworkConfigurator::findLongestCommonDestinationPrefix(uint32 destinat
  */
 void IPv4NetworkConfigurator::addOriginalRouteInfos(RoutingTableInfo& routingTableInfo, int begin, int end, const std::vector<RouteInfo *>& originalRouteInfos)
 {
-    for (int i = 0; i < (int)originalRouteInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)originalRouteInfos.size(); i++) {
         IPv4NetworkConfigurator::RouteInfo *originalRouteInfo = originalRouteInfos.at(i);
         IPv4NetworkConfigurator::RouteInfo *matchingRouteInfo = routingTableInfo.findBestMatchingRouteInfo(originalRouteInfo->destination, begin, end);
         ASSERT(matchingRouteInfo && matchingRouteInfo->color == originalRouteInfo->color);
@@ -2031,10 +1923,10 @@ bool IPv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
     //  - the original routes on I and J are going to be routed by M after the merge, so check if the routes in between don't interrupt them
     //  - the original routes following M can be accidentally overridden by M (being larger than the sum of I and J), so verify that M does not interrupt them
     // note that the condition is not symmetric because I follows J so it requires fewer checks and we do use that.
-    if (!interruptsAnyOriginalRoute(routingTableInfo, j + 1, i, routeInfoJ->originalRouteInfos) && // check that original routes on J are not interrupted between J and I
-        !interruptsAnyOriginalRoute(routingTableInfo, i + 1, m, routeInfoJ->originalRouteInfos) && // check that original routes on J are not interrupted between I and M
-        !interruptsAnyOriginalRoute(routingTableInfo, i + 1, m, routeInfoI->originalRouteInfos) && // check that original routes on I are not interrupted between I and M
-        !interruptsSubsequentOriginalRoutes(routingTableInfo, m)) // check that the original routes after M are not interrupted by M
+    if (!interruptsAnyOriginalRoute(routingTableInfo, j + 1, i, routeInfoJ->originalRouteInfos) &&    // check that original routes on J are not interrupted between J and I
+        !interruptsAnyOriginalRoute(routingTableInfo, i + 1, m, routeInfoJ->originalRouteInfos) &&    // check that original routes on J are not interrupted between I and M
+        !interruptsAnyOriginalRoute(routingTableInfo, i + 1, m, routeInfoI->originalRouteInfos) &&    // check that original routes on I are not interrupted between I and M
+        !interruptsSubsequentOriginalRoutes(routingTableInfo, m))    // check that the original routes after M are not interrupted by M
     {
         // now we know that the merge does not conflict with any route in the routing table.
         // the next thing to do is to maintain the original routes attached to the optimized ones.
@@ -2045,14 +1937,11 @@ bool IPv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
         addOriginalRouteInfos(routingTableInfo, j + 1, m + 1, routeInfoJ->originalRouteInfos);
 
         // move original routes from the routes following the merged one if necessary.
-        for (int k = m + 1; k < (int)routingTableInfo.routeInfos.size(); k++)
-        {
+        for (int k = m + 1; k < (int)routingTableInfo.routeInfos.size(); k++) {
             IPv4NetworkConfigurator::RouteInfo *followingRouteInfo = routingTableInfo.routeInfos.at(k);
-            for (int l = 0; l < (int)followingRouteInfo->originalRouteInfos.size(); l++)
-            {
+            for (int l = 0; l < (int)followingRouteInfo->originalRouteInfos.size(); l++) {
                 IPv4NetworkConfigurator::RouteInfo *originalRouteInfo = followingRouteInfo->originalRouteInfos.at(l);
-                if (!((originalRouteInfo->destination ^ mergedRouteInfo->destination) & mergedRouteInfo->netmask))
-                {
+                if (!((originalRouteInfo->destination ^ mergedRouteInfo->destination) & mergedRouteInfo->netmask)) {
                     followingRouteInfo->originalRouteInfos.erase(followingRouteInfo->originalRouteInfos.begin() + l);
                     ASSERT(mergedRouteInfo->color == originalRouteInfo->color);
                     mergedRouteInfo->originalRouteInfos.push_back(originalRouteInfo);
@@ -2064,13 +1953,12 @@ bool IPv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
         routingTableInfo.removeRouteInfo(routeInfoJ);
 #ifndef NDEBUG
         //checkOriginalRoutes(routingTableInfo, originalRouteInfos);
-#endif
+#endif // ifndef NDEBUG
         delete routeInfoI;
         delete routeInfoJ;
         return true;
     }
-    else
-    {
+    else {
         // merge failed; restore original state
         routeInfoI->enabled = true;
         routeInfoJ->enabled = true;
@@ -2089,19 +1977,16 @@ bool IPv4NetworkConfigurator::tryToMergeTwoRoutes(RoutingTableInfo& routingTable
  */
 bool IPv4NetworkConfigurator::tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo)
 {
-    for (int i = 0; i < (int)routingTableInfo.routeInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)routingTableInfo.routeInfos.size(); i++) {
         IPv4NetworkConfigurator::RouteInfo *routeInfoI = routingTableInfo.routeInfos.at(i);
 
         // iterate backward so that we try to merge routes having longer netmasks first.
         // this results in smaller changes and allows more symmetric optimization.
-        for (int j = i - 1; j >= 0; j--)
-        {
+        for (int j = i - 1; j >= 0; j--) {
             IPv4NetworkConfigurator::RouteInfo *routeInfoJ = routingTableInfo.routeInfos.at(j);
 
             // we can only merge neighbor routes having the same color
-            if (routeInfoI->color == routeInfoJ->color && routesCanBeNeighbors(routingTableInfo.routeInfos, i, j))
-            {
+            if (routeInfoI->color == routeInfoJ->color && routesCanBeNeighbors(routingTableInfo.routeInfos, i, j)) {
                 // it is worth to actually try to merge them
                 if (tryToMergeTwoRoutes(routingTableInfo, i, j, routeInfoI, routeInfoJ))
                     return true;
@@ -2126,16 +2011,14 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
     // instead of working with IPv4 routes we transform them into the internal representation of the optimizer.
     // routes are classified based on their action (gateway, interface, type, source, metric, etc.) and a color is assigned to them.
     RoutingTableInfo routingTableInfo;
-    std::vector<IPv4Route *> colorToRoute;  // a mapping from color to route action (interface, gateway, metric, etc.)
-    std::vector<RouteInfo *> originalRouteInfos; // a copy of the original routes in the optimizer's format
+    std::vector<IPv4Route *> colorToRoute;    // a mapping from color to route action (interface, gateway, metric, etc.)
+    std::vector<RouteInfo *> originalRouteInfos;    // a copy of the original routes in the optimizer's format
 
     // build colorToRouteColor, originalRouteInfos and initial routeInfos in routingTableInfo
-    for (int i = 0; i < (int)originalRoutes.size(); i++)
-    {
+    for (int i = 0; i < (int)originalRoutes.size(); i++) {
         IPv4Route *originalRoute = originalRoutes.at(i);
         int color = findRouteIndexWithSameColor(colorToRoute, originalRoute);
-        if (color == -1)
-        {
+        if (color == -1) {
             color = colorToRoute.size();
             colorToRoute.push_back(originalRoute);
         }
@@ -2152,22 +2035,22 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
 
 #ifndef NDEBUG
     checkOriginalRoutes(routingTableInfo, originalRouteInfos);
-#endif
+#endif // ifndef NDEBUG
 
     // STEP 2.
     // from now on we are only working with the internal data structures called RouteInfo and RoutingTableInfo.
     // the main optimizer loop runs until it cannot merge any two routes.
-    while (tryToMergeAnyTwoRoutes(routingTableInfo));
+    while (tryToMergeAnyTwoRoutes(routingTableInfo))
+        ;
 
 #ifndef NDEBUG
     checkOriginalRoutes(routingTableInfo, originalRouteInfos);
-#endif
+#endif // ifndef NDEBUG
 
     // STEP 3.
     // convert the optimized routes to new optimized IPv4 routes based on the saved colors
     std::vector<IPv4Route *> optimizedRoutes;
-    for (int i = 0; i < (int)routingTableInfo.routeInfos.size(); i++)
-    {
+    for (int i = 0; i < (int)routingTableInfo.routeInfos.size(); i++) {
         RouteInfo *routeInfo = routingTableInfo.routeInfos.at(i);
         IPv4Route *routeColor = colorToRoute[routeInfo->color];
         IPv4Route *optimizedRoute = new IPv4Route();
@@ -2189,20 +2072,17 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
     originalRoutes = optimizedRoutes;
 }
 
-bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address &ret, InterfaceEntry * interfaceEntry, bool netmask)
+bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
     std::map<InterfaceEntry *, InterfaceInfo *>::iterator it = topology.interfaceInfos.find(interfaceEntry);
     if (it == topology.interfaceInfos.end())
         return false;
     else {
-        InterfaceInfo * interfaceInfo = it->second;
+        InterfaceInfo *interfaceInfo = it->second;
         if (interfaceInfo->configure)
             ret = netmask ? interfaceInfo->getNetmask() : interfaceInfo->getAddress();
         return interfaceInfo->configure;
     }
 }
-
-
-}
-
+} // namespace inet
 

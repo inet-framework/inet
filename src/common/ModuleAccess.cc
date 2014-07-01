@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "ModuleAccess.h"
 
 namespace inet {
-
 inline bool _isNetworkNode(cModule *mod)
 {
     cProperties *props = mod->getProperties();
@@ -33,8 +31,7 @@ bool isNetworkNode(cModule *mod)
 
 static cModule *findSubmodRecursive(cModule *curmod, const char *name)
 {
-    for (cModule::SubmoduleIterator i(curmod); !i.end(); i++)
-    {
+    for (cModule::SubmoduleIterator i(curmod); !i.end(); i++) {
         cModule *submod = i();
         if (!strcmp(submod->getFullName(), name))
             return submod;
@@ -48,7 +45,7 @@ static cModule *findSubmodRecursive(cModule *curmod, const char *name)
 cModule *findModuleWherever(const char *name, cModule *from)
 {
     cModule *mod = NULL;
-    for (cModule *curmod=from; !mod && curmod; curmod=curmod->getParentModule())
+    for (cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
         mod = findSubmodRecursive(curmod, name);
     return mod;
 }
@@ -56,8 +53,7 @@ cModule *findModuleWherever(const char *name, cModule *from)
 cModule *findModuleWhereverInNode(const char *name, cModule *from)
 {
     cModule *mod = NULL;
-    for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
-    {
+    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
         mod = findSubmodRecursive(curmod, name);
         if (mod || _isNetworkNode(curmod))
             break;
@@ -68,15 +64,14 @@ cModule *findModuleWhereverInNode(const char *name, cModule *from)
 cModule *findModuleSomewhereUp(const char *name, cModule *from)
 {
     cModule *mod = NULL;
-    for (cModule *curmod=from; !mod && curmod; curmod=curmod->getParentModule())
+    for (cModule *curmod = from; !mod && curmod; curmod = curmod->getParentModule())
         mod = curmod->getSubmodule(name);
     return mod;
 }
 
 cModule *findContainingNode(cModule *from)
 {
-    for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
-    {
+    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
         if (_isNetworkNode(curmod))
             return curmod;
     }
@@ -94,12 +89,12 @@ cModule *getContainingNode(cModule *from)
 cModule *findModuleUnderContainingNode(cModule *from)
 {
     cModule *prevmod = NULL;
-    for (cModule *curmod=from; curmod; curmod=curmod->getParentModule())
-    {
+    for (cModule *curmod = from; curmod; curmod = curmod->getParentModule()) {
         if (_isNetworkNode(curmod))
             return prevmod;
         prevmod = curmod;
     }
     return NULL;
 }
-}
+} // namespace inet
+

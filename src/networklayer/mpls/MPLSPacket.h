@@ -21,14 +21,13 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Represents a packet with MPLS headers
  */
-class INET_API MPLSPacket: public cPacket
+class INET_API MPLSPacket : public cPacket
 {
   protected:
-    typedef std::vector<int> LabelStack; // note: last element is the top of stack
+    typedef std::vector<int> LabelStack;    // note: last element is the top of stack
     LabelStack labels;
 
   private:
@@ -37,7 +36,7 @@ class INET_API MPLSPacket: public cPacket
   public:
     /* constructors*/
     MPLSPacket(const char *name = NULL);
-    MPLSPacket(const MPLSPacket &p);
+    MPLSPacket(const MPLSPacket& p);
 
     /* assignment operator*/
     virtual MPLSPacket& operator=(const MPLSPacket& p);
@@ -45,7 +44,7 @@ class INET_API MPLSPacket: public cPacket
     /**
      * cloning function
      */
-    virtual MPLSPacket *dup() const {return new MPLSPacket(*this);}
+    virtual MPLSPacket *dup() const { return new MPLSPacket(*this); }
 
     /**
      * Returns a string with the labels, starting with the top of stack.
@@ -55,32 +54,29 @@ class INET_API MPLSPacket: public cPacket
     /**
      * Swap Label operation
      */
-    inline void swapLabel(int newLabel)  {labels.back() = newLabel;}
+    inline void swapLabel(int newLabel) { labels.back() = newLabel; }
 
     /**
      * Pushes new label on the label stack
      */
-    inline void pushLabel(int newLabel)  {labels.push_back(newLabel); addBitLength(32);}
+    inline void pushLabel(int newLabel) { labels.push_back(newLabel); addBitLength(32); }
 
     /**
      * Pops the top label
      */
-    inline void popLabel()  {labels.pop_back(); addBitLength(-32);}
+    inline void popLabel() { labels.pop_back(); addBitLength(-32); }
 
     /**
      * Returns true if the label stack is not empty
      */
-    inline bool hasLabel()  {return !labels.empty();}
+    inline bool hasLabel() { return !labels.empty(); }
 
     /**
      * Returns the top label
      */
-    inline int getTopLabel()  {return labels.back();}
+    inline int getTopLabel() { return labels.back(); }
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_MPLSPACKET_H
 

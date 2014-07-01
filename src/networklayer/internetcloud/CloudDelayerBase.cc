@@ -17,16 +17,14 @@
 // @author Zoltan Bojthe
 //
 
-
 #include "CloudDelayerBase.h"
 
 #include "IPv4.h"
 
 namespace inet {
-
 Define_Module(CloudDelayerBase);
 
-#define SRCPAR "incomingInterfaceID"
+#define SRCPAR    "incomingInterfaceID"
 
 CloudDelayerBase::CloudDelayerBase()
 {
@@ -36,7 +34,7 @@ CloudDelayerBase::CloudDelayerBase()
 CloudDelayerBase::~CloudDelayerBase()
 {
     //TODO unregister hook if ipv4Layer exists
-    ipv4Layer = check_and_cast_nullable<IPv4*>(getModuleByPath("^.ip"));
+    ipv4Layer = check_and_cast_nullable<IPv4 *>(getModuleByPath("^.ip"));
     if (ipv4Layer)
         ipv4Layer->unregisterHook(0, this);
 }
@@ -45,9 +43,8 @@ void CloudDelayerBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER)
-    {
-        ipv4Layer = check_and_cast<IPv4*>(getModuleByPath("^.ip"));
+    if (stage == INITSTAGE_NETWORK_LAYER) {
+        ipv4Layer = check_and_cast<IPv4 *>(getModuleByPath("^.ip"));
         ipv4Layer->registerHook(0, this);
     }
 }
@@ -71,12 +68,12 @@ void CloudDelayerBase::calculateDropAndDelay(const cMessage *msg, int srcID, int
     outDelay = SIMTIME_ZERO;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress)
 {
     Enter_Method_Silent();
 
@@ -87,17 +84,15 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram
     simtime_t propDelay;
     bool isDrop;
     calculateDropAndDelay(msg, srcID, destID, isDrop, propDelay);
-    if (isDrop)
-    {
+    if (isDrop) {
         //TODO emit?
         EV_INFO << "Message " << msg->info() << " dropped in cloud.\n";
         return INetfilter::IHook::DROP;
     }
 
-    if (propDelay > SIMTIME_ZERO)
-    {
+    if (propDelay > SIMTIME_ZERO) {
         //TODO emit?
-        EV_INFO << "Message " << msg->info() << " delayed with " << propDelay*1000.0 << "ms in cloud.\n";
+        EV_INFO << "Message " << msg->info() << " delayed with " << propDelay * 1000.0 << "ms in cloud.\n";
         take(msg);
         scheduleAt(simTime() + propDelay, msg);
         return INetfilter::IHook::QUEUE;
@@ -105,23 +100,19 @@ INetfilter::IHook::Result CloudDelayerBase::datagramForwardHook(INetworkDatagram
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHopAddress)
+INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress)
 {
     return INetfilter::IHook::ACCEPT;
 }
-
-
-
-}
-
+} // namespace inet
 

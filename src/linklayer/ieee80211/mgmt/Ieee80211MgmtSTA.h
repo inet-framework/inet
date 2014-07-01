@@ -25,8 +25,6 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
-
-
 class InterfaceEntry;
 
 /**
@@ -43,15 +41,15 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //
     struct ScanningInfo
     {
-        MACAddress bssid; // specific BSSID to scan for, or the broadcast address
-        std::string ssid; // SSID to scan for (empty=any)
-        bool activeScan;  // whether to perform active or passive scanning
-        simtime_t probeDelay; // delay (in s) to be used prior to transmitting a Probe frame during active scanning
-        std::vector<int> channelList; // list of channels to scan
-        int currentChannelIndex; // index into channelList[]
-        bool busyChannelDetected; // during minChannelTime, we have to listen for busy channel
-        simtime_t minChannelTime; // minimum time to spend on each channel when scanning
-        simtime_t maxChannelTime; // maximum time to spend on each channel when scanning
+        MACAddress bssid;    // specific BSSID to scan for, or the broadcast address
+        std::string ssid;    // SSID to scan for (empty=any)
+        bool activeScan;    // whether to perform active or passive scanning
+        simtime_t probeDelay;    // delay (in s) to be used prior to transmitting a Probe frame during active scanning
+        std::vector<int> channelList;    // list of channels to scan
+        int currentChannelIndex;    // index into channelList[]
+        bool busyChannelDetected;    // during minChannelTime, we have to listen for busy channel
+        simtime_t minChannelTime;    // minimum time to spend on each channel when scanning
+        simtime_t maxChannelTime;    // maximum time to spend on each channel when scanning
     };
 
     //
@@ -60,19 +58,23 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     struct APInfo
     {
         int channel;
-        MACAddress address; // alias bssid
+        MACAddress address;    // alias bssid
         std::string ssid;
         Ieee80211SupportedRatesElement supportedRates;
         simtime_t beaconInterval;
         double rxPower;
 
         bool isAuthenticated;
-        int authSeqExpected;  // valid while authenticating; values: 1,3,5...
-        cMessage *authTimeoutMsg; // if non-NULL: authentication is in progress
+        int authSeqExpected;    // valid while authenticating; values: 1,3,5...
+        cMessage *authTimeoutMsg;    // if non-NULL: authentication is in progress
 
-        APInfo() {
-            channel = -1; beaconInterval = rxPower = 0; authSeqExpected = -1;
-            isAuthenticated = false; authTimeoutMsg = NULL;
+        APInfo()
+        {
+            channel = -1;
+            beaconInterval = rxPower = 0;
+            authSeqExpected = -1;
+            isAuthenticated = false;
+            authTimeoutMsg = NULL;
         }
     };
 
@@ -84,7 +86,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
         int receiveSequence;
         cMessage *beaconTimeoutMsg;
 
-        AssociatedAPInfo() : APInfo() {receiveSequence = 0; beaconTimeoutMsg = NULL;}
+        AssociatedAPInfo() : APInfo() { receiveSequence = 0; beaconTimeoutMsg = NULL; }
     };
 
   protected:
@@ -106,7 +108,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
 
     // associated Access Point
     bool isAssociated;
-    cMessage *assocTimeoutMsg; // if non-NULL: association is in progress
+    cMessage *assocTimeoutMsg;    // if non-NULL: association is in progress
     AssociatedAPInfo assocAP;
 
   public:
@@ -208,10 +210,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl);
     //@}
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_IEEE80211MGMTSTA_H
 

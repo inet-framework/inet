@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TCPSEGMENT_H
 #define __INET_TCPSEGMENT_H
 
@@ -24,18 +23,15 @@
 #include "TCPSegment_m.h"
 
 namespace inet {
-
-
 /** @name Comparing sequence numbers */
 //@{
-inline bool seqLess(uint32 a, uint32 b) {return a != b && (b - a) < (1UL << 31);}
-inline bool seqLE(uint32 a, uint32 b) {return (b - a) < (1UL << 31);}
-inline bool seqGreater(uint32 a, uint32 b) {return a != b && (a - b) < (1UL << 31);}
-inline bool seqGE(uint32 a, uint32 b) {return (a - b) < (1UL << 31);}
-inline uint32 seqMin(uint32 a, uint32 b) {return ((b - a) < (1UL << 31)) ? a : b;}
-inline uint32 seqMax(uint32 a, uint32 b) {return ((a - b) < (1UL << 31)) ? a : b;}
+inline bool seqLess(uint32 a, uint32 b) { return a != b && (b - a) < (1UL << 31); }
+inline bool seqLE(uint32 a, uint32 b) { return (b - a) < (1UL << 31); }
+inline bool seqGreater(uint32 a, uint32 b) { return a != b && (a - b) < (1UL << 31); }
+inline bool seqGE(uint32 a, uint32 b) { return (a - b) < (1UL << 31); }
+inline uint32 seqMin(uint32 a, uint32 b) { return ((b - a) < (1UL << 31)) ? a : b; }
+inline uint32 seqMax(uint32 a, uint32 b) { return ((a - b) < (1UL << 31)) ? a : b; }
 //@}
-
 
 class Sack : public Sack_Base
 {
@@ -43,11 +39,11 @@ class Sack : public Sack_Base
     Sack() : Sack_Base() {}
     Sack(unsigned int start_par, unsigned int end_par) { setSegment(start_par, end_par); }
     Sack(const Sack& other) : Sack_Base(other) {}
-    Sack& operator=(const Sack& other) {Sack_Base::operator=(other); return *this;}
-    virtual Sack *dup() const {return new Sack(*this);}
+    Sack& operator=(const Sack& other) { Sack_Base::operator=(other); return *this; }
+    virtual Sack *dup() const { return new Sack(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from Sack_Base
     virtual bool empty() const;
-    virtual bool contains(const Sack & other) const;
+    virtual bool contains(const Sack& other) const;
     virtual void clear();
     virtual void setSegment(unsigned int start_par, unsigned int end_par);
     virtual std::string str() const;
@@ -72,7 +68,7 @@ class INET_API TCPSegment : public TCPSegment_Base
     TCPSegment(const TCPSegment& other) : TCPSegment_Base(other) { copy(other); }
     ~TCPSegment();
     TCPSegment& operator=(const TCPSegment& other);
-    virtual TCPSegment *dup() const {return new TCPSegment(*this);}
+    virtual TCPSegment *dup() const { return new TCPSegment(*this); }
     virtual void parsimPack(cCommBuffer *b);
     virtual void parsimUnpack(cCommBuffer *b);
 
@@ -132,8 +128,7 @@ class INET_API TCPSegment : public TCPSegment_Base
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPSEGMENT_H
 
-
-#endif

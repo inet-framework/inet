@@ -21,20 +21,19 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-class MultiNetworkLayerUpperMultiplexer : public cSimpleModule {
+class MultiNetworkLayerUpperMultiplexer : public cSimpleModule
+{
   public:
-    MultiNetworkLayerUpperMultiplexer() { }
-    virtual ~MultiNetworkLayerUpperMultiplexer() { }
+    MultiNetworkLayerUpperMultiplexer() {}
+    virtual ~MultiNetworkLayerUpperMultiplexer() {}
 
   protected:
     virtual void initialize();
-    virtual void handleMessage(cMessage * message);
+    virtual void handleMessage(cMessage *message);
     int getProtocolCount();
-    int getProtocolIndex(cMessage * message);
+    int getProtocolIndex(cMessage *message);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MULTINETWORKLAYERUPPERMULTIPLEXER_H
 
-
-#endif

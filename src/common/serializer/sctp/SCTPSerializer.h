@@ -21,43 +21,40 @@
 #include "SCTPMessage.h"
 
 namespace inet {
-
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
 class SCTPSerializer
 {
-    public:
-        SCTPSerializer() {}
+  public:
+    SCTPSerializer() {}
 
-        /**
-         * Serializes an SCTPMessage for transmission on the wire.
-         * The checksum is NOT filled in. (The kernel does that when sending
-         * the frame over a raw socket.)
-         * Returns the length of data written into buffer.
-         */
-        int32 serialize(const SCTPMessage *msg, uint8 *buf, uint32 bufsize);
+    /**
+     * Serializes an SCTPMessage for transmission on the wire.
+     * The checksum is NOT filled in. (The kernel does that when sending
+     * the frame over a raw socket.)
+     * Returns the length of data written into buffer.
+     */
+    int32 serialize(const SCTPMessage *msg, uint8 *buf, uint32 bufsize);
 
-        /**
-         * Puts a packet sniffed from the wire into an SCTPMessage.
-         */
-        void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
+    /**
+     * Puts a packet sniffed from the wire into an SCTPMessage.
+     */
+    void parse(const uint8 *buf, uint32 bufsize, SCTPMessage *dest);
 
-        static uint32 checksum(const uint8 *buf, register uint32 len);
-        static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
-        void calculateSharedKey();
-        bool compareRandom();
+    static uint32 checksum(const uint8 *buf, register uint32 len);
+    static void hmacSha1(const uint8 *buf, uint32 buflen, const uint8 *key, uint32 keylen, uint8 *digest);
+    void calculateSharedKey();
+    bool compareRandom();
 
-    private:
-        static unsigned char keyVector[512];
-        static unsigned int  sizeKeyVector;
-        static unsigned char peerKeyVector[512];
-        static unsigned int  sizePeerKeyVector;
-        static unsigned char sharedKey[512];
+  private:
+    static unsigned char keyVector[512];
+    static unsigned int sizeKeyVector;
+    static unsigned char peerKeyVector[512];
+    static unsigned int sizePeerKeyVector;
+    static unsigned char sharedKey[512];
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_SCTPSERIALIZER_H
 

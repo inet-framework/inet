@@ -24,23 +24,24 @@
 #include <iostream>
 #include <sstream>
 
-#include "FWMath.h"  // for M_PI
+#include "FWMath.h"    // for M_PI
 #include "TraCIMobility.h"
 
 namespace inet {
-
 Define_Module(TraCIMobility);
 
 namespace {
-    const double MY_INFINITY = (std::numeric_limits<double>::has_infinity ? std::numeric_limits<double>::infinity() : std::numeric_limits<double>::max());
+const double MY_INFINITY = (std::numeric_limits<double>::has_infinity ? std::numeric_limits<double>::infinity() : std::numeric_limits<double>::max());
 
-    double roadIdAsDouble(std::string road_id) {
-        std::istringstream iss(road_id);
-        double d;
-        if (!(iss >> d)) return MY_INFINITY;
-        return d;
-    }
+double roadIdAsDouble(std::string road_id)
+{
+    std::istringstream iss(road_id);
+    double d;
+    if (!(iss >> d))
+        return MY_INFINITY;
+    return d;
 }
+} // namespace {
 
 void TraCIMobility::Statistics::initialize()
 {
@@ -54,7 +55,7 @@ void TraCIMobility::Statistics::initialize()
     totalCO2Emission = 0;
 }
 
-void TraCIMobility::Statistics::watch(cSimpleModule& )
+void TraCIMobility::Statistics::watch(cSimpleModule&)
 {
     WATCH(totalTime);
     WATCH(minSpeed);
@@ -64,12 +65,15 @@ void TraCIMobility::Statistics::watch(cSimpleModule& )
 
 void TraCIMobility::Statistics::recordScalars(cSimpleModule& module)
 {
-    if (firstRoadNumber != MY_INFINITY) module.recordScalar("firstRoadNumber", firstRoadNumber);
+    if (firstRoadNumber != MY_INFINITY)
+        module.recordScalar("firstRoadNumber", firstRoadNumber);
     module.recordScalar("startTime", startTime);
     module.recordScalar("totalTime", totalTime);
     module.recordScalar("stopTime", stopTime);
-    if (minSpeed != MY_INFINITY) module.recordScalar("minSpeed", minSpeed);
-    if (maxSpeed != -MY_INFINITY) module.recordScalar("maxSpeed", maxSpeed);
+    if (minSpeed != MY_INFINITY)
+        module.recordScalar("minSpeed", minSpeed);
+    if (maxSpeed != -MY_INFINITY)
+        module.recordScalar("maxSpeed", maxSpeed);
     module.recordScalar("totalDistance", totalDistance);
     module.recordScalar("totalCO2Emission", totalCO2Emission);
 }
@@ -78,8 +82,7 @@ void TraCIMobility::initialize(int stage)
 {
     //TODO why call the base::initialize() at the end?
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         accidentCount = par("accidentCount");
 
         currentPosXVec.setName("posx");
@@ -109,13 +112,15 @@ void TraCIMobility::initialize(int stage)
             scheduleAt(simTime() + accidentStart, startAccidentMsg);
         }
 
-        if (ev.isGUI()) updateDisplayString();
+        if (ev.isGUI())
+            updateDisplayString();
     }
 
     MobilityBase::initialize(stage);
 }
 
-void TraCIMobility::setInitialPosition() {
+void TraCIMobility::setInitialPosition()
+{
     ASSERT(isPreInitialized);
     isPreInitialized = false;
 }
@@ -200,28 +205,33 @@ void TraCIMobility::move()
                 double co2emission = calculateCO2emission(speed, acceleration);
                 currentAccelerationVec.record(acceleration);
                 currentCO2EmissionVec.record(co2emission);
-                statistics.totalCO2Emission+=co2emission * updateInterval.dbl();
+                statistics.totalCO2Emission += co2emission * updateInterval.dbl();
             }
             last_speed = speed;
-        } else {
+        }
+        else {
             last_speed = -1;
             speed = -1;
         }
     }
 
     lastPosition = nextPos;
-    if (ev.isGUI()) updateDisplayString();
+    if (ev.isGUI())
+        updateDisplayString();
     fixIfHostGetsOutside();
     emitMobilityStateChangedSignal();
     updateVisualRepresentation();
 }
 
-TraCIScenarioManager* TraCIMobility::getManager() const {
-    if (!manager) manager = check_and_cast<TraCIScenarioManager *>(const_cast<TraCIMobility*>(this)->getModuleByPath(par("traciScenarioManagerModule"))); //TODO: getModuleByPath is not const
+TraCIScenarioManager *TraCIMobility::getManager() const
+{
+    if (!manager)
+        manager = check_and_cast<TraCIScenarioManager *>(const_cast<TraCIMobility *>(this)->getModuleByPath(par("traciScenarioManagerModule"))); //TODO: getModuleByPath is not const
     return manager;
 }
 
-void TraCIMobility::updateDisplayString() {
+void TraCIMobility::updateDisplayString()
+{
     ASSERT(-M_PI <= angle);
     ASSERT(angle < M_PI);
 
@@ -282,26 +292,27 @@ void TraCIMobility::fixIfHostGetsOutside()
     raiseErrorIfOutside();
 }
 
-double TraCIMobility::calculateCO2emission(double v, double a) const {
+double TraCIMobility::calculateCO2emission(double v, double a) const
+{
     // Calculate CO2 emission parameters according to:
     // Cappiello, A. and Chabini, I. and Nam, E.K. and Lue, A. and Abou Zeid, M., "A statistical model of vehicle emissions and fuel consumption," IEEE 5th International Conference on Intelligent Transportation Systems (IEEE ITSC), pp. 801-809, 2002
 
-    double A = 1000 * 0.1326; // W/m/s
-    double B = 1000 * 2.7384e-03; // W/(m/s)^2
-    double C = 1000 * 1.0843e-03; // W/(m/s)^3
-    double M = 1325.0; // kg
+    double A = 1000 * 0.1326;    // W/m/s
+    double B = 1000 * 2.7384e-03;    // W/(m/s)^2
+    double C = 1000 * 1.0843e-03;    // W/(m/s)^3
+    double M = 1325.0;    // kg
 
     // power in W
-    double P_tract = A*v + B*v*v + C*v*v*v + M*a*v; // for sloped roads: +M*g*sin_theta*v
+    double P_tract = A * v + B * v * v + C * v * v * v + M * a * v;    // for sloped roads: +M*g*sin_theta*v
 
     /*
-    // "Category 7 vehicle" (e.g. a '92 Suzuki Swift)
-    double alpha = 1.01;
-    double beta = 0.0162;
-    double delta = 1.90e-06;
-    double zeta = 0.252;
-    double alpha1 = 0.985;
-    */
+       // "Category 7 vehicle" (e.g. a '92 Suzuki Swift)
+       double alpha = 1.01;
+       double beta = 0.0162;
+       double delta = 1.90e-06;
+       double zeta = 0.252;
+       double alpha1 = 0.985;
+     */
 
     // "Category 9 vehicle" (e.g. a '94 Dodge Spirit)
     double alpha = 1.11;
@@ -310,13 +321,11 @@ double TraCIMobility::calculateCO2emission(double v, double a) const {
     double zeta = 0.241;
     double alpha1 = 0.973;
 
-    if (P_tract <= 0) return alpha1;
-    return alpha + beta*v*3.6 + delta*v*v*v*(3.6*3.6*3.6) + zeta*a*v;
+    if (P_tract <= 0)
+        return alpha1;
+    return alpha + beta * v * 3.6 + delta * v * v * v * (3.6 * 3.6 * 3.6) + zeta * a * v;
 }
 
-#endif
-
-
-}
-
+#endif // ifdef WITH_TRACI
+} // namespace inet
 

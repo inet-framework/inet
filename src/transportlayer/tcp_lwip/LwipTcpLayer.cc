@@ -26,8 +26,6 @@
 #include "LwipTcpStackIf.h"
 
 namespace inet {
-
-
 LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     stackIf(stackIfP),
     tcp_input_pcb(NULL),
@@ -57,7 +55,7 @@ void LwipTcpLayer::if_receive_packet(int interfaceId, void *data, int datalen)
     struct pbuf *p = pbuf_alloc(PBUF_RAW, datalen, PBUF_RAM);
     memcpy(p->payload, data, datalen);
 
-    tcp_input(p, NULL/*interface*/);
+    tcp_input(p, NULL    /*interface*/);
 }
 
 /**
@@ -89,7 +87,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
     return 0;
 }
 
-struct netif * LwipTcpLayer::ip_route(struct ip_addr *addr)
+struct netif *LwipTcpLayer::ip_route(struct ip_addr *addr)
 {
     Address ipAddr;
 
@@ -99,7 +97,7 @@ struct netif * LwipTcpLayer::ip_route(struct ip_addr *addr)
     return stackIf.ip_route(ipAddr);
 }
 
-u8_t LwipTcpLayer::ip_addr_isbroadcast(struct ip_addr * addr, struct netif * interf)
+u8_t LwipTcpLayer::ip_addr_isbroadcast(struct ip_addr *addr, struct netif *interf)
 {
     // TODO implementing this if need
     return 0;
@@ -114,19 +112,14 @@ err_t LwipTcpLayer::lwip_tcp_event(void *arg, LwipTcpLayer::tcp_pcb *pcb,
 void LwipTcpLayer::memp_free(memp_t type, void *ptr)
 {
     if ((ptr != NULL) && ((type == MEMP_TCP_PCB) || (type == MEMP_TCP_PCB_LISTEN)))
-        stackIf.lwip_free_pcb_event((LwipTcpLayer::tcp_pcb*)ptr);
+        stackIf.lwip_free_pcb_event((LwipTcpLayer::tcp_pcb *)ptr);
 
     inet::memp_free(type, ptr);
 }
 
-void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(
-        LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo, const void *dataptr, int len)
+void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo, const void *dataptr, int len)
 {
     stackIf.notifyAboutIncomingSegmentProcessing(pcb, seqNo, dataptr, len);
 }
-
-
-
-}
-
+} // namespace inet
 

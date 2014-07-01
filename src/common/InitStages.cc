@@ -17,14 +17,9 @@
 // author: Zoltan Bojthe
 //
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
 // nothing to see here, please move along
-
-
-}
-
+} // namespace inet
 

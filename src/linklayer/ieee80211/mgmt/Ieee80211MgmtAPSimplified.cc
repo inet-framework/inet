@@ -15,19 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "Ieee80211MgmtAPSimplified.h"
 #include "Ieee802Ctrl.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame.h"
-#endif
+#endif // ifdef WITH_ETHERNET
 
 namespace inet {
-
-
 Define_Module(Ieee80211MgmtAPSimplified);
-
 
 // FIXME add sequence number handling
 
@@ -60,8 +56,7 @@ void Ieee80211MgmtAPSimplified::receiveSignal(cComponent *source, simsignal_t si
 void Ieee80211MgmtAPSimplified::handleDataFrame(Ieee80211DataFrame *frame)
 {
     // check toDS bit
-    if (!frame->getToDS())
-    {
+    if (!frame->getToDS()) {
         // looks like this is not for us - discard
         delete frame;
         return;
@@ -123,9 +118,5 @@ void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseF
 {
     dropManagementFrame(frame);
 }
-
-
-
-}
-
+} // namespace inet
 

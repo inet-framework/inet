@@ -17,16 +17,12 @@
 // @author: Zoltan Bojthe
 //
 
-
 #ifndef __INET_DELAYER_H
 #define __INET_DELAYER_H
-
 
 #include "INETDefs.h"
 
 namespace inet {
-
-
 /**
  * Delayer module.
  */
@@ -45,8 +41,7 @@ class INET_API Delayer : public cSimpleModule
     static simsignal_t sentPkSignal;
     static simsignal_t delaySignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_DELAYER_H
 
-
-#endif

@@ -20,12 +20,9 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #include "MovingMobilityBase.h"
 
 namespace inet {
-
-
 MovingMobilityBase::MovingMobilityBase()
 {
     moveTimer = NULL;
@@ -52,7 +49,8 @@ void MovingMobilityBase::initialize(int stage)
     }
 }
 
-void MovingMobilityBase::initializePosition() {
+void MovingMobilityBase::initializePosition()
+{
     MobilityBase::initializePosition();
     lastUpdate = simTime();
     scheduleUpdate();
@@ -104,8 +102,5 @@ Coord MovingMobilityBase::getCurrentSpeed()
     moveAndUpdate();
     return lastSpeed;
 }
-
-
-}
-
+} // namespace inet
 

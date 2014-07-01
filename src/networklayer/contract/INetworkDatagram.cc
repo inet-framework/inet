@@ -15,15 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INetworkDatagram.h"
 
 namespace inet {
-
 Register_Abstract_Class(INetworkDatagram);
-
-
-
-}
-
+} // namespace inet
 

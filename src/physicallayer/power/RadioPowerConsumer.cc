@@ -19,9 +19,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 RadioPowerConsumer::RadioPowerConsumer()
 {
     powerConsumerId = 0;
@@ -41,8 +39,7 @@ void RadioPowerConsumer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     EV << "Initializing RadioPowerConsumer, stage = " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         offPowerConsumption = par("offPowerConsumption");
         sleepPowerConsumption = par("sleepPowerConsumption");
         switchingPowerConsumption = par("switchingPowerConsumption");
@@ -56,19 +53,17 @@ void RadioPowerConsumer::initialize(int stage)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
-        radio = check_and_cast<IRadio*>(radioModule);
+        radio = check_and_cast<IRadio *>(radioModule);
         cModule *node = findContainingNode(this);
         powerSource = dynamic_cast<IPowerSource *>(node->getSubmodule("powerSource"));
         if (powerSource)
             powerConsumerId = powerSource->addPowerConsumer(this);
-
     }
 }
 
 void RadioPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal)
-    {
+    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal) {
         if (powerSource)
             powerSource->setPowerConsumption(powerConsumerId, getPowerConsumption());
     }
@@ -108,10 +103,6 @@ double RadioPowerConsumer::getPowerConsumption()
     }
     return powerConsumption;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

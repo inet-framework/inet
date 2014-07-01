@@ -24,8 +24,6 @@
 #include "ObstacleControl.h"
 
 namespace inet {
-
-
 Define_Module(ObstacleControl);
 
 ObstacleControl::ObstacleControl()
@@ -35,22 +33,21 @@ ObstacleControl::ObstacleControl()
     annotationGroup = NULL;
 }
 
-ObstacleControl::~ObstacleControl() {
+ObstacleControl::~ObstacleControl()
+{
 }
 
 void ObstacleControl::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         obstacles.clear();
         cacheEntries.clear();
 
         obstaclesXml = par("obstacles");
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
-    {
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         annotations = findModuleFromPar<AnnotationManager>(par("annotationManagerModule"), this);
         if (annotations)
             annotationGroup = annotations->createGroup("obstacles");
@@ -59,16 +56,19 @@ void ObstacleControl::initialize(int stage)
     }
 }
 
-void ObstacleControl::finish() {
+void ObstacleControl::finish()
+{
     for (Obstacles::iterator i = obstacles.begin(); i != obstacles.end(); ++i) {
         for (ObstacleGridRow::iterator j = i->begin(); j != i->end(); ++j) {
-            while (j->begin() != j->end()) erase(*j->begin());
+            while (j->begin() != j->end())
+                erase(*j->begin());
         }
     }
     obstacles.clear();
 }
 
-void ObstacleControl::handleMessage(cMessage *msg) {
+void ObstacleControl::handleMessage(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         handleSelfMsg(msg);
         return;
@@ -76,17 +76,19 @@ void ObstacleControl::handleMessage(cMessage *msg) {
     throw cRuntimeError("ObstacleControl doesn't handle messages from other modules");
 }
 
-void ObstacleControl::handleSelfMsg(cMessage *msg) {
+void ObstacleControl::handleSelfMsg(cMessage *msg)
+{
     throw cRuntimeError("ObstacleControl doesn't handle self-messages");
 }
 
-void ObstacleControl::addFromXml(cXMLElement* xml) {
+void ObstacleControl::addFromXml(cXMLElement *xml)
+{
     std::string rootTag = xml->getTagName();
     ASSERT(rootTag == "obstacles");
 
     cXMLElementList list = xml->getChildren();
     for (cXMLElementList::const_iterator i = list.begin(); i != list.end(); ++i) {
-        cXMLElement* e = *i;
+        cXMLElement *e = *i;
 
         std::string tag = e->getTagName();
         ASSERT(tag == "poly");
@@ -101,10 +103,14 @@ void ObstacleControl::addFromXml(cXMLElement* xml) {
         ASSERT(e->getAttribute("shape"));
         std::string shape = e->getAttribute("shape");
 
-        double attenuationPerWall = 50; /**< in dB */
-        double attenuationPerMeter = 1; /**< in dB / m */
-        if (type == "building") { attenuationPerWall = 50; attenuationPerMeter = 1; }
-        else throw cRuntimeError("unknown obstacle type: %s", type.c_str());
+        double attenuationPerWall = 50;    /**< in dB */
+        double attenuationPerMeter = 1;    /**< in dB / m */
+        if (type == "building") {
+            attenuationPerWall = 50;
+            attenuationPerMeter = 1;
+        }
+        else
+            throw cRuntimeError("unknown obstacle type: %s", type.c_str());
         Obstacle obs(id, attenuationPerWall, attenuationPerMeter);
         std::vector<Coord> sh;
         cStringTokenizer st(shape.c_str());
@@ -116,13 +122,12 @@ void ObstacleControl::addFromXml(cXMLElement* xml) {
         }
         obs.setShape(sh);
         add(obs);
-
     }
-
 }
 
-void ObstacleControl::add(Obstacle obstacle) {
-    Obstacle* o = new Obstacle(obstacle);
+void ObstacleControl::add(Obstacle obstacle)
+{
+    Obstacle *o = new Obstacle(obstacle);
 
     size_t fromRow = std::max(0, int(o->getBboxP1().x / GRIDCELL_SIZE));
     size_t toRow = std::max(0, int(o->getBboxP2().x / GRIDCELL_SIZE));
@@ -130,45 +135,53 @@ void ObstacleControl::add(Obstacle obstacle) {
     size_t toCol = std::max(0, int(o->getBboxP2().y / GRIDCELL_SIZE));
     for (size_t row = fromRow; row <= toRow; ++row) {
         for (size_t col = fromCol; col <= toCol; ++col) {
-            if (obstacles.size() < col+1) obstacles.resize(col+1);
-            if (obstacles[col].size() < row+1) obstacles[col].resize(row+1);
+            if (obstacles.size() < col + 1)
+                obstacles.resize(col + 1);
+            if (obstacles[col].size() < row + 1)
+                obstacles[col].resize(row + 1);
             (obstacles[col])[row].push_back(o);
         }
     }
 
     // visualize using AnnotationManager
-    if (annotations) o->visualRepresentation = annotations->drawPolygon(o->getShape(), "red", annotationGroup);
+    if (annotations)
+        o->visualRepresentation = annotations->drawPolygon(o->getShape(), "red", annotationGroup);
 
     cacheEntries.clear();
 }
 
-void ObstacleControl::erase(const Obstacle* obstacle) {
+void ObstacleControl::erase(const Obstacle *obstacle)
+{
     for (Obstacles::iterator i = obstacles.begin(); i != obstacles.end(); ++i) {
         for (ObstacleGridRow::iterator j = i->begin(); j != i->end(); ++j) {
             for (ObstacleGridCell::iterator k = j->begin(); k != j->end(); ) {
-                Obstacle* o = *k;
+                Obstacle *o = *k;
                 if (o == obstacle) {
                     k = j->erase(k);
-                } else {
+                }
+                else {
                     ++k;
                 }
             }
         }
     }
 
-    if (annotations && obstacle->visualRepresentation) annotations->erase(obstacle->visualRepresentation);
+    if (annotations && obstacle->visualRepresentation)
+        annotations->erase(obstacle->visualRepresentation);
     delete obstacle;
 
     cacheEntries.clear();
 }
 
-double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const {
+double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const
+{
     Enter_Method_Silent();
 
     // return cached result, if available
     CacheKey cacheKey(pSend, carrierFrequency, senderPos, senderAngle, receiverPos, receiverAngle);
     CacheEntries::const_iterator cacheEntryIter = cacheEntries.find(cacheKey);
-    if (cacheEntryIter != cacheEntries.end()) return cacheEntryIter->second;
+    if (cacheEntryIter != cacheEntries.end())
+        return cacheEntryIter->second;
 
     // calculate bounding box of transmission
     Coord bboxP1 = Coord(std::min(senderPos.x, receiverPos.x), std::min(senderPos.y, receiverPos.y));
@@ -179,47 +192,52 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
     size_t fromCol = std::max(0, int(bboxP1.y / GRIDCELL_SIZE));
     size_t toCol = std::max(0, int(bboxP2.y / GRIDCELL_SIZE));
 
-    std::set<Obstacle*> processedObstacles;
+    std::set<Obstacle *> processedObstacles;
     for (size_t col = fromCol; col <= toCol; ++col) {
-        if (col >= obstacles.size()) break;
+        if (col >= obstacles.size())
+            break;
         for (size_t row = fromRow; row <= toRow; ++row) {
-            if (row >= obstacles[col].size()) break;
+            if (row >= obstacles[col].size())
+                break;
             const ObstacleGridCell& cell = (obstacles[col])[row];
             for (ObstacleGridCell::const_iterator k = cell.begin(); k != cell.end(); ++k) {
+                Obstacle *o = *k;
 
-                Obstacle* o = *k;
-
-                if (processedObstacles.find(o) != processedObstacles.end()) continue;
+                if (processedObstacles.find(o) != processedObstacles.end())
+                    continue;
                 processedObstacles.insert(o);
 
                 // bail if bounding boxes cannot overlap
-                if (o->getBboxP2().x < bboxP1.x) continue;
-                if (o->getBboxP1().x > bboxP2.x) continue;
-                if (o->getBboxP2().y < bboxP1.y) continue;
-                if (o->getBboxP1().y > bboxP2.y) continue;
+                if (o->getBboxP2().x < bboxP1.x)
+                    continue;
+                if (o->getBboxP1().x > bboxP2.x)
+                    continue;
+                if (o->getBboxP2().y < bboxP1.y)
+                    continue;
+                if (o->getBboxP1().y > bboxP2.y)
+                    continue;
 
                 double pSendOld = pSend;
 
                 pSend = o->calculateReceivedPower(pSend, carrierFrequency, senderPos, senderAngle, receiverPos, receiverAngle);
 
                 // draw a "hit!" bubble
-                if (annotations && (pSend < pSendOld)) annotations->drawBubble(o->getBboxP1(), "hit");
+                if (annotations && (pSend < pSendOld))
+                    annotations->drawBubble(o->getBboxP1(), "hit");
 
                 // bail if attenuation is already extremely high
-                if (pSend < 1e-30) break;
-
+                if (pSend < 1e-30)
+                    break;
             }
         }
     }
 
     // cache result
-    if (cacheEntries.size() >= 1000) cacheEntries.clear();
+    if (cacheEntries.size() >= 1000)
+        cacheEntries.clear();
     cacheEntries[cacheKey] = pSend;
 
     return pSend;
 }
-
-
-}
-
+} // namespace inet
 

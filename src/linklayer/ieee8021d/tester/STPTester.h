@@ -26,7 +26,6 @@
 #include "STP.h"
 
 namespace inet {
-
 /**
  * Utility class for testing the STP protocol. First, it extracts the network
  * topology (network nodes marked with the @node NED property), regarding the
@@ -37,47 +36,45 @@ namespace inet {
 // TODO: this module should be moved into the test folder somewhere
 class INET_API STPTester : public cSimpleModule
 {
-    public:
-        enum Color
-        {
-            WHITE, GRAY, BLACK
-        };
+  public:
+    enum Color {
+        WHITE, GRAY, BLACK
+    };
 
-    protected:
-        bool loop;
-        int numOfVisitedNodes;
-        int numOfNodes;
-        std::map<Topology::Node *, int> color;
-        std::map<Topology::Node *, Topology::Node *> parent;
-        Topology graph;
+  protected:
+    bool loop;
+    int numOfVisitedNodes;
+    int numOfNodes;
+    std::map<Topology::Node *, int> color;
+    std::map<Topology::Node *, Topology::Node *> parent;
+    Topology graph;
 
-        simtime_t checkTime;
-        cMessage* checkTimer;
+    simtime_t checkTime;
+    cMessage *checkTimer;
 
-    public:
-        // Includes network topology extraction
-        STPTester();
-        ~STPTester();
-        virtual void initialize();
-        virtual void handleMessage(cMessage *msg);
+  public:
+    // Includes network topology extraction
+    STPTester();
+    ~STPTester();
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
 
-    protected:
-        void dfsVisit(Topology::Node * node);
-        bool isForwarding(Topology::Node * node, unsigned int portNum);
+  protected:
+    void dfsVisit(Topology::Node *node);
+    bool isForwarding(Topology::Node *node, unsigned int portNum);
 
-        // Analyzes the network graph
-        void depthFirstSearch();
+    // Analyzes the network graph
+    void depthFirstSearch();
 
-        // Getters for returning the result after a call to depthFirstSearch()
-        bool isLoopFreeGraph();
-        bool isConnectedGraph();
-        bool isTreeGraph();
+    // Getters for returning the result after a call to depthFirstSearch()
+    bool isLoopFreeGraph();
+    bool isConnectedGraph();
+    bool isTreeGraph();
 
-        int getNumOfNodes();
-        int getNumOfVisitedNodes();
+    int getNumOfNodes();
+    int getNumOfVisitedNodes();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_STPTESTER_H
 
-
-#endif

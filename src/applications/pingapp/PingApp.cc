@@ -28,7 +28,6 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
-
 using std::cout;
 
 Define_Module(PingApp);
@@ -55,8 +54,7 @@ void PingApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // read params
         // (defer reading srcAddr/destAddr to when ping starts, maybe
         // addresses will be assigned later by some protocol)
@@ -87,8 +85,7 @@ void PingApp::initialize(int stage)
         // references
         timer = new cMessage("sendPing");
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // startup
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         if (isEnabled() && isNodeUp())
@@ -98,15 +95,13 @@ void PingApp::initialize(int stage)
 
 void PingApp::handleMessage(cMessage *msg)
 {
-    if (!isNodeUp())
-    {
+    if (!isNodeUp()) {
         if (msg->isSelfMessage())
             throw cRuntimeError("Application is not running");
         delete msg;
         return;
     }
-    if (msg == timer)
-    {
+    if (msg == timer) {
         sendPingRequest();
         if (isEnabled())
             scheduleNextPingRequest(simTime());
@@ -114,8 +109,7 @@ void PingApp::handleMessage(cMessage *msg)
     else
         processPingResponse(check_and_cast<PingPayload *>(msg));
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[40];
         sprintf(buf, "sent: %ld pks\nrcvd: %ld pks", sentCount, numPongs);
         getDisplayString().setTagArg("t", 0, buf);
@@ -137,7 +131,8 @@ bool PingApp::handleOperationStage(LifecycleOperation *operation, int stage, IDo
         if (stage == NodeCrashOperation::STAGE_CRASH)
             stopSendingPingRequests();
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -186,8 +181,7 @@ bool PingApp::isEnabled()
 
 void PingApp::sendPingRequest()
 {
-    if (destAddr.isUnspecified())
-    {
+    if (destAddr.isUnspecified()) {
         srcAddr = AddressResolver().resolve(par("srcAddr"));
         destAddr = AddressResolver().resolve(par("destAddr"));
         EV_INFO << "Starting up with destination = " << destAddr << ", source = " << srcAddr << ".\n";
@@ -217,13 +211,13 @@ void PingApp::sendPingRequest()
 
 void PingApp::sendToICMP(PingPayload *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
 {
-    IAddressType * addressType = destAddr.getAddressType();
-    INetworkProtocolControlInfo * controlInfo = addressType->createNetworkProtocolControlInfo();
+    IAddressType *addressType = destAddr.getAddressType();
+    INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(srcAddr);
     controlInfo->setDestinationAddress(destAddr);
     controlInfo->setHopLimit(hopLimit);
     // TODO: remove
-    controlInfo->setTransportProtocol(1); // IP_PROT_ICMP);
+    controlInfo->setTransportProtocol(1);    // IP_PROT_ICMP);
     msg->setControlInfo(dynamic_cast<cObject *>(controlInfo));
     EV_INFO << "Sending ping request #" << msg->getSeqNo() << " to lower layer.\n";
     send(msg, "pingOut");
@@ -231,19 +225,18 @@ void PingApp::sendToICMP(PingPayload *msg, const Address& destAddr, const Addres
 
 void PingApp::processPingResponse(PingPayload *msg)
 {
-    if (msg->getOriginatorId() != pid)
-    {
+    if (msg->getOriginatorId() != pid) {
         EV_WARN << "Received response was not sent by this application, dropping packet\n";
         delete msg;
         return;
     }
 
     int timeLength = msg->getDataArraySize();
-    char time[timeLength + 1];      //FIXME visualC ???
+    char time[timeLength + 1];    //FIXME visualC ???
     for (int i = 0; i < timeLength; i++)
         time[i] = msg->getData(i);
     time[timeLength] = '\0';
-    simtime_t sendTime = STR_SIMTIME(time);     // Why converting to/from string?
+    simtime_t sendTime = STR_SIMTIME(time);    // Why converting to/from string?
 
     if (sendTime < lastStart) {
         EV_WARN << "Received response was not sent since last application start, dropping packet\n";
@@ -262,10 +255,9 @@ void PingApp::processPingResponse(PingPayload *msg)
     // sendTime was overwritten in the circular buffer) then we just return a 0
     // to signal that this value should not be used during the RTT statistics)
     simtime_t rtt = sendSeqNo - msg->getSeqNo() > PING_HISTORY_SIZE ?
-                       0 : simTime() - sendTimeHistory[msg->getSeqNo() % PING_HISTORY_SIZE];
+        0 : simTime() - sendTimeHistory[msg->getSeqNo() % PING_HISTORY_SIZE];
 
-    if (printPing)
-    {
+    if (printPing) {
         // TODO: why not EV? is it because of express mode?
         cout << getFullPath() << ": reply of " << std::dec << msg->getByteLength()
              << " bytes from " << src
@@ -287,19 +279,16 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
     numPongs++;
 
     // count only non 0 RTT values as 0s are invalid
-    if (rtt > 0)
-    {
+    if (rtt > 0) {
         rttStat.collect(rtt);
         emit(rttSignal, rtt);
     }
 
-    if (seqNo == expectedReplySeqNo)
-    {
+    if (seqNo == expectedReplySeqNo) {
         // expected ping reply arrived; expect next sequence number
         expectedReplySeqNo++;
     }
-    else if (seqNo > expectedReplySeqNo)
-    {
+    else if (seqNo > expectedReplySeqNo) {
         EV_DETAIL << "Jump in seq numbers, assuming pings since #" << expectedReplySeqNo << " got lost\n";
 
         // jump in the sequence: count pings in gap as lost for now
@@ -309,11 +298,10 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
         emit(numLostSignal, lossCount);
 
         // expect sequence numbers to continue from here
-        expectedReplySeqNo = seqNo+1;
+        expectedReplySeqNo = seqNo + 1;
     }
-    else // seqNo < expectedReplySeqNo
-    {
-        // ping reply arrived too late: count as out-of-order arrival (not loss after all)
+    else {    // seqNo < expectedReplySeqNo
+              // ping reply arrived too late: count as out-of-order arrival (not loss after all)
         EV_DETAIL << "Arrived out of order (too late)\n";
         outOfOrderArrivalCount++;
         lossCount--;
@@ -324,8 +312,7 @@ void PingApp::countPingResponse(int bytes, long seqNo, simtime_t rtt)
 
 void PingApp::finish()
 {
-    if (sentCount==0)
-    {
+    if (sentCount == 0) {
         if (printPing)
             EV_WARN << getFullPath() << ": No pings sent, skipping recording statistics and printing results.\n";
         return;
@@ -338,22 +325,18 @@ void PingApp::finish()
     recordScalar("ping out-of-order rate (%)", 100 * outOfOrderArrivalCount / (double)sentCount);
 
     // print it to stdout as well
-    if (printPing)
-    {
+    if (printPing) {
         // TODO: why not EV? is it because of express mode?
         cout << "--------------------------------------------------------" << endl;
         cout << "\t" << getFullPath() << endl;
         cout << "--------------------------------------------------------" << endl;
         cout << "ping " << par("destAddr").stringValue() << " (" << destAddr << "):" << endl;
-        cout << "sent: " << sentCount << "   received: " << numPongs << "   loss rate (%): " << (100 * lossCount / (double) sentCount) << endl;
+        cout << "sent: " << sentCount << "   received: " << numPongs << "   loss rate (%): " << (100 * lossCount / (double)sentCount) << endl;
         cout << "round-trip min/avg/max (ms): " << (rttStat.getMin() * 1000.0) << "/"
              << (rttStat.getMean() * 1000.0) << "/" << (rttStat.getMax() * 1000.0) << endl;
         cout << "stddev (ms): " << (rttStat.getStddev() * 1000.0) << "   variance:" << rttStat.getVariance() << endl;
         cout << "--------------------------------------------------------" << endl;
     }
 }
-
-
-}
-
+} // namespace inet
 

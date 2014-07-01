@@ -18,13 +18,12 @@
 #include "FindModule.h"
 
 namespace inet {
+Define_Module(LMacLayer)
 
-Define_Module( LMacLayer )
-
-#define myId (getParentModule()->getParentModule()->getIndex())
+#define myId    (getParentModule()->getParentModule()->getIndex())
 
 const MACAddress LMacLayer::LMAC_NO_RECEIVER = MACAddress(-2);
-const MACAddress LMacLayer::LMAC_FREE_SLOT   = MACAddress::BROADCAST_ADDRESS;
+const MACAddress LMacLayer::LMAC_FREE_SLOT = MACAddress::BROADCAST_ADDRESS;
 
 void LMacLayer::initialize(int stage)
 {
@@ -64,10 +63,10 @@ void LMacLayer::initialize(int stage)
         //channel = hasPar("defaultChannel") ? par("defaultChannel") : 0;
 
         EV_DETAIL << "queueLength = " << queueLength
-           << " slotDuration = " << slotDuration
-           << " controlDuration = " << controlDuration
-           << " numSlots = " << numSlots
-           << " bitrate = " << bitrate << endl;
+                  << " slotDuration = " << slotDuration
+                  << " controlDuration = " << controlDuration
+                  << " numSlots = " << numSlots
+                  << " bitrate = " << bitrate << endl;
 
         timeout = new cMessage("timeout");
         timeout->setKind(LMAC_TIMEOUT);
@@ -94,7 +93,8 @@ void LMacLayer::initialize(int stage)
     }
 }
 
-LMacLayer::~LMacLayer() {
+LMacLayer::~LMacLayer()
+{
     delete slotChange;
     cancelAndDelete(timeout);
     cancelAndDelete(wakeup);
@@ -105,7 +105,7 @@ LMacLayer::~LMacLayer() {
     cancelAndDelete(send_control);
 
     MacQueue::iterator it;
-    for(it = macQueue.begin(); it != macQueue.end(); ++it) {
+    for (it = macQueue.begin(); it != macQueue.end(); ++it) {
         delete (*it);
     }
     macQueue.clear();
@@ -115,16 +115,14 @@ void LMacLayer::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
-    if (!strcmp(addrstr, "auto"))
-    {
+    if (!strcmp(addrstr, "auto")) {
         // assign automatic address
         address = MACAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
     }
-    else
-    {
+    else {
         address.setAddress(addrstr);
     }
 }
@@ -157,22 +155,22 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
  */
 void LMacLayer::handleUpperPacket(cPacket *msg)
 {
-    LMacFrame *mac = static_cast<LMacFrame *>(encapsMsg(static_cast<cPacket*>(msg)));
+    LMacFrame *mac = static_cast<LMacFrame *>(encapsMsg(static_cast<cPacket *>(msg)));
 
     // message has to be queued if another message is waiting to be send
     // or if we are already trying to send another message
 
     if (macQueue.size() <= queueLength) {
         macQueue.push_back(mac);
-	    EV_DETAIL << "packet put in queue\n  queue size: " << macQueue.size() << " macState: " << macState
-	              << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;;
-
+        EV_DETAIL << "packet put in queue\n  queue size: " << macQueue.size() << " macState: " << macState
+                  << "; mySlot is " << mySlot << "; current slot is " << currSlot << endl;
+        ;
     }
     else {
         // queue is full, message has to be deleted
         EV_DETAIL << "New packet arrived, but queue is FULL, so new packet is deleted\n";
         delete mac;
-        EV_DETAIL <<  "ERROR: Queue is full, forced to delete.\n";
+        EV_DETAIL << "ERROR: Queue is full, forced to delete.\n";
     }
 }
 
@@ -186,429 +184,382 @@ void LMacLayer::handleUpperPacket(cPacket *msg)
  */
 void LMacLayer::handleSelfMessage(cMessage *msg)
 {
-	switch (macState)
-	{
-	case INIT:
-		if (msg->getKind() == LMAC_START_LMAC)
-		{
-			// the first 5 full slots we will be waking up every controlDuration to setup the network first
-			// normal packets will be queued, but will be send only after the setup phase
-			scheduleAt(slotDuration*5*numSlots, initChecker);
-			EV << "Startup time =" << slotDuration*5*numSlots << endl;
+    switch (macState) {
+        case INIT:
+            if (msg->getKind() == LMAC_START_LMAC) {
+                // the first 5 full slots we will be waking up every controlDuration to setup the network first
+                // normal packets will be queued, but will be send only after the setup phase
+                scheduleAt(slotDuration * 5 * numSlots, initChecker);
+                EV << "Startup time =" << slotDuration * 5 * numSlots << endl;
 
-			EV_DETAIL << "Scheduling the first wakeup at : " << slotDuration << endl;
+                EV_DETAIL << "Scheduling the first wakeup at : " << slotDuration << endl;
 
-			scheduleAt(slotDuration, wakeup);
+                scheduleAt(slotDuration, wakeup);
 
-			for (int i = 0; i < numSlots; i++)
-			{
-				occSlotsDirect[i] = LMAC_FREE_SLOT;
-				occSlotsAway[i]   = LMAC_FREE_SLOT;
-			}
+                for (int i = 0; i < numSlots; i++) {
+                    occSlotsDirect[i] = LMAC_FREE_SLOT;
+                    occSlotsAway[i] = LMAC_FREE_SLOT;
+                }
 
-			if (myId >= reservedMobileSlots)
-				mySlot = ((int) FindModule<>::findHost(this)->getId() ) % (numSlots - reservedMobileSlots);
-			else
-				mySlot = myId;
-			//occSlotsDirect[mySlot] = address;
-			//occSlotsAway[mySlot] = address;
-			currSlot = 0;
+                if (myId >= reservedMobileSlots)
+                    mySlot = ((int)FindModule<>::findHost(this)->getId()) % (numSlots - reservedMobileSlots);
+                else
+                    mySlot = myId;
+                //occSlotsDirect[mySlot] = address;
+                //occSlotsAway[mySlot] = address;
+                currSlot = 0;
 
-			EV_DETAIL << "ID: " << FindModule<>::findHost(this)->getId() << ". Picked random slot: " << mySlot << endl;
+                EV_DETAIL << "ID: " << FindModule<>::findHost(this)->getId() << ". Picked random slot: " << mySlot << endl;
 
-			macState=SLEEP;
-			EV_DETAIL << "Old state: INIT, New state: SLEEP" << endl;
-			SETUP_PHASE = true;
-		}
-		else {
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
+                macState = SLEEP;
+                EV_DETAIL << "Old state: INIT, New state: SLEEP" << endl;
+                SETUP_PHASE = true;
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-	case SLEEP:
-		if(msg->getKind() == LMAC_WAKEUP)
-		{
-			currSlot++;
-			currSlot %= numSlots;
-			EV_DETAIL << "New slot starting - No. " << currSlot << ", my slot is " << mySlot << endl;
+        case SLEEP:
+            if (msg->getKind() == LMAC_WAKEUP) {
+                currSlot++;
+                currSlot %= numSlots;
+                EV_DETAIL << "New slot starting - No. " << currSlot << ", my slot is " << mySlot << endl;
 
-			if (mySlot == currSlot)
-			{
-				EV_DETAIL << "Waking up in my slot. Switch to RECV first to check the channel.\n";
-				macState = CCA;
-				radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-				EV_DETAIL << "Old state: SLEEP, New state: CCA" << endl;
+                if (mySlot == currSlot) {
+                    EV_DETAIL << "Waking up in my slot. Switch to RECV first to check the channel.\n";
+                    macState = CCA;
+                    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+                    EV_DETAIL << "Old state: SLEEP, New state: CCA" << endl;
 
-				double small_delay = controlDuration*dblrand();
-				scheduleAt(simTime()+small_delay, checkChannel);
-				EV_DETAIL << "Checking for channel for " << small_delay << " time.\n";
-			}
-			else
-			{
-				EV_DETAIL << "Waking up in a foreign slot. Ready to receive control packet.\n";
-				macState = WAIT_CONTROL;
-				radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
-				EV_DETAIL << "Old state: SLEEP, New state: WAIT_CONTROL" << endl;
-				if (!SETUP_PHASE)	//in setup phase do not sleep
-					scheduleAt(simTime()+2.f*controlDuration, timeout);
-			}
-			if (SETUP_PHASE)
-			{
-				scheduleAt(simTime()+2.f*controlDuration, wakeup);
-				EV_DETAIL << "setup phase slot duration:" << 2.f*controlDuration << "while controlduration is" << controlDuration << endl;
-			}
-			else
-				scheduleAt(simTime()+slotDuration, wakeup);
-		}
-		else if(msg->getKind() == LMAC_SETUP_PHASE_END)
-		{
-			EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-			if (wakeup->isScheduled())
-				cancelEvent(wakeup);
+                    double small_delay = controlDuration * dblrand();
+                    scheduleAt(simTime() + small_delay, checkChannel);
+                    EV_DETAIL << "Checking for channel for " << small_delay << " time.\n";
+                }
+                else {
+                    EV_DETAIL << "Waking up in a foreign slot. Ready to receive control packet.\n";
+                    macState = WAIT_CONTROL;
+                    radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
+                    EV_DETAIL << "Old state: SLEEP, New state: WAIT_CONTROL" << endl;
+                    if (!SETUP_PHASE) //in setup phase do not sleep
+                        scheduleAt(simTime() + 2.f * controlDuration, timeout);
+                }
+                if (SETUP_PHASE) {
+                    scheduleAt(simTime() + 2.f * controlDuration, wakeup);
+                    EV_DETAIL << "setup phase slot duration:" << 2.f * controlDuration << "while controlduration is" << controlDuration << endl;
+                }
+                else
+                    scheduleAt(simTime() + slotDuration, wakeup);
+            }
+            else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
+                EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
+                if (wakeup->isScheduled())
+                    cancelEvent(wakeup);
 
-			scheduleAt(simTime()+slotDuration, wakeup);
+                scheduleAt(simTime() + slotDuration, wakeup);
 
-			SETUP_PHASE = false;
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
+                SETUP_PHASE = false;
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-	case CCA:
-		if(msg->getKind() == LMAC_CHECK_CHANNEL)
-		{
-			// if the channel is clear, get ready for sending the control packet
-			EV << "Channel is free, so let's prepare for sending.\n";
+        case CCA:
+            if (msg->getKind() == LMAC_CHECK_CHANNEL) {
+                // if the channel is clear, get ready for sending the control packet
+                EV << "Channel is free, so let's prepare for sending.\n";
 
-			macState = SEND_CONTROL;
-			radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
-			EV_DETAIL << "Old state: CCA, New state: SEND_CONTROL" << endl;
+                macState = SEND_CONTROL;
+                radio->setRadioMode(IRadio::RADIO_MODE_TRANSMITTER);
+                EV_DETAIL << "Old state: CCA, New state: SEND_CONTROL" << endl;
+            }
+            else if (msg->getKind() == LMAC_CONTROL) {
+                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
+                const MACAddress& dest = mac->getDestAddr();
+                EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
+                bool collision = false;
+                // if we are listening to the channel and receive anything, there is a collision in the slot.
+                if (checkChannel->isScheduled()) {
+                    cancelEvent(checkChannel);
+                    collision = true;
+                }
 
-		}
-		else if(msg->getKind() == LMAC_CONTROL)
-		{
-		    LMacFrame *const          mac  = static_cast<LMacFrame *>(msg);
-			const MACAddress& dest = mac->getDestAddr();
-			EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
-			bool collision = false;
-			// if we are listening to the channel and receive anything, there is a collision in the slot.
-			if (checkChannel->isScheduled())
-			{
-				cancelEvent(checkChannel);
-				collision = true;
-			}
+                for (int s = 0; s < numSlots; s++) {
+                    occSlotsAway[s] = mac->getOccupiedSlots(s);
+                    EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
+                    EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
+                }
 
-			for (int s = 0; s < numSlots; s++) {
-				occSlotsAway[s] = mac->getOccupiedSlots(s);
-				EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
-				EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
-			}
+                if (mac->getMySlot() > -1) {
+                    // check first whether this address didn't have another occupied slot and free it again
+                    for (int i = 0; i < numSlots; i++) {
+                        if (occSlotsDirect[i] == mac->getSrcAddr())
+                            occSlotsDirect[i] = LMAC_FREE_SLOT;
+                        if (occSlotsAway[i] == mac->getSrcAddr())
+                            occSlotsAway[i] = LMAC_FREE_SLOT;
+                    }
+                    occSlotsAway[mac->getMySlot()] = mac->getSrcAddr();
+                    occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
+                }
+                collision = collision || (mac->getMySlot() == mySlot);
+                if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision) {
+                    EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
+                    findNewSlot();
+                    EV_DETAIL << "My new slot is " << mySlot << endl;
+                }
+                if (mySlot < 0) {
+                    EV_DETAIL << "I don;t have a slot - try to find one.\n";
+                    findNewSlot();
+                }
 
-			if (mac->getMySlot() >-1)
-			{
-				// check first whether this address didn't have another occupied slot and free it again
-				for (int i=0; i < numSlots; i++)
-				{
-					if (occSlotsDirect[i] == mac->getSrcAddr())
-						occSlotsDirect[i] = LMAC_FREE_SLOT;
-					if (occSlotsAway[i] == mac->getSrcAddr())
-						occSlotsAway[i] = LMAC_FREE_SLOT;
-				}
-				occSlotsAway[mac->getMySlot()]   = mac->getSrcAddr();
-				occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
-			}
-			collision = collision || (mac->getMySlot() == mySlot);
-			if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision)
-			{
-				EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
-				findNewSlot();
-				EV_DETAIL << "My new slot is " << mySlot << endl;
-			}
-			if (mySlot < 0)
-			{
-				EV_DETAIL << "I don;t have a slot - try to find one.\n";
-				findNewSlot();
-			}
+                if (dest == address || dest.isBroadcast()) {
+                    EV_DETAIL << "I need to stay awake.\n";
+                    if (timeout->isScheduled())
+                        cancelEvent(timeout);
+                    macState = WAIT_DATA;
+                    EV_DETAIL << "Old state: CCA, New state: WAIT_DATA" << endl;
+                }
+                else {
+                    EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
+                    macState = SLEEP;
+                    EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
+                    radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+                    if (timeout->isScheduled())
+                        cancelEvent(timeout);
+                }
+                delete mac;
+            }
+            //probably it never happens
+            else if (msg->getKind() == LMAC_DATA) {
+                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
+                const MACAddress& dest = mac->getDestAddr();
+                //bool collision = false;
+                // if we are listening to the channel and receive anything, there is a collision in the slot.
+                if (checkChannel->isScheduled()) {
+                    cancelEvent(checkChannel);
+                    //collision = true;
+                }
+                EV_DETAIL << " I have received a data packet.\n";
+                if (dest == address || dest.isBroadcast()) {
+                    EV_DETAIL << "sending pkt to upper...\n";
+                    sendUp(decapsMsg(mac));
+                }
+                else {
+                    EV_DETAIL << "packet not for me, deleting...\n";
+                    delete mac;
+                }
+                // in any case, go back to sleep
+                macState = SLEEP;
+                EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
+                radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+            }
+            else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
+                EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
+                if (wakeup->isScheduled())
+                    cancelEvent(wakeup);
 
-			if(dest == address || dest.isBroadcast())
-			{
-				EV_DETAIL << "I need to stay awake.\n";
-				if (timeout->isScheduled())
-					cancelEvent(timeout);
-				macState=WAIT_DATA;
-				EV_DETAIL << "Old state: CCA, New state: WAIT_DATA" << endl;
-			}
-			else
-			{
-				EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
-				macState = SLEEP;
-				EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
-				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-				if (timeout->isScheduled())
-					cancelEvent(timeout);
-			}
-			delete mac;
-		}
-		//probably it never happens
-		else if(msg->getKind() == LMAC_DATA)
-		{
-		    LMacFrame *const          mac  = static_cast<LMacFrame *>(msg);
-			const MACAddress& dest = mac->getDestAddr();
-			//bool collision = false;
-			// if we are listening to the channel and receive anything, there is a collision in the slot.
-			if (checkChannel->isScheduled())
-			{
-				cancelEvent(checkChannel);
-				//collision = true;
-			}
-			EV_DETAIL << " I have received a data packet.\n";
-			if(dest == address || dest.isBroadcast())
-			{
-				EV_DETAIL << "sending pkt to upper...\n";
-				sendUp(decapsMsg(mac));
-			}
-			else {
-				EV_DETAIL << "packet not for me, deleting...\n";
-				delete mac;
-			}
-			// in any case, go back to sleep
-			macState = SLEEP;
-			EV_DETAIL << "Old state: CCA, New state: SLEEP" << endl;
-			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-		}
-		else if(msg->getKind() == LMAC_SETUP_PHASE_END)
-		{
-			EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-			if (wakeup->isScheduled())
-				cancelEvent(wakeup);
+                scheduleAt(simTime() + slotDuration, wakeup);
 
-			scheduleAt(simTime()+slotDuration, wakeup);
+                SETUP_PHASE = false;
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-			SETUP_PHASE = false;
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
+        case WAIT_CONTROL:
+            if (msg->getKind() == LMAC_TIMEOUT) {
+                EV_DETAIL << "Control timeout. Go back to sleep.\n";
+                macState = SLEEP;
+                EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
+                radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+            }
+            else if (msg->getKind() == LMAC_CONTROL) {
+                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
+                const MACAddress& dest = mac->getDestAddr();
+                EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
 
-	case WAIT_CONTROL:
-		if(msg->getKind() == LMAC_TIMEOUT)
-		{
-			EV_DETAIL << "Control timeout. Go back to sleep.\n";
-			macState = SLEEP;
-			EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
-			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-		}
-		else if(msg->getKind() == LMAC_CONTROL)
-		{
-		    LMacFrame *const          mac  = static_cast<LMacFrame *>(msg);
-			const MACAddress& dest = mac->getDestAddr();
-			EV_DETAIL << " I have received a control packet from src " << mac->getSrcAddr() << " and dest " << dest << ".\n";
+                bool collision = false;
 
-			bool collision = false;
+                // check first the slot assignment
+                // copy the current slot assignment
 
-			// check first the slot assignment
-			// copy the current slot assignment
+                for (int s = 0; s < numSlots; s++) {
+                    occSlotsAway[s] = mac->getOccupiedSlots(s);
+                    EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
+                    EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
+                }
 
-			for (int s = 0; s < numSlots; s++)
-			{
-				occSlotsAway[s] = mac->getOccupiedSlots(s);
-				EV_DETAIL << "Occupied slot " << s << ": " << occSlotsAway[s] << endl;
-				EV_DETAIL << "Occupied direct slot " << s << ": " << occSlotsDirect[s] << endl;
-			}
+                if (mac->getMySlot() > -1) {
+                    // check first whether this address didn't have another occupied slot and free it again
+                    for (int i = 0; i < numSlots; i++) {
+                        if (occSlotsDirect[i] == mac->getSrcAddr())
+                            occSlotsDirect[i] = LMAC_FREE_SLOT;
+                        if (occSlotsAway[i] == mac->getSrcAddr())
+                            occSlotsAway[i] = LMAC_FREE_SLOT;
+                    }
+                    occSlotsAway[mac->getMySlot()] = mac->getSrcAddr();
+                    occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
+                }
 
-			if (mac->getMySlot() >-1)
-			{
-				// check first whether this address didn't have another occupied slot and free it again
-				for (int i=0; i < numSlots; i++)
-				{
-					if (occSlotsDirect[i] == mac->getSrcAddr())
-						occSlotsDirect[i] = LMAC_FREE_SLOT;
-					if (occSlotsAway[i] == mac->getSrcAddr())
-						occSlotsAway[i] = LMAC_FREE_SLOT;
-				}
-				occSlotsAway[mac->getMySlot()]   = mac->getSrcAddr();
-				occSlotsDirect[mac->getMySlot()] = mac->getSrcAddr();
-			}
+                collision = collision || (mac->getMySlot() == mySlot);
+                if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision) {
+                    EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
+                    findNewSlot();
+                    EV_DETAIL << "My new slot is " << mySlot << endl;
+                }
+                if (mySlot < 0) {
+                    EV_DETAIL << "I don;t have a slot - try to find one.\n";
+                    findNewSlot();
+                }
 
-			collision = collision || (mac->getMySlot() == mySlot);
-			if (((mySlot > -1) && (mac->getOccupiedSlots(mySlot) > LMAC_FREE_SLOT) && (mac->getOccupiedSlots(mySlot) != address)) || collision)
-			{
-				EV_DETAIL << "My slot is taken by " << mac->getOccupiedSlots(mySlot) << ". I need to change it.\n";
-				findNewSlot();
-				EV_DETAIL << "My new slot is " << mySlot << endl;
-			}
-			if (mySlot < 0)
-			{
-				EV_DETAIL << "I don;t have a slot - try to find one.\n";
-				findNewSlot();
-			}
+                if (dest == address || dest.isBroadcast()) {
+                    EV_DETAIL << "I need to stay awake.\n";
+                    macState = WAIT_DATA;
+                    EV_DETAIL << "Old state: WAIT_CONTROL, New state: WAIT_DATA" << endl;
+                    if (timeout->isScheduled())
+                        cancelEvent(timeout);
+                }
+                else {
+                    EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
+                    macState = SLEEP;
+                    EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
+                    radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+                    if (timeout->isScheduled())
+                        cancelEvent(timeout);
+                }
+                delete mac;
+            }
+            else if ((msg->getKind() == LMAC_WAKEUP)) {
+                if (SETUP_PHASE == true)
+                    EV_DETAIL << "End of setup-phase slot" << endl;
+                else
+                    EV_DETAIL << "Very unlikely transition";
 
-			if(dest == address || dest.isBroadcast())
-			{
-				EV_DETAIL << "I need to stay awake.\n";
-				macState=WAIT_DATA;
-				EV_DETAIL << "Old state: WAIT_CONTROL, New state: WAIT_DATA" << endl;
-				if (timeout->isScheduled())
-					cancelEvent(timeout);
-			}
-			else
-			{
-				EV_DETAIL << "Incoming data packet not for me. Going back to sleep.\n";
-				macState = SLEEP;
-				EV_DETAIL << "Old state: WAIT_CONTROL, New state: SLEEP" << endl;
-				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-				if (timeout->isScheduled())
-					cancelEvent(timeout);
-			}
-			delete mac;
-		}
-		else if ((msg->getKind() == LMAC_WAKEUP))
-		{
-			if (SETUP_PHASE == true)
-				EV_DETAIL << "End of setup-phase slot" << endl;
-			else
-				EV_DETAIL << "Very unlikely transition";
+                macState = SLEEP;
+                EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
+                scheduleAt(simTime(), wakeup);
+            }
+            else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
+                EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
+                if (wakeup->isScheduled())
+                    cancelEvent(wakeup);
 
-			macState = SLEEP;
-			EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
-			scheduleAt(simTime(), wakeup);
+                scheduleAt(simTime() + slotDuration, wakeup);
 
-		}
-		else if (msg->getKind() == LMAC_SETUP_PHASE_END)
-		{
-			EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-			if (wakeup->isScheduled())
-				cancelEvent(wakeup);
+                SETUP_PHASE = false;
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
 
-			scheduleAt(simTime()+slotDuration, wakeup);
+            break;
 
-			SETUP_PHASE = false;
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
+        case SEND_CONTROL:
 
-		break;
+            if (msg->getKind() == LMAC_SEND_CONTROL) {
+                // send first a control message, so that non-receiving nodes can switch off.
+                EV << "Sending a control packet.\n";
+                LMacFrame *control = new LMacFrame();
+                control->setKind(LMAC_CONTROL);
+                if ((macQueue.size() > 0) && !SETUP_PHASE)
+                    control->setDestAddr((macQueue.front())->getDestAddr());
+                else
+                    control->setDestAddr(LMAC_NO_RECEIVER);
 
-	case SEND_CONTROL:
+                control->setSrcAddr(address);
+                control->setMySlot(mySlot);
+                control->setBitLength(headerLength + numSlots);
+                control->setOccupiedSlotsArraySize(numSlots);
+                for (int i = 0; i < numSlots; i++)
+                    control->setOccupiedSlots(i, occSlotsDirect[i]);
 
-		if(msg->getKind() == LMAC_SEND_CONTROL)
-		{
-			// send first a control message, so that non-receiving nodes can switch off.
-			EV << "Sending a control packet.\n";
-			LMacFrame* control = new LMacFrame();
-			control->setKind(LMAC_CONTROL);
-			if ((macQueue.size() > 0) && !SETUP_PHASE)
-				control->setDestAddr((macQueue.front())->getDestAddr());
-			else
-				control->setDestAddr(LMAC_NO_RECEIVER);
+                sendDown(control);
+                if ((macQueue.size() > 0) && (!SETUP_PHASE))
+                    scheduleAt(simTime() + controlDuration, sendData);
+            }
+            else if (msg->getKind() == LMAC_SEND_DATA) {
+                // we should be in our own slot and the control packet should be already sent. receiving neighbors should wait for the data now.
+                if (currSlot != mySlot) {
+                    EV_DETAIL << "ERROR: Send data message received, but we are not in our slot!!! Repair.\n";
+                    radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+                    if (timeout->isScheduled())
+                        cancelEvent(timeout);
+                    return;
+                }
+                LMacFrame *data = macQueue.front()->dup();
+                data->setKind(LMAC_DATA);
+                data->setMySlot(mySlot);
+                data->setOccupiedSlotsArraySize(numSlots);
+                for (int i = 0; i < numSlots; i++)
+                    data->setOccupiedSlots(i, occSlotsDirect[i]);
 
-			control->setSrcAddr(address);
-			control->setMySlot(mySlot);
-			control->setBitLength(headerLength + numSlots);
-			control->setOccupiedSlotsArraySize(numSlots);
-			for (int i = 0; i < numSlots; i++)
-				control->setOccupiedSlots(i, occSlotsDirect[i]);
+                EV << "Sending down data packet\n";
+                sendDown(data);
+                delete macQueue.front();
+                macQueue.pop_front();
+                macState = SEND_DATA;
+                EV_DETAIL << "Old state: SEND_CONTROL, New state: SEND_DATA" << endl;
+            }
+            else if (msg->getKind() == LMAC_SETUP_PHASE_END) {
+                EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
+                if (wakeup->isScheduled())
+                    cancelEvent(wakeup);
 
-			sendDown(control);
-			if ((macQueue.size() > 0) && (!SETUP_PHASE))
-				scheduleAt(simTime()+controlDuration, sendData);
-		}
-		else if(msg->getKind() == LMAC_SEND_DATA)
-		{
-			// we should be in our own slot and the control packet should be already sent. receiving neighbors should wait for the data now.
-			if (currSlot != mySlot)
-			{
-				EV_DETAIL << "ERROR: Send data message received, but we are not in our slot!!! Repair.\n";
-				radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-				if (timeout->isScheduled())
-					cancelEvent(timeout);
-				return;
-			}
-			LMacFrame* data = macQueue.front()->dup();
-			data->setKind(LMAC_DATA);
-			data->setMySlot(mySlot);
-			data->setOccupiedSlotsArraySize(numSlots);
-			for (int i = 0; i < numSlots; i++)
-				data->setOccupiedSlots(i, occSlotsDirect[i]);
+                scheduleAt(simTime() + slotDuration, wakeup);
 
-			EV << "Sending down data packet\n";
-			sendDown(data);
-			delete macQueue.front();
-			macQueue.pop_front();
-			macState = SEND_DATA;
-			EV_DETAIL << "Old state: SEND_CONTROL, New state: SEND_DATA" << endl;
-		}
-		else if(msg->getKind() == LMAC_SETUP_PHASE_END)
-		{
-			EV_DETAIL << "Setup phase end. Start normal work at the next slot.\n";
-			if (wakeup->isScheduled())
-				cancelEvent(wakeup);
+                SETUP_PHASE = false;
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-			scheduleAt(simTime()+slotDuration, wakeup);
+        case SEND_DATA:
+            if (msg->getKind() == LMAC_WAKEUP) {
+                error("I am still sending a message, while a new slot is starting!\n");
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-			SETUP_PHASE = false;
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
+        case WAIT_DATA:
+            if (msg->getKind() == LMAC_DATA) {
+                LMacFrame *const mac = static_cast<LMacFrame *>(msg);
+                const MACAddress& dest = mac->getDestAddr();
 
-	case SEND_DATA:
-		if(msg->getKind() == LMAC_WAKEUP)
-		{
-			error("I am still sending a message, while a new slot is starting!\n");
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
+                EV_DETAIL << " I have received a data packet.\n";
+                if (dest == address || dest.isBroadcast()) {
+                    EV_DETAIL << "sending pkt to upper...\n";
+                    sendUp(decapsMsg(mac));
+                }
+                else {
+                    EV_DETAIL << "packet not for me, deleting...\n";
+                    delete mac;
+                }
+                // in any case, go back to sleep
+                macState = SLEEP;
+                EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
+                radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
+                if (timeout->isScheduled())
+                    cancelEvent(timeout);
+            }
+            else if (msg->getKind() == LMAC_WAKEUP) {
+                macState = SLEEP;
+                EV_DETAIL << "Unlikely transition. Old state: WAIT_DATA, New state: SLEEP" << endl;
+                scheduleAt(simTime(), wakeup);
+            }
+            else {
+                EV << "Unknown packet" << msg->getKind() << "in state" << macState << endl;
+            }
+            break;
 
-	case WAIT_DATA:
-		if(msg->getKind() == LMAC_DATA)
-		{
-		    LMacFrame *const          mac  = static_cast<LMacFrame *>(msg);
-			const MACAddress& dest = mac->getDestAddr();
-
-			EV_DETAIL << " I have received a data packet.\n";
-			if(dest == address || dest.isBroadcast())
-			{
-				EV_DETAIL << "sending pkt to upper...\n";
-				sendUp(decapsMsg(mac));
-			}
-			else {
-				EV_DETAIL << "packet not for me, deleting...\n";
-				delete mac;
-			}
-			// in any case, go back to sleep
-			macState = SLEEP;
-			EV_DETAIL << "Old state: WAIT_DATA, New state: SLEEP" << endl;
-			radio->setRadioMode(IRadio::RADIO_MODE_SLEEP);
-			if (timeout->isScheduled())
-				cancelEvent(timeout);
-		}
-		else if(msg->getKind() == LMAC_WAKEUP)
-		{
-			macState = SLEEP;
-			EV_DETAIL << "Unlikely transition. Old state: WAIT_DATA, New state: SLEEP" << endl;
-			scheduleAt(simTime(), wakeup);
-		}
-		else
-		{
-			EV << "Unknown packet" << msg->getKind() <<  "in state" << macState << endl;
-		}
-		break;
-	default:
-		opp_error("Unknown mac state: %d", macState);
-		break;
-	}
+        default:
+            opp_error("Unknown mac state: %d", macState);
+            break;
+    }
 }
 
 /**
@@ -616,8 +567,8 @@ void LMacLayer::handleSelfMessage(cMessage *msg)
  */
 void LMacLayer::handleLowerPacket(cPacket *msg)
 {
-	// simply pass the massage as self message, to be processed by the FSM.
-	handleSelfMessage(msg);
+    // simply pass the massage as self message, to be processed by the FSM.
+    handleSelfMessage(msg);
 }
 
 /**
@@ -625,18 +576,14 @@ void LMacLayer::handleLowerPacket(cPacket *msg)
  */
 void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == IRadio::transmissionStateChangedSignal)
-    {
+    if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
-        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-        {
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             // if data is scheduled for transfer, don;t do anything.
-            if (sendData->isScheduled())
-            {
+            if (sendData->isScheduled()) {
                 EV_DETAIL << " transmission of control packet over. data transfer will start soon." << endl;
             }
-            else
-            {
+            else {
                 EV_DETAIL << " transmission over. nothing else is scheduled, get back to sleep." << endl;
                 macState = SLEEP;
                 EV_DETAIL << "Old state: ?, New state: SLEEP" << endl;
@@ -647,15 +594,13 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
         }
         transmissionState = newRadioTransmissionState;
     }
-	else if (signalID == IRadio::radioModeChangedSignal)
-    {
+    else if (signalID == IRadio::radioModeChangedSignal) {
         IRadio::RadioMode radioMode = (IRadio::RadioMode)value;
-        if (macState == SEND_CONTROL && radioMode == IRadio::RADIO_MODE_TRANSMITTER)
-        {
+        if (macState == SEND_CONTROL && radioMode == IRadio::RADIO_MODE_TRANSMITTER) {
             // we just switched to TX after CCA, so simply send the first sendPremable self message
             scheduleAt(simTime(), send_control);
         }
-	}
+    }
 }
 
 /**
@@ -663,32 +608,29 @@ void LMacLayer::receiveSignal(cComponent *source, simsignal_t signalID, long val
  */
 void LMacLayer::findNewSlot()
 {
-	// pick a random slot at the beginning and schedule the next wakeup
-	// free the old one first
-	int counter = 0;
+    // pick a random slot at the beginning and schedule the next wakeup
+    // free the old one first
+    int counter = 0;
 
-	mySlot = intrand((numSlots - reservedMobileSlots));
-	while ((occSlotsAway[mySlot] != LMAC_FREE_SLOT) && (counter < (numSlots - reservedMobileSlots)))
-	{
-		counter++;
-		mySlot--;
-		if (mySlot < 0)
-			mySlot = (numSlots - reservedMobileSlots)-1;
-	}
-	if (occSlotsAway[mySlot] != LMAC_FREE_SLOT)
-	{
-		EV << "ERROR: I cannot find a free slot. Cannot send data.\n";
-		mySlot = -1;
-	}
-	else
-	{
-		EV << "ERROR: My new slot is : " << mySlot << endl;
-	}
-	EV << "ERROR: I needed to find new slot\n";
-	slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId()-4);
+    mySlot = intrand((numSlots - reservedMobileSlots));
+    while ((occSlotsAway[mySlot] != LMAC_FREE_SLOT) && (counter < (numSlots - reservedMobileSlots))) {
+        counter++;
+        mySlot--;
+        if (mySlot < 0)
+            mySlot = (numSlots - reservedMobileSlots) - 1;
+    }
+    if (occSlotsAway[mySlot] != LMAC_FREE_SLOT) {
+        EV << "ERROR: I cannot find a free slot. Cannot send data.\n";
+        mySlot = -1;
+    }
+    else {
+        EV << "ERROR: My new slot is : " << mySlot << endl;
+    }
+    EV << "ERROR: I needed to find new slot\n";
+    slotChange->recordWithTimestamp(simTime(), FindModule<>::findHost(this)->getId() - 4);
 }
 
-cPacket* LMacLayer::decapsMsg(LMacFrame * msg)
+cPacket *LMacLayer::decapsMsg(LMacFrame *msg)
 {
     cPacket *m = msg->decapsulate();
     setUpControlInfo(m, msg->getSrcAddr());
@@ -710,7 +652,7 @@ LMacFrame *LMacLayer::encapsMsg(cPacket *netwPkt)
 
     // copy dest address from the Control Info attached to the network
     // message by the network layer
-    IMACProtocolControlInfo* cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
+    IMACProtocolControlInfo *cInfo = check_and_cast<IMACProtocolControlInfo *>(netwPkt->removeControlInfo());
     EV_DETAIL << "CInfo removed, mac addr=" << cInfo->getDestinationAddress() << endl;
     pkt->setDestAddr(cInfo->getDestinationAddress());
 
@@ -749,7 +691,7 @@ void LMacLayer::attachSignal(LMacFrame *macPkt)
 /**
  * Attaches a "control info" (MacToNetw) structure (object) to the message pMsg.
  */
-cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr)
+cObject *LMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr)
 {
     SimpleLinkLayerControlInfo *const cCtrlInfo = new SimpleLinkLayerControlInfo();
     cCtrlInfo->setSrc(pSrcAddr);
@@ -757,8 +699,5 @@ cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pS
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
-
-
-}
-
+} // namespace inet
 

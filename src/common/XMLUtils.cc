@@ -1,10 +1,8 @@
-
 #include "XMLUtils.h"
 #include "AddressResolver.h"
 
 namespace inet {
-
-const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name)
+const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
     if (!child)
@@ -13,13 +11,13 @@ const cXMLElement* getUniqueChild(const cXMLElement *node, const char *name)
     return child;
 }
 
-const cXMLElement* getUniqueChildIfExists(const cXMLElement *node, const char *name)
+const cXMLElement *getUniqueChildIfExists(const cXMLElement *node, const char *name)
 {
     cXMLElementList list = node->getChildrenByTagName(name);
     if (list.size() > 1)
         throw cRuntimeError("XML error: at most one %s element expected", name);
     else if (list.size() == 1)
-        return (*list.begin());
+        return *list.begin();
     else
         return NULL;
 }
@@ -56,22 +54,22 @@ void checkTags(const cXMLElement *node, const char *allowed)
 
     cStringTokenizer st(allowed, " ");
     const char *nt;
-    while ((nt = st.nextToken())!=NULL)
+    while ((nt = st.nextToken()) != NULL)
         tags.push_back(nt);
 
-    for (cXMLElement *child=node->getFirstChild(); child; child=child->getNextSibling())
-    {
+    for (cXMLElement *child = node->getFirstChild(); child; child = child->getNextSibling()) {
         unsigned int i;
         for (i = 0; i < tags.size(); i++)
             if (!strcmp(child->getTagName(), tags[i]))
                 break;
+
         if (i == tags.size())
             throw cRuntimeError("Subtag <%s> not expected in <%s>",
                     child->getTagName(), node->getTagName());
     }
 }
 
-const char* getParameterStrValue(const cXMLElement *ptr, const char *name, const char *def)
+const char *getParameterStrValue(const cXMLElement *ptr, const char *name, const char *def)
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
@@ -95,7 +93,7 @@ bool getParameterBoolValue(const cXMLElement *ptr, const char *name)
     return parseBool(xvalue->getNodeValue());
 }
 
-const char* getParameterStrValue(const cXMLElement *ptr, const char *name)
+const char *getParameterStrValue(const cXMLElement *ptr, const char *name)
 {
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
     return xvalue->getNodeValue();
@@ -168,4 +166,5 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
     const char *attrStr = getRequiredAttribute(*node, attrName);
     return parseBool(attrStr);
 }
-}
+} // namespace inet
+

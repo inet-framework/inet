@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ETHERFRAMECLASSIFIER_H
 #define __INET_ETHERFRAMECLASSIFIER_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Ethernet Frame classifier.
  *
@@ -38,9 +36,7 @@ class INET_API EtherFrameClassifier : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ETHERFRAMECLASSIFIER_H
 

@@ -20,9 +20,7 @@
 #include "SCTP.h"
 
 namespace inet {
-
 Register_Class(SCTPAlg);
-
 
 SCTPAlg::SCTPAlg() : SCTPAlgorithm()
 {
@@ -39,7 +37,7 @@ SCTPStateVariables *SCTPAlg::createStateVariables()
 {
     ASSERT(state == NULL);
     state = new SCTPAlgStateVariables();
-    return (state);
+    return state;
 }
 
 void SCTPAlg::established(bool active)
@@ -53,16 +51,17 @@ void SCTPAlg::connectionClosed()
 {
 }
 
-void SCTPAlg::processTimer(cMessage* timer, SCTPEventCode& event)
+void SCTPAlg::processTimer(cMessage *timer, SCTPEventCode& event)
 {
     EV_INFO << "no extra timers in this SCTP variant" << endl;
 }
 
-void SCTPAlg::sendCommandInvoked(SCTPPathVariables* path)
+void SCTPAlg::sendCommandInvoked(SCTPPathVariables *path)
 {
-    if(state->allowCMT) {
-       assoc->sendOnAllPaths(path);
-    } else {
+    if (state->allowCMT) {
+        assoc->sendOnAllPaths(path);
+    }
+    else {
         assoc->sendOnPath(path);
     }
 }
@@ -88,8 +87,5 @@ void SCTPAlg::sackSent()
 void SCTPAlg::dataSent(uint32)
 {
 }
-
-
-}
-
+} // namespace inet
 

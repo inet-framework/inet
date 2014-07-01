@@ -23,14 +23,11 @@
 #ifndef __INET_BINDINGCACHE_H
 #define __INET_BINDINGCACHE_H
 
-
 #include "INETDefs.h"
 
 #include "IPv6Address.h"
 
 namespace inet {
-
-
 // these token must be equal to those in the BindingUpdateList file!
 #define HO_TOKEN    1101
 #define CO_TOKEN    2101
@@ -60,13 +57,13 @@ class INET_API BindingCache : public cSimpleModule
         /*o  A flag indicating whether or not this Binding Cache entry is a
              home registration entry (applicable only on nodes which support
              home agent functionality).*/
-        bool isHomeRegisteration;     //if FALSE, it is Correspondent Registeration
+        bool isHomeRegisteration;    //if FALSE, it is Correspondent Registeration
 
         /*o  The maximum value of the Sequence Number field received in
              previous Binding Updates for this home address.  The Sequence
              Number field is 16 bits long.  Sequence Number values MUST be
              compared modulo 2**16 as explained in Section 9.5.1.*/
-        uint sequenceNumber;     //Sequence number of BU message sent
+        uint sequenceNumber;    //Sequence number of BU message sent
 
         /*o  Usage information for this Binding Cache entry.  This is needed to
              implement the cache replacement policy in use in the Binding
@@ -76,7 +73,7 @@ class INET_API BindingCache : public cSimpleModule
         // omitted
     };
 
-    typedef std::map<IPv6Address,BindingCacheEntry> BindingCache6; //The IPv6 Address KEY of this map is the HomeAddress of the MN
+    typedef std::map<IPv6Address, BindingCacheEntry> BindingCache6;    //The IPv6 Address KEY of this map is the HomeAddress of the MN
     BindingCache6 bindingCache;
 
     friend std::ostream& operator<<(std::ostream& os, const BindingCacheEntry& bce);
@@ -152,9 +149,7 @@ class INET_API BindingCache : public cSimpleModule
      */
     virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_BINDINGCACHE_H
 

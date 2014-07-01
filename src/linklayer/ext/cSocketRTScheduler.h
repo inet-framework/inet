@@ -33,88 +33,86 @@
 #define HAVE_U_INT64_T
 #ifdef HAVE_PCAP
 #include <pcap.h>
-#endif
+#endif // ifdef HAVE_PCAP
 #include "ExtFrame_m.h"
 
 namespace inet {
-
 class cSocketRTScheduler : public cScheduler
 {
-    protected:
-        int fd;
+  protected:
+    int fd;
 
-        virtual bool receiveWithTimeout();
-        virtual int receiveUntil(const timeval& targetTime);
-    public:
-        /**
-         * Constructor.
-         */
-        cSocketRTScheduler();
+    virtual bool receiveWithTimeout();
+    virtual int receiveUntil(const timeval& targetTime);
 
-        /**
-         * Destructor.
-         */
-        virtual ~cSocketRTScheduler();
+  public:
+    /**
+     * Constructor.
+     */
+    cSocketRTScheduler();
+
+    /**
+     * Destructor.
+     */
+    virtual ~cSocketRTScheduler();
 #ifdef HAVE_PCAP
-        static std::vector<cModule *> modules;
-        static std::vector<pcap_t *> pds;
-        static std::vector<int> datalinks;
-        static std::vector<int> headerLengths;
-#endif
-        static timeval baseTime;
+    static std::vector<cModule *> modules;
+    static std::vector<pcap_t *> pds;
+    static std::vector<int> datalinks;
+    static std::vector<int> headerLengths;
+#endif // ifdef HAVE_PCAP
+    static timeval baseTime;
 
-        /**
-         * Called at the beginning of a simulation run.
-         */
-        virtual void startRun();
+    /**
+     * Called at the beginning of a simulation run.
+     */
+    virtual void startRun();
 
-        /**
-         * Called at the end of a simulation run.
-         */
-        virtual void endRun();
+    /**
+     * Called at the end of a simulation run.
+     */
+    virtual void endRun();
 
-        /**
-         * Recalculates "base time" from current wall clock time.
-         */
-        virtual void executionResumed();
+    /**
+     * Recalculates "base time" from current wall clock time.
+     */
+    virtual void executionResumed();
 
-        /**
-         * To be called from the module which wishes to receive data from the
-         * socket. The method must be called from the module's initialize()
-         * function.
-         */
-        void setInterfaceModule(cModule *mod, const char *dev, const char *filter);
+    /**
+     * To be called from the module which wishes to receive data from the
+     * socket. The method must be called from the module's initialize()
+     * function.
+     */
+    void setInterfaceModule(cModule *mod, const char *dev, const char *filter);
 
 #if OMNETPP_VERSION >= 0x0500
-        /**
-         * Returns the first event in the Future Event Set.
-         */
-        virtual cEvent *guessNextEvent();
+    /**
+     * Returns the first event in the Future Event Set.
+     */
+    virtual cEvent *guessNextEvent();
 
-        /**
-         * Scheduler function -- it comes from the cScheduler interface.
-         */
-        virtual cEvent *takeNextEvent();
+    /**
+     * Scheduler function -- it comes from the cScheduler interface.
+     */
+    virtual cEvent *takeNextEvent();
 
-        /**
-         * Scheduler function -- it comes from the cScheduler interface.
-         */
-        virtual void putBackEvent(cEvent *event);
-#else
-        /**
-         * Scheduler function -- it comes from cScheduler interface.
-         */
-        virtual cMessage *getNextEvent();
-#endif
+    /**
+     * Scheduler function -- it comes from the cScheduler interface.
+     */
+    virtual void putBackEvent(cEvent *event);
+#else // if OMNETPP_VERSION >= 0x0500
+      /**
+       * Scheduler function -- it comes from cScheduler interface.
+       */
+    virtual cMessage *getNextEvent();
+#endif // if OMNETPP_VERSION >= 0x0500
 
-        /**
-         * Send on the currently open connection
-         */
-        void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
+    /**
+     * Send on the currently open connection
+     */
+    void sendBytes(unsigned char *buf, size_t numBytes, struct sockaddr *from, socklen_t addrlen);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_CSOCKETRTSCHEDULER_H
 

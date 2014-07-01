@@ -20,12 +20,10 @@
 #ifndef __INET_INITSTAGES
 #define __INET_INITSTAGES
 
-
 /**
  * Initialization stages.
  */
-enum InitStages
-{
+enum InitStages {
     /**
      * Local initializations. Initializations that don't use or affect
      * other modules take place (e.g. reading of parameters); modules may
@@ -116,5 +114,5 @@ enum InitStages
     NUM_INIT_STAGES,
 };
 
-#endif // __INET_INITSTAGES
+#endif    // __INET_INITSTAGES
 

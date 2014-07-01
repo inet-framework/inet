@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFNeighborState.h"
 
 #include "OSPFArea.h"
@@ -23,11 +22,8 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborState* newState, OSPF::NeighborState* currentState)
+void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborState *newState, OSPF::NeighborState *currentState)
 {
-
     OSPF::Neighbor::NeighborStateType oldState = currentState->getState();
     OSPF::Neighbor::NeighborStateType nextState = newState->getState();
     bool shouldRebuildRoutingTable = false;
@@ -36,7 +32,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 
     if ((oldState == OSPF::Neighbor::FULL_STATE) || (nextState == OSPF::Neighbor::FULL_STATE)) {
         OSPF::RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
-        OSPF::RouterLSA* routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
+        OSPF::RouterLSA *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
         if (routerLSA != NULL) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -44,8 +40,9 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                 routerLSA->getHeader().setLsAge(MAX_AGE);
                 neighbor->getInterface()->getArea()->floodLSA(routerLSA);
                 routerLSA->incrementInstallTime();
-            } else {
-                OSPF::RouterLSA* newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
+            }
+            else {
+                OSPF::RouterLSA *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -56,7 +53,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         }
 
         if (neighbor->getInterface()->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-            OSPF::NetworkLSA* networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
+            OSPF::NetworkLSA *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != NULL) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
@@ -64,14 +61,16 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
                     networkLSA->getHeader().setLsAge(MAX_AGE);
                     neighbor->getInterface()->getArea()->floodLSA(networkLSA);
                     networkLSA->incrementInstallTime();
-                } else {
-                    OSPF::NetworkLSA* newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
+                }
+                else {
+                    OSPF::NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                         shouldRebuildRoutingTable |= networkLSA->update(newLSA);
                         delete newLSA;
-                    } else {    // no neighbors on the network -> old NetworkLSA must be flushed
+                    }
+                    else {    // no neighbors on the network -> old NetworkLSA must be flushed
                         networkLSA->getHeader().setLsAge(MAX_AGE);
                         networkLSA->incrementInstallTime();
                     }
@@ -86,8 +85,5 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
         neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
     }
 }
-
-
-}
-
+} // namespace inet
 

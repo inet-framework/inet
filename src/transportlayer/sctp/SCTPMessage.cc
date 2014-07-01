@@ -16,33 +16,31 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "SCTPMessage.h"
 #include "SCTPAssociation.h"
 
 namespace inet {
-
-
 Register_Class(SCTPMessage);
 
 SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
 {
-     if (this == &other) return *this;
-     clean();
-     SCTPMessage_Base::operator=(other);
-     copy(other);
-     return *this;
+    if (this == &other)
+        return *this;
+    clean();
+    SCTPMessage_Base::operator=(other);
+    copy(other);
+    return *this;
 }
 
 void SCTPMessage::copy(const SCTPMessage& other)
 {
-     this->setTag(other.getTag());
-     this->setSrcPort(other.getSrcPort());
-     this->setDestPort(other.getDestPort());
-     this->setChecksumOk(other.getChecksumOk());
-     this->setByteLength(SCTP_COMMON_HEADER);
-     for (std::list<cPacket*>::const_iterator i=other.chunkList.begin(); i!=other.chunkList.end(); ++i)
-          addChunk((cPacket *)(*i)->dup());
+    this->setTag(other.getTag());
+    this->setSrcPort(other.getSrcPort());
+    this->setDestPort(other.getDestPort());
+    this->setChecksumOk(other.getChecksumOk());
+    this->setByteLength(SCTP_COMMON_HEADER);
+    for (std::list<cPacket *>::const_iterator i = other.chunkList.begin(); i != other.chunkList.end(); ++i)
+        addChunk((cPacket *)(*i)->dup());
 }
 
 SCTPMessage::~SCTPMessage()
@@ -52,49 +50,47 @@ SCTPMessage::~SCTPMessage()
 
 void SCTPMessage::clean()
 {
-    SCTPChunk* chunk;
-    if (this->getChunksArraySize()>0)
-    for (uint32 i=0; i < this->getChunksArraySize(); i++)
-    {
-        chunk = (SCTPChunk*)this->getChunks(i);
-        dropAndDelete(chunk);
-    }
+    SCTPChunk *chunk;
+    if (this->getChunksArraySize() > 0)
+        for (uint32 i = 0; i < this->getChunksArraySize(); i++) {
+            chunk = (SCTPChunk *)this->getChunks(i);
+            dropAndDelete(chunk);
+        }
 }
 
 void SCTPMessage::setChunksArraySize(uint32 size)
 {
-     throw new cException(this, "setChunkArraySize() not supported, use addChunk()");
+    throw new cException(this, "setChunkArraySize() not supported, use addChunk()");
 }
 
 uint32 SCTPMessage::getChunksArraySize() const
 {
-     return chunkList.size();
+    return chunkList.size();
 }
 
 cPacketPtr& SCTPMessage::getChunks(uint32 k)
 {
-     std::list<cPacket*>::iterator i = chunkList.begin();
-     while (k>0 && i!=chunkList.end())
-          (++i, --k);
-     return *i;
+    std::list<cPacket *>::iterator i = chunkList.begin();
+    while (k > 0 && i != chunkList.end())
+        (++i, --k);
+    return *i;
 }
 
 void SCTPMessage::setChunks(uint32 k, const cPacketPtr& chunks_var)
 {
-     throw new cException(this, "setChunks() not supported, use addChunk()");
+    throw new cException(this, "setChunks() not supported, use addChunk()");
 }
 
-void SCTPMessage::addChunk(cPacket* msg)
+void SCTPMessage::addChunk(cPacket *msg)
 {
     char str[256];
     take(msg);
-    if (this->chunkList.size()<9)
-    {
+    if (this->chunkList.size() < 9) {
         strcpy(str, this->getName());
         snprintf(str, sizeof(str), "%s %s", this->getName(), msg->getName());
         this->setName(str);
     }
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     chunkList.push_back(msg);
 }
 
@@ -106,7 +102,7 @@ cPacket *SCTPMessage::removeChunk()
     cPacket *msg = chunkList.front();
     chunkList.pop_front();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -118,7 +114,7 @@ cPacket *SCTPMessage::removeLastChunk()
     cPacket *msg = chunkList.back();
     chunkList.pop_back();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -140,53 +136,53 @@ cPacket *SCTPMessage::peekLastChunk()
     return msg;
 }
 
-
 Register_Class(SCTPErrorChunk);
 
 SCTPErrorChunk& SCTPErrorChunk::operator=(const SCTPErrorChunk& other)
 {
-     if (this == &other) return *this;
-     clean();
-     SCTPErrorChunk_Base::operator=(other);
-     copy(other);
-     return *this;
+    if (this == &other)
+        return *this;
+    clean();
+    SCTPErrorChunk_Base::operator=(other);
+    copy(other);
+    return *this;
 }
 
 void SCTPErrorChunk::copy(const SCTPErrorChunk& other)
 {
-     for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
-          addParameters((cPacket *)(*i)->dup());
+    for (std::list<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
+        addParameters((cPacket *)(*i)->dup());
 }
 
 void SCTPErrorChunk::setParametersArraySize(uint32 size)
 {
-     throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
+    throw new cException(this, "setParametersArraySize() not supported, use addParameter()");
 }
 
 uint32 SCTPErrorChunk::getParametersArraySize() const
 {
-     return parameterList.size();
+    return parameterList.size();
 }
 
 cPacketPtr& SCTPErrorChunk::getParameters(uint32 k)
 {
-     std::list<cPacket*>::iterator i = parameterList.begin();
-     while (k>0 && i!=parameterList.end())
-          (++i, --k);
-     return *i;
+    std::list<cPacket *>::iterator i = parameterList.begin();
+    while (k > 0 && i != parameterList.end())
+        (++i, --k);
+    return *i;
 }
 
 void SCTPErrorChunk::setParameters(uint32 k, const cPacketPtr& chunks_var)
 {
-     throw new cException(this, "setParameter() not supported, use addParameter()");
+    throw new cException(this, "setParameter() not supported, use addParameter()");
 }
 
-void SCTPErrorChunk::addParameters(cPacket* msg)
+void SCTPErrorChunk::addParameters(cPacket *msg)
 {
-     take(msg);
+    take(msg);
 
-     this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
-     parameterList.push_back(msg);
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
+    parameterList.push_back(msg);
 }
 
 cPacket *SCTPErrorChunk::removeParameter()
@@ -197,7 +193,7 @@ cPacket *SCTPErrorChunk::removeParameter()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
 
@@ -208,8 +204,7 @@ SCTPErrorChunk::~SCTPErrorChunk()
 
 void SCTPErrorChunk::clean()
 {
-    while (!parameterList.empty())
-    {
+    while (!parameterList.empty()) {
         cPacket *msg = parameterList.front();
         parameterList.pop_front();
         dropAndDelete(msg);
@@ -223,7 +218,7 @@ SCTPStreamResetChunk& SCTPStreamResetChunk::operator=(const SCTPStreamResetChunk
     SCTPStreamResetChunk_Base::operator=(other);
 
     this->setByteLength(SCTP_STREAM_RESET_CHUNK_LENGTH);
-    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+    for (std::list<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
         addParameter((cPacket *)(*i)->dup());
 
     return *this;
@@ -241,8 +236,8 @@ uint32 SCTPStreamResetChunk::getParametersArraySize() const
 
 cPacketPtr& SCTPStreamResetChunk::getParameters(uint32 k)
 {
-    std::list<cPacket*>::iterator i = parameterList.begin();
-    while (k>0 && i!=parameterList.end())
+    std::list<cPacket *>::iterator i = parameterList.begin();
+    while (k > 0 && i != parameterList.end())
         (++i, --k);
     return *i;
 }
@@ -252,12 +247,11 @@ void SCTPStreamResetChunk::setParameters(const uint32 k, const cPacketPtr& chunk
     throw new cException(this, "setParameters() not supported, use addParameter()");
 }
 
-void SCTPStreamResetChunk::addParameter(cPacket* msg)
+void SCTPStreamResetChunk::addParameter(cPacket *msg)
 {
     take(msg);
-    if (this->parameterList.size()<2)
-    {
-        this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    if (this->parameterList.size() < 2) {
+        this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
         parameterList.push_back(msg);
     }
     else
@@ -272,10 +266,9 @@ cPacket *SCTPStreamResetChunk::removeParameter()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
-
 
 Register_Class(SCTPAsconfChunk);
 
@@ -284,7 +277,7 @@ SCTPAsconfChunk& SCTPAsconfChunk::operator=(const SCTPAsconfChunk& other)
     SCTPAsconfChunk_Base::operator=(other);
 
     this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
-    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+    for (std::list<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
         addAsconfParam((cPacket *)(*i)->dup());
 
     return *this;
@@ -302,8 +295,8 @@ uint32 SCTPAsconfChunk::getAsconfParamsArraySize() const
 
 cPacketPtr& SCTPAsconfChunk::getAsconfParams(uint32 k)
 {
-    std::list<cPacket*>::iterator i = parameterList.begin();
-    while (k>0 && i!=parameterList.end())
+    std::list<cPacket *>::iterator i = parameterList.begin();
+    while (k > 0 && i != parameterList.end())
         (++i, --k);
     return *i;
 }
@@ -313,10 +306,10 @@ void SCTPAsconfChunk::setAsconfParams(const uint32 k, const cPacketPtr& chunks_v
     throw new cException(this, "setAsconfParams() not supported, use addAsconfParam()");
 }
 
-void SCTPAsconfChunk::addAsconfParam(cPacket* msg)
+void SCTPAsconfChunk::addAsconfParam(cPacket *msg)
 {
     take(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     parameterList.push_back(msg);
 }
 
@@ -328,10 +321,9 @@ cPacket *SCTPAsconfChunk::removeAsconfParam()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
-
 
 Register_Class(SCTPAsconfAckChunk);
 
@@ -340,7 +332,7 @@ SCTPAsconfAckChunk& SCTPAsconfAckChunk::operator=(const SCTPAsconfAckChunk& othe
     SCTPAsconfAckChunk_Base::operator=(other);
 
     this->setByteLength(SCTP_ADD_IP_CHUNK_LENGTH);
-    for (std::list<cPacket*>::const_iterator i=other.parameterList.begin(); i!=other.parameterList.end(); ++i)
+    for (std::list<cPacket *>::const_iterator i = other.parameterList.begin(); i != other.parameterList.end(); ++i)
         addAsconfResponse((cPacket *)(*i)->dup());
 
     return *this;
@@ -358,8 +350,8 @@ uint32 SCTPAsconfAckChunk::getAsconfResponseArraySize() const
 
 cPacketPtr& SCTPAsconfAckChunk::getAsconfResponse(uint32 k)
 {
-    std::list<cPacket*>::iterator i = parameterList.begin();
-    while (k>0 && i!=parameterList.end())
+    std::list<cPacket *>::iterator i = parameterList.begin();
+    while (k > 0 && i != parameterList.end())
         (++i, --k);
     return *i;
 }
@@ -369,10 +361,10 @@ void SCTPAsconfAckChunk::setAsconfResponse(const uint32 k, const cPacketPtr& chu
     throw new cException(this, "setAsconfresponse() not supported, use addAsconfResponse()");
 }
 
-void SCTPAsconfAckChunk::addAsconfResponse(cPacket* msg)
+void SCTPAsconfAckChunk::addAsconfResponse(cPacket *msg)
 {
     take(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     parameterList.push_back(msg);
 }
 
@@ -384,12 +376,8 @@ cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
     cPacket *msg = parameterList.front();
     parameterList.pop_front();
     drop(msg);
-    this->setByteLength(this->getByteLength()+ADD_PADDING(msg->getByteLength()));
+    this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
-
-
-
-}
-
+} // namespace inet
 

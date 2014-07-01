@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_GAUSSMARKOVMOBILITY_H
 #define __INET_GAUSSMARKOVMOBILITY_H
 
@@ -24,8 +23,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Gauss Markov movement model. See NED file for more info.
  *
@@ -34,13 +31,13 @@ namespace inet {
 class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
 {
   protected:
-    double speed;          ///< speed of the host
-    double angle;          ///< angle of linear motion
-    double alpha;          ///< alpha parameter
-    int margin;            ///< margin at which the host gets repelled from the border
-    double speedMean;      ///< speed mean
-    double angleMean;      ///< angle mean
-    double variance;       ///< variance
+    double speed;    ///< speed of the host
+    double angle;    ///< angle of linear motion
+    double alpha;    ///< alpha parameter
+    int margin;    ///< margin at which the host gets repelled from the border
+    double speedMean;    ///< speed mean
+    double angleMean;    ///< angle mean
+    double variance;    ///< variance
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -60,8 +57,7 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
   public:
     GaussMarkovMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GAUSSMARKOVMOBILITY_H
 
-
-#endif

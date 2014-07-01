@@ -22,20 +22,19 @@
 #include "NetworkProtocolCommand_m.h"
 
 namespace inet {
-
 /**
  * This purely virtual interface provides an abstraction for different network protocols.
  */
-class INET_API INetworkProtocol {
+class INET_API INetworkProtocol
+{
   public:
-    virtual ~INetworkProtocol() { }
+    virtual ~INetworkProtocol() {}
 
 //    virtual INetworkLayerControlInfo *createControlInfo() = 0;
 
 //    virtual Address resolveAddress(const char * address) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_INETWORKPROTOCOL_H
 
-
-#endif

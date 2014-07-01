@@ -21,30 +21,25 @@
 #include "FreeSpacePathLoss.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This class implements the log normal shadowing model.
  */
 class INET_API LogNormalShadowing : public FreeSpacePathLoss
 {
-    protected:
-        double sigma;
+  protected:
+    double sigma;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        LogNormalShadowing();
-        virtual void printToStream(std::ostream &stream) const;
-        virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
+  public:
+    LogNormalShadowing();
+    virtual void printToStream(std::ostream& stream) const;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_LOGNORMALSHADOWING_H
 
-}
-
-
-#endif

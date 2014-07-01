@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_WISEROUTEDATAGRAM_H
 #define __INET_WISEROUTEDATAGRAM_H
 
@@ -23,7 +22,6 @@
 #include "WiseRouteDatagram_m.h"
 
 namespace inet {
-
 /**
  * Represents an WiseRoute datagram. More info in the WiseRouteDatagram.msg file
  * (and the documentation generated from it).
@@ -33,19 +31,18 @@ class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetwor
   public:
     WiseRouteDatagram(const char *name = NULL, int kind = 0) : WiseRouteDatagram_Base(name, kind) {}
     WiseRouteDatagram(const WiseRouteDatagram& other) : WiseRouteDatagram_Base(other) {}
-    WiseRouteDatagram& operator=(const WiseRouteDatagram& other) {WiseRouteDatagram_Base::operator=(other); return *this;}
+    WiseRouteDatagram& operator=(const WiseRouteDatagram& other) { WiseRouteDatagram_Base::operator=(other); return *this; }
 
-    virtual WiseRouteDatagram *dup() const {return new WiseRouteDatagram(*this);}
+    virtual WiseRouteDatagram *dup() const { return new WiseRouteDatagram(*this); }
 
     virtual Address getSourceAddress() const { return Address(getSrcAddr()); }
-    virtual void setSourceAddress(const Address & address) { setSrcAddr(address.toModuleId()); }
+    virtual void setSourceAddress(const Address& address) { setSrcAddr(address.toModuleId()); }
     virtual Address getDestinationAddress() const { return Address(getDestAddr()); }
-    virtual void setDestinationAddress(const Address & address) { setDestAddr(address.toModuleId()); }
+    virtual void setDestinationAddress(const Address& address) { setDestAddr(address.toModuleId()); }
     virtual int getTransportProtocol() const { return WiseRouteDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_WISEROUTEDATAGRAM_H
 
-
-#endif

@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IEEE80211ECLASSIFIER_H
 #define __INET_IEEE80211ECLASSIFIER_H
 
 #include "IQoSClassifier.h"
 
 namespace inet {
-
 /**
  * An example packet classifier based on the UDP/TCP port number.
  * Access point management frames are classified into the 'defaultManagement' class (3 by default).
@@ -38,6 +36,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
   private:
     int defaultAC;
     int defaultManagement;
+
   public:
     Ieee80211eClassifier();
     virtual int getNumQueues();
@@ -53,9 +52,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
      */
     virtual int classifyPacket(cMessage *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IEEE80211ECLASSIFIER_H
 

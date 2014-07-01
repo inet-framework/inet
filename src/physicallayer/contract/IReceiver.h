@@ -26,10 +26,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into packets.
@@ -49,65 +46,63 @@ namespace physicallayer
 // TODO: this is rather an interface for receivers that support "what if" questions for the future (parallel computation)
 class INET_API IReceiver : public IPrintableObject
 {
-    public:
-        /**
-         * Returns the minimum interference power below which receptions are to
-         * be ignored while computing the interference. Returns a value in the
-         * range [0, +infinity) or NaN if unspecified.
-         */
-        virtual W getMinInterferencePower() const = 0;
+  public:
+    /**
+     * Returns the minimum interference power below which receptions are to
+     * be ignored while computing the interference. Returns a value in the
+     * range [0, +infinity) or NaN if unspecified.
+     */
+    virtual W getMinInterferencePower() const = 0;
 
-        /**
-         * Returns the minimum reception power below which successful reception
-         * is definitely not possible. Returns a value in the range [0, +infinity)
-         * or NaN if unspecified.
-         */
-        virtual W getMinReceptionPower() const = 0;
+    /**
+     * Returns the minimum reception power below which successful reception
+     * is definitely not possible. Returns a value in the range [0, +infinity)
+     * or NaN if unspecified.
+     */
+    virtual W getMinReceptionPower() const = 0;
 
-        /**
-         * Returns a description of how the receiver is listening on the radio medium.
-         */
-        virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
+    /**
+     * Returns a description of how the receiver is listening on the radio medium.
+     */
+    virtual const IListening *createListening(const IRadio *radio, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition) const = 0;
 
-        /**
-         * Returns the result of the listening process specifying the reception
-         * state of the receiver. This function must be purely functional and
-         * support optimistic parallel computation.
-         */
-        virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
+    /**
+     * Returns the result of the listening process specifying the reception
+     * state of the receiver. This function must be purely functional and
+     * support optimistic parallel computation.
+     */
+    virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
 
-        /**
-         * Returns whether the transmission can be received successfully or not.
-         * This function need not be purely functional and need not support
-         * optimistic parallel computation.
-         */
-        virtual bool computeIsReceptionPossible(const ITransmission *transmission) const = 0;
+    /**
+     * Returns whether the transmission can be received successfully or not.
+     * This function need not be purely functional and need not support
+     * optimistic parallel computation.
+     */
+    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const = 0;
 
-        /**
-         * Returns whether the transmission represented by the reception can be
-         * received successfully or not. This function must be purely functional
-         * and support optimistic parallel computation.
-         */
-        virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
+    /**
+     * Returns whether the transmission represented by the reception can be
+     * received successfully or not. This function must be purely functional
+     * and support optimistic parallel computation.
+     */
+    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
 
-        /**
-         * Returns whether the reception is actually attempted or ignored by the
-         * receiver. This function must be purely functional and support optimistic
-         * parallel computation.
-         */
-        virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const = 0;
+    /**
+     * Returns whether the reception is actually attempted or ignored by the
+     * receiver. This function must be purely functional and support optimistic
+     * parallel computation.
+     */
+    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const = 0;
 
-        /**
-         * Returns the result of the reception process specifying whether it was
-         * successful or not and any other physical properties. This function must
-         * be purely functional and support optimistic parallel computation.
-         */
-        virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
+    /**
+     * Returns the result of the reception process specifying whether it was
+     * successful or not and any other physical properties. This function must
+     * be purely functional and support optimistic parallel computation.
+     */
+    virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IRECEIVER_H
 
-}
-
-
-#endif

@@ -23,11 +23,10 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 // not all compilers define INFINITY (gcc does)
 #ifndef INFINITY
-#define INFINITY HUGE_VAL
-#endif
+#define INFINITY    HUGE_VAL
+#endif // ifndef INFINITY
 
 /**
  * Routing support. The Topology class was designed primarily to support
@@ -75,8 +74,8 @@ class INET_API Topology : public cOwnedObject
         int moduleId;
         double weight;
         bool enabled;
-        std::vector<Link*> inLinks;
-        std::vector<Link*> outLinks;
+        std::vector<Link *> inLinks;
+        std::vector<Link *> outLinks;
 
         // variables used by the shortest-path algorithms
         double dist;
@@ -86,7 +85,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Constructor
          */
-        Node(int moduleId=-1) {this->moduleId=moduleId; weight=0; enabled=true; dist=INFINITY; outPath=NULL;}
+        Node(int moduleId = -1) { this->moduleId = moduleId; weight = 0; enabled = true; dist = INFINITY; outPath = NULL; }
         virtual ~Node() {}
 
         /** @name Node attributes: weight, enabled state, correspondence to modules. */
@@ -95,42 +94,42 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the ID of the network module to which this node corresponds.
          */
-        int getModuleId() const  {return moduleId;}
+        int getModuleId() const { return moduleId; }
 
         /**
          * Returns the pointer to the network module to which this node corresponds.
          */
-        cModule *getModule() const  {return simulation.getModule(moduleId);}
+        cModule *getModule() const { return simulation.getModule(moduleId); }
 
         /**
          * Returns the weight of this node. Weight is used with the
          * weighted shortest path finder methods of Topology.
          */
-        double getWeight() const  {return weight;}
+        double getWeight() const { return weight; }
 
         /**
          * Sets the weight of this node. Weight is used with the
          * weighted shortest path finder methods of Topology.
          */
-        void setWeight(double d)  {weight=d;}
+        void setWeight(double d) { weight = d; }
 
         /**
          * Returns true of this node is enabled. This has significance
          * with the shortest path finder methods of Topology.
          */
-        bool isEnabled() const  {return enabled;}
+        bool isEnabled() const { return enabled; }
 
         /**
          * Enable this node. This has significance with the shortest path
          * finder methods of Topology.
          */
-        void enable()  {enabled=true;}
+        void enable() { enabled = true; }
 
         /**
          * Disable this node. This has significance with the shortest path
          * finder methods of Topology.
          */
-        void disable()  {enabled=false;}
+        void disable() { enabled = false; }
         //@}
 
         /** @name Node connectivity. */
@@ -139,7 +138,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the number of incoming links to this graph node.
          */
-        int getNumInLinks() const  {return inLinks.size();}
+        int getNumInLinks() const { return inLinks.size(); }
 
         /**
          * Returns ith incoming link of graph node.
@@ -149,7 +148,7 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the number of outgoing links from this graph node.
          */
-        int getNumOutLinks() const  {return outLinks.size();}
+        int getNumOutLinks() const { return outLinks.size(); }
 
         /**
          * Returns ith outgoing link of graph node.
@@ -163,23 +162,22 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the distance of this node to the target node.
          */
-        double getDistanceToTarget() const  {return dist;}
+        double getDistanceToTarget() const { return dist; }
 
         /**
          * Returns the number of shortest paths towards the target node.
          * (There may be several paths with the same length.)
          */
-        int getNumPaths() const  {return outPath?1:0;}
+        int getNumPaths() const { return outPath ? 1 : 0; }
 
         /**
          * Returns the next link in the ith shortest paths towards the
          * target node. (There may be several paths with the same
          * length.)
          */
-        LinkOut *getPath(int) const  {return (LinkOut *)outPath;}
+        LinkOut *getPath(int) const { return (LinkOut *)outPath; }
         //@}
     };
-
 
     /**
      * Supporting class for Topology, represents a link in the graph.
@@ -200,40 +198,39 @@ class INET_API Topology : public cOwnedObject
         /**
          * Constructor.
          */
-        Link(double weight=1) {srcNode=destNode=NULL; srcGateId=destGateId=-1; this->weight=weight; enabled=true;}
+        Link(double weight = 1) { srcNode = destNode = NULL; srcGateId = destGateId = -1; this->weight = weight; enabled = true; }
         virtual ~Link() {}
 
         /**
          * Returns the weight of this link. Weight is used with the
          * weighted shortest path finder methods of Topology.
          */
-        double getWeight() const  {return weight;}
+        double getWeight() const { return weight; }
 
         /**
          * Sets the weight of this link. Weight is used with the
          * weighted shortest path finder methods of Topology.
          */
-        void setWeight(double d)  {weight=d;}
+        void setWeight(double d) { weight = d; }
 
         /**
          * Returns true of this link is enabled. This has significance
          * with the shortest path finder methods of Topology.
          */
-        bool isEnabled() const  {return enabled;}
+        bool isEnabled() const { return enabled; }
 
         /**
          * Enables this link. This has significance with the shortest path
          * finder methods of Topology.
          */
-        void enable()  {enabled=true;}
+        void enable() { enabled = true; }
 
         /**
          * Disables this link. This has significance with the shortest path
          * finder methods of Topology.
          */
-        void disable()  {enabled=false;}
+        void disable() { enabled = false; }
     };
-
 
     /**
      * Supporting class for Topology.
@@ -249,34 +246,33 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the node at the remote end of this connection.
          */
-        Node *getRemoteNode() const  {return srcNode;}
+        Node *getRemoteNode() const { return srcNode; }
 
         /**
          * Returns the node at the local end of this connection.
          */
-        Node *getLocalNode() const  {return destNode;}
+        Node *getLocalNode() const { return destNode; }
 
         /**
          * Returns the gate ID at the remote end of this connection.
          */
-        int getRemoteGateId() const  {return srcGateId;}
+        int getRemoteGateId() const { return srcGateId; }
 
         /**
          * Returns the gate ID at the local end of this connection.
          */
-        int getLocalGateId() const  {return destGateId;}
+        int getLocalGateId() const { return destGateId; }
 
         /**
          * Returns the gate at the remote end of this connection.
          */
-        cGate *getRemoteGate() const  {return srcNode->getModule()->gate(srcGateId);}
+        cGate *getRemoteGate() const { return srcNode->getModule()->gate(srcGateId); }
 
         /**
          * Returns the gate at the local end of this connection.
          */
-        cGate *getLocalGate() const  {return destNode->getModule()->gate(destGateId);}
+        cGate *getLocalGate() const { return destNode->getModule()->gate(destGateId); }
     };
-
 
     /**
      * Supporting class for Topology.
@@ -292,32 +288,32 @@ class INET_API Topology : public cOwnedObject
         /**
          * Returns the node at the remote end of this connection.
          */
-        Node *getRemoteNode() const  {return destNode;}
+        Node *getRemoteNode() const { return destNode; }
 
         /**
          * Returns the node at the local end of this connection.
          */
-        Node *getLocalNode() const  {return srcNode;}
+        Node *getLocalNode() const { return srcNode; }
 
         /**
          * Returns the gate ID at the remote end of this connection.
          */
-        int getRemoteGateId() const  {return destGateId;}
+        int getRemoteGateId() const { return destGateId; }
 
         /**
          * Returns the gate ID at the local end of this connection.
          */
-        int getLocalGateId() const  {return srcGateId;}
+        int getLocalGateId() const { return srcGateId; }
 
         /**
          * Returns the gate at the remote end of this connection.
          */
-        cGate *getRemoteGate() const  {return destNode->getModule()->gate(destGateId);}
+        cGate *getRemoteGate() const { return destNode->getModule()->gate(destGateId); }
 
         /**
          * Returns the gate at the local end of this connection.
          */
-        cGate *getLocalGate() const  {return srcNode->getModule()->gate(srcGateId);}
+        cGate *getLocalGate() const { return srcNode->getModule()->gate(srcGateId); }
     };
 
     /**
@@ -333,7 +329,7 @@ class INET_API Topology : public cOwnedObject
     };
 
   protected:
-    std::vector<Node*> nodes;
+    std::vector<Node *> nodes;
     Node *target;
 
     // note: the purpose of the (unsigned int) cast is that nodes with moduleId==-1 are inserted at the end of the vector
@@ -350,7 +346,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Constructor.
      */
-    explicit Topology(const char *name=NULL);
+    explicit Topology(const char *name = NULL);
 
     /**
      * Copy constructor.
@@ -375,7 +371,7 @@ class INET_API Topology : public cOwnedObject
      * Creates and returns an exact copy of this object.
      * See cObject for more details.
      */
-    virtual Topology *dup() const  {return new Topology(*this);}
+    virtual Topology *dup() const { return new Topology(*this); }
 
     /**
      * Produces a one-line description of the object's contents.
@@ -413,7 +409,7 @@ class INET_API Topology : public cOwnedObject
      * parameter may take any value you like, and it is passed back to selfunc()
      * in its second argument.
      */
-    void extractFromNetwork(bool (*selfunc)(cModule *,void *), void *userdata=NULL);
+    void extractFromNetwork(bool (*selfunc)(cModule *, void *), void *userdata = NULL);
 
     /**
      * The type safe, object-oriented equivalent of extractFromNetwork(selfunc, userdata).
@@ -461,7 +457,7 @@ class INET_API Topology : public cOwnedObject
      * </pre>
      *
      */
-    void extractByProperty(const char *propertyName, const char *value=NULL);
+    void extractByProperty(const char *propertyName, const char *value = NULL);
 
     /**
      * Extracts model topology by a module parameter. All modules get included
@@ -469,7 +465,7 @@ class INET_API Topology : public cOwnedObject
      * method returns the paramValue string. If paramValue is NULL, only the
      * parameter's existence is checked but not its value.
      */
-    void extractByParameter(const char *paramName, const char *paramValue=NULL);
+    void extractByParameter(const char *paramName, const char *paramValue = NULL);
 
     /**
      * Deletes the topology stored in the object.
@@ -512,7 +508,6 @@ class INET_API Topology : public cOwnedObject
 
     //@}
 
-
     /** @name Functions to examine topology by hand.
      *
      * Users also need to rely on Node and Link member functions
@@ -523,7 +518,7 @@ class INET_API Topology : public cOwnedObject
     /**
      * Returns the number of nodes in the graph.
      */
-    int getNumNodes() const  {return nodes.size();}
+    int getNumNodes() const { return nodes.size(); }
 
     /**
      * Returns pointer to the ith node in the graph. Node's methods
@@ -566,7 +561,7 @@ class INET_API Topology : public cOwnedObject
      * Returns the node that was passed to the most recently called
      * shortest path finding function.
      */
-    Node *getTargetNode() const {return target;}
+    Node *getTargetNode() const { return target; }
     //@}
 
   protected:
@@ -580,8 +575,7 @@ class INET_API Topology : public cOwnedObject
      */
     virtual Link *createLink() { return new Link(); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TOPOLOGY_H
 
-
-#endif

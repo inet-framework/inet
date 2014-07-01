@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_LINESEGMENTSMOBILITYBASE_H
 #define __INET_LINESEGMENTSMOBILITYBASE_H
 
@@ -24,8 +23,6 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Base class for mobility models where movement consists of
  * a sequence of linear movements of constant speed.
@@ -58,8 +55,7 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
   public:
     LineSegmentsMobilityBase();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LINESEGMENTSMOBILITYBASE_H
 
-
-#endif

@@ -18,7 +18,6 @@
 #include "OrdinalBasedDropper.h"
 
 namespace inet {
-
 Define_Module(OrdinalBasedDropper);
 
 simsignal_t OrdinalBasedDropper::rcvdPkSignal = registerSignal("rcvdPk");
@@ -38,10 +37,10 @@ void OrdinalBasedDropper::initialize()
     const char *vector = par("dropsVector");
     parseVector(vector);
 
-    if (dropsVector.size()==0)
-        {EV << "DropsGenerator: Empty dropsVector" << endl;}
-    else
-    {
+    if (dropsVector.size() == 0) {
+        EV << "DropsGenerator: Empty dropsVector" << endl;
+    }
+    else {
         EV << "DropsGenerator: dropsVector=" << vector << endl;
         generateFurtherDrops = true;
     }
@@ -52,21 +51,18 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
     numPackets++;
     emit(rcvdPkSignal, msg);
 
-    if (generateFurtherDrops)
-    {
-        if (numPackets==dropsVector[0])
-        {
+    if (generateFurtherDrops) {
+        if (numPackets == dropsVector[0]) {
             EV << "DropsGenerator: Dropping packet number " << numPackets << " " << msg << endl;
             emit(dropPkSignal, msg);
             delete msg;
             numDropped++;
             dropsVector.erase(dropsVector.begin());
-            if (dropsVector.size() == 0)
-            {
+            if (dropsVector.size() == 0) {
                 EV << "DropsGenerator: End of dropsVector reached." << endl;
                 generateFurtherDrops = false;
             }
-            return; // drop message
+            return;    // drop message
         }
     }
     emit(sentPkSignal, msg);
@@ -76,34 +72,36 @@ void OrdinalBasedDropper::handleMessage(cMessage *msg)
 void OrdinalBasedDropper::parseVector(const char *vector)
 {
     const char *v = vector;
-    while (*v)
-    {
+    while (*v) {
         // parse packet numbers
-        while (isspace(*v)) v++;
-        if (!*v || *v==';') break;
+        while (isspace(*v))
+            v++;
+        if (!*v || *v == ';')
+            break;
         if (!isdigit(*v))
             throw cRuntimeError("Syntax error in dropsVector: packet number expected");
-        if (dropsVector.size()>0 && dropsVector.back() >= (unsigned int)atoi(v))
+        if (dropsVector.size() > 0 && dropsVector.back() >= (unsigned int)atoi(v))
             throw cRuntimeError("Syntax error in dropsVector: packet numbers in ascending order expected");
 
         dropsVector.push_back(atoi(v));
-        while (isdigit(*v)) v++;
+        while (isdigit(*v))
+            v++;
 
         // skip delimiter
-        while (isspace(*v)) v++;
-        if (!*v) break;
-        if (*v!=';')
+        while (isspace(*v))
+            v++;
+        if (!*v)
+            break;
+        if (*v != ';')
             throw cRuntimeError("Syntax error in dropsVector: separator ';' missing");
         v++;
-        while (isspace(*v)) v++;
+        while (isspace(*v))
+            v++;
     }
 }
 
 void OrdinalBasedDropper::finish()
 {
 }
-
-
-}
-
+} // namespace inet
 

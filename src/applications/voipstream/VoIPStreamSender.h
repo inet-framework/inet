@@ -16,13 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_VOIPSTREAMSENDER_H
 #define __INET_VOIPSTREAMSENDER_H
 
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature
-#endif
+#endif // ifndef HAVE_FFMPEG
 
 #include <fnmatch.h>
 #include <vector>
@@ -35,12 +34,12 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 #ifndef HAVE_FFMPEG_AVRESAMPLE
 #error Please install libavresample or disable 'VoIPStream' feature
-#endif
+#endif // ifndef HAVE_FFMPEG_AVRESAMPLE
 #include <libavresample/avresample.h>
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 };
 
 #include "AudioOutFile.h"
@@ -51,7 +50,6 @@ extern "C" {
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 //using namespace std;
 
 class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
@@ -70,8 +68,8 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     virtual void finish();
 
     virtual void openSoundFile(const char *name);
-    virtual VoIPStreamPacket* generatePacket();
-    virtual bool checkSilence(AVSampleFormat sampleFormat, void* _buf, int samples);
+    virtual VoIPStreamPacket *generatePacket();
+    virtual bool checkSilence(AVSampleFormat sampleFormat, void *_buf, int samples);
     virtual void readFrame();
 
   protected:
@@ -79,20 +77,22 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     {
       public:
         enum { BUFSIZE = AVCODEC_MAX_AUDIO_FRAME_SIZE };
+
       protected:
         char *samples;
         int bufferSize;
         int readOffset;
         int writeOffset;
+
       public:
         Buffer();
         ~Buffer();
         void clear(int framesize);
-        int length() const {return writeOffset - readOffset; }
-        bool empty() const {return writeOffset <= readOffset; }
-        char* readPtr() { return samples + readOffset; }
-        char* writePtr() { return samples + writeOffset; }
-        int availableSpace() const {return bufferSize - writeOffset; }
+        int length() const { return writeOffset - readOffset; }
+        bool empty() const { return writeOffset <= readOffset; }
+        char *readPtr() { return samples + readOffset; }
+        char *writePtr() { return samples + writeOffset; }
+        int availableSpace() const { return bufferSize - writeOffset; }
         void notifyRead(int length) { readOffset += length; ASSERT(readOffset <= writeOffset); }
         void notifyWrote(int length) { writeOffset += length; ASSERT(writeOffset <= bufferSize); }
         void align();
@@ -105,36 +105,36 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     Address destAddress;
 
     int voipHeaderSize;
-    int voipSilenceThreshold;       // the maximum amplitude of a silence packet
-    int voipSilencePacketSize;      // size of a silence packet
-    int sampleRate;                 // samples/sec [Hz]
+    int voipSilenceThreshold;    // the maximum amplitude of a silence packet
+    int voipSilencePacketSize;    // size of a silence packet
+    int sampleRate;    // samples/sec [Hz]
     const char *codec;
     int compressedBitRate;
     simtime_t packetTimeLength;
-    const char *soundFile;          // input audio file name
+    const char *soundFile;    // input audio file name
     int repeatCount;
 
-    const char *traceFileName;      // name of the output trace file, NULL or empty to turn off recording
+    const char *traceFileName;    // name of the output trace file, NULL or empty to turn off recording
     AudioOutFile outFile;
 
     // AVCodec parameters
     AVFormatContext *pFormatCtx;
     AVCodecContext *pCodecCtx;
-    AVCodec *pCodec;                // input decoder codec
+    AVCodec *pCodec;    // input decoder codec
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     AVAudioResampleContext *pReSampleCtx;
-#else
+#else // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     ReSampleContext *pReSampleCtx;
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 
     AVCodecContext *pEncoderCtx;
-    AVCodec *pCodecEncoder;         // output encoder codec
+    AVCodec *pCodecEncoder;    // output encoder codec
 
     // state variables
     UDPSocket socket;
     int streamIndex;
-    uint32_t pktID;                 // increasing packet sequence number
+    uint32_t pktID;    // increasing packet sequence number
     int samplesPerPacket;
     AVPacket packet;
     Buffer sampleBuffer;
@@ -144,8 +144,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     // statistics:
     static simsignal_t sentPkSignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_VOIPSTREAMSENDER_H
 
-
-#endif

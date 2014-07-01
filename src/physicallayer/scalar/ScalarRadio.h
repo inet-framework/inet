@@ -21,24 +21,19 @@
 #include "Radio.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ScalarRadio : public Radio
 {
-    protected:
-        void handleUpperCommand(cMessage *message);
+  protected:
+    void handleUpperCommand(cMessage *message);
 
-    public:
-        ScalarRadio();
+  public:
+    ScalarRadio();
 
-        virtual void setBitrate(bps bitrate);
+    virtual void setBitrate(bps bitrate);
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCALARRADIO_H
 
-}
-
-
-#endif

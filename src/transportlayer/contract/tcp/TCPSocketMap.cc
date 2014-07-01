@@ -20,8 +20,6 @@
 #include "TCPSocketMap.h"
 
 namespace inet {
-
-
 TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
 {
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
@@ -30,32 +28,29 @@ TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
 
     int connId = ind->getConnId();
     SocketMap::iterator i = socketMap.find(connId);
-    ASSERT(i==socketMap.end() || i->first==i->second->getConnectionId());
-    return (i==socketMap.end()) ? NULL : i->second;
+    ASSERT(i == socketMap.end() || i->first == i->second->getConnectionId());
+    return (i == socketMap.end()) ? NULL : i->second;
 }
 
 void TCPSocketMap::addSocket(TCPSocket *socket)
 {
-    ASSERT(socketMap.find(socket->getConnectionId())==socketMap.end());
+    ASSERT(socketMap.find(socket->getConnectionId()) == socketMap.end());
     socketMap[socket->getConnectionId()] = socket;
 }
 
 TCPSocket *TCPSocketMap::removeSocket(TCPSocket *socket)
 {
     SocketMap::iterator i = socketMap.find(socket->getConnectionId());
-    if (i!=socketMap.end())
+    if (i != socketMap.end())
         socketMap.erase(i);
     return socket;
 }
 
 void TCPSocketMap::deleteSockets()
 {
-    for (SocketMap::iterator i=socketMap.begin(); i!=socketMap.end(); ++i)
-       delete i->second;
+    for (SocketMap::iterator i = socketMap.begin(); i != socketMap.end(); ++i)
+        delete i->second;
     socketMap.clear();
 }
-
-
-}
-
+} // namespace inet
 

@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #ifndef __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
 #define __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
 
@@ -25,8 +24,6 @@
 #include "StationaryMobility.h"
 
 namespace inet {
-
-
 /**
  * @brief Mobility model which places all hosts at constant distances
  * in a line with an orientation
@@ -58,8 +55,7 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
   public:
     LinearNodeDistributionMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LINEARNODEDISTRIBUTIONMOBILITY_H
 
-
-#endif

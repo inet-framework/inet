@@ -21,24 +21,20 @@
 #include "OSPFNeighbor.h"
 
 namespace inet {
-
 namespace OSPF {
+class NeighborState
+{
+  protected:
+    void changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState);
 
-class NeighborState {
-protected:
-    void changeState(Neighbor* neighbor, NeighborState* newState, NeighborState* currentState);
-
-public:
+  public:
     virtual ~NeighborState() {}
 
-    virtual void processEvent(Neighbor* neighbor, Neighbor::NeighborEventType event) = 0;
+    virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event) = 0;
     virtual Neighbor::NeighborStateType getState() const = 0;
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_OSPFNEIGHBORSTATE_H
 

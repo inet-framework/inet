@@ -4,17 +4,16 @@
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz <Matthias.Oppitz@gmx.de>
 
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPRECEIVERINFO_H
 #define __INET_RTPRECEIVERINFO_H
@@ -25,7 +24,6 @@
 #include "RTPParticipantInfo.h"
 
 namespace inet {
-
 /**
  * This class, a subclass of RTPParticipantInfo, is used for storing information
  * about other RTP endsystems.
@@ -35,7 +33,7 @@ namespace inet {
 class INET_API RTPReceiverInfo : public RTPParticipantInfo
 {
   public:
-    enum {MAX_INACTIVE_INTERVALS = 5 };
+    enum { MAX_INACTIVE_INTERVALS = 5 };
     /**
      * Default constructor.
      */
@@ -158,7 +156,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
      * The clock rate (in ticks per second) the sender increases the
      * RTP timestamps. It is calculated when two sender reports have
      * been received.
-    */
+     */
     int _clockRate;
 
     /**
@@ -207,10 +205,9 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
 
     int packetLoss;
 
-    FILE * packetSequenceLostLogFile;
+    FILE *packetSequenceLostLogFile;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPRECEIVERINFO_H
 
-
-#endif

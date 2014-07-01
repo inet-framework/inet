@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -27,19 +27,16 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 Define_Module(EtherAppSrv);
 
 simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");
 simsignal_t EtherAppSrv::rcvdPkSignal = registerSignal("rcvdPk");
 
-
 void EtherAppSrv::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         localSAP = par("localSAP");
 
         // statistics
@@ -48,8 +45,7 @@ void EtherAppSrv::initialize(int stage)
         WATCH(packetsSent);
         WATCH(packetsReceived);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
         if (isNodeUp())
@@ -101,8 +97,7 @@ void EtherAppSrv::handleMessage(cMessage *msg)
     strcat(msgname, "-resp-");
     char *s = msgname + strlen(msgname);
 
-    while (replyBytes > 0)
-    {
+    while (replyBytes > 0) {
         int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
         replyBytes -= l;
 
@@ -159,17 +154,13 @@ bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage,
         if (stage == NodeCrashOperation::STAGE_CRASH)
             stopApp();
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
-
 
 void EtherAppSrv::finish()
 {
 }
-
-
-
-}
-
+} // namespace inet
 

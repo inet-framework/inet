@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ETHERENCAP_H
 #define __INET_ETHERENCAP_H
@@ -23,10 +23,8 @@
 #include "Ethernet.h"
 
 namespace inet {
-
 // Forward declarations:
 class EtherFrame;
-
 
 /**
  * Performs Ethernet II encapsulation/decapsulation. More info in the NED file.
@@ -37,13 +35,13 @@ class INET_API EtherEncap : public cSimpleModule
     int seqNum;
 
     // statistics
-    long totalFromHigherLayer;  // total number of packets received from higher layer
-    long totalFromMAC;          // total number of frames received from MAC
-    long totalPauseSent;        // total number of PAUSE frames sent
+    long totalFromHigherLayer;    // total number of packets received from higher layer
+    long totalFromMAC;    // total number of frames received from MAC
+    long totalPauseSent;    // total number of PAUSE frames sent
     static simsignal_t encapPkSignal;
     static simsignal_t decapPkSignal;
     static simsignal_t pauseSentSignal;
-    bool useSNAP;               // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
+    bool useSNAP;    // true: generate EtherFrameWithSNAP, false: generate EthernetIIFrame
 
   protected:
     virtual void initialize();
@@ -55,10 +53,7 @@ class INET_API EtherEncap : public cSimpleModule
 
     virtual void updateDisplayString();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_ETHERENCAP_H
 

@@ -21,30 +21,25 @@
 #include "ListeningBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API BandListening : public ListeningBase
 {
-    protected:
-        const Hz carrierFrequency;
-        const Hz bandwidth;
+  protected:
+    const Hz carrierFrequency;
+    const Hz bandwidth;
 
-    public:
-        BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
-            ListeningBase(radio, startTime, endTime, startPosition, endPosition),
-            carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth)
-        {}
+  public:
+    BandListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition, Hz carrierFrequency, Hz bandwidth) :
+        ListeningBase(radio, startTime, endTime, startPosition, endPosition),
+        carrierFrequency(carrierFrequency),
+        bandwidth(bandwidth)
+    {}
 
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual Hz getBandwidth() const { return bandwidth; }
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual Hz getBandwidth() const { return bandwidth; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_BANDLISTENING_H
 
-}
-
-
-#endif

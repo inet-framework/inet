@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include <stdio.h>
 
@@ -24,8 +24,6 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
-
-
 Define_Module(EtherEncap);
 
 simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
@@ -47,29 +45,26 @@ void EtherEncap::initialize()
 
 void EtherEncap::handleMessage(cMessage *msg)
 {
-    if (msg->arrivedOn("lowerLayerIn"))
-    {
+    if (msg->arrivedOn("lowerLayerIn")) {
         EV_INFO << "Received " << msg << " from lower layer." << endl;
         processFrameFromMAC(check_and_cast<EtherFrame *>(msg));
     }
-    else
-    {
+    else {
         EV_INFO << "Received " << msg << " from upper layer." << endl;
         // from higher layer
-        switch (msg->getKind())
-        {
+        switch (msg->getKind()) {
             case IEEE802CTRL_DATA:
-            case 0: // default message kind (0) is also accepted
-              processPacketFromHigherLayer(PK(msg));
-              break;
+            case 0:    // default message kind (0) is also accepted
+                processPacketFromHigherLayer(PK(msg));
+                break;
 
             case IEEE802CTRL_SENDPAUSE:
-              // higher layer want MAC to send PAUSE frame
-              handleSendPause(msg);
-              break;
+                // higher layer want MAC to send PAUSE frame
+                handleSendPause(msg);
+                break;
 
             default:
-              throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
+                throw cRuntimeError("Received message `%s' with unknown message kind %d", msg->getName(), msg->getKind());
         }
     }
 
@@ -96,17 +91,16 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
     // with this information and transmits resultant frame to lower layer
 
     // create Ethernet frame, fill it in from Ieee802Ctrl and encapsulate msg in it
-    EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() <<"' for MAC\n";
+    EV_DETAIL << "Encapsulating higher layer packet `" << msg->getName() << "' for MAC\n";
 
-    IMACProtocolControlInfo* controlInfo = check_and_cast<IMACProtocolControlInfo*>(msg->removeControlInfo());
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(controlInfo);
+    IMACProtocolControlInfo *controlInfo = check_and_cast<IMACProtocolControlInfo *>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(controlInfo);
     EtherFrame *frame = NULL;
 
-    if (useSNAP)
-    {
+    if (useSNAP) {
         EtherFrameWithSNAP *snapFrame = new EtherFrameWithSNAP(msg->getName());
 
-        snapFrame->setSrc(controlInfo->getSourceAddress());  // if blank, will be filled in by MAC
+        snapFrame->setSrc(controlInfo->getSourceAddress());    // if blank, will be filled in by MAC
         snapFrame->setDest(controlInfo->getDestinationAddress());
         snapFrame->setOrgCode(0);
         if (etherctrl)
@@ -114,11 +108,10 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
         snapFrame->setByteLength(ETHER_MAC_FRAME_BYTES + ETHER_LLC_HEADER_LENGTH + ETHER_SNAP_HEADER_LENGTH);
         frame = snapFrame;
     }
-    else
-    {
+    else {
         EthernetIIFrame *eth2Frame = new EthernetIIFrame(msg->getName());
 
-        eth2Frame->setSrc(controlInfo->getSourceAddress());  // if blank, will be filled in by MAC
+        eth2Frame->setSrc(controlInfo->getSourceAddress());    // if blank, will be filled in by MAC
         eth2Frame->setDest(controlInfo->getDestinationAddress());
         if (etherctrl)
             eth2Frame->setEtherType(etherctrl->getEtherType());
@@ -129,7 +122,7 @@ void EtherEncap::processPacketFromHigherLayer(cPacket *msg)
 
     frame->encapsulate(msg);
     if (frame->getByteLength() < MIN_ETHERNET_FRAME_BYTES)
-        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES);  // "padding"
+        frame->setByteLength(MIN_ETHERNET_FRAME_BYTES); // "padding"
 
     EV_INFO << "Sending " << frame << " to lower layer.\n";
     send(frame, "lowerLayerOut");
@@ -151,7 +144,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
     higherlayermsg->setControlInfo(etherctrl);
 
     EV_DETAIL << "Decapsulating frame `" << frame->getName() << "', passing up contained packet `"
-             << higherlayermsg->getName() << "' to higher layer\n";
+              << higherlayermsg->getName() << "' to higher layer\n";
 
     totalFromMAC++;
     emit(decapPkSignal, higherlayermsg);
@@ -164,7 +157,7 @@ void EtherEncap::processFrameFromMAC(EtherFrame *frame)
 
 void EtherEncap::handleSendPause(cMessage *msg)
 {
-    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+    Ieee802Ctrl *etherctrl = dynamic_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     if (!etherctrl)
         throw cRuntimeError("PAUSE command `%s' from higher layer received without Ieee802Ctrl", msg->getName());
     int pauseUnits = etherctrl->getPauseUnits();
@@ -190,9 +183,5 @@ void EtherEncap::handleSendPause(cMessage *msg)
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
 }
-
-
-
-}
-
+} // namespace inet
 

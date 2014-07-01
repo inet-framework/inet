@@ -18,9 +18,7 @@
 #include "DimensionalReception.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
     Argument start(DimensionSet::timeFreqDomain);
@@ -31,10 +29,6 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
     end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
     return W(MappingUtils::findMin(*power, start, end));
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

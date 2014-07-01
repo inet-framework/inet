@@ -15,14 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPByteStreamSendQueue.h"
 
 #include "ByteArrayMessage.h"
 #include "TCPSegment.h"
 
 namespace inet {
-
 Register_Class(TCPByteStreamSendQueue);
 
 TCPByteStreamSendQueue::TCPByteStreamSendQueue() : TCPSendQueue()
@@ -72,7 +70,7 @@ uint32 TCPByteStreamSendQueue::getBufferEndSeq()
 TCPSegment *TCPByteStreamSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong numBytes)
 {
     //tcpEV << "sendQ: " << info() << " createSeg(seq=" << fromSeq << " len=" << numBytes << ")\n";
-    ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq+numBytes, end));
+    ASSERT(seqLE(begin, fromSeq) && seqLE(fromSeq + numBytes, end));
 
     TCPSegment *tcpseg = new TCPSegment();
     tcpseg->setSequenceNo(fromSeq);
@@ -100,8 +98,5 @@ void TCPByteStreamSendQueue::discardUpTo(uint32 seqNum)
     dataBuffer.drop(seqNum - begin);
     begin = seqNum;
 }
-
-
-}
-
+} // namespace inet
 

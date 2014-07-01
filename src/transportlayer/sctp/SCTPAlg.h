@@ -24,60 +24,55 @@
 #include "SCTPAlgorithm.h"
 
 namespace inet {
-
-
 /**
  * State variables for SCTPAlg.
  */
 class INET_API SCTPAlgStateVariables : public SCTPStateVariables
 {
   public:
-     //...
+    //...
 };
-
 
 class INET_API SCTPAlg : public SCTPAlgorithm
 {
   protected:
-     SCTPAlgStateVariables *state;
+    SCTPAlgStateVariables *state;
 
   public:
-     /**
-      * Ctor.
-      */
-     SCTPAlg();
+    /**
+     * Ctor.
+     */
+    SCTPAlg();
 
-     /**
-      * Virtual dtor.
-      */
-     virtual ~SCTPAlg();
+    /**
+     * Virtual dtor.
+     */
+    virtual ~SCTPAlg();
 
-     /**
-      * Creates and returns a SCTPStateVariables object.
-      */
-     virtual SCTPStateVariables* createStateVariables();
+    /**
+     * Creates and returns a SCTPStateVariables object.
+     */
+    virtual SCTPStateVariables *createStateVariables();
 
-     virtual void established(bool active);
+    virtual void established(bool active);
 
-     virtual void connectionClosed();
+    virtual void connectionClosed();
 
-     virtual void processTimer(cMessage* timer, SCTPEventCode& event);
+    virtual void processTimer(cMessage *timer, SCTPEventCode& event);
 
-     virtual void sendCommandInvoked(SCTPPathVariables* path);
+    virtual void sendCommandInvoked(SCTPPathVariables *path);
 
-     virtual void receivedDataAck(uint32 firstSeqAcked);
+    virtual void receivedDataAck(uint32 firstSeqAcked);
 
-     virtual void receivedDuplicateAck();
+    virtual void receivedDuplicateAck();
 
-     virtual void receivedAckForDataNotYetSent(uint32 seq);
+    virtual void receivedAckForDataNotYetSent(uint32 seq);
 
-     virtual void sackSent();
+    virtual void sackSent();
 
-     virtual void dataSent(uint32 fromseq);
-
+    virtual void dataSent(uint32 fromseq);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPALG_H
 
-
-#endif

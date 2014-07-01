@@ -25,35 +25,35 @@
 #include "Ieee8021dInterfaceData.h"
 
 namespace inet {
-
 /**
  * Base class for STP and RSTP.
  */
 class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListener
 {
-protected:
-    bool visualize;                  // if true it visualize the spanning tree
-    bool isOperational;              // for lifecycle
-    unsigned int numPorts;           // number of ports
+  protected:
+    bool visualize;    // if true it visualize the spanning tree
+    bool isOperational;    // for lifecycle
+    unsigned int numPorts;    // number of ports
 
-    unsigned int bridgePriority;     // bridge's priority
-    MACAddress bridgeAddress;        // bridge's MAC address
+    unsigned int bridgePriority;    // bridge's priority
+    MACAddress bridgeAddress;    // bridge's MAC address
 
     simtime_t maxAge;
     simtime_t helloTime;
     simtime_t forwardDelay;
 
     cModule *switchModule;
-    IMACAddressTable * macTable;
-    IInterfaceTable * ifTable;
-    InterfaceEntry * ie;
+    IMACAddressTable *macTable;
+    IInterfaceTable *ifTable;
+    InterfaceEntry *ie;
 
-public:
+  public:
     STPBase();
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {}
-protected:
-    virtual int numInitStages() const {return NUM_INIT_STAGES;}
+
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 
     virtual void start();
@@ -92,9 +92,9 @@ protected:
     /*
      * Returns the first non-loopback interface.
      */
-    virtual InterfaceEntry * chooseInterface();
+    virtual InterfaceEntry *chooseInterface();
 };
-}
+} // namespace inet
 
+#endif // ifndef __INET_STPBASE_H
 
-#endif

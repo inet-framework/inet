@@ -1,32 +1,29 @@
- /**
-******************************************************
-* @file EthernetApplication.cc
-* @brief Simple traffic generator.
-* It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
-*
-* @author Juan Luis Garrote Molinero
-* @version 1.0
-* @date Feb 2011
-*
-*
-******************************************************/
+/**
+ ******************************************************
+ * @file EthernetApplication.cc
+ * @brief Simple traffic generator.
+ * It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
+ *
+ * @author Juan Luis Garrote Molinero
+ * @version 1.0
+ * @date Feb 2011
+ *
+ *
+ ******************************************************/
 
 #include "EthernetApplication.h"
 #include "EtherApp_m.h"
 #include "Ieee802Ctrl.h"
 
 namespace inet {
-
-
-Define_Module (EthernetApplication);
+Define_Module(EthernetApplication);
 simsignal_t EthernetApplication::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t EthernetApplication::rcvdPkSignal = SIMSIGNAL_NULL;
 void EthernetApplication::initialize(int stage)
 {
     // we can only initialize in the 2nd stage (stage==1), because
     // assignment of "auto" MAC addresses takes place in stage 0
-    if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         reqLength = &par("reqLength");
         respLength = &par("respLength");
         waitTime = &par("waitTime");
@@ -49,7 +46,7 @@ void EthernetApplication::initialize(int stage)
 
         cMessage *timermsg = new cMessage("generateNextPacket");
         simtime_t d = par("startTime").doubleValue();
-        scheduleAt(simTime()+d, timermsg);
+        scheduleAt(simTime() + d, timermsg);
     }
 }
 
@@ -57,11 +54,9 @@ MACAddress EthernetApplication::resolveDestMACAddress()
 {
     MACAddress destMACAddress;
     const char *destAddress = par("destAddress");
-    if (destAddress[0])
-    {
+    if (destAddress[0]) {
         // try as mac address first, then as a module
-        if (!destMACAddress.tryParse(destAddress))
-        {
+        if (!destMACAddress.tryParse(destAddress)) {
             cModule *destStation = simulation.getModuleByPath(destAddress);
             if (!destStation)
                 error("cannot resolve MAC address '%s': not a 12-hex-digit MAC address or a valid module path name", destAddress);
@@ -76,14 +71,12 @@ MACAddress EthernetApplication::resolveDestMACAddress()
 
 void EthernetApplication::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         sendPacket();
         simtime_t d = waitTime->doubleValue();
-        scheduleAt(simTime()+d, msg);
+        scheduleAt(simTime() + d, msg);
     }
-    else
-    {
+    else {
         receivePacket(msg);
     }
 }
@@ -121,9 +114,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
     packetsReceived++;
     // simtime_t lastEED = simTime() - msg->getCreationTime();
 
-
-    if (dynamic_cast<EtherAppReq *>(msg))
-    {
+    if (dynamic_cast<EtherAppReq *>(msg)) {
         EtherAppReq *req = check_and_cast<EtherAppReq *>(msg);
         emit(rcvdPkSignal, req);
         Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(req->removeControlInfo());
@@ -138,8 +129,7 @@ void EthernetApplication::receivePacket(cMessage *msg)
         int k = 0;
         strcat(msgname, "-resp-");
         char *s = msgname + strlen(msgname);
-        while (replyBytes > 0)
-        {
+        while (replyBytes > 0) {
             int l = replyBytes > MAX_REPLY_CHUNK_SIZE ? MAX_REPLY_CHUNK_SIZE : replyBytes;
             replyBytes -= l;
 
@@ -172,9 +162,5 @@ void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& des
 void EthernetApplication::finish()
 {
 }
-
-
-
-}
-
+} // namespace inet
 

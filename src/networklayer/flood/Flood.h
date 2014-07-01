@@ -6,12 +6,12 @@
  * copyright:   (C) 2004 Telecommunication Networks Group (TKN) at
  *              Technische Universitaet Berlin, Germany.
  *
- *              This program is free software; you can redistribute it 
- *              and/or modify it under the terms of the GNU General Public 
+ *              This program is free software; you can redistribute it
+ *              and/or modify it under the terms of the GNU General Public
  *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later 
+ *              version 2 of the License, or (at your option) any later
  *              version.
- *              For further information see file COPYING 
+ *              For further information see file COPYING
  *              in the top level directory
  *
  ***************************************************************************
@@ -30,7 +30,6 @@
 #include "FloodDatagram.h"
 
 namespace inet {
-
 /**
  * @brief A simple flooding protocol
  *
@@ -42,7 +41,7 @@ namespace inet {
  * .ini file (@ref bcMaxEntries) as well as the time after which an entry
  * is deleted (@ref bcDelTime).
  *
- * If you prefere a memory-less version you can comment out the 
+ * If you prefere a memory-less version you can comment out the
  * @verbatim #define PLAINFLOODING @endverbatim
  *
  * @ingroup netwLayer
@@ -52,7 +51,7 @@ namespace inet {
  **/
 class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
 {
-protected:
+  protected:
     /** @brief Network layer sequence number*/
     unsigned long seqNum;
 
@@ -68,14 +67,17 @@ protected:
     /** @brief Defines whether to use plain flooding or not*/
     bool plainFlooding;
 
-    class Bcast {
-    public:
-        unsigned long    seqNum;
-        Address          srcAddr;
-        simtime_t        delTime;
-    public:
-        Bcast(unsigned long n = 0, const Address& s = Address(),  simtime_t_cref d = SIMTIME_ZERO) :
-            seqNum(n), srcAddr(s), delTime(d) {
+    class Bcast
+    {
+      public:
+        unsigned long seqNum;
+        Address srcAddr;
+        simtime_t delTime;
+
+      public:
+        Bcast(unsigned long n = 0, const Address& s = Address(), simtime_t_cref d = SIMTIME_ZERO) :
+            seqNum(n), srcAddr(s), delTime(d)
+        {
         }
     };
 
@@ -90,25 +92,25 @@ protected:
      **/
     unsigned int bcMaxEntries;
 
-    /** 
+    /**
      * @brief Time after which an entry for an already broadcasted msg
      * can be deleted
      **/
     simtime_t bcDelTime;
 
-public:
+  public:
     Flood()
-    	: NetworkProtocolBase()
-    	, seqNum(0)
-    	, defaultTtl(0)
-    	, plainFlooding(false)
-    	, bcMsgs()
-    	, bcMaxEntries(0)
-    	, bcDelTime()
-    	, nbDataPacketsReceived(0)
-    	, nbDataPacketsSent(0)
-    	, nbDataPacketsForwarded(0)
-    	, nbHops(0)
+        : NetworkProtocolBase()
+        , seqNum(0)
+        , defaultTtl(0)
+        , plainFlooding(false)
+        , bcMsgs()
+        , bcMaxEntries(0)
+        , bcDelTime()
+        , nbDataPacketsReceived(0)
+        , nbDataPacketsSent(0)
+        , nbDataPacketsForwarded(0)
+        , nbHops(0)
     {}
 
     /** @brief Initialization of omnetpp.ini parameters*/
@@ -116,9 +118,9 @@ public:
 
     virtual void initialize(int);
 
-    virtual void finish();    
+    virtual void finish();
 
-protected:
+  protected:
 
     long nbDataPacketsReceived;
     long nbDataPacketsSent;
@@ -126,17 +128,17 @@ protected:
     long nbHops;
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket*);
+    virtual void handleUpperPacket(cPacket *);
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket*);
-    
+    virtual void handleLowerPacket(cPacket *);
+
     /** @brief Checks whether a message was already broadcasted*/
     bool notBroadcasted(FloodDatagram *);
 
-    cMessage* decapsMsg(FloodDatagram *);
+    cMessage *decapsMsg(FloodDatagram *);
 
-    FloodDatagram * encapsMsg(cPacket*);
+    FloodDatagram *encapsMsg(cPacket *);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.
@@ -151,10 +153,9 @@ protected:
      * @param pMsg      The message where the "control info" shall be attached.
      * @param pDestAddr The MAC address of the message receiver.
      */
-    virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
+    virtual cObject *setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLOOD_H
 
-
-#endif

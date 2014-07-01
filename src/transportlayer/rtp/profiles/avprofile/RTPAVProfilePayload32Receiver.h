@@ -4,17 +4,16 @@
     begin                : Sun Jan 6 2002
     copyright            : (C) 2002 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 /** \file RTPAVProfilePayload32Receiver.h
  * This file declares the class RTPAVProfilePayload32Receiver.
@@ -28,7 +27,6 @@
 #include "RTPPayloadReceiver.h"
 
 namespace inet {
-
 /**
  * This module is used to receive getData(mpeg video) of payload 32 for rtp
  * endsystems working under the rtp av profile.
@@ -40,42 +38,41 @@ namespace inet {
  */
 class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
 {
-    protected:
-      /**
-       * Destructor.
-       */
-      virtual ~RTPAVProfilePayload32Receiver();
+  protected:
+    /**
+     * Destructor.
+     */
+    virtual ~RTPAVProfilePayload32Receiver();
 
-      /**
-       * Calls the method of the superclass RTPPayloadReceiver and sets the
-       * payload type to 32.
-       */
-      virtual void initialize();
+    /**
+     * Calls the method of the superclass RTPPayloadReceiver and sets the
+     * payload type to 32.
+     */
+    virtual void initialize();
 
-    protected:
-        /**
-         * A reordering queue for incoming packets.
-         */
-        cQueue *_queue;
+  protected:
+    /**
+     * A reordering queue for incoming packets.
+     */
+    cQueue *_queue;
 
-        /**
-         * Stores the lowest allowed time stamp of rtp data packets. The value
-         * is used to throw away packets from mpeg frames already stored in
-         * the data file.
-         */
-        uint32 _lowestAllowedTimeStamp;
+    /**
+     * Stores the lowest allowed time stamp of rtp data packets. The value
+     * is used to throw away packets from mpeg frames already stored in
+     * the data file.
+     */
+    uint32 _lowestAllowedTimeStamp;
 
-        uint32 _highestSequenceNumber;
+    uint32 _highestSequenceNumber;
 
-        /**
-         * Writes information about received frames into the output file.
-         * The only error correction provided is reordering packets
-         * of one frame if needed.
-         */
-        virtual void processPacket(RTPPacket *packet);
+    /**
+     * Writes information about received frames into the output file.
+     * The only error correction provided is reordering packets
+     * of one frame if needed.
+     */
+    virtual void processPacket(RTPPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H
 
-
-#endif

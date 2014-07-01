@@ -15,15 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
 class INET_API Join : public cSimpleModule
 {
   protected:
     cGate *outg;
+
   protected:
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
@@ -40,6 +39,5 @@ void Join::handleMessage(cMessage *msg)
 {
     send(msg, outg);
 }
-
-}
+} // namespace inet
 

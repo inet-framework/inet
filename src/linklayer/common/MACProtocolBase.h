@@ -23,7 +23,6 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
-
 class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
 {
   public:
@@ -45,18 +44,17 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
     virtual void registerInterface();
     virtual InterfaceEntry *createInterfaceEntry() = 0;
 
-    virtual void sendUp(cMessage* message);
-    virtual void sendDown(cMessage* message);
+    virtual void sendUp(cMessage *message);
+    virtual void sendDown(cMessage *message);
 
-    virtual bool isUpperMessage(cMessage* message);
-    virtual bool isLowerMessage(cMessage* message);
+    virtual bool isUpperMessage(cMessage *message);
+    virtual bool isLowerMessage(cMessage *message);
 
     virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_LINK_LAYER; }
     virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_LINK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MACPROTOCOLBASE_H
 
-
-#endif

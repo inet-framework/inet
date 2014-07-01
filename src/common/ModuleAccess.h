@@ -22,7 +22,6 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
-
 /**
  * Returns true if the given module is a network node, i.e. a module
  * with the @node property set.
@@ -78,16 +77,15 @@ INET_API cModule *findModuleUnderContainingNode(cModule *from);
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
-template <typename T>
+template<typename T>
 INET_API T *findModuleFromPar(cPar& par, cModule *from)
 {
     const char *path = par.stringValue();
-    if (path && *path)
-    {
+    if (path && *path) {
         cModule *mod = from->getModuleByPath(path);
         if (!mod)
             throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
-        T* m = dynamic_cast<T*>(mod);
+        T *m = dynamic_cast<T *>(mod);
         if (!m)
             throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
         return m;
@@ -101,14 +99,14 @@ INET_API T *findModuleFromPar(cPar& par, cModule *from)
  * Returns the pointer to a module of type T or throws an error if module not found
  * or type mismatch.
  */
-template <typename T>
+template<typename T>
 INET_API T *getModuleFromPar(cPar& par, cModule *from)
 {
     const char *path = par.stringValue();
     cModule *mod = from->getModuleByPath(path);
     if (!mod)
         throw cRuntimeError("Module not found on path '%s' defined by par '%s'", path, par.getFullPath().c_str());
-    T* m = dynamic_cast<T*>(mod);
+    T *m = dynamic_cast<T *>(mod);
     if (!m)
         throw cRuntimeError("Module can not cast to '%s' on path '%s' defined by par '%s'", opp_typename(typeid(T)), path, par.getFullPath().c_str());
     return m;
@@ -121,13 +119,15 @@ INET_API T *getModuleFromPar(cPar& par, cModule *from)
 template<typename T>
 class INET_API ModuleAccess
 {
-     // Note: MSVC 6.0 doesn't like const char *N as template parameter,
-     // so we have to pass it via the ctor...
+    // Note: MSVC 6.0 doesn't like const char *N as template parameter,
+    // so we have to pass it via the ctor...
+
   private:
     const char *name;
     T *p;
+
   public:
-    ModuleAccess(const char *n) {name = n; p = NULL;}
+    ModuleAccess(const char *n) { name = n; p = NULL; }
     virtual ~ModuleAccess() {}
 
     virtual T *get()
@@ -155,12 +155,10 @@ class INET_API ModuleAccess
     {
         if (!from) throw cRuntimeError("Invalid argument: module must not be NULL");
         cModule *m = findModuleWhereverInNode(name, from);
-        return dynamic_cast<T*>(m);
+        return dynamic_cast<T *>(m);
     }
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_MODULEACCESS_H
 

@@ -22,33 +22,29 @@
 #include "BGPCommon.h"
 
 namespace inet {
-
 namespace BGP {
-
 class INET_API RoutingTableEntry : public IPv4Route
 {
-
-public:
+  public:
     typedef unsigned char RoutingPathType;
 
     RoutingTableEntry(void);
-    RoutingTableEntry(const IPv4Route* entry);
+    RoutingTableEntry(const IPv4Route *entry);
     virtual ~RoutingTableEntry(void) {}
 
-    void            setPathType(RoutingPathType type)               { _pathType = type; }
-    RoutingPathType getPathType(void) const                         { return _pathType; }
-    void            addAS(ASID newAS)                               { _ASList.push_back(newAS); }
-    unsigned int    getASCount(void) const                          { return _ASList.size(); }
-    ASID            getAS(unsigned int index) const                 { return _ASList[index]; }
+    void setPathType(RoutingPathType type) { _pathType = type; }
+    RoutingPathType getPathType(void) const { return _pathType; }
+    void addAS(ASID newAS) { _ASList.push_back(newAS); }
+    unsigned int getASCount(void) const { return _ASList.size(); }
+    ASID getAS(unsigned int index) const { return _ASList[index]; }
 
-    private:
+  private:
     // destinationID is RoutingEntry::host
     // addressMask is RoutingEntry::netmask
-    RoutingPathType         _pathType;
-    std::vector<ASID>       _ASList;
+    RoutingPathType _pathType;
+    std::vector<ASID> _ASList;
 };
-
-}
+} // namespace BGP
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
     IPv4Route(), _pathType(BGP::Incomplete)
@@ -58,7 +54,7 @@ inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
     setSourceType(IRoute::BGP);
 }
 
-inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route* entry)
+inline BGP::RoutingTableEntry::RoutingTableEntry(const IPv4Route *entry)
 {
     setDestination(entry->getDestination());
     setNetmask(entry->getNetmask());
@@ -76,10 +72,21 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
         << entry.getNetmask().str()
         << " , PathType: ";
     switch (entry.getPathType()) {
-        case BGP::EGP:          out << "EGP";           break;
-        case BGP::IGP:          out << "IGP";           break;
-        case BGP::Incomplete:   out << "Incomplete";    break;
-        default:                out << "Unknown";       break;
+        case BGP::EGP:
+            out << "EGP";
+            break;
+
+        case BGP::IGP:
+            out << "IGP";
+            break;
+
+        case BGP::Incomplete:
+            out << "Incomplete";
+            break;
+
+        default:
+            out << "Unknown";
+            break;
     }
 
     out << " , NextHops: "
@@ -92,9 +99,7 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
     }
     return out;
 }
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_BGPROUTINGTABLEENTRY_H
 

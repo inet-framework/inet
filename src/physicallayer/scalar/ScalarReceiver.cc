@@ -21,16 +21,14 @@
 #include "BandListening.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(ScalarReceiver);
 
-void ScalarReceiver::printToStream(std::ostream &stream) const
+void ScalarReceiver::printToStream(std::ostream& stream) const
 {
     stream << "scalar receiver, "
            << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " <<  sensitivity << ", "
+           << "sensitivity = " << sensitivity << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth;
 }
@@ -43,11 +41,9 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const st
     simtime_t noiseStartTime = SimTime::getMaxTime();
     simtime_t noiseEndTime = 0;
     std::map<simtime_t, W> *powerChanges = new std::map<simtime_t, W>();
-    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++)
-    {
+    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++) {
         const ScalarReception *reception = check_and_cast<const ScalarReception *>(*it);
-        if (carrierFrequency == reception->getCarrierFrequency() && bandwidth == reception->getBandwidth())
-        {
+        if (carrierFrequency == reception->getCarrierFrequency() && bandwidth == reception->getBandwidth()) {
             W power = reception->getPower();
             simtime_t startTime = reception->getStartTime();
             simtime_t endTime = reception->getEndTime();
@@ -69,14 +65,11 @@ const INoise *ScalarReceiver::computeNoise(const IListening *listening, const st
         else if (areOverlappingBands(carrierFrequency, bandwidth, reception->getCarrierFrequency(), reception->getBandwidth()))
             throw cRuntimeError("Overlapping bands are not supported");
     }
-    if (backgroundNoise)
-    {
+    if (backgroundNoise) {
         const ScalarNoise *scalarBackgroundNoise = check_and_cast<const ScalarNoise *>(backgroundNoise);
-        if (carrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && bandwidth == scalarBackgroundNoise->getBandwidth())
-        {
+        if (carrierFrequency == scalarBackgroundNoise->getCarrierFrequency() && bandwidth == scalarBackgroundNoise->getBandwidth()) {
             const std::map<simtime_t, W> *backgroundNoisePowerChanges = check_and_cast<const ScalarNoise *>(backgroundNoise)->getPowerChanges();
-            for (std::map<simtime_t, W>::const_iterator it = backgroundNoisePowerChanges->begin(); it != backgroundNoisePowerChanges->end(); it++)
-            {
+            for (std::map<simtime_t, W>::const_iterator it = backgroundNoisePowerChanges->begin(); it != backgroundNoisePowerChanges->end(); it++) {
                 std::map<simtime_t, W>::iterator jt = powerChanges->find(it->first);
                 if (jt != powerChanges->end())
                     jt->second += it->second;
@@ -96,10 +89,6 @@ double ScalarReceiver::computeMinSNIR(const IReception *reception, const INoise 
     const ScalarReception *scalarReception = check_and_cast<const ScalarReception *>(reception);
     return unit(scalarReception->getPower() / scalarNoise->computeMaxPower(reception->getStartTime(), reception->getEndTime())).get();
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

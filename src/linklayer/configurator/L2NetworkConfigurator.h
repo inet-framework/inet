@@ -30,8 +30,6 @@
 #include "Topology.h"
 
 namespace inet {
-
-
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
  */
@@ -40,6 +38,7 @@ class L2NetworkConfigurator : public cSimpleModule
   public:
     L2NetworkConfigurator() { rootNode = NULL; }
     typedef Ieee8021dInterfaceData::PortInfo PortInfo;
+
   protected:
     class InterfaceInfo;
 
@@ -48,13 +47,14 @@ class L2NetworkConfigurator : public cSimpleModule
      */
     class Node : public Topology::Node
     {
-        public:
-            cModule * module;
-            IInterfaceTable * interfaceTable;
-            std::vector<InterfaceInfo *> interfaceInfos;
-        public:
-            Node(cModule * module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; }
-            ~Node() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
+      public:
+        cModule *module;
+        IInterfaceTable *interfaceTable;
+        std::vector<InterfaceInfo *> interfaceInfos;
+
+      public:
+        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; }
+        ~Node() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
     };
 
     /**
@@ -62,54 +62,54 @@ class L2NetworkConfigurator : public cSimpleModule
      */
     class InterfaceInfo : public cObject
     {
-        public:
-            Node * node;
-            Node * childNode;
-            InterfaceEntry * interfaceEntry;
-            PortInfo portData;
+      public:
+        Node *node;
+        Node *childNode;
+        InterfaceEntry *interfaceEntry;
+        PortInfo portData;
 
-        public:
-            InterfaceInfo(Node * node, Node * childNode, InterfaceEntry * interfaceEntry);
-            virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
+      public:
+        InterfaceInfo(Node *node, Node *childNode, InterfaceEntry *interfaceEntry);
+        virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
     };
 
     class Matcher
     {
-        protected:
-            bool matchesany;
-            std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
+      protected:
+        bool matchesany;
+        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
 
-        public:
-            Matcher(const char *pattern);
-            ~Matcher();
+      public:
+        Matcher(const char *pattern);
+        ~Matcher();
 
-            bool matches(const char *s);
-            bool matchesAny() { return matchesany; }
+        bool matches(const char *s);
+        bool matchesAny() { return matchesany; }
     };
 
     class Link : public Topology::Link
     {
-        public:
-            InterfaceInfo * sourceInterfaceInfo;
-            InterfaceInfo * destinationInterfaceInfo;
+      public:
+        InterfaceInfo *sourceInterfaceInfo;
+        InterfaceInfo *destinationInterfaceInfo;
 
-        public:
-            Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+      public:
+        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
     };
 
     class L2Topology : public Topology
     {
-        protected:
-            virtual Node * createNode(cModule * module) { return new L2NetworkConfigurator::Node(module); }
-            virtual Link * createLink() { return new L2NetworkConfigurator::Link(); }
+      protected:
+        virtual Node *createNode(cModule *module) { return new L2NetworkConfigurator::Node(module); }
+        virtual Link *createLink() { return new L2NetworkConfigurator::Link(); }
     };
 
-    cXMLElement * configuration;
+    cXMLElement *configuration;
     L2Topology topology;
-    Node * rootNode;
+    Node *rootNode;
 
     virtual void initialize(int stage);
-    virtual int numInitStages() const  { return NUM_INIT_STAGES; }
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
 
     /**
@@ -126,24 +126,23 @@ class L2NetworkConfigurator : public cSimpleModule
     virtual void computeConfiguration();
 
     // helper functions
-    virtual bool linkContainsMatchingHostExcept(InterfaceInfo * currentInfo, Matcher& hostMatcher, cModule * exceptModule);
+    virtual bool linkContainsMatchingHostExcept(InterfaceInfo *currentInfo, Matcher& hostMatcher, cModule *exceptModule);
     void ensureConfigurationComputed(L2Topology& topology);
-    virtual Topology::LinkOut * findLinkOut(Node * node, int gateId);
-    void configureInterface(InterfaceInfo * interfaceInfo);
+    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
+    void configureInterface(InterfaceInfo *interfaceInfo);
 
-public:
+  public:
     /**
      * Reads interface elements from the configuration file and stores result.
      */
-    virtual void readInterfaceConfiguration(Node * rootNode);
+    virtual void readInterfaceConfiguration(Node *rootNode);
 
     /**
      * Configures the provided interface based on the current network configuration.
      */
-    virtual void configureInterface(InterfaceEntry * interfaceEntry);
+    virtual void configureInterface(InterfaceEntry *interfaceEntry);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_L2NETWORKCONFIGURATOR_H
 
-
-#endif

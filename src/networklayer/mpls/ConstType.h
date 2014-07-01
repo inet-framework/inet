@@ -16,24 +16,18 @@
 #ifndef __INET_CONSTTYPE_H
 #define __INET_CONSTTYPE_H
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
-enum messageKind
-{
+enum messageKind {
     MPLS_KIND,
     LDP_KIND,
     SIGNAL_KIND
 };
 
-
-namespace ConstType
-{
-
-const  char libDataMarker[] = "In-lbl       In-intf     Out-lbl       Out-intf";
-const  char prtDataMarker[] = "Prefix            Pointer";
+namespace ConstType {
+const char libDataMarker[] = "In-lbl       In-intf     Out-lbl       Out-intf";
+const char prtDataMarker[] = "Prefix            Pointer";
 
 const char UnknownData[] = "UNDEFINED";
 const char NoLabel[] = "Nolabel";
@@ -44,12 +38,8 @@ const int ldp_port = 646;
 
 const int LDP_KIND = 10;
 const int HOW_KIND = 50;
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_CONSTTYPE_H
 

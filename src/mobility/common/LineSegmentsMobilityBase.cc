@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LineSegmentsMobilityBase.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 LineSegmentsMobilityBase::LineSegmentsMobilityBase()
 {
     targetPosition = Coord::ZERO;
@@ -54,8 +51,5 @@ void LineSegmentsMobilityBase::move()
         lastPosition += lastSpeed * (now - lastUpdate).dbl();
     }
 }
-
-
-}
-
+} // namespace inet
 

@@ -19,9 +19,7 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 void SNIRReceiverBase::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
@@ -58,10 +56,6 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
     bool isReceptionSuccessful = isReceptionAttempted && computeIsReceptionSuccessful(listening, reception, indication);
     return new ReceptionDecision(reception, indication, isReceptionPossible, isReceptionAttempted, isReceptionSuccessful);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

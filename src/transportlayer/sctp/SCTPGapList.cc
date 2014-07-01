@@ -20,7 +20,6 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
-
 // ###### Constructor #######################################################
 SCTPSimpleGapList::SCTPSimpleGapList()
 {
@@ -31,12 +30,10 @@ SCTPSimpleGapList::SCTPSimpleGapList()
     }
 }
 
-
 // ###### Destructor ########################################################
 SCTPSimpleGapList::~SCTPSimpleGapList()
 {
 }
-
 
 // ###### Check gap list ####################################################
 void SCTPSimpleGapList::check(const uint32 cTsnAck) const
@@ -52,7 +49,6 @@ void SCTPSimpleGapList::check(const uint32 cTsnAck) const
     }
 }
 
-
 // ###### Print gap list ####################################################
 void SCTPSimpleGapList::print(std::ostream& os) const
 {
@@ -66,7 +62,6 @@ void SCTPSimpleGapList::print(std::ostream& os) const
     os << " }";
 }
 
-
 // ###### Is TSN in gap list? ###############################################
 bool SCTPSimpleGapList::tsnInGapList(const uint32 tsn) const
 {
@@ -78,7 +73,6 @@ bool SCTPSimpleGapList::tsnInGapList(const uint32 tsn) const
     return false;
 }
 
-
 // ###### Forward CumAckTSN #################################################
 void SCTPSimpleGapList::forwardCumAckTSN(const uint32 cTsnAck)
 {
@@ -88,10 +82,10 @@ void SCTPSimpleGapList::forwardCumAckTSN(const uint32 cTsnAck)
         uint32 advance = 0;
         while (counter < NumGaps) {
             // Check whether CumAckTSN can be advanced.
-            if (SCTPAssociation::tsnGe(cTsnAck, GapStartList[counter])) {   // Yes!
+            if (SCTPAssociation::tsnGe(cTsnAck, GapStartList[counter])) {    // Yes!
                 advance++;
             }
-            else {   // No -> end of search.
+            else {    // No -> end of search.
                 break;
             }
             counter++;
@@ -108,7 +102,6 @@ void SCTPSimpleGapList::forwardCumAckTSN(const uint32 cTsnAck)
     }
 }
 
-
 // ###### Try to advance CumAckTSN ##########################################
 bool SCTPSimpleGapList::tryToAdvanceCumAckTSN(uint32& cTsnAck)
 {
@@ -118,21 +111,20 @@ bool SCTPSimpleGapList::tryToAdvanceCumAckTSN(uint32& cTsnAck)
         uint32 counter = 0;
         while (counter < NumGaps) {
             // Check whether CumAckTSN can be advanced.
-            if (cTsnAck + 1 == GapStartList[0]) {   // Yes!
+            if (cTsnAck + 1 == GapStartList[0]) {    // Yes!
                 cTsnAck = GapStopList[0];
                 // We can take out all fragments of this block
                 for (uint32 i = 1; i < NumGaps; i++) {
-                    GapStartList[i-1] = GapStartList[i];
-                    GapStopList[i-1] = GapStopList[i];
+                    GapStartList[i - 1] = GapStartList[i];
+                    GapStopList[i - 1] = GapStopList[i];
                 }
                 progress = true;
             }
             counter++;
         }
     }
-    return (progress);
+    return progress;
 }
-
 
 // ###### Remove TSN from gap list ##########################################
 void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
@@ -144,15 +136,15 @@ void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
             // ====== Gap block contains more than one TSN =====================
             const int32 gapsize = (int32)(GapStopList[i] - GapStartList[i] + 1);
             if (gapsize > 1) {
-                if (GapStopList[i] == removedTSN) {   // Remove stop TSN
+                if (GapStopList[i] == removedTSN) {    // Remove stop TSN
                     GapStopList[i]--;
                 }
-                else if (GapStartList[i] == removedTSN) {   // Remove start TSN
+                else if (GapStartList[i] == removedTSN) {    // Remove start TSN
                     GapStartList[i]++;
                 }
-                else {   // Block has to be splitted up
-                    NumGaps = std::min(NumGaps + 1, (uint32)MAX_GAP_COUNT);   // Enforce upper limit!
-                    for (int32 j = NumGaps - 1;  j > i; j--) {
+                else {    // Block has to be splitted up
+                    NumGaps = std::min(NumGaps + 1, (uint32)MAX_GAP_COUNT);    // Enforce upper limit!
+                    for (int32 j = NumGaps - 1; j > i; j--) {
                         GapStopList[j] = GapStopList[j - 1];
                         GapStartList[j] = GapStartList[j - 1];
                     }
@@ -162,7 +154,6 @@ void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
                     }
                 }
             }
-
             // ====== Just a single TSN in the gap block (start==stop) =========
             else {
                 for (int32 j = i; j <= initialNumGaps - 1; j++) {
@@ -174,20 +165,19 @@ void SCTPSimpleGapList::removeFromGapList(const uint32 removedTSN)
                 NumGaps--;
             }
 
-            break;  // TSN removed -> done!
+            break;    // TSN removed -> done!
         }
     }
 }
 
-
 // ###### Add TSN to gap list ###############################################
 bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
-        uint32&      cTsnAck,
-        bool&        newChunkReceived)
+        uint32& cTsnAck,
+        bool& newChunkReceived)
 {
     if (SCTPAssociation::tsnLe(receivedTSN, cTsnAck)) {
         // Received TSN covered by CumAckTSN -> nothing to do.
-        return (false);
+        return false;
     }
 
     uint32 lo = cTsnAck + 1;
@@ -213,16 +203,16 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                             return true;
                         }
                         /* some gap must increase its upper bound */
-                        GapStopList[i-1] = receivedTSN;
+                        GapStopList[i - 1] = receivedTSN;
                         newChunkReceived = true;
                         return true;
                     }
-                    else {   /* a gap in between */
-                        NumGaps = std::min(NumGaps + 1, (uint32)MAX_GAP_COUNT);   //  Enforce upper limit!
+                    else {    /* a gap in between */
+                        NumGaps = std::min(NumGaps + 1, (uint32)MAX_GAP_COUNT);    //  Enforce upper limit!
 
                         for (uint32 j = NumGaps - 1; j > i; j--) {
-                            GapStartList[j] = GapStartList[j-1];
-                            GapStopList[j] = GapStopList[j-1];
+                            GapStartList[j] = GapStartList[j - 1];
+                            GapStopList[j] = GapStopList[j - 1];
                         }
                         GapStartList[i] = receivedTSN;
                         GapStopList[i] = receivedTSN;
@@ -230,10 +220,10 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                         return true;
                     }
                 }
-                else {   /* alright: gapsize is 1: our received tsn may close gap between fragments */
+                else {    /* alright: gapsize is 1: our received tsn may close gap between fragments */
                     if (lo == cTsnAck + 1) {
                         cTsnAck = GapStopList[i];
-                        if (i == NumGaps-1) {
+                        if (i == NumGaps - 1) {
                             GapStartList[i] = 0;
                             GapStopList[i] = 0;
                         }
@@ -248,8 +238,8 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                         return true;
                     }
                     else {
-                        GapStopList[i-1] = GapStopList[i];
-                        if (i == NumGaps-1) {
+                        GapStopList[i - 1] = GapStopList[i];
+                        if (i == NumGaps - 1) {
                             GapStartList[i] = 0;
                             GapStopList[i] = 0;
                         }
@@ -265,34 +255,34 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
                     }
                 }
             }
-            else {  /* receivedTSN is not in the gap between these fragments... */
+            else {    /* receivedTSN is not in the gap between these fragments... */
                 lo = GapStopList[i] + 1;
             }
-        } /* end: for */
-    } /* end: for */
+        }    /* end: for */
+    }    /* end: for */
 
     // ====== We have reached the end of the list ============================
-    if (receivedTSN == lo) {   // just increase CumAckTSN, handle further update of CumAckTSN later
+    if (receivedTSN == lo) {    // just increase CumAckTSN, handle further update of CumAckTSN later
         if (receivedTSN == cTsnAck + 1) {
             cTsnAck = receivedTSN;
             newChunkReceived = true;
             return true;
         }
         // Update last fragment, stop TSN by one.
-        GapStopList[NumGaps-1]++;
+        GapStopList[NumGaps - 1]++;
 
         newChunkReceived = true;
         return true;
-
     }
     else {
         // If the received TSN is new, the list is either empty or the received
         // TSN is larger than the last gap end + 1. Otherwise, the TSN has already
         // been acknowledged.
-        if ( (NumGaps == 0) ||
-                (SCTPAssociation::tsnGt(receivedTSN, GapStopList[NumGaps - 1] + 1)) ) {
+        if ((NumGaps == 0) ||
+            (SCTPAssociation::tsnGt(receivedTSN, GapStopList[NumGaps - 1] + 1)))
+        {
             // A new fragment altogether, past the end of the list
-            if (NumGaps < MAX_GAP_COUNT) {   // T.D. 18.12.09: Enforce upper limit!
+            if (NumGaps < MAX_GAP_COUNT) {    // T.D. 18.12.09: Enforce upper limit!
                 GapStartList[NumGaps] = receivedTSN;
                 GapStopList[NumGaps] = receivedTSN;
                 NumGaps++;
@@ -305,20 +295,16 @@ bool SCTPSimpleGapList::updateGapList(const uint32 receivedTSN,
     return false;
 }
 
-
-
 // ###### Constructor #######################################################
 SCTPGapList::SCTPGapList()
 {
     CumAckTSN = 0;
 }
 
-
 // ###### DestruSCTPGapListctor ########################################################
 SCTPGapList::~SCTPGapList()
 {
 }
-
 
 // ###### Check gap list ####################################################
 void SCTPGapList::check() const
@@ -327,7 +313,6 @@ void SCTPGapList::check() const
     RevokableGapList.check(CumAckTSN);
     NonRevokableGapList.check(CumAckTSN);
 }
-
 
 // ###### Print gap list ####################################################
 void SCTPGapList::print(std::ostream& os) const
@@ -338,7 +323,6 @@ void SCTPGapList::print(std::ostream& os) const
     os << "   NR-Gaps=" << NonRevokableGapList;
 }
 
-
 // ###### Forward CumAckTSN #################################################
 void SCTPGapList::forwardCumAckTSN(const uint32 cumAckTSN)
 {
@@ -348,18 +332,16 @@ void SCTPGapList::forwardCumAckTSN(const uint32 cumAckTSN)
     NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
 }
 
-
 // ###### Advance CumAckTSN #################################################
 bool SCTPGapList::tryToAdvanceCumAckTSN()
 {
     if (CombinedGapList.tryToAdvanceCumAckTSN(CumAckTSN)) {
         RevokableGapList.forwardCumAckTSN(CumAckTSN);
         NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
-        return (true);
+        return true;
     }
-    return (false);
+    return false;
 }
-
 
 // ###### Remove TSN from gap list ##########################################
 void SCTPGapList::removeFromGapList(const uint32 removedTSN)
@@ -369,11 +351,10 @@ void SCTPGapList::removeFromGapList(const uint32 removedTSN)
     CombinedGapList.removeFromGapList(removedTSN);
 }
 
-
 // ###### Add TSN to gap list ###############################################
 bool SCTPGapList::updateGapList(const uint32 receivedTSN,
-        bool&        newChunkReceived,
-        bool         tsnIsRevokable)
+        bool& newChunkReceived,
+        bool tsnIsRevokable)
 {
     uint32 oldCumAckTSN = CumAckTSN;
     if (tsnIsRevokable) {
@@ -396,11 +377,7 @@ bool SCTPGapList::updateGapList(const uint32 receivedTSN,
         RevokableGapList.forwardCumAckTSN(CumAckTSN);
         NonRevokableGapList.forwardCumAckTSN(CumAckTSN);
     }
-    return (newChunk);
+    return newChunk;
 }
-
-
-
-}
-
+} // namespace inet
 

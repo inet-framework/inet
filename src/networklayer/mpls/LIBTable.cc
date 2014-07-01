@@ -18,21 +18,17 @@
 #include "XMLUtils.h"
 
 namespace inet {
-
 Define_Module(LIBTable);
-
 
 void LIBTable::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         maxLabel = 0;
         WATCH_VECTOR(lib);
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         // read configuration
         readTableFromXML(par("config").xmlValue());
     }
@@ -48,8 +44,7 @@ bool LIBTable::resolveLabel(std::string inInterface, int inLabel,
 {
     bool any = (inInterface.length() == 0);
 
-    for (unsigned int i = 0; i < lib.size(); i++)
-    {
+    for (unsigned int i = 0; i < lib.size(); i++) {
         if (!any && lib[i].inInterface != inInterface)
             continue;
 
@@ -66,10 +61,9 @@ bool LIBTable::resolveLabel(std::string inInterface, int inLabel,
 }
 
 int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-            std::string outInterface, int color)
+        std::string outInterface, int color)
 {
-    if (inLabel == -1)
-    {
+    if (inLabel == -1) {
         LIBEntry newItem;
         newItem.inLabel = ++maxLabel;
         newItem.inInterface = inInterface;
@@ -79,10 +73,8 @@ int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
         lib.push_back(newItem);
         return newItem.inLabel;
     }
-    else
-    {
-        for (unsigned int i = 0; i < lib.size(); i++)
-        {
+    else {
+        for (unsigned int i = 0; i < lib.size(); i++) {
             if (lib[i].inLabel != inLabel)
                 continue;
 
@@ -93,14 +85,13 @@ int LIBTable::installLibEntry(int inLabel, std::string inInterface, const LabelO
             return inLabel;
         }
         ASSERT(false);
-        return 0; // prevent warning
+        return 0;    // prevent warning
     }
 }
 
 void LIBTable::removeLibEntry(int inLabel)
 {
-    for (unsigned int i = 0; i < lib.size(); i++)
-    {
+    for (unsigned int i = 0; i < lib.size(); i++) {
         if (lib[i].inLabel != inLabel)
             continue;
 
@@ -110,14 +101,13 @@ void LIBTable::removeLibEntry(int inLabel)
     ASSERT(false);
 }
 
-void LIBTable::readTableFromXML(const cXMLElement* libtable)
+void LIBTable::readTableFromXML(const cXMLElement *libtable)
 {
     ASSERT(libtable);
     ASSERT(!strcmp(libtable->getTagName(), "libtable"));
     checkTags(libtable, "libentry");
     cXMLElementList list = libtable->getChildrenByTagName("libentry");
-    for (cXMLElementList::iterator it=list.begin(); it != list.end(); it++)
-    {
+    for (cXMLElementList::iterator it = list.begin(); it != list.end(); it++) {
         const cXMLElement& entry = **it;
 
         checkTags(&entry, "inLabel inInterface outLabel outInterface color");
@@ -129,28 +119,24 @@ void LIBTable::readTableFromXML(const cXMLElement* libtable)
         newItem.color = getParameterIntValue(&entry, "color", 0);
 
         cXMLElementList ops = getUniqueChild(&entry, "outLabel")->getChildrenByTagName("op");
-        for (cXMLElementList::iterator oit=ops.begin(); oit != ops.end(); oit++)
-        {
+        for (cXMLElementList::iterator oit = ops.begin(); oit != ops.end(); oit++) {
             const cXMLElement& op = **oit;
             const char *val = op.getAttribute("value");
             const char *code = op.getAttribute("code");
             ASSERT(code);
             LabelOp l;
 
-            if (!strcmp(code, "push"))
-            {
+            if (!strcmp(code, "push")) {
                 l.optcode = PUSH_OPER;
                 ASSERT(val);
                 l.label = atoi(val);
                 ASSERT(l.label > 0);
             }
-            else if (!strcmp(code, "pop"))
-            {
+            else if (!strcmp(code, "pop")) {
                 l.optcode = POP_OPER;
                 ASSERT(!val);
             }
-            else if (!strcmp(code, "swap"))
-            {
+            else if (!strcmp(code, "swap")) {
                 l.optcode = SWAP_OPER;
                 ASSERT(val);
                 l.label = atoi(val);
@@ -201,13 +187,11 @@ LabelOpVector LIBTable::popLabel()
     return vec;
 }
 
-std::ostream & operator<<(std::ostream & os, const LabelOpVector& label)
+std::ostream& operator<<(std::ostream& os, const LabelOpVector& label)
 {
     os << "{";
-    for (unsigned int i = 0; i < label.size(); i++)
-    {
-        switch (label[i].optcode)
-        {
+    for (unsigned int i = 0; i < label.size(); i++) {
+        switch (label[i].optcode) {
             case PUSH_OPER:
                 os << "PUSH " << label[i].label;
                 break;
@@ -233,7 +217,7 @@ std::ostream & operator<<(std::ostream & os, const LabelOpVector& label)
     return os;
 }
 
-std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
+std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib)
 {
     os << "inLabel:" << lib.inLabel;
     os << "    inInterface:" << lib.inInterface;
@@ -242,5 +226,5 @@ std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib)
     os << "    color:" << lib.color;
     return os;
 }
+} // namespace inet
 
-}

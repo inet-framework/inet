@@ -19,9 +19,7 @@
 #include "PhysicalObject.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(ObstacleLoss);
 
 ObstacleLoss::ObstacleLoss() :
@@ -31,14 +29,13 @@ ObstacleLoss::ObstacleLoss() :
 
 void ObstacleLoss::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         const char *environmentModule = par("environmentModule");
         environment = check_and_cast<PhysicalEnvironment *>(simulation.getModuleByPath(environmentModule));
     }
 }
 
-void ObstacleLoss::printToStream(std::ostream &stream) const
+void ObstacleLoss::printToStream(std::ostream& stream) const
 {
     stream << "obstacle loss";
 }
@@ -57,9 +54,8 @@ double ObstacleLoss::computeDielectricLoss(const PhysicalObject *object, Hz freq
 double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const
 {
     double totalLoss = 1;
-    const std::vector<PhysicalObject *> &objects = environment->getObjects();
-    for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
-    {
+    const std::vector<PhysicalObject *>& objects = environment->getObjects();
+    for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++) {
         const PhysicalObject *object = *it;
         const Coord& obstaclePosition = object->getPosition();
         const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
@@ -68,8 +64,6 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
     }
     return totalLoss;
 }
-
-}
-
-}
+} // namespace physicallayer
+} // namespace inet
 

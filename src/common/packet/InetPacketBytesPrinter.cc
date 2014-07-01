@@ -15,22 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
 #if OMNETPP_VERSION >= 0x0405
 
 class INET_API InetPacketBytesPrinter : public cMessagePrinter
 {
-    protected:
-        mutable bool showEncapsulatedPackets;
-    public:
-        InetPacketBytesPrinter() { showEncapsulatedPackets = true; }
-        virtual ~InetPacketBytesPrinter() {}
-        virtual int getScoreFor(cMessage *msg) const;
-        virtual void printMessage(std::ostream& os, cMessage *msg) const;
+  protected:
+    mutable bool showEncapsulatedPackets;
+
+  public:
+    InetPacketBytesPrinter() { showEncapsulatedPackets = true; }
+    virtual ~InetPacketBytesPrinter() {}
+    virtual int getScoreFor(cMessage *msg) const;
+    virtual void printMessage(std::ostream& os, cMessage *msg) const;
 };
 
 Register_MessagePrinter(InetPacketBytesPrinter);
@@ -52,7 +51,7 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); showEncapsulatedPackets && pk; pk = pk->getEncapsulatedPacket()) {
         std::ostringstream out;
-        out << pk->getClassName() <<":" << pk->getByteLength() << " bytes";
+        out << pk->getClassName() << ":" << pk->getByteLength() << " bytes";
         if (outs.length())
             out << INFO_SEPAR << outs;
         outs = out.str();
@@ -60,9 +59,6 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << outs;
 }
 
-#endif // Register_MessagePrinter
-
-
-}
-
+#endif    // Register_MessagePrinter
+} // namespace inet
 

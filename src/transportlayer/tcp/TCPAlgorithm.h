@@ -25,9 +25,6 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
-
-
 /**
  * Abstract base class for TCP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
@@ -37,8 +34,8 @@ namespace inet {
 class INET_API TCPAlgorithm : public cObject
 {
   protected:
-    TCPConnection *conn; // we belong to this connection
-    TCPStateVariables *state; // our state variables
+    TCPConnection *conn;    // we belong to this connection
+    TCPStateVariables *state;    // our state variables
 
     /**
      * Create state block (TCB) used by this TCP variant. It is expected
@@ -52,7 +49,7 @@ class INET_API TCPAlgorithm : public cObject
     /**
      * Ctor.
      */
-    TCPAlgorithm() {state = NULL; conn = NULL;}
+    TCPAlgorithm() { state = NULL; conn = NULL; }
 
     /**
      * Virtual dtor.
@@ -63,7 +60,7 @@ class INET_API TCPAlgorithm : public cObject
      * Assign this object to a TCPConnection. Its sendQueue and receiveQueue
      * must be set already at this time, because we cache their pointers here.
      */
-    void setConnection(TCPConnection *_conn) {conn = _conn;}
+    void setConnection(TCPConnection *_conn) { conn = _conn; }
 
     /**
      * Creates and returns the TCP state variables.
@@ -184,10 +181,8 @@ class INET_API TCPAlgorithm : public cObject
      * to update state vars with new measured RTT value.
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPALGORITHM_H
 
-
-#endif

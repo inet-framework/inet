@@ -29,34 +29,33 @@
 #include "IPv4NetworkConfigurator.h"
 
 namespace inet {
-
 /**
  * This module provides the static configuration for the IPv4RoutingTable and
  * the IPv4 network interfaces of a particular node in the network.
  *
  * For more info please see the NED file.
  */
-class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle {
-    protected:
-        NodeStatus *nodeStatus;
-        IInterfaceTable *interfaceTable;
-        IIPv4RoutingTable *routingTable;
-        IPv4NetworkConfigurator *networkConfigurator;
+class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle
+{
+  protected:
+    NodeStatus *nodeStatus;
+    IInterfaceTable *interfaceTable;
+    IIPv4RoutingTable *routingTable;
+    IPv4NetworkConfigurator *networkConfigurator;
 
-    public:
-        IPv4NodeConfigurator();
+  public:
+    IPv4NodeConfigurator();
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-        virtual void initialize(int stage);
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-        virtual void prepareNode();
-        virtual void prepareInterface(InterfaceEntry *interfaceEntry);
-        virtual void configureNode();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void initialize(int stage);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void prepareNode();
+    virtual void prepareInterface(InterfaceEntry *interfaceEntry);
+    virtual void configureNode();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV4NODECONFIGURATOR_H
 
-
-#endif

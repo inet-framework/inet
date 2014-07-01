@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include <stdlib.h>
 #include <string.h>
 
@@ -24,8 +23,6 @@
 #include "ReassemblyBuffer.h"
 
 namespace inet {
-
-
 ReassemblyBuffer::ReassemblyBuffer()
 {
     main.beg = main.end = 0;
@@ -43,13 +40,12 @@ bool ReassemblyBuffer::addFragment(ushort beg, ushort end, bool islast)
     merge(beg, end, islast);
 
     // do we have the complete datagram?
-    return main.beg==0 && main.islast;
+    return main.beg == 0 && main.islast;
 }
 
 void ReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
 {
-    if (main.end==beg)
-    {
+    if (main.end == beg) {
         // most typical case (<95%): new fragment follows last one
         main.end = end;
         if (islast)
@@ -57,15 +53,13 @@ void ReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
         if (fragments)
             mergeFragments();
     }
-    else if (main.beg==end)
-    {
+    else if (main.beg == end) {
         // new fragment precedes what we already have
         main.beg = beg;
         if (fragments)
             mergeFragments();
     }
-    else if (main.end<beg || main.beg>end)
-    {
+    else if (main.end < beg || main.beg > end) {
         // disjoint fragment, store it until another fragment fills in the gap
         if (!fragments)
             fragments = new RegionVector();
@@ -75,8 +69,7 @@ void ReassemblyBuffer::merge(ushort beg, ushort end, bool islast)
         r.islast = islast;
         fragments->push_back(r);
     }
-    else
-    {
+    else {
         // overlapping is not possible;
         // fragment's range already contained in buffer (probably duplicate fragment)
     }
@@ -87,50 +80,38 @@ void ReassemblyBuffer::mergeFragments()
     RegionVector& frags = *fragments;
 
     bool oncemore;
-    do
-    {
+    do {
         oncemore = false;
-        for (RegionVector::iterator i=frags.begin(); i!=frags.end(); )
-        {
+        for (RegionVector::iterator i = frags.begin(); i != frags.end(); ) {
             bool deleteit = false;
             Region& frag = *i;
-            if (main.end==frag.beg)
-            {
+            if (main.end == frag.beg) {
                 main.end = frag.end;
                 if (frag.islast)
                     main.islast = true;
                 deleteit = true;
             }
-            else if (main.beg==frag.end)
-            {
+            else if (main.beg == frag.end) {
                 main.beg = frag.beg;
                 deleteit = true;
             }
-            else if (main.beg<=frag.beg && main.end>=frag.end)
-            {
+            else if (main.beg <= frag.beg && main.end >= frag.end) {
                 // we already have this region (duplicate fragment), delete it
                 deleteit = true;
             }
 
-            if (deleteit)
-            {
+            if (deleteit) {
                 // deletion is tricky because erase() invalidates iterator
                 int pos = i - frags.begin();
                 frags.erase(i);
                 i = frags.begin() + pos;
                 oncemore = true;
             }
-            else
-            {
+            else {
                 ++i;
             }
         }
-    }
-    while (oncemore);
+    } while (oncemore);
 }
-
-
-
-}
-
+} // namespace inet
 

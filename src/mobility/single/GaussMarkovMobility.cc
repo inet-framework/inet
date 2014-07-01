@@ -17,14 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "GaussMarkovMobility.h"
 
 namespace inet {
-
-
 Define_Module(GaussMarkovMobility);
-
 
 GaussMarkovMobility::GaussMarkovMobility()
 {
@@ -42,8 +38,7 @@ void GaussMarkovMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing GaussMarkovMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         speedMean = par("speed");
         angleMean = par("angle");
         alpha = par("alpha");
@@ -66,8 +61,7 @@ void GaussMarkovMobility::preventBorderHugging()
     bool right = (lastPosition.x >= constraintAreaMax.x - margin);
     bool top = (lastPosition.y < constraintAreaMin.y + margin);
     bool bottom = (lastPosition.y >= constraintAreaMax.y - margin);
-    if (top || bottom)
-    {
+    if (top || bottom) {
         angleMean = bottom ? 270.0 : 90.0;
         if (right)
             angleMean -= 45.0;
@@ -91,17 +85,17 @@ void GaussMarkovMobility::move()
 void GaussMarkovMobility::setTargetPosition()
 {
     // calculate new speed and direction based on the model
-    speed = alpha * speed +
-                (1.0 - alpha) * speedMean +
-                sqrt(1.0 - alpha * alpha)
-                  * normal(0.0, 1.0)
-                  * variance;
+    speed = alpha * speed
+        + (1.0 - alpha) * speedMean
+        + sqrt(1.0 - alpha * alpha)
+        * normal(0.0, 1.0)
+        * variance;
 
-    angle = alpha * angle +
-                (1.0 - alpha) * angleMean +
-                sqrt(1.0 - alpha * alpha)
-                  * normal(0.0, 1.0)
-                  * variance;
+    angle = alpha * angle
+        + (1.0 - alpha) * angleMean
+        + sqrt(1.0 - alpha * alpha)
+        * normal(0.0, 1.0)
+        * variance;
 
     double rad = PI * angle / 180.0;
     Coord direction(cos(rad), sin(rad));
@@ -111,8 +105,5 @@ void GaussMarkovMobility::setTargetPosition()
     EV_DEBUG << " speed = " << speed << " angle = " << angle << endl;
     EV_DEBUG << " mspeed = " << speedMean << " mangle = " << angleMean << endl;
 }
-
-
-}
-
+} // namespace inet
 

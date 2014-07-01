@@ -27,17 +27,17 @@
 
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 #include <ws2tcpip.h>
-#endif
+#endif // if defined(_WIN32) || defined(__WIN32__) || defined(WIN32) || defined(__CYGWIN__) || defined(_WIN64)
 
-#define PCAP_SNAPLEN 65536 /* capture all data packets with up to pcap_snaplen bytes */
-#define PCAP_TIMEOUT 10    /* Timeout in ms */
+#define PCAP_SNAPLEN    65536 /* capture all data packets with up to pcap_snaplen bytes */
+#define PCAP_TIMEOUT    10    /* Timeout in ms */
 
 #ifdef HAVE_PCAP
-std::vector<cModule *>cSocketRTScheduler::modules;
-std::vector<pcap_t *>cSocketRTScheduler::pds;
-std::vector<int32>cSocketRTScheduler::datalinks;
-std::vector<int32>cSocketRTScheduler::headerLengths;
-#endif
+std::vector<cModule *> cSocketRTScheduler::modules;
+std::vector<pcap_t *> cSocketRTScheduler::pds;
+std::vector<int32> cSocketRTScheduler::datalinks;
+std::vector<int32> cSocketRTScheduler::headerLengths;
+#endif // ifdef HAVE_PCAP
 
 namespace inet {
 timeval cSocketRTScheduler::baseTime;
@@ -48,7 +48,6 @@ inline std::ostream& operator<<(std::ostream& out, const timeval& tv)
 {
     return out << (uint32)tv.tv_sec << "s" << tv.tv_usec << "us";
 }
-
 
 cSocketRTScheduler::cSocketRTScheduler() : cScheduler()
 {
@@ -71,9 +70,8 @@ void cSocketRTScheduler::startRun()
     const int32 on = 1;
     if (setsockopt(fd, IPPROTO_IP, IP_HDRINCL, (char *)&on, sizeof(on)) < 0)
         throw cRuntimeError("cSocketRTScheduler: couldn't set sockopt for raw socket");
-#endif
+#endif // ifdef HAVE_PCAP
 }
-
 
 void cSocketRTScheduler::endRun()
 {
@@ -81,8 +79,7 @@ void cSocketRTScheduler::endRun()
     fd = INVALID_SOCKET;
 
 #ifdef HAVE_PCAP
-    for (uint16 i=0; i<pds.size(); i++)
-    {
+    for (uint16 i = 0; i < pds.size(); i++) {
         pcap_stat ps;
         if (pcap_stats(pds.at(i), &ps) < 0)
             throw cRuntimeError("cSocketRTScheduler::endRun(): Cannot query pcap statistics: %s", pcap_geterr(pds.at(i)));
@@ -96,7 +93,7 @@ void cSocketRTScheduler::endRun()
     pds.clear();
     datalinks.clear();
     headerLengths.clear();
-#endif
+#endif // ifdef HAVE_PCAP
 }
 
 void cSocketRTScheduler::executionResumed()
@@ -110,7 +107,7 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 #ifdef HAVE_PCAP
     char errbuf[PCAP_ERRBUF_SIZE];
     struct bpf_program fcode;
-    pcap_t * pd;
+    pcap_t *pd;
     int32 datalink;
     int32 headerLength;
 
@@ -138,23 +135,27 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
 #ifndef LINUX
     if (pcap_setnonblock(pd, 1, errbuf) < 0)
         throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Cannot put pcap device into non-blocking mode, error: %s", errbuf);
-#endif
+#endif // ifndef LINUX
 
     switch (datalink) {
-    case DLT_NULL:
-        headerLength = 4;
-        break;
-    case DLT_EN10MB:
-        headerLength = 14;
-        break;
-    case DLT_SLIP:
-        headerLength = 24;
-        break;
-    case DLT_PPP:
-        headerLength = 24;
-        break;
-    default:
-        throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
+        case DLT_NULL:
+            headerLength = 4;
+            break;
+
+        case DLT_EN10MB:
+            headerLength = 14;
+            break;
+
+        case DLT_SLIP:
+            headerLength = 24;
+            break;
+
+        case DLT_PPP:
+            headerLength = 24;
+            break;
+
+        default:
+            throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): Unsupported datalink: %d", datalink);
     }
     modules.push_back(mod);
     pds.push_back(pd);
@@ -162,9 +163,9 @@ void cSocketRTScheduler::setInterfaceModule(cModule *mod, const char *dev, const
     headerLengths.push_back(headerLength);
 
     EV << "Opened pcap device " << dev << " with filter " << filter << " and datalink " << datalink << ".\n";
-#else
+#else // ifdef HAVE_PCAP
     throw cRuntimeError("cSocketRTScheduler::setInterfaceModule(): code was compiled without pcap support");
-#endif
+#endif // ifdef HAVE_PCAP
 }
 
 #ifdef HAVE_PCAP
@@ -182,8 +183,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     module = cSocketRTScheduler::modules.at(i);
 
     // skip ethernet frames not encapsulating an IP packet.
-    if (datalink == DLT_EN10MB)
-    {
+    if (datalink == DLT_EN10MB) {
         ethernet_hdr = (struct ether_header *)bytes;
         if (ntohs(ethernet_hdr->ether_type) != ETHERTYPE_IP)
             return;
@@ -192,7 +192,7 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     // put the IP packet from wire into data[] array of ExtFrame
     ExtFrame *notificationMsg = new ExtFrame("rtEvent");
     notificationMsg->setDataArraySize(hdr->caplen - headerLength);
-    for (uint16 j=0; j < hdr->caplen - headerLength; j++)
+    for (uint16 j = 0; j < hdr->caplen - headerLength; j++)
         notificationMsg->setData(j, bytes[j + headerLength]);
 
     // signalize new incoming packet to the interface via cMessage
@@ -200,13 +200,14 @@ static void packet_handler(u_char *user, const struct pcap_pkthdr *hdr, const u_
     timeval curTime;
     gettimeofday(&curTime, NULL);
     curTime = timeval_substract(curTime, cSocketRTScheduler::baseTime);
-    simtime_t t = curTime.tv_sec + curTime.tv_usec*1e-6;
+    simtime_t t = curTime.tv_sec + curTime.tv_usec * 1e-6;
     // TBD assert that it's somehow not smaller than previous event's time
     notificationMsg->setArrival(module, -1, t);
 
     simulation.msgQueue.insert(notificationMsg);
 }
-#endif
+
+#endif // ifdef HAVE_PCAP
 
 bool cSocketRTScheduler::receiveWithTimeout()
 {
@@ -217,8 +218,8 @@ bool cSocketRTScheduler::receiveWithTimeout()
 #ifdef LINUX
     int32 fd[FD_SETSIZE], maxfd;
     fd_set rdfds;
-#endif
-#endif
+#endif // ifdef LINUX
+#endif // ifdef HAVE_PCAP
 
     found = false;
     timeout.tv_sec = 0;
@@ -227,24 +228,21 @@ bool cSocketRTScheduler::receiveWithTimeout()
 #ifdef LINUX
     FD_ZERO(&rdfds);
     maxfd = -1;
-    for (uint16 i = 0; i < pds.size(); i++)
-    {
+    for (uint16 i = 0; i < pds.size(); i++) {
         fd[i] = pcap_get_selectable_fd(pds.at(i));
         if (fd[i] > maxfd)
             maxfd = fd[i];
         FD_SET(fd[i], &rdfds);
     }
-    if (select(maxfd + 1, &rdfds, NULL, NULL, &timeout) < 0)
-    {
+    if (select(maxfd + 1, &rdfds, NULL, NULL, &timeout) < 0) {
         return found;
     }
-#endif
-    for (uint16 i = 0; i < pds.size(); i++)
-    {
+#endif // ifdef LINUX
+    for (uint16 i = 0; i < pds.size(); i++) {
 #ifdef LINUX
         if (!(FD_ISSET(fd[i], &rdfds)))
             continue;
-#endif
+#endif // ifdef LINUX
         if ((n = pcap_dispatch(pds.at(i), 1, packet_handler, (uint8 *)&i)) < 0)
             throw cRuntimeError("cSocketRTScheduler::pcap_dispatch(): An error occured: %s", pcap_geterr(pds.at(i)));
         if (n > 0)
@@ -253,10 +251,10 @@ bool cSocketRTScheduler::receiveWithTimeout()
 #ifndef LINUX
     if (!found)
         select(0, NULL, NULL, NULL, &timeout);
-#endif
-#else
+#endif // ifndef LINUX
+#else // ifdef HAVE_PCAP
     select(0, NULL, NULL, NULL, &timeout);
-#endif
+#endif // ifdef HAVE_PCAP
     return found;
 }
 
@@ -266,8 +264,7 @@ int32 cSocketRTScheduler::receiveUntil(const timeval& targetTime)
     // in order to keep UI responsiveness by invoking ev.idle()
     timeval curTime;
     gettimeofday(&curTime, NULL);
-    while (timeval_greater(targetTime, curTime))
-    {
+    while (timeval_greater(targetTime, curTime)) {
         if (receiveWithTimeout())
             return 1;
         if (ev.idle())
@@ -282,38 +279,35 @@ cEvent *cSocketRTScheduler::guessNextEvent()
 {
     return sim->msgQueue.peekFirst();
 }
+
 cEvent *cSocketRTScheduler::takeNextEvent()
-#else
-cMessage *cSocketRTScheduler::getNextEvent()
-#define cEvent cMessage
-#endif
+#else // if OMNETPP_VERSION >= 0x0500
+cMessage * cSocketRTScheduler::getNextEvent()
+#define cEvent    cMessage
+#endif // if OMNETPP_VERSION >= 0x0500
 {
     timeval targetTime, curTime, diffTime;
 
     // calculate target time
     cEvent *event = sim->msgQueue.peekFirst();
-    if (!event)
-    {
+    if (!event) {
         targetTime.tv_sec = LONG_MAX;
         targetTime.tv_usec = 0;
     }
-    else
-    {
+    else {
         simtime_t eventSimtime = event->getArrivalTime();
         targetTime = timeval_add(baseTime, eventSimtime.dbl());
     }
 
     gettimeofday(&curTime, NULL);
-    if (timeval_greater(targetTime, curTime))
-    {
+    if (timeval_greater(targetTime, curTime)) {
         int32 status = receiveUntil(targetTime);
         if (status == -1)
             return NULL; // interrupted by user
         if (status == 1)
             event = sim->msgQueue.peekFirst(); // received something
     }
-    else
-    {
+    else {
         // we're behind -- customized versions of this class may
         // alert if we're too much behind, whatever that means
         diffTime = timeval_substract(curTime, targetTime);
@@ -330,22 +324,20 @@ void cSocketRTScheduler::putBackEvent(cEvent *event)
 {
     sim->msgQueue.putBackFirst(event);
 }
-#endif
+
+#endif // if OMNETPP_VERSION >= 0x0500
 
 void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr *to, socklen_t addrlen)
 {
     if (fd == INVALID_SOCKET)
         throw cRuntimeError("cSocketRTScheduler::sendBytes(): no raw socket.");
 
-    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);  //note: no ssize_t on MSVC
+    int sent = sendto(fd, (char *)buf, numBytes, 0, to, addrlen);    //note: no ssize_t on MSVC
 
     if ((size_t)sent == numBytes)
         EV << "Sent an IP packet with length of " << sent << " bytes.\n";
     else
         EV << "Sending of an IP packet FAILED! (sendto returned " << sent << " (" << strerror(errno) << ") instead of " << numBytes << ").\n";
 }
-
-
-}
-
+} // namespace inet
 

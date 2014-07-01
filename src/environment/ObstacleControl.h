@@ -17,7 +17,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_OBSTACLECONTROL_H
 #define __INET_OBSTACLECONTROL_H
 
@@ -31,7 +30,6 @@
 #include "AnnotationManager.h"
 
 namespace inet {
-
 /**
  * ObstacleControl models obstacles that block radio transmissions.
  *
@@ -41,79 +39,81 @@ namespace inet {
  */
 class INET_API ObstacleControl : public cSimpleModule
 {
-    public:
-        ObstacleControl();
-        virtual ~ObstacleControl();
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg);
-        void handleSelfMsg(cMessage *msg);
+  public:
+    ObstacleControl();
+    virtual ~ObstacleControl();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
+    void handleSelfMsg(cMessage *msg);
 
-        void addFromXml(cXMLElement* xml);
-        void add(Obstacle obstacle);
-        void erase(const Obstacle* obstacle);
+    void addFromXml(cXMLElement *xml);
+    void add(Obstacle obstacle);
+    void erase(const Obstacle *obstacle);
 
-        /**
-         * calculate additional attenuation by obstacles, return signal strength
-         */
-        double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const;
+    /**
+     * calculate additional attenuation by obstacles, return signal strength
+     */
+    double calculateReceivedPower(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) const;
 
-    protected:
-        struct CacheKey {
-            const double pSend;
-            const double carrierFrequency;
-            const Coord senderPos;
-            const double senderAngle;
-            const Coord receiverPos;
-            const double receiverAngle;
+  protected:
+    struct CacheKey
+    {
+        const double pSend;
+        const double carrierFrequency;
+        const Coord senderPos;
+        const double senderAngle;
+        const Coord receiverPos;
+        const double receiverAngle;
 
-            CacheKey(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) :
-                pSend(pSend),
-                carrierFrequency(carrierFrequency),
-                senderPos(senderPos),
-                senderAngle(senderAngle),
-                receiverPos(receiverPos),
-                receiverAngle(receiverAngle) {
-            }
-            bool operator<(const CacheKey& o) const {
-                if (senderPos.x < o.senderPos.x) return true;
-                if (senderPos.x > o.senderPos.x) return false;
-                if (senderPos.y < o.senderPos.y) return true;
-                if (senderPos.y > o.senderPos.y) return false;
-                if (receiverPos.x < o.receiverPos.x) return true;
-                if (receiverPos.x > o.receiverPos.x) return false;
-                if (receiverPos.y < o.receiverPos.y) return true;
-                if (receiverPos.y > o.receiverPos.y) return false;
-                if (pSend < o.pSend) return true;
-                if (pSend > o.pSend) return false;
-                if (senderAngle < o.senderAngle) return true;
-                if (senderAngle > o.senderAngle) return false;
-                if (receiverAngle < o.receiverAngle) return true;
-                if (receiverAngle > o.receiverAngle) return false;
-                if (carrierFrequency < o.carrierFrequency) return true;
-                if (carrierFrequency > o.carrierFrequency) return false;
-                return false;
-            }
-        };
+        CacheKey(double pSend, double carrierFrequency, const Coord& senderPos, double senderAngle, const Coord& receiverPos, double receiverAngle) :
+            pSend(pSend),
+            carrierFrequency(carrierFrequency),
+            senderPos(senderPos),
+            senderAngle(senderAngle),
+            receiverPos(receiverPos),
+            receiverAngle(receiverAngle)
+        {
+        }
 
-        enum { GRIDCELL_SIZE = 1024 };
+        bool operator<(const CacheKey& o) const
+        {
+            if (senderPos.x < o.senderPos.x) return true;
+            if (senderPos.x > o.senderPos.x) return false;
+            if (senderPos.y < o.senderPos.y) return true;
+            if (senderPos.y > o.senderPos.y) return false;
+            if (receiverPos.x < o.receiverPos.x) return true;
+            if (receiverPos.x > o.receiverPos.x) return false;
+            if (receiverPos.y < o.receiverPos.y) return true;
+            if (receiverPos.y > o.receiverPos.y) return false;
+            if (pSend < o.pSend) return true;
+            if (pSend > o.pSend) return false;
+            if (senderAngle < o.senderAngle) return true;
+            if (senderAngle > o.senderAngle) return false;
+            if (receiverAngle < o.receiverAngle) return true;
+            if (receiverAngle > o.receiverAngle) return false;
+            if (carrierFrequency < o.carrierFrequency) return true;
+            if (carrierFrequency > o.carrierFrequency) return false;
+            return false;
+        }
+    };
 
-        typedef std::list<Obstacle*> ObstacleGridCell;
-        typedef std::vector<ObstacleGridCell> ObstacleGridRow;
-        typedef std::vector<ObstacleGridRow> Obstacles;
-        typedef std::map<CacheKey, double> CacheEntries;
+    enum { GRIDCELL_SIZE = 1024 };
 
-        cXMLElement* obstaclesXml; /**< obstacles to add at startup */
+    typedef std::list<Obstacle *> ObstacleGridCell;
+    typedef std::vector<ObstacleGridCell> ObstacleGridRow;
+    typedef std::vector<ObstacleGridRow> Obstacles;
+    typedef std::map<CacheKey, double> CacheEntries;
 
-        Obstacles obstacles;
-        AnnotationManager* annotations;
-        AnnotationManager::Group* annotationGroup;
-        mutable CacheEntries cacheEntries;
+    cXMLElement *obstaclesXml;    /**< obstacles to add at startup */
+
+    Obstacles obstacles;
+    AnnotationManager *annotations;
+    AnnotationManager::Group *annotationGroup;
+    mutable CacheEntries cacheEntries;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_OBSTACLECONTROL_H
 

@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /*
     This is an alternative FSM implementation.
 
@@ -96,59 +95,57 @@ namespace inet {
             }
         }
     }
-*/
+ */
 
-#define FSMA_Switch(fsm)                                               \
-    bool ___is_event = true;                                           \
-    bool ___exit = false;                                              \
-    bool ___condition_seen = false;                                    \
-    int ___c = 0;                                                      \
-    cFSM *___fsm = &fsm;                                               \
-    EV_DEBUG << "processing event in state machine " << (fsm).getName() << endl;  \
+#define FSMA_Switch(fsm) \
+    bool ___is_event = true; \
+    bool ___exit = false; \
+    bool ___condition_seen = false; \
+    int ___c = 0; \
+    cFSM *___fsm = &fsm; \
+    EV_DEBUG << "processing event in state machine " << (fsm).getName() << endl; \
     while (!___exit && (___c++ < FSM_MAXT || (throw cRuntimeError(E_INFLOOP, (fsm).getStateName()), 0)))
 
-#define FSMA_Print(exiting)                                              \
-    (EV_DEBUG << "FSM " << ___fsm->getName()                             \
+#define FSMA_Print(exiting) \
+    (EV_DEBUG << "FSM " << ___fsm->getName() \
               << ((exiting) ? ": leaving state  " : ": entering state ") \
               << ___fsm->getStateName() << endl)
 
-#define FSMA_State(s)  if (___condition_seen = false, ___exit = true, ___fsm->getState() == (s))
+#define FSMA_State(s)    if (___condition_seen = false, ___exit = true, ___fsm->getState() == (s))
 
-#define FSMA_Event_Transition(transition, condition, target, action)                    \
-    ___condition_seen = true; if ((condition) && ___is_event)                             \
-    {                                                                                   \
-        ___is_event = false;                                                            \
+#define FSMA_Event_Transition(transition, condition, target, action) \
+    ___condition_seen = true; if ((condition) && ___is_event) \
+    { \
+        ___is_event = false; \
         FSMA_Transition(transition, (condition), target, action)
 
-#define FSMA_No_Event_Transition(transition, condition, target, action)                 \
-    ___condition_seen = true; if ((condition) && !___is_event)                            \
-    {                                                                                   \
+#define FSMA_No_Event_Transition(transition, condition, target, action) \
+    ___condition_seen = true; if ((condition) && !___is_event) \
+    { \
         FSMA_Transition(transition, (condition), target, action)
 
-#define FSMA_Transition(transition, condition, target, action)                          \
-        FSMA_Print(true);                                                               \
-        EV_DEBUG << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
-        action;                                                                         \
-        ___fsm->setState(target, #target);                                              \
-        FSMA_Print(false);                                                              \
-        ___exit = false;                                                                \
-        continue;                                                                       \
+#define FSMA_Transition(transition, condition, target, action) \
+    FSMA_Print(true); \
+    EV_DEBUG << "firing " << #transition << " transition for " << ___fsm->getName() << endl; \
+    action; \
+    ___fsm->setState(target, #target); \
+    FSMA_Print(false); \
+    ___exit = false; \
+    continue; \
     }
 
-#define FSMA_Enter(action)                                                              \
-    if (!___is_event)                                                                   \
-    {                                                                                   \
-        if (___condition_seen)                                                          \
-            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code");   \
-        action;                                                                         \
+#define FSMA_Enter(action) \
+    if (!___is_event) \
+    { \
+        if (___condition_seen) \
+            throw cRuntimeError("FSMA_Enter() must precede all FSMA_*_Transition()'s in the code"); \
+        action; \
     }
 
 #if OMNETPP_VERSION < 0x500
-#define E_INFLOOP eINFLOOP
-#endif
+#define E_INFLOOP    eINFLOOP
+#endif // if OMNETPP_VERSION < 0x500
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_FSMA_H
 

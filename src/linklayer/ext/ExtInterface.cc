@@ -34,20 +34,15 @@
 #include "opp_utils.h"
 
 namespace inet {
-
-
 Define_Module(ExtInterface);
-
 
 void ExtInterface::initialize(int stage)
 {
     MACBase::initialize(stage);
 
     // subscribe at scheduler for external messages
-    if (stage == INITSTAGE_LOCAL)
-    {
-        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL)
-        {
+    if (stage == INITSTAGE_LOCAL) {
+        if (dynamic_cast<cSocketRTScheduler *>(simulation.getScheduler()) != NULL) {
             rtScheduler = check_and_cast<cSocketRTScheduler *>(simulation.getScheduler());
             //device = ev.config()->getAsString("Capture", "device", "lo0");
             device = par("device");
@@ -56,8 +51,7 @@ void ExtInterface::initialize(int stage)
             rtScheduler->setInterfaceModule(this, device, filter);
             connected = true;
         }
-        else
-        {
+        else {
             // this simulation run works without external interface..
             connected = false;
         }
@@ -66,15 +60,12 @@ void ExtInterface::initialize(int stage)
         WATCH(numRcvd);
         WATCH(numDropped);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         registerInterface();
     }
-    else if (stage == INITSTAGE_LAST)
-    {
+    else if (stage == INITSTAGE_LAST) {
         // if not connected, make it gray
-        if (ev.isGUI() && !connected)
-        {
+        if (ev.isGUI() && !connected) {
             getDisplayString().setTagArg("i", 1, "#707070");
             getDisplayString().setTagArg("i", 2, "100");
         }
@@ -101,20 +92,18 @@ InterfaceEntry *ExtInterface::createInterfaceEntry()
 
 void ExtInterface::handleMessage(cMessage *msg)
 {
-    if (!isOperational)
-    {
+    if (!isOperational) {
         handleMessageWhenDown(msg);
         return;
     }
 
-    if (dynamic_cast<ExtFrame *>(msg) != NULL)
-    {
+    if (dynamic_cast<ExtFrame *>(msg) != NULL) {
         // incoming real packet from wire (captured by pcap)
         uint32 packetLength;
         ExtFrame *rawPacket = check_and_cast<ExtFrame *>(msg);
 
         packetLength = rawPacket->getDataArraySize();
-        for (uint32 i=0; i < packetLength; i++)
+        for (uint32 i = 0; i < packetLength; i++)
             buffer[i] = rawPacket->getData(i);
 
         IPv4Datagram *ipPacket = new IPv4Datagram("ip-from-wire");
@@ -129,8 +118,7 @@ void ExtInterface::handleMessage(cMessage *msg)
         send(ipPacket, "upperLayerOut");
         numRcvd++;
     }
-    else
-    {
+    else {
         memset(buffer, 0, sizeof(buffer));
         IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
 
@@ -145,13 +133,12 @@ void ExtInterface::handleMessage(cMessage *msg)
             return;
         }
 
-        if (connected)
-        {
+        if (connected) {
             struct sockaddr_in addr;
             addr.sin_family = AF_INET;
 #if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_len = sizeof(struct sockaddr_in);
-#endif
+#endif // if !defined(linux) && !defined(__linux) && !defined(_WIN32)
             addr.sin_port = 0;
             addr.sin_addr.s_addr = htonl(ipPacket->getDestAddress().getInt());
             int32 packetLength = IPv4Serializer().serialize(ipPacket, buffer, sizeof(buffer));
@@ -162,11 +149,10 @@ void ExtInterface::handleMessage(cMessage *msg)
                << " and length of "
                << ipPacket->getByteLength()
                << " bytes to link layer.\n";
-            rtScheduler->sendBytes(buffer, packetLength, (struct sockaddr *) &addr, sizeof(struct sockaddr_in));
+            rtScheduler->sendBytes(buffer, packetLength, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
             numSent++;
         }
-        else
-        {
+        else {
             EV << "Interface is not connected, dropping packet " << msg << endl;
             numDropped++;
         }
@@ -198,8 +184,7 @@ void ExtInterface::updateDisplayString()
     const char *str;
     char buf[80];
 
-    if (connected)
-    {
+    if (connected) {
         sprintf(buf, "pcap device: %s\nrcv:%d snt:%d", device, numRcvd, numSent);
         str = buf;
     }
@@ -210,8 +195,8 @@ void ExtInterface::updateDisplayString()
 
 void ExtInterface::finish()
 {
-    std::cout << getFullPath() << ": " << numSent << " packets sent, " <<
-            numRcvd << " packets received, " << numDropped <<" packets dropped.\n";
+    std::cout << getFullPath() << ": " << numSent << " packets sent, "
+              << numRcvd << " packets received, " << numDropped << " packets dropped.\n";
 }
 
 void ExtInterface::flushQueue()
@@ -223,9 +208,5 @@ void ExtInterface::clearQueue()
 {
     // does not have a queue, do nothing
 }
-
-
-
-}
-
+} // namespace inet
 

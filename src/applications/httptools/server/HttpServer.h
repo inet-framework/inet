@@ -22,7 +22,6 @@
 #include "HttpServerBase.h"
 
 namespace inet {
-
 /**
  * HttpServerDirect module.
  *
@@ -36,28 +35,25 @@ namespace inet {
  */
 class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInterface
 {
-    protected:
-        TCPSocket listensocket;
-        TCPSocketMap sockCollection;
-        unsigned long numBroken;
-        unsigned long socketsOpened;
+  protected:
+    TCPSocket listensocket;
+    TCPSocketMap sockCollection;
+    unsigned long numBroken;
+    unsigned long socketsOpened;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
 
-        virtual void socketEstablished(int connId, void *yourPtr);
-        virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
-        virtual void socketPeerClosed(int connId, void *yourPtr);
-        virtual void socketClosed(int connId, void *yourPtr);
-        virtual void socketFailure(int connId, void *yourPtr, int code);
+    virtual void socketEstablished(int connId, void *yourPtr);
+    virtual void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);
+    virtual void socketPeerClosed(int connId, void *yourPtr);
+    virtual void socketClosed(int connId, void *yourPtr);
+    virtual void socketFailure(int connId, void *yourPtr, int code);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_HTTPSERVER_H
 

@@ -22,55 +22,50 @@
 #include "IModulation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API FlatTransmitterBase : public TransmitterBase
 {
-    protected:
-        const IModulation *modulation;
-        int headerBitLength;
-        Hz carrierFrequency;
-        Hz bandwidth;
-        bps bitrate;
-        W power;
+  protected:
+    const IModulation *modulation;
+    int headerBitLength;
+    Hz carrierFrequency;
+    Hz bandwidth;
+    bps bitrate;
+    W power;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        FlatTransmitterBase() :
-            modulation(NULL),
-            headerBitLength(-1),
-            carrierFrequency(Hz(sNaN)),
-            bandwidth(Hz(sNaN)),
-            bitrate(sNaN),
-            power(W(sNaN))
-        {}
+  public:
+    FlatTransmitterBase() :
+        modulation(NULL),
+        headerBitLength(-1),
+        carrierFrequency(Hz(sNaN)),
+        bandwidth(Hz(sNaN)),
+        bitrate(sNaN),
+        power(W(sNaN))
+    {}
 
-        virtual W getMaxPower() const { return power; }
-        virtual const IModulation *getModulation() const { return modulation; }
+    virtual W getMaxPower() const { return power; }
+    virtual const IModulation *getModulation() const { return modulation; }
 
-        virtual int getHeaderBitLength() const { return headerBitLength; }
-        virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }
+    virtual int getHeaderBitLength() const { return headerBitLength; }
+    virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }
 
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }
 
-        virtual Hz getBandwidth() const { return bandwidth; }
-        virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
+    virtual Hz getBandwidth() const { return bandwidth; }
+    virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
 
-        virtual bps getBitrate() const { return bitrate; }
-        virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
+    virtual bps getBitrate() const { return bitrate; }
+    virtual void setBitrate(bps bitrate) { this->bitrate = bitrate; }
 
-        virtual W getPower() const { return power; }
-        virtual void setPower(W power) { this->power = power; }
+    virtual W getPower() const { return power; }
+    virtual void setPower(W power) { this->power = power; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLATTRANSMITTERBASE_H
 
-}
-
-
-#endif

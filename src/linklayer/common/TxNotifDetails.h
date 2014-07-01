@@ -15,18 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TXNOTIFDETAILS_H
 #define __INET_TXNOTIFDETAILS_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
-
 // Forward declarations:
 class InterfaceEntry;
-
 
 /**
  * Details class for the NF_PP_TX_BEGIN, NF_PP_TX_END and NF_PP_RX_END
@@ -40,16 +36,14 @@ class TxNotifDetails : public cObject
     InterfaceEntry *ie;
 
   public:
-    TxNotifDetails() {msg = NULL; ie = NULL;}
+    TxNotifDetails() { msg = NULL; ie = NULL; }
 
-    cPacket *getPacket() const {return msg;}
-    InterfaceEntry *getInterfaceEntry() const {return ie;}
-    void setPacket(cPacket *m) {msg = m;}
-    void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
+    cPacket *getPacket() const { return msg; }
+    InterfaceEntry *getInterfaceEntry() const { return ie; }
+    void setPacket(cPacket *m) { msg = m; }
+    void setInterfaceEntry(InterfaceEntry *e) { ie = e; }
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TXNOTIFDETAILS_H
 

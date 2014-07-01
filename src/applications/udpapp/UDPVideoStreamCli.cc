@@ -23,8 +23,6 @@
 #include "AddressResolver.h"
 
 namespace inet {
-
-
 Define_Module(UDPVideoStreamCli);
 
 simsignal_t UDPVideoStreamCli::rcvdPkSignal = registerSignal("rcvdPk");
@@ -33,8 +31,7 @@ void UDPVideoStreamCli::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         selfMsg = new cMessage("UDPVideoStreamStart");
     }
 }
@@ -44,24 +41,20 @@ void UDPVideoStreamCli::finish()
     ApplicationBase::finish();
 }
 
-void UDPVideoStreamCli::handleMessageWhenUp(cMessage* msg)
+void UDPVideoStreamCli::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         requestStream();
     }
-    else if (msg->getKind() == UDP_I_DATA)
-    {
+    else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
         receiveStream(PK(msg));
     }
-    else if (msg->getKind() == UDP_I_ERROR)
-    {
+    else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 }
@@ -73,8 +66,7 @@ void UDPVideoStreamCli::requestStream()
     const char *address = par("serverAddress");
     Address svrAddr = AddressResolver().resolve(address);
 
-    if (svrAddr.isUnspecified())
-    {
+    if (svrAddr.isUnspecified()) {
         EV_ERROR << "Server address is unspecified, skip sending video stream request\n";
         return;
     }
@@ -114,9 +106,5 @@ void UDPVideoStreamCli::handleNodeCrash()
 {
     cancelEvent(selfMsg);
 }
-
-
-
-}
-
+} // namespace inet
 

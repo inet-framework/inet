@@ -18,8 +18,7 @@
 #include "LSA.h"
 
 namespace inet {
-
-bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
+bool OSPF::NetworkLSA::update(const OSPFNetworkLSA *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -27,12 +26,13 @@ bool OSPF::NetworkLSA::update(const OSPFNetworkLSA* lsa)
     if (different) {
         clearNextHops();
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
-bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA* networkLSA) const
+bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA *networkLSA) const
 {
     const OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
@@ -56,10 +56,7 @@ bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA* networkLSA) const
         }
     }
 
-    return (differentHeader || differentBody);
+    return differentHeader || differentBody;
 }
-
-
-}
-
+} // namespace inet
 

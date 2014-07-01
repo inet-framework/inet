@@ -1,26 +1,24 @@
 /***************************************************************************
- * author:      Andreas Kuntz
- *
- * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
- *
- * author:      Alfonso Ariza
- *              Malaga university
- *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
- ***************************************************************************/
+* author:      Andreas Kuntz
+*
+* copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+*
+* author:      Alfonso Ariza
+*              Malaga university
+*
+*              This program is free software; you can redistribute it
+*              and/or modify it under the terms of the GNU General Public
+*              License as published by the Free Software Foundation; either
+*              version 2 of the License, or (at your option) any later
+*              version.
+*              For further information see file COPYING
+*              in the top level directory
+***************************************************************************/
 
 #include "LogNormalShadowing.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(LogNormalShadowing);
 
 LogNormalShadowing::LogNormalShadowing() :
@@ -31,13 +29,12 @@ LogNormalShadowing::LogNormalShadowing() :
 void LogNormalShadowing::initialize(int stage)
 {
     FreeSpacePathLoss::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         sigma = par("sigma");
     }
 }
 
-void LogNormalShadowing::printToStream(std::ostream &stream) const
+void LogNormalShadowing::printToStream(std::ostream& stream) const
 {
     stream << "log normal shadowing, "
            << "alpha = " << alpha << ", "
@@ -55,10 +52,6 @@ double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m
     double PL_db = PL_d0_db + 10 * alpha * log10(unit(distance / d0).get()) + normal(0.0, sigma);
     return FWMath::dB2fraction(-PL_db);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

@@ -21,23 +21,18 @@
 #include "IPrintableObject.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents a meaningless radio signal.
  */
 class INET_API INoise : public IPrintableObject
 {
-    public:
-        virtual const simtime_t getStartTime() const = 0;
-        virtual const simtime_t getEndTime() const = 0;
+  public:
+    virtual const simtime_t getStartTime() const = 0;
+    virtual const simtime_t getEndTime() const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_INOISE_H
 
-}
-
-
-#endif

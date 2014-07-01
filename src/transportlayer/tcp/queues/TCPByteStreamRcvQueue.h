@@ -29,7 +29,6 @@
 #include "ByteArray.h"
 
 namespace inet {
-
 /**
  * TCP send queue that stores actual bytes.
  *
@@ -46,20 +45,20 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
       public:
         Region(uint32 _begin, uint32 _end) : TCPVirtualDataRcvQueue::Region(_begin, _end) {};
         Region(uint32 _begin, uint32 _end, ByteArray _data)
-                : TCPVirtualDataRcvQueue::Region(_begin, _end), data(_data) {};
+            : TCPVirtualDataRcvQueue::Region(_begin, _end), data(_data) {};
 
         virtual ~Region() {};
 
         /// Merge other to self
-        virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
+        virtual bool merge(const TCPVirtualDataRcvQueue::Region *other);
 
         /// Copy self to msg
-        virtual void copyTo(cPacket* msg) const;
+        virtual void copyTo(cPacket *msg) const;
 
         /**
          * Returns an allocated new Region object with filled with begin..seq and set self to seq..end
          */
-        virtual TCPByteStreamRcvQueue::Region* split(uint32 seq);
+        virtual TCPByteStreamRcvQueue::Region *split(uint32 seq);
     };
 
   public:
@@ -78,16 +77,15 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual std::string info() const;
 
-    cPacket* extractBytesUpTo(uint32 seq);
+    cPacket *extractBytesUpTo(uint32 seq);
 
     /**
      * Create a new Region from tcpseg.
      * Called from insertBytesFromSegment()
      */
-    virtual TCPVirtualDataRcvQueue::Region* createRegionFromSegment(TCPSegment *tcpseg);
+    virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPBYTESTREAMRCVQUEUE_H
 
-
-#endif

@@ -20,25 +20,21 @@
 #include "NetworkProtocolCommand_m.h"
 
 namespace inet {
-
 void IPSocket::registerProtocol(int protocol)
 {
     if (gateToIP && gateToIP->isConnected()) {
-        RegisterTransportProtocolCommand * message = new RegisterTransportProtocolCommand();
+        RegisterTransportProtocolCommand *message = new RegisterTransportProtocolCommand();
         message->setProtocol(protocol);
         sendToIP(message);
     }
 }
 
-void IPSocket::sendToIP(cMessage * message)
+void IPSocket::sendToIP(cMessage *message)
 {
     if (!gateToIP)
         throw cRuntimeError("IPSocket: setOutputGate() must be invoked before socket can be used");
 
     check_and_cast<cSimpleModule *>(gateToIP->getOwnerModule())->send(message, gateToIP);
 }
-
-
-}
-
+} // namespace inet
 

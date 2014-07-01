@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
 #define __INET_PROBABILISTICBROADCASTDATAGRAM_H
 
@@ -23,7 +22,6 @@
 #include "ProbabilisticBroadcastDatagram_m.h"
 
 namespace inet {
-
 /**
  * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastDatagram.msg file
  * (and the documentation generated from it).
@@ -33,19 +31,18 @@ class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDat
   public:
     ProbabilisticBroadcastDatagram(const char *name = NULL, int kind = 0) : ProbabilisticBroadcastDatagram_Base(name, kind) {}
     ProbabilisticBroadcastDatagram(const ProbabilisticBroadcastDatagram& other) : ProbabilisticBroadcastDatagram_Base(other) {}
-    ProbabilisticBroadcastDatagram& operator=(const ProbabilisticBroadcastDatagram& other) {ProbabilisticBroadcastDatagram_Base::operator=(other); return *this;}
+    ProbabilisticBroadcastDatagram& operator=(const ProbabilisticBroadcastDatagram& other) { ProbabilisticBroadcastDatagram_Base::operator=(other); return *this; }
 
-    virtual ProbabilisticBroadcastDatagram *dup() const {return new ProbabilisticBroadcastDatagram(*this);}
+    virtual ProbabilisticBroadcastDatagram *dup() const { return new ProbabilisticBroadcastDatagram(*this); }
 
     virtual Address getSourceAddress() const { return Address(getSrcAddr()); }
-    virtual void setSourceAddress(const Address & address) { setSrcAddr(address.toModuleId()); }
+    virtual void setSourceAddress(const Address& address) { setSrcAddr(address.toModuleId()); }
     virtual Address getDestinationAddress() const { return Address(getDestAddr()); }
-    virtual void setDestinationAddress(const Address & address) { setDestAddr(address.toModuleId()); }
+    virtual void setDestinationAddress(const Address& address) { setDestAddr(address.toModuleId()); }
     virtual int getTransportProtocol() const { return ProbabilisticBroadcastDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
 
-
-#endif

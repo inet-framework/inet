@@ -19,8 +19,6 @@
 #include "SCTPSendStream.h"
 
 namespace inet {
-
-
 SCTPSendStream::SCTPSendStream(const uint16 id)
 {
     streamId = id;
@@ -40,19 +38,19 @@ SCTPSendStream::~SCTPSendStream()
 
 void SCTPSendStream::deleteQueue()
 {
-    SCTPDataMsg* datMsg;
-    SCTPSimpleMessage* smsg;
+    SCTPDataMsg *datMsg;
+    SCTPSimpleMessage *smsg;
     int32 count = streamQ->length();
     while (!streamQ->empty()) {
-        datMsg = check_and_cast<SCTPDataMsg*>(streamQ->pop());
-        smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
+        datMsg = check_and_cast<SCTPDataMsg *>(streamQ->pop());
+        smsg = check_and_cast<SCTPSimpleMessage *>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
         count--;
     }
     while (!uStreamQ->empty()) {
-        datMsg = check_and_cast<SCTPDataMsg*>(uStreamQ->pop());
-        smsg = check_and_cast<SCTPSimpleMessage*>(datMsg->decapsulate());
+        datMsg = check_and_cast<SCTPDataMsg *>(uStreamQ->pop());
+        smsg = check_and_cast<SCTPSimpleMessage *>(datMsg->decapsulate());
         delete smsg;
         delete datMsg;
     }
@@ -60,9 +58,5 @@ void SCTPSendStream::deleteQueue()
     delete uStreamQ;
     totalLength = 0;
 }
-
-
-
-}
-
+} // namespace inet
 

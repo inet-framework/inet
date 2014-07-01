@@ -21,7 +21,6 @@
 #include "PowerSourceBase.h"
 
 namespace inet {
-
 /**
  * This class implements an ideal power source.
  *
@@ -34,8 +33,7 @@ class INET_API IdealPowerSource : public PowerSourceBase
 
     virtual double getResidualCapacity() { return INFINITY; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALPOWERSOURCE_H
 
-
-#endif

@@ -23,10 +23,7 @@
 #include "IReception.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface models how a radio signal attenuates during propagation. It
  * includes various effects such as free-space path loss, shadowing, refraction,
@@ -34,18 +31,16 @@ namespace physicallayer
  */
 class INET_API IAttenuation : public IPrintableObject
 {
-    public:
-        /**
-         * Returns the reception for the provided transmission at the receiver.
-         * The result incorporates all modeled attenuation including the way the
-         * receiver listens on the radio channel. This function never returns NULL.
-         */
-        virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
+  public:
+    /**
+     * Returns the reception for the provided transmission at the receiver.
+     * The result incorporates all modeled attenuation including the way the
+     * receiver listens on the radio channel. This function never returns NULL.
+     */
+    virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IATTENUATION_H
 
-}
-
-
-#endif

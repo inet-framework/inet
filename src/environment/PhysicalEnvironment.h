@@ -21,40 +21,39 @@
 #include "PhysicalObject.h"
 
 namespace inet {
-
 /**
  * This class represents the physical environment specifying certain physical properties.
  */
 // TODO: add loading objects from XML file
 class INET_API PhysicalEnvironment : public cModule
 {
-    protected:
-        K temperature;
-        Pa pressure;
-        percent relativeHumidity;
-        Coord spaceMin;
-        Coord spaceMax;
-        const char *viewAngle;
-        std::vector<PhysicalObject *> objects;
+  protected:
+    K temperature;
+    Pa pressure;
+    percent relativeHumidity;
+    Coord spaceMin;
+    Coord spaceMax;
+    const char *viewAngle;
+    std::vector<PhysicalObject *> objects;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
 
-        virtual void parseObjects(cXMLElement* xml);
-        virtual void updateCanvas();
+    virtual void parseObjects(cXMLElement *xml);
+    virtual void updateCanvas();
 
-    public:
-        PhysicalEnvironment();
+  public:
+    PhysicalEnvironment();
 
-        virtual K getTemperature() const { return temperature; }
-        virtual Pa getPressure() const { return pressure; }
-        virtual percent getRelativeHumidity() const { return relativeHumidity; }
-        virtual const Coord getSpaceMin() { return spaceMin; }
-        virtual const Coord getSpaceMax() { return spaceMax; }
-        virtual const std::vector<PhysicalObject *> &getObjects() { return objects; }
+    virtual K getTemperature() const { return temperature; }
+    virtual Pa getPressure() const { return pressure; }
+    virtual percent getRelativeHumidity() const { return relativeHumidity; }
+    virtual const Coord getSpaceMin() { return spaceMin; }
+    virtual const Coord getSpaceMax() { return spaceMax; }
+    virtual const std::vector<PhysicalObject *>& getObjects() { return objects; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PHYSICALENVIRONMENT_H
 
-#endif

@@ -23,31 +23,31 @@
 #include "IQueueAccess.h"
 
 namespace inet {
-
 /**
  * Base class for algorithmic droppers (RED, DropTail, etc.).
  */
 class INET_API AlgorithmicDropperBase : public cSimpleModule, public IQueueAccess
 {
-    protected:
-      int numGates;
-      std::vector<IQueueAccess*> outQueues; // vector of out queues indexed by gate index (may contain duplicate elements)
-      std::set<IQueueAccess*> outQueueSet; // set of out queues; comparing pointers is ok
-    public:
-      AlgorithmicDropperBase() : numGates(0) {};
-      virtual ~AlgorithmicDropperBase() {};
-    protected:
-      virtual void initialize();
-      virtual void handleMessage(cMessage *msg);
-      virtual bool shouldDrop(cPacket *packet) = 0;
-      virtual void dropPacket(cPacket *packet);
-      virtual void sendOut(cPacket *packet);
+  protected:
+    int numGates;
+    std::vector<IQueueAccess *> outQueues;    // vector of out queues indexed by gate index (may contain duplicate elements)
+    std::set<IQueueAccess *> outQueueSet;    // set of out queues; comparing pointers is ok
 
-      virtual int getLength() const;
-      virtual int getByteLength() const;
+  public:
+    AlgorithmicDropperBase() : numGates(0) {};
+    virtual ~AlgorithmicDropperBase() {};
+
+  protected:
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual bool shouldDrop(cPacket *packet) = 0;
+    virtual void dropPacket(cPacket *packet);
+    virtual void sendOut(cPacket *packet);
+
+    virtual int getLength() const;
+    virtual int getByteLength() const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ALGORITHMICDROPPERBASE_H
 
-
-#endif

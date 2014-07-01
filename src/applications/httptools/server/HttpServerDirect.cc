@@ -18,15 +18,12 @@
 #include "HttpServerDirect.h"
 
 namespace inet {
-
 Define_Module(HttpServerDirect);
-
 
 void HttpServerDirect::initialize(int stage)
 {
     HttpServerBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         EV_DEBUG << "Initializing direct server component\n";
 
         // Set the link speed
@@ -42,31 +39,25 @@ void HttpServerDirect::finish()
 void HttpServerDirect::handleMessage(cMessage *msg)
 {
     EV_DEBUG << "Handling received message " << msg->getName() << endl;
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         // Self messages are not used at the present
     }
-    else
-    {
-        HttpNodeBase *senderModule = dynamic_cast<HttpNodeBase*>(msg->getSenderModule());
-        if (senderModule == NULL)
-        {
+    else {
+        HttpNodeBase *senderModule = dynamic_cast<HttpNodeBase *>(msg->getSenderModule());
+        if (senderModule == NULL) {
             EV_ERROR << "Unspecified sender module in received message " << msg->getName() << endl;
             delete msg;
         }
 
         EV_DEBUG << "Sender is " << senderModule->getFullName()
                  << " in host " << senderModule->getParentModule()->getFullName() << endl;
-        cPacket* reply = handleReceivedMessage(msg);
+        cPacket *reply = handleReceivedMessage(msg);
         // Echo back to the requester
-        if (reply!=NULL)
+        if (reply != NULL)
             sendDirectToModule(senderModule, reply, 0.0, rdReplyDelay);
         delete msg;
     }
     updateDisplay();
 }
-
-
-}
-
+} // namespace inet
 

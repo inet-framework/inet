@@ -24,9 +24,6 @@
 #include "SCTPQueue.h"
 
 namespace inet {
-
-
-
 /**
  * Abstract base class for SCTP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
@@ -36,7 +33,7 @@ namespace inet {
 class INET_API SCTPAlgorithm : public cObject
 {
   protected:
-    SCTPAssociation *assoc; // we belong to this association
+    SCTPAssociation *assoc;    // we belong to this association
     SCTPQueue *transmissionQ;
     SCTPQueue *retransmissionQ;
 
@@ -51,7 +48,8 @@ class INET_API SCTPAlgorithm : public cObject
      */
     virtual ~SCTPAlgorithm() {}
 
-    inline void setAssociation(SCTPAssociation* _assoc)  {
+    inline void setAssociation(SCTPAssociation *_assoc)
+    {
         assoc = _assoc;
         transmissionQ = assoc->getTransmissionQueue();
         retransmissionQ = assoc->getRetransmissionQueue();
@@ -67,7 +65,7 @@ class INET_API SCTPAlgorithm : public cObject
 
     virtual void processTimer(cMessage *timer, SCTPEventCode& event) = 0;
 
-    virtual void sendCommandInvoked(SCTPPathVariables* path) = 0;
+    virtual void sendCommandInvoked(SCTPPathVariables *path) = 0;
 
     virtual void receivedDataAck(uint32 firstSeqAcked) = 0;
 
@@ -78,12 +76,8 @@ class INET_API SCTPAlgorithm : public cObject
     virtual void sackSent() = 0;
 
     virtual void dataSent(uint32 fromseq) = 0;
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_SCTPALGORITHM_H
 

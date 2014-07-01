@@ -39,7 +39,6 @@
  *
  **************************************************************************/
 
-
 #ifndef __INET_MOBANCOORDINATOR_H
 #define __INET_MOBANCOORDINATOR_H
 
@@ -54,12 +53,10 @@
 #include "PostureTransition.h"
 
 namespace inet {
-
-
 class MoBANLocal;
 
 /**
- *\page mobancpp MoBAN C++ reference
+   *\page mobancpp MoBAN C++ reference
  * This is the C++ implementation reference for MoBAN, which is a configurable mobility model for wireless Body Area Networks. MoBANCoordinator and MoBANLocal
  * classes describe the behavior of the Coordinator module and local mobility module of the MoBAN, respectively. There are two more classes which are used in the
  * coordinator module.
@@ -75,7 +72,7 @@ class MoBANLocal;
  * @ingroup MoBAN
  * @author Majid Nabi
  *
-*/
+ */
 
 /**
  * @brief This is the coordinator module of the MoBAN mobility model. It should be instantiated in the top level simulation network, once per WBAN.
@@ -93,7 +90,7 @@ class MoBANLocal;
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
+class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
 {
   protected:
     /** @brief The mobility modules of the nodes in this WBAN */
@@ -103,16 +100,16 @@ class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
     double speed;
 
     /** @brief Pointer to the file for logging MoBAN mobility pattern for future use */
-    FILE* logfile;
+    FILE *logfile;
 
     /** @brief Number of predefined postures */
     unsigned int numPostures;
 
     /** @brief The list of all predefined postures (posture data base) */
-    std::vector<Posture*> postureList;
+    std::vector<Posture *> postureList;
 
     /** @brief The current selected posture */
-    Posture* currentPosture;
+    Posture *currentPosture;
 
     /** @brief The minimum value of the duration for stable postures */
     simtime_t minDuration;
@@ -125,19 +122,20 @@ class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
     bool useMobilityPattern;
 
     /** @brief Data type for one instance of mobility pattern. */
-    typedef struct pattern{
+    typedef struct pattern
+    {
         unsigned int postureID;
         Coord targetPos;
         double speed;
         simtime_t duration;
-    }Pattern;
+    } Pattern;
 
     /** @brief The mobility pattern data base. */
-    Pattern* mobilityPattern;
+    Pattern *mobilityPattern;
 
     /** @brief The number of mobility pattern instances which has been read from the input file
      * (length of mobility pattern data base).
-    */
+     */
     int patternLength;
 
     /** @brief The index of the currently applied mobility pattern from */
@@ -145,20 +143,20 @@ class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
 
     /** @brief A matrix which maintains the transition probabilities of the Markov Model of posture pattern.
      *  To be given through configuration file.
-    */
-    double** markovMatrix;
+     */
+    double **markovMatrix;
 
     /** @brief Possible (supported) strategies for posture selection. */
     enum posture_sel_type {
-      UNIFORM_RANDOM = 0,   // uniform random posture selection. No correlation is applied.
-      MARKOV_BASE            // Either a Markov model matrix or a steady state vector is given for space-time domains
+        UNIFORM_RANDOM = 0,    // uniform random posture selection. No correlation is applied.
+        MARKOV_BASE    // Either a Markov model matrix or a steady state vector is given for space-time domains
     };
 
     /** @brief The requested strategy for posture selection. To be given through configuration file. */
     posture_sel_type postureSelStrategy;
 
     /** @brief Class for performing operation for spatial and temporal correlations in posture selection. */
-    PostureTransition* transitions;
+    PostureTransition *transitions;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -206,8 +204,7 @@ class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
     /** @brief Collect MoBAN local modules */
     void collectLocalModules(cModule *module);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MOBANCOORDINATOR_H
 
-
-#endif

@@ -23,15 +23,13 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 /**
  * Base class for operations that manipulate network nodes.
  */
 class INET_API NodeOperation : public LifecycleOperation
 {
-    public:
-        virtual void initialize(cModule *module, StringMap& params);
-
+  public:
+    virtual void initialize(cModule *module, StringMap& params);
 };
 
 /**
@@ -45,17 +43,18 @@ class INET_API NodeStartOperation : public NodeOperation
 {
   public:
     enum Stage {
-      STAGE_LOCAL, // for changes that don't depend on other modules
-      STAGE_PHYSICAL_LAYER,
-      STAGE_LINK_LAYER,
-      STAGE_NETWORK_LAYER,
-      STAGE_TRANSPORT_LAYER,
-      STAGE_ROUTING_PROTOCOLS,
-      STAGE_APPLICATION_LAYER,
-      STAGE_LAST
+        STAGE_LOCAL,    // for changes that don't depend on other modules
+        STAGE_PHYSICAL_LAYER,
+        STAGE_LINK_LAYER,
+        STAGE_NETWORK_LAYER,
+        STAGE_TRANSPORT_LAYER,
+        STAGE_ROUTING_PROTOCOLS,
+        STAGE_APPLICATION_LAYER,
+        STAGE_LAST
     };
+
   public:
-    virtual int getNumStages() const { return STAGE_LAST+1; }
+    virtual int getNumStages() const { return STAGE_LAST + 1; }
     virtual Kind getKind() const { return UP; }
 };
 
@@ -65,21 +64,22 @@ class INET_API NodeStartOperation : public NodeOperation
  * The operation should be applied to the module of a network node. Operation
  * stages are organized top-down similarly to the OSI network layers.
  */
-class INET_API NodeShutdownOperation : public NodeOperation {
+class INET_API NodeShutdownOperation : public NodeOperation
+{
   public:
     enum Stage {
-      STAGE_LOCAL, // for changes that don't depend on other modules
-      STAGE_APPLICATION_LAYER,
-      STAGE_ROUTING_PROTOCOLS,
-      STAGE_TRANSPORT_LAYER,
-      STAGE_NETWORK_LAYER,
-      STAGE_LINK_LAYER,
-      STAGE_PHYSICAL_LAYER,
-      STAGE_LAST  // for changes that others shouldn't depend on
+        STAGE_LOCAL,    // for changes that don't depend on other modules
+        STAGE_APPLICATION_LAYER,
+        STAGE_ROUTING_PROTOCOLS,
+        STAGE_TRANSPORT_LAYER,
+        STAGE_NETWORK_LAYER,
+        STAGE_LINK_LAYER,
+        STAGE_PHYSICAL_LAYER,
+        STAGE_LAST    // for changes that others shouldn't depend on
     };
 
   public:
-    virtual int getNumStages() const { return STAGE_LAST+1; }
+    virtual int getNumStages() const { return STAGE_LAST + 1; }
     virtual Kind getKind() const { return DOWN; }
 };
 
@@ -91,8 +91,8 @@ class INET_API NodeShutdownOperation : public NodeOperation {
  * The operation should be applied to the module of a network node. Operation
  * stages are organized top-down similarly to the OSI network layers.
  * /
-class INET_API NodeSuspendOperation : public NodeOperation {
-  public:
+   class INET_API NodeSuspendOperation : public NodeOperation {
+   public:
     enum Stage {
       STAGE_LOCAL, // for changes that don't depend on other modules
       STAGE_APPLICATION_LAYER,
@@ -103,11 +103,11 @@ class INET_API NodeSuspendOperation : public NodeOperation {
       STAGE_LAST
     };
 
-  public:
+   public:
     virtual int getNumStages() const { return STAGE_LAST+1; }
     virtual Kind getKind() const { return DOWN; }
-};
-*/
+   };
+ */
 
 /**
  * This operation represents the process of crashing a network node. The
@@ -119,19 +119,19 @@ class INET_API NodeSuspendOperation : public NodeOperation {
  * operation has only one stage, and the execution must finish in zero
  * simulation time.
  */
-class INET_API NodeCrashOperation : public NodeOperation {
+class INET_API NodeCrashOperation : public NodeOperation
+{
   public:
     enum Stage {
-      STAGE_CRASH, // the only stage, must execute within zero simulation time
-      STAGE_LAST
+        STAGE_CRASH,    // the only stage, must execute within zero simulation time
+        STAGE_LAST
     };
 
   public:
-    virtual int getNumStages() const { return STAGE_LAST+1; }
+    virtual int getNumStages() const { return STAGE_LAST + 1; }
     virtual Kind getKind() const { return DOWN; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_NODEOPERATIONS_H
 
-
-#endif

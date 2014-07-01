@@ -18,40 +18,68 @@
 #include "IRoute.h"
 
 namespace inet {
-
 const char *IRoute::sourceTypeName(SourceType sourceType)
 {
-    switch (sourceType)
-    {
-        case MANUAL:               return "MANUAL";
-        case IFACENETMASK:         return "IFACENETMASK";
-        case ROUTER_ADVERTISEMENT: return "FROM_RA";
-        case OWN_ADV_PREFIX:       return "OWN_ADV_PREFIX";
-        case ICMP_REDIRECT:        return "REDIRECT";
-        case RIP:                  return "RIP";
-        case OSPF:                 return "OSPF";
-        case BGP:                  return "BGP";
-        case ZEBRA:                return "ZEBRA";
-        case MANET:                return "MANET";
-        case MANET2:               return "MANET2";
-        case DYMO:                 return "DYMO";
-        case AODV:                 return "AODV";
-        default:                   return "???";
+    switch (sourceType) {
+        case MANUAL:
+            return "MANUAL";
+
+        case IFACENETMASK:
+            return "IFACENETMASK";
+
+        case ROUTER_ADVERTISEMENT:
+            return "FROM_RA";
+
+        case OWN_ADV_PREFIX:
+            return "OWN_ADV_PREFIX";
+
+        case ICMP_REDIRECT:
+            return "REDIRECT";
+
+        case RIP:
+            return "RIP";
+
+        case OSPF:
+            return "OSPF";
+
+        case BGP:
+            return "BGP";
+
+        case ZEBRA:
+            return "ZEBRA";
+
+        case MANET:
+            return "MANET";
+
+        case MANET2:
+            return "MANET2";
+
+        case DYMO:
+            return "DYMO";
+
+        case AODV:
+            return "AODV";
+
+        default:
+            return "???";
     }
 }
 
 const char *IMulticastRoute::sourceTypeName(SourceType sourceType)
 {
-    switch (sourceType)
-    {
-        case MANUAL:       return "MANUAL";
-        case DVMRP:        return "DVRMP";
-        case PIM_SM:       return "PIM-SM";
-        default:           return "???";
+    switch (sourceType) {
+        case MANUAL:
+            return "MANUAL";
+
+        case DVMRP:
+            return "DVRMP";
+
+        case PIM_SM:
+            return "PIM-SM";
+
+        default:
+            return "???";
     }
 }
-
-
-}
-
+} // namespace inet
 

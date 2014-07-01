@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "MACRelayUnit.h"
 #include "EtherFrame.h"
@@ -21,7 +21,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Define_Module(MACRelayUnit);
 
 MACRelayUnit::MACRelayUnit()
@@ -31,8 +30,7 @@ MACRelayUnit::MACRelayUnit()
 
 void MACRelayUnit::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // number of ports
         numPorts = gate("ifOut", 0)->size();
         if (gate("ifIn", 0)->size() != numPorts)
@@ -45,8 +43,7 @@ void MACRelayUnit::initialize(int stage)
         WATCH(numProcessedFrames);
         WATCH(numDiscardedFrames);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
     }
@@ -54,13 +51,12 @@ void MACRelayUnit::initialize(int stage)
 
 void MACRelayUnit::handleMessage(cMessage *msg)
 {
-    if (!isOperational)
-    {
+    if (!isOperational) {
         EV << "Message '" << msg << "' arrived when module status is down, dropped it\n";
         delete msg;
         return;
     }
-    EtherFrame * frame = check_and_cast<EtherFrame*>(msg);
+    EtherFrame *frame = check_and_cast<EtherFrame *>(msg);
     // Frame received from MAC unit
     handleAndDispatchFrame(frame);
 }
@@ -75,8 +71,7 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
     addressTable->updateTableWithAddress(inputport, frame->getSrc());
 
     // handle broadcast frames first
-    if (frame->getDest().isBroadcast())
-    {
+    if (frame->getDest().isBroadcast()) {
         EV << "Broadcasting broadcast frame " << frame << endl;
         broadcastFrame(frame, inputport);
         return;
@@ -87,33 +82,30 @@ void MACRelayUnit::handleAndDispatchFrame(EtherFrame *frame)
     int outputport = addressTable->getPortForAddress(frame->getDest());
     // should not send out the same frame on the same ethernet port
     // (although wireless ports are ok to receive the same message)
-    if (inputport == outputport)
-    {
-        EV << "Output port is same as input port, " << frame->getFullName() <<
-              " dest " << frame->getDest() << ", discarding frame\n";
+    if (inputport == outputport) {
+        EV << "Output port is same as input port, " << frame->getFullName()
+           << " dest " << frame->getDest() << ", discarding frame\n";
         numDiscardedFrames++;
         delete frame;
         return;
     }
 
-    if (outputport >= 0)
-    {
+    if (outputport >= 0) {
         EV << "Sending frame " << frame << " with dest address " << frame->getDest() << " to port " << outputport << endl;
         send(frame, "ifOut", outputport);
     }
-    else
-    {
+    else {
         EV << "Dest address " << frame->getDest() << " unknown, broadcasting frame " << frame << endl;
         broadcastFrame(frame, inputport);
     }
-
 }
 
 void MACRelayUnit::broadcastFrame(EtherFrame *frame, int inputport)
 {
-    for (int i=0; i<numPorts; ++i)
+    for (int i = 0; i < numPorts; ++i)
         if (i != inputport)
-            send((EtherFrame*)frame->dup(), "ifOut", i);
+            send((EtherFrame *)frame->dup(), "ifOut", i);
+
     delete frame;
 }
 
@@ -133,26 +125,22 @@ bool MACRelayUnit::handleOperationStage(LifecycleOperation *operation, int stage
 {
     Enter_Method_Silent();
 
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
             start();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
             stop();
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             stop();
         }
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
 
@@ -164,8 +152,5 @@ void MACRelayUnit::finish()
     recordScalar("processed frames", numProcessedFrames);
     recordScalar("discarded frames", numDiscardedFrames);
 }
-
-
-}
-
+} // namespace inet
 

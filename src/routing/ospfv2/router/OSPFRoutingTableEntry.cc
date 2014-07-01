@@ -15,11 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFRoutingTableEntry.h"
 
 namespace inet {
-
 OSPF::RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
     IPv4Route(),
@@ -58,7 +56,8 @@ void OSPF::RoutingTableEntry::setPathType(RoutingPathType type)
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
-    } else {
+    }
+    else {
         setMetric(cost);
     }
 }
@@ -69,7 +68,8 @@ void OSPF::RoutingTableEntry::setCost(Metric pathCost)
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
-    } else {
+    }
+    else {
         setMetric(cost);
     }
 }
@@ -80,7 +80,8 @@ void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
     // FIXME: this is a hack. But the correct way to do it is to implement a separate IIPv4RoutingTable module for OSPF...
     if (pathType == OSPF::RoutingTableEntry::TYPE2_EXTERNAL) {
         setMetric(cost + type2Cost * 1000);
-    } else {
+    }
+    else {
         setMetric(cost);
     }
 }
@@ -88,7 +89,7 @@ void OSPF::RoutingTableEntry::setType2Cost(Metric pathCost)
 void OSPF::RoutingTableEntry::addNextHop(OSPF::NextHop hop)
 {
     if (nextHops.size() == 0) {
-        InterfaceEntry*    routingInterface = ift->getInterfaceById(hop.ifIndex);
+        InterfaceEntry *routingInterface = ift->getInterfaceById(hop.ifIndex);
 
         setInterface(routingInterface);
         // TODO: this used to be commented out, but it seems we need it
@@ -107,21 +108,20 @@ bool OSPF::RoutingTableEntry::operator==(const RoutingTableEntry& entry) const
         return false;
     }
     for (i = 0; i < hopCount; i++) {
-        if ((nextHops[i] != entry.nextHops[i]))
-        {
+        if ((nextHops[i] != entry.nextHops[i])) {
             return false;
         }
     }
 
-    return ((destinationType == entry.destinationType) &&
-            (getDestination() == entry.getDestination()) &&
-            (getNetmask() == entry.getNetmask()) &&
-            (optionalCapabilities == entry.optionalCapabilities) &&
-            (area == entry.area) &&
-            (pathType == entry.pathType) &&
-            (cost == entry.cost) &&
-            (type2Cost == entry.type2Cost) &&
-            (linkStateOrigin == entry.linkStateOrigin));
+    return (destinationType == entry.destinationType) &&
+           (getDestination() == entry.getDestination()) &&
+           (getNetmask() == entry.getNetmask()) &&
+           (optionalCapabilities == entry.optionalCapabilities) &&
+           (area == entry.area) &&
+           (pathType == entry.pathType) &&
+           (cost == entry.cost) &&
+           (type2Cost == entry.type2Cost) &&
+           (linkStateOrigin == entry.linkStateOrigin);
 }
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry)
@@ -129,7 +129,8 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
     out << "Destination: " << entry.getDestination() << "/" << entry.getNetmask() << " (";
     if (entry.getDestinationType() == OSPF::RoutingTableEntry::NETWORK_DESTINATION) {
         out << "Network";
-    } else {
+    }
+    else {
         if ((entry.getDestinationType() & OSPF::RoutingTableEntry::AREA_BORDER_ROUTER_DESTINATION) != 0) {
             out << "AreaBorderRouter";
         }
@@ -144,11 +145,25 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
         << entry.getArea().str(false)
         << ", PathType: ";
     switch (entry.getPathType()) {
-        case OSPF::RoutingTableEntry::INTRAAREA:      out << "IntraArea";     break;
-        case OSPF::RoutingTableEntry::INTERAREA:      out << "InterArea";     break;
-        case OSPF::RoutingTableEntry::TYPE1_EXTERNAL: out << "Type1External"; break;
-        case OSPF::RoutingTableEntry::TYPE2_EXTERNAL: out << "Type2External"; break;
-        default:                                      out << "Unknown";       break;
+        case OSPF::RoutingTableEntry::INTRAAREA:
+            out << "IntraArea";
+            break;
+
+        case OSPF::RoutingTableEntry::INTERAREA:
+            out << "InterArea";
+            break;
+
+        case OSPF::RoutingTableEntry::TYPE1_EXTERNAL:
+            out << "Type1External";
+            break;
+
+        case OSPF::RoutingTableEntry::TYPE2_EXTERNAL:
+            out << "Type2External";
+            break;
+
+        default:
+            out << "Unknown";
+            break;
     }
     out << ", iface: " << entry.getInterfaceName();
     out << ", Cost: " << entry.getCost()
@@ -163,6 +178,5 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
 
     return out;
 }
-
-}
+} // namespace inet
 

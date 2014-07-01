@@ -21,21 +21,16 @@
 #include "ListeningBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealListening : public ListeningBase
 {
-    public:
-        IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
-            ListeningBase(radio, startTime, endTime, startPosition, endPosition)
-        {}
+  public:
+    IdealListening(const IRadio *radio, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+        ListeningBase(radio, startTime, endTime, startPosition, endPosition)
+    {}
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALLISTENING_H
 
-}
-
-
-#endif

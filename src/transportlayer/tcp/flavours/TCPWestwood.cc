@@ -1,14 +1,10 @@
-
-#include <algorithm>   // min,max
+#include <algorithm>    // min,max
 
 #include "TCP.h"
 #include "TCPWestwood.h"
 
 namespace inet {
-
-
 Register_Class(TCPWestwood);
-
 
 TCPWestwoodStateVariables::TCPWestwoodStateVariables()
 {
@@ -62,12 +58,11 @@ void TCPWestwood::recalculateBWE(uint32 cumul_ack)
     simtime_t timeAck = currentTime - state->w_lastAckTime;
 
     // Update BWE
-    if (timeAck > 0)
-    {
+    if (timeAck > 0) {
         double old_sample_bwe = state->w_sample_bwe;
         double old_bwe = state->w_bwe;
         state->w_sample_bwe = (cumul_ack) / timeAck;
-        state->w_bwe = (19.0/21.0) * old_bwe + (1.0/21.0) * (state->w_sample_bwe + old_sample_bwe);
+        state->w_bwe = (19.0 / 21.0) * old_bwe + (1.0 / 21.0) * (state->w_sample_bwe + old_sample_bwe);
         EV_DEBUG << "recalculateBWE(), new w_bwe=" << state->w_bwe << "\n";
     }
     state->w_lastAckTime = currentTime;
@@ -85,14 +80,12 @@ void TCPWestwood::processRexmitTimer(TCPEventCode& event)
     // and is set to 1 in cong. avoidance.
     // the cong. window is reset to 1 after a timeout, as is done by TCP Reno. Conservative. Reaseon: fairness.
 
-    if (state->snd_cwnd < state->ssthresh)
-    { // Slow start
+    if (state->snd_cwnd < state->ssthresh) {    // Slow start
         state->w_a = state->w_a + 1;
         if (state->w_a > 4)
             state->w_a = 4;
     }
-    else
-    { // Cong. avoidance
+    else {    // Cong. avoidance
         state->w_a = 1;
     }
 
@@ -116,8 +109,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
     const TCPSegmentTransmitInfoList::Item *found = state->regions.get(firstSeqAcked);
     state->regions.clearTo(state->snd_una);
 
-    if (found != NULL)
-    {
+    if (found != NULL) {
         simtime_t currentTime = simTime();
         simtime_t newRTT = currentTime - found->getFirstSentTime();
 
@@ -127,7 +119,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 
         // cumul_ack: cumulative ack's that acks 2 or more pkts count 1,
         // because DUPACKs count them
-        uint32 cumul_ack = state->snd_una - firstSeqAcked;// acked bytes
+        uint32 cumul_ack = state->snd_una - firstSeqAcked;    // acked bytes
         if ((state->dupacks * state->snd_mss) >= cumul_ack)
             cumul_ack = state->snd_mss; // cumul_ack = 1:
         else
@@ -138,13 +130,11 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
             cumul_ack = 2 * state->snd_mss;
 
         recalculateBWE(cumul_ack);
-    }   // Closes if w_sendtime != NULL
-
+    }    // Closes if w_sendtime != NULL
 
     // Same behavior of Reno during fast recovery, slow start and cong. avoidance
 
-    if (state->dupacks >= DUPTHRESH) // DUPTHRESH = 3
-    {
+    if (state->dupacks >= DUPTHRESH) {    // DUPTHRESH = 3
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -154,13 +144,11 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
     }
-    else
-    {
+    else {
         //
         // Perform slow start and congestion avoidance.
         //
-        if (state->snd_cwnd < state->ssthresh)
-        {
+        if (state->snd_cwnd < state->ssthresh) {
             EV_DETAIL << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
             // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
@@ -183,8 +171,7 @@ void TCPWestwood::receivedDataAck(uint32 firstSeqAcked)
 
             EV_DETAIL << "cwnd=" << state->snd_cwnd << "\n";
         }
-        else
-        {
+        else {
             // perform Congestion Avoidance (RFC 2581)
             uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
@@ -219,10 +206,9 @@ void TCPWestwood::receivedDuplicateAck()
         // BWE calculation: dupack counts 1
         uint32 cumul_ack = state->snd_mss;
         recalculateBWE(cumul_ack);
-    }   // Closes if w_sendtime != NULL
+    }    // Closes if w_sendtime != NULL
 
-    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
-    {
+    if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         EV_DETAIL << "Westwood on dupAcks == DUPTHRESH(=3): Faster Retransmit \n";
 
         // TCP Westwood: congestion control with faster recovery. S. Mascolo, C. Casetti, M. Gerla, S.S. Lee, M. Sanadidi
@@ -246,14 +232,12 @@ void TCPWestwood::receivedDuplicateAck()
         // a is restored to 1 in cong. avoidance: ssthresh was set correctly and there is no need to reduce
         // the impact of BWE
 
-        if (state->snd_cwnd < state->ssthresh)
-        { // Slow start
+        if (state->snd_cwnd < state->ssthresh) {    // Slow start
             state->w_a = state->w_a + 0.25;
             if (state->w_a > 4)
                 state->w_a = 4;
         }
-        else
-        { // Cong. avoidance
+        else {    // Cong. avoidance
             state->w_a = 1;
         }
 
@@ -275,8 +259,7 @@ void TCPWestwood::receivedDuplicateAck()
         sendData(false);
     }
     // Behavior like Reno:
-    else if (state->dupacks > DUPTHRESH) // DUPTHRESH = 3
-    {
+    else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
         // Westwood: like Reno
         state->snd_cwnd += state->snd_mss;
         EV_DETAIL << "Westwood on dupAcks > DUPTHRESH(=3): Fast Recovery: inflating cwnd by SMSS, new cwnd=" << state->snd_cwnd << "\n";
@@ -306,9 +289,5 @@ void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 
     state->regions.set(fromseq, toseq, simTime());
 }
-
-
-
-}
-
+} // namespace inet
 

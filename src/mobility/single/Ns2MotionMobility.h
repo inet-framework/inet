@@ -17,7 +17,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_NS2MOTIONMOBILITY_H
 #define __INET_NS2MOTIONMOBILITY_H
 
@@ -26,8 +25,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Uses the ns2 motion native file format. See NED file for more info.
  *
@@ -45,6 +42,7 @@ class INET_API Ns2MotionFile
   public:
     typedef std::vector<double> Line;
     double initial[3];
+
   protected:
     friend class Ns2MotionMobility;
     typedef std::vector<Line> LineList;
@@ -83,8 +81,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 
     virtual ~Ns2MotionMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_NS2MOTIONMOBILITY_H
 
-
-#endif

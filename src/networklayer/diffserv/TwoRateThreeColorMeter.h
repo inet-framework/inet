@@ -16,14 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TWORATETHREECOLORMETER_H
 #define __INET_TWORATETHREECOLORMETER_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * This class can be used as a meter in an ITrafficConditioner.
  * It marks the packets based on two rates, Peak Information Rate (PIR)
@@ -35,14 +33,14 @@ namespace inet {
 class INET_API TwoRateThreeColorMeter : public cSimpleModule
 {
   protected:
-    double PIR; // Peak Information Rate (bits/sec)
-    long PBS; // Peak Burst Size (bits)
-    double CIR; // Commited Information Rate (bits/sec)
-    long CBS; // Committed Burst Size (bits)
+    double PIR;    // Peak Information Rate (bits/sec)
+    long PBS;    // Peak Burst Size (bits)
+    double CIR;    // Commited Information Rate (bits/sec)
+    long CBS;    // Committed Burst Size (bits)
     bool colorAwareMode;
 
-    long Tp; // token bucket for peak burst
-    long Tc; // token bucket for committed burst
+    long Tp;    // token bucket for peak burst
+    long Tc;    // token bucket for committed burst
     simtime_t lastUpdateTime;
 
     int numRcvd;
@@ -61,8 +59,7 @@ class INET_API TwoRateThreeColorMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TWORATETHREECOLORMETER_H
 
-
-#endif

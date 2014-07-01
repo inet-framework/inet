@@ -15,13 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LSA.h"
 
 namespace inet {
-
-
-bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
+bool OSPF::RouterLSA::update(const OSPFRouterLSA *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -29,12 +26,13 @@ bool OSPF::RouterLSA::update(const OSPFRouterLSA* lsa)
     if (different) {
         clearNextHops();
         return true;
-    } else {
+    }
+    else {
         return false;
     }
 }
 
-bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA* routerLSA) const
+bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA *routerLSA) const
 {
     const OSPFLSAHeader& lsaHeader = routerLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
@@ -83,10 +81,7 @@ bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA* routerLSA) const
         }
     }
 
-    return (differentHeader || differentBody);
+    return differentHeader || differentBody;
 }
-
-
-}
-
+} // namespace inet
 

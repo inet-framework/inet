@@ -29,13 +29,12 @@
 #include "IntServ.h"
 
 namespace inet {
-
 class RSVP;
 
 /**
  * TODO documentation
  */
-class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, public IRSVPClassifier
+class INET_API SimpleClassifier : public cSimpleModule, public IScriptable, public IRSVPClassifier
 {
   public:
     struct FECEntry
@@ -79,9 +78,7 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
     virtual void readItemFromXML(const cXMLElement *fec);
     std::vector<FECEntry>::iterator findFEC(int fecid);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_SIMPLECLASSIFIER_H
 

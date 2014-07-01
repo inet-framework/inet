@@ -3,15 +3,15 @@
 // it under the terms of the GNU Lesser General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Lesser General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
 #include "L2NodeConfigurator.h"
 #include "ModuleAccess.h"
@@ -19,7 +19,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Define_Module(L2NodeConfigurator);
 
 L2NodeConfigurator::L2NodeConfigurator()
@@ -31,8 +30,7 @@ L2NodeConfigurator::L2NodeConfigurator()
 
 void L2NodeConfigurator::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         cModule *host = getContainingNode(this);
         nodeStatus = dynamic_cast<NodeStatus *>(host->getSubmodule("status"));
         interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -45,8 +43,7 @@ bool L2NodeConfigurator::handleOperationStage(LifecycleOperation *operation, int
 {
     Enter_Method_Silent();
     if (dynamic_cast<NodeStartOperation *>(operation)) {
-        if (stage == NodeStartOperation::STAGE_LINK_LAYER)
-        {
+        if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
             prepareNode();
             configureNode();
         }
@@ -66,10 +63,10 @@ void L2NodeConfigurator::prepareNode()
         prepareInterface(interfaceTable->getInterface(i));
 }
 
-void L2NodeConfigurator::prepareInterface(InterfaceEntry * interfaceEntry)
+void L2NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
 {
     ASSERT(!interfaceEntry->ieee8021dData());
-    Ieee8021dInterfaceData * ieee8021dInterfaceData = new Ieee8021dInterfaceData();
+    Ieee8021dInterfaceData *ieee8021dInterfaceData = new Ieee8021dInterfaceData();
     interfaceEntry->setIeee8021dInterfaceData(ieee8021dInterfaceData);
 }
 
@@ -86,16 +83,12 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
     if (nodeStatus && nodeStatus->getState() != NodeStatus::UP)
         return;
 
-    if (signalID == NF_INTERFACE_CREATED)
-    {
+    if (signalID == NF_INTERFACE_CREATED) {
         InterfaceEntry *ie = check_and_cast<InterfaceEntry *>(obj);
         prepareInterface(ie);
         if (networkConfigurator)
             networkConfigurator->configureInterface(ie);
     }
 }
-
-
-}
-
+} // namespace inet
 

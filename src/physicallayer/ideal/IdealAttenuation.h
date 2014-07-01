@@ -21,20 +21,15 @@
 #include "IAttenuation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IdealAttenuation : public cModule, public IAttenuation
 {
-    public:
-        virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
-        virtual void printToStream(std::ostream &stream) const { stream << "ideal attenuation"; }
+  public:
+    virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
+    virtual void printToStream(std::ostream& stream) const { stream << "ideal attenuation"; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALATTENUATION_H
 
-}
-
-
-#endif

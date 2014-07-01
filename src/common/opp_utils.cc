@@ -15,14 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "opp_utils.h"
 
 namespace inet {
-
-namespace OPP_Global
-{
-
+namespace OPP_Global {
 std::string ltostr(long i)
 {
     std::ostringstream os;
@@ -58,13 +54,14 @@ unsigned long atoul(const char *s)
 std::string stripnonalnum(const char *s)
 {
     std::string result;
-    for (; *s; s++)
+    for ( ; *s; s++)
         if (isalnum(*s))
             result += *s;
+
     return result;
 }
 
-#define BUFLEN 1024
+#define BUFLEN    1024
 
 std::string stringf(const char *fmt, ...)
 {
@@ -72,7 +69,7 @@ std::string stringf(const char *fmt, ...)
     va_list va;
     va_start(va, fmt);
     vsnprintf(buf, BUFLEN, fmt, va);
-    buf[BUFLEN-1] = '\0';
+    buf[BUFLEN - 1] = '\0';
     va_end(va);
     return buf;
 }
@@ -81,12 +78,11 @@ std::string vstringf(const char *fmt, va_list& args)
 {
     char buf[BUFLEN];
     vsnprintf(buf, BUFLEN, fmt, args);
-    buf[BUFLEN-1] = '\0';
+    buf[BUFLEN - 1] = '\0';
     return buf;
 }
 
 #undef BUFLEN
+} // namespace OPP_Global
+} // namespace inet
 
-}
-
-}

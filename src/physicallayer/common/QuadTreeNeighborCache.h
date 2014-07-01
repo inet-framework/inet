@@ -22,55 +22,53 @@
 #include "QuadTree.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighborCache
 {
-    public:
-        typedef std::vector<const IRadio *> Radios;
-        typedef QuadTree::QuadTreeVisitor QuadTreeVisitor;
+  public:
+    typedef std::vector<const IRadio *> Radios;
+    typedef QuadTree::QuadTreeVisitor QuadTreeVisitor;
 
-    protected:
-        class QuadTreeNeighborCacheVisitor : public QuadTree::QuadTreeVisitor
-        {
-            protected:
-                RadioMedium *radioMedium;
-                IRadio *transmitter;
-                const IRadioFrame *frame;
-            public:
-                void visitor(const cObject *radio);
-                QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
-                    radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
-        };
-
-    protected:
-        QuadTree *quadTree;
-        Radios radios;
-        cMessage *rebuildQuadTreeTimer;
+  protected:
+    class QuadTreeNeighborCacheVisitor : public QuadTree::QuadTreeVisitor
+    {
+      protected:
         RadioMedium *radioMedium;
-        Coord constraintAreaMax, constraintAreaMin;
-        unsigned int maxNumOfPointsPerQuadrant;
-        double range;
-        double rebuildPeriod;
-        double maxSpeed;
+        IRadio *transmitter;
+        const IRadioFrame *frame;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void handleMessage(cMessage *msg);
-        void fillQuadTreeWithRadios();
+      public:
+        void visitor(const cObject *radio);
+        QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
+            radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
+    };
 
-    public:
-        void addRadio(const IRadio *radio);
-        void removeRadio(const IRadio *radio);
-        void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
-        QuadTreeNeighborCache();
-        ~QuadTreeNeighborCache();
+  protected:
+    QuadTree *quadTree;
+    Radios radios;
+    cMessage *rebuildQuadTreeTimer;
+    RadioMedium *radioMedium;
+    Coord constraintAreaMax, constraintAreaMin;
+    unsigned int maxNumOfPointsPerQuadrant;
+    double range;
+    double rebuildPeriod;
+    double maxSpeed;
+
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void handleMessage(cMessage *msg);
+    void fillQuadTreeWithRadios();
+
+  public:
+    void addRadio(const IRadio *radio);
+    void removeRadio(const IRadio *radio);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+    QuadTreeNeighborCache();
+    ~QuadTreeNeighborCache();
 };
-
-}
-
-}
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* QUADTREENEIGHBORCACHE_H_ */
+

@@ -22,30 +22,26 @@
 #include "UDPPacket.h"
 
 namespace inet {
-
-
 /**
  * Converts between UDPPacket and binary (network byte order) UDP header.
  */
 class UDPSerializer
 {
-    public:
-        UDPSerializer() {}
+  public:
+    UDPSerializer() {}
 
-        /**
-         * Serializes an UDPPacket for transmission on the wire.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize);
+    /**
+     * Serializes an UDPPacket for transmission on the wire.
+     * Returns the length of data written into buffer.
+     */
+    int serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize);
 
-        /**
-         * Puts a packet sniffed from the wire into an UDPPacket.
-         */
-        void parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *pkt);
+    /**
+     * Puts a packet sniffed from the wire into an UDPPacket.
+     */
+    void parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *pkt);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPSERIALIZER_H
 

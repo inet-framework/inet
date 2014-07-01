@@ -29,13 +29,11 @@
 #include "TCPCommand_m.h"
 
 namespace inet {
-
 // Forward declarations:
 class TCPConnection;
 class TCPSegment;
 class TCPSendQueue;
 class TCPReceiveQueue;
-
 
 /**
  * Implements the TCP protocol. This section describes the internal
@@ -93,7 +91,7 @@ class TCPReceiveQueue;
 class INET_API TCP : public cSimpleModule, public ILifecycle
 {
   public:
-    struct AppConnKey  // XXX this class is redundant since connId is already globally unique
+    struct AppConnKey    // XXX this class is redundant since connId is already globally unique
     {
         int appGateIndex;
         int connId;
@@ -105,14 +103,13 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
             else
                 return connId < b.connId;
         }
-
     };
     struct SockPair
     {
         Address localAddr;
         Address remoteAddr;
-        int localPort;   // -1: unspec
-        int remotePort;  // -1: unspec
+        int localPort;    // -1: unspec
+        int remotePort;    // -1: unspec
 
         inline bool operator<(const SockPair& b) const
         {
@@ -128,8 +125,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     };
 
   protected:
-    typedef std::map<AppConnKey, TCPConnection*> TcpAppConnMap;
-    typedef std::map<SockPair, TCPConnection*> TcpConnMap;
+    typedef std::map<AppConnKey, TCPConnection *> TcpAppConnMap;
+    typedef std::map<SockPair, TCPConnection *> TcpConnMap;
 
     TcpAppConnMap tcpAppConnMap;
     TcpConnMap tcpConnMap;
@@ -150,10 +147,10 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
 
   public:
     static bool testing;    // switches between tcpEV and testingEV
-    static bool logverbose; // if !testing, turns on more verbose logging
+    static bool logverbose;    // if !testing, turns on more verbose logging
 
-    bool recordStatistics;  // output vectors on/off
-    bool isOperational;     // lifecycle: node is up/down
+    bool recordStatistics;    // output vectors on/off
+    bool isOperational;    // lifecycle: node is up/down
 
   public:
     TCP() {}
@@ -192,12 +189,12 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCPSendQueue* createSendQueue(TCPDataTransferMode transferModeP);
+    virtual TCPSendQueue *createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCPReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
+    virtual TCPReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
@@ -205,8 +202,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     // called at shutdown/crash
     virtual void reset();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCP_H
 
-
-#endif

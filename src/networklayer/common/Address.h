@@ -27,7 +27,6 @@
 #include "ModulePathAddress.h"
 
 namespace inet {
-
 class IAddressType;
 
 /**
@@ -40,77 +39,77 @@ class IAddressType;
  */
 class INET_API Address
 {
-    public:
-        enum AddressType {
-            NONE,
-            IPv4,
-            IPv6,
-            MAC,
-            MODULEPATH,
-            MODULEID
-        };
-    private:
-        uint64 hi;
-        uint64 lo;
+  public:
+    enum AddressType {
+        NONE,
+        IPv4,
+        IPv6,
+        MAC,
+        MODULEPATH,
+        MODULEID
+    };
 
-    private:
-        uint64 get(AddressType type) const;
-        void set(AddressType type, uint64 lo);
+  private:
+    uint64 hi;
+    uint64 lo;
 
-    public:
-        Address() { set(NONE, 0); }
-        explicit Address(const char *str) { tryParse(str); }
-        Address(const IPv4Address& addr) { set(addr); }
-        Address(const IPv6Address& addr) { set(addr); }
-        Address(const MACAddress& addr) { set(addr); }
-        Address(const ModuleIdAddress& addr) { set(addr); }
-        Address(const ModulePathAddress& addr) { set(addr); }
+  private:
+    uint64 get(AddressType type) const;
+    void set(AddressType type, uint64 lo);
 
-        void set(const IPv4Address& addr) { set(IPv4, addr.getInt()); }
-        void set(const IPv6Address& addr);
-        void set(const MACAddress& addr) { set(MAC, addr.getInt()); }
-        void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
-        void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
+  public:
+    Address() { set(NONE, 0); }
+    explicit Address(const char *str) { tryParse(str); }
+    Address(const IPv4Address& addr) { set(addr); }
+    Address(const IPv6Address& addr) { set(addr); }
+    Address(const MACAddress& addr) { set(addr); }
+    Address(const ModuleIdAddress& addr) { set(addr); }
+    Address(const ModulePathAddress& addr) { set(addr); }
 
-        IPv4Address toIPv4() const { return getType() == NONE ? IPv4Address() : IPv4Address(get(IPv4)); }
-        IPv6Address toIPv6() const { return getType() == NONE ? IPv6Address() : IPv6Address(hi, lo); }
-        MACAddress toMAC() const { return getType() == NONE ? MACAddress() : MACAddress(get(MAC)); }
-        ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
-        ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
+    void set(const IPv4Address& addr) { set(IPv4, addr.getInt()); }
+    void set(const IPv6Address& addr);
+    void set(const MACAddress& addr) { set(MAC, addr.getInt()); }
+    void set(const ModuleIdAddress& addr) { set(MODULEID, addr.getId()); }
+    void set(const ModulePathAddress& addr) { set(MODULEPATH, addr.getId()); }
 
-        std::string str() const;
-        AddressType getType() const;
-        IAddressType * getAddressType() const;
+    IPv4Address toIPv4() const { return getType() == NONE ? IPv4Address() : IPv4Address(get(IPv4)); }
+    IPv6Address toIPv6() const { return getType() == NONE ? IPv6Address() : IPv6Address(hi, lo); }
+    MACAddress toMAC() const { return getType() == NONE ? MACAddress() : MACAddress(get(MAC)); }
+    ModuleIdAddress toModuleId() const { return getType() == NONE ? ModuleIdAddress() : ModuleIdAddress(get(MODULEID)); }
+    ModulePathAddress toModulePath() const { return getType() == NONE ? ModulePathAddress() : ModulePathAddress(get(MODULEPATH)); }
 
-        /**
-         * Get the first prefixLength bits of the address, with the rest set to zero.
-         */
-        Address getPrefix(int prefixLength) const;
+    std::string str() const;
+    AddressType getType() const;
+    IAddressType *getAddressType() const;
 
-        bool tryParse(const char *addr);
+    /**
+     * Get the first prefixLength bits of the address, with the rest set to zero.
+     */
+    Address getPrefix(int prefixLength) const;
 
-        bool isUnspecified() const;
-        bool isUnicast() const;
-        bool isMulticast() const;
-        bool isBroadcast() const;
-        bool isLinkLocal() const;
+    bool tryParse(const char *addr);
 
-        bool operator<(const Address& other) const;
-        bool operator>(const Address& other) const { return other < *this; };
-        bool operator==(const Address& other) const;
-        bool operator!=(const Address& other) const;
+    bool isUnspecified() const;
+    bool isUnicast() const;
+    bool isMulticast() const;
+    bool isBroadcast() const;
+    bool isLinkLocal() const;
 
-        bool matches(const Address& other, int prefixLength) const;
+    bool operator<(const Address& other) const;
+    bool operator>(const Address& other) const { return other < *this; };
+    bool operator==(const Address& other) const;
+    bool operator!=(const Address& other) const;
 
-        static const char *getTypeName(AddressType t);
+    bool matches(const Address& other, int prefixLength) const;
+
+    static const char *getTypeName(AddressType t);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Address& address)
 {
     return os << address.str();
 }
+} // namespace inet
 
-}
+#endif // ifndef __INET_ADDRESS_H
 
-
-#endif

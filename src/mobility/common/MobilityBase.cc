@@ -20,12 +20,10 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #include "MobilityBase.h"
 #include "FWMath.h"
 
 namespace inet {
-
 Register_Abstract_Class(MobilityBase);
 
 static bool parseIntTo(const char *s, double& destValue)
@@ -62,8 +60,7 @@ void MobilityBase::initialize(int stage)
     cSimpleModule::initialize(stage);
 
     EV_TRACE << "initializing MobilityBase stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         constraintAreaMin.x = par("constraintAreaMinX");
         constraintAreaMin.y = par("constraintAreaMinY");
         constraintAreaMin.z = par("constraintAreaMinZ");
@@ -75,14 +72,13 @@ void MobilityBase::initialize(int stage)
             const char *s = visualRepresentation->getDisplayString().getTagArg("p", 2);
             if (s && *s)
                 throw cRuntimeError("The coordinates of '%s' are invalid. Please remove automatic arrangement"
-                      " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
+                                    " (3rd argument of 'p' tag) from '@display' attribute.", visualRepresentation->getFullPath().c_str());
         }
         WATCH(constraintAreaMin);
         WATCH(constraintAreaMax);
         WATCH(lastPosition);
     }
-    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
-    {
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2) {
         initializeOrientation();
         initializePosition();
     }
@@ -100,17 +96,14 @@ void MobilityBase::setInitialPosition()
 {
     // reading the coordinates from omnetpp.ini makes predefined scenarios a lot easier
     bool filled = false;
-    if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue() && visualRepresentation)
-    {
+    if (hasPar("initFromDisplayString") && par("initFromDisplayString").boolValue() && visualRepresentation) {
         filled = parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 0), lastPosition.x)
-              && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
+            && parseIntTo(visualRepresentation->getDisplayString().getTagArg("p", 1), lastPosition.y);
         if (filled)
             lastPosition.z = 0;
-
     }
     // not all mobility models have "initialX", "initialY" and "initialZ" parameters
-    else if (hasPar("initialX") && hasPar("initialY") && hasPar("initialZ"))
-    {
+    else if (hasPar("initialX") && hasPar("initialY") && hasPar("initialZ")) {
         lastPosition.x = par("initialX");
         lastPosition.y = par("initialY");
         lastPosition.z = par("initialZ");
@@ -126,22 +119,21 @@ void MobilityBase::checkPosition()
         throw cRuntimeError("Mobility position is not a finite number after initialize (x=%g,y=%g,z=%g)", lastPosition.x, lastPosition.y, lastPosition.z);
     if (isOutside())
         throw cRuntimeError("Mobility position (x=%g,y=%g,z=%g) is outside the constraint area (%g,%g,%g - %g,%g,%g)",
-              lastPosition.x, lastPosition.y, lastPosition.z,
-              constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
-              constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
+                lastPosition.x, lastPosition.y, lastPosition.z,
+                constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
+                constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z);
 }
 
 void MobilityBase::initializeOrientation()
 {
-    if (hasPar("initialAlpha") && hasPar("initialBeta") && hasPar("initialGamma"))
-    {
+    if (hasPar("initialAlpha") && hasPar("initialBeta") && hasPar("initialGamma")) {
         lastOrientation.alpha = par("initialAlpha");
         lastOrientation.beta = par("initialBeta");
         lastOrientation.gamma = par("initialGamma");
     }
 }
 
-void MobilityBase::handleMessage(cMessage * message)
+void MobilityBase::handleMessage(cMessage *message)
 {
     if (message->isSelfMessage())
         handleSelfMessage(message);
@@ -152,8 +144,7 @@ void MobilityBase::handleMessage(cMessage * message)
 void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
-    if (ev.isGUI() && visualRepresentation)
-    {
+    if (ev.isGUI() && visualRepresentation) {
         visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
     }
@@ -176,11 +167,11 @@ Coord MobilityBase::getRandomPosition()
 bool MobilityBase::isOutside()
 {
     return lastPosition.x < constraintAreaMin.x || lastPosition.x > constraintAreaMax.x
-        || lastPosition.y < constraintAreaMin.y || lastPosition.y > constraintAreaMax.y
-        || lastPosition.z < constraintAreaMin.z || lastPosition.z > constraintAreaMax.z;
+           || lastPosition.y < constraintAreaMin.y || lastPosition.y > constraintAreaMax.y
+           || lastPosition.z < constraintAreaMin.z || lastPosition.z > constraintAreaMax.z;
 }
 
-static int reflect(double min, double max, double &coordinate, double &speed)
+static int reflect(double min, double max, double& coordinate, double& speed)
 {
     double size = max - min;
     double value = coordinate - min;
@@ -212,7 +203,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& speed, double&
     }
 }
 
-static void wrap(double min, double max, double &coordinate)
+static void wrap(double min, double max, double& coordinate)
 {
     coordinate = FWMath::modulo(coordinate - min, max - min) + min;
 }
@@ -235,8 +226,7 @@ void MobilityBase::wrapIfOutside(Coord& targetPosition)
 
 void MobilityBase::placeRandomlyIfOutside(Coord& targetPosition)
 {
-    if (isOutside())
-    {
+    if (isOutside()) {
         Coord newPosition = getRandomPosition();
         targetPosition += newPosition - lastPosition;
         lastPosition = newPosition;
@@ -245,28 +235,36 @@ void MobilityBase::placeRandomlyIfOutside(Coord& targetPosition)
 
 void MobilityBase::raiseErrorIfOutside()
 {
-    if (isOutside())
-    {
+    if (isOutside()) {
         throw cRuntimeError("Mobility moved outside the area %g,%g,%g - %g,%g,%g (x=%g,y=%g,z=%g)",
-              constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
-              constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z,
-              lastPosition.x, lastPosition.y, lastPosition.z);
+                constraintAreaMin.x, constraintAreaMin.y, constraintAreaMin.z,
+                constraintAreaMax.x, constraintAreaMax.y, constraintAreaMax.z,
+                lastPosition.x, lastPosition.y, lastPosition.z);
     }
 }
 
 void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle)
 {
-    switch (policy)
-    {
-        case REFLECT:       reflectIfOutside(targetPosition, speed, angle); break;
-        case WRAP:          wrapIfOutside(targetPosition); break;
-        case PLACERANDOMLY: placeRandomlyIfOutside(targetPosition); break;
-        case RAISEERROR:    raiseErrorIfOutside(); break;
-        default:            throw cRuntimeError("Invalid outside policy=%d in module", policy, getFullPath().c_str());
+    switch (policy) {
+        case REFLECT:
+            reflectIfOutside(targetPosition, speed, angle);
+            break;
+
+        case WRAP:
+            wrapIfOutside(targetPosition);
+            break;
+
+        case PLACERANDOMLY:
+            placeRandomlyIfOutside(targetPosition);
+            break;
+
+        case RAISEERROR:
+            raiseErrorIfOutside();
+            break;
+
+        default:
+            throw cRuntimeError("Invalid outside policy=%d in module", policy, getFullPath().c_str());
     }
 }
-
-
-}
-
+} // namespace inet
 

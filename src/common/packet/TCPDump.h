@@ -21,39 +21,34 @@
 #ifndef __INET_TCPDUMP_H
 #define __INET_TCPDUMP_H
 
-
 #include "INETDefs.h"
 
 #include "PcapDump.h"
 #include "PacketDump.h"
 
 namespace inet {
-
-
 /**
  * Dumps every packet using the PcapDump class and the
  * PacketDump class.
  */
 class INET_API TCPDump : public cSimpleModule
 {
-    protected:
-        PcapDump pcapDump;
-        PacketDump tcpdump;
-        unsigned int snaplen;
-        unsigned long first, last, space;
-        bool dumpBadFrames;
-        bool dropBadFrames;
+  protected:
+    PcapDump pcapDump;
+    PacketDump tcpdump;
+    unsigned int snaplen;
+    unsigned long first, last, space;
+    bool dumpBadFrames;
+    bool dropBadFrames;
 
-    public:
-        TCPDump();
-        ~TCPDump();
-        virtual void handleMessage(cMessage *msg);
-        virtual void initialize();
-        virtual void finish();
+  public:
+    TCPDump();
+    ~TCPDump();
+    virtual void handleMessage(cMessage *msg);
+    virtual void initialize();
+    virtual void finish();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TCPDUMP_H
 

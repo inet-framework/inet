@@ -20,9 +20,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(ScalarRadio);
 
 ScalarRadio::ScalarRadio() :
@@ -32,8 +30,7 @@ ScalarRadio::ScalarRadio() :
 
 void ScalarRadio::handleUpperCommand(cMessage *message)
 {
-    if (message->getKind() == RADIO_C_CONFIGURE)
-    {
+    if (message->getKind() == RADIO_C_CONFIGURE) {
         RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
         bps newBitrate = configureCommand->getBitrate();
         if (!isNaN(newBitrate.get()))
@@ -50,10 +47,6 @@ void ScalarRadio::setBitrate(bps newBitrate)
     scalarTransmitter->setBitrate(newBitrate);
     endReceptionTimer = NULL;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

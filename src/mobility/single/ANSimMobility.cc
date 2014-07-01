@@ -15,20 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "ANSimMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(ANSimMobility);
-
 
 static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
 {
     cXMLElement *child = node->getFirstChild();
-    while (child && strcmp(child->getTagName(), tagname)!=0)
+    while (child && strcmp(child->getTagName(), tagname) != 0)
         child = child->getNextSibling();
 
     if (!child)
@@ -49,21 +45,20 @@ void ANSimMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing ANSimMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         nodeId = par("nodeId");
         if (nodeId == -1)
             nodeId = getContainingNode(this)->getIndex();
 
         // get script: param should point to <simulation> element
         cXMLElement *rootElem = par("ansimTrace");
-        if (strcmp(rootElem->getTagName(), "simulation")!=0)
+        if (strcmp(rootElem->getTagName(), "simulation") != 0)
             throw cRuntimeError("<simulation> is expected as root element not <%s> at %s",
-                  rootElem->getTagName(), rootElem->getSourceLocation());
+                    rootElem->getTagName(), rootElem->getSourceLocation());
         nextPositionChange = rootElem->getElementByPath("mobility/position_change");
         if (!nextPositionChange)
             throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
-                  rootElem->getSourceLocation());
+                    rootElem->getSourceLocation());
     }
 }
 
@@ -78,9 +73,9 @@ void ANSimMobility::setInitialPosition()
 cXMLElement *ANSimMobility::findNextPositionChange(cXMLElement *positionChange)
 {
     // find next <position_change> element with matching <node_id> tag (current one also OK)
-    while(positionChange){
+    while (positionChange) {
         const char *nodeIdStr = firstChildWithTag(positionChange, "node_id")->getNodeValue();
-        if(nodeIdStr && atoi(nodeIdStr) == nodeId)
+        if (nodeIdStr && atoi(nodeIdStr) == nodeId)
             break;
 
         positionChange = positionChange->getNextSibling();
@@ -91,8 +86,7 @@ cXMLElement *ANSimMobility::findNextPositionChange(cXMLElement *positionChange)
 void ANSimMobility::setTargetPosition()
 {
     nextPositionChange = findNextPositionChange(nextPositionChange);
-    if (!nextPositionChange)
-    {
+    if (!nextPositionChange) {
         nextChange = -1;
         stationary = true;
         targetPosition = lastPosition;
@@ -132,8 +126,5 @@ void ANSimMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
-
-
-}
-
+} // namespace inet
 

@@ -21,29 +21,24 @@
 #include "FlatReceptionBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ScalarReception : public FlatReceptionBase
 {
-    protected:
-        const W power;
+  protected:
+    const W power;
 
-    public:
-        ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
-            FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
-            power(power)
-        {}
+  public:
+    ScalarReception(const IRadio *radio, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth, W power) :
+        FlatReceptionBase(radio, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, carrierFrequency, bandwidth),
+        power(power)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
-        virtual W getPower() const { return power; }
-        virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const { return power; }
+    virtual void printToStream(std::ostream& stream) const;
+    virtual W getPower() const { return power; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const { return power; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCALARRECEPTION_H
 
-}
-
-
-#endif

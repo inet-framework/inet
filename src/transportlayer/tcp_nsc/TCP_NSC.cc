@@ -17,18 +17,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "TCP_NSC.h"
 
-#include "headers/defs.h"   // for endian macros
+#include "headers/defs.h"    // for endian macros
 
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 #include "IAddressType.h"
 #include "IPSocket.h"
@@ -56,10 +55,7 @@
 #include <sim_errno.h>
 
 namespace inet {
-
-
 Define_Module(TCP_NSC);
-
 
 //static member variables:
 const Address TCP_NSC::localInnerIpS("1.0.0.253");
@@ -67,20 +63,20 @@ const Address TCP_NSC::localInnerMaskS("255.255.255.0");
 const Address TCP_NSC::localInnerGwS("1.0.0.254");
 const Address TCP_NSC::remoteFirstInnerIpS("2.0.0.1");
 
-const char * TCP_NSC::stackNameParamNameS = "stackName";
-const char * TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
+const char *TCP_NSC::stackNameParamNameS = "stackName";
+const char *TCP_NSC::bufferSizeParamNameS = "stackBufferSize";
 
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    unsigned int ihl:4;
-    unsigned int version:4;
+    unsigned int ihl : 4;
+    unsigned int version : 4;
 #elif BYTE_ORDER == BIG_ENDIAN
-    unsigned int version:4;
-    unsigned int ihl:4;
-#else
+    unsigned int version : 4;
+    unsigned int ihl : 4;
+#else // if BYTE_ORDER == LITTLE_ENDIAN
 # error "Please check BYTE_ORDER declaration"
-#endif
+#endif // if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t tos;
     uint16_t tot_len;
     uint16_t id;
@@ -96,16 +92,16 @@ struct nsc_iphdr
 struct nsc_ipv6hdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    uint32_t flow:20;
-    uint32_t ds:8;
-    uint32_t version:4;
+    uint32_t flow : 20;
+    uint32_t ds : 8;
+    uint32_t version : 4;
 #elif BYTE_ORDER == BIG_ENDIAN
-    uint32_t version:4;
-    uint32_t ds:8;
-    uint32_t flow:20;
-#else
+    uint32_t version : 4;
+    uint32_t ds : 8;
+    uint32_t flow : 20;
+#else // if BYTE_ORDER == LITTLE_ENDIAN
 # error "Please check BYTE_ORDER declaration"
-#endif
+#endif // if BYTE_ORDER == LITTLE_ENDIAN
     uint16_t len;
     uint8_t next_header;
     uint8_t hop_limit;
@@ -142,7 +138,7 @@ static std::ostream& operator<<(std::ostream& osP, const TCP_NSC_Connection::Soc
 }
 
 TCP_NSC::TCP_NSC()
-  : pStackM(NULL),
+    : pStackM(NULL),
     pNsiTimerM(NULL),
     isAliveM(false),
     curAddrCounterM(0),
@@ -155,8 +151,7 @@ TCP_NSC::TCP_NSC()
     rcvAckVector(NULL)
 {
     // statistics:
-    if (true) // (getTcpMain()->recordStatistics)
-    {
+    if (true) {    // (getTcpMain()->recordStatistics)
         sndNxtVector = new cOutVector("sent seq");
         sndAckVector = new cOutVector("sent ack");
         rcvSeqVector = new cOutVector("rcvd seq");
@@ -169,16 +164,14 @@ TCP_NSC::TCP_NSC()
 uint32_t TCP_NSC::mapRemote2Nsc(Address const& addrP)
 {
     Remote2NscMap::iterator i = remote2NscMapM.find(addrP);
-    if (i != remote2NscMapM.end())
-    {
+    if (i != remote2NscMapM.end()) {
         return i->second;
     }
 
     // get first free remote NSC IP
     uint32_t ret = remoteFirstInnerIpS.toIPv4().getInt();
     Nsc2RemoteMap::iterator j;
-    for ( j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++)
-    {
+    for (j = nsc2RemoteMapM.begin(); j != nsc2RemoteMapM.end(); j++) {
         if (j->first > ret)
             break;
         ret = j->first + 1;
@@ -187,15 +180,15 @@ uint32_t TCP_NSC::mapRemote2Nsc(Address const& addrP)
     // add new pair to maps
     remote2NscMapM[addrP] = ret;
     nsc2RemoteMapM[ret] = addrP;
-    ASSERT( remote2NscMapM.find(addrP) != remote2NscMapM.end() );
-    ASSERT( nsc2RemoteMapM.find(ret) != nsc2RemoteMapM.end() );
+    ASSERT(remote2NscMapM.find(addrP) != remote2NscMapM.end());
+    ASSERT(nsc2RemoteMapM.find(ret) != nsc2RemoteMapM.end());
     return ret;
 }
 
 // return original remote ip from remote NSC IP
 // assert if  IP not exists in map
 // nscAddrP in host byte order!
-Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
+Address const& TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
 {
     Nsc2RemoteMap::iterator i = nsc2RemoteMapM.find(nscAddrP);
 
@@ -205,6 +198,7 @@ Address const & TCP_NSC::mapNsc2Remote(uint32_t nscAddrP)
     ASSERT(0);
     exit(1);
 }
+
 // x == mapNsc2Remote(mapRemote2Nsc(x))
 
 void TCP_NSC::initialize(int stage)
@@ -213,8 +207,7 @@ void TCP_NSC::initialize(int stage)
 
     EV_TRACE << this << ": initialize stage " << stage << endl;
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         const char *q;
         q = par("sendQueueClass");
 
@@ -229,14 +222,13 @@ void TCP_NSC::initialize(int stage)
         WATCH_MAP(tcpAppConnMapM);
 
         // load the stack
-        const char* stackName = this->par(stackNameParamNameS).stringValue();
+        const char *stackName = this->par(stackNameParamNameS).stringValue();
         int bufferSize = (int)(this->par(bufferSizeParamNameS).longValue());
         loadStack(stackName, bufferSize);
         pStackM->if_attach(localInnerIpS.str().c_str(), localInnerMaskS.str().c_str(), 1500);
         pStackM->add_default_gateway(localInnerGwS.str().c_str());
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER)
-    {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -245,8 +237,7 @@ void TCP_NSC::initialize(int stage)
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(IP_PROT_TCP);
     }
-    else if (stage == INITSTAGE_LAST)
-    {
+    else if (stage == INITSTAGE_LAST) {
         isAliveM = true;
     }
 }
@@ -256,8 +247,7 @@ TCP_NSC::~TCP_NSC()
     EV_TRACE << this << ": destructor\n";
     isAliveM = false;
 
-    while (!tcpAppConnMapM.empty())
-    {
+    while (!tcpAppConnMapM.empty()) {
         TcpAppConnMap::iterator i = tcpAppConnMapM.begin();
         delete (*i).second.pNscSocketM;
         tcpAppConnMapM.erase(i);
@@ -271,31 +261,28 @@ TCP_NSC::~TCP_NSC()
 }
 
 // send a TCP_I_ESTABLISHED msg to Application Layer
-void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection &connP)
+void TCP_NSC::sendEstablishedMsg(TCP_NSC_Connection& connP)
 {
     cMessage *msg = connP.createEstablishedMsg();
 
-    if (msg)
-    {
+    if (msg) {
         send(msg, "appOut", connP.appGateIndexM);
         connP.sentEstablishedM = true;
     }
 }
 
-void TCP_NSC::changeAddresses(TCP_NSC_Connection &connP,
-        const TCP_NSC_Connection::SockPair &inetSockPairP,
-        const TCP_NSC_Connection::SockPair &nscSockPairP)
+void TCP_NSC::changeAddresses(TCP_NSC_Connection& connP,
+        const TCP_NSC_Connection::SockPair& inetSockPairP,
+        const TCP_NSC_Connection::SockPair& nscSockPairP)
 {
-    if (!(connP.inetSockPairM == inetSockPairP))
-    {
+    if (!(connP.inetSockPairM == inetSockPairP)) {
         EV_DEBUG << "conn:" << connP << " change inetMap from " << connP.inetSockPairM << " to " << inetSockPairP << "\n";
         inetSockPair2ConnIdMapM.erase(connP.inetSockPairM);
         connP.inetSockPairM = inetSockPairP;
         inetSockPair2ConnIdMapM[connP.inetSockPairM] = connP.connIdM;
     }
 
-    if (!(connP.nscSockPairM == nscSockPairP))
-    {
+    if (!(connP.nscSockPairM == nscSockPairP)) {
         EV_DEBUG << "conn:" << connP << " change nscMap from " << connP.nscSockPairM << " to " << nscSockPairP << "\n";
         // remove old from map:
         nscSockPair2ConnIdMapM.erase(connP.nscSockPairM);
@@ -306,7 +293,7 @@ void TCP_NSC::changeAddresses(TCP_NSC_Connection &connP,
     }
 }
 
-void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
+void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
 {
     // get src/dest addresses
     TCP_NSC_Connection::SockPair nscSockPair, inetSockPair, inetSockPairAny;
@@ -320,17 +307,14 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     inetSockPair.localM.ipAddrM = controlInfo->getDestinationAddress();
     //int interfaceId = controlInfo->getInterfaceId();
 
-    if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL)
-    {
+    if (dynamic_cast<IPv6ControlInfo *>(ctrl) != NULL) {
         {
             // HACK: when IPv6, then correcting the TCPOPTION_MAXIMUM_SEGMENT_SIZE option
             //       with IP header size difference
             unsigned short numOptions = tcpsegP->getOptionsArraySize();
-            for (unsigned short i=0; i < numOptions; i++)
-            {
+            for (unsigned short i = 0; i < numOptions; i++) {
                 TCPOption& option = tcpsegP->getOptions(i);
-                if (option.getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE)
-                {
+                if (option.getKind() == TCPOPTION_MAXIMUM_SEGMENT_SIZE) {
                     unsigned int value = option.getValues(0);
                     value -= sizeof(struct nsc_ipv6hdr) - sizeof(struct nsc_iphdr);
                     option.setValues(0, value);
@@ -363,28 +347,28 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     nscSockPair.localM.ipAddrM = localInnerIpS;
     nscSockPair.remoteM.ipAddrM.set(IPv4Address(nscSrcAddr));
 
-    EV_DETAIL << this << ": data arrived for interface of stack "<< pStackM << "\n"
-            << "  src:"<< inetSockPair.remoteM.ipAddrM <<",dest:"<< inetSockPair.localM.ipAddrM <<"\n";
+    EV_DETAIL << this << ": data arrived for interface of stack " << pStackM << "\n"
+              << "  src:" << inetSockPair.remoteM.ipAddrM << ",dest:" << inetSockPair.localM.ipAddrM << "\n";
 
     nsc_iphdr *ih = (nsc_iphdr *)data;
     tcphdr *tcph = (tcphdr *)(data + ipHdrLen);
     // set IP header:
     ih->version = 4;
-    ih->ihl = ipHdrLen/4;
+    ih->ihl = ipHdrLen / 4;
     ih->tos = 0;
     ih->id = htons(tcpsegP->getSequenceNo());
-    ih->frag_off = htons(0x4000);   // don't fragment, offset = 0;
+    ih->frag_off = htons(0x4000);    // don't fragment, offset = 0;
     ih->ttl = 64;
-    ih->protocol = 6;       // TCP
+    ih->protocol = 6;    // TCP
     ih->check = 0;
     ih->saddr = htonl(nscSrcAddr);
     ih->daddr = htonl(localInnerIpS.toIPv4().getInt());
 
     EV_DEBUG << this << ": modified to: IP " << ih->version << " len " << ih->ihl
-          << " protocol " << (unsigned int)(ih->protocol)
-          << " saddr " << (ih->saddr)
-          << " daddr " << (ih->daddr)
-          << "\n";
+             << " protocol " << (unsigned int)(ih->protocol)
+             << " saddr " << (ih->saddr)
+             << " daddr " << (ih->daddr)
+             << "\n";
 
     size_t totalTcpLen = maxBufferSize - ipHdrLen;
     TCP_NSC_Connection *conn;
@@ -395,8 +379,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
 
     totalTcpLen = TCPSerializer().serialize(tcpsegP, (unsigned char *)tcph, totalTcpLen);
 
-    if (conn)
-    {
+    if (conn) {
         conn->receiveQueueM->notifyAboutIncomingSegmentProcessing(tcpsegP);
     }
 
@@ -417,25 +400,22 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     TcpAppConnMap::iterator j;
     int changes = 0;
 
-    for (j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j)
-    {
-        TCP_NSC_Connection &c = j->second;
+    for (j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
+        TCP_NSC_Connection& c = j->second;
 
-        if (c.pNscSocketM && c.isListenerM)
-        {
+        if (c.pNscSocketM && c.isListenerM) {
             // accepting socket
             EV_DETAIL << this << ": NSC: attempting to accept:\n";
 
             INetStreamSocket *sock = NULL;
             int err;
 
-            err = c.pNscSocketM->accept( &sock );
+            err = c.pNscSocketM->accept(&sock);
 
             EV_DETAIL << this << ": accept returned " << err << " , sock is " << sock
-                << " socket" << c.pNscSocketM << "\n";
+                      << " socket" << c.pNscSocketM << "\n";
 
-            if (sock)
-            {
+            if (sock) {
                 ASSERT(changes == 0);
                 ASSERT(c.inetSockPairM.localM.portM == inetSockPair.localM.portM);
                 ++changes;
@@ -465,22 +445,19 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 sendEstablishedMsg(*conn);
             }
         }
-        else if (c.pNscSocketM && !c.disconnectCalledM && c.pNscSocketM->is_connected() ) // not listener
-        {
+        else if (c.pNscSocketM && !c.disconnectCalledM && c.pNscSocketM->is_connected()) {    // not listener
             bool hasData = false;
             int err = NSC_EAGAIN;
             EV_DEBUG << this << ": NSC: attempting to read from socket " << c.pNscSocketM << "\n";
 
-            if ((!c.sentEstablishedM) && c.pNscSocketM->is_connected())
-            {
+            if ((!c.sentEstablishedM) && c.pNscSocketM->is_connected()) {
                 ASSERT(changes == 0);
                 hasData = true;
                 changeAddresses(c, inetSockPair, nscSockPair);
                 sendEstablishedMsg(c);
             }
 
-            while (true)
-            {
+            while (true) {
                 static char buf[4096];
 
                 int buflen = sizeof(buf);
@@ -489,8 +466,7 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
 
                 EV_DEBUG << this << ": NSC: read: err " << err << " , buflen " << buflen << "\n";
 
-                if (err == 0 && buflen > 0)
-                {
+                if (err == 0 && buflen > 0) {
                     ASSERT(changes == 0);
                     if (!hasData)
                         changeAddresses(c, inetSockPair, nscSockPair);
@@ -502,19 +478,17 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                     size_t peerAddrLen=sizeof(peerAddr),sockAddrLen=sizeof(sockAddr);
                     c.pNscSocketM->getpeername((sockaddr*)&peerAddr, &peerAddrLen);
                     c.pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
-*/
+ */
                     err = NSC_EAGAIN;
                 }
                 else
                     break;
             }
 
-            if (hasData)
-            {
+            if (hasData) {
                 cPacket *dataMsg;
 
-                while (NULL != (dataMsg = c.receiveQueueM->extractBytesUpTo()))
-                {
+                while (NULL != (dataMsg = c.receiveQueueM->extractBytesUpTo())) {
                     TCPConnectInfo *tcpConnectInfo = new TCPConnectInfo();
                     tcpConnectInfo->setConnId(c.connIdM);
                     tcpConnectInfo->setLocalAddr(c.inetSockPairM.localM.ipAddrM);
@@ -535,21 +509,35 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
                 const char *name;
                 switch (err) {
                     case 0:
-                        code = TCP_I_PEER_CLOSED; name = "PEER_CLOSED"; break;
+                        code = TCP_I_PEER_CLOSED;
+                        name = "PEER_CLOSED";
+                        break;
+
                     case NSC_ECONNREFUSED:
-                        code = TCP_I_CONNECTION_REFUSED; name = "CONNECTION_REFUSED"; break;
+                        code = TCP_I_CONNECTION_REFUSED;
+                        name = "CONNECTION_REFUSED";
+                        break;
+
                     case NSC_ECONNRESET:
-                        code = TCP_I_CONNECTION_RESET; name = "CONNECTION_RESET"; break;
+                        code = TCP_I_CONNECTION_RESET;
+                        name = "CONNECTION_RESET";
+                        break;
+
                     case NSC_ETIMEDOUT:
-                        code = TCP_I_TIMED_OUT; name = "TIMED_OUT"; break;
+                        code = TCP_I_TIMED_OUT;
+                        name = "TIMED_OUT";
+                        break;
 
                     case NSC_EAGAIN:
-                        code = -1; name = ""; break;
+                        code = -1;
+                        name = "";
+                        break;
+
                     default:
-                        throw cRuntimeError("Unknown NSC error returned by read_data(): %d", err); break;
+                        throw cRuntimeError("Unknown NSC error returned by read_data(): %d", err);
+                        break;
                 }
-                if (code != -1)
-                {
+                if (code != -1) {
                     cMessage *msg = new cMessage(name);
                     msg->setKind(code);
                     TCPCommand *ind = new TCPCommand();
@@ -562,39 +550,48 @@ void TCP_NSC::handleIpInputMessage(TCPSegment* tcpsegP)
     }
 
     /*
-    ...
-    NSC: process segment (data,len); should call removeConnection() if socket has
-    closed and completely done
+       ...
+       NSC: process segment (data,len); should call removeConnection() if socket has
+       closed and completely done
 
-    XXX: probably need to poll sockets to see if they are closed.
-    ...
-    */
+       XXX: probably need to poll sockets to see if they are closed.
+       ...
+     */
 
-    delete [] data;
+    delete[] data;
     delete tcpsegP;
 }
 
-TCP_NSC_SendQueue* TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
+TCP_NSC_SendQueue *TCP_NSC::createSendQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataSendQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCP_NSC_ByteStreamSendQueue();
-        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedSendQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
+    switch (transferModeP) {
+        case TCP_TRANSFER_BYTECOUNT:
+            return new TCP_NSC_VirtualDataSendQueue();
+
+        case TCP_TRANSFER_BYTESTREAM:
+            return new TCP_NSC_ByteStreamSendQueue();
+
+        case TCP_TRANSFER_OBJECT:    //return new TCP_NSC_MsgBasedSendQueue();
+        default:
+            throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
     }
 }
 
-TCP_NSC_ReceiveQueue* TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
+TCP_NSC_ReceiveQueue *TCP_NSC::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT:   return new TCP_NSC_VirtualDataReceiveQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCP_NSC_ByteStreamReceiveQueue();
-        case TCP_TRANSFER_OBJECT:      //return new TCP_NSC_MsgBasedReceiveQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
+    switch (transferModeP) {
+        case TCP_TRANSFER_BYTECOUNT:
+            return new TCP_NSC_VirtualDataReceiveQueue();
+
+        case TCP_TRANSFER_BYTESTREAM:
+            return new TCP_NSC_ByteStreamReceiveQueue();
+
+        case TCP_TRANSFER_OBJECT:    //return new TCP_NSC_MsgBasedReceiveQueue();
+        default:
+            throw cRuntimeError("Invalid TCP data transfer mode: %d at %s", transferModeP, this->getFullPath().c_str());
     }
 }
+
 void TCP_NSC::handleAppMessage(cMessage *msgP)
 {
     TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msgP->getControlInfo());
@@ -602,8 +599,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
 
     TCP_NSC_Connection *conn = findAppConn(connId);
 
-    if (!conn)
-    {
+    if (!conn) {
         TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(controlInfo);
 
         // add into appConnMap
@@ -611,7 +607,7 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
         conn->tcpNscM = this;
         conn->connIdM = connId;
         conn->appGateIndexM = msgP->getArrivalGate()->getIndex();
-        conn->pNscSocketM = NULL;  // will be filled in within processAppCommand()
+        conn->pNscSocketM = NULL;    // will be filled in within processAppCommand()
 
         TCPDataTransferMode transferMode = (TCPDataTransferMode)(openCmd->getDataTransferMode());
         // create send queue
@@ -630,20 +626,18 @@ void TCP_NSC::handleAppMessage(cMessage *msgP)
 
 void TCP_NSC::handleMessage(cMessage *msgP)
 {
-    if (msgP->isSelfMessage())
-    {
+    if (msgP->isSelfMessage()) {
         // timer expired
         /*
-        ...
-        NSC timer processing
-        ...
+           ...
+           NSC timer processing
+           ...
            Timers are ordinary cMessage objects that are started by
            scheduleAt(simTime()+timeout, msg), and can be cancelled
            via cancelEvent(msg); when they expire (fire) they are delivered
            to the module via handleMessage(), i.e. they end up here.
-        */
-        if (msgP == pNsiTimerM )
-        { // nsc_nsi_timer
+         */
+        if (msgP == pNsiTimerM) {    // nsc_nsi_timer
             do_SEND_all();
 
             pStackM->increment_ticks();
@@ -653,30 +647,27 @@ void TCP_NSC::handleMessage(cMessage *msgP)
             scheduleAt(msgP->getArrivalTime() + 1.0 / (double)pStackM->get_hz(), msgP);
         }
     }
-    else if (msgP->arrivedOn("ipIn"))
-    {
+    else if (msgP->arrivedOn("ipIn")) {
         if (false
 #ifdef WITH_IPv4
-                || dynamic_cast<ICMPMessage *>(msgP)
-#endif
+            || dynamic_cast<ICMPMessage *>(msgP)
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                || dynamic_cast<ICMPv6Message *>(msgP)
-#endif
+            || dynamic_cast<ICMPv6Message *>(msgP)
+#endif // ifdef WITH_IPv6
             )
         {
-            EV_WARN << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
+            EV_WARN << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msgP;
         }
-        else
-        {
+        else {
             EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
             // must be a TCPSegment
             TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msgP);
             handleIpInputMessage(tcpseg);
         }
     }
-    else // must be from app
-    {
+    else {    // must be from app
         EV_DEBUG << this << ": handle msg: " << msgP->getName() << "\n";
         handleAppMessage(msgP);
     }
@@ -696,13 +687,13 @@ TCP_NSC_Connection *TCP_NSC::findAppConn(int connIdP)
     return i == tcpAppConnMapM.end() ? NULL : &(i->second);
 }
 
-TCP_NSC_Connection *TCP_NSC::findConnByInetSockPair(TCP_NSC_Connection::SockPair const & sockPairP)
+TCP_NSC_Connection *TCP_NSC::findConnByInetSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
     SockPair2ConnIdMap::iterator i = inetSockPair2ConnIdMapM.find(sockPairP);
     return i == inetSockPair2ConnIdMapM.end() ? NULL : findAppConn(i->second);
 }
 
-TCP_NSC_Connection *TCP_NSC::findConnByNscSockPair(TCP_NSC_Connection::SockPair const & sockPairP)
+TCP_NSC_Connection *TCP_NSC::findConnByNscSockPair(TCP_NSC_Connection::SockPair const& sockPairP)
 {
     SockPair2ConnIdMap::iterator i = nscSockPair2ConnIdMapM.find(sockPairP);
     return i == nscSockPair2ConnIdMapM.end() ? NULL : findAppConn(i->second);
@@ -723,10 +714,10 @@ void TCP_NSC::removeConnection(int connIdP)
 void TCP_NSC::printConnBrief(TCP_NSC_Connection& connP)
 {
     EV_DEBUG << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM
-            << " nscsocket=" << connP.pNscSocketM << "\n";
+             << " nscsocket=" << connP.pNscSocketM << "\n";
 }
 
-void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
+void TCP_NSC::loadStack(const char *stacknameP, int bufferSizeP)
 {
     void *handle = NULL;
     FCreateStack create = NULL;
@@ -735,15 +726,13 @@ void TCP_NSC::loadStack(const char* stacknameP, int bufferSizeP)
 
     handle = dlopen(stacknameP, RTLD_NOW);
 
-    if (!handle)
-    {
+    if (!handle) {
         throw cRuntimeError("The loading of '%s' NSC stack is unsuccessful: %s. Check the LD_LIBRARY_PATH or stackname!", stacknameP, dlerror());
     }
 
     create = (FCreateStack)dlsym(handle, "nsc_create_stack");
 
-    if (!create)
-    {
+    if (!create) {
         throw cRuntimeError("The '%s' NSC stack creation unsuccessful: %s", stacknameP, dlerror());
     }
 
@@ -784,10 +773,10 @@ void TCP_NSC::send_callback(const void *dataP, int datalenP)
 }
 
 /*
-void TCP_NSC::interrupt()
-{
-}
-*/
+   void TCP_NSC::interrupt()
+   {
+   }
+ */
 
 /** This is called when something interesting happened to a socket. Perhaps
  * a socket can now be written to or read from or something. We cannot
@@ -814,7 +803,7 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
     double t = simTime().dbl();
     *sec = (unsigned int)(t);
     *usec = (unsigned int)((t - *sec) * 1000000 + 0.5);
-#else
+#else // ifdef USE_DOUBLE_SIMTIME
     simtime_t t = simTime();
     int64 raw = t.raw();
     int64 scale = t.getScale();
@@ -829,7 +818,7 @@ void TCP_NSC::gettime(unsigned int *secP, unsigned int *usecP)
 
     *secP = secs;
     *usecP = usecs;
-#endif
+#endif // ifdef USE_DOUBLE_SIMTIME
 
     EV_TRACE << this << ": gettime(" << *secP << "," << *usecP << ") called\n";
 }
@@ -843,9 +832,9 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     ASSERT(ipHdrLen <= lenP);
     int totalLen = ntohs(iph->tot_len);
     ASSERT(totalLen == lenP);
-    tcphdr const *tcph = (tcphdr const*)(((const char *)(iph)) + ipHdrLen);
+    tcphdr const *tcph = (tcphdr const *)(((const char *)(iph)) + ipHdrLen);
 
-        // XXX add some info (seqNo, len, etc)
+    // XXX add some info (seqNo, len, etc)
 
     TCP_NSC_Connection::SockPair nscSockPair;
     TCP_NSC_Connection *conn;
@@ -855,36 +844,32 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     nscSockPair.remoteM.ipAddrM.set(IPv4Address(ntohl(iph->daddr)));
     nscSockPair.remoteM.portM = ntohs(tcph->th_dport);
 
-    if (curConnM)
-    {
+    if (curConnM) {
         changeAddresses(*curConnM, curConnM->inetSockPairM, nscSockPair);
         conn = curConnM;
     }
-    else
-    {
+    else {
         conn = findConnByNscSockPair(nscSockPair);
     }
 
     TCPSegment *tcpseg;
 
-    if (conn)
-    {
-        tcpseg = conn->sendQueueM->createSegmentWithBytes(tcph, totalLen-ipHdrLen);
+    if (conn) {
+        tcpseg = conn->sendQueueM->createSegmentWithBytes(tcph, totalLen - ipHdrLen);
         src = conn->inetSockPairM.localM.ipAddrM;
         dest = conn->inetSockPairM.remoteM.ipAddrM;
     }
-    else
-    {
+    else {
         tcpseg = new TCPSegment("tcp-segment");
 
-        TCPSerializer().parse((const unsigned char *)tcph, totalLen-ipHdrLen, tcpseg, true);
+        TCPSerializer().parse((const unsigned char *)tcph, totalLen - ipHdrLen, tcpseg, true);
         dest = mapNsc2Remote(ntohl(iph->daddr));
     }
 
     ASSERT(tcpseg);
 
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
-       << " to " << dest << "\n";
+             << " to " << dest << "\n";
 
     IAddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
@@ -893,13 +878,12 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     controlInfo->setDestinationAddress(dest);
     tcpseg->setControlInfo(check_and_cast<cObject *>(controlInfo));
 
-    if (conn)
-    {
+    if (conn) {
         conn->receiveQueueM->notifyAboutSending(tcpseg);
     }
 
     // record seq (only if we do send data) and ackno
-    if (sndNxtVector && tcpseg->getPayloadLength()!=0)
+    if (sndNxtVector && tcpseg->getPayloadLength() != 0)
         sndNxtVector->record(tcpseg->getSequenceNo());
 
     if (sndAckVector)
@@ -932,22 +916,40 @@ void TCP_NSC::processAppCommand(TCP_NSC_Connection& connP, cMessage *msgP)
     // first do actions
     TCPCommand *tcpCommand = (TCPCommand *)(msgP->removeControlInfo());
 
-    switch (msgP->getKind())
-    {
-        case TCP_C_OPEN_ACTIVE: process_OPEN_ACTIVE(connP, tcpCommand, msgP); break;
-        case TCP_C_OPEN_PASSIVE: process_OPEN_PASSIVE(connP, tcpCommand, msgP); break;
-        case TCP_C_SEND: process_SEND(connP, tcpCommand, check_and_cast<cPacket*>(msgP)); break;
-        case TCP_C_CLOSE: process_CLOSE(connP, tcpCommand, msgP); break;
-        case TCP_C_ABORT: process_ABORT(connP, tcpCommand, msgP); break;
-        case TCP_C_STATUS: process_STATUS(connP, tcpCommand, msgP); break;
-        default: throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
+    switch (msgP->getKind()) {
+        case TCP_C_OPEN_ACTIVE:
+            process_OPEN_ACTIVE(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_OPEN_PASSIVE:
+            process_OPEN_PASSIVE(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_SEND:
+            process_SEND(connP, tcpCommand, check_and_cast<cPacket *>(msgP));
+            break;
+
+        case TCP_C_CLOSE:
+            process_CLOSE(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_ABORT:
+            process_ABORT(connP, tcpCommand, msgP);
+            break;
+
+        case TCP_C_STATUS:
+            process_STATUS(connP, tcpCommand, msgP);
+            break;
+
+        default:
+            throw cRuntimeError("Wrong command from app: %d", msgP->getKind());
     }
 
     /*
-    ...
-    NSC: should call removeConnection(connP.connIdM) if socket has been destroyed
-    ...
-    */
+       ...
+       NSC: should call removeConnection(connP.connIdM) if socket has been destroyed
+       ...
+     */
 }
 
 void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
@@ -964,8 +966,8 @@ void TCP_NSC::process_OPEN_ACTIVE(TCP_NSC_Connection& connP, TCPCommand *tcpComm
         throw cRuntimeError("Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
     EV_INFO << this << ": OPEN: "
-        << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << " --> "
-        << inetSockPair.remoteM.ipAddrM << ":" << inetSockPair.remoteM.portM << "\n";
+            << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << " --> "
+            << inetSockPair.remoteM.ipAddrM << ":" << inetSockPair.remoteM.portM << "\n";
 
     // insert to map:
     uint32_t nscRemoteAddr = mapRemote2Nsc(inetSockPair.remoteM.ipAddrM);
@@ -1002,7 +1004,6 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     if (!openCmd->getFork())
         throw cRuntimeError("TCP_NSC supports Forking mode only");
 
-
     TCP_NSC_Connection::SockPair inetSockPair, nscSockPair;
     inetSockPair.localM.ipAddrM = openCmd->getLocalAddr();
     inetSockPair.remoteM.ipAddrM = openCmd->getRemoteAddr();
@@ -1010,10 +1011,10 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     inetSockPair.remoteM.portM = openCmd->getRemotePort();
 
     uint32_t nscRemoteAddr = inetSockPair.remoteM.ipAddrM.isUnspecified()
-            ? ntohl(INADDR_ANY)
-            : mapRemote2Nsc(inetSockPair.remoteM.ipAddrM); // Don't remove! It's insert remoteAddr into MAP.
+        ? ntohl(INADDR_ANY)
+        : mapRemote2Nsc(inetSockPair.remoteM.ipAddrM);    // Don't remove! It's insert remoteAddr into MAP.
 
-    (void)nscRemoteAddr; // Eliminate "unused variable" warning.
+    (void)nscRemoteAddr;    // Eliminate "unused variable" warning.
 
     if (inetSockPair.localM.portM == -1)
         throw cRuntimeError("Error processing command OPEN_PASSIVE: local port must be specified");
@@ -1021,10 +1022,10 @@ void TCP_NSC::process_OPEN_PASSIVE(TCP_NSC_Connection& connP, TCPCommand *tcpCom
     EV_INFO << this << "Starting to listen on: " << inetSockPair.localM.ipAddrM << ":" << inetSockPair.localM.portM << "\n";
 
     /*
-    ...
-    NSC: process passive open request
-    ...
-    */
+       ...
+       NSC: process passive open request
+       ...
+     */
     nscSockPair.localM.portM = inetSockPair.localM.portM;
 
     changeAddresses(connP, inetSockPair, nscSockPair);
@@ -1052,8 +1053,7 @@ void TCP_NSC::process_SEND(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, c
 
 void TCP_NSC::do_SEND_all()
 {
-    for (TcpAppConnMap::iterator j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j)
-    {
+    for (TcpAppConnMap::iterator j = tcpAppConnMapM.begin(); j != tcpAppConnMapM.end(); ++j) {
         TCP_NSC_Connection& conn = j->second;
         conn.do_SEND();
     }
@@ -1081,19 +1081,19 @@ void TCP_NSC::process_ABORT(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, 
 
 void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP, cMessage *msgP)
 {
-    delete tcpCommandP; // but we'll reuse msg for reply
+    delete tcpCommandP;    // but we'll reuse msg for reply
 
     TCPStatusInfo *statusInfo = new TCPStatusInfo();
 
     /*
-    ...
-    NSC: fill in status if possible
+       ...
+       NSC: fill in status if possible
 
          Still more work to do here. Some of this needs to be implemented on
          the NSC side, which is fairly trivial, just updating the get_var
          function for each stack.
-    ...
-    */
+       ...
+     */
 
     char result[512];
 
@@ -1108,7 +1108,6 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
     statusInfo->setRemotePort(connP.inetSockPairM.remoteM.portM);
     //connP.pNscSocketM->get_var("ssthresh_", result, sizeof(result));
     //connP.pNscSocketM->get_var("rxtcur_", result, sizeof(result));
-
 
 /* other TCP model:
     statusInfo->setState(fsm.getState());
@@ -1129,7 +1128,7 @@ void TCP_NSC::process_STATUS(TCP_NSC_Connection& connP, TCPCommand *tcpCommandP,
     statusInfo->setRcv_up(state->rcv_up);
     statusInfo->setIrs(state->irs);
     statusInfo->setFin_ack_rcvd(state->fin_ack_rcvd);
-*/
+ */
 
     msgP->setControlInfo(statusInfo);
     msgP->setKind(TCP_I_STATUS);
@@ -1143,6 +1142,5 @@ bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
-
-}
+} // namespace inet
 

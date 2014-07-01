@@ -15,21 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "StationaryMobility.h"
 
 namespace inet {
-
-
 Define_Module(StationaryMobility);
-
 
 void StationaryMobility::handleSelfMessage(cMessage *msg)
 {
     ASSERT(false);
 }
-
-
-}
-
+} // namespace inet
 

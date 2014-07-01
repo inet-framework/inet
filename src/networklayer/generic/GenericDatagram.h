@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_GENERICDATAGRAM_H
 #define __INET_GENERICDATAGRAM_H
 
@@ -25,7 +24,6 @@
 #include "IPProtocolId_m.h"
 
 namespace inet {
-
 /**
  * Represents a generic datagram. More info in the GenericDatagram.msg file
  * (and the documentation generated from it).
@@ -34,19 +32,18 @@ class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDat
 {
   public:
     GenericDatagram(const char *name = NULL, int kind = 0) : GenericDatagram_Base(name, kind) {}
-    GenericDatagram(const GenericDatagram& other) : GenericDatagram_Base(other.getName()) {operator=(other);}
-    GenericDatagram& operator=(const GenericDatagram& other) {GenericDatagram_Base::operator=(other); return *this;}
-    virtual GenericDatagram *dup() const {return new GenericDatagram(*this);}
+    GenericDatagram(const GenericDatagram& other) : GenericDatagram_Base(other.getName()) { operator=(other); }
+    GenericDatagram& operator=(const GenericDatagram& other) { GenericDatagram_Base::operator=(other); return *this; }
+    virtual GenericDatagram *dup() const { return new GenericDatagram(*this); }
 
-    virtual Address getSourceAddress() const {return GenericDatagram_Base::_getSrcAddr();}
-    virtual void setSourceAddress(const Address& addr)  {GenericDatagram_Base::setSourceAddress(addr);}
-    virtual Address getDestinationAddress() const  {return GenericDatagram_Base::_getDestAddr();}
-    virtual void setDestinationAddress(const Address& addr)  {GenericDatagram_Base::setDestinationAddress(addr);}
-    virtual int getTransportProtocol() const {return GenericDatagram_Base::getTransportProtocol();}
-    virtual void setTransportProtocol(int protocol) {GenericDatagram_Base::setTransportProtocol(protocol);}
+    virtual Address getSourceAddress() const { return GenericDatagram_Base::_getSrcAddr(); }
+    virtual void setSourceAddress(const Address& addr) { GenericDatagram_Base::setSourceAddress(addr); }
+    virtual Address getDestinationAddress() const { return GenericDatagram_Base::_getDestAddr(); }
+    virtual void setDestinationAddress(const Address& addr) { GenericDatagram_Base::setDestinationAddress(addr); }
+    virtual int getTransportProtocol() const { return GenericDatagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) { GenericDatagram_Base::setTransportProtocol(protocol); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GENERICDATAGRAM_H
 
-
-#endif

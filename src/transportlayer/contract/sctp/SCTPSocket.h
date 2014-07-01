@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_SCTPSOCKET_H
 #define __INET_SCTPSOCKET_H
 
@@ -26,15 +25,12 @@
 #include "Address.h"
 
 namespace inet {
-
-
 class SCTPStatusInfo;
 class SCTP;
 
 typedef std::vector<Address> AddressVector;
 
-
-class  INET_API SCTPSocket
+class INET_API SCTPSocket
 {
   public:
     /**
@@ -55,7 +51,7 @@ class  INET_API SCTPSocket
         virtual void socketPeerClosed(int assocId, void *yourPtr) {}
         virtual void socketClosed(int assocId, void *yourPtr) {}
         virtual void socketFailure(int assocId, void *yourPtr, int code) {}
-        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status){}// {delete status;}
+        virtual void socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status) {}    // {delete status;}
         virtual void sendRequestArrived() {}
         virtual void msgAbandonedArrived(int assocId) {}
         virtual void shutdownReceivedArrived(int connId) {}
@@ -64,26 +60,25 @@ class  INET_API SCTPSocket
         virtual void addressAddedArrived(int assocId, Address localAddr, Address remoteAddr) {}
     };
 
-    enum State {NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR};
+    enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
 
-    protected:
-        int assocId;
-        int sockId;
-        int sockstate;
-        bool oneToOne;
+  protected:
+    int assocId;
+    int sockId;
+    int sockstate;
+    bool oneToOne;
 
-        Address localAddr;
-        AddressVector localAddresses;
+    Address localAddr;
+    AddressVector localAddresses;
 
-        int localPrt;
-        Address remoteAddr;
-        AddressVector remoteAddresses;
-        int remotePrt;
-        int fsmStatus;
-        int inboundStreams;
-        int outboundStreams;
-        int lastStream;
-
+    int localPrt;
+    Address remoteAddr;
+    AddressVector remoteAddresses;
+    int remotePrt;
+    int fsmStatus;
+    int inboundStreams;
+    int outboundStreams;
+    int lastStream;
 
     CallbackInterface *cb;
     void *yourPtr;
@@ -92,12 +87,12 @@ class  INET_API SCTPSocket
     void sendToSCTP(cPacket *msg);
 
   public:
-  cGate *gateToSctp;
+    cGate *gateToSctp;
     /**
      * Constructor. The connectionId() method returns a valid Id right after
      * constructor call.
      */
-   // SCTPSocket();
+    // SCTPSocket();
     SCTPSocket(bool type = true);
 
     /**
@@ -117,14 +112,14 @@ class  INET_API SCTPSocket
      * to identify the connection when it receives a command from the application
      * (or SCTPSocket).
      */
-    int getConnectionId() const  {return assocId;}
+    int getConnectionId() const { return assocId; }
 
     /**
      * Returns the socket state, one of NOT_BOUND, CLOSED, LISTENING, CONNECTING,
      * CONNECTED, etc. Messages received from SCTP must be routed through
      * processMessage() in order to keep socket state up-to-date.
      */
-    int getState()   {return sockstate;}
+    int getState() { return sockstate; }
 
     /**
      * Returns name of socket state code returned by state().
@@ -133,11 +128,11 @@ class  INET_API SCTPSocket
 
     /** @name Getter functions */
     //@{
-    AddressVector getLocalAddresses()  {return localAddresses;}
-    int getLocalPort() {return localPrt;}
-    AddressVector getRemoteAddresses()  {return remoteAddresses;}
-    int getRemotePort() {return remotePrt;}
-    Address getRemoteAddr() {return remoteAddr;}
+    AddressVector getLocalAddresses() { return localAddresses; }
+    int getLocalPort() { return localPrt; }
+    AddressVector getRemoteAddresses() { return remoteAddresses; }
+    int getRemotePort() { return remotePrt; }
+    Address getRemoteAddr() { return remoteAddr; }
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -147,11 +142,11 @@ class  INET_API SCTPSocket
      * Sets the gate on which to send to SCTP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("sctpOut"));</tt>
      */
-    void setOutputGate(cGate *toSctp)  {gateToSctp = toSctp;};
-    void setOutboundStreams(int streams) {outboundStreams = streams;};
-    void setInboundStreams(int streams) {inboundStreams = streams;};
-    int getOutboundStreams() {return outboundStreams;};
-    int getLastStream() {return lastStream;};
+    void setOutputGate(cGate *toSctp) { gateToSctp = toSctp; };
+    void setOutboundStreams(int streams) { outboundStreams = streams; };
+    void setInboundStreams(int streams) { inboundStreams = streams; };
+    int getOutboundStreams() { return outboundStreams; };
+    int getLastStream() { return lastStream; };
     void setStreamPriority(uint32 stream, uint32 priority);
 
     /**
@@ -182,14 +177,14 @@ class  INET_API SCTPSocket
      * connection will be accepted, and SCTP will refuse subsequent ones.
      * See SCTPOpenCommand documentation (neddoc) for more info.
      */
-    void listen(bool fork=false, bool streamReset=false, uint32 requests=0, uint32 messagesToPush=0);
+    void listen(bool fork = false, bool streamReset = false, uint32 requests = 0, uint32 messagesToPush = 0);
 
     /**
      * Active OPEN to the given remote socket.
      */
     void connect(Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests);
 
-    void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset=false, int32 prMethod=0, uint32 numRequests = 0);
+    void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 
     /**
      * Sends data packet.
@@ -281,12 +276,9 @@ class  INET_API SCTPSocket
     void processMessage(cPacket *msg);
     //@}
 
-
-    void setState(int state) {sockstate = state; };
+    void setState(int state) { sockstate = state; };
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_SCTPSOCKET_H
 

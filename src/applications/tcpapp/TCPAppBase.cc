@@ -20,7 +20,6 @@
 #include "AddressResolver.h"
 
 namespace inet {
-
 simsignal_t TCPAppBase::connectSignal = registerSignal("connect");
 simsignal_t TCPAppBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPAppBase::sentPkSignal = registerSignal("sentPk");
@@ -29,8 +28,7 @@ void TCPAppBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numSessions = numBroken = packetsSent = packetsRcvd = bytesSent = bytesRcvd = 0;
 
         WATCH(numSessions);
@@ -40,8 +38,7 @@ void TCPAppBase::initialize(int stage)
         WATCH(bytesSent);
         WATCH(bytesRcvd);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
@@ -74,12 +71,10 @@ void TCPAppBase::connect()
 
     Address destination;
     AddressResolver().tryResolve(connectAddress, destination);
-    if (destination.isUnspecified())
-    {
+    if (destination.isUnspecified()) {
         EV_ERROR << "Connecting to " << connectAddress << " port=" << connectPort << ": cannot resolve destination address\n";
     }
-    else
-    {
+    else {
         EV_INFO << "Connecting to " << connectAddress << "(" << destination << ") port=" << connectPort << endl;
         setStatusString("connecting");
 
@@ -133,8 +128,7 @@ void TCPAppBase::socketDataArrived(int, void *, cPacket *msg, bool)
 void TCPAppBase::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
-    if (socket.getState() == TCPSocket::PEER_CLOSED)
-    {
+    if (socket.getState() == TCPSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well\n";
         close();
     }
@@ -164,9 +158,5 @@ void TCPAppBase::finish()
     EV_INFO << modulePath << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
     EV_INFO << modulePath << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -30,42 +30,38 @@
 #include "IClassifier.h"
 
 namespace inet {
-
-
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
 class INET_API MPLS : public cSimpleModule
 {
-    protected:
-        simtime_t delay1;
+  protected:
+    simtime_t delay1;
 
-        //no longer used, see comment in intialize
-        //std::vector<bool> labelIf;
+    //no longer used, see comment in intialize
+    //std::vector<bool> labelIf;
 
-        LIBTable *lt;
-        IInterfaceTable *ift;
-        IClassifier *pct;
+    LIBTable *lt;
+    IInterfaceTable *ift;
+    IClassifier *pct;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg);
 
-    protected:
-        virtual void processPacketFromL3(cMessage *msg);
-        virtual void processPacketFromL2(cMessage *msg);
-        virtual void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
+  protected:
+    virtual void processPacketFromL3(cMessage *msg);
+    virtual void processPacketFromL2(cMessage *msg);
+    virtual void processMPLSPacketFromL2(MPLSPacket *mplsPacket);
 
-        virtual bool tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
-        virtual void labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
+    virtual bool tryLabelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
+    virtual void labelAndForwardIPv4Datagram(IPv4Datagram *ipdatagram);
 
-        virtual void sendToL2(cMessage *msg, int gateIndex);
-        virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
+    virtual void sendToL2(cMessage *msg, int gateIndex);
+    virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_MPLS_H
 

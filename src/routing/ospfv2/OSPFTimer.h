@@ -18,13 +18,10 @@
 #ifndef __INET_OSPFTIMER_H
 #define __INET_OSPFTIMER_H
 
-
 #include "INETDefs.h"
 
 namespace inet {
-
-enum OSPFTimerType
-{
+enum OSPFTimerType {
     INTERFACE_HELLO_TIMER = 0,
     INTERFACE_WAIT_TIMER = 1,
     INTERFACE_ACKNOWLEDGEMENT_TIMER = 3,
@@ -35,10 +32,7 @@ enum OSPFTimerType
     NEIGHBOR_REQUEST_RETRANSMISSION_TIMER = 8,
     DATABASE_AGE_TIMER = 9,
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_OSPFTIMER_H
 

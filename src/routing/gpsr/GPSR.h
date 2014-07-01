@@ -32,7 +32,6 @@
 #include "GPSR_m.h"
 
 namespace inet {
-
 /**
  * This class implements the Greedy Perimeter Stateless Routing for Wireless Networks.
  * The implementation supports both GG and RNG planarization algorithms.
@@ -46,113 +45,112 @@ namespace inet {
 // KLUDGE: we should rather add these fields as header extensions
 class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener, public INetfilter::IHook
 {
-    private:
-        // GPSR parameters
-        GPSRPlanarizationMode planarizationMode;
-        const char * interfaces;
-        simtime_t beaconInterval;
-        simtime_t maxJitter;
-        simtime_t neighborValidityInterval;
+  private:
+    // GPSR parameters
+    GPSRPlanarizationMode planarizationMode;
+    const char *interfaces;
+    simtime_t beaconInterval;
+    simtime_t maxJitter;
+    simtime_t neighborValidityInterval;
 
-        // context
-        cModule * host;
-        NodeStatus * nodeStatus;
-        IMobility * mobility;
-        IAddressType * addressType;
-        IInterfaceTable * interfaceTable;
-        IRoutingTable * routingTable; // TODO: delete when necessary functions are moved to interface table
-        INetfilter * networkProtocol;
-        static PositionTable globalPositionTable; // KLUDGE: implement position registry protocol
+    // context
+    cModule *host;
+    NodeStatus *nodeStatus;
+    IMobility *mobility;
+    IAddressType *addressType;
+    IInterfaceTable *interfaceTable;
+    IRoutingTable *routingTable;    // TODO: delete when necessary functions are moved to interface table
+    INetfilter *networkProtocol;
+    static PositionTable globalPositionTable;    // KLUDGE: implement position registry protocol
 
-        // internal
-        cMessage * beaconTimer;
-        cMessage * purgeNeighborsTimer;
-        PositionTable neighborPositionTable;
+    // internal
+    cMessage *beaconTimer;
+    cMessage *purgeNeighborsTimer;
+    PositionTable neighborPositionTable;
 
-    public:
-        GPSR();
-        virtual ~GPSR();
+  public:
+    GPSR();
+    virtual ~GPSR();
 
-    protected:
-        // module interface
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        void initialize(int stage);
-        void handleMessage(cMessage * message);
+  protected:
+    // module interface
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    void initialize(int stage);
+    void handleMessage(cMessage *message);
 
-    private:
-        // handling messages
-        void processSelfMessage(cMessage * message);
-        void processMessage(cMessage * message);
+  private:
+    // handling messages
+    void processSelfMessage(cMessage *message);
+    void processMessage(cMessage *message);
 
-        // handling beacon timers
-        void scheduleBeaconTimer();
-        void processBeaconTimer();
+    // handling beacon timers
+    void scheduleBeaconTimer();
+    void processBeaconTimer();
 
-        // handling purge neighbors timers
-        void schedulePurgeNeighborsTimer();
-        void processPurgeNeighborsTimer();
+    // handling purge neighbors timers
+    void schedulePurgeNeighborsTimer();
+    void processPurgeNeighborsTimer();
 
-        // handling UDP packets
-        void sendUDPPacket(UDPPacket * packet, double delay);
-        void processUDPPacket(UDPPacket * packet);
+    // handling UDP packets
+    void sendUDPPacket(UDPPacket *packet, double delay);
+    void processUDPPacket(UDPPacket *packet);
 
-        // handling beacons
-        GPSRBeacon * createBeacon();
-        void sendBeacon(GPSRBeacon * beacon, double delay);
-        void processBeacon(GPSRBeacon * beacon);
+    // handling beacons
+    GPSRBeacon *createBeacon();
+    void sendBeacon(GPSRBeacon *beacon, double delay);
+    void processBeacon(GPSRBeacon *beacon);
 
-        // handling packets
-        GPSRPacket * createPacket(Address destination, cPacket * content);
-        int computePacketBitLength(GPSRPacket * packet);
+    // handling packets
+    GPSRPacket *createPacket(Address destination, cPacket *content);
+    int computePacketBitLength(GPSRPacket *packet);
 
-        // configuration
-        bool isNodeUp() const;
-        void configureInterfaces();
+    // configuration
+    bool isNodeUp() const;
+    void configureInterfaces();
 
-        // position
-        static Coord intersectSections(Coord & begin1, Coord & end1, Coord & begin2, Coord & end2);
-        Coord getDestinationPosition(const Address & address) const;
-        Coord getNeighborPosition(const Address & address) const;
+    // position
+    static Coord intersectSections(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2);
+    Coord getDestinationPosition(const Address& address) const;
+    Coord getNeighborPosition(const Address& address) const;
 
-        // angle
-        static double getVectorAngle(Coord vector);
-        double getDestinationAngle(const Address & address);
-        double getNeighborAngle(const Address & address);
+    // angle
+    static double getVectorAngle(Coord vector);
+    double getDestinationAngle(const Address& address);
+    double getNeighborAngle(const Address& address);
 
-        // address
-        std::string getHostName() const;
-        Address getSelfAddress() const;
-        Address getSenderNeighborAddress(INetworkDatagram * datagram) const;
+    // address
+    std::string getHostName() const;
+    Address getSelfAddress() const;
+    Address getSenderNeighborAddress(INetworkDatagram *datagram) const;
 
-        // neighbor
-        simtime_t getNextNeighborExpiration();
-        void purgeNeighbors();
-        std::vector<Address> getPlanarNeighbors();
-        Address getNextPlanarNeighborCounterClockwise(const Address & startNeighborAddress, double startNeighborAngle);
+    // neighbor
+    simtime_t getNextNeighborExpiration();
+    void purgeNeighbors();
+    std::vector<Address> getPlanarNeighbors();
+    Address getNextPlanarNeighborCounterClockwise(const Address& startNeighborAddress, double startNeighborAngle);
 
-        // next hop
-        Address findNextHop(INetworkDatagram * datagram, const Address & destination);
-        Address findGreedyRoutingNextHop(INetworkDatagram * datagram, const Address & destination);
-        Address findPerimeterRoutingNextHop(INetworkDatagram * datagram, const Address & destination);
+    // next hop
+    Address findNextHop(INetworkDatagram *datagram, const Address& destination);
+    Address findGreedyRoutingNextHop(INetworkDatagram *datagram, const Address& destination);
+    Address findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Address& destination);
 
-        // routing
-        Result routeDatagram(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
+    // routing
+    Result routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
 
-        // netfilter
-        virtual Result datagramPreRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
-        virtual Result datagramForwardHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop) { return ACCEPT; }
-        virtual Result datagramPostRoutingHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop) { return ACCEPT; }
-        virtual Result datagramLocalInHook(INetworkDatagram * datagram, const InterfaceEntry * inputInterfaceEntry);
-        virtual Result datagramLocalOutHook(INetworkDatagram * datagram, const InterfaceEntry *& outputInterfaceEntry, Address & nextHop);
+    // netfilter
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop) { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop) { return ACCEPT; }
+    virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry);
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
 
-        // lifecycle
-        virtual bool handleOperationStage(LifecycleOperation * operation, int stage, IDoneCallback * doneCallback);
+    // lifecycle
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
-        // notification
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    // notification
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GPSR_H
 
-
-#endif

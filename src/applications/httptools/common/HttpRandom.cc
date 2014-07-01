@@ -17,16 +17,23 @@
 #include "HttpRandom.h"
 
 namespace inet {
-
 std::string rdObject::typeStr()
 {
-    switch (m_type)
-    {
-        case dt_normal: return DISTR_NORMAL_STR;
-        case dt_uniform: return DISTR_UNIFORM_STR;
-        case dt_exponential: return DISTR_EXPONENTIAL_STR;
-        case dt_histogram: return DISTR_HISTOGRAM_STR;
-        default: return "UNKNOWN";
+    switch (m_type) {
+        case dt_normal:
+            return DISTR_NORMAL_STR;
+
+        case dt_uniform:
+            return DISTR_UNIFORM_STR;
+
+        case dt_exponential:
+            return DISTR_EXPONENTIAL_STR;
+
+        case dt_histogram:
+            return DISTR_HISTOGRAM_STR;
+
+        default:
+            return "UNKNOWN";
     }
 }
 
@@ -53,7 +60,7 @@ rdNormal::rdNormal(cXMLAttributeMap attributes)
     if (m_bMinLimit)
         m_min = atof(attributes["min"].c_str());
     if (_hasKey(attributes, "nonNegative"))
-        m_nonNegative = strcmp(attributes["nonNegative"].c_str(), "true")==0;
+        m_nonNegative = strcmp(attributes["nonNegative"].c_str(), "true") == 0;
     else
         m_nonNegative = false;
 }
@@ -61,14 +68,12 @@ rdNormal::rdNormal(cXMLAttributeMap attributes)
 double rdNormal::draw()
 {
     double retval = 0.0;
-    do
-    {
+    do {
         if (m_nonNegative)
             retval = truncnormal(m_mean, m_sd);
         else
             retval = normal(m_mean, m_sd);
-    }
-    while (m_bMinLimit && retval<m_min);
+    } while (m_bMinLimit && retval < m_min);
 
     return retval;
 }
@@ -147,7 +152,7 @@ rdHistogram::rdHistogram(cXMLAttributeMap attributes)
         throw "No bins specified for a histogram distribution";
     std::string binstr = attributes["bins"];
     if (_hasKey(attributes, "zeroBased"))
-        m_zeroBased = strcmp(attributes["zeroBased"].c_str(), "true")==0;
+        m_zeroBased = strcmp(attributes["zeroBased"].c_str(), "true") == 0;
     __parseBinString(binstr);
     __normalizeBins();
 }
@@ -159,21 +164,21 @@ double rdHistogram::draw()
     double cumsum = 0;
     int cumcount = 0;
     int count = m_bins.size();
-    for (int i=0; i<count; i++)
-    {
+    for (int i = 0; i < count; i++) {
         // First select the bin
         bin = m_bins[i];
         cumsum += bin.sum;
-        if (cumsum >= val)
-        {
+        if (cumsum >= val) {
             // Then choose from the elements in the bin
-            double n = uniform(1, bin.count)+cumcount;
-            if (m_zeroBased) return n-1.0;
-            else return n;
+            double n = uniform(1, bin.count) + cumcount;
+            if (m_zeroBased)
+                return n - 1.0;
+            else
+                return n;
         }
-        cumcount += bin.count; // Keep the running count for the elements
+        cumcount += bin.count;    // Keep the running count for the elements
     }
-    return -1.0; // Default return in case something weird happens
+    return -1.0;    // Default return in case something weird happens
 }
 
 void rdHistogram::__parseBinString(std::string binstr)
@@ -184,16 +189,15 @@ void rdHistogram::__parseBinString(std::string binstr)
     cStringTokenizer tokenizer = cStringTokenizer(binstr.c_str(), ";");
     std::string curtuple, countstr, sumstr;
     std::vector<std::string> res = tokenizer.asVector();
-    for (std::vector<std::string>::iterator i=res.begin(); i!=res.end(); i++)
-    {
+    for (std::vector<std::string>::iterator i = res.begin(); i != res.end(); i++) {
         curtuple = (*i);
         curtuple = trimLeft(curtuple, "(");
         curtuple = trimRight(curtuple, ")");
         int pos = curtuple.find(',');
-        if (pos==-1)
-            continue;  // Invalid tuple -- raise error here?
+        if (pos == -1)
+            continue; // Invalid tuple -- raise error here?
         countstr = curtuple.substr(0, pos);
-        sumstr = curtuple.substr(pos+1, curtuple.size()-pos-1);
+        sumstr = curtuple.substr(pos + 1, curtuple.size() - pos - 1);
         rdHistogramBin bin;
         bin.count = safeatoi(countstr.c_str(), 0);
         bin.sum = safeatof(sumstr.c_str(), 0.0);
@@ -204,11 +208,12 @@ void rdHistogram::__parseBinString(std::string binstr)
 void rdHistogram::__normalizeBins()
 {
     double sum = 0;
-    for (unsigned int i=0; i<m_bins.size(); i++)
+    for (unsigned int i = 0; i < m_bins.size(); i++)
         sum += m_bins[i].sum;
-    if (sum!=0)
-        for (unsigned int i=0; i<m_bins.size(); i++)
-            m_bins[i].sum = m_bins[i].sum/sum;
+    if (sum != 0)
+        for (unsigned int i = 0; i < m_bins.size(); i++)
+            m_bins[i].sum = m_bins[i].sum / sum;
+
 }
 
 rdConstant::rdConstant(double value)
@@ -244,26 +249,20 @@ rdZipf::rdZipf(cXMLAttributeMap attributes)
     bool baseZero = false;
 
     if (_hasKey(attributes, "zeroBased"))
-        baseZero = strcmp(attributes["zeroBased"].c_str(), "true")==0;
+        baseZero = strcmp(attributes["zeroBased"].c_str(), "true") == 0;
 
-    try
-    {
+    try {
         n = atoi(attributes["n"].c_str());
     }
-    catch (...)
-    {
+    catch (...) {
         n = 1;
     }
-
-    try
-    {
+    try {
         alpha = atof(attributes["alpha"].c_str());
     }
-    catch (...)
-    {
+    catch (...) {
         alpha = 1.0;
     }
-
     __initialize(n, alpha, baseZero);
 }
 
@@ -278,14 +277,15 @@ double rdZipf::draw()
     double sum_prob = 0;
     double z = uniform(0.0001, 0.9999);
     int i;
-    for (i=1; i<=m_number; i++)
-    {
-        sum_prob += m_c / pow((double) i, m_alpha);
+    for (i = 1; i <= m_number; i++) {
+        sum_prob += m_c / pow((double)i, m_alpha);
         if (sum_prob >= z)
             break;
     }
-    if (m_baseZero) return i-1;
-    else return i;
+    if (m_baseZero)
+        return i - 1;
+    else
+        return i;
 }
 
 std::string rdZipf::toString()
@@ -309,44 +309,52 @@ void rdZipf::__initialize(int n, double alpha, bool baseZero)
 void rdZipf::__setup_c()
 {
     m_c = 0.0;
-    for (int i=1; i<=m_number; i++)
-        m_c += (1.0 / pow((double) i, m_alpha));
+    for (int i = 1; i <= m_number; i++)
+        m_c += (1.0 / pow((double)i, m_alpha));
     m_c = 1.0 / m_c;
 }
 
-rdObject* rdObjectFactory::create(cXMLAttributeMap attributes)
+rdObject *rdObjectFactory::create(cXMLAttributeMap attributes)
 {
     std::string typeName = attributes["type"];
     DISTR_TYPE dt;
-    if (typeName=="normal") dt = dt_normal;
-    else if (typeName=="uniform") dt = dt_uniform;
-    else if (typeName=="exponential") dt = dt_exponential;
-    else if (typeName=="histogram") dt = dt_histogram;
-    else if (typeName=="constant") dt = dt_constant;
-    else if (typeName=="zipf") dt = dt_zipf;
-    else return NULL;
+    if (typeName == "normal")
+        dt = dt_normal;
+    else if (typeName == "uniform")
+        dt = dt_uniform;
+    else if (typeName == "exponential")
+        dt = dt_exponential;
+    else if (typeName == "histogram")
+        dt = dt_histogram;
+    else if (typeName == "constant")
+        dt = dt_constant;
+    else if (typeName == "zipf")
+        dt = dt_zipf;
+    else
+        return NULL;
 
-    switch (dt)
-    {
+    switch (dt) {
         case dt_normal:
             return new rdNormal(attributes);
+
         case dt_uniform:
             return new rdUniform(attributes);
+
         case dt_exponential:
             return new rdExponential(attributes);
+
         case dt_histogram:
             return new rdHistogram(attributes);
+
         case dt_constant:
             return new rdConstant(attributes);
+
         case dt_zipf:
             return new rdZipf(attributes);
+
         default:
             return NULL;
     }
 }
-
-
-
-}
-
+} // namespace inet
 

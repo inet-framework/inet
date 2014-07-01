@@ -15,8 +15,6 @@
 #include "ByteArrayMessage.h"
 
 namespace inet {
-
-
 void ByteArrayMessage::setDataFromBuffer(const void *ptr, unsigned int length)
 {
     byteArray_var.setDataFromBuffer(ptr, (unsigned int)length);
@@ -36,8 +34,5 @@ void ByteArrayMessage::removePrefix(unsigned int length)
 {
     byteArray_var.truncateData(length);
 }
-
-
-}
-
+} // namespace inet
 

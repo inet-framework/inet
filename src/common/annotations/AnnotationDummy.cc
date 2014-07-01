@@ -20,16 +20,10 @@
 #include "AnnotationDummy.h"
 
 namespace inet {
-
 Define_Module(AnnotationDummy);
 
 AnnotationDummy::~AnnotationDummy()
 {
 }
-
-
-
-
-}
-
+} // namespace inet
 

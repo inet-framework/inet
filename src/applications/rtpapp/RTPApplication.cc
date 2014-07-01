@@ -23,7 +23,6 @@
 #include "RTPInterfacePacket_m.h"
 
 namespace inet {
-
 Define_Module(RTPApplication)
 
 RTPApplication::RTPApplication()
@@ -39,8 +38,7 @@ void RTPApplication::initialize(int stage)
 
     // because of AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // the common name (CNAME) of this host
         commonName = par("commonName");
 
@@ -69,8 +67,7 @@ void RTPApplication::initialize(int stage)
         ssrc = 0;
         isActiveSession = false;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -93,106 +90,91 @@ void RTPApplication::initialize(int stage)
     }
 }
 
-void RTPApplication::handleMessage(cMessage* msgIn)
+void RTPApplication::handleMessage(cMessage *msgIn)
 {
-    if (msgIn->isSelfMessage())
-    {
-        switch (msgIn->getKind())
-        {
-        case ENTER_SESSION:
-            EV_INFO << "enterSession" << endl;
-            if (isActiveSession)
-            {
-                EV_WARN << "Session already entered\n";
-            }
-            else
-            {
-                isActiveSession = true;
-                RTPCIEnterSession* ci = new RTPCIEnterSession();
-                ci->setCommonName(commonName);
-                ci->setProfileName(profileName);
-                ci->setBandwidth(bandwidth);
-                ci->setDestinationAddress(destinationAddress);
-                ci->setPort(port);
-                cMessage *msg = new RTPControlMsg("Enter Session");
-                msg->setControlInfo(ci);
-                send(msg, "rtpOut");
-            }
-            break;
+    if (msgIn->isSelfMessage()) {
+        switch (msgIn->getKind()) {
+            case ENTER_SESSION:
+                EV_INFO << "enterSession" << endl;
+                if (isActiveSession) {
+                    EV_WARN << "Session already entered\n";
+                }
+                else {
+                    isActiveSession = true;
+                    RTPCIEnterSession *ci = new RTPCIEnterSession();
+                    ci->setCommonName(commonName);
+                    ci->setProfileName(profileName);
+                    ci->setBandwidth(bandwidth);
+                    ci->setDestinationAddress(destinationAddress);
+                    ci->setPort(port);
+                    cMessage *msg = new RTPControlMsg("Enter Session");
+                    msg->setControlInfo(ci);
+                    send(msg, "rtpOut");
+                }
+                break;
 
-        case START_TRANSMISSION:
-            EV_INFO << "startTransmission" << endl;
-            if (!isActiveSession)
-            {
-                EV_WARN << "Session already left\n";
-            }
-            else
-            {
-                RTPCISenderControl *ci = new RTPCISenderControl();
-                ci->setCommand(RTP_CONTROL_PLAY);
-                ci->setSsrc(ssrc);
-                cMessage *msg = new RTPControlMsg("senderModuleControl(PLAY)");
-                msg->setControlInfo(ci);
-                send(msg, "rtpOut");
+            case START_TRANSMISSION:
+                EV_INFO << "startTransmission" << endl;
+                if (!isActiveSession) {
+                    EV_WARN << "Session already left\n";
+                }
+                else {
+                    RTPCISenderControl *ci = new RTPCISenderControl();
+                    ci->setCommand(RTP_CONTROL_PLAY);
+                    ci->setSsrc(ssrc);
+                    cMessage *msg = new RTPControlMsg("senderModuleControl(PLAY)");
+                    msg->setControlInfo(ci);
+                    send(msg, "rtpOut");
 
-                cMessage *selfMsg = new cMessage("stopTransmission", STOP_TRANSMISSION);
-                scheduleAt(simTime() + transmissionStopDelay, selfMsg);
-            }
-            break;
+                    cMessage *selfMsg = new cMessage("stopTransmission", STOP_TRANSMISSION);
+                    scheduleAt(simTime() + transmissionStopDelay, selfMsg);
+                }
+                break;
 
-        case STOP_TRANSMISSION:
-            EV_INFO << "stopTransmission" << endl;
-            if (!isActiveSession)
-            {
-                EV_WARN << "Session already left\n";
-            }
-            else
-            {
-                RTPCISenderControl *ci = new RTPCISenderControl();
-                ci->setCommand(RTP_CONTROL_STOP);
-                ci->setSsrc(ssrc);
-                cMessage *msg = new RTPControlMsg("senderModuleControl(STOP)");
-                msg->setControlInfo(ci);
-                send(msg, "rtpOut");
-            }
-            break;
+            case STOP_TRANSMISSION:
+                EV_INFO << "stopTransmission" << endl;
+                if (!isActiveSession) {
+                    EV_WARN << "Session already left\n";
+                }
+                else {
+                    RTPCISenderControl *ci = new RTPCISenderControl();
+                    ci->setCommand(RTP_CONTROL_STOP);
+                    ci->setSsrc(ssrc);
+                    cMessage *msg = new RTPControlMsg("senderModuleControl(STOP)");
+                    msg->setControlInfo(ci);
+                    send(msg, "rtpOut");
+                }
+                break;
 
-        case LEAVE_SESSION:
-            EV_INFO << "leaveSession" << endl;
-            if (!isActiveSession)
-            {
-                EV_WARN << "Session already left\n";
-            }
-            else
-            {
-                RTPCILeaveSession* ci = new RTPCILeaveSession();
-                cMessage *msg = new RTPControlMsg("Leave Session");
-                msg->setControlInfo(ci);
-                send(msg, "rtpOut");
-            }
-            break;
+            case LEAVE_SESSION:
+                EV_INFO << "leaveSession" << endl;
+                if (!isActiveSession) {
+                    EV_WARN << "Session already left\n";
+                }
+                else {
+                    RTPCILeaveSession *ci = new RTPCILeaveSession();
+                    cMessage *msg = new RTPControlMsg("Leave Session");
+                    msg->setControlInfo(ci);
+                    send(msg, "rtpOut");
+                }
+                break;
 
-        default:
-            throw cRuntimeError("Invalid msgKind value %d in message '%s'",
+            default:
+                throw cRuntimeError("Invalid msgKind value %d in message '%s'",
                     msgIn->getKind(), msgIn->getName());
         }
     }
-    else if (isActiveSession)
-    {
+    else if (isActiveSession) {
         cObject *obj = msgIn->removeControlInfo();
         RTPControlInfo *ci = dynamic_cast<RTPControlInfo *>(obj);
-        if (ci)
-        {
-            switch (ci->getType())
-            {
-            case RTP_IFP_SESSION_ENTERED:
-                {
+        if (ci) {
+            switch (ci->getType()) {
+                case RTP_IFP_SESSION_ENTERED: {
                     EV_INFO << "Session Entered" << endl;
                     ssrc = (check_and_cast<RTPCISessionEntered *>(ci))->getSsrc();
-                    if (opp_strcmp(fileName, ""))
-                    {
+                    if (opp_strcmp(fileName, "")) {
                         EV_INFO << "CreateSenderModule" << endl;
-                        RTPCICreateSenderModule* ci = new RTPCICreateSenderModule();
+                        RTPCICreateSenderModule *ci = new RTPCICreateSenderModule();
                         ci->setSsrc(ssrc);
                         ci->setPayloadType(payloadType);
                         ci->setFileName(fileName);
@@ -200,8 +182,7 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                         msg->setControlInfo(ci);
                         send(msg, "rtpOut");
                     }
-                    else
-                    {
+                    else {
                         cMessage *selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
                         EV_INFO << "Receiver Module : leaveSession" << endl;
                         scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
@@ -209,55 +190,52 @@ void RTPApplication::handleMessage(cMessage* msgIn)
                 }
                 break;
 
-            case RTP_IFP_SENDER_MODULE_CREATED:
-                {
+                case RTP_IFP_SENDER_MODULE_CREATED: {
                     EV_INFO << "Sender Module Created" << endl;
                     cMessage *selfMsg = new cMessage("startTransmission", START_TRANSMISSION);
                     scheduleAt(simTime() + transmissionStartDelay, selfMsg);
                 }
                 break;
 
-            case RTP_IFP_SENDER_STATUS:
-                {
+                case RTP_IFP_SENDER_STATUS: {
                     cMessage *selfMsg;
                     RTPCISenderStatus *rsim = check_and_cast<RTPCISenderStatus *>(ci);
-                    switch (rsim->getStatus())
-                    {
-                    case RTP_SENDER_STATUS_PLAYING:
-                        EV_INFO << "PLAYING" << endl;
-                        break;
+                    switch (rsim->getStatus()) {
+                        case RTP_SENDER_STATUS_PLAYING:
+                            EV_INFO << "PLAYING" << endl;
+                            break;
 
-                    case RTP_SENDER_STATUS_FINISHED:
-                        EV_INFO << "FINISHED" << endl;
-                        selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
-                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
-                        break;
+                        case RTP_SENDER_STATUS_FINISHED:
+                            EV_INFO << "FINISHED" << endl;
+                            selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
+                            scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
+                            break;
 
-                    case RTP_SENDER_STATUS_STOPPED:
-                        EV_INFO << "STOPPED" << endl;
-                        selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
-                        scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
-                        break;
+                        case RTP_SENDER_STATUS_STOPPED:
+                            EV_INFO << "STOPPED" << endl;
+                            selfMsg = new cMessage("leaveSession", LEAVE_SESSION);
+                            scheduleAt(simTime() + sessionLeaveDelay, selfMsg);
+                            break;
 
-                    default:
-                        throw cRuntimeError("Invalid sender status: %d", rsim->getStatus());
+                        default:
+                            throw cRuntimeError("Invalid sender status: %d", rsim->getStatus());
                     }
                 }
                 break;
 
-            case RTP_IFP_SESSION_LEFT:
-                if (!isActiveSession)
-                    EV_WARN << "Session already left\n";
-                else
-                    isActiveSession = false;
-                break;
+                case RTP_IFP_SESSION_LEFT:
+                    if (!isActiveSession)
+                        EV_WARN << "Session already left\n";
+                    else
+                        isActiveSession = false;
+                    break;
 
-            case RTP_IFP_SENDER_MODULE_DELETED:
-                EV_INFO << "Sender Module Deleted" << endl;
-                break;
+                case RTP_IFP_SENDER_MODULE_DELETED:
+                    EV_INFO << "Sender Module Deleted" << endl;
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
         delete obj;
@@ -272,9 +250,5 @@ bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int sta
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
-
-
-
-}
-
+} // namespace inet
 

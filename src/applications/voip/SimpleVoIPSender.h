@@ -27,7 +27,6 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
@@ -44,8 +43,8 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     Address destAddress;
 
     // state
-    cMessage* selfSender;   // timer for sending packets
-    cMessage* selfSource;   // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
+    cMessage *selfSender;    // timer for sending packets
+    cMessage *selfSource;    // timer for changing talkspurt/silence periods - FIXME: be more specific with the name of this self message
     simtime_t silenceDuration;
     simtime_t talkspurtDuration;
     int packetID;
@@ -67,8 +66,7 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     virtual ~SimpleVoIPSender();
     SimpleVoIPSender();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SIMPLEVOIPSENDER_H
 
-
-#endif

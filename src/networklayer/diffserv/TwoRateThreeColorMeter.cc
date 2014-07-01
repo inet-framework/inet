@@ -21,18 +21,15 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 using namespace DiffservUtil;
 
 Define_Module(TwoRateThreeColorMeter);
-
 
 void TwoRateThreeColorMeter::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numRcvd = 0;
         numYellow = 0;
         numRed = 0;
@@ -46,8 +43,7 @@ void TwoRateThreeColorMeter::initialize(int stage)
         Tp = PBS;
         Tc = CBS;
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         PIR = parseInformationRate(par("pir"), "pir", ift, *this, 0);
         CIR = parseInformationRate(par("cir"), "cir", ift, *this, 0);
@@ -57,25 +53,36 @@ void TwoRateThreeColorMeter::initialize(int stage)
 
 void TwoRateThreeColorMeter::handleMessage(cMessage *msg)
 {
-    cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket*>(msg));
+    cPacket *packet = findIPDatagramInPacket(check_and_cast<cPacket *>(msg));
     if (!packet)
         throw cRuntimeError("TwoRateThreeColorMeter received a packet that does not encapsulate an IP datagram.");
 
     numRcvd++;
     int color = meterPacket(packet);
-    switch (color)
-    {
-        case GREEN: send(packet, "greenOut"); break;
-        case YELLOW: numYellow++; send(packet, "yellowOut"); break;
-        case RED: numRed++; send(packet, "redOut"); break;
+    switch (color) {
+        case GREEN:
+            send(packet, "greenOut");
+            break;
+
+        case YELLOW:
+            numYellow++;
+            send(packet, "yellowOut");
+            break;
+
+        case RED:
+            numRed++;
+            send(packet, "redOut");
+            break;
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[80] = "";
-        if (numRcvd>0) sprintf(buf+strlen(buf), "rcvd: %d ", numRcvd);
-        if (numYellow>0) sprintf(buf+strlen(buf), "yellow:%d ", numYellow);
-        if (numRed>0) sprintf(buf+strlen(buf), "red:%d ", numRed);
+        if (numRcvd > 0)
+            sprintf(buf + strlen(buf), "rcvd: %d ", numRcvd);
+        if (numYellow > 0)
+            sprintf(buf + strlen(buf), "yellow:%d ", numYellow);
+        if (numRed > 0)
+            sprintf(buf + strlen(buf), "red:%d ", numRed);
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
@@ -101,17 +108,14 @@ int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
     int oldColor = colorAwareMode ? getColor(packet) : -1;
     int newColor;
     int packetSizeInBits = 8 * packet->getByteLength();
-    if (oldColor == RED || Tp - packetSizeInBits < 0)
-    {
+    if (oldColor == RED || Tp - packetSizeInBits < 0) {
         newColor = RED;
     }
-    else if (oldColor == YELLOW || Tc - packetSizeInBits < 0)
-    {
+    else if (oldColor == YELLOW || Tc - packetSizeInBits < 0) {
         Tp -= packetSizeInBits;
         newColor = YELLOW;
     }
-    else
-    {
+    else {
         Tp -= packetSizeInBits;
         Tc -= packetSizeInBits;
         newColor = GREEN;
@@ -120,8 +124,5 @@ int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
     setColor(packet, newColor);
     return newColor;
 }
-
-
-}
-
+} // namespace inet
 

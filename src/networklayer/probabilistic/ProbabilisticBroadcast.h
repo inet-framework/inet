@@ -16,7 +16,6 @@
 #include "Address.h"
 
 namespace inet {
-
 /**
  * @brief This class offers a data dissemination service using
  *        probabilistic broadcast. Each packet which arrives from
@@ -28,35 +27,35 @@ namespace inet {
  **/
 class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetworkProtocol
 {
-private:
-	/** @brief Copy constructor is not allowed.
-	 */
-	ProbabilisticBroadcast(const ProbabilisticBroadcast&);
-	/** @brief Assignment operator is not allowed.
-	 */
-	ProbabilisticBroadcast& operator=(const ProbabilisticBroadcast&);
+  private:
+    /** @brief Copy constructor is not allowed.
+     */
+    ProbabilisticBroadcast(const ProbabilisticBroadcast&);
+    /** @brief Assignment operator is not allowed.
+     */
+    ProbabilisticBroadcast& operator=(const ProbabilisticBroadcast&);
 
-public:
-	ProbabilisticBroadcast()
-		: NetworkProtocolBase()
-		, broadcastPeriod()
-		, beta(0)
-		, timeToLive()
-		, maxNbBcast(0)
-		, maxFirstBcastBackoff(0)
-		, timeInQueueAfterDeath(0)
-		, headerLength(0)
-		, broadcastTimer(NULL)
-		, knownMsgIds()
-		, msgQueue()
-		, debugMsgIdSet()
-		, nbDataPacketsReceived(0)
-		, nbDataPacketsSent(0)
-		, nbHops(0)
-		, debugNbMessageKnown(0)
-		, nbDataPacketsForwarded(0)
- 		, oneHopLatencies()
-	{}
+  public:
+    ProbabilisticBroadcast()
+        : NetworkProtocolBase()
+        , broadcastPeriod()
+        , beta(0)
+        , timeToLive()
+        , maxNbBcast(0)
+        , maxFirstBcastBackoff(0)
+        , timeInQueueAfterDeath(0)
+        , headerLength(0)
+        , broadcastTimer(NULL)
+        , knownMsgIds()
+        , msgQueue()
+        , debugMsgIdSet()
+        , nbDataPacketsReceived(0)
+        , nbDataPacketsSent(0)
+        , nbHops(0)
+        , debugNbMessageKnown(0)
+        , nbDataPacketsForwarded(0)
+        , oneHopLatencies()
+    {}
 
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -65,36 +64,37 @@ public:
 
     virtual void finish();
 
-protected:
-	enum messagesTypes {
-		UNKNOWN=0,
-		BROADCAST_TIMER,
-		NEIGHBOR_TIMER,
-		BETA_TIMER,
-	};
+  protected:
+    enum messagesTypes {
+        UNKNOWN = 0,
+        BROADCAST_TIMER,
+        NEIGHBOR_TIMER,
+        BETA_TIMER,
+    };
 
-	/** @brief Store messages in a structure so that we can keep some
-	 *         information needed by the protocol
-	 **/
-	typedef struct tMsgDesc {
-		ProbabilisticBroadcastDatagram* pkt;
-		int                        nbBcast;     // number of times the present node has passed the
-		                                        // message through a broadcast attempt.
-		bool                       initialSend; // true if message to be sent for first
-		                                        // time by its creator.
-	} tMsgDesc;
+    /** @brief Store messages in a structure so that we can keep some
+     *         information needed by the protocol
+     **/
+    typedef struct tMsgDesc
+    {
+        ProbabilisticBroadcastDatagram *pkt;
+        int nbBcast;    // number of times the present node has passed the
+                        // message through a broadcast attempt.
+        bool initialSend;    // true if message to be sent for first
+                             // time by its creator.
+    } tMsgDesc;
 
-	typedef std::set<unsigned int> MsgIdSet;
-	typedef std::multimap<simtime_t, tMsgDesc*> TimeMsgMap;
+    typedef std::set<unsigned int> MsgIdSet;
+    typedef std::multimap<simtime_t, tMsgDesc *> TimeMsgMap;
 
-	/** @brief Handle messages from upper layer */
-	virtual void handleUpperPacket(cPacket* msg);
+    /** @brief Handle messages from upper layer */
+    virtual void handleUpperPacket(cPacket *msg);
 
-	/** @brief Handle messages from lower layer */
-	virtual void handleLowerPacket(cPacket* msg);
+    /** @brief Handle messages from lower layer */
+    virtual void handleLowerPacket(cPacket *msg);
 
-	/** @brief Handle self messages */
-	virtual void handleSelfMessage(cMessage* msg);
+    /** @brief Handle self messages */
+    virtual void handleSelfMessage(cMessage *msg);
 
     /** @brief Checks whether a message is known (= kept in memory) or not */
     virtual bool messageKnown(unsigned int msgId);
@@ -108,36 +108,36 @@ protected:
      *  @param bcastDelay relative (to now) simulator time of next broadcast attempt.
      *  @param msg descriptor of the message to insert in the queue.
      **/
-	virtual void insertMessage(simtime_t_cref bcastDelay, tMsgDesc* msgDesc);
+    virtual void insertMessage(simtime_t_cref bcastDelay, tMsgDesc *msgDesc);
 
-	/** @brief Returns the descriptor of the first message in the queue,
-	 *         then remove its pointer from the queue and its id from the
-	 *         known IDs list. Then re-schedule the broadcastTimer to the
-	 *         broadcast instant of the new first element in the list.
-	 **/
-	virtual tMsgDesc* popFirstMessageUpdateQueue(void);
+    /** @brief Returns the descriptor of the first message in the queue,
+     *         then remove its pointer from the queue and its id from the
+     *         known IDs list. Then re-schedule the broadcastTimer to the
+     *         broadcast instant of the new first element in the list.
+     **/
+    virtual tMsgDesc *popFirstMessageUpdateQueue(void);
 
-	/** @brief Returns a network layer packet which encapsulates the upper layer
-	 *         packet passed to the function.
-	 **/
-	virtual cPacket* encapsMsg(cPacket* msg);
+    /** @brief Returns a network layer packet which encapsulates the upper layer
+     *         packet passed to the function.
+     **/
+    virtual cPacket *encapsMsg(cPacket *msg);
 
-	/** @brief extracts and returns the application layer packet which is encapsulated
-	 *         in the network layer packet given in argument.
-	 **/
-	virtual cPacket* decapsMsg(ProbabilisticBroadcastDatagram* msg);
+    /** @brief extracts and returns the application layer packet which is encapsulated
+     *         in the network layer packet given in argument.
+     **/
+    virtual cPacket *decapsMsg(ProbabilisticBroadcastDatagram *msg);
 
-	/** @brief Insert a new message in both known ID list and message queue.
-	 *         The message comes either from upper layer or from lower layer.
-	 *         In both cases, it will be inserted in the queue with a broadcast
-	 *         attempt delay taken uniformly between 0 and min(broadcast period, TTL)
-	 *         in order to implement a random backoff for the first broadcast of
-	 *         a message.
-	 *  @param msgDesc descriptor of the message to insert in the queue.
-	 *  @param iAmInitialSender message comes from upper layer, I am its creator
-	 *                          and initial sender.
-	 **/
-	virtual void insertNewMessage(ProbabilisticBroadcastDatagram* pkt, bool iAmInitialSender = false);
+    /** @brief Insert a new message in both known ID list and message queue.
+     *         The message comes either from upper layer or from lower layer.
+     *         In both cases, it will be inserted in the queue with a broadcast
+     *         attempt delay taken uniformly between 0 and min(broadcast period, TTL)
+     *         in order to implement a random backoff for the first broadcast of
+     *         a message.
+     *  @param msgDesc descriptor of the message to insert in the queue.
+     *  @param iAmInitialSender message comes from upper layer, I am its creator
+     *                          and initial sender.
+     **/
+    virtual void insertNewMessage(ProbabilisticBroadcastDatagram *pkt, bool iAmInitialSender = false);
 
     /**
      * @brief Attaches a "control info" (NetwToMac) structure (object) to the message pMsg.
@@ -152,62 +152,63 @@ protected:
      * @param pMsg      The message where the "control info" shall be attached.
      * @param pDestAddr The MAC address of the message receiver.
      */
-    virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
+    virtual cObject *setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 
-	/**
-	 * @brief Period (in sim time) between two broadcast attempts.
-	 * Read from omnetpp.ini
-	 **/
-	simtime_t broadcastPeriod;
+    /**
+     * @brief Period (in sim time) between two broadcast attempts.
+     * Read from omnetpp.ini
+     **/
+    simtime_t broadcastPeriod;
 
-	/**
-	 * @brief Probability of each broadcast attempt.
-	 * Read from omnetpp.ini
-	 **/
-	double beta;
+    /**
+     * @brief Probability of each broadcast attempt.
+     * Read from omnetpp.ini
+     **/
+    double beta;
 
+    /*
+     * @brief Default time to live for packets to send.
+     */
+    simtime_t timeToLive;
 
-	/*
-	 * @brief Default time to live for packets to send.
-	 */
-	simtime_t timeToLive;
+    static long id_counter;
 
-	static long id_counter;
+    static long getNextID()
+    {
+        long nextID = id_counter;
+        id_counter++;
+        return nextID;
+    }
 
-	static long getNextID() {
-		long nextID = id_counter;
-		id_counter++;
-		return nextID;
-	}
-	/**
-	 * @brief Maximal number of broadcast attempts for each packet.
-	 * Read from omnetpp.ini
-	 **/
-	int maxNbBcast;
+    /**
+     * @brief Maximal number of broadcast attempts for each packet.
+     * Read from omnetpp.ini
+     **/
+    int maxNbBcast;
 
-	/**
-	 * @brief Maximal back-off before first broadcast attempt [seconds].
-	 * Read from omnetpp.ini
-	 **/
-	int maxFirstBcastBackoff;
+    /**
+     * @brief Maximal back-off before first broadcast attempt [seconds].
+     * Read from omnetpp.ini
+     **/
+    int maxFirstBcastBackoff;
 
-	/**
-	 * @brief How long the message should be kept in queue after its died.
-	 *        That way the message is known if the node receives one of its
-	 *        copy that isn't dead because of TTL de-synchronization due to
-	 *        MAC backoff, propagation delay and clock drift.
-	 * Read from omnetpp.ini
-	 **/
-	simtime_t timeInQueueAfterDeath;
+    /**
+     * @brief How long the message should be kept in queue after its died.
+     *        That way the message is known if the node receives one of its
+     *        copy that isn't dead because of TTL de-synchronization due to
+     *        MAC backoff, propagation delay and clock drift.
+     * Read from omnetpp.ini
+     **/
+    simtime_t timeInQueueAfterDeath;
 
-	/**
+    /**
      * @brief Length of the NetwPkt header
      * Read from omnetpp.ini
      **/
     int headerLength;
 
     // perform broadcast attempt for the first message in the list each time it expires
-    cMessage* broadcastTimer;
+    cMessage *broadcastTimer;
 
     // we use two containers: a set which stores the ID's of the messages which are kept
     // in memory and a multimap which stores a pair <Key, Value> where Key is the next
@@ -218,7 +219,7 @@ protected:
     MsgIdSet debugMsgIdSet;
 
     // variables for statistics
-    long nbDataPacketsReceived; // total number of received packets from lower layer
+    long nbDataPacketsReceived;    // total number of received packets from lower layer
     long nbDataPacketsSent;
     long nbHops;
     int debugNbMessageKnown;
@@ -229,8 +230,7 @@ protected:
 
     Address myNetwAddr;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PROBABILISTICBROADCAST_H
 
-
-#endif

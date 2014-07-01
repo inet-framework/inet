@@ -17,7 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_RTCPPACKET3_H
 #define __INET_RTCPPACKET3_H
 
@@ -26,19 +25,16 @@
 #include "RTCPPacket3_m.h"
 
 namespace inet {
-
-
 class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
   public:
     RTCPSenderReportPacket(const char *name = NULL, int kind = 0);
     RTCPSenderReportPacket(const RTCPSenderReportPacket& other) : RTCPSenderReportPacket_Base(other) {}
-    RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) {RTCPSenderReportPacket_Base::operator=(other); return *this;}
-    virtual RTCPSenderReportPacket *dup() const {return new RTCPSenderReportPacket(*this);}
+    RTCPSenderReportPacket& operator=(const RTCPSenderReportPacket& other) { RTCPSenderReportPacket_Base::operator=(other); return *this; }
+    virtual RTCPSenderReportPacket *dup() const { return new RTCPSenderReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
+} // namespace inet
 
-}
+#endif    // _RTCPPACKET3_M_H_
 
-
-#endif // _RTCPPACKET3_M_H_

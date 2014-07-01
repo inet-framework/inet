@@ -21,31 +21,26 @@
 #include "ReceptionBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API FlatReceptionBase : public ReceptionBase
 {
-    protected:
-        const Hz carrierFrequency;
-        const Hz bandwidth;
+  protected:
+    const Hz carrierFrequency;
+    const Hz bandwidth;
 
-    public:
-        FlatReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
-            ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-            carrierFrequency(carrierFrequency),
-            bandwidth(bandwidth)
-        {}
+  public:
+    FlatReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, Hz carrierFrequency, Hz bandwidth) :
+        ReceptionBase(receiver, transmission, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
+        carrierFrequency(carrierFrequency),
+        bandwidth(bandwidth)
+    {}
 
-        virtual Hz getCarrierFrequency() const { return carrierFrequency; }
-        virtual Hz getBandwidth() const { return bandwidth; }
-        virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
+    virtual Hz getCarrierFrequency() const { return carrierFrequency; }
+    virtual Hz getBandwidth() const { return bandwidth; }
+    virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_FLATRECEPTIONBASE_H
 
-}
-
-
-#endif

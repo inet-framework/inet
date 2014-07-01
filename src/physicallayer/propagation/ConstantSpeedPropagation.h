@@ -21,29 +21,24 @@
 #include "PropagationBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
-    protected:
-        const int mobilityApproximationCount;
+  protected:
+    const int mobilityApproximationCount;
 
-    protected:
-        virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
+  protected:
+    virtual const Coord computeArrivalPosition(const simtime_t startTime, const Coord startPosition, IMobility *mobility) const;
 
-    public:
-        ConstantSpeedPropagation();
+  public:
+    ConstantSpeedPropagation();
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
+    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_CONSTANTSPEEDPROPAGATION_H
 
-}
-
-
-#endif

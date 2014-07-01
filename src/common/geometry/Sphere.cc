@@ -19,7 +19,6 @@
 #include "Plane.h"
 
 namespace inet {
-
 Sphere::Sphere(double radius) :
     radius(radius)
 {
@@ -36,13 +35,11 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     b = 2 * (dp.x * point1.x + dp.y * point1.y + dp.z * point1.z);
     c = point1 * point1 - radius * radius;
     bb4ac = b * b - 4 * a * c;
-    if (abs(a) > EPSILON && bb4ac >= 0)
-    {
+    if (abs(a) > EPSILON && bb4ac >= 0) {
         double alpha1 = (-b + sqrt(bb4ac)) / (2 * a);
         double alpha2 = (-b - sqrt(bb4ac)) / (2 * a);
         // TODO: complete for other cases, e.g. when there's only 1 real intersection point
-        if (0 <= alpha1 && alpha1 <= 1 && 0 <= alpha2 && alpha2 <= 1)
-        {
+        if (0 <= alpha1 && alpha1 <= 1 && 0 <= alpha2 && alpha2 <= 1) {
             intersection1 = point1 * (1 - alpha1) + point2 * alpha1;
             intersection2 = point1 * (1 - alpha2) + point2 * alpha2;
             return true;
@@ -53,5 +50,5 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     else
         return false;
 }
+} // namespace inet
 
-}

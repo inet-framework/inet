@@ -25,8 +25,6 @@
 #include "Ieee80211MgmtAPBase.h"
 
 namespace inet {
-
-
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * an access point (AP). See corresponding NED file for a detailed description.
@@ -37,33 +35,35 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
 {
   public:
     /** State of a STA */
-    enum STAStatus {NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED};
+    enum STAStatus { NOT_AUTHENTICATED, AUTHENTICATED, ASSOCIATED };
 
     /** Describes a STA */
-    struct STAInfo {
+    struct STAInfo
+    {
         MACAddress address;
         STAStatus status;
-        int authSeqExpected;  // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
+        int authSeqExpected;    // when NOT_AUTHENTICATED: transaction sequence number of next expected auth frame
         //int consecFailedTrans;  //XXX
         //double expiry;          //XXX association should expire after a while if STA is silent?
     };
 
     class NotificationInfoSta : public cObject
     {
-          MACAddress apAddress;
-          MACAddress staAddress;
-        public:
-          void setApAddress(const MACAddress & a){apAddress = a;}
-          void setStaAddress(const MACAddress & a){staAddress = a;}
-          const MACAddress & getApAddress() const {return apAddress;}
-          const MACAddress & getStaAddress() const {return staAddress;}
+        MACAddress apAddress;
+        MACAddress staAddress;
+
+      public:
+        void setApAddress(const MACAddress& a) { apAddress = a; }
+        void setStaAddress(const MACAddress& a) { staAddress = a; }
+        const MACAddress& getApAddress() const { return apAddress; }
+        const MACAddress& getStaAddress() const { return staAddress; }
     };
 
-
-    struct MAC_compare {
-        bool operator()(const MACAddress& u1, const MACAddress& u2) const {return u1.compareTo(u2) < 0;}
+    struct MAC_compare
+    {
+        bool operator()(const MACAddress& u1, const MACAddress& u2) const { return u1.compareTo(u2) < 0; }
     };
-    typedef std::map<MACAddress,STAInfo, MAC_compare> STAList;
+    typedef std::map<MACAddress, STAInfo, MAC_compare> STAList;
 
   protected:
     // configuration
@@ -74,7 +74,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     Ieee80211SupportedRatesElement supportedRates;
 
     // state
-    STAList staList; ///< list of STAs
+    STAList staList;    ///< list of STAs
     cMessage *beaconTimer;
 
   public:
@@ -121,20 +121,19 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
     //@}
 
-    void sendAssocNotification(const MACAddress &addr);
+    void sendAssocNotification(const MACAddress& addr);
 
-    void sendDisAssocNotification(const MACAddress &addr);
+    void sendDisAssocNotification(const MACAddress& addr);
 
     /** lifecycle support */
     //@{
+
   protected:
     virtual void start();
     virtual void stop();
     //@}
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IEEE80211MGMTAP_H
 

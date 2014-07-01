@@ -19,7 +19,6 @@
 #include "LMacFrame_m.h"
 
 namespace inet {
-
 using namespace physicallayer;
 
 /**
@@ -62,171 +61,168 @@ using namespace physicallayer;
  **/
 class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
 {
-    private:
-        /** @brief Copy constructor is not allowed.
-         */
-        LMacLayer(const LMacLayer&);
-        /** @brief Assignment operator is not allowed.
-         */
-        LMacLayer& operator=(const LMacLayer&);
+  private:
+    /** @brief Copy constructor is not allowed.
+     */
+    LMacLayer(const LMacLayer&);
+    /** @brief Assignment operator is not allowed.
+     */
+    LMacLayer& operator=(const LMacLayer&);
 
-    public:
-	LMacLayer()
-		: MACProtocolBase()
-		, SETUP_PHASE(true)
-		, slotChange()
-		, macState()
-		, slotDuration(0)
+  public:
+    LMacLayer()
+        : MACProtocolBase()
+        , SETUP_PHASE(true)
+        , slotChange()
+        , macState()
+        , slotDuration(0)
         , headerLength(0)
-		, controlDuration(0)
-		, mySlot(0)
-		, numSlots(0)
-		, currSlot()
-		, reservedMobileSlots(0)
-		, macQueue()
+        , controlDuration(0)
+        , mySlot(0)
+        , numSlots(0)
+        , currSlot()
+        , reservedMobileSlots(0)
+        , macQueue()
         , radio(NULL)
         , transmissionState(IRadio::TRANSMISSION_STATE_UNDEFINED)
-		, queueLength(0)
-		, wakeup(NULL)
-		, timeout(NULL)
-		, sendData(NULL)
-		, initChecker(NULL)
-		, checkChannel(NULL)
-		, start_lmac(NULL)
-		, send_control(NULL)
-		, bitrate(0)
-	{}
-        /** @brief Clean up messges.*/
-        virtual ~LMacLayer();
+        , queueLength(0)
+        , wakeup(NULL)
+        , timeout(NULL)
+        , sendData(NULL)
+        , initChecker(NULL)
+        , checkChannel(NULL)
+        , start_lmac(NULL)
+        , send_control(NULL)
+        , bitrate(0)
+    {}
+    /** @brief Clean up messges.*/
+    virtual ~LMacLayer();
 
-        /** @brief Initialization of the module and some variables*/
-        virtual void initialize(int);
+    /** @brief Initialization of the module and some variables*/
+    virtual void initialize(int);
 
-        /** @brief Handle messages from lower layer */
-        virtual void handleLowerPacket(cPacket*);
+    /** @brief Handle messages from lower layer */
+    virtual void handleLowerPacket(cPacket *);
 
-        /** @brief Handle messages from upper layer */
-        virtual void handleUpperPacket(cPacket*);
+    /** @brief Handle messages from upper layer */
+    virtual void handleUpperPacket(cPacket *);
 
-        /** @brief Handle self messages such as timers */
-        virtual void handleSelfMessage(cMessage*);
+    /** @brief Handle self messages such as timers */
+    virtual void handleSelfMessage(cMessage *);
 
-        /** @brief Handle control messages from lower layer */
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
+    /** @brief Handle control messages from lower layer */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
 
-        /** @brief Encapsulate the NetwPkt into an MacPkt */
-        virtual LMacFrame* encapsMsg(cPacket*);
-        virtual cPacket* decapsMsg(LMacFrame*);
-        cObject* setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr);
+    /** @brief Encapsulate the NetwPkt into an MacPkt */
+    virtual LMacFrame *encapsMsg(cPacket *);
+    virtual cPacket *decapsMsg(LMacFrame *);
+    cObject *setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr);
 
-    protected:
-        /** @brief Generate new interface address*/
-        virtual void initializeMACAddress();
-        virtual InterfaceEntry *createInterfaceEntry();
-        virtual void handleCommand(cMessage *msg) {}
+  protected:
+    /** @brief Generate new interface address*/
+    virtual void initializeMACAddress();
+    virtual InterfaceEntry *createInterfaceEntry();
+    virtual void handleCommand(cMessage *msg) {}
 
-        typedef std::list<LMacFrame*> MacQueue;
+    typedef std::list<LMacFrame *> MacQueue;
 
-        /** @brief MAC states
-         *
-         *  The MAC states help to keep track what the MAC is actually
-         *  trying to do -- this is esp. useful when radio switching takes
-         *  some time.
-         *  SLEEP -- the node sleeps but accepts packets from the network layer
-         *  RX  -- MAC accepts packets from PHY layer
-         *  TX  -- MAC transmits a packet
-         *  CCA -- Clear Channel Assessment - MAC checks
-         *         whether medium is busy
-         */
+    /** @brief MAC states
+     *
+     *  The MAC states help to keep track what the MAC is actually
+     *  trying to do -- this is esp. useful when radio switching takes
+     *  some time.
+     *  SLEEP -- the node sleeps but accepts packets from the network layer
+     *  RX  -- MAC accepts packets from PHY layer
+     *  TX  -- MAC transmits a packet
+     *  CCA -- Clear Channel Assessment - MAC checks
+     *         whether medium is busy
+     */
 
-        enum States
-        {
-            INIT, SLEEP, CCA, WAIT_CONTROL, WAIT_DATA, SEND_CONTROL, SEND_DATA
-        };
+    enum States {
+        INIT, SLEEP, CCA, WAIT_CONTROL, WAIT_DATA, SEND_CONTROL, SEND_DATA
+    };
 
-        enum TYPES
-        {
-            LMAC_CONTROL = 167,
-            LMAC_TIMEOUT = 168,
-            LMAC_WAKEUP = 169,
-            LMAC_SEND_DATA = 170,
-            LMAC_SETUP_PHASE_END = 171,
-            LMAC_CHECK_CHANNEL = 172,
-            LMAC_SOMEBODY = 173,
-            LMAC_DATA = 174,
-            LMAC_START_LMAC = 175,
-            LMAC_SEND_CONTROL = 176
-        };
+    enum TYPES {
+        LMAC_CONTROL = 167,
+        LMAC_TIMEOUT = 168,
+        LMAC_WAKEUP = 169,
+        LMAC_SEND_DATA = 170,
+        LMAC_SETUP_PHASE_END = 171,
+        LMAC_CHECK_CHANNEL = 172,
+        LMAC_SOMEBODY = 173,
+        LMAC_DATA = 174,
+        LMAC_START_LMAC = 175,
+        LMAC_SEND_CONTROL = 176
+    };
 
-        /** @brief dummy receiver address to indicate no pending packets in the control packet */
-        static const MACAddress LMAC_NO_RECEIVER;
-        static const MACAddress LMAC_FREE_SLOT;
+    /** @brief dummy receiver address to indicate no pending packets in the control packet */
+    static const MACAddress LMAC_NO_RECEIVER;
+    static const MACAddress LMAC_FREE_SLOT;
 
-        /** @brief the setup phase is the beginning of the simulation, where only control packets at very small slot durations are exchanged. */
-        bool SETUP_PHASE;
+    /** @brief the setup phase is the beginning of the simulation, where only control packets at very small slot durations are exchanged. */
+    bool SETUP_PHASE;
 
-        /** @brief indicate how often the node needs to change its slot because of collisions */
-        cOutVector* slotChange;
+    /** @brief indicate how often the node needs to change its slot because of collisions */
+    cOutVector *slotChange;
 
-        /** @brief keep track of MAC state */
-        States macState;
+    /** @brief keep track of MAC state */
+    States macState;
 
-        /** @brief Duration of a slot */
-        double slotDuration;
-        /** @brief Length of the header*/
-        int headerLength;
-        /** @brief Duration of teh control time in each slot */
-        double controlDuration;
-        /** @brief my slot ID */
-        int mySlot;
-        /** @brief how many slots are there */
-        int numSlots;
-        /** @brief The current slot of the simulation */
-        int currSlot;
-        /** @brief Occupied slots from nodes, from which I hear directly */
-        MACAddress occSlotsDirect[64];
-        /** @brief Occupied slots of two-hop neighbors */
-        MACAddress occSlotsAway[64];
-        /** @brief The first couple of slots are reserved for nodes with special needs to avoid changing slots for them (mobile nodes) */
-        int reservedMobileSlots;
+    /** @brief Duration of a slot */
+    double slotDuration;
+    /** @brief Length of the header*/
+    int headerLength;
+    /** @brief Duration of teh control time in each slot */
+    double controlDuration;
+    /** @brief my slot ID */
+    int mySlot;
+    /** @brief how many slots are there */
+    int numSlots;
+    /** @brief The current slot of the simulation */
+    int currSlot;
+    /** @brief Occupied slots from nodes, from which I hear directly */
+    MACAddress occSlotsDirect[64];
+    /** @brief Occupied slots of two-hop neighbors */
+    MACAddress occSlotsAway[64];
+    /** @brief The first couple of slots are reserved for nodes with special needs to avoid changing slots for them (mobile nodes) */
+    int reservedMobileSlots;
 
-        /** @brief The MAC address of the interface. */
-        MACAddress address;
+    /** @brief The MAC address of the interface. */
+    MACAddress address;
 
-        /** @brief A queue to store packets from upper layer in case another
-         packet is still waiting for transmission..*/
-        MacQueue macQueue;
+    /** @brief A queue to store packets from upper layer in case another
+       packet is still waiting for transmission..*/
+    MacQueue macQueue;
 
-        /** @brief The radio. */
-        IRadio *radio;
-        IRadio::TransmissionState transmissionState;
+    /** @brief The radio. */
+    IRadio *radio;
+    IRadio::TransmissionState transmissionState;
 
-        /** @brief length of the queue*/
-        unsigned queueLength;
+    /** @brief length of the queue*/
+    unsigned queueLength;
 
-        cMessage* wakeup;
-        cMessage* timeout;
-        cMessage* sendData;
-        cMessage* initChecker;
-        cMessage* checkChannel;
-        cMessage* start_lmac;
-        cMessage* send_control;
+    cMessage *wakeup;
+    cMessage *timeout;
+    cMessage *sendData;
+    cMessage *initChecker;
+    cMessage *checkChannel;
+    cMessage *start_lmac;
+    cMessage *send_control;
 
-        /** @brief the bit rate at which we transmit */
-        double bitrate;
+    /** @brief the bit rate at which we transmit */
+    double bitrate;
 
-        /** @brief find a new slot */
-        void findNewSlot();
+    /** @brief find a new slot */
+    void findNewSlot();
 
-        /** @brief Internal function to attach a signal to the packet */
-        void attachSignal(LMacFrame* macPkt);
+    /** @brief Internal function to attach a signal to the packet */
+    void attachSignal(LMacFrame *macPkt);
 
-        virtual void flushQueue();
+    virtual void flushQueue();
 
-        virtual void clearQueue();
+    virtual void clearQueue();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LMACLAYER_H
 
-
-#endif

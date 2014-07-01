@@ -16,14 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_BEHAVIORAGGREGATECLASSIFIER_H
 #define __INET_BEHAVIORAGGREGATECLASSIFIER_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Behavior Aggregate Classifier.
  */
@@ -31,7 +29,7 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
 {
   protected:
     int numOutGates;
-    std::map<int,int> dscpToGateIndexMap;
+    std::map<int, int> dscpToGateIndexMap;
 
     int numRcvd;
 
@@ -49,8 +47,7 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
 
     int getDscpFromPacket(cPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_BEHAVIORAGGREGATECLASSIFIER_H
 
-
-#endif

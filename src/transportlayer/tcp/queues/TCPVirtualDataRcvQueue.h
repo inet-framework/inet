@@ -20,7 +20,6 @@
 #ifndef __INET_TCPVIRTUALDATARCVQUEUE_H
 #define __INET_TCPVIRTUALDATARCVQUEUE_H
 
-
 #include <list>
 #include <string>
 
@@ -28,8 +27,6 @@
 #include "TCPReceiveQueue.h"
 
 namespace inet {
-
-
 /**
  * Receive queue that manages "virtual bytes", that is, byte counts only.
  *
@@ -47,12 +44,12 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         uint32 end;
 
       public:
-        enum CompareStatus {BEFORE = 1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
+        enum CompareStatus { BEFORE = 1, BEFORE_TOUCH, OVERLAP, AFTER_TOUCH, AFTER };
         Region(uint32 _begin, uint32 _end) : begin(_begin), end(_end) {};
         virtual ~Region() {};
-        uint32 getBegin() const {return begin;}
-        uint32 getEnd() const {return end;}
-        unsigned long getLength() const {return (ulong)(end - begin);}
+        uint32 getBegin() const { return begin; }
+        uint32 getEnd() const { return end; }
+        unsigned long getLength() const { return (ulong)(end - begin); }
         unsigned long getLengthTo(uint32 seq) const;
 
         /** Compare self and other */
@@ -61,7 +58,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         // Virtual functions:
 
         /** Merge other region to self */
-        virtual bool merge(const TCPVirtualDataRcvQueue::Region* other);
+        virtual bool merge(const TCPVirtualDataRcvQueue::Region *other);
 
         /** Copy self to msg */
         virtual void copyTo(cPacket *msg) const;
@@ -69,10 +66,10 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
         /**
          * Returns an allocated new Region object with filled with [begin..seq) and set self to [seq..end)
          */
-        virtual TCPVirtualDataRcvQueue::Region* split(uint32 seq);
+        virtual TCPVirtualDataRcvQueue::Region *split(uint32 seq);
     };
 
-    typedef std::list<Region*> RegionList;
+    typedef std::list<Region *> RegionList;
 
     RegionList regionList;
 
@@ -80,13 +77,13 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     void merge(TCPVirtualDataRcvQueue::Region *region);
 
     // Returns number of bytes extracted
-    TCPVirtualDataRcvQueue::Region* extractTo(uint32 toSeq);
+    TCPVirtualDataRcvQueue::Region *extractTo(uint32 toSeq);
 
     /**
      * Create a new Region from tcpseg.
      * Called from insertBytesFromSegment()
      */
-    virtual TCPVirtualDataRcvQueue::Region* createRegionFromSegment(TCPSegment *tcpseg);
+    virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg);
 
   public:
     /**
@@ -131,8 +128,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 
     virtual uint32 getFirstSeqNo();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPVIRTUALDATARCVQUEUE_H
 
-
-#endif

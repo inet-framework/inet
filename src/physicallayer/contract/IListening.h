@@ -22,10 +22,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class IRadio;
 
 /**
@@ -33,19 +30,17 @@ class IRadio;
  */
 class INET_API IListening : public IPrintableObject
 {
-    public:
-        virtual const IRadio *getReceiver() const = 0;
+  public:
+    virtual const IRadio *getReceiver() const = 0;
 
-        virtual const simtime_t getStartTime() const = 0;
-        virtual const simtime_t getEndTime() const = 0;
+    virtual const simtime_t getStartTime() const = 0;
+    virtual const simtime_t getEndTime() const = 0;
 
-        virtual const Coord getStartPosition() const = 0;
-        virtual const Coord getEndPosition() const = 0;
+    virtual const Coord getStartPosition() const = 0;
+    virtual const Coord getEndPosition() const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ILISTENING_H
 
-}
-
-
-#endif

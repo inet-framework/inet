@@ -20,7 +20,6 @@
 #include "common.h"
 
 namespace inet {
-
 std::string intToString(int i)
 {
     std::ostringstream stream;
@@ -28,9 +27,5 @@ std::string intToString(int i)
     std::string str(stream.str());
     return str;
 }
-
-
-
-}
-
+} // namespace inet
 

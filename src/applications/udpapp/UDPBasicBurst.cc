@@ -18,23 +18,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "UDPBasicBurst.h"
 
 #include "UDPControlInfo_m.h"
 #include "AddressResolver.h"
 #include "ModuleAccess.h"
 
-
 namespace inet {
-
 EXECUTE_ON_STARTUP(
-    cEnum *e = cEnum::find("inet::ChooseDestAddrMode");
-    if (!e) enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
-    e->insert(UDPBasicBurst::ONCE, "once");
-    e->insert(UDPBasicBurst::PER_BURST, "perBurst");
-    e->insert(UDPBasicBurst::PER_SEND, "perSend");
-);
+        cEnum * e = cEnum::find("inet::ChooseDestAddrMode");
+        if (!e)
+            enums.getInstance()->add(e = new cEnum("inet::ChooseDestAddrMode"));
+        e->insert(UDPBasicBurst::ONCE, "once");
+        e->insert(UDPBasicBurst::PER_BURST, "perBurst");
+        e->insert(UDPBasicBurst::PER_SEND, "perSend");
+        );
 
 Define_Module(UDPBasicBurst);
 
@@ -63,8 +61,7 @@ void UDPBasicBurst::initialize(int stage)
 {
     ApplicationBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         counter = 0;
         numSent = 0;
         numReceived = 0;
@@ -138,12 +135,10 @@ void UDPBasicBurst::processStart()
 
     IInterfaceTable *ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
 
-    while ((token = tokenizer.nextToken()) != NULL)
-    {
+    while ((token = tokenizer.nextToken()) != NULL) {
         if (strstr(token, "Broadcast") != NULL)
             destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
-        else
-        {
+        else {
             Address addr = AddressResolver().resolve(token);
             if (excludeLocalDestAddresses && ift && ift->isLocalAddress(addr))
                 continue;
@@ -158,8 +153,7 @@ void UDPBasicBurst::processStart()
 
     isSource = !destAddresses.empty();
 
-    if (isSource)
-    {
+    if (isSource) {
         if (chooseDestAddrMode == ONCE)
             destAddr = chooseDestAddr();
 
@@ -171,8 +165,7 @@ void UDPBasicBurst::processStart()
 
 void UDPBasicBurst::processSend()
 {
-    if (stopTime < SIMTIME_ZERO || simTime() < stopTime)
-    {
+    if (stopTime < SIMTIME_ZERO || simTime() < stopTime) {
         // send and reschedule next sending
         if (isSource) // if the node is a sink, don't generate messages
             generateBurst();
@@ -186,32 +179,37 @@ void UDPBasicBurst::processStop()
 
 void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         switch (msg->getKind()) {
-            case START: processStart(); break;
-            case SEND:  processSend(); break;
-            case STOP:  processStop(); break;
-            default: throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
+            case START:
+                processStart();
+                break;
+
+            case SEND:
+                processSend();
+                break;
+
+            case STOP:
+                processStop();
+                break;
+
+            default:
+                throw cRuntimeError("Invalid kind %d in self message", (int)msg->getKind());
         }
     }
-    else if (msg->getKind() == UDP_I_DATA)
-    {
+    else if (msg->getKind() == UDP_I_DATA) {
         // process incoming packet
         processPacket(PK(msg));
     }
-    else if (msg->getKind() == UDP_I_ERROR)
-    {
+    else if (msg->getKind() == UDP_I_ERROR) {
         EV_WARN << "Ignoring UDP error report\n";
         delete msg;
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unrecognized message (%s)%s", msg->getClassName(), msg->getName());
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
         getDisplayString().setTagArg("t", 0, buf);
@@ -220,23 +218,19 @@ void UDPBasicBurst::handleMessageWhenUp(cMessage *msg)
 
 void UDPBasicBurst::processPacket(cPacket *pk)
 {
-    if (pk->getKind() == UDP_I_ERROR)
-    {
+    if (pk->getKind() == UDP_I_ERROR) {
         EV_WARN << "UDP error received\n";
         delete pk;
         return;
     }
 
-    if (pk->hasPar("sourceId") && pk->hasPar("msgId"))
-    {
+    if (pk->hasPar("sourceId") && pk->hasPar("msgId")) {
         // duplicate control
         int moduleId = (int)pk->par("sourceId");
         int msgId = (int)pk->par("msgId");
         SourceSequence::iterator it = sourceSequence.find(moduleId);
-        if (it != sourceSequence.end())
-        {
-            if (it->second >= msgId)
-            {
+        if (it != sourceSequence.end()) {
+            if (it->second >= msgId) {
                 EV_DEBUG << "Out of order packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
                 emit(outOfOrderPkSignal, pk);
                 delete pk;
@@ -250,10 +244,8 @@ void UDPBasicBurst::processPacket(cPacket *pk)
             sourceSequence[moduleId] = msgId;
     }
 
-    if (delayLimit > 0)
-    {
-        if (simTime() - pk->getTimestamp() > delayLimit)
-        {
+    if (delayLimit > 0) {
+        if (simTime() - pk->getTimestamp() > delayLimit) {
             EV_DEBUG << "Old packet: " << UDPSocket::getReceivedPacketInfo(pk) << endl;
             emit(dropPkSignal, pk);
             delete pk;
@@ -280,8 +272,7 @@ void UDPBasicBurst::generateBurst()
         throw cRuntimeError("The sendInterval parameter must be bigger than 0");
     nextPkt += sendInterval;
 
-    if (activeBurst && nextBurst <= now) // new burst
-    {
+    if (activeBurst && nextBurst <= now) {    // new burst
         double burstDuration = burstDurationPar->doubleValue();
         if (burstDuration < 0.0)
             throw cRuntimeError("The burstDuration parameter mustn't be smaller than 0");
@@ -289,8 +280,7 @@ void UDPBasicBurst::generateBurst()
 
         if (burstDuration == 0.0)
             activeBurst = false;
-        else
-        {
+        else {
             if (sleepDuration < 0.0)
                 throw cRuntimeError("The sleepDuration parameter mustn't be smaller than 0");
             nextSleep = now + burstDuration;
@@ -314,8 +304,7 @@ void UDPBasicBurst::generateBurst()
     if (activeBurst && nextPkt >= nextSleep)
         nextPkt = nextBurst;
 
-    if (stopTime >= SIMTIME_ZERO && nextPkt >= stopTime)
-    {
+    if (stopTime >= SIMTIME_ZERO && nextPkt >= stopTime) {
         timerNext->setKind(STOP);
         nextPkt = stopTime;
     }
@@ -334,8 +323,7 @@ bool UDPBasicBurst::handleNodeStart(IDoneCallback *doneCallback)
 {
     simtime_t start = std::max(startTime, simTime());
 
-    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))
-    {
+    if ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)) {
         timerNext->setKind(START);
         scheduleAt(start, timerNext);
     }
@@ -358,6 +346,5 @@ void UDPBasicBurst::handleNodeCrash()
         cancelEvent(timerNext);
     activeBurst = false;
 }
-
-}
+} // namespace inet
 

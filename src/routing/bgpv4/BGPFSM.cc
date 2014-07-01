@@ -19,7 +19,6 @@
 #include "BGPSession.h"
 
 namespace inet {
-
 using namespace BGPFSM;
 
 //TopState
@@ -66,14 +65,14 @@ void Connect::ConnectRetryTimer_Expires()
     //- stays in the Connect state.
     setState<Connect>();
 }
+
 void Connect::HoldTimer_Expires()
 {
     EV_INFO << "Processing Connect::HoldTimer_Expires" << std::endl;
     BGPSession& session = TopState::box().getModule();
     //In response to any other events (Events 8, 10-11, 13, 19, 23, 25-28), the local system:
     //- if the ConnectRetryTimer is running, stops and resets the ConnectRetryTimer (sets to zero),
-    if (session._ptrConnectRetryTimer->isScheduled())
-    {
+    if (session._ptrConnectRetryTimer->isScheduled()) {
         session.restartsConnectRetryTimer(false);
     }
     //- if the DelayOpenTimer is running, stops and resets the DelayOpenTimer (sets to zero),
@@ -81,16 +80,18 @@ void Connect::HoldTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by 1,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- performs peer oscillation damping if the DampPeerOscillations attribute is set to True, and
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void Connect::KeepaliveTimer_Expires()
 {
     EV_INFO << "Processing Connect::KeepaliveTimer_Expires" << std::endl;
     Connect::HoldTimer_Expires();
 }
+
 void Connect::TcpConnectionConfirmed()
 {
     EV_INFO << "Processing Connect::TcpConnectionConfirmed" << std::endl;
@@ -108,22 +109,25 @@ void Connect::TcpConnectionConfirmed()
     //- changes its state to OpenSent.
     setState<OpenSent>();
 }
+
 void Connect::TcpConnectionFails()
 {
     setState<Active>();
 }
+
 void Connect::KeepAliveMsgEvent()
 {
     EV_INFO << "Processing Connect::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._keepAliveMsgRcv ++;
+    session._keepAliveMsgRcv++;
     Connect::HoldTimer_Expires();
 }
+
 void Connect::UpdateMsgEvent()
 {
     EV_INFO << "Processing Connect::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._updateMsgRcv ++;
+    session._updateMsgRcv++;
     Connect::HoldTimer_Expires();
 }
 
@@ -142,6 +146,7 @@ void Active::ConnectRetryTimer_Expires()
     //- changes its state to Connect.
     setState<Connect>();
 }
+
 void Active::HoldTimer_Expires()
 {
     EV_INFO << "Processing Active::HoldTimer_Expires" << std::endl;
@@ -153,15 +158,17 @@ void Active::HoldTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by one,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void Active::KeepaliveTimer_Expires()
 {
     EV_TRACE << "Processing Active::KeepaliveTimer_Expires" << std::endl;
     Active::HoldTimer_Expires();
 }
+
 void Active::TcpConnectionConfirmed()
 {
     EV_TRACE << "Processing Active::TcpConnectionConfirmed" << std::endl;
@@ -177,29 +184,33 @@ void Active::TcpConnectionConfirmed()
     //- changes its state to OpenSent.
     setState<OpenSent>();
 }
+
 void Active::TcpConnectionFails()
 {
     setState<Idle>();
 }
+
 void Active::OpenMsgEvent()
 {
     EV_TRACE << "Processing Active::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._openMsgRcv ++;
+    session._openMsgRcv++;
     Active::HoldTimer_Expires();
 }
+
 void Active::KeepAliveMsgEvent()
 {
     EV_TRACE << "Processing Active::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._keepAliveMsgRcv ++;
+    session._keepAliveMsgRcv++;
     Active::HoldTimer_Expires();
 }
+
 void Active::UpdateMsgEvent()
 {
     EV_TRACE << "Processing Active::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._updateMsgRcv ++;
+    session._updateMsgRcv++;
     Active::HoldTimer_Expires();
 }
 
@@ -216,11 +227,12 @@ void OpenSent::ConnectRetryTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by one,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void OpenSent::HoldTimer_Expires()
 {
     EV_TRACE << "Processing OpenSent::HoldTimer_Expires" << std::endl;
@@ -232,16 +244,18 @@ void OpenSent::HoldTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- (optionally) performs peer oscillation damping if the DampPeerOscillations attribute is set to TRUE, and
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void OpenSent::KeepaliveTimer_Expires()
 {
     EV_TRACE << "Processing OpenSent::KeepaliveTimer_Expires" << std::endl;
     OpenSent::ConnectRetryTimer_Expires();
 }
+
 void OpenSent::TcpConnectionFails()
 {
     EV_TRACE << "Processing OpenSent::BGPOpen" << std::endl;
@@ -256,11 +270,12 @@ void OpenSent::TcpConnectionFails()
     //- changes its state to Active.
     setState<Active>();
 }
+
 void OpenSent::OpenMsgEvent()
 {
     EV_TRACE << "Processing OpenSent::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._openMsgRcv ++;
+    session._openMsgRcv++;
     //When an OPEN message is received, all fields are checked for correctness.
     //If there are no errors in the OPEN message (Event 19), the local system:
     //- sets the BGP ConnectRetryTimer to zero,
@@ -274,11 +289,12 @@ void OpenSent::OpenMsgEvent()
     //- changes its state to OpenConfirm.
     setState<OpenConfirm>();
 }
+
 void OpenSent::KeepAliveMsgEvent()
 {
     EV_TRACE << "Processing OpenSent::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._keepAliveMsgRcv ++;
+    session._keepAliveMsgRcv++;
     OpenSent::ConnectRetryTimer_Expires();
 }
 
@@ -286,7 +302,7 @@ void OpenSent::UpdateMsgEvent()
 {
     EV_TRACE << "Processing OpenSent::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._updateMsgRcv ++;
+    session._updateMsgRcv++;
     OpenSent::ConnectRetryTimer_Expires();
 }
 
@@ -304,10 +320,11 @@ void OpenConfirm::ConnectRetryTimer_Expires()
     //- drops the TCP connection (send TCP FIN),
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by 1,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void OpenConfirm::HoldTimer_Expires()
 {
     std::cout << "OpenConfirm::HoldTimer_Expires" << std::endl;
@@ -320,10 +337,11 @@ void OpenConfirm::HoldTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by 1,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void OpenConfirm::KeepaliveTimer_Expires()
 {
     std::cout << "OpenConfirm::KeepaliveTimer_Expires" << std::endl;
@@ -336,40 +354,44 @@ void OpenConfirm::KeepaliveTimer_Expires()
     session.restartsKeepAliveTimer();
     //- remains in the OpenConfirmed state.
 }
+
 void OpenConfirm::TcpConnectionFails()
 {
     std::cout << "OpenConfirm::TcpConnectionFails" << std::endl;
     setState<Idle>();
 }
+
 void OpenConfirm::OpenMsgEvent()
 {
     EV_TRACE << "Processing OpenConfirm::BGPOpen - collision" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._openMsgRcv ++;
+    session._openMsgRcv++;
     //If the local system receives a valid OPEN message (BGPOpen (Event 19)),
     //the collision detect function is processed per Section 6.8.
 //TODO session._bgpRouting.collisionDetection();
     //If this connection is to be dropped due to connection collision, the local system:
     OpenConfirm::ConnectRetryTimer_Expires();
 }
+
 void OpenConfirm::KeepAliveMsgEvent()
 {
     std::cout << "OpenConfirm::KeepAliveMsgEvent" << std::endl;
     EV_TRACE << "Processing OpenConfirm::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._keepAliveMsgRcv ++;
+    session._keepAliveMsgRcv++;
     //If the local system receives a KEEPALIVE message (KeepAliveMsg Event 26)), the local system:
     //- restarts the HoldTimer and
     session.restartsHoldTimer();
     //- changes its state to Established.
     setState<Established>();
 }
+
 void OpenConfirm::UpdateMsgEvent()
 {
     std::cout << "OpenConfirm::UpdateMsgEvent" << std::endl;
     EV_TRACE << "Processing OpenConfirm::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._updateMsgRcv ++;
+    session._updateMsgRcv++;
     OpenConfirm::ConnectRetryTimer_Expires();
 }
 
@@ -382,12 +404,11 @@ void Established::entry()
 
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
-    const IPv4Route*          rtEntry;
-    BGP::RoutingTableEntry* BGPEntry;
-    IIPv4RoutingTable*          IPRoutingTable = session.getIPRoutingTable();
+    const IPv4Route *rtEntry;
+    BGP::RoutingTableEntry *BGPEntry;
+    IIPv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
-    for (int i=1; i<IPRoutingTable->getNumRoutes(); i++)
-    {
+    for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
         rtEntry = IPRoutingTable->getRoute(i);
         if (rtEntry->getNetmask() == IPv4Address::ALLONES_ADDRESS ||
             rtEntry->getSourceType() == IRoute::IFACENETMASK ||
@@ -397,10 +418,8 @@ void Established::entry()
             continue;
         }
 
-        if (session.getType() == BGP::EGP)
-        {
-            if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry))
-            {
+        if (session.getType() == BGP::EGP) {
+            if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)) {
                 continue;
             }
             BGPEntry = new BGP::RoutingTableEntry(rtEntry);
@@ -411,19 +430,18 @@ void Established::entry()
         }
     }
 
-    std::vector<BGP::RoutingTableEntry*> BGPRoutingTable = session.getBGPRoutingTable();
-    for (std::vector<BGP::RoutingTableEntry*>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++)
-    {
+    std::vector<BGP::RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
+    for (std::vector<BGP::RoutingTableEntry *>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
         session.updateSendProcess((*it));
     }
 
     //when all EGP Session is in established state, start IGP Session(s)
     BGP::SessionID nextSession = session.findAndStartNextSession(BGP::EGP);
-    if (nextSession == (BGP::SessionID)-1)
-    {
+    if (nextSession == (BGP::SessionID)-1) {
         session.findAndStartNextSession(BGP::IGP);
     }
 }
+
 void Established::ConnectRetryTimer_Expires()
 {
     EV_TRACE << "Processing Established::ConnectRetryTimer_Expires" << std::endl;
@@ -436,10 +454,11 @@ void Established::ConnectRetryTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by 1,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void Established::HoldTimer_Expires()
 {
     EV_TRACE << "Processing Established::HoldTimer_Expires" << std::endl;
@@ -451,10 +470,11 @@ void Established::HoldTimer_Expires()
     //- drops the TCP connection,
     session._info.socket->abort();
     //- increments the ConnectRetryCounter by 1,
-    ++ session._connectRetryCounter;
+    ++session._connectRetryCounter;
     //- changes its state to Idle.
     setState<Idle>();
 }
+
 void Established::KeepaliveTimer_Expires()
 {
     EV_TRACE << "Processing Established::KeepaliveTimer_Expires" << std::endl;
@@ -463,45 +483,44 @@ void Established::KeepaliveTimer_Expires()
     //- sends a KEEPALIVE message, and
     session.sendKeepAliveMessage();
     //- restarts the KeepaliveTimer, unless the negotiated HoldTime value is zero.
-    if (session._holdTime != 0)
-    {
+    if (session._holdTime != 0) {
         session.restartsKeepAliveTimer();
     }
 }
+
 void Established::TcpConnectionFails()
 {
     EV_TRACE << "Processing Established::TcpConnectionFails" << std::endl;
 }
+
 void Established::OpenMsgEvent()
 {
     EV_TRACE << "Processing Established::BGPOpen" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._openMsgRcv ++;
+    session._openMsgRcv++;
 }
+
 void Established::KeepAliveMsgEvent()
 {
     EV_TRACE << "Processing Established::KeepAliveMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._keepAliveMsgRcv ++;
+    session._keepAliveMsgRcv++;
     //If the local system receives a KEEPALIVE message (Event 26), the local system:
     //- restarts its HoldTimer, if the negotiated HoldTime value is non-zero, and
     session.restartsHoldTimer();
     //- remains in the Established state.
 }
+
 void Established::UpdateMsgEvent()
 {
     EV_TRACE << "Processing Established::UpdateMsgEvent" << std::endl;
     BGPSession& session = TopState::box().getModule();
-    session._updateMsgRcv ++;
+    session._updateMsgRcv++;
     //If the local system receives an UPDATE message (Event 27), the local system:
     //- processes the message,
     //- restarts its HoldTimer, if the negotiated HoldTime value is non-zero, and
     session.restartsHoldTimer();
     //- remains in the Established state.
 }
-
-
-
-}
-
+} // namespace inet
 

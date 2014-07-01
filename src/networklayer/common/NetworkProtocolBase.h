@@ -24,32 +24,30 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
-
 class INET_API NetworkProtocolBase : public LayeredProtocolBase
 {
   protected:
     ProtocolMapping protocolMapping;
-    IInterfaceTable* interfaceTable;
+    IInterfaceTable *interfaceTable;
 
   protected:
     NetworkProtocolBase();
 
     virtual void initialize(int stage);
 
-    virtual void handleUpperCommand(cMessage* message);
+    virtual void handleUpperCommand(cMessage *message);
 
-    virtual void sendUp(cMessage* message, int transportProtocol);
-    virtual void sendDown(cMessage* message, int interfaceId = -1);
+    virtual void sendUp(cMessage *message, int transportProtocol);
+    virtual void sendDown(cMessage *message, int interfaceId = -1);
 
-    virtual bool isUpperMessage(cMessage* message);
-    virtual bool isLowerMessage(cMessage* message);
+    virtual bool isUpperMessage(cMessage *message);
+    virtual bool isLowerMessage(cMessage *message);
 
     virtual bool isInitializeStage(int stage) { return stage == INITSTAGE_NETWORK_LAYER; }
     virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_NETWORK_LAYER; }
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_NETWORKPROTOCOLBASE_H
 
-
-#endif

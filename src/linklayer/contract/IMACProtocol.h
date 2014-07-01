@@ -21,15 +21,14 @@
 #include "IMACProtocolControlInfo.h"
 
 namespace inet {
-
-class INET_API IMACProtocol {
+class INET_API IMACProtocol
+{
   public:
-    virtual ~IMACProtocol() { }
+    virtual ~IMACProtocol() {}
 
 //    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IMACPROTOCOL_H
 
-
-#endif

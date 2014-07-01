@@ -20,21 +20,20 @@
 
 // non-stdc integer type names that occur in BSD headers
 
-typedef uint8_t  u_int8_t;
+typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
 typedef uint32_t u_int32_t;
 typedef uint64_t u_int64_t;
 
-typedef unsigned char  uchar;
+typedef unsigned char uchar;
 typedef unsigned short ushort;
-typedef unsigned int   uint;
-typedef unsigned long  ulong;
+typedef unsigned int uint;
+typedef unsigned long ulong;
 
-typedef unsigned char  u_char;
+typedef unsigned char u_char;
 typedef unsigned short u_short;
-typedef unsigned int   u_int;
-typedef unsigned long  u_long;
+typedef unsigned int u_int;
+typedef unsigned long u_long;
 
-#endif
-
+#endif // ifndef __INET_BSDINT_H
 

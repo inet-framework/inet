@@ -18,11 +18,10 @@
 #include "LineSegment.h"
 
 namespace inet {
-
 LineSegment::LineSegment(const Coord& point1, const Coord& point2) :
     point1(point1),
     point2(point2)
 {
 }
+} // namespace inet
 
-}

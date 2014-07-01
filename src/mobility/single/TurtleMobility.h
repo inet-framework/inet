@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TURTLEMOBILITY_H
 #define __INET_TURTLEMOBILITY_H
 
@@ -26,8 +25,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief LOGO-style movement model, with the script coming from XML.
  * See NED file for more info.
@@ -46,7 +43,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     double speed;
     double angle;
     BorderPolicy borderPolicy;
-    std::stack<long> loopVars; // for <repeat>
+    std::stack<long> loopVars;    // for <repeat>
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -78,8 +75,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
   public:
     TurtleMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TURTLEMOBILITY_H
 
-
-#endif

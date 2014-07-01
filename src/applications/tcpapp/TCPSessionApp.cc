@@ -23,15 +23,11 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
-
 Define_Module(TCPSessionApp);
 
-
-#define MSGKIND_CONNECT  1
-#define MSGKIND_SEND     2
-#define MSGKIND_CLOSE    3
-
+#define MSGKIND_CONNECT    1
+#define MSGKIND_SEND       2
+#define MSGKIND_CLOSE      3
 
 TCPSessionApp::TCPSessionApp()
 {
@@ -47,8 +43,7 @@ TCPSessionApp::~TCPSessionApp()
 void TCPSessionApp::initialize(int stage)
 {
     TCPAppBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         activeOpen = par("active");
         tOpen = par("tOpen");
         tSend = par("tSend");
@@ -68,8 +63,7 @@ void TCPSessionApp::initialize(int stage)
         if (commands.size() == 0)
             throw cRuntimeError("sendScript is empty");
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         timeoutMsg = new cMessage("timer");
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
 
@@ -88,8 +82,7 @@ bool TCPSessionApp::isNodeUp()
 bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_APPLICATION_LAYER) {
             if (simTime() <= tOpen) {
                 timeoutMsg->setKind(MSGKIND_CONNECT);
@@ -97,8 +90,7 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
             }
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             cancelEvent(timeoutMsg);
             if (socket.getState() == TCPSocket::CONNECTED || socket.getState() == TCPSocket::CONNECTING || socket.getState() == TCPSocket::PEER_CLOSED)
@@ -106,8 +98,7 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
             // TODO: wait until socket is closed
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
@@ -118,22 +109,21 @@ bool TCPSessionApp::handleOperationStage(LifecycleOperation *operation, int stag
 
 void TCPSessionApp::handleTimer(cMessage *msg)
 {
-    switch (msg->getKind())
-    {
+    switch (msg->getKind()) {
         case MSGKIND_CONNECT:
             if (activeOpen)
                 connect(); // sending will be scheduled from socketEstablished()
             else
-                ;//TODO
+                ; //TODO
             break;
 
         case MSGKIND_SEND:
-           sendData();
-           break;
+            sendData();
+            break;
 
         case MSGKIND_CLOSE:
-           close();
-           break;
+            close();
+            break;
 
         default:
             throw cRuntimeError("Invalid timer msg: kind=%d", msg->getKind());
@@ -158,19 +148,16 @@ void TCPSessionApp::sendData()
 
 cPacket *TCPSessionApp::createDataPacket(long sendBytes)
 {
-    switch (socket.getDataTransferMode())
-    {
+    switch (socket.getDataTransferMode()) {
         case TCP_TRANSFER_BYTECOUNT:
-        case TCP_TRANSFER_OBJECT:
-        {
+        case TCP_TRANSFER_OBJECT: {
             cPacket *msg = NULL;
             msg = new cPacket("data1");
             msg->setByteLength(sendBytes);
             return msg;
         }
 
-        case TCP_TRANSFER_BYTESTREAM:
-        {
+        case TCP_TRANSFER_BYTESTREAM: {
             ByteArrayMessage *msg = new ByteArrayMessage("data1");
             unsigned char *ptr = new unsigned char[sendBytes];
 
@@ -191,7 +178,7 @@ void TCPSessionApp::socketEstablished(int connId, void *ptr)
 {
     TCPAppBase::socketEstablished(connId, ptr);
 
-    ASSERT(commandIndex==0);
+    ASSERT(commandIndex == 0);
     timeoutMsg->setKind(MSGKIND_SEND);
     simtime_t tSend = commands[commandIndex].tSend;
     scheduleAt(std::max(tSend, simTime()), timeoutMsg);
@@ -219,8 +206,7 @@ void TCPSessionApp::parseScript(const char *script)
     const char *s = script;
 
     EV_DEBUG << "parse script \"" << script << "\"\n";
-    while (*s)
-    {
+    while (*s) {
         // parse time
         while (isspace(*s))
             s++;
@@ -257,7 +243,7 @@ void TCPSessionApp::parseScript(const char *script)
         if (!*s)
             break;
 
-        if (*s!=';')
+        if (*s != ';')
             throw cRuntimeError("Syntax error in script: separator ';' missing");
 
         s++;
@@ -274,9 +260,5 @@ void TCPSessionApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
-
-
-
-}
-
+} // namespace inet
 

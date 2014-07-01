@@ -18,9 +18,8 @@
 #include "Polygon.h"
 
 namespace inet {
-
 Polygon::Polygon()
 {
 }
+} // namespace inet
 
-}

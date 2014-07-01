@@ -23,30 +23,25 @@
 #include "MappingUtils.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DimensionalNoise : public FlatNoiseBase
 {
-    protected:
-        const ConstMapping *power;
+  protected:
+    const ConstMapping *power;
 
-    public:
-        DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
-            FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
-            power(power)
-        {}
+  public:
+    DimensionalNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const ConstMapping *power) :
+        FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
+        power(power)
+    {}
 
-        virtual ~DimensionalNoise() { delete power; }
-        virtual void printToStream(std::ostream &stream) const { stream << "dimensional noise"; }
-        virtual const ConstMapping *getPower() const { return power; }
-        virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
+    virtual ~DimensionalNoise() { delete power; }
+    virtual void printToStream(std::ostream& stream) const { stream << "dimensional noise"; }
+    virtual const ConstMapping *getPower() const { return power; }
+    virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIMENSIONALNOISE_H
 
-}
-
-
-#endif

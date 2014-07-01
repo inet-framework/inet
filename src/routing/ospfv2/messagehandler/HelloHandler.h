@@ -21,20 +21,16 @@
 #include "IMessageHandler.h"
 
 namespace inet {
-
 namespace OSPF {
+class HelloHandler : public IMessageHandler
+{
+  public:
+    HelloHandler(Router *containingRouter);
 
-class HelloHandler : public IMessageHandler {
-public:
-    HelloHandler(Router* containingRouter);
-
-    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* unused = NULL);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused = NULL);
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_HELLOHANDLER_H
 

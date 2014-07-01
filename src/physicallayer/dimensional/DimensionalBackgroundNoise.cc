@@ -21,16 +21,13 @@
 #include "BandListening.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(DimensionalBackgroundNoise);
 
 void DimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         power = mW(FWMath::dBm2mW(par("power")));
     }
 }
@@ -45,10 +42,6 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
     const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerMapping);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

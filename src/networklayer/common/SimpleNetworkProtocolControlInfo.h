@@ -23,31 +23,29 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
-
 class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
 {
   private:
-    void copy(const SimpleNetworkProtocolControlInfo& other) { }
+    void copy(const SimpleNetworkProtocolControlInfo& other) {}
 
   public:
     SimpleNetworkProtocolControlInfo() : SimpleNetworkProtocolControlInfo_Base() {}
-    SimpleNetworkProtocolControlInfo(const SimpleNetworkProtocolControlInfo& other) : SimpleNetworkProtocolControlInfo_Base(other) {copy(other);}
-    SimpleNetworkProtocolControlInfo& operator=(const SimpleNetworkProtocolControlInfo& other) {if (this==&other) return *this; SimpleNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this;}
-    virtual SimpleNetworkProtocolControlInfo *dup() const {return new SimpleNetworkProtocolControlInfo(*this);}
+    SimpleNetworkProtocolControlInfo(const SimpleNetworkProtocolControlInfo& other) : SimpleNetworkProtocolControlInfo_Base(other) { copy(other); }
+    SimpleNetworkProtocolControlInfo& operator=(const SimpleNetworkProtocolControlInfo& other) { if (this == &other) return *this; SimpleNetworkProtocolControlInfo_Base::operator=(other); copy(other); return *this; }
+    virtual SimpleNetworkProtocolControlInfo *dup() const { return new SimpleNetworkProtocolControlInfo(*this); }
 
     virtual short getTransportProtocol() const { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
     virtual Address getSourceAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const Address & address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
+    virtual void setSourceAddress(const Address& address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
     virtual Address getDestinationAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const Address & address) { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
+    virtual void setDestinationAddress(const Address& address) { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
     virtual int getInterfaceId() const { return SimpleNetworkProtocolControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { SimpleNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 
-
-#endif

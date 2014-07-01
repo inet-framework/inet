@@ -25,15 +25,13 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
-
 /**
  * Simple traffic generator for the Ethernet model.
  */
 class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
 {
   protected:
-    enum Kinds {START=100, NEXT};
+    enum Kinds { START = 100, NEXT };
 
     // send parameters
     long seqNum;
@@ -78,10 +76,8 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
   public:
     EtherAppCli();
     virtual ~EtherAppCli();
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ETHERAPPCLI_H
 
-
-#endif

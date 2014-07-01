@@ -18,8 +18,6 @@
 #include "Sink.h"
 
 namespace inet {
-
-
 Define_Module(Sink);
 
 simsignal_t Sink::rcvdPkSignal = registerSignal("rcvdPk");
@@ -54,10 +52,5 @@ void Sink::finish()
     recordScalar("throughput", throughput);
     recordScalar("packetPerSec", packetPerSec);
 }
-
-
-
-
-}
-
+} // namespace inet
 

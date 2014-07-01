@@ -21,30 +21,25 @@
 #include "AntennaBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DipoleAntenna : public AntennaBase
 {
-    protected:
-        m length;
+  protected:
+    m length;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        DipoleAntenna();
+  public:
+    DipoleAntenna();
 
-        virtual void printToStream(std::ostream &stream) const { stream << "dipole antenna"; }
-        virtual m getLength() const { return length; }
-        virtual double getMaxGain() const { return 1.5; }
-        virtual double computeGain(const EulerAngles direction) const;
+    virtual void printToStream(std::ostream& stream) const { stream << "dipole antenna"; }
+    virtual m getLength() const { return length; }
+    virtual double getMaxGain() const { return 1.5; }
+    virtual double computeGain(const EulerAngles direction) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIPOLEANTENNA_H
 
-}
-
-
-#endif

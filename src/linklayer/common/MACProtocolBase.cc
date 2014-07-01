@@ -18,7 +18,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 MACProtocolBase::MACProtocolBase() :
     upperLayerInGateId(-1),
     upperLayerOutGateId(-1),
@@ -31,8 +30,7 @@ MACProtocolBase::MACProtocolBase() :
 void MACProtocolBase::initialize(int stage)
 {
     LayeredProtocolBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         upperLayerInGateId = findGate("upperLayerIn");
         upperLayerOutGateId = findGate("upperLayerOut");
         lowerLayerInGateId = findGate("lowerLayerIn");
@@ -50,31 +48,28 @@ void MACProtocolBase::registerInterface()
     }
 }
 
-void MACProtocolBase::sendUp(cMessage* message)
+void MACProtocolBase::sendUp(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToUpperSignal, message);
     send(message, upperLayerOutGateId);
 }
 
-void MACProtocolBase::sendDown(cMessage* message)
+void MACProtocolBase::sendDown(cMessage *message)
 {
     if (message->isPacket())
         emit(packetSentToLowerSignal, message);
     send(message, lowerLayerOutGateId);
 }
 
-bool MACProtocolBase::isUpperMessage(cMessage* message)
+bool MACProtocolBase::isUpperMessage(cMessage *message)
 {
     return message->getArrivalGateId() == upperLayerInGateId;
 }
 
-bool MACProtocolBase::isLowerMessage(cMessage* message)
+bool MACProtocolBase::isLowerMessage(cMessage *message)
 {
     return message->getArrivalGateId() == lowerLayerInGateId;
 }
-
-
-}
-
+} // namespace inet
 

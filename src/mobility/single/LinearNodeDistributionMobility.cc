@@ -16,14 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #include "LinearNodeDistributionMobility.h"
 
 namespace inet {
-
-
 Define_Module(LinearNodeDistributionMobility);
-
 
 LinearNodeDistributionMobility::LinearNodeDistributionMobility()
 {
@@ -38,8 +34,7 @@ void LinearNodeDistributionMobility::initialize(int stage)
     StationaryMobility::initialize(stage);
 
     EV_TRACE << "initializing LinearNodeDistributionMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         initialX = par("initialX").doubleValue();
         initialY = par("initialY").doubleValue();
         separation = par("separation").doubleValue();
@@ -70,8 +65,5 @@ void LinearNodeDistributionMobility::finish()
     recordScalar("x", lastPosition.x);
     recordScalar("y", lastPosition.y);
 }
-
-
-}
-
+} // namespace inet
 

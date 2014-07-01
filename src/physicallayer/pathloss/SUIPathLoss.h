@@ -1,18 +1,18 @@
 /***************************************************************************
- * author:      Konrad Polys, Krzysztof Grochla
- *
- * copyright:   (c) 2013 The Institute of Theoretical and Applied Informatics
- *                       of the Polish Academy of Sciences, Project
- *                       LIDER/10/194/L-3/11/ supported by NCBIR
- *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
- ***************************************************************************/
+* author:      Konrad Polys, Krzysztof Grochla
+*
+* copyright:   (c) 2013 The Institute of Theoretical and Applied Informatics
+*                       of the Polish Academy of Sciences, Project
+*                       LIDER/10/194/L-3/11/ supported by NCBIR
+*
+*              This program is free software; you can redistribute it
+*              and/or modify it under the terms of the GNU General Public
+*              License as published by the Free Software Foundation; either
+*              version 2 of the License, or (at your option) any later
+*              version.
+*              For further information see file COPYING
+*              in the top level directory
+***************************************************************************/
 
 #ifndef __INET_SUIPATHLOSS_H
 #define __INET_SUIPATHLOSS_H
@@ -21,10 +21,7 @@
 #include "IPathLoss.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This class implements the empirical Stanford University Interim path loss model.
  *
@@ -32,28 +29,26 @@ namespace physicallayer
  */
 class INET_API SUIPathLoss : public cModule, public IPathLoss
 {
-    protected:
-        /** @brief Transmitter antenna high */
-        m ht;
+  protected:
+    /** @brief Transmitter antenna high */
+    m ht;
 
-        /** @brief Receiver antenna high */
-        m hr;
+    /** @brief Receiver antenna high */
+    m hr;
 
-        double a, b, c, d, s;
+    double a, b, c, d, s;
 
-    protected:
-        virtual void initialize(int stage);
+  protected:
+    virtual void initialize(int stage);
 
-    public:
-        SUIPathLoss();
-        virtual void printToStream(std::ostream &stream) const;
-        virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
-        virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const { return m(qNaN); }
+  public:
+    SUIPathLoss();
+    virtual void printToStream(std::ostream& stream) const;
+    virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
+    virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const { return m(qNaN); }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SUIPATHLOSS_H
 
-}
-
-
-#endif

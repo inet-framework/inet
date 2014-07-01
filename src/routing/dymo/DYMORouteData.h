@@ -10,13 +10,12 @@
 #include "DYMOdefs.h"
 
 namespace inet {
-
 namespace DYMO {
-
 /**
  * DYMO specific extra route data attached to routes in the routing table.
  */
-class INET_API DYMORouteData : public cObject {
+class INET_API DYMORouteData : public cObject
+{
   private:
     bool isBroken;
     DYMOSequenceNumber sequenceNumber;
@@ -26,7 +25,7 @@ class INET_API DYMORouteData : public cObject {
 
   public:
     DYMORouteData();
-    virtual ~DYMORouteData() { }
+    virtual ~DYMORouteData() {}
 
     bool getBroken() const { return isBroken; }
     void setBroken(bool isBroken) { this->isBroken = isBroken; }
@@ -43,10 +42,8 @@ class INET_API DYMORouteData : public cObject {
     DYMOMetricType getMetricType() const { return metricType; }
     void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
 };
+} // namespace DYMO
+} // namespace inet
 
-}
+#endif // ifndef __INET_DYMOROUTEDATA_H
 
-}
-
-
-#endif

@@ -21,7 +21,6 @@
 #include "Coord.h"
 
 namespace inet {
-
 const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
 
 /**
@@ -31,7 +30,8 @@ const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
  * If the normal distance between two points on one axis is bigger than
  * half of the size there must be a "shorter way" over the border on this axis
  */
-static double dist(double coord1, double coord2, double size) {
+static double dist(double coord1, double coord2, double size)
+{
     double difference = fabs(coord1 - coord2);
     if (difference == 0)
         // NOTE: event if size is zero
@@ -43,14 +43,12 @@ static double dist(double coord1, double coord2, double size) {
     }
 }
 
-double Coord::sqrTorusDist(const Coord& b, const Coord& size) const {
+double Coord::sqrTorusDist(const Coord& b, const Coord& size) const
+{
     double xDist = dist(x, b.x, size.x);
     double yDist = dist(y, b.y, size.y);
     double zDist = dist(z, b.z, size.z);
     return xDist * xDist + yDist * yDist + zDist * zDist;
 }
-
-
-}
-
+} // namespace inet
 

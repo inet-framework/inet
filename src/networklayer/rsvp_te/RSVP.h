@@ -29,13 +29,11 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 class SimpleClassifier;
 class IIPv4RoutingTable;
 class IInterfaceTable;
 class TED;
 class LIBTable;
-
 
 /**
  * TODO documentation
@@ -194,26 +192,26 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
   protected:
     virtual void processSignallingMessage(SignallingMsg *msg);
     virtual void processPSB_TIMER(PsbTimerMsg *msg);
-    virtual void processPSB_TIMEOUT(PsbTimeoutMsg* msg);
+    virtual void processPSB_TIMEOUT(PsbTimeoutMsg *msg);
     virtual void processRSB_REFRESH_TIMER(RsbRefreshTimerMsg *msg);
     virtual void processRSB_COMMIT_TIMER(RsbCommitTimerMsg *msg);
-    virtual void processRSB_TIMEOUT(RsbTimeoutMsg* msg);
-    virtual void processHELLO_TIMER(HelloTimerMsg* msg);
-    virtual void processHELLO_TIMEOUT(HelloTimeoutMsg* msg);
-    virtual void processPATH_NOTIFY(PathNotifyMsg* msg);
-    virtual void processRSVPMessage(RSVPMessage* msg);
-    virtual void processHelloMsg(RSVPHelloMsg* msg);
-    virtual void processPathMsg(RSVPPathMsg* msg);
-    virtual void processResvMsg(RSVPResvMsg* msg);
-    virtual void processPathTearMsg(RSVPPathTear* msg);
-    virtual void processPathErrMsg(RSVPPathError* msg);
+    virtual void processRSB_TIMEOUT(RsbTimeoutMsg *msg);
+    virtual void processHELLO_TIMER(HelloTimerMsg *msg);
+    virtual void processHELLO_TIMEOUT(HelloTimeoutMsg *msg);
+    virtual void processPATH_NOTIFY(PathNotifyMsg *msg);
+    virtual void processRSVPMessage(RSVPMessage *msg);
+    virtual void processHelloMsg(RSVPHelloMsg *msg);
+    virtual void processPathMsg(RSVPPathMsg *msg);
+    virtual void processResvMsg(RSVPResvMsg *msg);
+    virtual void processPathTearMsg(RSVPPathTear *msg);
+    virtual void processPathErrMsg(RSVPPathError *msg);
 
-    virtual PathStateBlock_t* createPSB(RSVPPathMsg *msg);
-    virtual PathStateBlock_t* createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
+    virtual PathStateBlock_t *createPSB(RSVPPathMsg *msg);
+    virtual PathStateBlock_t *createIngressPSB(const traffic_session_t& session, const traffic_path_t& path);
     virtual void removePSB(PathStateBlock_t *psb);
-    virtual ResvStateBlock_t* createRSB(RSVPResvMsg *msg);
-    virtual ResvStateBlock_t* createEgressRSB(PathStateBlock_t *psb);
-    virtual void updateRSB(ResvStateBlock_t* rsb, RSVPResvMsg *msg);
+    virtual ResvStateBlock_t *createRSB(RSVPResvMsg *msg);
+    virtual ResvStateBlock_t *createEgressRSB(PathStateBlock_t *psb);
+    virtual void updateRSB(ResvStateBlock_t *rsb, RSVPResvMsg *msg);
     virtual void removeRSB(ResvStateBlock_t *rsb);
     virtual void removeRsbFilter(ResvStateBlock_t *rsb, unsigned int index);
 
@@ -235,7 +233,7 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     virtual void setupHello();
     virtual void startHello(IPv4Address peer, simtime_t delay);
-    virtual void removeHello(HelloState_t* h);
+    virtual void removeHello(HelloState_t *h);
 
     virtual void recoveryEvent(IPv4Address peer);
 
@@ -248,16 +246,16 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     virtual bool evalNextHopInterface(IPv4Address destAddr, const EroVector& ERO, IPv4Address& OI);
 
-    virtual PathStateBlock_t* findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
-    virtual ResvStateBlock_t* findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
+    virtual PathStateBlock_t *findPSB(const SessionObj_t& session, const SenderTemplateObj_t& sender);
+    virtual ResvStateBlock_t *findRSB(const SessionObj_t& session, const SenderTemplateObj_t& sender, unsigned int& index);
 
-    virtual PathStateBlock_t* findPsbById(int id);
-    virtual ResvStateBlock_t* findRsbById(int id);
+    virtual PathStateBlock_t *findPsbById(int id);
+    virtual ResvStateBlock_t *findRsbById(int id);
 
     std::vector<traffic_session_t>::iterator findSession(const SessionObj_t& session);
-    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj_t &sender);
+    std::vector<traffic_path_t>::iterator findPath(traffic_session_t *session, const SenderTemplateObj_t& sender);
 
-    virtual HelloState_t* findHello(IPv4Address peer);
+    virtual HelloState_t *findHello(IPv4Address peer);
 
     virtual void print(RSVPPathMsg *p);
     virtual void print(RSVPResvMsg *r);
@@ -293,7 +291,6 @@ class INET_API RSVP : public cSimpleModule, public IScriptable, public ILifecycl
 
     // IScriptable implementation
     virtual void processCommand(const cXMLElement& node);
-
 };
 
 bool operator==(const SessionObj_t& a, const SessionObj_t& b);
@@ -308,10 +305,7 @@ bool operator!=(const SenderTemplateObj_t& a, const SenderTemplateObj_t& b);
 std::ostream& operator<<(std::ostream& os, const SessionObj_t& a);
 std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a);
 std::ostream& operator<<(std::ostream& os, const FlowSpecObj_t& a);
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_RSVP_H
 

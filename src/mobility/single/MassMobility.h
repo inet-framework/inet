@@ -17,7 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_MASSMOBILITY_H
 #define __INET_MASSMOBILITY_H
 
@@ -26,8 +25,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Models the mobility of with mass, making random motions.
  * See NED file for more info.
@@ -44,7 +41,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
     cPar *speedParameter;
 
     // current state
-    double angle;   ///< angle of linear motion
+    double angle;    ///< angle of linear motion
 
     simtime_t previousChange;
     Coord sourcePosition;
@@ -64,8 +61,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
   public:
     MassMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MASSMOBILITY_H
 
-
-#endif

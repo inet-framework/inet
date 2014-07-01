@@ -21,32 +21,27 @@
 #include "IListeningDecision.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ListeningDecision : public IListeningDecision, public cObject
 {
-    protected:
-        const IListening *listening;
-        const bool isListeningPossible_;
+  protected:
+    const IListening *listening;
+    const bool isListeningPossible_;
 
-    public:
-        ListeningDecision(const IListening *listening, bool isListeningPossible_) :
-            listening(listening),
-            isListeningPossible_(isListeningPossible_)
-        {}
+  public:
+    ListeningDecision(const IListening *listening, bool isListeningPossible_) :
+        listening(listening),
+        isListeningPossible_(isListeningPossible_)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const IListening *getListening() const { return listening; }
+    virtual const IListening *getListening() const { return listening; }
 
-        virtual bool isListeningPossible() const { return isListeningPossible_; }
+    virtual bool isListeningPossible() const { return isListeningPossible_; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_LISTENINGDECISION_H
 
-}
-
-
-#endif

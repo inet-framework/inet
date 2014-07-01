@@ -25,36 +25,35 @@
 #include "HttpUtils.h"
 
 namespace inet {
-
-enum DISTR_TYPE {dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf};
+enum DISTR_TYPE { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf };
 
 // Defines for the distribution names
-#define DISTR_NORMAL_STR "normal"
-#define DISTR_UNIFORM_STR "uniform"
-#define DISTR_EXPONENTIAL_STR "exponential"
-#define DISTR_HISTOGRAM_STR "histogram"
-#define DISTR_CONSTANT_STR "constant"
-#define DISTR_ZIPF_STR "zipf"
+#define DISTR_NORMAL_STR         "normal"
+#define DISTR_UNIFORM_STR        "uniform"
+#define DISTR_EXPONENTIAL_STR    "exponential"
+#define DISTR_HISTOGRAM_STR      "histogram"
+#define DISTR_CONSTANT_STR       "constant"
+#define DISTR_ZIPF_STR           "zipf"
 
 /**
  * Base random object. Should not be instantiated directly.
  */
 class rdObject
 {
-    protected:
-        DISTR_TYPE m_type;
-        bool _hasKey(cXMLAttributeMap attributes, std::string key) {return attributes.find(key)!=attributes.end();}
+  protected:
+    DISTR_TYPE m_type;
+    bool _hasKey(cXMLAttributeMap attributes, std::string key) { return attributes.find(key) != attributes.end(); }
 
-    public:
-        virtual ~rdObject(){}
-        DISTR_TYPE getType() {return m_type;}
-        std::string typeStr();
-        virtual std::string toString() {return typeStr();}
+  public:
+    virtual ~rdObject() {}
+    DISTR_TYPE getType() { return m_type; }
+    std::string typeStr();
+    virtual std::string toString() { return typeStr(); }
 
-        /*
-         * Returns a random number. Must be implemented in derived classes.
-         */
-        virtual double draw() = 0;
+    /*
+     * Returns a random number. Must be implemented in derived classes.
+     */
+    virtual double draw() = 0;
 };
 
 /**
@@ -63,38 +62,39 @@ class rdObject
  */
 class rdNormal : public rdObject
 {
-    protected:
-        double m_mean;          ///< The mean of the distribution.
-        double m_sd;            ///< The sd of the distribution.
-        double m_min;           ///< The minimum limit   .
-        bool m_bMinLimit;       ///< Set if the minimum limit is set.
-        bool m_nonNegative;     ///< Non-negative only -- uses the truncnormal function.
-    public:
+  protected:
+    double m_mean;    ///< The mean of the distribution.
+    double m_sd;    ///< The sd of the distribution.
+    double m_min;    ///< The minimum limit   .
+    bool m_bMinLimit;    ///< Set if the minimum limit is set.
+    bool m_nonNegative;    ///< Non-negative only -- uses the truncnormal function.
 
-        /*
-         * Constructor for direct initialization
-         */
-        rdNormal(double mean, double sd, bool nonNegative = false);
+  public:
 
-        /*
-         * Constructor for initialization with an XML element
-         */
-        rdNormal(cXMLAttributeMap attributes);
+    /*
+     * Constructor for direct initialization
+     */
+    rdNormal(double mean, double sd, bool nonNegative = false);
 
-        /*
-         * Set the min limit for the random values
-         */
-        void setMinLimit(double min) {m_min = min; m_bMinLimit = true;}
+    /*
+     * Constructor for initialization with an XML element
+     */
+    rdNormal(cXMLAttributeMap attributes);
 
-        /*
-         * Cancel the min limit when not needed any more
-         */
-        void resetMinLimit() {m_bMinLimit = false;}
+    /*
+     * Set the min limit for the random values
+     */
+    void setMinLimit(double min) { m_min = min; m_bMinLimit = true; }
 
-        /*
-         * Get a random value
-         */
-        virtual double draw();
+    /*
+     * Cancel the min limit when not needed any more
+     */
+    void resetMinLimit() { m_bMinLimit = false; }
+
+    /*
+     * Get a random value
+     */
+    virtual double draw();
 };
 
 /**
@@ -103,30 +103,31 @@ class rdNormal : public rdObject
  */
 class rdUniform : public rdObject
 {
-    protected:
-        double m_beginning; ///< Low limit
-        double m_end;       ///< High limit
-    public:
-        /*
-         * Constructor for direct initialization
-         */
-        rdUniform(double beginning, double end);
+  protected:
+    double m_beginning;    ///< Low limit
+    double m_end;    ///< High limit
 
-        /*
-         * Constructor for initialization with an XML element
-         */
-        rdUniform(cXMLAttributeMap attributes);
+  public:
+    /*
+     * Constructor for direct initialization
+     */
+    rdUniform(double beginning, double end);
 
-        /*
-         * Get a random value
-         */
-        virtual double draw();
+    /*
+     * Constructor for initialization with an XML element
+     */
+    rdUniform(cXMLAttributeMap attributes);
 
-        // Getters and setters
-        double getBeginning() {return m_beginning;}
-        void setBeginning(double beginning) {m_beginning = beginning;}
-        double getEnd() {return m_end;}
-        void setEnd(double end) {m_end = end;}
+    /*
+     * Get a random value
+     */
+    virtual double draw();
+
+    // Getters and setters
+    double getBeginning() { return m_beginning; }
+    void setBeginning(double beginning) { m_beginning = beginning; }
+    double getEnd() { return m_end; }
+    void setEnd(double end) { m_end = end; }
 };
 
 /**
@@ -135,34 +136,35 @@ class rdUniform : public rdObject
  */
 class rdExponential : public rdObject
 {
-    protected:
-        double m_mean;      // the distribution mean
-        double m_min;       // the low limit
-        double m_max;       // the high limit
-        bool m_bMinLimit;
-        bool m_bMaxLimit;
-    public:
+  protected:
+    double m_mean;    // the distribution mean
+    double m_min;    // the low limit
+    double m_max;    // the high limit
+    bool m_bMinLimit;
+    bool m_bMaxLimit;
 
-        /*
-         * Constructor for direct initialization
-         */
-        rdExponential(double mean);
+  public:
 
-        /*
-         *  Constructor for initialization with an XML element
-         */
-        rdExponential(cXMLAttributeMap attributes);
+    /*
+     * Constructor for direct initialization
+     */
+    rdExponential(double mean);
 
-        /*
-         * Get a random value
-         */
-        virtual double draw();
+    /*
+     *  Constructor for initialization with an XML element
+     */
+    rdExponential(cXMLAttributeMap attributes);
 
-        // Getters and setters
-        void setMinLimit(double min) {m_min = min; m_bMinLimit = true;}
-        void resetMinLimit() {m_bMinLimit = false;}
-        void setMaxLimit(double max) {m_max = max; m_bMaxLimit = true;}
-        void resetMaxLimit() {m_bMaxLimit = false;}
+    /*
+     * Get a random value
+     */
+    virtual double draw();
+
+    // Getters and setters
+    void setMinLimit(double min) { m_min = min; m_bMinLimit = true; }
+    void resetMinLimit() { m_bMinLimit = false; }
+    void setMaxLimit(double max) { m_max = max; m_bMaxLimit = true; }
+    void resetMaxLimit() { m_bMaxLimit = false; }
 };
 
 /**
@@ -170,38 +172,37 @@ class rdExponential : public rdObject
  */
 class rdHistogram : public rdObject
 {
-    protected:
-        struct rdHistogramBin
-        {
-            int count;
-            double sum;
-        };
+  protected:
+    struct rdHistogramBin
+    {
+        int count;
+        double sum;
+    };
 
-        typedef std::vector<rdHistogramBin> rdHistogramBins;
+    typedef std::vector<rdHistogramBin> rdHistogramBins;
 
-        rdHistogramBins m_bins;
-        bool m_zeroBased;
+    rdHistogramBins m_bins;
+    bool m_zeroBased;
 
-    private:
-        void __parseBinString(std::string binstr);
-        void __normalizeBins();
+  private:
+    void __parseBinString(std::string binstr);
+    void __normalizeBins();
 
-    public:
-        /*
-         * Constructor for direct initialization
-         */
-        rdHistogram(rdHistogramBins bins, bool zeroBased = false);
+  public:
+    /*
+     * Constructor for direct initialization
+     */
+    rdHistogram(rdHistogramBins bins, bool zeroBased = false);
 
-        /*
-         * Constructor for initialization with an XML element
-         */
-        rdHistogram(cXMLAttributeMap attributes);
+    /*
+     * Constructor for initialization with an XML element
+     */
+    rdHistogram(cXMLAttributeMap attributes);
 
-        /*
-         * Get a random value
-         */
-        double draw();
-
+    /*
+     * Get a random value
+     */
+    double draw();
 };
 
 /**
@@ -211,24 +212,25 @@ class rdHistogram : public rdObject
  */
 class rdConstant : public rdObject
 {
-    protected:
-        double m_value; ///< The constant
-    public:
+  protected:
+    double m_value;    ///< The constant
 
-        /*
-         * Constructor for direct initialization
-         */
-        rdConstant(double value);
+  public:
 
-        /*
-         * Constructor for initialization with an XML element
-         */
-        rdConstant(cXMLAttributeMap attributes);
+    /*
+     * Constructor for direct initialization
+     */
+    rdConstant(double value);
 
-        /*
-         * Get a random value
-         */
-        double draw();
+    /*
+     * Constructor for initialization with an XML element
+     */
+    rdConstant(cXMLAttributeMap attributes);
+
+    /*
+     * Get a random value
+     */
+    double draw();
 };
 
 /**
@@ -238,44 +240,44 @@ class rdConstant : public rdObject
  */
 class rdZipf : public rdObject
 {
-    protected:
-        double m_alpha;     // the alpha value
-        int m_number;       // the number of nodes to pick from
-        double m_c;         // helper constant.
-        bool m_baseZero;    // true if we want a zero-based return value
+  protected:
+    double m_alpha;    // the alpha value
+    int m_number;    // the number of nodes to pick from
+    double m_c;    // helper constant.
+    bool m_baseZero;    // true if we want a zero-based return value
 
-    private:
-        // Initialization methods.
-        void __initialize(int n, double alpha, bool baseZero);
-        void __setup_c();
+  private:
+    // Initialization methods.
+    void __initialize(int n, double alpha, bool baseZero);
+    void __setup_c();
 
-    public:
+  public:
 
-        /*
-         * Constructor for direct initialization *
-         */
-        rdZipf(int n, double alpha, bool baseZero = false);
+    /*
+     * Constructor for direct initialization *
+     */
+    rdZipf(int n, double alpha, bool baseZero = false);
 
-        /*
-         * Constructor for initialization with an XML element
-         */
-        rdZipf(cXMLAttributeMap attributes);
+    /*
+     * Constructor for initialization with an XML element
+     */
+    rdZipf(cXMLAttributeMap attributes);
 
-        /*
-         * Get a random value -- a element in the pick order (popularity order)
-         */
-        virtual double draw();
+    /*
+     * Get a random value -- a element in the pick order (popularity order)
+     */
+    virtual double draw();
 
-        /*
-         *  Return the object definition as a string
-         */
-        virtual std::string toString();
+    /*
+     *  Return the object definition as a string
+     */
+    virtual std::string toString();
 
-        // Getters and setters
-        void setN(int n) {m_number = n; __setup_c();}
-        int getN() {return m_number;}
-        void setAlpha(double alpha) {m_alpha = alpha; __setup_c();}
-        double getAlpha() {return m_alpha;}
+    // Getters and setters
+    void setN(int n) { m_number = n; __setup_c(); }
+    int getN() { return m_number; }
+    void setAlpha(double alpha) { m_alpha = alpha; __setup_c(); }
+    double getAlpha() { return m_alpha; }
 };
 
 /**
@@ -284,14 +286,13 @@ class rdZipf : public rdObject
  */
 class rdObjectFactory
 {
-    public:
-        /*
-         * Return a rdObject-derived class based on the type name in the XML element
-         */
-        rdObject* create(cXMLAttributeMap attributes);
+  public:
+    /*
+     * Return a rdObject-derived class based on the type name in the XML element
+     */
+    rdObject *create(cXMLAttributeMap attributes);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_HTTPRANDOM_H
 
-
-#endif

@@ -18,7 +18,6 @@
 #include "ByteArray.h"
 
 namespace inet {
-
 /**
  * Buffer that carries BytesArrays.
  */
@@ -40,7 +39,7 @@ class ByteArrayBuffer : public cObject
     ByteArrayBuffer(const ByteArrayBuffer& other);
     ByteArrayBuffer& operator=(const ByteArrayBuffer& other);
 
-    virtual ByteArrayBuffer *dup() const {return new ByteArrayBuffer(*this);}
+    virtual ByteArrayBuffer *dup() const { return new ByteArrayBuffer(*this); }
 
     /** Clear buffer */
     virtual void clear();
@@ -49,7 +48,7 @@ class ByteArrayBuffer : public cObject
     virtual void push(const ByteArray& byteArrayP);
 
     /** Push data to end of buffer */
-    virtual void push(const void* bufferP, unsigned int bufferLengthP);
+    virtual void push(const void *bufferP, unsigned int bufferLengthP);
 
     /** Returns length of stored data */
     virtual uint64 getLength() const { return dataLengthM; }
@@ -61,7 +60,7 @@ class ByteArrayBuffer : public cObject
      * @param srcOffsP: source offset
      * @return count of copied bytes
      */
-    virtual unsigned int getBytesToBuffer(void* bufferP, unsigned int bufferLengthP, unsigned int srcOffsP = 0) const;
+    virtual unsigned int getBytesToBuffer(void *bufferP, unsigned int bufferLengthP, unsigned int srcOffsP = 0) const;
 
     /**
      * Move bytes to an external buffer
@@ -69,7 +68,7 @@ class ByteArrayBuffer : public cObject
      * @param bufferLengthP: length of output buffer
      * @return count of moved bytes
      */
-    virtual unsigned int popBytesToBuffer(void* bufferP, unsigned int bufferLengthP);
+    virtual unsigned int popBytesToBuffer(void *bufferP, unsigned int bufferLengthP);
 
     /**
      * Drop bytes from buffer
@@ -78,8 +77,7 @@ class ByteArrayBuffer : public cObject
      */
     virtual unsigned int drop(unsigned int lengthP);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_BYTEARRAYBUFFER_H
 
-
-#endif

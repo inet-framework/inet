@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TelnetApp.h"
 
 #include "ModuleAccess.h"
@@ -24,11 +23,9 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
-
-#define MSGKIND_CONNECT  0
-#define MSGKIND_SEND     1
-#define MSGKIND_CLOSE    2
-
+#define MSGKIND_CONNECT    0
+#define MSGKIND_SEND       1
+#define MSGKIND_CLOSE      2
 
 Define_Module(TelnetApp);
 
@@ -53,14 +50,12 @@ void TelnetApp::initialize(int stage)
 {
     TCPAppBase::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numCharsToType = numLinesToType = 0;
         WATCH(numCharsToType);
         WATCH(numLinesToType);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -86,8 +81,7 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
             simtime_t now = simTime();
             simtime_t startTime = par("startTime");
             simtime_t start = std::max(startTime, now);
-            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime)))
-            {
+            if (timeoutMsg && ((stopTime < SIMTIME_ZERO) || (start < stopTime) || (start == stopTime && startTime == stopTime))) {
                 timeoutMsg->setKind(MSGKIND_CONNECT);
                 scheduleAt(start, timeoutMsg);
             }
@@ -105,45 +99,43 @@ bool TelnetApp::handleOperationStage(LifecycleOperation *operation, int stage, I
         if (stage == NodeCrashOperation::STAGE_CRASH)
             cancelEvent(timeoutMsg);
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
 void TelnetApp::handleTimer(cMessage *msg)
 {
-    switch (msg->getKind())
-    {
+    switch (msg->getKind()) {
         case MSGKIND_CONNECT:
             EV_INFO << "user fires up telnet program\n";
             connect();
             break;
 
         case MSGKIND_SEND:
-           if (numCharsToType > 0)
-           {
-               // user types a character and expects it to be echoed
-               EV_INFO << "user types one character, " << numCharsToType-1 << " more to go\n";
-               sendGenericAppMsg(1, 1);
-               checkedScheduleAt(simTime() + (simtime_t)par("keyPressDelay"), timeoutMsg);
-               numCharsToType--;
-           }
-           else
-           {
-               EV_INFO << "user hits Enter key\n";
-               // Note: reply length must be at least 2, otherwise we'll think
-               // it's an echo when it comes back!
-               sendGenericAppMsg(1, 2 + (long)par("commandOutputLength"));
-               numCharsToType = (long)par("commandLength");
+            if (numCharsToType > 0) {
+                // user types a character and expects it to be echoed
+                EV_INFO << "user types one character, " << numCharsToType - 1 << " more to go\n";
+                sendGenericAppMsg(1, 1);
+                checkedScheduleAt(simTime() + (simtime_t)par("keyPressDelay"), timeoutMsg);
+                numCharsToType--;
+            }
+            else {
+                EV_INFO << "user hits Enter key\n";
+                // Note: reply length must be at least 2, otherwise we'll think
+                // it's an echo when it comes back!
+                sendGenericAppMsg(1, 2 + (long)par("commandOutputLength"));
+                numCharsToType = (long)par("commandLength");
 
-               // Note: no checkedScheduleAt(), because user only starts typing next command
-               // when output from previous one has arrived (see socketDataArrived())
-           }
-           break;
+                // Note: no checkedScheduleAt(), because user only starts typing next command
+                // when output from previous one has arrived (see socketDataArrived())
+            }
+            break;
 
         case MSGKIND_CLOSE:
-           EV_INFO << "user exits telnet program\n";
-           close();
-           break;
+            EV_INFO << "user exits telnet program\n";
+            close();
+            break;
     }
 }
 
@@ -163,8 +155,8 @@ void TelnetApp::socketEstablished(int connId, void *ptr)
     TCPAppBase::socketEstablished(connId, ptr);
 
     // schedule first sending
-    numLinesToType = (long) par("numCommands");
-    numCharsToType = (long) par("commandLength");
+    numLinesToType = (long)par("numCommands");
+    numCharsToType = (long)par("commandLength");
     timeoutMsg->setKind(numLinesToType > 0 ? MSGKIND_SEND : MSGKIND_CLOSE);
     checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
 }
@@ -174,13 +166,11 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urge
     int len = msg->getByteLength();
     TCPAppBase::socketDataArrived(connId, ptr, msg, urgent);
 
-    if (len == 1)
-    {
+    if (len == 1) {
         // this is an echo, ignore
         EV_INFO << "received echo\n";
     }
-    else
-    {
+    else {
         // output from last typed command arrived.
         EV_INFO << "received output of command typed\n";
 
@@ -188,14 +178,12 @@ void TelnetApp::socketDataArrived(int connId, void *ptr, cPacket *msg, bool urge
         // starts typing again after a delay
         numLinesToType--;
 
-        if (numLinesToType == 0)
-        {
+        if (numLinesToType == 0) {
             EV_INFO << "user has no more commands to type\n";
             timeoutMsg->setKind(MSGKIND_CLOSE);
             checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
         }
-        else
-        {
+        else {
             EV_INFO << "user looks at output, then starts typing next command\n";
             timeoutMsg->setKind(MSGKIND_SEND);
             checkedScheduleAt(simTime() + (simtime_t)par("thinkTime"), timeoutMsg);
@@ -220,9 +208,5 @@ void TelnetApp::socketFailure(int connId, void *ptr, int code)
     timeoutMsg->setKind(MSGKIND_CONNECT);
     checkedScheduleAt(simTime() + (simtime_t)par("reconnectInterval"), timeoutMsg);
 }
-
-
-
-}
-
+} // namespace inet
 

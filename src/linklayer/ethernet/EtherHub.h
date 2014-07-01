@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ETHERHUB_H
 #define __INET_ETHERHUB_H
@@ -21,7 +21,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
@@ -29,13 +28,13 @@ namespace inet {
 class INET_API EtherHub : public cSimpleModule, protected cListener
 {
   protected:
-    int numPorts;         // sizeof(ethg)
-    int inputGateBaseId;  // gate id of ethg$i[0]
-    int outputGateBaseId; // gate id of ethg$o[0]
+    int numPorts;    // sizeof(ethg)
+    int inputGateBaseId;    // gate id of ethg$i[0]
+    int outputGateBaseId;    // gate id of ethg$o[0]
     bool dataratesDiffer;
 
     // statistics
-    long numMessages;   // number of messages handled
+    long numMessages;    // number of messages handled
     static simsignal_t pkSignal;
 
   protected:
@@ -46,9 +45,7 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
 
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ETHERHUB_H
 

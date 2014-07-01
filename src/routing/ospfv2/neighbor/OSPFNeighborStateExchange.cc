@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFNeighborStateExchange.h"
 
 #include "MessageHandler.h"
@@ -30,12 +29,10 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::Neighbor::NeighborEventType event)
+void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         changeState(neighbor, new OSPF::NeighborStateDown, this);
@@ -43,7 +40,7 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
     if (event == OSPF::Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
         if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
-            MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+            MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
         changeState(neighbor, new OSPF::NeighborStateDown, this);
@@ -53,7 +50,7 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
         changeState(neighbor, new OSPF::NeighborStateInit, this);
     }
     if (event == OSPF::Neighbor::HELLO_RECEIVED) {
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
@@ -64,7 +61,7 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
         }
     }
     if ((event == OSPF::Neighbor::SEQUENCE_NUMBER_MISMATCH) || (event == OSPF::Neighbor::BAD_LINK_STATE_REQUEST)) {
-        MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         neighbor->incrementDDSequenceNumber();
         neighbor->sendDatabaseDescriptionPacket(true);
@@ -73,12 +70,13 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
     }
     if (event == OSPF::Neighbor::EXCHANGE_DONE) {
         if (neighbor->isLinkStateRequestListEmpty()) {
-            MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+            MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             neighbor->clearRequestRetransmissionTimer();
             changeState(neighbor, new OSPF::NeighborStateFull, this);
-        } else {
-            MessageHandler* messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
+        }
+        else {
+            MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getRouterDeadInterval());
             changeState(neighbor, new OSPF::NeighborStateLoading, this);
         }
@@ -92,8 +90,5 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
         neighbor->startRequestRetransmissionTimer();
     }
 }
-
-
-}
-
+} // namespace inet
 

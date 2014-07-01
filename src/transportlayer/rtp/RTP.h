@@ -4,21 +4,19 @@
     begin            : Fri Aug 2 2007
     copyright        : (C) 2007 by Matthias Oppitz,  Ahmed Ayadi
     email            : <Matthias.Oppitz@gmx.de> <ahmed.ayadi@sophia.inria.fr>
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTP_H
 #define __INET_RTP_H
-
 
 #include "INETDefs.h"
 #include "ILifecycle.h"
@@ -28,7 +26,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
 /**
  * An RTP is the center of the RTP layer of an endsystem.
  * It creates the profile module, sends and receives RTP data packets
@@ -155,11 +152,11 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     virtual void initializeRTCP();
 
     /**
-    Determines the maximum transmission unit that can be uses for
-    RTP. This implementation assumes that we use an ethernet with
-    1500 bytes mtu. The returned value is 1500 bytes minus header
-    sizes for ip and udp.
-    */
+       Determines the maximum transmission unit that can be uses for
+       RTP. This implementation assumes that we use an ethernet with
+       1500 bytes mtu. The returned value is 1500 bytes minus header
+       sizes for ip and udp.
+     */
     virtual int resolveMTU();
 
   protected:
@@ -208,8 +205,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     //statistics:
     static simsignal_t rcvdPkSignal;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTP_H
 
-
-#endif

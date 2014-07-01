@@ -21,20 +21,16 @@
 #include "IMessageHandler.h"
 
 namespace inet {
-
 namespace OSPF {
+class LinkStateRequestHandler : public IMessageHandler
+{
+  public:
+    LinkStateRequestHandler(Router *containingRouter);
 
-class LinkStateRequestHandler : public IMessageHandler {
-public:
-    LinkStateRequestHandler(Router* containingRouter);
-
-    void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
+    void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_LINKSTATEREQUESTHANDLER_H
 

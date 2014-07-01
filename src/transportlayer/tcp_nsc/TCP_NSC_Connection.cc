@@ -17,11 +17,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include "TCP_NSC_Connection.h"
 
-#include "headers/defs.h"   // for endian macros
-#include <sim_interface.h> // NSC header
+#include "headers/defs.h"    // for endian macros
+#include <sim_interface.h>    // NSC header
 #include "headers/tcphdr.h"
 #include "TCP_NSC.h"
 #include "TCP_NSC_Queues.h"
@@ -35,19 +34,17 @@
 #include <netinet/in.h>
 
 namespace inet {
-
-
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
-    unsigned int ihl:4;
-    unsigned int version:4;
+    unsigned int ihl : 4;
+    unsigned int version : 4;
 #elif BYTE_ORDER == BIG_ENDIAN
-    unsigned int version:4;
-    unsigned int ihl:4;
-#else
+    unsigned int version : 4;
+    unsigned int ihl : 4;
+#else // if BYTE_ORDER == LITTLE_ENDIAN
 # error "Please check BYTE_ORDER declaration"
-#endif
+#endif // if BYTE_ORDER == LITTLE_ENDIAN
     uint8_t tos;
     uint16_t tot_len;
     uint16_t id;
@@ -77,7 +74,7 @@ TCP_NSC_Connection::TCP_NSC_Connection()
 }
 
 // create a TCP_I_ESTABLISHED msg
-cMessage* TCP_NSC_Connection::createEstablishedMsg()
+cMessage *TCP_NSC_Connection::createEstablishedMsg()
 {
     if (sentEstablishedM)
         return NULL;
@@ -98,7 +95,7 @@ cMessage* TCP_NSC_Connection::createEstablishedMsg()
     return msg;
 }
 
-void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, SockPair &nscSockPairP)
+void TCP_NSC_Connection::connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(!pNscSocketM);
     pNscSocketM = stackP.new_tcp_socket();
@@ -118,7 +115,7 @@ void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, Soc
 
     struct sockaddr_in sockAddr;
     size_t sockAddrLen = sizeof(sockAddr);
-    pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
+    pNscSocketM->getsockname((sockaddr *)&sockAddr, &sockAddrLen);
     nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
 /*
@@ -126,10 +123,10 @@ void TCP_NSC_Connection::connect(INetStack &stackP, SockPair &inetSockPairP, Soc
     pNscSocketM->getpeername((sockaddr*)&sockAddr, &sockAddrLen);
     nscSockPairP.remoteM.ipAddrM.set(sockAddr.sin_addr.s_addr);
     nscSockPairP.remoteM.portM = ntohs(sockAddr.sin_port);
-*/
+ */
 }
 
-void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, SockPair &nscSockPairP)
+void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP)
 {
     ASSERT(nscSockPairP.localM.portM != -1);
     ASSERT(!pNscSocketM);
@@ -151,7 +148,7 @@ void TCP_NSC_Connection::listen(INetStack &stackP, SockPair &inetSockPairP, Sock
 
     struct sockaddr_in sockAddr;
     size_t sockAddrLen = sizeof(sockAddr);
-    pNscSocketM->getsockname((sockaddr*)&sockAddr, &sockAddrLen);
+    pNscSocketM->getsockname((sockaddr *)&sockAddr, &sockAddrLen);
 
     nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
@@ -167,15 +164,13 @@ void TCP_NSC_Connection::send(cPacket *msgP)
 
 void TCP_NSC_Connection::do_SEND()
 {
-    if (pNscSocketM)
-    {
+    if (pNscSocketM) {
         ASSERT(sendQueueM);
 
         char buffer[4096];
         int allsent = 0;
 
-        while (1)
-        {
+        while (1) {
             int bytes = sendQueueM->getBytesForTcpLayer(buffer, sizeof(buffer));
 
             if (0 == bytes)
@@ -183,23 +178,19 @@ void TCP_NSC_Connection::do_SEND()
 
             int sent = pNscSocketM->send_data(buffer, bytes);
 
-            if (sent > 0)
-            {
+            if (sent > 0) {
                 sendQueueM->dequeueTcpLayerMsg(sent);
                 allsent += sent;
             }
-            else
-            {
+            else {
                 EV_WARN << "TCP_NSC connection: " << connIdM << ": Error do sending, err is " << sent << "\n";
                 break;
-
             }
         }
 
         EV_DEBUG << "do_SEND(): " << connIdM << " sent:" << allsent << ", unsent:" << sendQueueM->getBytesAvailable() << "\n";
 
-        if (onCloseM && sendQueueM->getBytesAvailable()==0 && !disconnectCalledM)
-        {
+        if (onCloseM && sendQueueM->getBytesAvailable() == 0 && !disconnectCalledM) {
             disconnectCalledM = true;
             pNscSocketM->disconnect();
             cMessage *msg = new cMessage("CLOSED");
@@ -223,9 +214,5 @@ void TCP_NSC_Connection::abort()
     sendQueueM->dequeueTcpLayerMsg(sendQueueM->getBytesAvailable());
     close();
 }
-
-
-
-}
-
+} // namespace inet
 

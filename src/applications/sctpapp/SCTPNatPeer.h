@@ -19,8 +19,6 @@
 #include "SCTPSocket.h"
 
 namespace inet {
-
-
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
@@ -45,7 +43,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     int32 packetsSent;
     int32 packetsRcvd;
     int32 numSessions;
-    int32 numRequestsToSend; // requests to send in this session
+    int32 numRequestsToSend;    // requests to send in this session
     bool ordered;
     int32 queueSize;
     cMessage *timeoutMsg;
@@ -64,30 +62,32 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     AddressVector peerAddressList;
     AddressVector localAddressList;
     //cOutVector* rcvdBytes;
-    typedef std::map<int32,int64> RcvdPacketsPerAssoc;
+    typedef std::map<int32, int64> RcvdPacketsPerAssoc;
     RcvdPacketsPerAssoc rcvdPacketsPerAssoc;
-    typedef std::map<int32,int64> SentPacketsPerAssoc;
+    typedef std::map<int32, int64> SentPacketsPerAssoc;
     SentPacketsPerAssoc sentPacketsPerAssoc;
-    typedef std::map<int32,int64> RcvdBytesPerAssoc;
+    typedef std::map<int32, int64> RcvdBytesPerAssoc;
     RcvdBytesPerAssoc rcvdBytesPerAssoc;
-    typedef std::map<int32,cOutVector*> BytesPerAssoc;
+    typedef std::map<int32, cOutVector *> BytesPerAssoc;
     BytesPerAssoc bytesPerAssoc;
-    typedef std::map<int32,cDoubleHistogram*> HistEndToEndDelay;
+    typedef std::map<int32, cDoubleHistogram *> HistEndToEndDelay;
     HistEndToEndDelay histEndToEndDelay;
-    typedef std::map<int32,cOutVector*> EndToEndDelay;
+    typedef std::map<int32, cOutVector *> EndToEndDelay;
     EndToEndDelay endToEndDelay;
     void sendOrSchedule(cPacket *msg);
     void sendRequest(bool last = true);
     int32 ssn;
+
   public:
     SCTPNatPeer();
     virtual ~SCTPNatPeer();
-    struct pathStatus {
+    struct pathStatus
+    {
         bool active;
         bool primaryPath;
-        Address  pid;
+        Address pid;
     };
-    typedef std::map<Address,pathStatus> SCTPPathStatus;
+    typedef std::map<Address, pathStatus> SCTPPathStatus;
     SCTPPathStatus sctpPathStatus;
     //virtual void socketStatusArrived(int32 assocId, void *yourPtr, SCTPStatusInfo *status);
     void initialize();
@@ -95,7 +95,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void finish();
     void handleTimer(cMessage *msg);
     /*void setAssociation(SCTPAssociation *_assoc) {
-    assoc = _assoc;};*/
+       assoc = _assoc;};*/
     void generateAndSend();
     void connect(Address connectAddress, int32 connectPort);
     void connectx(AddressVector connectAddressList, int32 connectPort);
@@ -104,9 +104,9 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void socketEstablished(int32, void *, uint64 buffer);
 
     /**
-    * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
-    * Beware: this funcion deletes the incoming message, which might not be what you want.
-    */
+     * Does nothing but update statistics/status. Redefine to perform or schedule next sending.
+     * Beware: this funcion deletes the incoming message, which might not be what you want.
+     */
     void socketDataArrived(int32 connId, void *yourPtr, cPacket *msg, bool urgent);
 
     void socketDataNotificationArrived(int32 connId, void *yourPtr, cPacket *msg);
@@ -134,11 +134,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void addressAddedArrived(int32 assocId, Address localAddr, Address remoteAddr);
     void setStatusString(const char *s);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
-
+#endif // ifndef __INET_SCTPNATPEER_H
 

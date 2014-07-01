@@ -24,26 +24,24 @@
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
-
 class INET_API MACAddressType : public IAddressType
 {
-    public:
-        static MACAddressType INSTANCE;
+  public:
+    static MACAddressType INSTANCE;
 
-    public:
-        MACAddressType() { }
-        virtual ~MACAddressType() { }
+  public:
+    MACAddressType() {}
+    virtual ~MACAddressType() {}
 
-        virtual int getMaxPrefixLength() const { return 0; }
-        virtual Address getUnspecifiedAddress() const { return MACAddress::UNSPECIFIED_ADDRESS; }
-        virtual Address getBroadcastAddress() const { return MACAddress::BROADCAST_ADDRESS; }
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const { return MACAddress(-109); } // TODO: constant
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return MACAddress(-9); } // TODO: constant
-        virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
-        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return MACAddress::UNSPECIFIED_ADDRESS; }
+    virtual int getMaxPrefixLength() const { return 0; }
+    virtual Address getUnspecifiedAddress() const { return MACAddress::UNSPECIFIED_ADDRESS; }
+    virtual Address getBroadcastAddress() const { return MACAddress::BROADCAST_ADDRESS; }
+    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return MACAddress(-109); }    // TODO: constant
+    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return MACAddress(-9); }    // TODO: constant
+    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
+    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return MACAddress::UNSPECIFIED_ADDRESS; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MACADDRESSTYPE_H
 
-
-#endif

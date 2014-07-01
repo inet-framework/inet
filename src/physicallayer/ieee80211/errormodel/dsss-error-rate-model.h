@@ -18,8 +18,8 @@
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
 
-#ifndef __INET_DSSS-ERROR-RATE-MODEL_H
-#define __INET_DSSS-ERROR-RATE-MODEL_H
+#ifndef __INET_DSSS - ERROR - RATE - MODEL_H
+#define __INET_DSSS    -ERROR - RATE - MODEL_H
 //#include <stdint.h>
 
 #ifdef ENABLE_GSL
@@ -28,19 +28,18 @@
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_sf_bessel.h>
 
-#endif
+#endif // ifdef ENABLE_GSL
 namespace inet {
 namespace physicallayer {
-
 #ifdef ENABLE_GSL
 typedef struct FunctionParameterType
 {
-  double beta;
-  double n;
+    double beta;
+    double n;
 } FunctionParameters;
 
 double IntegralFunction(double x, void *params);
-#endif
+#endif // ifdef ENABLE_GSL
 
 /**
  * \brief an implementation of DSSS error rate model
@@ -66,27 +65,28 @@ double IntegralFunction(double x, void *params);
  */
 class DsssErrorRateModel
 {
-private:
-  static const double spectralEfficiency1bit;
-  static const double spectralEfficiency2bit;
-public:
-  static double DqpskFunction(double x);
-  static double GetDsssDbpskSuccessRate(double sinr, uint32_t nbits);
-  static double GetDsssDqpskSuccessRate(double sinr, uint32_t nbits);
-  static double GetDsssDqpskCck5_5SuccessRate(double sinr, uint32_t nbits);
-  static double GetDsssDqpskCck11SuccessRate(double sinr, uint32_t nbits);
+  private:
+    static const double spectralEfficiency1bit;
+    static const double spectralEfficiency2bit;
+
+  public:
+    static double DqpskFunction(double x);
+    static double GetDsssDbpskSuccessRate(double sinr, uint32_t nbits);
+    static double GetDsssDqpskSuccessRate(double sinr, uint32_t nbits);
+    static double GetDsssDqpskCck5_5SuccessRate(double sinr, uint32_t nbits);
+    static double GetDsssDqpskCck11SuccessRate(double sinr, uint32_t nbits);
 #ifdef ENABLE_GSL
-  static double SymbolErrorProb16Cck(double e2);  /// equation (18) in Pursley's paper
-  static double SymbolErrorProb256Cck(double e1);  /// equation (17) in Pursley's paper
-#else
-protected:
-  static const double WLAN_SIR_PERFECT;
-  static const double WLAN_SIR_IMPOSSIBLE;
-#endif
+    static double SymbolErrorProb16Cck(double e2);    /// equation (18) in Pursley's paper
+    static double SymbolErrorProb256Cck(double e1);    /// equation (17) in Pursley's paper
+#else // ifdef ENABLE_GSL
+
+  protected:
+    static const double WLAN_SIR_PERFECT;
+    static const double WLAN_SIR_IMPOSSIBLE;
+#endif // ifdef ENABLE_GSL
 };
-
-}
-
-}
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* DSSS_ERROR_RATE_MODEL_H */
+

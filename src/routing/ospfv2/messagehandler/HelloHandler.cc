@@ -23,16 +23,14 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-OSPF::HelloHandler::HelloHandler(OSPF::Router* containingRouter) :
+OSPF::HelloHandler::HelloHandler(OSPF::Router *containingRouter) :
     OSPF::IMessageHandler(containingRouter)
 {
 }
 
-void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* unused)
+void OSPF::HelloHandler::processPacket(OSPFPacket *packet, OSPF::Interface *intf, OSPF::Neighbor *unused)
 {
-    OSPFHelloPacket* helloPacket = check_and_cast<OSPFHelloPacket*> (packet);
+    OSPFHelloPacket *helloPacket = check_and_cast<OSPFHelloPacket *>(packet);
     bool shouldRebuildRoutingTable = false;
 
     /* The values of the Network Mask, HelloInterval,
@@ -52,20 +50,20 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
         if (!((interfaceType != OSPF::Interface::POINTTOPOINT) &&
               (interfaceType != OSPF::Interface::VIRTUAL) &&
               (intf->getAddressRange().mask != helloPacket->getNetworkMask())
-             )
-           )
+              )
+            )
         {
             /* The setting of the E-bit found in the Hello Packet's Options field must match this area's
                ExternalRoutingCapability.
              */
             if (intf->getArea()->getExternalRoutingCapability() == helloPacket->getOptions().E_ExternalRoutingCapability) {
-                INetworkProtocolControlInfo* controlInfo = check_and_cast<INetworkProtocolControlInfo *> (helloPacket->getControlInfo());
+                INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo *>(helloPacket->getControlInfo());
                 IPv4Address srcAddress = controlInfo->getSourceAddress().toIPv4();
                 bool neighborChanged = false;
                 bool neighborsDRStateChanged = false;
                 bool drChanged = false;
                 bool backupSeen = false;
-                OSPF::Neighbor* neighbor;
+                OSPF::Neighbor *neighbor;
 
                 /* If the receiving interface connects to a broadcast, Point-to-
                    MultiPoint or NBMA network the source is identified by the IP
@@ -76,7 +74,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     (interfaceType == OSPF::Interface::NBMA))
                 {
                     neighbor = intf->getNeighborByAddress(srcAddress);
-                } else {
+                }
+                else {
                     /* If the receiving interface connects to a point-to-point link or a virtual link,
                        the source is identified by the Router ID found in the Hello's OSPF packet header.
                      */
@@ -121,7 +120,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                         (intf->getState() == OSPF::Interface::WAITING_STATE))
                     {
                         backupSeen = true;
-                    } else {
+                    }
+                    else {
                         /* Otherwise, if the neighbor is declaring itself to be Designated Router and it
                            had not previously, or the neighbor is not declaring itself
                            Designated Router where it had previously, the receiving
@@ -148,7 +148,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                         (intf->getState() == OSPF::Interface::WAITING_STATE))
                     {
                         backupSeen = true;
-                    } else {
+                    }
+                    else {
                         /* Otherwise, if the neighbor is declaring itself to be Backup Designated Router
                            and it had not previously, or the neighbor is not declaring
                            itself Backup Designated Router where it had previously, the
@@ -190,8 +191,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                        new addresses.
                      */
                     if (!neighbor->designatedRoutersAreSetUp()) {
-                        OSPF::Neighbor* designated = intf->getNeighborByAddress(designatedAddress);
-                        OSPF::Neighbor* backup = intf->getNeighborByAddress(backupAddress);
+                        OSPF::Neighbor *designated = intf->getNeighborByAddress(designatedAddress);
+                        OSPF::Neighbor *backup = intf->getNeighborByAddress(backupAddress);
 
                         if (designated != NULL) {
                             dRouterID.routerID = designated->getNeighborID();
@@ -207,7 +208,8 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                             neighbor->setupDesignatedRouters(true);
                         }
                     }
-                } else {
+                }
+                else {
                     OSPF::DesignatedRouterID dRouterID;
                     bool designatedSetUp = false;
                     bool backupSetUp = false;
@@ -222,7 +224,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     dRouterID.routerID = helloPacket->getDesignatedRouter();
                     dRouterID.ipInterfaceAddress = dRouterID.routerID;
 
-                    OSPF::Neighbor* designated = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
+                    OSPF::Neighbor *designated = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
                     // Get the Designated Router ID from the corresponding Neighbor Object.
                     if (designated != NULL) {
@@ -236,7 +238,7 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                     dRouterID.routerID = helloPacket->getBackupDesignatedRouter();
                     dRouterID.ipInterfaceAddress = dRouterID.routerID;
 
-                    OSPF::Neighbor* backup = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
+                    OSPF::Neighbor *backup = intf->getNeighborByAddress(dRouterID.ipInterfaceAddress);
 
                     // Get the Backup Designated Router ID from the corresponding Neighbor Object.
                     if (backup != NULL) {
@@ -295,14 +297,14 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                      */
                     unsigned int neighborCount = intf->getNeighborCount();
                     for (i = 0; i < neighborCount; i++) {
-                        OSPF::Neighbor* stuckNeighbor = intf->getNeighbor(i);
+                        OSPF::Neighbor *stuckNeighbor = intf->getNeighbor(i);
                         if (stuckNeighbor->getState() == OSPF::Neighbor::TWOWAY_STATE) {
                             stuckNeighbor->processEvent(OSPF::Neighbor::IS_ADJACENCY_OK);
                         }
                     }
 
                     if (neighborsDRStateChanged) {
-                        OSPF::RouterLSA* routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
+                        OSPF::RouterLSA *routerLSA = intf->getArea()->findRouterLSA(router->getRouterID());
 
                         if (routerLSA != NULL) {
                             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -310,8 +312,9 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
                                 routerLSA->getHeader().setLsAge(MAX_AGE);
                                 intf->getArea()->floodLSA(routerLSA);
                                 routerLSA->incrementInstallTime();
-                            } else {
-                                OSPF::RouterLSA* newLSA = intf->getArea()->originateRouterLSA();
+                            }
+                            else {
+                                OSPF::RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
                                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -334,8 +337,5 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
         router->rebuildRoutingTable();
     }
 }
-
-
-}
-
+} // namespace inet
 

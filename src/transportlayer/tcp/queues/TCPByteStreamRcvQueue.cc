@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "TCPByteStreamRcvQueue.h"
@@ -26,11 +25,9 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
 Register_Class(TCPByteStreamRcvQueue);
 
-
-bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* _other)
+bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region *_other)
 {
     const Region *other = dynamic_cast<const Region *>(_other);
 
@@ -43,9 +40,8 @@ bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
     uint32 nbegin = seqMin(begin, other->begin);
     uint32 nend = seqMax(end, other->end);
 
-    if (nbegin != begin || nend != end)
-    {
-        char *buff = new char[nend-nbegin];
+    if (nbegin != begin || nend != end) {
+        char *buff = new char[nend - nbegin];
 
         if (nbegin != begin)
             other->data.copyDataToBuffer(buff, begin - nbegin);
@@ -63,7 +59,7 @@ bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* 
     return true;
 }
 
-TCPByteStreamRcvQueue::Region* TCPByteStreamRcvQueue::Region::split(uint32 seq)
+TCPByteStreamRcvQueue::Region *TCPByteStreamRcvQueue::Region::split(uint32 seq)
 {
     ASSERT(seqGreater(seq, begin) && seqLess(seq, end));
 
@@ -74,7 +70,7 @@ TCPByteStreamRcvQueue::Region* TCPByteStreamRcvQueue::Region::split(uint32 seq)
     return reg;
 }
 
-void TCPByteStreamRcvQueue::Region::copyTo(cPacket* msg_) const
+void TCPByteStreamRcvQueue::Region::copyTo(cPacket *msg_) const
 {
     ASSERT(getLength() == data.getDataArraySize());
 
@@ -95,9 +91,8 @@ std::string TCPByteStreamRcvQueue::info() const
 
     os << "rcv_nxt=" << rcv_nxt;
 
-    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
-    {
-        os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() <<")";
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i) {
+        os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
     }
 
     os << " " << regionList.size() << "msgs";
@@ -109,8 +104,7 @@ cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
 {
     cPacket *msg = NULL;
     TCPVirtualDataRcvQueue::Region *reg = extractTo(seq);
-    if (reg)
-    {
+    if (reg) {
         msg = new ByteArrayMessage("data");
         reg->copyTo(msg);
         delete reg;
@@ -118,18 +112,14 @@ cPacket *TCPByteStreamRcvQueue::extractBytesUpTo(uint32 seq)
     return msg;
 }
 
-TCPVirtualDataRcvQueue::Region* TCPByteStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
+TCPVirtualDataRcvQueue::Region *TCPByteStreamRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
 {
     ASSERT(tcpseg->getPayloadLength() == tcpseg->getByteArray().getDataArraySize());
 
     Region *region = new Region(tcpseg->getSequenceNo(),
-            tcpseg->getSequenceNo()+tcpseg->getPayloadLength(), tcpseg->getByteArray());
+                tcpseg->getSequenceNo() + tcpseg->getPayloadLength(), tcpseg->getByteArray());
 
     return region;
 }
-
-
-
-}
-
+} // namespace inet
 

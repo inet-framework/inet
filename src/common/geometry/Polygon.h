@@ -21,16 +21,15 @@
 #include "Coord.h"
 
 namespace inet {
-
 class INET_API Polygon
 {
-    protected:
-        std::vector<Coord> points;
+  protected:
+    std::vector<Coord> points;
 
-    public:
-        Polygon();
+  public:
+    Polygon();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_POLYGON_H
 
-#endif

@@ -1,26 +1,24 @@
 /***************************************************************************
- * author:      Andreas Kuntz
- *
- * copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
- *
- * author:      Alfonso Ariza
- *              Malaga university
- *
- *              This program is free software; you can redistribute it
- *              and/or modify it under the terms of the GNU General Public
- *              License as published by the Free Software Foundation; either
- *              version 2 of the License, or (at your option) any later
- *              version.
- *              For further information see file COPYING
- *              in the top level directory
- ***************************************************************************/
+* author:      Andreas Kuntz
+*
+* copyright:   (c) 2008 Institute of Telematics, University of Karlsruhe (TH)
+*
+* author:      Alfonso Ariza
+*              Malaga university
+*
+*              This program is free software; you can redistribute it
+*              and/or modify it under the terms of the GNU General Public
+*              License as published by the Free Software Foundation; either
+*              version 2 of the License, or (at your option) any later
+*              version.
+*              For further information see file COPYING
+*              in the top level directory
+***************************************************************************/
 
 #include "TwoRayGroundReflection.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(TwoRayGroundReflection);
 
 TwoRayGroundReflection::TwoRayGroundReflection() :
@@ -32,14 +30,13 @@ TwoRayGroundReflection::TwoRayGroundReflection() :
 void TwoRayGroundReflection::initialize(int stage)
 {
     FreeSpacePathLoss::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         ht = m(par("TransmiterAntennaHigh"));
         hr = m(par("ReceiverAntennaHigh"));
     }
 }
 
-void TwoRayGroundReflection::printToStream(std::ostream &stream) const
+void TwoRayGroundReflection::printToStream(std::ostream& stream) const
 {
     stream << "two ray ground reflection, "
            << "alpha = " << alpha << ", "
@@ -74,10 +71,6 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
          */
         return unit((ht * ht * hr * hr) / (distance * distance * distance * distance * systemLoss)).get();
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

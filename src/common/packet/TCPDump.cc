@@ -19,15 +19,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPDump.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 namespace inet {
-
 //----
 
 Define_Module(TCPDump);
@@ -42,7 +40,7 @@ TCPDump::~TCPDump()
 
 void TCPDump::initialize()
 {
-    const char* file = this->par("dumpFile");
+    const char *file = this->par("dumpFile");
 
     dumpBadFrames = par("dumpBadFrames").boolValue();
     dropBadFrames = par("dropBadFrames").boolValue();
@@ -57,24 +55,22 @@ void TCPDump::initialize()
 
 void TCPDump::handleMessage(cMessage *msg)
 {
-    if (!ev.isDisabled() && msg->isPacket())
-    {
+    if (!ev.isDisabled() && msg->isPacket()) {
         bool l2r = msg->arrivedOn("hlIn");
         tcpdump.dumpPacket(l2r, PK(msg));
     }
 
 #ifdef WITH_IPv4
     if (pcapDump.isOpen() && dynamic_cast<IPv4Datagram *>(msg)
-            && (dumpBadFrames || !PK(msg)->hasBitError()))
+        && (dumpBadFrames || !PK(msg)->hasBitError()))
     {
         const simtime_t stime = simulation.getSimTime();
         IPv4Datagram *ipPacket = check_and_cast<IPv4Datagram *>(msg);
         pcapDump.writeFrame(stime, ipPacket);
     }
-#endif
+#endif // ifdef WITH_IPv4
 
-    if (PK(msg)->hasBitError() && dropBadFrames)
-    {
+    if (PK(msg)->hasBitError() && dropBadFrames) {
         delete msg;
         return;
     }
@@ -96,9 +92,5 @@ void TCPDump::finish()
     tcpdump.dump("", "tcpdump finished");
     pcapDump.closePcap();
 }
-
-
-
-}
-
+} // namespace inet
 

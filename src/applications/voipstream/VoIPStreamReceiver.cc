@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "VoIPStreamReceiver.h"
 
 #include "INETEndians.h"
@@ -24,8 +23,6 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
-
 Define_Module(VoIPStreamReceiver);
 
 simsignal_t VoIPStreamReceiver::rcvdPkSignal = registerSignal("rcvdPk");
@@ -45,8 +42,7 @@ void VoIPStreamReceiver::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
 
@@ -61,8 +57,7 @@ void VoIPStreamReceiver::initialize(int stage)
         // initialize avcodec library
         av_register_all();
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -76,8 +71,7 @@ void VoIPStreamReceiver::initialize(int stage)
 
 void VoIPStreamReceiver::handleMessage(cMessage *msg)
 {
-    if (msg->getKind() == UDP_I_ERROR)
-    {
+    if (msg->getKind() == UDP_I_ERROR) {
         delete msg;
         return;
     }
@@ -86,14 +80,12 @@ void VoIPStreamReceiver::handleMessage(cMessage *msg)
     bool ok = true;
     if (curConn.offline)
         createConnection(vp);
-    else
-    {
+    else {
         checkSourceAndParameters(vp);
         ok = vp->getSeqNo() > curConn.seqNo && vp->getTimeStamp() > curConn.timeStamp;
     }
 
-    if (ok)
-    {
+    if (ok) {
         emit(rcvdPkSignal, vp);
         decodePacket(vp);
     }
@@ -111,8 +103,7 @@ void VoIPStreamReceiver::Connection::openAudio(const char *fileName)
 void VoIPStreamReceiver::Connection::writeLostSamples(int sampleCount)
 {
     int pktBytes = sampleCount * av_get_bytes_per_sample(decCtx->sample_fmt);
-    if (outFile.isOpen())
-    {
+    if (outFile.isOpen()) {
         uint8_t decBuf[pktBytes];
         memset(decBuf, 0, pktBytes);
         outFile.write(decBuf, pktBytes);
@@ -127,7 +118,9 @@ void VoIPStreamReceiver::Connection::writeAudioFrame(uint8_t *inbuf, int inbytes
     avpkt.size = inbytes;
 
     int gotFrame;
-    AVFrame decodedFrame = {{0}};
+    AVFrame decodedFrame = {
+        { 0 }
+    };
     int consumedBytes = avcodec_decode_audio4(decCtx, &decodedFrame, &gotFrame, &avpkt);
     if (consumedBytes < 0 || !gotFrame)
         throw cRuntimeError("Error in avcodec_decode_audio4(): returns: %d, gotFrame: %d", consumedBytes, gotFrame);
@@ -189,39 +182,44 @@ void VoIPStreamReceiver::checkSourceAndParameters(VoIPStreamPacket *vp)
 
     UDPDataIndication *udpCtrl = check_and_cast<UDPDataIndication *>(vp->getControlInfo());
     if (curConn.srcAddr != udpCtrl->getSrcAddr()
-            || curConn.srcPort != udpCtrl->getSrcPort()
-            || curConn.destAddr != udpCtrl->getDestAddr()
-            || curConn.destPort != udpCtrl->getDestPort()
-            || vp->getSsrc() != curConn.ssrc)
+        || curConn.srcPort != udpCtrl->getSrcPort()
+        || curConn.destAddr != udpCtrl->getDestAddr()
+        || curConn.destPort != udpCtrl->getDestPort()
+        || vp->getSsrc() != curConn.ssrc)
         throw cRuntimeError("Voice packet received from third party during a voice session (concurrent voice sessions not supported)");
 
     if (vp->getCodec() != curConn.codec
-            || vp->getSampleBits() != curConn.sampleBits
-            || vp->getSampleRate() != curConn.sampleRate
-            || vp->getSamplesPerPacket() != curConn.samplesPerPacket
-            || vp->getTransmitBitrate() != curConn.transmitBitrate
+        || vp->getSampleBits() != curConn.sampleBits
+        || vp->getSampleRate() != curConn.sampleRate
+        || vp->getSamplesPerPacket() != curConn.samplesPerPacket
+        || vp->getTransmitBitrate() != curConn.transmitBitrate
         )
         throw cRuntimeError("Cannot change voice encoding parameters a during session");
 }
 
 void VoIPStreamReceiver::closeConnection()
 {
-    if (!curConn.offline)
-    {
+    if (!curConn.offline) {
         curConn.offline = true;
         avcodec_close(curConn.decCtx);
         curConn.outFile.close();
-        emit(connStateSignal, -1L); // so that sum() yields the number of active sessions
+        emit(connStateSignal, -1L);    // so that sum() yields the number of active sessions
     }
 }
 
 void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
 {
-    switch (vp->getType())
-    {
-        case VOICE: emit(packetHasVoiceSignal, 1); break;
-        case SILENCE: emit(packetHasVoiceSignal, 0); break;
-        default: throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
+    switch (vp->getType()) {
+        case VOICE:
+            emit(packetHasVoiceSignal, 1);
+            break;
+
+        case SILENCE:
+            emit(packetHasVoiceSignal, 0);
+            break;
+
+        default:
+            throw cRuntimeError("The received VoIPStreamPacket has unknown type %d", vp->getType());
     }
     uint16_t newSeqNo = vp->getSeqNo();
     if (newSeqNo > curConn.seqNo + 1)
@@ -230,8 +228,7 @@ void VoIPStreamReceiver::decodePacket(VoIPStreamPacket *vp)
     // for fingerprint
     cHasher *hasher = simulation.getHasher();
 
-    if (simTime() > curConn.lastPacketFinish)
-    {
+    if (simTime() > curConn.lastPacketFinish) {
         int lostSamples = ceil(SIMTIME_DBL((simTime() - curConn.lastPacketFinish) * curConn.sampleRate));
         ASSERT(lostSamples > 0);
         EV_INFO << "Lost " << lostSamples << " samples\n";
@@ -257,9 +254,5 @@ void VoIPStreamReceiver::finish()
     EV_TRACE << "Sink finish()" << endl;
     closeConnection();
 }
-
-
-
-}
-
+} // namespace inet
 

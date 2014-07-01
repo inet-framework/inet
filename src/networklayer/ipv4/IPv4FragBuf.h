@@ -18,7 +18,6 @@
 #ifndef __INET_IPV4FRAGBUF_H
 #define __INET_IPV4FRAGBUF_H
 
-
 #include <map>
 
 #include "INETDefs.h"
@@ -27,11 +26,8 @@
 #include "ReassemblyBuffer.h"
 
 namespace inet {
-
-
 class ICMP;
 class IPv4Datagram;
-
 
 /**
  * Reassembly buffer for fragmented IPv4 datagrams.
@@ -48,8 +44,9 @@ class INET_API IPv4FragBuf
         IPv4Address src;
         IPv4Address dest;
 
-        inline bool operator<(const Key& b) const {
-            return (id!=b.id) ? (id<b.id) : (src!=b.src) ? (src<b.src) : (dest<b.dest);
+        inline bool operator<(const Key& b) const
+        {
+            return (id != b.id) ? (id < b.id) : (src != b.src) ? (src < b.src) : (dest < b.dest);
         }
     };
 
@@ -58,13 +55,13 @@ class INET_API IPv4FragBuf
     //
     struct DatagramBuffer
     {
-        ReassemblyBuffer buf;  // reassembly buffer
-        IPv4Datagram *datagram;  // the actual datagram
-        simtime_t lastupdate;  // last time a new fragment arrived
+        ReassemblyBuffer buf;    // reassembly buffer
+        IPv4Datagram *datagram;    // the actual datagram
+        simtime_t lastupdate;    // last time a new fragment arrived
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<Key,DatagramBuffer> Buffers;
+    typedef std::map<Key, DatagramBuffer> Buffers;
 
     // the reassembly buffers
     Buffers bufs;
@@ -107,9 +104,7 @@ class INET_API IPv4FragBuf
      */
     void purgeStaleFragments(simtime_t lastupdate);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPV4FRAGBUF_H
 

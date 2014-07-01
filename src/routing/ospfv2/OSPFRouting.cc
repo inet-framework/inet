@@ -31,9 +31,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 Define_Module(OSPFRouting);
-
 
 OSPFRouting::OSPFRouting()
 {
@@ -50,8 +48,7 @@ void OSPFRouting::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_ROUTING_PROTOCOLS)
-    {
+    if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         rt = getModuleFromPar<IIPv4RoutingTable>(par("routingTableModule"), this);
         IPSocket ipSocket(gate("ipOut"));
@@ -96,16 +93,14 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
 {
     Enter_Method_Silent();
 
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_ROUTING_PROTOCOLS) {
             ASSERT(ospfRouter == NULL);
             isUp = true;
             createOspfRouter();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_ROUTING_PROTOCOLS) {
             ASSERT(ospfRouter);
             isUp = false;
@@ -113,8 +108,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
             ospfRouter = NULL;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             ASSERT(ospfRouter);
             isUp = false;
@@ -122,8 +116,7 @@ bool OSPFRouting::handleOperationStage(LifecycleOperation *operation, int stage,
             ospfRouter = NULL;
         }
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
     return true;
@@ -135,7 +128,7 @@ bool OSPFRouting::isNodeUp()
     return !nodeStatus || nodeStatus->getState() == NodeStatus::UP;
 }
 
-void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange &netAddr)
+void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange& netAddr)
 {
     simulation.setContext(this);
     OSPFASExternalLSAContents newExternalContents;
@@ -146,20 +139,15 @@ void OSPFRouting::insertExternalRoute(int ifIndex, const OSPF::IPv4AddressRange 
     ospfRouter->updateExternalRoute(netAddr.address, newExternalContents, ifIndex);
 }
 
-bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
+bool OSPFRouting::checkExternalRoute(const IPv4Address& route)
 {
-    for (unsigned long i=1; i < ospfRouter->getASExternalLSACount(); i++)
-    {
-        OSPF::ASExternalLSA* externalLSA = ospfRouter->getASExternalLSA(i);
+    for (unsigned long i = 1; i < ospfRouter->getASExternalLSACount(); i++) {
+        OSPF::ASExternalLSA *externalLSA = ospfRouter->getASExternalLSA(i);
         IPv4Address externalAddr = externalLSA->getHeader().getLinkStateID();
         if (externalAddr == route) //FIXME was this meant???
             return true;
     }
     return false;
 }
-
-
-
-}
-
+} // namespace inet
 

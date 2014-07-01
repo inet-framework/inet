@@ -17,15 +17,11 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #include "ConstSpeedMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(ConstSpeedMobility);
-
 
 ConstSpeedMobility::ConstSpeedMobility()
 {
@@ -37,8 +33,7 @@ void ConstSpeedMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing ConstSpeedMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         speed = par("speed");
         stationary = speed == 0;
     }
@@ -51,8 +46,5 @@ void ConstSpeedMobility::setTargetPosition()
     double distance = positionDelta.length();
     nextChange = simTime() + distance / speed;
 }
-
-
-}
-
+} // namespace inet
 

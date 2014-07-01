@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_UDPSINK_H
 #define __INET_UDPSINK_H
 
@@ -26,8 +25,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
-
 /**
  * Consumes and prints packets received from the UDP module. See NED for more info.
  */
@@ -49,6 +46,7 @@ class INET_API UDPSink : public ApplicationBase
   public:
     UDPSink();
     virtual ~UDPSink();
+
   protected:
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();
@@ -66,9 +64,7 @@ class INET_API UDPSink : public ApplicationBase
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPSINK_H
 

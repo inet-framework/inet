@@ -40,7 +40,6 @@
  *
  **************************************************************************/
 
-
 #ifndef __INET_POSTURE_H
 #define __INET_POSTURE_H
 
@@ -50,8 +49,6 @@
 #include "Coord.h"
 
 namespace inet {
-
-
 /**
  * @brief to store the specification of a posture on the MoBAN mobility model.
  *
@@ -60,7 +57,8 @@ namespace inet {
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class INET_API Posture {
+class INET_API Posture
+{
   protected:
     /** @brief Number of nodes existing in the WBAN */
     unsigned int numNodes;
@@ -69,7 +67,7 @@ class INET_API Posture {
     unsigned int postureID;
 
     /** @brief The relative reference position of each node in this posture */
-    Coord* nodePs;
+    Coord *nodePs;
 
     /** @brief A given name to the posture like walking, sitting.
      * It might be used for showing the current posture in the graphical interface during the simulation run */
@@ -77,17 +75,17 @@ class INET_API Posture {
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
      * for any pair of nodes (numNodes by numNodes matrix) */
-    double** alphaMean;
+    double **alphaMean;
 
     /** @brief Mean value of the normal distribution for the path lost coefficient (alpha)
-    * for any pair of nodes (numNodes by numNodes matrix) */
-    double** alphaSD;  // Standard deviation of alpha
+     * for any pair of nodes (numNodes by numNodes matrix) */
+    double **alphaSD;    // Standard deviation of alpha
 
     /** @brief Radious of the sphere around each node for individual mobility */
-    double* nodeRadius;
+    double *nodeRadius;
 
     /** @brief Movement speed of the node for individual mobility */
-    double* nodeSpeed;
+    double *nodeSpeed;
 
     /** @brief Maximum value of the speed range for the global movement in this posture */
     double maxSpeed;
@@ -130,7 +128,7 @@ class INET_API Posture {
     int getPostureID();
 
     /** @brief Returns posture name. */
-    char* getPostureName();
+    char *getPostureName();
 
     /** @brief Returns maximum value of the speed range of this posture. */
     double getMaxSpeed();
@@ -145,7 +143,7 @@ class INET_API Posture {
     double getSpeed(unsigned int);
 
     /** @brief Returns the relative position of a node in this posture. */
-    Coord  getPs(unsigned int);
+    Coord getPs(unsigned int);
 
     /** @brief Returns the mean value of a normal distribution for path lost coefficient of wave propagation between two nodes in this posture. */
     double getAlphaMean(unsigned int, unsigned int);
@@ -153,8 +151,7 @@ class INET_API Posture {
     /** @brief Returns the standard deviation of a normal distribution for path lost coefficient of wave propagation between two nodes in this posture. */
     double getAlphaSD(unsigned int, unsigned int);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_POSTURE_H
 
-
-#endif

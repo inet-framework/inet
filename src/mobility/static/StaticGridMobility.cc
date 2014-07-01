@@ -17,14 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-
 #include "StaticGridMobility.h"
 
 namespace inet {
-
-
 Define_Module(StaticGridMobility);
-
 
 void StaticGridMobility::setInitialPosition()
 {
@@ -33,8 +29,8 @@ void StaticGridMobility::setInitialPosition()
     double marginY = par("marginY");
     double separationX = par("separationX");
     double separationY = par("separationY");
-    int columns =  par("columns");
-    int rows =  par("rows");
+    int columns = par("columns");
+    int rows = par("rows");
     if (numHosts > rows * columns)
         throw cRuntimeError("parameter error: numHosts > rows * columns");
 
@@ -42,16 +38,12 @@ void StaticGridMobility::setInitialPosition()
 
     int row = index / columns;
     int col = index % columns;
-    lastPosition.x = constraintAreaMin.x + marginX + (col+0.5) * separationX;
-    lastPosition.y = constraintAreaMin.y + marginY + (row+0.5) * separationY;
+    lastPosition.x = constraintAreaMin.x + marginX + (col + 0.5) * separationX;
+    lastPosition.y = constraintAreaMin.y + marginY + (row + 0.5) * separationY;
     lastPosition.z = par("initialZ");
     recordScalar("x", lastPosition.x);
     recordScalar("y", lastPosition.y);
     recordScalar("z", lastPosition.z);
 }
-
-
-
-}
-
+} // namespace inet
 

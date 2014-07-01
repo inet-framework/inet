@@ -32,7 +32,6 @@
 #include <map>
 
 namespace inet {
-
 /*
  * This class implements AODV routing protocol and Netfilter hooks
  * in the IP-layer required by this protocol.
@@ -115,7 +114,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     unsigned int rerrCount;    // num of originated RERR in the last second
     unsigned int rreqCount;    // num of originated RREQ in the last second
     simtime_t lastBroadcastTime;    // the last time when any control packet was broadcasted
-    std::map<Address, unsigned int> addressToRreqRetries; // number of re-discovery attempts per address
+    std::map<Address, unsigned int> addressToRreqRetries;    // number of re-discovery attempts per address
 
     // self messages
     cMessage *helloMsgTimer;    // timer to send hello messages (only if the feature is enabled)
@@ -206,9 +205,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     AODVRouting();
     virtual ~AODVRouting();
 };
+} // namespace inet
 
-}
-
-
-#endif // ifndef AODVROUTING_H_
+#endif    // ifndef AODVROUTING_H_
 

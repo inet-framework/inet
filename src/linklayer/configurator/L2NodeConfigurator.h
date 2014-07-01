@@ -23,36 +23,34 @@
 #include "L2NetworkConfigurator.h"
 
 namespace inet {
-
 /**
  * Configures L2 data of a node. See the NED definition for details.
  */
 class L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cListener
 {
-    protected:
-        NodeStatus * nodeStatus;
-        IInterfaceTable * interfaceTable;
-        L2NetworkConfigurator * networkConfigurator;
+  protected:
+    NodeStatus *nodeStatus;
+    IInterfaceTable *interfaceTable;
+    L2NetworkConfigurator *networkConfigurator;
 
-    public:
-        L2NodeConfigurator();
+  public:
+    L2NodeConfigurator();
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-        virtual void initialize(int stage);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void initialize(int stage);
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
-        virtual void prepareNode();
-        virtual void prepareInterface(InterfaceEntry *interfaceEntry);
-        virtual void configureNode();
+    virtual void prepareNode();
+    virtual void prepareInterface(InterfaceEntry *interfaceEntry);
+    virtual void configureNode();
 
-        // cListener:
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    // cListener:
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_L2NODECONFIGURATOR_H
 
-
-#endif

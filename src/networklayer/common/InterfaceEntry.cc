@@ -15,7 +15,6 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 //#include <stdio.h>
 //#include <stdlib.h>
 //#include <string.h>
@@ -27,21 +26,19 @@
 
 #include "IInterfaceTable.h"
 
-
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "IPv6InterfaceData.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
 #include "GenericNetworkProtocolInterfaceData.h"
-#endif
+#endif // ifdef WITH_GENERIC
 
 namespace inet {
-
 Register_Abstract_Class(InterfaceEntryChangeDetails);
 Register_Abstract_Class(InterfaceEntry);
 
@@ -64,7 +61,7 @@ std::string InterfaceEntryChangeDetails::detailedInfo() const
     return out.str();
 }
 
-InterfaceEntry::InterfaceEntry(cModule* ifmod)
+InterfaceEntry::InterfaceEntry(cModule *ifmod)
 {
     ownerp = NULL;
     interfaceModule = ifmod;
@@ -101,16 +98,21 @@ std::string InterfaceEntry::info() const
 {
     std::stringstream out;
     out << (getName()[0] ? getName() : "*");
-    if (getNetworkLayerGateIndex()==-1)
+    if (getNetworkLayerGateIndex() == -1)
         out << "  on:-";
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "  MTU:" << getMTU();
-    if (!isUp()) out << " DOWN";
-    if (isBroadcast()) out << " BROADCAST";
-    if (isMulticast()) out << " MULTICAST";
-    if (isPointToPoint()) out << " POINTTOPOINT";
-    if (isLoopback()) out << " LOOPBACK";
+    if (!isUp())
+        out << " DOWN";
+    if (isBroadcast())
+        out << " BROADCAST";
+    if (isMulticast())
+        out << " MULTICAST";
+    if (isPointToPoint())
+        out << " POINTTOPOINT";
+    if (isLoopback())
+        out << " LOOPBACK";
     out << "  macAddr:";
     if (getMacAddress().isUnspecified())
         out << "n/a";
@@ -120,17 +122,17 @@ std::string InterfaceEntry::info() const
 #ifdef WITH_IPv4
     if (ipv4data)
         out << " " << ipv4data->info();
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
         out << " " << ipv6data->info();
-#endif
+#endif // ifdef WITH_IPv6
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->info(); // Khmm...
     if (trilldata)
         out << " " << ((InterfaceProtocolData *)trilldata)->info(); // Khmm...
     if (ieee8021ddata)
-            out << " " << ((InterfaceProtocolData *)ieee8021ddata)->info(); // Khmm...
+        out << " " << ((InterfaceProtocolData *)ieee8021ddata)->info(); // Khmm...
     return out.str();
 }
 
@@ -138,16 +140,21 @@ std::string InterfaceEntry::detailedInfo() const
 {
     std::stringstream out;
     out << "name:" << (getName()[0] ? getName() : "*");
-    if (getNetworkLayerGateIndex()==-1)
+    if (getNetworkLayerGateIndex() == -1)
         out << "  on:-";
     else
         out << "  on:nwLayer.ifOut[" << getNetworkLayerGateIndex() << "]";
     out << "MTU: " << getMTU() << " \t";
-    if (!isUp()) out << "DOWN ";
-    if (isBroadcast()) out << "BROADCAST ";
-    if (isMulticast()) out << "MULTICAST ";
-    if (isPointToPoint()) out << "POINTTOPOINT ";
-    if (isLoopback()) out << "LOOPBACK ";
+    if (!isUp())
+        out << "DOWN ";
+    if (isBroadcast())
+        out << "BROADCAST ";
+    if (isMulticast())
+        out << "MULTICAST ";
+    if (isPointToPoint())
+        out << "POINTTOPOINT ";
+    if (isLoopback())
+        out << "LOOPBACK ";
     out << "\n";
     out << "  macAddr:";
     if (getMacAddress().isUnspecified())
@@ -158,11 +165,11 @@ std::string InterfaceEntry::detailedInfo() const
 #ifdef WITH_IPv4
     if (ipv4data)
         out << " " << ipv4data->detailedInfo() << "\n";
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
         out << " " << ipv6data->detailedInfo() << "\n";
-#endif
+#endif // ifdef WITH_IPv6
     if (isisdata)
         out << " " << ((InterfaceProtocolData *)isisdata)->detailedInfo() << "\n"; // Khmm...
     if (trilldata)
@@ -171,6 +178,7 @@ std::string InterfaceEntry::detailedInfo() const
         out << " " << ((InterfaceProtocolData *)ieee8021ddata)->detailedInfo() << "\n"; // Khmm...
     return out.str();
 }
+
 std::string InterfaceEntry::getFullPath() const
 {
     return ownerp == NULL ? getFullName() : ownerp->getHostModule()->getFullPath() + "." + getFullName();
@@ -178,8 +186,7 @@ std::string InterfaceEntry::getFullPath() const
 
 void InterfaceEntry::changed(simsignal_t signalID, int fieldId)
 {
-    if (ownerp)
-    {
+    if (ownerp) {
         InterfaceEntryChangeDetails details(this, fieldId);
         ownerp->interfaceChanged(signalID, &details);
     }
@@ -191,18 +198,18 @@ void InterfaceEntry::resetInterface()
     if (ipv4data && ipv4data->ownerp == this)
         delete ipv4data;
     ipv4data = NULL;
-#else
+#else // ifdef WITH_IPv4
     if (ipv4data)
         throw cRuntimeError(this, "Model error: ipv4data filled, but INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data && ipv6data->ownerp == this)
         delete ipv6data;
     ipv6data = NULL;
-#else
+#else // ifdef WITH_IPv6
     if (ipv6data)
         throw cRuntimeError(this, "Model error: ipv6data filled, but INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this)
         delete (InterfaceProtocolData *)isisdata;
     isisdata = NULL;
@@ -222,9 +229,9 @@ void InterfaceEntry::setGenericNetworkProtocolData(GenericNetworkProtocolInterfa
     genericNetworkProtocolData = p;
     p->ownerp = this;
     configChanged(F_GENERIC_DATA);
-#else
+#else // ifdef WITH_GENERIC
     throw cRuntimeError(this, "setGenericNetworkProtocolData(): INET was compiled without Generic Network Layer support");
-#endif
+#endif // ifdef WITH_GENERIC
 }
 
 const Address InterfaceEntry::getNetworkAddress() const
@@ -232,15 +239,15 @@ const Address InterfaceEntry::getNetworkAddress() const
 #ifdef WITH_IPv4
     if (ipv4data)
         return ipv4data->getIPAddress();
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     if (ipv6data)
         return ipv6data->getPreferredAddress();
-#endif
+#endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
     if (genericNetworkProtocolData)
         return genericNetworkProtocolData->getAddress();
-#endif
+#endif // ifdef WITH_GENERIC
     return getModulePathAddress();
 }
 
@@ -252,9 +259,9 @@ void InterfaceEntry::setIPv4Data(IPv4InterfaceData *p)
     ipv4data = p;
     p->ownerp = this;
     configChanged(F_IPV4_DATA);
-#else
+#else // ifdef WITH_IPv4
     throw cRuntimeError(this, "setIPv4Data(): INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
 }
 
 void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
@@ -265,9 +272,9 @@ void InterfaceEntry::setIPv6Data(IPv6InterfaceData *p)
     ipv6data = p;
     p->ownerp = this;
     configChanged(F_IPV6_DATA);
-#else
+#else // ifdef WITH_IPv6
     throw cRuntimeError(this, "setIPv6Data(): INET was compiled without IPv6 support");
-#endif
+#endif // ifdef WITH_IPv6
 }
 
 void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
@@ -275,7 +282,7 @@ void InterfaceEntry::setTRILLInterfaceData(TRILLInterfaceData *p)
     if (trilldata && ((InterfaceProtocolData *)trilldata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)trilldata; // Khmm...
     trilldata = p;
-    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
     configChanged(F_TRILL_DATA);
 }
 
@@ -284,7 +291,7 @@ void InterfaceEntry::setISISInterfaceData(ISISInterfaceData *p)
     if (isisdata && ((InterfaceProtocolData *)isisdata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)isisdata; // Khmm...
     isisdata = p;
-    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
     configChanged(F_ISIS_DATA);
 }
 
@@ -293,97 +300,98 @@ void InterfaceEntry::setIeee8021dInterfaceData(Ieee8021dInterfaceData *p)
     if (ieee8021ddata && ((InterfaceProtocolData *)ieee8021ddata)->ownerp == this) // Khmm...
         delete (InterfaceProtocolData *)ieee8021ddata; // Khmm...
     ieee8021ddata = p;
-    ((InterfaceProtocolData*)p)->ownerp = this; // Khmm...
+    ((InterfaceProtocolData *)p)->ownerp = this;    // Khmm...
     configChanged(F_IEEE8021D_DATA);
 }
 
 bool InterfaceEntry::setEstimateCostProcess(int position, MacEstimateCostProcess *p)
 {
     ASSERT(position >= 0);
-    if (estimateCostProcessArray.size() <= (size_t)position)
-    {
-        estimateCostProcessArray.resize(position+1, NULL);
+    if (estimateCostProcessArray.size() <= (size_t)position) {
+        estimateCostProcessArray.resize(position + 1, NULL);
     }
-    if (estimateCostProcessArray[position]!=NULL)
+    if (estimateCostProcessArray[position] != NULL)
         return false;
     estimateCostProcessArray[position] = p;
     return true;
 }
 
-MacEstimateCostProcess* InterfaceEntry::getEstimateCostProcess(int position)
+MacEstimateCostProcess *InterfaceEntry::getEstimateCostProcess(int position)
 {
     ASSERT(position >= 0);
-    if ((size_t)position < estimateCostProcessArray.size())
-    {
+    if ((size_t)position < estimateCostProcessArray.size()) {
         return estimateCostProcessArray[position];
     }
     return NULL;
 }
 
-void InterfaceEntry::joinMulticastGroup(const Address & address) const {
+void InterfaceEntry::joinMulticastGroup(const Address& address) const
+{
     switch (address.getType()) {
 #ifdef WITH_IPv4
         case Address::IPv4:
             ipv4Data()->joinMulticastGroup(address.toIPv4());
             break;
-#endif
+
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case Address::IPv6:
             // TODO
             // ipv6Data()->joinMulticastGroup(address.toIPv6());
             break;
-#endif
+
+#endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
         case Address::MAC:
         case Address::MODULEID:
         case Address::MODULEPATH:
             getGenericNetworkProtocolData()->joinMulticastGroup(address);
             break;
-#endif
+
+#endif // ifdef WITH_GENERIC
         default:
             throw cRuntimeError("Unknown address type");
     }
 }
 
-static void toIPv4AddressVector(const std::vector<Address> &addresses, std::vector<IPv4Address> &result)
+static void toIPv4AddressVector(const std::vector<Address>& addresses, std::vector<IPv4Address>& result)
 {
     result.reserve(addresses.size());
     for (unsigned int i = 0; i < addresses.size(); ++i)
         result.push_back(addresses[i].toIPv4());
 }
 
-void InterfaceEntry::changeMulticastGroupMembership(const Address &multicastAddress,
-        McastSourceFilterMode oldFilterMode, const std::vector<Address> &oldSourceList,
-        McastSourceFilterMode newFilterMode, const std::vector<Address> &newSourceList)
+void InterfaceEntry::changeMulticastGroupMembership(const Address& multicastAddress,
+        McastSourceFilterMode oldFilterMode, const std::vector<Address>& oldSourceList,
+        McastSourceFilterMode newFilterMode, const std::vector<Address>& newSourceList)
 {
     switch (multicastAddress.getType()) {
 #ifdef WITH_IPv4
-        case Address::IPv4:
-        {
+        case Address::IPv4: {
             std::vector<IPv4Address> oldIPv4SourceList, newIPv4SourceList;
             toIPv4AddressVector(oldSourceList, oldIPv4SourceList);
             toIPv4AddressVector(newSourceList, newIPv4SourceList);
             ipv4Data()->changeMulticastGroupMembership(multicastAddress.toIPv4(),
-                                                        oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
+                    oldFilterMode, oldIPv4SourceList, newFilterMode, newIPv4SourceList);
             break;
         }
-#endif
+
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
         case Address::IPv6:
             // TODO
             break;
-#endif
+
+#endif // ifdef WITH_IPv6
         case Address::MAC:
         case Address::MODULEID:
         case Address::MODULEPATH:
             // TODO
             break;
+
         default:
             throw cRuntimeError("Unknown address type");
     }
 }
-
-
-}
-
+} // namespace inet
 

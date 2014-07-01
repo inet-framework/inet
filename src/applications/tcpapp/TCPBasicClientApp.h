@@ -25,7 +25,6 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 /**
  * An example request-reply based client application.
  */
@@ -34,8 +33,8 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
   protected:
     cMessage *timeoutMsg;
     NodeStatus *nodeStatus;
-    bool earlySend;  // if true, don't wait with sendRequest() until established()
-    int numRequestsToSend; // requests to send in this session
+    bool earlySend;    // if true, don't wait with sendRequest() until established()
+    int numRequestsToSend;    // requests to send in this session
     simtime_t startTime;
     simtime_t stopTime;
 
@@ -56,8 +55,7 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     TCPBasicClientApp();
     virtual ~TCPBasicClientApp();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPBASICCLIENTAPP_H
 
-
-#endif

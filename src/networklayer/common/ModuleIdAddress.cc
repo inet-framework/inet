@@ -18,15 +18,11 @@
 #include "ModuleIdAddress.h"
 
 namespace inet {
-
 bool ModuleIdAddress::tryParse(const char *addr)
 {
-    char * endp;
+    char *endp;
     id = strtol(addr, &endp, 10);
     return *endp == 0;
 }
-
-
-}
-
+} // namespace inet
 

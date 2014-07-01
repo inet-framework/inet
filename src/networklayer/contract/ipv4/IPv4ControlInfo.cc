@@ -19,10 +19,9 @@
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 namespace inet {
-
 IPv4ControlInfo::~IPv4ControlInfo()
 {
     clean();
@@ -30,7 +29,8 @@ IPv4ControlInfo::~IPv4ControlInfo()
 
 IPv4ControlInfo& IPv4ControlInfo::operator=(const IPv4ControlInfo& other)
 {
-    if (this==&other) return *this;
+    if (this == &other)
+        return *this;
     clean();
     IPv4ControlInfo_Base::operator=(other);
     copy(other);
@@ -41,24 +41,23 @@ void IPv4ControlInfo::clean()
 {
 #ifdef WITH_IPv4
     dropAndDelete(dgram);
-#else
-    if(dgram)
+#else // ifdef WITH_IPv4
+    if (dgram)
         throw cRuntimeError("INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
 }
 
 void IPv4ControlInfo::copy(const IPv4ControlInfo& other)
 {
     dgram = other.dgram;
 
-    if(dgram)
-    {
+    if (dgram) {
 #ifdef WITH_IPv4
         dgram = dgram->dup();
         take(dgram);
-#else
+#else // ifdef WITH_IPv4
         throw cRuntimeError(this, "INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
     }
 }
 
@@ -69,9 +68,9 @@ void IPv4ControlInfo::setOrigDatagram(IPv4Datagram *d)
         throw cRuntimeError(this, "IPv4ControlInfo::setOrigDatagram(): a datagram is already attached");
     dgram = d;
     take(dgram);
-#else
+#else // ifdef WITH_IPv4
     throw cRuntimeError(this, "INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
 }
 
 IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
@@ -79,20 +78,16 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
 #ifdef WITH_IPv4
     if (!dgram)
         throw cRuntimeError(this, "IPv4ControlInfo::removeOrigDatagram(): no datagram attached "
-                  "(already removed, or maybe this IPv4ControlInfo does not come "
-                  "from the IPv4 module?)");
+                                  "(already removed, or maybe this IPv4ControlInfo does not come "
+                                  "from the IPv4 module?)");
 
     IPv4Datagram *ret = dgram;
     drop(dgram);
     dgram = NULL;
     return ret;
-#else
+#else // ifdef WITH_IPv4
     throw cRuntimeError(this, "INET was compiled without IPv4 support");
-#endif
+#endif // ifdef WITH_IPv4
 }
-
-
-
-}
-
+} // namespace inet
 

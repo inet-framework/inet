@@ -15,10 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_TCPSOCKETMAP_H
 #define __INET_TCPSOCKETMAP_H
-
 
 #include <map>
 
@@ -27,8 +25,6 @@
 #include "TCPSocket.h"
 
 namespace inet {
-
-
 /**
  * Small utility class for managing a large number of TCPSocket objects.
  */
@@ -36,8 +32,9 @@ namespace inet {
 class INET_API TCPSocketMap
 {
   protected:
-    typedef std::map<int,TCPSocket*> SocketMap;
+    typedef std::map<int, TCPSocket *> SocketMap;
     SocketMap socketMap;
+
   public:
     /**
      * Constructor.
@@ -72,17 +69,14 @@ class INET_API TCPSocketMap
     /**
      * Returns the number of sockets stored.
      */
-    unsigned int size() {return socketMap.size();}
+    unsigned int size() { return socketMap.size(); }
 
     /**
      * Deletes the socket objects.
      */
     void deleteSockets();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_TCPSOCKETMAP_H
 

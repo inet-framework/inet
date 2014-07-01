@@ -24,7 +24,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * This class provides network addresses using the module id of interface modules.
  * The module id address supports unspecified, broadcast and multicast addresses too.
@@ -32,42 +31,42 @@ namespace inet {
  */
 class INET_API ModuleIdAddress
 {
-    private:
-        int id;
-    public:
-        ModuleIdAddress() : id(0) { }
-        ModuleIdAddress(int id) : id(id) { }
+  private:
+    int id;
 
-        int getId() const { return id; }
-        bool tryParse(const char *addr);
+  public:
+    ModuleIdAddress() : id(0) {}
+    ModuleIdAddress(int id) : id(id) {}
 
-        bool isUnspecified() const { return id == 0; }
-        bool isUnicast() const { return id > 0; }
-        bool isMulticast() const { return id < -1; }
-        bool isBroadcast() const { return id == -1; }
+    int getId() const { return id; }
+    bool tryParse(const char *addr);
 
-        /**
-         * Returns equals(addr).
-         */
-        bool operator==(const ModuleIdAddress& addr1) const { return id == addr1.id; }
+    bool isUnspecified() const { return id == 0; }
+    bool isUnicast() const { return id > 0; }
+    bool isMulticast() const { return id < -1; }
+    bool isBroadcast() const { return id == -1; }
 
-        /**
-         * Returns !equals(addr).
-         */
-        bool operator!=(const ModuleIdAddress& addr1) const { return id != addr1.id; }
+    /**
+     * Returns equals(addr).
+     */
+    bool operator==(const ModuleIdAddress& addr1) const { return id == addr1.id; }
 
-        /**
-         * Compares two addresses.
-         */
-        bool operator<(const ModuleIdAddress& addr1) const { return id < addr1.id; }
-        bool operator<=(const ModuleIdAddress& addr1) const { return id <= addr1.id; }
-        bool operator>(const ModuleIdAddress& addr1) const { return id > addr1.id; }
-        bool operator>=(const ModuleIdAddress& addr1) const { return id >= addr1.id; }
+    /**
+     * Returns !equals(addr).
+     */
+    bool operator!=(const ModuleIdAddress& addr1) const { return id != addr1.id; }
 
-        std::string str() const { std::stringstream s; s << id; return s.str(); }
+    /**
+     * Compares two addresses.
+     */
+    bool operator<(const ModuleIdAddress& addr1) const { return id < addr1.id; }
+    bool operator<=(const ModuleIdAddress& addr1) const { return id <= addr1.id; }
+    bool operator>(const ModuleIdAddress& addr1) const { return id > addr1.id; }
+    bool operator>=(const ModuleIdAddress& addr1) const { return id >= addr1.id; }
+
+    std::string str() const { std::stringstream s; s << id; return s.str(); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MODULEIDADDRESS_H
 
-
-#endif

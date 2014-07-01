@@ -4,27 +4,23 @@
     begin                : Tue Oct 23 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include <string.h>
 
 #include "sdes.h"
 
 namespace inet {
-
-
 Register_Class(SDESItem);
-
 
 SDESItem::SDESItem() : cObject()
 {
@@ -57,7 +53,8 @@ SDESItem::~SDESItem()
 
 SDESItem& SDESItem::operator=(const SDESItem& sdesItem)
 {
-    if (this == &sdesItem) return *this;
+    if (this == &sdesItem)
+        return *this;
     clean();
     cObject::operator=(sdesItem);
     copy(sdesItem);
@@ -108,7 +105,6 @@ int SDESItem::getLength() const
     return _length + 2;
 }
 
-
 //
 // SDESChunk
 //
@@ -132,7 +128,8 @@ SDESChunk::~SDESChunk()
 
 SDESChunk& SDESChunk::operator=(const SDESChunk& sdesChunk)
 {
-    if (this == &sdesChunk) return *this;
+    if (this == &sdesChunk)
+        return *this;
     cArray::operator=(sdesChunk);
     copy(sdesChunk);
     return *this;
@@ -160,10 +157,8 @@ void SDESChunk::dump(std::ostream& os) const
 {
     os << "SDESChunk:" << endl;
     os << "  ssrc = " << _ssrc << endl;
-    for (int i = 0; i < size(); i++)
-    {
-        if (exist(i))
-        {
+    for (int i = 0; i < size(); i++) {
+        if (exist(i)) {
             ((const SDESItem *)(get(i)))->dump(os);
         }
     }
@@ -171,13 +166,10 @@ void SDESChunk::dump(std::ostream& os) const
 
 void SDESChunk::addSDESItem(SDESItem *sdesItem)
 {
-    for (int i = 0; i < size(); i++)
-    {
-        if (exist(i))
-        {
+    for (int i = 0; i < size(); i++) {
+        if (exist(i)) {
             SDESItem *compareItem = (SDESItem *)(get(i));
-            if (compareItem->getType() == sdesItem->getType())
-            {
+            if (compareItem->getType() == sdesItem->getType()) {
                 remove(compareItem);
                 _length = _length - compareItem->getLength();
                 delete compareItem;
@@ -204,8 +196,5 @@ int SDESChunk::getLength() const
 {
     return _length;
 }
-
-
-}
-
+} // namespace inet
 

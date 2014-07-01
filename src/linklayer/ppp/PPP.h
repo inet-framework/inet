@@ -18,7 +18,6 @@
 #ifndef __INET_PPP_H
 #define __INET_PPP_H
 
-
 #include "INETDefs.h"
 
 #include "PPPFrame_m.h"
@@ -28,7 +27,6 @@
 #include "MACBase.h"
 
 namespace inet {
-
 class InterfaceEntry;
 class IPassiveQueue;
 
@@ -40,7 +38,7 @@ class INET_API PPP : public MACBase
   protected:
     long txQueueLimit;
     cGate *physOutGate;
-    cChannel *datarateChannel; // NULL if we're not connected
+    cChannel *datarateChannel;    // NULL if we're not connected
 
     cQueue txQueue;
     cMessage *endTransmissionEvent;
@@ -79,7 +77,7 @@ class INET_API PPP : public MACBase
 
     // MACBase functions
     virtual InterfaceEntry *createInterfaceEntry();
-    virtual bool isUpperMsg(cMessage *msg) {return msg->arrivedOn("netwIn");}
+    virtual bool isUpperMsg(cMessage *msg) { return msg->arrivedOn("netwIn"); }
     virtual void flushQueue();
     virtual void clearQueue();
 
@@ -92,8 +90,7 @@ class INET_API PPP : public MACBase
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PPP_H
 
-
-#endif

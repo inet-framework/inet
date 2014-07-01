@@ -26,34 +26,33 @@
 #include "Coord.h"
 
 namespace inet {
-
 /**
  * This class provides a mapping between node addresses and their positions.
  */
-class INET_API PositionTable {
-    private:
-        typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
-        typedef std::map<Address, AddressToPositionMapValue> AddressToPositionMap;
-        AddressToPositionMap addressToPositionMap;
+class INET_API PositionTable
+{
+  private:
+    typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
+    typedef std::map<Address, AddressToPositionMapValue> AddressToPositionMap;
+    AddressToPositionMap addressToPositionMap;
 
-    public:
-        PositionTable() { }
+  public:
+    PositionTable() {}
 
-        std::vector<Address> getAddresses() const;
+    std::vector<Address> getAddresses() const;
 
-        bool hasPosition(const Address & address) const;
-        Coord getPosition(const Address & address) const;
-        void setPosition(const Address & address, const Coord & coord);
+    bool hasPosition(const Address& address) const;
+    Coord getPosition(const Address& address) const;
+    void setPosition(const Address& address, const Coord& coord);
 
-        void removePosition(const Address & address);
-        void removeOldPositions(simtime_t timestamp);
+    void removePosition(const Address& address);
+    void removeOldPositions(simtime_t timestamp);
 
-        void clear();
+    void clear();
 
-        simtime_t getOldestPosition() const;
+    simtime_t getOldestPosition() const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_POSITIONTABLE_H
 
-
-#endif

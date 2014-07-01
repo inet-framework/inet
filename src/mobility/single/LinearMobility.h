@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_LINEARMOBILITY_H
 #define __INET_LINEARMOBILITY_H
 
@@ -25,8 +24,6 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Linear movement model. See NED file for more info.
  *
@@ -36,9 +33,9 @@ namespace inet {
 class INET_API LinearMobility : public MovingMobilityBase
 {
   protected:
-    double speed;          ///< speed of the host
-    double angle;          ///< angle of linear motion
-    double acceleration;   ///< acceleration of linear motion
+    double speed;    ///< speed of the host
+    double angle;    ///< angle of linear motion
+    double acceleration;    ///< acceleration of linear motion
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -52,8 +49,7 @@ class INET_API LinearMobility : public MovingMobilityBase
   public:
     LinearMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LINEARMOBILITY_H
 
-
-#endif

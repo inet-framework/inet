@@ -1,15 +1,15 @@
- /**
-******************************************************
-* @file EthernetApplication.h
-* @brief Simple traffic generator.
-* It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
-*
-* @author Juan Luis Garrote Molinero
-* @version 1.0
-* @date Feb 2011
-*
-*
-******************************************************/
+/**
+ ******************************************************
+ * @file EthernetApplication.h
+ * @brief Simple traffic generator.
+ * It generates Etherapp requests and responses. Based in EtherAppCli and EtherAppSrv.
+ *
+ * @author Juan Luis Garrote Molinero
+ * @version 1.0
+ * @date Feb 2011
+ *
+ *
+ ******************************************************/
 #ifndef __INET_ETHERNETAPPLICATION_H
 #define __INET_ETHERNETAPPLICATION_H
 
@@ -17,16 +17,14 @@
 #include "MACAddress.h"
 
 namespace inet {
-
-#define MAX_REPLY_CHUNK_SIZE   1497
-
+#define MAX_REPLY_CHUNK_SIZE    1497
 
 /**
  * Ethernet application. Both, server and client side.
  */
 class INET_API EthernetApplication : public cSimpleModule
 {
-	 protected:
+  protected:
     // send parameters
     long seqNum;
     cPar *reqLength;
@@ -49,9 +47,9 @@ class INET_API EthernetApplication : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-	/*
-	 *	Gets the MAC address in case a host name was set in destAddress parameter
-	 */
+    /*
+     *	Gets the MAC address in case a host name was set in destAddress parameter
+     */
     virtual MACAddress resolveDestMACAddress();
 
     /*
@@ -68,12 +66,8 @@ class INET_API EthernetApplication : public cSimpleModule
      * generates response packet. Server side.
      */
     virtual void receivePacket(cMessage *msg);
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_ETHERNETAPPLICATION_H
 

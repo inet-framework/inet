@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 // for INT64_C(x), UINT64_C(x):
 #define __STDC_CONSTANT_MACROS
 #include <stdint.h>
@@ -30,8 +29,6 @@ extern "C" {
 }
 
 namespace inet {
-
-
 void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short int sampleBits)
 {
     AVStream *st = avformat_new_stream(oc, NULL);
@@ -46,7 +43,7 @@ void AudioOutFile::addAudioStream(enum CodecID codec_id, int sampleRate, short i
     /* put sample parameters */
     c->bit_rate = sampleRate * sampleBits;
     c->sample_rate = sampleRate;
-    c->sample_fmt = AV_SAMPLE_FMT_S16;  //FIXME hack!
+    c->sample_fmt = AV_SAMPLE_FMT_S16;    //FIXME hack!
     c->channels = 1;
     audio_st = st;
 }
@@ -59,13 +56,11 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
 
     // auto detect the output format from the name. default is WAV
     AVOutputFormat *fmt = av_guess_format(NULL, resultFile, NULL);
-    if (!fmt)
-    {
+    if (!fmt) {
         EV_WARN << "Could not deduce output format from file extension: using WAV.\n";
         fmt = av_guess_format("wav", NULL, NULL);
     }
-    if (!fmt)
-    {
+    if (!fmt) {
         throw cRuntimeError("Could not find suitable output format for filename '%s'", resultFile);
     }
 
@@ -86,8 +81,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
 
     /* now that all the parameters are set, we can open the audio and
        video codecs and allocate the necessary encode buffers */
-    if (audio_st)
-    {
+    if (audio_st) {
         AVCodecContext *c = audio_st->codec;
 
         /* find the audio encoder */
@@ -101,8 +95,7 @@ void AudioOutFile::open(const char *resultFile, int sampleRate, short int sample
     }
 
     /* open the output file, if needed */
-    if (!(fmt->flags & AVFMT_NOFILE))
-    {
+    if (!(fmt->flags & AVFMT_NOFILE)) {
         if (avio_open(&oc->pb, resultFile, AVIO_FLAG_WRITE) < 0)
             throw cRuntimeError("Could not open '%s'", resultFile);
     }
@@ -128,20 +121,20 @@ void AudioOutFile::write(void *decBuf, int pktBytes)
 
     frame->nb_samples = samples;
 
-#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54,28,0)
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
     frame->channel_layout = AV_CH_LAYOUT_MONO;
     frame->sample_rate = c->sample_rate;
-#endif
+#endif // if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(54, 28, 0)
 
-    int ret = avcodec_fill_audio_frame(frame, /*channels*/ 1, c->sample_fmt,
-            (const uint8_t*)(decBuf), pktBytes, 1);
+    int ret = avcodec_fill_audio_frame(frame,    /*channels*/ 1, c->sample_fmt,
+                (const uint8_t *)(decBuf), pktBytes, 1);
     if (ret < 0)
         throw cRuntimeError("Error in avcodec_fill_audio_frame(): err=%d", ret);
 
     // The bitsPerOutSample is not 0 when codec is PCM.
     int gotPacket;
     ret = avcodec_encode_audio2(c, &pkt, frame, &gotPacket);
-    if(ret < 0 || gotPacket != 1)
+    if (ret < 0 || gotPacket != 1)
         throw cRuntimeError("avcodec_encode_audio() error: %d gotPacket: %d", ret, gotPacket);
 
     // write the compressed frame into the media file
@@ -168,14 +161,12 @@ bool AudioOutFile::close()
         avcodec_close(audio_st->codec);
 
     /* free the streams */
-    for (unsigned int i = 0; i < oc->nb_streams; i++)
-    {
+    for (unsigned int i = 0; i < oc->nb_streams; i++) {
         av_freep(&oc->streams[i]->codec);
         av_freep(&oc->streams[i]);
     }
 
-    if (!(oc->oformat->flags & AVFMT_NOFILE))
-    {
+    if (!(oc->oformat->flags & AVFMT_NOFILE)) {
         /* close the output file */
         avio_close(oc->pb);
     }
@@ -190,8 +181,5 @@ AudioOutFile::~AudioOutFile()
 {
     close();
 }
-
-
-}
-
+} // namespace inet
 

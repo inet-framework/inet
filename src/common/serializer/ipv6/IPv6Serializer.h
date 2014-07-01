@@ -21,30 +21,26 @@
 #include "IPv6Datagram.h"
 
 namespace inet {
-
-
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
 class IPv6Serializer
 {
-    public:
-        IPv6Serializer() {}
+  public:
+    IPv6Serializer() {}
 
-        /**
-         * Serializes an IPv6Datagram for transmission on the wire.
-         * Returns the length of data written into buffer.
-         */
-        int serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize);
+    /**
+     * Serializes an IPv6Datagram for transmission on the wire.
+     * Returns the length of data written into buffer.
+     */
+    int serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize);
 
-        /**
-         * Puts a packet sniffed from the wire into an IPv6Datagram.
-         */
-        void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
+    /**
+     * Puts a packet sniffed from the wire into an IPv6Datagram.
+     */
+    void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPV6SERIALIZER_H
 

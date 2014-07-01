@@ -23,12 +23,10 @@
 #include "INETDefs.h"
 
 #include "IPv4Address.h"
-#include "IPv4Route.h"  // not strictly required, but most clients will need it anyway
+#include "IPv4Route.h"    // not strictly required, but most clients will need it anyway
 #include "IRoutingTable.h"
 
 namespace inet {
-
-
 /**
  * A C++ interface to abstract the functionality of IIPv4RoutingTable.
  * Referring to IIPv4RoutingTable via this interface makes it possible to
@@ -145,7 +143,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     /**
      * Returns route for a multicast origin and group.
      */
-    virtual const IPv4MulticastRoute *findBestMatchingMulticastRoute(const IPv4Address &origin, const IPv4Address& group) const = 0;
+    virtual const IPv4MulticastRoute *findBestMatchingMulticastRoute(const IPv4Address& origin, const IPv4Address& group) const = 0;
     //@}
 
     /** @name Route table manipulation */
@@ -242,9 +240,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     virtual void multicastRouteChanged(IPv4MulticastRoute *entry, int fieldCode) = 0;
     //@}
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IIPV4ROUTINGTABLE_H
 

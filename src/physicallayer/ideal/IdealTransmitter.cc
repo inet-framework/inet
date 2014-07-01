@@ -20,15 +20,12 @@
 #include "IMobility.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(IdealTransmitter);
 
 void IdealTransmitter::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         bitrate = bps(par("bitrate"));
         maxCommunicationRange = m(par("maxCommunicationRange"));
         maxInterferenceRange = m(par("maxInterferenceRange"));
@@ -36,7 +33,7 @@ void IdealTransmitter::initialize(int stage)
     }
 }
 
-void IdealTransmitter::printToStream(std::ostream &stream) const
+void IdealTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "ideal transmitter, bitrate = " << bitrate << ", "
            << "maxCommunicationRange = " << maxCommunicationRange << ", "
@@ -55,10 +52,6 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new IdealTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

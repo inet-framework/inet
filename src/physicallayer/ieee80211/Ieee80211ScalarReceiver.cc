@@ -25,7 +25,6 @@
 
 namespace inet {
 namespace physicallayer {
-
 Define_Module(Ieee80211ScalarReceiver);
 
 Ieee80211ScalarReceiver::~Ieee80211ScalarReceiver()
@@ -37,8 +36,7 @@ Ieee80211ScalarReceiver::~Ieee80211ScalarReceiver()
 void Ieee80211ScalarReceiver::initialize(int stage)
 {
     ScalarReceiver::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))
             opMode = 'b';
@@ -63,13 +61,12 @@ void Ieee80211ScalarReceiver::initialize(int stage)
         else if (!strcmp("nist", errorModelString))
             errorModel = new NistErrorRateModel();
         else
-            opp_error("Error %s model is not valid",errorModelString);
+            opp_error("Error %s model is not valid", errorModelString);
         autoHeaderSize = par("autoHeaderSize");
         parseTable = NULL;
         const char *fname = par("berTableFile");
         std::string name(fname);
-        if (!name.empty())
-        {
+        if (!name.empty()) {
             parseTable = new BerParseFile(opMode);
             parseTable->parseFile(fname);
         }
@@ -92,21 +89,17 @@ bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, do
 
     modeBody = WifiModulationType::getModulationType(opMode, bitrate);
     modeHeader = WifiModulationType::getPlcpHeaderMode(modeBody, preambleUsed);
-    if (opMode == 'g')
-    {
-        if (autoHeaderSize)
-        {
-           ModulationType modeBodyA = WifiModulationType::getModulationType('a', bitrate);
-           headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed))*modeHeader.getDataRate());
+    if (opMode == 'g') {
+        if (autoHeaderSize) {
+            ModulationType modeBodyA = WifiModulationType::getModulationType('a', bitrate);
+            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBodyA, preambleUsed)) * modeHeader.getDataRate());
         }
     }
-    else if (opMode == 'b' || opMode == 'a' || opMode == 'p')
-    {
+    else if (opMode == 'b' || opMode == 'a' || opMode == 'p') {
         if (autoHeaderSize)
-             headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBody, preambleUsed))*modeHeader.getDataRate());
+            headerSize = ceil(SIMTIME_DBL(WifiModulationType::getPlcpHeaderDuration(modeBody, preambleUsed)) * modeHeader.getDataRate());
     }
-    else
-    {
+    else {
         opp_error("Radio model not supported yet, must be a,b,g or p");
     }
 
@@ -128,10 +121,6 @@ bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, do
     else
         return false;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

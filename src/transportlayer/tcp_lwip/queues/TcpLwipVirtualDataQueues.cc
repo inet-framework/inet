@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TcpLwipVirtualDataQueues.h"
 
 #include "TCPCommand_m.h"
@@ -24,12 +23,9 @@
 #include "TCPSerializer.h"
 
 namespace inet {
-
-
 Register_Class(TcpLwipVirtualDataSendQueue);
 
 Register_Class(TcpLwipVirtualDataReceiveQueue);
-
 
 TcpLwipVirtualDataSendQueue::TcpLwipVirtualDataSendQueue()
     :
@@ -57,8 +53,7 @@ void TcpLwipVirtualDataSendQueue::enqueueAppData(cPacket *msgP)
     unsentTcpLayerBytesM += bytes;
 }
 
-unsigned int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(
-        void* bufferP, unsigned int bufferLengthP) const
+unsigned int TcpLwipVirtualDataSendQueue::getBytesForTcpLayer(void *bufferP, unsigned int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -77,8 +72,7 @@ unsigned long TcpLwipVirtualDataSendQueue::getBytesAvailable() const
     return unsentTcpLayerBytesM;
 }
 
-TCPSegment* TcpLwipVirtualDataSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, unsigned int tcpLengthP)
+TCPSegment *TcpLwipVirtualDataSendQueue::createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -123,26 +117,24 @@ void TcpLwipVirtualDataReceiveQueue::setConnection(TcpLwipConnection *connP)
     TcpLwipReceiveQueue::setConnection(connP);
 }
 
-void TcpLwipVirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(
-        TCPSegment *tcpsegP, uint32 seqno, const void *bufferP, size_t bufferLengthP)
+void TcpLwipVirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqno, const void *bufferP, size_t bufferLengthP)
 {
     ASSERT(tcpsegP);
     ASSERT(bufferP);
 }
 
-void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void* dataP, unsigned int dataLengthP)
+void TcpLwipVirtualDataReceiveQueue::enqueueTcpLayerData(void *dataP, unsigned int dataLengthP)
 {
     bytesInQueueM += dataLengthP;
 }
 
-cPacket* TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
+cPacket *TcpLwipVirtualDataReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
 
-    if (bytesInQueueM)
-    {
+    if (bytesInQueueM) {
         dataMsg = new cPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(bytesInQueueM);
@@ -171,8 +163,5 @@ void TcpLwipVirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
-
-
-}
-
+} // namespace inet
 

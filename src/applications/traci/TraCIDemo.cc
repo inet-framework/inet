@@ -23,7 +23,6 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
 Define_Module(TraCIDemo);
 
 simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -32,12 +31,10 @@ void TraCIDemo::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         sentMessage = false;
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         bool isOperational;
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
@@ -51,52 +48,59 @@ void TraCIDemo::initialize(int stage)
     }
 }
 
-void TraCIDemo::setupLowerLayer() {
+void TraCIDemo::setupLowerLayer()
+{
     socket.setOutputGate(gate("udp$o"));
-    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this) -> collectMulticastGroups();
+    MulticastGroupList mgl = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this)->collectMulticastGroups();
     socket.joinLocalMulticastGroups(mgl);
     socket.bind(12345);
     socket.setBroadcast(true);
 }
 
-void TraCIDemo::handleMessage(cMessage* msg) {
+void TraCIDemo::handleMessage(cMessage *msg)
+{
     if (msg->isSelfMessage()) {
         handleSelfMsg(msg);
-    } else {
+    }
+    else {
         handleLowerMsg(msg);
     }
 }
 
-void TraCIDemo::handleSelfMsg(cMessage* msg) {
+void TraCIDemo::handleSelfMsg(cMessage *msg)
+{
 }
 
-void TraCIDemo::handleLowerMsg(cMessage* msg) {
-    if (!sentMessage) sendMessage();
+void TraCIDemo::handleLowerMsg(cMessage *msg)
+{
+    if (!sentMessage)
+        sendMessage();
     delete msg;
 }
 
-void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj) {
+void TraCIDemo::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
+{
     Enter_Method_Silent();
     if (signalID == mobilityStateChangedSignal) {
         handlePositionUpdate();
     }
 }
 
-void TraCIDemo::sendMessage() {
+void TraCIDemo::sendMessage()
+{
     sentMessage = true;
 
-    cPacket* newMessage = new cPacket();
+    cPacket *newMessage = new cPacket();
 
     socket.sendTo(newMessage, IPv4Address::ALL_HOSTS_MCAST, 12345);
 }
 
-void TraCIDemo::handlePositionUpdate() {
+void TraCIDemo::handlePositionUpdate()
+{
     if (traci->getPosition().x < 7350) {
-        if (!sentMessage) sendMessage();
+        if (!sentMessage)
+            sendMessage();
     }
 }
-
-
-}
-
+} // namespace inet
 

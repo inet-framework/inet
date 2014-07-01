@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "IPvXTrafGen.h"
 
 #include "ModuleAccess.h"
@@ -27,8 +26,6 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
-
-
 Define_Module(IPvXTrafGen);
 
 simsignal_t IPvXTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
@@ -53,8 +50,7 @@ void IPvXTrafGen::initialize(int stage)
 
     // because of IPvXAddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         protocol = par("protocol");
         numPackets = par("numPackets");
         startTime = par("startTime");
@@ -70,8 +66,7 @@ void IPvXTrafGen::initialize(int stage)
         WATCH(numSent);
         WATCH(numReceived);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         IPSocket ipSocket(gate("ipOut"));
         ipSocket.registerProtocol(protocol);
 
@@ -94,16 +89,13 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
-    if (msg == timer)
-    {
-        if (msg->getKind() == START)
-        {
+    if (msg == timer) {
+        if (msg->getKind() == START) {
             destAddresses.clear();
             const char *destAddrs = par("destAddresses");
             cStringTokenizer tokenizer(destAddrs);
             const char *token;
-            while ((token = tokenizer.nextToken()) != NULL)
-            {
+            while ((token = tokenizer.nextToken()) != NULL) {
                 Address result;
                 AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
@@ -112,8 +104,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
                     destAddresses.push_back(result);
             }
         }
-        if (!destAddresses.empty())
-        {
+        if (!destAddresses.empty()) {
             sendPacket();
             if (isEnabled())
                 scheduleNextPacket(simTime());
@@ -122,8 +113,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
     else
         processPacket(PK(msg));
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[40];
         sprintf(buf, "rcvd: %d pks\nsent: %d pks", numReceived, numSent);
         getDisplayString().setTagArg("t", 0, buf);
@@ -145,20 +135,19 @@ bool IPvXTrafGen::handleOperationStage(LifecycleOperation *operation, int stage,
         if (stage == NodeCrashOperation::STAGE_CRASH)
             cancelNextPacket();
     }
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
 void IPvXTrafGen::scheduleNextPacket(simtime_t previous)
 {
     simtime_t next;
-    if (previous == -1)
-    {
+    if (previous == -1) {
         next = simTime() <= startTime ? startTime : simTime();
         timer->setKind(START);
     }
-    else
-    {
+    else {
         next = previous + sendIntervalPar->doubleValue();
         timer->setKind(NEXT);
     }
@@ -178,7 +167,7 @@ bool IPvXTrafGen::isNodeUp()
 
 bool IPvXTrafGen::isEnabled()
 {
-    return (numPackets == -1 || numSent < numPackets);
+    return numPackets == -1 || numSent < numPackets;
 }
 
 Address IPvXTrafGen::chooseDestAddr()
@@ -217,8 +206,7 @@ void IPvXTrafGen::printPacket(cPacket *msg)
     int protocol = -1;
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-    if (ctrl != NULL)
-    {
+    if (ctrl != NULL) {
         src = ctrl->getSourceAddress();
         dest = ctrl->getDestinationAddress();
         protocol = ctrl->getTransportProtocol();
@@ -239,9 +227,5 @@ void IPvXTrafGen::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
-
-
-
-}
-
+} // namespace inet
 

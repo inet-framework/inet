@@ -22,7 +22,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 // forward declarations:
 class TcpLwipConnection;
 class TCPSegment;
@@ -96,7 +95,7 @@ class INET_API TcpLwipSendQueue : public cObject
     /**
      * set connection queue, and initialise queue variables.
      */
-    virtual void setConnection(TcpLwipConnection *connP) {connM = connP; }
+    virtual void setConnection(TcpLwipConnection *connP) { connM = connP; }
 
     /**
      * Called on SEND app command, it inserts in the queue the data the user
@@ -137,7 +136,7 @@ class INET_API TcpLwipSendQueue : public cObject
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP) = 0;
 
   protected:
     TcpLwipConnection *connM;
@@ -168,14 +167,14 @@ class INET_API TcpLwipReceiveQueue : public cObject
      * //FIXME revise this comment
      */
     virtual void notifyAboutIncomingSegmentProcessing(TCPSegment *tcpsegP, uint32 seqNo,
-            const void* bufferP, size_t bufferLengthP) = 0;
+            const void *bufferP, size_t bufferLengthP) = 0;
 
     /**
      * The method called when data received from LWIP
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP) = 0;
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP) = 0;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -213,8 +212,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
   protected:
     TcpLwipConnection *connM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPLWIPQUEUES_H
 
-
-#endif

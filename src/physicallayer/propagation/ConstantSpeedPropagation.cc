@@ -19,9 +19,7 @@
 #include "Arrival.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(ConstantSpeedPropagation);
 
 ConstantSpeedPropagation::ConstantSpeedPropagation() :
@@ -31,10 +29,10 @@ ConstantSpeedPropagation::ConstantSpeedPropagation() :
 
 const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t time, const Coord position, IMobility *mobility) const
 {
-    switch (mobilityApproximationCount)
-    {
+    switch (mobilityApproximationCount) {
         case 0:
             return mobility->getCurrentPosition();
+
 // TODO: revive
 //        case 1:
 //            return mobility->getPosition(time);
@@ -50,7 +48,7 @@ const Coord ConstantSpeedPropagation::computeArrivalPosition(const simtime_t tim
     }
 }
 
-void ConstantSpeedPropagation::printToStream(std::ostream &stream) const
+void ConstantSpeedPropagation::printToStream(std::ostream& stream) const
 {
     stream << "constant speed propagation"
            << ", theoretical propagation speed = " << propagationSpeed
@@ -74,10 +72,6 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
     const EulerAngles endArrivalOrientation = mobility->getCurrentAngularPosition();
     return new Arrival(startPropagationTime, endPropagationTime, startArrivalTime, endArrivalTime, startArrivalPosition, endArrivalPosition, startArrivalOrientation, endArrivalOrientation);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

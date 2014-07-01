@@ -23,4 +23,3 @@
  * @verbinclude WHATSNEW
  */
 
-

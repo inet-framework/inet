@@ -30,164 +30,160 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 /**
  * Implements a DHCP client. See NED file for more details.
  */
 class INET_API DHCPClient : public cSimpleModule, public cListener, public ILifecycle
 {
-    protected:
-        // DHCP timer types (RFC 2131 4.4.5)
-        enum TimerType
-        {
-            WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT, START_DHCP
-        };
+  protected:
+    // DHCP timer types (RFC 2131 4.4.5)
+    enum TimerType {
+        WAIT_OFFER, WAIT_ACK, T1, T2, LEASE_TIMEOUT, START_DHCP
+    };
 
-        // DHCP client states (RFC 2131, Figure 5: state transition diagram)
-        enum ClientState
-        {
-            IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
-        };
+    // DHCP client states (RFC 2131, Figure 5: state transition diagram)
+    enum ClientState {
+        IDLE, INIT, INIT_REBOOT, REBOOTING, SELECTING, REQUESTING, BOUND, RENEWING, REBINDING
+    };
 
-        // parameters
-        int serverPort;
-        int clientPort;
-        UDPSocket socket; // UDP socket for client-server communication
-        std::string hostName;
-        simtime_t startTime; // application start time
-        MACAddress macAddress; // client's MAC address
-        cModule *host; // containing host module (@node)
-        InterfaceEntry *ie; // interface to configure
-        IIPv4RoutingTable *irt; // routing table to update
+    // parameters
+    int serverPort;
+    int clientPort;
+    UDPSocket socket;    // UDP socket for client-server communication
+    std::string hostName;
+    simtime_t startTime;    // application start time
+    MACAddress macAddress;    // client's MAC address
+    cModule *host;    // containing host module (@node)
+    InterfaceEntry *ie;    // interface to configure
+    IIPv4RoutingTable *irt;    // routing table to update
 
-        // state
-        cMessage* timerT1; // time at which the client enters the RENEWING state
-        cMessage* timerT2; // time at which the client enters the REBINDING state
-        cMessage* timerTo; // response timeout: WAIT_ACK, WAIT_OFFER
-        cMessage* leaseTimer; // length of time the lease is valid
-        cMessage* startTimer; // self message to start DHCP initialization
-        bool isOperational; // lifecycle
-        ClientState clientState; // current state
-        unsigned int xid; // transaction id; to associate messages and responses between a client and a server
-        DHCPLease *lease; // leased IP information
-        IPv4Route *route; // last added route
+    // state
+    cMessage *timerT1;    // time at which the client enters the RENEWING state
+    cMessage *timerT2;    // time at which the client enters the REBINDING state
+    cMessage *timerTo;    // response timeout: WAIT_ACK, WAIT_OFFER
+    cMessage *leaseTimer;    // length of time the lease is valid
+    cMessage *startTimer;    // self message to start DHCP initialization
+    bool isOperational;    // lifecycle
+    ClientState clientState;    // current state
+    unsigned int xid;    // transaction id; to associate messages and responses between a client and a server
+    DHCPLease *lease;    // leased IP information
+    IPv4Route *route;    // last added route
 
-        // statistics
-        int numSent; // number of sent DHCP messages
-        int numReceived; // number of received DHCP messages
-        int responseTimeout; // timeout waiting for DHCPACKs, DHCPOFFERs
+    // statistics
+    int numSent;    // number of sent DHCP messages
+    int numReceived;    // number of received DHCP messages
+    int responseTimeout;    // timeout waiting for DHCPACKs, DHCPOFFERs
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual void handleMessage(cMessage * msg);
-        virtual void scheduleTimerTO(TimerType type);
-        virtual void scheduleTimerT1();
-        virtual void scheduleTimerT2();
-        static const char *getStateName(ClientState state);
-        const char *getAndCheckMessageTypeName(DHCPMessageType type);
-        virtual void updateDisplayString();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
+    virtual void scheduleTimerTO(TimerType type);
+    virtual void scheduleTimerT1();
+    virtual void scheduleTimerT2();
+    static const char *getStateName(ClientState state);
+    const char *getAndCheckMessageTypeName(DHCPMessageType type);
+    virtual void updateDisplayString();
 
-        /*
-         * Opens a UDP socket for client-server communication.
-         */
-        virtual void openSocket();
+    /*
+     * Opens a UDP socket for client-server communication.
+     */
+    virtual void openSocket();
 
-        /*
-         * Handles incoming DHCP messages, and implements the
-         * state-transition diagram for DHCP clients.
-         */
-        virtual void handleDHCPMessage(DHCPMessage * msg);
+    /*
+     * Handles incoming DHCP messages, and implements the
+     * state-transition diagram for DHCP clients.
+     */
+    virtual void handleDHCPMessage(DHCPMessage *msg);
 
-        /*
-         * Performs state changes and requests according to the timer expiration events
-         * (e. g. retransmits DHCPREQUEST after the WAIT_ACK timeout expires).
-         */
-        virtual void handleTimer(cMessage * msg);
+    /*
+     * Performs state changes and requests according to the timer expiration events
+     * (e. g. retransmits DHCPREQUEST after the WAIT_ACK timeout expires).
+     */
+    virtual void handleTimer(cMessage *msg);
 
-        /*
-         * Signal handler for cObject, override cListener function.
-         */
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    /*
+     * Signal handler for cObject, override cListener function.
+     */
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-        /*
-         * Performs UDP transmission.
-         */
-        virtual void sendToUDP(cPacket * msg, int srcPort, const Address& destAddr, int destPort);
+    /*
+     * Performs UDP transmission.
+     */
+    virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
 
-        /*
-         * Client broadcast to locate available servers.
-         */
-        virtual void sendDiscover();
+    /*
+     * Client broadcast to locate available servers.
+     */
+    virtual void sendDiscover();
 
-        /*
-         * Client message to servers either (a) requesting offered parameters
-         * from one server and implicitly declining offers from all others,
-         * (b) confirming correctness of previously allocated address after,
-         * e.g., system reboot, or (c) extending the lease on a particular
-         * network address.
-         */
-        virtual void sendRequest();
+    /*
+     * Client message to servers either (a) requesting offered parameters
+     * from one server and implicitly declining offers from all others,
+     * (b) confirming correctness of previously allocated address after,
+     * e.g., system reboot, or (c) extending the lease on a particular
+     * network address.
+     */
+    virtual void sendRequest();
 
-        /*
-         * Client to server indicating network address is already in use.
-         */
-        virtual void sendDecline(IPv4Address declinedIp);
+    /*
+     * Client to server indicating network address is already in use.
+     */
+    virtual void sendDecline(IPv4Address declinedIp);
 
-        /*
-         * Records configuration parameters from a DHCPACK message.
-         */
-        virtual void recordLease(DHCPMessage * dhcpACK);
+    /*
+     * Records configuration parameters from a DHCPACK message.
+     */
+    virtual void recordLease(DHCPMessage *dhcpACK);
 
-        /*
-         * Records minimal configuration parameters from a DHCPOFFER message.
-         */
-        virtual void recordOffer(DHCPMessage * dhcpOffer);
+    /*
+     * Records minimal configuration parameters from a DHCPOFFER message.
+     */
+    virtual void recordOffer(DHCPMessage *dhcpOffer);
 
-        /*
-         * Assigns the IP address to the interface.
-         */
-        virtual void bindLease();
+    /*
+     * Assigns the IP address to the interface.
+     */
+    virtual void bindLease();
 
-        /*
-         * Removes the configured IP address (e. g. when clients get a DHCPNAK message in REBINDING or RENEWING states
-         * or the lease time expires).
-         */
-        virtual void unboundLease();
+    /*
+     * Removes the configured IP address (e. g. when clients get a DHCPNAK message in REBINDING or RENEWING states
+     * or the lease time expires).
+     */
+    virtual void unboundLease();
 
-        /*
-         * Starts the DHCP configuration process with sending a DHCPDISCOVER.
-         */
-        virtual void initClient();
+    /*
+     * Starts the DHCP configuration process with sending a DHCPDISCOVER.
+     */
+    virtual void initClient();
 
-        /*
-         * Starts the DHCP configuration process with known network address.
-         */
-        virtual void initRebootedClient();
+    /*
+     * Starts the DHCP configuration process with known network address.
+     */
+    virtual void initRebootedClient();
 
-        /*
-         * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
-         * in response to DHCPINFORM messages.
-         */
-        virtual void handleDHCPACK(DHCPMessage * msg);
+    /*
+     * Handles DHCPACK in any state. Note that, handleDHCPACK() doesn't handle DHCPACK messages
+     * in response to DHCPINFORM messages.
+     */
+    virtual void handleDHCPACK(DHCPMessage *msg);
 
-        /*
-         * Selects the first non-loopback interface
-         */
-        virtual InterfaceEntry *chooseInterface();
+    /*
+     * Selects the first non-loopback interface
+     */
+    virtual InterfaceEntry *chooseInterface();
 
-        // Lifecycle methods
-        virtual void startApp();
-        virtual void stopApp();
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-    public:
-        DHCPClient();
-        virtual ~DHCPClient();
+    // Lifecycle methods
+    virtual void startApp();
+    virtual void stopApp();
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
+  public:
+    DHCPClient();
+    virtual ~DHCPClient();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_DHCPCLIENT_H
 
-
-#endif

@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LSA.h"
 
 namespace inet {
-
-
 bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
@@ -48,8 +45,8 @@ bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 
 bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
-    long           leftSequenceNumber = leftLSA.getLsSequenceNumber();
-    long           rightSequenceNumber = rightLSA.getLsSequenceNumber();
+    long leftSequenceNumber = leftLSA.getLsSequenceNumber();
+    long rightSequenceNumber = rightLSA.getLsSequenceNumber();
     unsigned short leftAge = leftLSA.getLsAge();
     unsigned short rightAge = rightLSA.getLsAge();
 
@@ -67,16 +64,16 @@ bool operator==(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 
 bool operator==(const OSPFOptions& leftOptions, const OSPFOptions& rightOptions)
 {
-    return ((leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
-            (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
-            (leftOptions.NP_Type7LSA == rightOptions.NP_Type7LSA) &&
-            (leftOptions.EA_ForwardExternalLSAs == rightOptions.EA_ForwardExternalLSAs) &&
-            (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits));
+    return (leftOptions.E_ExternalRoutingCapability == rightOptions.E_ExternalRoutingCapability) &&
+           (leftOptions.MC_MulticastForwarding == rightOptions.MC_MulticastForwarding) &&
+           (leftOptions.NP_Type7LSA == rightOptions.NP_Type7LSA) &&
+           (leftOptions.EA_ForwardExternalLSAs == rightOptions.EA_ForwardExternalLSAs) &&
+           (leftOptions.DC_DemandCircuits == rightOptions.DC_DemandCircuits);
 }
 
-unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA)
+unsigned int calculateLSASize(const OSPFRouterLSA *routerLSA)
 {
-    unsigned int   lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
+    unsigned int lsaLength = OSPF_LSA_HEADER_LENGTH + OSPF_ROUTERLSA_HEADER_LENGTH;
     unsigned short linkCount = routerLSA->getLinksArraySize();
 
     for (unsigned short i = 0; i < linkCount; i++) {
@@ -87,22 +84,22 @@ unsigned int calculateLSASize(const OSPFRouterLSA* routerLSA)
     return lsaLength;
 }
 
-unsigned int calculateLSASize(const OSPFNetworkLSA* networkLSA)
+unsigned int calculateLSASize(const OSPFNetworkLSA *networkLSA)
 {
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH +
-            (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH));
+    return OSPF_LSA_HEADER_LENGTH + OSPF_NETWORKLSA_MASK_LENGTH
+           + (networkLSA->getAttachedRoutersArraySize() * OSPF_NETWORKLSA_ADDRESS_LENGTH);
 }
 
-unsigned int calculateLSASize(const OSPFSummaryLSA* summaryLSA)
+unsigned int calculateLSASize(const OSPFSummaryLSA *summaryLSA)
 {
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH +
-            (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH));
+    return OSPF_LSA_HEADER_LENGTH + OSPF_SUMMARYLSA_HEADER_LENGTH
+           + (summaryLSA->getTosDataArraySize() * OSPF_TOS_LENGTH);
 }
 
-unsigned int calculateLSASize(const OSPFASExternalLSA* asExternalLSA)
+unsigned int calculateLSASize(const OSPFASExternalLSA *asExternalLSA)
 {
-    return (OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH +
-            (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH));
+    return OSPF_LSA_HEADER_LENGTH + OSPF_ASEXTERNALLSA_HEADER_LENGTH
+           + (asExternalLSA->getContents().getExternalTOSInfoArraySize() * OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH);
 }
 
 std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsaHeader)
@@ -110,12 +107,29 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFLSAHeader& lsaHeader)
     ostr << "LSAHeader: age=" << lsaHeader.getLsAge()
          << ", type=";
     switch (lsaHeader.getLsType()) {
-        case ROUTERLSA_TYPE:                     ostr << "RouterLSA";                     break;
-        case NETWORKLSA_TYPE:                    ostr << "NetworkLSA";                    break;
-        case SUMMARYLSA_NETWORKS_TYPE:           ostr << "SummaryLSA_Networks";           break;
-        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:  ostr << "SummaryLSA_ASBoundaryRouters";  break;
-        case AS_EXTERNAL_LSA_TYPE:               ostr << "ASExternalLSA";                 break;
-        default:                                 ostr << "Unknown";                       break;
+        case ROUTERLSA_TYPE:
+            ostr << "RouterLSA";
+            break;
+
+        case NETWORKLSA_TYPE:
+            ostr << "NetworkLSA";
+            break;
+
+        case SUMMARYLSA_NETWORKS_TYPE:
+            ostr << "SummaryLSA_Networks";
+            break;
+
+        case SUMMARYLSA_ASBOUNDARYROUTERS_TYPE:
+            ostr << "SummaryLSA_ASBoundaryRouters";
+            break;
+
+        case AS_EXTERNAL_LSA_TYPE:
+            ostr << "ASExternalLSA";
+            break;
+
+        default:
+            ostr << "Unknown";
+            break;
     }
     ostr << ", LSID=" << lsaHeader.getLinkStateID().str(false)
          << ", advertisingRouter=" << lsaHeader.getAdvertisingRouter().str(false)
@@ -140,9 +154,10 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFNetworkLSA& lsa)
 
 std::ostream& operator<<(std::ostream& ostr, const TOSData& tos)
 {
-    ostr << "tos: " << (int) tos.tos
+    ostr << "tos: " << (int)tos.tos
          << "metric:";
-    for (int i=0; i<3; i++) ostr << " " << (int)tos.tosMetric[i];
+    for (int i = 0; i < 3; i++)
+        ostr << " " << (int)tos.tosMetric[i];
     return ostr;
 }
 
@@ -157,8 +172,7 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
         ostr << data;
     ostr << ", cost: " << link.getLinkCost();
     unsigned int cnt = link.getTosDataArraySize();
-    if (cnt)
-    {
+    if (cnt) {
         ostr << ", tos: {";
         for (unsigned int i = 0; i < cnt; i++) {
             ostr << " " << link.getTosData(i);
@@ -170,14 +184,17 @@ std::ostream& operator<<(std::ostream& ostr, const Link& link)
 
 std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa)
 {
-    if (lsa.getV_VirtualLinkEndpoint()) ostr << "V, ";
-    if (lsa.getE_ASBoundaryRouter()) ostr << "E, ";
-    if (lsa.getB_AreaBorderRouter()) ostr << "B, ";
+    if (lsa.getV_VirtualLinkEndpoint())
+        ostr << "V, ";
+    if (lsa.getE_ASBoundaryRouter())
+        ostr << "E, ";
+    if (lsa.getB_AreaBorderRouter())
+        ostr << "B, ";
     ostr << "numberOfLinks: " << lsa.getNumberOfLinks() << ", ";
     unsigned int cnt = lsa.getLinksArraySize();
     if (cnt) {
         ostr << "Links: {";
-        for (unsigned int i = 0; i < cnt; i++){
+        for (unsigned int i = 0; i < cnt; i++) {
             ostr << " {" << lsa.getLinks(i) << "}";
         }
         ostr << "}, ";
@@ -231,5 +248,5 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
     ostr << lsa.getHeader();
     return ostr;
 }
+} // namespace inet
 
-}

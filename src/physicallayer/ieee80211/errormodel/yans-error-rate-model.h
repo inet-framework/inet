@@ -17,18 +17,15 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef __INET_YANS-ERROR-RATE-MODEL_H
-#define __INET_YANS-ERROR-RATE-MODEL_H
+#ifndef __INET_YANS - ERROR - RATE - MODEL_H
+#define __INET_YANS    -ERROR - RATE - MODEL_H
 
 #include "WifiMode.h"
 #include "IErrorModel.h"
 #include "dsss-error-rate-model.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * \brief Model the error rate for different modulations.
  *
@@ -55,33 +52,31 @@ namespace physicallayer
  */
 class YansErrorRateModel : public IErrorModel
 {
-public:
-  YansErrorRateModel();
+  public:
+    YansErrorRateModel();
 
-  virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
+    virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const;
 
-private:
-  double Log2(double val) const;
-  double GetBpskBer(double snr, uint32_t signalSpread, uint32_t phyRate) const;
-  double GetQamBer(double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const;
-  uint32_t Factorial(uint32_t k) const;
-  double Binomial(uint32_t k, double p, uint32_t n) const;
-  double CalculatePdOdd(double ber, unsigned int d) const;
-  double CalculatePdEven(double ber, unsigned int d) const;
-  double CalculatePd(double ber, unsigned int d) const;
-  double GetFecBpskBer(double snr, double nbits,
-                        uint32_t signalSpread, uint32_t phyRate,
-                        uint32_t dFree, uint32_t adFree) const;
-  double GetFecQamBer(double snr, uint32_t nbits,
-                       uint32_t signalSpread,
-                       uint32_t phyRate,
-                       uint32_t m, uint32_t dfree,
-                       uint32_t adFree, uint32_t adFreePlusOne) const;
+  private:
+    double Log2(double val) const;
+    double GetBpskBer(double snr, uint32_t signalSpread, uint32_t phyRate) const;
+    double GetQamBer(double snr, unsigned int m, uint32_t signalSpread, uint32_t phyRate) const;
+    uint32_t Factorial(uint32_t k) const;
+    double Binomial(uint32_t k, double p, uint32_t n) const;
+    double CalculatePdOdd(double ber, unsigned int d) const;
+    double CalculatePdEven(double ber, unsigned int d) const;
+    double CalculatePd(double ber, unsigned int d) const;
+    double GetFecBpskBer(double snr, double nbits,
+            uint32_t signalSpread, uint32_t phyRate,
+            uint32_t dFree, uint32_t adFree) const;
+    double GetFecQamBer(double snr, uint32_t nbits,
+            uint32_t signalSpread,
+            uint32_t phyRate,
+            uint32_t m, uint32_t dfree,
+            uint32_t adFree, uint32_t adFreePlusOne) const;
 };
-
-}
-
-}
-
+} // namespace physicallayer
+} // namespace inet
 
 #endif /* YANS_ERROR_RATE_MODEL_H */
+

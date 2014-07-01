@@ -21,7 +21,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)
-#endif
+#endif // ifdef _MSC_VER
 
 #include <map>
 
@@ -33,8 +33,7 @@
 #include "IIPv4RoutingTable.h"
 
 namespace inet {
-
-#define SCTP_UDP_PORT  9899
+#define SCTP_UDP_PORT    9899
 
 class SCTPAssociation;
 class SCTPMessage;
@@ -85,179 +84,177 @@ class SCTPMessage;
  */
 class INET_API SCTP : public cSimpleModule
 {
-    public:
-        struct AppAssocKey
+  public:
+    struct AppAssocKey
+    {
+        int32 appGateIndex;
+        int32 assocId;
+
+        inline bool operator<(const AppAssocKey& b) const
         {
-            int32 appGateIndex;
-            int32 assocId;
-
-            inline bool operator<(const AppAssocKey& b) const
-            {
-                if (appGateIndex!=b.appGateIndex)
-                    return appGateIndex<b.appGateIndex;
-                else
-                    return assocId<b.assocId;
-            }
-
-        };
-        struct SockPair
-        {
-            Address localAddr;
-            Address remoteAddr;
-            uint16 localPort;
-            uint16 remotePort;
-
-            inline bool operator<(const SockPair& b) const
-            {
-                if (remoteAddr!=b.remoteAddr)
-                    return remoteAddr<b.remoteAddr;
-                else if (localAddr!=b.localAddr)
-                    return localAddr<b.localAddr;
-                else if (remotePort!=b.remotePort)
-                    return remotePort<b.remotePort;
-                else
-                    return localPort<b.localPort;
-            }
-        };
-        struct VTagPair
-        {
-            uint32 peerVTag;
-            uint32 localVTag;
-            uint16 localPort;
-            uint16 remotePort;
-        };
-        typedef struct
-        {
-            int32 assocId;
-            simtime_t start;
-            simtime_t stop;
-            uint64 rcvdBytes;
-            uint64 sentBytes;
-            uint64 transmittedBytes;
-            uint64 ackedBytes;
-            uint32 numFastRtx;
-            uint32 numDups;
-            uint32 numT3Rtx;
-            uint32 numPathFailures;
-            uint32 numForwardTsn;
-            double throughput;
-            simtime_t lifeTime;
-            uint32 numOverfullSACKs;
-            uint64 sumRGapRanges;                              // Total sum of RGap ranges (Last RGapStop - CumAck)
-            uint64 sumNRGapRanges;                             // Total sum of NRGap ranges (Last NRGapStop - CumAck)
-            uint32 numDropsBecauseNewTSNGreaterThanHighestTSN;
-            uint32 numDropsBecauseNoRoomInBuffer;
-            uint32 numChunksReneged;
-            uint32 numAuthChunksSent;
-            uint32 numAuthChunksAccepted;
-            uint32 numAuthChunksRejected;
-            uint32 numResetRequestsSent;
-            uint32 numResetRequestsPerformed;
-            simtime_t fairStart;
-            simtime_t fairStop;
-            uint64 fairAckedBytes;
-            double fairThroughput;
-            simtime_t fairLifeTime;
-            uint64 numEndToEndMessages;
-            SimTime cumEndToEndDelay;
-            uint64 startEndToEndDelay;
-            uint64 stopEndToEndDelay;
-        }AssocStat;
-
-        typedef std::map<int32,AssocStat> AssocStatMap;
-        AssocStatMap assocStatMap;
-        typedef std::map<int32, VTagPair> SctpVTagMap;
-        SctpVTagMap sctpVTagMap;
-
-
-        typedef std::map<AppAssocKey,SCTPAssociation*> SctpAppAssocMap;
-        typedef std::map<SockPair,SCTPAssociation*> SctpAssocMap;
-
-        SctpAppAssocMap sctpAppAssocMap;
-        SctpAssocMap sctpAssocMap;
-        std::list<SCTPAssociation*>assocList;
-
-        UDPSocket udpSocket;
-
-    protected:
-        IRoutingTable *rt;
-        IInterfaceTable *ift;
-
-        int32 sizeAssocMap;
-        static int32 nextAssocId;
-
-        uint16 nextEphemeralPort;
-
-        SCTPAssociation *findAssocForMessage(Address srcAddr, Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
-        SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
-        void sendAbortFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address destAddr);
-        void sendShutdownCompleteFromMain(SCTPMessage* sctpmsg, Address srcAddr, Address destAddr);
-        void updateDisplayString();
-
-    public:
-        void printInfoAssocMap();
-        void printVTagMap();
-
-        void removeAssociation(SCTPAssociation *assoc);
-        simtime_t testTimeout;
-        uint32 numGapReports;
-        uint32 numPacketsReceived;
-        uint32 numPacketsDropped;
-        bool auth;
-        bool addIP;
-        bool pktdrop;
-        bool sackNow;
-        uint64 numPktDropReports;
-
-    public:
-        virtual ~SCTP();
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg);
-        virtual void finish();
-
-        inline AssocStat* getAssocStat(uint32 assocId) {
-            SCTP::AssocStatMap::iterator found = assocStatMap.find(assocId);
-            if (found != assocStatMap.end()) {
-              return (&found->second);
-            }
-            return (NULL);
+            if (appGateIndex != b.appGateIndex)
+                return appGateIndex < b.appGateIndex;
+            else
+                return assocId < b.assocId;
         }
+    };
+    struct SockPair
+    {
+        Address localAddr;
+        Address remoteAddr;
+        uint16 localPort;
+        uint16 remotePort;
 
-        /**
-        * To be called from SCTPAssociation when socket pair    changes
-        */
-        void updateSockPair(SCTPAssociation *assoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
-        void addLocalAddress(SCTPAssociation *assoc, Address address);
-        void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
-        bool addRemoteAddress(SCTPAssociation *assoc, Address localAddress, Address remoteAddress);
-        void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
-        void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, Address address, std::vector<Address> locAddresses);
-        /**
-        * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
-        * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
-        */
-        void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
+        inline bool operator<(const SockPair& b) const
+        {
+            if (remoteAddr != b.remoteAddr)
+                return remoteAddr < b.remoteAddr;
+            else if (localAddr != b.localAddr)
+                return localAddr < b.localAddr;
+            else if (remotePort != b.remotePort)
+                return remotePort < b.remotePort;
+            else
+                return localPort < b.localPort;
+        }
+    };
+    struct VTagPair
+    {
+        uint32 peerVTag;
+        uint32 localVTag;
+        uint16 localPort;
+        uint16 remotePort;
+    };
+    typedef struct
+    {
+        int32 assocId;
+        simtime_t start;
+        simtime_t stop;
+        uint64 rcvdBytes;
+        uint64 sentBytes;
+        uint64 transmittedBytes;
+        uint64 ackedBytes;
+        uint32 numFastRtx;
+        uint32 numDups;
+        uint32 numT3Rtx;
+        uint32 numPathFailures;
+        uint32 numForwardTsn;
+        double throughput;
+        simtime_t lifeTime;
+        uint32 numOverfullSACKs;
+        uint64 sumRGapRanges;    // Total sum of RGap ranges (Last RGapStop - CumAck)
+        uint64 sumNRGapRanges;    // Total sum of NRGap ranges (Last NRGapStop - CumAck)
+        uint32 numDropsBecauseNewTSNGreaterThanHighestTSN;
+        uint32 numDropsBecauseNoRoomInBuffer;
+        uint32 numChunksReneged;
+        uint32 numAuthChunksSent;
+        uint32 numAuthChunksAccepted;
+        uint32 numAuthChunksRejected;
+        uint32 numResetRequestsSent;
+        uint32 numResetRequestsPerformed;
+        simtime_t fairStart;
+        simtime_t fairStop;
+        uint64 fairAckedBytes;
+        double fairThroughput;
+        simtime_t fairLifeTime;
+        uint64 numEndToEndMessages;
+        SimTime cumEndToEndDelay;
+        uint64 startEndToEndDelay;
+        uint64 stopEndToEndDelay;
+    } AssocStat;
 
-        /**
-        * To be called from SCTPAssociation: reserves an ephemeral port for the connection.
-        */
-        uint16 getEphemeralPort();
+    typedef std::map<int32, AssocStat> AssocStatMap;
+    AssocStatMap assocStatMap;
+    typedef std::map<int32, VTagPair> SctpVTagMap;
+    SctpVTagMap sctpVTagMap;
 
-        /**
-        * Generates a new integer, to be used as assocId. (assocId is part of the key
-        * which associates connections with their apps).
-        */
-        static int32 getNewAssocId() {return ++nextAssocId;}
+    typedef std::map<AppAssocKey, SCTPAssociation *> SctpAppAssocMap;
+    typedef std::map<SockPair, SCTPAssociation *> SctpAssocMap;
 
-        SCTPAssociation* getAssoc(int32 assocId);
-        SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
-        SctpVTagMap getVTagMap() {return sctpVTagMap;};
+    SctpAppAssocMap sctpAppAssocMap;
+    SctpAssocMap sctpAssocMap;
+    std::list<SCTPAssociation *> assocList;
 
-        void bindPortForUDP();
+    UDPSocket udpSocket;
+
+  protected:
+    IRoutingTable *rt;
+    IInterfaceTable *ift;
+
+    int32 sizeAssocMap;
+    static int32 nextAssocId;
+
+    uint16 nextEphemeralPort;
+
+    SCTPAssociation *findAssocForMessage(Address srcAddr, Address destAddr, uint32 srcPort, uint32 destPort, bool findListen);
+    SCTPAssociation *findAssocForApp(int32 appGateIndex, int32 assocId);
+    void sendAbortFromMain(SCTPMessage *sctpmsg, Address srcAddr, Address destAddr);
+    void sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, Address srcAddr, Address destAddr);
+    void updateDisplayString();
+
+  public:
+    void printInfoAssocMap();
+    void printVTagMap();
+
+    void removeAssociation(SCTPAssociation *assoc);
+    simtime_t testTimeout;
+    uint32 numGapReports;
+    uint32 numPacketsReceived;
+    uint32 numPacketsDropped;
+    bool auth;
+    bool addIP;
+    bool pktdrop;
+    bool sackNow;
+    uint64 numPktDropReports;
+
+  public:
+    virtual ~SCTP();
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg);
+    virtual void finish();
+
+    inline AssocStat *getAssocStat(uint32 assocId)
+    {
+        SCTP::AssocStatMap::iterator found = assocStatMap.find(assocId);
+        if (found != assocStatMap.end()) {
+            return &found->second;
+        }
+        return NULL;
+    }
+
+    /**
+     * To be called from SCTPAssociation when socket pair    changes
+     */
+    void updateSockPair(SCTPAssociation *assoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
+    void addLocalAddress(SCTPAssociation *assoc, Address address);
+    void addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
+    bool addRemoteAddress(SCTPAssociation *assoc, Address localAddress, Address remoteAddress);
+    void removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses);
+    void removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, Address address, std::vector<Address> locAddresses);
+    /**
+     * Update assocs socket pair, and register newAssoc (which'll keep LISTENing).
+     * Also, assoc will get a new assocId (and newAssoc will live on with its old assocId).
+     */
+    void addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort);
+
+    /**
+     * To be called from SCTPAssociation: reserves an ephemeral port for the connection.
+     */
+    uint16 getEphemeralPort();
+
+    /**
+     * Generates a new integer, to be used as assocId. (assocId is part of the key
+     * which associates connections with their apps).
+     */
+    static int32 getNewAssocId() { return ++nextAssocId; }
+
+    SCTPAssociation *getAssoc(int32 assocId);
+    SCTPAssociation *findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uint32 localPort);
+    SctpVTagMap getVTagMap() { return sctpVTagMap; };
+
+    void bindPortForUDP();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTP_H
 
-
-#endif

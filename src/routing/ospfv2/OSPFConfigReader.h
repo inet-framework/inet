@@ -18,7 +18,6 @@
 #ifndef __INET_OSPFCONFIGREADER_H
 #define __INET_OSPFCONFIGREADER_H
 
-
 #include <vector>
 
 #include "INETDefs.h"
@@ -29,8 +28,6 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
 /**
  * Configuration reader for the OSPF module.
  */
@@ -38,10 +35,10 @@ class INET_API OSPFConfigReader
 {
   private:
     cModule *ospfModule;
-    IInterfaceTable *ift;     // provides access to the interface table
-    OSPF::Router *ospfRouter; // data structure to fill in
+    IInterfaceTable *ift;    // provides access to the interface table
+    OSPF::Router *ospfRouter;    // data structure to fill in
 
-    cPar& par(const char *name) const  {return ospfModule->par(name);}
+    cPar& par(const char *name) const { return ospfModule->par(name); }
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     bool getBoolAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
     const char *getStrAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
@@ -73,7 +70,7 @@ class INET_API OSPFConfigReader
     /**
      * Loads authenticationType and authenticationKey attributes for a router interface
      */
-    void loadAuthenticationConfig(OSPF::Interface* intf, const cXMLElement& ifConfig);
+    void loadAuthenticationConfig(OSPF::Interface *intf, const cXMLElement& ifConfig);
 
     /**
      * Loads OSPF configuration information for a router interface.
@@ -107,12 +104,8 @@ class INET_API OSPFConfigReader
      * Returns true if the configuration was successfully loaded.
      */
     bool loadConfigFromXML(cXMLElement *asConfig, OSPF::Router *ospfRouter);
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_OSPFCONFIGREADER_H
 

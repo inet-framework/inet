@@ -22,42 +22,37 @@
 #include "IMobility.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
  */
 class INET_API IAntenna : public IPrintableObject
 {
-    public:
-        /**
-         * Returns the mobility of this antenna that describes its position and
-         * orientation over time.
-         */
-        virtual IMobility *getMobility() const = 0;
+  public:
+    /**
+     * Returns the mobility of this antenna that describes its position and
+     * orientation over time.
+     */
+    virtual IMobility *getMobility() const = 0;
 
-        /**
-         * Returns the maximum possible antenna gain independent of any direction.
-         */
-        virtual double getMaxGain() const = 0;
+    /**
+     * Returns the maximum possible antenna gain independent of any direction.
+     */
+    virtual double getMaxGain() const = 0;
 
-        /**
-         * Returns the antenna gain in the provided direction. The direction is
-         * relative to the antenna geometry, so the result depends only on the
-         * antenna characteristics. For transmissions it determines how well the
-         * antenna converts input power into radio waves headed in the specified
-         * direction. For receptions it determines how well the antenna converts
-         * radio waves arriving from the the specified direction.
-         */
-        virtual double computeGain(const EulerAngles direction) const = 0;
+    /**
+     * Returns the antenna gain in the provided direction. The direction is
+     * relative to the antenna geometry, so the result depends only on the
+     * antenna characteristics. For transmissions it determines how well the
+     * antenna converts input power into radio waves headed in the specified
+     * direction. For receptions it determines how well the antenna converts
+     * radio waves arriving from the the specified direction.
+     */
+    virtual double computeGain(const EulerAngles direction) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IANTENNA_H
 
-}
-
-
-#endif

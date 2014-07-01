@@ -21,34 +21,29 @@
 #include "AntennaBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API InterpolatingAntenna : public AntennaBase
 {
-    protected:
-        double maxGain;
-        std::map<double, double> elevationGainMap;
-        std::map<double, double> headingGainMap;
-        std::map<double, double> bankGainMap;
+  protected:
+    double maxGain;
+    std::map<double, double> elevationGainMap;
+    std::map<double, double> headingGainMap;
+    std::map<double, double> bankGainMap;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual void parseMap(std::map<double, double> &gainMap, const char *text);
-        virtual double computeGain(const std::map<double, double> &gainMap, double angle) const;
+  protected:
+    virtual void initialize(int stage);
+    virtual void parseMap(std::map<double, double>& gainMap, const char *text);
+    virtual double computeGain(const std::map<double, double>& gainMap, double angle) const;
 
-    public:
-        InterpolatingAntenna();
+  public:
+    InterpolatingAntenna();
 
-        virtual void printToStream(std::ostream &stream) const { stream << "interpolating antenna"; }
-        virtual double getMaxGain() const { return maxGain; }
-        virtual double computeGain(const EulerAngles direction) const;
+    virtual void printToStream(std::ostream& stream) const { stream << "interpolating antenna"; }
+    virtual double getMaxGain() const { return maxGain; }
+    virtual double computeGain(const EulerAngles direction) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_INTERPOLATINGANTENNA_H
 
-}
-
-
-#endif

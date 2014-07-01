@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #include "GenericARP.h"
 #include "InterfaceEntry.h"
@@ -25,7 +25,6 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
-
 Define_Module(GenericARP);
 
 MACAddress GenericARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
@@ -43,8 +42,7 @@ void GenericARP::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         ift = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     }
 }
@@ -60,16 +58,19 @@ void GenericARP::handleMessage(cMessage *msg)
 
 MACAddress GenericARP::mapUnicastAddress(Address addr)
 {
-    cModule * module;
+    cModule *module;
     switch (addr.getType()) {
         case Address::MAC:
             return addr.toMAC();
+
         case Address::MODULEID:
             module = simulation.getModule(addr.toModuleId().getId());
             break;
+
         case Address::MODULEPATH:
             module = simulation.getModule(addr.toModulePath().getId());
             break;
+
         default:
             throw cRuntimeError("Unknown address type");
     }
@@ -92,9 +93,5 @@ MACAddress GenericARP::mapMulticastAddress(Address addr)
     // macAddr.setAddressByte(5, addr.getDByte(3));
     return macAddr;
 }
-
-
-
-}
-
+} // namespace inet
 

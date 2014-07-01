@@ -32,19 +32,17 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 class BGPSession;
-
 
 class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
 {
-public:
+  public:
     BGPRouting()
         : _myAS(0), _inft(0), _rt(0) {}
 
     virtual ~BGPRouting();
 
-protected:
+  protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
@@ -59,13 +57,13 @@ protected:
 
     friend class BGPSession;
     //functions used by the BGPSession class
-    int             getScheduleAt(simtime_t t, cMessage* msg)   { return scheduleAt(t, msg);}
-    simtime_t       getSimTime()                                { return simTime();}
-    void            getCancelAndDelete(cMessage* msg)           { return cancelAndDelete(msg);}
-    cMessage*       getCancelEvent(cMessage* msg)               { return cancelEvent(msg);}
-    cGate*          getGate(const char* gateName)               { return gate(gateName);}
-    IIPv4RoutingTable*  getIPRoutingTable()                         { return _rt;}
-    std::vector<BGP::RoutingTableEntry*> getBGPRoutingTable()   { return _BGPRoutingTable;}
+    int getScheduleAt(simtime_t t, cMessage *msg) { return scheduleAt(t, msg); }
+    simtime_t getSimTime() { return simTime(); }
+    void getCancelAndDelete(cMessage *msg) { return cancelAndDelete(msg); }
+    cMessage *getCancelEvent(cMessage *msg) { return cancelEvent(msg); }
+    cGate *getGate(const char *gateName) { return gate(gateName); }
+    IIPv4RoutingTable *getIPRoutingTable() { return _rt; }
+    std::vector<BGP::RoutingTableEntry *> getBGPRoutingTable() { return _BGPRoutingTable; }
     /**
      * \brief active listenSocket for a given session (used by BGPFSM)
      */
@@ -76,8 +74,8 @@ protected:
     void openTCPConnectionToPeer(BGP::SessionID sessionID);
     /**
      * \brief RFC 4271, 9.2 : Update-Send Process / Sent or not new UPDATE messages to its peers
-      */
-    void updateSendProcess(const unsigned char decisionProcessResult, BGP::SessionID sessionIndex, BGP::RoutingTableEntry* entry);
+     */
+    void updateSendProcess(const unsigned char decisionProcessResult, BGP::SessionID sessionIndex, BGP::RoutingTableEntry *entry);
     /**
      * \brief find the next SessionID compared to his type and start this session if boolean is true
      */
@@ -87,9 +85,9 @@ protected:
      *
      * \return true if it is, false else
      */
-    bool checkExternalRoute(const IPv4Route* ospfRoute);
+    bool checkExternalRoute(const IPv4Route *ospfRoute);
 
-private:
+  private:
     void handleTimer(cMessage *timer);
 
     void processMessageFromTCP(cMessage *msg);
@@ -97,60 +95,58 @@ private:
     void processMessage(const BGPKeepAliveMessage& msg);
     void processMessage(const BGPUpdateMessage& msg);
 
-    bool deleteBGPRoutingEntry(BGP::RoutingTableEntry* entry);
+    bool deleteBGPRoutingEntry(BGP::RoutingTableEntry *entry);
     /**
      * \brief RFC 4271: 9.1. : Decision Process used when an UPDATE message is received
      *  As matches, routes are sent or not to UpdateSentProcess
      *  The result can be ROUTE_DESTINATION_CHANGED, NEW_ROUTE_ADDED or 0 if no routingTable modification
      */
-    unsigned char decisionProcess(const BGPUpdateMessage& msg, BGP::RoutingTableEntry* entry, BGP::SessionID sessionIndex);
+    unsigned char decisionProcess(const BGPUpdateMessage& msg, BGP::RoutingTableEntry *entry, BGP::SessionID sessionIndex);
     /**
      * \brief RFC 4271: 9.1.2.2 Breaking Ties used when BGP speaker may have several routes
      *  to the same destination that have the same degree of preference.
      *
      * \return bool, true if this process changed the route, false else
      */
-    bool tieBreakingProcess(BGP::RoutingTableEntry* oldEntry, BGP::RoutingTableEntry* entry);
+    bool tieBreakingProcess(BGP::RoutingTableEntry *oldEntry, BGP::RoutingTableEntry *entry);
 
-    BGP::SessionID createSession(BGP::type typeSession, const char* peerAddr);
-    bool isInASList(std::vector<BGP::ASID> ASList, BGP::RoutingTableEntry* entry);
-    unsigned long   isInTable(std::vector<BGP::RoutingTableEntry*> rtTable, BGP::RoutingTableEntry* entry);
+    BGP::SessionID createSession(BGP::type typeSession, const char *peerAddr);
+    bool isInASList(std::vector<BGP::ASID> ASList, BGP::RoutingTableEntry *entry);
+    unsigned long isInTable(std::vector<BGP::RoutingTableEntry *> rtTable, BGP::RoutingTableEntry *entry);
 
     std::vector<const char *> loadASConfig(cXMLElementList& ASConfig);
-    void loadSessionConfig(cXMLElementList& sessionList, simtime_t* delayTab);
+    void loadSessionConfig(cXMLElementList& sessionList, simtime_t *delayTab);
     void loadConfigFromXML(cXMLElement *bgpConfig);
     BGP::ASID findMyAS(cXMLElementList& ASList, int& outRouterPosition);
-    bool ospfExist(IIPv4RoutingTable* rtTable);
-    void loadTimerConfig(cXMLElementList& timerConfig, simtime_t* delayTab);
-    unsigned char asLoopDetection(BGP::RoutingTableEntry* entry, BGP::ASID myAS);
-    BGP::SessionID findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession*> sessions, IPv4Address peerAddr);
-    int isInRoutingTable(IIPv4RoutingTable* rtTable, IPv4Address addr);
-    int isInInterfaceTable(IInterfaceTable* rtTable, IPv4Address addr);
-    BGP::SessionID findIdFromSocketConnId(std::map<BGP::SessionID, BGPSession*> sessions, int connId);
+    bool ospfExist(IIPv4RoutingTable *rtTable);
+    void loadTimerConfig(cXMLElementList& timerConfig, simtime_t *delayTab);
+    unsigned char asLoopDetection(BGP::RoutingTableEntry *entry, BGP::ASID myAS);
+    BGP::SessionID findIdFromPeerAddr(std::map<BGP::SessionID, BGPSession *> sessions, IPv4Address peerAddr);
+    int isInRoutingTable(IIPv4RoutingTable *rtTable, IPv4Address addr);
+    int isInInterfaceTable(IInterfaceTable *rtTable, IPv4Address addr);
+    BGP::SessionID findIdFromSocketConnId(std::map<BGP::SessionID, BGPSession *> sessions, int connId);
     unsigned int calculateStartDelay(int rtListSize, unsigned char rtPosition, unsigned char rtPeerPosition);
 
-    TCPSocketMap                            _socketMap;
-    BGP::ASID                               _myAS;
-    BGP::SessionID                          _currSessionId;
+    TCPSocketMap _socketMap;
+    BGP::ASID _myAS;
+    BGP::SessionID _currSessionId;
 
-    IInterfaceTable*                        _inft;
-    IIPv4RoutingTable*                          _rt;                // The IP routing table
-    std::vector<BGP::RoutingTableEntry*>    _BGPRoutingTable;   // The BGP routing table
-    std::vector<BGP::RoutingTableEntry*>    _prefixListIN;
-    std::vector<BGP::RoutingTableEntry*>    _prefixListOUT;
-    std::vector<BGP::ASID>                  _ASListIN;
-    std::vector<BGP::ASID>                  _ASListOUT;
-    std::map<BGP::SessionID, BGPSession*>   _BGPSessions;
+    IInterfaceTable *_inft;
+    IIPv4RoutingTable *_rt;    // The IP routing table
+    std::vector<BGP::RoutingTableEntry *> _BGPRoutingTable;    // The BGP routing table
+    std::vector<BGP::RoutingTableEntry *> _prefixListIN;
+    std::vector<BGP::RoutingTableEntry *> _prefixListOUT;
+    std::vector<BGP::ASID> _ASListIN;
+    std::vector<BGP::ASID> _ASListOUT;
+    std::map<BGP::SessionID, BGPSession *> _BGPSessions;
 
-    static const int  BGP_TCP_CONNECT_VALID = 71;
-    static const int  BGP_TCP_CONNECT_CONFIRM = 72;
-    static const int  BGP_TCP_CONNECT_FAILED = 73;
-    static const int  BGP_TCP_CONNECT_OPEN_RCV = 74;
-    static const int  BGP_TCP_KEEP_ALIVE_RCV = 75;
+    static const int BGP_TCP_CONNECT_VALID = 71;
+    static const int BGP_TCP_CONNECT_CONFIRM = 72;
+    static const int BGP_TCP_CONNECT_FAILED = 73;
+    static const int BGP_TCP_CONNECT_OPEN_RCV = 74;
+    static const int BGP_TCP_KEEP_ALIVE_RCV = 75;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_BGPROUTING_H
 

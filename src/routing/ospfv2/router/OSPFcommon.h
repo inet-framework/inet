@@ -18,7 +18,6 @@
 #ifndef __INET_OSPFCOMMON_H
 #define __INET_OSPFCOMMON_H
 
-
 #include <ctype.h>
 #include <functional>
 #include <stdio.h>
@@ -27,43 +26,39 @@
 #include "AddressResolver.h"
 
 namespace inet {
-
-
 // global constants
-#define LS_REFRESH_TIME                     1800
-#define MIN_LS_INTERVAL                     5
-#define MIN_LS_ARRIVAL                      1
-#define MAX_AGE                             3600
-#define CHECK_AGE                           300
-#define MAX_AGE_DIFF                        900
-#define LS_INFINITY                         16777215
-#define DEFAULT_DESTINATION_ADDRESS         0
-#define DEFAULT_DESTINATION_MASK            0
-#define INITIAL_SEQUENCE_NUMBER             -2147483647
-#define MAX_SEQUENCE_NUMBER                 2147483647
+#define LS_REFRESH_TIME                        1800
+#define MIN_LS_INTERVAL                        5
+#define MIN_LS_ARRIVAL                         1
+#define MAX_AGE                                3600
+#define CHECK_AGE                              300
+#define MAX_AGE_DIFF                           900
+#define LS_INFINITY                            16777215
+#define DEFAULT_DESTINATION_ADDRESS            0
+#define DEFAULT_DESTINATION_MASK               0
+#define INITIAL_SEQUENCE_NUMBER                -2147483647
+#define MAX_SEQUENCE_NUMBER                    2147483647
 
-#define VIRTUAL_LINK_TTL                    32
+#define VIRTUAL_LINK_TTL                       32
 //#define IPV4_HEADER_LENGTH                  60    // use IP_MAX_HEADER_BYTES from IPv4Datagram_m.h
-#define IPV4_DATAGRAM_LENGTH                65536
-#define OSPF_HEADER_LENGTH                  24
-#define OSPF_LSA_HEADER_LENGTH              20
-#define OSPF_HELLO_HEADER_LENGTH            20
-#define OSPF_DD_HEADER_LENGTH               8
-#define OSPF_REQUEST_LENGTH                 12
-#define OSPF_ROUTERLSA_HEADER_LENGTH        4
-#define OSPF_LINK_HEADER_LENGTH             12
-#define OSPF_TOS_LENGTH                     4
-#define OSPF_NETWORKLSA_MASK_LENGTH         4
-#define OSPF_NETWORKLSA_ADDRESS_LENGTH      4
-#define OSPF_SUMMARYLSA_HEADER_LENGTH       8
-#define OSPF_ASEXTERNALLSA_HEADER_LENGTH    16
-#define OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH  12
-#define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP 179
-#define OSPF_BGP_DEFAULT_COST               1
-
+#define IPV4_DATAGRAM_LENGTH                   65536
+#define OSPF_HEADER_LENGTH                     24
+#define OSPF_LSA_HEADER_LENGTH                 20
+#define OSPF_HELLO_HEADER_LENGTH               20
+#define OSPF_DD_HEADER_LENGTH                  8
+#define OSPF_REQUEST_LENGTH                    12
+#define OSPF_ROUTERLSA_HEADER_LENGTH           4
+#define OSPF_LINK_HEADER_LENGTH                12
+#define OSPF_TOS_LENGTH                        4
+#define OSPF_NETWORKLSA_MASK_LENGTH            4
+#define OSPF_NETWORKLSA_ADDRESS_LENGTH         4
+#define OSPF_SUMMARYLSA_HEADER_LENGTH          8
+#define OSPF_ASEXTERNALLSA_HEADER_LENGTH       16
+#define OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH     12
+#define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP    179
+#define OSPF_BGP_DEFAULT_COST                  1
 
 namespace OSPF {
-
 typedef unsigned long Metric;
 
 enum AuthenticationType {
@@ -72,37 +67,53 @@ enum AuthenticationType {
     CRYTOGRAPHIC_TYPE = 2
 };
 
-struct AuthenticationKeyType {
-    char    bytes[8];
+struct AuthenticationKeyType
+{
+    char bytes[8];
 };
 
-struct IPv4AddressRange {
+struct IPv4AddressRange
+{
     IPv4Address address;
     IPv4Address mask;
     IPv4AddressRange() : address(), mask() {}
     IPv4AddressRange(IPv4Address addressPar, IPv4Address maskPar) : address(addressPar), mask(maskPar) {}
 
-    bool operator<(const IPv4AddressRange& other) const {
-        return ((mask > other.mask) || ((mask == other.mask) && (address < other.address)));
+    bool operator<(const IPv4AddressRange& other) const
+    {
+        return (mask > other.mask) || ((mask == other.mask) && (address < other.address));
     }
-    bool operator==(const IPv4AddressRange& other) const {
+
+    bool operator==(const IPv4AddressRange& other) const
+    {
         return (address == other.address) && (mask == other.mask);
     }
-    bool contains(const IPv4Address& other) const {
+
+    bool contains(const IPv4Address& other) const
+    {
         return IPv4Address::maskedAddrAreEqual(address, other, mask);
     }
-    bool contains(const IPv4AddressRange& other) const {
+
+    bool contains(const IPv4AddressRange& other) const
+    {
         return IPv4Address::maskedAddrAreEqual(address, other.address, mask) && (mask <= other.mask);
     }
-    bool containsRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const {
+
+    bool containsRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const
+    {
         return IPv4Address::maskedAddrAreEqual(address, otherAddress, mask) && (mask <= otherMask);
     }
-    bool containedByRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const {
+
+    bool containedByRange(const IPv4Address& otherAddress, const IPv4Address& otherMask) const
+    {
         return IPv4Address::maskedAddrAreEqual(otherAddress, address, otherMask) && (otherMask <= mask);
     }
-    bool operator!=(OSPF::IPv4AddressRange other) const {
-        return (! operator==(other));
+
+    bool operator!=(OSPF::IPv4AddressRange other) const
+    {
+        return !operator==(other);
     }
+
     std::string str() const;
 };
 
@@ -114,40 +125,44 @@ inline std::string IPv4AddressRange::str() const
     return str;
 }
 
-struct HostRouteParameters {
+struct HostRouteParameters
+{
     unsigned char ifIndex;
-    IPv4Address   address;
-    Metric        linkCost;
+    IPv4Address address;
+    Metric linkCost;
 };
 
 typedef IPv4Address RouterID;
 typedef IPv4Address AreaID;
 typedef IPv4Address LinkStateID;
 
-struct LSAKeyType {
-    LinkStateID linkStateID;
-    RouterID    advertisingRouter;
-};
-
-class LSAKeyType_Less : public std::binary_function <LSAKeyType, LSAKeyType, bool>
+struct LSAKeyType
 {
-public:
-    bool operator() (LSAKeyType leftKey, LSAKeyType rightKey) const;
+    LinkStateID linkStateID;
+    RouterID advertisingRouter;
 };
 
-struct DesignatedRouterID {
-    RouterID    routerID;
+class LSAKeyType_Less : public std::binary_function<LSAKeyType, LSAKeyType, bool>
+{
+  public:
+    bool operator()(LSAKeyType leftKey, LSAKeyType rightKey) const;
+};
+
+struct DesignatedRouterID
+{
+    RouterID routerID;
     IPv4Address ipInterfaceAddress;
 };
 
-const RouterID              NULL_ROUTERID(0,0,0,0);
-const AreaID                BACKBONE_AREAID(0,0,0,0);
-const LinkStateID           NULL_LINKSTATEID(0,0,0,0);
-const IPv4Address           NULL_IPV4ADDRESS(0, 0, 0, 0);
-const IPv4AddressRange      NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0));
-const DesignatedRouterID    NULL_DESIGNATEDROUTERID = { IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)};
-
-}
+const RouterID NULL_ROUTERID(0, 0, 0, 0);
+const AreaID BACKBONE_AREAID(0, 0, 0, 0);
+const LinkStateID NULL_LINKSTATEID(0, 0, 0, 0);
+const IPv4Address NULL_IPV4ADDRESS(0, 0, 0, 0);
+const IPv4AddressRange NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0));
+const DesignatedRouterID NULL_DESIGNATEDROUTERID = {
+    IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)
+};
+} // namespace OSPF
 
 inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
 {
@@ -170,69 +185,113 @@ inline bool isSameNetwork(IPv4Address address1, IPv4Address mask1, IPv4Address a
 
 inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
-    return (leftID.routerID == rightID.routerID &&
-            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress);
+    return leftID.routerID == rightID.routerID &&
+           leftID.ipInterfaceAddress == rightID.ipInterfaceAddress;
 }
 
 inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
 {
-    return (!(leftID == rightID));
+    return !(leftID == rightID);
 }
 
-inline bool OSPF::LSAKeyType_Less::operator() (OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
+inline bool OSPF::LSAKeyType_Less::operator()(OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
 {
-    return ((leftKey.linkStateID < rightKey.linkStateID) ||
-            ((leftKey.linkStateID == rightKey.linkStateID) &&
-             (leftKey.advertisingRouter < rightKey.advertisingRouter)));
+    return (leftKey.linkStateID < rightKey.linkStateID) ||
+           ((leftKey.linkStateID == rightKey.linkStateID) &&
+            (leftKey.advertisingRouter < rightKey.advertisingRouter));
 }
 
-inline IPv4Address ipv4AddressFromAddressString(const char* charForm)
+inline IPv4Address ipv4AddressFromAddressString(const char *charForm)
 {
     return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4).toIPv4();
 }
 
-inline IPv4Address ipv4NetmaskFromAddressString(const char* charForm)
+inline IPv4Address ipv4NetmaskFromAddressString(const char *charForm)
 {
-    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4|AddressResolver::ADDR_MASK).toIPv4();
+    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4 | AddressResolver::ADDR_MASK).toIPv4();
 }
 
 inline char hexCharToByte(char hex)
 {
     switch (hex) {
-        case '0':   return 0;
-        case '1':   return 1;
-        case '2':   return 2;
-        case '3':   return 3;
-        case '4':   return 4;
-        case '5':   return 5;
-        case '6':   return 6;
-        case '7':   return 7;
-        case '8':   return 8;
-        case '9':   return 9;
-        case 'A':   return 10;
-        case 'B':   return 11;
-        case 'C':   return 12;
-        case 'D':   return 13;
-        case 'E':   return 14;
-        case 'F':   return 15;
-        case 'a':   return 10;
-        case 'b':   return 11;
-        case 'c':   return 12;
-        case 'd':   return 13;
-        case 'e':   return 14;
-        case 'f':   return 15;
-        default:    break;
-    };
+        case '0':
+            return 0;
+
+        case '1':
+            return 1;
+
+        case '2':
+            return 2;
+
+        case '3':
+            return 3;
+
+        case '4':
+            return 4;
+
+        case '5':
+            return 5;
+
+        case '6':
+            return 6;
+
+        case '7':
+            return 7;
+
+        case '8':
+            return 8;
+
+        case '9':
+            return 9;
+
+        case 'A':
+            return 10;
+
+        case 'B':
+            return 11;
+
+        case 'C':
+            return 12;
+
+        case 'D':
+            return 13;
+
+        case 'E':
+            return 14;
+
+        case 'F':
+            return 15;
+
+        case 'a':
+            return 10;
+
+        case 'b':
+            return 11;
+
+        case 'c':
+            return 12;
+
+        case 'd':
+            return 13;
+
+        case 'e':
+            return 14;
+
+        case 'f':
+            return 15;
+
+        default:
+            break;
+    }
+    ;
     return 0;
 }
 
 inline char hexPairToByte(char upperHex, char lowerHex)
 {
-    return ((hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex)));
+    return (hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex));
 }
+} // namespace inet
 
-}
-
-
-#endif // __COMMON_HPP__
+#endif    // __COMMON_HPP__
 

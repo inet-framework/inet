@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_GLOBALARP_H
 #define __INET_GLOBALARP_H
@@ -31,7 +31,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 // Forward declarations:
 class ARPPacket;
 class IInterfaceTable;
@@ -45,19 +44,19 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 {
   public:
     struct ARPCacheEntry;
-    typedef std::map<Address, ARPCacheEntry*> ARPCache;
-    typedef std::vector<cMessage*> MsgPtrVector;
+    typedef std::map<Address, ARPCacheEntry *> ARPCache;
+    typedef std::vector<cMessage *> MsgPtrVector;
 
     // IPv4Address -> MACAddress table
     // TBD should we key it on (IPv4Address, InterfaceEntry*)?
     class ARPCacheEntry
     {
       public:
-        GlobalARP *owner;     // owner ARP module of this cache entry
-        const InterfaceEntry *ie; // NIC to send the packet to
-        MACAddress macAddress;  // MAC address
-        simtime_t lastUpdate;  // entries should time out after cacheTimeout
-        ARPCache::iterator myIter;  // iterator pointing to this entry
+        GlobalARP *owner;    // owner ARP module of this cache entry
+        const InterfaceEntry *ie;    // NIC to send the packet to
+        MACAddress macAddress;    // MAC address
+        simtime_t lastUpdate;    // entries should time out after cacheTimeout
+        ARPCache::iterator myIter;    // iterator pointing to this entry
     };
 
   protected:
@@ -67,7 +66,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     static int globalArpCacheRefCnt;
 
     IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;  // for answering ProxyARP requests
+    IIPv4RoutingTable *rt;    // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.
@@ -103,9 +102,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 
     virtual void updateDisplayString();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_GLOBALARP_H
 

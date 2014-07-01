@@ -15,13 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPMsgBasedSendQueue.h"
 
 #include "TCPSegment.h"
 
 namespace inet {
-
 Register_Class(TCPMsgBasedSendQueue);
 
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
@@ -90,8 +88,7 @@ TCPSegment *TCPMsgBasedSendQueue::createSegmentWithBytes(uint32 fromSeq, ulong n
     uint32 toSeq = fromSeq + numBytes;
     const char *payloadName = NULL;
 
-    while (i != payloadQueue.end() && seqLE(i->endSequenceNo, toSeq))
-    {
+    while (i != payloadQueue.end() && seqLE(i->endSequenceNo, toSeq)) {
         if (!payloadName)
             payloadName = i->msg->getName();
 
@@ -119,14 +116,10 @@ void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
     begin = seqNum;
 
     // remove payload messages whose endSequenceNo is below seqNum
-    while (!payloadQueue.empty() && seqLE(payloadQueue.front().endSequenceNo, seqNum))
-    {
+    while (!payloadQueue.empty() && seqLE(payloadQueue.front().endSequenceNo, seqNum)) {
         delete payloadQueue.front().msg;
         payloadQueue.pop_front();
     }
 }
-
-
-}
-
+} // namespace inet
 

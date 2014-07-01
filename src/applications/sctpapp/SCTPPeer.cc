@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "SCTPPeer.h"
 
 #include "AddressResolver.h"
@@ -30,13 +29,12 @@
 #include <stdio.h>
 
 namespace inet {
-
-#define MSGKIND_CONNECT  0
-#define MSGKIND_SEND     1
-#define MSGKIND_ABORT    2
-#define MSGKIND_PRIMARY  3
-#define MSGKIND_RESET    4
-#define MSGKIND_STOP     5
+#define MSGKIND_CONNECT    0
+#define MSGKIND_SEND       1
+#define MSGKIND_ABORT      2
+#define MSGKIND_PRIMARY    3
+#define MSGKIND_RESET      4
+#define MSGKIND_STOP       5
 
 Define_Module(SCTPPeer);
 
@@ -77,8 +75,7 @@ void SCTPPeer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         numSessions = packetsSent = packetsRcvd = bytesSent = notificationsReceived = 0;
         WATCH(numSessions);
         WATCH(packetsSent);
@@ -86,8 +83,7 @@ void SCTPPeer::initialize(int stage)
         WATCH(bytesSent);
         WATCH(numRequestsToSend);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
         AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
@@ -99,17 +95,15 @@ void SCTPPeer::initialize(int stage)
         queueSize = par("queueSize");
         lastStream = 0;
         timeoutMsg = new cMessage("SrvAppTimer");
-        SCTPSocket* socket = new SCTPSocket();
+        SCTPSocket *socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));
         socket->setOutboundStreams(outboundStreams);
 
-        if (addresses.size() == 0)
-        {
+        if (addresses.size() == 0) {
             socket->bind(port);
             clientSocket.bind(port);
         }
-        else
-        {
+        else {
             socket->bindx(addresses, port);
             clientSocket.bindx(addresses, port);
         }
@@ -118,8 +112,7 @@ void SCTPPeer::initialize(int stage)
         clientSocket.setCallbackObject(this);
         clientSocket.setOutputGate(gate("sctpOut"));
 
-        if ((simtime_t)par("startTime") > SIMTIME_ZERO)     //FIXME is invalid the startTime == 0 ????
-        {
+        if ((simtime_t)par("startTime") > SIMTIME_ZERO) {    //FIXME is invalid the startTime == 0 ????
             connectTimer = new cMessage("ConnectTimer");
             connectTimer->setKind(MSGKIND_CONNECT);
             scheduleAt(par("startTime"), connectTimer);
@@ -137,24 +130,22 @@ void SCTPPeer::initialize(int stage)
 
 void SCTPPeer::sendOrSchedule(cPacket *msg)
 {
-    if (delay==0)
-    {
+    if (delay == 0) {
         send(msg, "sctpOut");
     }
-    else
-    {
-        scheduleAt(simulation.getSimTime()+delay, msg);
+    else {
+        scheduleAt(simulation.getSimTime() + delay, msg);
     }
 }
 
 void SCTPPeer::generateAndSend(SCTPConnectInfo *connectInfo)
 {
-    cPacket* cmsg = new cPacket("CMSG");
-    SCTPSimpleMessage* msg = new SCTPSimpleMessage("Server");
+    cPacket *cmsg = new cPacket("CMSG");
+    SCTPSimpleMessage *msg = new SCTPSimpleMessage("Server");
     int numBytes = par("requestLength");
     msg->setDataArraySize(numBytes);
 
-    for (int i=0; i<numBytes; i++)
+    for (int i = 0; i < numBytes; i++)
         msg->setData(i, 's');
 
     msg->setDataLen(numBytes);
@@ -201,20 +192,18 @@ void SCTPPeer::connect()
         clientSocket.connect(destination, connectPort, streamReset, (int)par("prMethod"), (unsigned int)par("numRequestsPerSession"));
     }
 
-    if (streamReset)
-    {
-        cMessage* cmsg = new cMessage("StreamReset");
+    if (streamReset) {
+        cMessage *cmsg = new cMessage("StreamReset");
         cmsg->setKind(MSGKIND_RESET);
         EV_INFO << "StreamReset Timer scheduled at " << simulation.getSimTime() << "\n";
-        scheduleAt(simulation.getSimTime()+par("streamRequestTime"), cmsg);
+        scheduleAt(simulation.getSimTime() + par("streamRequestTime"), cmsg);
     }
 
     unsigned int streamNum = 0;
     cStringTokenizer tokenizer(par("streamPriorities").stringValue());
-    while (tokenizer.hasMoreTokens())
-    {
+    while (tokenizer.hasMoreTokens()) {
         const char *token = tokenizer.nextToken();
-        clientSocket.setStreamPriority(streamNum, (unsigned int) atoi(token));
+        clientSocket.setStreamPriority(streamNum, (unsigned int)atoi(token));
 
         streamNum++;
     }
@@ -227,13 +216,11 @@ void SCTPPeer::handleMessage(cMessage *msg)
     if (msg->isSelfMessage())
         handleTimer(msg);
 
-    switch (msg->getKind())
-    {
+    switch (msg->getKind()) {
         case SCTP_I_PEER_CLOSED:
-        case SCTP_I_ABORT:
-        {
+        case SCTP_I_ABORT: {
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo()->dup());
-            cPacket* cmsg = new cPacket("Notification");
+            cPacket *cmsg = new cPacket("Notification");
             SCTPSendCommand *cmd = new SCTPSendCommand();
             id = ind->getAssocId();
             cmd->setAssocId(id);
@@ -247,12 +234,10 @@ void SCTPPeer::handleMessage(cMessage *msg)
             break;
         }
 
-        case SCTP_I_ESTABLISHED:
-        {
-            if (clientSocket.getState()==SCTPSocket::CONNECTING)
+        case SCTP_I_ESTABLISHED: {
+            if (clientSocket.getState() == SCTPSocket::CONNECTING)
                 clientSocket.processMessage(PK(msg));
-            else
-            {
+            else {
                 SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->removeControlInfo());
                 numSessions++;
                 serverAssocId = connectInfo->getAssocId();
@@ -272,41 +257,34 @@ void SCTPPeer::handleMessage(cMessage *msg)
                 //delete connectInfo;
                 delete msg;
 
-                if (par("numPacketsToSendPerClient").longValue() > 0)
-                {
+                if (par("numPacketsToSendPerClient").longValue() > 0) {
                     SentPacketsPerAssoc::iterator i = sentPacketsPerAssoc.find(serverAssocId);
                     numRequestsToSend = i->second;
-                    if (par("thinkTime").doubleValue() > 0)
-                    {
+                    if (par("thinkTime").doubleValue() > 0) {
                         generateAndSend(connectInfo);
                         timeoutMsg->setKind(SCTP_C_SEND);
-                        scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
+                        scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
                         numRequestsToSend--;
                         i->second = numRequestsToSend;
                     }
-                    else
-                    {
-                        if (queueSize==0)
-                        {
-                            while (numRequestsToSend > 0)
-                            {
+                    else {
+                        if (queueSize == 0) {
+                            while (numRequestsToSend > 0) {
                                 generateAndSend(connectInfo);
                                 numRequestsToSend--;
                                 i->second = numRequestsToSend;
                             }
                         }
-                        else if (queueSize>0)
-                        {
+                        else if (queueSize > 0) {
                             int count = 0;
-                            while (numRequestsToSend > 0 && count++ < queueSize*2)
-                            {
+                            while (numRequestsToSend > 0 && count++ < queueSize * 2) {
                                 generateAndSend(connectInfo);
                                 numRequestsToSend--;
                                 i->second = numRequestsToSend;
                             }
 
-                            cPacket* cmsg = new cPacket("Queue");
-                            SCTPInfo* qinfo = new SCTPInfo();
+                            cPacket *cmsg = new cPacket("Queue");
+                            SCTPInfo *qinfo = new SCTPInfo();
                             qinfo->setText(queueSize);
                             cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
                             qinfo->setAssocId(id);
@@ -317,19 +295,17 @@ void SCTPPeer::handleMessage(cMessage *msg)
                         EV_INFO << "!!!!!!!!!!!!!!!All data sent from Server !!!!!!!!!!\n";
 
                         RcvdPacketsPerAssoc::iterator j = rcvdPacketsPerAssoc.find(serverAssocId);
-                        if (j->second == 0 && par("waitToClose").doubleValue()>0)
-                        {
+                        if (j->second == 0 && par("waitToClose").doubleValue() > 0) {
                             char as[5];
                             sprintf(as, "%d", serverAssocId);
-                            cMessage* abortMsg = new cMessage(as);
+                            cMessage *abortMsg = new cMessage(as);
                             abortMsg->setKind(SCTP_I_ABORT);
-                            scheduleAt(simulation.getSimTime()+par("waitToClose"), abortMsg);
+                            scheduleAt(simulation.getSimTime() + par("waitToClose"), abortMsg);
                         }
-                        else
-                        {
+                        else {
                             EV_INFO << "no more packets to send, call shutdown for assoc " << serverAssocId << "\n";
-                            cPacket* cmsg = new cPacket("ShutdownRequest");
-                            SCTPCommand* cmd = new SCTPCommand();
+                            cPacket *cmsg = new cPacket("ShutdownRequest");
+                            SCTPCommand *cmd = new SCTPCommand();
                             cmsg->setKind(SCTP_C_SHUTDOWN);
                             cmd->setAssocId(serverAssocId);
                             cmsg->setControlInfo(cmd);
@@ -341,11 +317,10 @@ void SCTPPeer::handleMessage(cMessage *msg)
             break;
         }
 
-        case SCTP_I_DATA_NOTIFICATION:
-        {
+        case SCTP_I_DATA_NOTIFICATION: {
             notificationsReceived++;
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-            cPacket* cmsg = new cPacket("Notification");
+            cPacket *cmsg = new cPacket("Notification");
             SCTPSendCommand *cmd = new SCTPSendCommand();
             id = ind->getAssocId();
             cmd->setAssocId(id);
@@ -355,45 +330,39 @@ void SCTPPeer::handleMessage(cMessage *msg)
             cmsg->setControlInfo(cmd);
             delete ind;
             delete msg;
-            if (!cmsg->isScheduled() && schedule==false)
-            {
-                scheduleAt(simulation.getSimTime()+par("delayFirstRead"), cmsg);
+            if (!cmsg->isScheduled() && schedule == false) {
+                scheduleAt(simulation.getSimTime() + par("delayFirstRead"), cmsg);
             }
-            else if (schedule==true)
+            else if (schedule == true)
                 sendOrSchedule(cmsg);
             break;
         }
 
-        case SCTP_I_DATA:
-        {
+        case SCTP_I_DATA: {
             SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo());
             id = ind->getAssocId();
             RcvdBytesPerAssoc::iterator j = rcvdBytesPerAssoc.find(id);
-            if (j==rcvdBytesPerAssoc.end() && (clientSocket.getState()==SCTPSocket::CONNECTED))
+            if (j == rcvdBytesPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else
-            {
+            else {
                 j->second += PK(msg)->getByteLength();
                 BytesPerAssoc::iterator k = bytesPerAssoc.find(id);
                 k->second->record(j->second);
                 packetsRcvd++;
 
-                if (!echo)
-                {
-                    if (par("numPacketsToReceivePerClient").longValue() > 0)
-                    {
+                if (!echo) {
+                    if (par("numPacketsToReceivePerClient").longValue() > 0) {
                         RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
                         i->second--;
-                        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
+                        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg);
                         EndToEndDelay::iterator j = endToEndDelay.find(id);
-                        j->second->record(simulation.getSimTime()-smsg->getCreationTime());
+                        j->second->record(simulation.getSimTime() - smsg->getCreationTime());
                         HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
-                        k->second->collect(simulation.getSimTime()-smsg->getCreationTime());
+                        k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
 
-                        if (i->second == 0)
-                        {
-                            cPacket* cmsg = new cPacket("Request");
-                            SCTPInfo* qinfo = new SCTPInfo();
+                        if (i->second == 0) {
+                            cPacket *cmsg = new cPacket("Request");
+                            SCTPInfo *qinfo = new SCTPInfo();
                             cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                             qinfo->setAssocId(id);
                             cmsg->setControlInfo(qinfo);
@@ -402,23 +371,22 @@ void SCTPPeer::handleMessage(cMessage *msg)
                     }
                     delete msg;
                 }
-                else
-                {
+                else {
                     SCTPSendCommand *cmd = new SCTPSendCommand();
                     cmd->setAssocId(id);
 
                     //FIXME: why do it: msg->dup(); ... ; delete msg;
-                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
+                    SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
                     EndToEndDelay::iterator j = endToEndDelay.find(id);
-                    j->second->record(simulation.getSimTime()-smsg->getCreationTime());
+                    j->second->record(simulation.getSimTime() - smsg->getCreationTime());
                     HistEndToEndDelay::iterator k = histEndToEndDelay.find(id);
-                    k->second->collect(simulation.getSimTime()-smsg->getCreationTime());
-                    cPacket* cmsg = new cPacket("SVData");
+                    k->second->collect(simulation.getSimTime() - smsg->getCreationTime());
+                    cPacket *cmsg = new cPacket("SVData");
                     bytesSent += smsg->getByteLength();
                     cmd->setPrValue(0);
                     emit(sentPkSignal, smsg);
                     cmd->setSendUnordered(cmd->getSendUnordered());
-                    lastStream = (lastStream+1)%outboundStreams;
+                    lastStream = (lastStream + 1) % outboundStreams;
                     cmd->setSid(lastStream);
                     cmd->setLast(true);
                     cmsg->encapsulate(smsg);
@@ -432,21 +400,18 @@ void SCTPPeer::handleMessage(cMessage *msg)
             break;
         }
 
-        case SCTP_I_SHUTDOWN_RECEIVED:
-        {
+        case SCTP_I_SHUTDOWN_RECEIVED: {
             SCTPCommand *command = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
             id = command->getAssocId();
             EV_INFO << "server: SCTP_I_SHUTDOWN_RECEIVED for assoc " << id << "\n";
             RcvdPacketsPerAssoc::iterator i = rcvdPacketsPerAssoc.find(id);
 
-            if (i==rcvdPacketsPerAssoc.end() && (clientSocket.getState()==SCTPSocket::CONNECTED))
+            if (i == rcvdPacketsPerAssoc.end() && (clientSocket.getState() == SCTPSocket::CONNECTED))
                 clientSocket.processMessage(PK(msg));
-            else
-            {
-                if (i->second == 0)
-                {
-                    cPacket* cmsg = new cPacket("Request");
-                    SCTPInfo* qinfo = new SCTPInfo();
+            else {
+                if (i->second == 0) {
+                    cPacket *cmsg = new cPacket("Request");
+                    SCTPInfo *qinfo = new SCTPInfo();
                     cmsg->setKind(SCTP_C_NO_OUTSTANDING);
                     qinfo->setAssocId(id);
                     cmsg->setControlInfo(qinfo);
@@ -459,19 +424,19 @@ void SCTPPeer::handleMessage(cMessage *msg)
             delete msg;
             break;
         }
+
         case SCTP_I_SEND_STREAMS_RESETTED:
-        case SCTP_I_RCV_STREAMS_RESETTED:
-        {
+        case SCTP_I_RCV_STREAMS_RESETTED: {
             EV_INFO << "Streams have been resetted\n";
             break;
         }
+
         case SCTP_I_CLOSED:
             delete msg;
             break;
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[32];
         RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.find(id);
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", l->second, bytesSent);
@@ -485,33 +450,31 @@ void SCTPPeer::handleTimer(cMessage *msg)
 
     SCTPConnectInfo *connectInfo = dynamic_cast<SCTPConnectInfo *>(msg->getControlInfo());
 
-    switch (msg->getKind())
-    {
+    switch (msg->getKind()) {
         case MSGKIND_CONNECT:
             EV_INFO << "starting session call connect\n";
             connect();
             break;
 
         case SCTP_C_SEND:
-            if (numRequestsToSend>0)
-            {
+            if (numRequestsToSend > 0) {
                 generateAndSend(connectInfo);
                 if (par("thinkTime").doubleValue() > 0)
-                    scheduleAt(simulation.getSimTime()+par("thinkTime"), timeoutMsg);
+                    scheduleAt(simulation.getSimTime() + par("thinkTime"), timeoutMsg);
                 numRequestsToSend--;
             }
             break;
 
-        case SCTP_I_ABORT:
-        {
-            cPacket* cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
-            SCTPCommand* cmd = new SCTPCommand();
+        case SCTP_I_ABORT: {
+            cPacket *cmsg = new cPacket("CLOSE", SCTP_C_CLOSE);
+            SCTPCommand *cmd = new SCTPCommand();
             int id = atoi(msg->getName());
             cmd->setAssocId(id);
             cmsg->setControlInfo(cmd);
             sendOrSchedule(cmsg);
         }
         break;
+
         case SCTP_C_RECEIVE:
             schedule = true;
             sendOrSchedule(PK(msg));
@@ -525,7 +488,7 @@ void SCTPPeer::handleTimer(cMessage *msg)
 void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg)
 {
     SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->removeControlInfo());
-    cPacket* cmsg = new cPacket("CMSG");
+    cPacket *cmsg = new cPacket("CMSG");
     SCTPSendCommand *cmd = new SCTPSendCommand();
     cmd->setAssocId(ind->getAssocId());
     cmd->setSid(ind->getSid());
@@ -536,12 +499,10 @@ void SCTPPeer::socketDataNotificationArrived(int connId, void *ptr, cPacket *msg
     clientSocket.sendNotification(cmsg);
 }
 
-
 void SCTPPeer::socketPeerClosed(int, void *)
 {
     // close the connection (if not already closed)
-    if (clientSocket.getState()==SCTPSocket::PEER_CLOSED)
-    {
+    if (clientSocket.getState() == SCTPSocket::PEER_CLOSED) {
         EV_INFO << "remote SCTP closed, closing here as well\n";
         setStatusString("closing");
         clientSocket.close();
@@ -562,7 +523,7 @@ void SCTPPeer::socketFailure(int, void *, int code)
     setStatusString("broken");
     // reconnect after a delay
     timeMsg->setKind(MSGKIND_CONNECT);
-    scheduleAt(simulation.getSimTime()+par("reconnectInterval"), timeMsg);
+    scheduleAt(simulation.getSimTime() + par("reconnectInterval"), timeMsg);
 }
 
 void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *status)
@@ -570,13 +531,11 @@ void SCTPPeer::socketStatusArrived(int assocId, void *yourPtr, SCTPStatusInfo *s
     struct PathStatus ps;
     SCTPPathStatus::iterator i = sctpPathStatus.find(status->getPathId());
 
-    if (i!=sctpPathStatus.end())
-    {
+    if (i != sctpPathStatus.end()) {
         ps = i->second;
         ps.active = status->getActive();
     }
-    else
-    {
+    else {
         ps.active = status->getActive();
         ps.primaryPath = false;
         sctpPathStatus[ps.pid] = ps;
@@ -591,7 +550,7 @@ void SCTPPeer::setStatusString(const char *s)
 
 void SCTPPeer::sendRequest(bool last)
 {
-    EV_INFO << "sending request, " << numRequestsToSend-1 << " more to go\n";
+    EV_INFO << "sending request, " << numRequestsToSend - 1 << " more to go\n";
     long numBytes = par("requestLength");
 
     if (numBytes < 1)
@@ -599,12 +558,12 @@ void SCTPPeer::sendRequest(bool last)
 
     EV_INFO << "SCTPClient: sending " << numBytes << " data bytes\n";
 
-    cPacket* cmsg = new cPacket("AppData");
-    SCTPSimpleMessage* msg = new SCTPSimpleMessage("data");
+    cPacket *cmsg = new cPacket("AppData");
+    SCTPSimpleMessage *msg = new SCTPSimpleMessage("data");
 
     msg->setDataArraySize(numBytes);
 
-    for (int i=0; i<numBytes; i++)
+    for (int i = 0; i < numBytes; i++)
         msg->setData(i, 'a');
 
     msg->setDataLen(numBytes);
@@ -623,7 +582,7 @@ void SCTPPeer::sendRequest(bool last)
 void SCTPPeer::socketEstablished(int, void *)
 {
     int count = 0;
-     // *redefine* to perform or schedule first sending
+    // *redefine* to perform or schedule first sending
     EV_INFO << "SCTPClient: connected\n";
     setStatusString("connected");
     // determine number of requests in this session
@@ -634,50 +593,39 @@ void SCTPPeer::socketEstablished(int, void *)
         numRequestsToSend = 0;
 
     // perform first request (next one will be sent when reply arrives)
-    if (numRequestsToSend > 0)
-    {
-        if (par("thinkTime").doubleValue() > 0)
-        {
-            if (sendAllowed)
-            {
+    if (numRequestsToSend > 0) {
+        if (par("thinkTime").doubleValue() > 0) {
+            if (sendAllowed) {
                 sendRequest();
                 numRequestsToSend--;
             }
 
             timeMsg->setKind(MSGKIND_SEND);
-            scheduleAt(simulation.getSimTime()+par("thinkTime"), timeMsg);
-
+            scheduleAt(simulation.getSimTime() + par("thinkTime"), timeMsg);
         }
-        else
-        {
-            if (queueSize > 0)
-            {
-                while (numRequestsToSend > 0 && count++ < queueSize*2 && sendAllowed)
-                {
-                    sendRequest(count == queueSize*2);
+        else {
+            if (queueSize > 0) {
+                while (numRequestsToSend > 0 && count++ < queueSize * 2 && sendAllowed) {
+                    sendRequest(count == queueSize * 2);
                     numRequestsToSend--;
                 }
 
-                if (numRequestsToSend>0 && sendAllowed)
+                if (numRequestsToSend > 0 && sendAllowed)
                     sendQueueRequest();
             }
-            else
-            {
-                while (numRequestsToSend > 0 && sendAllowed)
-                {
+            else {
+                while (numRequestsToSend > 0 && sendAllowed) {
                     sendRequest();
                     numRequestsToSend--;
                 }
             }
 
-            if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0)
-            {
+            if (numPacketsToReceive == 0 && par("waitToClose").doubleValue() > 0) {
                 timeMsg->setKind(MSGKIND_ABORT);
-                scheduleAt(simulation.getSimTime()+par("waitToClose"), timeMsg);
+                scheduleAt(simulation.getSimTime() + par("waitToClose"), timeMsg);
             }
 
-            if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0)
-            {
+            if (numRequestsToSend == 0 && par("waitToClose").doubleValue() == 0) {
                 EV_INFO << "socketEstablished:no more packets to send, call shutdown\n";
                 clientSocket.shutdown();
             }
@@ -687,8 +635,8 @@ void SCTPPeer::socketEstablished(int, void *)
 
 void SCTPPeer::sendQueueRequest()
 {
-    cPacket* cmsg = new cPacket("Queue");
-    SCTPInfo* qinfo = new SCTPInfo();
+    cPacket *cmsg = new cPacket("Queue");
+    SCTPInfo *qinfo = new SCTPInfo();
     qinfo->setText(queueSize);
     cmsg->setKind(SCTP_C_QUEUE_MSGS_LIMIT);
     qinfo->setAssocId(clientSocket.getConnectionId());
@@ -702,12 +650,10 @@ void SCTPPeer::sendRequestArrived()
 
     EV_INFO << "sendRequestArrived numRequestsToSend=" << numRequestsToSend << "\n";
 
-    while (numRequestsToSend > 0 && count++ < queueSize && sendAllowed)
-    {
+    while (numRequestsToSend > 0 && count++ < queueSize && sendAllowed) {
         numRequestsToSend--;
-        sendRequest(count == queueSize || numRequestsToSend==0);
-        if (numRequestsToSend == 0)
-        {
+        sendRequest(count == queueSize || numRequestsToSend == 0);
+        if (numRequestsToSend == 0) {
             EV_INFO << "no more packets to send, call shutdown\n";
             clientSocket.shutdown();
         }
@@ -721,16 +667,15 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 
     EV_INFO << "Client received packet Nr " << packetsRcvd << " from SCTP\n";
 
-    SCTPCommand* ind = check_and_cast<SCTPCommand*>(msg->getControlInfo());
+    SCTPCommand *ind = check_and_cast<SCTPCommand *>(msg->getControlInfo());
 
     emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
 
-    if (echo)
-    {
+    if (echo) {
         //FIXME why do it: msg->dup(); ... ; delete msg;
-        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg->dup());
-        cPacket* cmsg = new cPacket("SVData");
+        SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage *>(msg->dup());
+        cPacket *cmsg = new cPacket("SVData");
         echoedBytesSent += smsg->getByteLength();
         emit(echoedPkSignal, smsg);
         cmsg->encapsulate(smsg);
@@ -740,11 +685,9 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
         clientSocket.send(cmsg, 0, 0, 1);
     }
 
-    if (par("numPacketsToReceive").longValue()>0)
-    {
+    if (par("numPacketsToReceive").longValue() > 0) {
         numPacketsToReceive--;
-        if (numPacketsToReceive == 0)
-        {
+        if (numPacketsToReceive == 0) {
             setStatusString("closing");
             clientSocket.close();
         }
@@ -753,17 +696,15 @@ void SCTPPeer::socketDataArrived(int, void *, cPacket *msg, bool)
 
 void SCTPPeer::shutdownReceivedArrived(int connId)
 {
-    if (numRequestsToSend==0)
-    {
-        cPacket* cmsg = new cPacket("Request");
-        SCTPInfo* qinfo = new SCTPInfo();
+    if (numRequestsToSend == 0) {
+        cPacket *cmsg = new cPacket("Request");
+        SCTPInfo *qinfo = new SCTPInfo();
         cmsg->setKind(SCTP_C_NO_OUTSTANDING);
         qinfo->setAssocId(connId);
         cmsg->setControlInfo(qinfo);
         clientSocket.sendNotification(cmsg);
     }
 }
-
 
 void SCTPPeer::msgAbandonedArrived(int assocId)
 {
@@ -780,16 +721,11 @@ void SCTPPeer::finish()
     EV_INFO << getFullPath() << ": opened " << numSessions << " sessions\n";
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << packetsSent << " packets\n";
 
-    for (RcvdBytesPerAssoc::iterator l=rcvdBytesPerAssoc.begin(); l!=rcvdBytesPerAssoc.end(); ++l)
+    for (RcvdBytesPerAssoc::iterator l = rcvdBytesPerAssoc.begin(); l != rcvdBytesPerAssoc.end(); ++l)
         EV_DETAIL << getFullPath() << ": received " << l->second << " bytes in assoc " << l->first << "\n";
 
     EV_INFO << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV_INFO << getFullPath() << "Over all " << notificationsReceived << " notifications received\n ";
-
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -24,7 +24,6 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
 class InterfaceEntry;
 
 /**
@@ -32,48 +31,47 @@ class InterfaceEntry;
  */
 class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListener
 {
-    protected:
-        cModule *hostModule;
-        bool isOperational;  // for use in handleMessage()
-        InterfaceEntry *interfaceEntry;  // NULL if no InterfaceTable or node is down
+  protected:
+    cModule *hostModule;
+    bool isOperational;    // for use in handleMessage()
+    InterfaceEntry *interfaceEntry;    // NULL if no InterfaceTable or node is down
 
-    public:
-        MACBase();
-        virtual ~MACBase();
+  public:
+    MACBase();
+    virtual ~MACBase();
 
-    protected:
-        using cListener::receiveSignal;
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        void registerInterface(); // do not override! override createInterfaceEntry()
-        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
-        virtual void updateOperationalFlag(bool isNodeUp);
-        virtual bool isNodeUp();
-        virtual void handleMessageWhenDown(cMessage *msg);
+  protected:
+    using cListener::receiveSignal;
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    void registerInterface();    // do not override! override createInterfaceEntry()
+    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
+    virtual void updateOperationalFlag(bool isNodeUp);
+    virtual bool isNodeUp();
+    virtual void handleMessageWhenDown(cMessage *msg);
 
-        /**
-         * should create InterfaceEntry
-         */
-        virtual InterfaceEntry *createInterfaceEntry() = 0;
+    /**
+     * should create InterfaceEntry
+     */
+    virtual InterfaceEntry *createInterfaceEntry() = 0;
 
-        /**
-         * should clear queue and emit signal "dropPkFromHLIfaceDown" with entire packets
-         */
-        virtual void flushQueue() = 0;
+    /**
+     * should clear queue and emit signal "dropPkFromHLIfaceDown" with entire packets
+     */
+    virtual void flushQueue() = 0;
 
-        /**
-         * should clear queue silently
-         */
-        virtual void clearQueue() = 0;
+    /**
+     * should clear queue silently
+     */
+    virtual void clearQueue() = 0;
 
-        /**
-         * should return true if the msg arrived from upper layer, else return false
-         */
-        virtual bool isUpperMsg(cMessage *msg) = 0;
+    /**
+     * should return true if the msg arrived from upper layer, else return false
+     */
+    virtual bool isUpperMsg(cMessage *msg) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MACBASE_H
 
-
-#endif

@@ -18,14 +18,8 @@
 #include "ITransmission.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 int ITransmission::nextId = 0;
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

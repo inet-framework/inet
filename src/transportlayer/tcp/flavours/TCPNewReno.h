@@ -23,13 +23,10 @@
 #include "TCPTahoeRenoFamily.h"
 
 namespace inet {
-
-
 /**
  * State variables for TCPNewReno.
  */
 typedef TCPTahoeRenoFamilyStateVariables TCPNewRenoStateVariables;
-
 
 /**
  * Implements TCP NewReno.
@@ -37,10 +34,11 @@ typedef TCPTahoeRenoFamilyStateVariables TCPNewRenoStateVariables;
 class INET_API TCPNewReno : public TCPTahoeRenoFamily
 {
   protected:
-    TCPNewRenoStateVariables *&state; // alias to TCPAlgorithm's 'state'
+    TCPNewRenoStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPNewRenoStateVariables object. */
-    virtual TCPStateVariables *createStateVariables() {
+    virtual TCPStateVariables *createStateVariables()
+    {
         return new TCPNewRenoStateVariables();
     }
 
@@ -60,8 +58,7 @@ class INET_API TCPNewReno : public TCPTahoeRenoFamily
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPNEWRENO_H
 
-
-#endif

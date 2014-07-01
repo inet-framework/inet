@@ -23,19 +23,16 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Register_Enum(inet::NodeStatus, (NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN));
 Define_Module(NodeStatus);
 
 simsignal_t NodeStatus::nodeStatusChangedSignal = registerSignal("nodeStatusChanged");
 
-
 void NodeStatus::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         state = getStateByName(par("initialStatus"));
         origIcon = getDisplayString().getTagArg("i", 0);
         updateDisplayString();
@@ -60,13 +57,13 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
     if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " starting up" << endl;
-            if(getState() != DOWN)
+            if (getState() != DOWN)
                 throw cRuntimeError("Current node status is not 'down' at NodeStartOperation");
             setState(GOING_UP);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
         if (opStage == operation->getNumStages() - 1) {
-            ASSERT(getState()==GOING_UP);
+            ASSERT(getState() == GOING_UP);
             setState(UP);
             EV << node->getFullPath() << " started" << endl;
         }
@@ -74,13 +71,13 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " shutting down" << endl;
-            if(getState() != UP)
+            if (getState() != UP)
                 throw cRuntimeError("Current node status is not 'up' at NodeShutdownOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
         if (opStage == operation->getNumStages() - 1) {
-            ASSERT(getState()==GOING_DOWN);
+            ASSERT(getState() == GOING_DOWN);
             setState(DOWN);
             EV << node->getFullPath() << " shut down" << endl;
         }
@@ -88,13 +85,13 @@ bool NodeStatus::handleOperationStage(LifecycleOperation *operation, int opStage
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (opStage == 0) {
             EV << node->getFullPath() << " crashing" << endl;
-            if(getState() != UP)
+            if (getState() != UP)
                 throw cRuntimeError("Current node status is not 'up' at NodeCrashOperation");
             setState(GOING_DOWN);
         }
         // NOTE: this is not an 'else if' so that it works if there's only 1 stage
         if (opStage == operation->getNumStages() - 1) {
-            ASSERT(getState()==GOING_DOWN);
+            ASSERT(getState() == GOING_DOWN);
             setState(DOWN);
             EV << node->getFullPath() << " crashed" << endl;
         }
@@ -112,22 +109,33 @@ void NodeStatus::setState(State s)
 void NodeStatus::updateDisplayString()
 {
     const char *icon;
-    switch(state)
-    {
-        case UP: icon = ""; break;
-        case DOWN: icon = "status/cross"; break;
-        case GOING_UP: icon = "status/execute"; break;
-        case GOING_DOWN: icon = "status/execute"; break;
-        default: throw cRuntimeError("Unknown status");
+    switch (state) {
+        case UP:
+            icon = "";
+            break;
+
+        case DOWN:
+            icon = "status/cross";
+            break;
+
+        case GOING_UP:
+            icon = "status/execute";
+            break;
+
+        case GOING_DOWN:
+            icon = "status/execute";
+            break;
+
+        default:
+            throw cRuntimeError("Unknown status");
     }
     cModule *node = getContainingNode(this);
-    const char *myicon = state==UP ? origIcon.c_str() : icon;
+    const char *myicon = state == UP ? origIcon.c_str() : icon;
     getDisplayString().setTagArg("i", 0, myicon);
     if (*icon)
         node->getDisplayString().setTagArg("i2", 0, icon);
     else
         node->getDisplayString().removeTag("i2");
 }
-
-}
+} // namespace inet
 

@@ -15,15 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFInterfaceStateLoopback.h"
 
 #include "OSPFInterfaceStateDown.h"
 
 namespace inet {
-
-
-void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->reset();
@@ -33,9 +30,5 @@ void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Int
         changeState(intf, new OSPF::InterfaceStateDown, this);
     }
 }
-
-
-
-}
-
+} // namespace inet
 

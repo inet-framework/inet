@@ -25,16 +25,13 @@
 #include "Ieee80211Consts.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(Ieee80211ScalarTransmitter);
 
 void Ieee80211ScalarTransmitter::initialize(int stage)
 {
     ScalarTransmitter::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         const char *opModeString = par("opMode");
         if (!strcmp("b", opModeString))
             opMode = 'b';
@@ -72,10 +69,6 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, opMode, preambleMode);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

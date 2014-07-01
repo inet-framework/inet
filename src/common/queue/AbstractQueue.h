@@ -21,8 +21,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-
 /**
  * Abstract base class for single-server queues. Contains special
  * optimization for zero service time (i.e. it does not schedule the
@@ -101,12 +99,8 @@ class INET_API AbstractQueue : public cSimpleModule
      */
     virtual cPacket *cancelService();
     //@}
-
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_ABSTRACTQUEUE_H
 

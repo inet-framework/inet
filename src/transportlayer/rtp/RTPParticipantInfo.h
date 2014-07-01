@@ -4,21 +4,19 @@
     begin                : Wed Oct 24 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #ifndef __INET_RTPPARTICIPANTINFO_H
 #define __INET_RTPPARTICIPANTINFO_H
-
 
 #include "RTPParticipantInfo_m.h"
 
@@ -27,8 +25,6 @@
 #include "sdes.h"
 
 namespace inet {
-
-
 //Forward declarations:
 class ReceptionReport;
 class RTPPacket;
@@ -86,12 +82,12 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      * This method extracts information about an RTP endsystem
      * as provided by the given SenderReport.
      */
-    virtual void processSenderReport(SenderReport &report, simtime_t arrivalTime);
+    virtual void processSenderReport(SenderReport& report, simtime_t arrivalTime);
 
     /**
      * This method extracts information of the given ReceptionReport.
      */
-    virtual void processReceptionReport(ReceptionReport &report, simtime_t arrivalTime);
+    virtual void processReceptionReport(ReceptionReport& report, simtime_t arrivalTime);
 
     /**
      * This method extracts sdes information of the given sdes chunk.and stores it.
@@ -195,8 +191,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     int _silentIntervals;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RTPPARTICIPANTINFO_H
 
-
-#endif

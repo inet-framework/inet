@@ -17,20 +17,18 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_TCP_NSC_H
 #define __INET_TCP_NSC_H
 
 #ifndef HAVE_NSC
 #error Please install NSC or disable 'TCP_NSC' feature
-#endif
-
+#endif // ifndef HAVE_NSC
 
 #include <map>
 
 #include "INETDefs.h"
 
-#include <sim_interface.h> // NSC. We need this here to derive from classes
+#include <sim_interface.h>    // NSC. We need this here to derive from classes
 
 #include "ILifecycle.h"
 #include "Address.h"
@@ -38,7 +36,6 @@
 #include "TCP_NSC_Connection.h"
 
 namespace inet {
-
 // forward declarations:
 class TCPCommand;
 class TCPSegment;
@@ -51,7 +48,7 @@ class TCP_NSC_ReceiveQueue;
 class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback, public ILifecycle
 {
   protected:
-    enum {MAX_SEND_BYTES = 500000};
+    enum { MAX_SEND_BYTES = 500000 };
 
   public:
     TCP_NSC();
@@ -76,26 +73,26 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     // internal utility functions:
 
-    void changeAddresses(TCP_NSC_Connection &connP,
-            const TCP_NSC_Connection::SockPair &inetSockPairP,
-            const TCP_NSC_Connection::SockPair &nscSockPairP);
+    void changeAddresses(TCP_NSC_Connection& connP,
+            const TCP_NSC_Connection::SockPair& inetSockPairP,
+            const TCP_NSC_Connection::SockPair& nscSockPairP);
 
     // find a TCP_NSC_Connection by connection ID
     TCP_NSC_Connection *findAppConn(int connIdP);
 
     // find a TCP_NSC_Connection by inet sockpair
-    TCP_NSC_Connection *findConnByInetSockPair(TCP_NSC_Connection::SockPair const & sockPairP);
+    TCP_NSC_Connection *findConnByInetSockPair(TCP_NSC_Connection::SockPair const& sockPairP);
 
     // find a TCP_NSC_Connection by nsc sockpair
-    TCP_NSC_Connection *findConnByNscSockPair(TCP_NSC_Connection::SockPair const & sockPairP);
+    TCP_NSC_Connection *findConnByNscSockPair(TCP_NSC_Connection::SockPair const& sockPairP);
 
     virtual void updateDisplayString();
     void removeConnection(int connIdP);
     void printConnBrief(TCP_NSC_Connection& connP);
-    void loadStack(const char* stacknameP, int bufferSizeP);
+    void loadStack(const char *stacknameP, int bufferSizeP);
 
     void handleAppMessage(cMessage *msgP);
-    void handleIpInputMessage(TCPSegment* tcpsegP);
+    void handleIpInputMessage(TCPSegment *tcpsegP);
 
     // function to be called back from the NSC stack:
 
@@ -125,26 +122,26 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     // assert if not exists in map
     // nscAddrP has IP in host byte order
     // x == mapNsc2Remote(mapRemote2Nsc(x))
-    Address const & mapNsc2Remote(u_int32_t nscAddrP);
+    Address const& mapNsc2Remote(u_int32_t nscAddrP);
 
     // send a connection established msg to application layer
-    void sendEstablishedMsg(TCP_NSC_Connection &connP);
+    void sendEstablishedMsg(TCP_NSC_Connection& connP);
 
     /**
      * To be called from TCPConnection: create a new send queue.
      */
-    virtual TCP_NSC_SendQueue* createSendQueue(TCPDataTransferMode transferModeP);
+    virtual TCP_NSC_SendQueue *createSendQueue(TCPDataTransferMode transferModeP);
 
     /**
      * To be called from TCPConnection: create a new receive queue.
      */
-    virtual TCP_NSC_ReceiveQueue* createReceiveQueue(TCPDataTransferMode transferModeP);
+    virtual TCP_NSC_ReceiveQueue *createReceiveQueue(TCPDataTransferMode transferModeP);
 
     // ILifeCycle:
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
   protected:
-    typedef std::map<int,TCP_NSC_Connection> TcpAppConnMap; // connId-to-TCP_NSC_Connection
+    typedef std::map<int, TCP_NSC_Connection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection
     typedef std::map<u_int32_t, Address> Nsc2RemoteMap;
     typedef std::map<Address, u_int32_t> Remote2NscMap;
     typedef std::map<TCP_NSC_Connection::SockPair, int> SockPair2ConnIdMap;
@@ -162,27 +159,26 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     cMessage *pNsiTimerM;
 
   protected:
-    bool isAliveM;   // true when I between initialize() and finish()
+    bool isAliveM;    // true when I between initialize() and finish()
 
-    int curAddrCounterM; // incr, when set curLocalAddr, decr when "felhasznaltam"
-    TCP_NSC_Connection *curConnM; // store current connection in connect/listen command
+    int curAddrCounterM;    // incr, when set curLocalAddr, decr when "felhasznaltam"
+    TCP_NSC_Connection *curConnM;    // store current connection in connect/listen command
 
-    static const Address localInnerIpS; // local NSC IP addr
-    static const Address localInnerGwS; // local NSC gateway IP addr
-    static const Address localInnerMaskS; // local NSC Network Mask
-    static const Address remoteFirstInnerIpS; // first remote NSC IP addr
+    static const Address localInnerIpS;    // local NSC IP addr
+    static const Address localInnerGwS;    // local NSC gateway IP addr
+    static const Address localInnerMaskS;    // local NSC Network Mask
+    static const Address remoteFirstInnerIpS;    // first remote NSC IP addr
 
-    static const char * stackNameParamNameS; // name of stackname parameter
-    static const char * bufferSizeParamNameS; // name of buffersize parameter
+    static const char *stackNameParamNameS;    // name of stackname parameter
+    static const char *bufferSizeParamNameS;    // name of buffersize parameter
 
     // statistics
-    cOutVector *sndNxtVector;   // sent seqNo
-    cOutVector *sndAckVector;   // sent ackNo
-    cOutVector *rcvSeqVector;   // received seqNo
-    cOutVector *rcvAckVector;   // received ackNo (= snd_una)
+    cOutVector *sndNxtVector;    // sent seqNo
+    cOutVector *sndAckVector;    // sent ackNo
+    cOutVector *rcvSeqVector;    // received seqNo
+    cOutVector *rcvAckVector;    // received ackNo (= snd_una)
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCP_NSC_H
 
-
-#endif

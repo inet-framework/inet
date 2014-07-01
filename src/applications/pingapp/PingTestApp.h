@@ -21,11 +21,10 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 class PingPayload;
 
 // how many ping request's send time is stored
-#define PINGTEST_HISTORY_SIZE 100
+#define PINGTEST_HISTORY_SIZE    100
 
 /**
  * Generates ping requests and calculates the packet loss and round trip
@@ -50,7 +49,7 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     bool continuous;
 
     // state
-    long sendSeqNo; // to match the response with the request that caused the response
+    long sendSeqNo;    // to match the response with the request that caused the response
     long expectedReplySeqNo;
     simtime_t sendTimeHistory[PINGTEST_HISTORY_SIZE];
 
@@ -61,9 +60,9 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     static simsignal_t outOfOrderArrivalsSignal;
     static simsignal_t pingTxSeqSignal;
     static simsignal_t pingRxSeqSignal;
-    long lossCount; // number of lost requests
-    long outOfOrderArrivalCount; // number of responses which arrived too late
-    long numPongs; // number of received Ping requests
+    long lossCount;    // number of lost requests
+    long outOfOrderArrivalCount;    // number of responses which arrived too late
+    long numPongs;    // number of received Ping requests
 
   protected:
     virtual void initialize(int stage);
@@ -80,4 +79,5 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
-}
+} // namespace inet
+

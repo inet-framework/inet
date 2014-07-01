@@ -18,17 +18,11 @@
 #include "RadioFrame.h"
 
 namespace inet {
-
 namespace physicallayer {
-
-void RadioFrame::printToStream(std::ostream &stream) const
+void RadioFrame::printToStream(std::ostream& stream) const
 {
     stream << (cPacket *)this;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_PROTOCOLMAP_H
 #define __INET_PROTOCOLMAP_H
 
@@ -23,7 +22,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * Maps protocol numbers to output gates
  */
@@ -35,7 +33,7 @@ class INET_API ProtocolMapping
         int protocolNumber;
         int outGateIndex;
 
-        Entry() { }
+        Entry() {}
         Entry(int protocolNumber, int outGateIndex) { this->protocolNumber = protocolNumber; this->outGateIndex = outGateIndex; }
     };
     // we use vector because it's probably faster: we'll hit 1st or 2nd entry
@@ -55,8 +53,7 @@ class INET_API ProtocolMapping
     /** find output gate index for protocol ID and returns it. Throws an error if not found. */
     int getOutputGateForProtocol(int protocol) const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PROTOCOLMAP_H
 
-
-#endif

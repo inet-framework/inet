@@ -15,25 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "LinkStateAcknowledgementHandler.h"
 
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-OSPF::LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(OSPF::Router* containingRouter) :
+OSPF::LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(OSPF::Router *containingRouter) :
     OSPF::IMessageHandler(containingRouter)
 {
 }
 
-void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf, OSPF::Neighbor* neighbor)
+void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket *packet, OSPF::Interface *intf, OSPF::Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Acknowledgement packet received", intf, neighbor);
 
     if (neighbor->getState() >= OSPF::Neighbor::EXCHANGE_STATE) {
-        OSPFLinkStateAcknowledgementPacket* lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket*> (packet);
+        OSPFLinkStateAcknowledgementPacket *lsAckPacket = check_and_cast<OSPFLinkStateAcknowledgementPacket *>(packet);
 
         int lsaCount = lsAckPacket->getLsaHeadersArraySize();
 
@@ -41,7 +38,7 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
 
         for (int i = 0; i < lsaCount; i++) {
             OSPFLSAHeader& lsaHeader = lsAckPacket->getLsaHeaders(i);
-            OSPFLSA* lsaOnRetransmissionList;
+            OSPFLSA *lsaOnRetransmissionList;
             OSPF::LSAKeyType lsaKey;
 
             EV_DETAIL << "    " << lsaHeader << "\n";
@@ -52,7 +49,8 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
             if ((lsaOnRetransmissionList = neighbor->findOnRetransmissionList(lsaKey)) != NULL) {
                 if (operator==(lsaHeader, lsaOnRetransmissionList->getHeader())) {
                     neighbor->removeFromRetransmissionList(lsaKey);
-                } else {
+                }
+                else {
                     EV_INFO << "Got an Acknowledgement packet for an unsent Update packet.\n";
                 }
             }
@@ -62,9 +60,5 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
         }
     }
 }
-
-
-
-}
-
+} // namespace inet
 

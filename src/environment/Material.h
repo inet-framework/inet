@@ -26,30 +26,31 @@ using namespace units::constants;
 
 class INET_API Material
 {
-    public:
-        static Material vacuum;
-        static Material air;
-        static Material copper;
-        static Material aluminium;
-        static Material wood;
-        static Material brick;
-        static Material concrete;
-        static Material glass;
+  public:
+    static Material vacuum;
+    static Material air;
+    static Material copper;
+    static Material aluminium;
+    static Material wood;
+    static Material brick;
+    static Material concrete;
+    static Material glass;
 
-    protected:
-        Ohmm resistivity;
-        double relativePermittivity;
-        double relativePermeability;
+  protected:
+    Ohmm resistivity;
+    double relativePermittivity;
+    double relativePermeability;
 
-    public:
-        Material(Ohmm resistivity, double relativePermittivity, double relativePermeability);
+  public:
+    Material(Ohmm resistivity, double relativePermittivity, double relativePermeability);
 
-        virtual Ohmm getResistivity() const { return resistivity; }
-        virtual double getRelativePermittivity() const { return relativePermittivity; }
-        virtual double getRelativePermeability() const { return relativePermeability; }
-        virtual double getDielectricLossTangent(Hz frequency) const;
-        virtual double getRefractiveIndex() const;
-        virtual mps getPropagationSpeed() const;
+    virtual Ohmm getResistivity() const { return resistivity; }
+    virtual double getRelativePermittivity() const { return relativePermittivity; }
+    virtual double getRelativePermeability() const { return relativePermeability; }
+    virtual double getDielectricLossTangent(Hz frequency) const;
+    virtual double getRefractiveIndex() const;
+    virtual mps getPropagationSpeed() const;
 };
 
-#endif
+#endif // ifndef __INET_MATERIAL_H
+

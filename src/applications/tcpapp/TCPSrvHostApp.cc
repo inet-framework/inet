@@ -22,16 +22,13 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 Define_Module(TCPSrvHostApp);
-
 
 void TCPSrvHostApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
 
@@ -60,24 +57,21 @@ void TCPSrvHostApp::updateDisplay()
 
 void TCPSrvHostApp::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         TCPServerThreadBase *thread = (TCPServerThreadBase *)msg->getContextPointer();
         thread->timerExpired(msg);
     }
-    else
-    {
+    else {
         TCPSocket *socket = socketMap.findSocketFor(msg);
 
-        if (!socket)
-        {
+        if (!socket) {
             // new connection -- create new socket object and server process
             socket = new TCPSocket(msg);
             socket->setOutputGate(gate("tcpOut"));
 
             const char *serverThreadClass = par("serverThreadClass");
             TCPServerThreadBase *proc =
-                    check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
+                check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
 
             socket->setCallbackObject(proc);
             proc->init(this, socket);
@@ -105,9 +99,5 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     updateDisplay();
 }
-
-
-
-}
-
+} // namespace inet
 

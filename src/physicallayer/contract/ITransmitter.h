@@ -21,34 +21,29 @@
 #include "ITransmission.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * packets into electric signals.
  */
 class INET_API ITransmitter : public IPrintableObject
 {
-    public:
-        /**
-         * Returns the maximum transmission power above which no transmission is
-         * ever transmitted. Returns a value in the range [0, +infinity] or NaN
-         * if unspecified.
-         */
-        virtual W getMaxPower() const = 0;
+  public:
+    /**
+     * Returns the maximum transmission power above which no transmission is
+     * ever transmitted. Returns a value in the range [0, +infinity] or NaN
+     * if unspecified.
+     */
+    virtual W getMaxPower() const = 0;
 
-        /**
-         * Returns a transmission which describes the radio signal corresponding
-         * to the provided mac frame. This function never returns NULL.
-         */
-        virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
+    /**
+     * Returns a transmission which describes the radio signal corresponding
+     * to the provided mac frame. This function never returns NULL.
+     */
+    virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ITRANSMITTER_H
 
-}
-
-
-#endif

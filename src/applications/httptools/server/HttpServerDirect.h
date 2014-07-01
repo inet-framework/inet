@@ -21,7 +21,6 @@
 #include "HttpServerBase.h"
 
 namespace inet {
-
 /**
  * Server module for direct message passing.
  *
@@ -37,16 +36,13 @@ namespace inet {
  */
 class INET_API HttpServerDirect : public HttpServerBase
 {
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_HTTPSERVERDIRECT_H
 

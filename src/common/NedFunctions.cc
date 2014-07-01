@@ -16,18 +16,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 // compatibility for pre-4.2b3 omnetpp
 #ifndef Define_NED_Math_Function
-#define cNEDValue  cDynamicExpression::Value
-#define stringValue()  s.c_str()
-#define stdstringValue()  s
-#endif
+#define cNEDValue           cDynamicExpression::Value
+#define stringValue()       s.c_str()
+#define stdstringValue()    s
+#endif // ifndef Define_NED_Math_Function
 
 namespace inet {
-
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
     return classes.getInstance()->lookup(argv[0].stringValue()) != NULL;
@@ -37,7 +35,7 @@ Define_NED_Function2(nedf_haveClass,
         "bool haveClass(string className)",
         "string",
         "Returns true if the given C++ class exists"
-);
+        );
 
 cNEDValue nedf_moduleListByPath(cComponent *context, cNEDValue argv[], int argc)
 {
@@ -49,8 +47,7 @@ cNEDValue nedf_moduleListByPath(cComponent *context, cNEDValue argv[], int argc)
 
     topo.extractByModulePath(paths);
 
-    for (int i = 0; i < topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
         if (modulenames.length() > 0)
             modulenames = modulenames + " " + path;
@@ -65,7 +62,7 @@ Define_NED_Function2(nedf_moduleListByPath,
         "string",
         "Returns a space-separated list of the modules at the given path(s). "
         "See cTopology::extractByModulePath()."
-);
+        );
 
 cNEDValue nedf_moduleListByNedType(cComponent *context, cNEDValue argv[], int argc)
 {
@@ -77,8 +74,7 @@ cNEDValue nedf_moduleListByNedType(cComponent *context, cNEDValue argv[], int ar
 
     topo.extractByNedTypeName(paths);
 
-    for (int i = 0; i < topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         std::string path = topo.getNode(i)->getModule()->getFullPath();
         if (modulenames.length() > 0)
             modulenames = modulenames + " " + path;
@@ -93,23 +89,23 @@ Define_NED_Function2(nedf_moduleListByNedType,
         "string",
         "Returns a space-separated list of the modules with the given NED type(s). "
         "See cTopology::extractByNedTypeName()."
-);
+        );
 
 cNEDValue nedf_select(cComponent *context, cNEDValue argv[], int argc)
 {
     long index = argv[0];
     if (index < 0)
         throw cRuntimeError("select(): negative index %ld", index);
-    if (index >= argc-1)
-        throw cRuntimeError("select(): index=%ld is too large", index, argc-1);
-    return argv[index+1];
+    if (index >= argc - 1)
+        throw cRuntimeError("select(): index=%ld is too large", index, argc - 1);
+    return argv[index + 1];
 }
 
 Define_NED_Function2(nedf_select,
         "any select(int index, ...)",
         "misc",
         "Returns the <index>th item from the rest of the argument list; numbering starts from 0."
-);
+        );
 
 cNEDValue nedf_absPath(cComponent *context, cNEDValue argv[], int argc)
 {
@@ -117,9 +113,14 @@ cNEDValue nedf_absPath(cComponent *context, cNEDValue argv[], int argc)
         throw cRuntimeError("absPath(): must be one argument instead of %d argument(s)", argc);
     const char *path = argv[0].stringValue();
     switch (*path) {
-        case '.': return context->getFullPath() + path;
-        case '^': return context->getFullPath() + '.' + path;
-        default: return argv[0];
+        case '.':
+            return context->getFullPath() + path;
+
+        case '^':
+            return context->getFullPath() + '.' + path;
+
+        default:
+            return argv[0];
     }
 }
 
@@ -127,10 +128,6 @@ Define_NED_Function2(nedf_absPath,
         "string absPath(string modulePath)",
         "string",
         "Returns absolute path of given module"
-);
-
-
-
-}
-
+        );
+} // namespace inet
 

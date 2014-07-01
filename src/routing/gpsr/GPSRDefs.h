@@ -19,7 +19,7 @@
 #ifndef __INET_GPSRDEFS_H
 #define __INET_GPSRDEFS_H
 
-#define GPSR_UDP_PORT 269
+#define GPSR_UDP_PORT    269
 
 namespace inet {
 enum GPSRForwardingMode {
@@ -31,7 +31,7 @@ enum GPSRPlanarizationMode {
     GPSR_GG_PLANARIZATION,
     GPSR_RNG_PLANARIZATION
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GPSRDEFS_H
 
-#endif

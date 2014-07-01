@@ -15,17 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_UDPCONTROLINFO_H
 #define __INET_UDPCONTROLINFO_H
 
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_UDPCONTROLINFO_H
 

@@ -21,23 +21,18 @@
 #include "AntennaBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API IsotropicAntenna : public AntennaBase
 {
-    public:
-        IsotropicAntenna();
+  public:
+    IsotropicAntenna();
 
-        virtual void printToStream(std::ostream &stream) const { stream << "isotropic antenna"; }
-        virtual double getMaxGain() const { return 1; }
-        virtual double computeGain(const EulerAngles direction) const { return 1; }
+    virtual void printToStream(std::ostream& stream) const { stream << "isotropic antenna"; }
+    virtual double getMaxGain() const { return 1; }
+    virtual double computeGain(const EulerAngles direction) const { return 1; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ISOTROPICANTENNA_H
 
-}
-
-
-#endif

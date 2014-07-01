@@ -21,23 +21,22 @@
 #include "Coord.h"
 
 namespace inet {
-
 /**
  * This class represents a 3 dimensional line segment between two points.
  */
 class INET_API LineSegment
 {
-    protected:
-        Coord point1;
-        Coord point2;
+  protected:
+    Coord point1;
+    Coord point2;
 
-    public:
-        LineSegment(const Coord& point1, const Coord& point2);
+  public:
+    LineSegment(const Coord& point1, const Coord& point2);
 
-        const Coord& getPoint1() const { return point1; }
-        const Coord& getPoint2() const { return point2; }
+    const Coord& getPoint1() const { return point1; }
+    const Coord& getPoint2() const { return point2; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LINESEGMENT_H
 
-#endif

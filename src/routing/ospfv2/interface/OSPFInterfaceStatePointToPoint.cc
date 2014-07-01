@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFInterfaceStatePointToPoint.h"
 
 #include "MessageHandler.h"
@@ -25,9 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::INTERFACE_DOWN) {
         intf->reset();
@@ -42,7 +39,8 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
             if (intf->getNeighborCount() > 0) {
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
-        } else {
+        }
+        else {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
@@ -51,9 +49,5 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
         intf->sendDelayedAcknowledgements();
     }
 }
-
-
-
-}
-
+} // namespace inet
 

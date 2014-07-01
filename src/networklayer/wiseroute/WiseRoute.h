@@ -33,7 +33,6 @@
 #include "WiseRouteDatagram.h"
 
 namespace inet {
-
 /**
  * @brief Wiseroute is a simple loop-free routing algorithm that
  * builds a routing tree from a central network point. It is especially
@@ -50,47 +49,47 @@ namespace inet {
  **/
 class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
 {
-private:
-	/** @brief Copy constructor is not allowed.
-	 */
-	WiseRoute(const WiseRoute&);
-	/** @brief Assignment operator is not allowed.
-	 */
-	WiseRoute& operator=(const WiseRoute&);
+  private:
+    /** @brief Copy constructor is not allowed.
+     */
+    WiseRoute(const WiseRoute&);
+    /** @brief Assignment operator is not allowed.
+     */
+    WiseRoute& operator=(const WiseRoute&);
 
-public:
-	WiseRoute()
-		: NetworkProtocolBase()
-		, routeTable()
-		, floodTable()
-		, headerLength(0)
-		, sinkAddress()
-		, rssiThreshold(0)
-		, routeFloodsInterval(0)
-		, floodSeqNumber(0)
-		, routeFloodTimer(NULL)
-		, nbDataPacketsForwarded(0)
-		, nbDataPacketsReceived(0)
-		, nbDataPacketsSent(0)
-		, nbDuplicatedFloodsReceived(0)
-		, nbFloodsSent(0)
-		, nbPureUnicastSent(0)
-		, nbRouteFloodsSent(0)
-		, nbRouteFloodsReceived(0)
-		, nbUnicastFloodForwarded(0)
-		, nbPureUnicastForwarded(0)
-		, nbGetRouteFailures(0)
-		, nbRoutesRecorded(0)
-		, nbHops(0)
-		, receivedRSSI()
-		, routeRSSI()
-		, allReceivedRSSI()
-		, allReceivedBER()
-		, routeBER()
-		, receivedBER()
-		, nextHopSelectionForSink()
-		, trace(false)
-	{}
+  public:
+    WiseRoute()
+        : NetworkProtocolBase()
+        , routeTable()
+        , floodTable()
+        , headerLength(0)
+        , sinkAddress()
+        , rssiThreshold(0)
+        , routeFloodsInterval(0)
+        , floodSeqNumber(0)
+        , routeFloodTimer(NULL)
+        , nbDataPacketsForwarded(0)
+        , nbDataPacketsReceived(0)
+        , nbDataPacketsSent(0)
+        , nbDuplicatedFloodsReceived(0)
+        , nbFloodsSent(0)
+        , nbPureUnicastSent(0)
+        , nbRouteFloodsSent(0)
+        , nbRouteFloodsReceived(0)
+        , nbUnicastFloodForwarded(0)
+        , nbPureUnicastForwarded(0)
+        , nbGetRouteFailures(0)
+        , nbRoutesRecorded(0)
+        , nbHops(0)
+        , receivedRSSI()
+        , routeRSSI()
+        , allReceivedRSSI()
+        , allReceivedBER()
+        , routeBER()
+        , receivedBER()
+        , nextHopSelectionForSink()
+        , trace(false)
+    {}
     /** @brief Initialization of the module and some variables*/
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
@@ -100,33 +99,33 @@ public:
 
     virtual ~WiseRoute();
 
-protected:
-	enum messagesTypes {
-	    DATA,
-	    ROUTE_FLOOD,
-	    SEND_ROUTE_FLOOD_TIMER
-	};
+  protected:
+    enum messagesTypes {
+        DATA,
+        ROUTE_FLOOD,
+        SEND_ROUTE_FLOOD_TIMER
+    };
 
-	typedef enum floodTypes {
-		NOTAFLOOD,
-		FORWARD,
-		FORME,
-		DUPLICATE
-	} floodTypes;
+    typedef enum floodTypes {
+        NOTAFLOOD,
+        FORWARD,
+        FORME,
+        DUPLICATE
+    } floodTypes;
 
+    typedef struct tRouteTableEntry
+    {
+        Address nextHop;
+        double rssi;
+    } tRouteTableEntry;
 
-	typedef struct tRouteTableEntry {
-		Address          nextHop;
-		double           rssi;
-	} tRouteTableEntry;
+    typedef std::map<Address, tRouteTableEntry> tRouteTable;
+    typedef std::multimap<tRouteTable::key_type, unsigned long> tFloodTable;
 
-	typedef std::map<Address, tRouteTableEntry>        tRouteTable;
-	typedef std::multimap<tRouteTable::key_type, unsigned long> tFloodTable;
+    tRouteTable routeTable;
+    tFloodTable floodTable;
 
-	tRouteTable routeTable;
-	tFloodTable floodTable;
-
-	IARP *arp;
+    IARP *arp;
 
     /**
      * @brief Length of the NetwPkt header
@@ -148,7 +147,7 @@ protected:
     /** @brief Flood sequence number */
     unsigned long floodSeqNumber;
 
-    cMessage* routeFloodTimer;
+    cMessage *routeFloodTimer;
 
     long nbDataPacketsForwarded;
     long nbDataPacketsReceived;
@@ -186,13 +185,13 @@ protected:
     /*@{*/
 
     /** @brief Handle messages from upper layer */
-    virtual void handleUpperPacket(cPacket* msg);
+    virtual void handleUpperPacket(cPacket *msg);
 
     /** @brief Handle messages from lower layer */
-    virtual void handleLowerPacket(cPacket* msg);
+    virtual void handleLowerPacket(cPacket *msg);
 
     /** @brief Handle self messages */
-    virtual void handleSelfMessage(cMessage* msg);
+    virtual void handleSelfMessage(cMessage *msg);
 
     /** @brief Update routing table.
      *
@@ -202,7 +201,7 @@ protected:
     virtual void updateRouteTable(const tRouteTable::key_type& origin, const Address& lastHop, double rssi, double ber);
 
     /** @brief Decapsulate a message */
-    cMessage* decapsMsg(WiseRouteDatagram *msg);
+    cMessage *decapsMsg(WiseRouteDatagram *msg);
 
     /** @brief update flood table. returns detected flood type (general or unicast flood to forward,
      *         duplicate flood to delete, unicast flood to me
@@ -225,10 +224,9 @@ protected:
      * @param pMsg      The message where the "control info" shall be attached.
      * @param pDestAddr The MAC address of the message receiver.
      */
-    virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
+    virtual cObject *setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_WISEROUTE_H
 
-
-#endif

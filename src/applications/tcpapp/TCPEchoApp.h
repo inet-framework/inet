@@ -24,7 +24,6 @@
 #include "TCPSocket.h"
 
 namespace inet {
-
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
@@ -58,10 +57,8 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
 
   public:
     TCPEchoApp();
-
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPECHOAPP_H
 
-
-#endif

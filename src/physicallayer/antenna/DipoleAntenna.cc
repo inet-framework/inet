@@ -18,9 +18,7 @@
 #include "DipoleAntenna.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(DipoleAntenna);
 
 DipoleAntenna::DipoleAntenna() :
@@ -39,10 +37,6 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
     double q = sin(direction.beta - M_PI_2);
     return 1.5 * q * q;
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

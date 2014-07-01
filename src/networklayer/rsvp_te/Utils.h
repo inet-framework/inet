@@ -22,7 +22,6 @@
 #include "IntServ.h"
 
 namespace inet {
-
 EroVector routeToEro(const IPAddressVector& rro);
 std::string vectorToString(const IPAddressVector& vec);
 std::string vectorToString(const IPAddressVector& vec, const char *delim);
@@ -42,7 +41,7 @@ bool find(std::vector<int>& vec, int value);
 /**
  * TODO documentation
  */
-bool find(const IPAddressVector& vec, IPv4Address addr); // use TEMPLATE
+bool find(const IPAddressVector& vec, IPv4Address addr);    // use TEMPLATE
 
 /**
  * TODO documentation
@@ -60,9 +59,7 @@ int find(const EroVector& ERO, IPv4Address node);
 cModule *getPayloadOwner(cPacket *msg);
 
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
+} // namespace inet
 
+#endif // ifndef __INET_UTILS_H
 
-}
-
-
-#endif

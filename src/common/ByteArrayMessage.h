@@ -18,7 +18,6 @@
 #include "ByteArrayMessage_m.h"
 
 namespace inet {
-
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */
@@ -33,17 +32,17 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     /**
      * Copy constructor
      */
-    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other) { }
+    ByteArrayMessage(const ByteArrayMessage& other) : ByteArrayMessage_Base(other) {}
 
     /**
      * operator =
      */
-    ByteArrayMessage& operator=(const ByteArrayMessage& other) {ByteArrayMessage_Base::operator=(other); return *this;}
+    ByteArrayMessage& operator=(const ByteArrayMessage& other) { ByteArrayMessage_Base::operator=(other); return *this; }
 
     /**
      * Creates and returns an exact copy of this object.
      */
-    virtual ByteArrayMessage *dup() const {return new ByteArrayMessage(*this);}
+    virtual ByteArrayMessage *dup() const { return new ByteArrayMessage(*this); }
 
     /**
      * Set data from buffer
@@ -74,9 +73,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
      */
     virtual void removePrefix(unsigned int length);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_BYTEARRAYMESSAGE_H
 

@@ -21,7 +21,6 @@
 #include "IClassifier.h"
 
 namespace inet {
-
 /**
  * TODO
  */
@@ -32,8 +31,7 @@ class INET_API IRSVPClassifier : public IClassifier
 
     virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IRSVPCLASSIFIER_H
 
-
-#endif

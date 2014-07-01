@@ -22,28 +22,26 @@
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * This class defines that interface of the queues that
  * algorithmic droppers use.
  */
 class INET_API IQueueAccess
 {
-    public:
-        virtual ~IQueueAccess() {};
+  public:
+    virtual ~IQueueAccess() {};
 
-        /**
-         * Returns the number of frames in the queue.
-         */
-        virtual int getLength() const = 0;
+    /**
+     * Returns the number of frames in the queue.
+     */
+    virtual int getLength() const = 0;
 
-        /**
-         * Returns the number of bytes in the queue.
-         */
-        virtual int getByteLength() const = 0;
+    /**
+     * Returns the number of bytes in the queue.
+     */
+    virtual int getByteLength() const = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IQUEUEACCESS_H
 
-
-#endif

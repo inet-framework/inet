@@ -21,7 +21,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 Define_Module(Battery);
 
 Battery::Battery()
@@ -42,8 +41,7 @@ Battery::~Battery()
 
 void Battery::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         crashNodeWhenDepleted = par("crashNodeWhenDepleted");
         nominalCapacity = residualCapacity = par("nominalCapacity");
         nominalVoltage = par("nominalVoltage");
@@ -52,14 +50,14 @@ void Battery::initialize(int stage)
     }
 }
 
-void Battery::handleMessage(cMessage * message)
+void Battery::handleMessage(cMessage *message)
 {
     if (message == depletedTimer) {
         updateResidualCapacity();
         emit(powerConsumptionChangedSignal, residualCapacity);
         if (crashNodeWhenDepleted) {
-            LifecycleController * lifecycleController = check_and_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
-            NodeCrashOperation * operation = new NodeCrashOperation();
+            LifecycleController *lifecycleController = check_and_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
+            NodeCrashOperation *operation = new NodeCrashOperation();
             LifecycleOperation::StringMap params;
             operation->initialize(findContainingNode(this), params);
             lifecycleController->initiateOperation(operation);
@@ -96,8 +94,5 @@ void Battery::scheduleDepletedTimer()
     if (totalConsumedPower > 0)
         scheduleAt(simTime() + residualCapacity / totalConsumedPower, depletedTimer);
 }
-
-
-}
-
+} // namespace inet
 

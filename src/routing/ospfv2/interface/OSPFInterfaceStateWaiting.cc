@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "OSPFInterfaceStateWaiting.h"
 
 #include "MessageHandler.h"
@@ -25,9 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
-
-
-void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Interface::InterfaceEventType event)
+void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if ((event == OSPF::Interface::BACKUP_SEEN) ||
         (event == OSPF::Interface::WAIT_TIMER))
@@ -45,11 +42,12 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
     if (event == OSPF::Interface::HELLO_TIMER) {
         if (intf->getType() == OSPF::Interface::BROADCAST) {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
-        } else {    // OSPF::Interface::NBMA
+        }
+        else {    // OSPF::Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
             int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
-                OSPF::Neighbor* neighbor = intf->getNeighbor(i);
+                OSPF::Neighbor *neighbor = intf->getNeighbor(i);
                 if (neighbor->getPriority() > 0) {
                     intf->sendHelloPacket(neighbor->getAddress(), ttl);
                 }
@@ -61,9 +59,5 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
         intf->sendDelayedAcknowledgements();
     }
 }
-
-
-
-}
-
+} // namespace inet
 

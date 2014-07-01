@@ -18,7 +18,6 @@
 #include "Plane.h"
 
 namespace inet {
-
 Plane::Plane(const Coord& basePoint, const Coord& normalVector) :
     basePoint(basePoint),
     normalVector(normalVector)
@@ -33,8 +32,7 @@ Coord Plane::computeIntersection(const LineSegment& lineSegment)
     double denominator = normalVector * (point2 - point1);
     if (denominator == 0)
         return Coord(qNaN, qNaN, qNaN);
-    else
-    {
+    else {
         double numerator = normalVector * (basePoint - point1);
         double q = numerator / denominator;
         if (q < 0 || q > 1)
@@ -43,5 +41,5 @@ Coord Plane::computeIntersection(const LineSegment& lineSegment)
             return point1 * (1 - q) + point2 * q;
     }
 }
+} // namespace inet
 
-}

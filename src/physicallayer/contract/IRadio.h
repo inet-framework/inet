@@ -25,10 +25,7 @@
 #include "ITransmitter.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class IRadioMedium;
 
 /**
@@ -44,255 +41,250 @@ class IRadioMedium;
 //       the current state, and thus allowing listeners to use the current value too
 class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 {
-    protected:
-        static int nextId;
+  protected:
+    static int nextId;
 
-    public:
+  public:
+    /**
+     * This signal is emitted every time the radio mode changes.
+     * The signal value is the new radio mode.
+     */
+    static simsignal_t radioModeChangedSignal;
+
+    /**
+     * This signal is emitted every time the radio listening changes.
+     * The signal value is the new listening.
+     */
+    static simsignal_t listeningChangedSignal;
+
+    /**
+     * This signal is emitted every time the radio reception state changes.
+     * The signal value is the new radio reception state.
+     */
+    static simsignal_t receptionStateChangedSignal;
+
+    /**
+     * This signal is emitted every time the radio transmission state changes.
+     * The signal value is the new radio transmission state.
+     */
+    static simsignal_t transmissionStateChangedSignal;
+
+    /**
+     * This signal is emitted every time the radio medium changes.
+     * The signal value is the new radio medium.
+     */
+    static simsignal_t radioChannelChangedSignal;
+
+    /**
+     * This enumeration specifies the requested operational mode of the radio.
+     * NOTE: Some parts of the code base may be sensitive to the order of the
+     * enum items because they may be used as an array index.
+     */
+    enum RadioMode {
         /**
-         * This signal is emitted every time the radio mode changes.
-         * The signal value is the new radio mode.
+         * The radio is turned off, frame reception or transmission is not
+         * possible, power consumption is zero, radio mode switching is slow.
          */
-        static simsignal_t radioModeChangedSignal;
-
-        /**
-         * This signal is emitted every time the radio listening changes.
-         * The signal value is the new listening.
-         */
-        static simsignal_t listeningChangedSignal;
-
-        /**
-         * This signal is emitted every time the radio reception state changes.
-         * The signal value is the new radio reception state.
-         */
-        static simsignal_t receptionStateChangedSignal;
-
-        /**
-         * This signal is emitted every time the radio transmission state changes.
-         * The signal value is the new radio transmission state.
-         */
-        static simsignal_t transmissionStateChangedSignal;
-
-        /**
-         * This signal is emitted every time the radio medium changes.
-         * The signal value is the new radio medium.
-         */
-        static simsignal_t radioChannelChangedSignal;
-
-        /**
-         * This enumeration specifies the requested operational mode of the radio.
-         * NOTE: Some parts of the code base may be sensitive to the order of the
-         * enum items because they may be used as an array index.
-         */
-        enum RadioMode
-        {
-            /**
-             * The radio is turned off, frame reception or transmission is not
-             * possible, power consumption is zero, radio mode switching is slow.
-             */
-            RADIO_MODE_OFF,
-
-            /**
-             * The radio is sleeping, frame reception or transmission is not possible,
-             * power consumption is minimal, radio mode switching is fast.
-             */
-            RADIO_MODE_SLEEP,
-
-            /**
-             * The radio is prepared for frame reception, frame transmission is not
-             * possible, power consumption is low when receiver is idle and medium
-             * when receiving.
-             */
-            RADIO_MODE_RECEIVER,
-
-            /**
-             * The radio is prepared for frame transmission, frame reception is not
-             * possible, power consumption is low when transmitter is idle and high
-             * when transmitting.
-             */
-            RADIO_MODE_TRANSMITTER,
-
-            /**
-             * The radio is prepared for simultaneous frame reception and transmission,
-             * power consumption is low when transceiver is idle, medium when receiving
-             * and high when transmitting.
-             */
-            RADIO_MODE_TRANSCEIVER,
-
-            /**
-             * The radio is switching from one mode to another, frame reception or
-             * transmission is not possible, power consumption is minimal.
-             */
-            RADIO_MODE_SWITCHING // this radio mode must be the very last
-        };
+        RADIO_MODE_OFF,
 
         /**
-         * This enumeration specifies the reception state of the radio. This also
-         * determines the state of the radio medium.
+         * The radio is sleeping, frame reception or transmission is not possible,
+         * power consumption is minimal, radio mode switching is fast.
          */
-        enum ReceptionState
-        {
-            /**
-             * The radio medium state is unknown, reception state is meaningless,
-             * signal detection is not possible. (e.g. the radio mode is off, sleep
-             * or transmitter)
-             */
-            RECEPTION_STATE_UNDEFINED,
-
-            /**
-             * The radio medium is free, no signal is detected. (e.g. the RSSI is
-             * below the energy detection threshold)
-             */
-            RECEPTION_STATE_IDLE,
-
-            /**
-             * The radio medium is busy, a signal is detected but it is not strong
-             * enough to receive. (e.g. the RSSI is above the energy detection
-             * threshold but below the reception threshold)
-             */
-            RECEPTION_STATE_BUSY,
-
-            /**
-             * The radio medium is busy, a signal strong enough to evaluate is detected,
-             * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
-             * above the reception threshold but the SNIR is not yet evaluated)
-             */
-            RECEPTION_STATE_SYNCHRONIZING,
-
-            /**
-             * The radio medium is busy, a signal strong enough to receive is detected.
-             * (e.g. the SNIR was above the reception threshold during synchronize)
-             */
-            RECEPTION_STATE_RECEIVING
-        };
+        RADIO_MODE_SLEEP,
 
         /**
-         * This enumeration specifies the transmission state of the radio.
+         * The radio is prepared for frame reception, frame transmission is not
+         * possible, power consumption is low when receiver is idle and medium
+         * when receiving.
          */
-        enum TransmissionState
-        {
-            /**
-             * The transmission state is undefined or meaningless. (e.g. the radio
-             * mode is off, sleep or receiver)
-             */
-            TRANSMISSION_STATE_UNDEFINED,
-
-            /**
-             * The radio is not transmitting a signal on the radio medium. (e.g. the
-             * last transmission has been completed)
-             */
-            TRANSMISSION_STATE_IDLE,
-
-            /**
-             * The radio medium is busy, the radio is currently transmitting a signal.
-             */
-            TRANSMISSION_STATE_TRANSMITTING,
-        };
+        RADIO_MODE_RECEIVER,
 
         /**
-         * The enumeration registered for radio mode.
+         * The radio is prepared for frame transmission, frame reception is not
+         * possible, power consumption is low when transmitter is idle and high
+         * when transmitting.
          */
-        static cEnum *radioModeEnum;
+        RADIO_MODE_TRANSMITTER,
 
         /**
-         * The enumeration registered for radio reception state.
+         * The radio is prepared for simultaneous frame reception and transmission,
+         * power consumption is low when transceiver is idle, medium when receiving
+         * and high when transmitting.
          */
-        static cEnum *receptionStateEnum;
+        RADIO_MODE_TRANSCEIVER,
 
         /**
-         * The enumeration registered for radio transmission state.
+         * The radio is switching from one mode to another, frame reception or
+         * transmission is not possible, power consumption is minimal.
          */
-        static cEnum *transmissionStateEnum;
+        RADIO_MODE_SWITCHING    // this radio mode must be the very last
+    };
 
-    public:
+    /**
+     * This enumeration specifies the reception state of the radio. This also
+     * determines the state of the radio medium.
+     */
+    enum ReceptionState {
         /**
-         * Returns the gate of the radio that receives incoming radio frames.
+         * The radio medium state is unknown, reception state is meaningless,
+         * signal detection is not possible. (e.g. the radio mode is off, sleep
+         * or transmitter)
          */
-        virtual const cGate *getRadioGate() const = 0;
-
-        /**
-         * Returns the current radio mode, This is the same mode as the one emitted
-         * with the last radioModeChangedSignal.
-         */
-        virtual RadioMode getRadioMode() const = 0;
-
-        /**
-         * Changes the current radio mode. The actual change may take zero or more time.
-         * The new radio mode will be emitted with a radioModeChangedSignal.
-         */
-        virtual void setRadioMode(RadioMode radioMode) = 0;
+        RECEPTION_STATE_UNDEFINED,
 
         /**
-         * Returns the current radio reception state. This is the same state as the one emitted
-         * with the last receptionStateChangedSignal
+         * The radio medium is free, no signal is detected. (e.g. the RSSI is
+         * below the energy detection threshold)
          */
-        virtual ReceptionState getReceptionState() const = 0;
+        RECEPTION_STATE_IDLE,
 
         /**
-         * Returns the current radio transmission state. This is the same state as the one emitted
-         * with the last transmissionStateChangedSignal
+         * The radio medium is busy, a signal is detected but it is not strong
+         * enough to receive. (e.g. the RSSI is above the energy detection
+         * threshold but below the reception threshold)
          */
-        virtual TransmissionState getTransmissionState() const = 0;
+        RECEPTION_STATE_BUSY,
 
         /**
-         * Returns an identifier for this radio which is globally unique
-         * for the whole lifetime of the simulation among all radios.
+         * The radio medium is busy, a signal strong enough to evaluate is detected,
+         * whether the signal is noise or not is not yet decided. (e.g. the RSSI is
+         * above the reception threshold but the SNIR is not yet evaluated)
          */
-        virtual int getId() const = 0;
+        RECEPTION_STATE_SYNCHRONIZING,
 
         /**
-         * Returns the antenna used by the transceiver of this radio. This function
-         * never returns NULL.
+         * The radio medium is busy, a signal strong enough to receive is detected.
+         * (e.g. the SNIR was above the reception threshold during synchronize)
          */
-        virtual const IAntenna *getAntenna() const = 0;
+        RECEPTION_STATE_RECEIVING
+    };
+
+    /**
+     * This enumeration specifies the transmission state of the radio.
+     */
+    enum TransmissionState {
+        /**
+         * The transmission state is undefined or meaningless. (e.g. the radio
+         * mode is off, sleep or receiver)
+         */
+        TRANSMISSION_STATE_UNDEFINED,
 
         /**
-         * Returns the transmitter part of this radio. This function never returns NULL.
+         * The radio is not transmitting a signal on the radio medium. (e.g. the
+         * last transmission has been completed)
          */
-        virtual const ITransmitter *getTransmitter() const = 0;
+        TRANSMISSION_STATE_IDLE,
 
         /**
-         * Returns the receiver part of this radio. This function never returns NULL.
+         * The radio medium is busy, the radio is currently transmitting a signal.
          */
-        virtual const IReceiver *getReceiver() const = 0;
+        TRANSMISSION_STATE_TRANSMITTING,
+    };
 
-        /**
-         * Returns the radio medium where this radio is transmitting and receiving
-         * radio signals. This function never returns NULL.
-         */
-        virtual const IRadioMedium *getMedium() const = 0;
+    /**
+     * The enumeration registered for radio mode.
+     */
+    static cEnum *radioModeEnum;
 
-        /**
-         * Returns the ongoing transmission that the transmitter is currently
-         * transmitting or NULL.
-         */
-        virtual const ITransmission *getTransmissionInProgress() const = 0;
+    /**
+     * The enumeration registered for radio reception state.
+     */
+    static cEnum *receptionStateEnum;
 
-        /**
-         * Returns the ongoing reception that the receiver is currently receiving
-         * or NULL.
-         */
-        virtual const ITransmission *getReceptionInProgress() const = 0;
+    /**
+     * The enumeration registered for radio transmission state.
+     */
+    static cEnum *transmissionStateEnum;
 
-    public:
-        /**
-         * Returns the name of the provided radio mode.
-         */
-        static const char *getRadioModeName(RadioMode radioMode);
+  public:
+    /**
+     * Returns the gate of the radio that receives incoming radio frames.
+     */
+    virtual const cGate *getRadioGate() const = 0;
 
-        /**
-         * Returns the name of the provided radio reception state.
-         */
-        static const char *getRadioReceptionStateName(ReceptionState receptionState);
+    /**
+     * Returns the current radio mode, This is the same mode as the one emitted
+     * with the last radioModeChangedSignal.
+     */
+    virtual RadioMode getRadioMode() const = 0;
 
-        /**
-         * Returns the name of the provided radio transmission state.
-         */
-        static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
+    /**
+     * Changes the current radio mode. The actual change may take zero or more time.
+     * The new radio mode will be emitted with a radioModeChangedSignal.
+     */
+    virtual void setRadioMode(RadioMode radioMode) = 0;
+
+    /**
+     * Returns the current radio reception state. This is the same state as the one emitted
+     * with the last receptionStateChangedSignal
+     */
+    virtual ReceptionState getReceptionState() const = 0;
+
+    /**
+     * Returns the current radio transmission state. This is the same state as the one emitted
+     * with the last transmissionStateChangedSignal
+     */
+    virtual TransmissionState getTransmissionState() const = 0;
+
+    /**
+     * Returns an identifier for this radio which is globally unique
+     * for the whole lifetime of the simulation among all radios.
+     */
+    virtual int getId() const = 0;
+
+    /**
+     * Returns the antenna used by the transceiver of this radio. This function
+     * never returns NULL.
+     */
+    virtual const IAntenna *getAntenna() const = 0;
+
+    /**
+     * Returns the transmitter part of this radio. This function never returns NULL.
+     */
+    virtual const ITransmitter *getTransmitter() const = 0;
+
+    /**
+     * Returns the receiver part of this radio. This function never returns NULL.
+     */
+    virtual const IReceiver *getReceiver() const = 0;
+
+    /**
+     * Returns the radio medium where this radio is transmitting and receiving
+     * radio signals. This function never returns NULL.
+     */
+    virtual const IRadioMedium *getMedium() const = 0;
+
+    /**
+     * Returns the ongoing transmission that the transmitter is currently
+     * transmitting or NULL.
+     */
+    virtual const ITransmission *getTransmissionInProgress() const = 0;
+
+    /**
+     * Returns the ongoing reception that the receiver is currently receiving
+     * or NULL.
+     */
+    virtual const ITransmission *getReceptionInProgress() const = 0;
+
+  public:
+    /**
+     * Returns the name of the provided radio mode.
+     */
+    static const char *getRadioModeName(RadioMode radioMode);
+
+    /**
+     * Returns the name of the provided radio reception state.
+     */
+    static const char *getRadioReceptionStateName(ReceptionState receptionState);
+
+    /**
+     * Returns the name of the provided radio transmission state.
+     */
+    static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_IRADIO_H
 
-}
-
-
-#endif

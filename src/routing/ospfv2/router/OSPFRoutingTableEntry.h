@@ -18,7 +18,6 @@
 #ifndef __INET_OSPFROUTINGTABLEENTRY_H
 #define __INET_OSPFROUTINGTABLEENTRY_H
 
-
 #include <memory.h>
 
 #include "INETDefs.h"
@@ -30,12 +29,10 @@
 #include "OSPFPacket_m.h"
 
 namespace inet {
-
 namespace OSPF {
-
 class RoutingTableEntry : public IPv4Route
 {
-public:
+  public:
     enum RoutingPathType {
         INTRAAREA = 0,
         INTERAREA = 1,
@@ -50,54 +47,50 @@ public:
     static const unsigned char AREA_BORDER_ROUTER_DESTINATION = 1;
     static const unsigned char AS_BOUNDARY_ROUTER_DESTINATION = 2;
 
-private:
-    IInterfaceTable*        ift;
-    RoutingDestinationType  destinationType;
-    OSPFOptions             optionalCapabilities;
-    AreaID                  area;
-    RoutingPathType         pathType;
-    Metric                  cost;
-    Metric                  type2Cost;
-    const OSPFLSA*          linkStateOrigin;
-    std::vector<NextHop>    nextHops;
+  private:
+    IInterfaceTable *ift;
+    RoutingDestinationType destinationType;
+    OSPFOptions optionalCapabilities;
+    AreaID area;
+    RoutingPathType pathType;
+    Metric cost;
+    Metric type2Cost;
+    const OSPFLSA *linkStateOrigin;
+    std::vector<NextHop> nextHops;
     // IPv4Route::interfacePtr comes from nextHops[0].ifIndex
     // IPv4Route::gateway is nextHops[0].hopAddress
 
-public:
+  public:
     RoutingTableEntry(IInterfaceTable *ift);
     RoutingTableEntry(const RoutingTableEntry& entry);
     virtual ~RoutingTableEntry() {}
 
     bool operator==(const RoutingTableEntry& entry) const;
-    bool operator!=(const RoutingTableEntry& entry) const { return (!((*this) == entry)); }
+    bool operator!=(const RoutingTableEntry& entry) const { return !((*this) == entry); }
 
-    void                   setDestinationType(RoutingDestinationType type)  { destinationType = type; }
-    RoutingDestinationType getDestinationType() const  { return destinationType; }
-    void                   setOptionalCapabilities(OSPFOptions options)  { optionalCapabilities = options; }
-    OSPFOptions            getOptionalCapabilities() const  { return optionalCapabilities; }
-    void                   setArea(AreaID source)  { area = source; }
-    AreaID                 getArea() const  { return area; }
-    void                   setPathType(RoutingPathType type);
-    RoutingPathType        getPathType() const  { return pathType; }
-    void                   setCost(Metric pathCost);
-    Metric                 getCost() const  { return cost; }
-    void                   setType2Cost(Metric pathCost);
-    Metric                 getType2Cost() const  { return type2Cost; }
-    void                   setLinkStateOrigin(const OSPFLSA* lsa)  { linkStateOrigin = lsa; }
-    const OSPFLSA*         getLinkStateOrigin() const  { return linkStateOrigin; }
-    void                   addNextHop(NextHop hop);
-    void                   clearNextHops()  { nextHops.clear(); }
-    unsigned int           getNextHopCount() const  { return nextHops.size(); }
-    NextHop                getNextHop(unsigned int index) const  { return nextHops[index]; }
+    void setDestinationType(RoutingDestinationType type) { destinationType = type; }
+    RoutingDestinationType getDestinationType() const { return destinationType; }
+    void setOptionalCapabilities(OSPFOptions options) { optionalCapabilities = options; }
+    OSPFOptions getOptionalCapabilities() const { return optionalCapabilities; }
+    void setArea(AreaID source) { area = source; }
+    AreaID getArea() const { return area; }
+    void setPathType(RoutingPathType type);
+    RoutingPathType getPathType() const { return pathType; }
+    void setCost(Metric pathCost);
+    Metric getCost() const { return cost; }
+    void setType2Cost(Metric pathCost);
+    Metric getType2Cost() const { return type2Cost; }
+    void setLinkStateOrigin(const OSPFLSA *lsa) { linkStateOrigin = lsa; }
+    const OSPFLSA *getLinkStateOrigin() const { return linkStateOrigin; }
+    void addNextHop(NextHop hop);
+    void clearNextHops() { nextHops.clear(); }
+    unsigned int getNextHopCount() const { return nextHops.size(); }
+    NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
 };
-
-}
-
+} // namespace OSPF
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry);
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_OSPFROUTINGTABLEENTRY_H
 

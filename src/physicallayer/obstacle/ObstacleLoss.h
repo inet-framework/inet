@@ -22,31 +22,27 @@
 #include "PhysicalEnvironment.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 // TODO: add reflection from walls
 // TODO: allow dB attenuation per meter/per wall
 // TODO: fix problem when one end is in the obstacle
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
-    protected:
-        PhysicalEnvironment *environment;
+  protected:
+    PhysicalEnvironment *environment;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual double computeDielectricLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
+  protected:
+    virtual void initialize(int stage);
+    virtual double computeDielectricLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
 
-    public:
-        ObstacleLoss();
+  public:
+    ObstacleLoss();
 
-        virtual void printToStream(std::ostream &stream) const;
-        virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
+    virtual void printToStream(std::ostream& stream) const;
+    virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_OBSTACLELOSS_H
 
-}
-
-#endif

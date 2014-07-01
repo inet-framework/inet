@@ -19,11 +19,10 @@
 #include "TCP.h"
 
 namespace inet {
-
 Register_Class(TCPNoCongestionControl);
 
 TCPNoCongestionControl::TCPNoCongestionControl() : TCPBaseAlg(),
-        state((TCPNoCongestionControlStateVariables *&)TCPAlgorithm::state)
+    state((TCPNoCongestionControlStateVariables *&)TCPAlgorithm::state)
 {
 }
 
@@ -53,8 +52,5 @@ void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
     // ack may have freed up some room in the window, try sending
     sendData(false);
 }
-
-
-}
-
+} // namespace inet
 

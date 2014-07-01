@@ -26,11 +26,10 @@
 #include "IPv4Datagram.h"
 
 namespace inet {
-
 // label operations
-#define PUSH_OPER              0
-#define SWAP_OPER              1
-#define POP_OPER               2
+#define PUSH_OPER    0
+#define SWAP_OPER    1
+#define POP_OPER     2
 
 /**
  * TODO documentation
@@ -46,54 +45,52 @@ typedef std::vector<LabelOp> LabelOpVector;
 /**
  * TODO documentation
  */
-class INET_API LIBTable: public cSimpleModule
+class INET_API LIBTable : public cSimpleModule
 {
-    public:
-        struct LIBEntry
-        {
-            int inLabel;
-            std::string inInterface;
+  public:
+    struct LIBEntry
+    {
+        int inLabel;
+        std::string inInterface;
 
-            LabelOpVector outLabel;
-            std::string outInterface;
+        LabelOpVector outLabel;
+        std::string outInterface;
 
-            // FIXME colors in nam, temporary solution
-            int color;
-        };
+        // FIXME colors in nam, temporary solution
+        int color;
+    };
 
-    protected:
-        int maxLabel;
-        std::vector<LIBEntry> lib;
+  protected:
+    int maxLabel;
+    std::vector<LIBEntry> lib;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg);
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg);
 
-        // static configuration
-        virtual void readTableFromXML(const cXMLElement* libtable);
+    // static configuration
+    virtual void readTableFromXML(const cXMLElement *libtable);
 
-    public:
-        // label management
-        virtual bool resolveLabel(std::string inInterface, int inLabel,
-                          LabelOpVector& outLabel, std::string& outInterface, int& color);
+  public:
+    // label management
+    virtual bool resolveLabel(std::string inInterface, int inLabel,
+            LabelOpVector& outLabel, std::string& outInterface, int& color);
 
-        virtual int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
-                            std::string outInterface, int color);
+    virtual int installLibEntry(int inLabel, std::string inInterface, const LabelOpVector& outLabel,
+            std::string outInterface, int color);
 
-        virtual void removeLibEntry(int inLabel);
+    virtual void removeLibEntry(int inLabel);
 
-        // utility
-        static LabelOpVector pushLabel(int label);
-        static LabelOpVector swapLabel(int label);
-        static LabelOpVector popLabel();
+    // utility
+    static LabelOpVector pushLabel(int label);
+    static LabelOpVector swapLabel(int label);
+    static LabelOpVector popLabel();
 };
 
-std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib);
-std::ostream & operator<<(std::ostream & os, const LabelOpVector& label);
+std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib);
+std::ostream& operator<<(std::ostream& os, const LabelOpVector& label);
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_LIBTABLE_H
 

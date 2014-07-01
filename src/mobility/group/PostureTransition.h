@@ -40,7 +40,6 @@
  *
  **************************************************************************/
 
-
 #ifndef __INET_POSTURETRANSITION_H
 #define __INET_POSTURETRANSITION_H
 
@@ -51,8 +50,6 @@
 #include "Coord.h"
 
 namespace inet {
-
-
 /**
  * @brief Class to provide spatial and temporal correlation in the posture selection process of the MoBAN mobility model.
  * This class obtains and stores Markovian transition matrices. There is also the possibility to get a steady state vector. In this
@@ -66,7 +63,8 @@ namespace inet {
  * @ingroup MoBAN
  * @author Majid Nabi
  */
-class INET_API PostureTransition {
+class INET_API PostureTransition
+{
   protected:
     /** @brief Number of postures. */
     int numPos;
@@ -74,74 +72,80 @@ class INET_API PostureTransition {
     /** @brief The index of the default (base) transition matrix. If no default is set, the first matrix is supposed as the default.
      * Default matrix is used for the cases that a time or space domain does not lie in any given area types or time domains.
      * It is also used for generating the transition matrix in the case that a steady state vector is given for a space-time domain.
-    */
+     */
     int defaultMatrixID;
 
     /** @brief Data type for one instance of Markov transition matrix. */
-    typedef struct{
+    typedef struct
+    {
         std::string name;
-        double** matrix;
-    }TransMatrix;
+        double **matrix;
+    } TransMatrix;
 
     /** @brief Data type for a list of Markov transition matrices. */
-    typedef std::vector<TransMatrix*> TransMatrixList;
+    typedef std::vector<TransMatrix *> TransMatrixList;
 
     /** @brief The list of all given transition matrices. */
     TransMatrixList matrixList;
 
     /** @brief Data type for one instance of the area (space) boundary. */
-    typedef struct{
+    typedef struct
+    {
         Coord low;
         Coord high;
-    }AreaBound;
+    } AreaBound;
 
     /** @brief Data type for one instance of area type. */
-    typedef struct{
-         std::string name;
-          std::vector<AreaBound*> boundries;
-    }AreaType;
+    typedef struct
+    {
+        std::string name;
+        std::vector<AreaBound *> boundries;
+    } AreaType;
 
     /** @brief Data type for the list of area types. */
-    typedef std::vector<AreaType*> AreaTypeList;
+    typedef std::vector<AreaType *> AreaTypeList;
 
     /** @brief The list of all defined area types. */
     AreaTypeList areaTypeList;
 
     /** @brief Data type for one instance of the time boundary. */
-    typedef struct{
+    typedef struct
+    {
         simtime_t low;
         simtime_t high;
-    }TimeBound;
+    } TimeBound;
 
     /** @brief Data type for one instance of time domain. */
-    typedef struct{
-           std::string name;
-           std::vector<TimeBound*> boundries;
-    }TimeDomainType;
+    typedef struct
+    {
+        std::string name;
+        std::vector<TimeBound *> boundries;
+    } TimeDomainType;
 
     /** @brief Data type for the list of time domains. */
-    typedef std::vector<TimeDomainType*> TimeDomainList;
+    typedef std::vector<TimeDomainType *> TimeDomainList;
 
     /** @brief The list of all defined time domains. */
     TimeDomainList timeDomainList;
 
     /** @brief Data type for one instance of space-time combination. */
-    typedef struct{
+    typedef struct
+    {
         int timeID;
         int areaID;
         int matrixID;
-    }CombinationType;
+    } CombinationType;
 
     /** @brief Data type for the list of space-time combinations. */
-    typedef std::vector<CombinationType*> CombinationList;
+    typedef std::vector<CombinationType *> CombinationList;
 
     /** @brief The list of all given space-time combinations. */
     CombinationList combinationList;
 
     /** @brief Gets a steady state vector and return a matrix which is as close as posible to the default matrix
      * and satisfies the given steady state.
-    */
-    double** extractMatrixFromSteadyState(double*);
+     */
+    double **extractMatrixFromSteadyState(double *);
 
     /** @brief Gets a time and finds the ID of the containing time domain if there is. If not, return -1. */
     int findTimeDomain(simtime_t);
@@ -151,39 +155,39 @@ class INET_API PostureTransition {
 
     /** @brief Checks if a matrix can be a Markov transition matrix. All elements should be in the range [0,1]
      * and elements of each column of the matrix should add up to 1.
-    */
-    bool isMarkovian(double**);
+     */
+    bool isMarkovian(double **);
 
     /** @brief Checks if a vector can be the steady state of a Markov chain. All elements should be in the range [0,1]
      * and the sum of elements should be 1.
      */
-    bool isMarkovian(double*);
+    bool isMarkovian(double *);
 
     /** @brief Multiplies two matrices with dimension numPos*numPose . */
-    void multMatrix(double**, double**, double**);
+    void multMatrix(double **, double **, double **);
 
     /** @brief Adds two matrices with dimension numPos*numPose . */
-    void addMatrix(double**, double**, double**);
+    void addMatrix(double **, double **, double **);
 
     /** @brief Subtracts two matrices with dimension numPos*numPose . */
-    void subtractMatrix(double**, double**, double**);
+    void subtractMatrix(double **, double **, double **);
 
     /** @brief Multiply a vector of size numPos with its transpose. */
-    void multVector(double*, double**);
+    void multVector(double *, double **);
 
   public:
     /** @brief Construct a posture transition object. The parameter is the number of postures which is
      * the dimension of all matrices
-    */
+     */
     PostureTransition(int);
 
     /** @brief Receives a transition matrix and add to the list. */
-    int addMatrix(std::string, double**, bool);
+    int addMatrix(std::string, double **, bool);
 
     /** @brief Receives a steady state vector, extracts the corresponding transition matrix
      * considering the default matrix, and add to the list of given matrices
-    */
-    int addSteadyState(std::string, double*);
+     */
+    int addSteadyState(std::string, double *);
 
     /** @brief Adds a area type to the list with the given name and returns the index of this area type in the list. */
     int addAreaType(std::string);
@@ -201,10 +205,9 @@ class INET_API PostureTransition {
     bool addCombination(std::string, std::string, std::string);
 
     /** @brief Gets a time and location, and returns the corresponding Markov transition matrix. */
-    double** getMatrix(simtime_t, Coord);
+    double **getMatrix(simtime_t, Coord);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_POSTURETRANSITION_H
 
-
-#endif

@@ -24,8 +24,6 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
-
-
 /**
  * State variables for TCPBaseAlg.
  */
@@ -38,45 +36,44 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
 
     /// retransmit count
     //@{
-    int rexmit_count;         ///< number of retransmissions (=1 after first rexmit)
-    simtime_t rexmit_timeout; ///< current retransmission timeout (aka RTO)
+    int rexmit_count;    ///< number of retransmissions (=1 after first rexmit)
+    simtime_t rexmit_timeout;    ///< current retransmission timeout (aka RTO)
     //@}
 
     /// persist factor
     //@{
-    uint persist_factor;       ///< factor needed for simplified PERSIST timer calculation
-    simtime_t persist_timeout; ///< current persist timeout
+    uint persist_factor;    ///< factor needed for simplified PERSIST timer calculation
+    simtime_t persist_timeout;    ///< current persist timeout
     //@}
 
     /// congestion window
     //@{
-    uint32 snd_cwnd;            ///< congestion window
+    uint32 snd_cwnd;    ///< congestion window
     //@}
 
     /// round-trip time measurements
     //@{
-    uint32 rtseq;             ///< starting sequence number of timed data
-    simtime_t rtseq_sendtime; ///< time when rtseq was sent (0 if RTT measurement is not running)
+    uint32 rtseq;    ///< starting sequence number of timed data
+    simtime_t rtseq_sendtime;    ///< time when rtseq was sent (0 if RTT measurement is not running)
     //@}
 
     /// round-trip time estimation (Jacobson's algorithm)
     //@{
-    simtime_t srtt;          ///< smoothed round-trip time
-    simtime_t rttvar;        ///< variance of round-trip time
+    simtime_t srtt;    ///< smoothed round-trip time
+    simtime_t rttvar;    ///< variance of round-trip time
     //@}
 
     /// number of RTOs
     //@{
-    uint32 numRtos;          ///< total number of RTOs
+    uint32 numRtos;    ///< total number of RTOs
     //@}
 
     /// RFC 3782 variables
     //@{
-    uint32 recover;            ///< recover (RFC 3782)
-    bool firstPartialACK;      ///< first partial acknowledgement (RFC 3782)
+    uint32 recover;    ///< recover (RFC 3782)
+    bool firstPartialACK;    ///< first partial acknowledgement (RFC 3782)
     //@}
 };
-
 
 /**
  * Includes basic TCP algorithms: adaptive retransmission, PERSIST timer,
@@ -105,20 +102,20 @@ class INET_API TCPBaseAlgStateVariables : public TCPStateVariables
 class INET_API TCPBaseAlg : public TCPAlgorithm
 {
   protected:
-    TCPBaseAlgStateVariables *&state; // alias to TCPAlgorithm's 'state'
+    TCPBaseAlgStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     cMessage *rexmitTimer;
     cMessage *persistTimer;
     cMessage *delayedAckTimer;
     cMessage *keepAliveTimer;
 
-    cOutVector *cwndVector;  // will record changes to snd_cwnd
-    cOutVector *ssthreshVector; // will record changes to ssthresh
-    cOutVector *rttVector;   // will record measured RTT
-    cOutVector *srttVector;  // will record smoothed RTT
-    cOutVector *rttvarVector; // will record RTT variance (rttvar)
-    cOutVector *rtoVector;   // will record retransmission timeout
-    cOutVector *numRtosVector; // will record total number of RTOs
+    cOutVector *cwndVector;    // will record changes to snd_cwnd
+    cOutVector *ssthreshVector;    // will record changes to ssthresh
+    cOutVector *rttVector;    // will record measured RTT
+    cOutVector *srttVector;    // will record smoothed RTT
+    cOutVector *rttvarVector;    // will record RTT variance (rttvar)
+    cOutVector *rtoVector;    // will record retransmission timeout
+    cOutVector *numRtosVector;    // will record total number of RTOs
 
   protected:
     /** @name Process REXMIT, PERSIST, DELAYED-ACK and KEEP-ALIVE timers */
@@ -153,7 +150,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     virtual bool sendData(bool sendCommandInvoked);
 
     /** Utility function */
-    cMessage *cancelEvent(cMessage *msg) {return conn->getTcpMain()->cancelEvent(msg);}
+    cMessage *cancelEvent(cMessage *msg) { return conn->getTcpMain()->cancelEvent(msg); }
 
   public:
     /**
@@ -200,8 +197,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
 
     virtual void restartRexmitTimer();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPBASEALG_H
 
-
-#endif

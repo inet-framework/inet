@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "Ieee80211eClassifier.h"
@@ -24,20 +23,19 @@
 #ifdef WITH_IPv4
   #include "IPv4Datagram.h"
   #include "ICMPMessage_m.h"
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
   #include "IPv6Datagram.h"
   #include "ICMPv6Message_m.h"
-#endif
+#endif // ifdef WITH_IPv6
 #ifdef WITH_UDP
   #include "UDPPacket_m.h"
-#endif
+#endif // ifdef WITH_UDP
 #ifdef WITH_TCP_COMMON
   #include "TCPSegment.h"
-#endif
+#endif // ifdef WITH_TCP_COMMON
 
 namespace inet {
-
 Register_Class(Ieee80211eClassifier);
 
 Ieee80211eClassifier::Ieee80211eClassifier()
@@ -45,7 +43,6 @@ Ieee80211eClassifier::Ieee80211eClassifier()
     defaultAC = 0;
     defaultManagement = 3;
 }
-
 
 int Ieee80211eClassifier::getNumQueues()
 {
@@ -55,7 +52,7 @@ int Ieee80211eClassifier::getNumQueues()
 int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 {
     ASSERT(check_and_cast<Ieee80211DataOrMgmtFrame *>(frame));
-    cPacket *ipData = NULL;  // must be initialized in case neither IPv4 nor IPv6 is present
+    cPacket *ipData = NULL;    // must be initialized in case neither IPv4 nor IPv6 is present
 
     // if this is a management type, use a pre-configured default class
     if (dynamic_cast<Ieee80211ManagementFrame *>(frame))
@@ -63,13 +60,13 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 
     // we have a data packet
     cPacket *encapsulatedNetworkPacket = PK(frame)->getEncapsulatedPacket();
-    ASSERT(encapsulatedNetworkPacket);  // frame must contain an encapsulated network data frame
+    ASSERT(encapsulatedNetworkPacket);    // frame must contain an encapsulated network data frame
 
 #ifdef WITH_IPv4
     ipData = dynamic_cast<IPv4Datagram *>(encapsulatedNetworkPacket);
     if (ipData && dynamic_cast<ICMPMessage *>(ipData->getEncapsulatedPacket()))
-        return 1;  // ICMP class
-#endif
+        return 1; // ICMP class
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
     if (!ipData) {
@@ -77,15 +74,14 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
         if (ipData && dynamic_cast<ICMPv6Message *>(ipData->getEncapsulatedPacket()))
             return 1; // ICMPv6 class
     }
-#endif
+#endif // ifdef WITH_IPv6
 
     if (!ipData)
         return defaultAC; // neither IPv4 nor IPv6 packet (unknown protocol) = default AC
 
 #ifdef WITH_UDP
     UDPPacket *udp = dynamic_cast<UDPPacket *>(ipData->getEncapsulatedPacket());
-    if (udp)
-    {
+    if (udp) {
         if (udp->getDestinationPort() == 21 || udp->getSourcePort() == 21)
             return 0;
         if (udp->getDestinationPort() == 80 || udp->getSourcePort() == 80)
@@ -95,12 +91,11 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
         if (udp->getDestinationPort() == 5000 || udp->getSourcePort() == 5000)
             return 3;
     }
-#endif
+#endif // ifdef WITH_UDP
 
 #ifdef WITH_TCP_COMMON
     TCPSegment *tcp = dynamic_cast<TCPSegment *>(ipData->getEncapsulatedPacket());
-    if (tcp)
-    {
+    if (tcp) {
         if (tcp->getDestPort() == 21 || tcp->getSrcPort() == 21)
             return 0;
         if (tcp->getDestPort() == 80 || tcp->getSrcPort() == 80)
@@ -110,13 +105,9 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
         if (tcp->getDestPort() == 5000 || tcp->getSrcPort() == 5000)
             return 3;
     }
-#endif
+#endif // ifdef WITH_TCP_COMMON
 
     return defaultAC;
 }
-
-
-
-}
-
+} // namespace inet
 

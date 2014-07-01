@@ -21,28 +21,24 @@
 #include "OSPFPacket_m.h"
 
 namespace inet {
-
 namespace OSPF {
-
 class Router;
 class Interface;
 class Neighbor;
 
 class IMessageHandler
 {
-protected:
-    Router* router;
+  protected:
+    Router *router;
 
-public:
-    IMessageHandler(Router* containingRouter)  { router = containingRouter; }
+  public:
+    IMessageHandler(Router *containingRouter) { router = containingRouter; }
     virtual ~IMessageHandler() {}
 
-    virtual void processPacket(OSPFPacket*, Interface* intf, Neighbor* neighbor) = 0;
+    virtual void processPacket(OSPFPacket *, Interface *intf, Neighbor *neighbor) = 0;
 };
+} // namespace OSPF
+} // namespace inet
 
-}
+#endif // ifndef __INET_IMESSAGEHANDLER_H
 
-}
-
-
-#endif

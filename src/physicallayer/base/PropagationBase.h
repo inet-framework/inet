@@ -21,29 +21,24 @@
 #include "IPropagation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API PropagationBase : public cModule, public IPropagation
 {
-    protected:
-        mps propagationSpeed;
-        mutable long arrivalComputationCount;
+  protected:
+    mps propagationSpeed;
+    mutable long arrivalComputationCount;
 
-    protected:
-        virtual void initialize(int stage);
-        virtual void finish();
+  protected:
+    virtual void initialize(int stage);
+    virtual void finish();
 
-    public:
-        PropagationBase();
+  public:
+    PropagationBase();
 
-        virtual mps getPropagationSpeed() const { return propagationSpeed; }
+    virtual mps getPropagationSpeed() const { return propagationSpeed; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_PROPAGATIONBASE_H
 
-}
-
-
-#endif

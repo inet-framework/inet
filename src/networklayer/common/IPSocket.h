@@ -22,34 +22,33 @@
 #include "IPProtocolId_m.h"
 
 namespace inet {
-
 /**
  * TODO
  */
-class IPSocket {
+class IPSocket
+{
   private:
-    cGate * gateToIP;
+    cGate *gateToIP;
 
   protected:
-    void sendToIP(cMessage * message);
+    void sendToIP(cMessage *message);
 
   public:
-    IPSocket(cGate * gateToIP = NULL) { this->gateToIP = gateToIP; }
-    virtual ~IPSocket() { }
+    IPSocket(cGate *gateToIP = NULL) { this->gateToIP = gateToIP; }
+    virtual ~IPSocket() {}
 
     /**
      * Sets the gate on which to send to IP. Must be invoked before socket
      * can be used. Example: <tt>socket.setOutputGate(gate("ipOut"));</tt>
      */
-    void setOutputGate(cGate * gateToIP) { this->gateToIP = gateToIP;}
+    void setOutputGate(cGate *gateToIP) { this->gateToIP = gateToIP; }
 
     /**
      * Registers the given IP protocol to the connected gate.
      */
     void registerProtocol(int protocol);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPSOCKET_H
 
-
-#endif

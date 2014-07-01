@@ -25,11 +25,8 @@
 #include "SCTP.h"
 
 namespace inet {
-
-
 class SCTPDataVariables;
 class SCTPAssociation;
-
 
 /**
  * Abstract base class for SCTP receive queues. This class represents
@@ -50,34 +47,34 @@ class SCTPAssociation;
  */
 class INET_API SCTPQueue : public cObject
 {
-    public:
+  public:
     /**
-      * Constructor.
-      */
-     SCTPQueue();
+     * Constructor.
+     */
+    SCTPQueue();
 
-     /**
-      * Virtual destructor.
-      */
-     ~SCTPQueue();
+    /**
+     * Virtual destructor.
+     */
+    ~SCTPQueue();
 
-    bool checkAndInsertChunk(const uint32 key, SCTPDataVariables* chunk);
+    bool checkAndInsertChunk(const uint32 key, SCTPDataVariables *chunk);
     /* returns true if new data is inserted and false if data was present */
 
-    SCTPDataVariables* getAndExtractChunk(const uint32 tsn);
-    SCTPDataVariables* extractMessage();
+    SCTPDataVariables *getAndExtractChunk(const uint32 tsn);
+    SCTPDataVariables *extractMessage();
 
     void printQueue() const;
 
     uint32 getQueueSize() const;
 
-    SCTPDataVariables* getFirstChunk() const;
+    SCTPDataVariables *getFirstChunk() const;
 
-    cMessage* getMsg(const uint32 key) const;
+    cMessage *getMsg(const uint32 key) const;
 
-    SCTPDataVariables* getChunk(const uint32 key) const;
+    SCTPDataVariables *getChunk(const uint32 key) const;
 
-    SCTPDataVariables* getChunkFast(const uint32 tsn, bool& firstTime);
+    SCTPDataVariables *getChunkFast(const uint32 tsn, bool& firstTime);
 
     void removeMsg(const uint32 key);
 
@@ -85,28 +82,27 @@ class INET_API SCTPQueue : public cObject
 
     int32 getNumBytes() const;
 
-    SCTPDataVariables* dequeueChunkBySSN(const uint16 ssn);
+    SCTPDataVariables *dequeueChunkBySSN(const uint16 ssn);
 
     uint32 getSizeOfFirstChunk(const Address& remoteAddress);
 
     uint16 getFirstSsnInQueue(const uint16 sid);
 
     void findEarliestOutstandingTSNsForPath(const Address& remoteAddress,
-                                            uint32&            earliestOutstandingTSN,
-                                            uint32&            rtxEarliestOutstandingTSN) const;
+            uint32& earliestOutstandingTSN,
+            uint32& rtxEarliestOutstandingTSN) const;
 
   public:
-     typedef std::map<uint32, SCTPDataVariables*> PayloadQueue;
-     PayloadQueue payloadQueue;
+    typedef std::map<uint32, SCTPDataVariables *> PayloadQueue;
+    PayloadQueue payloadQueue;
 
   protected:
-     SCTPAssociation* assoc;    // SCTP connection object
+    SCTPAssociation *assoc;    // SCTP connection object
 
   private:
-     PayloadQueue::iterator GetChunkFastIterator;
+    PayloadQueue::iterator GetChunkFastIterator;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPQUEUE_H
 
-
-#endif

@@ -22,16 +22,14 @@
 #include "BandListening.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(DimensionalReceiver);
 
-void DimensionalReceiver::printToStream(std::ostream &stream) const
+void DimensionalReceiver::printToStream(std::ostream& stream) const
 {
     stream << "dimensional receiver, "
            << "energyDetection = " << energyDetection << ", "
-           << "sensitivity = " <<  sensitivity << ", "
+           << "sensitivity = " << sensitivity << ", "
            << "carrierFrequency = " << carrierFrequency << ", "
            << "bandwidth = " << bandwidth;
 }
@@ -41,8 +39,7 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
     std::vector<ConstMapping *> receptionPowers;
     const DimensionalNoise *dimensionalBackgroundNoise = check_and_cast<const DimensionalNoise *>(backgroundNoise);
     receptionPowers.push_back(const_cast<ConstMapping *>(dimensionalBackgroundNoise->getPower()));
-    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++)
-    {
+    for (std::vector<const IReception *>::const_iterator it = receptions->begin(); it != receptions->end(); it++) {
         const DimensionalReception *reception = check_and_cast<const DimensionalReception *>(*it);
         receptionPowers.push_back(const_cast<ConstMapping *>(reception->getPower()));
     }
@@ -80,10 +77,6 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
     EV_DEBUG << "SNIR end" << endl;
     return MappingUtils::findMin(*snirMapping, start, end);
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

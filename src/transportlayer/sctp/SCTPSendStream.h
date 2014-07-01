@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_SCTPSENDSTREAM_H
 #define __INET_SCTPSENDSTREAM_H
 
@@ -28,36 +27,34 @@
 #include "SCTPQueue.h"
 
 namespace inet {
-
 class SCTPMessage;
 class SCTPCommand;
 class SCTPDataVariables;
 
-
 class INET_API SCTPSendStream : public cObject
 {
-    protected:
-        uint16  streamId;
-        uint16  nextStreamSeqNum;
-        cPacketQueue* streamQ;
-        cPacketQueue* uStreamQ;
-        int32     ssn;
-        uint64 totalLength;
-    public:
+  protected:
+    uint16 streamId;
+    uint16 nextStreamSeqNum;
+    cPacketQueue *streamQ;
+    cPacketQueue *uStreamQ;
+    int32 ssn;
+    uint64 totalLength;
 
-        SCTPSendStream(const uint16 id);
-        ~SCTPSendStream();
+  public:
 
-        inline cPacketQueue* getStreamQ() const { return streamQ; };
-        inline cPacketQueue* getUnorderedStreamQ() const { return uStreamQ; };
-        inline uint32 getNextStreamSeqNum() const { return nextStreamSeqNum; };
-        inline void setNextStreamSeqNum(const uint16 num) { nextStreamSeqNum = num; };
-        inline uint16 getStreamId() const { return streamId; };
-        inline void setStreamId(const uint16 id) { streamId = id; };
-        void deleteQueue();
+    SCTPSendStream(const uint16 id);
+    ~SCTPSendStream();
+
+    inline cPacketQueue *getStreamQ() const { return streamQ; };
+    inline cPacketQueue *getUnorderedStreamQ() const { return uStreamQ; };
+    inline uint32 getNextStreamSeqNum() const { return nextStreamSeqNum; };
+    inline void setNextStreamSeqNum(const uint16 num) { nextStreamSeqNum = num; };
+    inline uint16 getStreamId() const { return streamId; };
+    inline void setStreamId(const uint16 id) { streamId = id; };
+    void deleteQueue();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPSENDSTREAM_H
 
-
-#endif

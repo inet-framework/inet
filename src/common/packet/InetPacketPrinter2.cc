@@ -15,61 +15,63 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
-
 
 #include "Address.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame.h"
-#else
+#else // ifdef WITH_ETHERNET
 class EtherFrame;
-#endif
+#endif // ifdef WITH_ETHERNET
 
 #ifdef WITH_IPv4
 #include "ARPPacket_m.h"
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
-#else
+#else // ifdef WITH_IPv4
 class ARPPacket;
 class ICMPMessage;
 class IPv4Datagram;
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
-#else
+#else // ifdef WITH_TCP_COMMON
 class TCPSegment;
-#endif
+#endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
 #include "UDPPacket.h"
-#else
+#else // ifdef WITH_UDP
 class UDPPacket;
-#endif
+#endif // ifdef WITH_UDP
 
 #ifdef WITH_IEEE80211
 #include "Ieee80211Frame_m.h"
-#else
+#else // ifdef WITH_IEEE80211
 class Ieee80211Frame;
-#endif
+#endif // ifdef WITH_IEEE80211
 
 #include "INetworkDatagram.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_RIP
 #include "RIPPacket_m.h"
-#else
+#else // ifdef WITH_RIP
 class RIPPacket;
-#endif
+#endif // ifdef WITH_RIP
 
 #ifdef WITH_RADIO
 #include "RadioFrame.h"
 #include "ScalarTransmission.h"
-#else
-namespace inet { namespace physicallayer { class RadioFrame; } }
-#endif
+#else // ifdef WITH_RADIO
+namespace inet {
+namespace physicallayer {
+class RadioFrame;
+} // namespace physicallayer
+} // namespace inet
+#endif // ifdef WITH_RADIO
 
 //TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
 #if OMNETPP_VERSION >= 0x0405
@@ -79,24 +81,26 @@ using namespace physicallayer;
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
-    protected:
-        mutable bool showEncapsulatedPackets;
-        mutable Address srcAddr;
-        mutable Address destAddr;
-    protected:
-        std::string formatARPPacket(ARPPacket *packet) const;
-        std::string formatICMPPacket(ICMPMessage *packet) const;
-        std::string formatIeee80211Frame(Ieee80211Frame *packet) const;
-        std::string formatPingPayload(PingPayload *packet) const;
-        std::string formatRIPPacket(RIPPacket *packet) const;
-        std::string formatRadioFrame(RadioFrame *packet) const;
-        std::string formatTCPPacket(TCPSegment *tcpSeg) const;
-        std::string formatUDPPacket(UDPPacket *udpPacket) const;
-    public:
-        InetPacketPrinter2() { showEncapsulatedPackets = true; }
-        virtual ~InetPacketPrinter2() {}
-        virtual int getScoreFor(cMessage *msg) const;
-        virtual void printMessage(std::ostream& os, cMessage *msg) const;
+  protected:
+    mutable bool showEncapsulatedPackets;
+    mutable Address srcAddr;
+    mutable Address destAddr;
+
+  protected:
+    std::string formatARPPacket(ARPPacket *packet) const;
+    std::string formatICMPPacket(ICMPMessage *packet) const;
+    std::string formatIeee80211Frame(Ieee80211Frame *packet) const;
+    std::string formatPingPayload(PingPayload *packet) const;
+    std::string formatRIPPacket(RIPPacket *packet) const;
+    std::string formatRadioFrame(RadioFrame *packet) const;
+    std::string formatTCPPacket(TCPSegment *tcpSeg) const;
+    std::string formatUDPPacket(UDPPacket *udpPacket) const;
+
+  public:
+    InetPacketPrinter2() { showEncapsulatedPackets = true; }
+    virtual ~InetPacketPrinter2() {}
+    virtual int getScoreFor(cMessage *msg) const;
+    virtual void printMessage(std::ostream& os, cMessage *msg) const;
 };
 
 Register_MessagePrinter(InetPacketPrinter2);
@@ -133,25 +137,25 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
                 }
             }
             else
-#endif
-                out << pk->getClassName() << ": " << srcAddr << " > " << destAddr;
+#endif // ifdef WITH_IPv4
+            out << pk->getClassName() << ": " << srcAddr << " > " << destAddr;
         }
 #ifdef WITH_ETHERNET
         else if (dynamic_cast<EtherFrame *>(pk)) {
             EtherFrame *eth = static_cast<EtherFrame *>(pk);
             out << "ETH: " << eth->getSrc() << " > " << eth->getDest() << " (" << eth->getByteLength() << " bytes)";
         }
-#endif
+#endif // ifdef WITH_ETHERNET
 #ifdef WITH_TCP_COMMON
         else if (dynamic_cast<TCPSegment *>(pk)) {
             out << formatTCPPacket(static_cast<TCPSegment *>(pk));
         }
-#endif
+#endif // ifdef WITH_TCP_COMMON
 #ifdef WITH_UDP
         else if (dynamic_cast<UDPPacket *>(pk)) {
             out << formatUDPPacket(static_cast<UDPPacket *>(pk));
         }
-#endif
+#endif // ifdef WITH_UDP
 #ifdef WITH_IPv4
         else if (dynamic_cast<ICMPMessage *>(pk)) {
             out << formatICMPPacket(static_cast<ICMPMessage *>(pk));
@@ -159,12 +163,12 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         else if (dynamic_cast<ARPPacket *>(pk)) {
             out << formatARPPacket(static_cast<ARPPacket *>(pk));
         }
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IEEE80211
         else if (dynamic_cast<Ieee80211Frame *>(pk)) {
             out << formatIeee80211Frame(static_cast<Ieee80211Frame *>(pk));
         }
-#endif
+#endif // ifdef WITH_IEEE80211
         else if (dynamic_cast<PingPayload *>(pk)) {
             out << formatPingPayload(static_cast<PingPayload *>(pk));
         }
@@ -172,14 +176,14 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
         else if (dynamic_cast<RIPPacket *>(pk)) {
             out << formatRIPPacket(static_cast<RIPPacket *>(pk));
         }
-#endif
+#endif // ifdef WITH_RIP
 #ifdef WITH_RADIO
         else if (dynamic_cast<RadioFrame *>(pk)) {
             out << formatRadioFrame(static_cast<RadioFrame *>(pk));
         }
-#endif
+#endif // ifdef WITH_RADIO
         else
-            out << pk->getClassName() <<":" << pk->getByteLength() << " bytes";
+            out << pk->getClassName() << ":" << pk->getByteLength() << " bytes";
         if (outs.length())
             out << INFO_SEPAR << outs;
         outs = out.str();
@@ -196,21 +200,25 @@ std::string InetPacketPrinter2::formatARPPacket(ARPPacket *packet) const
             os << "ARP req: " << packet->getDestIPAddress()
                << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
             break;
+
         case ARP_REPLY:
             os << "ARP reply: "
-            << packet->getSrcIPAddress() << "=" << packet->getSrcMACAddress()
-            << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))"
+               << packet->getSrcIPAddress() << "=" << packet->getSrcMACAddress()
+               << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))"
             ;
             break;
+
         case ARP_RARP_REQUEST:
             os << "RARP req: " << packet->getDestMACAddress()
                << "=? (s=" << packet->getSrcIPAddress() << "(" << packet->getSrcMACAddress() << "))";
             break;
+
         case ARP_RARP_REPLY:
             os << "RARP reply: "
                << packet->getSrcMACAddress() << "=" << packet->getSrcIPAddress()
                << " (d=" << packet->getDestIPAddress() << "(" << packet->getDestMACAddress() << "))";
             break;
+
         default:
             os << "ARP op=" << packet->getOpcode() << ": d=" << packet->getDestIPAddress()
                << "(" << packet->getDestMACAddress()
@@ -218,7 +226,7 @@ std::string InetPacketPrinter2::formatARPPacket(ARPPacket *packet) const
                << "(" << packet->getSrcMACAddress() << ")";
             break;
     }
-#endif
+#endif // ifdef WITH_IPv4
     return os.str();
 }
 
@@ -229,79 +237,100 @@ std::string InetPacketPrinter2::formatIeee80211Frame(Ieee80211Frame *packet) con
     os << "WLAN ";
     switch (packet->getType()) {
         case ST_ASSOCIATIONREQUEST:
-            os << " assoc req";     //TODO
+            os << " assoc req";    //TODO
             break;
+
         case ST_ASSOCIATIONRESPONSE:
-            os << " assoc resp";     //TODO
+            os << " assoc resp";    //TODO
             break;
+
         case ST_REASSOCIATIONREQUEST:
-            os << " reassoc req";     //TODO
+            os << " reassoc req";    //TODO
             break;
+
         case ST_REASSOCIATIONRESPONSE:
-            os << " reassoc resp";     //TODO
+            os << " reassoc resp";    //TODO
             break;
+
         case ST_PROBEREQUEST:
-            os << " probe request";     //TODO
+            os << " probe request";    //TODO
             break;
+
         case ST_PROBERESPONSE:
-            os << " probe response";     //TODO
+            os << " probe response";    //TODO
             break;
+
         case ST_BEACON:
-            os << "beacon";     //TODO
+            os << "beacon";    //TODO
             break;
+
         case ST_ATIM:
-            os << " atim";     //TODO
+            os << " atim";    //TODO
             break;
+
         case ST_DISASSOCIATION:
-            os << " disassoc";     //TODO
+            os << " disassoc";    //TODO
             break;
+
         case ST_AUTHENTICATION:
-            os << " auth";     //TODO
+            os << " auth";    //TODO
             break;
+
         case ST_DEAUTHENTICATION:
-            os << " deauth";     //TODO
+            os << " deauth";    //TODO
             break;
+
         case ST_ACTION:
-            os << " action";     //TODO
+            os << " action";    //TODO
             break;
+
         case ST_NOACKACTION:
-            os << " noackaction";     //TODO
+            os << " noackaction";    //TODO
             break;
+
         case ST_PSPOLL:
-            os << " pspoll";     //TODO
+            os << " pspoll";    //TODO
             break;
-        case ST_RTS:
-        {
+
+        case ST_RTS: {
             Ieee80211RTSFrame *pk = check_and_cast<Ieee80211RTSFrame *>(packet);
             os << " rts " << pk->getTransmitterAddress() << " to " << packet->getReceiverAddress();
             break;
         }
+
         case ST_CTS:
             os << " cts " << packet->getReceiverAddress();
             break;
+
         case ST_ACK:
             os << " ack " << packet->getReceiverAddress();
             break;
+
         case ST_BLOCKACK_REQ:
-            os << " reassoc resp";     //TODO
+            os << " reassoc resp";    //TODO
             break;
+
         case ST_BLOCKACK:
-            os << " block ack";     //TODO
+            os << " block ack";    //TODO
             break;
+
         case ST_DATA:
-            os << " data";     //TODO
+            os << " data";    //TODO
             break;
+
         case ST_LBMS_REQUEST:
-            os << " lbms req";     //TODO
+            os << " lbms req";    //TODO
             break;
+
         case ST_LBMS_REPORT:
-            os << " lbms report";     //TODO
+            os << " lbms report";    //TODO
             break;
+
         default:
             os << "??? (" << packet->getClassName() << ")";
             break;
     }
-#endif
+#endif // ifdef WITH_IEEE80211
     return os.str();
 }
 
@@ -312,18 +341,37 @@ std::string InetPacketPrinter2::formatTCPPacket(TCPSegment *tcpSeg) const
     os << "TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ":";
     // flags
     bool flags = false;
-    if (tcpSeg->getUrgBit()) { flags = true; os << " U"; }
-    if (tcpSeg->getAckBit()) { flags = true; os << " A"; }
-    if (tcpSeg->getPshBit()) { flags = true; os << " P"; }
-    if (tcpSeg->getRstBit()) { flags = true; os << " R"; }
-    if (tcpSeg->getSynBit()) { flags = true; os << " S"; }
-    if (tcpSeg->getFinBit()) { flags = true; os << " F"; }
-    if (!flags) { os << " ."; }
+    if (tcpSeg->getUrgBit()) {
+        flags = true;
+        os << " U";
+    }
+    if (tcpSeg->getAckBit()) {
+        flags = true;
+        os << " A";
+    }
+    if (tcpSeg->getPshBit()) {
+        flags = true;
+        os << " P";
+    }
+    if (tcpSeg->getRstBit()) {
+        flags = true;
+        os << " R";
+    }
+    if (tcpSeg->getSynBit()) {
+        flags = true;
+        os << " S";
+    }
+    if (tcpSeg->getFinBit()) {
+        flags = true;
+        os << " F";
+    }
+    if (!flags) {
+        os << " .";
+    }
 
     // data-seqno
-    if (tcpSeg->getPayloadLength()>0 || tcpSeg->getSynBit())
-    {
-        os << " " << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo()+tcpSeg->getPayloadLength();
+    if (tcpSeg->getPayloadLength() > 0 || tcpSeg->getSynBit()) {
+        os << " " << tcpSeg->getSequenceNo() << ":" << tcpSeg->getSequenceNo() + tcpSeg->getPayloadLength();
         os << "(" << tcpSeg->getPayloadLength() << ")";
     }
 
@@ -337,7 +385,7 @@ std::string InetPacketPrinter2::formatTCPPacket(TCPSegment *tcpSeg) const
     // urgent
     if (tcpSeg->getUrgBit())
         os << " urg " << tcpSeg->getUrgentPointer();
-#endif
+#endif // ifdef WITH_TCP_COMMON
     return os.str();
 }
 
@@ -347,7 +395,7 @@ std::string InetPacketPrinter2::formatUDPPacket(UDPPacket *udpPacket) const
 #ifdef WITH_UDP
     os << "UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
        << ": (" << udpPacket->getByteLength() << ")";
-#endif
+#endif // ifdef WITH_UDP
     return os.str();
 }
 
@@ -358,13 +406,20 @@ std::string InetPacketPrinter2::formatPingPayload(PingPayload *packet) const
 #ifdef WITH_IPv4
     ICMPMessage *owner = dynamic_cast<ICMPMessage *>(packet->getOwner());
     if (owner) {
-        switch(owner->getType()) {
-            case ICMP_ECHO_REQUEST: os << "req "; break;
-            case ICMP_ECHO_REPLY: os << "reply "; break;
-            default: break;
+        switch (owner->getType()) {
+            case ICMP_ECHO_REQUEST:
+                os << "req ";
+                break;
+
+            case ICMP_ECHO_REPLY:
+                os << "reply ";
+                break;
+
+            default:
+                break;
         }
     }
-#endif
+#endif // ifdef WITH_IPv4
     os << srcAddr << " to " << destAddr
        << " (" << packet->getByteLength() << " bytes) id=" << packet->getId()
        << " seq=" << packet->getSeqNo();
@@ -380,20 +435,23 @@ std::string InetPacketPrinter2::formatICMPPacket(ICMPMessage *packet) const
         case ICMP_ECHO_REQUEST:
             os << "ICMP echo request " << srcAddr << " to " << destAddr;
             break;
+
         case ICMP_ECHO_REPLY:
             os << "ICMP echo reply " << srcAddr << " to " << destAddr;
             break;
+
         case ICMP_DESTINATION_UNREACHABLE:
             os << "ICMP dest unreachable " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode()
                << " origin:" << INFO_SEPAR;
             InetPacketPrinter2().printMessage(os, packet->getEncapsulatedPacket());
-            showEncapsulatedPackets = false; // stop printing
+            showEncapsulatedPackets = false;    // stop printing
             break;
+
         default:
             os << "ICMP " << srcAddr << " to " << destAddr << " type=" << packet->getType() << " code=" << packet->getCode();
             break;
     }
-#endif
+#endif // ifdef WITH_IPv4
     return os.str();
 }
 
@@ -402,14 +460,22 @@ std::string InetPacketPrinter2::formatRIPPacket(RIPPacket *packet) const
     std::ostringstream os;
 #ifdef WITH_RIP
     os << "RIP: ";
-    switch(packet->getCommand()) {
-        case RIP_REQUEST:  os << "req "; break;
-        case RIP_RESPONSE: os << "resp "; break;
-        default: os << "unknown "; break;
+    switch (packet->getCommand()) {
+        case RIP_REQUEST:
+            os << "req ";
+            break;
+
+        case RIP_RESPONSE:
+            os << "resp ";
+            break;
+
+        default:
+            os << "unknown ";
+            break;
     }
     unsigned int size = packet->getEntryArraySize();
     for (unsigned int i = 0; i < size; ++i) {
-        RIPEntry &entry = packet->getEntry(i);
+        RIPEntry& entry = packet->getEntry(i);
         if (i > 0)
             os << "; ";
         if (i > 2) {
@@ -422,9 +488,9 @@ std::string InetPacketPrinter2::formatRIPPacket(RIPPacket *packet) const
         if (entry.metric == 16)
             os << " unroutable";
         else
-        os << " m=" << entry.metric;
+            os << " m=" << entry.metric;
     }
-#endif
+#endif // ifdef WITH_RIP
     return os.str();
 }
 
@@ -436,17 +502,16 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
     const ScalarTransmission *scalarTransmission = dynamic_cast<const ScalarTransmission *>(transmission);
     os << "RADIO from " << transmission->getStartPosition();
     if (scalarTransmission)
-        os << " on " << scalarTransmission->getCarrierFrequency().get()/1e6 << "MHz, ";
+        os << " on " << scalarTransmission->getCarrierFrequency().get() / 1e6 << "MHz, ";
     // TODO: revive
     // const Ieee80211RadioSignalTransmission *ieee80211Transmission = dynamic_cast<const Ieee80211RadioSignalTransmission *>(transmission);
     // if (ieee80211Transmission)
     //     os << "ch=" << ieee80211Transmission->getChannelNumber() << ", ";
-    os << "duration=" << SIMTIME_DBL(packet->getDuration())*1000 << "ms";
-#endif
+    os << "duration=" << SIMTIME_DBL(packet->getDuration()) * 1000 << "ms";
+#endif // ifdef WITH_RADIO
     return os.str();
 }
+} // namespace inet
 
-}
-
-#endif // Register_MessagePrinter
+#endif    // Register_MessagePrinter
 

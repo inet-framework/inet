@@ -16,18 +16,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm>   // min,max
+#include <algorithm>    // min,max
 #include "TCPReno.h"
 #include "TCP.h"
 
 namespace inet {
-
-
 Register_Class(TCPReno);
 
-
 TCPReno::TCPReno() : TCPTahoeRenoFamily(),
-        state((TCPRenoStateVariables *&)TCPAlgorithm::state)
+    state((TCPRenoStateVariables *&)TCPAlgorithm::state)
 {
 }
 
@@ -45,7 +42,7 @@ void TCPReno::recalculateSlowStartThreshold()
 
     // set ssthresh to flight size / 2, but at least 2 SMSS
     // (the formula below practically amounts to ssthresh = cwnd / 2 most of the time)
-    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd); // FIXME TODO - Does this formula computes the amount of outstanding data?
+    uint32 flight_size = std::min(state->snd_cwnd, state->snd_wnd);    // FIXME TODO - Does this formula computes the amount of outstanding data?
     // uint32 flight_size = state->snd_max - state->snd_una;
     state->ssthresh = std::max(flight_size / 2, 2 * state->snd_mss);
 
@@ -81,7 +78,7 @@ void TCPReno::processRexmitTimer(TCPEventCode& event)
         cwndVector->record(state->snd_cwnd);
 
     EV_INFO << "Begin Slow Start: resetting cwnd to " << state->snd_cwnd
-          << ", ssthresh=" << state->ssthresh << "\n";
+            << ", ssthresh=" << state->ssthresh << "\n";
 
     state->afterRto = true;
 
@@ -92,8 +89,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
 {
     TCPTahoeRenoFamily::receivedDataAck(firstSeqAcked);
 
-    if (state->dupacks >= DUPTHRESH) // DUPTHRESH = 3
-    {
+    if (state->dupacks >= DUPTHRESH) {    // DUPTHRESH = 3
         //
         // Perform Fast Recovery: set cwnd to ssthresh (deflating the window).
         //
@@ -103,13 +99,11 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
     }
-    else
-    {
+    else {
         //
         // Perform slow start and congestion avoidance.
         //
-        if (state->snd_cwnd < state->ssthresh)
-        {
+        if (state->snd_cwnd < state->ssthresh) {
             EV_INFO << "cwnd <= ssthresh: Slow Start: increasing cwnd by one SMSS bytes to ";
 
             // perform Slow Start. RFC 2581: "During slow start, a TCP increments cwnd
@@ -132,8 +126,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
 
             EV_INFO << "cwnd=" << state->snd_cwnd << "\n";
         }
-        else
-        {
+        else {
             // perform Congestion Avoidance (RFC 2581)
             uint32 incr = state->snd_mss * state->snd_mss / state->snd_cwnd;
 
@@ -157,8 +150,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         }
     }
 
-    if (state->sack_enabled && state->lossRecovery)
-    {
+    if (state->sack_enabled && state->lossRecovery) {
         // RFC 3517, page 7: "Once a TCP is in the loss recovery phase the following procedure MUST
         // be used for each arriving ACK:
         //
@@ -168,8 +160,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         // the scoreboard for sequence numbers greater than the new value of
         // HighACK SHOULD NOT be cleared when leaving the loss recovery
         // phase."
-        if (seqGE(state->snd_una, state->recoveryPoint))
-        {
+        if (seqGE(state->snd_una, state->recoveryPoint)) {
             EV_INFO << "Loss Recovery terminated.\n";
             state->lossRecovery = false;
         }
@@ -181,8 +172,7 @@ void TCPReno::receivedDataAck(uint32 firstSeqAcked)
         //
         // (B.2) Use SetPipe () to re-calculate the number of octets still
         // in the network."
-        else
-        {
+        else {
             // update of scoreboard (B.1) has already be done in readHeaderOptions()
             conn->setPipe();
 
@@ -211,12 +201,10 @@ void TCPReno::receivedDuplicateAck()
 {
     TCPTahoeRenoFamily::receivedDuplicateAck();
 
-    if (state->dupacks == DUPTHRESH) // DUPTHRESH = 3
-    {
+    if (state->dupacks == DUPTHRESH) {    // DUPTHRESH = 3
         EV_INFO << "Reno on dupAcks == DUPTHRESH(=3): perform Fast Retransmit, and enter Fast Recovery:";
 
-        if (state->sack_enabled)
-        {
+        if (state->sack_enabled) {
             // RFC 3517, page 6: "When a TCP sender receives the duplicate ACK corresponding to
             // DupThresh ACKs, the scoreboard MUST be updated with the new SACK
             // information (via Update ()).  If no previous loss event has occurred
@@ -237,9 +225,8 @@ void TCPReno::receivedDuplicateAck()
             // recovery phase (as described in section 5) MUST NOT be initiated
             // until HighACK is greater than or equal to the new value of
             // RecoveryPoint."
-            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) // HighACK = snd_una
-            {
-                state->recoveryPoint = state->snd_max; // HighData = snd_max
+            if (state->recoveryPoint == 0 || seqGE(state->snd_una, state->recoveryPoint)) {    // HighACK = snd_una
+                state->recoveryPoint = state->snd_max;    // HighData = snd_max
                 state->lossRecovery = true;
                 EV_DETAIL << " recoveryPoint=" << state->recoveryPoint;
             }
@@ -254,7 +241,7 @@ void TCPReno::receivedDuplicateAck()
         // enter Fast Recovery
         recalculateSlowStartThreshold();
         // "set cwnd to ssthresh plus 3 * SMSS." (RFC 2581)
-        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss; // 20051129 (1)
+        state->snd_cwnd = state->ssthresh + 3 * state->snd_mss;    // 20051129 (1)
 
         if (cwndVector)
             cwndVector->record(state->snd_cwnd);
@@ -269,8 +256,7 @@ void TCPReno::receivedDuplicateAck()
         // Note: Restart of REXMIT timer on retransmission is not part of RFC 2581, however optional in RFC 3517 if sent during recovery.
         // Resetting the REXMIT timer is discussed in RFC 2582/3782 (NewReno) and RFC 2988.
 
-        if (state->sack_enabled)
-        {
+        if (state->sack_enabled) {
             // RFC 3517, page 7: "(4) Run SetPipe ()
             //
             // Set a "pipe" variable  to the number of outstanding octets
@@ -282,8 +268,7 @@ void TCPReno::receivedDuplicateAck()
             conn->setPipe();
             // RFC 3517, page 7: "(5) In order to take advantage of potential additional available
             // cwnd, proceed to step (C) below."
-            if (state->lossRecovery)
-            {
+            if (state->lossRecovery) {
                 // RFC 3517, page 9: "Therefore we give implementers the latitude to use the standard
                 // [RFC2988] style RTO management or, optionally, a more careful variant
                 // that re-arms the RTO timer on each retransmission that is sent during
@@ -306,8 +291,7 @@ void TCPReno::receivedDuplicateAck()
         // try to transmit new segments (RFC 2581)
         sendData(false);
     }
-    else if (state->dupacks > DUPTHRESH) // DUPTHRESH = 3
-    {
+    else if (state->dupacks > DUPTHRESH) {    // DUPTHRESH = 3
         //
         // Reno: For each additional duplicate ACK received, increment cwnd by SMSS.
         // This artificially inflates the congestion window in order to reflect the
@@ -336,8 +320,5 @@ void TCPReno::receivedDuplicateAck()
         sendData(false);
     }
 }
-
-
-}
-
+} // namespace inet
 

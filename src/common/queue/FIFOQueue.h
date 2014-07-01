@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_FIFOQUEUE_H
 #define __INET_FIFOQUEUE_H
 
@@ -25,7 +24,6 @@
 #include "IQueueAccess.h"
 
 namespace inet {
-
 /**
  * Passive FIFO Queue with unlimited buffer space.
  */
@@ -58,8 +56,7 @@ class INET_API FIFOQueue : public PassiveQueueBase, public IQueueAccess
 
     virtual int getByteLength() const { return byteLength; }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_FIFOQUEUE_H
 
-
-#endif

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPEchoApp.h"
 
 #include "ByteArrayMessage.h"
@@ -24,7 +23,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
 Define_Module(TCPEchoApp);
 
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
@@ -39,8 +37,7 @@ void TCPEchoApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         delay = par("echoDelay");
         echoFactor = par("echoFactor");
 
@@ -53,8 +50,7 @@ void TCPEchoApp::initialize(int stage)
 
         nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         if (isNodeUp())
             startListening();
     }
@@ -81,8 +77,7 @@ void TCPEchoApp::stopListening()
 
 void TCPEchoApp::sendDown(cMessage *msg)
 {
-    if (msg->isPacket())
-    {
+    if (msg->isPacket()) {
         bytesSent += ((cPacket *)msg)->getByteLength();
         emit(sentPkSignal, (cPacket *)msg);
     }
@@ -94,12 +89,10 @@ void TCPEchoApp::handleMessage(cMessage *msg)
 {
     if (!isNodeUp())
         throw cRuntimeError("Application is not running");
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         sendDown(msg);
     }
-    else if (msg->getKind() == TCP_I_PEER_CLOSED)
-    {
+    else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
@@ -109,18 +102,15 @@ void TCPEchoApp::handleMessage(cMessage *msg)
         else
             scheduleAt(simTime() + delay, msg); // send after a delay
     }
-    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA)
-    {
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         cPacket *pkt = check_and_cast<cPacket *>(msg);
         emit(rcvdPkSignal, pkt);
         bytesRcvd += pkt->getByteLength();
 
-        if (echoFactor == 0)
-        {
+        if (echoFactor == 0) {
             delete pkt;
         }
-        else
-        {
+        else {
             // reverse direction, modify length, and send it back
             pkt->setKind(TCP_C_SEND);
             TCPCommand *ind = check_and_cast<TCPCommand *>(pkt->removeControlInfo());
@@ -139,8 +129,7 @@ void TCPEchoApp::handleMessage(cMessage *msg)
             ByteArrayMessage *baMsg = dynamic_cast<ByteArrayMessage *>(pkt);
 
             // if (dataTransferMode == TCP_TRANSFER_BYTESTREAM)
-            if (baMsg)
-            {
+            if (baMsg) {
                 ByteArray& outdata = baMsg->getByteArray();
                 ByteArray indata = outdata;
                 outdata.setDataArraySize(byteLen);
@@ -155,14 +144,12 @@ void TCPEchoApp::handleMessage(cMessage *msg)
                 scheduleAt(simTime() + delay, pkt); // send after a delay
         }
     }
-    else
-    {
+    else {
         // some indication -- ignore
         delete msg;
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[80];
         sprintf(buf, "rcvd: %ld bytes\nsent: %ld bytes", bytesRcvd, bytesSent);
         getDisplayString().setTagArg("t", 0, buf);
@@ -181,8 +168,10 @@ bool TCPEchoApp::handleOperationStage(LifecycleOperation *operation, int stage, 
             // TODO: wait until socket is closed
             stopListening();
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation)) ;
-    else throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
+    else if (dynamic_cast<NodeCrashOperation *>(operation))
+        ;
+    else
+        throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
 
@@ -191,9 +180,5 @@ void TCPEchoApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
-
-
-
-}
-
+} // namespace inet
 

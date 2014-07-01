@@ -24,29 +24,27 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
-
 /**
  * This class provides the abstract interface for different address types.
  */
 class INET_API IAddressType
 {
-    public:
-        IAddressType() { }
-        virtual ~IAddressType() { }
+  public:
+    IAddressType() {}
+    virtual ~IAddressType() {}
 
-        virtual int getMaxPrefixLength() const = 0;
-        virtual Address getUnspecifiedAddress() const = 0;
-        virtual Address getBroadcastAddress() const = 0;
-        virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
-        virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
-        virtual INetworkProtocolControlInfo * createNetworkProtocolControlInfo() const = 0; // TODO: move, where?
-        /**
-         * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.
-         */
-        virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
+    virtual int getMaxPrefixLength() const = 0;
+    virtual Address getUnspecifiedAddress() const = 0;
+    virtual Address getBroadcastAddress() const = 0;
+    virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
+    virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
+    virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const = 0;    // TODO: move, where?
+    /**
+     * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.
+     */
+    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IADDRESSTYPE_H
 
-
-#endif

@@ -17,7 +17,6 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #ifndef __INET_CONSTSPEEDMOBILITY_H
 #define __INET_CONSTSPEEDMOBILITY_H
 
@@ -26,8 +25,6 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Moves along a line with constant speed to a randomly chosen target.
  * When the target is reached it selects randomly a new one.
@@ -53,8 +50,7 @@ class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
   public:
     ConstSpeedMobility();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_CONSTSPEEDMOBILITY_H
 
-
-#endif

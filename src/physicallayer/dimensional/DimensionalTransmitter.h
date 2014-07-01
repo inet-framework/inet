@@ -21,25 +21,20 @@
 #include "FlatTransmitterBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DimensionalTransmitter : public FlatTransmitterBase
 {
-    public:
-        DimensionalTransmitter() :
-            FlatTransmitterBase()
-        {}
+  public:
+    DimensionalTransmitter() :
+        FlatTransmitterBase()
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIMENSIONALTRANSMITTER_H
 
-}
-
-
-#endif

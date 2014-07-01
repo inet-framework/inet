@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IPV6DATAGRAM_H
 #define __INET_IPV6DATAGRAM_H
 
@@ -25,7 +24,6 @@
 #include "IPv6Datagram_m.h"
 
 namespace inet {
-
 /**
  * Represents an IPv6 datagram. More info in the IPv6Datagram.msg file
  * (and the documentation generated from it).
@@ -33,7 +31,7 @@ namespace inet {
 class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
 {
   protected:
-    typedef std::vector<IPv6ExtensionHeader*> ExtensionHeaders;
+    typedef std::vector<IPv6ExtensionHeader *> ExtensionHeaders;
     ExtensionHeaders extensionHeaders;
 
   private:
@@ -47,7 +45,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     IPv6Datagram& operator=(const IPv6Datagram& other);
     ~IPv6Datagram();
 
-    virtual IPv6Datagram *dup() const {return new IPv6Datagram(*this);}
+    virtual IPv6Datagram *dup() const { return new IPv6Datagram(*this); }
 
     /**
      * Returns bits 0-5 of the Traffic Class field, a value in the 0..63 range
@@ -57,17 +55,17 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     /**
      * Sets bits 0-5 of the Traffic Class field; expects a value in the 0..63 range
      */
-    virtual void setDiffServCodePoint(int dscp)  { setTrafficClass( (getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
+    virtual void setDiffServCodePoint(int dscp) { setTrafficClass((getTrafficClass() & 0xc0) | (dscp & 0x3f)); }
 
     /**
      * Returns bits 6-7 of the Traffic Class field, a value in the range 0..3
      */
-    virtual int getExplicitCongestionNotification() const  { return (getTrafficClass() >> 6) & 0x03; }
+    virtual int getExplicitCongestionNotification() const { return (getTrafficClass() >> 6) & 0x03; }
 
     /**
      * Sets bits 6-7 of the Traffic Class field; expects a value in the 0..3 range
      */
-    virtual void setExplicitCongestionNotification(int ecn)  { setTrafficClass( (getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
+    virtual void setExplicitCongestionNotification(int ecn) { setTrafficClass((getTrafficClass() & 0x3f) | ((ecn & 0x3) << 6)); }
 
     /** Generated but unused method, should not be called. */
     virtual void setExtensionHeaderArraySize(unsigned int size);
@@ -91,7 +89,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      * second extension is returned. (The datagram might
      * contain two Destination Options extension.)
      */
-    virtual IPv6ExtensionHeader* findExtensionHeaderByType(IPProtocolId extensionType, int index=0) const;
+    virtual IPv6ExtensionHeader *findExtensionHeaderByType(IPProtocolId extensionType, int index = 0) const;
 
     /**
      * Adds an extension header to the datagram.
@@ -121,25 +119,23 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
     /**
      * Removes and returns the first extension header of this datagram
      */
-    virtual IPv6ExtensionHeader* removeFirstExtensionHeader();
+    virtual IPv6ExtensionHeader *removeFirstExtensionHeader();
 
     /**
      * Removes and returns the first extension header with the given type.
      */
-    virtual IPv6ExtensionHeader* removeExtensionHeader(IPProtocolId extensionType);
-
+    virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
 
     virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
-    virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toIPv6()); }
+    virtual void setSourceAddress(const Address& address) { setSrcAddress(address.toIPv6()); }
     virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
-    virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toIPv6()); }
-    virtual int getTransportProtocol() const {return IPv6Datagram_Base::getTransportProtocol();}
-    virtual void setTransportProtocol(int protocol) {IPv6Datagram_Base::setTransportProtocol(protocol);}
+    virtual void setDestinationAddress(const Address& address) { setDestAddress(address.toIPv6()); }
+    virtual int getTransportProtocol() const { return IPv6Datagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) { IPv6Datagram_Base::setTransportProtocol(protocol); }
 };
 
 std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV6DATAGRAM_H
 
-
-#endif

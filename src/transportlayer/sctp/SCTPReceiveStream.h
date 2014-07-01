@@ -24,19 +24,18 @@
 #include "SCTPQueue.h"
 
 namespace inet {
-
-
 class INET_API SCTPReceiveStream : public cObject
 {
   protected:
     uint16 streamId;
     int32 expectedStreamSeqNum;
-    SCTPQueue* deliveryQ;
-    SCTPQueue* orderedQ;
-    SCTPQueue* unorderedQ;
-    uint32 reassemble(SCTPQueue* queue, uint32 tsn);
+    SCTPQueue *deliveryQ;
+    SCTPQueue *orderedQ;
+    SCTPQueue *unorderedQ;
+    uint32 reassemble(SCTPQueue *queue, uint32 tsn);
+
   public:
-    uint32 enqueueNewDataChunk(SCTPDataVariables* dchunk);
+    uint32 enqueueNewDataChunk(SCTPDataVariables *dchunk);
     /**
      * Ctor.
      */
@@ -46,16 +45,15 @@ class INET_API SCTPReceiveStream : public cObject
      * Virtual dtor.
      */
     ~SCTPReceiveStream();
-    inline SCTPQueue* getDeliveryQ() const { return deliveryQ; };
-    inline SCTPQueue* getOrderedQ() const { return orderedQ; };
-    inline SCTPQueue* getUnorderedQ() const { return unorderedQ; };
+    inline SCTPQueue *getDeliveryQ() const { return deliveryQ; };
+    inline SCTPQueue *getOrderedQ() const { return orderedQ; };
+    inline SCTPQueue *getUnorderedQ() const { return unorderedQ; };
     inline int32 getExpectedStreamSeqNum() const { return expectedStreamSeqNum; };
     inline int32 getStreamId() const { return streamId; };
     inline void setExpectedStreamSeqNum(const int32 num) { expectedStreamSeqNum = num; };
     inline void setStreamId(const uint16 id) { streamId = id; };
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPRECEIVESTREAM_H
 
-
-#endif

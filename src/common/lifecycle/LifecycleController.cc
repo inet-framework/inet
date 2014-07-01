@@ -22,9 +22,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 Define_Module(LifecycleController);
-
 
 void LifecycleController::Callback::init(LifecycleController *controller, LifecycleOperation *operation, cModule *module)
 {
@@ -43,9 +41,9 @@ void LifecycleController::Callback::invoke()
 //----
 
 template<typename T>
-void vector_delete_element(std::vector<T*>& v, T* p)
+void vector_delete_element(std::vector<T *>& v, T *p)
 {
-    typename std::vector<T*>::iterator it = std::find(v.begin(), v.end(), p);
+    typename std::vector<T *>::iterator it = std::find(v.begin(), v.end(), p);
     ASSERT(it != v.end());
     v.erase(it);
     delete p;
@@ -71,7 +69,7 @@ void LifecycleController::processCommand(const cXMLElement& node)
     // resolve operation
     const char *operationName = node.getAttribute("operation");
     LifecycleOperation *operation = check_and_cast<LifecycleOperation *>(createOne(operationName));
-    std::map<std::string,std::string> params = node.getAttributes();
+    std::map<std::string, std::string> params = node.getAttributes();
     params.erase("module");
     params.erase("t");
     params.erase("target");
@@ -96,8 +94,7 @@ bool LifecycleController::initiateOperation(LifecycleOperation *operation, IDone
 bool LifecycleController::resumeOperation(LifecycleOperation *operation)
 {
     int numStages = operation->getNumStages();
-    while (operation->currentStage < numStages)
-    {
+    while (operation->currentStage < numStages) {
         EV << "Doing stage " << operation->currentStage << "/" << operation->getNumStages()
            << " of operation " << operation->getClassName() << " on " << operation->rootModule->getFullPath() << endl;
         doOneStage(operation, operation->rootModule);
@@ -110,18 +107,16 @@ bool LifecycleController::resumeOperation(LifecycleOperation *operation)
     // done: invoke callback (unless we are still under initiateOperation())
     if (operation->operationCompletionCallback && !operation->insideInitiateOperation)
         operation->operationCompletionCallback->invoke();
-    return true; // done
+    return true;    // done
 }
 
 void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *submodule)
 {
-    ILifecycle *subject = dynamic_cast<ILifecycle*>(submodule);
-    if (subject)
-    {
+    ILifecycle *subject = dynamic_cast<ILifecycle *>(submodule);
+    if (subject) {
         Callback *callback = spareCallback ? spareCallback : new Callback();
         bool done = subject->handleOperationStage(operation, operation->currentStage, callback);
-        if (!done)
-        {
+        if (!done) {
             callback->init(this, operation, submodule);
             operation->pendingList.push_back(callback);
             spareCallback = NULL;
@@ -130,10 +125,9 @@ void LifecycleController::doOneStage(LifecycleOperation *operation, cModule *sub
             spareCallback = callback;
     }
 
-    for (cModule::SubmoduleIterator i(submodule); !i.end(); i++)
-    {
-         cModule *child = i();
-         doOneStage(operation, child);
+    for (cModule::SubmoduleIterator i(submodule); !i.end(); i++) {
+        cModule *child = i();
+        doOneStage(operation, child);
     }
 }
 
@@ -142,22 +136,18 @@ void LifecycleController::moduleOperationStageCompleted(Callback *callback)
     Enter_Method_Silent();
 
     LifecycleOperation *operation = callback->operation;
-    vector_delete_element(operation->pendingList, (IDoneCallback*)callback);
+    vector_delete_element(operation->pendingList, (IDoneCallback *)callback);
 
     EV << "Module " << callback->module->getFullPath() << " completed stage "
        << operation->currentStage << " of operation " << operation->getClassName() << ", "
        << operation->pendingList.size() << " more module(s) pending"
        << (operation->pendingList.empty() ? ", stage completed" : "") << endl;
 
-    if (operation->pendingList.empty())
-    {
+    if (operation->pendingList.empty()) {
         operation->currentStage++;
         operation->insideInitiateOperation = false;
         resumeOperation(operation);
     }
 }
-
-
-}
-
+} // namespace inet
 

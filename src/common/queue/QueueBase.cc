@@ -15,12 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "QueueBase.h"
 
 namespace inet {
-
-
 void QueueBase::initialize()
 {
     AbstractQueue::initialize();
@@ -41,9 +38,5 @@ simtime_t QueueBase::startService(cPacket *msg)
 {
     return delay;
 }
-
-
-
-}
-
+} // namespace inet
 

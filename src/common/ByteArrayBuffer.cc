@@ -15,9 +15,8 @@
 #include "ByteArrayBuffer.h"
 
 namespace inet {
-
 ByteArrayBuffer::ByteArrayBuffer()
- :
+    :
     dataLengthM(0)
 {
 }
@@ -30,7 +29,8 @@ ByteArrayBuffer::ByteArrayBuffer(const ByteArrayBuffer& other)
 
 ByteArrayBuffer& ByteArrayBuffer::operator=(const ByteArrayBuffer& other)
 {
-    if (this==&other) return *this;
+    if (this == &other)
+        return *this;
     cObject::operator=(other);
     copy(other);
     return *this;
@@ -42,7 +42,7 @@ void ByteArrayBuffer::push(const ByteArray& byteArrayP)
     dataLengthM += byteArrayP.getDataArraySize();
 }
 
-void ByteArrayBuffer::push(const void* bufferP, unsigned int bufferLengthP)
+void ByteArrayBuffer::push(const void *bufferP, unsigned int bufferLengthP)
 {
     ByteArray byteArray;
     dataListM.push_back(byteArray);
@@ -50,29 +50,26 @@ void ByteArrayBuffer::push(const void* bufferP, unsigned int bufferLengthP)
     dataLengthM += bufferLengthP;
 }
 
-unsigned int ByteArrayBuffer::getBytesToBuffer(void* bufferP, unsigned int bufferLengthP, unsigned int srcOffsP) const
+unsigned int ByteArrayBuffer::getBytesToBuffer(void *bufferP, unsigned int bufferLengthP, unsigned int srcOffsP) const
 {
     unsigned int copiedBytes = 0;
     DataList::const_iterator i;
 
-    for (i = this->dataListM.begin(); (copiedBytes < bufferLengthP) && (i != dataListM.end()); ++i)
-    {
+    for (i = this->dataListM.begin(); (copiedBytes < bufferLengthP) && (i != dataListM.end()); ++i) {
         unsigned int cbytes = i->copyDataToBuffer((char *)bufferP + copiedBytes,
-                bufferLengthP - copiedBytes, srcOffsP);
-        if (cbytes)
-        {
+                    bufferLengthP - copiedBytes, srcOffsP);
+        if (cbytes) {
             copiedBytes += cbytes;
             srcOffsP = 0;
         }
-        else
-        {
+        else {
             srcOffsP -= i->getDataArraySize();
         }
     }
     return copiedBytes;
 }
 
-unsigned int ByteArrayBuffer::popBytesToBuffer(void* bufferP, unsigned int bufferLengthP)
+unsigned int ByteArrayBuffer::popBytesToBuffer(void *bufferP, unsigned int bufferLengthP)
 {
     return drop(getBytesToBuffer(bufferP, bufferLengthP));
 }
@@ -83,18 +80,15 @@ unsigned int ByteArrayBuffer::drop(unsigned int lengthP)
 
     unsigned int length = lengthP;
 
-    while (length > 0)
-    {
+    while (length > 0) {
         unsigned int sliceLength = dataListM.front().getDataArraySize();
 
-        if (sliceLength <= length)
-        {
+        if (sliceLength <= length) {
             dataListM.pop_front();
             dataLengthM -= sliceLength;
             length -= sliceLength;
         }
-        else
-        {
+        else {
             dataListM.front().truncateData(length);
             dataLengthM -= length;
             length = 0;
@@ -108,14 +102,9 @@ void ByteArrayBuffer::clear()
 {
     dataLengthM = 0;
 
-    while (dataListM.begin() != dataListM.end())
-    {
+    while (dataListM.begin() != dataListM.end()) {
         dataListM.pop_front();
     }
 }
-
-
-
-}
-
+} // namespace inet
 

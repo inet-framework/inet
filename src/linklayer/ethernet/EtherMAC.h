@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ETHERMAC_H
 #define __INET_ETHERMAC_H
@@ -23,8 +23,6 @@
 #include "EtherMACBase.h"
 
 namespace inet {
-
-
 class EtherJam;
 class EtherPauseFrame;
 class IPassiveQueue;
@@ -53,7 +51,7 @@ class INET_API EtherMAC : public EtherMACBase
   protected:
     // states
     int numConcurrentTransmissions;    // number of colliding frames -- we must receive this many jams (caches endRxTimeList.size())
-    int  backoffs;                     // value of backoff for exponential back-off algorithm
+    int backoffs;    // value of backoff for exponential back-off algorithm
     long currentSendPkTreeID;
 
     // other variables
@@ -64,21 +62,21 @@ class INET_API EtherMAC : public EtherMACBase
     // stores the end time of the reconnect state
     struct PkIdRxTime
     {
-        long packetTreeId;             // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
-        simtime_t endTime;             // end of reception
-        PkIdRxTime(long id, simtime_t time) {packetTreeId=id; endTime = time;}
+        long packetTreeId;    // >=0: tree ID of packet being received; -1: this is a special entry that stores the end time of the reconnect state
+        simtime_t endTime;    // end of reception
+        PkIdRxTime(long id, simtime_t time) { packetTreeId = id; endTime = time; }
     };
     typedef std::list<PkIdRxTime> EndRxTimeList;
-    EndRxTimeList endRxTimeList;       // list of incoming packets, ordered by endTime
+    EndRxTimeList endRxTimeList;    // list of incoming packets, ordered by endTime
 
     // statistics
-    simtime_t totalCollisionTime;      // total duration of collisions on channel
-    simtime_t totalSuccessfulRxTxTime; // total duration of successful transmissions on channel
-    simtime_t channelBusySince;        // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
-    unsigned long numCollisions;       // collisions (NOT number of collided frames!) sensed
-    unsigned long numBackoffs;         // number of retransmissions
-    unsigned int  framesSentInBurst;   // Number of frames send out in current frame burst
-    long bytesSentInBurst;             // Number of bytes transmitted in current frame burst
+    simtime_t totalCollisionTime;    // total duration of collisions on channel
+    simtime_t totalSuccessfulRxTxTime;    // total duration of successful transmissions on channel
+    simtime_t channelBusySince;    // needed for computing totalCollisionTime/totalSuccessfulRxTxTime
+    unsigned long numCollisions;    // collisions (NOT number of collided frames!) sensed
+    unsigned long numBackoffs;    // number of retransmissions
+    unsigned int framesSentInBurst;    // Number of frames send out in current frame burst
+    long bytesSentInBurst;    // Number of bytes transmitted in current frame burst
 
     static simsignal_t collisionSignal;
     static simsignal_t backoffSignal;
@@ -117,9 +115,7 @@ class INET_API EtherMAC : public EtherMACBase
 
     virtual void printState();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ETHERMAC_H
 

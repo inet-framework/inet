@@ -23,7 +23,6 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 /**
  * An example Telnet client application. The server app should be TCPGenericSrvApp.
  */
@@ -31,8 +30,8 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
 {
   protected:
     cMessage *timeoutMsg;
-    int numLinesToType; // lines (commands) the user will type in this session
-    int numCharsToType; // characters the user will type for current line (command)
+    int numLinesToType;    // lines (commands) the user will type in this session
+    int numCharsToType;    // characters the user will type for current line (command)
     simtime_t stopTime;
 
   protected:
@@ -52,9 +51,7 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     TelnetApp();
     virtual ~TelnetApp();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TELNETAPP_H
 

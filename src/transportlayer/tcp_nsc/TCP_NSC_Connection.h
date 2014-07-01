@@ -16,14 +16,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_TCP_NSC_CONNECTION_H
 #define __INET_TCP_NSC_CONNECTION_H
 
 #ifndef HAVE_NSC
 #error Please install NSC or disable 'TCP_NSC' feature
-#endif
-
+#endif // ifndef HAVE_NSC
 
 #include "INETDefs.h"
 
@@ -33,14 +31,13 @@
 class INetStack;
 class INetStreamSocket;
 namespace inet {
-    class TCPConnectInfo;
-    class TCP_NSC;
-    class TCP_NSC_ReceiveQueue;
-    class TCP_NSC_SendQueue;
-}
+class TCPConnectInfo;
+class TCP_NSC;
+class TCP_NSC_ReceiveQueue;
+class TCP_NSC_SendQueue;
+} // namespace inet
 
 namespace inet {
-
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
@@ -88,9 +85,9 @@ class INET_API TCP_NSC_Connection
 
   public:
     TCP_NSC_Connection();
-    cMessage* createEstablishedMsg();
-    void listen(INetStack &stackP, SockPair &inetSockPairP, SockPair &nscSockPairP);
-    void connect(INetStack &stackP, SockPair &inetSockPairP, SockPair &nscSockPairP);
+    cMessage *createEstablishedMsg();
+    void listen(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
+    void connect(INetStack& stackP, SockPair& inetSockPairP, SockPair& nscSockPairP);
     void close();
     void abort();
     void send(cPacket *msgP);
@@ -112,11 +109,10 @@ class INET_API TCP_NSC_Connection
     int tcpWinSizeM;
 
     TCP_NSC *tcpNscM;
-    TCP_NSC_ReceiveQueue * receiveQueueM;
-    TCP_NSC_SendQueue * sendQueueM;
+    TCP_NSC_ReceiveQueue *receiveQueueM;
+    TCP_NSC_SendQueue *sendQueueM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCP_NSC_CONNECTION_H
 
-
-#endif

@@ -24,7 +24,6 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
 // forward declarations:
 class TCP_NSC_Connection;
 
@@ -97,7 +96,7 @@ class INET_API TCP_NSC_SendQueue : public cObject
     /**
      * set connection queue, and initialise queue variables.
      */
-    virtual void setConnection(TCP_NSC_Connection *connP) {connM = connP; }
+    virtual void setConnection(TCP_NSC_Connection *connP) { connM = connP; }
 
     /**
      * Called on SEND app command, it inserts in the queue the data the user
@@ -116,7 +115,7 @@ class INET_API TCP_NSC_SendQueue : public cObject
      *
      * called before called socket->send_data()
      */
-    virtual int getBytesForTcpLayer(void* bufferP, int bufferLengthP) const = 0;
+    virtual int getBytesForTcpLayer(void *bufferP, int bufferLengthP) const = 0;
 
     /**
      * The function should remove msgLengthP bytes from NSCqueue
@@ -143,7 +142,7 @@ class INET_API TCP_NSC_SendQueue : public cObject
      * called from inside of send_callback()
      * called before called the send() to IP layer
      */
-    virtual TCPSegment * createSegmentWithBytes(const void* tcpDataP, int tcpLengthP) = 0;
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, int tcpLengthP) = 0;
 
     /**
      * Tells the queue that bytes up to (but NOT including) seqNum have been
@@ -188,7 +187,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
      * The method should set status of the data in queue to received
      * called after socket->read_data() successfull
      */
-    virtual void enqueueNscData(void* dataP, int dataLengthP) = 0;
+    virtual void enqueueNscData(void *dataP, int dataLengthP) = 0;
 
     /**
      * Should create a packet to be passed up to the app, up to (but NOT
@@ -198,7 +197,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
      *
      * called after socket->read_data() successfull
      */
-    virtual cPacket* extractBytesUpTo() = 0;
+    virtual cPacket *extractBytesUpTo() = 0;
 
     /**
      * Returns the number of bytes (out-of-order-segments) currently buffered in queue.
@@ -226,8 +225,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
   protected:
     TCP_NSC_Connection *connM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCP_NSC_QUEUES_H
 
-
-#endif

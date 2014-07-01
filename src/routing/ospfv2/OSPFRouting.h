@@ -18,7 +18,6 @@
 #ifndef __INET_OSPFROUTING_H
 #define __INET_OSPFROUTING_H
 
-
 #include <vector>
 
 #include "INETDefs.h"
@@ -30,18 +29,16 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
-
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
-class OSPFRouting :  public cSimpleModule, public ILifecycle
+class OSPFRouting : public cSimpleModule, public ILifecycle
 {
   private:
     IIPv4RoutingTable *rt;
     IInterfaceTable *ift;
     bool isUp;
-    OSPF::Router *ospfRouter; // root object of the OSPF data structure
+    OSPF::Router *ospfRouter;    // root object of the OSPF data structure
 
   public:
     OSPFRouting();
@@ -59,6 +56,7 @@ class OSPFRouting :  public cSimpleModule, public ILifecycle
      * Used by the BGPRouting module.
      */
     bool checkExternalRoute(const IPv4Address& route);
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
@@ -68,10 +66,7 @@ class OSPFRouting :  public cSimpleModule, public ILifecycle
     virtual void createOspfRouter();
     virtual bool isNodeUp();
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_OSPFROUTING_H
 

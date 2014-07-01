@@ -18,7 +18,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_UDPBASICBURST_H
 #define __INET_UDPBASICBURST_H
 
@@ -31,21 +30,19 @@
 #include "UDPSocket.h"
 
 namespace inet {
-
-
 /**
  * UDP application. See NED for more info.
  */
 class INET_API UDPBasicBurst : public ApplicationBase
 {
   public:
-    enum ChooseDestAddrMode
-    {
+    enum ChooseDestAddrMode {
         ONCE = 1, PER_BURST, PER_SEND
     };
+
   protected:
     enum SelfMsgKinds { START = 1, SEND, STOP };
-    typedef std::map<int,int> SourceSequence;
+    typedef std::map<int, int> SourceSequence;
 
     // parameters
     std::vector<Address> destAddresses;
@@ -75,7 +72,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     bool haveSleepDuration;
 
     // statistics:
-    static int counter; // counter for generating a global number for each packet
+    static int counter;    // counter for generating a global number for each packet
 
     int numSent;
     int numReceived;
@@ -111,9 +108,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     UDPBasicBurst();
     ~UDPBasicBurst();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_UDPBASICBURST_H
 

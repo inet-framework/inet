@@ -21,25 +21,21 @@
 #include "OSPFInterface.h"
 
 namespace inet {
-
 namespace OSPF {
+class InterfaceState
+{
+  protected:
+    void changeState(Interface *intf, InterfaceState *newState, InterfaceState *currentState);
+    void calculateDesignatedRouter(Interface *intf);
 
-class InterfaceState {
-protected:
-    void changeState(Interface* intf, InterfaceState* newState, InterfaceState* currentState);
-    void calculateDesignatedRouter(Interface* intf);
-
-public:
+  public:
     virtual ~InterfaceState() {}
 
-    virtual void processEvent(Interface* intf, Interface::InterfaceEventType event) = 0;
+    virtual void processEvent(Interface *intf, Interface::InterfaceEventType event) = 0;
     virtual Interface::InterfaceStateType getState() const = 0;
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_OSPFINTERFACESTATE_H
 

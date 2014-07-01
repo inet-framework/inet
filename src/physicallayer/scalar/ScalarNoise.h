@@ -21,30 +21,25 @@
 #include "FlatNoiseBase.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ScalarNoise : public FlatNoiseBase
 {
-    protected:
-        const std::map<simtime_t, W> *powerChanges;
+  protected:
+    const std::map<simtime_t, W> *powerChanges;
 
-    public:
-        ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
-            FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
-            powerChanges(powerChanges)
-        {}
+  public:
+    ScalarNoise(simtime_t startTime, simtime_t endTime, Hz carrierFrequency, Hz bandwidth, const std::map<simtime_t, W> *powerChanges) :
+        FlatNoiseBase(startTime, endTime, carrierFrequency, bandwidth),
+        powerChanges(powerChanges)
+    {}
 
-        virtual ~ScalarNoise() { delete powerChanges; }
-        virtual void printToStream(std::ostream &stream) const { stream << "scalar noise"; }
-        virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
-        virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
+    virtual ~ScalarNoise() { delete powerChanges; }
+    virtual void printToStream(std::ostream& stream) const { stream << "scalar noise"; }
+    virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
+    virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCALARNOISE_H
 
-}
-
-
-#endif

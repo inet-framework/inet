@@ -29,8 +29,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
-
 MACBase::MACBase()
 {
     hostModule = NULL;
@@ -46,15 +44,13 @@ void MACBase::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         hostModule = findContainingNode(this);
         if (hostModule)
             hostModule->subscribe(NF_INTERFACE_DELETED, this);
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
-        updateOperationalFlag(isNodeUp());  // needs to be done when interface is already registered (=last stage)
+    else if (stage == INITSTAGE_LINK_LAYER) {
+        updateOperationalFlag(isNodeUp());    // needs to be done when interface is already registered (=last stage)
     }
 }
 
@@ -62,28 +58,24 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 {
     Enter_Method_Silent();
 
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_LINK_LAYER) {
             updateOperationalFlag(true);
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_LINK_LAYER) {
             updateOperationalFlag(false);
             flushQueue();
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             updateOperationalFlag(false);
             clearQueue();
         }
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
 
@@ -92,8 +84,7 @@ bool MACBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 
 void MACBase::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 {
-    if (signalID == NF_INTERFACE_DELETED)
-    {
+    if (signalID == NF_INTERFACE_DELETED) {
         if (interfaceEntry == check_and_cast<const InterfaceEntry *>(obj))
             interfaceEntry = NULL;
     }
@@ -107,10 +98,10 @@ bool MACBase::isNodeUp()
 
 void MACBase::updateOperationalFlag(bool isNodeUp)
 {
-    isOperational = isNodeUp; // TODO and interface is up, too
+    isOperational = isNodeUp;    // TODO and interface is up, too
 }
 
-void MACBase::registerInterface()  //XXX registerInterfaceIfInterfaceTableExists() ???
+void MACBase::registerInterface()    //XXX registerInterfaceIfInterfaceTableExists() ???
 {
     ASSERT(interfaceEntry == NULL);
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
@@ -122,7 +113,7 @@ void MACBase::registerInterface()  //XXX registerInterfaceIfInterfaceTableExists
 
 void MACBase::handleMessageWhenDown(cMessage *msg)
 {
-    if (isUpperMsg(msg) || msg->isSelfMessage()) { //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
+    if (isUpperMsg(msg) || msg->isSelfMessage()) {    //FIXME remove 1st part -- it is not possible to ensure that no msg is sent by upper layer (race condition!!!)
         throw cRuntimeError("Message received from higher layer while interface is off");
     }
     else {
@@ -130,8 +121,5 @@ void MACBase::handleMessageWhenDown(cMessage *msg)
         delete msg;
     }
 }
-
-
-}
-
+} // namespace inet
 

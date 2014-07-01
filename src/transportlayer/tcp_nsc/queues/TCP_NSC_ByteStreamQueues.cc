@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCP_NSC_ByteStreamQueues.h"
 
 #include "ByteArrayMessage.h"
@@ -26,12 +25,9 @@
 #include "TCPSegment.h"
 
 namespace inet {
-
-
 Register_Class(TCP_NSC_ByteStreamSendQueue);
 
 Register_Class(TCP_NSC_ByteStreamReceiveQueue);
-
 
 TCP_NSC_ByteStreamSendQueue::TCP_NSC_ByteStreamSendQueue()
 {
@@ -58,7 +54,7 @@ void TCP_NSC_ByteStreamSendQueue::enqueueAppData(cPacket *msgP)
     delete msgP;
 }
 
-int TCP_NSC_ByteStreamSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
+int TCP_NSC_ByteStreamSendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
     return byteArrayBufferM.getBytesToBuffer(bufferP, bufferLengthP);
@@ -74,8 +70,7 @@ ulong TCP_NSC_ByteStreamSendQueue::getBytesAvailable() const
     return byteArrayBufferM.getLength();
 }
 
-TCPSegment* TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, int tcpLengthP)
+TCPSegment *TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -87,9 +82,9 @@ TCPSegment* TCP_NSC_ByteStreamSendQueue::createSegmentWithBytes(
     char msgname[80];
     sprintf(msgname, "%.10s%s%s%s(l=%lu,%u bytes)",
             "tcpseg",
-            tcpseg->getSynBit() ? " SYN":"",
-            tcpseg->getFinBit() ? " FIN":"",
-            (tcpseg->getAckBit() && 0==numBytes) ? " ACK":"",
+            tcpseg->getSynBit() ? " SYN" : "",
+            tcpseg->getFinBit() ? " FIN" : "",
+            (tcpseg->getAckBit() && 0 == numBytes) ? " ACK" : "",
             (unsigned long)numBytes,
             tcpseg->getByteArray().getDataArraySize());
     tcpseg->setName(msgname);
@@ -126,20 +121,19 @@ void TCP_NSC_ByteStreamReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSeg
     ASSERT(tcpsegP);
 }
 
-void TCP_NSC_ByteStreamReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)
+void TCP_NSC_ByteStreamReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
     byteArrayBufferM.push(dataP, dataLengthP);
 }
 
-cPacket* TCP_NSC_ByteStreamReceiveQueue::extractBytesUpTo()
+cPacket *TCP_NSC_ByteStreamReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     ByteArrayMessage *dataMsg = NULL;
     uint64 bytesInQueue = byteArrayBufferM.getLength();
 
-    if (bytesInQueue)
-    {
+    if (bytesInQueue) {
         dataMsg = new ByteArrayMessage("DATA");
         dataMsg->setKind(TCP_I_DATA);
         unsigned int extractBytes = bytesInQueue;
@@ -171,9 +165,5 @@ void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
-
-
-
-}
-
+} // namespace inet
 

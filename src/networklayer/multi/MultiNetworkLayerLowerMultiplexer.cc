@@ -20,24 +20,23 @@
 #ifdef WITH_IPv4
 #include "ARPPacket_m.h"
 #include "IPv4Datagram.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "IPv6Datagram.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 #ifdef WITH_GENERIC
 #include "GenericDatagram.h"
-#endif
+#endif // ifdef WITH_GENERIC
 
 namespace inet {
-
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
-void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage * message)
+void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage *message)
 {
-    cGate * arrivalGate = message->getArrivalGate();
-    const char * arrivalGateName = arrivalGate->getBaseName();
+    cGate *arrivalGate = message->getArrivalGate();
+    const char *arrivalGateName = arrivalGate->getBaseName();
     if (!strcmp(arrivalGateName, "ifUpperIn"))
         send(message, "ifLowerOut", arrivalGate->getIndex() / getProtocolCount());
     else if (!strcmp(arrivalGateName, "ifLowerIn"))
@@ -51,25 +50,25 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolCount()
     return 3;
 }
 
-int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
+int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage *message)
 {
     // TODO: handle the case when some network protocols are disabled
-    if (false) ;
+    if (false)
+        ;
 #ifdef WITH_IPv4
     else if (dynamic_cast<IPv4Datagram *>(message) || dynamic_cast<ARPPacket *>(message))
         return 0;
-#endif
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
     else if (dynamic_cast<IPv6Datagram *>(message))
         return 1;
-#endif
+#endif // ifdef WITH_IPv6
 #ifdef WITH_GENERIC
     else if (dynamic_cast<GenericDatagram *>(message))
         return 2;
-#endif
+#endif // ifdef WITH_GENERIC
     else
         throw cRuntimeError("Unknown message");
 }
-
-}
+} // namespace inet
 

@@ -16,14 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_SINGLERATETHREECOLORMETER_H
 #define __INET_SINGLERATETHREECOLORMETER_H
 
 #include "INETDefs.h"
 
 namespace inet {
-
 /**
  * This class can be used as a meter in an ITrafficConditioner.
  * It marks the packets according to three parameters,
@@ -35,13 +33,13 @@ namespace inet {
 class INET_API SingleRateThreeColorMeter : public cSimpleModule
 {
   protected:
-    double CIR; // Commited Information Rate (bits/sec)
-    long CBS; // Committed Burst Size (bits)
-    long EBS; // Excess Burst Size (bits)
+    double CIR;    // Commited Information Rate (bits/sec)
+    long CBS;    // Committed Burst Size (bits)
+    long EBS;    // Excess Burst Size (bits)
     bool colorAwareMode;
 
-    long Tc; // token bucket for committed burst
-    long Te; // token bucket for excess burst
+    long Tc;    // token bucket for committed burst
+    long Te;    // token bucket for excess burst
     simtime_t lastUpdateTime;
 
     int numRcvd;
@@ -60,8 +58,7 @@ class INET_API SingleRateThreeColorMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SINGLERATETHREECOLORMETER_H
 
-
-#endif

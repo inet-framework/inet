@@ -24,10 +24,7 @@
 #include <math.h>
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
@@ -47,9 +44,10 @@ class BerParseFile
             ber = m.ber;
             return *this;
         }
-        bool operator<(SnrBer const &o) const
+
+        bool operator<(SnrBer const& o) const
         {
-            return (snr < o.snr)?true:false;
+            return (snr < o.snr) ? true : false;
         }
     };
     typedef std::vector<SnrBer> SnrBerList;
@@ -59,7 +57,7 @@ class BerParseFile
         SnrBerList snrlist;
     };
 
-    typedef std::vector<LongBer*> BerList;
+    typedef std::vector<LongBer *> BerList;
 // A and G
     typedef std::vector<BerList> BerTable;
     BerTable berTable;
@@ -72,19 +70,17 @@ class BerParseFile
     {
         return pow(10.0, (dB / 10));
     }
+
   public:
     void parseFile(const char *filename);
-    bool isFile() {return fileBer;}
+    bool isFile() { return fileBer; }
     void setPhyOpMode(char p);
     double getPer(double speed, double tsnr, int tlen);
-    BerParseFile(char p) {setPhyOpMode(p); fileBer = false;}
+    BerParseFile(char p) { setPhyOpMode(p); fileBer = false; }
     ~BerParseFile();
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
-
-}
-
-
-#endif
+#endif // ifndef __INET_BERPARSEFILE_H
 

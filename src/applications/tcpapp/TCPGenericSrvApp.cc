@@ -25,20 +25,16 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
-
-
 Define_Module(TCPGenericSrvApp);
 
 simsignal_t TCPGenericSrvApp::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t TCPGenericSrvApp::sentPkSignal = registerSignal("sentPk");
 
-
 void TCPGenericSrvApp::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         delay = par("replyDelay");
         maxMsgDelay = 0;
 
@@ -50,8 +46,7 @@ void TCPGenericSrvApp::initialize(int stage)
         WATCH(bytesRcvd);
         WATCH(bytesSent);
     }
-    else if (stage == INITSTAGE_APPLICATION_LAYER)
-    {
+    else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         TCPSocket socket;
@@ -70,26 +65,24 @@ void TCPGenericSrvApp::initialize(int stage)
 
 void TCPGenericSrvApp::sendOrSchedule(cMessage *msg, simtime_t delay)
 {
-    if (delay==0)
+    if (delay == 0)
         sendBack(msg);
     else
-        scheduleAt(simTime()+delay, msg);
+        scheduleAt(simTime() + delay, msg);
 }
 
 void TCPGenericSrvApp::sendBack(cMessage *msg)
 {
-    cPacket *packet = dynamic_cast<cPacket*>(msg);
+    cPacket *packet = dynamic_cast<cPacket *>(msg);
 
-    if (packet)
-    {
+    if (packet) {
         msgsSent++;
         bytesSent += packet->getByteLength();
         emit(sentPkSignal, packet);
 
         EV_INFO << "sending \"" << packet->getName() << "\" to TCP, " << packet->getByteLength() << " bytes\n";
     }
-    else
-    {
+    else {
         EV_INFO << "sending \"" << msg->getName() << "\" to TCP\n";
     }
 
@@ -98,27 +91,24 @@ void TCPGenericSrvApp::sendBack(cMessage *msg)
 
 void TCPGenericSrvApp::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         sendBack(msg);
     }
-    else if (msg->getKind()==TCP_I_PEER_CLOSED)
-    {
+    else if (msg->getKind() == TCP_I_PEER_CLOSED) {
         // we'll close too, but only after there's surely no message
         // pending to be sent back in this connection
         msg->setName("close");
         msg->setKind(TCP_C_CLOSE);
-        sendOrSchedule(msg, delay+maxMsgDelay);
+        sendOrSchedule(msg, delay + maxMsgDelay);
     }
-    else if (msg->getKind()==TCP_I_DATA || msg->getKind()==TCP_I_URGENT_DATA)
-    {
+    else if (msg->getKind() == TCP_I_DATA || msg->getKind() == TCP_I_URGENT_DATA) {
         GenericAppMsg *appmsg = dynamic_cast<GenericAppMsg *>(msg);
         if (!appmsg)
             throw cRuntimeError("Message (%s)%s is not a GenericAppMsg -- "
-                  "probably wrong client app, or wrong setting of TCP's "
-                  "dataTransferMode parameters "
-                  "(try \"object\")",
-                  msg->getClassName(), msg->getName());
+                                "probably wrong client app, or wrong setting of TCP's "
+                                "dataTransferMode parameters "
+                                "(try \"object\")",
+                    msg->getClassName(), msg->getName());
 
         msgsRcvd++;
         bytesRcvd += appmsg->getByteLength();
@@ -127,18 +117,16 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
         long requestedBytes = appmsg->getExpectedReplyLength();
 
         simtime_t msgDelay = appmsg->getReplyDelay();
-        if (msgDelay>maxMsgDelay)
+        if (msgDelay > maxMsgDelay)
             maxMsgDelay = msgDelay;
 
         bool doClose = appmsg->getServerClose();
         int connId = check_and_cast<TCPCommand *>(appmsg->getControlInfo())->getConnId();
 
-        if (requestedBytes==0)
-        {
+        if (requestedBytes == 0) {
             delete msg;
         }
-        else
-        {
+        else {
             delete appmsg->removeControlInfo();
             TCPSendCommand *cmd = new TCPSendCommand();
             cmd->setConnId(connId);
@@ -147,28 +135,25 @@ void TCPGenericSrvApp::handleMessage(cMessage *msg)
             // set length and send it back
             appmsg->setKind(TCP_C_SEND);
             appmsg->setByteLength(requestedBytes);
-            sendOrSchedule(appmsg, delay+msgDelay);
+            sendOrSchedule(appmsg, delay + msgDelay);
         }
 
-        if (doClose)
-        {
+        if (doClose) {
             cMessage *msg = new cMessage("close");
             msg->setKind(TCP_C_CLOSE);
             TCPCommand *cmd = new TCPCommand();
             cmd->setConnId(connId);
             msg->setControlInfo(cmd);
-            sendOrSchedule(msg, delay+maxMsgDelay);
+            sendOrSchedule(msg, delay + maxMsgDelay);
         }
     }
-    else
-    {
+    else {
         // some indication -- ignore
-        EV_WARN << "drop msg: " << msg->getName() << ", kind:"<< msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
+        EV_WARN << "drop msg: " << msg->getName() << ", kind:" << msg->getKind() << "(" << cEnum::get("inet::TcpStatusInd")->getStringFor(msg->getKind()) << ")\n";
         delete msg;
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[64];
         sprintf(buf, "rcvd: %ld pks %ld bytes\nsent: %ld pks %ld bytes", msgsRcvd, bytesRcvd, msgsSent, bytesSent);
         getDisplayString().setTagArg("t", 0, buf);
@@ -180,9 +165,5 @@ void TCPGenericSrvApp::finish()
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
-
-
-
-}
-
+} // namespace inet
 

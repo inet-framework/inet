@@ -21,52 +21,47 @@
 #include "IArrival.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API Arrival : public virtual IArrival
 {
-    protected:
-        const simtime_t startPropagationTime;
-        const simtime_t endPropagationTime;
-        const simtime_t startTime;
-        const simtime_t endTime;
-        const Coord startPosition;
-        const Coord endPosition;
-        const EulerAngles startOrientation;
-        const EulerAngles endOrientation;
+  protected:
+    const simtime_t startPropagationTime;
+    const simtime_t endPropagationTime;
+    const simtime_t startTime;
+    const simtime_t endTime;
+    const Coord startPosition;
+    const Coord endPosition;
+    const EulerAngles startOrientation;
+    const EulerAngles endOrientation;
 
-    public:
-        Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
-            startPropagationTime(startPropagationTime),
-            endPropagationTime(endPropagationTime),
-            startTime(startTime),
-            endTime(endTime),
-            startPosition(startPosition),
-            endPosition(endPosition),
-            startOrientation(startOrientation),
-            endOrientation(endOrientation)
-        {}
+  public:
+    Arrival(const simtime_t startPropagationTime, const simtime_t endPropagationTime, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+        startPropagationTime(startPropagationTime),
+        endPropagationTime(endPropagationTime),
+        startTime(startTime),
+        endTime(endTime),
+        startPosition(startPosition),
+        endPosition(endPosition),
+        startOrientation(startOrientation),
+        endOrientation(endOrientation)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const {}
+    virtual void printToStream(std::ostream& stream) const {}
 
-        virtual const simtime_t getStartPropagationTime() const { return startPropagationTime; }
-        virtual const simtime_t getEndPropagationTime() const { return endPropagationTime; }
+    virtual const simtime_t getStartPropagationTime() const { return startPropagationTime; }
+    virtual const simtime_t getEndPropagationTime() const { return endPropagationTime; }
 
-        virtual const simtime_t getStartTime() const { return startTime; }
-        virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const { return startTime; }
+    virtual const simtime_t getEndTime() const { return endTime; }
 
-        virtual const Coord getStartPosition() const { return startPosition; }
-        virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const { return startPosition; }
+    virtual const Coord getEndPosition() const { return endPosition; }
 
-        virtual const EulerAngles getStartOrientation() const { return startOrientation; }
-        virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+    virtual const EulerAngles getStartOrientation() const { return startOrientation; }
+    virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_ARRIVAL_H
 
-}
-
-
-#endif

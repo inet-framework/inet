@@ -26,9 +26,8 @@
 #include "InterfaceMatcher.h"
 
 namespace inet {
-
-inline bool isEmpty(const char *s) {return !s || !s[0];}
-inline bool isNotEmpty(const char *s) {return s && s[0];}
+inline bool isEmpty(const char *s) { return !s || !s[0]; }
+inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
 InterfaceMatcher::Matcher::Matcher(const char *pattern)
 {
@@ -53,6 +52,7 @@ bool InterfaceMatcher::Matcher::matches(const char *s) const
     for (int i = 0; i < (int)matchers.size(); i++)
         if (matchers[i]->matches(s))
             return true;
+
     return false;
 }
 
@@ -68,35 +68,31 @@ bool InterfaceMatcher::Selector::matches(const InterfaceEntry *ie)
     std::string hostFullPath = hostModule->getFullPath();
     std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
 
-    return  (hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
-            (nameMatcher.matchesAny() || nameMatcher.matches(ie->getFullName())) &&
-            (towardsMatcher.matchesAny() || parent->linkContainsMatchingHost(ie, towardsMatcher));
+    return (hostMatcher.matchesAny() || hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str())) &&
+           (nameMatcher.matchesAny() || nameMatcher.matches(ie->getFullName())) &&
+           (towardsMatcher.matchesAny() || parent->linkContainsMatchingHost(ie, towardsMatcher));
 }
 
-InterfaceMatcher::InterfaceMatcher(const cXMLElementList &xmlSelectors)
+InterfaceMatcher::InterfaceMatcher(const cXMLElementList& xmlSelectors)
 {
-    for (int i = 0; i < (int)xmlSelectors.size(); i++)
-    {
+    for (int i = 0; i < (int)xmlSelectors.size(); i++) {
         cXMLElement *interfaceElement = xmlSelectors[i];
-        const char *hostAttr = interfaceElement->getAttribute("hosts");  // "host* router[0..3]"
-        const char *interfaceAttr = interfaceElement->getAttribute("names"); // i.e. interface names, like "eth* ppp0"
+        const char *hostAttr = interfaceElement->getAttribute("hosts");    // "host* router[0..3]"
+        const char *interfaceAttr = interfaceElement->getAttribute("names");    // i.e. interface names, like "eth* ppp0"
 
-        const char *towardsAttr = interfaceElement->getAttribute("towards"); // neighbor host names, like "ap switch"
-        const char *amongAttr = interfaceElement->getAttribute("among"); // neighbor host names, like "host[*] router1"
+        const char *towardsAttr = interfaceElement->getAttribute("towards");    // neighbor host names, like "ap switch"
+        const char *amongAttr = interfaceElement->getAttribute("among");    // neighbor host names, like "host[*] router1"
 
-        if (amongAttr && *amongAttr)       // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
-        {
+        if (amongAttr && *amongAttr) {    // among="X Y Z" means hosts = "X Y Z" towards = "X Y Z"
             if ((hostAttr && *hostAttr) || (towardsAttr && *towardsAttr))
                 throw cRuntimeError("The 'hosts'/'towards' and 'among' attributes are mutually exclusive, at %s", interfaceElement->getSourceLocation());
             towardsAttr = hostAttr = amongAttr;
         }
 
-        try
-        {
+        try {
             selectors.push_back(new Selector(hostAttr, interfaceAttr, towardsAttr, this));
         }
-        catch (std::exception& e)
-        {
+        catch (std::exception& e) {
             throw cRuntimeError("Error in XML <interface> element at %s: %s", interfaceElement->getSourceLocation(), e.what());
         }
     }
@@ -116,9 +112,9 @@ int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
     for (int i = 0; i < (int)selectors.size(); i++)
         if (selectors[i]->matches(ie))
             return i;
+
     return -1;
 }
-
 
 static bool hasInterfaceTable(cModule *module)
 {
@@ -130,55 +126,49 @@ static cGate *findRemoteGate(cGate *startGate)
     for (cGate *gate = startGate->getNextGate(); gate; gate = gate->getNextGate())
         if (isNetworkNode(gate->getOwnerModule()))
             return gate;
+
     return NULL;
 }
 
-bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher &hostMatcher) const
+bool InterfaceMatcher::linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const
 {
     int outGateId = ie->getNodeOutputGateId();
     cModule *node = ie->getInterfaceTable()->getHostModule();
     cGate *outGate = node->gate(outGateId);
 
-    std::vector<cModule*> hostNodes;
-    std::vector<cModule*> deviceNodes;
+    std::vector<cModule *> hostNodes;
+    std::vector<cModule *> deviceNodes;
     collectNeighbors(outGate, hostNodes, deviceNodes, node);
 
-    for (std::vector<cModule*>::iterator it = hostNodes.begin(); it != hostNodes.end(); ++it)
-    {
+    for (std::vector<cModule *>::iterator it = hostNodes.begin(); it != hostNodes.end(); ++it) {
         cModule *neighbour = *it;
         std::string hostFullPath = neighbour->getFullPath();
         std::string hostShortenedFullPath = hostFullPath.substr(hostFullPath.find('.') + 1);
         if (hostMatcher.matches(hostShortenedFullPath.c_str()) || hostMatcher.matches(hostFullPath.c_str()))
             return true;
-
     }
 
     return false;
 }
 
-
-void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes, cModule *excludedNode) const
+void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule *>& hostNodes, std::vector<cModule *>& deviceNodes, cModule *excludedNode) const
 {
     cGate *neighborGate = findRemoteGate(outGate);
     if (!neighborGate)
         return;
 
     cModule *neighborNode = neighborGate->getOwnerModule();
-    if (hasInterfaceTable(neighborNode))
-    {
+    if (hasInterfaceTable(neighborNode)) {
         // neighbor is a host or router
         if (neighborNode != excludedNode && !contains(hostNodes, neighborNode))
             hostNodes.push_back(neighborNode);
     }
-    else
-    {
+    else {
         // assume that neighbor is an L2 or L1 device (bus/hub/switch/bridge/access point/etc); visit all its output links
-        if (!contains(deviceNodes, neighborNode))
-        {
+        if (!contains(deviceNodes, neighborNode)) {
             if (neighborNode != excludedNode)
                 deviceNodes.push_back(neighborNode);
-            for (cModule::GateIterator it(neighborNode); !it.end(); it++)
-            {
+            for (cModule::GateIterator it(neighborNode); !it.end(); it++) {
                 cGate *gate = it();
                 if (gate->getType() == cGate::OUTPUT)
                     collectNeighbors(gate, hostNodes, deviceNodes, excludedNode);
@@ -186,8 +176,5 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &h
         }
     }
 }
-
-
-}
-
+} // namespace inet
 

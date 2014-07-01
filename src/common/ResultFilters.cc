@@ -17,50 +17,42 @@
 // @author Zoltan Bojthe
 //
 
-
 #include "ResultFilters.h"
 
 #include "Coord.h"
 #include "IMobility.h"
 
 namespace inet {
-
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
 void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
 {
-    if (dynamic_cast<cMessage *>(object))
-    {
+    if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
         fire(this, t, t - msg->getCreationTime());
     }
 }
 
-
 Register_ResultFilter("messageTSAge", MessageTSAgeFilter);
 
 void MessageTSAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
 {
-    if (dynamic_cast<cMessage *>(object))
-    {
+    if (dynamic_cast<cMessage *>(object)) {
         cMessage *msg = (cMessage *)object;
         fire(this, t, t - msg->getTimestamp());
     }
 }
-
 
 Register_ResultFilter("mobilityPos", MobilityPosFilter);
 
 void MobilityPosFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
 {
     IMobility *module = dynamic_cast<IMobility *>(object);
-    if (module)
-    {
+    if (module) {
         Coord coord = module->getCurrentPosition();
         fire(this, t, &coord);
     }
 }
-
 
 Register_ResultFilter("xCoord", XCoordFilter);
 
@@ -70,7 +62,6 @@ void XCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
         fire(this, t, ((Coord *)object)->x);
 }
 
-
 Register_ResultFilter("yCoord", YCoordFilter);
 
 void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
@@ -79,7 +70,6 @@ void YCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
         fire(this, t, ((Coord *)object)->y);
 }
 
-
 Register_ResultFilter("zCoord", ZCoordFilter);
 
 void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
@@ -87,8 +77,5 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
     if (dynamic_cast<Coord *>(object))
         fire(this, t, ((Coord *)object)->z);
 }
-
-
-}
-
+} // namespace inet
 

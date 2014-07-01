@@ -19,14 +19,11 @@
 #ifndef __INET_TCPLWIPVIRTUALDATAQUEUES_H
 #define __INET_TCPLWIPVIRTUALDATAQUEUES_H
 
-
 #include "INETDefs.h"
 
 #include "TcpLwipQueues.h"
 
 namespace inet {
-
-
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  */
@@ -53,7 +50,7 @@ class INET_API TcpLwipVirtualDataSendQueue : public TcpLwipSendQueue
 
     virtual unsigned long getBytesAvailable() const;
 
-    virtual TCPSegment* createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
+    virtual TCPSegment *createSegmentWithBytes(const void *tcpDataP, unsigned int tcpLengthP);
 
     virtual void discardUpTo(uint32 seqNumP);
 
@@ -85,7 +82,7 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
             const void *bufferP, size_t bufferLengthP);
 
     // see TcpLwipReceiveQueue
-    virtual void enqueueTcpLayerData(void* dataP, unsigned int dataLengthP);
+    virtual void enqueueTcpLayerData(void *dataP, unsigned int dataLengthP);
 
     // see TcpLwipReceiveQueue
     virtual cPacket *extractBytesUpTo();
@@ -105,8 +102,7 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPLWIPVIRTUALDATAQUEUES_H
 
-
-#endif

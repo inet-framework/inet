@@ -17,7 +17,7 @@
 
 #include "INETDefs.h"
 
-#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER  /* cEventlogListener is only supported from 5.0 */
+#if OMNETPP_VERSION >= 0x0500 && defined HAVE_CEVENTLOGLISTENER    /* cEventlogListener is only supported from 5.0 */
 
 #include "NotifierConsts.h"
 #include "IInterfaceTable.h"
@@ -25,15 +25,13 @@
 #include "IPv4RoutingTable.h"
 #include "IPv6RoutingTable.h"
 #include "GenericRoutingTable.h"
-#include "IPv4InterfaceData.h" // TODO: remove?
+#include "IPv4InterfaceData.h"    // TODO: remove?
 #include "ModuleAccess.h"
 #include "RoutingTableRecorder.h"
 
-
 Define_Module(RoutingTableRecorder);
 
-#define LL INT64_PRINTF_FORMAT  // for eventnumber_t
-
+#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
 
 class RoutingTableNotificationBoardListener : public cListener
 {
@@ -59,8 +57,7 @@ void RoutingTableRecorder::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         if (par("enabled").boolValue())
             hookListeners();
     }
@@ -86,7 +83,7 @@ void RoutingTableRecorder::hookListeners()
     systemModule->subscribe(NF_ROUTE_CHANGED, listener);
 
     // hook on eventlog manager
-    cEnvir* envir = simulation.getEnvir();
+    cEnvir *envir = simulation.getEnvir();
     cIndexedEventlogManager *eventlogManager = dynamic_cast<cIndexedEventlogManager *>(envir->getEventlogManager());
     if (eventlogManager)
         eventlogManager->addEventlogListener(this);
@@ -98,18 +95,18 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *source, simsign
     if (!m)
         m = source->getParentModule();
     cModule *host = findContainingNode(m, true);
-    if (signalID==NF_ROUTE_ADDED || signalID==NF_ROUTE_DELETED || signalID==NF_ROUTE_CHANGED)
+    if (signalID == NF_ROUTE_ADDED || signalID == NF_ROUTE_DELETED || signalID == NF_ROUTE_CHANGED)
         recordRoute(host, check_and_cast<const IRoute *>(obj), signalID);
-    else if (signalID==NF_INTERFACE_CREATED || signalID==NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_CREATED || signalID == NF_INTERFACE_DELETED)
         recordInterface(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
-    else if (signalID==NF_INTERFACE_CONFIG_CHANGED || signalID==NF_INTERFACE_IPv4CONFIG_CHANGED)
+    else if (signalID == NF_INTERFACE_CONFIG_CHANGED || signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
         recordInterface(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
 }
 
 void RoutingTableRecorder::recordSnapshot()
 {
     for (int id = 0; id < simulation.getLastComponentId(); id++) {
-        cModule* module = simulation.getModule(id);
+        cModule *module = simulation.getModule(id);
         IInterfaceTable *ift = dynamic_cast<IInterfaceTable *>(module);
         if (ift) {
             cModule *host = module->getParentModule();
@@ -118,7 +115,7 @@ void RoutingTableRecorder::recordSnapshot()
         }
     }
     for (int id = 0; id < simulation.getLastComponentId(); id++) {
-        cModule* module = simulation.getModule(id);
+        cModule *module = simulation.getModule(id);
         IPv4RoutingTable *rt = dynamic_cast<IPv4RoutingTable *>(module);
         if (rt) {
             // TODO: find out host correctly
@@ -145,29 +142,25 @@ void RoutingTableRecorder::recordSnapshot()
 
 void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *interface, simsignal_t signalID)
 {
-    cEnvir* envir = simulation.getEnvir();
+    cEnvir *envir = simulation.getEnvir();
     // moduleId, ifname, address
     std::stringstream content;
     content << host->getId() << " " << interface->getName() << " ";
-    content << (interface->ipv4Data()!=NULL ? interface->ipv4Data()->getIPAddress().str() : IPv4Address().str());
+    content << (interface->ipv4Data() != NULL ? interface->ipv4Data()->getIPAddress().str() : IPv4Address().str());
 
-    if (signalID == NF_INTERFACE_CREATED)
-    {
+    if (signalID == NF_INTERFACE_CREATED) {
         envir->customCreatedEntry("IT", interfaceKey, content.str().c_str());
         interfaceEntryToKey[interface] = interfaceKey;
         interfaceKey++;
     }
-    else if (signalID == NF_INTERFACE_DELETED)
-    {
+    else if (signalID == NF_INTERFACE_DELETED) {
         envir->customDeletedEntry("IT", interfaceEntryToKey[interface]);
         interfaceEntryToKey.erase(interface);
     }
-    else if (signalID == NF_INTERFACE_CONFIG_CHANGED || signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
-    {
+    else if (signalID == NF_INTERFACE_CONFIG_CHANGED || signalID == NF_INTERFACE_IPv4CONFIG_CHANGED) {
         envir->customChangedEntry("IT", interfaceEntryToKey[interface], content.str().c_str());
     }
-    else if (signalID == -1)
-    {
+    else if (signalID == -1) {
         envir->customFoundEntry("IT", interfaceEntryToKey[interface], content.str().c_str());
     }
     else
@@ -176,41 +169,31 @@ void RoutingTableRecorder::recordInterface(cModule *host, const InterfaceEntry *
 
 void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int signalID)
 {
-    cEnvir* envir = simulation.getEnvir();
+    cEnvir *envir = simulation.getEnvir();
     // moduleId, dest, dest netmask, nexthop
     std::stringstream content;
     content << host->getId() << " " << route->getDestinationAsGeneric().str() << " " << route->getPrefixLength() << " " << route->getNextHopAsGeneric().str();
 
-    if (signalID == NF_ROUTE_ADDED)
-    {
+    if (signalID == NF_ROUTE_ADDED) {
         envir->customCreatedEntry("RT", routeKey, content.str().c_str());
         routeToKey[route] = routeKey;
         routeKey++;
     }
-    else if (signalID == NF_ROUTE_DELETED)
-    {
+    else if (signalID == NF_ROUTE_DELETED) {
         envir->customDeletedEntry("RT", routeToKey[route]);
         routeToKey.erase(route);
     }
-    else if (signalID == NF_ROUTE_CHANGED)
-    {
+    else if (signalID == NF_ROUTE_CHANGED) {
         envir->customChangedEntry("RT", routeToKey[route], content.str().c_str());
     }
-    else if (signalID == -1)
-    {
+    else if (signalID == -1) {
         envir->customFoundEntry("RT", routeToKey[route], content.str().c_str());
     }
     else
         throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 }
 
-
-
-
 #else /*OMNETPP_VERSION*/
-
-
-
 
 #include "NotifierConsts.h"
 #include "IIPv4RoutingTable.h"
@@ -221,13 +204,11 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 #include "RoutingTableRecorder.h"
 
 namespace inet {
-
 Define_Module(RoutingTableRecorder);
 
-#define LL INT64_PRINTF_FORMAT  // for eventnumber_t
+#define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
 
 Register_PerRunConfigOption(CFGID_ROUTINGLOG_FILE, "routinglog-file", CFG_FILENAME, "${resultdir}/${configname}-${runnumber}.rt", "Name of the routing log file to generate.");
-
 
 class RoutingTableRecorderListener : public cListener
 {
@@ -252,8 +233,7 @@ void RoutingTableRecorder::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER) {
         if (par("enabled").boolValue())
             hookListeners();
     }
@@ -282,8 +262,7 @@ void RoutingTableRecorder::hookListeners()
 
 void RoutingTableRecorder::ensureRoutingLogFileOpen()
 {
-    if (routingLogFile == NULL)
-    {
+    if (routingLogFile == NULL) {
         // hack to ensure that results/ folder is created
         simulation.getSystemModule()->recordScalar("hackForCreateResultsFolder", 0);
 
@@ -300,11 +279,11 @@ void RoutingTableRecorder::receiveChangeNotification(cComponent *nsource, simsig
     if (!m)
         m = nsource->getParentModule();
     cModule *host = getContainingNode(m);
-    if (signalID==NF_ROUTE_ADDED || signalID==NF_ROUTE_DELETED || signalID==NF_ROUTE_CHANGED)
+    if (signalID == NF_ROUTE_ADDED || signalID == NF_ROUTE_DELETED || signalID == NF_ROUTE_CHANGED)
         recordRouteChange(host, check_and_cast<const IRoute *>(obj), signalID);
-    else if (signalID==NF_INTERFACE_CREATED || signalID==NF_INTERFACE_DELETED)
+    else if (signalID == NF_INTERFACE_CREATED || signalID == NF_INTERFACE_DELETED)
         recordInterfaceChange(host, check_and_cast<const InterfaceEntry *>(obj), signalID);
-    else if (signalID==NF_INTERFACE_CONFIG_CHANGED || signalID==NF_INTERFACE_IPv4CONFIG_CHANGED)
+    else if (signalID == NF_INTERFACE_CONFIG_CHANGED || signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
         recordInterfaceChange(host, check_and_cast<const InterfaceEntryChangeDetails *>(obj)->getInterfaceEntry(), signalID);
 }
 
@@ -314,11 +293,16 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
 
     const char *tag;
 
-    if (signalID == NF_INTERFACE_CREATED) tag = "+I";
-    else if (signalID == NF_INTERFACE_DELETED) tag = "-I";
-    else if (signalID == NF_INTERFACE_CONFIG_CHANGED) tag = "*I";
-    else if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED) tag = "*I";
-    else throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+    if (signalID == NF_INTERFACE_CREATED)
+        tag = "+I";
+    else if (signalID == NF_INTERFACE_DELETED)
+        tag = "-I";
+    else if (signalID == NF_INTERFACE_CONFIG_CHANGED)
+        tag = "*I";
+    else if (signalID == NF_INTERFACE_IPv4CONFIG_CHANGED)
+        tag = "*I";
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 
     // action, eventNo, simtime, moduleId, ifname, address
     ensureRoutingLogFileOpen();
@@ -328,20 +312,24 @@ void RoutingTableRecorder::recordInterfaceChange(cModule *host, const InterfaceE
             SIMTIME_STR(simTime()),
             host->getId(),
             ie->getName(),
-            (ie->ipv4Data()!=NULL ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
+            (ie->ipv4Data() != NULL ? ie->ipv4Data()->getIPAddress().str().c_str() : IPv4Address().str().c_str())
             );
     fflush(routingLogFile);
 }
 
 void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route, simsignal_t signalID)
 {
-    IRoutingTable *rt = route->getRoutingTableAsGeneric(); // may be NULL! (route already removed from its routing table)
+    IRoutingTable *rt = route->getRoutingTableAsGeneric();    // may be NULL! (route already removed from its routing table)
 
     const char *tag;
-    if (signalID == NF_ROUTE_ADDED) tag = "+R";
-    else if (signalID == NF_ROUTE_CHANGED) tag = "*R";
-    else if (signalID == NF_ROUTE_DELETED) tag = "-R";
-    else throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
+    if (signalID == NF_ROUTE_ADDED)
+        tag = "+R";
+    else if (signalID == NF_ROUTE_CHANGED)
+        tag = "*R";
+    else if (signalID == NF_ROUTE_DELETED)
+        tag = "-R";
+    else
+        throw cRuntimeError("Unexpected signal: %s", getSignalName(signalID));
 
     // action, eventNo, simtime, moduleId, routerID, dest, dest netmask, nexthop
     ensureRoutingLogFileOpen();
@@ -354,10 +342,9 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
             route->getDestinationAsGeneric().str().c_str(),
             route->getPrefixLength(),
             route->getNextHopAsGeneric().str().c_str()
-    );
+            );
     fflush(routingLogFile);
 }
-
 
 //TODO: routerID change
 //    // time, moduleId, routerID
@@ -369,7 +356,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //            );
 //    fflush(routingLogFile);
 //}
-
-}
+} // namespace inet
 
 #endif /*OMNETPP_VERSION*/
+

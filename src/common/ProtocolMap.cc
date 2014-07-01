@@ -15,56 +15,59 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "ProtocolMap.h"
 
 namespace inet {
-
-
 void ProtocolMapping::parseProtocolMapping(const char *s)
 {
-    while (isspace(*s)) s++;
+    while (isspace(*s))
+        s++;
 
-    while (*s)
-    {
+    while (*s) {
         Entry entry;
 
         if (!isdigit(*s))
             throw cRuntimeError("Syntax error: protocol number expected");
         entry.protocolNumber = atoi(s);
-        while (isdigit(*s)) s++;
+        while (isdigit(*s))
+            s++;
 
-        if (*s++!=':')
+        if (*s++ != ':')
             throw cRuntimeError("Syntax error: colon expected");
 
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
         if (!isdigit(*s))
             throw cRuntimeError("Syntax error in script: output gate index expected");
         entry.outGateIndex = atoi(s);
-        while (isdigit(*s)) s++;
+        while (isdigit(*s))
+            s++;
 
         // add
         entries.push_back(entry);
 
         // skip delimiter
-        while (isspace(*s)) s++;
-        if (!*s) break;
-        if (*s++!=',')
+        while (isspace(*s))
+            s++;
+        if (!*s)
+            break;
+        if (*s++ != ',')
             throw cRuntimeError("Syntax error: comma expected");
-        while (isspace(*s)) s++;
+        while (isspace(*s))
+            s++;
     }
-
 }
 
 int ProtocolMapping::findOutputGateForProtocol(int protocol) const
 {
-    for (Entries::const_iterator i=entries.begin(); i!=entries.end(); ++i)
-        if (i->protocolNumber==protocol)
+    for (Entries::const_iterator i = entries.begin(); i != entries.end(); ++i)
+        if (i->protocolNumber == protocol)
             return i->outGateIndex;
 
-    return -2;  // illegal gateindex
+
+    return -2;    // illegal gateindex
 }
 
 int ProtocolMapping::getOutputGateForProtocol(int protocol) const
@@ -85,8 +88,5 @@ void ProtocolMapping::addProtocolMapping(int protocol, int gateIndex)
     else
         throw cRuntimeError("The protocol %d should not register to gate index=%d because it already registered to gate index=%d.", protocol, gateIndex, registered);
 }
-
-
-}
-
+} // namespace inet
 

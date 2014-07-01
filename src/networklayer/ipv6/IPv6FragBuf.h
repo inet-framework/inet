@@ -25,7 +25,6 @@
 #include "IPv6Address.h"
 
 namespace inet {
-
 class ICMPv6;
 class IPv6Datagram;
 class IPv6FragmentHeader;
@@ -45,8 +44,9 @@ class INET_API IPv6FragBuf
         IPv6Address src;
         IPv6Address dest;
 
-        inline bool operator<(const Key& b) const {
-            return (id!=b.id) ? (id<b.id) : (src!=b.src) ? (src<b.src) : (dest<b.dest);
+        inline bool operator<(const Key& b) const
+        {
+            return (id != b.id) ? (id < b.id) : (src != b.src) ? (src < b.src) : (dest < b.dest);
         }
     };
 
@@ -55,13 +55,13 @@ class INET_API IPv6FragBuf
     //
     struct DatagramBuffer
     {
-        ReassemblyBuffer buf;  // reassembly buffer
-        IPv6Datagram *datagram;  // the actual datagram
-        simtime_t createdAt;  // time of the buffer creation (i.e. reception time of first-arriving fragment)
+        ReassemblyBuffer buf;    // reassembly buffer
+        IPv6Datagram *datagram;    // the actual datagram
+        simtime_t createdAt;    // time of the buffer creation (i.e. reception time of first-arriving fragment)
     };
 
     // we use std::map for fast lookup by datagram Id
-    typedef std::map<Key,DatagramBuffer> Buffers;
+    typedef std::map<Key, DatagramBuffer> Buffers;
 
     // the reassembly buffers
     Buffers bufs;
@@ -104,9 +104,7 @@ class INET_API IPv6FragBuf
      */
     void purgeStaleFragments(simtime_t lastupdate);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_IPV6FRAGBUF_H
 

@@ -23,7 +23,6 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 OperationalBase::OperationalBase() :
     isOperational(false)
 {
@@ -37,8 +36,7 @@ void OperationalBase::finish()
 
 void OperationalBase::initialize(int stage)
 {
-    if (isInitializeStage(stage))
-    {
+    if (isInitializeStage(stage)) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         setOperational(!nodeStatus || nodeStatus->getState() == NodeStatus::UP);
         if (isOperational)
@@ -68,27 +66,21 @@ void OperationalBase::handleMessageWhenDown(cMessage *message)
 bool OperationalBase::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
 {
     Enter_Method_Silent();
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
-        if (isNodeStartStage(stage))
-        {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
+        if (isNodeStartStage(stage)) {
             setOperational(true);
             return handleNodeStart(doneCallback);
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
-        if (isNodeShutdownStage(stage))
-        {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
+        if (isNodeShutdownStage(stage)) {
             bool done = handleNodeShutdown(doneCallback);
             setOperational(false);
             return done;
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
-        {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
             handleNodeCrash();
             setOperational(false);
             return true;
@@ -116,8 +108,5 @@ void OperationalBase::setOperational(bool isOperational)
     this->isOperational = isOperational;
     lastChange = simTime();
 }
-
-
-}
-
+} // namespace inet
 

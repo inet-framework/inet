@@ -4,17 +4,16 @@
     (C) 2007 Ahmed Ayadi  <ahmed.ayadi@sophia.inria.fr>
     (C) 2001 Matthias Oppitz, Arndt Buschmann <Matthias.Oppitz@gmx.de> <a.buschmann@gmx.de>
 
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include "RTPPayloadSender.h"
 
@@ -22,10 +21,7 @@
 #include "RTPInnerPacket.h"
 
 namespace inet {
-
-
 Define_Module(RTPPayloadSender);
-
 
 RTPPayloadSender::RTPPayloadSender()
 {
@@ -54,65 +50,58 @@ void RTPPayloadSender::initialize()
 
 void RTPPayloadSender::handleMessage(cMessage *msg)
 {
-    if (msg == _reminderMessage)
-    {
+    if (msg == _reminderMessage) {
         delete msg;
         _reminderMessage = NULL;
-        if (!sendPacket())
-        {
+        if (!sendPacket()) {
             endOfFile();
         }
     }
-    else if (msg->getArrivalGateId() == findGate("profileIn"))
-    {
+    else if (msg->getArrivalGateId() == findGate("profileIn")) {
         RTPInnerPacket *rinpIn = check_and_cast<RTPInnerPacket *>(msg);
-        if (rinpIn->getType() == RTP_INP_INITIALIZE_SENDER_MODULE)
-        {
+        if (rinpIn->getType() == RTP_INP_INITIALIZE_SENDER_MODULE) {
             initializeSenderModule(rinpIn);
         }
-        else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_CONTROL)
-        {
+        else if (rinpIn->getType() == RTP_INP_SENDER_MODULE_CONTROL) {
             RTPSenderControlMessage *rscm = (RTPSenderControlMessage *)(rinpIn->decapsulate());
             delete rinpIn;
-            switch (rscm->getCommand())
-            {
-            case RTP_CONTROL_PLAY:
-                play();
-                break;
+            switch (rscm->getCommand()) {
+                case RTP_CONTROL_PLAY:
+                    play();
+                    break;
 
-            case RTP_CONTROL_PLAY_UNTIL_TIME:
-                playUntilTime(rscm->getCommandParameter1());
-                break;
+                case RTP_CONTROL_PLAY_UNTIL_TIME:
+                    playUntilTime(rscm->getCommandParameter1());
+                    break;
 
-            case RTP_CONTROL_PLAY_UNTIL_BYTE:
-                playUntilByte(rscm->getCommandParameter1());
-                break;
+                case RTP_CONTROL_PLAY_UNTIL_BYTE:
+                    playUntilByte(rscm->getCommandParameter1());
+                    break;
 
-            case RTP_CONTROL_PAUSE:
-                pause();
-                break;
+                case RTP_CONTROL_PAUSE:
+                    pause();
+                    break;
 
-            case RTP_CONTROL_STOP:
-                stop();
-                break;
+                case RTP_CONTROL_STOP:
+                    stop();
+                    break;
 
-            case RTP_CONTROL_SEEK_TIME:
-                seekTime(rscm->getCommandParameter1());
-                break;
+                case RTP_CONTROL_SEEK_TIME:
+                    seekTime(rscm->getCommandParameter1());
+                    break;
 
-            case RTP_CONTROL_SEEK_BYTE:
-                seekByte(rscm->getCommandParameter1());
-                break;
+                case RTP_CONTROL_SEEK_BYTE:
+                    seekByte(rscm->getCommandParameter1());
+                    break;
 
-            default:
-                throw cRuntimeError("unknown sender control message");
-                break;
+                default:
+                    throw cRuntimeError("unknown sender control message");
+                    break;
             }
             delete rscm;
         }
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unknown message!");
     }
 }
@@ -154,8 +143,7 @@ void RTPPayloadSender::play()
     rinpOut->setSenderModuleStatusPkt(_ssrc, rssm);
     send(rinpOut, "profileOut");
 
-    if (!sendPacket())
-    {
+    if (!sendPacket()) {
         endOfFile();
     }
 }
@@ -219,8 +207,5 @@ bool RTPPayloadSender::sendPacket()
     throw cRuntimeError("sendPacket() not implemented");
     return false;
 }
-
-
-}
-
+} // namespace inet
 

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCP.h"
 
 #include "IPSocket.h"
@@ -31,11 +30,11 @@
 
 #ifdef WITH_IPv4
 #include "ICMPMessage_m.h"
-#endif
+#endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
 #include "ICMPv6Message_m.h"
-#endif
+#endif // ifdef WITH_IPv6
 
 #include "TCPByteStreamRcvQueue.h"
 #include "TCPByteStreamSendQueue.h"
@@ -45,12 +44,10 @@
 #include "TCPVirtualDataSendQueue.h"
 
 namespace inet {
-
-
 Define_Module(TCP);
 
-#define EPHEMERAL_PORTRANGE_START 1024
-#define EPHEMERAL_PORTRANGE_END   5000
+#define EPHEMERAL_PORTRANGE_START    1024
+#define EPHEMERAL_PORTRANGE_END      5000
 
 static std::ostream& operator<<(std::ostream& os, const TCP::SockPair& sp)
 {
@@ -74,11 +71,9 @@ static std::ostream& operator<<(std::ostream& os, const TCPConnection& conn)
 
 void TCP::initialize(int stage)
 {
-
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         const char *q;
         q = par("sendQueueClass");
         if (*q != '\0')
@@ -98,8 +93,7 @@ void TCP::initialize(int stage)
 
         cModule *netw = simulation.getSystemModule();
     }
-    else if (stage == INITSTAGE_TRANSPORT_LAYER)
-    {
+    else if (stage == INITSTAGE_TRANSPORT_LAYER) {
         NodeStatus *nodeStatus = dynamic_cast<NodeStatus *>(findContainingNode(this)->getSubmodule("status"));
         isOperational = (!nodeStatus) || nodeStatus->getState() == NodeStatus::UP;
         IPSocket ipSocket(gate("ipOut"));
@@ -109,8 +103,7 @@ void TCP::initialize(int stage)
 
 TCP::~TCP()
 {
-    while (!tcpAppConnMap.empty())
-    {
+    while (!tcpAppConnMap.empty()) {
         TcpAppConnMap::iterator i = tcpAppConnMap.begin();
         delete i->second;
         tcpAppConnMap.erase(i);
@@ -119,36 +112,32 @@ TCP::~TCP()
 
 void TCP::handleMessage(cMessage *msg)
 {
-    if (!isOperational)
-    {
+    if (!isOperational) {
         if (msg->isSelfMessage())
             throw cRuntimeError("Model error: self msg '%s' received when isOperational is false", msg->getName());
         EV_ERROR << "TCP is turned off, dropping '" << msg->getName() << "' message\n";
         delete msg;
     }
-    else if (msg->isSelfMessage())
-    {
-        TCPConnection *conn = (TCPConnection *) msg->getContextPointer();
+    else if (msg->isSelfMessage()) {
+        TCPConnection *conn = (TCPConnection *)msg->getContextPointer();
         bool ret = conn->processTimer(msg);
         if (!ret)
             removeConnection(conn);
     }
-    else if (msg->arrivedOn("ipIn"))
-    {
+    else if (msg->arrivedOn("ipIn")) {
         if (false
 #ifdef WITH_IPv4
-                || dynamic_cast<ICMPMessage *>(msg)
-#endif
+            || dynamic_cast<ICMPMessage *>(msg)
+#endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                || dynamic_cast<ICMPv6Message *>(msg)
-#endif
+            || dynamic_cast<ICMPv6Message *>(msg)
+#endif // ifdef WITH_IPv6
             )
         {
-            EV_DETAIL << "ICMP error received -- discarding\n"; // FIXME can ICMP packets really make it up to TCP???
+            EV_DETAIL << "ICMP error received -- discarding\n";    // FIXME can ICMP packets really make it up to TCP???
             delete msg;
         }
-        else
-        {
+        else {
             // must be a TCPSegment
             TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
 
@@ -167,28 +156,24 @@ void TCP::handleMessage(cMessage *msg)
 
             // process segment
             TCPConnection *conn = findConnForSegment(tcpseg, srcAddr, destAddr);
-            if (conn)
-            {
+            if (conn) {
                 bool ret = conn->processTCPSegment(tcpseg, srcAddr, destAddr);
                 if (!ret)
                     removeConnection(conn);
             }
-            else
-            {
+            else {
                 segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
             }
         }
     }
-    else // must be from app
-    {
+    else {    // must be from app
         TCPCommand *controlInfo = check_and_cast<TCPCommand *>(msg->getControlInfo());
         int appGateIndex = msg->getArrivalGate()->getIndex();
         int connId = controlInfo->getConnId();
 
         TCPConnection *conn = findConnForApp(appGateIndex, connId);
 
-        if (!conn)
-        {
+        if (!conn) {
             conn = createConnection(appGateIndex, connId);
 
             // add into appConnMap here; it'll be added to connMap during processing
@@ -224,8 +209,7 @@ void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, Address srcAddr, Address
 
 void TCP::updateDisplayString()
 {
-    if (ev.isDisabled())
-    {
+    if (ev.isDisabled()) {
         // in express mode, we don't bother to update the display
         // (std::map's iteration is not very fast if map is large)
         getDisplayString().setTagArg("t", 0, "");
@@ -240,47 +224,91 @@ void TCP::updateDisplayString()
     else
         getDisplayString().setTagArg("i2", 0, "status/cross");
 
-
     int numINIT = 0, numCLOSED = 0, numLISTEN = 0, numSYN_SENT = 0, numSYN_RCVD = 0,
         numESTABLISHED = 0, numCLOSE_WAIT = 0, numLAST_ACK = 0, numFIN_WAIT_1 = 0,
         numFIN_WAIT_2 = 0, numCLOSING = 0, numTIME_WAIT = 0;
 
-    for (TcpAppConnMap::iterator i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i)
-    {
+    for (TcpAppConnMap::iterator i = tcpAppConnMap.begin(); i != tcpAppConnMap.end(); ++i) {
         int state = (*i).second->getFsmState();
 
-        switch (state)
-        {
-           case TCP_S_INIT:        numINIT++; break;
-           case TCP_S_CLOSED:      numCLOSED++; break;
-           case TCP_S_LISTEN:      numLISTEN++; break;
-           case TCP_S_SYN_SENT:    numSYN_SENT++; break;
-           case TCP_S_SYN_RCVD:    numSYN_RCVD++; break;
-           case TCP_S_ESTABLISHED: numESTABLISHED++; break;
-           case TCP_S_CLOSE_WAIT:  numCLOSE_WAIT++; break;
-           case TCP_S_LAST_ACK:    numLAST_ACK++; break;
-           case TCP_S_FIN_WAIT_1:  numFIN_WAIT_1++; break;
-           case TCP_S_FIN_WAIT_2:  numFIN_WAIT_2++; break;
-           case TCP_S_CLOSING:     numCLOSING++; break;
-           case TCP_S_TIME_WAIT:   numTIME_WAIT++; break;
+        switch (state) {
+            case TCP_S_INIT:
+                numINIT++;
+                break;
+
+            case TCP_S_CLOSED:
+                numCLOSED++;
+                break;
+
+            case TCP_S_LISTEN:
+                numLISTEN++;
+                break;
+
+            case TCP_S_SYN_SENT:
+                numSYN_SENT++;
+                break;
+
+            case TCP_S_SYN_RCVD:
+                numSYN_RCVD++;
+                break;
+
+            case TCP_S_ESTABLISHED:
+                numESTABLISHED++;
+                break;
+
+            case TCP_S_CLOSE_WAIT:
+                numCLOSE_WAIT++;
+                break;
+
+            case TCP_S_LAST_ACK:
+                numLAST_ACK++;
+                break;
+
+            case TCP_S_FIN_WAIT_1:
+                numFIN_WAIT_1++;
+                break;
+
+            case TCP_S_FIN_WAIT_2:
+                numFIN_WAIT_2++;
+                break;
+
+            case TCP_S_CLOSING:
+                numCLOSING++;
+                break;
+
+            case TCP_S_TIME_WAIT:
+                numTIME_WAIT++;
+                break;
         }
     }
 
     char buf2[200];
     buf2[0] = '\0';
 
-    if (numINIT > 0)       sprintf(buf2+strlen(buf2), "init:%d ", numINIT);
-    if (numCLOSED > 0)     sprintf(buf2+strlen(buf2), "closed:%d ", numCLOSED);
-    if (numLISTEN > 0)     sprintf(buf2+strlen(buf2), "listen:%d ", numLISTEN);
-    if (numSYN_SENT > 0)   sprintf(buf2+strlen(buf2), "syn_sent:%d ", numSYN_SENT);
-    if (numSYN_RCVD > 0)   sprintf(buf2+strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
-    if (numESTABLISHED > 0) sprintf(buf2+strlen(buf2), "estab:%d ", numESTABLISHED);
-    if (numCLOSE_WAIT > 0) sprintf(buf2+strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
-    if (numLAST_ACK > 0)   sprintf(buf2+strlen(buf2), "last_ack:%d ", numLAST_ACK);
-    if (numFIN_WAIT_1 > 0) sprintf(buf2+strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
-    if (numFIN_WAIT_2 > 0) sprintf(buf2+strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
-    if (numCLOSING > 0)    sprintf(buf2+strlen(buf2), "closing:%d ", numCLOSING);
-    if (numTIME_WAIT > 0)  sprintf(buf2+strlen(buf2), "time_wait:%d ", numTIME_WAIT);
+    if (numINIT > 0)
+        sprintf(buf2 + strlen(buf2), "init:%d ", numINIT);
+    if (numCLOSED > 0)
+        sprintf(buf2 + strlen(buf2), "closed:%d ", numCLOSED);
+    if (numLISTEN > 0)
+        sprintf(buf2 + strlen(buf2), "listen:%d ", numLISTEN);
+    if (numSYN_SENT > 0)
+        sprintf(buf2 + strlen(buf2), "syn_sent:%d ", numSYN_SENT);
+    if (numSYN_RCVD > 0)
+        sprintf(buf2 + strlen(buf2), "syn_rcvd:%d ", numSYN_RCVD);
+    if (numESTABLISHED > 0)
+        sprintf(buf2 + strlen(buf2), "estab:%d ", numESTABLISHED);
+    if (numCLOSE_WAIT > 0)
+        sprintf(buf2 + strlen(buf2), "close_wait:%d ", numCLOSE_WAIT);
+    if (numLAST_ACK > 0)
+        sprintf(buf2 + strlen(buf2), "last_ack:%d ", numLAST_ACK);
+    if (numFIN_WAIT_1 > 0)
+        sprintf(buf2 + strlen(buf2), "fin_wait_1:%d ", numFIN_WAIT_1);
+    if (numFIN_WAIT_2 > 0)
+        sprintf(buf2 + strlen(buf2), "fin_wait_2:%d ", numFIN_WAIT_2);
+    if (numCLOSING > 0)
+        sprintf(buf2 + strlen(buf2), "closing:%d ", numCLOSING);
+    if (numTIME_WAIT > 0)
+        sprintf(buf2 + strlen(buf2), "time_wait:%d ", numTIME_WAIT);
 
     getDisplayString().setTagArg("t", 0, buf2);
 }
@@ -345,8 +373,7 @@ ushort TCP::getEphemeralPort()
     if (lastEphemeralPort == EPHEMERAL_PORTRANGE_END) // wrap
         lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 
-    while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end())
-    {
+    while (usedEphemeralPorts.find(lastEphemeralPort) != usedEphemeralPorts.end()) {
         if (lastEphemeralPort == searchUntil) // got back to starting point?
             throw cRuntimeError("Ephemeral port range %d..%d exhausted, all ports occupied", EPHEMERAL_PORTRANGE_START, EPHEMERAL_PORTRANGE_END);
 
@@ -371,15 +398,14 @@ void TCP::addSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr
 
     // make sure connection is unique
     TcpConnMap::iterator it = tcpConnMap.find(key);
-    if (it != tcpConnMap.end())
-    {
+    if (it != tcpConnMap.end()) {
         // throw "address already in use" error
         if (remoteAddr.isUnspecified() && remotePort == -1)
             throw cRuntimeError("Address already in use: there is already a connection listening on %s:%d",
-                  localAddr.str().c_str(), localPort);
+                    localAddr.str().c_str(), localPort);
         else
             throw cRuntimeError("Address already in use: there is already a connection %s:%d to %s:%d",
-                  localAddr.str().c_str(), localPort, remoteAddr.str().c_str(), remotePort);
+                    localAddr.str().c_str(), localPort, remoteAddr.str().c_str(), remotePort);
     }
 
     // then insert it into tcpConnMap
@@ -466,25 +492,37 @@ void TCP::finish()
     EV_INFO << getFullPath() << ": finishing with " << tcpConnMap.size() << " connections open.\n";
 }
 
-TCPSendQueue* TCP::createSendQueue(TCPDataTransferMode transferModeP)
+TCPSendQueue *TCP::createSendQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataSendQueue();
-        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedSendQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCPByteStreamSendQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    switch (transferModeP) {
+        case TCP_TRANSFER_BYTECOUNT:
+            return new TCPVirtualDataSendQueue();
+
+        case TCP_TRANSFER_OBJECT:
+            return new TCPMsgBasedSendQueue();
+
+        case TCP_TRANSFER_BYTESTREAM:
+            return new TCPByteStreamSendQueue();
+
+        default:
+            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
 
-TCPReceiveQueue* TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
+TCPReceiveQueue *TCP::createReceiveQueue(TCPDataTransferMode transferModeP)
 {
-    switch (transferModeP)
-    {
-        case TCP_TRANSFER_BYTECOUNT:   return new TCPVirtualDataRcvQueue();
-        case TCP_TRANSFER_OBJECT:      return new TCPMsgBasedRcvQueue();
-        case TCP_TRANSFER_BYTESTREAM:  return new TCPByteStreamRcvQueue();
-        default: throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
+    switch (transferModeP) {
+        case TCP_TRANSFER_BYTECOUNT:
+            return new TCPVirtualDataRcvQueue();
+
+        case TCP_TRANSFER_OBJECT:
+            return new TCPMsgBasedRcvQueue();
+
+        case TCP_TRANSFER_BYTESTREAM:
+            return new TCPByteStreamRcvQueue();
+
+        default:
+            throw cRuntimeError("Invalid TCP data transfer mode: %d", transferModeP);
     }
 }
 
@@ -492,16 +530,14 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
 {
     Enter_Method_Silent();
 
-    if (dynamic_cast<NodeStartOperation *>(operation))
-    {
+    if (dynamic_cast<NodeStartOperation *>(operation)) {
         if (stage == NodeStartOperation::STAGE_TRANSPORT_LAYER) {
             //FIXME implementation
             isOperational = true;
             updateDisplayString();
         }
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
         if (stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER) {
             //FIXME close connections???
             reset();
@@ -509,8 +545,7 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
             updateDisplayString();
         }
     }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    {
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {
         if (stage == NodeCrashOperation::STAGE_CRASH) {
             //FIXME implementation
             reset();
@@ -518,8 +553,7 @@ bool TCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
             updateDisplayString();
         }
     }
-    else
-    {
+    else {
         throw cRuntimeError("Unsupported operation '%s'", operation->getClassName());
     }
 
@@ -535,9 +569,5 @@ void TCP::reset()
     usedEphemeralPorts.clear();
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 }
-
-
-
-}
-
+} // namespace inet
 

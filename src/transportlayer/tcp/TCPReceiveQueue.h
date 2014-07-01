@@ -24,11 +24,8 @@
 #include "TCPConnection.h"
 
 namespace inet {
-
-
 class TCPSegment;
 class TCPCommand;
-
 
 /**
  * Abstract base class for TCP receive queues. This class represents
@@ -50,13 +47,13 @@ class TCPCommand;
 class INET_API TCPReceiveQueue : public cObject
 {
   protected:
-    TCPConnection *conn; // the connection that owns this queue
+    TCPConnection *conn;    // the connection that owns this queue
 
   public:
     /**
      * Ctor.
      */
-    TCPReceiveQueue()  {conn = NULL;}
+    TCPReceiveQueue() { conn = NULL; }
 
     /**
      * Virtual dtor.
@@ -66,7 +63,7 @@ class INET_API TCPReceiveQueue : public cObject
     /**
      * Set the connection that owns this queue.
      */
-    virtual void setConnection(TCPConnection *_conn)  {conn = _conn;}
+    virtual void setConnection(TCPConnection *_conn) { conn = _conn; }
 
     /**
      * Set initial receive sequence number.
@@ -123,8 +120,7 @@ class INET_API TCPReceiveQueue : public cObject
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32 getFirstSeqNo() = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_TCPRECEIVEQUEUE_H
 
-
-#endif

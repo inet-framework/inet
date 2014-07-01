@@ -17,7 +17,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -27,13 +26,10 @@
 
 #ifndef atoi
 #include <cstdlib>
-#endif
+#endif // ifndef atoi
 
 namespace inet {
-
-
 Define_Module(Ns2MotionMobility);
-
 
 Ns2MotionMobility::Ns2MotionMobility()
 {
@@ -52,7 +48,6 @@ Ns2MotionMobility::~Ns2MotionMobility()
 
 void Ns2MotionMobility::parseFile(const char *filename)
 {
-
     std::ifstream in(filename, std::ios::in);
 
     if (in.fail())
@@ -61,8 +56,7 @@ void Ns2MotionMobility::parseFile(const char *filename)
     std::string line;
     std::string subline;
 
-    while (std::getline(in, line))
-    {
+    while (std::getline(in, line)) {
         // '#' line
         int num_node = -1;
         std::string::size_type found = line.find('#');
@@ -78,42 +72,37 @@ void Ns2MotionMobility::parseFile(const char *filename)
         // Node Id
         std::string::size_type pos1 = subline.find('(');
         std::string::size_type pos2 = subline.find(')');
-        if (pos2-pos1>1)
-            num_node = std::atoi(subline.substr(pos1+1, pos2-1).c_str());
-        if (num_node!=nodeId)
+        if (pos2 - pos1 > 1)
+            num_node = std::atoi(subline.substr(pos1 + 1, pos2 - 1).c_str());
+        if (num_node != nodeId)
             continue;
         // Initial position
         found = subline.find("set ");
-        if (found!=std::string::npos)
-        {
+        if (found != std::string::npos) {
             // Initial position
             found = subline.find("X_");
-            if (found!=std::string::npos)
-            {
-                ns2File->initial[0] = std::atof(subline.substr(found+3, std::string::npos).c_str());
+            if (found != std::string::npos) {
+                ns2File->initial[0] = std::atof(subline.substr(found + 3, std::string::npos).c_str());
             }
             found = subline.find("Y_");
-            if (found!=std::string::npos)
-            {
-                ns2File->initial[1] = std::atof(subline.substr(found+3, std::string::npos).c_str());
+            if (found != std::string::npos) {
+                ns2File->initial[1] = std::atof(subline.substr(found + 3, std::string::npos).c_str());
             }
 
             found = subline.find("Z_");
-            if (found!=std::string::npos)
-            {
-                ns2File->initial[2] = std::atof(subline.substr(found+3, std::string::npos).c_str());
+            if (found != std::string::npos) {
+                ns2File->initial[2] = std::atof(subline.substr(found + 3, std::string::npos).c_str());
             }
         }
         found = subline.find("setdest");
-        if (found!=std::string::npos)
-        {
+        if (found != std::string::npos) {
             ns2File->lines.push_back(Ns2MotionFile::Line());
             Ns2MotionFile::Line& vec = ns2File->lines.back();
             // initial time
             found = subline.find("at");
-            vec.push_back(std::atof(subline.substr(found+3).c_str()));
+            vec.push_back(std::atof(subline.substr(found + 3).c_str()));
 
-            std::string parameters = subline.substr(subline.find("setdest ")+8, std::string::npos);
+            std::string parameters = subline.substr(subline.find("setdest ") + 8, std::string::npos);
 
             std::stringstream linestream(parameters);
             double d;
@@ -123,9 +112,8 @@ void Ns2MotionMobility::parseFile(const char *filename)
     }
     in.close();
     // exist data?
-    if (ns2File->initial[0]==-1 || ns2File->initial[1]==-1 || ns2File->initial[2]==-1)
+    if (ns2File->initial[0] == -1 || ns2File->initial[1] == -1 || ns2File->initial[2] == -1)
         throw cRuntimeError("node '%d' Error ns2 motion file '%s'", nodeId, filename);
-
 }
 
 void Ns2MotionMobility::initialize(int stage)
@@ -133,8 +121,7 @@ void Ns2MotionMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing Ns2MotionMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         scrollX = par("scrollX");
         scrollY = par("scrollY");
         nodeId = par("nodeId");
@@ -150,28 +137,23 @@ void Ns2MotionMobility::initialize(int stage)
 
 void Ns2MotionMobility::setInitialPosition()
 {
-    lastPosition.x = ns2File->initial[0]+scrollX;
-    lastPosition.y = ns2File->initial[1]+scrollY;
+    lastPosition.x = ns2File->initial[0] + scrollX;
+    lastPosition.y = ns2File->initial[1] + scrollY;
 }
 
 void Ns2MotionMobility::setTargetPosition()
 {
-
-    if (ns2File->lines.size()==0)
-    {
+    if (ns2File->lines.size() == 0) {
         stationary = true;
         return;
     }
 
-    if (vecpos >= ns2File->lines.size())
-    {
+    if (vecpos >= ns2File->lines.size()) {
         stationary = true;
         return;
     }
 
-
-    if (ns2File->lines.begin()+vecpos == ns2File->lines.end())
-    {
+    if (ns2File->lines.begin() + vecpos == ns2File->lines.end()) {
         stationary = true;
         return;
     }
@@ -180,23 +162,20 @@ void Ns2MotionMobility::setTargetPosition()
     double time = vec[0];
     simtime_t now = simTime();
     // TODO: this code is dubious at best
-    if (now < time)
-    {
+    if (now < time) {
         nextChange = time;
         targetPosition = lastPosition;
     }
-    else if (vec[3] == 0) // the node is stopped
-    {
-        const Ns2MotionFile::Line& vec = ns2File->lines[vecpos+1];
+    else if (vec[3] == 0) {    // the node is stopped
+        const Ns2MotionFile::Line& vec = ns2File->lines[vecpos + 1];
         double time = vec[0];
         nextChange = time;
         targetPosition = lastPosition;
         vecpos++;
     }
-    else
-    {
-        targetPosition.x = vec[1]+scrollX;
-        targetPosition.y = vec[2]+scrollY;
+    else {
+        targetPosition.x = vec[1] + scrollX;
+        targetPosition.y = vec[2] + scrollY;
         double speed = vec[3];
         double distance = lastPosition.distance(targetPosition);
         double travelTime = distance / speed;
@@ -210,8 +189,5 @@ void Ns2MotionMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
-
-
-}
-
+} // namespace inet
 

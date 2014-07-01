@@ -17,7 +17,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_RTCPPACKET1_H
 #define __INET_RTCPPACKET1_H
 
@@ -26,15 +25,13 @@
 #include "RTCPPacket1_m.h"
 
 namespace inet {
-
-
 class RTCPPacket : public RTCPPacket_Base
 {
   public:
-    RTCPPacket(const char *name = NULL, int kind = 0) : RTCPPacket_Base(name, kind) { };
+    RTCPPacket(const char *name = NULL, int kind = 0) : RTCPPacket_Base(name, kind) {};
     RTCPPacket(const RTCPPacket& other) : RTCPPacket_Base(other) {}
-    RTCPPacket& operator=(const RTCPPacket& other) {RTCPPacket_Base::operator=(other); return *this;}
-    virtual RTCPPacket *dup() const {return new RTCPPacket(*this);}
+    RTCPPacket& operator=(const RTCPPacket& other) { RTCPPacket_Base::operator=(other); return *this; }
+    virtual RTCPPacket *dup() const { return new RTCPPacket(*this); }
 
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPPacket_Base
 
@@ -50,13 +47,12 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
   public:
     RTCPCompoundPacket(const char *name = NULL, int kind = 0) : RTCPCompoundPacket_Base(name, kind) {};
     RTCPCompoundPacket(const RTCPCompoundPacket& other) : RTCPCompoundPacket_Base(other) {}
-    RTCPCompoundPacket& operator=(const RTCPCompoundPacket& other) {RTCPCompoundPacket_Base::operator=(other); return *this;}
-    virtual RTCPCompoundPacket *dup() const {return new RTCPCompoundPacket(*this);}
+    RTCPCompoundPacket& operator=(const RTCPCompoundPacket& other) { RTCPCompoundPacket_Base::operator=(other); return *this; }
+    virtual RTCPCompoundPacket *dup() const { return new RTCPCompoundPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base
     void addRTCPPacket(RTCPPacket *rtcpPacket);
 };
+} // namespace inet
 
-}
+#endif    // __INET_RTCPPACKET1_H_
 
-
-#endif // __INET_RTCPPACKET1_H_

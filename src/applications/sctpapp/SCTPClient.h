@@ -25,7 +25,6 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 class SCTPAssociation;
 
 /**
@@ -33,90 +32,89 @@ class SCTPAssociation;
  */
 class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInterface, public ILifecycle
 {
-    protected:
-        struct PathStatus
-        {
-            Address pid;
-            bool active;
-            bool primaryPath;
-        };
-        typedef std::map<Address,PathStatus> SCTPPathStatus;
+  protected:
+    struct PathStatus
+    {
+        Address pid;
+        bool active;
+        bool primaryPath;
+    };
+    typedef std::map<Address, PathStatus> SCTPPathStatus;
 
-        // parameters: see the corresponding NED variables
-        std::map<unsigned int,unsigned int> streamRequestLengthMap;
-        std::map<unsigned int,unsigned int> streamRequestRatioMap;
-        std::map<unsigned int,unsigned int> streamRequestRatioSendMap;
-        int queueSize;
-        unsigned int outStreams;
-        unsigned int inStreams;
-        bool echo;
-        bool ordered;
-        bool finishEndsSimulation;
+    // parameters: see the corresponding NED variables
+    std::map<unsigned int, unsigned int> streamRequestLengthMap;
+    std::map<unsigned int, unsigned int> streamRequestRatioMap;
+    std::map<unsigned int, unsigned int> streamRequestRatioSendMap;
+    int queueSize;
+    unsigned int outStreams;
+    unsigned int inStreams;
+    bool echo;
+    bool ordered;
+    bool finishEndsSimulation;
 
-        // state
-        SCTPSocket socket;
-        SCTPPathStatus sctpPathStatus;
-        cMessage* timeMsg;
-        cMessage* stopTimer;
-        cMessage* primaryChangeTimer;
-        int64 bufferSize;
-        bool timer;
-        bool sendAllowed;
+    // state
+    SCTPSocket socket;
+    SCTPPathStatus sctpPathStatus;
+    cMessage *timeMsg;
+    cMessage *stopTimer;
+    cMessage *primaryChangeTimer;
+    int64 bufferSize;
+    bool timer;
+    bool sendAllowed;
 
-        // statistics
-        unsigned long int packetsSent;
-        unsigned long int packetsRcvd;
-        unsigned long int bytesSent;
-        unsigned long int echoedBytesSent;
-        unsigned long int bytesRcvd;
-        unsigned long int numRequestsToSend; // requests to send in this session
-        unsigned long int numPacketsToReceive;
-        unsigned int numBytes;
-        int numSessions;
-        int numBroken;
-        int chunksAbandoned;
-        static simsignal_t sentPkSignal;
-        static simsignal_t rcvdPkSignal;
-        static simsignal_t echoedPkSignal;
+    // statistics
+    unsigned long int packetsSent;
+    unsigned long int packetsRcvd;
+    unsigned long int bytesSent;
+    unsigned long int echoedBytesSent;
+    unsigned long int bytesRcvd;
+    unsigned long int numRequestsToSend;    // requests to send in this session
+    unsigned long int numPacketsToReceive;
+    unsigned int numBytes;
+    int numSessions;
+    int numBroken;
+    int chunksAbandoned;
+    static simsignal_t sentPkSignal;
+    static simsignal_t rcvdPkSignal;
+    static simsignal_t echoedPkSignal;
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        void initialize(int stage);
-        void handleMessage(cMessage *msg);
-        void finish();
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    void initialize(int stage);
+    void handleMessage(cMessage *msg);
+    void finish();
 
-        void connect();
-        void close();
-        void setStatusString(const char *s);
-        void handleTimer(cMessage *msg);
+    void connect();
+    void close();
+    void setStatusString(const char *s);
+    void handleTimer(cMessage *msg);
 
-        /* SCTPSocket::CallbackInterface callback methods */
-        void socketEstablished(int connId, void *yourPtr, unsigned long int buffer); // TODO: needs a better name
-        void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent); // TODO: needs a better name
-        void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
-        void socketPeerClosed(int connId, void *yourPtr);
-        void socketClosed(int connId, void *yourPtr);
-        void socketFailure(int connId, void *yourPtr, int code);
-        void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
+    /* SCTPSocket::CallbackInterface callback methods */
+    void socketEstablished(int connId, void *yourPtr, unsigned long int buffer);    // TODO: needs a better name
+    void socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent);    // TODO: needs a better name
+    void socketDataNotificationArrived(int connId, void *yourPtr, cPacket *msg);
+    void socketPeerClosed(int connId, void *yourPtr);
+    void socketClosed(int connId, void *yourPtr);
+    void socketFailure(int connId, void *yourPtr, int code);
+    void socketStatusArrived(int connId, void *yourPtr, SCTPStatusInfo *status);
 
-        void setPrimaryPath(const char* addr);
-        void sendRequestArrived();
-        void sendQueueRequest();
-        void shutdownReceivedArrived(int connId);
-        void sendqueueAbatedArrived(int connId, unsigned long int buffer);
-        void msgAbandonedArrived(int assocId);
-        void sendStreamResetNotification();
-        void sendRequest(bool last = true);
+    void setPrimaryPath(const char *addr);
+    void sendRequestArrived();
+    void sendQueueRequest();
+    void shutdownReceivedArrived(int connId);
+    void sendqueueAbatedArrived(int connId, unsigned long int buffer);
+    void msgAbandonedArrived(int assocId);
+    void sendStreamResetNotification();
+    void sendRequest(bool last = true);
 
-        virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
-        { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
+    virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
+    { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
-    public:
-        SCTPClient();
-        virtual ~SCTPClient();
+  public:
+    SCTPClient();
+    virtual ~SCTPClient();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SCTPCLIENT_H
 
-
-#endif

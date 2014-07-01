@@ -28,7 +28,6 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
-
 class SimpleVoIPPacket;
 
 /**
@@ -46,7 +45,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
         simtime_t playoutTime;
     };
 
-    typedef std::list<VoIPPacketInfo*> PacketsList;
+    typedef std::list<VoIPPacketInfo *> PacketsList;
     typedef std::vector<VoIPPacketInfo> PacketsVector;
 
     class TalkspurtInfo
@@ -57,18 +56,19 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
             ACTIVE,
             FINISHED
         };
-        Status  status;
+        Status status;
         unsigned int talkspurtID;
         unsigned int talkspurtNumPackets;
         simtime_t voiceDuration;
-        PacketsVector  packets;
+        PacketsVector packets;
+
       public:
         TalkspurtInfo() : status(EMPTY), talkspurtID(-1) {}
         void startTalkspurt(SimpleVoIPPacket *pk);
         void finishTalkspurt() { status = FINISHED; packets.clear(); }
         bool checkPacket(SimpleVoIPPacket *pk);
         void addPacket(SimpleVoIPPacket *pk);
-        bool isActive() { return (status == ACTIVE); }
+        bool isActive() { return status == ACTIVE; }
     };
 
     // parameters
@@ -78,11 +78,11 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     int emodelBpl;
     int emodelA;
     simtime_t playoutDelay;
-    simtime_t mosSpareTime; // spare time before calculating MOS (after calculated playout time of last packet)
+    simtime_t mosSpareTime;    // spare time before calculating MOS (after calculated playout time of last packet)
 
     // state
     UDPSocket socket;
-    cMessage* selfTalkspurtFinished;
+    cMessage *selfTalkspurtFinished;
     TalkspurtInfo currentTalkspurt;
 
     static simsignal_t packetLossRateSignal;
@@ -94,7 +94,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 
     double eModel(double delay, double loss);
     void evaluateTalkspurt(bool finish);
-    void startTalkspurt(SimpleVoIPPacket* packet);
+    void startTalkspurt(SimpleVoIPPacket *packet);
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -106,12 +106,10 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 
   public:
-     SimpleVoIPReceiver();
-     ~SimpleVoIPReceiver();
+    SimpleVoIPReceiver();
+    ~SimpleVoIPReceiver();
 };
+} // namespace inet
 
+#endif // ifndef __INET_SIMPLEVOIPRECEIVER_H
 
-}
-
-
-#endif

@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCP_NSC_VirtualDataQueues.h"
 
 #include "TCPCommand_m.h"
@@ -24,12 +23,9 @@
 #include "TCPSerializer.h"
 
 namespace inet {
-
-
 Register_Class(TCP_NSC_VirtualDataSendQueue);
 
 Register_Class(TCP_NSC_VirtualDataReceiveQueue);
-
 
 TCP_NSC_VirtualDataSendQueue::TCP_NSC_VirtualDataSendQueue()
     :
@@ -57,7 +53,7 @@ void TCP_NSC_VirtualDataSendQueue::enqueueAppData(cPacket *msgP)
     unsentNscBytesM += bytes;
 }
 
-int TCP_NSC_VirtualDataSendQueue::getBytesForTcpLayer(void* bufferP, int bufferLengthP) const
+int TCP_NSC_VirtualDataSendQueue::getBytesForTcpLayer(void *bufferP, int bufferLengthP) const
 {
     ASSERT(bufferP);
 
@@ -73,11 +69,10 @@ void TCP_NSC_VirtualDataSendQueue::dequeueTcpLayerMsg(int msgLengthP)
 
 ulong TCP_NSC_VirtualDataSendQueue::getBytesAvailable() const
 {
-    return unsentNscBytesM; // TODO
+    return unsentNscBytesM;    // TODO
 }
 
-TCPSegment* TCP_NSC_VirtualDataSendQueue::createSegmentWithBytes(
-        const void* tcpDataP, int tcpLengthP)
+TCPSegment *TCP_NSC_VirtualDataSendQueue::createSegmentWithBytes(const void *tcpDataP, int tcpLengthP)
 {
     ASSERT(tcpDataP);
 
@@ -119,19 +114,18 @@ void TCP_NSC_VirtualDataReceiveQueue::notifyAboutIncomingSegmentProcessing(TCPSe
     ASSERT(tcpsegP);
 }
 
-void TCP_NSC_VirtualDataReceiveQueue::enqueueNscData(void* dataP, int dataLengthP)
+void TCP_NSC_VirtualDataReceiveQueue::enqueueNscData(void *dataP, int dataLengthP)
 {
     bytesInQueueM += dataLengthP;
 }
 
-cPacket* TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
+cPacket *TCP_NSC_VirtualDataReceiveQueue::extractBytesUpTo()
 {
     ASSERT(connM);
 
     cPacket *dataMsg = NULL;
 
-    if (bytesInQueueM)
-    {
+    if (bytesInQueueM) {
         dataMsg = new cPacket("DATA");
         dataMsg->setKind(TCP_I_DATA);
         dataMsg->setByteLength(bytesInQueueM);
@@ -160,9 +154,5 @@ void TCP_NSC_VirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpse
 {
     // nothing to do
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include <string.h>
 #include "TCP.h"
 #include "TCPConnection.h"
@@ -26,8 +25,6 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
-
-
 //
 // Event processing code
 //
@@ -38,8 +35,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
     Address localAddr, remoteAddr;
     int localPort, remotePort;
 
-    switch (fsm.getState())
-    {
+    switch (fsm.getState()) {
         case TCP_S_INIT:
             initConnection(openCmd);
 
@@ -53,8 +49,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
             if (remoteAddr.isUnspecified() || remotePort == -1)
                 throw cRuntimeError(tcpMain, "Error processing command OPEN_ACTIVE: remote address and port must be specified");
 
-            if (localPort == -1)
-            {
+            if (localPort == -1) {
                 localPort = tcpMain->getEphemeralPort();
                 EV_DETAIL << "Assigned ephemeral port " << localPort << "\n";
             }
@@ -84,8 +79,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
     Address localAddr;
     int localPort;
 
-    switch (fsm.getState())
-    {
+    switch (fsm.getState()) {
         case TCP_S_INIT:
             initConnection(openCmd);
 
@@ -117,8 +111,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
 
     // FIXME how to support PUSH? One option is to treat each SEND as a unit of data,
     // and set PSH at SEND boundaries
-    switch (fsm.getState())
-    {
+    switch (fsm.getState()) {
         case TCP_S_INIT:
             throw cRuntimeError(tcpMain, "Error processing command SEND: connection not open");
 
@@ -129,14 +122,14 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
             sendSyn();
             startSynRexmitTimer();
             scheduleTimeout(connEstabTimer, TCP_TIMEOUT_CONN_ESTAB);
-            sendQueue->enqueueAppData(PK(msg));  // queue up for later
+            sendQueue->enqueueAppData(PK(msg));    // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
         case TCP_S_SYN_RCVD:
         case TCP_S_SYN_SENT:
             EV_DETAIL << "Queueing up data for sending later.\n";
-            sendQueue->enqueueAppData(PK(msg)); // queue up for later
+            sendQueue->enqueueAppData(PK(msg));    // queue up for later
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue\n";
             break;
 
@@ -144,7 +137,7 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
         case TCP_S_CLOSE_WAIT:
             sendQueue->enqueueAppData(PK(msg));
             EV_DETAIL << sendQueue->getBytesAvailable(state->snd_una) << " bytes in queue, plus "
-                  << (state->snd_max-state->snd_una) << " bytes unacknowledged\n";
+                      << (state->snd_max - state->snd_una) << " bytes unacknowledged\n";
             tcpAlgorithm->sendCommandInvoked();
             break;
 
@@ -157,9 +150,9 @@ void TCPConnection::process_SEND(TCPEventCode& event, TCPCommand *tcpCommand, cM
     }
 
     if ((state->sendQueueLimit > 0) && (sendQueue->getBytesAvailable(state->snd_una) > state->sendQueueLimit))
-       state->queueUpdate = false;
+        state->queueUpdate = false;
 
-    delete sendCommand; // msg itself has been taken by the sendQueue
+    delete sendCommand;    // msg itself has been taken by the sendQueue
 }
 
 void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
@@ -167,8 +160,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
     delete tcpCommand;
     delete msg;
 
-    switch (fsm.getState())
-    {
+    switch (fsm.getState()) {
         case TCP_S_INIT:
             throw cRuntimeError(tcpMain, "Error processing command CLOSE: connection not open");
 
@@ -191,8 +183,7 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
             // then form a FIN segment and send it, and enter FIN-WAIT-1 state;
             // otherwise queue for processing after entering ESTABLISHED state.
             //"
-            if (state->snd_max == sendQueue->getBufferEndSeq())
-            {
+            if (state->snd_max == sendQueue->getBufferEndSeq()) {
                 EV_DETAIL << "No outstanding SENDs, sending FIN right away, advancing snd_nxt over the FIN\n";
                 state->snd_nxt = state->snd_max;
                 sendFin();
@@ -204,10 +195,9 @@ void TCPConnection::process_CLOSE(TCPEventCode& event, TCPCommand *tcpCommand, c
 
                 // state transition will automatically take us to FIN_WAIT_1 (or LAST_ACK)
             }
-            else
-            {
+            else {
                 EV_DETAIL << "SEND of " << (sendQueue->getBufferEndSeq() - state->snd_max)
-                      << " bytes pending, deferring sending of FIN\n";
+                          << " bytes pending, deferring sending of FIN\n";
                 event = TCP_E_IGNORE;
             }
             state->send_fin = true;
@@ -235,8 +225,7 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
     // state, flush queues etc -- no need to do it here. Also, we don't need to
     // send notification to the user, they know what's going on.
     //
-    switch (fsm.getState())
-    {
+    switch (fsm.getState()) {
         case TCP_S_INIT:
             throw cRuntimeError("Error processing command ABORT: connection not open");
 
@@ -253,12 +242,11 @@ void TCPConnection::process_ABORT(TCPEventCode& event, TCPCommand *tcpCommand, c
             sendRst(state->snd_nxt);
             break;
     }
-
 }
 
 void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
-    delete tcpCommand; // but reuse msg for reply
+    delete tcpCommand;    // but reuse msg for reply
 
     if (fsm.getState() == TCP_S_INIT)
         throw cRuntimeError("Error processing command STATUS: connection not open");
@@ -295,16 +283,13 @@ void TCPConnection::process_STATUS(TCPEventCode& event, TCPCommand *tcpCommand, 
 
 void TCPConnection::process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
-    if(state == NULL)
+    if (state == NULL)
         opp_error("Called process_QUEUE_BYTES_LIMIT on uninitialized TCPConnection!");
 
-    state->sendQueueLimit = tcpCommand->getUserId(); // Set queue size limit
+    state->sendQueueLimit = tcpCommand->getUserId();    // Set queue size limit
     EV << "state->sendQueueLimit set to " << state->sendQueueLimit << "\n";
     delete msg;
     delete tcpCommand;
 }
-
-
-}
-
+} // namespace inet
 

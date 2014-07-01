@@ -21,42 +21,37 @@
 #include "IListening.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ListeningBase : public IListening
 {
-    protected:
-        const IRadio *receiver;
-        const simtime_t startTime;
-        const simtime_t endTime;
-        const Coord startPosition;
-        const Coord endPosition;
+  protected:
+    const IRadio *receiver;
+    const simtime_t startTime;
+    const simtime_t endTime;
+    const Coord startPosition;
+    const Coord endPosition;
 
-    public:
-        ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
-            receiver(receiver),
-            startTime(startTime),
-            endTime(endTime),
-            startPosition(startPosition),
-            endPosition(endPosition)
-        {}
+  public:
+    ListeningBase(const IRadio *receiver, simtime_t startTime, simtime_t endTime, Coord startPosition, Coord endPosition) :
+        receiver(receiver),
+        startTime(startTime),
+        endTime(endTime),
+        startPosition(startPosition),
+        endPosition(endPosition)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const IRadio *getReceiver() const { return receiver; }
+    virtual const IRadio *getReceiver() const { return receiver; }
 
-        virtual const simtime_t getStartTime() const { return startTime; }
-        virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const { return startTime; }
+    virtual const simtime_t getEndTime() const { return endTime; }
 
-        virtual const Coord getStartPosition() const { return startPosition; }
-        virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const { return startPosition; }
+    virtual const Coord getEndPosition() const { return endPosition; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_LISTENINGBASE_H
 
-}
-
-
-#endif

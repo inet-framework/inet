@@ -16,14 +16,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "INETDefs.h"
 
 #include "FIFOQueue.h"
 
 namespace inet {
-
-
 Define_Module(FIFOQueue);
 
 simsignal_t FIFOQueue::queueLengthSignal = registerSignal("queueLength");
@@ -37,7 +34,7 @@ void FIFOQueue::initialize()
 
 cMessage *FIFOQueue::enqueue(cMessage *msg)
 {
-    cPacket *packet = check_and_cast<cPacket*>(msg);
+    cPacket *packet = check_and_cast<cPacket *>(msg);
     queue.insert(packet);
     byteLength += packet->getByteLength();
     emit(queueLengthSignal, queue.length());
@@ -49,7 +46,7 @@ cMessage *FIFOQueue::dequeue()
     if (queue.empty())
         return NULL;
 
-    cPacket *packet = check_and_cast<cPacket*>(queue.pop());
+    cPacket *packet = check_and_cast<cPacket *>(queue.pop());
     byteLength -= packet->getByteLength();
     emit(queueLengthSignal, queue.length());
     return packet;
@@ -64,9 +61,5 @@ bool FIFOQueue::isEmpty()
 {
     return queue.empty();
 }
-
-
-
-}
-
+} // namespace inet
 

@@ -23,52 +23,47 @@
 #include "IRadio.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API ReceptionBase : public virtual IReception
 {
-    protected:
-        const IRadio *receiver;
-        const ITransmission *transmission;
-        const simtime_t startTime;
-        const simtime_t endTime;
-        const Coord startPosition;
-        const Coord endPosition;
-        const EulerAngles startOrientation;
-        const EulerAngles endOrientation;
+  protected:
+    const IRadio *receiver;
+    const ITransmission *transmission;
+    const simtime_t startTime;
+    const simtime_t endTime;
+    const Coord startPosition;
+    const Coord endPosition;
+    const EulerAngles startOrientation;
+    const EulerAngles endOrientation;
 
-    public:
-        ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
-            receiver(receiver),
-            transmission(transmission),
-            startTime(startTime),
-            endTime(endTime),
-            startPosition(startPosition),
-            endPosition(endPosition),
-            startOrientation(startOrientation),
-            endOrientation(endOrientation)
-        {}
+  public:
+    ReceptionBase(const IRadio *receiver, const ITransmission *transmission, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation) :
+        receiver(receiver),
+        transmission(transmission),
+        startTime(startTime),
+        endTime(endTime),
+        startPosition(startPosition),
+        endPosition(endPosition),
+        startOrientation(startOrientation),
+        endOrientation(endOrientation)
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 
-        virtual const IRadio *getReceiver() const { return receiver; }
-        virtual const ITransmission *getTransmission() const { return transmission; }
+    virtual const IRadio *getReceiver() const { return receiver; }
+    virtual const ITransmission *getTransmission() const { return transmission; }
 
-        virtual const simtime_t getStartTime() const { return startTime; }
-        virtual const simtime_t getEndTime() const { return endTime; }
+    virtual const simtime_t getStartTime() const { return startTime; }
+    virtual const simtime_t getEndTime() const { return endTime; }
 
-        virtual const Coord getStartPosition() const { return startPosition; }
-        virtual const Coord getEndPosition() const { return endPosition; }
+    virtual const Coord getStartPosition() const { return startPosition; }
+    virtual const Coord getEndPosition() const { return endPosition; }
 
-        virtual const EulerAngles getStartOrientation() const { return startOrientation; }
-        virtual const EulerAngles getEndOrientation() const { return endOrientation; }
+    virtual const EulerAngles getStartOrientation() const { return startOrientation; }
+    virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_RECEPTIONBASE_H
 
-}
-
-
-#endif

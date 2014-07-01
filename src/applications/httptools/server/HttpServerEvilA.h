@@ -22,7 +22,6 @@
 #include "HttpServer.h"
 
 namespace inet {
-
 /**
  * An evil attacker server demonstration - type A.
  *
@@ -41,17 +40,16 @@ namespace inet {
  */
 class INET_API HttpServerEvilA : public HttpServer
 {
-    private:
-        int badLow;
-        int badHigh;
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void initialize(int stage);
-        virtual std::string generateBody();
+  private:
+    int badLow;
+    int badHigh;
+
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void initialize(int stage);
+    virtual std::string generateBody();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_HTTPSERVEREVILA_H
 

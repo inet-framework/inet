@@ -48,7 +48,6 @@
 #include "MoBANLocal.h"
 
 namespace inet {
-
 Define_Module(MoBANCoordinator);
 
 void MoBANCoordinator::initialize(int stage)
@@ -56,8 +55,7 @@ void MoBANCoordinator::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MoBANCoordinator stage " << stage << endl;
-    if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
-    {
+    if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT) {
         useMobilityPattern = par("useMobilityPattern").boolValue();
         collectLocalModules(getParentModule());
 
@@ -76,12 +74,14 @@ void MoBANCoordinator::initialize(int stage)
             if (!readMobilityPatternFile())
                 throw cRuntimeError("MoBAN Coordinator: error in reading the input mobility pattern file");
 
+
         lastPosition = selectDestination();
         publishToNodes();
     }
 }
 
-void MoBANCoordinator::setInitialPosition() {
+void MoBANCoordinator::setInitialPosition()
+{
 //    lastPosition = selectDestination();
 }
 
@@ -91,20 +91,21 @@ void MoBANCoordinator::setInitialPosition() {
  * variables to make the movement.
  * In the case of using a logged mobility pattern, the new posture and other parameters are obtained from the pattern.
  */
-void MoBANCoordinator::setTargetPosition() {
+void MoBANCoordinator::setTargetPosition()
+{
     // select the new posture and set the variable currentPosture as well as the reference points of all nodes within the WBAN.
     if (useMobilityPattern) {
         currentPattern = (currentPattern + 1) % patternLength;
         int postureID = mobilityPattern[currentPattern].postureID;
         currentPosture = postureList[postureID];
-    } else
+    }
+    else
         selectPosture();
 
     EV_DEBUG << "New posture is selected: " << currentPosture->getPostureName() << endl;
 
     simtime_t duration;
-    if (currentPosture->isMobile())
-    {
+    if (currentPosture->isMobile()) {
         double distance;
 
         if (useMobilityPattern) {
@@ -116,14 +117,13 @@ void MoBANCoordinator::setTargetPosition() {
             speed = selectSpeed();
         }
 
-        if (speed==0)
+        if (speed == 0)
             throw cRuntimeError("The velocity in a mobile posture should not be zero!");
 
         distance = lastPosition.distance(targetPosition);
         duration = distance / speed;
     }
-    else
-    {
+    else {
         targetPosition = lastPosition;
         if (useMobilityPattern)
             duration = mobilityPattern[currentPattern].duration;
@@ -133,17 +133,17 @@ void MoBANCoordinator::setTargetPosition() {
     nextChange = simTime() + duration;
 
     //show posture name in the graphical interface
-    if (ev.isGUI()){
+    if (ev.isGUI()) {
         char dis_str[100];
-        sprintf(dis_str,"%s until %f", currentPosture->getPostureName(), nextChange.dbl());
+        sprintf(dis_str, "%s until %f", currentPosture->getPostureName(), nextChange.dbl());
         getDisplayString().setTagArg("t", 0, dis_str);
     }
 
     // write the move step into the output log file
     if (currentPosture->isMobile())
-        fprintf(logfile,"%s %d %f %f %f %f \n", currentPosture->getPostureName(), currentPosture->getPostureID(), targetPosition.x, targetPosition.y, targetPosition.z, speed);
+        fprintf(logfile, "%s %d %f %f %f %f \n", currentPosture->getPostureName(), currentPosture->getPostureID(), targetPosition.x, targetPosition.y, targetPosition.z, speed);
     else
-        fprintf(logfile,"%s %d %f \n", currentPosture->getPostureName(), currentPosture->getPostureID(), duration.dbl());
+        fprintf(logfile, "%s %d %f \n", currentPosture->getPostureName(), currentPosture->getPostureID(), duration.dbl());
 
     publishToNodes();
 
@@ -160,11 +160,12 @@ void MoBANCoordinator::setTargetPosition() {
  * In any case, the next posture is selected considering the current posture and according to the final
  * Markov transition matrix.
  */
-void MoBANCoordinator::selectPosture() {
+void MoBANCoordinator::selectPosture()
+{
     int postureID = 0;
 
     if (postureSelStrategy == UNIFORM_RANDOM) {
-        postureID = floor(uniform(0, numPostures)); // uniformly random posture selection
+        postureID = floor(uniform(0, numPostures));    // uniformly random posture selection
         currentPosture = postureList[postureID];
         return;
     }
@@ -175,13 +176,11 @@ void MoBANCoordinator::selectPosture() {
     /* Using transition matrix to select the next posture */
     double randomValue = uniform(0, 1);
     double comp = 0;
-    int currentP = currentPosture->getPostureID(); // it determines the column in the matrix
+    int currentP = currentPosture->getPostureID();    // it determines the column in the matrix
 
-    for (int i = 0; i < static_cast<int>(numPostures); ++i)
-    {
+    for (int i = 0; i < static_cast<int>(numPostures); ++i) {
         comp += markovMatrix[i][currentP];
-        if (randomValue < comp)
-        {
+        if (randomValue < comp) {
             postureID = i;
             break;
         }
@@ -194,7 +193,8 @@ void MoBANCoordinator::selectPosture() {
  * Select a stay time duration in the specified duration range for the new posture.
  * It is called whenever a new stable posture is selected.
  */
-simtime_t MoBANCoordinator::selectDuration() {
+simtime_t MoBANCoordinator::selectDuration()
+{
     return uniform(minDuration, maxDuration);
 }
 
@@ -203,10 +203,11 @@ simtime_t MoBANCoordinator::selectDuration() {
  * It is called whenever a new mobile posture is selected.
  * It is taken into account that all nodes should be inside the area.
  */
-Coord MoBANCoordinator::selectDestination() {
+Coord MoBANCoordinator::selectDestination()
+{
     Coord res;
     res = getRandomPosition();
-    res.z = lastPosition.z; // the z value remain the same
+    res.z = lastPosition.z;    // the z value remain the same
 
     // check if it is okay using CoverRadius
     while (!isInsideWorld(res)) {
@@ -222,14 +223,16 @@ Coord MoBANCoordinator::selectDestination() {
  * It is called whenever a new stable posture is selected.
  * In the case of using a logged mobility pattern, the speed value is retrieved from the pattern.
  */
-double MoBANCoordinator::selectSpeed() {
-    return (uniform(currentPosture->getMinSpeed(), currentPosture->getMaxSpeed()));
+double MoBANCoordinator::selectSpeed()
+{
+    return uniform(currentPosture->getMinSpeed(), currentPosture->getMaxSpeed());
 }
 
 /**
  * Checks if all nodes of the WBAN are inside the simulation environment with the current position.
  */
-bool MoBANCoordinator::isInsideWorld(Coord tPos) {
+bool MoBANCoordinator::isInsideWorld(Coord tPos)
+{
     Coord absolutePosition;
 
     for (unsigned int i = 0; i < localModules.size(); ++i) {
@@ -243,8 +246,9 @@ bool MoBANCoordinator::isInsideWorld(Coord tPos) {
 
 /**
  * Publishes the reference point and other information of the posture to the blackboard of the belonging nodes.
-*/
-void MoBANCoordinator::publishToNodes() {
+ */
+void MoBANCoordinator::publishToNodes()
+{
     for (unsigned int i = 0; i < localModules.size(); ++i) {
         MoBANLocal *localModule = localModules[i];
         EV_DEBUG << "Publish data for: " << localModule->getParentModule()->getFullName() << endl;
@@ -252,7 +256,8 @@ void MoBANCoordinator::publishToNodes() {
     }
 }
 
-void MoBANCoordinator::finish() {
+void MoBANCoordinator::finish()
+{
     fclose(logfile);
 }
 
@@ -260,7 +265,8 @@ void MoBANCoordinator::finish() {
  * This function reads the input mobility pattern file and make a list of the mobility patterns.
  * It will be called in the initialization phase if the useMobilityPattern parameter is true.
  */
-bool MoBANCoordinator::readMobilityPatternFile() {
+bool MoBANCoordinator::readMobilityPatternFile()
+{
     patternLength = 0;
     double x, y, z, s;
     int id;
@@ -277,26 +283,25 @@ bool MoBANCoordinator::readMobilityPatternFile() {
     while ((c = fgetc(fp)) != EOF)
         if (c == '\n')
             patternLength++;
+
     fclose(fp);
 
     EV_DEBUG << "Mobility Pattern Length: " << patternLength << endl;
 
     mobilityPattern = new Pattern[patternLength];
 
-    fp = fopen(file_name,"r");
+    fp = fopen(file_name, "r");
 
-    int i=0;
-    while (fscanf(fp,"%49s %d",posture_name,&id)!= -1) {
+    int i = 0;
+    while (fscanf(fp, "%49s %d", posture_name, &id) != -1) {
         mobilityPattern[i].postureID = id;
-        if (postureList[id]->isMobile())
-        {
-            assert(fscanf(fp,"%le %le %le %le",&x,&y,&z,&s)!=-1);
-            mobilityPattern[i].targetPos = Coord(x,y,z);
+        if (postureList[id]->isMobile()) {
+            assert(fscanf(fp, "%le %le %le %le", &x, &y, &z, &s) != -1);
+            mobilityPattern[i].targetPos = Coord(x, y, z);
             mobilityPattern[i].speed = s;
         }
-        else
-        {
-            assert (fscanf(fp,"%le",&x)!=-1);
+        else {
+            assert(fscanf(fp, "%le", &x) != -1);
             mobilityPattern[i].duration = x;
         }
         ++i;
@@ -316,13 +321,13 @@ bool MoBANCoordinator::readMobilityPatternFile() {
  * and movement velocity  of all nodes in the WBAN.
  * The function will be called in the initialization phase.
  */
-bool MoBANCoordinator::readPostureSpecificationFile() {
-
-    cXMLElement* xmlPosture = par("postureSpecFile").xmlValue();
+bool MoBANCoordinator::readPostureSpecificationFile()
+{
+    cXMLElement *xmlPosture = par("postureSpecFile").xmlValue();
     if (xmlPosture == 0)
         return false;
 
-    const char* str;
+    const char *str;
 
     // read the specification of every posture from file and make a list of postures
     cXMLElementList postures;
@@ -337,17 +342,16 @@ bool MoBANCoordinator::readPostureSpecificationFile() {
     unsigned int postureID;
 
     cXMLElementList::const_iterator posture;
-    for (posture = postures.begin(); posture != postures.end(); posture++)
-    {
+    for (posture = postures.begin(); posture != postures.end(); posture++) {
         str = (*posture)->getAttribute("postureID");
         postureID = strtol(str, 0, 0);
         if (postureID < 0 || postureID >= numPostures)
-            error ("Posture ID in input posture specification file is out of the range");
+            error("Posture ID in input posture specification file is out of the range");
 
         postureList.push_back(new Posture(postureID, localModules.size()));
 
         str = (*posture)->getAttribute("name");
-        postureList[postureID]->setPostureName(const_cast<char*> (str));
+        postureList[postureID]->setPostureName(const_cast<char *>(str));
 
         str = (*posture)->getAttribute("minSpeed");
         double minS = strtod(str, 0);
@@ -361,11 +365,10 @@ bool MoBANCoordinator::readPostureSpecificationFile() {
 
         nodeParameters = (*posture)->getElementsByTagName("nodeParameters");
         if (nodeParameters.size() != localModules.size())
-            error ("Some nodes may not have specified parameters in a posture in input posture specification file");
+            error("Some nodes may not have specified parameters in a posture in input posture specification file");
 
         cXMLElementList::const_iterator param;
-        for (param = nodeParameters.begin(); param!= nodeParameters.end(); param++)
-        {
+        for (param = nodeParameters.begin(); param != nodeParameters.end(); param++) {
             str = (*param)->getAttribute("positionX");
             x = strtod(str, 0);
 
@@ -393,12 +396,11 @@ bool MoBANCoordinator::readPostureSpecificationFile() {
     for (unsigned int i = 0; i < numPostures; ++i) {
         EV_DEBUG << "Information for the posture: " << i << " is" << endl;
         for (unsigned int j = 0; j < localModules.size(); ++j)
-        EV_DEBUG << "Node " << j << " position: " << postureList[i]->getPs(j) <<
-            " and radius: " << postureList[i]->getRadius(j) << " and speed: " << postureList[i]->getSpeed(j) << endl;
+            EV_DEBUG << "Node " << j << " position: " << postureList[i]->getPs(j)
+                     << " and radius: " << postureList[i]->getRadius(j) << " and speed: " << postureList[i]->getSpeed(j) << endl;
     }
 
     return true;
-
 }
 
 /**
@@ -408,15 +410,16 @@ bool MoBANCoordinator::readPostureSpecificationFile() {
  * space-time correlation are required to be simulated.
  * The function will be called in the initialization phase.
  */
-bool MoBANCoordinator::readConfigurationFile() {
-    cXMLElement* xmlConfig = par("configFile").xmlValue();
+bool MoBANCoordinator::readConfigurationFile()
+{
+    cXMLElement *xmlConfig = par("configFile").xmlValue();
     if (xmlConfig == 0)
         return false;
 
     cXMLElementList tagList;
-    cXMLElement* tempTag;
-    const char* str;
-    std::string sstr; // for easier comparison
+    cXMLElement *tempTag;
+    const char *str;
+    std::string sstr;    // for easier comparison
 
     /* Reading the initial posture if it is given*/
     int postureID;
@@ -435,30 +438,30 @@ bool MoBANCoordinator::readConfigurationFile() {
     /* Reading the initial position if it is given */
     tagList = xmlConfig->getElementsByTagName("initialLocation");
     if (tagList.empty())
-        lastPosition = Coord(10,10,5); // no initial location has been specified .
-    else
-    {
-        double x,y,z;
-        tempTag= tagList.front();
+        lastPosition = Coord(10, 10, 5); // no initial location has been specified .
+    else {
+        double x, y, z;
+        tempTag = tagList.front();
 
-        str = tempTag->getAttribute("x"); x = strtod(str, 0);
-        str = tempTag->getAttribute("y"); y = strtod(str, 0);
-        str = tempTag->getAttribute("z"); z = strtod(str, 0);
-        lastPosition = Coord(x,y,z);
+        str = tempTag->getAttribute("x");
+        x = strtod(str, 0);
+        str = tempTag->getAttribute("y");
+        y = strtod(str, 0);
+        str = tempTag->getAttribute("z");
+        z = strtod(str, 0);
+        lastPosition = Coord(x, y, z);
     }
     EV_DEBUG << "Initial position of the LC: " << lastPosition << endl;
 
     /* Reading the given range for duration of stable postures */
     tagList = xmlConfig->getElementsByTagName("durationRange");
-    if (tagList.empty())
-    {
+    if (tagList.empty()) {
         // no duration is specified. We assign a value!
         minDuration = 0;
         maxDuration = 100;
     }
-    else
-    {
-        tempTag= tagList.front();
+    else {
+        tempTag = tagList.front();
 
         str = tempTag->getAttribute("min");
         minDuration = strtod(str, 0);
@@ -472,9 +475,8 @@ bool MoBANCoordinator::readConfigurationFile() {
     /* Reading the Markov transition matrices, if there are any. */
     tagList = xmlConfig->getElementsByTagName("markovMatrices");
 
-    if (tagList.empty())
-    {
-        postureSelStrategy = UNIFORM_RANDOM; // no posture selection strategy is required. uniform random is applied
+    if (tagList.empty()) {
+        postureSelStrategy = UNIFORM_RANDOM;    // no posture selection strategy is required. uniform random is applied
         EV_DEBUG << "Posture Selection strategy: UNIFORM_RANDOM " << endl;
         return true;
     }
@@ -484,9 +486,8 @@ bool MoBANCoordinator::readConfigurationFile() {
     cXMLElementList matrixList;
     matrixList = tempTag->getElementsByTagName("MarkovMatrix");
 
-    if (tagList.empty())
-    {
-        postureSelStrategy = UNIFORM_RANDOM; // no posture selection strategy is required. uniform random is applied
+    if (tagList.empty()) {
+        postureSelStrategy = UNIFORM_RANDOM;    // no posture selection strategy is required. uniform random is applied
         EV_DEBUG << "Posture Selection strategy: UNIFORM_RANDOM " << endl;
         return true;
     }
@@ -494,55 +495,50 @@ bool MoBANCoordinator::readConfigurationFile() {
     postureSelStrategy = MARKOV_BASE;
 
     // make an empty matrix for the Markov Chain
-    double** matrix = new double* [numPostures];
-    for (unsigned int i=0;i<numPostures;++i)
-        matrix[i] = new double [numPostures];
+    double **matrix = new double *[numPostures];
+    for (unsigned int i = 0; i < numPostures; ++i)
+        matrix[i] = new double[numPostures];
 
-    bool setDefault=false; // variable to remember if the default matrix is defined.
+    bool setDefault = false;    // variable to remember if the default matrix is defined.
     cXMLElementList::const_iterator matrixTag;
-    for (matrixTag = matrixList.begin(); matrixTag != matrixList.end(); matrixTag++)
-    {
-
+    for (matrixTag = matrixList.begin(); matrixTag != matrixList.end(); matrixTag++) {
         cXMLElementList rowList;
         cXMLElementList cellList;
-        int i=0,j=0;
+        int i = 0, j = 0;
         bool thisDefault = false;
 
-        if ((*matrixTag)->getAttribute("type") != NULL)
-        {
+        if ((*matrixTag)->getAttribute("type") != NULL) {
             sstr = (*matrixTag)->getAttribute("type");
-            if (sstr == "Default" || sstr == "default")
-            {
+            if (sstr == "Default" || sstr == "default") {
                 if (setDefault)
-                    error ("There are more than one default matrix defined in the configuration file!");
-                else
-                    {setDefault = true; thisDefault = true;}
+                    error("There are more than one default matrix defined in the configuration file!");
+                else {
+                    setDefault = true;
+                    thisDefault = true;
+                }
             }
         }
-
 
         sstr = (*matrixTag)->getAttribute("name");
 
         rowList = (*matrixTag)->getElementsByTagName("row");
-        if (rowList.size()!= numPostures && rowList.size()!= 1)
+        if (rowList.size() != numPostures && rowList.size() != 1)
             throw cRuntimeError("Number of rows in  the Markov transition matrix should be equal to either the number"
-                    " of postures (full Markov matrix) or one (steady state vector)");
+                                " of postures (full Markov matrix) or one (steady state vector)");
 
-        if (rowList.size()!= numPostures && thisDefault)
+        if (rowList.size() != numPostures && thisDefault)
             throw cRuntimeError("Dimension of the default Markov matrix should be equal to the number of postures in the configuration file");
 
-        if ((rowList.size()== 1) && (!setDefault))
+        if ((rowList.size() == 1) && (!setDefault))
             throw cRuntimeError("A default matrix is supposed to be defined before a steady state can be defined in the configuration file");
 
-        for (cXMLElementList::const_iterator row = rowList.begin(); row != rowList.end(); row++)
-        {
+        for (cXMLElementList::const_iterator row = rowList.begin(); row != rowList.end(); row++) {
             cellList = (*row)->getElementsByTagName("cell");
-            if (cellList.size()!= numPostures)
+            if (cellList.size() != numPostures)
                 throw cRuntimeError("Number of columns in  the Markov transition matrix should be equal to the number of postures");
 
-            j=0;
-            for (cXMLElementList::const_iterator cell = cellList.begin(); cell != cellList.end(); cell++)
-            {
+            j = 0;
+            for (cXMLElementList::const_iterator cell = cellList.begin(); cell != cellList.end(); cell++) {
                 str = (*cell)->getAttribute("value");
                 matrix[i][j] = strtod(str, 0);
                 j++;
@@ -554,16 +550,14 @@ bool MoBANCoordinator::readConfigurationFile() {
         if (rowList.size() == 1)
             transitions->addSteadyState(sstr, matrix[0]); // steady state
         else
-            transitions->addMatrix(sstr, matrix, thisDefault);         // A full Markovian matrix
+            transitions->addMatrix(sstr, matrix, thisDefault); // A full Markovian matrix
 
         EV_DEBUG << "Markov transition matrix " << sstr << " : " << endl;
-        for (int k=0;k < i ; ++k)
-        {
-            for (unsigned int f=0; f<numPostures ;++f)
+        for (int k = 0; k < i; ++k) {
+            for (unsigned int f = 0; f < numPostures; ++f)
                 EV_DEBUG << matrix[k][f] << " ";
             EV_DEBUG << endl;
         }
-
     }
 
     /* Reading the Area types, if there are any. */
@@ -572,42 +566,45 @@ bool MoBANCoordinator::readConfigurationFile() {
     if (tagList.empty())
         EV_DEBUG << "No area type is given. So there is no spatial correlation in posture selection." << endl;
     else {
+        tempTag = tagList.front();
+        cXMLElementList typeList = tempTag->getElementsByTagName("areaType");
 
-            tempTag = tagList.front();
-            cXMLElementList typeList = tempTag->getElementsByTagName("areaType");
+        if (typeList.empty())
+            error("No areaType has been defined in areaTypes!");
 
-            if (typeList.empty())
-                error ("No areaType has been defined in areaTypes!");
+        for (cXMLElementList::const_iterator aType = typeList.begin(); aType != typeList.end(); aType++) {
+            sstr = (*aType)->getAttribute("name");
 
-            for (cXMLElementList::const_iterator aType = typeList.begin(); aType != typeList.end(); aType++)
-            {
-                sstr = (*aType)->getAttribute("name");
+            EV_DEBUG << "Area type " << sstr << " : " << endl;
 
-                EV_DEBUG << "Area type " << sstr << " : " << endl;
+            int typeID = transitions->addAreaType(sstr);
 
-                int typeID = transitions->addAreaType(sstr);
+            cXMLElementList boundList = (*aType)->getElementsByTagName("boundary");
+            if (boundList.empty())
+                error("No boundary is given for a area type!");
 
-                cXMLElementList boundList = (*aType)->getElementsByTagName("boundary");
-                if (boundList.empty())
-                    error ("No boundary is given for a area type!");
+            Coord minBound, maxBound;
+            for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++) {
+                str = (*aBound)->getAttribute("xMin");
+                minBound.x = strtod(str, 0);
+                str = (*aBound)->getAttribute("yMin");
+                minBound.y = strtod(str, 0);
+                str = (*aBound)->getAttribute("zMin");
+                minBound.z = strtod(str, 0);
 
-                Coord minBound, maxBound;
-                for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++)
-                {
-                    str = (*aBound)->getAttribute("xMin"); minBound.x = strtod(str, 0);
-                    str = (*aBound)->getAttribute("yMin"); minBound.y = strtod(str, 0);
-                    str = (*aBound)->getAttribute("zMin"); minBound.z = strtod(str, 0);
+                str = (*aBound)->getAttribute("xMax");
+                maxBound.x = strtod(str, 0);
+                str = (*aBound)->getAttribute("yMax");
+                maxBound.y = strtod(str, 0);
+                str = (*aBound)->getAttribute("zMax");
+                maxBound.z = strtod(str, 0);
 
-                    str = (*aBound)->getAttribute("xMax"); maxBound.x = strtod(str, 0);
-                    str = (*aBound)->getAttribute("yMax"); maxBound.y = strtod(str, 0);
-                    str = (*aBound)->getAttribute("zMax"); maxBound.z = strtod(str, 0);
-
-                    transitions->setAreaBoundry(typeID,minBound,maxBound);
-                    EV_DEBUG << "Low bound: " << minBound << endl;
-                    EV_DEBUG << "High bound: " << maxBound << endl;
-                }
+                transitions->setAreaBoundry(typeID, minBound, maxBound);
+                EV_DEBUG << "Low bound: " << minBound << endl;
+                EV_DEBUG << "High bound: " << maxBound << endl;
             }
         }
+    }
 
     /* Reading the time domains, if there are any. */
     tagList = xmlConfig->getElementsByTagName("timeDomains");
@@ -615,35 +612,34 @@ bool MoBANCoordinator::readConfigurationFile() {
     if (tagList.empty())
         EV_DEBUG << "No time domain is given. So there is no temporal correlation in posture selection." << endl;
     else {
+        tempTag = tagList.front();
+        cXMLElementList typeList = tempTag->getElementsByTagName("timeDomain");
 
-            tempTag = tagList.front();
-            cXMLElementList typeList = tempTag->getElementsByTagName("timeDomain");
+        if (typeList.empty())
+            error("No timeDomain has been defined in timeDomains!");
 
-            if (typeList.empty())
-                error ("No timeDomain has been defined in timeDomains!");
+        for (cXMLElementList::const_iterator aType = typeList.begin(); aType != typeList.end(); aType++) {
+            sstr = (*aType)->getAttribute("name");
 
-            for (cXMLElementList::const_iterator aType = typeList.begin(); aType != typeList.end(); aType++)
-            {
-                sstr = (*aType)->getAttribute("name");
+            EV_DEBUG << "Time domain " << sstr << " : " << endl;
 
-                EV_DEBUG << "Time domain " << sstr << " : " << endl;
+            int typeID = transitions->addTimeDomain(sstr);
 
-                int typeID = transitions->addTimeDomain(sstr);
+            cXMLElementList boundList = (*aType)->getElementsByTagName("boundary");
+            if (boundList.empty())
+                error("No boundary is given for a time domain!");
 
-                cXMLElementList boundList = (*aType)->getElementsByTagName("boundary");
-                if (boundList.empty())
-                    error ("No boundary is given for a time domain!");
+            simtime_t minTime, maxTime;
+            for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++) {
+                str = (*aBound)->getAttribute("tMin");
+                minTime = strtod(str, 0);
+                str = (*aBound)->getAttribute("tMax");
+                maxTime = strtod(str, 0);
 
-                simtime_t minTime,maxTime;
-                for (cXMLElementList::const_iterator aBound = boundList.begin(); aBound != boundList.end(); aBound++)
-                {
-                    str = (*aBound)->getAttribute("tMin"); minTime = strtod(str,0);
-                    str = (*aBound)->getAttribute("tMax"); maxTime = strtod(str,0);
-
-                    transitions->setTimeBoundry(typeID,minTime,maxTime);
-                    EV_DEBUG << "Low bound: (" << minTime.dbl() << ", " << maxTime << ")" << endl;
-                }
+                transitions->setTimeBoundry(typeID, minTime, maxTime);
+                EV_DEBUG << "Low bound: (" << minTime.dbl() << ", " << maxTime << ")" << endl;
             }
+        }
     }
 
     /* Reading the combinations, if there are any. */
@@ -652,46 +648,44 @@ bool MoBANCoordinator::readConfigurationFile() {
     if (tagList.empty())
         EV_DEBUG << "No combination is given. The default Markov model is then used for the whole time and space!" << endl;
     else {
-            tempTag = tagList.front();
-            cXMLElementList combList = tempTag->getElementsByTagName("combination");
+        tempTag = tagList.front();
+        cXMLElementList combList = tempTag->getElementsByTagName("combination");
 
-            if (combList.empty())
-                error ("No combination has been defined in combinations!");
+        if (combList.empty())
+            error("No combination has been defined in combinations!");
 
-            EV_DEBUG << "Combinations: " << endl;
+        EV_DEBUG << "Combinations: " << endl;
 
-            for (cXMLElementList::const_iterator aComb = combList.begin(); aComb != combList.end(); aComb++)
-            {
-                std::string areaName,timeName,matrixName;
+        for (cXMLElementList::const_iterator aComb = combList.begin(); aComb != combList.end(); aComb++) {
+            std::string areaName, timeName, matrixName;
 
-                if ((*aComb)->getAttribute("areaType") != NULL)
-                    areaName = (*aComb)->getAttribute("areaType");
-                else
-                    areaName.clear();
+            if ((*aComb)->getAttribute("areaType") != NULL)
+                areaName = (*aComb)->getAttribute("areaType");
+            else
+                areaName.clear();
 
-                if ((*aComb)->getAttribute("timeDomain") != NULL)
-                    timeName = (*aComb)->getAttribute("timeDomain");
-                else
-                    timeName.clear();
+            if ((*aComb)->getAttribute("timeDomain") != NULL)
+                timeName = (*aComb)->getAttribute("timeDomain");
+            else
+                timeName.clear();
 
-                if ((*aComb)->getAttribute("matrix") != NULL)
-                    matrixName = (*aComb)->getAttribute("matrix");
-                else
-                    throw cRuntimeError("No transition matrix is specified for a combination");
+            if ((*aComb)->getAttribute("matrix") != NULL)
+                matrixName = (*aComb)->getAttribute("matrix");
+            else
+                throw cRuntimeError("No transition matrix is specified for a combination");
 
-                transitions->addCombination(areaName, timeName, matrixName);
+            transitions->addCombination(areaName, timeName, matrixName);
 
-                EV_DEBUG << "(" << areaName << ", " << timeName << ", " << matrixName << ")" << endl;
-            }
+            EV_DEBUG << "(" << areaName << ", " << timeName << ", " << matrixName << ")" << endl;
         }
+    }
 
     return true;
 }
 
 void MoBANCoordinator::collectLocalModules(cModule *module)
 {
-    for (cModule::SubmoduleIterator it(module); !it.end(); it++)
-    {
+    for (cModule::SubmoduleIterator it(module); !it.end(); it++) {
         cModule *submodule = it();
         collectLocalModules(submodule);
         MoBANLocal *localModule = dynamic_cast<MoBANLocal *>(submodule);
@@ -701,8 +695,5 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
         }
     }
 }
-
-
-}
-
+} // namespace inet
 

@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 #ifndef __INET_ARP_H
 #define __INET_ARP_H
@@ -30,7 +30,6 @@
 #include "ModuleAccess.h"
 
 namespace inet {
-
 // Forward declarations:
 class ARPPacket;
 class IInterfaceTable;
@@ -44,22 +43,22 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
 {
   public:
     struct ARPCacheEntry;
-    typedef std::map<IPv4Address, ARPCacheEntry*> ARPCache;
-    typedef std::vector<cMessage*> MsgPtrVector;
+    typedef std::map<IPv4Address, ARPCacheEntry *> ARPCache;
+    typedef std::vector<cMessage *> MsgPtrVector;
 
     // IPv4Address -> MACAddress table
     // TBD should we key it on (IPv4Address, InterfaceEntry*)?
     class ARPCacheEntry
     {
       public:
-        ARP *owner;     // owner ARP module of this cache entry
-        const InterfaceEntry *ie; // NIC to send the packet to
-        bool pending; // true if resolution is pending
-        MACAddress macAddress;  // MAC address
-        simtime_t lastUpdate;  // entries should time out after cacheTimeout
-        int numRetries; // if pending==true: 0 after first ARP request, 1 after second, etc.
-        cMessage *timer;  // if pending==true: request timeout msg
-        ARPCache::iterator myIter;  // iterator pointing to this entry
+        ARP *owner;    // owner ARP module of this cache entry
+        const InterfaceEntry *ie;    // NIC to send the packet to
+        bool pending;    // true if resolution is pending
+        MACAddress macAddress;    // MAC address
+        simtime_t lastUpdate;    // entries should time out after cacheTimeout
+        int numRetries;    // if pending==true: 0 after first ARP request, 1 after second, etc.
+        cMessage *timer;    // if pending==true: request timeout msg
+        ARPCache::iterator myIter;    // iterator pointing to this entry
     };
 
   protected:
@@ -83,7 +82,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     cGate *netwOutGate;
 
     IInterfaceTable *ift;
-    IIPv4RoutingTable *rt;  // for answering ProxyARP requests
+    IIPv4RoutingTable *rt;    // for answering ProxyARP requests
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.
@@ -123,9 +122,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual void dumpARPPacket(ARPPacket *arp);
     virtual void updateDisplayString();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ARP_H
 

@@ -29,7 +29,6 @@
 #include "NodeStatus.h"
 
 namespace inet {
-
 // Forward declarations:
 class EtherFrame;
 class EtherTraffic;
@@ -41,8 +40,7 @@ class InterfaceEntry;
 class INET_API EtherMACBase : public MACBase
 {
   protected:
-    enum MACTransmitState
-    {
+    enum MACTransmitState {
         TX_IDLE_STATE = 1,
         WAIT_IFG_STATE,
         SEND_IFG_STATE,
@@ -52,8 +50,7 @@ class INET_API EtherMACBase : public MACBase
         PAUSE_STATE
     };
 
-    enum MACReceiveState
-    {
+    enum MACReceiveState {
         RX_IDLE_STATE = 1,
         RECEIVING_STATE,
         RX_COLLISION_STATE,
@@ -61,8 +58,7 @@ class INET_API EtherMACBase : public MACBase
     };
 
     // Self-message kind values
-    enum SelfMsgKindValues
-    {
+    enum SelfMsgKindValues {
         ENDIFG = 100,
         ENDRECEPTION,
         ENDBACKOFF,
@@ -71,36 +67,35 @@ class INET_API EtherMACBase : public MACBase
         ENDPAUSE
     };
 
-    enum
-    {
+    enum {
         NUM_OF_ETHERDESCRS = 6
     };
 
     struct EtherDescr
     {
-        double        txrate;
-        double        halfBitTime;          // transmission time of a half bit
-        int64         frameMinBytes;        // minimal frame length
+        double txrate;
+        double halfBitTime;    // transmission time of a half bit
+        int64 frameMinBytes;    // minimal frame length
         // for half-duplex operation:
-        unsigned int  maxFramesInBurst;
-        int64         maxBytesInBurst;      // including IFG and preamble, etc.
-        int64         halfDuplexFrameMinBytes;   // minimal frame length in half-duplex mode; -1 means half duplex is not supported
-        int64         frameInBurstMinBytes; // minimal frame length in burst mode, after first frame
-        double        slotTime;             // slot time
-        double        maxPropagationDelay;  // used for detecting longer cables than allowed
+        unsigned int maxFramesInBurst;
+        int64 maxBytesInBurst;    // including IFG and preamble, etc.
+        int64 halfDuplexFrameMinBytes;    // minimal frame length in half-duplex mode; -1 means half duplex is not supported
+        int64 frameInBurstMinBytes;    // minimal frame length in burst mode, after first frame
+        double slotTime;    // slot time
+        double maxPropagationDelay;    // used for detecting longer cables than allowed
     };
 
     class InnerQueue
     {
       protected:
         cQueue queue;
-        int queueLimit;               // max queue length
+        int queueLimit;    // max queue length
 
       protected:
-        static int packetCompare(cObject *a, cObject *b);  // PAUSE frames have higher priority
+        static int packetCompare(cObject *a, cObject *b);    // PAUSE frames have higher priority
 
       public:
-        InnerQueue(const char* name = NULL, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
+        InnerQueue(const char *name = NULL, int limit = 0) : queue(name, packetCompare), queueLimit(limit) {}
         void insertFrame(cObject *obj) { queue.insert(obj); }
         cObject *pop() { return queue.pop(); }
         bool empty() const { return queue.empty(); }
@@ -121,9 +116,9 @@ class INET_API EtherMACBase : public MACBase
         ~MacQueue() { delete innerQueue; };
         bool isEmpty() { return innerQueue ? innerQueue->empty() : extQueue->isEmpty(); }
         void setExternalQueue(IPassiveQueue *_extQueue)
-                { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
-        void setInternalQueue(const char* name = NULL, int limit = 0)
-                { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
+        { delete innerQueue; innerQueue = NULL; extQueue = _extQueue; };
+        void setInternalQueue(const char *name = NULL, int limit = 0)
+        { delete innerQueue; innerQueue = new InnerQueue(name, limit); extQueue = NULL; };
     };
 
     // MAC constants for bitrates and modes
@@ -131,29 +126,29 @@ class INET_API EtherMACBase : public MACBase
     static const EtherDescr nullEtherDescr;
 
     // configuration
-    const EtherDescr *curEtherDescr;// constants for the current Ethernet mode, e.g. txrate
-    MACAddress address;             // own MAC address
-    bool connected;                 // true if connected to a network, set automatically by exploring the network configuration
-    bool disabled;                  // true if the MAC is disabled, defined by the user
-    bool promiscuous;               // if true, passes up all received frames
-    bool duplexMode;                // true if operating in full-duplex mode
-    bool frameBursting;             // frame bursting on/off (Gigabit Ethernet)
-    bool connectionColoring;        // colors the connection when transmitting
+    const EtherDescr *curEtherDescr;    // constants for the current Ethernet mode, e.g. txrate
+    MACAddress address;    // own MAC address
+    bool connected;    // true if connected to a network, set automatically by exploring the network configuration
+    bool disabled;    // true if the MAC is disabled, defined by the user
+    bool promiscuous;    // if true, passes up all received frames
+    bool duplexMode;    // true if operating in full-duplex mode
+    bool frameBursting;    // frame bursting on/off (Gigabit Ethernet)
+    bool connectionColoring;    // colors the connection when transmitting
 
     // gate pointers, etc.
-    MacQueue txQueue;               // the output queue
-    cChannel *transmissionChannel;  // transmission channel
-    cGate *physInGate;              // pointer to the "phys$i" gate
-    cGate *physOutGate;             // pointer to the "phys$o" gate
-    cGate *upperLayerInGate;        // pointer to the "upperLayerIn" gate
+    MacQueue txQueue;    // the output queue
+    cChannel *transmissionChannel;    // transmission channel
+    cGate *physInGate;    // pointer to the "phys$i" gate
+    cGate *physOutGate;    // pointer to the "phys$o" gate
+    cGate *upperLayerInGate;    // pointer to the "upperLayerIn" gate
 
     // state
-    bool channelsDiffer;            // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
-    MACTransmitState transmitState; // "transmit state" of the MAC
-    MACReceiveState receiveState;   // "receive state" of the MAC
-    simtime_t lastTxFinishTime;     // time of finishing the last transmission
-    int pauseUnitsRequested;        // requested pause duration, or zero -- examined at endTx
-    EtherFrame *curTxFrame;         // frame being transmitted
+    bool channelsDiffer;    // true when tx and rx channels differ (only one of them exists, or 'datarate' or 'disable' parameters differ) (configuration error, or between changes of tx/rx channels)
+    MACTransmitState transmitState;    // "transmit state" of the MAC
+    MACReceiveState receiveState;    // "receive state" of the MAC
+    simtime_t lastTxFinishTime;    // time of finishing the last transmission
+    int pauseUnitsRequested;    // requested pause duration, or zero -- examined at endTx
+    EtherFrame *curTxFrame;    // frame being transmitted
 
     // self messages
     cMessage *endTxMsg, *endIFGMsg, *endPauseMsg;
@@ -161,16 +156,16 @@ class INET_API EtherMACBase : public MACBase
     // statistics
     unsigned long numFramesSent;
     unsigned long numFramesReceivedOK;
-    unsigned long numBytesSent;        // includes Ethernet frame bytes with preamble
-    unsigned long numBytesReceivedOK;  // includes Ethernet frame bytes with preamble
-    unsigned long numFramesFromHL;     // packets received from higher layer (LLC or MACRelayUnit)
-    unsigned long numDroppedPkFromHLIfaceDown; // packets from higher layer dropped because interface down or not connected
-    unsigned long numDroppedIfaceDown; // packets from network layer dropped because interface down or not connected
-    unsigned long numDroppedBitError;  // frames dropped because of bit errors
-    unsigned long numDroppedNotForUs;  // frames dropped because destination address didn't match
-    unsigned long numFramesPassedToHL; // frames passed to higher layer
-    unsigned long numPauseFramesRcvd;  // PAUSE frames received from network
-    unsigned long numPauseFramesSent;  // PAUSE frames sent
+    unsigned long numBytesSent;    // includes Ethernet frame bytes with preamble
+    unsigned long numBytesReceivedOK;    // includes Ethernet frame bytes with preamble
+    unsigned long numFramesFromHL;    // packets received from higher layer (LLC or MACRelayUnit)
+    unsigned long numDroppedPkFromHLIfaceDown;    // packets from higher layer dropped because interface down or not connected
+    unsigned long numDroppedIfaceDown;    // packets from network layer dropped because interface down or not connected
+    unsigned long numDroppedBitError;    // frames dropped because of bit errors
+    unsigned long numDroppedNotForUs;    // frames dropped because destination address didn't match
+    unsigned long numFramesPassedToHL;    // frames passed to higher layer
+    unsigned long numPauseFramesRcvd;    // PAUSE frames received from network
+    unsigned long numPauseFramesSent;    // PAUSE frames sent
 
     static simsignal_t txPkSignal;
     static simsignal_t rxPkOkSignal;
@@ -194,7 +189,7 @@ class INET_API EtherMACBase : public MACBase
     EtherMACBase();
     virtual ~EtherMACBase();
 
-    virtual MACAddress getMACAddress() {return address;}
+    virtual MACAddress getMACAddress() { return address; }
 
     double getTxRate() { return curEtherDescr->txrate; }
     bool isActive() { return connected && !disabled; }
@@ -232,7 +227,7 @@ class INET_API EtherMACBase : public MACBase
     virtual InterfaceEntry *createInterfaceEntry();
     virtual void flushQueue();
     virtual void clearQueue();
-    virtual bool isUpperMsg(cMessage *msg) {return msg->getArrivalGate() == upperLayerInGate;}
+    virtual bool isUpperMsg(cMessage *msg) { return msg->getArrivalGate() == upperLayerInGate; }
 
     // display
     virtual void updateDisplayString();
@@ -242,9 +237,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void receiveSignal(cComponent *src, simsignal_t signalId, cObject *obj);
     virtual void refreshConnection();
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_ETHERMACBASE_H
 

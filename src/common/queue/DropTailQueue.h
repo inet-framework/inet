@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_DROPTAILQUEUE_H
 #define __INET_DROPTAILQUEUE_H
 
@@ -24,7 +23,6 @@
 #include "PassiveQueueBase.h"
 
 namespace inet {
-
 /**
  * Drop-front queue. See NED for more info.
  */
@@ -64,8 +62,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
      */
     virtual bool isEmpty();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_DROPTAILQUEUE_H
 
-
-#endif

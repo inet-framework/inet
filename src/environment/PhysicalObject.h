@@ -23,45 +23,45 @@
 #include "Material.h"
 
 namespace inet {
-
 /**
  * This class represents a physical object, a rigid body and its physical properties.
  * The object can change its position and orientation over time.
  */
 class INET_API PhysicalObject
 {
-    protected:
-        const int id;
-        Coord position;
-        EulerAngles orientation;
-        const Shape *shape;
-        const Material *material;
+  protected:
+    const int id;
+    Coord position;
+    EulerAngles orientation;
+    const Shape *shape;
+    const Material *material;
 #ifdef __CCANVAS_H
-        const cFigure::Color color;
-#endif
-    public:
-        PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
+    const cFigure::Color color;
+#endif // ifdef __CCANVAS_H
+
+  public:
+    PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
 #ifdef __CCANVAS_H
-                , const cFigure::Color &color
-#endif
-                );
-        virtual ~PhysicalObject();
+            , const cFigure::Color& color
+#endif // ifdef __CCANVAS_H
+            );
+    virtual ~PhysicalObject();
 
-        virtual int getId() const { return id; }
+    virtual int getId() const { return id; }
 
-        virtual const Coord& getPosition() const { return position; }
-        virtual void setPosition(const Coord& position) { this->position = position; }
+    virtual const Coord& getPosition() const { return position; }
+    virtual void setPosition(const Coord& position) { this->position = position; }
 
-        virtual const EulerAngles& getOrientation() const { return orientation; }
-        virtual void setOrientation(const EulerAngles& orientation) { this->orientation = orientation; }
+    virtual const EulerAngles& getOrientation() const { return orientation; }
+    virtual void setOrientation(const EulerAngles& orientation) { this->orientation = orientation; }
 
-        virtual const Shape *getShape() const { return shape; }
-        virtual const Material *getMaterial() const { return material; }
+    virtual const Shape *getShape() const { return shape; }
+    virtual const Material *getMaterial() const { return material; }
 #ifdef __CCANVAS_H
-        virtual const cFigure::Color& getColor() const { return color; }
-#endif
+    virtual const cFigure::Color& getColor() const { return color; }
+#endif // ifdef __CCANVAS_H
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_PHYSICALOBJECT_H
 
-#endif

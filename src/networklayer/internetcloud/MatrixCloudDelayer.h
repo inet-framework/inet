@@ -20,13 +20,11 @@
 #ifndef __INET_MATRIXCLOUDDELAYER_H
 #define __INET_MATRIXCLOUDDELAYER_H
 
-
 #include "INETDefs.h"
 
 #include "CloudDelayerBase.h"
 
 namespace inet {
-
 class IInterfaceTable;
 class PatternMatcher;
 
@@ -41,7 +39,8 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     {
       private:
         bool matchesany;
-        std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
+        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
+
       public:
         Matcher(const char *pattern);
         ~Matcher();
@@ -59,6 +58,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         cDynamicExpression dataratePar;
         cDynamicExpression dropPar;
         cXMLElement *entity;
+
       public:
         MatrixEntry(cXMLElement *trafficEntity, bool defaultSymmetric);
         ~MatrixEntry() {}
@@ -72,13 +72,14 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
         cDynamicExpression *dataratePar;
         cDynamicExpression *dropPar;
         simtime_t lastSent;
+
       public:
         Descriptor() : delayPar(NULL), dataratePar(NULL), dropPar(NULL), lastSent(SIMTIME_ZERO) {}
     };
 
-    typedef std::pair<int,int> IDPair;
-    typedef std::map<IDPair,Descriptor> IDPairToDescriptorMap;
-    typedef std::vector<MatrixEntry*> MatrixEntryPtrVector;
+    typedef std::pair<int, int> IDPair;
+    typedef std::map<IDPair, Descriptor> IDPairToDescriptorMap;
+    typedef std::vector<MatrixEntry *> MatrixEntryPtrVector;
 
     MatrixEntryPtrVector matrixEntries;
     IDPairToDescriptorMap idPairToDescriptorMap;
@@ -96,15 +97,12 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
      */
     virtual void calculateDropAndDelay(const cMessage *msg, int srcID, int destID, bool& outDrop, simtime_t& outDelay);
 
-    MatrixCloudDelayer::Descriptor* getOrCreateDescriptor(int srcID, int destID);
+    MatrixCloudDelayer::Descriptor *getOrCreateDescriptor(int srcID, int destID);
 
     /// returns path of connected node for the interface specified by 'id'
     std::string getPathOfConnectedNodeOnIfaceID(int id);
 };
+} // namespace inet
 
-
-}
-
-
-#endif
+#endif // ifndef __INET_MATRIXCLOUDDELAYER_H
 

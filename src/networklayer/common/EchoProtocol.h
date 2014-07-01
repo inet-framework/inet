@@ -23,7 +23,6 @@
 #include "EchoPacket_m.h"
 
 namespace inet {
-
 class PingPayload;
 
 /**
@@ -32,22 +31,21 @@ class PingPayload;
 class INET_API EchoProtocol : public cSimpleModule
 {
   protected:
-    typedef std::map<long,int> PingMap;
+    typedef std::map<long, int> PingMap;
     PingMap pingMap;
 
   protected:
-    virtual void processPacket(EchoPacket * packet);
-    virtual void processEchoRequest(EchoPacket * packet);
-    virtual void processEchoReply(EchoPacket * packet);
-    virtual void sendEchoRequest(PingPayload * packet);
+    virtual void processPacket(EchoPacket *packet);
+    virtual void processEchoRequest(EchoPacket *packet);
+    virtual void processEchoReply(EchoPacket *packet);
+    virtual void sendEchoRequest(PingPayload *packet);
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ECHOPROTOCOL_H
 
-
-#endif

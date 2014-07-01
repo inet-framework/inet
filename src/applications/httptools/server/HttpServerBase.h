@@ -22,11 +22,10 @@
 #include "HttpNodeBase.h"
 
 namespace inet {
-
 // Event message kinds
-#define MSGKIND_START_SESSION 0
-#define MSGKIND_NEXT_MESSAGE  1
-#define MSGKIND_SCRIPT_EVENT  2
+#define MSGKIND_START_SESSION    0
+#define MSGKIND_NEXT_MESSAGE     1
+#define MSGKIND_SCRIPT_EVENT     2
 
 /**
  * Web server base class.
@@ -48,67 +47,64 @@ namespace inet {
  */
 class INET_API HttpServerBase : public HttpNodeBase
 {
-    protected:
-        /**
-         * Describes a HTML page
-         */
-        struct HtmlPageData
-        {
-            long size;
-            std::string body;
-        };
+  protected:
+    /**
+     * Describes a HTML page
+     */
+    struct HtmlPageData
+    {
+        long size;
+        std::string body;
+    };
 
-        std::string hostName; // the server name, e.g. www.example.com.
-        int port; // the listening port of the server
-        bool scriptedMode; // set to true if a scripted site definition is used
-        std::map<std::string,HtmlPageData> htmlPages; // A map of html pages, keyed by a resource URL. Used in scripted mode
-        std::map<std::string,unsigned int> resources; // a map of resource, keyed by a resource URL. Used in scripted mode
-        simtime_t activationTime; // the activation time of the server -- initial startup delay
+    std::string hostName;    // the server name, e.g. www.example.com.
+    int port;    // the listening port of the server
+    bool scriptedMode;    // set to true if a scripted site definition is used
+    std::map<std::string, HtmlPageData> htmlPages;    // A map of html pages, keyed by a resource URL. Used in scripted mode
+    std::map<std::string, unsigned int> resources;    // a map of resource, keyed by a resource URL. Used in scripted mode
+    simtime_t activationTime;    // the activation time of the server -- initial startup delay
 
-        // Basic statistics
-        long htmlDocsServed;
-        long imgResourcesServed;
-        long textResourcesServed;
-        long badRequests;
+    // Basic statistics
+    long htmlDocsServed;
+    long imgResourcesServed;
+    long textResourcesServed;
+    long badRequests;
 
-        rdObject *rdReplyDelay;             ///< The processing delay of the server.
-        rdObject *rdHtmlPageSize;           ///< The HTML page size distribution for the site.
-        rdObject *rdTextResourceSize;       ///< The text resource size distribution for the site.
-        rdObject *rdImageResourceSize;      ///< The image resource size distribution for the site.
-        rdObject *rdNumResources;           ///< Number of resources per HTML page.
-        rdObject *rdTextImageResourceRatio; ///< The ratio of text resources to images referenced in HTML pages.
-        rdObject *rdErrorMsgSize;           ///< The size of error messages.
+    rdObject *rdReplyDelay;    ///< The processing delay of the server.
+    rdObject *rdHtmlPageSize;    ///< The HTML page size distribution for the site.
+    rdObject *rdTextResourceSize;    ///< The text resource size distribution for the site.
+    rdObject *rdImageResourceSize;    ///< The image resource size distribution for the site.
+    rdObject *rdNumResources;    ///< Number of resources per HTML page.
+    rdObject *rdTextImageResourceRatio;    ///< The ratio of text resources to images referenced in HTML pages.
+    rdObject *rdErrorMsgSize;    ///< The size of error messages.
 
-    protected:
-        virtual void initialize(int stage);
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void finish();
-        virtual void handleMessage(cMessage *msg) = 0;
+  protected:
+    virtual void initialize(int stage);
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void finish();
+    virtual void handleMessage(cMessage *msg) = 0;
 
-        void updateDisplay();
-        HttpReplyMessage* generateDocument(HttpRequestMessage *request, const char* resource, int size = 0);
-        HttpReplyMessage* generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
-        HttpReplyMessage* handleGetRequest(HttpRequestMessage *request, std::string resource);
-        HttpReplyMessage* generateErrorReply(HttpRequestMessage *request, int code);
-        virtual std::string generateBody();
-        cPacket* handleReceivedMessage(cMessage *msg);
-        void registerWithController();
-        void readSiteDefinition(std::string file);
-        std::string readHtmlBodyFile(std::string file, std::string path);
+    void updateDisplay();
+    HttpReplyMessage *generateDocument(HttpRequestMessage *request, const char *resource, int size = 0);
+    HttpReplyMessage *generateResourceMessage(HttpRequestMessage *request, std::string resource, HttpContentType category);
+    HttpReplyMessage *handleGetRequest(HttpRequestMessage *request, std::string resource);
+    HttpReplyMessage *generateErrorReply(HttpRequestMessage *request, int code);
+    virtual std::string generateBody();
+    cPacket *handleReceivedMessage(cMessage *msg);
+    void registerWithController();
+    void readSiteDefinition(std::string file);
+    std::string readHtmlBodyFile(std::string file, std::string path);
 
-    public:
-        HttpServerBase();
-        ~HttpServerBase();
+  public:
+    HttpServerBase();
+    ~HttpServerBase();
 
-        /*
-         * Return the name of the server
-         */
-        const std::string& getHostName() { return hostName; }
+    /*
+     * Return the name of the server
+     */
+    const std::string& getHostName() { return hostName; }
 };
+} // namespace inet
 
-}
-
-
-#endif
-
+#endif // ifndef __INET_HTTPSERVERBASE_H
 

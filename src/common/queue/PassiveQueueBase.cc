@@ -20,7 +20,6 @@
 #include "PassiveQueueBase.h"
 
 namespace inet {
-
 simsignal_t PassiveQueueBase::rcvdPkSignal = registerSignal("rcvdPk");
 simsignal_t PassiveQueueBase::enqueuePkSignal = registerSignal("enqueuePk");
 simsignal_t PassiveQueueBase::dequeuePkSignal = registerSignal("dequeuePk");
@@ -46,23 +45,20 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
 
     emit(rcvdPkSignal, msg);
 
-    if (packetRequested > 0)
-    {
+    if (packetRequested > 0) {
         packetRequested--;
         emit(enqueuePkSignal, msg);
         emit(dequeuePkSignal, msg);
         emit(queueingTimeSignal, SIMTIME_ZERO);
         sendOut(msg);
     }
-    else
-    {
+    else {
         msg->setArrivalTime(simTime());
         cMessage *droppedMsg = enqueue(msg);
         if (msg != droppedMsg)
             emit(enqueuePkSignal, msg);
 
-        if (droppedMsg)
-        {
+        if (droppedMsg) {
             numQueueDropped++;
             emit(dropPkByQueueSignal, droppedMsg);
             delete droppedMsg;
@@ -71,8 +67,7 @@ void PassiveQueueBase::handleMessage(cMessage *msg)
             notifyListeners();
     }
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[40];
         sprintf(buf, "q rcvd: %d\nq dropped: %d", numQueueReceived, numQueueDropped);
         getDisplayString().setTagArg("t", 0, buf);
@@ -84,12 +79,10 @@ void PassiveQueueBase::requestPacket()
     Enter_Method("requestPacket()");
 
     cMessage *msg = dequeue();
-    if (msg == NULL)
-    {
+    if (msg == NULL) {
         packetRequested++;
     }
-    else
-    {
+    else {
         emit(dequeuePkSignal, msg);
         emit(queueingTimeSignal, simTime() - msg->getArrivalTime());
         sendOut(msg);
@@ -117,26 +110,22 @@ void PassiveQueueBase::finish()
 
 void PassiveQueueBase::addListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
     if (it == listeners.end())
         listeners.push_back(listener);
 }
 
 void PassiveQueueBase::removeListener(IPassiveQueueListener *listener)
 {
-    std::list<IPassiveQueueListener*>::iterator it = find(listeners.begin(), listeners.end(), listener);
+    std::list<IPassiveQueueListener *>::iterator it = find(listeners.begin(), listeners.end(), listener);
     if (it != listeners.end())
         listeners.erase(it);
 }
 
 void PassiveQueueBase::notifyListeners()
 {
-    for (std::list<IPassiveQueueListener*>::iterator it = listeners.begin(); it != listeners.end(); ++it)
+    for (std::list<IPassiveQueueListener *>::iterator it = listeners.begin(); it != listeners.end(); ++it)
         (*it)->packetEnqueued(this);
 }
-
-
-
-}
-
+} // namespace inet
 

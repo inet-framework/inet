@@ -22,13 +22,12 @@
 #include "MACAddress.h"
 
 namespace inet {
-
 /*
  * A C++ interface to abstract the functionality of IMACAddressTable.
  */
 class INET_API IMACAddressTable
 {
-    public:
+  public:
     /**
      * @brief For a known arriving port, V-TAG and destination MAC. It finds out the port where relay component should deliver the message
      * @param address MAC destination
@@ -76,7 +75,7 @@ class INET_API IMACAddressTable
     /**
      * Pre-reads in entries for Address Table during initialization.
      */
-    virtual void readAddressTable(const char * fileName) = 0;
+    virtual void readAddressTable(const char *fileName) = 0;
 
     /**
      * For lifecycle: clears all entries from the vlanAddressTable.
@@ -89,8 +88,7 @@ class INET_API IMACAddressTable
     virtual void setAgingTime(simtime_t agingTime) = 0;
     virtual void resetDefaultAging() = 0;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IMACADDRESSTABLE_H
 
-
-#endif

@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ICMPV6_H
 #define __INET_ICMPV6_H
 
@@ -26,8 +25,6 @@
 #include "ILifecycle.h"
 
 namespace inet {
-
-
 //foreign declarations:
 class IPv6Address;
 class IPv6ControlInfo;
@@ -67,12 +64,12 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
   protected:
     // internal helper functions
     virtual void sendToIP(ICMPv6Message *msg, const IPv6Address& dest);
-    virtual void sendToIP(ICMPv6Message *msg); // FIXME check if really needed
+    virtual void sendToIP(ICMPv6Message *msg);    // FIXME check if really needed
 
     virtual ICMPv6Message *createDestUnreachableMsg(int code);
     virtual ICMPv6Message *createPacketTooBigMsg(int mtu);
     virtual ICMPv6Message *createTimeExceededMsg(int code);
-    virtual ICMPv6Message *createParamProblemMsg(int code); //TODO:Section 3.4 describes a pointer. What is it?
+    virtual ICMPv6Message *createParamProblemMsg(int code);    //TODO:Section 3.4 describes a pointer. What is it?
 
   protected:
     /**
@@ -114,14 +111,10 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
     virtual void errorOut(ICMPv6Message *);
 
   protected:
-    typedef std::map<long,int> PingMap;
+    typedef std::map<long, int> PingMap;
     PingMap pingMap;
 };
+} // namespace inet
 
-
-}
-
-
-#endif
-
+#endif // ifndef __INET_ICMPV6_H
 

@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ORDINALBASEDDROPPER_H
 #define __INET_ORDINALBASEDDROPPER_H
 
@@ -24,8 +23,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-
 /**
  * Ordinal Based Dropper module.
  */
@@ -47,8 +44,7 @@ class INET_API OrdinalBasedDropper : public cSimpleModule
     virtual void parseVector(const char *vector);
     virtual void finish();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_ORDINALBASEDDROPPER_H
 
-
-#endif

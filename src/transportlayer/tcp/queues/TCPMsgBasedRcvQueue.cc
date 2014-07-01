@@ -16,16 +16,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPMsgBasedRcvQueue.h"
 
 #include "TCPCommand_m.h"
 #include "TCPSegment.h"
 
 namespace inet {
-
 Register_Class(TCPMsgBasedRcvQueue);
-
 
 TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 {
@@ -33,11 +30,10 @@ TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
 
 TCPMsgBasedRcvQueue::~TCPMsgBasedRcvQueue()
 {
-    while (! payloadList.empty())
-    {
-        EV_DEBUG << "SendQueue Destructor: Drop msg from " << this->getFullPath() <<
-                " Queue: offset=" << payloadList.front().seqNo <<
-                ", length=" << payloadList.front().packet->getByteLength() << endl;
+    while (!payloadList.empty()) {
+        EV_DEBUG << "SendQueue Destructor: Drop msg from " << this->getFullPath()
+                 << " Queue: offset=" << payloadList.front().seqNo
+                 << ", length=" << payloadList.front().packet->getByteLength() << endl;
         delete payloadList.front().packet;
         payloadList.pop_front();
     }
@@ -54,8 +50,7 @@ std::string TCPMsgBasedRcvQueue::info() const
 
     os << "rcv_nxt=" << rcv_nxt;
 
-    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i)
-    {
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i) {
         os << " [" << (*i)->getBegin() << ".." << (*i)->getEnd() << ")";
     }
 
@@ -71,17 +66,15 @@ uint32 TCPMsgBasedRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
     cPacket *msg;
     uint32 endSeqNo;
     PayloadList::iterator i = payloadList.begin();
-    while (NULL != (msg = tcpseg->removeFirstPayloadMessage(endSeqNo)))
-    {
+    while (NULL != (msg = tcpseg->removeFirstPayloadMessage(endSeqNo))) {
         while (i != payloadList.end() && seqLess(i->seqNo, endSeqNo))
             ++i;
 
         // insert, avoiding duplicates
         if (i != payloadList.end() && i->seqNo == endSeqNo)
             delete msg;
-        else
-        {
-            i = payloadList.insert(i,PayloadItem(endSeqNo, msg));
+        else {
+            i = payloadList.insert(i, PayloadItem(endSeqNo, msg));
             ASSERT(seqLE(payloadList.front().seqNo, payloadList.back().seqNo));
         }
     }
@@ -96,10 +89,8 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
         seq = payloadList.begin()->seqNo;
 
     Region *reg = extractTo(seq);
-    if (reg)
-    {
-        if (!payloadList.empty() && payloadList.begin()->seqNo == reg->getEnd())
-        {
+    if (reg) {
+        if (!payloadList.empty() && payloadList.begin()->seqNo == reg->getEnd()) {
             msg = payloadList.begin()->packet;
             payloadList.erase(payloadList.begin());
         }
@@ -107,8 +98,5 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
     }
     return msg;
 }
-
-
-}
-
+} // namespace inet
 

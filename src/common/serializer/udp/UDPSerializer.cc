@@ -19,7 +19,7 @@
 
 #include "headers/defs.h"
 
-namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
+namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
 #include "headers/in.h"
@@ -33,16 +33,14 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "TCPIPchecksum.h"
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
-
+#include <netinet/in.h>    // htonl, ntohl, ...
+#endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 using namespace INETFw;
 namespace inet {
-
 int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
 {
-    struct udphdr *udphdr = (struct udphdr *) (buf);
+    struct udphdr *udphdr = (struct udphdr *)(buf);
     int packetLength;
 
     packetLength = pkt->getByteLength();
@@ -55,8 +53,7 @@ int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned 
 
 void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *dest)
 {
-
-    struct udphdr *udphdr = (struct udphdr*) buf;
+    struct udphdr *udphdr = (struct udphdr *)buf;
 
     dest->setSourcePort(ntohs(udphdr->uh_sport));
     dest->setDestinationPort(ntohs(udphdr->uh_dport));
@@ -67,8 +64,5 @@ void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPac
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }
-
-
-}
-
+} // namespace inet
 

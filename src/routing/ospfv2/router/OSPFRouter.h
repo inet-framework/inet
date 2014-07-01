@@ -18,7 +18,6 @@
 #ifndef __INET_OSPFROUTER_H
 #define __INET_OSPFROUTER_H
 
-
 #include <map>
 #include <vector>
 
@@ -29,38 +28,36 @@
 #include "OSPFInterface.h"
 #include "OSPFRoutingTableEntry.h"
 
-
 namespace inet {
-
 /**
  * All OSPF classes are in this namespace.
  */
 namespace OSPF {
-
 /**
  * Represents the full OSPF data structure as laid out in RFC2328.
  */
-class Router {
-private:
-    IInterfaceTable*                                                   ift;
-    IIPv4RoutingTable*                                                 rt;
-    RouterID                                                           routerID;                ///< The router ID assigned by the IP layer.
-    std::map<AreaID, Area*>                                            areasByID;               ///< A map of the contained areas with the AreaID as key.
-    std::vector<Area*>                                                 areas;                   ///< A list of the contained areas.
-    std::map<LSAKeyType, ASExternalLSA*, LSAKeyType_Less>              asExternalLSAsByID;      ///< A map of the ASExternalLSAs advertised by this router.
-    std::vector<ASExternalLSA*>                                        asExternalLSAs;          ///< A list of the ASExternalLSAs advertised by this router.
-    std::map<IPv4Address, OSPFASExternalLSAContents>                   externalRoutes;          ///< A map of the external route advertised by this router.
-    cMessage*                                                          ageTimer;                ///< Database age timer - fires every second.
-    std::vector<RoutingTableEntry*>                                    routingTable;            ///< The OSPF routing table - contains more information than the one in the IP layer.
-    MessageHandler*                                                    messageHandler;          ///< The message dispatcher class.
-    bool                                                               rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
+class Router
+{
+  private:
+    IInterfaceTable *ift;
+    IIPv4RoutingTable *rt;
+    RouterID routerID;    ///< The router ID assigned by the IP layer.
+    std::map<AreaID, Area *> areasByID;    ///< A map of the contained areas with the AreaID as key.
+    std::vector<Area *> areas;    ///< A list of the contained areas.
+    std::map<LSAKeyType, ASExternalLSA *, LSAKeyType_Less> asExternalLSAsByID;    ///< A map of the ASExternalLSAs advertised by this router.
+    std::vector<ASExternalLSA *> asExternalLSAs;    ///< A list of the ASExternalLSAs advertised by this router.
+    std::map<IPv4Address, OSPFASExternalLSAContents> externalRoutes;    ///< A map of the external route advertised by this router.
+    cMessage *ageTimer;    ///< Database age timer - fires every second.
+    std::vector<RoutingTableEntry *> routingTable;    ///< The OSPF routing table - contains more information than the one in the IP layer.
+    MessageHandler *messageHandler;    ///< The message dispatcher class.
+    bool rfc1583Compatibility;    ///< Decides whether to handle the preferred routing table entry to an AS boundary router as defined in RFC1583 or not.
 
-public:
+  public:
     /**
      * Constructor.
      * Initializes internal variables, adds a MessageHandler and starts the Database Age timer.
      */
-    Router(RouterID id, cSimpleModule* containingModule, IInterfaceTable* ift, IIPv4RoutingTable* rt);
+    Router(RouterID id, cSimpleModule *containingModule, IInterfaceTable *ift, IIPv4RoutingTable *rt);
 
     /**
      * Destructor.
@@ -68,55 +65,55 @@ public:
      */
     virtual ~Router();
 
-    void                     setRouterID(RouterID id)  { routerID = id; }
-    RouterID                 getRouterID() const  { return routerID; }
-    void                     setRFC1583Compatibility(bool compatibility)  { rfc1583Compatibility = compatibility; }
-    bool                     getRFC1583Compatibility() const  { return rfc1583Compatibility; }
-    unsigned long            getAreaCount() const  { return areas.size(); }
+    void setRouterID(RouterID id) { routerID = id; }
+    RouterID getRouterID() const { return routerID; }
+    void setRFC1583Compatibility(bool compatibility) { rfc1583Compatibility = compatibility; }
+    bool getRFC1583Compatibility() const { return rfc1583Compatibility; }
+    unsigned long getAreaCount() const { return areas.size(); }
 
-    MessageHandler*          getMessageHandler()  { return messageHandler; }
+    MessageHandler *getMessageHandler() { return messageHandler; }
 
-    unsigned long            getASExternalLSACount() const  { return asExternalLSAs.size(); }
-    ASExternalLSA*           getASExternalLSA(unsigned long i)  { return asExternalLSAs[i]; }
-    const ASExternalLSA*     getASExternalLSA(unsigned long i) const  { return asExternalLSAs[i]; }
-    bool                     getASBoundaryRouter() const  { return (externalRoutes.size() > 0); }
+    unsigned long getASExternalLSACount() const { return asExternalLSAs.size(); }
+    ASExternalLSA *getASExternalLSA(unsigned long i) { return asExternalLSAs[i]; }
+    const ASExternalLSA *getASExternalLSA(unsigned long i) const { return asExternalLSAs[i]; }
+    bool getASBoundaryRouter() const { return externalRoutes.size() > 0; }
 
-    unsigned long            getRoutingTableEntryCount() const  { return routingTable.size(); }
-    RoutingTableEntry*       getRoutingTableEntry(unsigned long i)  { return routingTable[i]; }
-    const RoutingTableEntry* getRoutingTableEntry(unsigned long i) const  { return routingTable[i]; }
-    void                     addRoutingTableEntry(RoutingTableEntry* entry) { routingTable.push_back(entry); }
+    unsigned long getRoutingTableEntryCount() const { return routingTable.size(); }
+    RoutingTableEntry *getRoutingTableEntry(unsigned long i) { return routingTable[i]; }
+    const RoutingTableEntry *getRoutingTableEntry(unsigned long i) const { return routingTable[i]; }
+    void addRoutingTableEntry(RoutingTableEntry *entry) { routingTable.push_back(entry); }
 
     /**
      * Adds OMNeT++ watches for the routerID, the list of Areas and the list of AS External LSAs.
      */
-    void                 addWatches();
+    void addWatches();
 
     /**
      * Adds a new Area to the Area list.
      * @param area [in] The Area to add.
      */
-    void                 addArea(Area* area);
+    void addArea(Area *area);
 
     /**
      * Returns the pointer to the Area identified by the input areaID, if it's on the Area list,
      * NULL otherwise.
      * @param areaID [in] The Area identifier.
      */
-    Area*                getAreaByID(AreaID areaID);
+    Area *getAreaByID(AreaID areaID);
 
     /**
      * Returns the Area pointer from the Area list which contains the input IPv4 address,
      * NULL if there's no such area connected to the Router.
      * @param address [in] The IPv4 address whose containing Area we're looking for.
      */
-    Area*                getAreaByAddr(IPv4Address address);
+    Area *getAreaByAddr(IPv4Address address);
 
     /**
      * Returns the pointer of the physical Interface identified by the input interface index,
      * NULL if the Router doesn't have such an interface.
      * @param ifIndex [in] The interface index to look for.
      */
-    Interface*           getNonVirtualInterface(unsigned char ifIndex);
+    Interface *getNonVirtualInterface(unsigned char ifIndex);
 
     /**
      * Installs a new LSA into the Router database.
@@ -126,7 +123,7 @@ public:
      * @param areaID [in] Identifies the input Router, Network and Summary LSA's Area.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool                 installLSA(OSPFLSA* lsa, AreaID areaID = BACKBONE_AREAID);
+    bool installLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID);
 
     /**
      * Find the LSA identified by the input lsaKey in the database.
@@ -136,35 +133,35 @@ public:
      *                     identified by this parameter.
      * @return The pointer to the LSA if it was found, NULL otherwise.
      */
-    OSPFLSA*             findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
+    OSPFLSA *findLSA(LSAType lsaType, LSAKeyType lsaKey, AreaID areaID);
 
     /**
      * Ages the LSAs in the Router's database.
      * This method is called on every firing of the DATABASE_AGE_TIMER(every second).
      * @sa RFC2328 Section 14.
      */
-    void                 ageDatabase();
+    void ageDatabase();
 
     /**
      * Returns true if any Neighbor on any Interface in any of the Router's Areas is
      * in any of the input states, false otherwise.
      * @param states [in] A bitfield combination of NeighborStateType values.
      */
-    bool                 hasAnyNeighborInStates(int states) const;
+    bool hasAnyNeighborInStates(int states) const;
 
     /**
      * Removes all LSAs from all Neighbor's retransmission lists which are identified by
      * the input lsaKey.
      * @param lsaKey [in] Identifies the LSAs to remove from the retransmission lists.
      */
-    void                 removeFromAllRetransmissionLists(LSAKeyType lsaKey);
+    void removeFromAllRetransmissionLists(LSAKeyType lsaKey);
 
     /**
      * Returns true if there's at least one LSA on any Neighbor's retransmission list
      * identified by the input lsaKey, false otherwise.
      * @param lsaKey [in] Identifies the LSAs to look for on the retransmission lists.
      */
-    bool                 isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
+    bool isOnAnyRetransmissionList(LSAKeyType lsaKey) const;
 
     /**
      * Floods out the input lsa on a set of Interfaces.
@@ -175,27 +172,27 @@ public:
      * @param neighbor [in] The Nieghbor this LSA arrived from.
      * @return True if the LSA was floooded back out on the receiving Interface, false otherwise.
      */
-    bool                 floodLSA(OSPFLSA* lsa, AreaID areaID = BACKBONE_AREAID, Interface* intf = NULL, Neighbor* neighbor = NULL);
+    bool floodLSA(OSPFLSA *lsa, AreaID areaID = BACKBONE_AREAID, Interface *intf = NULL, Neighbor *neighbor = NULL);
 
     /**
      * Returns true if the input IPv4 address falls into any of the Router's Areas' configured
      * IPv4 address ranges, false otherwise.
      * @param address [in] The IPv4 address to look for.
      */
-    bool                 isLocalAddress(IPv4Address address) const;
+    bool isLocalAddress(IPv4Address address) const;
 
     /**
      * Returns true if one of the Router's Areas the same IPv4 address range configured as the
      * input IPv4 address range, false otherwise.
      * @param addressRange [in] The IPv4 address range to look for.
      */
-    bool                 hasAddressRange(const IPv4AddressRange& addressRange) const;
+    bool hasAddressRange(const IPv4AddressRange& addressRange) const;
 
     /**
      * Returns true if the destination described by the input lsa is in the routing table, false otherwise.
      * @param lsa [in] The LSA which describes the destination to look for.
      */
-    bool                 isDestinationUnreachable(OSPFLSA* lsa) const;
+    bool isDestinationUnreachable(OSPFLSA *lsa) const;
 
     /**
      * Do a lookup in either the input OSPF routing table, or if it's NULL then in the Router's own routing table.
@@ -204,13 +201,13 @@ public:
      * @param table       [in] The routing table to do the lookup in.
      * @return The RoutingTableEntry describing the input destination if there's one, false otherwise.
      */
-    RoutingTableEntry*   lookup(IPv4Address destination, std::vector<RoutingTableEntry*>* table = NULL) const;
+    RoutingTableEntry *lookup(IPv4Address destination, std::vector<RoutingTableEntry *> *table = NULL) const;
 
     /**
      * Rebuilds the routing table from scratch(based on the LSA database).
      * @sa RFC2328 Section 16.
      */
-    void                 rebuildRoutingTable();
+    void rebuildRoutingTable();
 
     /**
      * Scans through the router's areas' preconfigured address ranges and returns
@@ -221,7 +218,7 @@ public:
      * @return The containing preconfigured address range if found,
      *         OSPF::NULL_IPV4ADDRESSRANGE otherwise.
      */
-    IPv4AddressRange     getContainingAddressRange(const IPv4AddressRange& addressRange, bool* advertise = NULL) const;
+    IPv4AddressRange getContainingAddressRange(const IPv4AddressRange& addressRange, bool *advertise = NULL) const;
 
     /**
      * Stores information on an AS External Route in externalRoutes and intalls(or
@@ -230,7 +227,7 @@ public:
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
      */
-    void                 updateExternalRoute(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void updateExternalRoute(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
 
     /**
      * Add an AS External Route in IPRoutingTable
@@ -238,14 +235,14 @@ public:
      * @param externalRouteContents [in] Route configuration data for the external route.
      * @param ifIndex               [in]
      */
-    void                 addExternalRouteInIPTable(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
+    void addExternalRouteInIPTable(IPv4Address networkAddress, const OSPFASExternalLSAContents& externalRouteContents, int ifIndex);
 
     /**
      * Removes an AS External Route from the database.
      * @param networkAddress [in] The network address of the external route which
      *                            needs to be removed.
      */
-    void                 removeExternalRoute(IPv4Address networkAddress);
+    void removeExternalRoute(IPv4Address networkAddress);
 
     /**
      * Selects the preferred routing table entry for the input LSA(which is either
@@ -265,9 +262,9 @@ public:
      * @sa RFC2328 Section 16.4. points(1) through(3)
      * @sa OSPF::Area::originateSummaryLSA
      */
-    RoutingTableEntry*   getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry*>* fromRoutingTable = NULL);
+    RoutingTableEntry *getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = NULL);
 
-private:
+  private:
     /**
      * Installs a new AS External LSA into the Router's database.
      * It tries to install keep one of multiple functionally equivalent AS External LSAs in the database.
@@ -275,28 +272,28 @@ private:
      * @param lsa [in] The LSA to install. It will be copied into the database.
      * @return True if the routing table needs to be updated, false otherwise.
      */
-    bool                 installASExternalLSA(OSPFASExternalLSA* lsa);
+    bool installASExternalLSA(OSPFASExternalLSA *lsa);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
      * @return The pointer to the AS External LSA if it was found, NULL otherwise.
      */
-    ASExternalLSA*       findASExternalLSA(LSAKeyType lsaKey);
+    ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey);
 
     /**
      * Find the AS External LSA identified by the input lsaKey in the database.
      * @param lsaKey [in] Look for the AS External LSA which is identified by this key.
      * @return The const pointer to the AS External LSA if it was found, NULL otherwise.
      */
-    const ASExternalLSA* findASExternalLSA(LSAKeyType lsaKey) const;
+    const ASExternalLSA *findASExternalLSA(LSAKeyType lsaKey) const;
 
     /**
      * Originates a new AS External LSA based on the input lsa.
      * @param lsa [in] The LSA whose contents should be copied into the newly originated LSA.
      * @return The newly originated LSA.
      */
-    ASExternalLSA*       originateASExternalLSA(ASExternalLSA* lsa);
+    ASExternalLSA *originateASExternalLSA(ASExternalLSA *lsa);
 
     /**
      * Generates a unique LinkStateID for a given destination. This may require the
@@ -313,10 +310,10 @@ private:
      * @sa RFC2328 Appendix E.
      * @sa OSPF::Area::getUniqueLinkStateID
      */
-    LinkStateID          getUniqueLinkStateID(const IPv4AddressRange& destination,
-                                              Metric destinationCost,
-                                              OSPF::ASExternalLSA*& lsaToReoriginate,
-                                              bool externalMetricIsType2 = false) const;
+    LinkStateID getUniqueLinkStateID(const IPv4AddressRange& destination,
+            Metric destinationCost,
+            OSPF::ASExternalLSA *& lsaToReoriginate,
+            bool externalMetricIsType2 = false) const;
 
     /**
      * Calculate the AS External Routes from the ASExternalLSAs in the database.
@@ -325,7 +322,7 @@ private:
      *                                 calculations.
      * @sa RFC2328 Section 16.4.
      */
-    void                 calculateASExternalRoutes(std::vector<RoutingTableEntry*>& newRoutingTable);
+    void calculateASExternalRoutes(std::vector<RoutingTableEntry *>& newRoutingTable);
 
     /**
      * After a routing table rebuild the changes in the routing table are
@@ -335,7 +332,7 @@ private:
      *                             is then compared with the one in routingTable).
      * @sa RFC2328 Section 12.4. points(5) through(6).
      */
-    void                 notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry*>& oldRoutingTable);
+    void notifyAboutRoutingTableChanges(std::vector<RoutingTableEntry *>& oldRoutingTable);
 
     /**
      * Returns true if there is a route to the AS Boundary Router identified by
@@ -343,7 +340,7 @@ private:
      * @param inRoutingTable [in] The routing table to look in.
      * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
      */
-    bool                 hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry*>& inRoutingTable, OSPF::RouterID routerID) const;
+    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, OSPF::RouterID routerID) const;
 
     /**
      * Returns an std::vector of routes leading to the AS Boundary Router
@@ -352,8 +349,8 @@ private:
      * @param fromRoutingTable [in] The routing table to look in.
      * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
      */
-    std::vector<RoutingTableEntry*>
-                         getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry*>& fromRoutingTable, OSPF::RouterID routerID) const;
+    std::vector<RoutingTableEntry *>
+    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, OSPF::RouterID routerID) const;
 
     /**
      * Prunes the input std::vector of RoutingTableEntries according to the RFC2328
@@ -361,7 +358,7 @@ private:
      * @param asbrEntries [in/out] The list of RoutingTableEntries to prune.
      * @sa RFC2328 Section 16.4.1.
      */
-    void                 pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry*>& asbrEntries) const;
+    void pruneASBoundaryRouterEntries(std::vector<RoutingTableEntry *>& asbrEntries) const;
 
     /**
      * Selects the least cost RoutingTableEntry from the input std::vector of
@@ -369,11 +366,10 @@ private:
      * @param entries [in] The RoutingTableEntries to choose the least cost one from.
      * @return The least cost entry or NULL if entries is empty.
      */
-    RoutingTableEntry*   selectLeastCostRoutingEntry(std::vector<RoutingTableEntry*>& entries) const;
+    RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<RoutingTableEntry *>& entries) const;
 };
+} // namespace OSPF
+} // namespace inet
 
-}
-}
-
-#endif
+#endif // ifndef __INET_OSPFROUTER_H
 

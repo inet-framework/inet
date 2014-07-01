@@ -18,7 +18,6 @@
 #include "HttpBrowser.h"
 
 namespace inet {
-
 Define_Module(HttpBrowser);
 
 HttpBrowser::HttpBrowser()
@@ -54,29 +53,24 @@ void HttpBrowser::finish()
 
 void HttpBrowser::handleMessage(cMessage *msg)
 {
-    if (msg->isSelfMessage())
-    {
+    if (msg->isSelfMessage()) {
         handleSelfMessages(msg);
     }
-    else
-    {
+    else {
         EV_DEBUG << "Message received: " << msg->getName() << endl;
 
         TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
-        if (!ind)
-        {
+        if (!ind) {
             EV_DEBUG << "No control info for the message" << endl;
         }
-        else
-        {
+        else {
             int connId = ind->getConnId();
             EV_DEBUG << "Connection ID: " << connId << endl;
         }
 
         // Locate the socket for the incoming message. One should definitely exist.
         TCPSocket *socket = sockCollection.findSocketFor(msg);
-        if (socket==NULL)
-        {
+        if (socket == NULL) {
             // Handle errors. @todo error instead of warning?
             EV_WARN << "No socket found for message " << msg->getName() << endl;
             delete msg;
@@ -93,8 +87,7 @@ void HttpBrowser::sendRequestToServer(BrowseEvent be)
     int connectPort;
     char szModuleName[127];
 
-    if (controller->getServerInfo(be.wwwhost.c_str(), szModuleName, connectPort) != 0)
-    {
+    if (controller->getServerInfo(be.wwwhost.c_str(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << be.wwwhost << endl;
         return;
     }
@@ -108,8 +101,7 @@ void HttpBrowser::sendRequestToServer(HttpRequestMessage *request)
     int connectPort;
     char szModuleName[127];
 
-    if (controller->getServerInfo(request->targetUrl(), szModuleName, connectPort) != 0)
-    {
+    if (controller->getServerInfo(request->targetUrl(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << request->targetUrl() << endl;
         return;
     }
@@ -124,8 +116,7 @@ void HttpBrowser::sendRequestToRandomServer()
     char szWWW[127];
     char szModuleName[127];
 
-    if (controller->getAnyServerInfo(szWWW, szModuleName, connectPort) != 0)
-    {
+    if (controller->getAnyServerInfo(szWWW, szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get a random server from controller" << endl;
         return;
     }
@@ -139,8 +130,7 @@ void HttpBrowser::sendRequestsToServer(std::string www, HttpRequestQueue queue)
     int connectPort;
     char szModuleName[127];
 
-    if (controller->getServerInfo(www.c_str(), szModuleName, connectPort) != 0)
-    {
+    if (controller->getServerInfo(www.c_str(), szModuleName, connectPort) != 0) {
         EV_ERROR << "Unable to get server info for URL " << www << endl;
         return;
     }
@@ -156,17 +146,15 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 
     socketsOpened++;
 
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "SocketEstablished failure. Null pointer" << endl;
         return;
     }
 
     // Get the socket and associated data structure.
-    SockData *sockdata = (SockData*)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
-    if (sockdata->messageQueue.empty())
-    {
+    if (sockdata->messageQueue.empty()) {
         EV_INFO << "No data to send on socket with connection id " << connId << ". Closing" << endl;
         socket->close();
         return;
@@ -174,8 +162,7 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 
     // Send pending messages on the established socket.
     EV_DEBUG << "Proceeding to send messages on socket " << connId << endl;
-    while (!sockdata->messageQueue.empty())
-    {
+    while (!sockdata->messageQueue.empty()) {
         cMessage *msg = sockdata->messageQueue.back();
         cPacket *pckt = check_and_cast<cPacket *>(msg);
         sockdata->messageQueue.pop_back();
@@ -188,18 +175,16 @@ void HttpBrowser::socketEstablished(int connId, void *yourPtr)
 void HttpBrowser::socketDataArrived(int connId, void *yourPtr, cPacket *msg, bool urgent)
 {
     EV_DEBUG << "Socket data arrived on connection " << connId << ": " << msg->getName() << endl;
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "socketDataArrivedfailure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData*)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
     handleDataMessage(msg);
 
-    if (--sockdata->pending==0)
-    {
+    if (--sockdata->pending == 0) {
         EV_DEBUG << "Received last expected reply on this socket. Issuing a close" << endl;
         socket->close();
     }
@@ -215,18 +200,16 @@ void HttpBrowser::socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *
 void HttpBrowser::socketPeerClosed(int connId, void *yourPtr)
 {
     EV_DEBUG << "Socket " << connId << " closed by peer" << endl;
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "socketPeerClosed failure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData*)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
 
     // close the connection (if not already closed)
-    if (socket->getState()==TCPSocket::PEER_CLOSED)
-    {
+    if (socket->getState() == TCPSocket::PEER_CLOSED) {
         EV_INFO << "remote TCP closed, closing here as well. Connection id is " << connId << endl;
         socket->close();
     }
@@ -236,13 +219,12 @@ void HttpBrowser::socketClosed(int connId, void *yourPtr)
 {
     EV_INFO << "Socket " << connId << " closed" << endl;
 
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "socketClosed failure. Null pointer" << endl;
         return;
     }
 
-    SockData *sockdata = (SockData*)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
@@ -254,25 +236,24 @@ void HttpBrowser::socketFailure(int connId, void *yourPtr, int code)
     EV_WARN << "connection broken. Connection id " << connId << endl;
     numBroken++;
 
-    if (yourPtr==NULL)
-    {
+    if (yourPtr == NULL) {
         EV_ERROR << "socketFailure failure. Null pointer" << endl;
         return;
     }
 
-    if (code==TCP_I_CONNECTION_RESET)
+    if (code == TCP_I_CONNECTION_RESET)
         EV_WARN << "Connection reset!\n";
-    else if (code==TCP_I_CONNECTION_REFUSED)
+    else if (code == TCP_I_CONNECTION_REFUSED)
         EV_WARN << "Connection refused!\n";
 
-    SockData *sockdata = (SockData*)yourPtr;
+    SockData *sockdata = (SockData *)yourPtr;
     TCPSocket *socket = sockdata->socket;
     sockCollection.removeSocket(socket);
     delete socket;
     delete sockdata;
 }
 
-void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRequestMessage *msg)
+void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRequestMessage *msg)
 {
     // Create a queue and push the single message
     HttpRequestQueue queue;
@@ -281,11 +262,10 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
     submitToSocket(moduleName, connectPort, queue);
 }
 
-void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRequestQueue &queue)
+void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRequestQueue& queue)
 {
     // Don't do anything if the queue is empty.
-    if (queue.empty())
-    {
+    if (queue.empty()) {
         EV_INFO << "Submitting to socket. No data to send to " << moduleName << ". Skipping connection." << endl;
         return;
     }
@@ -308,10 +288,5 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
     // Issue a connect to the socket for the specified module and port.
     socket->connect(AddressResolver().resolve(moduleName), connectPort);
 }
-
-
-
-
-}
-
+} // namespace inet
 

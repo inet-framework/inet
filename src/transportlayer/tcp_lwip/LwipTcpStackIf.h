@@ -18,9 +18,7 @@
 #include "lwip/opt.h"
 #include "lwip/lwip_tcp.h"
 
-
 namespace inet {
-
 //forward declarations:
 class Address;
 struct pbuf;
@@ -55,16 +53,15 @@ class LwipTcpStackIf
      * called before LWIP freeing a pcb.
      * @param pcb: pointer to pcb
      */
-    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb* pcb) = 0;
+    virtual void lwip_free_pcb_event(LwipTcpLayer::tcp_pcb *pcb) = 0;
 
     /**
      * Get the network interface
      */
-    virtual netif* ip_route(Address const & ipAddr) = 0;
+    virtual netif *ip_route(Address const& ipAddr) = 0;
 
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
             const void *dataptr, int len) = 0;
 };
-
-} // namespae inet
+}    // namespae inet
 

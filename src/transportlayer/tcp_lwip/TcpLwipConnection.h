@@ -16,7 +16,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-
 #ifndef __INET_TCPLWIPCONNECTION_H
 #define __INET_TCPLWIPCONNECTION_H
 
@@ -28,7 +27,6 @@
 #include "TCPCommand_m.h"
 
 namespace inet {
-
 // forward declarations:
 class TCP_lwIP;
 class TCPConnectInfo;
@@ -49,35 +47,35 @@ class INET_API TcpLwipConnection
       public:
         Stats();
         ~Stats();
-        void recordSend(const TCPSegment &tcpsegP);
-        void recordReceive(const TCPSegment &tcpsegP);
+        void recordSend(const TCPSegment& tcpsegP);
+        void recordReceive(const TCPSegment& tcpsegP);
 
       protected:
         // statistics
-        cOutVector sndWndVector;   // snd_wnd
-        cOutVector sndSeqVector;   // sent seqNo
-        cOutVector sndAckVector;   // sent ackNo
+        cOutVector sndWndVector;    // snd_wnd
+        cOutVector sndSeqVector;    // sent seqNo
+        cOutVector sndAckVector;    // sent ackNo
 
-        cOutVector rcvWndVector;   // rcv_wnd
-        cOutVector rcvSeqVector;   // received seqNo
-        cOutVector rcvAckVector;   // received ackNo (= snd_una)
+        cOutVector rcvWndVector;    // rcv_wnd
+        cOutVector rcvSeqVector;    // received seqNo
+        cOutVector rcvAckVector;    // received ackNo (= snd_una)
     };
 
     // prevent copy constructor:
     TcpLwipConnection(const TcpLwipConnection&);
 
   public:
-    TcpLwipConnection(TCP_lwIP &tcpLwipP, int connIdP, int gateIndexP,
+    TcpLwipConnection(TCP_lwIP& tcpLwipP, int connIdP, int gateIndexP,
             TCPDataTransferMode dataTransferModeP);
 
-    TcpLwipConnection(TcpLwipConnection &tcpLwipConnectionP, int connIdP,
+    TcpLwipConnection(TcpLwipConnection& tcpLwipConnectionP, int connIdP,
             LwipTcpLayer::tcp_pcb *pcbP);
 
     ~TcpLwipConnection();
 
     void sendEstablishedMsg();
 
-    static const char* indicationName(int code);
+    static const char *indicationName(int code);
 
     void sendIndicationToApp(int code);
 
@@ -92,7 +90,7 @@ class INET_API TcpLwipConnection
 
     void send(cPacket *msgP);
 
-    void fillStatusInfo(TCPStatusInfo &statusInfo);
+    void fillStatusInfo(TCPStatusInfo& statusInfo);
 
     void notifyAboutSending(const TCPSegment& tcpsegP);
 
@@ -100,7 +98,7 @@ class INET_API TcpLwipConnection
 
     void do_SEND();
 
-    INetStreamSocket* getSocket();
+    INetStreamSocket *getSocket();
 
     void initStats();
 
@@ -110,7 +108,7 @@ class INET_API TcpLwipConnection
     LwipTcpLayer::tcp_pcb *pcbM;
     TcpLwipSendQueue *sendQueueM;
     TcpLwipReceiveQueue *receiveQueueM;
-    TCP_lwIP &tcpLwipM;
+    TCP_lwIP& tcpLwipM;
 
   protected:
     long int totalSentM;
@@ -119,9 +117,7 @@ class INET_API TcpLwipConnection
 
     Stats *statsM;
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TCPLWIPCONNECTION_H
 

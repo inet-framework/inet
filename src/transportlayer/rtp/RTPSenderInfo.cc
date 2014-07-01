@@ -4,17 +4,16 @@
     begin                : Wed Dec 5 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include "RTPSenderInfo.h"
 
@@ -22,8 +21,6 @@
 #include "RTPPacket.h"
 
 namespace inet {
-
-
 Register_Class(RTPSenderInfo);
 
 RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
@@ -47,7 +44,8 @@ RTPSenderInfo::~RTPSenderInfo()
 
 RTPSenderInfo& RTPSenderInfo::operator=(const RTPSenderInfo& senderInfo)
 {
-    if (this == &senderInfo) return *this;
+    if (this == &senderInfo)
+        return *this;
     RTPParticipantInfo::operator=(senderInfo);
     copy(senderInfo);
     return *this;
@@ -69,7 +67,7 @@ RTPSenderInfo *RTPSenderInfo::dup() const
     return new RTPSenderInfo(*this);
 }
 
-void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id,  simtime_t arrivalTime)
+void RTPSenderInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t arrivalTime)
 {
     _packetsSent++;
     _bytesSent = _bytesSent + packet->getPayloadLength();
@@ -87,13 +85,12 @@ void RTPSenderInfo::processReceptionReport(ReceptionReport *report, simtime_t ar
 
 SenderReport *RTPSenderInfo::senderReport(simtime_t now)
 {
-    if (isSender())
-    {
+    if (isSender()) {
         SenderReport *senderReport = new SenderReport();
         // ntp time stamp is 64 bit integer
 
         uint64 ntpSeconds = (uint64)SIMTIME_DBL(now);
-        uint64 ntpFraction = (uint64)( (SIMTIME_DBL(now) - ntpSeconds*65536.0) * 65536.0);
+        uint64 ntpFraction = (uint64)((SIMTIME_DBL(now) - ntpSeconds * 65536.0) * 65536.0);
 
         senderReport->setNTPTimeStamp((uint64)(ntpSeconds << 32) + ntpFraction);
         senderReport->setRTPTimeStamp(SIMTIME_DBL(now - _startTime) * _clockRate);
@@ -101,8 +98,7 @@ SenderReport *RTPSenderInfo::senderReport(simtime_t now)
         senderReport->setByteCount(_bytesSent);
         return senderReport;
     }
-    else
-    {
+    else {
         return NULL;
     }
 }
@@ -131,8 +127,5 @@ bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 {
     return false;
 }
-
-
-}
-
+} // namespace inet
 

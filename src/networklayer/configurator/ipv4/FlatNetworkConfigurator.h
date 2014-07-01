@@ -23,10 +23,8 @@
 #include "IPv4Address.h"
 
 namespace inet {
-
 class IInterfaceTable;
 class IIPv4RoutingTable;
-
 
 /**
  * Configures IPv4 addresses and routing tables for a "flat" network,
@@ -38,8 +36,9 @@ class IIPv4RoutingTable;
 class INET_API FlatNetworkConfigurator : public cSimpleModule
 {
   protected:
-    struct NodeInfo {
-        NodeInfo() {isIPNode = false; ift = NULL; rt = NULL; usesDefaultRoute = false;}
+    struct NodeInfo
+    {
+        NodeInfo() { isIPNode = false; ift = NULL; rt = NULL; usesDefaultRoute = false; }
         bool isIPNode;
         IInterfaceTable *ift;
         IIPv4RoutingTable *rt;
@@ -61,9 +60,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
 
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_FLATNETWORKCONFIGURATOR_H
 

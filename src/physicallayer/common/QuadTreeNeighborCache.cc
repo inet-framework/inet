@@ -18,9 +18,7 @@
 #include "QuadTreeNeighborCache.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(QuadTreeNeighborCache);
 
 QuadTreeNeighborCache::QuadTreeNeighborCache()
@@ -32,8 +30,7 @@ QuadTreeNeighborCache::QuadTreeNeighborCache()
 
 void QuadTreeNeighborCache::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
         constraintAreaMax.x = par("constraintAreaMaxX");
@@ -46,13 +43,11 @@ void QuadTreeNeighborCache::initialize(int stage)
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
         if (maxSpeed != 0)
             scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
     }
 }
-
 
 void QuadTreeNeighborCache::handleMessage(cMessage *msg)
 {
@@ -64,7 +59,7 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
     scheduleAt(simTime() + rebuildPeriod, msg);
 }
 
-void QuadTreeNeighborCache::addRadio(const IRadio* radio)
+void QuadTreeNeighborCache::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
@@ -74,8 +69,7 @@ void QuadTreeNeighborCache::addRadio(const IRadio* radio)
 void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
 {
     Radios::iterator it = find(radios.begin(), radios.end(), radio);
-    if (it != radios.end())
-    {
+    if (it != radios.end()) {
         radios.erase(it);
         quadTree->remove(check_and_cast<const cObject *>(radio));
     }
@@ -85,23 +79,21 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
 
 void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame)
 {
-   double radius = range + rebuildPeriod * maxSpeed;
-   Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
-   QuadTreeVisitor *visitor = new QuadTreeNeighborCacheVisitor(radioMedium, transmitter, frame);
-   quadTree->rangeQuery(transmitterPos, radius, visitor);
-   delete visitor;
+    double radius = range + rebuildPeriod * maxSpeed;
+    Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
+    QuadTreeVisitor *visitor = new QuadTreeNeighborCacheVisitor(radioMedium, transmitter, frame);
+    quadTree->rangeQuery(transmitterPos, radius, visitor);
+    delete visitor;
 }
 
 void QuadTreeNeighborCache::fillQuadTreeWithRadios()
 {
-    for (unsigned int i = 0; i < radios.size(); i++)
-    {
+    for (unsigned int i = 0; i < radios.size(); i++) {
         Coord radioPos = radios[i]->getAntenna()->getMobility()->getCurrentPosition();
         if (!quadTree->insert(check_and_cast<const cObject *>(radios[i]), radioPos))
             throw cRuntimeError("Unsuccessful QuadTree building");
     }
 }
-
 
 QuadTreeNeighborCache::~QuadTreeNeighborCache()
 {
@@ -109,11 +101,10 @@ QuadTreeNeighborCache::~QuadTreeNeighborCache()
     cancelAndDelete(rebuildQuadTreeTimer);
 }
 
-void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject* radio)
+void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject *radio)
 {
     radioMedium->sendToRadio(transmitter, check_and_cast<const IRadio *>(radio), frame);
 }
+} // namespace physicallayer
+} // namespace inet
 
-}
-
-}

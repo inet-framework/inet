@@ -22,9 +22,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(Ieee80211Radio);
 
 Ieee80211Radio::Ieee80211Radio() :
@@ -42,8 +40,7 @@ void Ieee80211Radio::initialize(int stage)
 
 void Ieee80211Radio::handleUpperCommand(cMessage *message)
 {
-    if (message->getKind() == RADIO_C_CONFIGURE)
-    {
+    if (message->getKind() == RADIO_C_CONFIGURE) {
         RadioConfigureCommand *configureCommand = check_and_cast<RadioConfigureCommand *>(message->getControlInfo());
         int newChannelNumber = configureCommand->getChannelNumber();
         if (newChannelNumber != -1)
@@ -56,8 +53,7 @@ void Ieee80211Radio::handleUpperCommand(cMessage *message)
 
 void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 {
-    if (channelNumber != newChannelNumber)
-    {
+    if (channelNumber != newChannelNumber) {
         Hz carrierFrequency = Hz(CENTER_FREQUENCIES[newChannelNumber + 1]);
         ScalarTransmitter *scalarTransmitter = const_cast<ScalarTransmitter *>(check_and_cast<const ScalarTransmitter *>(transmitter));
         ScalarReceiver *scalarReceiver = const_cast<ScalarReceiver *>(check_and_cast<const ScalarReceiver *>(receiver));
@@ -70,10 +66,6 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
         emit(listeningChangedSignal, 0);
     }
 }
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

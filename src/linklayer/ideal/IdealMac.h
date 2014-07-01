@@ -26,7 +26,6 @@
 #include "MACProtocolBase.h"
 
 namespace inet {
-
 using namespace physicallayer;
 
 class IdealMacFrame;
@@ -44,10 +43,10 @@ class INET_API IdealMac : public MACProtocolBase
     static simsignal_t dropPkNotForUsSignal;
 
     // parameters
-    int headerLength;       // IdealMacFrame header length in bytes
-    double bitrate;         // [bits per sec]
-    bool promiscuous;       // promiscuous mode
-    MACAddress address;     // MAC address
+    int headerLength;    // IdealMacFrame header length in bytes
+    double bitrate;    // [bits per sec]
+    bool promiscuous;    // promiscuous mode
+    MACAddress address;    // MAC address
     bool fullDuplex;
 
     IRadio *radio;
@@ -72,7 +71,7 @@ class INET_API IdealMac : public MACProtocolBase
     virtual IdealMacFrame *encapsulate(cPacket *msg);
     virtual cPacket *decapsulate(IdealMacFrame *frame);
     virtual void initializeMACAddress();
-    virtual void acked(IdealMacFrame *frame);   // called by other IdealMac module, when receiving a packet with my moduleID
+    virtual void acked(IdealMacFrame *frame);    // called by other IdealMac module, when receiving a packet with my moduleID
 
     // get MSG from queue
     virtual void getNextMsgFromHL();
@@ -84,7 +83,7 @@ class INET_API IdealMac : public MACProtocolBase
     //@{
     virtual void handleUpperPacket(cPacket *msg);
     virtual void handleLowerPacket(cPacket *msg);
-    virtual void handleSelfMessage(cMessage* message);
+    virtual void handleSelfMessage(cMessage *message);
     //@}
 
   public:
@@ -95,8 +94,7 @@ class INET_API IdealMac : public MACProtocolBase
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IDEALMAC_H
 
-
-#endif

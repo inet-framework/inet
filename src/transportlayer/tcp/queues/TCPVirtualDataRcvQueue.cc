@@ -16,15 +16,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "TCPVirtualDataRcvQueue.h"
 
 namespace inet {
-
-
 Register_Class(TCPVirtualDataRcvQueue);
 
-bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region* other)
+bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region *other)
 {
     if (seqLess(end, other->begin) || seqLess(other->end, begin))
         return false;
@@ -35,11 +32,11 @@ bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region*
     return true;
 }
 
-TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::Region::split(uint32 seq)
+TCPVirtualDataRcvQueue::Region *TCPVirtualDataRcvQueue::Region::split(uint32 seq)
 {
     ASSERT(seqGreater(seq, begin) && seqLess(seq, end));
 
-    Region * reg = new Region(begin, seq);
+    Region *reg = new Region(begin, seq);
     begin = seq;
     return reg;
 }
@@ -82,8 +79,7 @@ TCPVirtualDataRcvQueue::TCPVirtualDataRcvQueue() : TCPReceiveQueue()
 
 TCPVirtualDataRcvQueue::~TCPVirtualDataRcvQueue()
 {
-    while (!regionList.empty())
-    {
+    while (!regionList.empty()) {
         delete regionList.front();
         regionList.pop_front();
     }
@@ -93,8 +89,7 @@ void TCPVirtualDataRcvQueue::init(uint32 startSeq)
 {
     rcv_nxt = startSeq;
 
-    while (!regionList.empty())
-    {
+    while (!regionList.empty()) {
         delete regionList.front();
         regionList.pop_front();
     }
@@ -107,26 +102,25 @@ std::string TCPVirtualDataRcvQueue::info() const
     sprintf(buf, "rcv_nxt=%u", rcv_nxt);
     res = buf;
 
-    for (RegionList::const_iterator i=regionList.begin(); i!=regionList.end(); ++i)
-    {
+    for (RegionList::const_iterator i = regionList.begin(); i != regionList.end(); ++i) {
         sprintf(buf, " [%u..%u)", (*i)->getBegin(), (*i)->getEnd());
         res += buf;
     }
     return res;
 }
 
-TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
+TCPVirtualDataRcvQueue::Region *TCPVirtualDataRcvQueue::createRegionFromSegment(TCPSegment *tcpseg)
 {
-    Region *region = new Region(tcpseg->getSequenceNo(), tcpseg->getSequenceNo()+tcpseg->getPayloadLength());
+    Region *region = new Region(tcpseg->getSequenceNo(), tcpseg->getSequenceNo() + tcpseg->getPayloadLength());
     return region;
 }
+
 uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
 {
     Region *region = createRegionFromSegment(tcpseg);
 
 #ifndef NDEBUG
-    if (!regionList.empty())
-    {
+    if (!regionList.empty()) {
         uint32 ob = regionList.front()->getBegin();
         uint32 oe = regionList.back()->getEnd();
         uint32 nb = region->getBegin();
@@ -137,7 +131,7 @@ uint32 TCPVirtualDataRcvQueue::insertBytesFromSegment(TCPSegment *tcpseg)
             throw cRuntimeError("The new segment is [%u, %u) out of the acceptable range at the queue %s",
                     region->getBegin(), region->getEnd(), info().c_str());
     }
-#endif
+#endif // ifndef NDEBUG
 
     merge(region);
 
@@ -158,12 +152,9 @@ void TCPVirtualDataRcvQueue::merge(TCPVirtualDataRcvQueue::Region *seg)
     RegionList::reverse_iterator i = regionList.rbegin();
     Region::CompareStatus cmp;
 
-    while (i != regionList.rend() && Region::BEFORE != (cmp = (*i)->compare(*seg)))
-    {
-        if (cmp != Region::AFTER)
-        {
-            if (seg->merge(*i))
-            {
+    while (i != regionList.rend() && Region::BEFORE != (cmp = (*i)->compare(*seg))) {
+        if (cmp != Region::AFTER) {
+            if (seg->merge(*i)) {
                 delete *i;
                 i = (RegionList::reverse_iterator)(regionList.erase((++i).base()));
                 continue;
@@ -182,8 +173,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     cPacket *msg = NULL;
     Region *reg = extractTo(seq);
 
-    if (reg)
-    {
+    if (reg) {
         msg = new cPacket("data");
         reg->copyTo(msg);
         delete reg;
@@ -191,7 +181,7 @@ cPacket *TCPVirtualDataRcvQueue::extractBytesUpTo(uint32 seq)
     return msg;
 }
 
-TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
+TCPVirtualDataRcvQueue::Region *TCPVirtualDataRcvQueue::extractTo(uint32 seq)
 {
     ASSERT(seqLE(seq, rcv_nxt));
 
@@ -204,8 +194,7 @@ TCPVirtualDataRcvQueue::Region* TCPVirtualDataRcvQueue::extractTo(uint32 seq)
     if (seqLE(seq, beg))
         return NULL;
 
-    if (seqGE(seq, reg->getEnd()))
-    {
+    if (seqGE(seq, reg->getEnd())) {
         regionList.pop_front();
         return reg;
     }
@@ -240,15 +229,12 @@ void TCPVirtualDataRcvQueue::getQueueStatus()
     EV_DEBUG << "receiveQLength=" << regionList.size() << " " << info() << "\n";
 }
 
-
 uint32 TCPVirtualDataRcvQueue::getLE(uint32 fromSeqNum)
 {
     RegionList::iterator i = regionList.begin();
 
-    while (i != regionList.end())
-    {
-        if (seqLE((*i)->getBegin(), fromSeqNum) && seqLess(fromSeqNum, (*i)->getEnd()))
-        {
+    while (i != regionList.end()) {
+        if (seqLE((*i)->getBegin(), fromSeqNum) && seqLess(fromSeqNum, (*i)->getEnd())) {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
             return (*i)->getBegin();
         }
@@ -263,10 +249,8 @@ uint32 TCPVirtualDataRcvQueue::getRE(uint32 toSeqNum)
 {
     RegionList::iterator i = regionList.begin();
 
-    while (i != regionList.end())
-    {
-        if (seqLess((*i)->getBegin(), toSeqNum) && seqLE(toSeqNum, (*i)->getEnd()))
-        {
+    while (i != regionList.end()) {
+        if (seqLess((*i)->getBegin(), toSeqNum) && seqLE(toSeqNum, (*i)->getEnd())) {
 //            tcpEV << "Enqueued region: [" << i->begin << ".." << i->end << ")\n";
             return (*i)->getEnd();
         }
@@ -283,8 +267,5 @@ uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
         return rcv_nxt;
     return seqMin(regionList.front()->getBegin(), rcv_nxt);
 }
-
-
-}
-
+} // namespace inet
 

@@ -16,7 +16,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 //  Cleanup and rewrite: Andras Varga, 2004
 
 #include "ErrorHandling.h"
@@ -25,8 +24,6 @@
 #include "IPv4Datagram.h"
 
 namespace inet {
-
-
 Define_Module(ErrorHandling);
 
 void ErrorHandling::initialize()
@@ -57,8 +54,7 @@ void ErrorHandling::handleMessage(cMessage *msg)
             << " Time: " << simTime()
             << "\n";
 
-    switch (icmpMsg->getType())
-    {
+    switch (icmpMsg->getType()) {
         case ICMP_DESTINATION_UNREACHABLE:
             numHostUnreachable++;
             break;
@@ -70,16 +66,11 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
     delete icmpMsg;
 
-    if (ev.isGUI())
-    {
+    if (ev.isGUI()) {
         char buf[80];
         sprintf(buf, "errors: %ld", numReceived);
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
-
-
-
-}
-
+} // namespace inet
 

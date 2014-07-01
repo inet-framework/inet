@@ -22,7 +22,6 @@
 #include "IScriptable.h"
 
 namespace inet {
-
 /**
  * Manages operations like shutdown/restart, suspend/resume, crash/recover
  * and similar operations for nodes (routers, hosts, etc), interfaces, and
@@ -62,47 +61,46 @@ namespace inet {
  */
 class INET_API LifecycleController : public cSimpleModule, public IScriptable
 {
-    protected:
-        class INET_API Callback : public IDoneCallback
-        {
-            public:
-                LifecycleController *controller;
-                LifecycleOperation *operation;
-                cModule *module;
+  protected:
+    class INET_API Callback : public IDoneCallback
+    {
+      public:
+        LifecycleController *controller;
+        LifecycleOperation *operation;
+        cModule *module;
 
-                void init(LifecycleController *controller, LifecycleOperation *operation, cModule *module);
-                virtual void invoke();
-        };
+        void init(LifecycleController *controller, LifecycleOperation *operation, cModule *module);
+        virtual void invoke();
+    };
 
-        Callback *spareCallback;
+    Callback *spareCallback;
 
-    protected:
-        virtual bool resumeOperation(LifecycleOperation *operation);
-        virtual void doOneStage(LifecycleOperation *operation, cModule *submodule);
-        virtual void moduleOperationStageCompleted(Callback *callback);  // invoked from the callback
+  protected:
+    virtual bool resumeOperation(LifecycleOperation *operation);
+    virtual void doOneStage(LifecycleOperation *operation, cModule *submodule);
+    virtual void moduleOperationStageCompleted(Callback *callback);    // invoked from the callback
 
-    public:
-        LifecycleController() : spareCallback(NULL) {}
-        ~LifecycleController() { delete spareCallback; }
-        virtual void initialize();
-        virtual void handleMessage(cMessage *msg);
-        virtual void processCommand(const cXMLElement& node);  // IScriptable
+  public:
+    LifecycleController() : spareCallback(NULL) {}
+    ~LifecycleController() { delete spareCallback; }
+    virtual void initialize();
+    virtual void handleMessage(cMessage *msg);
+    virtual void processCommand(const cXMLElement& node);    // IScriptable
 
-        /**
-         * Initiate an operation. See the class documentation and ILifecycle for
-         * details. The target module will be taken from the operation object.
-         *
-         * The return value indicates whether the operation has been completed
-         * inside the call (true), or is pending because it will take several
-         * events and likely nonzero simulation time to complete (false).
-         * In the latter case, and if you provided a completionCallback as
-         * parameter, you will be notified via the callback when the operation
-         * completes.
-         */
-        virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback=NULL);
+    /**
+     * Initiate an operation. See the class documentation and ILifecycle for
+     * details. The target module will be taken from the operation object.
+     *
+     * The return value indicates whether the operation has been completed
+     * inside the call (true), or is pending because it will take several
+     * events and likely nonzero simulation time to complete (false).
+     * In the latter case, and if you provided a completionCallback as
+     * parameter, you will be notified via the callback when the operation
+     * completes.
+     */
+    virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback = NULL);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_LIFECYCLECONTROLLER_H
 
-
-#endif

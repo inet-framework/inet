@@ -21,7 +21,6 @@
 #include "Shape.h"
 
 namespace inet {
-
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
  * The coordinate system origin is in the center of the cuboid and the faces
@@ -29,23 +28,23 @@ namespace inet {
  */
 class INET_API Cuboid : public Shape
 {
-    protected:
-        Coord size;
+  protected:
+    Coord size;
 
-    protected:
-        bool isInsideX(const Coord& point) const { return -size.x / 2 <= point.x && point.x <= size.x / 2; }
-        bool isInsideY(const Coord& point) const { return -size.x / 2 <= point.y && point.y <= size.y / 2; }
-        bool isInsideZ(const Coord& point) const { return -size.x / 2 <= point.z && point.z <= size.z / 2; }
+  protected:
+    bool isInsideX(const Coord& point) const { return -size.x / 2 <= point.x && point.x <= size.x / 2; }
+    bool isInsideY(const Coord& point) const { return -size.x / 2 <= point.y && point.y <= size.y / 2; }
+    bool isInsideZ(const Coord& point) const { return -size.x / 2 <= point.z && point.z <= size.z / 2; }
 
-    public:
-        Cuboid(const Coord& size);
+  public:
+    Cuboid(const Coord& size);
 
-        const Coord &getSize() const { return size; }
-        void setSize(const Coord& size) { this->size = size; }
+    const Coord& getSize() const { return size; }
+    void setSize(const Coord& size) { this->size = size; }
 
-        virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_CUBOID_H
 
-#endif

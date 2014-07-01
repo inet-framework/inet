@@ -17,15 +17,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #include "MassMobility.h"
 #include "FWMath.h"
 
 namespace inet {
-
-
 Define_Module(MassMobility);
-
 
 MassMobility::MassMobility()
 {
@@ -40,8 +36,7 @@ void MassMobility::initialize(int stage)
     LineSegmentsMobilityBase::initialize(stage);
 
     EV_TRACE << "initializing MassMobility stage " << stage << endl;
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         angle = par("startAngle").doubleValue();
         changeIntervalParameter = &par("changeInterval");
         changeAngleByParameter = &par("changeAngleBy");
@@ -82,8 +77,5 @@ void MassMobility::move()
         handleIfOutside(REFLECT, lastPosition, lastSpeed, dummyAngle);
     }
 }
-
-
-}
-
+} // namespace inet
 

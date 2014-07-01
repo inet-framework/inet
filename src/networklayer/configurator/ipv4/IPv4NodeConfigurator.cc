@@ -24,8 +24,6 @@
 #include "NodeOperations.h"
 
 namespace inet {
-
-
 Define_Module(IPv4NodeConfigurator);
 
 IPv4NodeConfigurator::IPv4NodeConfigurator()
@@ -40,8 +38,7 @@ void IPv4NodeConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         cModule *node = getContainingNode(this);
         if (!node)
             throw cRuntimeError("The container @node module not found");
@@ -59,13 +56,11 @@ void IPv4NodeConfigurator::initialize(int stage)
             networkConfigurator = check_and_cast<IPv4NetworkConfigurator *>(module);
         }
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER) {
         if (!nodeStatus || nodeStatus->getState() == NodeStatus::UP)
             prepareNode();
     }
-    else if (stage == INITSTAGE_NETWORK_LAYER_2)
-    {
+    else if (stage == INITSTAGE_NETWORK_LAYER_2) {
         if ((!nodeStatus || nodeStatus->getState() == NodeStatus::UP) && networkConfigurator)
             configureNode();
     }
@@ -80,10 +75,12 @@ bool IPv4NodeConfigurator::handleOperationStage(LifecycleOperation *operation, i
         else if (stage == NodeStartOperation::STAGE_NETWORK_LAYER && networkConfigurator)
             configureNode();
     }
-    else if (dynamic_cast<NodeShutdownOperation *>(operation))
-    { /*nothing to do*/; }
-    else if (dynamic_cast<NodeCrashOperation *>(operation))
-    { /*nothing to do*/; }
+    else if (dynamic_cast<NodeShutdownOperation *>(operation)) {    /*nothing to do*/
+        ;
+    }
+    else if (dynamic_cast<NodeCrashOperation *>(operation)) {    /*nothing to do*/
+        ;
+    }
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
@@ -100,19 +97,16 @@ void IPv4NodeConfigurator::prepareInterface(InterfaceEntry *interfaceEntry)
     ASSERT(!interfaceEntry->ipv4Data());
     IPv4InterfaceData *interfaceData = new IPv4InterfaceData();
     interfaceEntry->setIPv4Data(interfaceData);
-    if (interfaceEntry->isLoopback())
-    {
+    if (interfaceEntry->isLoopback()) {
         // we may reconfigure later it to be the routerId
         interfaceData->setIPAddress(IPv4Address::LOOPBACK_ADDRESS);
         interfaceData->setNetmask(IPv4Address::LOOPBACK_NETMASK);
         interfaceData->setMetric(1);
     }
-    else
-    {
+    else {
         // metric: some hints: OSPF cost (2e9/bps value), MS KB article Q299540, ...
-        interfaceData->setMetric((int)ceil(2e9/interfaceEntry->getDatarate())); // use OSPF cost as default
-        if (interfaceEntry->isMulticast())
-        {
+        interfaceData->setMetric((int)ceil(2e9 / interfaceEntry->getDatarate()));    // use OSPF cost as default
+        if (interfaceEntry->isMulticast()) {
             interfaceData->joinMulticastGroup(IPv4Address::ALL_HOSTS_MCAST);
             if (routingTable->isForwardingEnabled())
                 interfaceData->joinMulticastGroup(IPv4Address::ALL_ROUTERS_MCAST);
@@ -128,8 +122,5 @@ void IPv4NodeConfigurator::configureNode()
     if (par("configureRoutingTable").boolValue())
         networkConfigurator->configureRoutingTable(routingTable);
 }
-
-
-}
-
+} // namespace inet
 

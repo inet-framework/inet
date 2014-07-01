@@ -29,7 +29,6 @@
 #include "Address.h"
 
 namespace inet {
-
 class PatternMatcher;
 
 /**
@@ -39,134 +38,141 @@ class PatternMatcher;
  */
 class INET_API GenericNetworkConfigurator : public cSimpleModule
 {
-    public:
-        class LinkInfo;
-        class InterfaceInfo;
+  public:
+    class LinkInfo;
+    class InterfaceInfo;
 
-        /**
-         * Represents a node in the network.
-         */
-        class Node : public Topology::Node {
-            public:
-                cModule *module;
-                IInterfaceTable *interfaceTable;
-                GenericRoutingTable *routingTable;
-                std::vector<InterfaceInfo *> interfaceInfos;
+    /**
+     * Represents a node in the network.
+     */
+    class Node : public Topology::Node
+    {
+      public:
+        cModule *module;
+        IInterfaceTable *interfaceTable;
+        GenericRoutingTable *routingTable;
+        std::vector<InterfaceInfo *> interfaceInfos;
 
-            public:
-                Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
-        };
+      public:
+        Node(cModule *module) : Topology::Node(module->getId()) { this->module = module; interfaceTable = NULL; routingTable = NULL; }
+    };
 
-        /**
-         * Represents a connection (wired or wireless) in the network.
-         */
-        class Link : public Topology::Link {
-            public:
-                InterfaceInfo *sourceInterfaceInfo;
-                InterfaceInfo *destinationInterfaceInfo;
+    /**
+     * Represents a connection (wired or wireless) in the network.
+     */
+    class Link : public Topology::Link
+    {
+      public:
+        InterfaceInfo *sourceInterfaceInfo;
+        InterfaceInfo *destinationInterfaceInfo;
 
-            public:
-                Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
-        };
+      public:
+        Link() { sourceInterfaceInfo = NULL; destinationInterfaceInfo = NULL; }
+    };
 
-        /**
-         * Represents an interface in the network.
-         */
-        class InterfaceInfo : public cObject {
-            public:
-                Node *node;
-                LinkInfo *linkInfo;
-                InterfaceEntry *interfaceEntry;
-                bool configure;              // false means the IP address of the interface will not be modified
-                Address address;              // the bits
+    /**
+     * Represents an interface in the network.
+     */
+    class InterfaceInfo : public cObject
+    {
+      public:
+        Node *node;
+        LinkInfo *linkInfo;
+        InterfaceEntry *interfaceEntry;
+        bool configure;    // false means the IP address of the interface will not be modified
+        Address address;    // the bits
 
-                InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry) {
-                    this->node = node;
-                    this->linkInfo = linkInfo;
-                    this->interfaceEntry = interfaceEntry;
-                    configure = false;
-                }
-                virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
-        };
-
-        /**
-         * Represents a "link" in the network. A link is a communication medium between interfaces;
-         * it can be e.g. a point-to-point link, an Ethernet LAN or a wireless LAN.
-         */
-        class LinkInfo : public cObject {
-            public:
-                bool isWireless;
-                std::vector<InterfaceInfo *> interfaceInfos; // interfaces on that LAN or point-to-point link
-                InterfaceInfo* gatewayInterfaceInfo; // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
-
-                LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = NULL; }
-                ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
-        };
-
-        /**
-         * Represents the network topology.
-         */
-        class GenericTopology : public Topology {
-            public:
-                std::vector<LinkInfo *> linkInfos; // all links in the network
-
-            public:
-                virtual ~GenericTopology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
-
-            protected:
-                virtual Node *createNode(cModule *module) { return new GenericNetworkConfigurator::Node(module); }
-                virtual Link *createLink() { return new GenericNetworkConfigurator::Link(); }
-        };
-
-        class Matcher
+        InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
         {
-            private:
-                bool matchesany;
-                std::vector<inet::PatternMatcher *> matchers; // TODO replace with a MatchExpression once it becomes available in OMNeT++
-            public:
-                Matcher(const char *pattern);
-                ~Matcher();
-                bool matches(const char *s);
-                bool matchesAny() { return matchesany; }
-        };
+            this->node = node;
+            this->linkInfo = linkInfo;
+            this->interfaceEntry = interfaceEntry;
+            configure = false;
+        }
 
-    protected:
-        virtual int numInitStages() const { return NUM_INIT_STAGES; }
-        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
-        virtual void initialize(int stage);
+        virtual std::string getFullPath() const { return interfaceEntry->getFullPath(); }
+    };
 
-        /**
-         * Extracts network topology by walking through the module hierarchy.
-         * Creates vertices from modules having @node property.
-         * Creates edges from connections between network interfaces.
-         */
-        virtual void extractTopology(GenericTopology& topology);
+    /**
+     * Represents a "link" in the network. A link is a communication medium between interfaces;
+     * it can be e.g. a point-to-point link, an Ethernet LAN or a wireless LAN.
+     */
+    class LinkInfo : public cObject
+    {
+      public:
+        bool isWireless;
+        std::vector<InterfaceInfo *> interfaceInfos;    // interfaces on that LAN or point-to-point link
+        InterfaceInfo *gatewayInterfaceInfo;    // non-NULL if all hosts have 1 non-loopback interface except one host that has two of them (this will be the gateway)
 
-        /**
-         * Adds static routes to all routing tables in the network.
-         * The algorithm uses Dijkstra's weighted shortest path algorithm.
-         * May add default routes and subnet routes if possible and requested.
-         */
-        virtual void addStaticRoutes(GenericTopology& topology);
+        LinkInfo(bool isWireless) { this->isWireless = isWireless; gatewayInterfaceInfo = NULL; }
+        ~LinkInfo() { for (int i = 0; i < (int)interfaceInfos.size(); i++) delete interfaceInfos[i]; }
+    };
 
-        virtual void dumpTopology(GenericTopology& topology);
-        virtual void dumpRoutes(GenericTopology& topology);
+    /**
+     * Represents the network topology.
+     */
+    class GenericTopology : public Topology
+    {
+      public:
+        std::vector<LinkInfo *> linkInfos;    // all links in the network
 
-        // helper functions
-        virtual void extractWiredTopology(GenericTopology& topology);
-        virtual void extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo* linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
-        virtual void extractWirelessTopology(GenericTopology& topology);
-        virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
-        virtual double getChannelWeight(cChannel *transmissionChannel);
-        virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
-        virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
+      public:
+        virtual ~GenericTopology() { for (int i = 0; i < (int)linkInfos.size(); i++) delete linkInfos[i]; }
 
-        virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
-        virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
-        virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
+      protected:
+        virtual Node *createNode(cModule *module) { return new GenericNetworkConfigurator::Node(module); }
+        virtual Link *createLink() { return new GenericNetworkConfigurator::Link(); }
+    };
+
+    class Matcher
+    {
+      private:
+        bool matchesany;
+        std::vector<inet::PatternMatcher *> matchers;    // TODO replace with a MatchExpression once it becomes available in OMNeT++
+
+      public:
+        Matcher(const char *pattern);
+        ~Matcher();
+        bool matches(const char *s);
+        bool matchesAny() { return matchesany; }
+    };
+
+  protected:
+    virtual int numInitStages() const { return NUM_INIT_STAGES; }
+    virtual void handleMessage(cMessage *msg) { throw cRuntimeError("this module doesn't handle messages, it runs only in initialize()"); }
+    virtual void initialize(int stage);
+
+    /**
+     * Extracts network topology by walking through the module hierarchy.
+     * Creates vertices from modules having @node property.
+     * Creates edges from connections between network interfaces.
+     */
+    virtual void extractTopology(GenericTopology& topology);
+
+    /**
+     * Adds static routes to all routing tables in the network.
+     * The algorithm uses Dijkstra's weighted shortest path algorithm.
+     * May add default routes and subnet routes if possible and requested.
+     */
+    virtual void addStaticRoutes(GenericTopology& topology);
+
+    virtual void dumpTopology(GenericTopology& topology);
+    virtual void dumpRoutes(GenericTopology& topology);
+
+    // helper functions
+    virtual void extractWiredTopology(GenericTopology& topology);
+    virtual void extractWiredNeighbors(Topology::LinkOut *linkOut, LinkInfo *linkInfo, std::set<InterfaceEntry *>& interfacesSeen, std::vector<Node *>& nodesVisited);
+    virtual void extractWirelessTopology(GenericTopology& topology);
+    virtual InterfaceInfo *determineGatewayForLink(LinkInfo *linkInfo);
+    virtual double getChannelWeight(cChannel *transmissionChannel);
+    virtual bool isWirelessInterface(InterfaceEntry *interfaceEntry);
+    virtual const char *getWirelessId(InterfaceEntry *interfaceEntry);
+
+    virtual InterfaceInfo *createInterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry);
+    virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
+    virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_GENERICNETWORKCONFIGURATOR_H
 
-
-#endif

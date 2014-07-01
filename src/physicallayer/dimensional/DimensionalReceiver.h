@@ -22,27 +22,22 @@
 #include "IModulation.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DimensionalReceiver : public FlatReceiverBase
 {
-    protected:
-        virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const;
-        virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const;
+  protected:
+    virtual const INoise *computeNoise(const IListening *listening, const std::vector<const IReception *> *receptions, const INoise *backgroundNoise) const;
+    virtual double computeMinSNIR(const IReception *reception, const INoise *noise) const;
 
-    public:
-        DimensionalReceiver() :
-            FlatReceiverBase()
-        {}
+  public:
+    DimensionalReceiver() :
+        FlatReceiverBase()
+    {}
 
-        virtual void printToStream(std::ostream &stream) const;
+    virtual void printToStream(std::ostream& stream) const;
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIMENSIONALRECEIVER_H
 
-}
-
-
-#endif

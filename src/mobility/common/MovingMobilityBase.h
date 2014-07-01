@@ -19,7 +19,6 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-
 #ifndef __INET_MOVINGMOBILITYBASE_H
 #define __INET_MOVINGMOBILITYBASE_H
 
@@ -28,8 +27,6 @@
 #include "MobilityBase.h"
 
 namespace inet {
-
-
 /**
  * @brief Base class for moving mobility modules. Periodically emits a signal with the current mobility state.
  *
@@ -94,8 +91,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_MOVINGMOBILITYBASE_H
 
-
-#endif

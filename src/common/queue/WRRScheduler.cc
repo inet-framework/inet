@@ -19,7 +19,6 @@
 #include "opp_utils.h"
 
 namespace inet {
-
 Define_Module(WRRScheduler);
 
 WRRScheduler::~WRRScheduler()
@@ -52,13 +51,10 @@ void WRRScheduler::initialize()
 bool WRRScheduler::schedulePacket()
 {
     bool allQueueIsEmpty = true;
-    for (int i = 0; i < numInputs; ++i)
-    {
-        if (!inputQueues[i]->isEmpty())
-        {
+    for (int i = 0; i < numInputs; ++i) {
+        if (!inputQueues[i]->isEmpty()) {
             allQueueIsEmpty = false;
-            if (buckets[i] > 0)
-            {
+            if (buckets[i] > 0) {
                 buckets[i]--;
                 inputQueues[i]->requestPacket();
                 return true;
@@ -70,11 +66,9 @@ bool WRRScheduler::schedulePacket()
         return false;
 
     bool packetRequested = false;
-    for (int i = 0; i < numInputs; ++i)
-    {
+    for (int i = 0; i < numInputs; ++i) {
         buckets[i] = weights[i];
-        if (!packetRequested && buckets[i] > 0 && !inputQueues[i]->isEmpty())
-        {
+        if (!packetRequested && buckets[i] > 0 && !inputQueues[i]->isEmpty()) {
             buckets[i]--;
             inputQueues[i]->requestPacket();
             packetRequested = true;
@@ -83,8 +77,5 @@ bool WRRScheduler::schedulePacket()
 
     return packetRequested;
 }
-
-
-}
-
+} // namespace inet
 

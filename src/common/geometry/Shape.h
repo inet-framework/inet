@@ -21,22 +21,21 @@
 #include "LineSegment.h"
 
 namespace inet {
-
 /**
  * This class represents a 3 dimensional convex shape independently of its
  * position and orientation.
  */
 class INET_API Shape
 {
-    public:
-        Shape();
-        virtual ~Shape();
+  public:
+    Shape();
+    virtual ~Shape();
 
-        virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const = 0;
-        virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
-        virtual bool isIntersecting(const LineSegment& lineSegment) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const = 0;
+    virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
+    virtual bool isIntersecting(const LineSegment& lineSegment) const;
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_SHAPE_H
 
-#endif

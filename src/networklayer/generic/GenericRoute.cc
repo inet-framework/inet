@@ -19,20 +19,19 @@
 #include "GenericRoutingTable.h"
 
 namespace inet {
-
 std::string GenericRoute::info() const
 {
-    return ""; //TODO
+    return "";    //TODO
 }
 
 std::string GenericRoute::detailedInfo() const
 {
-    return ""; //TODO
+    return "";    //TODO
 }
 
 bool GenericRoute::equals(const IRoute& route) const
 {
-    return false; //TODO
+    return false;    //TODO
 }
 
 void GenericRoute::changed(int fieldCode)
@@ -48,16 +47,16 @@ IRoutingTable *GenericRoute::getRoutingTableAsGeneric() const
 
 //---
 
-#if 0 /*FIXME TODO!!!! */
+#if 0    /*FIXME TODO!!!! */
 
 std::string GenericMulticastRoute::info() const
 {
-    return ""; //TODO
+    return "";    //TODO
 }
 
 std::string GenericMulticastRoute::detailedInfo() const
 {
-    return ""; //TODO
+    return "";    //TODO
 }
 
 bool GenericMulticastRoute::addChild(InterfaceEntry *ie, bool isLeaf)
@@ -75,8 +74,5 @@ bool GenericMulticastRoute::removeChild(InterfaceEntry *ie)
 }
 
 #endif /*0*/
-
-
-}
-
+} // namespace inet
 

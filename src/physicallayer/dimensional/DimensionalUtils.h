@@ -22,19 +22,14 @@
 #include "MappingUtils.h"
 
 namespace inet {
-
-namespace physicallayer
-{
-
+namespace physicallayer {
 class INET_API DimensionalUtils
 {
-    public:
-        static ConstMapping *createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power);
+  public:
+    static ConstMapping *createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power);
 };
+} // namespace physicallayer
+} // namespace inet
 
-}
+#endif // ifndef __INET_DIMENSIONALUTILS_H
 
-}
-
-
-#endif

@@ -29,8 +29,6 @@
 #include "opp_utils.h"
 
 namespace inet {
-
-
 Define_Module(IdealMac);
 
 simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
@@ -52,13 +50,12 @@ IdealMac::~IdealMac()
 void IdealMac::flushQueue()
 {
     ASSERT(queueModule);
-    while (!queueModule->isEmpty())
-    {
+    while (!queueModule->isEmpty()) {
         cMessage *msg = queueModule->pop();
         //TODO emit(dropPkIfaceDownSignal, msg); -- 'pkDropped' signals are missing in this module!
         delete msg;
     }
-    queueModule->clear(); // clear request count
+    queueModule->clear();    // clear request count
 }
 
 void IdealMac::clearQueue()
@@ -67,12 +64,10 @@ void IdealMac::clearQueue()
     queueModule->clear();
 }
 
-
 void IdealMac::initialize(int stage)
 {
     MACProtocolBase::initialize(stage);
-    if (stage == INITSTAGE_LOCAL)
-    {
+    if (stage == INITSTAGE_LOCAL) {
         outStandingRequests = 0;
 
         bitrate = par("bitrate").doubleValue();
@@ -94,8 +89,7 @@ void IdealMac::initialize(int stage)
 
         initializeMACAddress();
     }
-    else if (stage == INITSTAGE_LINK_LAYER)
-    {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
         ackTimeoutMsg = new cMessage("link-break");
         getNextMsgFromHL();
@@ -107,16 +101,14 @@ void IdealMac::initializeMACAddress()
 {
     const char *addrstr = par("address");
 
-    if (!strcmp(addrstr, "auto"))
-    {
+    if (!strcmp(addrstr, "auto")) {
         // assign automatic address
         address = MACAddress::generateAutoAddress();
 
         // change module parameter from "auto" to concrete address
         par("address").setStringValue(address.str().c_str());
     }
-    else
-    {
+    else {
         address.setAddress(addrstr);
     }
 }
@@ -149,11 +141,9 @@ InterfaceEntry *IdealMac::createInterfaceEntry()
 void IdealMac::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     Enter_Method_Silent();
-    if (signalID == IRadio::transmissionStateChangedSignal)
-    {
+    if (signalID == IRadio::transmissionStateChangedSignal) {
         IRadio::TransmissionState newRadioTransmissionState = (IRadio::TransmissionState)value;
-        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE)
-        {
+        if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING && newRadioTransmissionState == IRadio::TRANSMISSION_STATE_IDLE) {
             radio->setRadioMode(fullDuplex ? IRadio::RADIO_MODE_TRANSCEIVER : IRadio::RADIO_MODE_RECEIVER);
             if (!lastSentPk)
                 getNextMsgFromHL();
@@ -167,18 +157,16 @@ void IdealMac::startTransmitting(cPacket *msg)
     // if there's any control info, remove it; then encapsulate the packet
     if (lastSentPk)
         throw cRuntimeError("Model error: unacked send");
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->getControlInfo());
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
     MACAddress dest = ctrl->getDestinationAddress();
     IdealMacFrame *frame = encapsulate(msg);
 
-    if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified())
-    {   // unicast
+    if (!dest.isBroadcast() && !dest.isMulticast() && !dest.isUnspecified()) {    // unicast
         lastSentPk = frame->dup();
         scheduleAt(simTime() + ackTimeout, ackTimeoutMsg);
     }
     else
         frame->setSrcModuleId(-1);
-
 
     // send
     EV << "Starting transmission of " << frame << endl;
@@ -189,8 +177,7 @@ void IdealMac::startTransmitting(cPacket *msg)
 void IdealMac::getNextMsgFromHL()
 {
     ASSERT(outStandingRequests >= queueModule->getNumPendingRequests());
-    if (outStandingRequests == 0)
-    {
+    if (outStandingRequests == 0) {
         queueModule->requestPacket();
         outStandingRequests++;
     }
@@ -200,13 +187,11 @@ void IdealMac::getNextMsgFromHL()
 void IdealMac::handleUpperPacket(cPacket *msg)
 {
     outStandingRequests--;
-    if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING)
-    {
+    if (radio->getTransmissionState() == IRadio::TRANSMISSION_STATE_TRANSMITTING) {
         // Logic error: we do not request packet from the external queue when radio is transmitting
         throw cRuntimeError("Received msg for transmission but transmitter is busy");
     }
-    else
-    {
+    else {
         // We are idle, so we can start transmitting right away.
         EV << "Received " << msg << " for transmission\n";
         startTransmitting(msg);
@@ -216,15 +201,13 @@ void IdealMac::handleUpperPacket(cPacket *msg)
 void IdealMac::handleLowerPacket(cPacket *msg)
 {
     IdealMacFrame *frame = check_and_cast<IdealMacFrame *>(msg);
-    if (frame->hasBitError())
-    {
+    if (frame->hasBitError()) {
         EV << "Received " << frame << " contains bit errors or collision, dropping it\n";
         delete frame;
         return;
     }
 
-    if (!dropFrameNotForUs(frame))
-    {
+    if (!dropFrameNotForUs(frame)) {
         int senderModuleId = frame->getSrcModuleId();
         IdealMac *senderMac = dynamic_cast<IdealMac *>(simulation.getModule(senderModuleId));
         if (senderMac)
@@ -236,10 +219,9 @@ void IdealMac::handleLowerPacket(cPacket *msg)
     }
 }
 
-void IdealMac::handleSelfMessage(cMessage* message)
+void IdealMac::handleSelfMessage(cMessage *message)
 {
-    if (message == ackTimeoutMsg)
-    {
+    if (message == ackTimeoutMsg) {
         EV_DETAIL << "IdealMac: timeout: " << lastSentPk->getFullName() << " is lost\n";
         // packet lost
         emit(NF_LINK_BREAK, lastSentPk);
@@ -247,12 +229,10 @@ void IdealMac::handleSelfMessage(cMessage* message)
         lastSentPk = NULL;
         getNextMsgFromHL();
     }
-    else
-    {
+    else {
         MACProtocolBase::handleSelfMessage(message);
     }
 }
-
 
 void IdealMac::acked(IdealMacFrame *frame)
 {
@@ -260,8 +240,7 @@ void IdealMac::acked(IdealMacFrame *frame)
 
     EV_DEBUG << "IdealMac::acked(" << frame->getFullName() << ") is ";
 
-    if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId())
-    {
+    if (lastSentPk && lastSentPk->getTreeId() == frame->getTreeId()) {
         EV_DEBUG << "accepted\n";
         cancelEvent(ackTimeoutMsg);
         delete lastSentPk;
@@ -274,7 +253,7 @@ void IdealMac::acked(IdealMacFrame *frame)
 
 IdealMacFrame *IdealMac::encapsulate(cPacket *msg)
 {
-    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
+    Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
     IdealMacFrame *frame = new IdealMacFrame(msg->getName());
     frame->setByteLength(headerLength);
     frame->setSrc(ctrl->getSrc());
@@ -303,7 +282,7 @@ bool IdealMac::dropFrameNotForUs(IdealMacFrame *frame)
     if (promiscuous || frame->getDest().isMulticast())
         return false;
 
-    EV << "Frame `" << frame->getName() <<"' not destined to us, discarding\n";
+    EV << "Frame `" << frame->getName() << "' not destined to us, discarding\n";
     emit(dropPkNotForUsSignal, frame);
     delete frame;
     return true;
@@ -321,5 +300,5 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     delete frame;
     return packet;
 }
+} // namespace inet
 
-}

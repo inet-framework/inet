@@ -24,21 +24,17 @@
 #include "IPv4InterfaceData.h"
 
 namespace inet {
-
 typedef cTopology WeightedTopology;
 
-
 Define_Module(FlatNetworkConfigurator);
-
 
 void FlatNetworkConfigurator::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER_2)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER_2) {
         cTopology topo("topo");
-        NodeInfoVector nodeInfo; // will be of size topo.nodes[]
+        NodeInfoVector nodeInfo;    // will be of size topo.nodes[]
 
         // extract topology into the cTopology object, then fill in
         // isIPNode, rt and ift members of nodeInfo[]
@@ -67,12 +63,10 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
 
     // fill in isIPNode, ift and rt members in nodeInfo[]
     nodeInfo.resize(topo.getNumNodes());
-    for (int i=0; i<topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = AddressResolver().findIPv4RoutingTableOf(mod)!=NULL && AddressResolver().findInterfaceTableOf(mod)!=NULL;
-        if (nodeInfo[i].isIPNode)
-        {
+        nodeInfo[i].isIPNode = AddressResolver().findIPv4RoutingTableOf(mod) != NULL && AddressResolver().findInterfaceTableOf(mod) != NULL;
+        if (nodeInfo[i].isIPNode) {
             nodeInfo[i].ift = AddressResolver().interfaceTableOf(mod);
             nodeInfo[i].rt = AddressResolver().routingTableOf(mod);
             nodeInfo[i].ipForwardEnabled = mod->hasPar("IPForward") ? mod->par("IPForward").boolValue() : false;
@@ -86,13 +80,12 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
     // assign IPv4 addresses
     uint32 networkAddress = IPv4Address(par("networkAddress").stringValue()).getInt();
     uint32 netmask = IPv4Address(par("netmask").stringValue()).getInt();
-    int maxNodes = (~netmask)-1;  // 0 and ffff have special meaning and cannot be used
-    if (topo.getNumNodes()>maxNodes)
+    int maxNodes = (~netmask) - 1;    // 0 and ffff have special meaning and cannot be used
+    if (topo.getNumNodes() > maxNodes)
         throw cRuntimeError("netmask too large, not enough addresses for all %d nodes", topo.getNumNodes());
 
     int numIPNodes = 0;
-    for (int i=0; i<topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         // skip bus types
         if (!nodeInfo[i].isIPNode)
             continue;
@@ -102,13 +95,11 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
 
         // find interface table and assign address to all (non-loopback) interfaces
         IInterfaceTable *ift = nodeInfo[i].ift;
-        for (int k=0; k<ift->getNumInterfaces(); k++)
-        {
+        for (int k = 0; k < ift->getNumInterfaces(); k++) {
             InterfaceEntry *ie = ift->getInterface(k);
-            if (!ie->isLoopback())
-            {
+            if (!ie->isLoopback()) {
                 ie->ipv4Data()->setIPAddress(IPv4Address(addr));
-                ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS); // full address must match for local delivery
+                ie->ipv4Data()->setNetmask(IPv4Address::ALLONES_ADDRESS);    // full address must match for local delivery
             }
         }
     }
@@ -117,8 +108,7 @@ void FlatNetworkConfigurator::assignAddresses(cTopology& topo, NodeInfoVector& n
 void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // add default route to nodes with exactly one (non-loopback) interface
-    for (int i=0; i<topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         cTopology::Node *node = topo.getNode(i);
 
         // skip bus types
@@ -131,16 +121,18 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
         // count non-loopback interfaces
         int numIntf = 0;
         InterfaceEntry *ie = NULL;
-        for (int k=0; k<ift->getNumInterfaces(); k++)
-            if (!ift->getInterface(k)->isLoopback())
-                {ie = ift->getInterface(k); numIntf++;}
+        for (int k = 0; k < ift->getNumInterfaces(); k++)
+            if (!ift->getInterface(k)->isLoopback()) {
+                ie = ift->getInterface(k);
+                numIntf++;
+            }
 
-        nodeInfo[i].usesDefaultRoute = (numIntf==1);
-        if (numIntf!=1)
+        nodeInfo[i].usesDefaultRoute = (numIntf == 1);
+        if (numIntf != 1)
             continue; // only deal with nodes with one interface plus loopback
 
         EV_INFO << "  " << node->getModule()->getFullName() << "=" << nodeInfo[i].address
-           << " has only one (non-loopback) interface, adding default route\n";
+                << " has only one (non-loopback) interface, adding default route\n";
 
         // add route
         IPv4Route *e = new IPv4Route();
@@ -156,8 +148,7 @@ void FlatNetworkConfigurator::addDefaultRoutes(cTopology& topo, NodeInfoVector& 
 void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     // fill in routing tables with static routes
-    for (int i=0; i<topo.getNumNodes(); i++)
-    {
+    for (int i = 0; i < topo.getNumNodes(); i++) {
         cTopology::Node *destNode = topo.getNode(i);
 
         // skip bus types
@@ -172,14 +163,14 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
 
         // add route (with host=destNode) to every routing table in the network
         // (excepting nodes with only one interface -- there we'll set up a default route)
-        for (int j=0; j<topo.getNumNodes(); j++)
-        {
-            if (i==j) continue;
+        for (int j = 0; j < topo.getNumNodes(); j++) {
+            if (i == j)
+                continue;
             if (!nodeInfo[j].isIPNode)
                 continue;
 
             cTopology::Node *atNode = topo.getNode(j);
-            if (atNode->getNumPaths()==0)
+            if (atNode->getNumPaths() == 0)
                 continue; // not connected
             if (nodeInfo[j].usesDefaultRoute)
                 continue; // already added default route here
@@ -200,7 +191,7 @@ void FlatNetworkConfigurator::fillRoutingTables(cTopology& topo, NodeInfoVector&
             IIPv4RoutingTable *rt = nodeInfo[j].rt;
             IPv4Route *e = new IPv4Route();
             e->setDestination(destAddr);
-            e->setNetmask(IPv4Address(255, 255, 255, 255)); // full match needed
+            e->setNetmask(IPv4Address(255, 255, 255, 255));    // full match needed
             e->setInterface(ie);
             e->setSourceType(IRoute::MANUAL);
             //e->getMetric() = 1;
@@ -217,18 +208,15 @@ void FlatNetworkConfigurator::handleMessage(cMessage *msg)
 void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo)
 {
     int numIPNodes = 0;
-    for (int i=0; i<topo.getNumNodes(); i++)
+    for (int i = 0; i < topo.getNumNodes(); i++)
         if (nodeInfo[i].isIPNode)
             numIPNodes++;
 
+
     // update display string
     char buf[80];
-    sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes()-numIPNodes);
+    sprintf(buf, "%d IPv4 nodes\n%d non-IPv4 nodes", numIPNodes, topo.getNumNodes() - numIPNodes);
     getDisplayString().setTagArg("t", 0, buf);
 }
-
-
-
-}
-
+} // namespace inet
 

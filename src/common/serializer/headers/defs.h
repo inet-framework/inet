@@ -22,55 +22,52 @@
 // Get integer types defined
 //
 #if defined(_MSC_VER) && (_MSC_VER < 1600)
-typedef __int8            int8_t;
-typedef __int16           int16_t;
-typedef __int32           int32_t;
-typedef __int64           int64_t;
-typedef unsigned __int8   uint8_t;
-typedef unsigned __int16  uint16_t;
-typedef unsigned __int32  uint32_t;
-typedef unsigned __int64  uint64_t;
-#else
-#include <stdint.h>  /* ISO C compliant platforms: Linux, Mac OS/X, recent MSVC versions */
-#endif
+typedef __int8 int8_t;
+typedef __int16 int16_t;
+typedef __int32 int32_t;
+typedef __int64 int64_t;
+typedef unsigned __int8 uint8_t;
+typedef unsigned __int16 uint16_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int64 uint64_t;
+#else // if defined(_MSC_VER) && (_MSC_VER < 1600)
+#include <stdint.h>    /* ISO C compliant platforms: Linux, Mac OS/X, recent MSVC versions */
+#endif // if defined(_MSC_VER) && (_MSC_VER < 1600)
 
 /* if nothing else helps:
-typedef signed char         int8_t;
-typedef short               int16_t;
-typedef int                 int32_t;
-typedef long long           int64_t;
-typedef unsigned char       uint8_t;
-typedef unsigned short      uint16_t;
-typedef unsigned int        uint32_t;
-typedef unsigned long long  uint64_t;
-*/
+   typedef signed char         int8_t;
+   typedef short               int16_t;
+   typedef int                 int32_t;
+   typedef long long           int64_t;
+   typedef unsigned char       uint8_t;
+   typedef unsigned short      uint16_t;
+   typedef unsigned int        uint32_t;
+   typedef unsigned long long  uint64_t;
+ */
 
 //
 // Get endianness macros defined
 //
-#if defined(_WIN32)  /*MSVC and MinGW*/
-# define LITTLE_ENDIAN  1
-# define BIG_ENDIAN     2
-# define BYTE_ORDER     LITTLE_ENDIAN   /* XXX at least on x86 */
+#if defined(_WIN32)    /*MSVC and MinGW*/
+# define LITTLE_ENDIAN    1
+# define BIG_ENDIAN       2
+# define BYTE_ORDER       LITTLE_ENDIAN   /* XXX at least on x86 */
 #elif defined(linux) || defined(__linux)
 # include <endian.h>
-# define LITTLE_ENDIAN __LITTLE_ENDIAN
-# define BIG_ENDIAN    __BIG_ENDIAN
-# define BYTE_ORDER    __BYTE_ORDER
+# define LITTLE_ENDIAN    __LITTLE_ENDIAN
+# define BIG_ENDIAN       __BIG_ENDIAN
+# define BYTE_ORDER       __BYTE_ORDER
 #elif defined(__APPLE__)
 #include <machine/endian.h>
 #else /* fallback, including cases __FreeBSD__, __NetBSD__ and __OpenBSD__ */
 //XXX this causes problems in FreeBSD, and probably not needed anyway: #define __BSD_VISIBLE
 #include <machine/endian.h>
 
-#endif
+#endif // if defined(_WIN32)
 
-#if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER!=LITTLE_ENDIAN && BYTE_ORDER!=BIG_ENDIAN)
+#if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
 #error Endian macros (LITTLE_ENDIAN, BIG_ENDIAN, BYTE_ORDER) are not set up correctly -- please fix this header file and report it.
-#endif
+#endif // if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
 
-
-
-#endif
-
+#endif // ifndef __INET_DEFS_H
 

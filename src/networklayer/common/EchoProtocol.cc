@@ -22,15 +22,13 @@
 #include "PingPayload_m.h"
 
 namespace inet {
-
 Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    if (stage == INITSTAGE_NETWORK_LAYER_2)
-    {
+    if (stage == INITSTAGE_NETWORK_LAYER_2) {
         IPSocket socket(gate("sendOut"));
         socket.registerProtocol(IP_PROT_ICMP);
     }
@@ -47,14 +45,15 @@ void EchoProtocol::handleMessage(cMessage *msg)
 
 void EchoProtocol::processPacket(EchoPacket *msg)
 {
-    switch (msg->getType())
-    {
+    switch (msg->getType()) {
         case ECHO_PROTOCOL_REQUEST:
             processEchoRequest(msg);
             break;
+
         case ECHO_PROTOCOL_REPLY:
             processEchoReply(msg);
             break;
+
         default:
             throw cRuntimeError("Unknown type %d", msg->getType());
     }
@@ -79,7 +78,7 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
 
 void EchoProtocol::processEchoReply(EchoPacket *reply)
 {
-    cObject* controlInfo = reply->removeControlInfo();
+    cObject *controlInfo = reply->removeControlInfo();
     PingPayload *payload = check_and_cast<PingPayload *>(reply->decapsulate());
     payload->setControlInfo(controlInfo);
     delete reply;
@@ -87,8 +86,7 @@ void EchoProtocol::processEchoReply(EchoPacket *reply)
     PingMap::iterator i = pingMap.find(originatorId);
     if (i != pingMap.end())
         send(payload, "pingOut", i->second);
-    else
-    {
+    else {
         EV_INFO << "Received ECHO REPLY has an unknown originator ID: " << originatorId << ", packet dropped." << endl;
         delete payload;
     }
@@ -99,8 +97,8 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     cGate *arrivalGate = msg->getArrivalGate();
     int i = arrivalGate->getIndex();
     pingMap[msg->getOriginatorId()] = i;
-    cObject* controlInfo = msg->removeControlInfo();
-    INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo*>(controlInfo);
+    cObject *controlInfo = msg->removeControlInfo();
+    INetworkProtocolControlInfo *networkControlInfo = check_and_cast<INetworkProtocolControlInfo *>(controlInfo);
     // TODO: remove
     networkControlInfo->setTransportProtocol(IP_PROT_ICMP);
     EchoPacket *request = new EchoPacket(msg->getName());
@@ -109,8 +107,5 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     request->setControlInfo(controlInfo);
     send(request, "sendOut");
 }
-
-
-}
-
+} // namespace inet
 

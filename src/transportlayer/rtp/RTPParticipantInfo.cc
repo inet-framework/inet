@@ -4,17 +4,16 @@
     begin                : Wed Oct 24 2001
     copyright            : (C) 2001 by Matthias Oppitz
     email                : Matthias.Oppitz@gmx.de
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-
+*                                                                         *
+*   This program is free software; you can redistribute it and/or modify  *
+*   it under the terms of the GNU General Public License as published by  *
+*   the Free Software Foundation; either version 2 of the License, or     *
+*   (at your option) any later version.                                   *
+*                                                                         *
+***************************************************************************/
 
 #include "RTPParticipantInfo.h"
 
@@ -22,10 +21,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
-
-
 Register_Class(RTPParticipantInfo);
-
 
 RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) :
     RTPParticipantInfo_Base(),
@@ -51,7 +47,8 @@ RTPParticipantInfo::~RTPParticipantInfo()
 
 RTPParticipantInfo& RTPParticipantInfo::operator=(const RTPParticipantInfo& other)
 {
-    if (this == &other) return *this;
+    if (this == &other)
+        return *this;
     RTPParticipantInfo_Base::operator=(other);
     copy(other);
     return *this;
@@ -74,22 +71,20 @@ void RTPParticipantInfo::processRTPPacket(RTPPacket *packet, int id, simtime_t a
     delete packet;
 }
 
-void RTPParticipantInfo::processSenderReport(SenderReport &report, simtime_t arrivalTime)
+void RTPParticipantInfo::processSenderReport(SenderReport& report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
-void RTPParticipantInfo::processReceptionReport(ReceptionReport &report, simtime_t arrivalTime)
+void RTPParticipantInfo::processReceptionReport(ReceptionReport& report, simtime_t arrivalTime)
 {
     // useful code can be found in subclasses
 }
 
 void RTPParticipantInfo::processSDESChunk(SDESChunk *sdesChunk, simtime_t arrivalTime)
 {
-    for (int i = 0; i < sdesChunk->size(); i++)
-    {
-        if (sdesChunk->exist(i))
-        {
+    for (int i = 0; i < sdesChunk->size(); i++) {
+        if (sdesChunk->exist(i)) {
             SDESItem *sdesItem = (SDESItem *)(sdesChunk->remove(i));
             addSDESItem(sdesItem);
         }
@@ -109,7 +104,7 @@ void RTPParticipantInfo::addSDESItem(SDESItem *sdesItem)
 
 bool RTPParticipantInfo::isSender() const
 {
-    return (_silentIntervals <= 1);
+    return _silentIntervals <= 1;
 }
 
 ReceptionReport *RTPParticipantInfo::receptionReport(simtime_t now)
@@ -153,8 +148,5 @@ char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);
 }
-
-
-}
-
+} // namespace inet
 

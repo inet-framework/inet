@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_IPV4DATAGRAM_H
 #define __INET_IPV4DATAGRAM_H
 
@@ -24,7 +23,6 @@
 #include "IPv4Datagram_m.h"
 
 namespace inet {
-
 /**
  * Represents an IPv4 datagram. More info in the IPv4Datagram.msg file
  * (and the documentation generated from it).
@@ -34,9 +32,9 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
   public:
     IPv4Datagram(const char *name = NULL, int kind = 0) : IPv4Datagram_Base(name, kind) {}
     IPv4Datagram(const IPv4Datagram& other) : IPv4Datagram_Base(other) {}
-    IPv4Datagram& operator=(const IPv4Datagram& other) {IPv4Datagram_Base::operator=(other); return *this;}
+    IPv4Datagram& operator=(const IPv4Datagram& other) { IPv4Datagram_Base::operator=(other); return *this; }
 
-    virtual IPv4Datagram *dup() const {return new IPv4Datagram(*this);}
+    virtual IPv4Datagram *dup() const { return new IPv4Datagram(*this); }
 
     /**
      * Returns bits 0-5 of the Type of Service field, a value in the 0..63 range
@@ -46,27 +44,26 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     /**
      * Sets bits 0-5 of the Type of Service field; expects a value in the 0..63 range
      */
-    virtual void setDiffServCodePoint(int dscp)  { setTypeOfService( (getTypeOfService() & 0xc0) | (dscp & 0x3f)); }
+    virtual void setDiffServCodePoint(int dscp) { setTypeOfService((getTypeOfService() & 0xc0) | (dscp & 0x3f)); }
 
     /**
      * Returns bits 6-7 of the Type of Service field, a value in the range 0..3
      */
-    virtual int getExplicitCongestionNotification() const  { return (getTypeOfService() >> 6) & 0x03; }
+    virtual int getExplicitCongestionNotification() const { return (getTypeOfService() >> 6) & 0x03; }
 
     /**
      * Sets bits 6-7 of the Type of Service; expects a value in the 0..3 range
      */
-    virtual void setExplicitCongestionNotification(int ecn)  { setTypeOfService( (getTypeOfService() & 0x3f) | ((ecn & 0x3) << 6)); }
+    virtual void setExplicitCongestionNotification(int ecn) { setTypeOfService((getTypeOfService() & 0x3f) | ((ecn & 0x3) << 6)); }
 
     virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
-    virtual void setSourceAddress(const Address & address) { setSrcAddress(address.toIPv4()); }
+    virtual void setSourceAddress(const Address& address) { setSrcAddress(address.toIPv4()); }
     virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
-    virtual void setDestinationAddress(const Address & address) { setDestAddress(address.toIPv4()); }
-    virtual int getTransportProtocol() const {return IPv4Datagram_Base::getTransportProtocol();}
-    virtual void setTransportProtocol(int protocol) {IPv4Datagram_Base::setTransportProtocol(protocol);}
+    virtual void setDestinationAddress(const Address& address) { setDestAddress(address.toIPv4()); }
+    virtual int getTransportProtocol() const { return IPv4Datagram_Base::getTransportProtocol(); }
+    virtual void setTransportProtocol(int protocol) { IPv4Datagram_Base::setTransportProtocol(protocol); }
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV4DATAGRAM_H
 
-
-#endif

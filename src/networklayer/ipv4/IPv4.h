@@ -32,13 +32,10 @@
 #include "QueueBase.h"
 
 namespace inet {
-
-
 class ARPPacket;
 class ICMPMessage;
 class IInterfaceTable;
 class IIPv4RoutingTable;
-
 
 /**
  * Implements the IPv4 protocol.
@@ -49,15 +46,16 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     /**
      * Represents an IPv4Datagram, queued by a Hook
      */
-    class QueuedDatagramForHook {
+    class QueuedDatagramForHook
+    {
       public:
-        QueuedDatagramForHook(IPv4Datagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry* outIE, const IPv4Address& nextHopAddr, IHook::Type hookType) :
-                datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
+        QueuedDatagramForHook(IPv4Datagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *outIE, const IPv4Address& nextHopAddr, IHook::Type hookType) :
+            datagram(datagram), inIE(inIE), outIE(outIE), nextHopAddr(nextHopAddr), hookType(hookType) {}
         virtual ~QueuedDatagramForHook() {}
 
-        IPv4Datagram* datagram;
-        const InterfaceEntry* inIE;
-        const InterfaceEntry* outIE;
+        IPv4Datagram *datagram;
+        const InterfaceEntry *inIE;
+        const InterfaceEntry *outIE;
         IPv4Address nextHopAddr;
         const IHook::Type hookType;
     };
@@ -82,23 +80,23 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
 
     // working vars
     bool isUp;
-    long curFragmentId; // counter, used to assign unique fragmentIds to datagrams
-    IPv4FragBuf fragbuf;  // fragmentation reassembly buffer
-    simtime_t lastCheckTime; // when fragbuf was last checked for state fragments
-    ProtocolMapping mapping; // where to send packets after decapsulation
+    long curFragmentId;    // counter, used to assign unique fragmentIds to datagrams
+    IPv4FragBuf fragbuf;    // fragmentation reassembly buffer
+    simtime_t lastCheckTime;    // when fragbuf was last checked for state fragments
+    ProtocolMapping mapping;    // where to send packets after decapsulation
 
     // ARP related
-    PendingPackets pendingPackets;  // map indexed with IPv4Address for outbound packets waiting for ARP resolution
+    PendingPackets pendingPackets;    // map indexed with IPv4Address for outbound packets waiting for ARP resolution
 
     // statistics
     int numMulticast;
     int numLocalDeliver;
-    int numDropped;  // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
+    int numDropped;    // forwarding off, no outgoing interface, too large but "don't fragment" is set, TTL exceeded, etc
     int numUnroutable;
     int numForwarded;
 
     // hooks
-    typedef std::multimap<int, IHook*> HookList;
+    typedef std::multimap<int, IHook *> HookList;
     HookList hooks;
     typedef std::list<QueuedDatagramForHook> DatagramQueueForHooks;
     DatagramQueueForHooks queuedDatagramsForHooks;
@@ -155,7 +153,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
      * Routes and sends datagram received from higher layers.
      * Invokes datagramLocalOutHook(), then routePacket().
      */
-    virtual void datagramLocalOut(IPv4Datagram* datagram, const InterfaceEntry* destIE, IPv4Address nextHopAddr);
+    virtual void datagramLocalOut(IPv4Datagram *datagram, const InterfaceEntry *destIE, IPv4Address nextHopAddr);
 
     /**
      * Handle incoming ARP packets by sending them over to ARP.
@@ -243,52 +241,53 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void endService(cPacket *packet);
 
     // NetFilter functions:
+
   protected:
     /**
      * called before a packet arriving from the network is routed
      */
-    IHook::Result datagramPreRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    IHook::Result datagramForwardHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
      */
-    IHook::Result datagramPostRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
      */
-    IHook::Result datagramLocalInHook(INetworkDatagram* datagram, const InterfaceEntry* inIE);
+    IHook::Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
 
     /**
      * called before a packet arriving locally is delivered
      */
-    IHook::Result datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, Address& nextHopAddr);
+    IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr);
 
   public:
     /**
      * registers a Hook to be executed during datagram processing
      */
-    virtual void registerHook(int priority, IHook* hook);
+    virtual void registerHook(int priority, IHook *hook);
 
     /**
      * unregisters a Hook to be executed during datagram processing
      */
-    virtual void unregisterHook(int priority, IHook* hook);
+    virtual void unregisterHook(int priority, IHook *hook);
 
     /**
      * drop a previously queued datagram
      */
-    void dropQueuedDatagram(const INetworkDatagram * datagram);
+    void dropQueuedDatagram(const INetworkDatagram *datagram);
 
     /**
      * re-injects a previously queued datagram
      */
-    void reinjectQueuedDatagram(const INetworkDatagram * datagram);
+    void reinjectQueuedDatagram(const INetworkDatagram *datagram);
 
     /**
      * send packet on transportOut gate specified by protocolId
@@ -309,8 +308,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void start();
     virtual void flush();
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_IPV4_H
 
-
-#endif

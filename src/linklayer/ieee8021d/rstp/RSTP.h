@@ -30,14 +30,14 @@
 #include "STPBase.h"
 
 namespace inet {
-
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
-class INET_API RSTP : public STPBase {
-protected:
+class INET_API RSTP : public STPBase
+{
+  protected:
     // kind codes for self messages
-    enum SelfKinds {SELF_HELLOTIME = 1, SELF_UPGRADE};
+    enum SelfKinds { SELF_HELLOTIME = 1, SELF_UPGRADE };
 
     enum CompareResult {
         WORSE_PORT = -4, WORSE_SRC = -3, WORSE_RPC = -2, WORSE_ROOT = -1, SIMILAR = 0,
@@ -49,16 +49,16 @@ protected:
     simtime_t tcWhileTime;
     bool autoEdge;
 
-    cMessage* helloTimer;
-    cMessage* upgradeTimer;
+    cMessage *helloTimer;
+    cMessage *upgradeTimer;
 
-public:
+  public:
     RSTP();
     virtual ~RSTP();
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 
-protected:
+  protected:
     virtual void initialize(int stage);
     virtual void finish() {}
     virtual void initInterfacedata(unsigned int portNum);
@@ -115,7 +115,7 @@ protected:
      * @brief Compares the BPDU frame with the BPDU this module would send through that port
      * @return (<0 if the root BPDU is better than BPDU)
      */
-    virtual CompareResult contestInterfacedata(BPDU* msg, unsigned int portNum);
+    virtual CompareResult contestInterfacedata(BPDU *msg, unsigned int portNum);
 
     /**
      * @brief Compares the port's best BPDU with the BPDU this module would send through that port
@@ -127,7 +127,7 @@ protected:
      * @brief Compares a port's best BPDU with a BPDU frame
      * @return (<0 if vector better than frame)
      */
-    virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU * msg, int linkCost);
+    virtual CompareResult compareInterfacedata(unsigned int portNum, BPDU *msg, int linkCost);
 
     /**
      * @brief Compares two RSTP data
@@ -160,12 +160,12 @@ protected:
      * @brief Checks the frame TC flag.
      * Sets TCWhile if the port was forwarding and the flag is true.
      */
-    virtual void checkTC(BPDU * frame, int arrival);
+    virtual void checkTC(BPDU *frame, int arrival);
 
     /**
      * @brief Handles the switch to backup in one of the ports
      */
-    virtual void handleBackup(BPDU * frame, unsigned int arrival);
+    virtual void handleBackup(BPDU *frame, unsigned int arrival);
 
     /**
      * @brief schedule next upgrade self-message
@@ -177,8 +177,7 @@ protected:
      */
     virtual void flushOtherPorts(unsigned int portNum);
 };
+} // namespace inet
 
-}
+#endif // ifndef __INET_RSTP_H
 
-
-#endif

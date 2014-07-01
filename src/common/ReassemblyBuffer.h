@@ -23,8 +23,6 @@
 #include "INETDefs.h"
 
 namespace inet {
-
-
 /**
  * Generic reassembly buffer for a fragmented datagram (or a fragmented anything).
  *
@@ -36,9 +34,9 @@ class INET_API ReassemblyBuffer
     // stores an offset range
     struct Region
     {
-        ushort beg;   // first offset stored
-        ushort end;   // last+1 offset stored
-        bool islast;  // if this region represents the last bytes of the datagram
+        ushort beg;    // first offset stored
+        ushort end;    // last+1 offset stored
+        bool islast;    // if this region represents the last bytes of the datagram
     };
 
     typedef std::vector<Region> RegionVector;
@@ -52,8 +50,8 @@ class INET_API ReassemblyBuffer
     // as new fragments arrive. If we receive non-connecting fragments,
     // put them aside into buf until new fragments come and fill the gap.
     //
-    Region main;   // offset range we already have
-    RegionVector *fragments;  // only used if we receive disjoint fragments
+    Region main;    // offset range we already have
+    RegionVector *fragments;    // only used if we receive disjoint fragments
 
   protected:
     void merge(ushort beg, ushort end, bool islast);
@@ -80,11 +78,9 @@ class INET_API ReassemblyBuffer
      * Returns the total (assembled) length of the datagram.
      * Can only be called after addFragment() returned true.
      */
-    ushort getTotalLength() const {return main.end;}
+    ushort getTotalLength() const { return main.end; }
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_REASSEMBLYBUFFER_H
 

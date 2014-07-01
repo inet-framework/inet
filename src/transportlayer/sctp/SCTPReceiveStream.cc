@@ -20,8 +20,6 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
-
-
 SCTPReceiveStream::SCTPReceiveStream()
 {
     streamId = 0;
@@ -38,7 +36,7 @@ SCTPReceiveStream::~SCTPReceiveStream()
     delete unorderedQ;
 }
 
-uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
+uint32 SCTPReceiveStream::reassemble(SCTPQueue *queue, uint32 tsn)
 {
     uint32 begintsn = tsn, endtsn = 0;
 
@@ -48,32 +46,28 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
     while (queue->getChunk(begintsn) && !(queue->getChunk(begintsn))->bbit)
         begintsn--;
 
-    if (queue->getChunk(begintsn))
-    {
+    if (queue->getChunk(begintsn)) {
         endtsn = begintsn;
 
         /* test if we have all fragments up to the end */
         while (queue->getChunk(endtsn) && !(queue->getChunk(endtsn))->ebit)
             endtsn++;
 
-        if (queue->getChunk(endtsn))
-        {
+        if (queue->getChunk(endtsn)) {
             EV_INFO << "All fragments found, now reassembling..." << endl;
 
             SCTPDataVariables *firstVar = queue->getChunk(begintsn), *processVar;
-            SCTPSimpleMessage* firstSimple = check_and_cast<SCTPSimpleMessage*>(firstVar->userData);
+            SCTPSimpleMessage *firstSimple = check_and_cast<SCTPSimpleMessage *>(firstVar->userData);
 
             EV_INFO << "First fragment has " << firstVar->len / 8 << " bytes." << endl;
 
-            while (++begintsn <= endtsn)
-            {
+            while (++begintsn <= endtsn) {
                 processVar = queue->getAndExtractChunk(begintsn);
-                SCTPSimpleMessage* processSimple = check_and_cast<SCTPSimpleMessage*>(processVar->userData);
+                SCTPSimpleMessage *processSimple = check_and_cast<SCTPSimpleMessage *>(processVar->userData);
 
                 EV_INFO << "Adding fragment with " << processVar->len / 8 << " bytes." << endl;
 
-                if ((firstSimple->getDataArraySize() > 0) && (processSimple->getDataArraySize() > 0))
-                {
+                if ((firstSimple->getDataArraySize() > 0) && (processSimple->getDataArraySize() > 0)) {
                     firstSimple->setDataArraySize(firstSimple->getDataArraySize() + processSimple->getDataArraySize());
                     firstSimple->setDataLen(firstSimple->getDataLen() + processSimple->getDataLen());
                     firstSimple->setByteLength(firstSimple->getByteLength() + processSimple->getByteLength());
@@ -90,71 +84,60 @@ uint32 SCTPReceiveStream::reassemble(SCTPQueue* queue, uint32 tsn)
 
             firstVar->ebit = 1;
 
-            EV_INFO << "Reassembly done. Length=" << firstVar->len<<"\n";
+            EV_INFO << "Reassembly done. Length=" << firstVar->len << "\n";
             return firstVar->tsn;
         }
     }
     return tsn;
 }
 
-
-uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
+uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
 {
-    uint32 delivery = 0;      //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
+    uint32 delivery = 0;    //0:orderedQ=false && deliveryQ=false; 1:orderedQ=true && deliveryQ=false; 2:oderedQ=true && deliveryQ=true; 3:fragment
 
-    SCTPDataVariables* chunk;
+    SCTPDataVariables *chunk;
     /* Enqueueing NEW data chunk. Append it to the respective queue */
 
     // ====== Unordered delivery =============================================
-    if (!dchunk->ordered)
-    {
-        if (dchunk->bbit && dchunk->ebit)
-        {
+    if (!dchunk->ordered) {
+        if (dchunk->bbit && dchunk->ebit) {
             /* put message into deliveryQ */
-            if (deliveryQ->checkAndInsertChunk(dchunk->tsn, dchunk))
-            {
+            if (deliveryQ->checkAndInsertChunk(dchunk->tsn, dchunk)) {
                 delivery = 2;
             }
-        } else {
+        }
+        else {
             unorderedQ->checkAndInsertChunk(dchunk->tsn, dchunk);
             delivery = 3;
 
             /* try to reassemble here */
             uint32 reassembled = reassemble(unorderedQ, dchunk->tsn);
 
-            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit)
-            {
+            if ((unorderedQ->getChunk(reassembled))->bbit && (unorderedQ->getChunk(reassembled))->bbit) {
                 /* put message into deliveryQ */
-                if (deliveryQ->checkAndInsertChunk(reassembled, unorderedQ->getAndExtractChunk(reassembled)))
-                {
+                if (deliveryQ->checkAndInsertChunk(reassembled, unorderedQ->getAndExtractChunk(reassembled))) {
                     delivery = 2;
                 }
             }
         }
     }
-
     // ====== Ordered delivery ===============================================
-    else if (dchunk->ordered)
-    {
+    else if (dchunk->ordered) {
         /* put message into orderedQ */
         if (orderedQ->checkAndInsertChunk(dchunk->tsn, dchunk))
             delivery = 1;
 
-        if (!dchunk->bbit || !dchunk->ebit)
-        {
+        if (!dchunk->bbit || !dchunk->ebit) {
             delivery = 3;
             /* try to reassemble */
             reassemble(orderedQ, dchunk->tsn);
         }
 
-        if (orderedQ->getQueueSize()>0)
-        {
+        if (orderedQ->getQueueSize() > 0) {
             /* dequeue first from orderedQ */
             chunk = orderedQ->dequeueChunkBySSN(expectedStreamSeqNum);
-            if (chunk)
-            {
-                if (deliveryQ->checkAndInsertChunk(chunk->tsn, chunk))
-                {
+            if (chunk) {
+                if (deliveryQ->checkAndInsertChunk(chunk->tsn, chunk)) {
                     ++expectedStreamSeqNum;
                     if (expectedStreamSeqNum > 65535)
                         expectedStreamSeqNum = 0;
@@ -166,8 +149,5 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
 
     return delivery;
 }
-
-
-}
-
+} // namespace inet
 

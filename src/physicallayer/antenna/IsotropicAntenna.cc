@@ -18,18 +18,12 @@
 #include "IsotropicAntenna.h"
 
 namespace inet {
-
 namespace physicallayer {
-
 Define_Module(IsotropicAntenna);
 
 IsotropicAntenna::IsotropicAntenna() :
     AntennaBase()
 {}
+} // namespace physicallayer
+} // namespace inet
 
-
-}
-
-
-
-}

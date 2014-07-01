@@ -1,15 +1,12 @@
 #ifndef __INET_TCPVEGAS_H
 #define __INET_TCPVEGAS_H
 
-
 #include "INETDefs.h"
 
 #include "TCPBaseAlg.h"
 #include "TCPSegmentTransmitInfoList.h"
 
 namespace inet {
-
-
 /**
  * State variables for TCPVegas.
  */
@@ -22,33 +19,32 @@ class INET_API TCPVegasStateVariables : public TCPBaseAlgStateVariables
     virtual std::string detailedInfo() const;
 
     uint32 v_recoverypoint;
-    simtime_t v_cwnd_changed; // last time cwnd changes because of a rtx.
+    simtime_t v_cwnd_changed;    // last time cwnd changes because of a rtx.
 
     simtime_t v_baseRTT;
-    simtime_t v_sumRTT; // sum of rtt's measured within one RTT
-    int v_cntRTT; // # of rtt's measured within one RTT
-    uint32 v_begseq; // register next pkt to be sent,for rtt calculation in receivedDataAck
-    simtime_t v_begtime; // register time for rtt calculation
+    simtime_t v_sumRTT;    // sum of rtt's measured within one RTT
+    int v_cntRTT;    // # of rtt's measured within one RTT
+    uint32 v_begseq;    // register next pkt to be sent,for rtt calculation in receivedDataAck
+    simtime_t v_begtime;    // register time for rtt calculation
 
-    simtime_t v_rtt_timeout; // vegas fine-grained timeout
-    simtime_t v_sa; // average for vegas fine-grained timeout
-    simtime_t v_sd; // deviation for vegas fine-grained timeout
+    simtime_t v_rtt_timeout;    // vegas fine-grained timeout
+    simtime_t v_sa;    // average for vegas fine-grained timeout
+    simtime_t v_sd;    // deviation for vegas fine-grained timeout
 
     TCPSegmentTransmitInfoList regions;
 
-    uint32 ssthresh; ///< slow start threshold
+    uint32 ssthresh;    ///< slow start threshold
 
-    bool v_inc_flag; // for slow start: "exponential growth only every other RTT"
-    bool v_incr_ss; // to control no incr. cwnd if during slowstart ssthresh has been exceeded before the rtt is over
-    int32 v_incr; // incr/decr
-    uint32 v_worried; // pkts a to retransmit due to vegas fine-grained timeout
+    bool v_inc_flag;    // for slow start: "exponential growth only every other RTT"
+    bool v_incr_ss;    // to control no incr. cwnd if during slowstart ssthresh has been exceeded before the rtt is over
+    int32 v_incr;    // incr/decr
+    uint32 v_worried;    // pkts a to retransmit due to vegas fine-grained timeout
 };
-
 
 class INET_API TCPVegas : public TCPBaseAlg
 {
   protected:
-    TCPVegasStateVariables *&state; // alias to TCPAlgorithm's 'state'
+    TCPVegasStateVariables *& state;    // alias to TCPAlgorithm's 'state'
 
     /** Create and return a TCPvegasStateVariables object. */
     virtual TCPStateVariables *createStateVariables()
@@ -77,9 +73,7 @@ class INET_API TCPVegas : public TCPBaseAlg
 
     virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
+} // namespace inet
 
-}
-
-
-#endif
+#endif // ifndef __INET_TCPVEGAS_H
 

@@ -15,16 +15,16 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <algorithm> // std::min
+#include <algorithm>    // std::min
 #include <platdep/sockets.h>
 
 #include "headers/defs.h"
 
-namespace INET6Fw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
+namespace INET6Fw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 /*#include "headers/bsdint.h"
-#include "headers/in.h"
-#include "headers/in_systm.h"*/
+   #include "headers/in.h"
+ #include "headers/in_systm.h"*/
 #include "headers/ip6.h"
 };
 
@@ -32,34 +32,32 @@ namespace INET6Fw // load headers into a namespace, to avoid conflicts with plat
 
 #ifdef WITH_UDP
 #include "UDPSerializer.h"
-#endif
+#endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
 #include "SCTPSerializer.h"
-#endif
+#endif // ifdef WITH_SCTP
 
 #include "TCPIPchecksum.h"
 
 #ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
-#endif
+#endif // ifdef WITH_TCP_COMMON
 
 #if defined(_MSC_VER)
-#undef s_addr   /* MSVC #definition interferes with us */
-#endif
+#undef s_addr    /* MSVC #definition interferes with us */
+#endif // if defined(_MSC_VER)
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
-#include <netinet/in.h>  // htonl, ntohl, ...
-#endif
+#include <netinet/in.h>    // htonl, ntohl, ...
+#endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
 #undef s_addr
 
-
 using namespace INET6Fw;
 namespace inet {
-
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {
     int packetLength, i;
@@ -67,7 +65,7 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 
     EV << "Serialize IPv6 packet\n";
 
-    struct ip6_hdr *ip6h = (struct ip6_hdr *) buf;
+    struct ip6_hdr *ip6h = (struct ip6_hdr *)buf;
 
     flowinfo = 0x06;
     flowinfo <<= 8;
@@ -88,45 +86,41 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 
     cMessage *encapPacket = dgram->getEncapsulatedPacket();
 
-    switch (dgram->getTransportProtocol())
-    {
+    switch (dgram->getTransportProtocol()) {
 /*      case IP_PROT_IPv6_ICMP:
         packetLength += ICMPv6Serializer().serialize(check_and_cast<ICMPv6Message *>(encapPacket),
                                                    buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES);
         break;*/
 #ifdef WITH_UDP
-      case IP_PROT_UDP:
-        packetLength = UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
-                                                   buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES);
-        break;
-#endif
+        case IP_PROT_UDP:
+            packetLength = UDPSerializer().serialize(check_and_cast<UDPPacket *>(encapPacket),
+                        buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES);
+            break;
+#endif // ifdef WITH_UDP
 
 #ifdef WITH_SCTP
-      case IP_PROT_SCTP:
-        packetLength = SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
-                                                   buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES);
-        break;
-#endif
+        case IP_PROT_SCTP:
+            packetLength = SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
+                        buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES);
+            break;
+#endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
-      case IP_PROT_TCP:
-        packetLength = TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
-                                                   buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES,
-                                                   dgram->getSrcAddress(), dgram->getDestAddress());
-        break;
-#endif
+        case IP_PROT_TCP:
+            packetLength = TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
+                        buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES,
+                        dgram->getSrcAddress(), dgram->getDestAddress());
+            break;
+#endif // ifdef WITH_TCP_COMMON
 
-      default:
-          printf("IPv6Serializer: cannot serialize protocol %d\n", dgram->getTransportProtocol());
-          return -1;
+        default:
+            printf("IPv6Serializer: cannot serialize protocol %d\n", dgram->getTransportProtocol());
+            return -1;
     }
 
     ip6h->ip6_plen = htons(packetLength);
 
-    return (packetLength + IPv6_HEADER_BYTES);
+    return packetLength + IPv6_HEADER_BYTES;
 }
-
-
-}
-
+} // namespace inet
 

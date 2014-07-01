@@ -15,10 +15,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-
 #ifndef __INET_ADDRESSRESOLVER_H
 #define __INET_ADDRESSRESOLVER_H
-
 
 #include <vector>
 
@@ -28,7 +26,6 @@
 #include "Address.h"
 
 namespace inet {
-
 // Forward declarations:
 class IInterfaceTable;
 class InterfaceEntry;
@@ -36,7 +33,7 @@ class IIPv4RoutingTable;
 class IPv6RoutingTable;
 class GenericRoutingTable;
 
-#define DEFAULT_ADDR_TYPE (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
+#define DEFAULT_ADDR_TYPE    (ADDR_IPv4 | ADDR_IPv6 | ADDR_MAC | ADDR_MODULEPATH | ADDR_MODULEID)
 
 /**
  * Utility class for finding IPv4 or IPv6 address of a host or router.
@@ -57,25 +54,25 @@ class INET_API AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv4AddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv6AddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getMACAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getMACAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getModulePathAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getModulePathAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getModuleIdAddressFrom(Address &retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getModuleIdAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(Address &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv4Address(Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(Address &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv6Address(Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceMACAddress(Address &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMACAddress(Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceModulePathAddress(Address &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModulePathAddress(Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceModuleIdAddress(Address &ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModuleIdAddress(Address& ret, InterfaceEntry *ie, bool mask);
 
   public:
     enum {
@@ -88,8 +85,8 @@ class INET_API AddressResolver
     };
 
   public:
-    AddressResolver() { }
-    virtual ~AddressResolver() { }
+    AddressResolver() {}
+    virtual ~AddressResolver() {}
 
     /**
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
@@ -199,13 +196,10 @@ class INET_API AddressResolver
     /**
      * Find the Host with the specified address.
      */
-    virtual cModule *findHostWithAddress(const Address &addr);
+    virtual cModule *findHostWithAddress(const Address& addr);
     //@}
 };
+} // namespace inet
 
-
-}
-
-
-#endif
+#endif // ifndef __INET_ADDRESSRESOLVER_H
 
