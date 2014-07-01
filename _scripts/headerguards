@@ -19,7 +19,7 @@ err = 0
 symbolmap = dict()
 for root, dirs, files in os.walk(rootPath):
     for filename in fnmatch.filter(files, fileType):
-        symbol = "__INET_" + getUpperCaseFilename(filename) + "_H"
+        symbol = "__INET_" + re.sub("[^A-Z0-9]", "_", getUpperCaseFilename(filename)) + "_H"
         fullpath = os.path.join(root, filename)
         if symbol in symbolmap:
             print "ERR: duplicated filename: ", filename, ": ", fullpath, " vs ", symbolmap[symbol]
