@@ -32,8 +32,9 @@
 
 #include "INETDefs.h"
 
-// CLASS
+namespace inet {
 
+// CLASS
 class Int128
 {
   private:
@@ -269,6 +270,8 @@ inline bool operator!=(const Int128& a, const Int128& b)
 // MISC
 
 //typedef Int128 __int128;
+
+} // namespace inet
 
 #endif // ifndef __INET_INT128_H
 

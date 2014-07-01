@@ -18,6 +18,8 @@
 #include "Material.h"
 #include "FWMath.h"
 
+namespace inet {
+
 // TODO: check values, add frequency dependence
 Material Material::vacuum(Ohmm(sNaN), 1, 1);
 Material Material::air(Ohmm(sNaN), 1.00058986, 1.00000037);
@@ -49,4 +51,6 @@ mps Material::getPropagationSpeed() const
 {
     return mps(SPEED_OF_LIGHT) / getRefractiveIndex();
 }
+
+} // namespace inet
 

@@ -20,6 +20,8 @@
 
 #include "int128.h"
 
+namespace inet {
+
 const Int128 Int128::INT128_MAX(UINT64_MAX, INT64_MAX);
 const Int128 Int128::INT128_MIN(0, INT64_MIN);
 
@@ -388,4 +390,6 @@ bool operator<(const Int128& a, const Int128& b)
     else
         return a.hi < b.hi;
 }
+
+} // namespace inet
 

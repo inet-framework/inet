@@ -21,6 +21,8 @@
 #include "INETDefs.h"
 #include "Units.h"
 
+namespace inet {
+
 using namespace units::values;
 using namespace units::constants;
 
@@ -51,6 +53,8 @@ class INET_API Material
     virtual double getRefractiveIndex() const;
     virtual mps getPropagationSpeed() const;
 };
+
+} // namespace inet
 
 #endif // ifndef __INET_MATERIAL_H
 

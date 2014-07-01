@@ -24,6 +24,8 @@
 
 #include <cmath>
 
+namespace inet {
+
 namespace units {
 
 namespace internal    // Boost would call this "detail"
@@ -732,7 +734,7 @@ namespace units {
 
 namespace units {
 
-typedef::units::unit unit;
+typedef ::inet::units::unit unit;
 
 // SI base units:
 
@@ -1184,6 +1186,8 @@ Value tan(const value<Value, Unit>& angle)
 }
 
 } // namespace units
+
+} // namespace inet
 
 #endif // ifndef __INET_UNITS_H
 
