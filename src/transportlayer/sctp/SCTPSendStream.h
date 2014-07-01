@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __SCTPSENDSTREAM_H
-#define __SCTPSENDSTREAM_H
+#ifndef __INET_SCTPSENDSTREAM_H
+#define __INET_SCTPSENDSTREAM_H
 
 #include <list>
 

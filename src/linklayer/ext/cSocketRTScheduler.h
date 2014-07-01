@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __CSOCKETRTSCHEDULER_H__
-#define __CSOCKETRTSCHEDULER_H__
+#ifndef __INET_CSOCKETRTSCHEDULER_H
+#define __INET_CSOCKETRTSCHEDULER_H
 
 #define WANT_WINSOCK2
 

@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __BINDINGCACHE_H__
-#define __BINDINGCACHE_H__
+#ifndef __INET_BINDINGCACHE_H
+#define __INET_BINDINGCACHE_H
 
 
 #include "INETDefs.h"

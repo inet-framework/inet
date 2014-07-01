@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NETWORKLAYERBASE_H_
-#define __INET_NETWORKLAYERBASE_H_
+#ifndef __INET_NETWORKPROTOCOLBASE_H
+#define __INET_NETWORKPROTOCOLBASE_H
 
 #include "LayeredProtocolBase.h"
 #include "NodeOperations.h"

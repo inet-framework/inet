@@ -41,8 +41,8 @@
  **************************************************************************/
 
 
-#ifndef POSTURE_H
-#define POSTURE_H
+#ifndef __INET_POSTURE_H
+#define __INET_POSTURE_H
 
 #include <string.h>
 

@@ -1,5 +1,5 @@
-#ifndef __IEEE80211_DATA_RATES_H__
-#define __IEEE80211_DATA_RATES_H__
+#ifndef __INET_IEEE80211DATARATE_H
+#define __INET_IEEE80211DATARATE_H
 
 #include "INETDefs.h"
 

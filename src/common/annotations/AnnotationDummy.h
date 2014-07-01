@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef WORLD_ANNOTATION_ANNOTATIONDUMMY_H
-#define WORLD_ANNOTATION_ANNOTATIONDUMMY_H
+#ifndef __INET_ANNOTATIONDUMMY_H
+#define __INET_ANNOTATIONDUMMY_H
 
 #include "INETDefs.h"
 

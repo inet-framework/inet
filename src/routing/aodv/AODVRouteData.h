@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef AODVROUTEDATA_H_
-#define AODVROUTEDATA_H_
+#ifndef __INET_AODVROUTEDATA_H
+#define __INET_AODVROUTEDATA_H
 
 #include <set>
 #include "Address.h"

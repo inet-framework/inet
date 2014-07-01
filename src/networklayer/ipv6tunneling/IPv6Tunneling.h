@@ -24,8 +24,8 @@
  * @date 12.06.07
  */
 
-#ifndef __IPv6TUNNELING_H__
-#define __IPv6TUNNELING_H__
+#ifndef __INET_IPV6TUNNELING_H
+#define __INET_IPV6TUNNELING_H
 
 #include "INETDefs.h"
 

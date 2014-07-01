@@ -18,8 +18,8 @@
 // Authors: ANSA Team, Benjamin Martin Seregi
 //
 
-#ifndef INET_SPANNINGTREE_H_
-#define INET_SPANNINGTREE_H_
+#ifndef __INET_STP_H
+#define __INET_STP_H
 
 #include "INETDefs.h"
 #include "MACAddress.h"

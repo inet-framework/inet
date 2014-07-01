@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ILISTENING_H_
-#define __INET_ILISTENING_H_
+#ifndef __INET_ILISTENING_H
+#define __INET_ILISTENING_H
 
 #include "Coord.h"
 #include "IPrintableObject.h"

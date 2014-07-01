@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETCOMMON_H
-#define __INET_INETCOMMON_H
+#ifndef __INET_COMMON_H
+#define __INET_COMMON_H
 
 #include "INETDefs.h"
 

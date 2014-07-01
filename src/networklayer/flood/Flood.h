@@ -20,8 +20,8 @@
  *              the user can decide whether to use plain flooding or not
  **************************************************************************/
 
-#ifndef _FLOOD_H_
-#define _FLOOD_H_
+#ifndef __INET_FLOOD_H
+#define __INET_FLOOD_H
 
 #include <list>
 #include "INetworkProtocol.h"

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef __INET_MACRELAYUNIT_H_
-#define __INET_MACRELAYUNIT_H_
+#ifndef __INET_MACRELAYUNIT_H
+#define __INET_MACRELAYUNIT_H
 
 #include "INETDefs.h"
 

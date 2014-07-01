@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _IPv6DATAGRAM_H_
-#define _IPv6DATAGRAM_H_
+#ifndef __INET_IPV6DATAGRAM_H
+#define __INET_IPV6DATAGRAM_H
 
 #include <list>
 #include "INETDefs.h"

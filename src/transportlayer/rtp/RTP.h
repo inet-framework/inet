@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 
-#ifndef __INET_RTPENDSYSTEMMODULE_H
-#define __INET_RTPENDSYSTEMMODULE_H
+#ifndef __INET_RTP_H
+#define __INET_RTP_H
 
 
 #include "INETDefs.h"

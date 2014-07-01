@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __LSA_HPP__
-#define __LSA_HPP__
+#ifndef __INET_LSA_H
+#define __INET_LSA_H
 
 
 #include <math.h>

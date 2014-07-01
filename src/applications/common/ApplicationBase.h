@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_APPLICATIONBASE_H_
-#define __INET_APPLICATIONBASE_H_
+#ifndef __INET_APPLICATIONBASE_H
+#define __INET_APPLICATIONBASE_H
 
 #include "OperationalBase.h"
 #include "NodeOperations.h"

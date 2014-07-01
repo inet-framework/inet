@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef QUADTREE_H_
-#define QUADTREE_H_
+#ifndef __INET_QUADTREE_H
+#define __INET_QUADTREE_H
 
 #include "INETDefs.h"
 #include "Coord.h"

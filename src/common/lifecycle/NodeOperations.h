@@ -17,8 +17,8 @@
 // Author: Levente Meszaros <levy@omnetpp.org>, Andras Varga (andras@omnetpp.org)
 //
 
-#ifndef __INET_NODEOPERATIONS_H_
-#define __INET_NODEOPERATIONS_H_
+#ifndef __INET_NODEOPERATIONS_H
+#define __INET_NODEOPERATIONS_H
 
 #include "LifecycleOperation.h"
 

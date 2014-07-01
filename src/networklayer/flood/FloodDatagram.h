@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _FLOODDATAGRAM_H_
-#define _FLOODDATAGRAM_H_
+#ifndef __INET_FLOODDATAGRAM_H
+#define __INET_FLOODDATAGRAM_H
 
 #include "INETDefs.h"
 #include "INetworkDatagram.h"

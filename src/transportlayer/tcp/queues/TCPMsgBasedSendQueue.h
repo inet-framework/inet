@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPMESSAGESENDQUEUE_H
-#define __INET_TCPMESSAGESENDQUEUE_H
+#ifndef __INET_TCPMSGBASEDSENDQUEUE_H
+#define __INET_TCPMSGBASEDSENDQUEUE_H
 
 #include <list>
 #include "TCPSendQueue.h"

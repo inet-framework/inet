@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __GENERICNETWORKPROTOCOLINTERFACEDATA_H
-#define __GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
+#define __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H
 
 #include <vector>
 

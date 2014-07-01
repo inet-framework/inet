@@ -11,8 +11,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __SCTPSERVER_H_
-#define __SCTPSERVER_H_
+#ifndef __INET_SCTPNATSERVER_H
+#define __INET_SCTPNATSERVER_H
 
 #include <omnetpp.h>
 #include "SCTPAssociation.h"

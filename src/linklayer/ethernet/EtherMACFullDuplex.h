@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHER_DUPLEX_MAC_H
-#define __INET_ETHER_DUPLEX_MAC_H
+#ifndef __INET_ETHERMACFULLDUPLEX_H
+#define __INET_ETHERMACFULLDUPLEX_H
 
 #include "INETDefs.h"
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRANSMISSIONBASE_H_
-#define __INET_TRANSMISSIONBASE_H_
+#ifndef __INET_TRANSMISSIONBASE_H
+#define __INET_TRANSMISSIONBASE_H
 
 #include "IRadio.h"
 #include "ITransmission.h"

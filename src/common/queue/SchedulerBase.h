@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCHEDULERBASE_H_
-#define SCHEDULERBASE_H_
+#ifndef __INET_SCHEDULERBASE_H
+#define __INET_SCHEDULERBASE_H
 
 #include "INETDefs.h"
 #include "IPassiveQueue.h"

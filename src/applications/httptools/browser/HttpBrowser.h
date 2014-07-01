@@ -15,8 +15,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_HTTPBROWSERDIRECT_H
-#define __INET_HTTPBROWSERDIRECT_H
+#ifndef __INET_HTTPBROWSER_H
+#define __INET_HTTPBROWSER_H
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"

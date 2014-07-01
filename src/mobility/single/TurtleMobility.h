@@ -16,8 +16,8 @@
 //
 
 
-#ifndef TURTLE_MOBILITY_H
-#define TURTLE_MOBILITY_H
+#ifndef __INET_TURTLEMOBILITY_H
+#define __INET_TURTLEMOBILITY_H
 
 #include <stack>
 

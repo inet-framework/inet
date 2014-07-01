@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPLWIP_DATASTREAMQUEUES_H
-#define __INET_TCPLWIP_DATASTREAMQUEUES_H
+#ifndef __INET_TCPLWIPBYTESTREAMQUEUES_H
+#define __INET_TCPLWIPBYTESTREAMQUEUES_H
 
 
 #include "INETDefs.h"

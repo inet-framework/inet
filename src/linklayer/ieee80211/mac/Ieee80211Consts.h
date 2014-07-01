@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IEEE80211_CONSTS_H
-#define IEEE80211_CONSTS_H
+#ifndef __INET_IEEE80211CONSTS_H
+#define __INET_IEEE80211CONSTS_H
 
 // frame lengths in bits
 const unsigned int LENGTH_RTS = 160; //bits

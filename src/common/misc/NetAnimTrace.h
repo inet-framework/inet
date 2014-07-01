@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_NETANIMTRACEWRITER_H
-#define __INET_NETANIMTRACEWRITER_H
+#ifndef __INET_NETANIMTRACE_H
+#define __INET_NETANIMTRACE_H
 
 #include <fstream>
 #include "INETDefs.h"

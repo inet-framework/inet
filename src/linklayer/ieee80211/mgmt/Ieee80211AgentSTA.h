@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IEEE80211_AGENT_STA_H
-#define IEEE80211_AGENT_STA_H
+#ifndef __INET_IEEE80211AGENTSTA_H
+#define __INET_IEEE80211AGENTSTA_H
 
 #include <vector>
 

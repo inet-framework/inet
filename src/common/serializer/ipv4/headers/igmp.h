@@ -34,8 +34,8 @@
  * $FreeBSD: src/sys/netinet/igmp.h,v 1.12 2004/08/16 18:32:07 rwatson Exp $
  */
 
-#ifndef OPPSIM_NETINET_IGMP_H_
-#define OPPSIM_NETINET_IGMP_H_
+#ifndef __INET_IGMP_H
+#define __INET_IGMP_H
 
 /*
  * Internet Group Management Protocol (IGMP) definitions.

@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_LOGNORMALSHADOWING_H_
-#define __INET_LOGNORMALSHADOWING_H_
+#ifndef __INET_LOGNORMALSHADOWING_H
+#define __INET_LOGNORMALSHADOWING_H
 
 #include "FreeSpacePathLoss.h"
 

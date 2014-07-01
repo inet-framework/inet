@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPCOMMAND_H
-#define __SCTPCOMMAND_H
+#ifndef __INET_SCTPCOMMAND_H
+#define __INET_SCTPCOMMAND_H
 
 
 //

@@ -20,8 +20,8 @@
 //  Author: Andras Varga
 //
 
-#ifndef __IPv4INTERFACEDATA_H
-#define __IPv4INTERFACEDATA_H
+#ifndef __INET_IPV4INTERFACEDATA_H
+#define __INET_IPV4INTERFACEDATA_H
 
 #include <vector>
 

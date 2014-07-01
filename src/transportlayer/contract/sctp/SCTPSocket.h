@@ -16,8 +16,8 @@
 //
 
 
-#ifndef __SCTPSOCKET_H
-#define __SCTPSOCKET_H
+#ifndef __INET_SCTPSOCKET_H
+#define __INET_SCTPSOCKET_H
 
 #include <vector>
 

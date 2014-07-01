@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_NAKAGAMIFADING_H_
-#define __INET_NAKAGAMIFADING_H_
+#ifndef __INET_NAKAGAMIFADING_H
+#define __INET_NAKAGAMIFADING_H
 
 #include "FreeSpacePathLoss.h"
 

@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef OPPSIM_NETINET_SCTP_H_
-#define OPPSIM_NETINET_SCTP_H_
+#ifndef __INET_SCTPHDR_H
+#define __INET_SCTPHDR_H
 
 #ifdef _MSC_VER
 #define __PACKED__

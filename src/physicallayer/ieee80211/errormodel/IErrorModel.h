@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef IERRORMODEL_H_
-#define IERRORMODEL_H_
+#ifndef __INET_IERRORMODEL_H
+#define __INET_IERRORMODEL_H
 
 #include "ModulationType.h"
 

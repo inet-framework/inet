@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __BINDINGUPDATELIST_H__
-#define __BINDINGUPDATELIST_H__
+#ifndef __INET_BINDINGUPDATELIST_H
+#define __INET_BINDINGUPDATELIST_H
 
 
 #include "INETDefs.h"

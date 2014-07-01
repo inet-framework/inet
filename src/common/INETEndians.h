@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_HEADERS_ENDIANS_H
-#define __INET_HEADERS_ENDIANS_H
+#ifndef __INET_INETENDIANS_H
+#define __INET_INETENDIANS_H
 
 //
 // Get endianness macros defined

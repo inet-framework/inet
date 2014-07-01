@@ -18,8 +18,8 @@
  **************************************************************************/
 
 
-#ifndef CONST_SPEED_MOBILITY_H
-#define CONST_SPEED_MOBILITY_H
+#ifndef __INET_CONSTSPEEDMOBILITY_H
+#define __INET_CONSTSPEEDMOBILITY_H
 
 #include "INETDefs.h"
 

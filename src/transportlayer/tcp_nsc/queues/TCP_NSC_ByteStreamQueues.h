@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCP_NSC_DATASTREAMQUEUES_H
-#define __INET_TCP_NSC_DATASTREAMQUEUES_H
+#ifndef __INET_TCP_NSC_BYTESTREAMQUEUES_H
+#define __INET_TCP_NSC_BYTESTREAMQUEUES_H
 
 
 #include "INETDefs.h"

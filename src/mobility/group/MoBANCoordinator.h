@@ -40,8 +40,8 @@
  **************************************************************************/
 
 
-#ifndef MO_BAN_COORDINATOR_H
-#define MO_BAN_COORDINATOR_H
+#ifndef __INET_MOBANCOORDINATOR_H
+#define __INET_MOBANCOORDINATOR_H
 
 #include <sstream>
 #include <vector>

@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_RAYLEIGHFADING_H_
-#define __INET_RAYLEIGHFADING_H_
+#ifndef __INET_RAYLEIGHFADING_H
+#define __INET_RAYLEIGHFADING_H
 
 #include "FreeSpacePathLoss.h"
 

@@ -16,8 +16,8 @@
 //
 
 
-#ifndef __INET_IEEE802CTRL_H_
-#define __INET_IEEE802CTRL_H_
+#ifndef __INET_IEEE802CTRL_H
+#define __INET_IEEE802CTRL_H
 
 #include "INETDefs.h"
 #include "IMACProtocolControlInfo.h"

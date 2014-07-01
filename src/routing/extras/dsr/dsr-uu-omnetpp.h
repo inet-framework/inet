@@ -5,8 +5,8 @@
  *
  * Author: Erik Nordström, <erikn@it.uu.se>
  */
-#ifndef _DSR_UU_OMNETPP_
-#define _DSR_UU_OMNETPP_
+#ifndef __INET_DSR_UU_OMNETPP_H
+#define __INET_DSR_UU_OMNETPP_H
 
 
 #ifndef OMNETPP

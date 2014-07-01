@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __GENERICROUTINGTABLE_H
-#define __GENERICROUTINGTABLE_H
+#ifndef __INET_GENERICROUTINGTABLE_H
+#define __INET_GENERICROUTINGTABLE_H
 
 #include <vector>
 

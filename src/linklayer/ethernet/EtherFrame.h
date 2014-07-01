@@ -1,5 +1,5 @@
-#ifndef __INET_ETHERFRAME_H_
-#define __INET_ETHERFRAME_H_
+#ifndef __INET_ETHERFRAME_H
+#define __INET_ETHERFRAME_H
 
 
 #include "EtherFrame_m.h"

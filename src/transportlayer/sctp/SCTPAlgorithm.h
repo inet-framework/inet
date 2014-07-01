@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPALGORITHM_H
-#define __SCTPALGORITHM_H
+#ifndef __INET_SCTPALGORITHM_H
+#define __INET_SCTPALGORITHM_H
 
 #include "INETDefs.h"
 

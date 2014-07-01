@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef OPP_UTILS_H
-#define OPP_UTILS_H
+#ifndef __INET_OPP_UTILS_H
+#define __INET_OPP_UTILS_H
 
 #include <string>
 

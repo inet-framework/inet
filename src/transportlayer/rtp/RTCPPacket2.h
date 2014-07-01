@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RTCPPACKET2_H_
-#define __INET_RTCPPACKET2_H_
+#ifndef __INET_RTCPPACKET2_H
+#define __INET_RTCPPACKET2_H
 
 #include "INETDefs.h"
 

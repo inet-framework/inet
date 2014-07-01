@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPCLIENT_H_
-#define __SCTPCLIENT_H_
+#ifndef __INET_SCTPCLIENT_H
+#define __INET_SCTPCLIENT_H
 
 #include "INETDefs.h"
 #include "SCTPSocket.h"

@@ -20,8 +20,8 @@
  * in RTCPSenderReportPacket and RTCPReceiverReportPacket.
  */
 
-#ifndef __INET_RTP_REPORTS_H
-#define __INET_RTP_REPORTS_H
+#ifndef __INET_REPORTS_H
+#define __INET_REPORTS_H
 
 
 #include "reports_m.h"

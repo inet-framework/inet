@@ -1,5 +1,5 @@
-#ifndef __MACHO_HPP__
-#define __MACHO_HPP__
+#ifndef __INET_MACHO_H
+#define __INET_MACHO_H
 
 // Macho - C++ Machine Objects
 //

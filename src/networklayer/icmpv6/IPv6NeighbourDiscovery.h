@@ -16,8 +16,8 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IPV6NEIGHBOURDISCOVERY_H
-#define IPV6NEIGHBOURDISCOVERY_H
+#ifndef __INET_IPV6NEIGHBOURDISCOVERY_H
+#define __INET_IPV6NEIGHBOURDISCOVERY_H
 
 
 #include <vector>

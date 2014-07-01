@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef RECTANGLE_MOBILITY_H
-#define RECTANGLE_MOBILITY_H
+#ifndef __INET_TRACTORMOBILITY_H
+#define __INET_TRACTORMOBILITY_H
 
 #include "INETDefs.h"
 #include "LineSegmentsMobilityBase.h"

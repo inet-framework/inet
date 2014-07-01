@@ -1,5 +1,5 @@
-#ifndef FIND_MODULE_H
-#define FIND_MODULE_H
+#ifndef __INET_FINDMODULE_H
+#define __INET_FINDMODULE_H
 
 #include <omnetpp.h>
 

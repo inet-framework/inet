@@ -17,8 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef __MODULATION_TYPE_H
-#define __MODULATION_TYPE_H
+#ifndef __INET_MODULATIONTYPE_H
+#define __INET_MODULATIONTYPE_H
 
 //#include <stdint.h>
 #include <string>

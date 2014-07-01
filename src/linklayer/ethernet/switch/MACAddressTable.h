@@ -14,8 +14,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_MACADDRESSTABLE_H_
-#define __INET_MACADDRESSTABLE_H_
+#ifndef __INET_MACADDRESSTABLE_H
+#define __INET_MACADDRESSTABLE_H
 
 #include "MACAddress.h"
 #include "IMACAddressTable.h"

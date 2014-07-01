@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __TCPSERIALIZER_H
-#define __TCPSERIALIZER_H
+#ifndef __INET_TCPSERIALIZER_H
+#define __INET_TCPSERIALIZER_H
 
 
 #include "Address.h"

@@ -17,8 +17,8 @@
 // Author: Benjamin Martin Seregi
 //
 
-#ifndef INET_IEEE8021DINTERFACEDATA_H_
-#define INET_IEEE8021DINTERFACEDATA_H_
+#ifndef __INET_IEEE8021DINTERFACEDATA_H
+#define __INET_IEEE8021DINTERFACEDATA_H
 
 #include "INETDefs.h"
 #include "InterfaceEntry.h"

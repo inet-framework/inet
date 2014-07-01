@@ -14,8 +14,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_SUIPATHLOSS_H_
-#define __INET_SUIPATHLOSS_H_
+#ifndef __INET_SUIPATHLOSS_H
+#define __INET_SUIPATHLOSS_H
 
 #include <string>
 #include "IPathLoss.h"

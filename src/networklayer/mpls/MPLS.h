@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_MPLSMODULE_H
-#define __INET_MPLSMODULE_H
+#ifndef __INET_MPLS_H
+#define __INET_MPLS_H
 
 #include <vector>
 

@@ -20,8 +20,8 @@
 */
 
 
-#ifndef CG_UNITS_HPP_INCLUDED
-#define CG_UNITS_HPP_INCLUDED
+#ifndef __INET_UNITS_H
+#define __INET_UNITS_H
 
 #include <cmath>
 

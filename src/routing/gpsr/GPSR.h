@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_GPSR_H_
-#define __INET_GPSR_H_
+#ifndef __INET_GPSR_H
+#define __INET_GPSR_H
 
 #include "INETDefs.h"
 #include "Coord.h"

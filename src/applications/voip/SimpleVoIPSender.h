@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef VOIPSENDER_H_
-#define VOIPSENDER_H_
+#ifndef __INET_SIMPLEVOIPSENDER_H
+#define __INET_SIMPLEVOIPSENDER_H
 
 #include <string.h>
 #include "INETDefs.h"

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IGENERICROUTE_H
-#define __INET_IGENERICROUTE_H
+#ifndef __INET_IROUTE_H
+#define __INET_IROUTE_H
 
 #include "INETDefs.h"
 #include "Address.h"

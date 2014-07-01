@@ -18,8 +18,8 @@
 //
 
 
-#ifndef __INET_RTCPPACKET1_H_
-#define __INET_RTCPPACKET1_H_
+#ifndef __INET_RTCPPACKET1_H
+#define __INET_RTCPPACKET1_H
 
 #include "INETDefs.h"
 

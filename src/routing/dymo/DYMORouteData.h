@@ -2,8 +2,8 @@
 // This program is property of its copyright holder. All rights reserved.
 //
 
-#ifndef __INET_DYMOROUTE_H_
-#define __INET_DYMOROUTE_H_
+#ifndef __INET_DYMOROUTEDATA_H
+#define __INET_DYMOROUTEDATA_H
 
 #include <omnetpp.h>
 #include "IRoute.h"

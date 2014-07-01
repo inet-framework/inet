@@ -17,8 +17,8 @@
 //
 
 
-#ifndef LINEAR_MOBILITY_H
-#define LINEAR_MOBILITY_H
+#ifndef __INET_LINEARMOBILITY_H
+#define __INET_LINEARMOBILITY_H
 
 #include "INETDefs.h"
 

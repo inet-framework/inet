@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __IPv6INTERFACEDATA_H
-#define __IPv6INTERFACEDATA_H
+#ifndef __INET_IPV6INTERFACEDATA_H
+#define __INET_IPV6INTERFACEDATA_H
 
 
 #include <vector>

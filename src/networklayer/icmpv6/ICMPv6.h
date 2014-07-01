@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __ICMPv6_H__
-#define __ICMPv6_H__
+#ifndef __INET_ICMPV6_H
+#define __INET_ICMPV6_H
 
 #include "INETDefs.h"
 

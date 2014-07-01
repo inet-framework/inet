@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _WISEROUTEDATAGRAM_H_
-#define _WISEROUTEDATAGRAM_H_
+#ifndef __INET_WISEROUTEDATAGRAM_H
+#define __INET_WISEROUTEDATAGRAM_H
 
 #include "INetworkDatagram.h"
 #include "WiseRouteDatagram_m.h"

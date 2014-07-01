@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPLWIP_VIRTUALDATAQUEUES_H
-#define __INET_TCPLWIP_VIRTUALDATAQUEUES_H
+#ifndef __INET_TCPLWIPVIRTUALDATAQUEUES_H
+#define __INET_TCPLWIPVIRTUALDATAQUEUES_H
 
 
 #include "INETDefs.h"

@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPLWIP_QUEUES_H
-#define __INET_TCPLWIP_QUEUES_H
+#ifndef __INET_TCPLWIPQUEUES_H
+#define __INET_TCPLWIPQUEUES_H
 
 #include "INETDefs.h"
 

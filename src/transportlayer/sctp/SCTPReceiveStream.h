@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPRECEIVESTREAM_H
-#define __SCTPRECEIVESTREAM_H
+#ifndef __INET_SCTPRECEIVESTREAM_H
+#define __INET_SCTPRECEIVESTREAM_H
 
 #include "INETDefs.h"
 

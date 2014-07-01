@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_HEADERS_DEFS_H
-#define __INET_HEADERS_DEFS_H
+#ifndef __INET_DEFS_H
+#define __INET_DEFS_H
 
 //
 // Get integer types defined

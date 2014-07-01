@@ -16,8 +16,8 @@
 */
 
 
-#ifndef MACADDRESS_H_
-#define MACADDRESS_H_
+#ifndef __INET_MACADDRESS_H
+#define __INET_MACADDRESS_H
 
 #include <string>
 

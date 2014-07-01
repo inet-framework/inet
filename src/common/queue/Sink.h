@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INET_SINK_H
-#define __INET_INET_SINK_H
+#ifndef __INET_SINK_H
+#define __INET_SINK_H
 
 #include "INETDefs.h"
 

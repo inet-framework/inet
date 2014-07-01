@@ -20,8 +20,8 @@
  *************************************************************************/
 
 
-#ifndef IMOBILITY_H
-#define IMOBILITY_H
+#ifndef __INET_IMOBILITY_H
+#define __INET_IMOBILITY_H
 
 #include "INETDefs.h"
 

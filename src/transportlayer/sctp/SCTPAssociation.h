@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPASSOCIATION_H
-#define __SCTPASSOCIATION_H
+#ifndef __INET_SCTPASSOCIATION_H
+#define __INET_SCTPASSOCIATION_H
 
 #include "INETDefs.h"
 

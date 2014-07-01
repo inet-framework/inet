@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_WORKPROTOCOLCONTROLINFO_H_
-#define __INET_WORKPROTOCOLCONTROLINFO_H_
+#ifndef __INET_INETWORKPROTOCOLCONTROLINFO_H
+#define __INET_INETWORKPROTOCOLCONTROLINFO_H
 
 #include "Address.h"
 

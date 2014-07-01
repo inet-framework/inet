@@ -18,8 +18,8 @@
 
 // This file is based on the PPP.h of INET written by Andras Varga.
 
-#ifndef __EXTINTERFACE_H
-#define __EXTINTERFACE_H
+#ifndef __INET_EXTINTERFACE_H
+#define __INET_EXTINTERFACE_H
 
 
 #ifndef MAX_MTU_SIZE

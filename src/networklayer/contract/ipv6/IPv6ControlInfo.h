@@ -15,8 +15,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __IPv6CONTROLINFO_H
-#define __IPv6CONTROLINFO_H
+#ifndef __INET_IPV6CONTROLINFO_H
+#define __INET_IPV6CONTROLINFO_H
 
 #include "INetworkProtocolControlInfo.h"
 #include "IPv6ControlInfo_m.h"

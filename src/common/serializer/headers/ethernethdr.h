@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef _NET_ETHERNET_H_
-#define _NET_ETHERNET_H_
+#ifndef __INET_ETHERNETHDR_H
+#define __INET_ETHERNETHDR_H
 
 /*
  * The number of bytes in an ethernet (MAC) address.

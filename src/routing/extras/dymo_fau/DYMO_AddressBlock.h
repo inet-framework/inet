@@ -17,8 +17,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DYMO_ADDRESSBLOCK_H_45948759
-#define DYMO_ADDRESSBLOCK_H_45948759
+#ifndef __INET_DYMO_ADDRESSBLOCK_H
+#define __INET_DYMO_ADDRESSBLOCK_H
 
 #include <stdexcept>
 

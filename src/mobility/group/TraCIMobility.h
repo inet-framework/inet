@@ -18,8 +18,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifndef MOBILITY_TRACI_TRACIMOBILITY_H
-#define MOBILITY_TRACI_TRACIMOBILITY_H
+#ifndef __INET_TRACIMOBILITY_H
+#define __INET_TRACIMOBILITY_H
 
 #ifdef WITH_TRACI
 

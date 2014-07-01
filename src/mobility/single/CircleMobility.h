@@ -16,8 +16,8 @@
 //
 
 
-#ifndef CIRCLE_MOBILITY_H
-#define CIRCLE_MOBILITY_H
+#ifndef __INET_CIRCLEMOBILITY_H
+#define __INET_CIRCLEMOBILITY_H
 
 #include "INETDefs.h"
 

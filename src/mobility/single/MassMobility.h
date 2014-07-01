@@ -18,8 +18,8 @@
 //
 
 
-#ifndef MASS_MOBILITY_H
-#define MASS_MOBILITY_H
+#ifndef __INET_MASSMOBILITY_H
+#define __INET_MASSMOBILITY_H
 
 #include "INETDefs.h"
 

@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef INET_DHCPLEASE_H__
-#define INET_DHCPLEASE_H__
+#ifndef __INET_DHCPLEASE_H
+#define __INET_DHCPLEASE_H
 
 #include "IPv4Address.h"
 #include "MACAddress.h"

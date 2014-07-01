@@ -16,8 +16,8 @@
 //
 
 
-#ifndef AN_SIM_MOBILITY_H
-#define AN_SIM_MOBILITY_H
+#ifndef __INET_ANSIMMOBILITY_H
+#define __INET_ANSIMMOBILITY_H
 
 #include "INETDefs.h"
 

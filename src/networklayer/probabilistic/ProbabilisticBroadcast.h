@@ -5,8 +5,8 @@
  *      Author: Damien Piguet
  */
 
-#ifndef __INET_PROBABILISTICBROADCAST_H_
-#define __INET_PROBABILISTICBROADCAST_H_
+#ifndef __INET_PROBABILISTICBROADCAST_H
+#define __INET_PROBABILISTICBROADCAST_H
 
 #include <set>
 #include <map>

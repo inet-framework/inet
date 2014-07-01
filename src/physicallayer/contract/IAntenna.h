@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IAntenna_H_
-#define __INET_IAntenna_H_
+#ifndef __INET_IANTENNA_H
+#define __INET_IANTENNA_H
 
 #include "IPrintableObject.h"
 #include "IMobility.h"

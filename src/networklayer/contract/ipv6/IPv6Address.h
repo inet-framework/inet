@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __IPv6ADDRESS_H
-#define __IPv6ADDRESS_H
+#ifndef __INET_IPV6ADDRESS_H
+#define __INET_IPV6ADDRESS_H
 
 #include <iostream>
 #include <string>

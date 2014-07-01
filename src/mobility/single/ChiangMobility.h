@@ -16,8 +16,8 @@
 //
 
 
-#ifndef CHIANG_MOBILITY_H
-#define CHIANG_MOBILITY_H
+#ifndef __INET_CHIANGMOBILITY_H
+#define __INET_CHIANGMOBILITY_H
 
 #include "INETDefs.h"
 

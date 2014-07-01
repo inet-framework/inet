@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET__DYMO_H_
-#define __INET__DYMO_H_
+#ifndef __INET_XDYMO_H
+#define __INET_XDYMO_H
 
 #include <vector>
 #include <map>

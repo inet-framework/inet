@@ -16,8 +16,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DYMO_Timer_H
-#define DYMO_Timer_H
+#ifndef __INET_DYMO_TIMER_H
+#define __INET_DYMO_TIMER_H
 
 #include <iostream>
 

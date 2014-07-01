@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IEEE80211RadioMedium_H_
-#define __INET_IEEE80211RadioMedium_H_
+#ifndef __INET_IEEE80211RADIOMEDIUM_H
+#define __INET_IEEE80211RADIOMEDIUM_H
 
 #include "RadioMedium.h"
 

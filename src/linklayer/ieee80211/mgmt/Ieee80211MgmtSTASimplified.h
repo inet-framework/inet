@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IEEE80211_MGMT_SIMPLIFIEDSTA_H
-#define IEEE80211_MGMT_SIMPLIFIEDSTA_H
+#ifndef __INET_IEEE80211MGMTSTASIMPLIFIED_H
+#define __INET_IEEE80211MGMTSTASIMPLIFIED_H
 
 #include "INETDefs.h"
 

@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef INET_DHCPCLIENT_H__
-#define INET_DHCPCLIENT_H__
+#ifndef __INET_DHCPCLIENT_H
+#define __INET_DHCPCLIENT_H
 
 #include <vector>
 #include "MACAddress.h"

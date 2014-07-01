@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INET_DIFFSERVQUEUE_H
-#define __INET_DIFFSERVQUEUE_H
+#ifndef __INET_DIFFSERVUTIL_H
+#define __INET_DIFFSERVUTIL_H
 
 #include "INETDefs.h"
 #include "IInterfaceTable.h"

@@ -13,8 +13,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_CONSTANT_H
-#define __INET_CONSTANT_H
+#ifndef __INET_CONSTTYPE_H
+#define __INET_CONSTTYPE_H
 
 
 #include "INETDefs.h"

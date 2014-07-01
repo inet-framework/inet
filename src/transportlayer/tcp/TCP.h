@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPMAIN_H
-#define __INET_TCPMAIN_H
+#ifndef __INET_TCP_H
+#define __INET_TCP_H
 
 #include <map>
 #include <set>

@@ -1,5 +1,5 @@
-#ifndef __WIFI_MODULATION_TYPE_H__
-#define __WIFI_MODULATION_TYPE_H__
+#ifndef __INET_WIFIMODE_H
+#define __INET_WIFIMODE_H
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2005,2006 INRIA

@@ -15,8 +15,8 @@
 //
 // Author: Benjamin Martin Seregi
 
-#ifndef IEEE8021DRelay_H_
-#define IEEE8021DRelay_H_
+#ifndef __INET_IEEE8021DRELAY_H
+#define __INET_IEEE8021DRELAY_H
 
 #include "INETDefs.h"
 #include "InterfaceTable.h"

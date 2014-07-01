@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALATTENUATION_H_
-#define __INET_IDEALATTENUATION_H_
+#ifndef __INET_IDEALATTENUATION_H
+#define __INET_IDEALATTENUATION_H
 
 #include "IAttenuation.h"
 

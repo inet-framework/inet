@@ -17,8 +17,8 @@
  */
 
 
-#ifndef STATIC_GRID_MOBILITY_H
-#define STATIC_GRID_MOBILITY_H
+#ifndef __INET_STATICGRIDMOBILITY_H
+#define __INET_STATICGRIDMOBILITY_H
 
 #include "INETDefs.h"
 

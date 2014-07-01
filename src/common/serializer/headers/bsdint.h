@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_HEADERS_BSDINT_H
-#define __INET_HEADERS_BSDINT_H
+#ifndef __INET_BSDINT_H
+#define __INET_BSDINT_H
 
 // non-stdc integer type names that occur in BSD headers
 

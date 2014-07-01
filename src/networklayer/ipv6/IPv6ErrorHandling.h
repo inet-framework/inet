@@ -21,8 +21,8 @@
 //  Cleanup and rewrite: Andras Varga, 2004
 //  Implementation of IPv6 version: Wei Yang, Ng, 2005
 
-#ifndef __IPv6ERRORHANDLING_H__
-#define __IPv6ERRORHANDLING_H__
+#ifndef __INET_IPV6ERRORHANDLING_H
+#define __INET_IPV6ERRORHANDLING_H
 
 #include "INETDefs.h"
 

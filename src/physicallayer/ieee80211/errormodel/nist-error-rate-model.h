@@ -17,8 +17,8 @@
  *
  * Author: Gary Pei <guangyu.pei@boeing.com>
  */
-#ifndef NIST_ERROR_RATE_MODEL_H
-#define NIST_ERROR_RATE_MODEL_H
+#ifndef __INET_NIST-ERROR-RATE-MODEL_H
+#define __INET_NIST-ERROR-RATE-MODEL_H
 
 //#include <stdint.h>
 #include "WifiMode.h"

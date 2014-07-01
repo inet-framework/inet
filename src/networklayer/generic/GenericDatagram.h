@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _INET_GENERICDATAGRAM_H_
-#define _INET_GENERICDATAGRAM_H_
+#ifndef __INET_GENERICDATAGRAM_H
+#define __INET_GENERICDATAGRAM_H
 
 #include "INETDefs.h"
 #include "INetworkDatagram.h"

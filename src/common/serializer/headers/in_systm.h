@@ -34,8 +34,8 @@
  * $FreeBSD: src/sys/netinet/in_systm.h,v 1.9 1999/12/29 04:41:00 peter Exp $
  */
 
-#ifndef __INET_NETINET_IN_SYSTM_H
-#define __INET_NETINET_IN_SYSTM_H
+#ifndef __INET_IN_SYSTM_H
+#define __INET_IN_SYSTM_H
 
 /*
  * Miscellaneous internetwork

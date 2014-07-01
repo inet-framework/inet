@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef SCTPGAPLIST_H
-#define SCTPGAPLIST_H
+#ifndef __INET_SCTPGAPLIST_H
+#define __INET_SCTPGAPLIST_H
 
 #include <omnetpp.h>
 #include <assert.h>

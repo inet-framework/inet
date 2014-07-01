@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETWORKLAYER_H_
-#define __INET_INETWORKLAYER_H_
+#ifndef __INET_INETWORKPROTOCOL_H
+#define __INET_INETWORKPROTOCOL_H
 
 #include "INetworkProtocolControlInfo.h"
 #include "NetworkProtocolCommand_m.h"

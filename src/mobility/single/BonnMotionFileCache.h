@@ -16,8 +16,8 @@
 //
 
 
-#ifndef BONN_MOTION_FILE_CACHE_H
-#define BONN_MOTION_FILE_CACHE_H
+#ifndef __INET_BONNMOTIONFILECACHE_H
+#define __INET_BONNMOTIONFILECACHE_H
 
 #include <list>
 #include <vector>

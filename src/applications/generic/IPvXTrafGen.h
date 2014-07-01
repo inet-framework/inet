@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INET_IPTRAFGEN_H
-#define __INET_IPTRAFGEN_H
+#ifndef __INET_IPVXTRAFGEN_H
+#define __INET_IPVXTRAFGEN_H
 
 #include <vector>
 

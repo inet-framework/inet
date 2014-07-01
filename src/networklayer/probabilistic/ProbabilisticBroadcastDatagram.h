@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _PROBABILISTICBROADCASTDATAGRAM_H_
-#define _PROBABILISTICBROADCASTDATAGRAM_H_
+#ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H
+#define __INET_PROBABILISTICBROADCASTDATAGRAM_H
 
 #include "INetworkDatagram.h"
 #include "ProbabilisticBroadcastDatagram_m.h"

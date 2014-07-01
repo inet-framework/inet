@@ -16,8 +16,8 @@
 //
 
 
-#ifndef __IPv6_H__
-#define __IPv6_H__
+#ifndef __INET_IPV6_H
+#define __INET_IPV6_H
 
 #include "INETDefs.h"
 #include "INetfilter.h"

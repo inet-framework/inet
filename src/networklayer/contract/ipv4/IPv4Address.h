@@ -23,8 +23,8 @@
 // Cleanup and rewrite: Andras Varga, 2004
 //
 
-#ifndef __INET_IPADDRESS_H
-#define __INET_IPADDRESS_H
+#ifndef __INET_IPV4ADDRESS_H
+#define __INET_IPV4ADDRESS_H
 
 #include <iostream>
 #include <string>

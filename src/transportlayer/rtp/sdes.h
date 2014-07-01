@@ -16,8 +16,8 @@
  ***************************************************************************/
 
 
-#ifndef __INET_RTP_SDES_H
-#define __INET_RTP_SDES_H
+#ifndef __INET_SDES_H
+#define __INET_SDES_H
 
 #include "INETDefs.h"
 

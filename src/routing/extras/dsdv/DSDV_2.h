@@ -13,8 +13,8 @@
  * Also we hope it will help in the developing of routing protocols using INET.
 */
 
-#ifndef __DSDV_2_H__
-#define __DSDV_2_H__
+#ifndef ___INET_DSDV_2_H
+#define ___INET_DSDV_2_H
 
 #include <stdio.h>
 #include <string.h>
@@ -92,7 +92,6 @@ class INET_API DSDVIPv4Route : public IPv4Route
         unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
-} //namespace
-
+}
 
 #endif

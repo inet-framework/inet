@@ -18,8 +18,8 @@
 //
 
 
-#ifndef NS2_MOTION_MOBILITY_H
-#define NS2_MOTION_MOBILITY_H
+#ifndef __INET_NS2MOTIONMOBILITY_H
+#define __INET_NS2MOTIONMOBILITY_H
 
 #include "INETDefs.h"
 

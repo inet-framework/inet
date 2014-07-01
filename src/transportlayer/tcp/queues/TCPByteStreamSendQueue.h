@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPDATASTREAMSENDQUEUE_H
-#define __INET_TCPDATASTREAMSENDQUEUE_H
+#ifndef __INET_TCPBYTESTREAMSENDQUEUE_H
+#define __INET_TCPBYTESTREAMSENDQUEUE_H
 
 #include <list>
 

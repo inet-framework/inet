@@ -33,8 +33,8 @@
  *      @(#)udp.h       8.1 (Berkeley) 6/10/93
  */
 
-#ifndef OPPSIM_NETINET_UDP_H_
-#define OPPSIM_NETINET_UDP_H_
+#ifndef __INET_UDPHDR_H
+#define __INET_UDPHDR_H
 
 /*
  * Udp protocol header.

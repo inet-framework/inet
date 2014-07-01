@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_FREESPACEPATHLOSS_H__
-#define __INET_FREESPACEPATHLOSS_H__
+#ifndef __INET_FREESPACEPATHLOSS_H
+#define __INET_FREESPACEPATHLOSS_H
 
 #include "IPathLoss.h"
 

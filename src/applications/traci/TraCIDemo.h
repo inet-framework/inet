@@ -16,8 +16,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 
-#ifndef TraCIDemo_H
-#define TraCIDemo_H
+#ifndef __INET_TRACIDEMO_H
+#define __INET_TRACIDEMO_H
 
 #include "INETDefs.h"
 #include "UDPSocket.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef _SCTPMESSAGE_H_
-#define _SCTPMESSAGE_H_
+#ifndef __INET_SCTPMESSAGE_H
+#define __INET_SCTPMESSAGE_H
 
 #include <list>
 #include "INETDefs.h"

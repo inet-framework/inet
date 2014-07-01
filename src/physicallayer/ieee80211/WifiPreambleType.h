@@ -21,8 +21,8 @@
 // IEEE Std 802.11-2007 section 18.2.2
 //
 //
-#ifndef ___WIFI_PREAMBLE_TYPE_H___
-#define ___WIFI_PREAMBLE_TYPE_H___
+#ifndef __INET_WIFIPREAMBLETYPE_H
+#define __INET_WIFIPREAMBLETYPE_H
 enum WifiPreamble {
   WIFI_PREAMBLE_LONG,
   WIFI_PREAMBLE_SHORT,

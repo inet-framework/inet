@@ -16,8 +16,8 @@
 //
 
 
-#ifndef _IPv4DATAGRAM_H_
-#define _IPv4DATAGRAM_H_
+#ifndef __INET_IPV4DATAGRAM_H
+#define __INET_IPV4DATAGRAM_H
 
 #include "INETDefs.h"
 #include "INetworkDatagram.h"

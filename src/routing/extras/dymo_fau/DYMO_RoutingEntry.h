@@ -17,8 +17,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DYMO_ROUTINGENTRY_H
-#define DYMO_ROUTINGENTRY_H
+#ifndef __INET_DYMO_ROUTINGENTRY_H
+#define __INET_DYMO_ROUTINGENTRY_H
 
 #include <string.h>
 #include <sstream>

@@ -19,8 +19,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef IEEE_80211_MAC_H
-#define IEEE_80211_MAC_H
+#ifndef __INET_IEEE80211MAC_H
+#define __INET_IEEE80211MAC_H
 
 // un-comment this if you do not want to log state machine transitions
 //#define FSM_DEBUG

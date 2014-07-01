@@ -17,8 +17,8 @@
  * part of:     framework implementation developed by tkn
  **************************************************************************/
 
-#ifndef FWMATH_H
-#define FWMATH_H
+#ifndef __INET_FWMATH_H
+#define __INET_FWMATH_H
 
 //
 // Support functions for mathematical operations

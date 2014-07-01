@@ -17,8 +17,8 @@
 // Author: Benjamin Seregi
 //
 
-#ifndef __INET_L2NETWORKCONFIGURATOR_H_
-#define __INET_L2NETWORKCONFIGURATOR_H_
+#ifndef __INET_L2NETWORKCONFIGURATOR_H
+#define __INET_L2NETWORKCONFIGURATOR_H
 
 #include <algorithm>
 #include <vector>

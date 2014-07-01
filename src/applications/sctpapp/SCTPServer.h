@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPSERVER_H_
-#define __SCTPSERVER_H_
+#ifndef __INET_SCTPSERVER_H
+#define __INET_SCTPSERVER_H
 
 #include "INETDefs.h"
 #include "SCTPAssociation.h"

@@ -15,8 +15,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef AODVROUTING_H_
-#define AODVROUTING_H_
+#ifndef __INET_AODVROUTING_H
+#define __INET_AODVROUTING_H
 
 #include "INETDefs.h"
 #include "IInterfaceTable.h"

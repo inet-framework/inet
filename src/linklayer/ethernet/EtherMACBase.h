@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ETHER_MAC_BASE_H
-#define __INET_ETHER_MAC_BASE_H
+#ifndef __INET_ETHERMACBASE_H
+#define __INET_ETHERMACBASE_H
 
 #include "INETDefs.h"
 

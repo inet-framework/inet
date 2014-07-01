@@ -14,8 +14,8 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#ifndef __INET_LIFECYCLEOPERATION_H_
-#define __INET_LIFECYCLEOPERATION_H_
+#ifndef __INET_LIFECYCLEOPERATION_H
+#define __INET_LIFECYCLEOPERATION_H
 
 #include "INETDefs.h"
 

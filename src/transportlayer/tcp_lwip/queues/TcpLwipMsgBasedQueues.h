@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TcpLwipMSGBASEDQUEUES_H
-#define __INET_TcpLwipMSGBASEDQUEUES_H
+#ifndef __INET_TCPLWIPMSGBASEDQUEUES_H
+#define __INET_TCPLWIPMSGBASEDQUEUES_H
 
 
 #include "INETDefs.h"

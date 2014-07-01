@@ -20,8 +20,8 @@
  **************************************************************************/
 
 
-#ifndef MOBILITY_BASE_H
-#define MOBILITY_BASE_H
+#ifndef __INET_MOBILITYBASE_H
+#define __INET_MOBILITYBASE_H
 
 #include "INETDefs.h"
 #include "ModuleAccess.h"

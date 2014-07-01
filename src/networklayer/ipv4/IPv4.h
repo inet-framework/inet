@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPv4_H
-#define __INET_IPv4_H
+#ifndef __INET_IPV4_H
+#define __INET_IPV4_H
 
 #include "INETDefs.h"
 

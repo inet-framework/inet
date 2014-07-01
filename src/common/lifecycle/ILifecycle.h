@@ -14,8 +14,8 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#ifndef __INET_ILIFECYCLE_H_
-#define __INET_ILIFECYCLE_H_
+#ifndef __INET_ILIFECYCLE_H
+#define __INET_ILIFECYCLE_H
 
 #include "INETDefs.h"
 

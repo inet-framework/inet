@@ -16,8 +16,8 @@
 //
 
 
-#ifndef RECTANGLE_MOBILITY_H
-#define RECTANGLE_MOBILITY_H
+#ifndef __INET_RECTANGLEMOBILITY_H
+#define __INET_RECTANGLEMOBILITY_H
 
 #include "INETDefs.h"
 

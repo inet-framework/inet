@@ -20,8 +20,8 @@
 /**
  * Helper functions for Tkenv to display our user-defined vectors
  */
-#ifndef INSPECTOR_HELPERS_H_98345979
-#define INSPECTOR_HELPERS_H_98345979
+#ifndef __INET_INSPECTORHELPERS_H
+#define __INET_INSPECTORHELPERS_H
 
 #include <iostream>
 #include "DYMO_RM_m.h"

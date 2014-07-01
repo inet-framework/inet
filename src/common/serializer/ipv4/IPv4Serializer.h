@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPSERIALIZER_H
-#define __INET_IPSERIALIZER_H
+#ifndef __INET_IPV4SERIALIZER_H
+#define __INET_IPV4SERIALIZER_H
 
 #include "IPv4Datagram.h"
 

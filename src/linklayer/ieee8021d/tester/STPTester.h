@@ -17,8 +17,8 @@
 // Author: Benjamin Martin Seregi
 //
 
-#ifndef INET_STPTESTER_H_
-#define INET_STPTESTER_H_
+#ifndef __INET_STPTESTER_H
+#define __INET_STPTESTER_H
 
 #include <map>
 #include "INETDefs.h"

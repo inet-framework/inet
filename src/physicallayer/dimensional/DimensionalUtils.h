@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALUTILS_H_
-#define __INET_DIMENSIONALUTILS_H_
+#ifndef __INET_DIMENSIONALUTILS_H
+#define __INET_DIMENSIONALUTILS_H
 
 #include "PhysicalLayerDefs.h"
 #include "MappingUtils.h"

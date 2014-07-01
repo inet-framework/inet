@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __ROUTINGTABLERECORDER_H
-#define __ROUTINGTABLERECORDER_H
+#ifndef __INET_ROUTINGTABLERECORDER_H
+#define __INET_ROUTINGTABLERECORDER_H
 
 #include "INETDefs.h"
 

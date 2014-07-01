@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef MODULATION_H
-#define MODULATION_H
+#ifndef __INET_MODULATION_H
+#define __INET_MODULATION_H
 
 #include "IModulation.h"
 

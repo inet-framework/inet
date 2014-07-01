@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPDATASTREAMRCVQUEUE_H
-#define __INET_TCPDATASTREAMRCVQUEUE_H
+#ifndef __INET_TCPBYTESTREAMRCVQUEUE_H
+#define __INET_TCPBYTESTREAMRCVQUEUE_H
 
 #include <map>
 #include <string>

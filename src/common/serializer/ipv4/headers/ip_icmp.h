@@ -34,8 +34,8 @@
  * $FreeBSD: src/sys/netinet/ip_icmp.h,v 1.16 1999/12/29 04:41:01 peter Exp $
  */
 
-#ifndef OPPSIM_NETINET_IP_ICMP_H_
-#define OPPSIM_NETINET_IP_ICMP_H_
+#ifndef __INET_IP_ICMP_H
+#define __INET_IP_ICMP_H
 
 /*
  * Interface Control Message Protocol Definitions.

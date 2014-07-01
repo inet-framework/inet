@@ -15,8 +15,8 @@
 // Author: Zsolt Prontvai
 //
 
-#ifndef __INET_STPBASE_H_
-#define __INET_STPBASE_H_
+#ifndef __INET_STPBASE_H
+#define __INET_STPBASE_H
 
 #include "ILifecycle.h"
 #include "MACAddress.h"

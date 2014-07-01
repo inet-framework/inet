@@ -17,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __BERPARSEFILE_H
-#define __BERPARSEFILE_H
+#ifndef __INET_BERPARSEFILE_H
+#define __INET_BERPARSEFILE_H
 
 #include <vector>
 #include <math.h>

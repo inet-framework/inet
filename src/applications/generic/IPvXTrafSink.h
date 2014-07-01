@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __INET_IPTRAFSINK_H
-#define __INET_IPTRAFSINK_H
+#ifndef __INET_IPVXTRAFSINK_H
+#define __INET_IPVXTRAFSINK_H
 
 #include <vector>
 

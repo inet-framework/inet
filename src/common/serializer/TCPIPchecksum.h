@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __TCPIPCHECKSUM_H
-#define __TCPIPCHECKSUM_H
+#ifndef __INET_TCPIPCHECKSUM_H
+#define __INET_TCPIPCHECKSUM_H
 
 
 #include "INETDefs.h"

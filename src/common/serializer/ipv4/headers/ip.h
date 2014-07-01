@@ -34,8 +34,8 @@
  * $FreeBSD: src/sys/netinet/ip.h,v 1.17 1999/12/22 19:13:20 shin Exp $
  */
 
-#ifndef OPPSIM_NETINET_IP_H_
-#define OPPSIM_NETINET_IP_H_
+#ifndef __INET_IP_H
+#define __INET_IP_H
 
 /*
  * Definitions for internet protocol version 4.

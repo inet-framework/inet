@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_RICIANFADING_H_
-#define __INET_RICIANFADING_H_
+#ifndef __INET_RICIANFADING_H
+#define __INET_RICIANFADING_H
 
 #include "FreeSpacePathLoss.h"
 

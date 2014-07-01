@@ -16,8 +16,8 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NEIGHBORCACHE_H
-#define NEIGHBORCACHE_H
+#ifndef __INET_IPV6NEIGHBOURCACHE_H
+#define __INET_IPV6NEIGHBOURCACHE_H
 
 #include <map>
 #include <vector>

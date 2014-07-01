@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IMODULATION_H
-#define IMODULATION_H
+#ifndef __INET_IMODULATION_H
+#define __INET_IMODULATION_H
 
 #include "INETDefs.h"
 

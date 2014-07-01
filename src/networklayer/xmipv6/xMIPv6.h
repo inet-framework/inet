@@ -20,8 +20,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-#ifndef __XMIPV6_H__
-#define __XMIPV6_H__
+#ifndef __INET_XMIPV6_H
+#define __INET_XMIPV6_H
 
 #include <vector>
 #include <map>

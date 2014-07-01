@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IEEE80211_MGMT_AP_H
-#define IEEE80211_MGMT_AP_H
+#ifndef __INET_IEEE80211MGMTAP_H
+#define __INET_IEEE80211MGMTAP_H
 
 #include <map>
 

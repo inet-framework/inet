@@ -40,8 +40,8 @@
  **************************************************************************/
 
 
-#ifndef MO_BAN_LOCAL_H
-#define MO_BAN_LOCAL_H
+#ifndef __INET_MOBANLOCAL_H
+#define __INET_MOBANLOCAL_H
 
 #include "INETDefs.h"
 

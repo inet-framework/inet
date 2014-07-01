@@ -19,8 +19,8 @@
  ***************************************************************************/
 
 ///
-#ifndef __Manet_routing_base_h__
-#define __Manet_routing_base_h__
+#ifndef __INET_MANETROUTINGBASE
+#define __INET_MANETROUTINGBASE
 
 #ifndef _MSC_VER
 #include <sys/time.h>

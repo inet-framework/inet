@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMACPROTOCOLCONTROLINFO_H_
-#define __INET_IMACPROTOCOLCONTROLINFO_H_
+#ifndef __INET_IMACPROTOCOLCONTROLINFO_H
+#define __INET_IMACPROTOCOLCONTROLINFO_H
 
 #include "MACAddress.h"
 

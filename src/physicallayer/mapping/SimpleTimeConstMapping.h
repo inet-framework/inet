@@ -18,8 +18,8 @@
  * description: This class implements a simple time-based constant mapping
  ***************************************************************************/
 
-#ifndef __INET_SIMPLETIMECONSTMAPPING_H_
-#define __INET_SIMPLETIMECONSTMAPPING_H_
+#ifndef __INET_SIMPLETIMECONSTMAPPING_H
+#define __INET_SIMPLETIMECONSTMAPPING_H
 
 #include "MappingBase.h"
 

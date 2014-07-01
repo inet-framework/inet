@@ -41,8 +41,8 @@
  **************************************************************************/
 
 
-#ifndef POSTURE_TRANSITION_H
-#define POSTURE_TRANSITION_H
+#ifndef __INET_POSTURETRANSITION_H
+#define __INET_POSTURETRANSITION_H
 
 #include <iostream>
 #include <sstream>

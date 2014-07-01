@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SCENARIOMANAGER_H
-#define SCENARIOMANAGER_H
+#ifndef __INET_SCENARIOMANAGER_H
+#define __INET_SCENARIOMANAGER_H
 
 #include "INETDefs.h"
 

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_DIMENSIONALTRANSMITTER_H_
-#define __INET_DIMENSIONALTRANSMITTER_H_
+#ifndef __INET_DIMENSIONALTRANSMITTER_H
+#define __INET_DIMENSIONALTRANSMITTER_H
 
 #include "FlatTransmitterBase.h"
 

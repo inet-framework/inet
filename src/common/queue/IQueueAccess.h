@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IQUEUEACCESS_H_
-#define IQUEUEACCESS_H_
+#ifndef __INET_IQUEUEACCESS_H
+#define __INET_IQUEUEACCESS_H
 
 #include "INETDefs.h"
 

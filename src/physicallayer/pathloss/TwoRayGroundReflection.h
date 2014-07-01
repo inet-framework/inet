@@ -15,8 +15,8 @@
  *              in the top level directory
  ***************************************************************************/
 
-#ifndef __INET_TWORAYGROUNDREFLECTION_H_
-#define __INET_TWORAYGROUNDREFLECTION_H_
+#ifndef __INET_TWORAYGROUNDREFLECTION_H
+#define __INET_TWORAYGROUNDREFLECTION_H
 
 #include "FreeSpacePathLoss.h"
 

@@ -1,5 +1,5 @@
-#ifndef __INET_BATMANMSG_H_
-#define __INET_BATMANMSG_H_
+#ifndef __INET_BATMANMSG_H
+#define __INET_BATMANMSG_H
 
 #include "INETDefs.h"
 
@@ -29,7 +29,7 @@ inline bool operator != (HnaElement const &a, HnaElement const &b)
 }
 
 
-} //namespace
+}
 
 
-#endif // __INET_BATMANMSG_H_
+#endif

@@ -17,8 +17,8 @@
 // Author: Levente Meszaros (levy@omnetpp.org)
 //
 
-#ifndef __INET_NODESTATUS_H_
-#define __INET_NODESTATUS_H_
+#ifndef __INET_NODESTATUS_H
+#define __INET_NODESTATUS_H
 
 #include "ILifecycle.h"
 

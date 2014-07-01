@@ -18,8 +18,8 @@
 //
 
 
-#ifndef WORLD_OBSTACLE_OBSTACLE_H
-#define WORLD_OBSTACLE_OBSTACLE_H
+#ifndef __INET_OBSTACLE_H
+#define __INET_OBSTACLE_H
 
 #include <vector>
 #include "Coord.h"

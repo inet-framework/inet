@@ -5,8 +5,8 @@
  *      Author: Damien Piguet, Dimitris Kotsakos, Jérôme Rousselot
  */
 
-#ifndef __INET_ADAPTIVEPROBABILISTICBROADCAST_H_
-#define __INET_ADAPTIVEPROBABILISTICBROADCAST_H_
+#ifndef __INET_ADAPTIVEPROBABILISTICBROADCAST_H
+#define __INET_ADAPTIVEPROBABILISTICBROADCAST_H
 
 #include <map>
 

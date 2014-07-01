@@ -18,8 +18,8 @@
 // Authors: Levente Meszaros (primary author), Andras Varga, Tamas Borbely
 //
 
-#ifndef __INET_IPV4CONFIGURATOR_H
-#define __INET_IPV4CONFIGURATOR_H
+#ifndef __INET_IPV4NETWORKCONFIGURATOR_H
+#define __INET_IPV4NETWORKCONFIGURATOR_H
 
 #include <algorithm>
 #include <omnetpp.h>

@@ -23,8 +23,8 @@
 //   (at your option) any later version.
 //
 /****************************************************************************/
-#ifndef TRACICONSTANTS_H
-#define TRACICONSTANTS_H
+#ifndef __INET_TRACICONSTANTS_H
+#define __INET_TRACICONSTANTS_H
 
 
 // ****************************************

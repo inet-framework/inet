@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __IPv6FRAGBUF_H__
-#define __IPv6FRAGBUF_H__
+#ifndef __INET_IPV6FRAGBUF_H
+#define __INET_IPV6FRAGBUF_H
 
 #include <map>
 #include <vector>

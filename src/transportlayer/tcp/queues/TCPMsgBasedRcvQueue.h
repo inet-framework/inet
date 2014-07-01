@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TCPMESSAGERCVQUEUE_H
-#define __INET_TCPMESSAGERCVQUEUE_H
+#ifndef __INET_TCPMSGBASEDRCVQUEUE_H
+#define __INET_TCPMSGBASEDRCVQUEUE_H
 
 #include <map>
 #include <string>

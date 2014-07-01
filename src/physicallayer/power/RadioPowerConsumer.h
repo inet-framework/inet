@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RADIOPOWERCONSUMER_H_
-#define __INET_RADIOPOWERCONSUMER_H_
+#ifndef __INET_RADIOPOWERCONSUMER_H
+#define __INET_RADIOPOWERCONSUMER_H
 
 #include "IPowerSource.h"
 #include "IRadio.h"

@@ -1,5 +1,5 @@
-#ifndef QUATERNION_H_
-#define QUATERNION_H_
+#ifndef __INET_QUATERNION_H
+#define __INET_QUATERNION_H
 
 #include "Coord.h"
 #include "FWMath.h"

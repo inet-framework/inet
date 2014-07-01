@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef QUADTREENEIGHBORCACHE_H_
-#define QUADTREENEIGHBORCACHE_H_
+#ifndef __INET_QUADTREENEIGHBORCACHE_H
+#define __INET_QUADTREENEIGHBORCACHE_H
 
 #include "RadioMedium.h"
 #include "QuadTree.h"

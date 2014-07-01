@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTPQUEUE_H
-#define __SCTPQUEUE_H
+#ifndef __INET_SCTPQUEUE_H
+#define __INET_SCTPQUEUE_H
 
 #include "INETDefs.h"
 

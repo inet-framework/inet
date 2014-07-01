@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef VOIPRECEIVER_H_
-#define VOIPRECEIVER_H_
+#ifndef __INET_SIMPLEVOIPRECEIVER_H
+#define __INET_SIMPLEVOIPRECEIVER_H
 
 #include <string.h>
 #include <list>

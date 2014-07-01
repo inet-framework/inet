@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __PLAINSCTP_H
-#define __PLAINSCTP_H
+#ifndef __INET_SCTPALG_H
+#define __INET_SCTPALG_H
 
 #include "INETDefs.h"
 

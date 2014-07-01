@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_YYYMULTIPLEXER_H_
-#define __INET_YYYMULTIPLEXER_H_
+#ifndef __INET_MULTINETWORKLAYERLOWERMULTIPLEXER_H
+#define __INET_MULTINETWORKLAYERLOWERMULTIPLEXER_H
 
 #include "INETDefs.h"
 

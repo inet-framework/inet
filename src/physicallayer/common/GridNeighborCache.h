@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef GRIDNEIGHBORCACHE_H_
-#define GRIDNEIGHBORCACHE_H_
+#ifndef __INET_GRIDNEIGHBORCACHE_H
+#define __INET_GRIDNEIGHBORCACHE_H
 
 #include "RadioMedium.h"
 

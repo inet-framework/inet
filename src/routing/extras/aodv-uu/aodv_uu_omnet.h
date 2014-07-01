@@ -22,8 +22,8 @@
  *****************************************************************************/
 
 
-#ifndef _AODV_UU_H
-#define _AODV_UU_H
+#ifndef __INET_AODV_UU_OMNET_H
+#define __INET_AODV_UU_OMNET_H
 
 /* Constants for interface queue packet buffering/dropping */
 #define IFQ_BUFFER 0
@@ -349,7 +349,7 @@ inline int NS_CLASS ifindex2devindex(unsigned int ifindex)
 }
 #endif
 
-} //namespace
+}
 
 
-#endif /* AODV_UU_H */
+#endif

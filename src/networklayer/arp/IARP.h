@@ -16,8 +16,8 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __INET_IARPCACHE_H
-#define __INET_IARPCACHE_H
+#ifndef __INET_IARP_H
+#define __INET_IARP_H
 
 
 #include "INETDefs.h"

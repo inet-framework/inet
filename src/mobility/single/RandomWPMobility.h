@@ -17,8 +17,8 @@
 //
 
 
-#ifndef RANDOM_WP_MOBILITY_H
-#define RANDOM_WP_MOBILITY_H
+#ifndef __INET_RANDOMWPMOBILITY_H
+#define __INET_RANDOMWPMOBILITY_H
 
 #include "INETDefs.h"
 

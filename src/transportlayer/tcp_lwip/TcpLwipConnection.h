@@ -17,8 +17,8 @@
 //
 
 
-#ifndef __TCP_LWIP_CONNECTION_H
-#define __TCP_LWIP_CONNECTION_H
+#ifndef __INET_TCPLWIPCONNECTION_H
+#define __INET_TCPLWIPCONNECTION_H
 
 #include "INETDefs.h"
 

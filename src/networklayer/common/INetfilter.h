@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_INETFILTER_H_
-#define __INET_INETFILTER_H_
+#ifndef __INET_INETFILTER_H
+#define __INET_INETFILTER_H
 
 #include <omnetpp.h>
 #include "InterfaceEntry.h"

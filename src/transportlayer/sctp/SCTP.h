@@ -16,8 +16,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __SCTP_H
-#define __SCTP_H
+#ifndef __INET_SCTP_H
+#define __INET_SCTP_H
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4786)

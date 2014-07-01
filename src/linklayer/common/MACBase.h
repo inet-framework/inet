@@ -17,8 +17,8 @@
 // Author: Andras Varga (andras@omnetpp.org)
 //
 
-#ifndef __INET_MACBASE_H_
-#define __INET_MACBASE_H_
+#ifndef __INET_MACBASE_H
+#define __INET_MACBASE_H
 
 #include "INETDefs.h"
 #include "ILifecycle.h"

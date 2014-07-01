@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BONN_MOTION_MOBILITY_H
-#define BONN_MOTION_MOBILITY_H
+#ifndef __INET_BONNMOTIONMOBILITY_H
+#define __INET_BONNMOTIONMOBILITY_H
 
 #include "INETDefs.h"
 

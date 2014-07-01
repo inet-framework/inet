@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _IPv6MOBILITYHEADERS_H_
-#define _IPv6MOBILITYHEADERS_H_
+#ifndef __INET_MOBILITYHEADER_H
+#define __INET_MOBILITYHEADER_H
 
 #include "INETDefs.h"
 

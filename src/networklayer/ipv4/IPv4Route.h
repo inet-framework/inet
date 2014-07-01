@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPv4ROUTE_H
-#define __INET_IPv4ROUTE_H
+#ifndef __INET_IPV4ROUTE_H
+#define __INET_IPV4ROUTE_H
 
 
 #include "INETDefs.h"

@@ -17,8 +17,8 @@
 //
 
 
-#ifndef VOIPSTREAM_VOIPSTREAMRECEIVER_H
-#define VOIPSTREAM_VOIPSTREAMRECEIVER_H
+#ifndef __INET_VOIPSTREAMRECEIVER_H
+#define __INET_VOIPSTREAMRECEIVER_H
 
 #ifndef HAVE_FFMPEG
 #error Please install libavcodec, libavformat, libavutil or disable 'VoIPStream' feature

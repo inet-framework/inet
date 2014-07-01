@@ -34,8 +34,8 @@
  * $FreeBSD: src/sys/netinet/in.h,v 1.48.2.11 2003/09/09 19:09:22 bms Exp $
  */
 
-#ifndef OPPSIM_NETINET_IN_H_
-#define OPPSIM_NETINET_IN_H_
+#ifndef __INET_IN_H
+#define __INET_IN_H
 
 #ifdef s_addr
 #undef s_addr

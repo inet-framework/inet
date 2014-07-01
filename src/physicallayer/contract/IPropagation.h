@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPROPAGATION_H_
-#define __INET_IPROPAGATION_H_
+#ifndef __INET_IPROPAGATION_H
+#define __INET_IPROPAGATION_H
 
 #include "IMobility.h"
 #include "IArrival.h"

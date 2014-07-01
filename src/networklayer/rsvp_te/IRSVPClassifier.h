@@ -12,8 +12,8 @@
 // See the GNU Lesser General Public License for more details.
 //
 
-#ifndef __INET_RSVPCLASSIFIER_H
-#define __INET_RSVPCLASSIFIER_H
+#ifndef __INET_IRSVPCLASSIFIER_H
+#define __INET_IRSVPCLASSIFIER_H
 
 #include "INETDefs.h"
 

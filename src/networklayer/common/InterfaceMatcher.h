@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef INTERFACEMATCHER_H_
-#define INTERFACEMATCHER_H_
+#ifndef __INET_INTERFACEMATCHER_H
+#define __INET_INTERFACEMATCHER_H
 
 #include <omnetpp.h>
 #include "INETDefs.h"

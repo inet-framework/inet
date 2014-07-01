@@ -16,8 +16,8 @@
 //
 
 
-#ifndef __INET_IPV6EXTENSIONHEADERS_H_
-#define __INET_IPV6EXTENSIONHEADERS_H_
+#ifndef __INET_IPV6EXTENSIONHEADERS_H
+#define __INET_IPV6EXTENSIONHEADERS_H
 
 #include "IPv6ExtensionHeaders_m.h"
 

@@ -1,6 +1,6 @@
 
-#ifndef EULERALNGLES_H_
-#define EULERALNGLES_H_
+#ifndef __INET_EULERANGLES_H
+#define __INET_EULERANGLES_H
 
 #include "FWMath.h"
 

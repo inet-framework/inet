@@ -17,8 +17,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef INET_DHCPSERVER_H__
-#define INET_DHCPSERVER_H__
+#ifndef __INET_DHCPSERVER_H
+#define __INET_DHCPSERVER_H
 
 #include <vector>
 #include <map>

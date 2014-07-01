@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef ISCRIPTABLE_H
-#define ISCRIPTABLE_H
+#ifndef __INET_ISCRIPTABLE_H
+#define __INET_ISCRIPTABLE_H
 
 #include "INETDefs.h"
 

@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-#ifndef LINEARROTATINGMOBILITYBASE_H_
-#define LINEARROTATINGMOBILITYBASE_H_
+#ifndef __INET_LINEARROTATINGMOBILITYBASE_H
+#define __INET_LINEARROTATINGMOBILITYBASE_H
 
 #include "RotatingMobilityBase.h"
 
