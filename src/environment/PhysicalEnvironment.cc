@@ -253,6 +253,18 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     }
 }
 
+cFigure::Point PhysicalEnvironment::projectPoint(Coord point)
+{
+    if (!strcmp(viewAngle, "x"))
+        return cFigure::Point(point.y, point.z);
+    else if (!strcmp(viewAngle, "y"))
+        return cFigure::Point(point.x, point.z);
+    else if (!strcmp(viewAngle, "z"))
+        return cFigure::Point(point.x, point.y);
+    else
+        throw cRuntimeError("Unknown view angle");
+}
+
 void PhysicalEnvironment::updateCanvas()
 {
 #ifdef __CCANVAS_H
@@ -267,8 +279,8 @@ void PhysicalEnvironment::updateCanvas()
             const Coord& size = cuboid->getSize();
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(cFigure::Point(position.x - size.x / 2, position.y - size.y / 2));
-            figure->setP2(cFigure::Point(position.x + size.x / 2, position.y + size.y / 2));
+            figure->setP1(projectPoint(position - size / 2));
+            figure->setP2(projectPoint(position + size / 2));
             figure->setFillColor(object->getColor());
             layer->addChild(figure);
             continue;
@@ -278,8 +290,8 @@ void PhysicalEnvironment::updateCanvas()
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(cFigure::Point(position.x - radius, position.y - radius));
-            figure->setP2(cFigure::Point(position.x + radius, position.y + radius));
+            figure->setP1(projectPoint(position - Coord(radius, radius, radius)));
+            figure->setP2(projectPoint(position + Coord(radius, radius, radius)));
             figure->setFillColor(object->getColor());
             layer->addChild(figure);
             continue;

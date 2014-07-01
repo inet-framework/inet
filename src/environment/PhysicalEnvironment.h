@@ -43,6 +43,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 
+    virtual cFigure::Point projectPoint(Coord point);
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
