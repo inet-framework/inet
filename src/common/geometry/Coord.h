@@ -271,6 +271,14 @@ class INET_API Coord : public cObject
                 this->y > a.y ? this->y : a.y,
                 this->z > a.z ? this->z : a.z);
     }
+
+    /**
+     * @brief Returns the angle between the two vectors.
+     */
+    double angle(const Coord& a)
+    {
+        return acos(*this * a / length() / a.length());
+    }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Coord& coord)

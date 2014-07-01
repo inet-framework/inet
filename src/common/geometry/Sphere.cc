@@ -51,6 +51,7 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
         if (alpha1 == alpha2)
             return false;
         else {
+            // TODO: face normal vectors
             intersection1 = point1 * (1 - alpha1) + point2 * alpha1;
             intersection2 = point1 * (1 - alpha2) + point2 * alpha2;
             return true;

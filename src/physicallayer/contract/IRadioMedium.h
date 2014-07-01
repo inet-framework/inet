@@ -18,6 +18,7 @@
 #ifndef __INET_IRADIOMEDIUM_H
 #define __INET_IRADIOMEDIUM_H
 
+#include "Material.h"
 #include "IRadio.h"
 #include "IRadioFrame.h"
 #include "IArrival.h"
@@ -60,6 +61,11 @@ class INET_API IRadioMedium : public IPrintableObject
      * is in the range [1, +infinity) or NaN if unspecified.
      */
     virtual double getMaxAntennaGain() const = 0;
+
+    /**
+     * Returns the material of the radio medium. This function never returns NULL.
+     */
+    virtual const Material *getMaterial() const = 0;
 
     /**
      * Returns the radio signal propagation model of this radio medium. This

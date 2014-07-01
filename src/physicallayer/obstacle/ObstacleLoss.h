@@ -31,11 +31,14 @@ namespace physicallayer {
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
   protected:
+    IRadioMedium *medium;
     PhysicalEnvironment *environment;
 
   protected:
     virtual void initialize(int stage);
-    virtual double computeDielectricLoss(const PhysicalObject *object, Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
+
+    virtual double computeDielectricLoss(const Material *material, Hz frequency, m distance) const;
+    virtual double computeReflectionLoss(const Material *incidentMaterial, const Material *refractiveMaterial, double angle) const;
 
   public:
     ObstacleLoss();

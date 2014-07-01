@@ -423,6 +423,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual W getMinReceptionPower() const { return minReceptionPower; }
     virtual double getMaxAntennaGain() const { return maxAntennaGain; }
 
+    virtual const Material *getMaterial() const { return &Material::air; }
     virtual const IPropagation *getPropagation() const { return propagation; }
     virtual const IPathLoss *getPathLoss() const { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }

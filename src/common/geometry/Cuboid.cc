@@ -59,6 +59,7 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     if (i < 2)
         return false;
     else {
+        // TODO: face normal vectors
         intersection1 = points[0];
         intersection2 = points[1];
         return true;
