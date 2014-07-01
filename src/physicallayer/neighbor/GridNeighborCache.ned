@@ -13,7 +13,9 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.common;
+package inet.physicallayer.neighbor;
+
+import inet.physicallayer.contract.INeighborCache;
 
 module GridNeighborCache like INeighborCache
 {

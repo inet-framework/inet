@@ -18,6 +18,7 @@
 package inet.physicallayer.common;
 
 import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.INeighborCache;
 import inet.physicallayer.contract.IObstacleLoss;
 import inet.physicallayer.contract.IPathLoss;
 import inet.physicallayer.contract.IPropagation;

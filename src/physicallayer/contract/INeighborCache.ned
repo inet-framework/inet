@@ -13,14 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-package inet.physicallayer.common;
+package inet.physicallayer.contract;
 
-module NeighborListCache like INeighborCache
+moduleinterface INeighborCache
 {
     parameters:
-        double range @unit(m);
         double refillPeriod @unit(s);
         double maxSpeed @unit(mps);
-        @class(NeighborListCache);
 }
-
