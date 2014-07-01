@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(Ieee80211Radio);
 
 Ieee80211Radio::Ieee80211Radio() :
@@ -69,5 +70,6 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

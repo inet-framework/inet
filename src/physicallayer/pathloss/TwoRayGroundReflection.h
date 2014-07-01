@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the two ray ground radio path loss model.
  */
@@ -42,6 +43,7 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_TWORAYGROUNDREFLECTION_H

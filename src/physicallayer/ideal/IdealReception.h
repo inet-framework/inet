@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IdealReception : public ReceptionBase
 {
   public:
@@ -46,6 +47,7 @@ class INET_API IdealReception : public ReceptionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALRECEPTION_H

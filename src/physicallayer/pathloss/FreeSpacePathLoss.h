@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the deterministic free space path loss model.
  *
@@ -46,6 +47,7 @@ class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_FREESPACEPATHLOSS_H

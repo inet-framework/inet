@@ -218,6 +218,7 @@ SUBSTATE(Established, TopState) {
 };
 
 } // namespace BGPFSM
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPFSM_H

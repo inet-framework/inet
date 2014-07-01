@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API FlatReceptionBase : public ReceptionBase
 {
   protected:
@@ -42,6 +43,7 @@ class INET_API FlatReceptionBase : public ReceptionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_FLATRECEPTIONBASE_H

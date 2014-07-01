@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 {
   protected:
@@ -67,6 +68,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RECEPTIONDECISION_H

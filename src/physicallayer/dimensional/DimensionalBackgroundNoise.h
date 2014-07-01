@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
@@ -42,6 +43,7 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALBACKGROUNDNOISE_H

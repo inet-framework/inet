@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalUtils
 {
   public:
@@ -31,6 +32,7 @@ class INET_API DimensionalUtils
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALUTILS_H

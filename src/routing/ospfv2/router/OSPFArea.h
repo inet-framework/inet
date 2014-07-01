@@ -30,6 +30,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class Router;
 
 class Area : public cObject
@@ -152,6 +153,7 @@ inline std::ostream& operator<<(std::ostream& ostr, Area& area)
 }
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFAREA_H

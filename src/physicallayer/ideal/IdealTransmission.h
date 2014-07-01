@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IdealTransmission : public TransmissionBase
 {
   protected:
@@ -44,6 +45,7 @@ class INET_API IdealTransmission : public TransmissionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALTRANSMISSION_H

@@ -12,6 +12,7 @@
 namespace inet {
 
 namespace DYMO {
+
 /**
  * DYMO specific extra route data attached to routes in the routing table.
  */
@@ -45,6 +46,7 @@ class INET_API DYMORouteData : public cObject
 };
 
 } // namespace DYMO
+
 } // namespace inet
 
 #endif // ifndef __INET_DYMOROUTEDATA_H

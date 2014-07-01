@@ -372,6 +372,7 @@ class Router
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTER_H

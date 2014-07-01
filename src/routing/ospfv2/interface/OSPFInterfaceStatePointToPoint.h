@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceStatePointToPoint : public InterfaceState
 {
   public:
@@ -31,6 +32,7 @@ class InterfaceStatePointToPoint : public InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATEPOINTTOPOINT_H

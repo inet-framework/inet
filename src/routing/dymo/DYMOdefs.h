@@ -8,6 +8,7 @@
 namespace inet {
 
 namespace DYMO {
+
 // TODO: use generic MANET port
 #define DYMO_UDP_PORT    269
 
@@ -27,6 +28,7 @@ enum DYMORouteState {
 };
 
 } // namespace DYMO
+
 } // namespace inet
 
 #endif // ifndef __INET_DYMODEFS_H

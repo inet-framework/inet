@@ -21,6 +21,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ImmediatePropagation);
 
 ImmediatePropagation::ImmediatePropagation() :
@@ -41,5 +42,6 @@ void ImmediatePropagation::printToStream(std::ostream& stream) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(NeighborListCache);
 
 void NeighborListCache::initialize(int stage)
@@ -124,5 +125,6 @@ NeighborListCache::~NeighborListCache()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

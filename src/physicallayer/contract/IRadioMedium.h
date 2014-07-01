@@ -32,6 +32,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents the whole radio medium. It keeps track of all radio
  * signal sources, all radio signal transmissions, and all radio signal receptions.
@@ -140,6 +141,7 @@ class INET_API IRadioMedium : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IRADIOMEDIUM_H

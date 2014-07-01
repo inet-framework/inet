@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface models a source which provides background noise over space and time.
  */
@@ -35,6 +36,7 @@ class INET_API IBackgroundNoise : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IBACKGROUNDNOISE_H

@@ -21,6 +21,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ConstantSpeedPropagation);
 
 ConstantSpeedPropagation::ConstantSpeedPropagation() :
@@ -75,5 +76,6 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

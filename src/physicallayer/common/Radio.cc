@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(Radio);
 
 Radio::Radio() :
@@ -396,5 +397,6 @@ void Radio::updateDisplayString()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

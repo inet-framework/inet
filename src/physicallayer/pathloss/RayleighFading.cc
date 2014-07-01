@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(RayleighFading);
 
 void RayleighFading::printToStream(std::ostream& stream) const
@@ -39,5 +40,6 @@ double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

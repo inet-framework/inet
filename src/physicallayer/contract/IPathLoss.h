@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface models path loss (or path attenuation) that is the reduction
  * in power density of a radio signal as it propagates through space.
@@ -45,6 +46,7 @@ class INET_API IPathLoss : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IPATHLOSS_H

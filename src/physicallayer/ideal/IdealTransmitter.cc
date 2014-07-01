@@ -22,6 +22,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(IdealTransmitter);
 
 void IdealTransmitter::initialize(int stage)
@@ -55,5 +56,6 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

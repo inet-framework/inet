@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(IdealReceiver);
 
 void IdealReceiver::initialize(int stage)
@@ -90,5 +91,6 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

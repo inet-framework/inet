@@ -27,6 +27,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 void FlatReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
@@ -117,5 +118,6 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

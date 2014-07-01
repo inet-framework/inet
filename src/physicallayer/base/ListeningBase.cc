@@ -20,11 +20,13 @@
 namespace inet {
 
 namespace physicallayer {
+
 void ListeningBase::printToStream(std::ostream& stream) const
 {
     stream << "listening";
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

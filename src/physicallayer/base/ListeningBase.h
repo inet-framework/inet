@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ListeningBase : public IListening
 {
   protected:
@@ -53,6 +54,7 @@ class INET_API ListeningBase : public IListening
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_LISTENINGBASE_H

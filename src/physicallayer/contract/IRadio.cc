@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 int IRadio::nextId = 0;
 
 simsignal_t IRadio::radioModeChangedSignal = cComponent::registerSignal("radioModeChanged");
@@ -74,5 +75,6 @@ const char *IRadio::getRadioTransmissionStateName(TransmissionState transmission
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

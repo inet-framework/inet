@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
   public:
@@ -71,6 +72,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* GRIDNEIGHBORCACHE_H_ */

@@ -28,6 +28,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * \ingroup wifi
  *
@@ -61,6 +62,7 @@ class NistErrorRateModel : public IErrorModel
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* NIST_ERROR_RATE_MODEL_H */

@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface models how a radio signal propagates through space over time.
  */
@@ -48,6 +49,7 @@ class INET_API IPropagation : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IPROPAGATION_H

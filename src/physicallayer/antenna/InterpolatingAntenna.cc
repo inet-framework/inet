@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(InterpolatingAntenna);
 
 InterpolatingAntenna::InterpolatingAntenna() :
@@ -90,5 +91,6 @@ double InterpolatingAntenna::computeGain(EulerAngles direction) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

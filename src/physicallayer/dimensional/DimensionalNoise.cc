@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
     Argument start(DimensionSet::timeFreqDomain);
@@ -32,5 +33,6 @@ W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) cons
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -31,6 +31,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class RoutingTableEntry : public IPv4Route
 {
   public:

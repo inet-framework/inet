@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * @brief A simple constant mapping for one value over time.
  *
@@ -67,6 +68,7 @@ class INET_API SimpleTimeConstMapping : public SimpleConstMapping
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SIMPLETIMECONSTMAPPING_H

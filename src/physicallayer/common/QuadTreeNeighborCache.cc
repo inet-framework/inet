@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(QuadTreeNeighborCache);
 
 QuadTreeNeighborCache::QuadTreeNeighborCache()
@@ -108,5 +109,6 @@ void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject 
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

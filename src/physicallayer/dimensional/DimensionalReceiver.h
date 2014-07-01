@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalReceiver : public FlatReceiverBase
 {
   protected:
@@ -39,6 +40,7 @@ class INET_API DimensionalReceiver : public FlatReceiverBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALRECEIVER_H

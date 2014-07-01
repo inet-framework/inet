@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IdealListening : public ListeningBase
 {
   public:
@@ -32,6 +33,7 @@ class INET_API IdealListening : public ListeningBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALLISTENING_H

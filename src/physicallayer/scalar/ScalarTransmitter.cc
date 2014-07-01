@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ScalarTransmitter);
 
 void ScalarTransmitter::printToStream(std::ostream& stream) const
@@ -51,5 +52,6 @@ const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmi
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

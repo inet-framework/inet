@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API SNIRReceiverBase : public ReceiverBase
 {
   protected:
@@ -61,6 +62,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SNIRRECEIVERBASE_H

@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(DipoleAntenna);
 
 DipoleAntenna::DipoleAntenna() :
@@ -40,5 +41,6 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

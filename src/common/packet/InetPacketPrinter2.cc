@@ -69,9 +69,11 @@ class RIPPacket;
 namespace inet {
 
 namespace physicallayer {
+
 class RadioFrame;
 
 } // namespace physicallayer
+
 } // namespace inet
 #endif // ifdef WITH_RADIO
 

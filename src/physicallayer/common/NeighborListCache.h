@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
   public:
@@ -68,6 +69,7 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* NEIGHBORLISTCACHE_H_ */

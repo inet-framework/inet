@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IsotropicAntenna : public AntennaBase
 {
   public:
@@ -34,6 +35,7 @@ class INET_API IsotropicAntenna : public AntennaBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ISOTROPICANTENNA_H

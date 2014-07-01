@@ -32,6 +32,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * The default implementation of the radio medium interface.
  */
@@ -446,6 +447,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RADIOMEDIUM_H

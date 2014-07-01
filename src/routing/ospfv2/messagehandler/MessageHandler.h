@@ -31,6 +31,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class MessageHandler : public IMessageHandler
 {
   private:
@@ -66,6 +67,7 @@ class MessageHandler : public IMessageHandler
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_MESSAGEHANDLER_H

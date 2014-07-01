@@ -21,6 +21,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class IErrorModel
 {
   public:
@@ -30,6 +31,7 @@ class IErrorModel
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* IERRORMODEL_H_ */

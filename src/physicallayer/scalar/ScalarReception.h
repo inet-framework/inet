@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ScalarReception : public FlatReceptionBase
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API ScalarReception : public FlatReceptionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SCALARRECEPTION_H

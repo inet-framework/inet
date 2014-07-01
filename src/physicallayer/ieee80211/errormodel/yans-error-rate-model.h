@@ -27,6 +27,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * \brief Model the error rate for different modulations.
  *
@@ -78,6 +79,7 @@ class YansErrorRateModel : public IErrorModel
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* YANS_ERROR_RATE_MODEL_H */

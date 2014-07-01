@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 void ReceptionDecision::printToStream(std::ostream& stream) const
 {
     stream << "reception decision, " << (isReceptionPossible_ ? "possible" : "impossible");
@@ -28,5 +29,6 @@ void ReceptionDecision::printToStream(std::ostream& stream) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

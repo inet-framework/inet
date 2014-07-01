@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceState
 {
   protected:
@@ -37,6 +38,7 @@ class InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATE_H

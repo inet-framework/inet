@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceStateLoopback : public InterfaceState
 {
   public:
@@ -31,6 +32,7 @@ class InterfaceStateLoopback : public InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATELOOPBACK_H

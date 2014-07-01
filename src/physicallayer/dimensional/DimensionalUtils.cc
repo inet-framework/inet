@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power)
 {
     Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, DimensionSet::timeFreqDomain, Mapping::LINEAR);
@@ -38,5 +39,6 @@ ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, con
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

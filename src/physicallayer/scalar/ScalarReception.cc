@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 void ScalarReception::printToStream(std::ostream& stream) const
 {
     ReceptionBase::printToStream(stream);
@@ -27,5 +28,6 @@ void ScalarReception::printToStream(std::ostream& stream) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

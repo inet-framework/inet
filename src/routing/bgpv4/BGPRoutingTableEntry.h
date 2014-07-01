@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace BGP {
+
 class INET_API RoutingTableEntry : public IPv4Route
 {
   public:

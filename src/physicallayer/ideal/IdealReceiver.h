@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IdealReceiver : public ReceiverBase
 {
   protected:
@@ -45,6 +46,7 @@ class INET_API IdealReceiver : public ReceiverBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALRECEIVER_H

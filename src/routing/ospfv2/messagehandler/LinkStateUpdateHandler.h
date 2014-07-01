@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class LinkStateUpdateHandler : public IMessageHandler
 {
   private:
@@ -49,6 +50,7 @@ class LinkStateUpdateHandler : public IMessageHandler
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_LINKSTATEUPDATEHANDLER_H

@@ -27,6 +27,7 @@
 namespace inet {
 
 namespace OSPF {
+
 struct NextHop
 {
     int ifIndex;

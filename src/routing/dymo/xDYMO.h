@@ -35,6 +35,7 @@
 namespace inet {
 
 namespace DYMO {
+
 /**
  * This class provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
  * based on the IETF draft at http://tools.ietf.org/html/draft-ietf-manet-dymo-24.
@@ -223,6 +224,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
 };
 
 } // namespace DYMO
+
 } // namespace inet
 
 #endif // ifndef __INET_XDYMO_H

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
   protected:
@@ -46,6 +47,7 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RADIOFRAME_H

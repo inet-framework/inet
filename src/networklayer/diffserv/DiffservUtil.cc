@@ -35,6 +35,7 @@
 namespace inet {
 
 namespace DiffservUtil {
+
 using namespace OPP_Global;
 
 // cached enums
@@ -242,5 +243,6 @@ void setColor(cPacket *packet, int color)
 }
 
 } // namespace DiffservUtil
+
 } // namespace inet
 

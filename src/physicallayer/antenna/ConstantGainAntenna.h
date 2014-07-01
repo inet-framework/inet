@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ConstantGainAntenna : public AntennaBase
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API ConstantGainAntenna : public AntennaBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_CONSTANTGAINANTENNA_H

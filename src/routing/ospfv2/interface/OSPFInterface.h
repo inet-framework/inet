@@ -32,6 +32,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceState;
 class Area;
 
@@ -175,6 +176,7 @@ class Interface
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACE_H

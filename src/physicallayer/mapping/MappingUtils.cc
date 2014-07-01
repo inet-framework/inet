@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping) :
     MultiDimMappingIterator<Linear>(mapping) {}
 
@@ -486,5 +487,6 @@ LinearIntplMappingIterator::~LinearIntplMappingIterator()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

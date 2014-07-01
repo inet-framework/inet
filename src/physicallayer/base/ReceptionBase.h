@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ReceptionBase : public virtual IReception
 {
   protected:
@@ -65,6 +66,7 @@ class INET_API ReceptionBase : public virtual IReception
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RECEPTIONBASE_H

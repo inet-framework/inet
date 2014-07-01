@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API AntennaBase : public IAntenna, public cModule
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API AntennaBase : public IAntenna, public cModule
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ANTENNABASE_H

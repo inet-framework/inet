@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(TwoRayGroundReflection);
 
 TwoRayGroundReflection::TwoRayGroundReflection() :
@@ -74,5 +75,6 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

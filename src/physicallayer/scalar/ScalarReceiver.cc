@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ScalarReceiver);
 
 void ScalarReceiver::printToStream(std::ostream& stream) const
@@ -92,5 +93,6 @@ double ScalarReceiver::computeMinSNIR(const IReception *reception, const INoise 
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

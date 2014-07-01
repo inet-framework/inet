@@ -20,11 +20,13 @@
 namespace inet {
 
 namespace physicallayer {
+
 void TransmissionBase::printToStream(std::ostream& stream) const
 {
     stream << "transmission, id = " << id << ", transmitter id = " << transmitter->getId();
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

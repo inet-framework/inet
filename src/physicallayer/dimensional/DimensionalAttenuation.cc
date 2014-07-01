@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(DimensionalAttenuation);
 
 const IReception *DimensionalAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
@@ -77,5 +78,6 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

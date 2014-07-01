@@ -22,6 +22,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ScalarBackgroundNoise);
 
 void ScalarBackgroundNoise::initialize(int stage)
@@ -44,5 +45,6 @@ const INoise *ScalarBackgroundNoise::computeNoise(const IListening *listening) c
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

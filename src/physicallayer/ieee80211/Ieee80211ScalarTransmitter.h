@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 {
   protected:
@@ -44,6 +45,7 @@ class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211SCALARTRANSMITTER_H

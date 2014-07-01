@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(IdealAttenuation);
 
 const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio, const ITransmission *transmission) const
@@ -51,5 +52,6 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

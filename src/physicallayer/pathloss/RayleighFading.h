@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the probabilistic Rayleigh fading model, see Rappaport
  * for more details.
@@ -37,6 +38,7 @@ class INET_API RayleighFading : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RAYLEIGHFADING_H

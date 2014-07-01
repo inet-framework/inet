@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceStateDesignatedRouter : public InterfaceState
 {
   public:
@@ -31,6 +32,7 @@ class InterfaceStateDesignatedRouter : public InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATEDESIGNATEDROUTER_H

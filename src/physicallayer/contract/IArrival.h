@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents the space and time coordinates of a transmission
  * arriving at a receiver.
@@ -48,6 +49,7 @@ class INET_API IArrival : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IARRIVAL_H

@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents the result of a receiver's reception process.
  *
@@ -79,6 +80,7 @@ class INET_API IReceptionDecision : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IRECEPTIONDECISION_H

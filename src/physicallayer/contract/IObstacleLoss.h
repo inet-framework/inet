@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 // TODO: merge with path loss?
 class INET_API IObstacleLoss : public IPrintableObject
 {
@@ -32,6 +33,7 @@ class INET_API IObstacleLoss : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IOBSTACLELOSS_H

@@ -7,6 +7,7 @@
 namespace inet {
 
 namespace DYMO {
+
 DYMORouteData::DYMORouteData()
 {
     isBroken = false;
@@ -17,5 +18,6 @@ DYMORouteData::DYMORouteData()
 }
 
 } // namespace DYMO
+
 } // namespace inet
 

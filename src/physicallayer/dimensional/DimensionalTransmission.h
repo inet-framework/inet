@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalTransmission : public FlatTransmissionBase
 {
   protected:
@@ -41,6 +42,7 @@ class INET_API DimensionalTransmission : public FlatTransmissionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALTRANSMISSION_H

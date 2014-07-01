@@ -20,11 +20,13 @@
 namespace inet {
 
 namespace physicallayer {
+
 void ListeningDecision::printToStream(std::ostream& stream) const
 {
     stream << "listening decision, " << (isListeningPossible_ ? "possible" : "impossible");
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

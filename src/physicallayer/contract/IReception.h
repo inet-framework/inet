@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents the reception of a transmission at a receiver. There's
  * one instance per transmission of this interface for each receiver.
@@ -82,6 +83,7 @@ class INET_API IReception : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IRECEPTION_H

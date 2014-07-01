@@ -22,6 +22,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(ScalarRadio);
 
 ScalarRadio::ScalarRadio() :
@@ -50,5 +51,6 @@ void ScalarRadio::setBitrate(bps newBitrate)
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

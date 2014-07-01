@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the stochastic Rician fading model.
  *
@@ -43,6 +44,7 @@ class INET_API RicianFading : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RICIANFADING_H

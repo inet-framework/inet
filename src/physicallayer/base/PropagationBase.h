@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API PropagationBase : public cModule, public IPropagation
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API PropagationBase : public cModule, public IPropagation
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_PROPAGATIONBASE_H

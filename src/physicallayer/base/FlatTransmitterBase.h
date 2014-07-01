@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API FlatTransmitterBase : public TransmitterBase
 {
   protected:
@@ -67,6 +68,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_FLATTRANSMITTERBASE_H

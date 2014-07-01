@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {
     const Coord transmissionStartPosition = transmission->getStartPosition();
@@ -33,5 +34,6 @@ EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *t
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceStateDown : public InterfaceState
 {
   public:
@@ -31,6 +32,7 @@ class InterfaceStateDown : public InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATEDOWN_H

@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class IRadio;
 
 /**
@@ -93,6 +94,7 @@ class INET_API ITransmission : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ITRANSMISSION_H

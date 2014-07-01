@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalAttenuation : public AttenuationBase
 {
   public:
@@ -31,6 +32,7 @@ class INET_API DimensionalAttenuation : public AttenuationBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALATTENUATION_H

@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface models how a radio signal attenuates during propagation. It
  * includes various effects such as free-space path loss, shadowing, refraction,
@@ -42,6 +43,7 @@ class INET_API IAttenuation : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IATTENUATION_H

@@ -260,6 +260,7 @@ value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
 namespace units {
 
 namespace internal {
+
 // Ensures (at compile-time) that the template argument is true.
 template<bool> struct legacy_static_assert;
 template<> struct legacy_static_assert<true> {};
@@ -614,6 +615,7 @@ struct scaling_factor<translate<U, N, D> >
 };
 
 } // namespace internal
+
 } // namespace units
 
 /*****************************************************************************/
@@ -630,6 +632,7 @@ struct scaling_factor<translate<U, N, D> >
 namespace units {
 
 namespace internal {
+
 // This is the default unit formatting mechanism
 template<typename Unit>
 struct output_unit2
@@ -728,6 +731,7 @@ Str& operator<<(Str& os, const value<Value, Unit>& value)
 namespace units {
 
 namespace units {
+
 typedef::units::unit unit;
 
 // SI base units:

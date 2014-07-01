@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(GridNeighborCache);
 
 void GridNeighborCache::initialize(int stage)
@@ -246,5 +247,6 @@ GridNeighborCache::~GridNeighborCache()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

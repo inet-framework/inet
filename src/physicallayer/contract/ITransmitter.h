@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * packets into electric signals.
@@ -45,6 +46,7 @@ class INET_API ITransmitter : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ITRANSMITTER_H

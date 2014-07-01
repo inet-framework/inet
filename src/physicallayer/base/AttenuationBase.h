@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API AttenuationBase : public cModule, public virtual IAttenuation
 {
   protected:
@@ -32,6 +33,7 @@ class INET_API AttenuationBase : public cModule, public virtual IAttenuation
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ATTENUATIONBASE_H

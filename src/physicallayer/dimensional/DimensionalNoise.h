@@ -25,6 +25,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DimensionalNoise : public FlatNoiseBase
 {
   protected:
@@ -43,6 +44,7 @@ class INET_API DimensionalNoise : public FlatNoiseBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIMENSIONALNOISE_H

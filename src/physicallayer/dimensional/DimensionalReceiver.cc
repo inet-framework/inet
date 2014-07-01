@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(DimensionalReceiver);
 
 void DimensionalReceiver::printToStream(std::ostream& stream) const
@@ -80,5 +81,6 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the Nakagami fading model.
  */
@@ -41,6 +42,7 @@ class INET_API NakagamiFading : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_NAKAGAMIFADING_H

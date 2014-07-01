@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(DimensionalTransmitter);
 
 void DimensionalTransmitter::printToStream(std::ostream& stream) const
@@ -49,5 +50,6 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

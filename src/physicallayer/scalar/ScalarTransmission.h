@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ScalarTransmission : public FlatTransmissionBase
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API ScalarTransmission : public FlatTransmissionBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SCALARTRANSMISSION_H

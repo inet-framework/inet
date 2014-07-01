@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API IdealAttenuation : public cModule, public IAttenuation
 {
   public:
@@ -31,6 +32,7 @@ class INET_API IdealAttenuation : public cModule, public IAttenuation
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALATTENUATION_H

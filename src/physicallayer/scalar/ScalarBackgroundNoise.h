@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
@@ -44,6 +45,7 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SCALARBACKGROUNDNOISE_H

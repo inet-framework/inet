@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighborCache
 {
   public:
@@ -70,6 +71,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif /* QUADTREENEIGHBORCACHE_H_ */

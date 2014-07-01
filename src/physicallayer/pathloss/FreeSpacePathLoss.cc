@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(FreeSpacePathLoss);
 
 FreeSpacePathLoss::FreeSpacePathLoss() :
@@ -65,5 +66,6 @@ m FreeSpacePathLoss::computeRange(mps propagationSpeed, Hz frequency, double los
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents a meaningless radio signal.
  */
@@ -34,6 +35,7 @@ class INET_API INoise : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_INOISE_H

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ScalarTransmitter : public FlatTransmitterBase
 {
   public:
@@ -36,6 +37,7 @@ class INET_API ScalarTransmitter : public FlatTransmitterBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SCALARTRANSMITTER_H

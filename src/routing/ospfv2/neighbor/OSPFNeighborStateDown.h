@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class NeighborStateDown : public NeighborState
 {
   public:
@@ -31,6 +32,7 @@ class NeighborStateDown : public NeighborState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFNEIGHBORSTATEDOWN_H

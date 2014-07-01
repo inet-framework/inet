@@ -38,6 +38,7 @@
 namespace inet {
 
 namespace DYMO {
+
 Define_Module(DYMO);
 
 //
@@ -1457,5 +1458,6 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 }
 
 } // namespace DYMO
+
 } // namespace inet
 

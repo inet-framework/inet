@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This interface represents a physical device (a part of the radio) which converts
  * electric signals into radio waves, and vice versa.
@@ -54,6 +55,7 @@ class INET_API IAntenna : public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IANTENNA_H

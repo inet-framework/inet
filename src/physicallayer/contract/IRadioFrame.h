@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
  */
@@ -56,6 +57,7 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IRADIOFRAME_H

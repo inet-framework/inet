@@ -21,6 +21,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 double NullModulation::calculateBER(double, double, double) const
 {
     return 0;
@@ -42,5 +43,6 @@ double QAM256Modulation::calculateBER(double snir, double bandwidth, double bitr
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

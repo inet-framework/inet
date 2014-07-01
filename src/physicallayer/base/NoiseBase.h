@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API NoiseBase : public INoise
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API NoiseBase : public INoise
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_NOISEBASE_H

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the empirical Stanford University Interim path loss model.
  *
@@ -50,6 +51,7 @@ class INET_API SUIPathLoss : public cModule, public IPathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SUIPATHLOSS_H

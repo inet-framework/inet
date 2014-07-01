@@ -28,6 +28,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class NeighborState;
 class Interface;
 

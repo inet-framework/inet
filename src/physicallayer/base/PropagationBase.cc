@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 PropagationBase::PropagationBase() :
     propagationSpeed(mps(sNaN)),
     arrivalComputationCount(0)
@@ -38,5 +39,6 @@ void PropagationBase::finish()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

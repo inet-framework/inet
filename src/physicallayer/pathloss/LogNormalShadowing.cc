@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(LogNormalShadowing);
 
 LogNormalShadowing::LogNormalShadowing() :
@@ -55,5 +56,6 @@ double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

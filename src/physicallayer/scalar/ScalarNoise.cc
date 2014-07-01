@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
     W noisePower = W(0);
@@ -33,5 +34,6 @@ W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

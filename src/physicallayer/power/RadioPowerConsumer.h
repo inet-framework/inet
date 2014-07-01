@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This is radio power consumer model.
  *
@@ -64,6 +65,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_RADIOPOWERCONSUMER_H

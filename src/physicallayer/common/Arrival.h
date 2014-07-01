@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API Arrival : public virtual IArrival
 {
   protected:
@@ -63,6 +64,7 @@ class INET_API Arrival : public virtual IArrival
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_ARRIVAL_H

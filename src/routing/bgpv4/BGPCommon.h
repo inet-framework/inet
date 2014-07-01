@@ -73,6 +73,7 @@ struct SessionInfo
 };
 
 } // namespace BGP
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPCOMMON_H

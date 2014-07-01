@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * Abstract class to encapsulate bit error rate calculation of modulation schemes
  */
@@ -35,6 +36,7 @@ class INET_API IModulation
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IMODULATION_H

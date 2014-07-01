@@ -28,6 +28,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 void BerParseFile::clearBerTable()
 {
     while (!berTable.empty()) {
@@ -358,5 +359,6 @@ BerParseFile::~BerParseFile()
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

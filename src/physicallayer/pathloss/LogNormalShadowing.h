@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * This class implements the log normal shadowing model.
  */
@@ -41,6 +42,7 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_LOGNORMALSHADOWING_H

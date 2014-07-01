@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * Ideal modulation which returns zero bit error rate, regardless of the parameters.
  */
@@ -65,6 +66,7 @@ class INET_API QAM256Modulation : public IModulation
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULATION_H

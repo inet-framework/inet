@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ScalarNoise : public FlatNoiseBase
 {
   protected:
@@ -41,6 +42,7 @@ class INET_API ScalarNoise : public FlatNoiseBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_SCALARNOISE_H

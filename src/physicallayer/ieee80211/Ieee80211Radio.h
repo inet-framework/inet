@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API Ieee80211Radio : public ScalarRadio
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211RADIO_H

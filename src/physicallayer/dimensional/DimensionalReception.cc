@@ -20,6 +20,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
     Argument start(DimensionSet::timeFreqDomain);
@@ -32,5 +33,6 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -21,6 +21,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 void AntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
@@ -28,5 +29,6 @@ void AntennaBase::initialize(int stage)
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class InterfaceStateBackup : public InterfaceState
 {
   public:
@@ -31,6 +32,7 @@ class InterfaceStateBackup : public InterfaceState
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFINTERFACESTATEBACKUP_H

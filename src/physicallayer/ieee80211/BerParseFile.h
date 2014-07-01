@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
@@ -82,6 +83,7 @@ class BerParseFile
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_BERPARSEFILE_H

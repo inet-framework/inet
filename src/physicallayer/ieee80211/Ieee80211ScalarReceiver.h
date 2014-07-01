@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 {
   protected:
@@ -54,6 +55,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211SCALARRECEIVER_H

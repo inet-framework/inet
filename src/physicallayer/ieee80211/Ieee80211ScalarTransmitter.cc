@@ -27,6 +27,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 Define_Module(Ieee80211ScalarTransmitter);
 
 void Ieee80211ScalarTransmitter::initialize(int stage)
@@ -72,5 +73,6 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
 }
 
 } // namespace physicallayer
+
 } // namespace inet
 

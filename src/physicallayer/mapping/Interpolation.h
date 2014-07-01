@@ -26,6 +26,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 /**
  * @brief Represents an interpolated value of any type.
  *
@@ -922,6 +923,7 @@ class InterpolateableMap : public TContainer
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_INTERPOLATION_H

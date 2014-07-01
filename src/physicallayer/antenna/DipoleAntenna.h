@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API DipoleAntenna : public AntennaBase
 {
   protected:
@@ -41,6 +42,7 @@ class INET_API DipoleAntenna : public AntennaBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_DIPOLEANTENNA_H

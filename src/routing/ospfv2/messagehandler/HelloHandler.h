@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace OSPF {
+
 class HelloHandler : public IMessageHandler
 {
   public:
@@ -32,6 +33,7 @@ class HelloHandler : public IMessageHandler
 };
 
 } // namespace OSPF
+
 } // namespace inet
 
 #endif // ifndef __INET_HELLOHANDLER_H

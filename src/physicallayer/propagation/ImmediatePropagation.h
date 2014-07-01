@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ImmediatePropagation : public PropagationBase
 {
   public:
@@ -34,6 +35,7 @@ class INET_API ImmediatePropagation : public PropagationBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_IMMEDIATEPROPAGATION_H

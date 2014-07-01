@@ -23,6 +23,7 @@
 namespace inet {
 
 namespace physicallayer {
+
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
   protected:
@@ -40,6 +41,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 };
 
 } // namespace physicallayer
+
 } // namespace inet
 
 #endif // ifndef __INET_CONSTANTSPEEDPROPAGATION_H
