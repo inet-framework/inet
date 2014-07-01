@@ -226,7 +226,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
         virtual void clearQueue();
 };
 
-} //namespace
+}
 
 
 #endif

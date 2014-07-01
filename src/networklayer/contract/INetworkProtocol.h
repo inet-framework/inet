@@ -35,7 +35,7 @@ class INET_API INetworkProtocol {
 //    virtual Address resolveAddress(const char * address) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

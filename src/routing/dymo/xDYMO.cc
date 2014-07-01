@@ -1459,6 +1459,6 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
     }
 }
 
-} // namespace DYMO
+}
 
-} // namespace
+}

@@ -37,7 +37,7 @@ class INET_API IPowerConsumer
     virtual double getPowerConsumption() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

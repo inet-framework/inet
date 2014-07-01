@@ -71,6 +71,6 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
 
 }
 
-} // namespace inet
+}
 
 #endif /* NEIGHBORLISTCACHE_H_ */

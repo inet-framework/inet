@@ -538,6 +538,6 @@ void TCP::reset()
 
 
 
-} // namespace inet
+}
 
 

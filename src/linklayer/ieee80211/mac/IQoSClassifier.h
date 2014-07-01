@@ -45,7 +45,7 @@ class INET_API IQoSClassifier : public cObject
     virtual int classifyPacket(cMessage *msg) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -56,7 +56,7 @@ class INET_API MACProtocolBase : public LayeredProtocolBase, public cListener
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_LINK_LAYER; }
 };
 
-} //namespace
+}
 
 
 #endif

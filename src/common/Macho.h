@@ -71,7 +71,7 @@
 // #include <iostream>
 // using namespace std;
 //
-// namespace Example {
+
 //     TOPSTATE(Top) {
 //         struct Box {
 //             Box() : data(0) {}
@@ -1220,7 +1220,7 @@ namespace Macho
         return new _Event0<TOP, R>(handler);
     }
 
-} // namespace Macho
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2209,7 +2209,7 @@ namespace Macho
     }
 #endif
 
-} // namespace Macho
+}
 
 
 #endif // __MACHO_HPP__

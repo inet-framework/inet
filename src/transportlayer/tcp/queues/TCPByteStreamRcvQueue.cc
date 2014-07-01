@@ -130,6 +130,6 @@ TCPVirtualDataRcvQueue::Region* TCPByteStreamRcvQueue::createRegionFromSegment(T
 
 
 
-} // namespace inet
+}
 
 

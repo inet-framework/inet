@@ -226,6 +226,6 @@ void ExtInterface::clearQueue()
 
 
 
-} // namespace inet
+}
 
 

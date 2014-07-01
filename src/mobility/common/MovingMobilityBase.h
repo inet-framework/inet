@@ -95,7 +95,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     virtual Coord getCurrentSpeed();
 };
 
-} //namespace
+}
 
 
 #endif

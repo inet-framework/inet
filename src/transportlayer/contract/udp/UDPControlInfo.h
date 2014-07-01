@@ -23,7 +23,7 @@
 
 namespace inet {
 
-} //namespace
+}
 
 
 #endif

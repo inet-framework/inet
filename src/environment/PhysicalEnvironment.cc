@@ -188,4 +188,4 @@ void PhysicalEnvironment::updateCanvas()
 #endif
 }
 
-} // namespace inet
+}

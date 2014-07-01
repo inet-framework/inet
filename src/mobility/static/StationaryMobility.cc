@@ -30,6 +30,6 @@ void StationaryMobility::handleSelfMessage(cMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

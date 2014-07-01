@@ -9,6 +9,6 @@ namespace inet {
 const Quaternion Quaternion::IDENTITY = Quaternion();
 
 
-} // namespace inet
+}
 
 

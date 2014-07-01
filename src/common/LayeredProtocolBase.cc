@@ -70,6 +70,6 @@ void LayeredProtocolBase::handleLowerCommand(cMessage* message)
 }
 
 
-} // namespace inet
+}
 
 

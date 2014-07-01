@@ -24,6 +24,6 @@ ApplicationBase::ApplicationBase()
 }
 
 
-} // namespace inet
+}
 
 

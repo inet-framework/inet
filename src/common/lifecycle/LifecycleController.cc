@@ -158,6 +158,6 @@ void LifecycleController::moduleOperationStageCompleted(Callback *callback)
 }
 
 
-} // namespace inet
+}
 
 

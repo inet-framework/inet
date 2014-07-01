@@ -331,6 +331,6 @@ void ScenarioManager::updateDisplayString()
 
 
 
-} // namespace inet
+}
 
 

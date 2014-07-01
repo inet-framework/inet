@@ -68,7 +68,7 @@ class INET_API ReceptionBase : public virtual IReception
 
 }
 
-} //namespace
+}
 
 
 #endif

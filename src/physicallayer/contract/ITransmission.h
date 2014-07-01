@@ -96,7 +96,7 @@ class INET_API ITransmission : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

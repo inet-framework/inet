@@ -194,6 +194,6 @@ void TCPEchoApp::finish()
 
 
 
-} // namespace inet
+}
 
 

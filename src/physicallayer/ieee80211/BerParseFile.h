@@ -83,7 +83,7 @@ class BerParseFile
 
 }
 
-} //namespace
+}
 
 
 #endif

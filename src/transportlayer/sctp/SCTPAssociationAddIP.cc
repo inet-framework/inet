@@ -318,6 +318,6 @@ SCTPSuccessIndication* SCTPAssociation::createSuccessIndication(const uint32 cor
 }
 
 
-} // namespace inet
+}
 
 

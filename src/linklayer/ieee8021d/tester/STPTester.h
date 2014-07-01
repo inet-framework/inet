@@ -77,7 +77,7 @@ class INET_API STPTester : public cSimpleModule
         int getNumOfVisitedNodes();
 };
 
-} //namespace
+}
 
 
 #endif

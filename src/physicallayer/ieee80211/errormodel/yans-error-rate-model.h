@@ -81,7 +81,7 @@ private:
 
 }
 
-} //namespace
+}
 
 
 #endif /* YANS_ERROR_RATE_MODEL_H */

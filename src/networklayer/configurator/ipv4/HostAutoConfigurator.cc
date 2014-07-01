@@ -109,6 +109,6 @@ void HostAutoConfigurator::setupNetworkLayer()
 
 
 
-} // namespace inet
+}
 
 

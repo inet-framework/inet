@@ -106,6 +106,6 @@ void OrdinalBasedDuplicator::finish()
 }
 
 
-} // namespace inet
+}
 
 

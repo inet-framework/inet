@@ -683,6 +683,6 @@ void SCTPClient::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -335,6 +335,6 @@ const char *Address::getTypeName(AddressType t)
 
 
 
-} // namespace inet
+}
 
 

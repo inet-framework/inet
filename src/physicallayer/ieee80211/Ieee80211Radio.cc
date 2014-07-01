@@ -72,6 +72,6 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 }
 
 
-} // namespace inet
+}
 
 

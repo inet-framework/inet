@@ -122,6 +122,6 @@ int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

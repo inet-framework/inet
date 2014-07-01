@@ -2831,5 +2831,5 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     return ret;
 }
 
-} // namespace inet
+}
 

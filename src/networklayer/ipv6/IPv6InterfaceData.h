@@ -791,7 +791,7 @@ class INET_API IPv6InterfaceData : public InterfaceProtocolData
 #endif /* WITH_xMIPv6 */
 };
 
-} //namespace
+}
 
 
 #endif

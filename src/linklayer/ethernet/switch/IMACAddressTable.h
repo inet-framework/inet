@@ -90,7 +90,7 @@ class INET_API IMACAddressTable
     virtual void resetDefaultAging() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

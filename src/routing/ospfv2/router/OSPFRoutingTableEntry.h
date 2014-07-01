@@ -91,13 +91,13 @@ public:
     NextHop                getNextHop(unsigned int index) const  { return nextHops[index]; }
 };
 
-} // namespace OSPF
+}
 
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry);
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFROUTINGTABLEENTRY_H
+#endif
 

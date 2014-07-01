@@ -42,7 +42,7 @@ class INET_API ScalarReceiver : public FlatReceiverBase
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -390,7 +390,7 @@ class INET_API IPv4RoutingTable: public cSimpleModule, public IIPv4RoutingTable,
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) { return deleteMulticastRoute(check_and_cast<IPv4MulticastRoute *>(entry)); }
 };
 
-} //namespace
+}
 
 
 #endif

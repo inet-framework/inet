@@ -36,7 +36,7 @@ class NetworkDatagramMultiplexer : public cSimpleModule {
     int getProtocolIndex(cMessage * message);
 };
 
-} //namespace
+}
 
 
 #endif

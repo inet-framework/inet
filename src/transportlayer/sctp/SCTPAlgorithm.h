@@ -81,7 +81,7 @@ class INET_API SCTPAlgorithm : public cObject
 
 };
 
-} //namespace
+}
 
 
 #endif

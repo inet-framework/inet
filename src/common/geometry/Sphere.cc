@@ -54,4 +54,4 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
         return false;
 }
 
-} // namespace inet
+}

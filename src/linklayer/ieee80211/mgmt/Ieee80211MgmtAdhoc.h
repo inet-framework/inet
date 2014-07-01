@@ -71,7 +71,7 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

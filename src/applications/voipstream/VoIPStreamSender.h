@@ -145,7 +145,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     static simsignal_t sentPkSignal;
 };
 
-} //namespace
+}
 
 
-#endif //VOIPSTREAM_VOIPSTREAMSENDER_H
+#endif

@@ -43,7 +43,7 @@ class INET_API ConstantGainAntenna : public AntennaBase
 
 }
 
-} //namespace
+}
 
 
 #endif

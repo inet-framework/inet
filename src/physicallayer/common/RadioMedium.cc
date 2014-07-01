@@ -842,6 +842,6 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
 }
 
 
-} // namespace inet
+}
 
 

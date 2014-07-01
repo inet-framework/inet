@@ -34,7 +34,7 @@ class INET_API DimensionalUtils
 
 }
 
-} //namespace
+}
 
 
 #endif

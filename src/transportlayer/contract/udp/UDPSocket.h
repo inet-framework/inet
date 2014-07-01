@@ -271,7 +271,7 @@ class INET_API UDPSocket
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

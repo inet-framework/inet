@@ -120,6 +120,6 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
 }
 
 
-} // namespace inet
+}
 
 

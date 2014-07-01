@@ -253,7 +253,7 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
     return os;
 }
 
-} //namespace
+}
 
 
 #endif

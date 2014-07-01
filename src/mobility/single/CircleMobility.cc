@@ -76,6 +76,6 @@ void CircleMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

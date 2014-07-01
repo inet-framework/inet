@@ -85,7 +85,7 @@ class ExtInterface : public MACBase
     virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -78,7 +78,7 @@ class INET_API MPLSPacket: public cPacket
     inline int getTopLabel()  {return labels.back();}
 };
 
-} //namespace
+}
 
 
 #endif

@@ -99,6 +99,6 @@ void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue q
 
 
 
-} // namespace inet
+}
 
 

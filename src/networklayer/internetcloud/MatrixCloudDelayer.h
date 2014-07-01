@@ -103,8 +103,8 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
 };
 
 
-} //namespace
+}
 
 
-#endif  // __INET_INTERNETCLOUD_MATRIXCLOUDDELAYER_H
+#endif
 

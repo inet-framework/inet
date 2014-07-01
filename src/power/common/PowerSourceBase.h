@@ -72,7 +72,7 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
     virtual void setPowerConsumption(int id, double consumedPower);
 };
 
-} //namespace
+}
 
 
 #endif

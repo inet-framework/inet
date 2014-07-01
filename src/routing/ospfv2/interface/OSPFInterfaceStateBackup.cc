@@ -59,6 +59,6 @@ void OSPF::InterfaceStateBackup::processEvent(OSPF::Interface* intf, OSPF::Inter
 
 
 
-} // namespace inet
+}
 
 

@@ -47,7 +47,7 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 
 }
 
-} //namespace
+}
 
 
 #endif

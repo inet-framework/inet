@@ -802,6 +802,6 @@ void SCTPAssociation::cwndUpdateAfterCwndTimeout(SCTPPathVariables* path)
 }
 
 
-} // namespace inet
+}
 
 

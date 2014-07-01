@@ -149,6 +149,6 @@ void TCPTahoe::receivedDuplicateAck()
 }
 
 
-} // namespace inet
+}
 
 

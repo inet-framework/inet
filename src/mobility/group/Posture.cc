@@ -192,6 +192,6 @@ bool Posture::isMobile()
 }
 
 
-} // namespace inet
+}
 
 

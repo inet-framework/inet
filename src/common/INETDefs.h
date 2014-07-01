@@ -107,7 +107,7 @@ inline cObject *createOne(const char *classname) {
     return ret;
 }
 
-} //namespace
+}
 
 
-#endif  // __INET_INETDEFS_H
+#endif

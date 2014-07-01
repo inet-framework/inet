@@ -53,6 +53,6 @@ std::string HttpServerEvilA::generateBody()
 }
 
 
-} // namespace inet
+}
 
 

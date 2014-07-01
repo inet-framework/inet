@@ -172,7 +172,7 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
 };
 #endif /*0*/
 
-} //namespace
+}
 
 
 #endif

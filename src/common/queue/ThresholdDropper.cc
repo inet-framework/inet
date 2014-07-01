@@ -40,6 +40,6 @@ bool ThresholdDropper::shouldDrop(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

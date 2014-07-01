@@ -450,7 +450,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
 }
 
-} //namespace
+}
 
 
 #endif

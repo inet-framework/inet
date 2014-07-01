@@ -41,5 +41,5 @@ void Join::handleMessage(cMessage *msg)
     send(msg, outg);
 }
 
-} // namespace inet
+}
 

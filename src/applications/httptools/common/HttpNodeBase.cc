@@ -191,6 +191,6 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage* httpRes
 }
 
 
-} // namespace inet
+}
 
 

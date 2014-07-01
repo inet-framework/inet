@@ -71,7 +71,7 @@ class INET_API EthernetApplication : public cSimpleModule
 
 };
 
-} //namespace
+}
 
 
 #endif

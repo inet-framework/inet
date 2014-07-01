@@ -261,7 +261,7 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
     virtual int getPrefixLength() const {return getOriginNetmask().getNetmaskLength();} //TODO inconsistent naming
     virtual Address getMulticastGroupAsGeneric() const {return getMulticastGroup();}
 };
-} //namespace
+}
 
 
 #endif // __INET_IPv4ROUTE_H

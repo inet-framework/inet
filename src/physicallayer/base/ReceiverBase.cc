@@ -62,6 +62,6 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
 }
 
 
-} // namespace inet
+}
 
 

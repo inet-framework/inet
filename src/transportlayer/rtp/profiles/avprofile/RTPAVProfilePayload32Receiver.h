@@ -75,7 +75,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
         virtual void processPacket(RTPPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -90,6 +90,6 @@ void SCTPAlg::dataSent(uint32)
 }
 
 
-} // namespace inet
+}
 
 

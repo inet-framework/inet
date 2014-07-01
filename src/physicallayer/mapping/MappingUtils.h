@@ -2490,7 +2490,7 @@ INET_API Mapping* operator-(const ConstMapping& f1, const ConstMapping& f2);
 
 }
 
-} //namespace
+}
 
 
 #endif

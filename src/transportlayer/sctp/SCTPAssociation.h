@@ -1358,7 +1358,7 @@ class INET_API SCTPAssociation : public cObject
         }
 };
 
-} //namespace
+}
 
 
 #endif

@@ -37,6 +37,6 @@ class INET_API Shape
         virtual bool isIntersecting(const LineSegment& lineSegment) const;
 };
 
-} // namespace inet
+}
 
 #endif

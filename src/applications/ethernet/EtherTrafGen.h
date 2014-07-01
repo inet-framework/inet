@@ -79,7 +79,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
 
 };
 
-} //namespace
+}
 
 
 #endif

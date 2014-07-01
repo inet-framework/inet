@@ -214,7 +214,7 @@ class INET_API TcpLwipReceiveQueue : public cObject
     TcpLwipConnection *connM;
 };
 
-} //namespace
+}
 
 
 #endif

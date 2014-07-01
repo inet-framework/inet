@@ -47,7 +47,7 @@ class INET_API EchoProtocol : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

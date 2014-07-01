@@ -116,7 +116,7 @@ class INET_API TCP_NSC_Connection
     TCP_NSC_SendQueue * sendQueueM;
 };
 
-} //namespace
+}
 
 
 #endif

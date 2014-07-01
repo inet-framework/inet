@@ -130,6 +130,6 @@ void IPv4NodeConfigurator::configureNode()
 }
 
 
-} // namespace inet
+}
 
 

@@ -132,4 +132,4 @@ NeighborListCache::~NeighborListCache()
 
 }
 
-} // namespace inet
+}

@@ -226,6 +226,6 @@ void TCP_NSC_Connection::abort()
 
 
 
-} // namespace inet
+}
 
 

@@ -53,7 +53,7 @@ bool getBoolAttribute(const cXMLElement &element, const char *name, const bool *
     throw cRuntimeError("Invalid boolean attribute %s = '%s' at %s", name, s, element.getSourceLocation());
 }
 
-} // namespace
+}
 
 
 //FIXME modified copy of 'Matcher' class from IPv4NetworkConfigurator
@@ -250,6 +250,6 @@ std::string MatrixCloudDelayer::getPathOfConnectedNodeOnIfaceID(int id)
 
 
 
-} // namespace inet
+}
 
 

@@ -54,7 +54,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
         virtual void recordPacket(cPacket *msg, bool l2r);
 };
 
-} //namespace
+}
 
 
 #endif

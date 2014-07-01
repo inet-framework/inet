@@ -351,6 +351,6 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
 
 
 
-} // namespace inet
+}
 
 

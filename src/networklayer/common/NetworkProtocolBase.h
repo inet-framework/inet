@@ -49,7 +49,7 @@ class INET_API NetworkProtocolBase : public LayeredProtocolBase
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_NETWORK_LAYER; }
 };
 
-} //namespace
+}
 
 
 #endif

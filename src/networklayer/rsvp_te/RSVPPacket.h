@@ -48,7 +48,7 @@ class RSVPPacket : public RSVPPacket_Base
     }
 };
 
-} //namespace
+}
 
 
 #endif

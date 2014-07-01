@@ -85,7 +85,7 @@ class INET_API IReception : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -23,4 +23,4 @@ Polygon::Polygon()
 {
 }
 
-} // namespace inet
+}

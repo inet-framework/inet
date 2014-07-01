@@ -705,6 +705,6 @@ void TCPBaseAlg::restartRexmitTimer()
 }
 
 
-} // namespace inet
+}
 
 

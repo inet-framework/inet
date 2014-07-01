@@ -27,6 +27,6 @@ bool ModuleIdAddress::tryParse(const char *addr)
 }
 
 
-} // namespace inet
+}
 
 

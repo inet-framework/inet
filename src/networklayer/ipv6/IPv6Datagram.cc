@@ -221,4 +221,4 @@ std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader& h)
     return out;
 }
 
-} // namespace inet
+}

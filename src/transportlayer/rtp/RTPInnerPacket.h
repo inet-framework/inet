@@ -117,7 +117,7 @@ class RTPInnerPacket : public RTPInnerPacket_Base
 
 };
 
-} //namespace
+}
 
 
 #endif

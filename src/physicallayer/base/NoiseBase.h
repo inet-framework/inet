@@ -43,7 +43,7 @@ class INET_API NoiseBase : public INoise
 
 }
 
-} //namespace
+}
 
 
 #endif

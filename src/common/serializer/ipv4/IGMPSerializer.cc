@@ -86,6 +86,6 @@ void IGMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, IGMPM
 }
 
 
-} // namespace inet
+}
 
 

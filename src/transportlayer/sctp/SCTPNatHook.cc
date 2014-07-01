@@ -328,6 +328,6 @@ void SCTPNatHook::finish()
 }
 
 
-} // namespace inet
+}
 
 

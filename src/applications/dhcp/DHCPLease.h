@@ -53,7 +53,7 @@ inline std::ostream& operator <<(std::ostream& os, DHCPLease obj)
     return os;
 }
 
-} //namespace
+}
 
 
 #endif

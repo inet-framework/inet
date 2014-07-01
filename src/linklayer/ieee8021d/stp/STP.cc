@@ -735,6 +735,6 @@ void STP::initInterfacedata(unsigned int portNum)
 }
 
 
-} // namespace inet
+}
 
 

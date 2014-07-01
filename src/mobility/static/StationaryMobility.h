@@ -52,7 +52,7 @@ class INET_API StationaryMobility : public MobilityBase
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
 };
 
-} //namespace
+}
 
 
 #endif

@@ -116,7 +116,7 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
         virtual ~SCTPClient();
 };
 
-} //namespace
+}
 
 
 #endif

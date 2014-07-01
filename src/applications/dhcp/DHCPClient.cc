@@ -774,6 +774,6 @@ bool DHCPClient::handleOperationStage(LifecycleOperation *operation, int stage, 
 
 
 
-} // namespace inet
+}
 
 

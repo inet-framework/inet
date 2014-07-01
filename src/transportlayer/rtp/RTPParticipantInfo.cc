@@ -155,6 +155,6 @@ char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
 }
 
 
-} // namespace inet
+}
 
 

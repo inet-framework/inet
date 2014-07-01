@@ -2212,6 +2212,6 @@ void SCTPSerializer::calculateSharedKey()
 
 
 
-} // namespace inet
+}
 
 

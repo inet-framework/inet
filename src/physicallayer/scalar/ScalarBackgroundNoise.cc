@@ -46,6 +46,6 @@ const INoise *ScalarBackgroundNoise::computeNoise(const IListening *listening) c
 }
 
 
-} // namespace inet
+}
 
 

@@ -57,7 +57,7 @@ class INET_API FlatTransmissionBase : public TransmissionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

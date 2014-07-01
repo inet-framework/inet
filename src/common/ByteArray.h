@@ -93,7 +93,7 @@ class ByteArray : public ByteArray_Base
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
 };
 
-} //namespace
+}
 
 
-#endif //  __INET_BYTEARRAY_H
+#endif

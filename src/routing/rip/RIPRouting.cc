@@ -1213,4 +1213,4 @@ bool RIPRouting::isLocalInterfaceRoute(const IRoute *route)
     return ie && !ie->isLoopback();
 }
 
-} // namespace
+}

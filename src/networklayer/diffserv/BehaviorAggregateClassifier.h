@@ -50,7 +50,7 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
     int getDscpFromPacket(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

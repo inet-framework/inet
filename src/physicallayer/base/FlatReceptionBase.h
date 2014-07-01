@@ -45,7 +45,7 @@ class INET_API FlatReceptionBase : public ReceptionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

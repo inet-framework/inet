@@ -33,7 +33,7 @@ class IErrorModel
 
 }
 
-} //namespace
+}
 
 
 #endif /* IERRORMODEL_H_ */

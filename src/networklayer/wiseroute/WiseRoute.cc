@@ -386,6 +386,6 @@ cObject* WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& p
 }
 
 
-} // namespace inet
+}
 
 

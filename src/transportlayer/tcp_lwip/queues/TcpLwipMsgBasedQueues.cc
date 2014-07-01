@@ -340,6 +340,6 @@ void TcpLwipMsgBasedReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP)
 
 
 
-} // namespace inet
+}
 
 

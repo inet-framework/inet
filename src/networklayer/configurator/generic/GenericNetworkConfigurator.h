@@ -166,7 +166,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
 };
 
-} //namespace
+}
 
 
 #endif

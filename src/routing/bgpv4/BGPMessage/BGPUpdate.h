@@ -34,7 +34,7 @@ public:
     void setNLRI(const BGPUpdateNLRI& NLRI_var);
 };
 
-} //namespace
+}
 
 
 #endif

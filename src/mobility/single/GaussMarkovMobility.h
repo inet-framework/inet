@@ -61,7 +61,7 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
     GaussMarkovMobility();
 };
 
-} //namespace
+}
 
 
 #endif

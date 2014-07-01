@@ -64,7 +64,7 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
     virtual void discardUpTo(uint32 seqNum);
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCPDATASTREAMSENDQUEUE_H
+#endif

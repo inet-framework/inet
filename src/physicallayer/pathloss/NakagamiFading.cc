@@ -53,6 +53,6 @@ double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
 }
 
 
-} // namespace inet
+}
 
 

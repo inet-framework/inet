@@ -37,7 +37,7 @@
 
 namespace inet {
 
-} //namespace
+}
 
 
 #endif

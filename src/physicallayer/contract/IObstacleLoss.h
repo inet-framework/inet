@@ -35,6 +35,6 @@ class INET_API IObstacleLoss : public IPrintableObject
 
 }
 
-} // namespace inet
+}
 
 #endif

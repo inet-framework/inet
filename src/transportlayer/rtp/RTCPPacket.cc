@@ -82,6 +82,6 @@ RTCPByePacket::RTCPByePacket(const char *name, int kind)
 };
 
 
-} // namespace inet
+}
 
 

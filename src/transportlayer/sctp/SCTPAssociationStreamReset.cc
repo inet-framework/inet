@@ -285,6 +285,6 @@ void SCTPAssociation::resetSsns()
 }
 
 
-} // namespace inet
+}
 
 

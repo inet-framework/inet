@@ -33,7 +33,7 @@ class MultiNetworkLayerLowerMultiplexer : public cSimpleModule {
     int getProtocolIndex(cMessage * message);
 };
 
-} //namespace
+}
 
 
 #endif

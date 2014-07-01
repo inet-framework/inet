@@ -965,6 +965,6 @@ void EtherMAC::beginSendFrames()
 
 
 
-} // namespace inet
+}
 
 

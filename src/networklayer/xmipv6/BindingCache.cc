@@ -145,4 +145,4 @@ int BindingCache::generateKey(int homeToken, int careOfToken, const IPv6Address&
     return homeToken + careOfToken;
 }
 
-} // namespace
+}

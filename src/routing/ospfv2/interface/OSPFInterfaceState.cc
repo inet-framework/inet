@@ -384,6 +384,6 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface* intf)
 }
 
 
-} // namespace inet
+}
 
 

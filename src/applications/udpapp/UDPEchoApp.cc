@@ -112,6 +112,6 @@ void UDPEchoApp::handleNodeCrash()
 
 
 
-} // namespace inet
+}
 
 

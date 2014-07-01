@@ -135,7 +135,7 @@ const char *notificationCategoryName(simsignal_t signalID);
  */
 void printNotificationBanner(simsignal_t signalID, const cObject *obj);
 
-} //namespace
+}
 
 
 #endif

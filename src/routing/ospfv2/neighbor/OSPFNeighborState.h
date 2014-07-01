@@ -35,10 +35,10 @@ public:
     virtual Neighbor::NeighborStateType getState() const = 0;
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFNEIGHBORSTATE_H
+#endif
 

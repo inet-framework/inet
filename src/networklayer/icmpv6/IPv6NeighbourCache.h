@@ -214,7 +214,7 @@ class INET_API IPv6NeighbourCache
     static const char *stateName(ReachabilityState state);
 };
 
-} //namespace
+}
 
 
 #endif

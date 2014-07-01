@@ -133,6 +133,6 @@ bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 }
 
 
-} // namespace inet
+}
 
 

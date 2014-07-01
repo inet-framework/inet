@@ -46,7 +46,7 @@ class INET_API IAddressType
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -56,7 +56,7 @@ class INET_API ProtocolMapping
     int getOutputGateForProtocol(int protocol) const;
 };
 
-} //namespace
+}
 
 
 #endif

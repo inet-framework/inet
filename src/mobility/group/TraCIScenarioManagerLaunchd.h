@@ -61,7 +61,7 @@ class INET_API TraCIScenarioManagerLaunchd : public TraCIScenarioManager
         virtual void init_traci();
 };
 
-} //namespace
+}
 
 #endif  // WITH_TRACI
 

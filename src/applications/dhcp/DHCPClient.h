@@ -187,7 +187,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
 
 };
 
-} //namespace
+}
 
 
 #endif

@@ -70,7 +70,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
 
 }
 
-} //namespace
+}
 
 
 #endif

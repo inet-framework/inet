@@ -183,6 +183,6 @@ void TCPGenericSrvApp::finish()
 
 
 
-} // namespace inet
+}
 
 

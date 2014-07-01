@@ -349,7 +349,7 @@ class INET_API TraCIScenarioManager : public cSimpleModule
 template<> void TraCIScenarioManager::TraCIBuffer::write(std::string inv);
 template<> std::string TraCIScenarioManager::TraCIBuffer::read();
 
-} //namespace
+}
 
 #endif  // WITH_TRACI
 

@@ -45,7 +45,7 @@ class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDat
     virtual void setTransportProtocol(int protocol) { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
 };
 
-} //namespace
+}
 
 
 #endif

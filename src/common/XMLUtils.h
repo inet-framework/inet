@@ -29,7 +29,7 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName);
 
 bool parseBool(const char *text);
 
-} //namespace
+}
 
 
 #endif

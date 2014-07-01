@@ -159,7 +159,7 @@ class INET_API ModuleAccess
     }
 };
 
-} //namespace
+}
 
 
 #endif

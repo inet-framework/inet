@@ -138,6 +138,6 @@ void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *f
 
 
 
-} // namespace inet
+}
 
 

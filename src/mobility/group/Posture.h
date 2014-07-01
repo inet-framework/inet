@@ -154,7 +154,7 @@ class INET_API Posture {
     double getAlphaSD(unsigned int, unsigned int);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -55,6 +55,6 @@ class INET_API PhysicalEnvironment : public cModule
         virtual const std::vector<PhysicalObject *> &getObjects() { return objects; }
 };
 
-} // namespace inet
+}
 
 #endif

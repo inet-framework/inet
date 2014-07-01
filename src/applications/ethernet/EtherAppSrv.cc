@@ -170,6 +170,6 @@ void EtherAppSrv::finish()
 
 
 
-} // namespace inet
+}
 
 

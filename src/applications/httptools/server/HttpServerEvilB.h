@@ -50,7 +50,7 @@ class INET_API HttpServerEvilB : public HttpServer
         virtual std::string generateBody();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -44,7 +44,7 @@ class ICMPSerializer
         void parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
 };
 
-} //namespace
+}
 
 
 #endif

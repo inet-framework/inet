@@ -384,6 +384,6 @@ void InterfaceEntry::changeMulticastGroupMembership(const Address &multicastAddr
 }
 
 
-} // namespace inet
+}
 
 

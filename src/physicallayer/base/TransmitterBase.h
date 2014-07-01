@@ -33,7 +33,7 @@ class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 
 }
 
-} //namespace
+}
 
 
 #endif

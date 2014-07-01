@@ -23,6 +23,6 @@ namespace inet {
 Register_Class(TxNotifDetails);
 
 
-} // namespace inet
+}
 
 

@@ -172,7 +172,7 @@ class INET_API IInterfaceTable
     virtual MulticastGroupList collectMulticastGroups() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

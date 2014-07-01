@@ -343,6 +343,6 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
 
 
 
-} // namespace inet
+}
 
 

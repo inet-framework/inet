@@ -58,7 +58,7 @@ class INET_API ChiangMobility : public LineSegmentsMobilityBase
     ChiangMobility();
 };
 
-} //namespace
+}
 
 
 #endif

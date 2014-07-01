@@ -790,6 +790,6 @@ void SCTPPeer::finish()
 
 
 
-} // namespace inet
+}
 
 

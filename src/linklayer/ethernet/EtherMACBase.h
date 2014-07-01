@@ -243,7 +243,7 @@ class INET_API EtherMACBase : public MACBase
     virtual void refreshConnection();
 };
 
-} //namespace
+}
 
 
 #endif

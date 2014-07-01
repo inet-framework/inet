@@ -39,4 +39,4 @@ class INET_API RTPAVProfile : public RTPProfile
     virtual void initialize();
 };
 
-} // namespace
+}

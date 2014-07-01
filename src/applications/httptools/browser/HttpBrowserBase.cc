@@ -613,6 +613,6 @@ void HttpBrowserBase::readScriptedEvents(const char* filename)
 }
 
 
-} // namespace inet
+}
 
 

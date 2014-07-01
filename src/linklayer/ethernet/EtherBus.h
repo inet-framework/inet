@@ -72,7 +72,7 @@ class INET_API EtherBus : public cSimpleModule, cListener
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
 
-} //namespace
+}
 
 
 #endif

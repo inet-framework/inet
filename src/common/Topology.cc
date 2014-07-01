@@ -470,6 +470,6 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
 
 
 
-} // namespace inet
+}
 
 

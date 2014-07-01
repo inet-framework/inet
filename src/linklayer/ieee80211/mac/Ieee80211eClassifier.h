@@ -54,7 +54,7 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
     virtual int classifyPacket(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

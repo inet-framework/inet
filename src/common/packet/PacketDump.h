@@ -121,8 +121,8 @@ class INET_API PacketDump
                 const std::string& destAddr, const char *comment);
 };
 
-} //namespace
+}
 
 
-#endif // __INET_PACKETDUMP_H
+#endif
 

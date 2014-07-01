@@ -203,6 +203,6 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
 
 
 
-} // namespace inet
+}
 
 

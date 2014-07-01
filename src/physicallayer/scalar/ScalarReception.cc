@@ -28,6 +28,6 @@ void ScalarReception::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

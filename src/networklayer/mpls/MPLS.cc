@@ -289,6 +289,6 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
 }
 
 
-} // namespace inet
+}
 
 

@@ -237,6 +237,6 @@ std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FECEntry& fec
 }
 
 
-} // namespace inet
+}
 
 

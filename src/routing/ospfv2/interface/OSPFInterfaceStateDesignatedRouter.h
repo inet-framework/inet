@@ -31,10 +31,10 @@ public:
     virtual Interface::InterfaceStateType getState() const { return Interface::DESIGNATED_ROUTER_STATE; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACESTATEDESIGNATEDROUTER_H
+#endif
 

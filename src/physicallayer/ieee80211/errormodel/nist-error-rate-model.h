@@ -64,7 +64,7 @@ private:
 
 }
 
-} //namespace
+}
 
 
 #endif /* NIST_ERROR_RATE_MODEL_H */

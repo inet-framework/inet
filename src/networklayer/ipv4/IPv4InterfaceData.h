@@ -208,7 +208,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

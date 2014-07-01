@@ -100,7 +100,7 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
     void setMoBANParameters(Coord referencePoint, double radius, double speed);
 };
 
-} //namespace
+}
 
 
 #endif

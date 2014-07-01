@@ -39,6 +39,6 @@ void PropagationBase::finish()
 }
 
 
-} // namespace inet
+}
 
 

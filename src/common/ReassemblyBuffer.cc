@@ -131,6 +131,6 @@ void ReassemblyBuffer::mergeFragments()
 
 
 
-} // namespace inet
+}
 
 

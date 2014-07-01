@@ -67,7 +67,7 @@ class INET_API AODVRouteData : public cObject
 
 std::ostream& operator<<(std::ostream& out, const AODVRouteData *data);
 
-} //namespace
+}
 
 
 #endif // ifndef AODVROUTEDATA_H_

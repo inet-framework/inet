@@ -114,7 +114,7 @@ class INET_API PassiveQueueBase : public cSimpleModule, public IPassiveQueue
     virtual void removeListener(IPassiveQueueListener *listener);
 };
 
-} //namespace
+}
 
 
 #endif

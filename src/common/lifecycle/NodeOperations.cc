@@ -38,6 +38,6 @@ void NodeOperation::initialize(cModule *module, StringMap& params)
 
 
 
-} // namespace inet
+}
 
 

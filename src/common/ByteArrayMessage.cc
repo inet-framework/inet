@@ -38,6 +38,6 @@ void ByteArrayMessage::removePrefix(unsigned int length)
 }
 
 
-} // namespace inet
+}
 
 

@@ -119,7 +119,7 @@ class INET_API ICMPv6 : public cSimpleModule, public ILifecycle
 };
 
 
-} //namespace
+}
 
 
 #endif

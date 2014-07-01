@@ -64,6 +64,6 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface* intf, OSPF::Inte
 
 
 
-} // namespace inet
+}
 
 

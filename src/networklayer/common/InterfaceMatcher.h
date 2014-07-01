@@ -80,7 +80,7 @@ class INET_API InterfaceMatcher
         void collectNeighbors(cGate *outGate, std::vector<cModule*> &hostNodes, std::vector<cModule*> &deviceNodes, cModule *exludedNode) const;
 };
 
-} //namespace
+}
 
 
 #endif /* INTERFACEMATCHER_H_ */

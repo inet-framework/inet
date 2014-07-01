@@ -127,6 +127,6 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 }
 
 
-} // namespace inet
+}
 
 

@@ -99,7 +99,7 @@ class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
     ByteArrayBuffer byteArrayBufferM;
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCP_NSC_DATASTREAMQUEUES_H
+#endif

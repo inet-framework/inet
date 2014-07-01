@@ -95,6 +95,6 @@ MACAddress GenericARP::mapMulticastAddress(Address addr)
 
 
 
-} // namespace inet
+}
 
 

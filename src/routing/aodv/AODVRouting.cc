@@ -1680,6 +1680,6 @@ AODVRouting::~AODVRouting()
 
 
 
-} // namespace inet
+}
 
 

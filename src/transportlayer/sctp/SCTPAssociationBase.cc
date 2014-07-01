@@ -1435,6 +1435,6 @@ void SCTPAssociation::removePath()
 }
 
 
-} // namespace inet
+}
 
 

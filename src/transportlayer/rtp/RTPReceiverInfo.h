@@ -210,7 +210,7 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
     FILE * packetSequenceLostLogFile;
 };
 
-} //namespace
+}
 
 
 #endif

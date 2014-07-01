@@ -97,6 +97,6 @@ void TraCIDemo::handlePositionUpdate() {
 }
 
 
-} // namespace inet
+}
 
 

@@ -427,6 +427,6 @@ IRoute* GenericRoutingTable::createRoute()
 
 
 
-} // namespace inet
+}
 
 

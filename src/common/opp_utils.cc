@@ -87,6 +87,6 @@ std::string vstringf(const char *fmt, va_list& args)
 
 #undef BUFLEN
 
-} // namespace OPP_Global
+}
 
-} // namespace inet
+}

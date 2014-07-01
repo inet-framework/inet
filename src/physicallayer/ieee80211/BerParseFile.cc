@@ -398,6 +398,6 @@ BerParseFile::~BerParseFile()
 }
 
 
-} // namespace inet
+}
 
 

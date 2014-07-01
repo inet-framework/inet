@@ -63,7 +63,7 @@ class INET_API ThruputMeter : public cSimpleModule
     virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

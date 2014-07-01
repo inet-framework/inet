@@ -893,6 +893,6 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

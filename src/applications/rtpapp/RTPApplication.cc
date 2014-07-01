@@ -275,6 +275,6 @@ bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int sta
 
 
 
-} // namespace inet
+}
 
 

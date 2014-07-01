@@ -83,7 +83,7 @@ class LinkStateRouting : public cSimpleModule, public cListener
 
 };
 
-} //namespace
+}
 
 
 #endif

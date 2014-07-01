@@ -54,7 +54,7 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
     static State getStateByName(const char *name);
 };
 
-} //namespace
+}
 
 
 #endif

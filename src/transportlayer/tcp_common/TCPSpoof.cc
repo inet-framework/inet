@@ -87,6 +87,6 @@ unsigned long TCPSpoof::chooseInitialSeqNum()
 
 
 
-} // namespace inet
+}
 
 

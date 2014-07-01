@@ -80,6 +80,6 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface* intf, OSPF::Interfa
 
 
 
-} // namespace inet
+}
 
 

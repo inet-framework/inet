@@ -94,6 +94,6 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor* neighbor, OSPF::N
 }
 
 
-} // namespace inet
+}
 
 

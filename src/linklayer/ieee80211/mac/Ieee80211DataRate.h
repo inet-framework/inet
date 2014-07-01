@@ -31,7 +31,7 @@ class Ieee80211Descriptor
     static int size() { return descriptorSize; }
 };
 
-} //namespace
+}
 
 
 #endif

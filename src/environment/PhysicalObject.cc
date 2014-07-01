@@ -40,4 +40,4 @@ PhysicalObject::~PhysicalObject()
     delete shape;
 }
 
-} // namespace inet
+}

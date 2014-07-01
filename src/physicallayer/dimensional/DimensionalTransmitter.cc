@@ -50,6 +50,6 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
 }
 
 
-} // namespace inet
+}
 
 

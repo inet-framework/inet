@@ -65,6 +65,6 @@ void RandomWPMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

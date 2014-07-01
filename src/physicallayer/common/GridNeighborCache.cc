@@ -250,4 +250,4 @@ GridNeighborCache::~GridNeighborCache()
 
 }
 
-} // namespace inet
+}

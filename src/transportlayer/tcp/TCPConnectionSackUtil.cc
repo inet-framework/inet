@@ -702,6 +702,6 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 }
 
 
-} // namespace inet
+}
 
 

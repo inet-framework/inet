@@ -90,7 +90,7 @@ class INET_API Battery : public PowerSourceBase
     virtual void scheduleDepletedTimer();
 };
 
-} //namespace
+}
 
 
 #endif

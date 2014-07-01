@@ -671,7 +671,7 @@ class INET_API Ieee80211Mac : public MACProtocolBase
     virtual unsigned int getQueueSize() {return transmissionQueueSize();}
 };
 
-} //namespace
+}
 
 
 #endif

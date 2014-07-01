@@ -76,7 +76,7 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
 
 }
 
-} //namespace
+}
 
 
 #endif

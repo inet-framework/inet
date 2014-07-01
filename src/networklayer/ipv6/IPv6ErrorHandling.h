@@ -48,7 +48,7 @@ class INET_API IPv6ErrorHandling: public cSimpleModule
     virtual void displayType4Msg(int code);
 };
 
-} //namespace
+}
 
 
 #endif

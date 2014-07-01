@@ -82,7 +82,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     virtual int classifyPacket(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

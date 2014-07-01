@@ -129,8 +129,8 @@ T check_and_cast_nullable(P *p)
 
 #endif  // OMNETPP_VERSION < 0x0500
 
-} //namespace
+}
 
 
-#endif  // __INET_COMPAT_H_
+#endif
 

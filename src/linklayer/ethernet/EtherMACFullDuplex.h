@@ -66,7 +66,7 @@ class INET_API EtherMACFullDuplex : public EtherMACBase
     simtime_t totalSuccessfulRxTime; // total duration of successful transmissions on channel
 };
 
-} //namespace
+}
 
 
 #endif

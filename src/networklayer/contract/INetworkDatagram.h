@@ -33,7 +33,7 @@ class INetworkDatagram {
     virtual void setTransportProtocol(int protocol) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

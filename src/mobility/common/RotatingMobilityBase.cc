@@ -96,6 +96,6 @@ EulerAngles RotatingMobilityBase::getCurrentAngularSpeed()
 }
 
 
-} // namespace inet
+}
 
 

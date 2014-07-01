@@ -53,7 +53,7 @@ class INET_API SUIPathLoss : public cModule, public IPathLoss
 
 }
 
-} //namespace
+}
 
 
 #endif

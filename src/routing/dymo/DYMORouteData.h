@@ -44,9 +44,9 @@ class INET_API DYMORouteData : public cObject {
     void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
 };
 
-} // namespace DYMO
+}
 
-} //namespace
+}
 
 
 #endif

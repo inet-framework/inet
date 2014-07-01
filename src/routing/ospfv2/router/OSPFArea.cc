@@ -2453,6 +2453,6 @@ void OSPF::Area::recheckSummaryLSAs(std::vector<OSPF::RoutingTableEntry*>& newRo
 }
 
 
-} // namespace inet
+}
 
 

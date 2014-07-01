@@ -209,7 +209,7 @@ class INET_API RTP : public cSimpleModule, public ILifecycle
     static simsignal_t rcvdPkSignal;
 };
 
-} //namespace
+}
 
 
 #endif

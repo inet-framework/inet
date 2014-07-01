@@ -38,7 +38,7 @@ class INET_API TCPGenericSrvThread : public TCPServerThreadBase
     virtual void timerExpired(cMessage *timer);
 };
 
-} //namespace
+}
 
 
 #endif

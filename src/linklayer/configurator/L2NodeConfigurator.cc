@@ -96,6 +96,6 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
 }
 
 
-} // namespace inet
+}
 
 

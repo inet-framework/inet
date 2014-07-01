@@ -307,6 +307,6 @@ cObject* Flood::setDownControlInfo(cMessage *const pMsg, const MACAddress& pDest
 }
 
 
-} // namespace inet
+}
 
 

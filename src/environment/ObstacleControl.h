@@ -112,7 +112,7 @@ class INET_API ObstacleControl : public cSimpleModule
         mutable CacheEntries cacheEntries;
 };
 
-} //namespace
+}
 
 
 #endif

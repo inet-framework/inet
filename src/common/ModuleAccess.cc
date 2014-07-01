@@ -102,4 +102,4 @@ cModule *findModuleUnderContainingNode(cModule *from)
     }
     return NULL;
 }
-} // namespace
+}

@@ -62,7 +62,7 @@ class RTCPByePacket : public RTCPByePacket_Base
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPByePacket_Base
 };
 
-} //namespace
+}
 
 
 #endif // __INET_RTCPPACKET2_H_

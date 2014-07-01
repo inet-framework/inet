@@ -376,6 +376,6 @@ void RoutingTableParser::parseRouting(char *routeFile)
 }
 
 
-} // namespace inet
+}
 
 

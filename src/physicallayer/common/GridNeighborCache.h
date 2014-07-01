@@ -75,6 +75,6 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
 
 }
 
-} // namespace inet
+}
 
 #endif /* GRIDNEIGHBORCACHE_H_ */

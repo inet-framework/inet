@@ -92,7 +92,7 @@ class RSVPPathError : public RSVPPathError_Base
     inline void setSenderTspec(const SenderTspecObj_t& s) {getSender_descriptor().Sender_Tspec_Object = s;}
 };
 
-} //namespace
+}
 
 
 #endif

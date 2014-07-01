@@ -410,6 +410,6 @@ void TCPSACKRexmitQueue::checkSackBlock(uint32 fromSeqNum, uint32 &length, bool 
 }
 
 
-} // namespace inet
+}
 
 

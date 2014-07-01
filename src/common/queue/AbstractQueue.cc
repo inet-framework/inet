@@ -101,6 +101,6 @@ cPacket *AbstractQueue::cancelService()
 }
 
 
-} // namespace inet
+}
 
 

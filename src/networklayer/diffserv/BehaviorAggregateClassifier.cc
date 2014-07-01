@@ -114,6 +114,6 @@ int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

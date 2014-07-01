@@ -139,6 +139,6 @@ void IPv6ErrorHandling::displayType4Msg(int code)
 
 
 
-} // namespace inet
+}
 
 

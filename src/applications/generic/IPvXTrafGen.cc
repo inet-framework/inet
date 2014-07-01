@@ -242,6 +242,6 @@ void IPvXTrafGen::processPacket(cPacket *msg)
 
 
 
-} // namespace inet
+}
 
 

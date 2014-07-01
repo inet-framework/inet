@@ -88,6 +88,6 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor* neighbor, OSPF::NeighborSt
 }
 
 
-} // namespace inet
+}
 
 

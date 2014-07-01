@@ -45,7 +45,7 @@ class INET_API TwoRayGroundReflection : public FreeSpacePathLoss
 
 }
 
-} //namespace
+}
 
 
 #endif

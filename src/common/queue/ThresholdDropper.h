@@ -39,7 +39,7 @@ class INET_API ThresholdDropper : public AlgorithmicDropperBase
     virtual bool shouldDrop(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

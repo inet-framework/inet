@@ -75,6 +75,6 @@ bool MACProtocolBase::isLowerMessage(cMessage* message)
 }
 
 
-} // namespace inet
+}
 
 

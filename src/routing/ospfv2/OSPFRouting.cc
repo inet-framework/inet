@@ -160,6 +160,6 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address &route)
 
 
 
-} // namespace inet
+}
 
 

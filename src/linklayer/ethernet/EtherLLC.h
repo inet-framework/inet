@@ -78,7 +78,7 @@ class INET_API EtherLLC : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
-} //namespace
+}
 
 
 #endif

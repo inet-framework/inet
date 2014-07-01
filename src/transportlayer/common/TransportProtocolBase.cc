@@ -20,6 +20,6 @@
 namespace inet {
 
 
-} // namespace inet
+}
 
 

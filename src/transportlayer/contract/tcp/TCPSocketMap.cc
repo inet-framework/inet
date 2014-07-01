@@ -56,6 +56,6 @@ void TCPSocketMap::deleteSockets()
 }
 
 
-} // namespace inet
+}
 
 

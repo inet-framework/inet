@@ -132,5 +132,5 @@ void NetfilterInfoHook::finish()
     netfilter->unregisterHook(0, this);
 }
 
-} // namespace inet
+}
 

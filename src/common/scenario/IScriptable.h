@@ -60,7 +60,7 @@ class INET_API IScriptable
     virtual void processCommand(const cXMLElement& node) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

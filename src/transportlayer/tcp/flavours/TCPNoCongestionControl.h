@@ -59,7 +59,7 @@ class INET_API TCPNoCongestionControl : public TCPBaseAlg
     virtual void receivedDataAck(uint32 firstSeqAcked);
 };
 
-} //namespace
+}
 
 
 #endif

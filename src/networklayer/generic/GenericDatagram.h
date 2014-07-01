@@ -46,7 +46,7 @@ class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDat
     virtual void setTransportProtocol(int protocol) {GenericDatagram_Base::setTransportProtocol(protocol);}
 };
 
-} //namespace
+}
 
 
 #endif

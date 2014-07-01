@@ -93,6 +93,6 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
 
 
 
-} // namespace inet
+}
 
 

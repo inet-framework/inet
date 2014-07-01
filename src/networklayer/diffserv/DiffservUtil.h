@@ -115,6 +115,6 @@ namespace DiffservUtil {
     void setColor(cPacket *packet, int color);
 }
 
-} // namespace inet
+}
 
 #endif

@@ -53,7 +53,7 @@ class INET_API PositionTable {
         simtime_t getOldestPosition() const;
 };
 
-} //namespace
+}
 
 
 #endif

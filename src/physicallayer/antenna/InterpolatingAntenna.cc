@@ -92,5 +92,5 @@ double InterpolatingAntenna::computeGain(EulerAngles direction) const
            computeGain(bankGainMap, direction.gamma);
 }
 
-} // namespace inet
+}
 

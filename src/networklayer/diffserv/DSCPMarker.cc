@@ -106,6 +106,6 @@ bool DSCPMarker::markPacket(cPacket *packet, int dscp)
 }
 
 
-} // namespace inet
+}
 
 

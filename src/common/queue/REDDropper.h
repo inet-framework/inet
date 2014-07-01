@@ -45,7 +45,7 @@ class REDDropper : public AlgorithmicDropperBase
     virtual bool shouldDrop(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

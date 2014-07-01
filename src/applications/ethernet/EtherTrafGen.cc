@@ -219,6 +219,6 @@ void EtherTrafGen::finish()
 
 
 
-} // namespace inet
+}
 
 

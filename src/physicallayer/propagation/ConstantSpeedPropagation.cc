@@ -76,6 +76,6 @@ const IArrival *ConstantSpeedPropagation::computeArrival(const ITransmission *tr
 }
 
 
-} // namespace inet
+}
 
 

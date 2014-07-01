@@ -1424,6 +1424,6 @@ uint32 SCTPAssociation::getAllTransQ()
 }
 
 
-} // namespace inet
+}
 
 

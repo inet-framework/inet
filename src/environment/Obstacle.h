@@ -54,7 +54,7 @@ class Obstacle {
         Coord bboxP2;
 };
 
-} //namespace
+}
 
 
 #endif

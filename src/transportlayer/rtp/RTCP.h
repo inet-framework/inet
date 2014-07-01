@@ -247,7 +247,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     static simsignal_t rcvdPkSignal;
 };
 
-} //namespace
+}
 
 
 #endif

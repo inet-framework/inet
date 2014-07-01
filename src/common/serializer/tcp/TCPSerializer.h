@@ -72,7 +72,7 @@ class TCPSerializer
                 const Address &srcIp, const Address &destIp);
 };
 
-} //namespace
+}
 
 
 #endif

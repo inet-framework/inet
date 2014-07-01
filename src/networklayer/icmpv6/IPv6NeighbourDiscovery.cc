@@ -2731,6 +2731,6 @@ bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule* module)
 
 
 
-} // namespace inet
+}
 
 

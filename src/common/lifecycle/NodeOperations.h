@@ -131,7 +131,7 @@ class INET_API NodeCrashOperation : public NodeOperation {
     virtual Kind getKind() const { return DOWN; }
 };
 
-} //namespace
+}
 
 
 #endif

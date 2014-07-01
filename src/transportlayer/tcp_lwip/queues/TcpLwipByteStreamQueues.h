@@ -111,7 +111,7 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     ByteArrayBuffer byteArrayBufferM;
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCPLWIP_DATASTREAMQUEUES_H
+#endif

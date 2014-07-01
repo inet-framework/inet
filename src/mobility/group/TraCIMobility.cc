@@ -317,6 +317,6 @@ double TraCIMobility::calculateCO2emission(double v, double a) const {
 #endif
 
 
-} // namespace inet
+}
 
 

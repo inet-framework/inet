@@ -539,6 +539,6 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
 }
 
 
-} // namespace inet
+}
 
 

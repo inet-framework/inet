@@ -118,7 +118,7 @@ class TED : public cSimpleModule, public ILifecycle
 
 std::ostream & operator<<(std::ostream & os, const TELinkStateInfo& info);
 
-} //namespace
+}
 
 
 #endif

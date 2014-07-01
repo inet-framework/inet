@@ -73,6 +73,6 @@ class INET_API QuadTree
         ~QuadTree();
 };
 
-} // namespace inet
+}
 
 #endif /* QUADTREE_H_ */

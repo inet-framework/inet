@@ -59,7 +59,7 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
     LinearNodeDistributionMobility();
 };
 
-} //namespace
+}
 
 
 #endif

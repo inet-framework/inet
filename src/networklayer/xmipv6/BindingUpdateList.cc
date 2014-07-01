@@ -432,4 +432,4 @@ void BindingUpdateList::resetBindingCacheEntry(BindingUpdateListEntry& entry)
     entry.tokenC = 0;*/
 }
 
-} // namespace
+}

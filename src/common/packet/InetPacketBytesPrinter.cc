@@ -63,6 +63,6 @@ void InetPacketBytesPrinter::printMessage(std::ostream& os, cMessage *msg) const
 #endif // Register_MessagePrinter
 
 
-} // namespace inet
+}
 
 

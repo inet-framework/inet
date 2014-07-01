@@ -48,7 +48,7 @@ class TxNotifDetails : public cObject
     void setInterfaceEntry(InterfaceEntry *e) {ie = e;}
 };
 
-} //namespace
+}
 
 
 #endif

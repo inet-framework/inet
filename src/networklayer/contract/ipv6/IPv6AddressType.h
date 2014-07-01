@@ -44,7 +44,7 @@ class INET_API IPv6AddressType : public IAddressType
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const;
 };
 
-} //namespace
+}
 
 
 #endif

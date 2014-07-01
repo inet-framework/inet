@@ -534,4 +534,4 @@ bool TED::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     }
     return true;
 }
-} // namespace
+}

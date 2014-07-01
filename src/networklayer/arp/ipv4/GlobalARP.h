@@ -104,8 +104,8 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     virtual void updateDisplayString();
 };
 
-} //namespace
+}
 
 
-#endif  // __INET_GLOBALARP_H
+#endif
 

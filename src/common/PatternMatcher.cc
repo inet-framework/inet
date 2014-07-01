@@ -374,5 +374,5 @@ bool PatternMatcher::containsWildcards(const char *pattern)
            strstr(pattern,"..");
 }
 
-};  // namespace
+};
 

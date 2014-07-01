@@ -3343,6 +3343,6 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables* chunk,
 }
 
 
-} // namespace inet
+}
 
 

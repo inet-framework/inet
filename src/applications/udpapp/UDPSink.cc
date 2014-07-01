@@ -174,6 +174,6 @@ void UDPSink::handleNodeCrash()
 
 
 
-} // namespace inet
+}
 
 

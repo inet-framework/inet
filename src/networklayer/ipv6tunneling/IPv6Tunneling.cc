@@ -660,4 +660,4 @@ std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun)
 
     return os;
 }
-} // namespace
+}

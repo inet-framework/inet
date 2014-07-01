@@ -40,6 +40,6 @@ class INET_API Sphere : public Shape
         virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
 };
 
-} // namespace inet
+}
 
 #endif

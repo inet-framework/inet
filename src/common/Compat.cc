@@ -65,6 +65,6 @@ double INET_API erfc(double x)
 #endif
 
 
-} // namespace inet
+}
 
 

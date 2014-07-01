@@ -47,7 +47,7 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     virtual void setHopLimit(short hopLimit) { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
 
-} //namespace
+}
 
 
 #endif

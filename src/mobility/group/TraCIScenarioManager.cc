@@ -1142,6 +1142,6 @@ template<> std::string TraCIScenarioManager::TraCIBuffer::read() {
 
 
 
-} // namespace inet
+}
 
 

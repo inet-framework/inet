@@ -43,7 +43,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
 
 }
 
-} //namespace
+}
 
 
 #endif

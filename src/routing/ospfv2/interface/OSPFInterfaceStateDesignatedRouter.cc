@@ -59,6 +59,6 @@ void OSPF::InterfaceStateDesignatedRouter::processEvent(OSPF::Interface* intf, O
 
 
 
-} // namespace inet
+}
 
 

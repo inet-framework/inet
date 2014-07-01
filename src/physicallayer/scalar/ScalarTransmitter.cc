@@ -52,6 +52,6 @@ const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmi
 }
 
 
-} // namespace inet
+}
 
 

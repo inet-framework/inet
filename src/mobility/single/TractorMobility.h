@@ -57,7 +57,7 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
     TractorMobility();
 };
 
-} //namespace
+}
 
 
 #endif

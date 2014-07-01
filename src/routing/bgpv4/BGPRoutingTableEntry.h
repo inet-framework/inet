@@ -48,7 +48,7 @@ public:
     std::vector<ASID>       _ASList;
 };
 
-} // namespace BGP
+}
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
     IPv4Route(), _pathType(BGP::Incomplete)
@@ -93,7 +93,7 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
     return out;
 }
 
-} //namespace
+}
 
 
 #endif

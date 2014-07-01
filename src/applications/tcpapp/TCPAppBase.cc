@@ -167,6 +167,6 @@ void TCPAppBase::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -43,7 +43,7 @@ class INET_API Sink : public cSimpleModule
     virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -207,7 +207,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     virtual ~AODVRouting();
 };
 
-} //namespace
+}
 
 
 #endif // ifndef AODVROUTING_H_

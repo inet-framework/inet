@@ -401,6 +401,6 @@ bool SCTPGapList::updateGapList(const uint32 receivedTSN,
 
 
 
-} // namespace inet
+}
 
 

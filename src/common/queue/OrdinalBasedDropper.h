@@ -48,7 +48,7 @@ class INET_API OrdinalBasedDropper : public cSimpleModule
     virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

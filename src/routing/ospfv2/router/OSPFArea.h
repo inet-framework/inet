@@ -151,10 +151,10 @@ inline std::ostream& operator<<(std::ostream& ostr, Area& area)
     return ostr;
 }
 
-} // namespace OSPF
+}
 
-} //namespace inet
+}
 
 
-#endif // __INET_OSPFAREA_H
+#endif
 

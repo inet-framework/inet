@@ -38,7 +38,7 @@ class INET_API ScalarRadio : public Radio
 
 }
 
-} //namespace
+}
 
 
 #endif

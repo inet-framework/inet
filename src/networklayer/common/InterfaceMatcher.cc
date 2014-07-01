@@ -188,6 +188,6 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule*> &h
 }
 
 
-} // namespace inet
+}
 
 

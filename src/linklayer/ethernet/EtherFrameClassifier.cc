@@ -35,6 +35,6 @@ void EtherFrameClassifier::handleMessage(cMessage *msg)
 
 
 
-} // namespace inet
+}
 
 

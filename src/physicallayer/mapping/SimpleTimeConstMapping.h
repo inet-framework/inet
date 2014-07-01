@@ -66,7 +66,7 @@ public:
 
 }
 
-} //namespace
+}
 
 
 #endif

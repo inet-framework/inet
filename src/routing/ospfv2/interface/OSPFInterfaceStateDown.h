@@ -31,10 +31,10 @@ public:
     virtual Interface::InterfaceStateType getState() const { return Interface::DOWN_STATE; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACESTATEDOWN_H
+#endif
 

@@ -31,10 +31,10 @@ public:
     virtual Interface::InterfaceStateType getState() const { return Interface::BACKUP_STATE; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACESTATEBACKUP_H
+#endif
 

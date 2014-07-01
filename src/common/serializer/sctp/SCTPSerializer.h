@@ -56,7 +56,7 @@ class SCTPSerializer
         static unsigned char sharedKey[512];
 };
 
-} //namespace
+}
 
 
 #endif

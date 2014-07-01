@@ -71,5 +71,5 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage * message)
         throw cRuntimeError("Unknown message");
 }
 
-} // namespace inet
+}
 

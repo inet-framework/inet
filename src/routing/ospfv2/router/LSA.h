@@ -155,7 +155,7 @@ public:
     bool  differsFrom(const OSPFASExternalLSA* asExternalLSA) const;
 };
 
-} // namespace OSPF
+}
 
 /**
  * Returns true if leftLSA is older than rightLSA.
@@ -201,7 +201,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
 
-} //namespace
+}
 
 
 #endif // __LSA_HPP__

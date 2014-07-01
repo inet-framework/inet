@@ -218,6 +218,6 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
 
 
 
-} // namespace inet
+}
 
 

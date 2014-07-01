@@ -80,7 +80,7 @@ class INET_API SimpleClassifier: public cSimpleModule, public IScriptable, publi
     std::vector<FECEntry>::iterator findFEC(int fecid);
 };
 
-} //namespace
+}
 
 
 #endif

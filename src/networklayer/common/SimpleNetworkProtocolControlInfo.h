@@ -47,7 +47,7 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
     virtual void setHopLimit(short hopLimit) { SimpleNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
 
-} //namespace
+}
 
 
 #endif

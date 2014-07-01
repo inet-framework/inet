@@ -344,6 +344,6 @@ bool Ieee8021dRelay::handleOperationStage(LifecycleOperation *operation, int sta
 }
 
 
-} // namespace inet
+}
 
 

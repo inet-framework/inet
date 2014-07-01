@@ -158,6 +158,6 @@ void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponse
 
 
 
-} // namespace inet
+}
 
 

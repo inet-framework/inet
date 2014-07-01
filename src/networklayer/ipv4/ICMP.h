@@ -80,7 +80,7 @@ class INET_API ICMP : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

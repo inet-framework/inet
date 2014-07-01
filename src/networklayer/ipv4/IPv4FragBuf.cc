@@ -147,6 +147,6 @@ void IPv4FragBuf::purgeStaleFragments(simtime_t lastupdate)
 
 
 
-} // namespace inet
+}
 
 

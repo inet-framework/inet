@@ -79,7 +79,7 @@ class ReceptionReport : public ReceptionReport_Base
     virtual void dump(std::ostream& os) const;
 };
 
-} //namespace
+}
 
 
 #endif

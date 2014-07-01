@@ -40,6 +40,6 @@ class INET_API Prism : public Shape
         virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
 };
 
-} // namespace inet
+}
 
 #endif

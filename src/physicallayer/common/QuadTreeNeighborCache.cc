@@ -116,4 +116,4 @@ void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject*
 
 }
 
-} // namespace inet
+}

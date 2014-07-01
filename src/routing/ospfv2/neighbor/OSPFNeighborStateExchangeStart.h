@@ -31,10 +31,10 @@ public:
     virtual Neighbor::NeighborStateType getState() const { return Neighbor::EXCHANGE_START_STATE; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFNEIGHBORSTATEEXCHANGESTART_H
+#endif
 

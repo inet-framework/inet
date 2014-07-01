@@ -108,7 +108,7 @@ class INET_API IPv4FragBuf
     void purgeStaleFragments(simtime_t lastupdate);
 };
 
-} //namespace
+}
 
 
 #endif

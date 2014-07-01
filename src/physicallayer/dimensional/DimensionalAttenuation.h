@@ -34,7 +34,7 @@ class INET_API DimensionalAttenuation : public AttenuationBase
 
 }
 
-} //namespace
+}
 
 
 #endif

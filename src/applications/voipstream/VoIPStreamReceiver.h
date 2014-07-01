@@ -117,7 +117,7 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
     static simsignal_t delaySignal;
 };
 
-} //namespace
+}
 
 
-#endif // VOIPSTREAM_VOIPSTREAMRECEIVER_H
+#endif

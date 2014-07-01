@@ -43,7 +43,7 @@ class INET_API ErrorHandling: public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -346,6 +346,6 @@ void cSocketRTScheduler::sendBytes(uint8 *buf, size_t numBytes, struct sockaddr 
 }
 
 
-} // namespace inet
+}
 
 

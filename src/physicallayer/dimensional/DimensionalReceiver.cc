@@ -82,6 +82,6 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
 }
 
 
-} // namespace inet
+}
 
 

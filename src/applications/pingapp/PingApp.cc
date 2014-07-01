@@ -354,6 +354,6 @@ void PingApp::finish()
 }
 
 
-} // namespace inet
+}
 
 

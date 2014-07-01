@@ -29,6 +29,6 @@ void ReceptionDecision::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

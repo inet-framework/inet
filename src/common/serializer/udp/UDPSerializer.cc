@@ -69,6 +69,6 @@ void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPac
 }
 
 
-} // namespace inet
+}
 
 

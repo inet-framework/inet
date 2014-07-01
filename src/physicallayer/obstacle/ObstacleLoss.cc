@@ -69,7 +69,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
     return totalLoss;
 }
 
-} // namespace physicallayer
+}
 
-} // namespace inet
+}
 

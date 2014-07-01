@@ -92,7 +92,7 @@ class INET_API IPassiveQueueListener
       virtual void packetEnqueued(IPassiveQueue *queue) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

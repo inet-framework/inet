@@ -106,7 +106,7 @@ class INET_API SCTPQueue : public cObject
      PayloadQueue::iterator GetChunkFastIterator;
 };
 
-} //namespace
+}
 
 
 #endif

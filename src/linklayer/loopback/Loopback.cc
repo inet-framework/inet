@@ -144,6 +144,6 @@ void Loopback::updateDisplayString()
 
 
 
-} // namespace inet
+}
 
 

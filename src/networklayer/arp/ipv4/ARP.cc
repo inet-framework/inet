@@ -506,6 +506,6 @@ Address ARP::getL3AddressFor(const MACAddress& macAddr) const
 
 
 
-} // namespace inet
+}
 
 

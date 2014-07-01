@@ -923,6 +923,6 @@ IPv4Route *IPv4RoutingTable::createNewRoute()
 }
 
 
-} // namespace inet
+}
 
 

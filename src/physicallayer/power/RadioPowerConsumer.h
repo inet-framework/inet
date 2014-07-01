@@ -67,7 +67,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 
 }
 
-} //namespace
+}
 
 
 #endif

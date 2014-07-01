@@ -267,6 +267,6 @@ void MobilityBase::handleIfOutside(BorderPolicy policy, Coord& targetPosition, C
 }
 
 
-} // namespace inet
+}
 
 

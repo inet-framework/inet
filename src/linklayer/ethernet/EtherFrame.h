@@ -7,7 +7,7 @@
 namespace inet {
 
 
-} //namespace
+}
 
 
-#endif // __INET_ETHERFRAME_H_
+#endif

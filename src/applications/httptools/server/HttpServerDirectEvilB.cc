@@ -55,6 +55,6 @@ std::string HttpServerDirectEvilB::generateBody()
 }
 
 
-} // namespace inet
+}
 
 

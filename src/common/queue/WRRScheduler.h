@@ -41,7 +41,7 @@ class WRRScheduler : public SchedulerBase
     virtual bool schedulePacket();
 };
 
-} //namespace
+}
 
 
 #endif

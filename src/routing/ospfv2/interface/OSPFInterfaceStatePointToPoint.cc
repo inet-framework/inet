@@ -54,6 +54,6 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface* intf, OSPF:
 
 
 
-} // namespace inet
+}
 
 

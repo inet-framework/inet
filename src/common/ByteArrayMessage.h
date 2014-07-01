@@ -75,7 +75,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
     virtual void removePrefix(unsigned int length);
 };
 
-} //namespace
+}
 
 
 #endif

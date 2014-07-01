@@ -66,7 +66,7 @@ class INET_API Arrival : public virtual IArrival
 
 }
 
-} //namespace
+}
 
 
 #endif

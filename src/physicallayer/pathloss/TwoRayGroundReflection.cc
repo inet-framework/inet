@@ -76,6 +76,6 @@ double TwoRayGroundReflection::computePathLoss(mps propagationSpeed, Hz frequenc
 }
 
 
-} // namespace inet
+}
 
 

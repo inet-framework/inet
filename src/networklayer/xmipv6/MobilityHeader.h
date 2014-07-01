@@ -44,7 +44,7 @@ class INET_API HomeAddressOption : public HomeAddressOption_Base
 
     virtual HomeAddressOption *dup() const {return new HomeAddressOption(*this);}
 };
-} //namespace
+}
 
 
 #endif

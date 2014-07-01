@@ -196,7 +196,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
     int _silentIntervals;
 };
 
-} //namespace
+}
 
 
 #endif

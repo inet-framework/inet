@@ -52,8 +52,8 @@ class INET_API TCPDump : public cSimpleModule
         virtual void finish();
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCPDUMP_H
+#endif
 

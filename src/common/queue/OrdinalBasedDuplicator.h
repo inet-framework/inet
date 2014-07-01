@@ -48,7 +48,7 @@ class INET_API OrdinalBasedDuplicator : public cSimpleModule
     virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -152,7 +152,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 
-} //namespace
+}
 
 
 #endif

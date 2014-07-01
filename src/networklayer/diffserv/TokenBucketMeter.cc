@@ -106,6 +106,6 @@ int TokenBucketMeter::meterPacket(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

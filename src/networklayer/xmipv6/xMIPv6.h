@@ -563,7 +563,7 @@ class INET_API xMIPv6 : public cSimpleModule
     void handleTokenExpiry(cMessage* msg);
 };
 
-} //namespace
+}
 
 
 #endif //__XMIPV6_H__

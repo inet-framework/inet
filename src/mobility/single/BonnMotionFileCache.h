@@ -81,7 +81,7 @@ class INET_API BonnMotionFileCache
     virtual const BonnMotionFile *getFile(const char *filename);
 };
 
-} //namespace
+}
 
 
 #endif

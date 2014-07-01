@@ -60,7 +60,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
 
 };
 
-} //namespace
+}
 
 
 #endif

@@ -50,6 +50,6 @@ std::string MPLSPacket::info() const
 
 
 
-} // namespace inet
+}
 
 

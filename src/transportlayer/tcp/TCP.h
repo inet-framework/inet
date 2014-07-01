@@ -206,7 +206,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     virtual void reset();
 };
 
-} //namespace
+}
 
 
 #endif

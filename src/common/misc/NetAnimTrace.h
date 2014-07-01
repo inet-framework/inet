@@ -48,7 +48,7 @@ class INET_API NetAnimTrace : public cSimpleModule, protected cListener
     virtual void addLink(cGate *gate);
 };
 
-} //namespace
+}
 
 
 #endif  // header guard

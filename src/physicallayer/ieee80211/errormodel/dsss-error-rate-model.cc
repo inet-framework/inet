@@ -175,6 +175,6 @@ double DsssErrorRateModel::SymbolErrorProb256Cck(double e1)
 
 
 
-} // namespace inet
+}
 
 

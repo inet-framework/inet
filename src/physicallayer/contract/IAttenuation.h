@@ -45,7 +45,7 @@ class INET_API IAttenuation : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

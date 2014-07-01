@@ -228,6 +228,6 @@ void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
 
 
 
-} // namespace inet
+}
 
 

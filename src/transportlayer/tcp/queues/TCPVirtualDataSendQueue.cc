@@ -88,6 +88,6 @@ void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
 }
 
 
-} // namespace inet
+}
 
 

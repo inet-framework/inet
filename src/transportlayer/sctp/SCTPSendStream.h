@@ -57,7 +57,7 @@ class INET_API SCTPSendStream : public cObject
         void deleteQueue();
 };
 
-} //namespace
+}
 
 
 #endif

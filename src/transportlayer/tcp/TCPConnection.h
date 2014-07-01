@@ -691,7 +691,7 @@ class INET_API TCPConnection
 
 };
 
-} //namespace
+}
 
 
 #endif

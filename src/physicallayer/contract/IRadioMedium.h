@@ -143,7 +143,7 @@ class INET_API IRadioMedium : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

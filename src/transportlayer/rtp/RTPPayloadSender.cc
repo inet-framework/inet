@@ -221,6 +221,6 @@ bool RTPPayloadSender::sendPacket()
 }
 
 
-} // namespace inet
+}
 
 

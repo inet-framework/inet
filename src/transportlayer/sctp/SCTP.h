@@ -257,7 +257,7 @@ class INET_API SCTP : public cSimpleModule
         void bindPortForUDP();
 };
 
-} //namespace
+}
 
 
 #endif

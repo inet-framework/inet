@@ -37,6 +37,6 @@ bool PriorityScheduler::schedulePacket()
 }
 
 
-} // namespace inet
+}
 
 

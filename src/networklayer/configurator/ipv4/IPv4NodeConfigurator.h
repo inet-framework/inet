@@ -56,7 +56,7 @@ class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle {
         virtual void configureNode();
 };
 
-} //namespace
+}
 
 
 #endif

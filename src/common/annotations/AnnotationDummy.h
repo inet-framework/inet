@@ -37,7 +37,7 @@ class INET_API AnnotationDummy : public cSimpleModule
   protected:
 };
 
-} //namespace
+}
 
 
 #endif

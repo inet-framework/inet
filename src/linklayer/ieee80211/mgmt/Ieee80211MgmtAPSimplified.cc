@@ -126,6 +126,6 @@ void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseF
 
 
 
-} // namespace inet
+}
 
 

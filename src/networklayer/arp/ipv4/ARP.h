@@ -124,7 +124,7 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual void updateDisplayString();
 };
 
-} //namespace
+}
 
 
 #endif

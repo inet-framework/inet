@@ -71,7 +71,7 @@ class INET_API TransmissionBase : public virtual ITransmission
 
 }
 
-} //namespace
+}
 
 
 #endif

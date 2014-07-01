@@ -174,6 +174,6 @@ void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 
 
 
-} // namespace inet
+}
 
 

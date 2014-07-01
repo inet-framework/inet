@@ -352,6 +352,6 @@ void TcpLwipConnection::do_SEND()
 
 
 
-} // namespace inet
+}
 
 

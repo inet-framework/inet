@@ -66,4 +66,4 @@ m FreeSpacePathLoss::computeRange(mps propagationSpeed, Hz frequency, double los
     return waveLength / pow(loss * 16.0 * M_PI * M_PI * systemLoss, 1.0 / alpha);
 }
 
-} // namespace inet
+}

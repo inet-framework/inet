@@ -182,7 +182,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     cOutVector *rcvAckVector;   // received ackNo (= snd_una)
 };
 
-} //namespace
+}
 
 
 #endif

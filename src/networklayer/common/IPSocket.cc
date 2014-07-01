@@ -39,6 +39,6 @@ void IPSocket::sendToIP(cMessage * message)
 }
 
 
-} // namespace inet
+}
 
 

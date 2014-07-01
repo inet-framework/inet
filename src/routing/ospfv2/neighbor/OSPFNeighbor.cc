@@ -737,6 +737,6 @@ void OSPF::Neighbor::deleteLastSentDDPacket()
 }
 
 
-} // namespace inet
+}
 
 

@@ -69,6 +69,6 @@ void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor* neighbor, OSPF::Nei
 }
 
 
-} // namespace inet
+}
 
 

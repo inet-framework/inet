@@ -70,7 +70,7 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
     virtual void joinMulticastGroup(Address address) { }
 };
 
-} //namespace
+}
 
 
 #endif

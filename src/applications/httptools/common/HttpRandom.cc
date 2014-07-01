@@ -347,6 +347,6 @@ rdObject* rdObjectFactory::create(cXMLAttributeMap attributes)
 
 
 
-} // namespace inet
+}
 
 

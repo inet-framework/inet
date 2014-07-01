@@ -37,7 +37,7 @@ class INET_API IsotropicAntenna : public AntennaBase
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -69,7 +69,7 @@ class INET_API TCPAppBase : public cSimpleModule, public TCPSocket::CallbackInte
     virtual void socketStatusArrived(int connId, void *yourPtr, TCPStatusInfo *status) {delete status;}
 };
 
-} //namespace
+}
 
 
 #endif

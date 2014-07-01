@@ -518,6 +518,6 @@ void OSPF::MessageHandler::printLinkStateAcknowledgementPacket(const OSPFLinkSta
 
 
 
-} // namespace inet
+}
 
 

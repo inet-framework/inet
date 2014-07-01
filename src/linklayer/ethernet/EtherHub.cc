@@ -203,6 +203,6 @@ void EtherHub::finish()
 
 
 
-} // namespace inet
+}
 
 

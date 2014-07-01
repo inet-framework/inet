@@ -245,6 +245,6 @@ bool OSPF::DatabaseDescriptionHandler::processDDPacket(OSPFDatabaseDescriptionPa
 }
 
 
-} // namespace inet
+}
 
 

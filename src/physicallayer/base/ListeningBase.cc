@@ -27,6 +27,6 @@ void ListeningBase::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

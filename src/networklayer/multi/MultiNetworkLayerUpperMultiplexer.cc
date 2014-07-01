@@ -97,5 +97,5 @@ int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage * message)
         throw cRuntimeError("Unknown control info");
 }
 
-} // namespace inet
+}
 

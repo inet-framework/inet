@@ -68,7 +68,7 @@ class INET_API ModulePathAddress
         std::string str() const;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -22,6 +22,6 @@ namespace inet {
 using namespace physicallayer;
 
 
-} // namespace inet
+}
 
 

@@ -77,6 +77,6 @@ bool GenericMulticastRoute::removeChild(InterfaceEntry *ie)
 #endif /*0*/
 
 
-} // namespace inet
+}
 
 

@@ -80,7 +80,7 @@ class INET_API ZCoordFilter : public cObjectResultFilter
 };
 
 
-} //namespace
+}
 
 
 #endif

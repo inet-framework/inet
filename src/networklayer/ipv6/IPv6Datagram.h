@@ -139,7 +139,7 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
 
 std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader&);
 
-} //namespace
+}
 
 
 #endif

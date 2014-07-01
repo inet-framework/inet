@@ -291,7 +291,7 @@ class rdObjectFactory
         rdObject* create(cXMLAttributeMap attributes);
 };
 
-} //namespace
+}
 
 
 #endif

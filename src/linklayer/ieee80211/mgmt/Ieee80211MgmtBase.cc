@@ -284,6 +284,6 @@ void Ieee80211MgmtBase::stop()
 
 
 
-} // namespace inet
+}
 
 

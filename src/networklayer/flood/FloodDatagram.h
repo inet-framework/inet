@@ -46,7 +46,7 @@ class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagra
     virtual void setTransportProtocol(int protocol) { FloodDatagram_Base::setTransportProtocol(protocol); };
 };
 
-} //namespace
+}
 
 
 #endif

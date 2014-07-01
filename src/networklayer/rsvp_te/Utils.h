@@ -62,7 +62,7 @@ cModule *getPayloadOwner(cPacket *msg);
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
 
 
-} //namespace
+}
 
 
 #endif

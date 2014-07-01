@@ -36,6 +36,6 @@ void OSPF::InterfaceStateLoopback::processEvent(OSPF::Interface* intf, OSPF::Int
 
 
 
-} // namespace inet
+}
 
 

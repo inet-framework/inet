@@ -61,7 +61,7 @@ class INET_API Loopback : public MACBase
     virtual void updateDisplayString();
 };
 
-} //namespace
+}
 
 
 #endif

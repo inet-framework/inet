@@ -36,7 +36,7 @@ enum OSPFTimerType
     DATABASE_AGE_TIMER = 9,
 };
 
-} //namespace
+}
 
 
 #endif

@@ -97,6 +97,6 @@ void ThruputMeter::finish()
 
 
 
-} // namespace inet
+}
 
 

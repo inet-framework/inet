@@ -43,7 +43,7 @@ class INET_API IQueueAccess
         virtual int getByteLength() const = 0;
 };
 
-} //namespace
+}
 
 
 #endif

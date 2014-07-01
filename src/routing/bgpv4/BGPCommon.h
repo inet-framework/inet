@@ -72,9 +72,9 @@ struct SessionInfo{
     bool            sessionEstablished;
 };
 
-} // namespace BGP
+}
 
-} //namespace
+}
 
 
 #endif

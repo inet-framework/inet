@@ -48,7 +48,7 @@ class INET_API ITransmitter : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

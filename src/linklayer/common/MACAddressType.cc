@@ -22,6 +22,6 @@ namespace inet {
 MACAddressType MACAddressType::INSTANCE;
 
 
-} // namespace inet
+}
 
 

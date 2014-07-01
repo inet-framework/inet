@@ -134,6 +134,6 @@ Coord MoBANLocal::getCurrentSpeed()
 }
 
 
-} // namespace inet
+}
 
 

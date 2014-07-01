@@ -280,6 +280,6 @@ IPv4Address IPv4Address::makeBroadcastAddress(IPv4Address netmask) const
 
 
 
-} // namespace inet
+}
 
 

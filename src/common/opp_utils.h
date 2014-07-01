@@ -63,9 +63,9 @@ namespace OPP_Global {
    */
   std::string vstringf(const char *fmt, va_list& args);
 
-} // namespace OPP_Global
+}
 
-} // namespace inet
+}
 
 #endif
 

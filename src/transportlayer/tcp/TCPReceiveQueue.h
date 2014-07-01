@@ -124,7 +124,7 @@ class INET_API TCPReceiveQueue : public cObject
     virtual uint32 getFirstSeqNo() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

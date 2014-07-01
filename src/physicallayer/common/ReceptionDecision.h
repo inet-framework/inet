@@ -70,7 +70,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 
 }
 
-} //namespace
+}
 
 
 #endif

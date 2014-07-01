@@ -49,7 +49,7 @@ class IPSocket {
     void registerProtocol(int protocol);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -275,7 +275,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
 	cObject* setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAddr);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -469,6 +469,6 @@ LinearIntplMappingIterator::~LinearIntplMappingIterator() {
 }
 
 
-} // namespace inet
+}
 
 

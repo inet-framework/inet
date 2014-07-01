@@ -181,7 +181,7 @@ class INET_API TCPSACKRexmitQueue
     bool checkQueue() const;
 };
 
-} //namespace
+}
 
 
 #endif

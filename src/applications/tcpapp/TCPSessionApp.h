@@ -76,7 +76,7 @@ class INET_API TCPSessionApp : public TCPAppBase
     virtual ~TCPSessionApp();
 };
 
-} //namespace
+}
 
 
 #endif

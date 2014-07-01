@@ -62,7 +62,7 @@ class INET_API FlatNetworkConfigurator : public cSimpleModule
     virtual void setDisplayString(cTopology& topo, NodeInfoVector& nodeInfo);
 };
 
-} //namespace
+}
 
 
 #endif

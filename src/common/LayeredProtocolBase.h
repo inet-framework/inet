@@ -47,7 +47,7 @@ class INET_API LayeredProtocolBase : public OperationalBase
     virtual bool isLowerMessage(cMessage* message) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -588,6 +588,6 @@ void OSPF::Interface::ageTransmittedLSALists()
 }
 
 
-} // namespace inet
+}
 
 

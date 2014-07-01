@@ -105,6 +105,6 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket* packet, OSPF::Inte
 }
 
 
-} // namespace inet
+}
 
 

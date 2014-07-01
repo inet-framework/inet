@@ -39,7 +39,7 @@ class INET_API EtherFrameClassifier : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

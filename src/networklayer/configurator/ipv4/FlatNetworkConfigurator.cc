@@ -229,6 +229,6 @@ void FlatNetworkConfigurator::setDisplayString(cTopology& topo, NodeInfoVector& 
 
 
 
-} // namespace inet
+}
 
 

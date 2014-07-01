@@ -653,4 +653,4 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
 }
 #endif /* WITH_xMIPv6 */
 
-} // namespace
+}

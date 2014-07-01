@@ -27,6 +27,6 @@ void ReceptionBase::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

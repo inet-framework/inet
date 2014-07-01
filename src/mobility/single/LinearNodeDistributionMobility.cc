@@ -72,6 +72,6 @@ void LinearNodeDistributionMobility::finish()
 }
 
 
-} // namespace inet
+}
 
 

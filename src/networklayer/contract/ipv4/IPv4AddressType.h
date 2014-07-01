@@ -44,7 +44,7 @@ class INET_API IPv4AddressType : public IAddressType
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
 
-} //namespace
+}
 
 
 #endif

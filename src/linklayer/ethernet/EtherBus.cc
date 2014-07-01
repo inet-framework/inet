@@ -291,6 +291,6 @@ void EtherBus::finish()
 
 
 
-} // namespace inet
+}
 
 

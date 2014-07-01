@@ -82,7 +82,7 @@ class INET_API IReceptionDecision : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

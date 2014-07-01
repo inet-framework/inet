@@ -33,6 +33,6 @@ void RTPAVProfile::initialize()
 }
 
 
-} // namespace inet
+}
 
 

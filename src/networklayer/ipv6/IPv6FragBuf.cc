@@ -178,6 +178,6 @@ void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
 
 
 
-} // namespace inet
+}
 
 

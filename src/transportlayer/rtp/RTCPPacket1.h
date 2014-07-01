@@ -56,7 +56,7 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
     void addRTCPPacket(RTCPPacket *rtcpPacket);
 };
 
-} //namespace
+}
 
 
 #endif // __INET_RTCPPACKET1_H_

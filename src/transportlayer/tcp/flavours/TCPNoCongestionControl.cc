@@ -55,6 +55,6 @@ void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
 }
 
 
-} // namespace inet
+}
 
 

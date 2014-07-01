@@ -30,6 +30,6 @@ AnnotationDummy::~AnnotationDummy()
 
 
 
-} // namespace inet
+}
 
 

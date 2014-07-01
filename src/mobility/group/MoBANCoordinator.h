@@ -207,7 +207,7 @@ class INET_API MoBANCoordinator: public LineSegmentsMobilityBase
     void collectLocalModules(cModule *module);
 };
 
-} //namespace
+}
 
 
 #endif

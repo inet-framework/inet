@@ -1084,6 +1084,6 @@ INetfilter::IHook::Result IPv6::datagramLocalOutHook(INetworkDatagram* datagram,
 }
 
 
-} // namespace inet
+}
 
 

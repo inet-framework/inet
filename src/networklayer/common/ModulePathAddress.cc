@@ -77,6 +77,6 @@ std::string ModulePathAddress::str() const
 
 
 
-} // namespace inet
+}
 
 

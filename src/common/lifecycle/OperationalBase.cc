@@ -118,6 +118,6 @@ void OperationalBase::setOperational(bool isOperational)
 }
 
 
-} // namespace inet
+}
 
 

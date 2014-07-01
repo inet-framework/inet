@@ -84,7 +84,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     virtual ~Ns2MotionMobility();
 };
 
-} //namespace
+}
 
 
 #endif

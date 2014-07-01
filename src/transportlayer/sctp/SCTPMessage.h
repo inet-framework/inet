@@ -209,7 +209,7 @@ class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
         */
         virtual cPacket* removeAsconfResponse();
 };
-} //namespace
+}
 
 
 #endif

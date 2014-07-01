@@ -244,5 +244,5 @@ void setColor(cPacket *packet, int color)
 }
 
 }
-} // namespace inet
+}
 

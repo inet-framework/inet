@@ -627,6 +627,6 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDa
 }
 
 
-} // namespace inet
+}
 
 

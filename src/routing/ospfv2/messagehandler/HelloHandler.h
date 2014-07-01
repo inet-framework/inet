@@ -31,10 +31,10 @@ public:
     void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* unused = NULL);
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_HELLOHANDLER_H
+#endif
 

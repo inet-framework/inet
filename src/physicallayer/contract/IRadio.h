@@ -292,7 +292,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

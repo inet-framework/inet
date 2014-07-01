@@ -33,7 +33,7 @@ class INET_API IRSVPClassifier : public IClassifier
     virtual void bind(const SessionObj_t& session, const SenderTemplateObj_t& sender, int inLabel) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

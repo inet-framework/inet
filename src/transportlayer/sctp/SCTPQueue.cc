@@ -242,6 +242,6 @@ uint32 SCTPQueue::getSizeOfFirstChunk(const Address& remoteAddress)
 }
 
 
-} // namespace inet
+}
 
 

@@ -150,6 +150,6 @@ IPv6ExtensionHeader* IPv6ControlInfo::removeFirstExtensionHeader()
 }
 
 
-} // namespace inet
+}
 
 

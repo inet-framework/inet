@@ -353,6 +353,6 @@ void PingTestApp::finish()
 
 
 
-} // namespace inet
+}
 
 

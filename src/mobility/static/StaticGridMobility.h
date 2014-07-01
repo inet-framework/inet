@@ -44,7 +44,7 @@ class INET_API StaticGridMobility : public StationaryMobility
     StaticGridMobility() {};
 };
 
-} //namespace
+}
 
 
 #endif

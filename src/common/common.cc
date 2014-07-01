@@ -31,6 +31,6 @@ std::string intToString(int i)
 
 
 
-} // namespace inet
+}
 
 

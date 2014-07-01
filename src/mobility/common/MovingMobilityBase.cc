@@ -106,6 +106,6 @@ Coord MovingMobilityBase::getCurrentSpeed()
 }
 
 
-} // namespace inet
+}
 
 

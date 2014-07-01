@@ -93,7 +93,7 @@ class INET_API PPP : public MACBase
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

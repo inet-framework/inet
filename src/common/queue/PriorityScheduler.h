@@ -35,7 +35,7 @@ class INET_API PriorityScheduler : public SchedulerBase
     virtual bool schedulePacket();
 };
 
-} //namespace
+}
 
 
 #endif

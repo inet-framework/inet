@@ -65,6 +65,6 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket* packet, OS
 
 
 
-} // namespace inet
+}
 
 

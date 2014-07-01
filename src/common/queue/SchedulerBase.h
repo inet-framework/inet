@@ -70,7 +70,7 @@ class INET_API SchedulerBase : public cSimpleModule, public IPassiveQueue, publi
       virtual void removeListener(IPassiveQueueListener *listener);
 };
 
-} //namespace
+}
 
 
 #endif /* SCHEDULERBASE_H_ */

@@ -153,7 +153,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
         virtual ~HttpBrowser();
 };
 
-} //namespace
+}
 
 
 #endif

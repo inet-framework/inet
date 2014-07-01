@@ -35,7 +35,7 @@ class INET_API IdealListening : public ListeningBase
 
 }
 
-} //namespace
+}
 
 
 #endif

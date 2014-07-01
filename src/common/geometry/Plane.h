@@ -39,6 +39,6 @@ class INET_API Plane
         Coord computeIntersection(const LineSegment& lineSegment);
 };
 
-} // namespace inet
+}
 
 #endif

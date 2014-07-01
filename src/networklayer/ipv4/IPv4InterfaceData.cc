@@ -522,6 +522,6 @@ bool IPv4InterfaceData::removeHostGroupData(IPv4Address multicastAddress)
 
 
 
-} // namespace inet
+}
 
 

@@ -122,7 +122,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

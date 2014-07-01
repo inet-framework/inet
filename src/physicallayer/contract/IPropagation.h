@@ -51,7 +51,7 @@ class INET_API IPropagation : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

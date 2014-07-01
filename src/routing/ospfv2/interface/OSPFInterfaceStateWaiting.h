@@ -31,10 +31,10 @@ public:
     virtual Interface::InterfaceStateType getState() const { return Interface::WAITING_STATE; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACESTATEWAITING_H
+#endif
 

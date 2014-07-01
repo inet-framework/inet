@@ -45,7 +45,7 @@ class LinearRotatingMobilityBase : public RotatingMobilityBase
     LinearRotatingMobilityBase();
 };
 
-} //namespace
+}
 
 
 #endif /* LINEARROTATINGMOBILITYBASE_H_ */

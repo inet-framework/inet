@@ -276,6 +276,6 @@ uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
 }
 
 
-} // namespace inet
+}
 
 

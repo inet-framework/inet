@@ -39,6 +39,6 @@ ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, con
 }
 
 
-} // namespace inet
+}
 
 

@@ -154,7 +154,7 @@ class INET_API HttpBrowserBase : public HttpNodeBase
         virtual ~HttpBrowserBase();
 };
 
-} //namespace
+}
 
 
 #endif

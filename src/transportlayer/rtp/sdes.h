@@ -204,7 +204,7 @@ class INET_API SDESChunk : public cArray
     int _length;
 };
 
-} //namespace
+}
 
 
 #endif

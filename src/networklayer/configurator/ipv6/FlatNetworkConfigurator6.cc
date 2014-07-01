@@ -281,6 +281,6 @@ void FlatNetworkConfigurator6::addStaticRoutes(cTopology& topo)
 
 
 
-} // namespace inet
+}
 
 

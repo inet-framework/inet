@@ -312,6 +312,6 @@ void HttpBrowser::submitToSocket(const char* moduleName, int connectPort, HttpRe
 
 
 
-} // namespace inet
+}
 
 

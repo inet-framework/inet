@@ -55,7 +55,7 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
     RandomWPMobility();
 };
 
-} //namespace
+}
 
 
 #endif

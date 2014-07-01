@@ -36,10 +36,10 @@ public:
     virtual Interface::InterfaceStateType getState() const = 0;
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACESTATE_H
+#endif
 

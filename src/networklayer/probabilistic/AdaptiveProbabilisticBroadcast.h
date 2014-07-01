@@ -55,7 +55,7 @@ protected:
     NeighborMap neighMap;
 };
 
-} //namespace
+}
 
 
 #endif

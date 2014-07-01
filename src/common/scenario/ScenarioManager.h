@@ -74,7 +74,7 @@ class INET_API ScenarioManager : public cSimpleModule
     virtual void updateDisplayString();
 };
 
-} //namespace
+}
 
 
 #endif

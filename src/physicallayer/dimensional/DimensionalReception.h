@@ -46,7 +46,7 @@ class INET_API DimensionalReception : public FlatReceptionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

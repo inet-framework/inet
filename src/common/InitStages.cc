@@ -25,6 +25,6 @@ namespace inet {
 // nothing to see here, please move along
 
 
-} // namespace inet
+}
 
 

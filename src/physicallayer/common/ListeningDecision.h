@@ -46,7 +46,7 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -67,7 +67,7 @@ class INET_API UDPSink : public ApplicationBase
     virtual void handleNodeCrash();
 };
 
-} //namespace
+}
 
 
 #endif

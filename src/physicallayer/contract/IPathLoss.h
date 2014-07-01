@@ -48,7 +48,7 @@ class INET_API IPathLoss : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

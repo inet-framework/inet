@@ -96,6 +96,6 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
 }
 
 
-} // namespace inet
+}
 
 

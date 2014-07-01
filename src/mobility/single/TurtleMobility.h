@@ -79,7 +79,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     TurtleMobility();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -27,6 +27,6 @@ void TransmissionBase::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

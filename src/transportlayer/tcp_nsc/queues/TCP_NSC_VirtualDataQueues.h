@@ -97,7 +97,7 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
     long int bytesInQueueM;
 };
 
-} //namespace
+}
 
 
 #endif

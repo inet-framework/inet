@@ -65,6 +65,6 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface* intf
 
 
 
-} // namespace inet
+}
 
 

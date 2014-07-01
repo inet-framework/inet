@@ -107,7 +107,7 @@ class INET_API IReceiver : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

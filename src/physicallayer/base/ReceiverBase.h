@@ -44,7 +44,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
 
 }
 
-} //namespace
+}
 
 
 #endif

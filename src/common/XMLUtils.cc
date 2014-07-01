@@ -168,4 +168,4 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
     const char *attrStr = getRequiredAttribute(*node, attrName);
     return parseBool(attrStr);
 }
-} // namespace
+}

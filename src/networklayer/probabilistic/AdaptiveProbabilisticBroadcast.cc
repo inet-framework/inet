@@ -127,6 +127,6 @@ void AdaptiveProbabilisticBroadcast::updateBeta()
 
 
 
-} // namespace inet
+}
 
 

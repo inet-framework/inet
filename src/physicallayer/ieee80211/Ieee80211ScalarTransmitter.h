@@ -47,7 +47,7 @@ class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 
 }
 
-} //namespace
+}
 
 
 #endif

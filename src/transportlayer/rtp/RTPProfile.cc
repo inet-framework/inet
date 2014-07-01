@@ -314,6 +314,6 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
 }
 
 
-} // namespace inet
+}
 
 

@@ -110,6 +110,6 @@ double RadioPowerConsumer::getPowerConsumption()
 }
 
 
-} // namespace inet
+}
 
 

@@ -510,6 +510,6 @@ void SCTPNatServer::finish()
 }
 
 
-} // namespace inet
+}
 
 

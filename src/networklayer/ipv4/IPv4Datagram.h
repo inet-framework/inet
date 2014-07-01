@@ -66,7 +66,7 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
     virtual void setTransportProtocol(int protocol) {IPv4Datagram_Base::setTransportProtocol(protocol);}
 };
 
-} //namespace
+}
 
 
 #endif

@@ -66,7 +66,7 @@ class INET_API Ieee80211MgmtAPSimplified : public Ieee80211MgmtAPBase
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

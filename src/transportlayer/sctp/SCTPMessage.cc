@@ -390,6 +390,6 @@ cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
 
 
 
-} // namespace inet
+}
 
 

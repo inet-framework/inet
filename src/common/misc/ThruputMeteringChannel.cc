@@ -162,6 +162,6 @@ void ThruputMeteringChannel::updateDisplay()
 
 
 
-} // namespace inet
+}
 
 

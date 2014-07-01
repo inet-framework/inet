@@ -134,7 +134,7 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
         virtual void resetDefaultAging();
 };
 
-} //namespace
+}
 
 
 #endif

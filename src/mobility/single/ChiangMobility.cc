@@ -93,6 +93,6 @@ void ChiangMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

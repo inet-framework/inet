@@ -57,7 +57,7 @@ class INET_API IAntenna : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

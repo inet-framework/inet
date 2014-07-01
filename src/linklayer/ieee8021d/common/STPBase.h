@@ -94,7 +94,7 @@ protected:
      */
     virtual InterfaceEntry * chooseInterface();
 };
-} //namespace
+}
 
 
 #endif

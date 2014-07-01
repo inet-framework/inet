@@ -43,7 +43,7 @@ class INET_API QueueBase : public AbstractQueue
     virtual simtime_t startService(cPacket *msg);
 };
 
-} //namespace
+}
 
 
 #endif

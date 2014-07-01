@@ -604,6 +604,6 @@ double** PostureTransition::extractMatrixFromSteadyState(double* vec)
 }
 
 
-} // namespace inet
+}
 
 

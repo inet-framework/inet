@@ -43,7 +43,7 @@ class INET_API PropagationBase : public cModule, public IPropagation
 
 }
 
-} //namespace
+}
 
 
 #endif

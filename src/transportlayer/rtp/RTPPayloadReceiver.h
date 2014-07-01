@@ -97,7 +97,7 @@ class INET_API RTPPayloadReceiver : public cSimpleModule
     static simsignal_t _rcvdPkRtpTimestampSignal;
 };
 
-} //namespace
+}
 
 
 #endif

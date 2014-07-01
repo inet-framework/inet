@@ -47,7 +47,7 @@ class INET_API IdealTransmission : public TransmissionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

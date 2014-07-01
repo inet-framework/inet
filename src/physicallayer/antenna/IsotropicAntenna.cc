@@ -28,6 +28,6 @@ IsotropicAntenna::IsotropicAntenna() :
 {}
 
 
-} // namespace inet
+}
 
 

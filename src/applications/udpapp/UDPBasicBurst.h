@@ -112,7 +112,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     ~UDPBasicBurst();
 };
 
-} //namespace
+}
 
 
 #endif

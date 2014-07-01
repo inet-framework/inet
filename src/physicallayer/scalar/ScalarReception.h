@@ -43,7 +43,7 @@ class INET_API ScalarReception : public FlatReceptionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

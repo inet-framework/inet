@@ -53,6 +53,6 @@ void OSPF::NeighborStateAttempt::processEvent(OSPF::Neighbor* neighbor, OSPF::Ne
 }
 
 
-} // namespace inet
+}
 
 

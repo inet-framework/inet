@@ -122,6 +122,6 @@ INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagra
 
 
 
-} // namespace inet
+}
 
 

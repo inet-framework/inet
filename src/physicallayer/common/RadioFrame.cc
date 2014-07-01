@@ -27,6 +27,6 @@ void RadioFrame::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

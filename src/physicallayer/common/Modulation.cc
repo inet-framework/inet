@@ -48,6 +48,6 @@ double QAM256Modulation::calculateBER(double snir, double bandwidth, double bitr
 
 
 
-} // namespace inet
+}
 
 

@@ -85,6 +85,6 @@ bool WRRScheduler::schedulePacket()
 }
 
 
-} // namespace inet
+}
 
 

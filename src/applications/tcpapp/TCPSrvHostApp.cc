@@ -108,6 +108,6 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
 
 
-} // namespace inet
+}
 
 

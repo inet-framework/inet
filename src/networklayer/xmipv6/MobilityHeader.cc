@@ -30,6 +30,6 @@ Register_Class(HomeAddressOption);
 
 
 
-} // namespace inet
+}
 
 

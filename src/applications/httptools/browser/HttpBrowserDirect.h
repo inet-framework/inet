@@ -48,7 +48,7 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
         virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
 };
 
-} //namespace
+}
 
 
 #endif

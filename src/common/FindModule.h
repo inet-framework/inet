@@ -136,7 +136,7 @@ class AccessModuleWrap
         }
 };
 
-} //namespace
+}
 
 
 #endif

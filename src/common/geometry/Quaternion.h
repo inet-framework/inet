@@ -12,8 +12,8 @@ class Quaternion
     public:
         static const Quaternion IDENTITY;
     protected:
-        float s;    // elforgad‡si szog felŽnek koszinusza
-        Coord d;   // elforgat‡si tengely
+        float s;    // elforgadï¿½si szog felï¿½nek koszinusza
+        Coord d;   // elforgatï¿½si tengely
     public:
         Quaternion() : d(0, 0, 1) { s = 0; }
         Quaternion( float s0, float x0 = 0, float y0 = 0, float z0 = 1 ) : d(x0, y0, z0) { s = s0; }
@@ -67,10 +67,10 @@ class Quaternion
 
         float getRotationAngle() {return FWMath::rad2deg(atan2(d.length(), s) * 2);}
 
-        Coord& getAxis() {return d;}        // forgat‡si tengely
+        Coord& getAxis() {return d;}        // forgatï¿½si tengely
 };
 
-} //namespace
+}
 
 
 #endif /* QUATERNION_H_ */

@@ -578,6 +578,6 @@ SCTPServer::SCTPServer()
 }
 
 
-} // namespace inet
+}
 
 

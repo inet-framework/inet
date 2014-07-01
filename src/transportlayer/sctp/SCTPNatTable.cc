@@ -158,6 +158,6 @@ SCTPNatEntry::~SCTPNatEntry()
 }
 
 
-} // namespace inet
+}
 
 

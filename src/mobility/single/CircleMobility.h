@@ -63,7 +63,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     CircleMobility();
 };
 
-} //namespace
+}
 
 
 #endif

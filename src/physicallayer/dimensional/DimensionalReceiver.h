@@ -42,7 +42,7 @@ class INET_API DimensionalReceiver : public FlatReceiverBase
 
 }
 
-} //namespace
+}
 
 
 #endif

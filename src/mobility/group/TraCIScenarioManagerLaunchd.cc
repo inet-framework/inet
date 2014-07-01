@@ -112,6 +112,6 @@ void TraCIScenarioManagerLaunchd::init_traci() {
 
 
 
-} // namespace inet
+}
 
 

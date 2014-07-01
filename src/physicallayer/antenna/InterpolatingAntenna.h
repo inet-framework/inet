@@ -48,7 +48,7 @@ class INET_API InterpolatingAntenna : public AntennaBase
 
 }
 
-} //namespace
+}
 
 
 #endif

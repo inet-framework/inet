@@ -162,7 +162,7 @@ class SCTPGapList
 
 inline std::ostream& operator<<(std::ostream& ostr, const SCTPGapList& gapList) { gapList.print(ostr); return ostr; }
 
-} //namespace
+}
 
 
 #endif

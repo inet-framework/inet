@@ -98,6 +98,6 @@ double ScalarReceiver::computeMinSNIR(const IReception *reception, const INoise 
 }
 
 
-} // namespace inet
+}
 
 

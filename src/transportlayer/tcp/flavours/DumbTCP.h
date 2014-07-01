@@ -93,7 +93,7 @@ class INET_API DumbTCP : public TCPAlgorithm
 
 };
 
-} //namespace
+}
 
 
 #endif

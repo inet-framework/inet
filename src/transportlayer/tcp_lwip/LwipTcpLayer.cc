@@ -127,6 +127,6 @@ void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(
 
 
 
-} // namespace inet
+}
 
 

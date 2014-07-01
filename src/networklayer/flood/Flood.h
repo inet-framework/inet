@@ -154,7 +154,7 @@ protected:
     virtual cObject* setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
 
-} //namespace
+}
 
 
 #endif

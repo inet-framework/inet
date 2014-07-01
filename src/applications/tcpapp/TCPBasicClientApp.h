@@ -57,7 +57,7 @@ class INET_API TCPBasicClientApp : public TCPAppBase, public ILifecycle
     virtual ~TCPBasicClientApp();
 };
 
-} //namespace
+}
 
 
 #endif

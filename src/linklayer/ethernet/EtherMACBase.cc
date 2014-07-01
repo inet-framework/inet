@@ -724,6 +724,6 @@ int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)
 
 
 
-} // namespace inet
+}
 
 

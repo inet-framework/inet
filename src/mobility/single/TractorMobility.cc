@@ -83,6 +83,6 @@ void TractorMobility::setTargetPosition()
 }
 
 
-} // namespace inet
+}
 
 

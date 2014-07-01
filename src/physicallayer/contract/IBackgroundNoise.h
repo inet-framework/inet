@@ -38,7 +38,7 @@ class INET_API IBackgroundNoise : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

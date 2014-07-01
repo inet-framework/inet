@@ -92,7 +92,7 @@ class INET_API LIBTable: public cSimpleModule
 std::ostream & operator<<(std::ostream & os, const LIBTable::LIBEntry & lib);
 std::ostream & operator<<(std::ostream & os, const LabelOpVector& label);
 
-} //namespace
+}
 
 
 #endif

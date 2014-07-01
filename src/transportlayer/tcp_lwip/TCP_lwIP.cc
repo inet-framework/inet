@@ -787,5 +787,5 @@ bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, ID
     return true;
 }
 
-} // namespace inet
+}
 

@@ -502,6 +502,6 @@ void Established::UpdateMsgEvent()
 
 
 
-} // namespace inet
+}
 
 

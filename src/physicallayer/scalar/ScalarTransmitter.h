@@ -39,7 +39,7 @@ class INET_API ScalarTransmitter: public FlatTransmitterBase
 
 }
 
-} //namespace
+}
 
 
 #endif

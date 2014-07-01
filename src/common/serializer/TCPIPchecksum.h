@@ -47,7 +47,7 @@ class TCPIPchecksum
         static uint16_t _checksum(const void *addr, unsigned int count);
 };
 
-} //namespace
+}
 
 
 #endif

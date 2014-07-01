@@ -92,6 +92,6 @@ void BonnMotionMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

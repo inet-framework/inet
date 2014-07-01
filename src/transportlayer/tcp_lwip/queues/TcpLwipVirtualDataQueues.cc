@@ -173,6 +173,6 @@ void TcpLwipVirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 }
 
 
-} // namespace inet
+}
 
 

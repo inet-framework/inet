@@ -80,7 +80,7 @@ class INET_API TCPSocketMap
     void deleteSockets();
 };
 
-} //namespace
+}
 
 
 #endif

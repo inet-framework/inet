@@ -109,4 +109,4 @@ void printNotificationBanner(simsignal_t signalID, const cObject *obj)
        << notificationCategoryName(signalID) << " "
        << (obj ? obj->info() : "") << "\n";
 }
-} // namespace
+}

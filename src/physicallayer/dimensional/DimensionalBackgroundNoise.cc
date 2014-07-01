@@ -47,6 +47,6 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
 }
 
 
-} // namespace inet
+}
 
 

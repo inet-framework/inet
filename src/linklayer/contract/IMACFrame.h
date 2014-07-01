@@ -35,7 +35,7 @@ class INET_API IMACFrame
     virtual void setDestinationAddress(const MACAddress & address) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -55,7 +55,7 @@ class INET_API SCTPReceiveStream : public cObject
     inline void setStreamId(const uint16 id) { streamId = id; };
 };
 
-} //namespace
+}
 
 
 #endif

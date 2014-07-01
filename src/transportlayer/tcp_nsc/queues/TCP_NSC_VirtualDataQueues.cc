@@ -163,6 +163,6 @@ void TCP_NSC_VirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpse
 
 
 
-} // namespace inet
+}
 
 

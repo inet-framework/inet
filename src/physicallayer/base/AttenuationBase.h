@@ -35,7 +35,7 @@ class INET_API AttenuationBase : public cModule, public virtual IAttenuation
 
 }
 
-} //namespace
+}
 
 
 #endif

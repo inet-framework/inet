@@ -172,6 +172,6 @@ bool STPTester::isForwarding(Topology::Node * node, unsigned int portNum)
 }
 
 
-} // namespace inet
+}
 
 

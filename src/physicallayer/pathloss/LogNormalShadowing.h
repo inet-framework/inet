@@ -44,7 +44,7 @@ class INET_API LogNormalShadowing : public FreeSpacePathLoss
 
 }
 
-} //namespace
+}
 
 
 #endif

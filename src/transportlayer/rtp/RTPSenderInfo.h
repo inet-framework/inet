@@ -138,7 +138,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
     uint32 _bytesSent;
 };
 
-} //namespace
+}
 
 
 #endif

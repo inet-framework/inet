@@ -73,6 +73,6 @@ void TCPGenericSrvThread::timerExpired(cMessage *timer)
 
 
 
-} // namespace inet
+}
 
 

@@ -31,7 +31,7 @@ class INET_API IPhysicalLayer
         virtual ~IPhysicalLayer() { }
 };
 
-} //namespace
+}
 
 
 #endif

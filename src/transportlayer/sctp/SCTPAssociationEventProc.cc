@@ -395,6 +395,6 @@ void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpComm
 }
 
 
-} // namespace inet
+}
 
 

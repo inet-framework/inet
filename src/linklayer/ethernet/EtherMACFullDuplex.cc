@@ -410,6 +410,6 @@ void EtherMACFullDuplex::beginSendFrames()
 
 
 
-} // namespace inet
+}
 
 

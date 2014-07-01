@@ -110,7 +110,7 @@ private:
     friend struct BGPFSM::Established;
 };
 
-} //namespace
+}
 
 
 #endif

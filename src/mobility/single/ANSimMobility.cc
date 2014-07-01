@@ -134,6 +134,6 @@ void ANSimMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

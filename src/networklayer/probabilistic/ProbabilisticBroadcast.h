@@ -230,7 +230,7 @@ protected:
     Address myNetwAddr;
 };
 
-} //namespace
+}
 
 
 #endif

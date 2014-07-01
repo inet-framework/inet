@@ -80,8 +80,8 @@ class PcapDump
 };
 
 
-} //namespace
+}
 
 
-#endif // __INET_PCAPDUMP_H
+#endif
 

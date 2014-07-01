@@ -28,6 +28,6 @@ void UnimplementedModule::handleMessage(cMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

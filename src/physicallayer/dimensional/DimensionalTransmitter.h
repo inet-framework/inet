@@ -39,7 +39,7 @@ class INET_API DimensionalTransmitter : public FlatTransmitterBase
 
 }
 
-} //namespace
+}
 
 
 #endif

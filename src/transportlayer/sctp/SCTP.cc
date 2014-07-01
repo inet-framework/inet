@@ -944,6 +944,6 @@ void SCTP::finish()
 }
 
 
-} // namespace inet
+}
 
 

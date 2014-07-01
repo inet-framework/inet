@@ -89,6 +89,6 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
 }
 
 
-} // namespace inet
+}
 
 

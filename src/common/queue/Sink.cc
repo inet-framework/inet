@@ -58,6 +58,6 @@ void Sink::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -164,7 +164,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::IDENTITY; }
 };
 
-} //namespace
+}
 
 
 #endif

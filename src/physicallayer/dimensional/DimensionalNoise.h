@@ -46,7 +46,7 @@ class INET_API DimensionalNoise : public FlatNoiseBase
 
 }
 
-} //namespace
+}
 
 
 #endif

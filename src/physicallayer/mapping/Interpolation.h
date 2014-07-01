@@ -866,7 +866,7 @@ public:
 
 }
 
-} //namespace
+}
 
 
 #endif

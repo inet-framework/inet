@@ -199,7 +199,7 @@ class INET_API TraCIMobility : public MobilityBase
 };
 
 #endif
-} //namespace
+}
 
 
 #endif

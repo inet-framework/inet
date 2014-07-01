@@ -41,6 +41,6 @@ double DipoleAntenna::computeGain(EulerAngles direction) const
 }
 
 
-} // namespace inet
+}
 
 

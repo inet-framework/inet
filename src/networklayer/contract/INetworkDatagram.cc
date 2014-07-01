@@ -24,6 +24,6 @@ Register_Abstract_Class(INetworkDatagram);
 
 
 
-} // namespace inet
+}
 
 

@@ -173,10 +173,10 @@ public:
     const Area*             getArea() const  { return parentArea; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_OSPFINTERFACE_H
+#endif
 

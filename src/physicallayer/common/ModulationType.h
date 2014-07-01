@@ -182,6 +182,6 @@ inline std::ostream& operator<<(std::ostream& out, const ModulationType& m)
     return out;
 }
 
-} //namespace
+}
 
 #endif

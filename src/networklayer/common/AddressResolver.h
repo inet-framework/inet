@@ -204,7 +204,7 @@ class INET_API AddressResolver
 };
 
 
-} //namespace
+}
 
 
 #endif

@@ -57,7 +57,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 
 }
 
-} //namespace
+}
 
 
 #endif

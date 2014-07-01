@@ -62,7 +62,7 @@ class INET_API TCPTahoe : public TCPTahoeRenoFamily
     virtual void receivedDuplicateAck();
 };
 
-} //namespace
+}
 
 
 #endif

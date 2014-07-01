@@ -230,6 +230,6 @@ bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 }
 
 
-} // namespace inet
+}
 
 

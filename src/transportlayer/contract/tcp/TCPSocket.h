@@ -407,7 +407,7 @@ class INET_API TCPSocket
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

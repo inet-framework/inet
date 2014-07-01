@@ -108,6 +108,6 @@ void RectangleMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

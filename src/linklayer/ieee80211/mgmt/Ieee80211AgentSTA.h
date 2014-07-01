@@ -104,7 +104,7 @@ class INET_API Ieee80211AgentSTA : public cSimpleModule, public cListener
     virtual void dumpAPList(Ieee80211Prim_ScanConfirm *resp);
 };
 
-} //namespace
+}
 
 
 #endif

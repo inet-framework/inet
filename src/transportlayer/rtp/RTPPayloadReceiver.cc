@@ -79,6 +79,6 @@ void RTPPayloadReceiver::closeOutputFile()
 }
 
 
-} // namespace inet
+}
 
 

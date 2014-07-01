@@ -38,5 +38,5 @@ std::ostream & operator<<(std::ostream& out, const AODVRouteData *data)
     return out;
 };
 
-} // namespace inet
+}
 

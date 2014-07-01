@@ -48,7 +48,7 @@ class UDPEchoApp : public ApplicationBase
     virtual void handleNodeCrash();
 };
 
-} //namespace
+}
 
 
 #endif

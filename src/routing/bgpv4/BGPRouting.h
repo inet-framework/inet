@@ -149,7 +149,7 @@ private:
     static const int  BGP_TCP_KEEP_ALIVE_RCV = 75;
 };
 
-} //namespace
+}
 
 
 #endif

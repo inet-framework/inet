@@ -247,6 +247,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
 
 
-} // namespace inet
+}
 
 

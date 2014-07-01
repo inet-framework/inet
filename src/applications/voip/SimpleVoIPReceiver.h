@@ -111,7 +111,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
 };
 
 
-} //namespace
+}
 
 
 #endif

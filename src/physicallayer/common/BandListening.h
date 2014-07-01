@@ -44,7 +44,7 @@ class INET_API BandListening : public ListeningBase
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -63,7 +63,7 @@ class TraCITestApp : public cSimpleModule, protected cListener, public ILifecycl
         TraCITestApp() { traci = NULL; }
 };
 
-} //namespace
+}
 
 
 #endif

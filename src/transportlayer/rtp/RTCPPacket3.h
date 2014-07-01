@@ -38,7 +38,7 @@ class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
 
-} //namespace
+}
 
 
 #endif // _RTCPPACKET3_M_H_

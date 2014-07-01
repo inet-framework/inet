@@ -889,6 +889,6 @@ cObject* CSMA::setUpControlInfo(cMessage * const pMsg, const MACAddress& pSrcAdd
 }
 
 
-} // namespace inet
+}
 
 

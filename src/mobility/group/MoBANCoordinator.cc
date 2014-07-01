@@ -703,6 +703,6 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
 }
 
 
-} // namespace inet
+}
 
 

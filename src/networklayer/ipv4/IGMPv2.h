@@ -214,7 +214,7 @@ class INET_API IGMPv2 : public cSimpleModule, protected cListener
     virtual void processLeave(InterfaceEntry *ie, IGMPMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

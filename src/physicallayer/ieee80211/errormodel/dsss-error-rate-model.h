@@ -87,6 +87,6 @@ protected:
 
 }
 
-} // namespace
+}
 
 #endif /* DSSS_ERROR_RATE_MODEL_H */

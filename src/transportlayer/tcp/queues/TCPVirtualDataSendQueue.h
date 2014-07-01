@@ -82,7 +82,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
     virtual void discardUpTo(uint32 seqNum);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -80,6 +80,6 @@ void ErrorHandling::handleMessage(cMessage *msg)
 
 
 
-} // namespace inet
+}
 
 

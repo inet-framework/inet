@@ -338,6 +338,6 @@ void TCPReno::receivedDuplicateAck()
 }
 
 
-} // namespace inet
+}
 
 

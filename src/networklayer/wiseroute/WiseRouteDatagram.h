@@ -45,7 +45,7 @@ class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetwor
     virtual void setTransportProtocol(int protocol) { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
 };
 
-} //namespace
+}
 
 
 #endif

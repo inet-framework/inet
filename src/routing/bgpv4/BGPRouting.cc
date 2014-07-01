@@ -886,6 +886,6 @@ BGP::SessionID BGPRouting::findNextSession(BGP::type type, bool startSession)
 
 
 
-} // namespace inet
+}
 
 

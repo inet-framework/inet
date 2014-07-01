@@ -96,7 +96,7 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
         HttpNodeBase();
 };
 
-} //namespace
+}
 
 
 #endif

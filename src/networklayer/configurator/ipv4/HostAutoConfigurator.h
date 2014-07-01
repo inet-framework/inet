@@ -42,7 +42,7 @@ class INET_API HostAutoConfigurator : public cSimpleModule
         void setupNetworkLayer();
 };
 
-} //namespace
+}
 
 
 #endif

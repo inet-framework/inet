@@ -201,7 +201,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
     virtual void restartRexmitTimer();
 };
 
-} //namespace
+}
 
 
 #endif

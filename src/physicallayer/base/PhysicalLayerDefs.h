@@ -25,6 +25,6 @@ namespace inet {
 
 using namespace units::values;
 
-} //namespace
+}
 
 #endif

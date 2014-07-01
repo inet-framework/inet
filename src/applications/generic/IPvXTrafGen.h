@@ -83,7 +83,7 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     virtual ~IPvXTrafGen();
 };
 
-} //namespace
+}
 
 
 #endif

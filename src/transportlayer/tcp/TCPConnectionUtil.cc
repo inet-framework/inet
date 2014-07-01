@@ -1537,6 +1537,6 @@ bool TCPConnection::isSendQueueEmpty()
 }
 
 
-} // namespace inet
+}
 
 

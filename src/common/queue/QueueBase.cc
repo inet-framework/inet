@@ -44,6 +44,6 @@ simtime_t QueueBase::startService(cPacket *msg)
 
 
 
-} // namespace inet
+}
 
 

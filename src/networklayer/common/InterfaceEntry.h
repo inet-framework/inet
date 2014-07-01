@@ -246,7 +246,7 @@ class INET_API InterfaceEntry : public cNamedObject
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

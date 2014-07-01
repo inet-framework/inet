@@ -43,7 +43,7 @@ class INET_API MACAddressType : public IAddressType
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return MACAddress::UNSPECIFIED_ADDRESS; }
 };
 
-} //namespace
+}
 
 
 #endif

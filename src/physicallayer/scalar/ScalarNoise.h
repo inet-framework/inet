@@ -44,7 +44,7 @@ class INET_API ScalarNoise : public FlatNoiseBase
 
 }
 
-} //namespace
+}
 
 
 #endif

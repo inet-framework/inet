@@ -83,7 +83,7 @@ class INET_API ReassemblyBuffer
     ushort getTotalLength() const {return main.end;}
 };
 
-} //namespace
+}
 
 
 #endif

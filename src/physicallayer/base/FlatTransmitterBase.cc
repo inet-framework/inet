@@ -47,6 +47,6 @@ void FlatTransmitterBase::initialize(int stage)
 }
 
 
-} // namespace inet
+}
 
 

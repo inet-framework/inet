@@ -37,7 +37,7 @@ class INET_API ImmediatePropagation : public PropagationBase
 
 }
 
-} //namespace
+}
 
 
 #endif

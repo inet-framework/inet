@@ -45,7 +45,7 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
 
 }
 
-} //namespace
+}
 
 
 #endif

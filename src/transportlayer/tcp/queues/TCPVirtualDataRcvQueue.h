@@ -132,7 +132,7 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
     virtual uint32 getFirstSeqNo();
 };
 
-} //namespace
+}
 
 
 #endif

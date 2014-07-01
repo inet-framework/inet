@@ -22,6 +22,6 @@ namespace inet {
 ModuleIdAddressType ModuleIdAddressType::INSTANCE;
 
 
-} // namespace inet
+}
 
 

@@ -216,7 +216,7 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     virtual void sendPacket(RIPPacket *packet, const Address &destAddr, int destPort, const InterfaceEntry *destInterface);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -52,6 +52,6 @@ const IReception *IdealAttenuation::computeReception(const IRadio *receiverRadio
 }
 
 
-} // namespace inet
+}
 
 

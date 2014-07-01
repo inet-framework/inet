@@ -110,7 +110,7 @@ class INET_API OSPFConfigReader
 
 };
 
-} //namespace
+}
 
 
 #endif

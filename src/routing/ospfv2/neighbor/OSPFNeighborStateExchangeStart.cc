@@ -75,6 +75,6 @@ void OSPF::NeighborStateExchangeStart::processEvent(OSPF::Neighbor* neighbor, OS
 }
 
 
-} // namespace inet
+}
 
 

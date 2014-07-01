@@ -50,7 +50,7 @@ class INET_API IdealReception : public ReceptionBase
 
 }
 
-} //namespace
+}
 
 
 #endif

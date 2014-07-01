@@ -150,6 +150,6 @@ void BGPSession::getStatistics(unsigned int* statTab)
 
 
 
-} // namespace inet
+}
 
 

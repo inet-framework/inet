@@ -212,7 +212,7 @@ inline std::ostream& operator<<(std::ostream& os, const MACAddress& mac)
     return os << mac.str();
 }
 
-} //namespace
+}
 
 
 #endif

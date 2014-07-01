@@ -63,6 +63,6 @@ void SCTPSendStream::deleteQueue()
 
 
 
-} // namespace inet
+}
 
 

@@ -190,6 +190,6 @@ void PcapRecorder::finish()
 
 
 
-} // namespace inet
+}
 
 

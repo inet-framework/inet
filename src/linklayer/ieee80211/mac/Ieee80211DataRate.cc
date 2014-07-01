@@ -210,6 +210,6 @@ const Ieee80211DescriptorData& Ieee80211Descriptor::getDescriptor(int idx)
 
 
 
-} // namespace inet
+}
 
 

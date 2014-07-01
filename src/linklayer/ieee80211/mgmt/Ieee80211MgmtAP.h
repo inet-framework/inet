@@ -133,7 +133,7 @@ class INET_API Ieee80211MgmtAP : public Ieee80211MgmtAPBase, protected cListener
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

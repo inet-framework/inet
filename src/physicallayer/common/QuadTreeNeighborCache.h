@@ -69,8 +69,8 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
         ~QuadTreeNeighborCache();
 };
 
-} // namespace physicallayer
+}
 
-} // namespace inet
+}
 
 #endif /* QUADTREENEIGHBORCACHE_H_ */

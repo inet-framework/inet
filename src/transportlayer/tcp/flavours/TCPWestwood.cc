@@ -309,6 +309,6 @@ void TCPWestwood::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 
 
 
-} // namespace inet
+}
 
 

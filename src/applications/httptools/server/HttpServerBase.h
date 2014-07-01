@@ -106,7 +106,7 @@ class INET_API HttpServerBase : public HttpNodeBase
         const std::string& getHostName() { return hostName; }
 };
 
-} //namespace
+}
 
 
 #endif

@@ -73,6 +73,6 @@ const char *IRadio::getRadioTransmissionStateName(TransmissionState transmission
     return transmissionStateEnum->getStringFor(transmissionState) + 19;
 }
 
-} // namespace physicallayer
-} // namespace inet
+}
+}
 

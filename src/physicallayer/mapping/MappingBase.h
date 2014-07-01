@@ -1734,7 +1734,7 @@ public:
 
 }
 
-} //namespace
+}
 
 
 #endif

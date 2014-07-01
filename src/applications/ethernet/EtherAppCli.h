@@ -81,7 +81,7 @@ class INET_API EtherAppCli : public cSimpleModule, public ILifecycle
 
 };
 
-} //namespace
+}
 
 
 #endif

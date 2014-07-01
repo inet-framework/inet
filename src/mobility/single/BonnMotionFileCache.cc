@@ -84,6 +84,6 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
 }
 
 
-} // namespace inet
+}
 
 

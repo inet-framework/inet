@@ -105,7 +105,7 @@ class INET_API IPv6FragBuf
     void purgeStaleFragments(simtime_t lastupdate);
 };
 
-} //namespace
+}
 
 
 #endif

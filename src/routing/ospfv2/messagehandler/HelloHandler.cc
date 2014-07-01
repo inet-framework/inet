@@ -336,6 +336,6 @@ void OSPF::HelloHandler::processPacket(OSPFPacket* packet, OSPF::Interface* intf
 }
 
 
-} // namespace inet
+}
 
 

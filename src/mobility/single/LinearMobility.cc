@@ -69,6 +69,6 @@ void LinearMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

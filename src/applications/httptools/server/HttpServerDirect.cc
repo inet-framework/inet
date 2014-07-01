@@ -67,6 +67,6 @@ void HttpServerDirect::handleMessage(cMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

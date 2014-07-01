@@ -360,6 +360,6 @@ cObject* ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const 
 }
 
 
-} // namespace inet
+}
 
 

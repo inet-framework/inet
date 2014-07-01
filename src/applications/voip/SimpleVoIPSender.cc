@@ -171,6 +171,6 @@ void SimpleVoIPSender::sendVoIPPacket()
 
 
 
-} // namespace inet
+}
 
 

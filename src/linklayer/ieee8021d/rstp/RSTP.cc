@@ -976,6 +976,6 @@ void RSTP::stop()
 }
 
 
-} // namespace inet
+}
 
 

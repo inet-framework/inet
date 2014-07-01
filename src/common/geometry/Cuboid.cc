@@ -60,4 +60,4 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     }
 }
 
-} // namespace inet
+}

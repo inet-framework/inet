@@ -175,6 +175,6 @@ void EthernetApplication::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -285,7 +285,7 @@ class INET_API BindingUpdateList : public cSimpleModule
     virtual void resetBindingCacheEntry(BindingUpdateListEntry& entry);
 };
 
-} //namespace
+}
 
 
 #endif

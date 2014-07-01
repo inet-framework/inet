@@ -211,7 +211,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
     cMessage *_reminderMessage;
 };
 
-} //namespace
+}
 
 
 #endif

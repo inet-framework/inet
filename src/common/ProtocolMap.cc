@@ -87,6 +87,6 @@ void ProtocolMapping::addProtocolMapping(int protocol, int gateIndex)
 }
 
 
-} // namespace inet
+}
 
 

@@ -2203,6 +2203,6 @@ bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address &ret, InterfaceEnt
 }
 
 
-} // namespace inet
+}
 
 

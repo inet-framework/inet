@@ -181,7 +181,7 @@ class Ieee8021dInterfaceData : public InterfaceProtocolData
         void setNextUpgrade(simtime_t nextUpgrade) {portData.nextUpgrade = nextUpgrade;}
 };
 
-} //namespace
+}
 
 
 #endif

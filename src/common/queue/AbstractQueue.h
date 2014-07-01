@@ -104,7 +104,7 @@ class INET_API AbstractQueue : public cSimpleModule
 
 };
 
-} //namespace
+}
 
 
 #endif

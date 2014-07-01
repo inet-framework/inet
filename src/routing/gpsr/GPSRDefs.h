@@ -32,6 +32,6 @@ enum GPSRPlanarizationMode {
     GPSR_RNG_PLANARIZATION
 };
 
-} // namespace
+}
 
 #endif

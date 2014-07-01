@@ -46,7 +46,7 @@ class INET_API Delayer : public cSimpleModule
     static simsignal_t delaySignal;
 };
 
-} //namespace
+}
 
 
 #endif

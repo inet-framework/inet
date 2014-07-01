@@ -226,6 +226,6 @@ double NistErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, 
 
 
 
-} // namespace inet
+}
 
 

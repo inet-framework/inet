@@ -342,6 +342,6 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
 }
 
 
-} // namespace inet
+}
 
 

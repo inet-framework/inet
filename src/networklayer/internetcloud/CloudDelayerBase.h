@@ -57,8 +57,8 @@ class INET_API CloudDelayerBase : public cSimpleModule, public INetfilter::IHook
     IPv4 *ipv4Layer;
 };
 
-} //namespace
+}
 
 
-#endif  // __INET_INTERNETCLOUD_CLOUDDELAYERBASE_H
+#endif
 

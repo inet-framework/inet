@@ -82,6 +82,6 @@ bool DropTailQueue::isEmpty()
 
 
 
-} // namespace inet
+}
 
 

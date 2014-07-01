@@ -61,7 +61,7 @@ class INET_API TCPReno : public TCPTahoeRenoFamily
     virtual void receivedDuplicateAck();
 };
 
-} //namespace
+}
 
 
 #endif

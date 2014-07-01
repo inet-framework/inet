@@ -51,6 +51,6 @@ void Delayer::handleMessage(cMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

@@ -345,6 +345,6 @@ bool ICMPv6::handleOperationStage(LifecycleOperation *operation, int stage, IDon
 
 
 
-} // namespace inet
+}
 
 

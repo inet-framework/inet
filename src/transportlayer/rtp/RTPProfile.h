@@ -216,7 +216,7 @@ class INET_API RTPProfile : public cSimpleModule
     bool _autoOutputFileNames;
 };
 
-} //namespace
+}
 
 
 #endif

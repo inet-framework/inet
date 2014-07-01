@@ -51,7 +51,7 @@ class INET_API IArrival : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

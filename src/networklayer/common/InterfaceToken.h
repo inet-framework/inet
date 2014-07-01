@@ -48,8 +48,8 @@ class INET_API InterfaceToken
     uint32 normal() const {return _normal;}
 };
 
-} //namespace
+}
 
 
-#endif // __INET_INTERFACETOKEN_H
+#endif
 

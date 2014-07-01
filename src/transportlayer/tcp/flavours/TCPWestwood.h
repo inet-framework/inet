@@ -69,7 +69,7 @@ class INET_API TCPWestwood : public TCPBaseAlg
     virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
 
-} //namespace
+}
 
 
 #endif

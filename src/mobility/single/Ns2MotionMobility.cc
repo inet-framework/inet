@@ -212,6 +212,6 @@ void Ns2MotionMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

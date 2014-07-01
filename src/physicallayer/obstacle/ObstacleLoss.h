@@ -47,6 +47,6 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 
 }
 
-} // namespace inet
+}
 
 #endif

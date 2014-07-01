@@ -50,7 +50,7 @@ class INET_API IdealTransmitter : public TransmitterBase
 
 }
 
-} //namespace
+}
 
 
 #endif

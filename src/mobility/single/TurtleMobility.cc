@@ -364,6 +364,6 @@ void TurtleMobility::gotoNextStatement()
 }
 
 
-} // namespace inet
+}
 
 

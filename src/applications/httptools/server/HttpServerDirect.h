@@ -44,7 +44,7 @@ class INET_API HttpServerDirect : public HttpServerBase
         virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

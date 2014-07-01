@@ -127,7 +127,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
         ~SCTPPeer();
 };
 
-} //namespace
+}
 
 
 #endif

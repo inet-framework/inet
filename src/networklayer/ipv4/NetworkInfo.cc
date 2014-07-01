@@ -144,6 +144,6 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
 }
 
 
-} // namespace inet
+}
 
 

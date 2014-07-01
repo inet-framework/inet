@@ -533,6 +533,6 @@ cModule *AddressResolver::findHostWithAddress(const Address & add)
 }
 
 
-} // namespace inet
+}
 
 

@@ -45,7 +45,7 @@ class INET_API IListening : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

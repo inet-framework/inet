@@ -40,7 +40,7 @@ class INET_API TCPSpoof : public cSimpleModule
     static simsignal_t sentPkSignal;
 };
 
-} //namespace
+}
 
 
 #endif

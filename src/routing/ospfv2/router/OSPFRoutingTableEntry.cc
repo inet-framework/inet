@@ -164,5 +164,5 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
     return out;
 }
 
-} // namespace inet
+}
 

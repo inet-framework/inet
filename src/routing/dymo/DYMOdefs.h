@@ -26,8 +26,8 @@ enum DYMORouteState {
     TIMED
 };
 
-} // namespace DYMO
+}
 
-} // namespace
+}
 
 #endif

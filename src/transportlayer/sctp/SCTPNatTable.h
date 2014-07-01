@@ -99,7 +99,7 @@ class INET_API SCTPNatTable : public cSimpleModule
     static uint32 getNextEntryNumber() {return nextEntryNumber++;};
 };
 
-} //namespace
+}
 
 
 #endif

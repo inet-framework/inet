@@ -257,6 +257,6 @@ void UDPBasicApp::handleNodeCrash()
 
 
 
-} // namespace inet
+}
 
 

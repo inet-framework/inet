@@ -209,7 +209,7 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

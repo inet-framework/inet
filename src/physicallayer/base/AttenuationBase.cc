@@ -34,6 +34,6 @@ EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *t
 }
 
 
-} // namespace inet
+}
 
 

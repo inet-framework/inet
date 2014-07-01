@@ -153,7 +153,7 @@ class INET_API BindingCache : public cSimpleModule
     virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
 };
 
-} //namespace
+}
 
 
 #endif

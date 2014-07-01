@@ -132,6 +132,6 @@ void MACBase::handleMessageWhenDown(cMessage *msg)
 }
 
 
-} // namespace inet
+}
 
 

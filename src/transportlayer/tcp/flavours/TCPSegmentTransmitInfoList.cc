@@ -100,6 +100,6 @@ void TCPSegmentTransmitInfoList::clearTo(uint32_t endseq)
 
 
 
-} // namespace inet
+}
 
 

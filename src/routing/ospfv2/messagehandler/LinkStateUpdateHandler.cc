@@ -350,6 +350,6 @@ void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
 }
 
 
-} // namespace inet
+}
 
 

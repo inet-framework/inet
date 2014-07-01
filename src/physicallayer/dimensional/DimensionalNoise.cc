@@ -33,6 +33,6 @@ W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) cons
 }
 
 
-} // namespace inet
+}
 
 

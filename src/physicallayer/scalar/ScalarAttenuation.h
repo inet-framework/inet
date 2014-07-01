@@ -34,7 +34,7 @@ class INET_API ScalarAttenuation : public AttenuationBase
 
 }
 
-} //namespace
+}
 
 
 #endif

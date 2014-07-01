@@ -130,6 +130,6 @@ bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, do
 }
 
 
-} // namespace inet
+}
 
 

@@ -534,6 +534,6 @@ HttpController::WebServerEntry* HttpController::__getRandomServerInfo()
 }
 
 
-} // namespace inet
+}
 
 

@@ -346,7 +346,7 @@ private:
 
 };
 
-} //namespace
+}
 
 
 #endif

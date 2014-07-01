@@ -118,7 +118,7 @@ class INET_API EtherMAC : public EtherMACBase
     virtual void printState();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -29,6 +29,6 @@ void AntennaBase::initialize(int stage)
 }
 
 
-} // namespace inet
+}
 
 

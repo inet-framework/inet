@@ -37,7 +37,7 @@ class INET_API INetworkProtocolControlInfo {
     virtual void setHopLimit(short hopLimit) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

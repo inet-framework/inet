@@ -29,7 +29,7 @@ class INET_API IMACProtocol {
 //    virtual ILinkLayerControlInfo *createControlInfo() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

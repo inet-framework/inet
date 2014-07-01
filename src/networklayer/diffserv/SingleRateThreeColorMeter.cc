@@ -120,6 +120,6 @@ int SingleRateThreeColorMeter::meterPacket(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

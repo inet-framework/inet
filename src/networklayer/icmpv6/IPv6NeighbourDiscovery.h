@@ -416,7 +416,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
 #endif /* WITH_xMIPv6 */
 };
 
-} //namespace
+}
 
 
 #endif //IPV6NEIGHBOURDISCOVERY_H

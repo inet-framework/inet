@@ -106,7 +106,7 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
     long int bytesInQueueM;
 };
 
-} //namespace
+}
 
 
 #endif

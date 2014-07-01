@@ -72,4 +72,4 @@ simtime_t PositionTable::getOldestPosition() const {
     return oldestPosition;
 }
 
-} // namespace inet
+}

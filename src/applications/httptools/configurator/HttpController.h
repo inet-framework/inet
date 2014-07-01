@@ -196,7 +196,7 @@ class HttpController : public cSimpleModule
         WebServerEntry* __getRandomServerInfo();
 };
 
-} //namespace
+}
 
 
 #endif

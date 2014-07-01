@@ -183,6 +183,6 @@ void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP
 }
 
 
-} // namespace inet
+}
 
 

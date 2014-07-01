@@ -169,6 +169,6 @@ void PcapDump::closePcap()
 
 
 
-} // namespace inet
+}
 
 

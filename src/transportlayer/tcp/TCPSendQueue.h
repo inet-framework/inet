@@ -157,7 +157,7 @@ class INET_API TCPSendQueue : public cObject
 
 };
 
-} //namespace
+}
 
 
 #endif

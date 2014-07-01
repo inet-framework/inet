@@ -68,7 +68,7 @@ inline std::ostream &operator<<(std::ostream &stream, const IPrintableObject &ob
 
 }
 
-} //namespace
+}
 
 
 #endif

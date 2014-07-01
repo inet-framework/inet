@@ -59,7 +59,7 @@ class INET_API LineSegmentsMobilityBase : public MovingMobilityBase
     LineSegmentsMobilityBase();
 };
 
-} //namespace
+}
 
 
 #endif

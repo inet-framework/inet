@@ -491,6 +491,6 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, OSPF::Router *os
 
 
 
-} // namespace inet
+}
 
 

@@ -56,7 +56,7 @@ class INET_API ListeningBase : public IListening
 
 }
 
-} //namespace
+}
 
 
 #endif

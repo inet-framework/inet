@@ -74,6 +74,6 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
 }
 
 
-} // namespace inet
+}
 
 

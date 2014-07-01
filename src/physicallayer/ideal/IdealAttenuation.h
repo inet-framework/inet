@@ -34,7 +34,7 @@ class INET_API IdealAttenuation : public cModule, public IAttenuation
 
 }
 
-} //namespace
+}
 
 
 #endif

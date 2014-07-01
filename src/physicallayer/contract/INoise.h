@@ -37,7 +37,7 @@ class INET_API INoise : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

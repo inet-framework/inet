@@ -16,6 +16,6 @@ DYMORouteData::DYMORouteData() {
     metricType = HOP_COUNT;
 }
 
-} // namespace DYMO
+}
 
-} // namespace
+}

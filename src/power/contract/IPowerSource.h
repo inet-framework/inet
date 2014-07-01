@@ -77,7 +77,7 @@ class INET_API IPowerSource
     virtual void setPowerConsumption(int id, double consumedPower) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -59,7 +59,7 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

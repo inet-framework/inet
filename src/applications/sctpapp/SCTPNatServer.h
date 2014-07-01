@@ -80,7 +80,7 @@ class INET_API SCTPNatServer : public cSimpleModule
     void printNatVector();
 };
 
-} //namespace
+}
 
 
 #endif

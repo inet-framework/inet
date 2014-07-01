@@ -559,6 +559,6 @@ MulticastGroupList InterfaceTable::collectMulticastGroups()
 }
 
 
-} // namespace inet
+}
 
 

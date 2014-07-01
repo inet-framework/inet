@@ -87,7 +87,7 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
     virtual TCPVirtualDataRcvQueue::Region* createRegionFromSegment(TCPSegment *tcpseg);
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCPDATASTREAMRCVQUEUE_H
+#endif

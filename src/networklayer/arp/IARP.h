@@ -75,7 +75,7 @@ class INET_API IARP
     virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

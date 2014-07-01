@@ -62,6 +62,6 @@ class INET_API PhysicalObject
 #endif
 };
 
-} // namespace inet
+}
 
 #endif

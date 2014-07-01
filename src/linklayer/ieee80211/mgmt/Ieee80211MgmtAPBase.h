@@ -79,7 +79,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
     virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -53,7 +53,7 @@ protected:
     unsigned                    checkedMsg;     /// Number of checked messages
 };
 
-} //namespace
+}
 
 
 #endif

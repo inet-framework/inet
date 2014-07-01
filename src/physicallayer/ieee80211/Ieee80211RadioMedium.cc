@@ -33,6 +33,6 @@ void Ieee80211RadioMedium::initialize(int stage)
 }
 
 
-} // namespace inet
+}
 
 

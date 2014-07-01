@@ -44,4 +44,4 @@ double Shape::computeIntersectionDistance(const LineSegment& lineSegment) const
         return 0;
 }
 
-} // namespace inet
+}

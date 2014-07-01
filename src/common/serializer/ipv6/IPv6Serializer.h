@@ -43,7 +43,7 @@ class IPv6Serializer
         void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
 };
 
-} //namespace
+}
 
 
 #endif

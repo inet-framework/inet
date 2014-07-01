@@ -448,6 +448,6 @@ void Ieee80211MgmtAP::stop()
 
 
 
-} // namespace inet
+}
 
 

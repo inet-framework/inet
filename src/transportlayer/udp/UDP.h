@@ -184,7 +184,7 @@ class INET_API UDP : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

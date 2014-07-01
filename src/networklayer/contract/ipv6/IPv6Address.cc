@@ -390,6 +390,6 @@ int IPv6Address::getMulticastScope() const
 
 
 
-} // namespace inet
+}
 
 

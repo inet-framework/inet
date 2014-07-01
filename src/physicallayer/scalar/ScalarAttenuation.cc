@@ -54,6 +54,6 @@ const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadi
 }
 
 
-} // namespace inet
+}
 
 

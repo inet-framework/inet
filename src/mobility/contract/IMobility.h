@@ -68,7 +68,7 @@ class INET_API IMobility
     // virtual Orientation getCurrentAngularAcceleration() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

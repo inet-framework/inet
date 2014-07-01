@@ -322,4 +322,4 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     return packet;
 }
 
-} // namespace inet
+}

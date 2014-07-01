@@ -178,7 +178,7 @@ protected:
     virtual void flushOtherPorts(unsigned int portNum);
 };
 
-} //namespace
+}
 
 
 #endif

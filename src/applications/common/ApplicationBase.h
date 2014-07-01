@@ -34,7 +34,7 @@ class INET_API ApplicationBase : public OperationalBase
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER; }
 };
 
-} //namespace
+}
 
 
 #endif

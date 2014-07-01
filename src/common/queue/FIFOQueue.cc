@@ -67,6 +67,6 @@ bool FIFOQueue::isEmpty()
 
 
 
-} // namespace inet
+}
 
 

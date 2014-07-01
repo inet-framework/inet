@@ -48,7 +48,7 @@ class INET_API IdealReceiver : public ReceiverBase
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -98,6 +98,6 @@ void Battery::scheduleDepletedTimer()
 }
 
 
-} // namespace inet
+}
 
 

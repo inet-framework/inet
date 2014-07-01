@@ -102,7 +102,7 @@ class INET_API RoutingTableParser
 };
 
 
-} //namespace
+}
 
 
 #endif

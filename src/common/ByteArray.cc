@@ -89,6 +89,6 @@ void ByteArray::truncateData(unsigned int truncleft, unsigned int truncright)
 }
 
 
-} // namespace inet
+}
 
 

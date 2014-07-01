@@ -354,6 +354,6 @@ void SimpleVoIPReceiver::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -231,7 +231,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
 };
 
 
-} //namespace
+}
 
 
 #endif

@@ -263,6 +263,6 @@ bool RTPReceiverInfo::toBeDeleted(simtime_t now)
 }
 
 
-} // namespace inet
+}
 
 

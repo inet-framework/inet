@@ -77,7 +77,7 @@ class RSVPResvError : public RSVPResvError_Base
     inline IPv4Address getLIH() {return getHop().Logical_Interface_Handle;}
 };
 
-} //namespace
+}
 
 
 #endif

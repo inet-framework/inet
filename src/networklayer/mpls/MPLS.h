@@ -64,7 +64,7 @@ class INET_API MPLS : public cSimpleModule
         virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
 };
 
-} //namespace
+}
 
 
 #endif

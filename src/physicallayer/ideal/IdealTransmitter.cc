@@ -57,6 +57,6 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
 }
 
 
-} // namespace inet
+}
 
 

@@ -71,6 +71,6 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage * message)
 }
 
 
-} // namespace inet
+}
 
 

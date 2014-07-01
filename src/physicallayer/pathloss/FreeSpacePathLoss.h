@@ -49,7 +49,7 @@ class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
 
 }
 
-} //namespace
+}
 
 
 #endif

@@ -300,6 +300,6 @@ void ICMP::sendToIP(ICMPMessage *msg)
 
 
 
-} // namespace inet
+}
 
 

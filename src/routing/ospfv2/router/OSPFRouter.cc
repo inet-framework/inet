@@ -1427,6 +1427,6 @@ void OSPF::Router::removeExternalRoute(IPv4Address networkAddress)
 }
 
 
-} // namespace inet
+}
 
 

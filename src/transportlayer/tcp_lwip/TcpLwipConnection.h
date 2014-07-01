@@ -120,7 +120,7 @@ class INET_API TcpLwipConnection
     Stats *statsM;
 };
 
-} //namespace
+}
 
 
 #endif

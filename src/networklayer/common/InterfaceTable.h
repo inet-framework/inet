@@ -237,7 +237,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     virtual MulticastGroupList collectMulticastGroups();
 };
 
-} //namespace
+}
 
 
 #endif

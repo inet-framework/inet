@@ -834,6 +834,6 @@ WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, WifiPreamble
 
 
 
-} // namespace inet
+}
 
 

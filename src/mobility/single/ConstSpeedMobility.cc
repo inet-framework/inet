@@ -53,6 +53,6 @@ void ConstSpeedMobility::setTargetPosition()
 }
 
 
-} // namespace inet
+}
 
 

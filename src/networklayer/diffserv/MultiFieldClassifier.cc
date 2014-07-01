@@ -302,6 +302,6 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
 
 
 
-} // namespace inet
+}
 
 

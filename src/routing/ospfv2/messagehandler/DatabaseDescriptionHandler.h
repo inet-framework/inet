@@ -34,10 +34,10 @@ public:
     void processPacket(OSPFPacket* packet, Interface* intf, Neighbor* neighbor);
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_DATABASEDESCRIPTIONHANDLER_H
+#endif
 

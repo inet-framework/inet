@@ -141,6 +141,6 @@ void SchedulerBase::notifyListeners()
 }
 
 
-} // namespace inet
+}
 
 

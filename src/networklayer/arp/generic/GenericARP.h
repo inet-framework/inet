@@ -58,8 +58,8 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 };
 
-} //namespace
+}
 
 
-#endif  // __INET_GENERICARP_H
+#endif
 

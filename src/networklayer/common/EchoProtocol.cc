@@ -111,6 +111,6 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
 }
 
 
-} // namespace inet
+}
 
 

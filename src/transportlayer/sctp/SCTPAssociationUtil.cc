@@ -2849,6 +2849,6 @@ void SCTPAssociation::putInTransmissionQ(const uint32 tsn, SCTPDataVariables* ch
 
 
 
-} // namespace inet
+}
 
 

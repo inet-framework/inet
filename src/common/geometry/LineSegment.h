@@ -38,6 +38,6 @@ class INET_API LineSegment
         const Coord& getPoint2() const { return point2; }
 };
 
-} // namespace inet
+}
 
 #endif

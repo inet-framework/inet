@@ -147,7 +147,7 @@ namespace inet {
 #define E_INFLOOP eINFLOOP
 #endif
 
-} //namespace
+}
 
 
 #endif

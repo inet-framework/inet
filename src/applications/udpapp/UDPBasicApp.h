@@ -80,7 +80,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     ~UDPBasicApp();
 };
 
-} //namespace
+}
 
 
 #endif

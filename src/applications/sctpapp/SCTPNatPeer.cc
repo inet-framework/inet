@@ -955,6 +955,6 @@ void SCTPNatPeer::finish()
 }
 
 
-} // namespace inet
+}
 
 

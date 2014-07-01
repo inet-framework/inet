@@ -56,7 +56,7 @@ class INET_API EtherEncap : public cSimpleModule
     virtual void updateDisplayString();
 };
 
-} //namespace
+}
 
 
 #endif

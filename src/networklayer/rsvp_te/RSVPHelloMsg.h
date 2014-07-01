@@ -46,7 +46,7 @@ class RSVPHelloMsg : public RSVPHelloMsg_Base
     virtual RSVPHelloMsg *dup() const {return new RSVPHelloMsg(*this);}
 };
 
-} //namespace
+}
 
 
 #endif

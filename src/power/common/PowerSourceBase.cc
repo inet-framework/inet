@@ -45,6 +45,6 @@ void PowerSourceBase::setPowerConsumption(int id, double consumedPower)
 }
 
 
-} // namespace inet
+}
 
 

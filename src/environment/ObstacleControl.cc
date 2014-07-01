@@ -220,6 +220,6 @@ double ObstacleControl::calculateReceivedPower(double pSend, double carrierFrequ
 }
 
 
-} // namespace inet
+}
 
 

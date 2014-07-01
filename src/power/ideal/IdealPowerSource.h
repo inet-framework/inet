@@ -35,7 +35,7 @@ class INET_API IdealPowerSource : public PowerSourceBase
     virtual double getResidualCapacity() { return INFINITY; }
 };
 
-} //namespace
+}
 
 
 #endif

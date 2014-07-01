@@ -189,6 +189,6 @@ void InetPacketPrinter::printICMPPacket(std::ostream& os, Address srcAddr, Addre
 
 
 
-} // namespace inet
+}
 
 

@@ -61,7 +61,7 @@ class INET_API TCPEchoApp : public cSimpleModule, public ILifecycle
 
 };
 
-} //namespace
+}
 
 
 #endif

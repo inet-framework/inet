@@ -285,7 +285,7 @@ class  INET_API SCTPSocket
     void setState(int state) {sockstate = state; };
 };
 
-} //namespace
+}
 
 
 #endif

@@ -888,6 +888,6 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
 
 
 
-} // namespace inet
+}
 
 

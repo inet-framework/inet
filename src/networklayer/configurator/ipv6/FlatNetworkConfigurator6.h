@@ -47,7 +47,7 @@ class INET_API FlatNetworkConfigurator6 : public cSimpleModule
     virtual bool isIPNode(cTopology::Node *node);
 };
 
-} //namespace
+}
 
 
 #endif

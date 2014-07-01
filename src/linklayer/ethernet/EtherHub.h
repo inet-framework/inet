@@ -47,7 +47,7 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
 
-} //namespace
+}
 
 
 #endif

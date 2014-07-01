@@ -243,7 +243,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     //@}
 };
 
-} //namespace
+}
 
 
 #endif

@@ -24,6 +24,6 @@ Register_Class(IPv4Datagram);
 
 
 
-} // namespace inet
+}
 
 

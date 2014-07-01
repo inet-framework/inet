@@ -364,6 +364,6 @@ void TCPSocket::readDataTransferModePar(cComponent &component)
 
 
 
-} // namespace inet
+}
 
 

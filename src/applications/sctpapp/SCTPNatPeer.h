@@ -135,7 +135,7 @@ class INET_API SCTPNatPeer : public cSimpleModule, public SCTPSocket::CallbackIn
     void setStatusString(const char *s);
 };
 
-} //namespace
+}
 
 
 #endif

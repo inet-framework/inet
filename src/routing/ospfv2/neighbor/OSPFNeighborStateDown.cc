@@ -54,6 +54,6 @@ void OSPF::NeighborStateDown::processEvent(OSPF::Neighbor* neighbor, OSPF::Neigh
 }
 
 
-} // namespace inet
+}
 
 

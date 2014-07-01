@@ -43,7 +43,7 @@ class INET_API ModuleIdAddressType : public IAddressType
         virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModuleIdAddress(); } // TODO constant
 };
 
-} //namespace
+}
 
 
 #endif

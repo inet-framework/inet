@@ -413,4 +413,4 @@ void Radio::updateDisplayString()
     }
 }
 
-} // namespace inet
+}

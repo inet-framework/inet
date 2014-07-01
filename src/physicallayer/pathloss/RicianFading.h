@@ -46,7 +46,7 @@ class INET_API RicianFading : public FreeSpacePathLoss
 
 }
 
-} //namespace
+}
 
 
 #endif

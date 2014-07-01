@@ -111,6 +111,6 @@ void IPvXTrafSink::processPacket(cPacket *msg)
 
 
 
-} // namespace inet
+}
 
 

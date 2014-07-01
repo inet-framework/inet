@@ -79,6 +79,6 @@ void OSPF::NeighborStateFull::processEvent(OSPF::Neighbor* neighbor, OSPF::Neigh
 }
 
 
-} // namespace inet
+}
 
 

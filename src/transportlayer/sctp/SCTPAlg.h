@@ -77,7 +77,7 @@ class INET_API SCTPAlg : public SCTPAlgorithm
 
 };
 
-} //namespace
+}
 
 
 #endif

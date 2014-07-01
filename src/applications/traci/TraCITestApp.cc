@@ -227,6 +227,6 @@ void TraCITestApp::handlePositionUpdate() {
 
 
 
-} // namespace inet
+}
 
 

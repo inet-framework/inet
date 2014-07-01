@@ -221,7 +221,7 @@ class INET_API LDP: public cSimpleModule, public TCPSocket::CallbackInterface, p
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 
-} //namespace
+}
 
 
 #endif

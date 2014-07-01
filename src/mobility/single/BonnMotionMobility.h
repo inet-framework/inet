@@ -61,7 +61,7 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     virtual ~BonnMotionMobility();
 };
 
-} //namespace
+}
 
 
 #endif

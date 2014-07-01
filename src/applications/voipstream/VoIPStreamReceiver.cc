@@ -260,6 +260,6 @@ void VoIPStreamReceiver::finish()
 
 
 
-} // namespace inet
+}
 
 

@@ -51,6 +51,6 @@ TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
 }
 
 
-} // namespace inet
+}
 
 

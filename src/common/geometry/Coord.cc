@@ -51,6 +51,6 @@ double Coord::sqrTorusDist(const Coord& b, const Coord& size) const {
 }
 
 
-} // namespace inet
+}
 
 

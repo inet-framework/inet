@@ -759,6 +759,6 @@ cObject* LMacLayer::setUpControlInfo(cMessage * const pMsg, const MACAddress& pS
 }
 
 
-} // namespace inet
+}
 
 

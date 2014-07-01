@@ -531,6 +531,6 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
 }
 
 
-} // namespace inet
+}
 
 

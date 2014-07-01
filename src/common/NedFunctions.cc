@@ -131,6 +131,6 @@ Define_NED_Function2(nedf_absPath,
 
 
 
-} // namespace inet
+}
 
 

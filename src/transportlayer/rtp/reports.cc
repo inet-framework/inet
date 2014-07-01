@@ -71,6 +71,6 @@ void ReceptionReport::dump(std::ostream& os) const
 }
 
 
-} // namespace inet
+}
 
 

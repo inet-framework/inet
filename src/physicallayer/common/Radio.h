@@ -183,7 +183,7 @@ class INET_API Radio : public PhysicalLayerBase, public virtual IRadio
 
 }
 
-} //namespace
+}
 
 
 #endif

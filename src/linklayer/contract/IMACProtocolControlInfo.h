@@ -33,7 +33,7 @@ class INET_API IMACProtocolControlInfo {
     virtual void setInterfaceId(int interfaceId) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

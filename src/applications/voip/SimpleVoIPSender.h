@@ -68,7 +68,7 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     SimpleVoIPSender();
 };
 
-} //namespace
+}
 
 
 #endif

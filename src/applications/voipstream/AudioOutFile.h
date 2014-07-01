@@ -56,7 +56,7 @@ class AudioOutFile
 };
 
 
-} //namespace
+}
 
 
-#endif // VOIPSTREAM_AUDIOOUTFILE_H
+#endif

@@ -25,4 +25,4 @@ LineSegment::LineSegment(const Coord& point1, const Coord& point2) :
 {
 }
 
-} // namespace inet
+}

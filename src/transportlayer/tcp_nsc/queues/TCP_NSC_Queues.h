@@ -227,7 +227,7 @@ class INET_API TCP_NSC_ReceiveQueue : public cObject
     TCP_NSC_Connection *connM;
 };
 
-} //namespace
+}
 
 
 #endif

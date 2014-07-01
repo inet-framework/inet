@@ -99,6 +99,6 @@ void TCPDump::finish()
 
 
 
-} // namespace inet
+}
 
 

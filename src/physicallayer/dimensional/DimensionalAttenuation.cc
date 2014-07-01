@@ -79,6 +79,6 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
 }
 
 
-} // namespace inet
+}
 
 

@@ -53,7 +53,7 @@ namespace inet {
 #define ETHER_PAUSE_COMMAND_BYTES    (2+2) /* opcode(2)+parameters(2) */
 #define ETHER_PAUSE_COMMAND_PADDED_BYTES std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES+ETHER_PAUSE_COMMAND_BYTES)
 
-} //namespace
+}
 
 
 #endif

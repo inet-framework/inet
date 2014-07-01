@@ -56,6 +56,6 @@ IRoutingTable *IPv6Route::getRoutingTableAsGeneric() const
 
 
 
-} // namespace inet
+}
 
 

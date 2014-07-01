@@ -168,6 +168,6 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables* dchunk)
 }
 
 
-} // namespace inet
+}
 
 

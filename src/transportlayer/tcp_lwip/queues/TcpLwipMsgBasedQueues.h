@@ -200,7 +200,7 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
     long int bytesInQueueM;
 };
 
-} //namespace
+}
 
 
 #endif

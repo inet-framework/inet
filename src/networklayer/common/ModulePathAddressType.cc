@@ -22,6 +22,6 @@ namespace inet {
 ModulePathAddressType ModulePathAddressType::INSTANCE;
 
 
-} // namespace inet
+}
 
 

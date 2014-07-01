@@ -490,4 +490,4 @@ void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
     sendToSCTP(msg);
 }
 
-} // namespace
+}

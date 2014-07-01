@@ -176,6 +176,6 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
 
 
 
-} // namespace inet
+}
 
 

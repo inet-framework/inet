@@ -34,7 +34,7 @@ class MultiNetworkLayerUpperMultiplexer : public cSimpleModule {
     int getProtocolIndex(cMessage * message);
 };
 
-} //namespace
+}
 
 
 #endif

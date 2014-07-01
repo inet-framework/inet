@@ -195,7 +195,7 @@ class INET_API FWMath {
   static double rad2deg(double rad) { return rad * 180 / M_PI; }
 };
 
-} //namespace
+}
 
 
 #endif

@@ -102,6 +102,6 @@ bool REDDropper::shouldDrop(cPacket *packet)
 }
 
 
-} // namespace inet
+}
 
 

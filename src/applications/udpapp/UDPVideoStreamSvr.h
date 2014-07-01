@@ -87,7 +87,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     virtual ~UDPVideoStreamSvr();
 };
 
-} //namespace
+}
 
 
 #endif

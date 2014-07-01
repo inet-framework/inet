@@ -54,7 +54,7 @@ class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
     ConstSpeedMobility();
 };
 
-} //namespace
+}
 
 
 #endif

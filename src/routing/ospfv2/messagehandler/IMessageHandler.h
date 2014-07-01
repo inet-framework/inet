@@ -40,9 +40,9 @@ public:
     virtual void processPacket(OSPFPacket*, Interface* intf, Neighbor* neighbor) = 0;
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_IMESSAGEHANDLER_H
+#endif

@@ -277,6 +277,6 @@ void TCPSessionApp::finish()
 
 
 
-} // namespace inet
+}
 
 

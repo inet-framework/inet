@@ -234,7 +234,7 @@ class INET_API IPv6 : public QueueBase, public ILifecycle, public INetfilter, pu
 #endif /* WITH_xMIPv6 */
 };
 
-} //namespace
+}
 
 
 #endif

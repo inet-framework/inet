@@ -19,7 +19,7 @@
 
 namespace inet {
 
-} //namespace
+}
 
 
 #endif

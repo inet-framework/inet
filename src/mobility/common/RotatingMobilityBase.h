@@ -80,7 +80,7 @@ class INET_API RotatingMobilityBase : public MobilityBase
 };
 
 
-} //namespace
+}
 
 
 #endif /* ROTATINGMOBILITYBASE_H_ */

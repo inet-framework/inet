@@ -254,6 +254,6 @@ void MessageChecker::finish()
 
 
 
-} // namespace inet
+}
 
 

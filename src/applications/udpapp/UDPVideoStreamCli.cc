@@ -117,6 +117,6 @@ void UDPVideoStreamCli::handleNodeCrash()
 
 
 
-} // namespace inet
+}
 
 

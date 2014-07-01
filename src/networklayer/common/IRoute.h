@@ -239,7 +239,7 @@ class INET_API IMulticastRoute
     static const char *sourceTypeName(SourceType sourceType);
 };
 
-} //namespace
+}
 
 
 #endif

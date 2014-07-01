@@ -143,7 +143,7 @@ public:
     virtual void configureInterface(InterfaceEntry * interfaceEntry);
 };
 
-} //namespace
+}
 
 
 #endif

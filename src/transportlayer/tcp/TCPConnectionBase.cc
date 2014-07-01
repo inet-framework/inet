@@ -618,6 +618,6 @@ void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
 }
 
 
-} // namespace inet
+}
 
 

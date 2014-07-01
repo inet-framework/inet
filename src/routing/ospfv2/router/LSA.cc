@@ -232,4 +232,4 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
     return ostr;
 }
 
-} // namespace
+}

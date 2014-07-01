@@ -571,6 +571,6 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
 
 
 
-} // namespace inet
+}
 
 

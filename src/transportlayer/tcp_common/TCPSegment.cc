@@ -217,6 +217,6 @@ cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
 
 
 
-} // namespace inet
+}
 
 

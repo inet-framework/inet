@@ -243,6 +243,6 @@ void EtherAppCli::finish()
 
 
 
-} // namespace inet
+}
 
 

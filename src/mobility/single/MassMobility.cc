@@ -84,6 +84,6 @@ void MassMobility::move()
 }
 
 
-} // namespace inet
+}
 
 

@@ -2269,4 +2269,4 @@ bool RSVP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     return true;
 }
 
-} // namespace
+}

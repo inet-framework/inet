@@ -56,6 +56,6 @@ void LineSegmentsMobilityBase::move()
 }
 
 
-} // namespace inet
+}
 
 

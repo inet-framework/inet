@@ -38,7 +38,7 @@ class INET_API IModulation
 
 }
 
-} //namespace
+}
 
 
 #endif

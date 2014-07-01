@@ -102,7 +102,7 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
         virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback=NULL);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -100,7 +100,7 @@ class INET_API Ieee8021dRelay : public cSimpleModule, public ILifecycle
         virtual void finish();
 };
 
-} //namespace
+}
 
 
 #endif

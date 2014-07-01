@@ -52,7 +52,7 @@ class L2NodeConfigurator : public cSimpleModule, public ILifecycle, public cList
         virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
 
-} //namespace
+}
 
 
 #endif

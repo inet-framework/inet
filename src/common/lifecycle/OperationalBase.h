@@ -52,7 +52,7 @@ class INET_API OperationalBase : public cSimpleModule, public ILifecycle
     OperationalBase();
 };
 
-} //namespace
+}
 
 
 #endif

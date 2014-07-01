@@ -31,6 +31,6 @@ class INET_API Polygon
         Polygon();
 };
 
-} // namespace inet
+}
 
 #endif

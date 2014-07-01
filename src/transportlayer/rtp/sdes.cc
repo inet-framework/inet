@@ -206,6 +206,6 @@ int SDESChunk::getLength() const
 }
 
 
-} // namespace inet
+}
 
 

@@ -52,6 +52,6 @@ void StaticGridMobility::setInitialPosition()
 
 
 
-} // namespace inet
+}
 
 

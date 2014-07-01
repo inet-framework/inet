@@ -63,7 +63,7 @@ class INET_API UDPVideoStreamCli : public ApplicationBase
     virtual ~UDPVideoStreamCli() { cancelAndDelete(selfMsg); }
 };
 
-} //namespace
+}
 
 
 #endif

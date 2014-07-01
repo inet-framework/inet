@@ -53,6 +53,6 @@ int RTPPacket::getPayloadLength() const
 }
 
 
-} // namespace inet
+}
 
 

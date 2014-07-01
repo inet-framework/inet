@@ -581,7 +581,7 @@ class INET_API Topology : public cOwnedObject
     virtual Link *createLink() { return new Link(); }
 };
 
-} //namespace
+}
 
 
 #endif

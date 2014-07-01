@@ -708,6 +708,6 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
 
 
 
-} // namespace inet
+}
 
 

@@ -310,6 +310,6 @@ void EtherLLC::stop()
 
 
 
-} // namespace inet
+}
 
 

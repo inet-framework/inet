@@ -52,6 +52,6 @@ void ScalarRadio::setBitrate(bps newBitrate)
 }
 
 
-} // namespace inet
+}
 
 

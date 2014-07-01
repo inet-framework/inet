@@ -69,9 +69,9 @@ class OSPFRouting :  public cSimpleModule, public ILifecycle
     virtual bool isNodeUp();
 };
 
-} //namespace
+}
 
 
-#endif  // __INET_OSPFROUTING_H
+#endif
 
 

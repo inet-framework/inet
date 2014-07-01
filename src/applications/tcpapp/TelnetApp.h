@@ -53,7 +53,7 @@ class INET_API TelnetApp : public TCPAppBase, public ILifecycle
     virtual ~TelnetApp();
 };
 
-} //namespace
+}
 
 
 #endif

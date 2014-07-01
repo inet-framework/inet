@@ -53,7 +53,7 @@ class INET_API LinearMobility : public MovingMobilityBase
     LinearMobility();
 };
 
-} //namespace
+}
 
 
 #endif

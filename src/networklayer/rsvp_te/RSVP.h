@@ -309,7 +309,7 @@ std::ostream& operator<<(std::ostream& os, const SessionObj_t& a);
 std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a);
 std::ostream& operator<<(std::ostream& os, const FlowSpecObj_t& a);
 
-} //namespace
+}
 
 
 #endif

@@ -88,6 +88,6 @@ void OSPF::NeighborStateLoading::processEvent(OSPF::Neighbor* neighbor, OSPF::Ne
 }
 
 
-} // namespace inet
+}
 
 

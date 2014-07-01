@@ -27,6 +27,6 @@ void ListeningDecision::printToStream(std::ostream &stream) const
 }
 
 
-} // namespace inet
+}
 
 

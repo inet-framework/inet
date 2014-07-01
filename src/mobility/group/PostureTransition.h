@@ -204,7 +204,7 @@ class INET_API PostureTransition {
     double** getMatrix(simtime_t, Coord);
 };
 
-} //namespace
+}
 
 
 #endif

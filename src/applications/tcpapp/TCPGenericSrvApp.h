@@ -57,7 +57,7 @@ class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
 
-} //namespace
+}
 
 
 #endif

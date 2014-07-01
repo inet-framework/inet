@@ -64,7 +64,7 @@ class INET_API SNIRReceiverBase : public ReceiverBase
 
 }
 
-} //namespace
+}
 
 
 #endif

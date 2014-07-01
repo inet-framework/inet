@@ -53,7 +53,7 @@ class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
     TCPTahoeRenoFamily();
 };
 
-} //namespace
+}
 
 
 #endif

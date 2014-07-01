@@ -220,9 +220,9 @@ private:
     void exit()     { std::cout << "Established::exit" << std::endl; }
 };
 
-} // namespace BGPFSM
+}
 
-} //namespace
+}
 
 
 #endif

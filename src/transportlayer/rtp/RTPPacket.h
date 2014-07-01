@@ -64,7 +64,7 @@ class RTPPacket : public RTPPacket_Base
     virtual void setPayloadLength(int x) { throw cRuntimeError("Don't use SetPayloadLength()"); }
 };
 
-} //namespace
+}
 
 
 #endif

@@ -210,6 +210,6 @@ void IPv4MulticastRoute::changed(int fieldCode)
 }
 
 
-} // namespace inet
+}
 
 

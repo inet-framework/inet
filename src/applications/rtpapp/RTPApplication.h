@@ -61,7 +61,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
         RTPApplication();
 };
 
-} //namespace
+}
 
 
 #endif

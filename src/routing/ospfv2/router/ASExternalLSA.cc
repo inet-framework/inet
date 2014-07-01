@@ -78,6 +78,6 @@ bool OSPF::ASExternalLSA::differsFrom(const OSPFASExternalLSA* asExternalLSA) co
 }
 
 
-} // namespace inet
+}
 
 

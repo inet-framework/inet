@@ -117,6 +117,6 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 
 
 
-} // namespace inet
+}
 
 

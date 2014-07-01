@@ -123,7 +123,7 @@ class INET_API AnnotationManager : public cSimpleModule
     Groups groups;
 };
 
-} //namespace
+}
 
 
 #endif

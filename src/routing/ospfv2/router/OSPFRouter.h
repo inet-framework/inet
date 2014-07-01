@@ -372,8 +372,8 @@ private:
     RoutingTableEntry*   selectLeastCostRoutingEntry(std::vector<RoutingTableEntry*>& entries) const;
 };
 
-} // namespace OSPF
-} // namespace inet
+}
+}
 
-#endif // __INET_OSPFROUTER_H
+#endif
 

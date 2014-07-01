@@ -102,6 +102,6 @@ void TCPByteStreamSendQueue::discardUpTo(uint32 seqNum)
 }
 
 
-} // namespace inet
+}
 
 

@@ -116,6 +116,6 @@ void ByteArrayBuffer::clear()
 
 
 
-} // namespace inet
+}
 
 

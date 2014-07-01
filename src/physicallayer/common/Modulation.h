@@ -68,7 +68,7 @@ class INET_API QAM256Modulation : public IModulation
 
 }
 
-} //namespace
+}
 
 
 #endif

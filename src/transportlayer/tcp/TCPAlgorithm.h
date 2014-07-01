@@ -187,7 +187,7 @@ class INET_API TCPAlgorithm : public cObject
 
 };
 
-} //namespace
+}
 
 
 #endif

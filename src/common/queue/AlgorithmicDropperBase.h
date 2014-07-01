@@ -47,7 +47,7 @@ class INET_API AlgorithmicDropperBase : public cSimpleModule, public IQueueAcces
       virtual int getByteLength() const;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -44,7 +44,7 @@ class INET_API DipoleAntenna : public AntennaBase
 
 }
 
-} //namespace
+}
 
 
 #endif

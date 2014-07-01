@@ -40,8 +40,8 @@ class INET_API NetworkInfo : public cSimpleModule, public IScriptable
     virtual void dumpRoutingInfo(cModule *target, const char *filename, bool append, bool compat);
 };
 
-} //namespace
+}
 
 
-#endif // __INET_NETWORKINFO_H_
+#endif
 

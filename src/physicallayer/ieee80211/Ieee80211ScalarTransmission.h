@@ -45,6 +45,6 @@ class INET_API Ieee80211ScalarTransmission : public ScalarTransmission
 
 }
 
-} // namespace inet
+}
 
 #endif

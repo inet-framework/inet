@@ -73,7 +73,7 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
         virtual bool isUpperMsg(cMessage *msg) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

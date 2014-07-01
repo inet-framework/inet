@@ -161,6 +161,6 @@ void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPM
 }
 
 
-} // namespace inet
+}
 
 

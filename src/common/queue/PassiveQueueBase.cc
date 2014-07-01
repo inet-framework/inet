@@ -137,6 +137,6 @@ void PassiveQueueBase::notifyListeners()
 
 
 
-} // namespace inet
+}
 
 

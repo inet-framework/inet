@@ -47,7 +47,7 @@ const int HOW_KIND = 50;
 
 };
 
-} //namespace
+}
 
 
 #endif

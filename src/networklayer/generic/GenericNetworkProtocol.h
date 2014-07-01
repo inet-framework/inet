@@ -173,7 +173,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
     virtual void endService(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

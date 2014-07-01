@@ -60,7 +60,7 @@ class TCPSegmentTransmitInfoList
     void clearTo(uint32_t endseg);
 };
 
-} //namespace
+}
 
 
 #endif

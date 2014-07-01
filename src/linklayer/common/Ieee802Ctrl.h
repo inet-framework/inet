@@ -46,7 +46,7 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControl
     virtual void setInterfaceId(int interfaceId) { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
 };
 
-} //namespace
+}
 
 
 #endif

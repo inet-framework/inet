@@ -46,7 +46,7 @@ class INET_API FlatNoiseBase : public NoiseBase
 
 }
 
-} //namespace
+}
 
 
 #endif

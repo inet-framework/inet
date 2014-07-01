@@ -43,6 +43,6 @@ std::string GenericNetworkProtocolInterfaceData::detailedInfo() const
 }
 
 
-} // namespace inet
+}
 
 

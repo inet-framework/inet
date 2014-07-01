@@ -348,7 +348,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
         bool getInterfaceIPv4Address(Address &ret, InterfaceEntry * interfaceEntry, bool netmask);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -96,7 +96,7 @@ class INET_API IdealMac : public MACProtocolBase
     virtual void initialize(int stage);
 };
 
-} //namespace
+}
 
 
 #endif

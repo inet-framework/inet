@@ -51,7 +51,7 @@ class INET_API IClassifier
      virtual bool lookupLabel(IPv4Datagram *ipdatagram, LabelOpVector& outLabel, std::string& outInterface, int& color) = 0;
 };
 
-} //namespace
+}
 
 
 #endif

@@ -149,5 +149,5 @@ void prepend(EroVector& dest, const EroVector& src, bool reverse)
 }
 */
 
-} // namespace inet
+}
 

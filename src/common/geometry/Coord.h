@@ -263,7 +263,7 @@ inline std::string Coord::info() const {
     return os.str();
 }
 
-} //namespace
+}
 
 
 #endif

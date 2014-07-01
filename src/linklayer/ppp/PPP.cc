@@ -505,6 +505,6 @@ void PPP::clearQueue()
 
 
 
-} // namespace inet
+}
 
 

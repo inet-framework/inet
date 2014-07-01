@@ -55,7 +55,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
         virtual void socketFailure(int connId, void *yourPtr, int code);
 };
 
-} //namespace
+}
 
 
 #endif

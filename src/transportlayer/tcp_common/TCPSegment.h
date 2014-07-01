@@ -133,7 +133,7 @@ class INET_API TCPSegment : public TCPSegment_Base
     virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
 
-} //namespace
+}
 
 
 #endif

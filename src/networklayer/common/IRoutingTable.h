@@ -175,7 +175,7 @@ class INET_API IRoutingTable
         virtual IRoute *createRoute() = 0;
 };
 
-} //namespace
+}
 
 
 #endif

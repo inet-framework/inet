@@ -43,7 +43,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 
 }
 
-} //namespace
+}
 
 
 #endif

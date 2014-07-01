@@ -65,7 +65,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
     virtual bool isEmpty();
 };
 
-} //namespace
+}
 
 
 #endif

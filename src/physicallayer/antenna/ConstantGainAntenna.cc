@@ -36,6 +36,6 @@ void ConstantGainAntenna::initialize(int stage)
 }
 
 
-} // namespace inet
+}
 
 

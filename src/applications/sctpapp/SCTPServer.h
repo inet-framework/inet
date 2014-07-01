@@ -103,7 +103,7 @@ class INET_API SCTPServer : public cSimpleModule, public ILifecycle
        virtual ~SCTPServer();
        SCTPServer();
 };
-} //namespace
+}
 
 
 #endif

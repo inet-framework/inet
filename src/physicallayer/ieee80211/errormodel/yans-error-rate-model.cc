@@ -295,6 +295,6 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
 
 
 
-} // namespace inet
+}
 
 

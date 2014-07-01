@@ -555,6 +555,6 @@ void VoIPStreamSender::readFrame()
 
 
 
-} // namespace inet
+}
 
 

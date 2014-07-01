@@ -60,6 +60,6 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
 }
 
 
-} // namespace inet
+}
 
 

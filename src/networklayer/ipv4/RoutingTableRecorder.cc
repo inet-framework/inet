@@ -370,6 +370,6 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //    fflush(routingLogFile);
 //}
 
-} // namespace
+}
 
 #endif /*OMNETPP_VERSION*/

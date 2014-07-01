@@ -109,6 +109,6 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
 }
 
 
-} // namespace inet
+}
 
 

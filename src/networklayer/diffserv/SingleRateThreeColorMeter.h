@@ -61,7 +61,7 @@ class INET_API SingleRateThreeColorMeter : public cSimpleModule
     virtual int meterPacket(cPacket *packet);
 };
 
-} //namespace
+}
 
 
 #endif

@@ -59,7 +59,7 @@ class INET_API EtherAppSrv : public cSimpleModule, public ILifecycle
     void sendPacket(cPacket *datapacket, const MACAddress& destAddr, int destSap);
 };
 
-} //namespace
+}
 
 
 #endif

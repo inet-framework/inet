@@ -33,6 +33,6 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
 }
 
 
-} // namespace inet
+}
 
 

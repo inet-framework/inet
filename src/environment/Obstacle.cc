@@ -243,6 +243,6 @@ double Obstacle::calculateReceivedPower(double pSend, double carrierFrequency, c
 }
 
 
-} // namespace inet
+}
 
 

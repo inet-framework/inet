@@ -436,6 +436,6 @@ void SimpleConstMapping::initializeArguments(const Argument& min,
 }
 
 
-} // namespace inet
+}
 
 

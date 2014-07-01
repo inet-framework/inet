@@ -44,7 +44,7 @@ class INET_API Ieee80211RadioMedium : public RadioMedium
 
 }
 
-} //namespace
+}
 
 
 #endif

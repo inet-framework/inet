@@ -166,6 +166,6 @@ void MACRelayUnit::finish()
 }
 
 
-} // namespace inet
+}
 
 

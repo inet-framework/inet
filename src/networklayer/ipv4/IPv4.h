@@ -310,7 +310,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void flush();
 };
 
-} //namespace
+}
 
 
 #endif

@@ -111,7 +111,7 @@ class INET_API ThruputMeteringChannel : public cDatarateChannel
     virtual void processMessage(cMessage *msg, simtime_t t, result_t& result);
 };
 
-} //namespace
+}
 
 
 #endif

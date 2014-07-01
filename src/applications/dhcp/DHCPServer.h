@@ -128,7 +128,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
 
 };
 
-} //namespace
+}
 
 
 #endif

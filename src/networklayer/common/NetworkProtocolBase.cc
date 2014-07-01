@@ -87,6 +87,6 @@ bool NetworkProtocolBase::isLowerMessage(cMessage* message)
 }
 
 
-} // namespace inet
+}
 
 

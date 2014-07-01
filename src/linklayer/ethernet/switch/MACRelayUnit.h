@@ -78,7 +78,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
         virtual void stop();
 };
 
-} //namespace
+}
 
 
 #endif

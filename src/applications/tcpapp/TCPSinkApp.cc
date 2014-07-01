@@ -94,6 +94,6 @@ void TCPSinkApp::finish()
 
 
 
-} // namespace inet
+}
 
 

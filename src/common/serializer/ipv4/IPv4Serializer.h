@@ -47,7 +47,7 @@ class IPv4Serializer
         void parse(const unsigned char *buf, unsigned int bufsize, IPv4Datagram *dest);
 };
 
-} //namespace
+}
 
 
 #endif

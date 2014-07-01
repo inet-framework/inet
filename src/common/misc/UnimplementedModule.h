@@ -31,7 +31,7 @@ class UnimplementedModule : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
 };
 
-} //namespace
+}
 
 
 #endif

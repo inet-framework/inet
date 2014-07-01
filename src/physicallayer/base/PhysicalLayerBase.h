@@ -35,7 +35,7 @@ class INET_API PhysicalLayerBase : public OperationalBase, public IPhysicalLayer
         virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_PHYSICAL_LAYER; }
 };
 
-} //namespace
+}
 
 
 #endif

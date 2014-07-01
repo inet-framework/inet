@@ -41,7 +41,7 @@ class INET_API IListeningDecision : public IPrintableObject
 
 }
 
-} //namespace
+}
 
 
 #endif

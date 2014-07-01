@@ -46,6 +46,6 @@ uint16_t TCPIPchecksum::_checksum(const void *addr, unsigned int count)
 }
 
 
-} // namespace inet
+}
 
 

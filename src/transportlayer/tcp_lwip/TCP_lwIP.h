@@ -159,8 +159,8 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     TCPSegment *pCurTcpSegM;
 };
 
-} //namespace
+}
 
 
-#endif // __INET_TCP_LWIP_H
+#endif
 

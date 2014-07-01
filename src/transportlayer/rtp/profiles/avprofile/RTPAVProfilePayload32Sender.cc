@@ -171,6 +171,6 @@ bool RTPAVProfilePayload32Sender::sendPacket()
 }
 
 
-} // namespace inet
+}
 
 

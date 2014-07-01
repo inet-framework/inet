@@ -65,10 +65,10 @@ public:
     bool    authenticatePacket(OSPFPacket* packet)  { return true; }
 };
 
-} // namespace OSPF
+}
 
-} //namespace
+}
 
 
-#endif // __INET_MESSAGEHANDLER_H
+#endif
 

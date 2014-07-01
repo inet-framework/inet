@@ -128,7 +128,7 @@ class INET_API IPv6Route : public cObject, public IRoute
     virtual void setProtocolData(cObject *protocolData) { _protocolData = protocolData; }
 };
 
-} //namespace
+}
 
 
 #endif

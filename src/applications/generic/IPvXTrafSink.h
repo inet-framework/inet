@@ -49,7 +49,7 @@ class INET_API IPvXTrafSink : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 };
 
-} //namespace
+}
 
 
 #endif

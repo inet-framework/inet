@@ -113,6 +113,6 @@ void GaussMarkovMobility::setTargetPosition()
 }
 
 
-} // namespace inet
+}
 
 

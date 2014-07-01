@@ -24,6 +24,6 @@ using namespace physicallayer;
 int ITransmission::nextId = 0;
 
 
-} // namespace inet
+}
 
 

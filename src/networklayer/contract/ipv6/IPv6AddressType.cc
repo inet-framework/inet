@@ -37,6 +37,6 @@ Address IPv6AddressType::getLinkLocalAddress(const InterfaceEntry *ie) const
 }
 
 
-} // namespace inet
+}
 
 

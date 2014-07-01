@@ -44,7 +44,7 @@ class IGMPSerializer
         void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
 };
 
-} //namespace
+}
 
 
 #endif

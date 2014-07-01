@@ -327,6 +327,6 @@ void AnnotationManager::hideAll(Group* group)
 }
 
 
-} // namespace inet
+}
 
 

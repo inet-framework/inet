@@ -34,7 +34,7 @@ class IPv6RoutingHeader : public IPv6RoutingHeader_Base
     virtual void setAddressArraySize(unsigned int size);
 };
 
-} //namespace
+}
 
 
 #endif // __INET_IPV6EXTENSIONHEADERS_H_
