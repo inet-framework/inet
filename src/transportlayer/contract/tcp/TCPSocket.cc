@@ -104,7 +104,7 @@ void TCPSocket::bind(int lPort)
     sockstate = BOUND;
 }
 
-void TCPSocket::bind(Address lAddr, int lPort)
+void TCPSocket::bind(L3Address lAddr, int lPort)
 {
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("TCPSocket::bind(): socket already bound");
@@ -139,7 +139,7 @@ void TCPSocket::listen(bool fork)
     sockstate = LISTENING;
 }
 
-void TCPSocket::connect(Address remoteAddress, int remotePort)
+void TCPSocket::connect(L3Address remoteAddress, int remotePort)
 {
     if (sockstate != NOT_BOUND && sockstate != BOUND)
         throw cRuntimeError("TCPSocket::connect(): connect() or listen() already called (need renewSocket()?)");
@@ -215,7 +215,7 @@ void TCPSocket::requestStatus()
 void TCPSocket::renewSocket()
 {
     connId = ev.getUniqueNumber();
-    remoteAddr = localAddr = Address();
+    remoteAddr = localAddr = L3Address();
     remotePrt = localPrt = -1;
     sockstate = NOT_BOUND;
 }

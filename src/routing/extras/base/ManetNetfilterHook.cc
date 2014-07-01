@@ -49,7 +49,7 @@ void ManetNetfilterHook::finishHook()
     ipLayer->unregisterHook(0, this);
 }
 
-INetfilter::IHook::Result ManetNetfilterHook::datagramPreRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result ManetNetfilterHook::datagramPreRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, L3Address& nextHopAddr)
 {
     if (isReactive)
     {
@@ -67,12 +67,12 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramPreRoutingHook(INetworkDat
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result ManetNetfilterHook::datagramForwardHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result ManetNetfilterHook::datagramForwardHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result ManetNetfilterHook::datagramPostRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result ManetNetfilterHook::datagramPostRoutingHook(INetworkDatagram* datagram, const InterfaceEntry* inIE, const InterfaceEntry*& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }
@@ -91,7 +91,7 @@ INetfilter::IHook::Result ManetNetfilterHook::datagramLocalInHook(INetworkDatagr
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result ManetNetfilterHook::datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result ManetNetfilterHook::datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, L3Address& nextHopAddr)
 {
     if (isReactive)
     {
@@ -158,7 +158,7 @@ bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const
     if (outIE != NULL)
         return false;
 
-    Address destAddr = datagram->getDestinationAddress();
+    L3Address destAddr = datagram->getDestinationAddress();
 
     if (destAddr.isMulticast() || destAddr.isBroadcast())
         return false;

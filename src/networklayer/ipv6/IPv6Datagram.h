@@ -127,10 +127,10 @@ class INET_API IPv6Datagram : public IPv6Datagram_Base, public INetworkDatagram
      */
     virtual IPv6ExtensionHeader *removeExtensionHeader(IPProtocolId extensionType);
 
-    virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
-    virtual void setSourceAddress(const Address& address) { setSrcAddress(address.toIPv6()); }
-    virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
-    virtual void setDestinationAddress(const Address& address) { setDestAddress(address.toIPv6()); }
+    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddress()); }
+    virtual void setSourceAddress(const L3Address& address) { setSrcAddress(address.toIPv6()); }
+    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddress()); }
+    virtual void setDestinationAddress(const L3Address& address) { setDestAddress(address.toIPv6()); }
     virtual int getTransportProtocol() const { return IPv6Datagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { IPv6Datagram_Base::setTransportProtocol(protocol); }
 };

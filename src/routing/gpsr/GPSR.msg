@@ -17,14 +17,14 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #include "Coord.h"
 #include "GPSRDefs.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 class noncobject Coord;
 
@@ -35,7 +35,7 @@ class noncobject GPSRForwardingMode;
 // the neighbors about the router's address and position.
 //
 packet GPSRBeacon {
-    Address address;
+    L3Address address;
     Coord position;
 }
 
@@ -53,7 +53,7 @@ packet GPSRPacket {
     Coord destinationPosition;               // D
     Coord perimeterRoutingStartPosition;     // Lp
     Coord perimeterRoutingForwardPosition;   // Lf
-    Address currentFaceFirstSenderAddress;   // e0
-    Address currentFaceFirstReceiverAddress; // e0
-    Address senderAddress; // TODO: this field is not strictly needed by GPSR (should be eliminated)
+    L3Address currentFaceFirstSenderAddress;   // e0
+    L3Address currentFaceFirstReceiverAddress; // e0
+    L3Address senderAddress; // TODO: this field is not strictly needed by GPSR (should be eliminated)
 }

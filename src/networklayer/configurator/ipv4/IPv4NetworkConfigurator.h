@@ -351,7 +351,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
     bool tryToMergeAnyTwoRoutes(RoutingTableInfo& routingTableInfo);
 
     // address resolver interface
-    bool getInterfaceIPv4Address(Address& ret, InterfaceEntry *interfaceEntry, bool netmask);
+    bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask);
 };
 
 } // namespace inet

@@ -31,7 +31,7 @@
 #include <sim_interface.h>    // NSC. We need this here to derive from classes
 
 #include "ILifecycle.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "TCPCommand_m.h"
 #include "TCP_NSC_Connection.h"
 
@@ -117,13 +117,13 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
     // return mapped remote IP in host byte order
     // if addrP not exists in map, it's create a new nsc addr, and insert it to map
-    u_int32_t mapRemote2Nsc(Address const& addrP);
+    u_int32_t mapRemote2Nsc(L3Address const& addrP);
 
     // return original remote ip from mapped ip
     // assert if not exists in map
     // nscAddrP has IP in host byte order
     // x == mapNsc2Remote(mapRemote2Nsc(x))
-    Address const& mapNsc2Remote(u_int32_t nscAddrP);
+    L3Address const& mapNsc2Remote(u_int32_t nscAddrP);
 
     // send a connection established msg to application layer
     void sendEstablishedMsg(TCP_NSC_Connection& connP);
@@ -143,8 +143,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
 
   protected:
     typedef std::map<int, TCP_NSC_Connection> TcpAppConnMap;    // connId-to-TCP_NSC_Connection
-    typedef std::map<u_int32_t, Address> Nsc2RemoteMap;
-    typedef std::map<Address, u_int32_t> Remote2NscMap;
+    typedef std::map<u_int32_t, L3Address> Nsc2RemoteMap;
+    typedef std::map<L3Address, u_int32_t> Remote2NscMap;
     typedef std::map<TCP_NSC_Connection::SockPair, int> SockPair2ConnIdMap;
 
     // Maps:
@@ -165,10 +165,10 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     int curAddrCounterM;    // incr, when set curLocalAddr, decr when "felhasznaltam"
     TCP_NSC_Connection *curConnM;    // store current connection in connect/listen command
 
-    static const Address localInnerIpS;    // local NSC IP addr
-    static const Address localInnerGwS;    // local NSC gateway IP addr
-    static const Address localInnerMaskS;    // local NSC Network Mask
-    static const Address remoteFirstInnerIpS;    // first remote NSC IP addr
+    static const L3Address localInnerIpS;    // local NSC IP addr
+    static const L3Address localInnerGwS;    // local NSC gateway IP addr
+    static const L3Address localInnerMaskS;    // local NSC Network Mask
+    static const L3Address remoteFirstInnerIpS;    // first remote NSC IP addr
 
     static const char *stackNameParamNameS;    // name of stackname parameter
     static const char *bufferSizeParamNameS;    // name of buffersize parameter

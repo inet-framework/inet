@@ -151,22 +151,22 @@ class DYMOUM : public ManetRoutingBase
     bool isRoot;
     struct timer proactive_rreq_timer;
     long proactive_rreq_timeout;
-    bool isBroadcast (Address add)
+    bool isBroadcast (L3Address add)
     {
         return add.isBroadcast();
     }
 
     // cMessage messageEvent;
 
-    typedef std::map<MACAddress, Address> MacToIpAddress;
+    typedef std::map<MACAddress, L3Address> MacToIpAddress;
     typedef std::multimap<simtime_t, struct timer*> DymoTimerMap;
-    typedef std::map<Address, rtable_entry_t *> DymoRoutingTable;
-    typedef std::map<Address, pending_rreq_t * > DymoPendingRreq;
+    typedef std::map<L3Address, rtable_entry_t *> DymoRoutingTable;
+    typedef std::map<L3Address, pending_rreq_t * > DymoPendingRreq;
     typedef std::vector<nb_t *> DymoNbList;
-    typedef std::map<Address, blacklist *> DymoBlackList;
+    typedef std::map<L3Address, blacklist *> DymoBlackList;
 
     // this static map simulate the exchange of seq num by the proactive protocol.
-    static std::map<Address,u_int32_t *> mapSeqNum;
+    static std::map<L3Address,u_int32_t *> mapSeqNum;
 
     MacToIpAddress *macToIpAdress;
     DymoTimerMap *dymoTimerList;
@@ -243,16 +243,16 @@ class DYMOUM : public ManetRoutingBase
 
     // Routing information access
     virtual bool supportGetRoute() {return false;}
-    virtual uint32_t getRoute(const Address &, std::vector<Address> &);
-    virtual bool getNextHop(const Address &, Address &add, int &iface, double &);
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &);
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Address &destination, const Address &nextHop,bool isReverse);
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address &nextHop,bool isReverse);
     virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *, Address &);
-    virtual int getRouteGroup(const AddressGroup &gr, std::vector<Address>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, Address&);
-    virtual int  getRouteGroup(const Address&, std::vector<Address> &, Address&, bool &, int group = 0);
-    virtual bool getNextHopGroup(const Address&, Address &add, int &iface, Address&, bool &, int group = 0);
+    virtual bool getDestAddress(cPacket *, L3Address &);
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&);
+    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&);
+    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0);
+    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0);
 
   protected:
     void drop(cPacket *p, int cause = 0)
@@ -271,7 +271,7 @@ class DYMOUM : public ManetRoutingBase
     virtual void initialize(int stage);
     void recvDYMOUMPacket(cMessage * p);
     void processPacket(IPv4Datagram *, unsigned int);
-    void processMacPacket(cPacket * p, const Address &, const Address &, int);
+    void processMacPacket(cPacket * p, const L3Address &, const L3Address &, int);
     void storeMacAddressIpAddressPairOf(INetworkDatagram *) const;
 
     cPacket * get_packet_queue(struct in_addr dest_addr);

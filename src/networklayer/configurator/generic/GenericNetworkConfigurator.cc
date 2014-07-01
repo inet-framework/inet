@@ -475,10 +475,10 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
                 InterfaceEntry *destinationInterfaceEntry = destinationInterfaceTable->getInterface(j);
                 if (!destinationInterfaceEntry->getGenericNetworkProtocolData())
                     continue;
-                Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
+                L3Address destinationAddress = destinationInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                 if (!destinationInterfaceEntry->isLoopback() && !destinationAddress.isUnspecified() && nextHopInterfaceEntry->getGenericNetworkProtocolData()) {
                     GenericRoute *route = new GenericRoute();
-                    Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
+                    L3Address nextHopAddress = nextHopInterfaceEntry->getGenericNetworkProtocolData()->getAddress();
                     route->setSourceType(IRoute::MANUAL);
                     route->setDestination(destinationAddress);
                     route->setInterface(sourceInterfaceEntry);

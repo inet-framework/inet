@@ -308,14 +308,14 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                     info->multi = nat->getMulti();
                     info->peer1Address1 = ind->getRemoteAddr();
                     if (info->multi) {
-                        info->peer1Address2 = Address();
-                        info->peer2Address2 = Address();
+                        info->peer1Address2 = L3Address();
+                        info->peer2Address2 = L3Address();
                     }
                     info->peer1Port = nat->getPortPeer1();
                     info->peer1Assoc = assocId;
                     info->peer1Gate = ind->getGate();
                     info->peer2 = nat->getPeer2();
-                    info->peer2Address1 = Address();
+                    info->peer2Address1 = L3Address();
                     info->peer2Port = 0;
                     info->peer2Assoc = 0;
                     info->peer2Gate = -1;
@@ -412,13 +412,13 @@ void SCTPNatServer::handleMessage(cMessage *msg)
                     EV << info->peer1 << " and assoc " << assocId << "\n";
                     ;
                     info->multi = 1;
-                    info->peer1Address1 = Address();
+                    info->peer1Address1 = L3Address();
                     info->peer1Address2 = ind->getRemoteAddr();
                     info->peer1Port = ind->getRemotePort();
                     info->peer1Gate = ind->getGate();
                     info->peer2 = 0;
-                    info->peer2Address1 = Address();
-                    info->peer2Address2 = Address();
+                    info->peer2Address1 = L3Address();
+                    info->peer2Address2 = L3Address();
                     info->peer2Port = 0;
                     info->peer2Assoc = 0;
                     info->peer2Gate = -1;

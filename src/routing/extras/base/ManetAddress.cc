@@ -35,17 +35,17 @@ void ManetNetworkAddress::set(const IPv6Address& addr, short unsigned int maskle
     prefixLength = masklen;
 }
 
-void ManetNetworkAddress::set(const Address& addr)
+void ManetNetworkAddress::set(const L3Address& addr)
 {
-    if (addr.getType() == Address::IPv6)
+    if (addr.getType() == L3Address::IPv6)
         set(addr.toIPv6());
     else
         set(addr.toIPv4());
 }
 
-void ManetNetworkAddress::set(const Address& addr, short unsigned int masklen)
+void ManetNetworkAddress::set(const L3Address& addr, short unsigned int masklen)
 {
-    if (addr.getType() == Address::IPv6)
+    if (addr.getType() == L3Address::IPv6)
         set(addr.toIPv6(), masklen);
     else
         set(addr.toIPv4(), masklen);
@@ -89,7 +89,7 @@ std::string ManetNetworkAddress::str() const
     return ss.str();
 }
 
-bool ManetNetworkAddress::contains(const Address& other) const
+bool ManetNetworkAddress::contains(const L3Address& other) const
 {
     if (getType() == other.getType())
     {

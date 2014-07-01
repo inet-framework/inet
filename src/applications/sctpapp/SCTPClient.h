@@ -36,11 +36,11 @@ class INET_API SCTPClient : public cSimpleModule, public SCTPSocket::CallbackInt
   protected:
     struct PathStatus
     {
-        Address pid;
+        L3Address pid;
         bool active;
         bool primaryPath;
     };
-    typedef std::map<Address, PathStatus> SCTPPathStatus;
+    typedef std::map<L3Address, PathStatus> SCTPPathStatus;
 
     // parameters: see the corresponding NED variables
     std::map<unsigned int, unsigned int> streamRequestLengthMap;

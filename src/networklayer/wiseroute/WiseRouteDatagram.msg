@@ -21,7 +21,7 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 class NetworkDatagramBase;
 
 packet WiseRouteDatagram extends NetworkDatagramBase
@@ -32,6 +32,6 @@ packet WiseRouteDatagram extends NetworkDatagramBase
 	int     isFlood;
 	int     nbHops;
     int     transportProtocol = -1;
-    Address finalDestAddr;
-    Address initialSrcAddr;
+    L3Address finalDestAddr;
+    L3Address initialSrcAddr;
 }

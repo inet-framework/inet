@@ -22,7 +22,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "MACAddress.h"
 #include "InterfaceToken.h"
 #include "NotifierConsts.h"
@@ -179,7 +179,7 @@ class INET_API InterfaceEntry : public cNamedObject
     cModule *getNetworkInterfaceModule() const { return interfaceModule->getParentModule(); }
     const ModuleIdAddress getModuleIdAddress() const { return ModuleIdAddress(getNetworkInterfaceModule()->getId()); }
     const ModulePathAddress getModulePathAddress() const { return ModulePathAddress(getNetworkInterfaceModule()->getId()); }
-    const Address getNetworkAddress() const;
+    const L3Address getNetworkAddress() const;
 
     /** @name Field getters. Note they are non-virtual and inline, for performance reasons. */
     //@{
@@ -227,10 +227,10 @@ class INET_API InterfaceEntry : public cNamedObject
     Ieee8021dInterfaceData *ieee8021dData() const { return ieee8021ddata; }
     //@}
 
-    virtual void joinMulticastGroup(const Address& address) const;    // XXX why const method?
-    virtual void changeMulticastGroupMembership(const Address& multicastAddress,
-            McastSourceFilterMode oldFilterMode, const std::vector<Address>& oldSourceList,
-            McastSourceFilterMode newFilterMode, const std::vector<Address>& newSourceList);
+    virtual void joinMulticastGroup(const L3Address& address) const;    // XXX why const method?
+    virtual void changeMulticastGroupMembership(const L3Address& multicastAddress,
+            McastSourceFilterMode oldFilterMode, const std::vector<L3Address>& oldSourceList,
+            McastSourceFilterMode newFilterMode, const std::vector<L3Address>& newSourceList);
 
     /** @name Installing protocol-specific interface data */
     //@{

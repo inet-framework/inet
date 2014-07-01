@@ -36,7 +36,7 @@ class INET_API UDPSink : public ApplicationBase
 
     UDPSocket socket;
     int localPort;
-    Address multicastGroup;
+    L3Address multicastGroup;
     simtime_t startTime;
     simtime_t stopTime;
     cMessage *selfMsg;

@@ -86,7 +86,7 @@ void NS_CLASS dlog(int pri, int errnum, const char *func, const char *format, ..
 #endif
 }
 #ifdef OMNETPP
-const char *NS_CLASS ip2str(Address &ipaddr)
+const char *NS_CLASS ip2str(L3Address &ipaddr)
 {
     return ipaddr.str().c_str();
 }
@@ -100,7 +100,7 @@ char *NS_CLASS ip2str(u_int32_t ipaddr)
     addr.s_addr = ipaddr;
     return inet_ntoa(addr);
 #else
-return Address::getInstance().print_nodeaddr(ipaddr);
+return L3Address::getInstance().print_nodeaddr(ipaddr);
 #endif
 }
 #endif

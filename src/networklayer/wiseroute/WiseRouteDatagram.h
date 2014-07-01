@@ -36,10 +36,10 @@ class INET_API WiseRouteDatagram : public WiseRouteDatagram_Base, public INetwor
 
     virtual WiseRouteDatagram *dup() const { return new WiseRouteDatagram(*this); }
 
-    virtual Address getSourceAddress() const { return Address(getSrcAddr()); }
-    virtual void setSourceAddress(const Address& address) { setSrcAddr(address.toModuleId()); }
-    virtual Address getDestinationAddress() const { return Address(getDestAddr()); }
-    virtual void setDestinationAddress(const Address& address) { setDestAddr(address.toModuleId()); }
+    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddr()); }
+    virtual void setSourceAddress(const L3Address& address) { setSrcAddr(address.toModuleId()); }
+    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddr()); }
+    virtual void setDestinationAddress(const L3Address& address) { setDestAddr(address.toModuleId()); }
     virtual int getTransportProtocol() const { return WiseRouteDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { WiseRouteDatagram_Base::setTransportProtocol(protocol); };
 };

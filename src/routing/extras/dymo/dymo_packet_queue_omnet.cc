@@ -211,7 +211,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                     if (isInMacLayer())
                     {
                         Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-                        Address nextHop;
+                        L3Address nextHop;
                         int iface;
                         double cost;
                         getNextHop(dest_addr.s_addr, nextHop, iface, cost);
@@ -361,20 +361,20 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
 #define ARP_DELAY 0.005
     if (verdict == PQ_ENC_SEND)
     {
-        gw_addr.s_addr = Address(*gateWayAddress);
+        gw_addr.s_addr = L3Address(*gateWayAddress);
         rt = rtable_find(gw_addr);
     }
     else
         rt = rtable_find(dest_addr);
 
-    std::vector<Address> list;
+    std::vector<L3Address> list;
     if (isInMacLayer())
     {
         std::vector<MACAddress> listMac;
         getApList(dest_addr.s_addr.toMAC(), listMac);
         while (!listMac.empty())
         {
-            list.push_back(Address(listMac.back()));
+            list.push_back(L3Address(listMac.back()));
             listMac.pop_back();
         }
     }
@@ -384,7 +384,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
         getApListIp(dest_addr.s_addr.toIPv4(), listIp);
         while (!listIp.empty())
         {
-            list.push_back(Address(listIp.back()));
+            list.push_back(L3Address(listIp.back()));
             listIp.pop_back();
         }
     }
@@ -443,7 +443,7 @@ int NS_CLASS packet_queue_set_verdict(struct in_addr dest_addr, int verdict)
                             if (isInMacLayer())
                             {
                                 Ieee802Ctrl *ctrl = new Ieee802Ctrl();
-                                Address nextHop;
+                                L3Address nextHop;
                                 int iface;
                                 double cost;
                                 getNextHop(dest_addr.s_addr, nextHop, iface, cost);

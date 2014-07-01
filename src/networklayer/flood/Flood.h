@@ -26,7 +26,7 @@
 #include <list>
 #include "INetworkProtocol.h"
 #include "NetworkProtocolBase.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "FloodDatagram.h"
 
 namespace inet {
@@ -57,7 +57,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     unsigned long seqNum;
 
     /** @brief cached variable of my networ address */
-    Address myNetwAddr;
+    L3Address myNetwAddr;
 
     /** @brief Length of the header*/
     int headerLength;
@@ -72,11 +72,11 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
     {
       public:
         unsigned long seqNum;
-        Address srcAddr;
+        L3Address srcAddr;
         simtime_t delTime;
 
       public:
-        Bcast(unsigned long n = 0, const Address& s = Address(), simtime_t_cref d = SIMTIME_ZERO) :
+        Bcast(unsigned long n = 0, const L3Address& s = L3Address(), simtime_t_cref d = SIMTIME_ZERO) :
             seqNum(n), srcAddr(s), delTime(d)
         {
         }

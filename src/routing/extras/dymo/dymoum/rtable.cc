@@ -143,7 +143,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
 
     // If there are buffered packets for this destination
     // now we send them
-    std::vector<Address> list;
+    std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i ++)
     {
@@ -230,7 +230,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 
     // If there are buffered packets for this destination
     // now we send them
-    std::vector<Address> list;
+    std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i ++)
     {
@@ -392,7 +392,7 @@ rtable_entry_t *NS_CLASS rtable_find(struct in_addr dest_addr)
     }
     else
     {
-        Address apAdd;
+        L3Address apAdd;
         if (getAp(dest_addr.s_addr, apAdd))
         {
             it = dymoRoutingTable->find(apAdd);
@@ -429,7 +429,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     rtable_entry_t *entry;
     struct in_addr netmask;
 
-    Address apAdd;
+    L3Address apAdd;
     if (getAp(dest_addr.s_addr, apAdd))
     {
         struct in_addr dest_addrAux;
@@ -475,7 +475,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
     entry->rt_is_gw     = is_gw;
     entry->rt_is_used   = 0;
     entry->rt_state     = RT_VALID;
-    netmask.s_addr      = Address();
+    netmask.s_addr      = L3Address();
     entry->rt_dest_addr.s_addr  = dest_addr.s_addr;
     entry->rt_nxthop_addr.s_addr    = nxthop_addr.s_addr;
     entry->cost         = cost;
@@ -501,7 +501,7 @@ rtable_entry_t *NS_CLASS rtable_insert(struct in_addr dest_addr,
         omnet_chg_rte(dest_addr, nxthop_addr, netmask, hopcnt,false,DEV_NR(ifindex).ipaddr);
     // If there are buffered packets for this destination
     // now we send them
-    std::vector<Address> list;
+    std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i++)
     {
@@ -528,7 +528,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 {
 
         // possible AP check
-    Address apAdd;
+    L3Address apAdd;
     if (getAp(dest_addr.s_addr, apAdd))
     {
         if (entry->rt_dest_addr.s_addr == dest_addr.s_addr)
@@ -582,7 +582,7 @@ rtable_entry_t *NS_CLASS rtable_update(rtable_entry_t *entry,
 //  timer_remove(&entry->rt_deltimer);
     // If there are buffered packets for this destination
     // now we send them
-    std::vector<Address> list;
+    std::vector<L3Address> list;
     getListRelatedAp(dest_addr.s_addr, list);
     for (unsigned int i = 0; i < list.size(); i ++)
     {

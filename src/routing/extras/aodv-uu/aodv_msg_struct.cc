@@ -146,7 +146,7 @@ RERR::~RERR()
     clearUdest();
 }
 
-void RERR::addUdest(const Address & src_addr, unsigned int udest_seqno)
+void RERR::addUdest(const L3Address & src_addr, unsigned int udest_seqno)
 {
 
     RERR_udest *temp_udest;

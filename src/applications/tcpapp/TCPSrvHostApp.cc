@@ -35,7 +35,7 @@ void TCPSrvHostApp::initialize(int stage)
 
         serverSocket.setOutputGate(gate("tcpOut"));
         serverSocket.readDataTransferModePar(*this);
-        serverSocket.bind(localAddress[0] ? Address(localAddress) : Address(), localPort);
+        serverSocket.bind(localAddress[0] ? L3Address(localAddress) : L3Address(), localPort);
         serverSocket.listen();
 
         bool isOperational;

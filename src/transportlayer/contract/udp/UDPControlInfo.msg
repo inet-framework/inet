@@ -18,12 +18,12 @@
 
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 
 //
@@ -81,7 +81,7 @@ class UDPControlInfo
 //
 class UDPBindCommand extends UDPControlInfo
 {
-    Address localAddr;
+    L3Address localAddr;
     int localPort = -1;
 }
 
@@ -97,7 +97,7 @@ class UDPBindCommand extends UDPControlInfo
 //
 class UDPConnectCommand extends UDPControlInfo
 {
-    Address remoteAddr;
+    L3Address remoteAddr;
     int remotePort = -1;
 }
 
@@ -114,9 +114,9 @@ class UDPConnectCommand extends UDPControlInfo
 //
 class UDPSendCommand extends UDPControlInfo
 {
-    Address destAddr; // destination IPv4 or IPv6 address
+    L3Address destAddr; // destination IPv4 or IPv6 address
     int destPort = -1;     // destination port
-    Address srcAddr;       // source address
+    L3Address srcAddr;       // source address
     int interfaceId = -1; // interface on which the packet must be sent (see ~InterfaceTable)
 }
 
@@ -140,8 +140,8 @@ class UDPCloseCommand extends UDPControlInfo
 //
 class UDPDataIndication extends UDPControlInfo
 {
-    Address srcAddr;   // source IPv4 or IPv6 address of the received packet
-    Address destAddr;  // destination IPv4 or IPv6 address of the received packet
+    L3Address srcAddr;   // source IPv4 or IPv6 address of the received packet
+    L3Address destAddr;  // destination IPv4 or IPv6 address of the received packet
     int srcPort;           // source port of the received packet
     int destPort;          // destination port of the received packet
     int ttl;               // TTL field of the received packet
@@ -158,8 +158,8 @@ class UDPDataIndication extends UDPControlInfo
 //
 class UDPErrorIndication extends UDPControlInfo
 {
-    Address srcAddr;   // source IPv4 or IPv6 address of the undeliverable packet
-    Address destAddr;  // destination IPv4 or IPv6 address of the undeliverable packet
+    L3Address srcAddr;   // source IPv4 or IPv6 address of the undeliverable packet
+    L3Address destAddr;  // destination IPv4 or IPv6 address of the undeliverable packet
     int srcPort;           // source port of the undeliverable packet
     int destPort;          // destination port of the undeliverable packet
 }
@@ -264,7 +264,7 @@ class UDPSetReuseAddressCommand extends UDPSetOptionCommand
 //
 class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    Address multicastAddr[];
+    L3Address multicastAddr[];
     int interfaceId[];
 }
 
@@ -277,7 +277,7 @@ class UDPJoinMulticastGroupsCommand extends UDPSetOptionCommand
 //
 class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 {
-    Address multicastAddr[];
+    L3Address multicastAddr[];
 }
 
 //
@@ -288,8 +288,8 @@ class UDPLeaveMulticastGroupsCommand extends UDPSetOptionCommand
 class UDPBlockMulticastSourcesCommand extends UDPSetOptionCommand
 {
     int interfaceId;
-    Address multicastAddr;
-    Address sourceList[];
+    L3Address multicastAddr;
+    L3Address sourceList[];
 }
 
 //
@@ -300,8 +300,8 @@ class UDPBlockMulticastSourcesCommand extends UDPSetOptionCommand
 class UDPUnblockMulticastSourcesCommand extends UDPSetOptionCommand
 {
     int interfaceId;
-    Address multicastAddr;
-    Address sourceList[];
+    L3Address multicastAddr;
+    L3Address sourceList[];
 }
 
 //
@@ -312,8 +312,8 @@ class UDPUnblockMulticastSourcesCommand extends UDPSetOptionCommand
 class UDPJoinMulticastSourcesCommand extends UDPSetOptionCommand
 {
     int interfaceId;
-    Address multicastAddr;
-    Address sourceList[];
+    L3Address multicastAddr;
+    L3Address sourceList[];
 }
 
 //
@@ -324,8 +324,8 @@ class UDPJoinMulticastSourcesCommand extends UDPSetOptionCommand
 class UDPLeaveMulticastSourcesCommand extends UDPSetOptionCommand
 {
     int interfaceId;
-    Address multicastAddr;
-    Address sourceList[];
+    L3Address multicastAddr;
+    L3Address sourceList[];
 }
 
 enum UDPSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOURCES = 2; }
@@ -340,7 +340,7 @@ enum UDPSourceFilterMode { UDP_INCLUDE_MCAST_SOURCES = 1; UDP_EXCLUDE_MCAST_SOUR
 class UDPSetMulticastSourceFilterCommand extends UDPSetOptionCommand
 {
     int interfaceId;
-    Address multicastAddr;
+    L3Address multicastAddr;
     int filterMode @enum(UDPSourceFilterMode);
-    Address sourceList[];
+    L3Address sourceList[];
 }

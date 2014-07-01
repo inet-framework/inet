@@ -19,7 +19,7 @@
 // ***************************************************************************
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #define DIRECTLINK 0x40
 #define UNIDIRECTIONAL 0x80
 
@@ -36,18 +36,18 @@ cplusplus {{
 namespace inet;
 
 class noncobject IPv4Address;
-class noncobject Address;
+class noncobject L3Address;
 
 struct vis_data
 {
     uint8_t type;
     uint8_t data;
-    Address ip;
+    L3Address ip;
 };
 
 struct HnaElement
 {
-    Address addr;
+    L3Address addr;
     uint8_t  netmask;
 };
 
@@ -60,8 +60,8 @@ packet BatmanPacket
     uint8_t        gatewayFlags;  // flags related to gateway functions: gateway class
     unsigned short seqNumber;
     unsigned short gatewayPort;
-    Address        orig;
-    Address        prevSender;
+    L3Address        orig;
+    L3Address        prevSender;
     uint8_t        tq;           // Quality
     uint8_t        hops;
     HnaElement   hnaMsg[];    ///< Packet body.
@@ -69,7 +69,7 @@ packet BatmanPacket
 
 
 packet visPacket {
-    Address senderIp;
+    L3Address senderIp;
     unsigned char version;
     unsigned char gwClass;
     unsigned char tqMax;

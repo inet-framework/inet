@@ -36,12 +36,12 @@ class INET_API IPv6AddressType : public IAddressType
     virtual ~IPv6AddressType() {}
 
     virtual int getMaxPrefixLength() const { return 128; }
-    virtual Address getUnspecifiedAddress() const { return IPv6Address::UNSPECIFIED_ADDRESS; }
-    virtual Address getBroadcastAddress() const { return IPv6Address::ALL_NODES_1; }
-    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv6Address::LL_MANET_ROUTERS; }
-    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; };
+    virtual L3Address getUnspecifiedAddress() const { return IPv6Address::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const { return IPv6Address::ALL_NODES_1; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const { return IPv6Address::LL_MANET_ROUTERS; }
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; };
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new IPv6ControlInfo(); }
-    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const;
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const;
 };
 
 } // namespace inet

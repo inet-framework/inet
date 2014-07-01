@@ -13,7 +13,7 @@
 #include "INetworkProtocol.h"
 #include "NetworkProtocolBase.h"
 #include "ProbabilisticBroadcastDatagram.h"
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
@@ -229,7 +229,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
     // networking layer (over one hop).
     cOutVector oneHopLatencies;
 
-    Address myNetwAddr;
+    L3Address myNetwAddr;
 };
 
 } // namespace inet

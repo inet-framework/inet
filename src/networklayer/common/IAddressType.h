@@ -19,7 +19,7 @@
 #define __INET_IADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "INetworkProtocolControlInfo.h"
 #include "InterfaceEntry.h"
 
@@ -35,15 +35,15 @@ class INET_API IAddressType
     virtual ~IAddressType() {}
 
     virtual int getMaxPrefixLength() const = 0;
-    virtual Address getUnspecifiedAddress() const = 0;
-    virtual Address getBroadcastAddress() const = 0;
-    virtual Address getLinkLocalManetRoutersMulticastAddress() const = 0;
-    virtual Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
+    virtual L3Address getUnspecifiedAddress() const = 0;
+    virtual L3Address getBroadcastAddress() const = 0;
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const = 0;
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const = 0;
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const = 0;    // TODO: move, where?
     /**
      * Returns the first valid link-local address of the interface, or UNSPECIFIED_ADDRESS if there's none.
      */
-    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const = 0;
 };
 
 } // namespace inet

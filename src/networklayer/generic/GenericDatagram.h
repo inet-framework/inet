@@ -37,10 +37,10 @@ class INET_API GenericDatagram : public GenericDatagram_Base, public INetworkDat
     GenericDatagram& operator=(const GenericDatagram& other) { GenericDatagram_Base::operator=(other); return *this; }
     virtual GenericDatagram *dup() const { return new GenericDatagram(*this); }
 
-    virtual Address getSourceAddress() const { return GenericDatagram_Base::_getSrcAddr(); }
-    virtual void setSourceAddress(const Address& addr) { GenericDatagram_Base::setSourceAddress(addr); }
-    virtual Address getDestinationAddress() const { return GenericDatagram_Base::_getDestAddr(); }
-    virtual void setDestinationAddress(const Address& addr) { GenericDatagram_Base::setDestinationAddress(addr); }
+    virtual L3Address getSourceAddress() const { return GenericDatagram_Base::_getSrcAddr(); }
+    virtual void setSourceAddress(const L3Address& addr) { GenericDatagram_Base::setSourceAddress(addr); }
+    virtual L3Address getDestinationAddress() const { return GenericDatagram_Base::_getDestAddr(); }
+    virtual void setDestinationAddress(const L3Address& addr) { GenericDatagram_Base::setDestinationAddress(addr); }
     virtual int getTransportProtocol() const { return GenericDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { GenericDatagram_Base::setTransportProtocol(protocol); }
 };

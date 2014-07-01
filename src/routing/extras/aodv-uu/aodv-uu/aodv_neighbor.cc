@@ -105,7 +105,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
     struct in_addr rerr_unicast_dest;
     int i;
 
-    rerr_unicast_dest.s_addr = Address();
+    rerr_unicast_dest.s_addr = L3Address();
 
     if (!rt)
         return;
@@ -183,7 +183,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                             precursor_t pr = rt_u->precursors[i];
                             if (pr.neighbor.s_addr != rerr_unicast_dest.s_addr)
                             {
-                                rerr_unicast_dest.s_addr = Address();
+                                rerr_unicast_dest.s_addr = L3Address();
                                 break;
                             }
                         }
@@ -220,7 +220,7 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
                 struct in_addr dest;
                 if (!DEV_NR(i).enabled)
                     continue;
-                dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+                dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
                 if (cont>1)
                     aodv_socket_send((AODV_msg *) rerr->dup(), dest,
                                      RERR_CALC_SIZE(rerr), 1, &DEV_NR(i),delay);

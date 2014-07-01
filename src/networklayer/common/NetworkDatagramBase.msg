@@ -16,16 +16,16 @@
 //
 
 cplusplus {{
-   #include "Address.h"
+   #include "L3Address.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 
 packet NetworkDatagramBase
 {
-    Address srcAddr;
-    Address destAddr;
+    L3Address srcAddr;
+    L3Address destAddr;
 }

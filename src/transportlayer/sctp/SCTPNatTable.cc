@@ -43,7 +43,7 @@ SCTPNatTable::~SCTPNatTable()
         delete natEntries[i];
 }
 
-SCTPNatEntry *SCTPNatTable::findNatEntry(Address srcAddr, uint16 srcPrt, Address destAddr, uint16 destPrt, uint32 globalVtag)
+SCTPNatEntry *SCTPNatTable::findNatEntry(L3Address srcAddr, uint16 srcPrt, L3Address destAddr, uint16 destPrt, uint32 globalVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -56,7 +56,7 @@ SCTPNatEntry *SCTPNatTable::findNatEntry(Address srcAddr, uint16 srcPrt, Address
     return NULL;
 }
 
-SCTPNatEntry *SCTPNatTable::getEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
+SCTPNatEntry *SCTPNatTable::getEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -71,7 +71,7 @@ SCTPNatEntry *SCTPNatTable::getEntry(Address globalAddr, uint16 globalPrt, Addre
     return NULL;
 }
 
-SCTPNatEntry *SCTPNatTable::getSpecialEntry(Address globalAddr, uint16 globalPrt, Address nattedAddr, uint16 nattedPrt)
+SCTPNatEntry *SCTPNatTable::getSpecialEntry(L3Address globalAddr, uint16 globalPrt, L3Address nattedAddr, uint16 nattedPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -87,7 +87,7 @@ SCTPNatEntry *SCTPNatTable::getSpecialEntry(Address globalAddr, uint16 globalPrt
     return NULL;
 }
 
-SCTPNatEntry *SCTPNatTable::getLocalInitEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt)
+SCTPNatEntry *SCTPNatTable::getLocalInitEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -100,7 +100,7 @@ SCTPNatEntry *SCTPNatTable::getLocalInitEntry(Address globalAddr, uint16 localPr
     return NULL;
 }
 
-SCTPNatEntry *SCTPNatTable::getLocalEntry(Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
+SCTPNatEntry *SCTPNatTable::getLocalEntry(L3Address globalAddr, uint16 localPrt, uint16 globalPrt, uint32 localVtag)
 {
     // linear search is OK because normally we don't have many interfaces and this func is rarely called
     Enter_Method_Silent();
@@ -136,9 +136,9 @@ void SCTPNatTable::printNatTable()
 
 SCTPNatEntry::SCTPNatEntry()
 {
-    localAddress = Address();
-    globalAddress = Address();
-    nattedAddress = Address();
+    localAddress = L3Address();
+    globalAddress = L3Address();
+    nattedAddress = L3Address();
     localPort = 0;
     globalPort = 0;
     nattedPort = 0;

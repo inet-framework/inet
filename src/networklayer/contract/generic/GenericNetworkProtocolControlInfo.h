@@ -18,7 +18,7 @@
 #ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 #define __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H
 
-#include "Address.h"
+#include "L3Address.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "INetworkProtocolControlInfo.h"
 
@@ -37,10 +37,10 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
 
     virtual short getTransportProtocol() const { return GenericNetworkProtocolControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) { GenericNetworkProtocolControlInfo_Base::setProtocol(protocol); }
-    virtual Address getSourceAddress() const { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const Address& address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
-    virtual Address getDestinationAddress() const { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const Address& address) { GenericNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
+    virtual L3Address getSourceAddress() const { return GenericNetworkProtocolControlInfo_Base::_getSourceAddress(); }
+    virtual void setSourceAddress(const L3Address& address) { GenericNetworkProtocolControlInfo_Base::setSourceAddress(address); }
+    virtual L3Address getDestinationAddress() const { return GenericNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
+    virtual void setDestinationAddress(const L3Address& address) { GenericNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
     virtual int getInterfaceId() const { return GenericNetworkProtocolControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { GenericNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }

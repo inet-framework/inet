@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "IPv4Address.h"
 #include "MACAddress.h"
 #include "ModuleAccess.h"
@@ -42,12 +42,12 @@ class INET_API IARP
     class Notification : public cObject
     {
       public:
-        Address l3Address;
+        L3Address l3Address;
         MACAddress macAddress;
         const InterfaceEntry *ie;
 
       public:
-        Notification(Address l3Address, MACAddress macAddress, const InterfaceEntry *ie)
+        Notification(L3Address l3Address, MACAddress macAddress, const InterfaceEntry *ie)
             : l3Address(l3Address), macAddress(macAddress), ie(ie) {}
     };
 
@@ -64,7 +64,7 @@ class INET_API IARP
      * (not in the cache, pending resolution, or already expired), UNSPECIFIED_ADDRESS
      * is returned.
      */
-    virtual Address getL3AddressFor(const MACAddress&) const = 0;
+    virtual L3Address getL3AddressFor(const MACAddress&) const = 0;
 
     /**
      * Tries to resolve the given network address to a MAC address. If the MAC
@@ -72,7 +72,7 @@ class INET_API IARP
      * an address resolution procedure. A signal is emitted when the address
      * resolution procedure terminates.
      */
-    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie) = 0;
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie) = 0;
 };
 
 } // namespace inet

@@ -132,13 +132,13 @@ class INET_API IPv4Route : public cObject, public IRoute
     void setProtocolData(cObject *protocolData) { this->protocolData = protocolData; }
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
-    virtual void setDestination(const Address& dest) { setDestination(dest.toIPv4()); }
+    virtual void setDestination(const L3Address& dest) { setDestination(dest.toIPv4()); }
     virtual void setPrefixLength(int len) { setNetmask(IPv4Address::makeNetmask(len)); }
-    virtual void setNextHop(const Address& nextHop) { setGateway(nextHop.toIPv4()); }    //TODO rename IPv4 method
+    virtual void setNextHop(const L3Address& nextHop) { setGateway(nextHop.toIPv4()); }    //TODO rename IPv4 method
 
-    virtual Address getDestinationAsGeneric() const { return getDestination(); }
+    virtual L3Address getDestinationAsGeneric() const { return getDestination(); }
     virtual int getPrefixLength() const { return getNetmask().getNetmaskLength(); }
-    virtual Address getNextHopAsGeneric() const { return getGateway(); }    //TODO rename IPv4 method
+    virtual L3Address getNextHopAsGeneric() const { return getGateway(); }    //TODO rename IPv4 method
 };
 
 /**
@@ -247,15 +247,15 @@ class INET_API IPv4MulticastRoute : public cObject, public IMulticastRoute
 
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
     virtual void setEnabled(bool enabled) {    /*TODO: setEnabled(enabled);*/ }
-    virtual void setOrigin(const Address& origin) { setOrigin(origin.toIPv4()); }
+    virtual void setOrigin(const L3Address& origin) { setOrigin(origin.toIPv4()); }
     virtual void setPrefixLength(int len) { setOriginNetmask(IPv4Address::makeNetmask(len)); }    //TODO inconsistent naming
-    virtual void setMulticastGroup(const Address& group) { setMulticastGroup(group.toIPv4()); }
+    virtual void setMulticastGroup(const L3Address& group) { setMulticastGroup(group.toIPv4()); }
 
     virtual bool isEnabled() const { return true;    /*TODO: isEnabled();*/ }
     virtual bool isExpired() const { return !isValid(); }    //TODO rename IPv4 method
-    virtual Address getOriginAsGeneric() const { return getOrigin(); }
+    virtual L3Address getOriginAsGeneric() const { return getOrigin(); }
     virtual int getPrefixLength() const { return getOriginNetmask().getNetmaskLength(); }    //TODO inconsistent naming
-    virtual Address getMulticastGroupAsGeneric() const { return getMulticastGroup(); }
+    virtual L3Address getMulticastGroupAsGeneric() const { return getMulticastGroup(); }
 };
 
 } // namespace inet

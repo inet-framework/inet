@@ -102,7 +102,7 @@ void UDPBasicBurst::initialize(int stage)
     }
 }
 
-Address UDPBasicBurst::chooseDestAddr()
+L3Address UDPBasicBurst::chooseDestAddr()
 {
     if (destAddresses.size() == 1)
         return destAddresses[0];
@@ -140,7 +140,7 @@ void UDPBasicBurst::processStart()
         if (strstr(token, "Broadcast") != NULL)
             destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
         else {
-            Address addr = AddressResolver().resolve(token);
+            L3Address addr = AddressResolver().resolve(token);
             if (excludeLocalDestAddresses && ift && ift->isLocalAddress(addr))
                 continue;
             destAddresses.push_back(addr);

@@ -37,7 +37,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     enum SelfMsgKinds { START = 1, SEND, STOP };
 
     // parameters
-    std::vector<Address> destAddresses;
+    std::vector<L3Address> destAddresses;
     int localPort, destPort;
     simtime_t startTime;
     simtime_t stopTime;
@@ -60,7 +60,7 @@ class INET_API UDPBasicApp : public ApplicationBase
     virtual void finish();
 
     // chooses random destination address
-    virtual Address chooseDestAddr();
+    virtual L3Address chooseDestAddr();
     virtual void sendPacket();
     virtual void processPacket(cPacket *msg);
     virtual void setSocketOptions();

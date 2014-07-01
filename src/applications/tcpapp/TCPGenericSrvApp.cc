@@ -53,7 +53,7 @@ void TCPGenericSrvApp::initialize(int stage)
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        socket.bind(localAddress[0] ? AddressResolver().resolve(localAddress) : Address(), localPort);
+        socket.bind(localAddress[0] ? AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
 
         bool isOperational;

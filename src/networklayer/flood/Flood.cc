@@ -267,7 +267,7 @@ cMessage *Flood::decapsMsg(FloodDatagram *floodDatagram)
  **/
 FloodDatagram *Flood::encapsMsg(cPacket *appPkt)
 {
-    Address netwAddr;
+    L3Address netwAddr;
 
     EV << "in encaps...\n";
 

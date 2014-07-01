@@ -18,7 +18,7 @@
 #ifndef __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 #define __INET_SIMPLENETWORKPROTOCOLCONTROLINFO_H
 
-#include "Address.h"
+#include "L3Address.h"
 #include "SimpleNetworkProtocolControlInfo_m.h"
 #include "INetworkProtocolControlInfo.h"
 
@@ -37,10 +37,10 @@ class INET_API SimpleNetworkProtocolControlInfo : public SimpleNetworkProtocolCo
 
     virtual short getTransportProtocol() const { return SimpleNetworkProtocolControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) { SimpleNetworkProtocolControlInfo_Base::setProtocol(protocol); }
-    virtual Address getSourceAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
-    virtual void setSourceAddress(const Address& address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
-    virtual Address getDestinationAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
-    virtual void setDestinationAddress(const Address& address) { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
+    virtual L3Address getSourceAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getSourceAddress(); }
+    virtual void setSourceAddress(const L3Address& address) { SimpleNetworkProtocolControlInfo_Base::setSourceAddress(address); }
+    virtual L3Address getDestinationAddress() const { return SimpleNetworkProtocolControlInfo_Base::_getDestinationAddress(); }
+    virtual void setDestinationAddress(const L3Address& address) { SimpleNetworkProtocolControlInfo_Base::setDestinationAddress(address); }
     virtual int getInterfaceId() const { return SimpleNetworkProtocolControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { SimpleNetworkProtocolControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const { return SimpleNetworkProtocolControlInfo_Base::getHopLimit(); }

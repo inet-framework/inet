@@ -143,7 +143,7 @@ void TCP::handleMessage(cMessage *msg)
             TCPSegment *tcpseg = check_and_cast<TCPSegment *>(msg);
 
             // get src/dest addresses
-            Address srcAddr, destAddr;
+            L3Address srcAddr, destAddr;
 
             cObject *ctrl = tcpseg->removeControlInfo();
             if (!ctrl)
@@ -200,7 +200,7 @@ TCPConnection *TCP::createConnection(int appGateIndex, int connId)
     return new TCPConnection(this, appGateIndex, connId);
 }
 
-void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
+void TCP::segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     TCPConnection *tmp = new TCPConnection();
     tmp->segmentArrivalWhileClosed(tcpseg, srcAddr, destAddr);
@@ -314,7 +314,7 @@ void TCP::updateDisplayString()
     getDisplayString().setTagArg("t", 0, buf2);
 }
 
-TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, Address srcAddr, Address destAddr)
+TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, L3Address srcAddr, L3Address destAddr)
 {
     SockPair key;
     key.localAddr = destAddr;
@@ -331,7 +331,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, Address srcAddr, Addr
         return i->second;
 
     // try with localAddr missing (only localPort specified in passive/active open)
-    key.localAddr = Address();
+    key.localAddr = L3Address();
     i = tcpConnMap.find(key);
 
     if (i != tcpConnMap.end())
@@ -339,7 +339,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, Address srcAddr, Addr
 
     // try fully qualified local socket + blank remote socket (for incoming SYN)
     key = save;
-    key.remoteAddr = Address();
+    key.remoteAddr = L3Address();
     key.remotePort = -1;
     i = tcpConnMap.find(key);
 
@@ -347,7 +347,7 @@ TCPConnection *TCP::findConnForSegment(TCPSegment *tcpseg, Address srcAddr, Addr
         return i->second;
 
     // try with blank remote socket, and localAddr missing (for incoming SYN)
-    key.localAddr = Address();
+    key.localAddr = L3Address();
     i = tcpConnMap.find(key);
 
     if (i != tcpConnMap.end())
@@ -388,7 +388,7 @@ ushort TCP::getEphemeralPort()
     return lastEphemeralPort;
 }
 
-void TCP::addSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
+void TCP::addSockPair(TCPConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // update addresses/ports in TCPConnection
     SockPair key;
@@ -417,7 +417,7 @@ void TCP::addSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr
         usedEphemeralPorts.insert(localPort);
 }
 
-void TCP::updateSockPair(TCPConnection *conn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
+void TCP::updateSockPair(TCPConnection *conn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // find with existing address/port pair...
     SockPair key;
@@ -442,7 +442,7 @@ void TCP::updateSockPair(TCPConnection *conn, Address localAddr, Address remoteA
     // localPort doesn't change (see ASSERT above), so there's no need to update usedEphemeralPorts[].
 }
 
-void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, Address localAddr, Address remoteAddr, int localPort, int remotePort)
+void TCP::addForkedConnection(TCPConnection *conn, TCPConnection *newConn, L3Address localAddr, L3Address remoteAddr, int localPort, int remotePort)
 {
     // update conn's socket pair, and register newConn (which'll keep LISTENing)
     updateSockPair(conn, localAddr, remoteAddr, localPort, remotePort);

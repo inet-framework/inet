@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "lwip/lwip_tcp.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
@@ -80,9 +80,9 @@ class INET_API TcpLwipConnection
 
     void sendIndicationToApp(int code);
 
-    void listen(Address& localAddr, unsigned short localPort);
+    void listen(L3Address& localAddr, unsigned short localPort);
 
-    void connect(Address& localAddr, unsigned short localPort, Address& remoteAddr,
+    void connect(L3Address& localAddr, unsigned short localPort, L3Address& remoteAddr,
             unsigned short remotePort);
 
     void close();

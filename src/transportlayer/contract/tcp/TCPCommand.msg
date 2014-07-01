@@ -17,12 +17,12 @@
 
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 //
 // TCP command codes, sent by the application to TCP. These constants
@@ -150,8 +150,8 @@ enum TCPDataTransferMode
 //
 class TCPOpenCommand extends TCPCommand
 {
-    Address localAddr; // may be left empty
-    Address remoteAddr;// required for active open
+    L3Address localAddr; // may be left empty
+    L3Address remoteAddr;// required for active open
     int localPort = -1;       // required for passive open
     int remotePort = -1;      // required for active open
     bool fork = false;        // used only for passive open
@@ -178,8 +178,8 @@ class TCPSendCommand extends TCPCommand
 //
 class TCPConnectInfo extends TCPCommand
 {
-    Address localAddr;
-    Address remoteAddr;
+    L3Address localAddr;
+    L3Address remoteAddr;
     int localPort;
     int remotePort;
 }
@@ -197,8 +197,8 @@ class TCPStatusInfo extends TCPCommand
     int state;
     string stateName;
 
-    Address localAddr;
-    Address remoteAddr;
+    L3Address localAddr;
+    L3Address remoteAddr;
     int localPort;
     int remotePort;
 

@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 #include "ILifecycle.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "RTPInnerPacket.h"
 #include "RTPInterfacePacket_m.h"
 #include "UDPSocket.h"

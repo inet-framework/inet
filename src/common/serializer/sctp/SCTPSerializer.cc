@@ -142,7 +142,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 int32 numaddr = initChunk->getAddressesArraySize();
                 for (int32 i = 0; i < numaddr; i++) {
 #ifdef WITH_IPv4
-                    if (initChunk->getAddresses(i).getType() == Address::IPv4) {
+                    if (initChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
@@ -151,7 +151,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (initChunk->getAddresses(i).getType() == Address::IPv6) {
+                    if (initChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)ic) + size_init_chunk + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
@@ -260,7 +260,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                 int32 numaddr = initAckChunk->getAddressesArraySize();
                 for (int32 i = 0; i < numaddr; i++) {
 #ifdef WITH_IPv4
-                    if (initAckChunk->getAddresses(i).getType() == Address::IPv4) {
+                    if (initAckChunk->getAddresses(i).getType() == L3Address::IPv4) {
                         struct init_ipv4_address_parameter *ipv4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                         ipv4addr->type = htons(INIT_PARAM_IPV4);
                         ipv4addr->length = htons(8);
@@ -269,7 +269,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (initAckChunk->getAddresses(i).getType() == Address::IPv6) {
+                    if (initAckChunk->getAddresses(i).getType() == L3Address::IPv6) {
                         struct init_ipv6_address_parameter *ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)iac) + size_init_chunk + parPtr);
                         ipv6addr->type = htons(INIT_PARAM_IPV6);
                         ipv6addr->length = htons(20);
@@ -454,11 +454,11 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
 
                     // deliver info:
                     struct heartbeat_info *hbi = (struct heartbeat_info *)(((unsigned char *)hbc) + size_heartbeat_chunk);
-                    Address addr = heartbeatChunk->getRemoteAddr();
+                    L3Address addr = heartbeatChunk->getRemoteAddr();
                     simtime_t time = heartbeatChunk->getTimeField();
                     int32 infolen;
 #ifdef WITH_IPv4
-                    if (addr.getType() == Address::IPv4) {
+                    if (addr.getType() == L3Address::IPv4) {
                         infolen = sizeof(addr.toIPv4().getInt()) + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
@@ -470,7 +470,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                    if (addr.getType() == Address::IPv6) {
+                    if (addr.getType() == L3Address::IPv6) {
                         infolen = 20 + sizeof(uint32);
                         hbi->type = htons(1);    // mandatory
                         hbi->length = htons(infolen + 4);
@@ -511,11 +511,11 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
                     }
                     else {
-                        Address addr = heartbeatAckChunk->getRemoteAddr();
+                        L3Address addr = heartbeatAckChunk->getRemoteAddr();
                         simtime_t time = heartbeatAckChunk->getTimeField();
 
 #ifdef WITH_IPv4
-                        if (addr.getType() == Address::IPv4) {
+                        if (addr.getType() == L3Address::IPv4) {
                             infolen = sizeof(addr.toIPv4().getInt()) + sizeof(uint32);
                             hbi->type = htons(1);    // mandatory
                             hbi->length = htons(infolen + 4);
@@ -527,7 +527,7 @@ int32 SCTPSerializer::serialize(const SCTPMessage *msg, unsigned char *buf, uint
                         }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-                        if (addr.getType() == Address::IPv6) {
+                        if (addr.getType() == L3Address::IPv6) {
                             infolen = 20 + sizeof(uint32);
                             hbi->type = htons(1);    // mandatory
                             hbi->length = htons(infolen + 4);
@@ -1164,7 +1164,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                L3Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
                                 chunk->setAddresses(addrcounter - 1, localv4Addr);
                                 chunklen += 8;
                                 break;
@@ -1176,7 +1176,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 ipv6addr = (struct init_ipv6_address_parameter *)(((unsigned char *)init_chunk) + size_init_chunk + parptr);
                                 IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                             ipv6addr->address[2], ipv6addr->address[3]);
-                                Address localv6Addr(ipv6Addr);
+                                L3Address localv6Addr(ipv6Addr);
                                 EV_INFO << "address" << ipv6Addr << "\n";
                                 chunk->setAddressesArraySize(++addrcounter);
                                 chunk->setAddresses(addrcounter - 1, localv6Addr);
@@ -1352,7 +1352,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 const struct init_ipv4_address_parameter *v4addr;
                                 v4addr = (struct init_ipv4_address_parameter *)(((unsigned char *)iac) + size_init_ack_chunk + parptr);
                                 chunk->setAddressesArraySize(++addrcounter);
-                                Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
+                                L3Address localv4Addr(IPv4Address(ntohl(v4addr->address)));
                                 chunk->setAddresses(addrcounter - 1, localv4Addr);
                                 chunklen += 8;
                                 break;
@@ -1365,7 +1365,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 IPv6Address ipv6Addr = IPv6Address(ipv6addr->address[0], ipv6addr->address[1],
                                             ipv6addr->address[2], ipv6addr->address[3]);
                                 EV_INFO << "address" << ipv6Addr << "\n";
-                                Address localv6Addr(ipv6Addr);
+                                L3Address localv6Addr(ipv6Addr);
 
                                 chunk->setAddressesArraySize(++addrcounter);
                                 chunk->setAddresses(addrcounter - 1, localv6Addr);
@@ -1594,7 +1594,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                             int32 infoLen = ntohs(hbi->length) - 4;
                             parptr += ADD_PADDING(infoLen) + 4;
                             parcounter++;
-                            chunk->setRemoteAddr(Address(IPv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
+                            chunk->setRemoteAddr(L3Address(IPv4Address(ntohl(HBI_ADDR(hbi).v4addr.address))));
                             chunk->setTimeField(ntohl((uint32)HBI_TIME(hbi)));
                             chunk->setInfoArraySize(infoLen);
                             for (int32 i = 0; i < infoLen; i++)
@@ -1794,7 +1794,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                         continue;
                     }
                     else {
-                        Address localAddr(IPv4Address(ntohl(ipv4addr->address)));
+                        L3Address localAddr(IPv4Address(ntohl(ipv4addr->address)));
                         chunk->setAddressParam(localAddr);
                     }
                     while (cLen > size_asconf_chunk + parptr) {
@@ -1810,7 +1810,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 addip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr1;
                                 v4addr1 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                Address localAddr(IPv4Address(ntohl(v4addr1->address)));
+                                L3Address localAddr(IPv4Address(ntohl(v4addr1->address)));
                                 addip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(addip);
                                 break;
@@ -1824,7 +1824,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 deleteip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr2;
                                 v4addr2 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                Address localAddr(IPv4Address(ntohl(v4addr2->address)));
+                                L3Address localAddr(IPv4Address(ntohl(v4addr2->address)));
                                 deleteip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(deleteip);
                                 break;
@@ -1838,7 +1838,7 @@ void SCTPSerializer::parse(const uint8_t *buf, uint32 bufsize, SCTPMessage *dest
                                 priip->setRequestCorrelationId(ntohl(ipparam->correlation_id));
                                 const struct init_ipv4_address_parameter *v4addr3;
                                 v4addr3 = (struct init_ipv4_address_parameter *)(((unsigned char *)asconf_chunk) + size_asconf_chunk + parptr + size_addip_parameter);
-                                Address localAddr(IPv4Address(ntohl(v4addr3->address)));
+                                L3Address localAddr(IPv4Address(ntohl(v4addr3->address)));
                                 priip->setAddressParam(localAddr);
                                 chunk->addAsconfParam(priip);
                                 break;

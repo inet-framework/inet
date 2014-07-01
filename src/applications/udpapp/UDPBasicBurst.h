@@ -46,7 +46,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     typedef std::map<int, int> SourceSequence;
 
     // parameters
-    std::vector<Address> destAddresses;
+    std::vector<L3Address> destAddresses;
     ChooseDestAddrMode chooseDestAddrMode;
     simtime_t delayLimit;
     simtime_t startTime;
@@ -62,7 +62,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
 
     // state
     UDPSocket socket;
-    Address destAddr;
+    L3Address destAddr;
     SourceSequence sourceSequence;
     cMessage *timerNext;
     simtime_t nextPkt;
@@ -86,7 +86,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     static simsignal_t dropPkSignal;
 
     // chooses random destination address
-    virtual Address chooseDestAddr();
+    virtual L3Address chooseDestAddr();
     virtual cPacket *createPacket();
     virtual void processPacket(cPacket *msg);
     virtual void generateBurst();

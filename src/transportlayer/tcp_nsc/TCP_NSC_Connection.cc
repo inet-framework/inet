@@ -153,7 +153,7 @@ void TCP_NSC_Connection::listen(INetStack& stackP, SockPair& inetSockPairP, Sock
 
     nscSockPairP.localM.ipAddrM.set(IPv4Address(sockAddr.sin_addr.s_addr));
     nscSockPairP.localM.portM = ntohs(sockAddr.sin_port);
-    nscSockPairP.remoteM.ipAddrM = Address();
+    nscSockPairP.remoteM.ipAddrM = L3Address();
     nscSockPairP.remoteM.portM = -1;
 }
 

@@ -102,7 +102,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     void processBeacon(GPSRBeacon *beacon);
 
     // handling packets
-    GPSRPacket *createPacket(Address destination, cPacket *content);
+    GPSRPacket *createPacket(L3Address destination, cPacket *content);
     int computePacketBitLength(GPSRPacket *packet);
 
     // configuration
@@ -111,39 +111,39 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
 
     // position
     static Coord intersectSections(Coord& begin1, Coord& end1, Coord& begin2, Coord& end2);
-    Coord getDestinationPosition(const Address& address) const;
-    Coord getNeighborPosition(const Address& address) const;
+    Coord getDestinationPosition(const L3Address& address) const;
+    Coord getNeighborPosition(const L3Address& address) const;
 
     // angle
     static double getVectorAngle(Coord vector);
-    double getDestinationAngle(const Address& address);
-    double getNeighborAngle(const Address& address);
+    double getDestinationAngle(const L3Address& address);
+    double getNeighborAngle(const L3Address& address);
 
     // address
     std::string getHostName() const;
-    Address getSelfAddress() const;
-    Address getSenderNeighborAddress(INetworkDatagram *datagram) const;
+    L3Address getSelfAddress() const;
+    L3Address getSenderNeighborAddress(INetworkDatagram *datagram) const;
 
     // neighbor
     simtime_t getNextNeighborExpiration();
     void purgeNeighbors();
-    std::vector<Address> getPlanarNeighbors();
-    Address getNextPlanarNeighborCounterClockwise(const Address& startNeighborAddress, double startNeighborAngle);
+    std::vector<L3Address> getPlanarNeighbors();
+    L3Address getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle);
 
     // next hop
-    Address findNextHop(INetworkDatagram *datagram, const Address& destination);
-    Address findGreedyRoutingNextHop(INetworkDatagram *datagram, const Address& destination);
-    Address findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Address& destination);
+    L3Address findNextHop(INetworkDatagram *datagram, const L3Address& destination);
+    L3Address findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination);
+    L3Address findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination);
 
     // routing
-    Result routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
+    Result routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);
 
     // netfilter
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop) { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop) { return ACCEPT; }
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop) { return ACCEPT; }
     virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry);
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop);
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop);
 
     // lifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

@@ -111,15 +111,15 @@ cModule *InterfaceTable::getHostModule()
     return host;
 }
 
-bool InterfaceTable::isLocalAddress(const Address& address) const
+bool InterfaceTable::isLocalAddress(const L3Address& address) const
 {
     return findInterfaceByAddress(address) != NULL;
 }
 
-InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) const
+InterfaceEntry *InterfaceTable::findInterfaceByAddress(const L3Address& address) const
 {
     if (!address.isUnspecified()) {
-        Address::AddressType addrType = address.getType();
+        L3Address::AddressType addrType = address.getType();
         for (int i = 0; i < (int)idToInterface.size(); i++) {
             InterfaceEntry *ie = idToInterface[i];
             if (ie) {
@@ -129,30 +129,30 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
 #endif // ifdef WITH_GENERIC
                 switch (addrType) {
 #ifdef WITH_IPv4
-                    case Address::IPv4:
+                    case L3Address::IPv4:
                         if (ie->ipv4Data() && ie->ipv4Data()->getIPAddress() == address.toIPv4())
                             return ie;
                         break;
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_IPv6
-                    case Address::IPv6:
+                    case L3Address::IPv6:
                         if (ie->ipv6Data() && ie->ipv6Data()->hasAddress(address.toIPv6()))
                             return ie;
                         break;
 #endif // ifdef WITH_IPv6
 
-                    case Address::MAC:
+                    case L3Address::MAC:
                         if (ie->getMacAddress() == address.toMAC())
                             return ie;
                         break;
 
-                    case Address::MODULEID:
+                    case L3Address::MODULEID:
                         if (ie->getModuleIdAddress() == address.toModuleId())
                             return ie;
                         break;
 
-                    case Address::MODULEPATH:
+                    case L3Address::MODULEPATH:
                         if (ie->getModulePathAddress() == address.toModulePath())
                             return ie;
                         break;
@@ -167,14 +167,14 @@ InterfaceEntry *InterfaceTable::findInterfaceByAddress(const Address& address) c
     return NULL;
 }
 
-bool InterfaceTable::isNeighborAddress(const Address& address) const
+bool InterfaceTable::isNeighborAddress(const L3Address& address) const
 {
     if (address.isUnspecified())
         return false;
 
     switch (address.getType()) {
 #ifdef WITH_IPv4
-        case Address::IPv4:
+        case L3Address::IPv4:
             for (int i = 0; i < (int)idToInterface.size(); i++) {
                 InterfaceEntry *ie = idToInterface[i];
                 if (ie && ie->ipv4Data()) {
@@ -188,7 +188,7 @@ bool InterfaceTable::isNeighborAddress(const Address& address) const
 
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
-        case Address::IPv6:
+        case L3Address::IPv6:
             for (int i = 0; i < (int)idToInterface.size(); i++) {
                 InterfaceEntry *ie = idToInterface[i];
                 if (ie && ie->ipv6Data()) {
@@ -203,9 +203,9 @@ bool InterfaceTable::isNeighborAddress(const Address& address) const
             break;
 
 #endif // ifdef WITH_IPv6
-        case Address::MAC:
-        case Address::MODULEPATH:
-        case Address::MODULEID:
+        case L3Address::MAC:
+        case L3Address::MODULEPATH:
+        case L3Address::MODULEID:
             // TODO
             break;
 

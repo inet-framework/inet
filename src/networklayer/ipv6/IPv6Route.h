@@ -114,13 +114,13 @@ class INET_API IPv6Route : public cObject, public IRoute
     unsigned int getAdminDist() const { return _adminDist; }
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
 
-    virtual void setDestination(const Address& dest) { if (_destPrefix != dest.toIPv6()) { _destPrefix = dest.toIPv6(); changed(F_DESTINATION); } }
+    virtual void setDestination(const L3Address& dest) { if (_destPrefix != dest.toIPv6()) { _destPrefix = dest.toIPv6(); changed(F_DESTINATION); } }
     virtual void setPrefixLength(int prefixLength) { if (_prefixLength != prefixLength) { _prefixLength = prefixLength; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const Address& nextHop) { if (_nextHop != nextHop.toIPv6()) { _nextHop = nextHop.toIPv6(); changed(F_NEXTHOP); } }
+    virtual void setNextHop(const L3Address& nextHop) { if (_nextHop != nextHop.toIPv6()) { _nextHop = nextHop.toIPv6(); changed(F_NEXTHOP); } }
     virtual void setSource(cObject *source) { if (_source != source) { _source = source; changed(F_SOURCE); } }
     virtual void setSourceType(SourceType type) { if (_sourceType != type) { _sourceType = type; changed(F_TYPE); } }
-    virtual Address getDestinationAsGeneric() const { return getDestPrefix(); }    //TODO rename IPv6 method
-    virtual Address getNextHopAsGeneric() const { return getNextHop(); }
+    virtual L3Address getDestinationAsGeneric() const { return getDestPrefix(); }    //TODO rename IPv6 method
+    virtual L3Address getNextHopAsGeneric() const { return getNextHop(); }
     virtual InterfaceEntry *getInterface() const { return _interfacePtr; }
     virtual void setInterface(InterfaceEntry *ie) { if (_interfacePtr != ie) { _interfacePtr = ie; changed(F_IFACE); } }
     virtual cObject *getSource() const { return _source; }

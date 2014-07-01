@@ -22,8 +22,8 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
-#include "Address.h"
+#include "L3Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
@@ -55,25 +55,25 @@ class INET_API AddressResolver
 {
   protected:
     // internal
-    virtual bool getIPv4AddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getIPv6AddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getMACAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getModulePathAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getModuleIdAddressFrom(Address& retAddr, IInterfaceTable *ift, bool netmask);
+    virtual bool getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask);
     // internal
-    virtual bool getInterfaceIPv4Address(Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceIPv6Address(Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceMACAddress(Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceModulePathAddress(Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
     // internal
-    virtual bool getInterfaceModuleIdAddress(Address& ret, InterfaceEntry *ie, bool mask);
+    virtual bool getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool mask);
 
   public:
     enum {
@@ -96,14 +96,14 @@ class INET_API AddressResolver
      * looked up using <tt>simulation.getModuleByPath()</tt>, and then
      * addressOf() will be called to determine its IP address.
      */
-    virtual Address resolve(const char *str, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address resolve(const char *str, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Utility function: Calls resolve() for each item in the string vector, and
      * returns the result in an address vector. The string vector may come e.g.
      * from cStringTokenizer::asVector().
      */
-    virtual std::vector<Address> resolve(std::vector<std::string> strs, int addrType = DEFAULT_ADDR_TYPE);
+    virtual std::vector<L3Address> resolve(std::vector<std::string> strs, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Similar to resolve(), but returns false (instead of throwing an error)
@@ -111,7 +111,7 @@ class INET_API AddressResolver
      * doesn't have an address assigned yet. (It still throws an error
      * on any other error condition).
      */
-    virtual bool tryResolve(const char *str, Address& result, int addrType = DEFAULT_ADDR_TYPE);
+    virtual bool tryResolve(const char *str, L3Address& result, int addrType = DEFAULT_ADDR_TYPE);
 
     /** @name Utility functions supporting resolve() */
     //@{
@@ -121,12 +121,12 @@ class INET_API AddressResolver
      * This function uses routingTableOf() to find the IIPv4RoutingTable module,
      * then invokes getAddressFrom() to extract the IP address.
      */
-    virtual Address addressOf(cModule *host, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address addressOf(cModule *host, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Similar to addressOf(), but only looks at the given interface
      */
-    virtual Address addressOf(cModule *host, const char *ifname, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address addressOf(cModule *host, const char *ifname, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Returns IPv4 or IPv6 address of the given host or router.
@@ -134,24 +134,24 @@ class INET_API AddressResolver
      * This function find an interface of host connected to destmod
      * then invokes getAddressFrom() to extract the IP address.
      */
-    virtual Address addressOf(cModule *host, cModule *destmod, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address addressOf(cModule *host, cModule *destmod, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Returns the router Id of the given router. Router Id is obtained from
      * the getRouterId() method of the IIPv4RoutingTable submodule.
      */
-    virtual Address routerIdOf(cModule *host);
+    virtual L3Address routerIdOf(cModule *host);
 
     /**
      * Returns the IPv4 or IPv6 address of the given host or router, given its IInterfaceTable
      * module. For IPv4, the first usable interface address is chosen.
      */
-    virtual Address getAddressFrom(IInterfaceTable *ift, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address getAddressFrom(IInterfaceTable *ift, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * Returns the IPv4 or IPv6 address of the given interface (of a host or router).
      */
-    virtual Address getAddressFrom(InterfaceEntry *ie, int addrType = DEFAULT_ADDR_TYPE);
+    virtual L3Address getAddressFrom(InterfaceEntry *ie, int addrType = DEFAULT_ADDR_TYPE);
 
     /**
      * The function tries to look up the IInterfaceTable module as submodule
@@ -197,7 +197,7 @@ class INET_API AddressResolver
     /**
      * Find the Host with the specified address.
      */
-    virtual cModule *findHostWithAddress(const Address& addr);
+    virtual cModule *findHostWithAddress(const L3Address& addr);
     //@}
 };
 

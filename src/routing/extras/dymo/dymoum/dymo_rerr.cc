@@ -223,7 +223,7 @@ void NS_CLASS rerr_forward(RERR *rerr)
         rerr=NULL;
         return;
     }
-    dest_addr.s_addr = Address(IPv4Address(DYMO_BROADCAST));
+    dest_addr.s_addr = L3Address(IPv4Address(DYMO_BROADCAST));
     // Send RE over all enabled interfaces
     for (i = 0; i < DYMO_MAX_NR_INTERFACES; i++)
     {

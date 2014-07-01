@@ -29,7 +29,7 @@ namespace inet {
 
 struct DestFilter
 {
-    vector<Address> destAddresses;
+    vector<L3Address> destAddresses;
     vector<int> prefixLengths;
 
     DestFilter(const char *str);
@@ -47,12 +47,12 @@ DestFilter::DestFilter(const char *str)
             const char *end = strchr(dest, '/');
             if (end)
             {
-                destAddresses.push_back(Address(string(dest,end).c_str()));
+                destAddresses.push_back(L3Address(string(dest,end).c_str()));
                 prefixLengths.push_back(atoi(end+1));
             }
             else
             {
-                Address dest = Address(dest);
+                L3Address dest = L3Address(dest);
                 destAddresses.push_back(dest);
                 prefixLengths.push_back(dest.getAddressType()->getMaxPrefixLength());
             }
@@ -67,7 +67,7 @@ bool DestFilter::matches(IRoute *route)
 
     for (int i = 0; i < (int)destAddresses.size(); ++i)
     {
-        Address &dest = destAddresses[i];
+        L3Address &dest = destAddresses[i];
         int prefixLength = prefixLengths[i];
         if (route->getDestinationAsGeneric().matches(dest, prefixLength))
             return true;

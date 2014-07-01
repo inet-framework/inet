@@ -38,7 +38,7 @@
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "ControlManetRouting_m.h"
 #ifdef WITH_80211MESH
 #include "LocatorNotificationInfo_m.h"
@@ -69,7 +69,7 @@ int DYMOUM::totalRerrRec = 0;
 #endif
 
 
-std::map<Address,u_int32_t *> DYMOUM::mapSeqNum;
+std::map<L3Address,u_int32_t *> DYMOUM::mapSeqNum;
 
 
 void DYMOUM::initialize(int stage)
@@ -132,9 +132,9 @@ void DYMOUM::initialize(int stage)
             dev_indices[i] = i;
             strcpy(DEV_NR(i).ifname, getInterfaceEntry(i)->getName());
             if (isInMacLayer())
-                DEV_NR(i).ipaddr.s_addr = Address(getInterfaceEntry(i)->getMacAddress());
+                DEV_NR(i).ipaddr.s_addr = L3Address(getInterfaceEntry(i)->getMacAddress());
             else
-                DEV_NR(i).ipaddr.s_addr = Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress());
+                DEV_NR(i).ipaddr.s_addr = L3Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress());
             if (getInterfaceEntry(i)->isLoopback())
                 continue;
             if (isInMacLayer())
@@ -147,7 +147,7 @@ void DYMOUM::initialize(int stage)
         {
             DEV_NR(getWlanInterfaceIndex(i)).enabled = 1;
             DEV_NR(getWlanInterfaceIndex(i)).sock = -1;
-            DEV_NR(getWlanInterfaceIndex(i)).bcast.s_addr = Address(IPv4Address(DYMO_BROADCAST));
+            DEV_NR(getWlanInterfaceIndex(i)).bcast.s_addr = L3Address(IPv4Address(DYMO_BROADCAST));
             numInterfacesActive++;
         }
 
@@ -443,7 +443,7 @@ void DYMOUM::handleMessage(cMessage *msg)
             else
             {
                 Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl*>(dymoMsg->getControlInfo());
-                src_addr.s_addr = Address(controlInfo->getSrc());
+                src_addr.s_addr = L3Address(controlInfo->getSrc());
                 EV_INFO << "rec packet from " << controlInfo->getSrc() <<endl;
             }
         }
@@ -628,7 +628,7 @@ void DYMOUM::storeMacAddressIpAddressPairOf(INetworkDatagram *dgram) const
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
             if (it == macToIpAdress->end())
             {
-                Address ip_src = dgram->getSourceAddress();
+                L3Address ip_src = dgram->getSourceAddress();
                 macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
             }
         }
@@ -661,14 +661,14 @@ void DYMOUM::recvDYMOUMPacket(cMessage * msg)
         if (dymoRe && dymoRe->a)
         {
             Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
-            src.s_addr = Address(ctrl->getSrc());
-            dst.s_addr = Address(ctrl->getDest());
+            src.s_addr = L3Address(ctrl->getSrc());
+            dst.s_addr = L3Address(ctrl->getDest());
         }
         else
         {
             Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->removeControlInfo());
-            src.s_addr = Address(ctrl->getSrc());
-            dst.s_addr = Address(ctrl->getDest());
+            src.s_addr = L3Address(ctrl->getSrc());
+            dst.s_addr = L3Address(ctrl->getDest());
             if (ctrl)
                 delete ctrl;
         }
@@ -703,8 +703,8 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
     bool isLocal = false;
     IPAddressVector phops;
 
-    src_addr.s_addr = Address(p->getSrcAddress());
-    dest_addr.s_addr = Address(p->getDestAddress());
+    src_addr.s_addr = L3Address(p->getSrcAddress());
+    dest_addr.s_addr = L3Address(p->getDestAddress());
     isLocal = true;
     if (!p->getSrcAddress().isUnspecified())
     {
@@ -715,7 +715,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
     bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(dest_addr.s_addr.toIPv4());
 
     /* If the packet is not interesting we just let it go through... */
-    if (dest_addr.s_addr == Address(IPv4Address(DYMO_BROADCAST)) || isMcast)
+    if (dest_addr.s_addr == L3Address(IPv4Address(DYMO_BROADCAST)) || isMcast)
     {
         if (p->getControlInfo())
             delete p->removeControlInfo();
@@ -796,7 +796,7 @@ void DYMOUM::processPacket(IPv4Datagram * p, unsigned int ifindex )
 }
 
 
-void DYMOUM::processMacPacket(cPacket * p, const Address &dest, const Address &src, int ifindex)
+void DYMOUM::processMacPacket(cPacket * p, const L3Address &dest, const L3Address &src, int ifindex)
 {
     struct in_addr dest_addr, src_addr;
     bool isLocal = false;
@@ -939,7 +939,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
     IPv4Datagram * ip_msg = NULL;
     struct in_addr source;
 
-    source.s_addr = Address();
+    source.s_addr = L3Address();
 
     if (dynamic_cast<Ieee80211DataOrMgmtFrame *>(const_cast<cObject*> (details)))
     {
@@ -972,7 +972,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
             MacToIpAddress::iterator it = macToIpAdress->find(macAddressConv);
 
             if (ip_msg)
-                source.s_addr = Address(ip_msg->getSrcAddress());
+                source.s_addr = L3Address(ip_msg->getSrcAddress());
 
             if (it!=macToIpAdress->end())
             {
@@ -982,7 +982,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
             {
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
                 {
-                    Address ip_src = ip_msg->getSourceAddress();
+                    L3Address ip_src = ip_msg->getSourceAddress();
                     macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
                     gatewayAddr.s_addr = ip_src;
                 }
@@ -992,7 +992,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
         }
         else
         {
-            gatewayAddr.s_addr = Address(frame->getTransmitterAddress());
+            gatewayAddr.s_addr = L3Address(frame->getTransmitterAddress());
         }
 
 
@@ -1066,7 +1066,7 @@ void DYMOUM::processPromiscuous(const cObject *details)
                 if ((dymo_msg->type==DYMO_RE_TYPE) && (((RE *) dymo_msg)->a==0))
                 {
                     //  proccess RREP
-                    addr.s_addr = Address(ip_msg->getSrcAddress());
+                    addr.s_addr = L3Address(ip_msg->getSrcAddress());
                     promiscuous_rrep((RE*)dymo_msg, addr);
                 } // end if promiscuous
                 //else if (dymo_msg->type==DYMO_RERR_TYPE)
@@ -1097,7 +1097,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
                 IPv4Datagram * ip_msg = dynamic_cast<IPv4Datagram *>(twoAddressFrame->getEncapsulatedPacket());
                 if (ip_msg && ip_msg->getTransportProtocol()==IP_PROT_MANET)
                 {
-                    Address ip_src = ip_msg->getSourceAddress();
+                    L3Address ip_src = ip_msg->getSourceAddress();
                     macToIpAdress->insert(std::make_pair(macAddressConv, ip_src));
                     //  gatewayAddr.s_addr = ip_msg->getSrcAddress().getInt();
                 }
@@ -1107,7 +1107,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
         }
         else
         {
-            addr.s_addr = Address(twoAddressFrame->getTransmitterAddress());
+            addr.s_addr = L3Address(twoAddressFrame->getTransmitterAddress());
         }
 
         entry = rtable_find(addr);
@@ -1159,7 +1159,7 @@ void DYMOUM::processFullPromiscuous(const cObject *details)
                 if ((dymo_msg->type==DYMO_RE_TYPE) && (((RE *) dymo_msg)->a==0))
                 {
                     //  proccess RREP
-                    addr.s_addr = Address(ip_msg->getSrcAddress());    //FIXME ip_msg may be NULL!
+                    addr.s_addr = L3Address(ip_msg->getSrcAddress());    //FIXME ip_msg may be NULL!
                     promiscuous_rrep((RE*)dymo_msg, addr);
                 } // end if promiscuous
                 //else if (dymo_msg->type==DYMO_RERR_TYPE)
@@ -1270,8 +1270,8 @@ void DYMOUM::packetFailed(IPv4Datagram *dgram)
     rtable_entry_t *rt;
     struct in_addr dest_addr, src_addr, next_hop;
 
-    src_addr.s_addr = Address(dgram->getSrcAddress());
-    dest_addr.s_addr = Address(dgram->getDestAddress());
+    src_addr.s_addr = L3Address(dgram->getSrcAddress());
+    dest_addr.s_addr = L3Address(dgram->getDestAddress());
 
     /* We don't care about link failures for broadcast or non-data packets */
     if (dgram->getDestAddress().getInt() == IP_BROADCAST ||
@@ -1322,7 +1322,7 @@ void DYMOUM::packetFailed(IPv4Datagram *dgram)
     else
     {
         struct in_addr nm;
-        nm.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
+        nm.s_addr = L3Address(IPv4Address::ALLONES_ADDRESS);
         omnet_chg_rte(dest_addr,dest_addr, nm,0,true);
     }
     scheduleNextEvent();
@@ -1338,14 +1338,14 @@ void DYMOUM::packetFailedMac(Ieee80211DataFrame *dgram)
         return;
     }
 
-    src_addr.s_addr = Address(dgram->getAddress3());
-    dest_addr.s_addr = Address(dgram->getAddress4());
-    next_hop.s_addr = Address(dgram->getReceiverAddress());
+    src_addr.s_addr = L3Address(dgram->getAddress3());
+    dest_addr.s_addr = L3Address(dgram->getAddress4());
+    next_hop.s_addr = L3Address(dgram->getReceiverAddress());
     int count = 0;
 
     if (isStaticNode() && getCollaborativeProtocol())
     {
-        Address next;
+        L3Address next;
         int iface;
         double cost;
         if (getCollaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
@@ -1430,16 +1430,16 @@ std::string DYMOUM::detailedInfo() const
 }
 
 
-uint32_t DYMOUM::getRoute(const Address &dest, std::vector<Address> &add)
+uint32_t DYMOUM::getRoute(const L3Address &dest, std::vector<L3Address> &add)
 {
     return 0;
 }
 
 
-bool  DYMOUM::getNextHop(const Address &dest, Address &add, int &iface, double &cost)
+bool  DYMOUM::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost)
 {
-    Address destAddr = dest;
-    Address apAddr;
+    L3Address destAddr = dest;
+    L3Address apAddr;
     if (getAp(dest,apAddr))
     {
         destAddr = apAddr;
@@ -1478,7 +1478,7 @@ bool DYMOUM::isProactive()
     return false;
 }
 
-void DYMOUM::setRefreshRoute(const Address &destination, const Address & nextHop,bool isReverse)
+void DYMOUM::setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse)
 {
     struct in_addr dest_addr, next_hop;
 
@@ -1487,11 +1487,11 @@ void DYMOUM::setRefreshRoute(const Address &destination, const Address & nextHop
 
     rtable_entry_t *route = NULL;
     rtable_entry_t *fwd_pre_rt = NULL;
-    Address dest = destination;
-    Address next = nextHop;
+    L3Address dest = destination;
+    L3Address next = nextHop;
 
     bool change = false;
-    Address apAddr;
+    L3Address apAddr;
     if (getAp(destination,apAddr))
     {
         dest = apAddr;
@@ -1598,7 +1598,7 @@ bool DYMOUM::isOurType(cPacket * msg)
     return false;
 }
 
-bool DYMOUM::getDestAddress(cPacket *msg, Address &dest)
+bool DYMOUM::getDestAddress(cPacket *msg, L3Address &dest)
 {
     RE *re = dynamic_cast <RE *>(msg);
     if (!re)
@@ -1613,17 +1613,17 @@ bool DYMOUM::getDestAddress(cPacket *msg, Address &dest)
 }
 
 // Group methods, allow the anycast procedure
-int DYMOUM::getRouteGroup(const AddressGroup &gr, std::vector<Address> &addr)
+int DYMOUM::getRouteGroup(const AddressGroup &gr, std::vector<L3Address> &addr)
 {
     return 0;
 }
 
-int  DYMOUM::getRouteGroup(const Address& dest, std::vector<Address> &add, Address& gateway, bool &isGroup, int group)
+int  DYMOUM::getRouteGroup(const L3Address& dest, std::vector<L3Address> &add, L3Address& gateway, bool &isGroup, int group)
 {
     return 0;
 }
 
-bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, Address& gw)
+bool DYMOUM::getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address& gw)
 {
     int distance = 1000;
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
@@ -1648,7 +1648,7 @@ bool DYMOUM::getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, A
     return true;
 }
 
-bool DYMOUM::getNextHopGroup(const Address& dest, Address &next, int &iface, Address& gw, bool &isGroup, int group)
+bool DYMOUM::getNextHopGroup(const L3Address& dest, L3Address &next, int &iface, L3Address& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
     bool find = false;
@@ -1707,9 +1707,9 @@ void DYMOUM::rreq_proactive(void *arg)
     if (!isRoot)
          return;
     if (this->isInMacLayer())
-         dest.s_addr = Address(MACAddress::BROADCAST_ADDRESS);
+         dest.s_addr = L3Address(MACAddress::BROADCAST_ADDRESS);
     else
-         dest.s_addr = Address(IPv4Address::ALLONES_ADDRESS);
+         dest.s_addr = L3Address(IPv4Address::ALLONES_ADDRESS);
     re_send_rreq(dest, 0, NET_DIAMETER);
     timer_set_timeout(&proactive_rreq_timer, proactive_rreq_timeout);
     timer_add(&proactive_rreq_timer);
@@ -1773,15 +1773,15 @@ void DYMOUM::processLocatorAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    Address destAddr;
-    Address apAddr;
+    L3Address destAddr;
+    L3Address apAddr;
     if (isInMacLayer())
-        destAddr = Address(infoLoc->getMacAddr());
+        destAddr = L3Address(infoLoc->getMacAddr());
     else
     {
         if (infoLoc->getIpAddr().isUnspecified())
             return;
-        destAddr = Address(infoLoc->getIpAddr());
+        destAddr = L3Address(infoLoc->getIpAddr());
     }
 
     if (getAp(destAddr, apAddr))
@@ -1817,14 +1817,14 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
 {
 #ifdef WITH_80211MESH
     LocatorNotificationInfo *infoLoc = check_and_cast<LocatorNotificationInfo*>(details);
-    Address destAddr;
+    L3Address destAddr;
     if (isInMacLayer())
-         destAddr = Address(infoLoc->getMacAddr());
+         destAddr = L3Address(infoLoc->getMacAddr());
     else
     {
         if (infoLoc->getIpAddr().isUnspecified())
             return;
-        destAddr = Address(infoLoc->getIpAddr());
+        destAddr = L3Address(infoLoc->getIpAddr());
     }
     struct in_addr dest_addrAux;
     dest_addrAux.s_addr = destAddr;

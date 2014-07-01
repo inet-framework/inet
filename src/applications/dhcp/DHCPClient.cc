@@ -667,7 +667,7 @@ void DHCPClient::scheduleTimerT2()
     scheduleAt(simTime() + (lease->rebindTime), timerT2);    // RFC 2131 4.4.5
 }
 
-void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort)
+void DHCPClient::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet " << msg << endl;
     UDPSocket::SendOptions options;

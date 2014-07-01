@@ -314,7 +314,7 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
 }
 
 void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
-        const Address& dest)
+        const L3Address& dest)
 {
     // Final touches on the segment before sending
     sctpmsg->setSrcPort(localPort);
@@ -525,7 +525,7 @@ void SCTPAssociation::sendInit()
     if (sctpMain->hasPar("natFriendly")) {
         friendly = sctpMain->par("natFriendly");
     }
-    if (remoteAddr.getType() == Address::IPv6) {
+    if (remoteAddr.getType() == L3Address::IPv6) {
         for (AddressVector::iterator i = adv.begin(); i != adv.end(); ++i) {
             if (!friendly) {
                 initChunk->setAddressesArraySize(addrNum + 1);
@@ -538,7 +538,7 @@ void SCTPAssociation::sendInit()
                 localAddr = (*i);
         }
     }
-    else if (remoteAddr.getType() == Address::IPv4) {
+    else if (remoteAddr.getType() == L3Address::IPv4) {
         int rlevel = getAddressLevel(remoteAddr);
         EV_DETAIL << "level of remote address=" << rlevel << "\n";
         for (AddressVector::iterator i = adv.begin(); i != adv.end(); ++i) {
@@ -918,8 +918,8 @@ void SCTPAssociation::sendHeartbeat(const SCTPPathVariables *path)
 }
 
 void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk *heartbeatChunk,
-        const Address& src,
-        const Address& dest)
+        const L3Address& src,
+        const L3Address& dest)
 {
     SCTPAuthenticationChunk *authChunk;
     SCTPMessage *sctpHeartbeatAck = new SCTPMessage();
@@ -950,7 +950,7 @@ void SCTPAssociation::sendHeartbeatAck(const SCTPHeartbeatChunk *heartbeatChunk,
     sendToIP(sctpHeartbeatAck, dest);
 }
 
-void SCTPAssociation::sendCookieAck(const Address& dest)
+void SCTPAssociation::sendCookieAck(const L3Address& dest)
 {
     SCTPAuthenticationChunk *authChunk;
     SCTPMessage *sctpcookieack = new SCTPMessage();
@@ -973,7 +973,7 @@ void SCTPAssociation::sendCookieAck(const Address& dest)
     sendToIP(sctpcookieack, dest);
 }
 
-void SCTPAssociation::sendShutdownAck(const Address& dest)
+void SCTPAssociation::sendShutdownAck(const L3Address& dest)
 {
     sendOnAllPaths(getPath(dest));
     if (getOutstandingBytes() == 0) {
@@ -1196,7 +1196,7 @@ void SCTPAssociation::scheduleSack()
     }
 }
 
-SCTPForwardTsnChunk *SCTPAssociation::createForwardTsnChunk(const Address& pid)
+SCTPForwardTsnChunk *SCTPAssociation::createForwardTsnChunk(const L3Address& pid)
 {
     uint16 chunkLength = SCTP_FORWARD_TSN_CHUNK_LENGTH;
     SCTPDataVariables *chunk;
@@ -1475,9 +1475,9 @@ SCTPSackChunk *SCTPAssociation::createSack()
     const uint32 mtu = getPath(remoteAddr)->pmtu;
 
     uint32 hdrSize;
-    if (remoteAddr.getType() == Address::IPv6)
+    if (remoteAddr.getType() == L3Address::IPv6)
         hdrSize = 40;
-    else if (remoteAddr.getType() == Address::IPv4)
+    else if (remoteAddr.getType() == L3Address::IPv4)
         hdrSize = 20;
     else
         throw cRuntimeError("Unknown address type");
@@ -1915,7 +1915,7 @@ SCTPDataChunk *SCTPAssociation::transformDataChunk(SCTPDataVariables *chunk)
     return dataChunk;
 }
 
-void SCTPAssociation::addPath(const Address& addr)
+void SCTPAssociation::addPath(const L3Address& addr)
 {
     EV_INFO << "Add Path remote address: " << addr << "\n";
 
@@ -1931,7 +1931,7 @@ void SCTPAssociation::addPath(const Address& addr)
     EV_INFO << "path added\n";
 }
 
-void SCTPAssociation::removePath(const Address& addr)
+void SCTPAssociation::removePath(const L3Address& addr)
 {
     SCTPPathMap::iterator pathIterator = sctpPathMap.find(addr);
     if (pathIterator != sctpPathMap.end()) {
@@ -2690,9 +2690,9 @@ void SCTPAssociation::disposeOf(SCTPMessage *sctpmsg)
     delete sctpmsg;
 }
 
-int SCTPAssociation::getAddressLevel(const Address& addr)
+int SCTPAssociation::getAddressLevel(const L3Address& addr)
 {
-    if (addr.getType() == Address::IPv6) {
+    if (addr.getType() == L3Address::IPv6) {
         switch (addr.toIPv6().getScope()) {
             case IPv6Address::UNSPECIFIED:
             case IPv6Address::MULTICAST:
@@ -2714,7 +2714,7 @@ int SCTPAssociation::getAddressLevel(const Address& addr)
                 throw cRuntimeError("Unknown IPv6 scope: %d", (int)(addr.toIPv6().getScope()));
         }
     }
-    else if (addr.getType() == Address::IPv4) {
+    else if (addr.getType() == L3Address::IPv4) {
         switch (addr.toIPv4().getAddressCategory()) {
             case IPv4Address::UNSPECIFIED:
             case IPv4Address::THIS_NETWORK:

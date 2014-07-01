@@ -17,7 +17,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 
 #ifdef WITH_ETHERNET
 #include "EtherFrame.h"
@@ -88,8 +88,8 @@ class INET_API InetPacketPrinter2 : public cMessagePrinter
 {
   protected:
     mutable bool showEncapsulatedPackets;
-    mutable Address srcAddr;
-    mutable Address destAddr;
+    mutable L3Address srcAddr;
+    mutable L3Address destAddr;
 
   protected:
     std::string formatARPPacket(ARPPacket *packet) const;
@@ -123,7 +123,7 @@ void InetPacketPrinter2::printMessage(std::ostream& os, cMessage *msg) const
     std::string outs;
 
     //reset mutable variables
-    srcAddr = destAddr = Address();
+    srcAddr = destAddr = L3Address();
     showEncapsulatedPackets = true;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); showEncapsulatedPackets && pk; pk = pk->getEncapsulatedPacket()) {

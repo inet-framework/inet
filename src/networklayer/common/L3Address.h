@@ -38,7 +38,7 @@ class IAddressType;
  *
  * @see IPv4Address, IPv6Address, MACAddress, ModulePathAddress, ModuleIdAddress
  */
-class INET_API Address
+class INET_API L3Address
 {
   public:
     enum AddressType {
@@ -59,13 +59,13 @@ class INET_API Address
     void set(AddressType type, uint64 lo);
 
   public:
-    Address() { set(NONE, 0); }
-    explicit Address(const char *str) { tryParse(str); }
-    Address(const IPv4Address& addr) { set(addr); }
-    Address(const IPv6Address& addr) { set(addr); }
-    Address(const MACAddress& addr) { set(addr); }
-    Address(const ModuleIdAddress& addr) { set(addr); }
-    Address(const ModulePathAddress& addr) { set(addr); }
+    L3Address() { set(NONE, 0); }
+    explicit L3Address(const char *str) { tryParse(str); }
+    L3Address(const IPv4Address& addr) { set(addr); }
+    L3Address(const IPv6Address& addr) { set(addr); }
+    L3Address(const MACAddress& addr) { set(addr); }
+    L3Address(const ModuleIdAddress& addr) { set(addr); }
+    L3Address(const ModulePathAddress& addr) { set(addr); }
 
     void set(const IPv4Address& addr) { set(IPv4, addr.getInt()); }
     void set(const IPv6Address& addr);
@@ -86,7 +86,7 @@ class INET_API Address
     /**
      * Get the first prefixLength bits of the address, with the rest set to zero.
      */
-    Address getPrefix(int prefixLength) const;
+    L3Address getPrefix(int prefixLength) const;
 
     bool tryParse(const char *addr);
 
@@ -96,17 +96,17 @@ class INET_API Address
     bool isBroadcast() const;
     bool isLinkLocal() const;
 
-    bool operator<(const Address& other) const;
-    bool operator>(const Address& other) const { return other < *this; };
-    bool operator==(const Address& other) const;
-    bool operator!=(const Address& other) const;
+    bool operator<(const L3Address& other) const;
+    bool operator>(const L3Address& other) const { return other < *this; };
+    bool operator==(const L3Address& other) const;
+    bool operator!=(const L3Address& other) const;
 
-    bool matches(const Address& other, int prefixLength) const;
+    bool matches(const L3Address& other, int prefixLength) const;
 
     static const char *getTypeName(AddressType t);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const Address& address)
+inline std::ostream& operator<<(std::ostream& os, const L3Address& address)
 {
     return os << address.str();
 }

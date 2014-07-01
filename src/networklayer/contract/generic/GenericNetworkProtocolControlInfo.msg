@@ -17,7 +17,7 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #include "IPProtocolId_m.h"
 }}
 
@@ -25,7 +25,7 @@ namespace inet;
 
 enum IPProtocolId;
 
-class noncobject Address;
+class noncobject L3Address;
 
 //
 // Control information for sending/receiving packets over the generic network protocol.
@@ -33,8 +33,8 @@ class noncobject Address;
 class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 {
     @customize(true);
-    Address destinationAddress @getter(_getDestinationAddress);   // destination address
-    Address sourceAddress @getter(_getSourceAddress);    // source address
+    L3Address destinationAddress @getter(_getDestinationAddress);   // destination address
+    L3Address sourceAddress @getter(_getSourceAddress);    // source address
     int interfaceId = -1; // interface on which the datagram was received, or
                           // should be sent (see ~InterfaceTable)
     short protocol @enum(IPProtocolId);  // encapsulated protocol
@@ -52,5 +52,5 @@ class GenericNetworkProtocolControlInfo  //TODO rename!!!!
 class GenericRoutingDecision
 {
     int interfaceId = -1; 
-    Address nextHop;
+    L3Address nextHop;
 }

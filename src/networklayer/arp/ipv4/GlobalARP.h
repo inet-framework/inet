@@ -23,7 +23,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "IARP.h"
 #include "ILifecycle.h"
 #include "IPv4Address.h"
@@ -45,7 +45,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 {
   public:
     struct ARPCacheEntry;
-    typedef std::map<Address, ARPCacheEntry *> ARPCache;
+    typedef std::map<L3Address, ARPCacheEntry *> ARPCache;
     typedef std::vector<cMessage *> MsgPtrVector;
 
     // IPv4Address -> MACAddress table
@@ -71,7 +71,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 
   protected:
     // Maps an IP multicast address to an Ethernet multicast address.
-    MACAddress mapMulticastAddress(Address addr);
+    MACAddress mapMulticastAddress(L3Address addr);
 
   public:
     GlobalARP();
@@ -79,8 +79,8 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /// IARPCache implementation  @{
-    virtual Address getL3AddressFor(const MACAddress& addr) const;
-    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie);
+    virtual L3Address getL3AddressFor(const MACAddress& addr) const;
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie);
     /// @}
 
     // cListener

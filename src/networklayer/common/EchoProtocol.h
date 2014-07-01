@@ -19,7 +19,7 @@
 #define __INET_ECHOPROTOCOL_H
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "EchoPacket_m.h"
 
 namespace inet {

@@ -19,17 +19,17 @@
 cplusplus {{
 #include <vector>
 
-#include "Address.h"
+#include "L3Address.h"
 #include "SCTPCommand.h"
 }}
 
 namespace inet;
 
 cplusplus {{
-typedef std::vector<Address> AddressVector;
+typedef std::vector<L3Address> AddressVector;
 }}
 
-class noncobject Address;
+class noncobject L3Address;
 
 class noncobject AddressVector;
 
@@ -62,8 +62,8 @@ class SCTPCommand extends cPacket
     int ssn = -1;
     unsigned short sendUnordered = false;
     double prValue = 0;
-    Address localAddr;
-    Address remoteAddr;
+    L3Address localAddr;
+    L3Address remoteAddr;
     int localPort = -1;
     int remotePort = -1;
     int gate = -1;
@@ -107,7 +107,7 @@ class SCTPErrorInfo extends SCTPCommand
 class SCTPOpenCommand extends SCTPCommand
 {
     AddressVector localAddresses;
-    Address remoteAddr;            // required for active open
+    L3Address remoteAddr;            // required for active open
     AddressVector remoteAddresses;
     bool fork = false;               // used only for passive open
     string queueClass = "SCTPQueue"; // may be left empty
@@ -162,18 +162,18 @@ class SCTPStatusInfo extends SCTPCommand
 {
     int state;
     string stateName;
-    Address pathId;
+    L3Address pathId;
     bool active;
 }
 
 class SCTPPathInfo extends SCTPCommand
 {
-    Address remoteAddress;
+    L3Address remoteAddress;
 }
 
 class SCTPResetInfo extends SCTPCommand
 {
-    Address remoteAddr;
+    L3Address remoteAddr;
     unsigned short requestType = 0;
     char streams[];
 }

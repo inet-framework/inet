@@ -22,7 +22,7 @@
 #include <vector>
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "ILifecycle.h"
 
 namespace inet {

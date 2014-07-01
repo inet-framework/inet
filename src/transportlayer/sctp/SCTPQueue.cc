@@ -201,7 +201,7 @@ uint16 SCTPQueue::getFirstSsnInQueue(const uint16 sid)
     return payloadQueue.begin()->second->ssn;
 }
 
-void SCTPQueue::findEarliestOutstandingTSNsForPath(const Address& remoteAddress,
+void SCTPQueue::findEarliestOutstandingTSNsForPath(const L3Address& remoteAddress,
         uint32& earliestOutstandingTSN,
         uint32& rtxEarliestOutstandingTSN) const
 {
@@ -232,7 +232,7 @@ void SCTPQueue::findEarliestOutstandingTSNsForPath(const Address& remoteAddress,
     }
 }
 
-uint32 SCTPQueue::getSizeOfFirstChunk(const Address& remoteAddress)
+uint32 SCTPQueue::getSizeOfFirstChunk(const L3Address& remoteAddress)
 {
     for (PayloadQueue::const_iterator iterator = payloadQueue.begin();
          iterator != payloadQueue.end(); ++iterator)

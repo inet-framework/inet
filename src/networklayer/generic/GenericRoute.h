@@ -19,7 +19,7 @@
 #define __INET_GENERICROUTE_H
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "IRoute.h"
 
 namespace inet {
@@ -36,8 +36,8 @@ class INET_API GenericRoute : public cObject, public IRoute
   private:
     GenericRoutingTable *owner;
     int prefixLength;
-    Address destination;
-    Address nextHop;
+    L3Address destination;
+    L3Address nextHop;
     InterfaceEntry *interface;
     SourceType sourceType;
     cObject *source;
@@ -58,9 +58,9 @@ class INET_API GenericRoute : public cObject, public IRoute
     bool equals(const IRoute& route) const;
 
     virtual void setRoutingTable(GenericRoutingTable *owner) { this->owner = owner; }
-    virtual void setDestination(const Address& dest) { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
+    virtual void setDestination(const L3Address& dest) { if (destination != dest) { this->destination = dest; changed(F_DESTINATION); } }
     virtual void setPrefixLength(int l) { if (prefixLength != l) { this->prefixLength = l; changed(F_PREFIX_LENGTH); } }
-    virtual void setNextHop(const Address& nextHop) { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
+    virtual void setNextHop(const L3Address& nextHop) { if (this->nextHop != nextHop) { this->nextHop = nextHop; changed(F_NEXTHOP); } }
     virtual void setInterface(InterfaceEntry *ie) { if (interface != ie) { this->interface = ie; changed(F_IFACE); } }
     virtual void setSourceType(SourceType sourceType) { if (this->sourceType != sourceType) { this->sourceType = sourceType; changed(F_TYPE); } }
     virtual void setSource(cObject *source) { if (this->source != source) { this->source = source; changed(F_SOURCE); } }
@@ -71,13 +71,13 @@ class INET_API GenericRoute : public cObject, public IRoute
     virtual IRoutingTable *getRoutingTableAsGeneric() const;
 
     /** Destination address prefix to match */
-    virtual Address getDestinationAsGeneric() const { return destination; }
+    virtual L3Address getDestinationAsGeneric() const { return destination; }
 
     /** Represents length of prefix to match */
     virtual int getPrefixLength() const { return prefixLength; }
 
     /** Next hop address */
-    virtual Address getNextHopAsGeneric() const { return nextHop; }
+    virtual L3Address getNextHopAsGeneric() const { return nextHop; }
 
     /** Next hop interface */
     virtual InterfaceEntry *getInterface() const { return interface; }
@@ -111,8 +111,8 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     IRoutingTable *owner;
     bool enabled;
     int prefixLength;
-    Address origin;
-    Address multicastGroup;
+    L3Address origin;
+    L3Address multicastGroup;
     InterfaceEntry *parent;
     std::vector<Child> children;
     cObject *source;
@@ -127,9 +127,9 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     virtual std::string detailedInfo() const;
 
     virtual void setEnabled(bool enabled) { this->enabled = enabled; }
-    virtual void setOrigin(const Address& origin) { this->origin = origin; }
+    virtual void setOrigin(const L3Address& origin) { this->origin = origin; }
     virtual void setPrefixLength(int len) { this->prefixLength = len; }
-    virtual void setMulticastGroup(const Address& group) { this->multicastGroup = group; }
+    virtual void setMulticastGroup(const L3Address& group) { this->multicastGroup = group; }
     virtual void setParent(InterfaceEntry *ie) { this->parent = ie; }
     virtual bool addChild(InterfaceEntry *ie, bool isLeaf);
     virtual bool removeChild(InterfaceEntry *ie);
@@ -146,13 +146,13 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     virtual bool isExpired() const { return false; }    //XXX
 
     /** Source address prefix to match */
-    virtual Address getOrigin() const { return origin; }
+    virtual L3Address getOrigin() const { return origin; }
 
     /** Prefix length to match */
     virtual int getPrefixLength() const { return prefixLength; }
 
     /** Multicast group address */
-    virtual Address getMulticastGroup() const { return multicastGroup; }
+    virtual L3Address getMulticastGroup() const { return multicastGroup; }
 
     /** Parent interface */
     virtual InterfaceEntry *getParent() const { return parent; }

@@ -16,7 +16,7 @@
 //
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"
 
@@ -37,9 +37,9 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
-    Address destAddr;
-    Address srcAddr;
-    std::vector<Address> destAddresses;
+    L3Address destAddr;
+    L3Address srcAddr;
+    std::vector<L3Address> destAddresses;
     int packetSize;
     cPar *sendIntervalp;
     int hopLimit;
@@ -71,10 +71,10 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     virtual void handleMessage(cMessage *msg);
     virtual void finish();
 
-    virtual std::vector<Address> getAllAddresses();
+    virtual std::vector<L3Address> getAllAddresses();
     virtual void sendPing();
     virtual void scheduleNextPing(cMessage *timer);
-    virtual void sendToICMP(cMessage *payload, const Address& destAddr, const Address& srcAddr, int hopLimit);
+    virtual void sendToICMP(cMessage *payload, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)

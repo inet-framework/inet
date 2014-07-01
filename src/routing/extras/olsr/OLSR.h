@@ -526,7 +526,7 @@ class OLSR : public ManetRoutingBase
     virtual void processLinkBreak(const cObject *details);
     virtual void scheduleNextEvent();
 
-    Address getIfaceAddressFromIndex(int index);
+    L3Address getIfaceAddressFromIndex(int index);
 
     const char * getNodeId(const nsaddr_t &addr);
 
@@ -541,16 +541,16 @@ class OLSR : public ManetRoutingBase
 
     // Routing information access
     virtual bool supportGetRoute() {return true;}
-    virtual uint32_t getRoute(const Address &, std::vector<Address> &);
-    virtual bool getNextHop(const Address &, Address &add, int &iface, double &);
+    virtual uint32_t getRoute(const L3Address &, std::vector<L3Address> &);
+    virtual bool getNextHop(const L3Address &, L3Address &add, int &iface, double &);
     virtual bool isProactive();
-    virtual void setRefreshRoute(const Address &destination, const Address & nextHop,bool isReverse) {}
+    virtual void setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse) {}
     virtual bool isOurType(cPacket *);
-    virtual bool getDestAddress(cPacket *, Address &);
-    virtual int getRouteGroup(const AddressGroup &gr, std::vector<Address>&);
-    virtual bool getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, Address&);
-    virtual int  getRouteGroup(const Address&, std::vector<Address> &, Address&, bool &, int group = 0);
-    virtual bool getNextHopGroup(const Address&, Address &add, int &iface, Address&, bool &, int group = 0);
+    virtual bool getDestAddress(cPacket *, L3Address &);
+    virtual int getRouteGroup(const AddressGroup &gr, std::vector<L3Address>&);
+    virtual bool getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address&);
+    virtual int  getRouteGroup(const L3Address&, std::vector<L3Address> &, L3Address&, bool &, int group = 0);
+    virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0);
 };
 
 } //namespace

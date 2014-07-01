@@ -35,7 +35,7 @@
 
 #include "ProtocolMap.h"
 #include "IPv4Address.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "ControlManetRouting_m.h"
 #include "Ieee802Ctrl.h"
 #include "aodv_uu_omnet.h"
@@ -182,14 +182,14 @@ void NS_CLASS initialize(int stage)
             if (!isInMacLayer())
             {
                 DEV_NR(i).netmask.s_addr =
-                    Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress().getNetworkMask());
+                    L3Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress().getNetworkMask());
                 DEV_NR(i).ipaddr.s_addr =
-                        Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress());
+                        L3Address(getInterfaceEntry(i)->ipv4Data()->getIPAddress());
             }
             else
             {
-                DEV_NR(i).netmask.s_addr = Address(MACAddress::BROADCAST_ADDRESS);
-                DEV_NR(i).ipaddr.s_addr = Address(getInterfaceEntry(i)->getMacAddress());
+                DEV_NR(i).netmask.s_addr = L3Address(MACAddress::BROADCAST_ADDRESS);
+                DEV_NR(i).ipaddr.s_addr = L3Address(getInterfaceEntry(i)->getMacAddress());
 
             }
             if (getInterfaceEntry(i)->isLoopback())
@@ -200,7 +200,7 @@ void NS_CLASS initialize(int stage)
         {
             DEV_NR(getWlanInterfaceIndex(i)).enabled = 1;
             DEV_NR(getWlanInterfaceIndex(i)).sock = -1;
-            DEV_NR(getWlanInterfaceIndex(i)).broadcast.s_addr = Address(IPv4Address(AODV_BROADCAST));
+            DEV_NR(getWlanInterfaceIndex(i)).broadcast.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
         }
 
         NS_DEV_NR = getWlanInterfaceIndexByAddress();
@@ -329,8 +329,8 @@ void NS_CLASS packetFailed(IPv4Datagram *dgram)
     rt_table_t *rt_next_hop, *rt;
     struct in_addr dest_addr, src_addr, next_hop;
 
-    src_addr.s_addr = Address(dgram->getSrcAddress());
-    dest_addr.s_addr = Address(dgram->getDestAddress());
+    src_addr.s_addr = L3Address(dgram->getSrcAddress());
+    dest_addr.s_addr = L3Address(dgram->getDestAddress());
 
 
     DEBUG(LOG_DEBUG, 0, "Got failure callback");
@@ -408,8 +408,8 @@ void NS_CLASS packetFailedMac(Ieee80211DataFrame *dgram)
         return;
     }
 
-    src_addr.s_addr = Address(dgram->getAddress3());
-    dest_addr.s_addr = Address(dgram->getAddress4());
+    src_addr.s_addr = L3Address(dgram->getAddress3());
+    dest_addr.s_addr = L3Address(dgram->getAddress4());
     if (seek_list_find(dest_addr))
     {
         DEBUG(LOG_DEBUG, 0, "Ongoing route discovery, buffering packet...");
@@ -418,10 +418,10 @@ void NS_CLASS packetFailedMac(Ieee80211DataFrame *dgram)
         return;
     }
 
-    next_hop.s_addr = Address(dgram->getReceiverAddress());
+    next_hop.s_addr = L3Address(dgram->getReceiverAddress());
     if (isStaticNode() && getCollaborativeProtocol())
     {
-        Address next;
+        L3Address next;
         int iface;
         double cost;
         if (getCollaborativeProtocol()->getNextHop(next_hop.s_addr, next, iface, cost))
@@ -539,7 +539,7 @@ void NS_CLASS handleMessage (cMessage *msg)
                         if (rev_rt && rev_rt->state == VALID)
                             rerr_dest = rev_rt->next_hop;
                         else
-                            rerr_dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+                            rerr_dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
 
                         aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr), 1, &DEV_IFINDEX(NS_IFINDEX));
                     }
@@ -555,7 +555,7 @@ void NS_CLASS handleMessage (cMessage *msg)
                     if (dynamic_cast<Ieee802Ctrl*> (ctrl))
                     {
                         Ieee802Ctrl *ieeectrl = dynamic_cast<Ieee802Ctrl*> (ctrl);
-                        Address address(ieeectrl->getDest());
+                        L3Address address(ieeectrl->getDest());
                         int index = getWlanInterfaceIndexByAddress(address);
                         if (index!=-1)
                             ifindex = index;
@@ -610,7 +610,7 @@ void NS_CLASS handleMessage (cMessage *msg)
             else
             {
                 Ieee802Ctrl *controlInfo = check_and_cast<Ieee802Ctrl*>(aodvMsg->getControlInfo());
-                src_addr.s_addr = Address(controlInfo->getSrc());
+                src_addr.s_addr = L3Address(controlInfo->getSrc());
             }
         }
         else
@@ -850,8 +850,8 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
     if (!isInMacLayer())
     {
         INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-        Address srcAddr = ctrl->getSourceAddress();
-        Address destAddr = ctrl->getDestinationAddress();
+        L3Address srcAddr = ctrl->getSourceAddress();
+        L3Address destAddr = ctrl->getDestinationAddress();
 
         src.s_addr = srcAddr;
         dst.s_addr =  destAddr;
@@ -861,8 +861,8 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
     else
     {
         Ieee802Ctrl *ctrl = check_and_cast<Ieee802Ctrl *>(msg->getControlInfo());
-        src.s_addr = Address(ctrl->getSrc());
-        dst.s_addr =  Address(ctrl->getDest());
+        src.s_addr = L3Address(ctrl->getSrc());
+        dst.s_addr =  L3Address(ctrl->getDest());
     }
 
     InterfaceEntry *   ie;
@@ -885,7 +885,7 @@ void NS_CLASS recvAODVUUPacket(cMessage * msg)
 }
 
 
-void NS_CLASS processMacPacket(cPacket * p, const Address &dest, const Address &src, int ifindex)
+void NS_CLASS processMacPacket(cPacket * p, const L3Address &dest, const L3Address &src, int ifindex)
 {
     struct in_addr dest_addr, src_addr;
     bool isLocal = false;
@@ -954,7 +954,7 @@ void NS_CLASS processMacPacket(cPacket * p, const Address &dest, const Address &
             if (rev_rt && rev_rt->state == VALID)
                 rerr_dest = rev_rt->next_hop;
             else
-                rerr_dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+                rerr_dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
             aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                     1, &DEV_IFINDEX(ifindex));
             if (wait_on_reboot)
@@ -1006,14 +1006,14 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
 
     bool isLocal=true;
 
-    src_addr.s_addr = Address(p->getSrcAddress());
-    dest_addr.s_addr = Address(p->getDestAddress());
+    src_addr.s_addr = L3Address(p->getSrcAddress());
+    dest_addr.s_addr = L3Address(p->getDestAddress());
 
     InterfaceEntry *   ie;
 
     if (!p->getSrcAddress().isUnspecified())
     {
-        isLocal = isLocalAddress(Address(p->getSrcAddress()));
+        isLocal = isLocalAddress(L3Address(p->getSrcAddress()));
     }
 
     ie = getInterfaceEntry (ifindex);
@@ -1025,7 +1025,7 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
     bool isMcast = ie->ipv4Data()->isMemberOfMulticastGroup(dest_addr.s_addr.toIPv4());
 
     /* If the packet is not interesting we just let it go through... */
-    if (isMcast || dest_addr.s_addr == Address(IPv4Address(AODV_BROADCAST)))
+    if (isMcast || dest_addr.s_addr == L3Address(IPv4Address(AODV_BROADCAST)))
     {
         send(p,"to_ip");
         return;
@@ -1101,7 +1101,7 @@ void NS_CLASS processPacket(IPv4Datagram * p,unsigned int ifindex)
         if (rev_rt && rev_rt->state == VALID)
             rerr_dest = rev_rt->next_hop;
         else
-            rerr_dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+            rerr_dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
 
         aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                          1, &DEV_IFINDEX(ifindex));
@@ -1212,17 +1212,17 @@ void NS_CLASS finish()
 }
 
 
-uint32_t NS_CLASS getRoute(const Address &dest,std::vector<Address> &add)
+uint32_t NS_CLASS getRoute(const L3Address &dest,std::vector<L3Address> &add)
 {
     return 0;
 }
 
 
-bool  NS_CLASS getNextHop(const Address &dest,Address &add, int &iface,double &cost)
+bool  NS_CLASS getNextHop(const L3Address &dest,L3Address &add, int &iface,double &cost)
 {
     struct in_addr destAddr;
     destAddr.s_addr = dest;
-    Address apAddr;
+    L3Address apAddr;
     rt_table_t * fwd_rt = this->rt_table_find(destAddr);
     if (fwd_rt)
     {
@@ -1256,14 +1256,14 @@ bool NS_CLASS isProactive()
     return false;
 }
 
-void NS_CLASS setRefreshRoute(const Address &destination, const Address & nextHop,bool isReverse)
+void NS_CLASS setRefreshRoute(const L3Address &destination, const L3Address & nextHop,bool isReverse)
 {
     struct in_addr dest_addr, next_hop;
     dest_addr.s_addr = destination;
     next_hop.s_addr = nextHop;
     rt_table_t * route  = rt_table_find(dest_addr);
 
-    Address apAddr;
+    L3Address apAddr;
     bool gratuitus = false;
 
 
@@ -1336,7 +1336,7 @@ bool NS_CLASS isOurType(cPacket * msg)
     return false;
 }
 
-bool NS_CLASS getDestAddress(cPacket *msg,Address &dest)
+bool NS_CLASS getDestAddress(cPacket *msg,L3Address &dest)
 {
     RREQ *rreq = dynamic_cast <RREQ *>(msg);
     if (!rreq)
@@ -1347,7 +1347,7 @@ bool NS_CLASS getDestAddress(cPacket *msg,Address &dest)
 }
 
 #ifdef AODV_USE_STL_RT
-bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &ifaceIndex,const int &hops,const Address &mask)
+bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const int &ifaceIndex,const int &hops,const L3Address &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1371,12 +1371,12 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &iface
 
             /* Unicast the RERR to the source of the data transmission
              * if possible, otherwise we broadcast it. */
-            rerr_dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+            rerr_dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
 
             aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
-        Address dest = fwd_rt->dest_addr.s_addr;
+        L3Address dest = fwd_rt->dest_addr.s_addr;
         AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
@@ -1410,7 +1410,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &iface
 }
 
 
-bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifaceName,const int &hops,const Address &mask)
+bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const char  *ifaceName,const int &hops,const L3Address &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1434,12 +1434,12 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifa
 
             /* Unicast the RERR to the source of the data transmission
              * if possible, otherwise we broadcast it. */
-            rerr_dest.s_addr = Address(IPv4Address(AODV_BROADCAST));
+            rerr_dest.s_addr = L3Address(IPv4Address(AODV_BROADCAST));
 
             aodv_socket_send((AODV_msg *) rerr, rerr_dest,RERR_CALC_SIZE(rerr),
                              1, &DEV_IFINDEX(NS_IFINDEX));
         }
-        Address dest = fwd_rt->dest_addr.s_addr;
+        L3Address dest = fwd_rt->dest_addr.s_addr;
         AodvRtTableMap::iterator it = aodvRtTableMap.find(dest);
         if (it != aodvRtTableMap.end())
         {
@@ -1478,7 +1478,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifa
 }
 #else
 
-bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &ifaceIndex,const int &hops,const Address &mask)
+bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const int &ifaceIndex,const int &hops,const L3Address &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1487,7 +1487,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &iface
     destAddr.s_addr = dest;
     nextAddr.s_addr = add;
     bool status=true;
-    bool delEntry = (add == (Address)0);
+    bool delEntry = (add == (L3Address)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
 
@@ -1534,7 +1534,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const int &iface
     return status;
 }
 
-bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifaceName,const int &hops,const Address &mask)
+bool  NS_CLASS setRoute(const L3Address &dest,const L3Address &add, const char  *ifaceName,const int &hops,const L3Address &mask)
 {
     Enter_Method_Silent();
     struct in_addr destAddr;
@@ -1544,7 +1544,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifa
     nextAddr.s_addr = add;
     bool status=true;
     int index;
-    bool delEntry = (add == (Address)0);
+    bool delEntry = (add == (L3Address)0);
 
     DEBUG(LOG_DEBUG, 0, "setRoute %s next hop %s",ip_to_str(destAddr),ip_to_str(nextAddr));
     rt_table_t * fwd_rt = rt_table_find(destAddr);
@@ -1596,7 +1596,7 @@ bool  NS_CLASS setRoute(const Address &dest,const Address &add, const char  *ifa
 }
 #endif
 
-void NS_CLASS actualizeTablesWithCollaborative(const Address &dest)
+void NS_CLASS actualizeTablesWithCollaborative(const L3Address &dest)
 {
    return;
 }

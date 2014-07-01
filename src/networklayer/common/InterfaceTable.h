@@ -127,18 +127,18 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const Address& address) const;
+    virtual bool isLocalAddress(const L3Address& address) const;
 
     /**
      * Checks if the address is on the network of one of the interfaces,
      * but not local.
      */
-    virtual bool isNeighborAddress(const Address& address) const;
+    virtual bool isNeighborAddress(const L3Address& address) const;
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    virtual InterfaceEntry *findInterfaceByAddress(const Address& address) const;
+    virtual InterfaceEntry *findInterfaceByAddress(const L3Address& address) const;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used

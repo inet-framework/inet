@@ -61,8 +61,8 @@ void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables *chunk)
 }
 
 bool SCTPAssociation::process_RCV_Message(SCTPMessage *sctpmsg,
-        const Address& src,
-        const Address& dest)
+        const L3Address& src,
+        const L3Address& dest)
 {
     // ====== Header checks ==================================================
     EV_DEBUG << getFullPath() << " SCTPAssociationRcvMessage:process_RCV_Message"
@@ -578,7 +578,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
             }
             for (uint32 j = 0; j < initchunk->getAddressesArraySize(); j++) {
                 // skip IPv6 because we can't send to them yet
-                if (initchunk->getAddresses(j).getType() == Address::IPv6)
+                if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
                 // set path variables for this pathlocalAddresses
                 if (!getPath(initchunk->getAddresses(j))) {
@@ -662,7 +662,7 @@ bool SCTPAssociation::processInitArrived(SCTPInitChunk *initchunk, int32 srcPort
         // check, whether a new address has been added
         bool addressPresent = false;
         for (uint32 j = 0; j < initchunk->getAddressesArraySize(); j++) {
-            if (initchunk->getAddresses(j).getType() == Address::IPv6)
+            if (initchunk->getAddresses(j).getType() == L3Address::IPv6)
                 continue;
             for (AddressVector::iterator k = remoteAddressList.begin(); k != remoteAddressList.end(); ++k) {
                 if ((*k) == (initchunk->getAddresses(j))) {
@@ -714,7 +714,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
             numberOfRemoteAddresses = initAckChunk->getAddressesArraySize();
             EV_INFO << "number of remote addresses in initAck=" << numberOfRemoteAddresses << "\n";
             for (uint32 j = 0; j < numberOfRemoteAddresses; j++) {
-                if (initAckChunk->getAddresses(j).getType() == Address::IPv6)
+                if (initAckChunk->getAddresses(j).getType() == L3Address::IPv6)
                     continue;
                 for (AddressVector::iterator k = state->localAddresses.begin(); k != state->localAddresses.end(); ++k) {
                     if (!((*k).isUnspecified())) {
@@ -769,7 +769,7 @@ bool SCTPAssociation::processInitAckArrived(SCTPInitAckChunk *initAckChunk)
     return trans;
 }
 
-bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, Address addr)
+bool SCTPAssociation::processCookieEchoArrived(SCTPCookieEchoChunk *cookieEcho, L3Address addr)
 {
     bool trans = false;
     SCTPCookie *cookie = check_and_cast<SCTPCookie *>(cookieEcho->getStateCookie());
@@ -1403,7 +1403,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     EV_DEBUG << "Before ccUpdateBytesAcked: ";
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
-        const Address& myPathId = myPath->remoteAddress;
+        const L3Address& myPathId = myPath->remoteAddress;
 
         if (myPath->newPseudoCumAck) {
             myPath->vectorPathPseudoCumAck->record(myPath->pseudoCumAck);
@@ -1472,7 +1472,7 @@ SCTPEventCode SCTPAssociation::processSackArrived(SCTPSackChunk *sackChunk)
     // ====== Need to stop or restart T3 timer? ==============================
     for (SCTPPathMap::iterator piter = sctpPathMap.begin(); piter != sctpPathMap.end(); piter++) {
         SCTPPathVariables *myPath = piter->second;
-        const Address& myPathId = myPath->remoteAddress;
+        const L3Address& myPathId = myPath->remoteAddress;
 
         // ====== Smart T3 Reset ===============================================
         bool updatedOldestChunkSendTime = false;
@@ -2217,7 +2217,7 @@ SCTPEventCode SCTPAssociation::processHeartbeatAckArrived(SCTPHeartbeatAckChunk 
     path->numberOfHeartbeatAcksRcvd++;
     path->vectorPathRcvdHbAck->record(path->numberOfHeartbeatAcksRcvd);
     /* hb-ack goes to pathmanagement, reset error counters, stop timeout timer */
-    const Address addr = hback->getRemoteAddr();
+    const L3Address addr = hback->getRemoteAddr();
     const simtime_t hbTimeField = hback->getTimeField();
     stopTimer(path->HeartbeatTimer);
     /* assume a valid RTT measurement on this path */
@@ -2474,8 +2474,8 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
 {
     SCTPParameter *sctpParam;
     SCTPPathVariables *path;
-    Address addr;
-    std::vector<Address> locAddr;
+    L3Address addr;
+    std::vector<L3Address> locAddr;
     SCTPAuthenticationChunk *authChunk;
     EV_INFO << "Asconf arrived " << asconfChunk->getName() << "\n";
     SCTPMessage *sctpAsconfAck = new SCTPMessage("ASCONF_ACK");
@@ -2553,7 +2553,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
                         asconfAckChunk->addAsconfResponse(errParam);
                     }
                     else {
-                        locAddr = (std::vector<Address>)state->localAddresses;
+                        locAddr = (std::vector<L3Address>)state->localAddresses;
                         sctpMain->removeRemoteAddressFromAllAssociations(this, addr, locAddr);
                         removePath(addr);
                         EV_INFO << "remove path from address " << addr << "\n";
@@ -2605,7 +2605,7 @@ SCTPEventCode SCTPAssociation::processAsconfArrived(SCTPAsconfChunk *asconfChunk
 SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *asconfAckChunk)
 {
     SCTPParameter *sctpParam;
-    Address addr;
+    L3Address addr;
     SCTPAsconfChunk *sctpasconf;
     std::vector<uint32> errorCorrId;
     std::vector<uint32>::iterator iter;
@@ -2617,7 +2617,7 @@ SCTPEventCode SCTPAssociation::processAsconfAckArrived(SCTPAsconfAckChunk *ascon
         state->errorCount = 0;
         state->asconfOutstanding = false;
         getPath(remoteAddr)->pathErrorCount = 0;
-        std::vector<Address> remAddr = (std::vector<Address>)remoteAddressList;
+        std::vector<L3Address> remAddr = (std::vector<L3Address>)remoteAddressList;
         for (uint32 j = 0; j < asconfAckChunk->getAsconfResponseArraySize(); j++) {
             sctpParam = (SCTPParameter *)(asconfAckChunk->getAsconfResponse(j));
             if (sctpParam->getParameterType() == ERROR_CAUSE_INDICATION) {

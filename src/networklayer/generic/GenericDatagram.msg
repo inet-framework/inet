@@ -16,13 +16,13 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #include "IPProtocolId_m.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 enum IPProtocolId;
 
 
@@ -32,8 +32,8 @@ enum IPProtocolId;
 packet GenericDatagram
 {
     @customize(true);
-    Address sourceAddress @getter(_getSrcAddr);
-    Address destinationAddress @getter(_getDestAddr);
+    L3Address sourceAddress @getter(_getSrcAddr);
+    L3Address destinationAddress @getter(_getDestAddr);
     int transportProtocol @enum(IPProtocolId) = IP_PROT_NONE;
     short hopLimit;
 }

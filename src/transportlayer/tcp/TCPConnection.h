@@ -22,7 +22,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "TCP.h"
 #include "TCPSegment.h"
 
@@ -322,8 +322,8 @@ class INET_API TCPConnection
     int connId;    // identifies connection within the app
 
     // socket pair
-    Address localAddr;
-    Address remoteAddr;
+    L3Address localAddr;
+    L3Address remoteAddr;
     int localPort;
     int remotePort;
 
@@ -408,9 +408,9 @@ class INET_API TCPConnection
      * Process incoming TCP segment. Returns a specific event code (e.g. TCP_E_RCV_SYN)
      * which will drive the state machine.
      */
-    virtual TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, Address src, Address dest);
-    virtual TCPEventCode processSegmentInListen(TCPSegment *tcpseg, Address src, Address dest);
-    virtual TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, Address src, Address dest);
+    virtual TCPEventCode process_RCV_SEGMENT(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInListen(TCPSegment *tcpseg, L3Address src, L3Address dest);
+    virtual TCPEventCode processSegmentInSynSent(TCPSegment *tcpseg, L3Address src, L3Address dest);
     virtual TCPEventCode processSegment1stThru8th(TCPSegment *tcpseg);
     virtual TCPEventCode processRstInSynReceived(TCPSegment *tcpseg);
     virtual bool processAckInEstabEtc(TCPSegment *tcpseg);
@@ -492,9 +492,9 @@ class INET_API TCPConnection
     /** Utility: sends RST */
     virtual void sendRst(uint32 seqNo);
     /** Utility: sends RST; does not use connection state */
-    virtual void sendRst(uint32 seq, Address src, Address dest, int srcPort, int destPort);
+    virtual void sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort);
     /** Utility: sends RST+ACK; does not use connection state */
-    virtual void sendRstAck(uint32 seq, uint32 ack, Address src, Address dest, int srcPort, int destPort);
+    virtual void sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort);
 
     /** Utility: sends FIN */
     virtual void sendFin();
@@ -529,7 +529,7 @@ class INET_API TCPConnection
     cMessage *cancelEvent(cMessage *msg) { return tcpMain->cancelEvent(msg); }
 
     /** Utility: send IP packet */
-    static void sendToIP(TCPSegment *tcpseg, Address src, Address dest);
+    static void sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest);
 
     /** Utility: sends packet to application */
     virtual void sendToApp(cMessage *msg);
@@ -590,7 +590,7 @@ class INET_API TCPConnection
      * connection object so that it can call this method, then immediately
      * deletes it.
      */
-    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, Address src, Address dest);
+    virtual void segmentArrivalWhileClosed(TCPSegment *tcpseg, L3Address src, L3Address dest);
 
     /** @name Various getters **/
     //@{
@@ -615,7 +615,7 @@ class INET_API TCPConnection
      * of false means that the connection structure must be deleted by the
      * caller (TCP).
      */
-    virtual bool processTCPSegment(TCPSegment *tcpSeg, Address srcAddr, Address destAddr);
+    virtual bool processTCPSegment(TCPSegment *tcpSeg, L3Address srcAddr, L3Address destAddr);
 
     /**
      * Process commands from the application.

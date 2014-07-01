@@ -251,7 +251,7 @@ void DYMOFau::handleMessage(cMessage* apMsg)
             msg_aux = udpPacket->decapsulate();
 
             INetworkProtocolControlInfo *controlInfo = check_and_cast<INetworkProtocolControlInfo*>(udpPacket->removeControlInfo());
-            Address srcAddr = controlInfo->getSourceAddress();
+            L3Address srcAddr = controlInfo->getSourceAddress();
             if (isLocalAddress(srcAddr) || srcAddr.isUnspecified())
             {
                 // local address delete packet
@@ -311,7 +311,7 @@ void DYMOFau::processPacket(const IPv4Datagram* datagram)
         TargetHopCount = entry->routeDist;
     }
 
-    if (!datagram->getSrcAddress().isUnspecified() && !isLocalAddress(Address(datagram->getSrcAddress())))
+    if (!datagram->getSrcAddress().isUnspecified() && !isLocalAddress(L3Address(datagram->getSrcAddress())))
     {
         // It's not a packet of this node, send error to source
         sendRERR(destAddr.getInt(), TargetSeqNum);
@@ -771,11 +771,11 @@ void DYMOFau::sendDown(cPacket* apMsg, int destAddr)
     if (IPv4Address::LL_MANET_ROUTERS.getInt()==(unsigned int)destAddr)
     {
         destAddr = IPv4Address::ALLONES_ADDRESS.getInt();
-        sendToIp(apMsg, UDPPort, Address(IPv4Address(destAddr)), UDPPort, 1, SIMTIME_DBL(jitter));
+        sendToIp(apMsg, UDPPort, L3Address(IPv4Address(destAddr)), UDPPort, 1, SIMTIME_DBL(jitter));
     }
     else
     {
-        sendToIp(apMsg, UDPPort, Address(IPv4Address(destAddr)), UDPPort, 1, 0.0);
+        sendToIp(apMsg, UDPPort, L3Address(IPv4Address(destAddr)), UDPPort, 1, 0.0);
     }
 }
 
@@ -979,7 +979,7 @@ simtime_t DYMOFau::computeBackoff(simtime_t backoff_var)
     return backoff_var * 2;
 }
 
-void DYMOFau::updateRouteLifetimes(const Address& targetAddr)
+void DYMOFau::updateRouteLifetimes(const L3Address& targetAddr)
 {
     DYMO_RoutingEntry* entry = dymo_routingTable->getForAddress(targetAddr.toIPv4());
     if (!entry) return;

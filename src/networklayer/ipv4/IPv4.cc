@@ -179,7 +179,7 @@ void IPv4::handleIncomingDatagram(IPv4Datagram *datagram, const InterfaceEntry *
     EV_DETAIL << "Received datagram `" << datagram->getName() << "' with dest=" << datagram->getDestAddress() << "\n";
 
     const InterfaceEntry *destIE = NULL;
-    Address nextHop(IPv4Address::UNSPECIFIED_ADDRESS);
+    L3Address nextHop(IPv4Address::UNSPECIFIED_ADDRESS);
     if (datagramPreRoutingHook(datagram, fromIE, destIE, nextHop) == INetfilter::IHook::ACCEPT)
         preroutingFinish(datagram, fromIE, destIE, nextHop.toIPv4());
 }
@@ -310,7 +310,7 @@ void IPv4::handlePacketFromHL(cPacket *packet)
         datagram->setControlInfo(controlInfo); //FIXME ne rakjuk bele a cntrInfot!!!!! de kell :( kulonben a hook queue-ban elveszik a multicastloop flag
 
     // TODO:
-    Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
+    L3Address nextHopAddr(IPv4Address::UNSPECIFIED_ADDRESS);
     if (datagramLocalOutHook(datagram, destIE, nextHopAddr) == INetfilter::IHook::ACCEPT)
         datagramLocalOut(datagram, destIE, nextHopAddr.toIPv4());
 }
@@ -446,7 +446,7 @@ void IPv4::routeUnicastPacket(IPv4Datagram *datagram, const InterfaceEntry *from
         icmp->sendErrorMessage(datagram, fromIE ? fromIE->getInterfaceId() : -1, ICMP_DESTINATION_UNREACHABLE, 0);
     }
     else {    // fragment and send
-        Address nextHop(nextHopAddr);
+        L3Address nextHop(nextHopAddr);
         if (fromIE != NULL) {
             if (datagramForwardHook(datagram, fromIE, destIE, nextHop) != INetfilter::IHook::ACCEPT)
                 return;
@@ -650,7 +650,7 @@ cPacket *IPv4::decapsulate(IPv4Datagram *datagram)
 
 void IPv4::fragmentPostRouting(IPv4Datagram *datagram, const InterfaceEntry *ie, IPv4Address nextHopAddr)
 {
-    Address nextHop(nextHopAddr);
+    L3Address nextHop(nextHopAddr);
     if (datagramPostRoutingHook(datagram, getSourceInterfaceFrom(datagram), ie, nextHop) == INetfilter::IHook::ACCEPT)
         fragmentAndSend(datagram, ie, nextHop.toIPv4());
 }
@@ -821,7 +821,7 @@ void IPv4::sendDatagramToOutput(IPv4Datagram *datagram, const InterfaceEntry *ie
 
 void IPv4::arpResolutionCompleted(IARP::Notification *entry)
 {
-    if (entry->l3Address.getType() != Address::IPv4)
+    if (entry->l3Address.getType() != L3Address::IPv4)
         return;
     PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
@@ -840,7 +840,7 @@ void IPv4::arpResolutionCompleted(IARP::Notification *entry)
 
 void IPv4::arpResolutionTimedOut(IARP::Notification *entry)
 {
-    if (entry->l3Address.getType() != Address::IPv4)
+    if (entry->l3Address.getType() != L3Address::IPv4)
         return;
     PendingPackets::iterator it = pendingPackets.find(entry->l3Address.toIPv4());
     if (it != pendingPackets.end()) {
@@ -956,7 +956,7 @@ void IPv4::reinjectQueuedDatagram(const INetworkDatagram *datagram)
     }
 }
 
-INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPreRoutingHook(datagram, inIE, outIE, nextHopAddr);
@@ -982,7 +982,7 @@ INetfilter::IHook::Result IPv4::datagramPreRoutingHook(INetworkDatagram *datagra
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramForwardHook(datagram, inIE, outIE, nextHopAddr);
@@ -1008,7 +1008,7 @@ INetfilter::IHook::Result IPv4::datagramForwardHook(INetworkDatagram *datagram, 
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramPostRoutingHook(datagram, inIE, outIE, nextHopAddr);
@@ -1103,7 +1103,7 @@ INetfilter::IHook::Result IPv4::datagramLocalInHook(INetworkDatagram *datagram, 
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result IPv4::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result IPv4::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     for (HookList::iterator iter = hooks.begin(); iter != hooks.end(); iter++) {
         IHook::Result r = iter->second->datagramLocalOutHook(datagram, outIE, nextHopAddr);

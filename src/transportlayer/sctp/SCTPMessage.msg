@@ -17,7 +17,7 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 }}
 
 namespace inet;
@@ -30,7 +30,7 @@ typedef cPacket *cPacketPtr;
 struct cPacketPtr;
 
 
-class noncobject Address;
+class noncobject L3Address;
 
 message SCTPSimpleMessage extends cPacket
 {
@@ -74,7 +74,7 @@ message SCTPInitChunk extends SCTPChunk
     // Initial TSN
     uint32 initTSN;
     bool forwardTsn;
-    Address addresses[];
+    L3Address addresses[];
     uint8 unrecognizedParameters[]; //Will be filled by the Parser, if unrecognized Parameters arrive.
     uint32 msg_rwnd;
     uint16 chunkTypes[]; //Chunk list parameter, i.e. for SCTP AUTH
@@ -96,7 +96,7 @@ message SCTPInitAckChunk extends SCTPChunk
     // Initial TSN
     uint32 initTSN;
     bool forwardTsn;
-    Address addresses[];
+    L3Address addresses[];
     char cookie[];
     uint8 unrecognizedParameters[];
     cPacketPtr stateCookie;
@@ -137,7 +137,7 @@ message SCTPDataMsg extends cPacket
     simtime_t enqueuingTime;
     simtime_t expiryTime;
     uint32 ppid;
-    Address initialDestination;
+    L3Address initialDestination;
     uint32 msgNum;
     uint16 sid;
     bool ordered;
@@ -209,14 +209,14 @@ message SCTPAbortChunk extends SCTPChunk
 
 message SCTPHeartbeatChunk extends SCTPChunk
 {
-    Address remoteAddr;
+    L3Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
 
 message SCTPHeartbeatAckChunk extends SCTPChunk
 {
-    Address remoteAddr;
+    L3Address remoteAddr;
     simtime_t timeField;
     char info[];
 }
@@ -312,7 +312,7 @@ message SCTPAsconfChunk extends SCTPChunk
 {
     @customize(true);
     uint32 serialNumber;
-    Address addressParam;
+    L3Address addressParam;
     uint32 peerVTag; //for NAT
     abstract cPacketPtr asconfParams[];
 }
@@ -327,19 +327,19 @@ message SCTPAsconfAckChunk extends SCTPChunk
 message SCTPAddIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    Address addressParam;
+    L3Address addressParam;
 }
 
 message SCTPDeleteIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    Address addressParam;
+    L3Address addressParam;
 }
 
 message SCTPSetPrimaryIPParameter extends SCTPParameter
 {
     uint32 requestCorrelationId; //assigned by the sender to identify each request parameter
-    Address addressParam;
+    L3Address addressParam;
 }
 
 message SCTPSupportedExtensionsParameter extends SCTPParameter
@@ -367,9 +367,9 @@ message NatMessage extends cPacket
 {
     bool        multi;
     uint16      peer1;
-    Address     peer1Addresses[];
+    L3Address     peer1Addresses[];
     uint32      portPeer1;
     uint16      peer2;
-    Address     peer2Addresses[];
+    L3Address     peer2Addresses[];
     uint32      portPeer2;
 }

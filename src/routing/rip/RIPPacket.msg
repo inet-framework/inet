@@ -15,10 +15,10 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-class noncobject Address;
+class noncobject L3Address;
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 }}
 
 namespace inet;
@@ -54,9 +54,9 @@ struct RIPEntry
 {
     unsigned short addressFamilyId @enum(RIP_AF); // usually AF_INET (2), but NONE (0) for whole table requests
     unsigned short routeTag;        // 0 for RIPv1
-    Address address;                // destination address
+    L3Address address;                // destination address
     int prefixLength;               // prefix length of the destination
-    Address nextHop;                // next hop address; may be unspecified if the packet is received from the next hop
+    L3Address nextHop;                // next hop address; may be unspecified if the packet is received from the next hop
     unsigned int metric;            // metric of the route (1-15) or infinity (16) if no route to the destination
 }
 

@@ -91,9 +91,9 @@ class VoIPStreamReceiver : public cSimpleModule, public ILifecycle
         AVCodecContext *decCtx;
         AVCodec *pCodecDec;
         AudioOutFile outFile;
-        Address srcAddr;
+        L3Address srcAddr;
         int srcPort;
-        Address destAddr;
+        L3Address destAddr;
         int destPort;
     };
 

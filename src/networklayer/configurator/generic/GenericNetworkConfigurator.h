@@ -26,7 +26,7 @@
 #include "Topology.h"
 #include "IInterfaceTable.h"
 #include "GenericRoutingTable.h"
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
@@ -81,7 +81,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
         LinkInfo *linkInfo;
         InterfaceEntry *interfaceEntry;
         bool configure;    // false means the IP address of the interface will not be modified
-        Address address;    // the bits
+        L3Address address;    // the bits
 
         InterfaceInfo(Node *node, LinkInfo *linkInfo, InterfaceEntry *interfaceEntry)
         {

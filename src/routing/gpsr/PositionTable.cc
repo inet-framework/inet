@@ -20,21 +20,21 @@
 
 namespace inet {
 
-std::vector<Address> PositionTable::getAddresses() const
+std::vector<L3Address> PositionTable::getAddresses() const
 {
-    std::vector<Address> addresses;
+    std::vector<L3Address> addresses;
     for (AddressToPositionMap::const_iterator it = addressToPositionMap.begin(); it != addressToPositionMap.end(); it++)
         addresses.push_back(it->first);
     return addresses;
 }
 
-bool PositionTable::hasPosition(const Address& address) const
+bool PositionTable::hasPosition(const L3Address& address) const
 {
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     return it != addressToPositionMap.end();
 }
 
-Coord PositionTable::getPosition(const Address& address) const
+Coord PositionTable::getPosition(const L3Address& address) const
 {
     AddressToPositionMap::const_iterator it = addressToPositionMap.find(address);
     if (it == addressToPositionMap.end())
@@ -43,13 +43,13 @@ Coord PositionTable::getPosition(const Address& address) const
         return it->second.second;
 }
 
-void PositionTable::setPosition(const Address& address, const Coord& coord)
+void PositionTable::setPosition(const L3Address& address, const Coord& coord)
 {
     ASSERT(!address.isUnspecified());
     addressToPositionMap[address] = AddressToPositionMapValue(simTime(), coord);
 }
 
-void PositionTable::removePosition(const Address& address)
+void PositionTable::removePosition(const L3Address& address)
 {
     AddressToPositionMap::iterator it = addressToPositionMap.find(address);
     addressToPositionMap.erase(it);

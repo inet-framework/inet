@@ -16,20 +16,20 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #include "simtime_t.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 //
-// Helper struct to represent (Address, sequence number) pairs in a RERR message
+// Helper struct to represent (L3Address, sequence number) pairs in a RERR message
 //
 struct UnreachableNode
 {
-    Address addr;
+    L3Address addr;
     unsigned int seqNum;
 };
 
@@ -62,9 +62,9 @@ class AODVRREQ extends AODVControlPacket
     bool unknownSeqNumFlag;
     unsigned int hopCount;
     unsigned int rreqId;
-    Address destAddr;
+    L3Address destAddr;
     unsigned int destSeqNum;
-    Address originatorAddr;
+    L3Address originatorAddr;
     unsigned int originatorSeqNum;
 }
 
@@ -78,9 +78,9 @@ class AODVRREP extends AODVControlPacket
     bool ackRequiredFlag;
     unsigned int prefixSize;
     unsigned int hopCount;
-    Address destAddr;
+    L3Address destAddr;
     unsigned int destSeqNum;
-    Address originatorAddr;
+    L3Address originatorAddr;
     unsigned int originatorSeqNum;
     simtime_t lifeTime;
 }
@@ -109,7 +109,7 @@ class AODVRREPACK extends AODVControlPacket
 //
 message WaitForRREP
 {
-    Address destAddr;
+    L3Address destAddr;
     unsigned int lastTTL;
     bool fromInvalidEntry;
 }

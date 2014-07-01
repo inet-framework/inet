@@ -30,7 +30,7 @@ namespace inet {
 
 void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
 {
-    Address lAddr, rAddr;
+    L3Address lAddr, rAddr;
 
     SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
 
@@ -74,7 +74,7 @@ void SCTPAssociation::process_ASSOCIATE(SCTPEventCode& event, SCTPCommand *sctpC
 
 void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sctpCommand, cPacket *msg)
 {
-    Address lAddr;
+    L3Address lAddr;
     int16 localPort;
 
     SCTPOpenCommand *openCmd = check_and_cast<SCTPOpenCommand *>(sctpCommand);
@@ -102,7 +102,7 @@ void SCTPAssociation::process_OPEN_PASSIVE(SCTPEventCode& event, SCTPCommand *sc
 
             EV_DEBUG << "Assoc " << assocId << "::Starting to listen on: " << lAddr << ":" << localPort << "\n";
 
-            sctpMain->updateSockPair(this, lAddr, Address(), localPort, 0);
+            sctpMain->updateSockPair(this, lAddr, L3Address(), localPort, 0);
             break;
 
         default:

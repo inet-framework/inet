@@ -19,7 +19,7 @@
 #define __INET_IROUTE_H
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "InterfaceEntry.h"
 
 namespace inet {
@@ -79,22 +79,22 @@ class INET_API IRoute
     /** The routing table in which this route is inserted, or NULL. */
     virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
-    virtual void setDestination(const Address& dest) = 0;
+    virtual void setDestination(const L3Address& dest) = 0;
     virtual void setPrefixLength(int l) = 0;
-    virtual void setNextHop(const Address& nextHop) = 0;
+    virtual void setNextHop(const L3Address& nextHop) = 0;
     virtual void setInterface(InterfaceEntry *ie) = 0;
     virtual void setSource(cObject *source) = 0;
     virtual void setSourceType(SourceType type) = 0;
     virtual void setMetric(int metric) = 0;    //XXX double?
 
     /** Destination address prefix to match */
-    virtual Address getDestinationAsGeneric() const = 0;
+    virtual L3Address getDestinationAsGeneric() const = 0;
 
     /** Represents length of prefix to match */
     virtual int getPrefixLength() const = 0;
 
     /** Next hop address */
-    virtual Address getNextHopAsGeneric() const = 0;
+    virtual L3Address getNextHopAsGeneric() const = 0;
 
     /** Next hop interface */
     virtual InterfaceEntry *getInterface() const = 0;
@@ -198,9 +198,9 @@ class INET_API IMulticastRoute
     virtual IRoutingTable *getRoutingTableAsGeneric() const = 0;
 
     virtual void setEnabled(bool enabled) = 0;
-    virtual void setOrigin(const Address& origin) = 0;
+    virtual void setOrigin(const L3Address& origin) = 0;
     virtual void setPrefixLength(int len) = 0;
-    virtual void setMulticastGroup(const Address& group) = 0;
+    virtual void setMulticastGroup(const L3Address& group) = 0;
     virtual void setInInterface(InInterface *_inInterface) = 0;
     virtual void clearOutInterfaces() = 0;
     virtual void addOutInterface(OutInterface *outInterface) = 0;
@@ -217,13 +217,13 @@ class INET_API IMulticastRoute
     virtual bool isExpired() const = 0;
 
     /** Source address prefix to match */
-    virtual Address getOriginAsGeneric() const = 0;
+    virtual L3Address getOriginAsGeneric() const = 0;
 
     /** Prefix length to match */
     virtual int getPrefixLength() const = 0;
 
     /** Multicast group address */
-    virtual Address getMulticastGroupAsGeneric() const = 0;
+    virtual L3Address getMulticastGroupAsGeneric() const = 0;
 
     /** Source of route */
     virtual cObject *getSource() const = 0;

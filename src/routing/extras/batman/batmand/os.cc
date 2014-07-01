@@ -27,7 +27,7 @@
 
 namespace inet {
 
-int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, const Address & destAdd, int32_t send_sock, BatmanIf *batman_if)
+int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, const L3Address & destAdd, int32_t send_sock, BatmanIf *batman_if)
 {
     if ((batman_if != NULL) && (!batman_if->if_active))
     {
@@ -35,9 +35,9 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
         return 0;
     }
     if (batman_if)
-        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), Address(batman_if->dev->ipv4Data()->getIPAddress()));
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), L3Address(batman_if->dev->ipv4Data()->getIPAddress()));
     else
-        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), Address());
+        sendToIp(packet_buff, BATMAN_PORT, destAdd, BATMAN_PORT, 1, par("broadcastDelay").doubleValue(), L3Address());
     return 0;
 }
 
@@ -46,7 +46,7 @@ int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, co
 // modification routing tables methods
 //
 //
-void Batman::add_del_route(const Address &dest, uint8_t netmask, const Address &router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
+void Batman::add_del_route(const L3Address &dest, uint8_t netmask, const L3Address &router, int32_t ifi, InterfaceEntry* dev, uint8_t rt_table, int8_t route_type, int8_t route_action)
 {
     if (route_type != ROUTE_TYPE_UNICAST)
         return;
@@ -62,10 +62,10 @@ void Batman::add_del_route(const Address &dest, uint8_t netmask, const Address &
     if (index < 0)
         return;
 
-    Address nmask(IPv4Address::makeNetmask(netmask));
+    L3Address nmask(IPv4Address::makeNetmask(netmask));
     if (route_action==ROUTE_DEL)
     {
-       setRoute(dest, Address(), index, 0, nmask);
+       setRoute(dest, L3Address(), index, 0, nmask);
        return;
     }
 
@@ -89,14 +89,14 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         if (!ifr->isUp())
             continue;
 
-        Address addr(ifr->ipv4Data()->getIPAddress());
-        Address netmask(ifr->ipv4Data()->getNetmask());
+        L3Address addr(ifr->ipv4Data()->getIPAddress());
+        L3Address netmask(ifr->ipv4Data()->getNetmask());
         uint8_t mask = ifr->ipv4Data()->getNetmask().getNetmaskLength();
 
         ManetNetworkAddress netaddr(addr, mask);// addr&netmask;
         BatmanIf *batman_if;
 
-        Address ZERO;
+        L3Address ZERO;
         add_del_route(netaddr.getAddress(), mask, ZERO, 0, ifr, BATMAN_RT_TABLE_TUNNEL, ROUTE_TYPE_THROW, rule_action);
 
         if ((batman_if = is_batman_if(ifr))==NULL)
@@ -105,14 +105,14 @@ int Batman::add_del_interface_rules(int8_t rule_action)
         add_del_rule(netaddr.getAddress(), mask, BATMAN_RT_TABLE_TUNNEL, (rule_action == RULE_DEL ? 0 : BATMAN_RT_PRIO_TUNNEL + if_count), 0, RULE_TYPE_SRC, rule_action);
 
         if (ifr->isLoopback())
-            add_del_rule(Address(), 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);
+            add_del_rule(L3Address(), 0, BATMAN_RT_TABLE_TUNNEL, BATMAN_RT_PRIO_TUNNEL, ifr, RULE_TYPE_IIF, rule_action);
         if_count++;
     }
 
     return 1;
 }
 
-void Batman::add_del_rule(const Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *iif, int8_t rule_type, int8_t rule_action)
+void Batman::add_del_rule(const L3Address& network, uint8_t netmask, int8_t rt_table, uint32_t prio, InterfaceEntry *iif, int8_t rule_type, int8_t rule_action)
 {
     return;
 }

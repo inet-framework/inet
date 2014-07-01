@@ -24,7 +24,7 @@ cplusplus {{
 namespace inet;
 
 class noncobject Ieee802Ctrl;
-class noncobject Address;
+//class noncobject Address;
 
 //
 // Control structure for communication between LLC and higher layers

@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "MACAddress.h"
 #include "ModuleAccess.h"
 #include "InterfaceEntry.h"
@@ -47,15 +47,15 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     virtual ~GenericARP() {}
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
-    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie);
-    virtual Address getL3AddressFor(const MACAddress&) const { throw cRuntimeError("getL3AddressFor() not implemented yet"); }
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie);
+    virtual L3Address getL3AddressFor(const MACAddress&) const { throw cRuntimeError("getL3AddressFor() not implemented yet"); }
 
   protected:
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 
-    MACAddress mapUnicastAddress(Address addr);
-    MACAddress mapMulticastAddress(Address addr);
+    MACAddress mapUnicastAddress(L3Address addr);
+    MACAddress mapMulticastAddress(L3Address addr);
     void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 };
 

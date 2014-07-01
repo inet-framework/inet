@@ -19,7 +19,7 @@
 #define __INET_AODVROUTEDATA_H
 
 #include <set>
-#include "Address.h"
+#include "L3Address.h"
 #include "INETDefs.h"
 
 namespace inet {
@@ -27,7 +27,7 @@ namespace inet {
 class INET_API AODVRouteData : public cObject
 {
   protected:
-    std::set<Address> precursorList;
+    std::set<L3Address> precursorList;
     bool active;
     bool repariable;
     bool beingRepaired;
@@ -61,8 +61,8 @@ class INET_API AODVRouteData : public cObject
     void setLifeTime(const simtime_t& lifeTime) { this->lifeTime = lifeTime; }
     bool isActive() const { return active; }
     void setIsActive(bool active) { this->active = active; }
-    void addPrecursor(const Address& precursorAddr) { precursorList.insert(precursorAddr); }
-    const std::set<Address>& getPrecursorList() const { return precursorList; }
+    void addPrecursor(const L3Address& precursorAddr) { precursorList.insert(precursorAddr); }
+    const std::set<L3Address>& getPrecursorList() const { return precursorList; }
 };
 
 std::ostream& operator<<(std::ostream& out, const AODVRouteData *data);

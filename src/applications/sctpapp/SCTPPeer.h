@@ -46,7 +46,7 @@ class INET_API SCTPPeer : public cSimpleModule, public SCTPSocket::CallbackInter
     typedef std::map<int, cOutVector *> BytesPerAssoc;
     typedef std::map<int, cDoubleHistogram *> HistEndToEndDelay;
     typedef std::map<int, cOutVector *> EndToEndDelay;
-    typedef std::map<Address, PathStatus> SCTPPathStatus;
+    typedef std::map<L3Address, PathStatus> SCTPPathStatus;
 
     // parameters
     double delay;

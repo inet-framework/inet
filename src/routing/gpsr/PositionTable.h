@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "Coord.h"
 
 namespace inet {
@@ -34,19 +34,19 @@ class INET_API PositionTable
 {
   private:
     typedef std::pair<simtime_t, Coord> AddressToPositionMapValue;
-    typedef std::map<Address, AddressToPositionMapValue> AddressToPositionMap;
+    typedef std::map<L3Address, AddressToPositionMapValue> AddressToPositionMap;
     AddressToPositionMap addressToPositionMap;
 
   public:
     PositionTable() {}
 
-    std::vector<Address> getAddresses() const;
+    std::vector<L3Address> getAddresses() const;
 
-    bool hasPosition(const Address& address) const;
-    Coord getPosition(const Address& address) const;
-    void setPosition(const Address& address, const Coord& coord);
+    bool hasPosition(const L3Address& address) const;
+    Coord getPosition(const L3Address& address) const;
+    void setPosition(const L3Address& address, const Coord& coord);
 
-    void removePosition(const Address& address);
+    void removePosition(const L3Address& address);
     void removeOldPositions(simtime_t timestamp);
 
     void clear();

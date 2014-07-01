@@ -132,8 +132,8 @@ SCTP::~SCTP()
 
 void SCTP::handleMessage(cMessage *msg)
 {
-    Address destAddr;
-    Address srcAddr;
+    L3Address destAddr;
+    L3Address srcAddr;
     bool findListen = false;
     bool bitError = false;
 
@@ -289,7 +289,7 @@ void SCTP::handleMessage(cMessage *msg)
         updateDisplayString();
 }
 
-void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, Address srcAddr, Address destAddr)
+void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -327,7 +327,7 @@ void SCTP::sendAbortFromMain(SCTPMessage *sctpmsg, Address srcAddr, Address dest
     }
 }
 
-void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, Address srcAddr, Address destAddr)
+void SCTP::sendShutdownCompleteFromMain(SCTPMessage *sctpmsg, L3Address srcAddr, L3Address destAddr)
 {
     SCTPMessage *msg = new SCTPMessage();
 
@@ -454,7 +454,7 @@ SCTPAssociation *SCTP::findAssocWithVTag(uint32 peerVTag, uint32 remotePort, uin
     return NULL;
 }
 
-SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
+SCTPAssociation *SCTP::findAssocForMessage(L3Address srcAddr, L3Address destAddr, uint32 srcPort, uint32 destPort, bool findListen)
 {
     SockPair key;
 
@@ -473,7 +473,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
         return i->second;
 
     // try with localAddr missing (only localPort specified in passive/active open)
-    key.localAddr = Address();
+    key.localAddr = L3Address();
 
     i = sctpAssocMap.find(key);
     if (i != sctpAssocMap.end()) {
@@ -484,7 +484,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
     if (findListen == true) {
         // try fully qualified local socket + blank remote socket (for incoming SYN)
         key = save;
-        key.remoteAddr = Address();
+        key.remoteAddr = L3Address();
         key.remotePort = 0;
         i = sctpAssocMap.find(key);
         if (i != sctpAssocMap.end()) {
@@ -493,7 +493,7 @@ SCTPAssociation *SCTP::findAssocForMessage(Address srcAddr, Address destAddr, ui
         }
 
         // try with blank remote socket, and localAddr missing (for incoming SYN)
-        key.localAddr = Address();
+        key.localAddr = L3Address();
         i = sctpAssocMap.find(key);
         if (i != sctpAssocMap.end()) {
             // try with blank remote socket, and localAddr missing
@@ -524,7 +524,7 @@ uint16 SCTP::getEphemeralPort()
     return nextEphemeralPort++;
 }
 
-void SCTP::updateSockPair(SCTPAssociation *assoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort)
+void SCTP::updateSockPair(SCTPAssociation *assoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort)
 {
     SockPair key;
     EV_INFO << "updateSockPair:   localAddr: " << localAddr << "   remoteAddr=" << remoteAddr << "    localPort=" << localPort << " remotePort=" << remotePort << "\n";
@@ -549,7 +549,7 @@ void SCTP::updateSockPair(SCTPAssociation *assoc, Address localAddr, Address rem
     printInfoAssocMap();
 }
 
-void SCTP::addLocalAddress(SCTPAssociation *assoc, Address address)
+void SCTP::addLocalAddress(SCTPAssociation *assoc, L3Address address)
 {
     SockPair key;
 
@@ -576,7 +576,7 @@ void SCTP::addLocalAddress(SCTPAssociation *assoc, Address address)
     printInfoAssocMap();
 }
 
-void SCTP::addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses)
+void SCTP::addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses)
 {
     SockPair key;
 
@@ -607,7 +607,7 @@ void SCTP::addLocalAddressToAllRemoteAddresses(SCTPAssociation *assoc, Address a
     }
 }
 
-void SCTP::removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, Address address, std::vector<Address> remAddresses)
+void SCTP::removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> remAddresses)
 {
     SockPair key;
 
@@ -630,7 +630,7 @@ void SCTP::removeLocalAddressFromAllRemoteAddresses(SCTPAssociation *assoc, Addr
     }
 }
 
-void SCTP::removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, Address address, std::vector<Address> locAddresses)
+void SCTP::removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, L3Address address, std::vector<L3Address> locAddresses)
 {
     SockPair key;
 
@@ -653,7 +653,7 @@ void SCTP::removeRemoteAddressFromAllAssociations(SCTPAssociation *assoc, Addres
     }
 }
 
-bool SCTP::addRemoteAddress(SCTPAssociation *assoc, Address localAddress, Address remoteAddress)
+bool SCTP::addRemoteAddress(SCTPAssociation *assoc, L3Address localAddress, L3Address remoteAddress)
 {
     EV_INFO << "Add remote Address: " << remoteAddress << " to local Address " << localAddress << "\n";
 
@@ -677,7 +677,7 @@ bool SCTP::addRemoteAddress(SCTPAssociation *assoc, Address localAddress, Addres
     return true;
 }
 
-void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, Address localAddr, Address remoteAddr, int32 localPort, int32 remotePort)
+void SCTP::addForkedAssociation(SCTPAssociation *assoc, SCTPAssociation *newAssoc, L3Address localAddr, L3Address remoteAddr, int32 localPort, int32 remotePort)
 {
     SockPair keyAssoc;
 

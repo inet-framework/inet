@@ -36,7 +36,7 @@
 
 #include "lwip/inet.h"
 
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
@@ -49,7 +49,7 @@ namespace inet {
 #endif
 PACK_STRUCT_BEGIN
 struct ip_addr {
-  PACK_STRUCT_FIELD(Address addr);
+  PACK_STRUCT_FIELD(L3Address addr);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
@@ -124,7 +124,7 @@ extern const struct ip_addr ip_addr_broadcast;
                                 (u32_t)((d) & 0xff))
 
 #define ip_addr_set(dest, src) (dest)->addr = \
-                               ((src) == NULL ? Address() : \
+                               ((src) == NULL ? L3Address() : \
                                (src)->addr)
 /**
  * Determine if two address are on the same network.

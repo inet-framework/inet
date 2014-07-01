@@ -36,12 +36,12 @@ class INET_API IPv4AddressType : public IAddressType
     virtual ~IPv4AddressType() {}
 
     virtual int getMaxPrefixLength() const { return 32; }
-    virtual Address getUnspecifiedAddress() const { return IPv4Address::UNSPECIFIED_ADDRESS; }
-    virtual Address getBroadcastAddress() const { return IPv4Address::ALLONES_ADDRESS; }
-    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
-    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
+    virtual L3Address getUnspecifiedAddress() const { return IPv4Address::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getBroadcastAddress() const { return IPv4Address::ALLONES_ADDRESS; }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const { return IPv4Address::LL_MANET_ROUTERS; }
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const { return ALL_RIP_ROUTERS_MCAST; }
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
-    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
 
 } // namespace inet

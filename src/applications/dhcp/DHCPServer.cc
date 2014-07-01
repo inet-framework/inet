@@ -444,7 +444,7 @@ DHCPLease *DHCPServer::getAvailableLease(IPv4Address requestedAddress, MACAddres
     return NULL;
 }
 
-void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort)
+void DHCPServer::sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort)
 {
     EV_INFO << "Sending packet: " << msg << "." << endl;
     numSent++;

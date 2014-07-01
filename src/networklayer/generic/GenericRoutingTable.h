@@ -37,8 +37,8 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
   private:
     IInterfaceTable *ift;    // cached pointer
 
-    Address routerId;
-    Address::AddressType addressType;
+    L3Address routerId;
+    L3Address::AddressType addressType;
     bool forwardingEnabled;
     bool multicastForwardingEnabled;
 
@@ -95,17 +95,17 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
     /**
      * Returns routerId.
      */
-    virtual Address getRouterIdAsGeneric() const;
+    virtual L3Address getRouterIdAsGeneric() const;
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const Address& dest) const;    //XXX maybe into InterfaceTable?
+    virtual bool isLocalAddress(const L3Address& dest) const;    //XXX maybe into InterfaceTable?
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const;    //XXX should be find..., see next one
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const;    //XXX should be find..., see next one
 
     /**
      * To be called from route objects whenever a field changes. Used for
@@ -122,7 +122,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * destination address, and returns the resulting route. Returns NULL
      * if there is no matching route.
      */
-    virtual GenericRoute *findBestMatchingRoute(const Address& dest) const;    //TODO make coveriant return types everywhere
+    virtual GenericRoute *findBestMatchingRoute(const L3Address& dest) const;    //TODO make coveriant return types everywhere
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -130,7 +130,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Returns the output interface for the packets with dest as destination
      * address, or NULL if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const;    //XXX redundant
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -139,7 +139,7 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * address if the destination is not in routing table or the gateway field
      * is not filled in in the route.
      */
-    virtual Address getNextHopForDestination(const Address& dest) const;    //XXX redundant AND unused
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const;    //XXX redundant AND unused
     //@}
 
     /** @name Multicast routing functions */
@@ -149,12 +149,12 @@ class INET_API GenericRoutingTable : public cSimpleModule, public IRoutingTable,
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    virtual bool isLocalMulticastAddress(const Address& dest) const;
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const;
 
     /**
      * Returns route for a multicast origin and group.
      */
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address& origin, const Address& group) const;
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const;
     //@}
 
     /** @name Route table manipulation */

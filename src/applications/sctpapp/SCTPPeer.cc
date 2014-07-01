@@ -185,7 +185,7 @@ void SCTPPeer::connect()
     EV_INFO << "Assoc " << clientSocket.getConnectionId() << "::connect to address " << connectAddress << ", port " << connectPort << "\n";
     numSessions++;
     bool streamReset = par("streamReset");
-    Address destination;
+    L3Address destination;
     AddressResolver().tryResolve(connectAddress, destination);
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;

@@ -377,7 +377,7 @@ void Batman::update_routes(OrigNode *orig_node, NeighNode *neigh_node, HnaElemen
     // XXX why is this needed? This check is not present in the original batman code.
     if (!isInMacLayer())
     {
-        Address next = omnet_exist_rte(orig_node->orig);
+        L3Address next = omnet_exist_rte(orig_node->orig);
         if (orig_node->router)
         {
             if (next != orig_node->router->addr)
@@ -635,7 +635,7 @@ static void send_vis_packet(void)
 }
 #endif
 
-uint8_t Batman::count_real_packets(BatmanPacket *in, const Address &neigh, BatmanIf *if_incoming)
+uint8_t Batman::count_real_packets(BatmanPacket *in, const L3Address &neigh, BatmanIf *if_incoming)
 {
     OrigNode *orig_node;
     NeighNode *tmp_neigh_node;
@@ -754,7 +754,7 @@ int8_t batman(void)
 /*
  cut from original int batman(void) function
 */
-void Batman::parseIncomingPacket(Address neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
+void Batman::parseIncomingPacket(L3Address neigh, BatmanIf *if_incoming, BatmanPacket *bat_packet)
 {
     OrigNode *orig_neigh_node, *orig_node;
     simtime_t curr_time;

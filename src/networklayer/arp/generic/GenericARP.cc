@@ -28,7 +28,7 @@ namespace inet {
 
 Define_Module(GenericARP);
 
-MACAddress GenericARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
+MACAddress GenericARP::resolveL3Address(const L3Address& address, const InterfaceEntry *ie)
 {
     if (address.isUnicast())
         return mapUnicastAddress(address);
@@ -57,18 +57,18 @@ void GenericARP::handleMessage(cMessage *msg)
     delete msg;
 }
 
-MACAddress GenericARP::mapUnicastAddress(Address addr)
+MACAddress GenericARP::mapUnicastAddress(L3Address addr)
 {
     cModule *module;
     switch (addr.getType()) {
-        case Address::MAC:
+        case L3Address::MAC:
             return addr.toMAC();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             module = simulation.getModule(addr.toModuleId().getId());
             break;
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             module = simulation.getModule(addr.toModulePath().getId());
             break;
 
@@ -80,7 +80,7 @@ MACAddress GenericARP::mapUnicastAddress(Address addr)
     return interfaceEntry->getMacAddress();
 }
 
-MACAddress GenericARP::mapMulticastAddress(Address addr)
+MACAddress GenericARP::mapMulticastAddress(L3Address addr)
 {
     ASSERT(addr.isMulticast());
 

@@ -98,7 +98,7 @@ void Batman::schedule_own_packet(BatmanIf *batman_if)
 }
 
 
-void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const Address &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time)
+void Batman::schedule_forward_packet(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, uint8_t directlink, int16_t hna_buff_len, BatmanIf *if_incoming, const simtime_t &curr_time)
 {
     ForwNode *forw_node_new = NULL, *forw_node_aggregate = NULL, *forw_node_pos = NULL;
     //struct list_head *list_pos = forw_list.next, *prev_list_head = (struct list_head *)&forw_list;

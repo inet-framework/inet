@@ -347,8 +347,8 @@ void NS_CLASS dymo_socket_send(struct in_addr dest_addr, struct dev_info *dev,do
     Scheduler::getInstance().schedule(target_, p, 0.0);
 #else
 
-    Address destAdd;
-    if (dest_addr.s_addr == Address(IPv4Address(DYMO_BROADCAST)))
+    L3Address destAdd;
+    if (dest_addr.s_addr == L3Address(IPv4Address(DYMO_BROADCAST)))
     {
         destAdd.set(IPv4Address::ALLONES_ADDRESS);
         if (delay>0)

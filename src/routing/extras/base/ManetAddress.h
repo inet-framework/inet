@@ -22,7 +22,7 @@
 
 #include "IPv4Address.h"
 #include "IPv6Address.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "MACAddress.h"
 
 namespace inet {
@@ -40,23 +40,23 @@ class ManetNetworkAddress
   public:
     ManetNetworkAddress() : prefixLength(0) {}
     ManetNetworkAddress(const ManetNetworkAddress& o) : address(o.address), prefixLength(o.prefixLength) {}
-    ManetNetworkAddress(const Address& o, short unsigned int masklen) : address(o), prefixLength(masklen) { setPrefixLen(masklen); }
+    ManetNetworkAddress(const L3Address& o, short unsigned int masklen) : address(o), prefixLength(masklen) { setPrefixLen(masklen); }
     explicit ManetNetworkAddress(IPv4Address addr, short unsigned int masklen=32) { set(addr, masklen); }
     explicit ManetNetworkAddress(const IPv6Address& addr, short unsigned int masklen=128) { set(addr, masklen); }
-    explicit ManetNetworkAddress(const Address& addr) { set(addr); }
+    explicit ManetNetworkAddress(const L3Address& addr) { set(addr); }
     explicit ManetNetworkAddress(MACAddress addr, short unsigned int masklen=48) { set(addr, masklen); }
 
     void set(IPv4Address addr, short unsigned int masklen = 32);
     void set(const IPv6Address& addr, short unsigned int masklen = 128);
-    void set(const Address& addr);
-    void set(const Address& addr, short unsigned int masklen);
+    void set(const L3Address& addr);
+    void set(const L3Address& addr, short unsigned int masklen);
     void set(MACAddress addr, short unsigned int masklen = 48);
 
     void setPrefixLen(short unsigned int masklen);
 
-    const Address& getAddress() const { return address; }
+    const L3Address& getAddress() const { return address; }
     short unsigned int getPrefixLength() const { return prefixLength; }
-    Address::AddressType getType() const { return address.getType(); }
+    L3Address::AddressType getType() const { return address.getType(); }
 
     std::string str() const;
 
@@ -75,12 +75,12 @@ class ManetNetworkAddress
     bool operator >(const ManetNetworkAddress& other) const { return compare(other) > 0; }
     bool operator >=(const ManetNetworkAddress& other) const { return compare(other) >= 0; }
 
-    bool contains(const Address& other) const;
+    bool contains(const L3Address& other) const;
     bool contains(const ManetNetworkAddress& other) const;
 
   protected:
     // member variables:
-    Address address;
+    L3Address address;
     short unsigned int prefixLength;
 };
 

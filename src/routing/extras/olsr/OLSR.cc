@@ -599,7 +599,7 @@ OLSR::check_packet(cPacket* msg, nsaddr_t &src_addr, int &index)
                 return NULL;
             }
             Ieee802Ctrl* ctrl = check_and_cast<Ieee802Ctrl*>(msg->removeControlInfo());
-            src_addr = Address(ctrl->getSrc());
+            src_addr = L3Address(ctrl->getSrc());
             delete ctrl;
             return dynamic_cast<OLSR_pkt  *>(msg);
         }
@@ -1794,7 +1794,7 @@ OLSR::send_pkt()
     int num_pkts = (num_msgs%OLSR_MAX_MSGS == 0) ? num_msgs/OLSR_MAX_MSGS :
                    (num_msgs/OLSR_MAX_MSGS + 1);
 
-    Address destAdd;
+    L3Address destAdd;
     if (!this->isInMacLayer())
         destAdd.set(IPv4Address::ALLONES_ADDRESS);
     else
@@ -1822,7 +1822,7 @@ OLSR::send_pkt()
             it = msgs_.erase(it);
         }
 
-        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, Address());
+        sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, L3Address());
     }
 }
 
@@ -2249,7 +2249,7 @@ OLSR::mac_failed(IPv4Datagram* p)
     EV_WARN <<"Node " << OLSR::node_id(ra_addr()) << "MAC Layer detects a breakage on link to "  <<
     OLSR::node_id(dest_addr);
 
-    if (dest_addr == Address(IPv4Address(IP_BROADCAST)))
+    if (dest_addr == L3Address(IPv4Address(IP_BROADCAST)))
     {
         return;
     }
@@ -2875,11 +2875,11 @@ OLSR::~OLSR()
 }
 
 
-uint32_t OLSR::getRoute(const Address &dest, std::vector<Address> &add)
+uint32_t OLSR::getRoute(const L3Address &dest, std::vector<L3Address> &add)
 {
     add.clear();
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
-    Address apAddr;
+    L3Address apAddr;
     if (!rt_entry)
     {
         if (getAp(dest, apAddr))
@@ -2908,12 +2908,12 @@ uint32_t OLSR::getRoute(const Address &dest, std::vector<Address> &add)
 }
 
 
-bool OLSR::getNextHop(const Address &dest, Address &add, int &iface, double &cost)
+bool OLSR::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost)
 {
     OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
     {
-        Address apAddr;
+        L3Address apAddr;
         if (getAp(dest, apAddr))
         {
 
@@ -2964,7 +2964,7 @@ bool OLSR::isOurType(cPacket * msg)
     return false;
 }
 
-bool OLSR::getDestAddress(cPacket *msg, Address &dest)
+bool OLSR::getDestAddress(cPacket *msg, L3Address &dest)
 {
     return false;
 }
@@ -2990,14 +2990,14 @@ void OLSR::scheduleNextEvent()
 
 
 // Group methods, allow the anycast procedure
-int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<Address> &add)
+int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<L3Address> &add)
 {
 
     int distance = 1000;
     add.clear();
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
-        Address dest = *it;
+        L3Address dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
@@ -3019,13 +3019,13 @@ int OLSR::getRouteGroup(const AddressGroup &gr, std::vector<Address> &add)
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, Address &gw)
+bool OLSR::getNextHopGroup(const AddressGroup &gr, L3Address &add, int &iface, L3Address &gw)
 {
 
     int distance = 1000;
     for (AddressGroupConstIterator it = gr.begin(); it!=gr.end(); it++)
     {
-        Address dest = *it;
+        L3Address dest = *it;
         OLSR_rt_entry* rt_entry = rtable_.lookup(dest);
         if (!rt_entry)
             continue;
@@ -3052,7 +3052,7 @@ bool OLSR::getNextHopGroup(const AddressGroup &gr, Address &add, int &iface, Add
 
 
 
-int  OLSR::getRouteGroup(const Address& dest, std::vector<Address> &add, Address& gateway, bool &isGroup, int group)
+int  OLSR::getRouteGroup(const L3Address& dest, std::vector<L3Address> &add, L3Address& gateway, bool &isGroup, int group)
 {
     AddressGroup gr;
     int distance = 0;
@@ -3074,7 +3074,7 @@ int  OLSR::getRouteGroup(const Address& dest, std::vector<Address> &add, Address
     return distance;
 }
 
-bool OLSR::getNextHopGroup(const Address& dest, Address &next, int &iface, Address& gw, bool &isGroup, int group)
+bool OLSR::getNextHopGroup(const L3Address& dest, L3Address &next, int &iface, L3Address& gw, bool &isGroup, int group)
 {
     AddressGroup gr;
     bool find = false;
@@ -3095,13 +3095,13 @@ bool OLSR::getNextHopGroup(const Address& dest, Address &next, int &iface, Addre
 
 
 
-Address OLSR::getIfaceAddressFromIndex(int index)
+L3Address OLSR::getIfaceAddressFromIndex(int index)
 {
     InterfaceEntry * entry = getInterfaceEntry(index);
     if (this->isInMacLayer())
-        return Address(entry->getMacAddress());
+        return L3Address(entry->getMacAddress());
     else
-        return Address(entry->ipv4Data()->getIPAddress());
+        return L3Address(entry->ipv4Data()->getIPAddress());
 }
 
 } // namespace inet

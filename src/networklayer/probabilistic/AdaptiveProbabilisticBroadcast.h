@@ -11,7 +11,7 @@
 #include <map>
 
 #include "ProbabilisticBroadcast.h"
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
     virtual void initialize(int);
 
   protected:
-    typedef std::map<Address, cMessage *> NeighborMap;
+    typedef std::map<L3Address, cMessage *> NeighborMap;
 
     /** @brief Handle messages from lower layer */
     virtual void handleLowerPacket(cPacket *msg);

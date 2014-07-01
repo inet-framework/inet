@@ -20,7 +20,7 @@
 
 cplusplus {{
 #include "OLSR_ETX_parameter.h"
-#include "Address.h"
+#include "L3Address.h"
 #include <string.h>
 }}
 
@@ -28,7 +28,7 @@ namespace inet;
 
 cplusplus {{
 #ifndef nsaddr_t
-typedef Address nsaddr_t;
+typedef L3Address nsaddr_t;
 #endif
 
 /********** Message types **********/

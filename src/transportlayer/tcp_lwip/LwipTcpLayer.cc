@@ -22,7 +22,7 @@
 
 #include "lwip/memp.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "LwipTcpStackIf.h"
 
 namespace inet {
@@ -90,7 +90,7 @@ err_t LwipTcpLayer::ip_output(LwipTcpLayer::tcp_pcb *pcb, struct pbuf *p,
 
 struct netif *LwipTcpLayer::ip_route(struct ip_addr *addr)
 {
-    Address ipAddr;
+    L3Address ipAddr;
 
     if (addr)
         ipAddr = addr->addr;

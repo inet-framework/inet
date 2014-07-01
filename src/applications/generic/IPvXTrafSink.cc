@@ -80,7 +80,7 @@ bool IPvXTrafSink::handleOperationStage(LifecycleOperation *operation, int stage
 
 void IPvXTrafSink::printPacket(cPacket *msg)
 {
-    Address src, dest;
+    L3Address src, dest;
     int protocol = -1;
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());

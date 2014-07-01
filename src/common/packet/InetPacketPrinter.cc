@@ -17,7 +17,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "INetworkDatagram.h"
 #include "PingPayload_m.h"
 
@@ -49,9 +49,9 @@ namespace inet {
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
-    void printTCPPacket(std::ostream& os, Address srcAddr, Address destAddr, TCPSegment *tcpSeg) const;
-    void printUDPPacket(std::ostream& os, Address srcAddr, Address destAddr, UDPPacket *udpPacket) const;
-    void printICMPPacket(std::ostream& os, Address srcAddr, Address destAddr, ICMPMessage *packet) const;
+    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, TCPSegment *tcpSeg) const;
+    void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPPacket *udpPacket) const;
+    void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
   public:
     InetPacketPrinter() {}
@@ -69,7 +69,7 @@ int InetPacketPrinter::getScoreFor(cMessage *msg) const
 
 void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 {
-    Address srcAddr, destAddr;
+    L3Address srcAddr, destAddr;
 
     for (cPacket *pk = dynamic_cast<cPacket *>(msg); pk; pk = pk->getEncapsulatedPacket()) {
         if (dynamic_cast<INetworkDatagram *>(pk)) {
@@ -107,7 +107,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Address destAddr, TCPSegment *tcpSeg) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, TCPSegment *tcpSeg) const
 {
 #ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";
@@ -162,7 +162,7 @@ void InetPacketPrinter::printTCPPacket(std::ostream& os, Address srcAddr, Addres
 #endif // ifdef WITH_TCP_COMMON
 }
 
-void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Address destAddr, UDPPacket *udpPacket) const
+void InetPacketPrinter::printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPPacket *udpPacket) const
 {
 #ifdef WITH_UDP
     os << " UDP: " << srcAddr << '.' << udpPacket->getSourcePort() << " > " << destAddr << '.' << udpPacket->getDestinationPort()
@@ -172,7 +172,7 @@ void InetPacketPrinter::printUDPPacket(std::ostream& os, Address srcAddr, Addres
 #endif // ifdef WITH_UDP
 }
 
-void InetPacketPrinter::printICMPPacket(std::ostream& os, Address srcAddr, Address destAddr, ICMPMessage *packet) const
+void InetPacketPrinter::printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const
 {
 #ifdef WITH_IPv4
     switch (packet->getType()) {

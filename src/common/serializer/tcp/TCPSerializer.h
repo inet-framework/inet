@@ -19,7 +19,7 @@
 #ifndef __INET_TCPSERIALIZER_H
 #define __INET_TCPSERIALIZER_H
 
-#include "Address.h"
+#include "L3Address.h"
 
 #include "headers/defs.h"
 
@@ -55,7 +55,7 @@ class TCPSerializer
      * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
      */
     int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
-            const Address& srcIp, const Address& destIp);
+            const L3Address& srcIp, const L3Address& destIp);
 
     /**
      * Puts a packet sniffed from the wire into a TCPSegment.
@@ -68,7 +68,7 @@ class TCPSerializer
      * Calculate checksum with pseudo header.
      */
     static uint16_t checksum(const void *addr, unsigned int count,
-            const Address& srcIp, const Address& destIp);
+            const L3Address& srcIp, const L3Address& destIp);
 };
 
 } // namespace inet

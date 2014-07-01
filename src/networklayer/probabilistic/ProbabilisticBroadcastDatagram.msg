@@ -21,7 +21,7 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 class NetworkDatagramBase;
 
 packet ProbabilisticBroadcastDatagram extends NetworkDatagramBase
@@ -32,6 +32,6 @@ packet ProbabilisticBroadcastDatagram extends NetworkDatagramBase
     int       nbHops;
     int       transportProtocol = -1;
     simtime_t appTtl;   // Message time-to-live set by application.
-    Address   initialSrcAddr;
-    Address   finalDestAddr;
+    L3Address   initialSrcAddr;
+    L3Address   finalDestAddr;
 }

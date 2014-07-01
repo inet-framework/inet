@@ -20,17 +20,17 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "InterfaceEntry.h"    // not strictly required, but clients will need it anyway
 
 namespace inet {
 
 struct MulticastGroup
 {
-    Address multicastAddr;
+    L3Address multicastAddr;
     int interfaceId;
 
-    MulticastGroup(Address multicastAddr, int interfaceId) : multicastAddr(multicastAddr), interfaceId(interfaceId) {}
+    MulticastGroup(L3Address multicastAddr, int interfaceId) : multicastAddr(multicastAddr), interfaceId(interfaceId) {}
 };
 
 typedef std::vector<MulticastGroup> MulticastGroupList;
@@ -67,18 +67,18 @@ class INET_API IInterfaceTable
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const Address& address) const = 0;
+    virtual bool isLocalAddress(const L3Address& address) const = 0;
 
     /**
      * Checks if the address is on the network of one of the interfaces,
      * but not local.
      */
-    virtual bool isNeighborAddress(const Address& address) const = 0;
+    virtual bool isNeighborAddress(const L3Address& address) const = 0;
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    virtual InterfaceEntry *findInterfaceByAddress(const Address& address) const = 0;
+    virtual InterfaceEntry *findInterfaceByAddress(const L3Address& address) const = 0;
 
     /**
      * Adds an interface. The entry->getInterfaceModule() will be used

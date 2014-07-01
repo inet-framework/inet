@@ -32,7 +32,7 @@ void SCTPNatHook::initialize()
     ipLayer->registerHook(0, this);
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
@@ -108,7 +108,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramForwardHook(INetworkDatagram *dat
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     SCTPNatEntry *entry;
     SCTPChunk *chunk;
@@ -240,7 +240,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramPreRoutingHook(INetworkDatagram *
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }
@@ -250,7 +250,7 @@ INetfilter::IHook::Result SCTPNatHook::datagramLocalInHook(INetworkDatagram *dat
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result SCTPNatHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result SCTPNatHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     return INetfilter::IHook::ACCEPT;
 }

@@ -17,12 +17,12 @@
 
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 }}
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 //
 // Network level control information for sending/receiving packets.
@@ -30,8 +30,8 @@ class noncobject Address;
 class SimpleNetworkProtocolControlInfo
 {
     @customize(true);
-    Address destinationAddress @getter(_getDestinationAddress);
-    Address sourceAddress @getter(_getSourceAddress);
+    L3Address destinationAddress @getter(_getDestinationAddress);
+    L3Address sourceAddress @getter(_getSourceAddress);
     int interfaceId = -1;
     short protocol;
     short hopLimit;

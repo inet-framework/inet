@@ -33,7 +33,7 @@ namespace inet {
 void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
-    Address localAddr, remoteAddr;
+    L3Address localAddr, remoteAddr;
     int localPort, remotePort;
 
     switch (fsm.getState()) {
@@ -77,7 +77,7 @@ void TCPConnection::process_OPEN_ACTIVE(TCPEventCode& event, TCPCommand *tcpComm
 void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCommand, cMessage *msg)
 {
     TCPOpenCommand *openCmd = check_and_cast<TCPOpenCommand *>(tcpCommand);
-    Address localAddr;
+    L3Address localAddr;
     int localPort;
 
     switch (fsm.getState()) {
@@ -95,7 +95,7 @@ void TCPConnection::process_OPEN_PASSIVE(TCPEventCode& event, TCPCommand *tcpCom
 
             EV_DETAIL << "Starting to listen on: " << localAddr << ":" << localPort << "\n";
 
-            tcpMain->addSockPair(this, localAddr, Address(), localPort, -1);
+            tcpMain->addSockPair(this, localAddr, L3Address(), localPort, -1);
             break;
 
         default:

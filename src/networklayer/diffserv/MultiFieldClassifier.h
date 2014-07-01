@@ -33,9 +33,9 @@ class INET_API MultiFieldClassifier : public cSimpleModule
     {
         int gateIndex;
 
-        Address srcAddr;
+        L3Address srcAddr;
         int srcPrefixLength;
-        Address destAddr;
+        L3Address destAddr;
         int destPrefixLength;
         int protocol;
         int tos;

@@ -109,7 +109,7 @@ void PingTestApp::handleMessage(cMessage *msg)
                 const char *token;
 
                 while ((token = tokenizer.nextToken()) != NULL) {
-                    Address addr = AddressResolver().resolve(token);
+                    L3Address addr = AddressResolver().resolve(token);
                     destAddresses.push_back(addr);
                 }
             }
@@ -141,9 +141,9 @@ void PingTestApp::handleMessage(cMessage *msg)
     }
 }
 
-std::vector<Address> PingTestApp::getAllAddresses()
+std::vector<L3Address> PingTestApp::getAllAddresses()
 {
-    std::vector<Address> result;
+    std::vector<L3Address> result;
 
 #if OMNETPP_VERSION < 0x500
     for (int i = 0; i <= simulation.getLastModuleId(); i++)
@@ -160,7 +160,7 @@ std::vector<Address> PingTestApp::getAllAddresses()
                     if (ie->ipv4Data()) {
                         IPv4Address address = ie->ipv4Data()->getIPAddress();
                         if (!address.isUnspecified())
-                            result.push_back(Address(address));
+                            result.push_back(L3Address(address));
                     }
 #endif // ifdef WITH_IPv4
 #ifdef WITH_IPv6
@@ -168,7 +168,7 @@ std::vector<Address> PingTestApp::getAllAddresses()
                         for (int k = 0; k < ie->ipv6Data()->getNumAddresses(); k++) {
                             IPv6Address address = ie->ipv6Data()->getAddress(k);
                             if (!address.isUnspecified() && address.isGlobal())
-                                result.push_back(Address(address));
+                                result.push_back(L3Address(address));
                         }
                     }
 #endif // ifdef WITH_IPv6
@@ -211,7 +211,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
         delete timer;
 }
 
-void PingTestApp::sendToICMP(cMessage *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
+void PingTestApp::sendToICMP(cMessage *msg, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit)
 {
     IAddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
@@ -227,7 +227,7 @@ void PingTestApp::sendToICMP(cMessage *msg, const Address& destAddr, const Addre
 void PingTestApp::processPingResponse(PingPayload *msg)
 {
     // get src, hopCount etc from packet, and print them
-    Address src, dest;
+    L3Address src, dest;
     int msgHopCount = -1;
 
     ASSERT(msg->getOriginatorId() == getId());    // ICMP module error

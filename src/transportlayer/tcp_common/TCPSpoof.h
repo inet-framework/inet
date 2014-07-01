@@ -27,7 +27,7 @@ namespace inet {
 class INET_API TCPSpoof : public cSimpleModule
 {
   protected:
-    virtual void sendToIP(TCPSegment *tcpseg, Address src, Address dest);
+    virtual void sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest);
     virtual unsigned long chooseInitialSeqNum();
     virtual void sendSpoofPacket();
 

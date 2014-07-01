@@ -259,7 +259,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
     tcpMain->send(tcpseg, "ipOut");
 }
 
-void TCPConnection::sendToIP(TCPSegment *tcpseg, Address src, Address dest)
+void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
 {
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
@@ -499,7 +499,7 @@ void TCPConnection::sendRst(uint32 seqNo)
     sendRst(seqNo, localAddr, remoteAddr, localPort, remotePort);
 }
 
-void TCPConnection::sendRst(uint32 seq, Address src, Address dest, int srcPort, int destPort)
+void TCPConnection::sendRst(uint32 seq, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     TCPSegment *tcpseg = createTCPSegment("RST");
 
@@ -513,7 +513,7 @@ void TCPConnection::sendRst(uint32 seq, Address src, Address dest, int srcPort, 
     sendToIP(tcpseg, src, dest);
 }
 
-void TCPConnection::sendRstAck(uint32 seq, uint32 ack, Address src, Address dest, int srcPort, int destPort)
+void TCPConnection::sendRstAck(uint32 seq, uint32 ack, L3Address src, L3Address dest, int srcPort, int destPort)
 {
     TCPSegment *tcpseg = createTCPSegment("RST+ACK");
 

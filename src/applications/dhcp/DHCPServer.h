@@ -107,7 +107,7 @@ class INET_API DHCPServer : public cSimpleModule, public cListener, public ILife
 
     virtual void handleSelfMessages(cMessage *msg);
     virtual InterfaceEntry *chooseInterface();
-    virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
+    virtual void sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
      * Signal handler for cObject, override cListener function.

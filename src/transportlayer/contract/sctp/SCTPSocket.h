@@ -22,14 +22,14 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
 class SCTPStatusInfo;
 class SCTP;
 
-typedef std::vector<Address> AddressVector;
+typedef std::vector<L3Address> AddressVector;
 
 class INET_API SCTPSocket
 {
@@ -58,7 +58,7 @@ class INET_API SCTPSocket
         virtual void shutdownReceivedArrived(int connId) {}
         virtual void sendqueueFullArrived(int connId) {}
         virtual void sendqueueAbatedArrived(int connId, uint64 buffer) {}
-        virtual void addressAddedArrived(int assocId, Address localAddr, Address remoteAddr) {}
+        virtual void addressAddedArrived(int assocId, L3Address localAddr, L3Address remoteAddr) {}
     };
 
     enum State { NOT_BOUND, CLOSED, LISTENING, CONNECTING, CONNECTED, PEER_CLOSED, LOCALLY_CLOSED, SOCKERROR };
@@ -69,11 +69,11 @@ class INET_API SCTPSocket
     int sockstate;
     bool oneToOne;
 
-    Address localAddr;
+    L3Address localAddr;
     AddressVector localAddresses;
 
     int localPrt;
-    Address remoteAddr;
+    L3Address remoteAddr;
     AddressVector remoteAddresses;
     int remotePrt;
     int fsmStatus;
@@ -133,7 +133,7 @@ class INET_API SCTPSocket
     int getLocalPort() { return localPrt; }
     AddressVector getRemoteAddresses() { return remoteAddresses; }
     int getRemotePort() { return remotePrt; }
-    Address getRemoteAddr() { return remoteAddr; }
+    L3Address getRemoteAddr() { return remoteAddr; }
     //@}
 
     /** @name Opening and closing connections, sending data */
@@ -159,11 +159,11 @@ class INET_API SCTPSocket
      * Bind the socket to a local port number and IP address (useful with
      * multi-homing).
      */
-    void bind(Address localAddr, int localPort);
+    void bind(L3Address localAddr, int localPort);
 
     void bindx(AddressVector localAddr, int localPort);
 
-    void addAddress(Address addr);
+    void addAddress(L3Address addr);
     //
     // TBD add support for these options too!
     //  string sendQueueClass;
@@ -183,7 +183,7 @@ class INET_API SCTPSocket
     /**
      * Active OPEN to the given remote socket.
      */
-    void connect(Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests);
+    void connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests);
 
     void connectx(AddressVector remoteAddresses, int32 remotePort, bool streamReset = false, int32 prMethod = 0, uint32 numRequests = 0);
 

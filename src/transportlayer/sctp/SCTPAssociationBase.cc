@@ -29,7 +29,7 @@
 
 namespace inet {
 
-SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation *assoc, const IRoutingTable *rt)
+SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *assoc, const IRoutingTable *rt)
 {
     // ====== Path Variable Initialization ===================================
     association = assoc;
@@ -239,7 +239,7 @@ SCTPPathVariables::~SCTPPathVariables()
     delete vectorPathBlockingTSNsMoved;
 }
 
-const Address SCTPDataVariables::zeroAddress = Address();
+const L3Address SCTPDataVariables::zeroAddress = L3Address();
 
 SCTPDataVariables::SCTPDataVariables()
 {
@@ -449,7 +449,7 @@ SCTPAssociation::SCTPAssociation(SCTP *_module, int32 _appGateIndex, int32 _asso
 
     // ====== Path Info ======================================================
     SCTPPathInfo *pinfo = new SCTPPathInfo("pathInfo");
-    pinfo->setRemoteAddress(Address());
+    pinfo->setRemoteAddress(L3Address());
 
     // ====== Timers =========================================================
     char timerName[128];
@@ -679,7 +679,7 @@ bool SCTPAssociation::processTimer(cMessage *msg)
     EV_INFO << msg->getName() << " timer expired at " << simulation.getSimTime() << "\n";
 
     SCTPPathInfo *pinfo = check_and_cast<SCTPPathInfo *>(msg->getControlInfo());
-    Address addr = pinfo->getRemoteAddress();
+    L3Address addr = pinfo->getRemoteAddress();
 
     if (!addr.isUnspecified())
         path = getPath(addr);
@@ -762,8 +762,8 @@ bool SCTPAssociation::processTimer(cMessage *msg)
 }
 
 bool SCTPAssociation::processSCTPMessage(SCTPMessage *sctpmsg,
-        const Address& msgSrcAddr,
-        const Address& msgDestAddr)
+        const L3Address& msgSrcAddr,
+        const L3Address& msgDestAddr)
 {
     printAssocBrief();
 

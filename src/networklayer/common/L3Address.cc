@@ -15,7 +15,7 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Address.h"
+#include "L3Address.h"
 #include "IPv4AddressType.h"
 #include "IPv6AddressType.h"
 #include "MACAddressType.h"
@@ -26,7 +26,7 @@ namespace inet {
 
 #define RESERVED_IPV6_ADDRESS_RANGE    0x8000 // IETF reserved address range 8000::/16 (extended)
 
-uint64 Address::get(AddressType type) const
+uint64 L3Address::get(AddressType type) const
 {
     if (getType() == type)
         return lo;
@@ -34,13 +34,13 @@ uint64 Address::get(AddressType type) const
         throw cRuntimeError("Address is not of the given type");
 }
 
-void Address::set(AddressType type, uint64 lo)
+void L3Address::set(AddressType type, uint64 lo)
 {
     this->hi = ((uint64)RESERVED_IPV6_ADDRESS_RANGE << 48) + (uint64)type;
     this->lo = lo;
 }
 
-void Address::set(const IPv6Address& addr)
+void L3Address::set(const IPv6Address& addr)
 {
     const uint32 *words = addr.words();
     hi = ((uint64) * (words + 0) << 32) + *(words + 1);
@@ -49,33 +49,33 @@ void Address::set(const IPv6Address& addr)
         throw cRuntimeError("Cannot set IPv6 address");
 }
 
-Address::AddressType Address::getType() const
+L3Address::AddressType L3Address::getType() const
 {
     if (hi >> 48 == RESERVED_IPV6_ADDRESS_RANGE)
         return (AddressType)(hi & 0xFF);
     else
-        return Address::IPv6;
+        return L3Address::IPv6;
 }
 
-IAddressType *Address::getAddressType() const
+IAddressType *L3Address::getAddressType() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return &IPv4AddressType::INSTANCE;
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return &IPv6AddressType::INSTANCE;
 
-        case Address::MAC:
+        case L3Address::MAC:
             return &MACAddressType::INSTANCE;
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return &ModuleIdAddressType::INSTANCE;
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return &ModulePathAddressType::INSTANCE;
 
         default:
@@ -83,25 +83,25 @@ IAddressType *Address::getAddressType() const
     }
 }
 
-std::string Address::str() const
+std::string L3Address::str() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             return "<none>";
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return toIPv4().str();
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().str();
 
-        case Address::MAC:
+        case L3Address::MAC:
             return toMAC().str();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId().str();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return toModulePath().str();
 
         default:
@@ -109,7 +109,7 @@ std::string Address::str() const
     }
 }
 
-bool Address::tryParse(const char *addr)
+bool L3Address::tryParse(const char *addr)
 {
     IPv6Address ipv6;
     MACAddress mac;
@@ -130,25 +130,25 @@ bool Address::tryParse(const char *addr)
     return true;
 }
 
-bool Address::isUnspecified() const
+bool L3Address::isUnspecified() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             return true;
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return toIPv4().isUnspecified();
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().isUnspecified();
 
-        case Address::MAC:
+        case L3Address::MAC:
             return toMAC().isUnspecified();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId().isUnspecified();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return toModulePath().isUnspecified();
 
         default:
@@ -156,25 +156,25 @@ bool Address::isUnspecified() const
     }
 }
 
-bool Address::isUnicast() const
+bool L3Address::isUnicast() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return !toIPv4().isMulticast() && !toIPv4().isLimitedBroadcastAddress();    // TODO: move to IPv4Address
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().isUnicast();
 
-        case Address::MAC:
+        case L3Address::MAC:
             return !toMAC().isBroadcast() && !toMAC().isMulticast();    // TODO: move to MACAddress
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId().isUnicast();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return toModulePath().isUnicast();
 
         default:
@@ -182,25 +182,25 @@ bool Address::isUnicast() const
     }
 }
 
-bool Address::isMulticast() const
+bool L3Address::isMulticast() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return toIPv4().isMulticast();
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().isMulticast();
 
-        case Address::MAC:
+        case L3Address::MAC:
             return toMAC().isMulticast();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId().isMulticast();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return toModulePath().isMulticast();
 
         default:
@@ -208,26 +208,26 @@ bool Address::isMulticast() const
     }
 }
 
-bool Address::isBroadcast() const
+bool L3Address::isBroadcast() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return toIPv4().isLimitedBroadcastAddress();
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return false;
 
         //throw cRuntimeError("IPv6 isBroadcast() unimplemented");
-        case Address::MAC:
+        case L3Address::MAC:
             return toMAC().isBroadcast();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId().isBroadcast();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return toModulePath().isBroadcast();
 
         default:
@@ -235,25 +235,25 @@ bool Address::isBroadcast() const
     }
 }
 
-bool Address::isLinkLocal() const
+bool L3Address::isLinkLocal() const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return false;
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().isLinkLocal();
 
-        case Address::MAC:
+        case L3Address::MAC:
             return true;
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return false;
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return false;
 
         default:
@@ -261,7 +261,7 @@ bool Address::isLinkLocal() const
     }
 }
 
-bool Address::operator<(const Address& other) const
+bool L3Address::operator<(const L3Address& other) const
 {
     AddressType type = getType();
     AddressType otherType = other.getType();
@@ -269,22 +269,22 @@ bool Address::operator<(const Address& other) const
         return type < otherType;
     else {
         switch (type) {
-            case Address::NONE:
+            case L3Address::NONE:
                 throw cRuntimeError("Address contains no value");
 
-            case Address::IPv4:
+            case L3Address::IPv4:
                 return toIPv4() < other.toIPv4();
 
-            case Address::IPv6:
+            case L3Address::IPv6:
                 return toIPv6() < other.toIPv6();
 
-            case Address::MAC:
+            case L3Address::MAC:
                 return toMAC() < other.toMAC();
 
-            case Address::MODULEID:
+            case L3Address::MODULEID:
                 return toModuleId() < other.toModuleId();
 
-            case Address::MODULEPATH:
+            case L3Address::MODULEPATH:
                 return toModulePath() < other.toModulePath();
 
             default:
@@ -293,29 +293,29 @@ bool Address::operator<(const Address& other) const
     }
 }
 
-bool Address::operator==(const Address& other) const
+bool L3Address::operator==(const L3Address& other) const
 {
     AddressType type = getType();
     if (type != other.getType())
         return false;
     else {
         switch (type) {
-            case Address::NONE:
+            case L3Address::NONE:
                 return true;
 
-            case Address::IPv4:
+            case L3Address::IPv4:
                 return toIPv4() == other.toIPv4();
 
-            case Address::IPv6:
+            case L3Address::IPv6:
                 return toIPv6() == other.toIPv6();
 
-            case Address::MAC:
+            case L3Address::MAC:
                 return toMAC() == other.toMAC();
 
-            case Address::MODULEID:
+            case L3Address::MODULEID:
                 return toModuleId() == other.toModuleId();
 
-            case Address::MODULEPATH:
+            case L3Address::MODULEPATH:
                 return toModulePath() == other.toModulePath();
 
             default:
@@ -324,30 +324,30 @@ bool Address::operator==(const Address& other) const
     }
 }
 
-bool Address::operator!=(const Address& other) const
+bool L3Address::operator!=(const L3Address& other) const
 {
     return !operator==(other);
 }
 
-bool Address::matches(const Address& other, int prefixLength) const
+bool L3Address::matches(const L3Address& other, int prefixLength) const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             throw cRuntimeError("Address contains no value");
 
-        case Address::IPv4:
+        case L3Address::IPv4:
             return IPv4Address::maskedAddrAreEqual(toIPv4(), other.toIPv4(), IPv4Address::makeNetmask(prefixLength));    //FIXME !!!!!
 
-        case Address::IPv6:
+        case L3Address::IPv6:
             return toIPv6().matches(other.toIPv6(), prefixLength);
 
-        case Address::MAC:
+        case L3Address::MAC:
             return toMAC() == other.toMAC();
 
-        case Address::MODULEID:
+        case L3Address::MODULEID:
             return toModuleId() == other.toModuleId();
 
-        case Address::MODULEPATH:
+        case L3Address::MODULEPATH:
             return ModulePathAddress::maskedAddrAreEqual(toModulePath(), other.toModulePath(), prefixLength);
 
         default:
@@ -355,25 +355,25 @@ bool Address::matches(const Address& other, int prefixLength) const
     }
 }
 
-Address Address::getPrefix(int prefixLength) const
+L3Address L3Address::getPrefix(int prefixLength) const
 {
     switch (getType()) {
-        case Address::NONE:
+        case L3Address::NONE:
             return *this;
 
-        case Address::IPv4:
-            return Address(toIPv4().getPrefix(prefixLength));
+        case L3Address::IPv4:
+            return L3Address(toIPv4().getPrefix(prefixLength));
 
-        case Address::IPv6:
-            return Address(toIPv6().getPrefix(prefixLength));
+        case L3Address::IPv6:
+            return L3Address(toIPv6().getPrefix(prefixLength));
 
-        case Address::MAC:
+        case L3Address::MAC:
             if (prefixLength != 48)
                 throw cRuntimeError("mask not supported for MACAddress");
             return *this;
 
-        case Address::MODULEID:
-        case Address::MODULEPATH:
+        case L3Address::MODULEID:
+        case L3Address::MODULEPATH:
             return *this;
 
         default:
@@ -381,7 +381,7 @@ Address Address::getPrefix(int prefixLength) const
     }
 }
 
-const char *Address::getTypeName(AddressType t)
+const char *L3Address::getTypeName(AddressType t)
 {
 #define CASE(x)    case x: \
         return #x

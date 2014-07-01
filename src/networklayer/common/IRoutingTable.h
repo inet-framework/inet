@@ -19,7 +19,7 @@
 #define __INET_IROUTINGTABLE_H
 
 #include "INETDefs.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "IRoute.h"
 
 namespace inet {
@@ -47,17 +47,17 @@ class INET_API IRoutingTable
     /**
      * Returns routerId.
      */
-    virtual Address getRouterIdAsGeneric() const = 0;
+    virtual L3Address getRouterIdAsGeneric() const = 0;
 
     /**
      * Checks if the address is a local one, i.e. one of the host's.
      */
-    virtual bool isLocalAddress(const Address& dest) const = 0;    //XXX maybe into InterfaceTable?
+    virtual bool isLocalAddress(const L3Address& dest) const = 0;    //XXX maybe into InterfaceTable?
 
     /**
      * Returns an interface given by its address. Returns NULL if not found.
      */
-    virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const = 0;    //XXX should be find..., see next one
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const = 0;    //XXX should be find..., see next one
     //@}
 
     /** @name Routing functions (query the route table) */
@@ -67,7 +67,7 @@ class INET_API IRoutingTable
      * destination address, and returns the resulting route. Returns NULL
      * if there is no matching route.
      */
-    virtual IRoute *findBestMatchingRoute(const Address& dest) const = 0;
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const = 0;
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -75,7 +75,7 @@ class INET_API IRoutingTable
      * Returns the output interface for the packets with dest as destination
      * address, or NULL if the destination is not in routing table.
      */
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const = 0;    //XXX redundant
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const = 0;    //XXX redundant
 
     /**
      * Convenience function based on findBestMatchingRoute().
@@ -84,7 +84,7 @@ class INET_API IRoutingTable
      * address if the destination is not in routing table or the gateway field
      * is not filled in in the route.
      */
-    virtual Address getNextHopForDestination(const Address& dest) const = 0;    //XXX redundant AND unused
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const = 0;    //XXX redundant AND unused
     //@}
 
     /** @name Multicast routing functions */
@@ -94,12 +94,12 @@ class INET_API IRoutingTable
      * Checks if the address is in one of the local multicast group
      * address list.
      */
-    virtual bool isLocalMulticastAddress(const Address& dest) const = 0;
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const = 0;
 
     /**
      * Returns route for a multicast origin and group.
      */
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address& origin, const Address& group) const = 0;
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const = 0;
     //@}
 
     /** @name Route table manipulation */

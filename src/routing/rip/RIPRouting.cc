@@ -267,7 +267,7 @@ void RIPRouting::configureInitialRoutes()
         else if (isDefaultRoute(route))
             importRoute(route, RIPRoute::RIP_ROUTE_DEFAULT);
         else {
-            const Address& destAddr = route->getDestinationAsGeneric();
+            const L3Address& destAddr = route->getDestinationAsGeneric();
             if (!destAddr.isMulticast() && !destAddr.isLinkLocal())
                 importRoute(route, RIPRoute::RIP_ROUTE_STATIC);
         }
@@ -605,7 +605,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
     }
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    Address srcAddr = ctrlInfo->getSrcAddr();
+    L3Address srcAddr = ctrlInfo->getSrcAddr();
     int srcPort = ctrlInfo->getSrcPort();
     int interfaceId = ctrlInfo->getInterfaceId();
     delete ctrlInfo;
@@ -652,7 +652,7 @@ void RIPRouting::processRequest(RIPPacket *packet)
  * This method is called by regular updates (every 30s), triggered updates (when some route changed),
  * and when RIP requests are processed.
  */
-void RIPRouting::sendRoutes(const Address& address, int port, const RIPInterfaceEntry& ripInterface, bool changedOnly)
+void RIPRouting::sendRoutes(const L3Address& address, int port, const RIPInterfaceEntry& ripInterface, bool changedOnly)
 {
     EV_DEBUG << "Sending " << (changedOnly ? "changed" : "all") << " routes on " << ripInterface.ie->getFullName() << std::endl;
 
@@ -758,7 +758,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
     }
 
     UDPDataIndication *ctrlInfo = check_and_cast<UDPDataIndication *>(packet->removeControlInfo());
-    Address srcAddr = ctrlInfo->getSrcAddr();
+    L3Address srcAddr = ctrlInfo->getSrcAddr();
     int interfaceId = ctrlInfo->getInterfaceId();
     delete ctrlInfo;
 
@@ -775,7 +775,7 @@ void RIPRouting::processResponse(RIPPacket *packet)
     for (int i = 0; i < numEntries; ++i) {
         RIPEntry& entry = packet->getEntry(i);
         int metric = std::min((int)entry.metric + incomingIe->metric, RIP_INFINITE_METRIC);
-        Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
+        L3Address nextHop = entry.nextHop.isUnspecified() ? srcAddr : entry.nextHop;
 
         RIPRoute *ripRoute = findRoute(entry.address, entry.prefixLength);
         if (ripRoute) {
@@ -880,8 +880,8 @@ bool RIPRouting::isValidResponse(RIPPacket *packet)
  * - Set the route change flag
  * - Signal the output process to trigger an update
  */
-void RIPRouting::addRoute(const Address& dest, int prefixLength, const InterfaceEntry *ie, const Address& nextHop,
-        int metric, uint16 routeTag, const Address& from)
+void RIPRouting::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop,
+        int metric, uint16 routeTag, const L3Address& from)
 {
     EV_DEBUG << "Add route to " << dest << "/" << prefixLength << ": "
              << "nextHop=" << nextHop << " metric=" << metric << std::endl;
@@ -913,7 +913,7 @@ void RIPRouting::addRoute(const Address& dest, int prefixLength, const Interface
  *  - If the new metric is infinity, start the deletion process
  *    (described above); otherwise, re-initialize the timeout
  */
-void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const Address& nextHop, int metric, uint16 routeTag, const Address& from)
+void RIPRouting::updateRoute(RIPRoute *ripRoute, const InterfaceEntry *ie, const L3Address& nextHop, int metric, uint16 routeTag, const L3Address& from)
 {
     //ASSERT(ripRoute && ripRoute->getType() == RIPRoute::RIP_ROUTE_RTE);
     //ASSERT(!ripRoute->getRoute() || ripRoute->getRoute()->getSource() == this);
@@ -1042,7 +1042,7 @@ void RIPRouting::purgeRoute(RIPRoute *ripRoute)
  * Sends the packet to the specified destination.
  * If the destAddr is a multicast, then the destInterface must be specified.
  */
-void RIPRouting::sendPacket(RIPPacket *packet, const Address& destAddr, int destPort, const InterfaceEntry *destInterface)
+void RIPRouting::sendPacket(RIPPacket *packet, const L3Address& destAddr, int destPort, const InterfaceEntry *destInterface)
 {
     packet->setByteLength(RIP_HEADER_SIZE + RIP_RTE_SIZE * packet->getEntryArraySize());
 
@@ -1072,7 +1072,7 @@ RIPInterfaceEntry *RIPRouting::findInterfaceById(int interfaceId)
     return NULL;
 }
 
-RIPRoute *RIPRouting::findRoute(const Address& destination, int prefixLength)
+RIPRoute *RIPRouting::findRoute(const L3Address& destination, int prefixLength)
 {
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
         if ((*it)->getDestination() == destination && (*it)->getPrefixLength() == prefixLength)
@@ -1081,7 +1081,7 @@ RIPRoute *RIPRouting::findRoute(const Address& destination, int prefixLength)
     return NULL;
 }
 
-RIPRoute *RIPRouting::findRoute(const Address& destination, int prefixLength, RIPRoute::RouteType type)
+RIPRoute *RIPRouting::findRoute(const L3Address& destination, int prefixLength, RIPRoute::RouteType type)
 {
     for (RouteVector::iterator it = ripRoutes.begin(); it != ripRoutes.end(); ++it)
         if ((*it)->getType() == type && (*it)->getDestination() == destination && (*it)->getPrefixLength() == prefixLength)
@@ -1152,7 +1152,7 @@ void RIPRouting::invalidateRoutes(const InterfaceEntry *ie)
 
 }
 
-IRoute *RIPRouting::addRoute(const Address& dest, int prefixLength, const InterfaceEntry *ie, const Address& nextHop, int metric)
+IRoute *RIPRouting::addRoute(const L3Address& dest, int prefixLength, const InterfaceEntry *ie, const L3Address& nextHop, int metric)
 {
     IRoute *route = rt->createRoute();
     route->setSourceType(IRoute::RIP);

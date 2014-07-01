@@ -18,7 +18,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
 
@@ -38,8 +38,8 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
 {
   protected:
     // parameters: for more details, see the corresponding NED parameters' documentation
-    Address destAddr;
-    Address srcAddr;
+    L3Address destAddr;
+    L3Address srcAddr;
     int packetSize;
     cPar *sendIntervalPar;
     int hopLimit;
@@ -82,7 +82,7 @@ class INET_API PingApp : public cSimpleModule, public ILifecycle
     virtual bool isNodeUp();
     virtual bool isEnabled();
     virtual void sendPingRequest();
-    virtual void sendToICMP(PingPayload *payload, const Address& destAddr, const Address& srcAddr, int hopLimit);
+    virtual void sendToICMP(PingPayload *payload, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit);
     virtual void processPingResponse(PingPayload *msg);
     virtual void countPingResponse(int bytes, long seqNo, simtime_t rtt);
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

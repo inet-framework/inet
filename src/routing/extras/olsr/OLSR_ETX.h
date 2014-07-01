@@ -247,7 +247,7 @@ class OLSR_ETX : public OLSR
         virtual void link_quality();
 
     public:
-        bool getNextHop(const Address &dest, Address &add, int &iface, double &cost);
+        bool getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost);
         OLSR_ETX() {}
         ~OLSR_ETX();
         static double emf_to_seconds(uint8_t);

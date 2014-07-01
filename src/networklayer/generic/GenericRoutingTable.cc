@@ -53,11 +53,11 @@ void GenericRoutingTable::initialize(int stage)
 
         const char *addressTypeString = par("addressType");
         if (!strcmp(addressTypeString, "mac"))
-            addressType = Address::MAC;
+            addressType = L3Address::MAC;
         else if (!strcmp(addressTypeString, "modulepath"))
-            addressType = Address::MODULEPATH;
+            addressType = L3Address::MODULEPATH;
         else if (!strcmp(addressTypeString, "moduleid"))
-            addressType = Address::MODULEID;
+            addressType = L3Address::MODULEID;
         else
             throw cRuntimeError("Unknown address type");
         forwardingEnabled = par("forwardingEnabled").boolValue();
@@ -139,7 +139,7 @@ void GenericRoutingTable::configureRouterId()
             for (int i = 0; i < ift->getNumInterfaces(); ++i) {
                 InterfaceEntry *ie = ift->getInterface(i);
                 if (!ie->isLoopback()) {
-                    Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
+                    L3Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
                     if (routerId.isUnspecified() || routerId < interfaceAddr)
                         routerId = interfaceAddr;
                 }
@@ -165,11 +165,11 @@ void GenericRoutingTable::configureInterface(InterfaceEntry *ie)
     // mac
     GenericNetworkProtocolInterfaceData *d = new GenericNetworkProtocolInterfaceData();
     d->setMetric(metric);
-    if (addressType == Address::MAC)
+    if (addressType == L3Address::MAC)
         d->setAddress(ie->getMacAddress());
-    else if (ie->getInterfaceModule() && addressType == Address::MODULEPATH)
+    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEPATH)
         d->setAddress(ModulePathAddress(interfaceModuleId));
-    else if (ie->getInterfaceModule() && addressType == Address::MODULEID)
+    else if (ie->getInterfaceModule() && addressType == L3Address::MODULEID)
         d->setAddress(ModuleIdAddress(interfaceModuleId));
     ie->setGenericNetworkProtocolData(d);
 }
@@ -226,37 +226,37 @@ bool GenericRoutingTable::isMulticastForwardingEnabled() const
     return multicastForwardingEnabled;
 }
 
-Address GenericRoutingTable::getRouterIdAsGeneric() const
+L3Address GenericRoutingTable::getRouterIdAsGeneric() const
 {
     return routerId;
 }
 
-bool GenericRoutingTable::isLocalAddress(const Address& dest) const
+bool GenericRoutingTable::isLocalAddress(const L3Address& dest) const
 {
     //TODO: Enter_Method("isLocalAddress(%s)", dest.str().c_str());
 
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
-        Address interfaceAddr = ift->getInterface(i)->getGenericNetworkProtocolData()->getAddress();
+        L3Address interfaceAddr = ift->getInterface(i)->getGenericNetworkProtocolData()->getAddress();
         if (interfaceAddr == dest)
             return true;
     }
     return false;
 }
 
-InterfaceEntry *GenericRoutingTable::getInterfaceByAddress(const Address& address) const
+InterfaceEntry *GenericRoutingTable::getInterfaceByAddress(const L3Address& address) const
 {
     // collect interface addresses if not yet done
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
         InterfaceEntry *ie = ift->getInterface(i);
-        Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
+        L3Address interfaceAddr = ie->getGenericNetworkProtocolData()->getAddress();
         if (interfaceAddr == address)
             return ie;
     }
     return NULL;
 }
 
-GenericRoute *GenericRoutingTable::findBestMatchingRoute(const Address& dest) const
+GenericRoute *GenericRoutingTable::findBestMatchingRoute(const L3Address& dest) const
 {
     //TODO Enter_Method("findBestMatchingRoute(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
@@ -273,7 +273,7 @@ GenericRoute *GenericRoutingTable::findBestMatchingRoute(const Address& dest) co
     return bestRoute;
 }
 
-InterfaceEntry *GenericRoutingTable::getOutputInterfaceForDestination(const Address& dest) const
+InterfaceEntry *GenericRoutingTable::getOutputInterfaceForDestination(const L3Address& dest) const
 {
     //TODO Enter_Method("getInterfaceForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
@@ -281,20 +281,20 @@ InterfaceEntry *GenericRoutingTable::getOutputInterfaceForDestination(const Addr
     return e ? e->getInterface() : NULL;
 }
 
-Address GenericRoutingTable::getNextHopForDestination(const Address& dest) const
+L3Address GenericRoutingTable::getNextHopForDestination(const L3Address& dest) const
 {
     //TODO Enter_Method("getGatewayForDestAddr(%u.%u.%u.%u)", dest.getDByte(0), dest.getDByte(1), dest.getDByte(2), dest.getDByte(3)); // note: str().c_str() too slow here
 
     const IRoute *e = findBestMatchingRoute(dest);
-    return e ? e->getNextHopAsGeneric() : Address();
+    return e ? e->getNextHopAsGeneric() : L3Address();
 }
 
-bool GenericRoutingTable::isLocalMulticastAddress(const Address& dest) const
+bool GenericRoutingTable::isLocalMulticastAddress(const L3Address& dest) const
 {
     return dest.isMulticast();    //TODO
 }
 
-IMulticastRoute *GenericRoutingTable::findBestMatchingMulticastRoute(const Address& origin, const Address& group) const
+IMulticastRoute *GenericRoutingTable::findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const
 {
     return NULL;    //TODO
 }

@@ -39,17 +39,17 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
     /**
      * called before a packet arriving from the network is routed
      */
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered via the network
      */
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet is delivered via the network
      */
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr);
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 
     /**
      * called before a packet arriving from the network is delivered locally
@@ -59,7 +59,7 @@ class INET_API NetfilterInfoHook : public cSimpleModule, public INetfilter::IHoo
     /**
      * called before a packet arriving locally is delivered
      */
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr);
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 };
 
 Define_Module(NetfilterInfoHook);
@@ -79,7 +79,7 @@ void NetfilterInfoHook::handleMessage(cMessage *msg)
     throw cRuntimeError("This module can not receive messages");
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": PREROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
             << " inIE=" << (inIE ? inIE->getName() : "NULL")
@@ -87,7 +87,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramPreRoutingHook(INetworkData
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": FORWARD: packet=" << dynamic_cast<cObject *>(datagram)->getName()
             << " inIE=" << (inIE ? inIE->getName() : "NULL")
@@ -97,7 +97,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramForwardHook(INetworkDatagra
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inIE, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": POSTROUTING packet=" << dynamic_cast<cObject *>(datagram)->getName()
             << " inIE=" << (inIE ? inIE->getName() : "NULL")
@@ -115,7 +115,7 @@ INetfilter::IHook::Result NetfilterInfoHook::datagramLocalInHook(INetworkDatagra
     return INetfilter::IHook::ACCEPT;
 }
 
-INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, Address& nextHopAddr)
+INetfilter::IHook::Result NetfilterInfoHook::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr)
 {
     EV_INFO << "HOOK " << getFullPath() << ": LOCAL OUT: packet=" << dynamic_cast<cObject *>(datagram)->getName()
             << " outIE=" << (outIE ? outIE->getName() : "NULL")

@@ -36,11 +36,11 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 
 namespace inet {
 
-typedef Address nsaddr_t;
+typedef L3Address nsaddr_t;
 
 //#ifndef nsaddr_t
 //typedef int64_t nsaddr_t;

@@ -97,7 +97,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
             cStringTokenizer tokenizer(destAddrs);
             const char *token;
             while ((token = tokenizer.nextToken()) != NULL) {
-                Address result;
+                L3Address result;
                 AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
                     EV_ERROR << "cannot resolve destination address: " << token << endl;
@@ -171,7 +171,7 @@ bool IPvXTrafGen::isEnabled()
     return numPackets == -1 || numSent < numPackets;
 }
 
-Address IPvXTrafGen::chooseDestAddr()
+L3Address IPvXTrafGen::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     return destAddresses[k];
@@ -185,7 +185,7 @@ void IPvXTrafGen::sendPacket()
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(packetLengthPar->longValue());
 
-    Address destAddr = chooseDestAddr();
+    L3Address destAddr = chooseDestAddr();
 
     IAddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
@@ -203,7 +203,7 @@ void IPvXTrafGen::sendPacket()
 
 void IPvXTrafGen::printPacket(cPacket *msg)
 {
-    Address src, dest;
+    L3Address src, dest;
     int protocol = -1;
 
     INetworkProtocolControlInfo *ctrl = dynamic_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());

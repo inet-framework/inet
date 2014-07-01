@@ -26,7 +26,7 @@
 
 namespace inet {
 
-NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const Address &neigh, BatmanIf *if_incoming)
+NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const L3Address &neigh, BatmanIf *if_incoming)
 {
     return new NeighNode(orig_node, orig_neigh_node, neigh, if_incoming, num_words, global_win_size);
 }
@@ -63,7 +63,7 @@ int choose_orig(void *data, int32_t size) {
 
 
 /* this function finds or creates an originator entry for the given address if it does not exits */
-OrigNode *Batman::get_orig_node(const Address &addr) {
+OrigNode *Batman::get_orig_node(const L3Address &addr) {
     OrigNode *orig_node;
     OrigMap::iterator it;
 
@@ -80,11 +80,11 @@ OrigNode *Batman::get_orig_node(const Address &addr) {
     orig_node->bcast_own_sum.resize(found_ifs);
     orig_node->clear();
     orig_node->orig = addr;
-    origMap.insert(std::pair<Address, OrigNode *>(addr, orig_node));
+    origMap.insert(std::pair<L3Address, OrigNode *>(addr, orig_node));
     return orig_node;
 }
 
-void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const Address &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
+void Batman::update_orig(OrigNode *orig_node, BatmanPacket *in, const L3Address &neigh, BatmanIf *if_incoming, HnaElement *hna_recv_buff, int16_t hna_buff_len, uint8_t is_duplicate, const simtime_t &curr_time) {
     GwNode *gw_node;
     NeighNode *neigh_node = NULL, *tmp_neigh_node = NULL, *best_neigh_node = NULL;
     uint8_t max_bcast_own = 0, max_tq = 0;
@@ -416,7 +416,7 @@ OrigNode::~OrigNode()
 
 void NeighNode::clear()
 {
-    addr = Address();
+    addr = L3Address();
     real_packet_count = 0;
     for (unsigned int i=0; i<tq_recv.size(); i++)
          tq_recv[i] = 0;
@@ -451,7 +451,7 @@ NeighNode::~NeighNode()
 }
 
 
-NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Address &neigh, BatmanIf* ifIncoming, const uint32_t &num_words, const uint32_t &global_win_size)
+NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const L3Address &neigh, BatmanIf* ifIncoming, const uint32_t &num_words, const uint32_t &global_win_size)
 {
     tq_recv.resize(sizeof(uint16_t) * global_win_size);
     real_bits.resize(num_words);

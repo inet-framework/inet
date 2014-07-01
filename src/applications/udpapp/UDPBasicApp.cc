@@ -97,7 +97,7 @@ void UDPBasicApp::setSocketOptions()
     }
 }
 
-Address UDPBasicApp::chooseDestAddr()
+L3Address UDPBasicApp::chooseDestAddr()
 {
     int k = intrand(destAddresses.size());
     if (destAddresses[k].isLinkLocal()) {    // KLUDGE for IPv6
@@ -119,7 +119,7 @@ void UDPBasicApp::sendPacket()
     cPacket *payload = new cPacket(msgName);
     payload->setByteLength(par("messageLength").longValue());
 
-    Address destAddr = chooseDestAddr();
+    L3Address destAddr = chooseDestAddr();
 
     emit(sentPkSignal, payload);
     socket.sendTo(payload, destAddr, destPort);
@@ -137,7 +137,7 @@ void UDPBasicApp::processStart()
     const char *token;
 
     while ((token = tokenizer.nextToken()) != NULL) {
-        Address result;
+        L3Address result;
         AddressResolver().tryResolve(token, result);
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;

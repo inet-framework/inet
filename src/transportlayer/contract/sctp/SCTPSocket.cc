@@ -92,12 +92,12 @@ void SCTPSocket::bind(int lPort)
     if (sockstate != NOT_BOUND)
         throw cRuntimeError("SCTPSocket::bind(): socket already bound");
 
-    localAddresses.push_back(Address());    // Unspecified address
+    localAddresses.push_back(L3Address());    // Unspecified address
     localPrt = lPort;
     sockstate = CLOSED;
 }
 
-void SCTPSocket::bind(Address lAddr, int lPort)
+void SCTPSocket::bind(L3Address lAddr, int lPort)
 {
     EV_INFO << "bind address " << lAddr << "\n";
     if (sockstate != NOT_BOUND)
@@ -108,7 +108,7 @@ void SCTPSocket::bind(Address lAddr, int lPort)
     sockstate = CLOSED;
 }
 
-void SCTPSocket::addAddress(Address addr)
+void SCTPSocket::addAddress(L3Address addr)
 {
     EV_INFO << "add address " << addr << "\n";
     localAddresses.push_back(addr);
@@ -116,7 +116,7 @@ void SCTPSocket::addAddress(Address addr)
 
 void SCTPSocket::bindx(AddressVector lAddresses, int lPort)
 {
-    Address lAddr;
+    L3Address lAddr;
     for (AddressVector::iterator i = lAddresses.begin(); i != lAddresses.end(); ++i) {
         EV << "bindx: bind address " << (*i) << "\n";
         localAddresses.push_back((*i));
@@ -154,7 +154,7 @@ void SCTPSocket::listen(bool fork, bool reset, uint32 requests, uint32 messagesT
     sockstate = LISTENING;
 }
 
-void SCTPSocket::connect(Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
+void SCTPSocket::connect(L3Address remoteAddress, int32 remotePort, bool streamReset, int32 prMethod, uint32 numRequests)
 {
     EV_INFO << "Socket connect. Assoc=" << assocId << ", sockstate=" << sockstate << "\n";
     if (oneToOne && sockstate != NOT_BOUND && sockstate != CLOSED)

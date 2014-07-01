@@ -22,7 +22,7 @@ cplusplus {{
 
 namespace inet;
 
-class noncobject Address;
+class noncobject L3Address;
 
 struct AODV_ext
 {
@@ -54,7 +54,7 @@ struct RERR_udest
     @existingClass(true);
     @descriptor(readonly);
     //uint32_t dest_addr;
-    Address dest_addr;
+    L3Address dest_addr;
     uint32_t dest_seqno;
 }
 
@@ -79,10 +79,10 @@ packet RREP extends AODV_msg
     uint16_t res2;
     uint8_t hcnt;
     //uint32_t dest_addr;
-    Address dest_addr;
+    L3Address dest_addr;
     uint32_t dest_seqno;
     //u_int32_t orig_addr;
-    Address orig_addr;
+    L3Address orig_addr;
     uint32_t lifetime;
     uint32_t cost;
     uint8_t  hopfix;
@@ -108,10 +108,10 @@ packet RREQ extends AODV_msg
     uint8_t hcnt;
     uint32_t rreq_id;
     //uint32_t dest_addr;
-    Address dest_addr;
+    L3Address dest_addr;
     uint32_t dest_seqno;
     //u_int32_t orig_addr;
-    Address orig_addr;
+    L3Address orig_addr;
     uint32_t orig_seqno;
     uint32_t cost;
     uint8_t hopfix;

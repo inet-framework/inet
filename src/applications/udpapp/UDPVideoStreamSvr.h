@@ -41,7 +41,7 @@ class INET_API UDPVideoStreamSvr : public ApplicationBase
     struct VideoStreamData
     {
         cMessage *timer;    // self timer msg
-        Address clientAddr;    // client address
+        L3Address clientAddr;    // client address
         int clientPort;    // client UDP port
         long videoSize;    // total size of video
         long bytesLeft;    // bytes left to transmit

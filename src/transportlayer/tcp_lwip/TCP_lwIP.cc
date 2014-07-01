@@ -60,15 +60,15 @@ TCP_lwIP::TCP_lwIP()
     isAliveM(false),
     pCurTcpSegM(NULL)
 {
-    netIf.gw.addr = Address();
+    netIf.gw.addr = L3Address();
     netIf.flags = 0;
     netIf.input = NULL;
-    netIf.ip_addr.addr = Address();
+    netIf.ip_addr.addr = L3Address();
     netIf.linkoutput = NULL;
     netIf.mtu = 1500;
     netIf.name[0] = 'T';
     netIf.name[1] = 'C';
-    netIf.netmask.addr = Address();
+    netIf.netmask.addr = L3Address();
     netIf.next = 0;
     netIf.num = 0;
     netIf.output = NULL;
@@ -139,7 +139,7 @@ void TCP_lwIP::sendEstablishedMsg(TcpLwipConnection& connP)
 
 void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
 {
-    Address srcAddr, destAddr;
+    L3Address srcAddr, destAddr;
     int interfaceId = -1;
 
     cObject *ctrl = tcpsegP->removeControlInfo();
@@ -181,8 +181,8 @@ void TCP_lwIP::handleIpInputMessage(TCPSegment *tcpsegP)
 
     // search unfilled local addr in pcb-s for this connection.
     TcpAppConnMap::iterator i;
-    Address laddr = ih->dest.addr;
-    Address raddr = ih->src.addr;
+    L3Address laddr = ih->dest.addr;
+    L3Address raddr = ih->src.addr;
     u16_t lport = tcpsegP->getDestPort();
     u16_t rport = tcpsegP->getSrcPort();
 
@@ -385,7 +385,7 @@ err_t TCP_lwIP::tcp_event_poll(TcpLwipConnection& conn)
     return ERR_OK;
 }
 
-struct netif *TCP_lwIP::ip_route(Address const& ipAddr)
+struct netif *TCP_lwIP::ip_route(L3Address const& ipAddr)
 {
     return &netIf;
 }
@@ -587,8 +587,8 @@ void TCP_lwIP::printConnBrief(TcpLwipConnection& connP)
     EV_TRACE << this << ": connId=" << connP.connIdM << " appGateIndex=" << connP.appGateIndexM;
 }
 
-void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, Address const& srcP,
-        Address const& destP, void *dataP, int lenP)
+void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
+        L3Address const& destP, void *dataP, int lenP)
 {
     TcpLwipConnection *conn = (pcb != NULL) ? (TcpLwipConnection *)(pcb->callback_arg) : NULL;
 

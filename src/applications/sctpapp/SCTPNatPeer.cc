@@ -163,7 +163,7 @@ void SCTPNatPeer::connectx(AddressVector connectAddressList, int32 connectPort)
     }
 }
 
-void SCTPNatPeer::connect(Address connectAddress, int32 connectPort)
+void SCTPNatPeer::connect(L3Address connectAddress, int32 connectPort)
 {
     clientSocket.setOutboundStreams(outboundStreams);
     clientSocket.setInboundStreams(inboundStreams);
@@ -673,11 +673,11 @@ void SCTPNatPeer::socketEstablished(int32, void *, uint64 buffer)
         msg->setMulti((bool)par("multi"));
         msg->setPeer1(par("ownName"));
         msg->setPeer1AddressesArraySize(1);
-        msg->setPeer1Addresses(0, Address());
+        msg->setPeer1Addresses(0, L3Address());
         msg->setPortPeer1(par("localPort"));
         msg->setPeer2(par("peerName"));
         msg->setPeer2AddressesArraySize(1);
-        msg->setPeer2Addresses(0, Address());
+        msg->setPeer2Addresses(0, L3Address());
         msg->setPortPeer2(0);
         cPacket *cmsg = new cPacket(msg->getName());
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");
@@ -830,7 +830,7 @@ void SCTPNatPeer::sendqueueFullArrived(int32 assocId)
     sendAllowed = false;
 }
 
-void SCTPNatPeer::addressAddedArrived(int32 assocId, Address localAddr, Address remoteAddr)
+void SCTPNatPeer::addressAddedArrived(int32 assocId, L3Address localAddr, L3Address remoteAddr)
 {
     EV << getFullPath() << ": addressAddedArrived for remoteAddr " << remoteAddr << "\n";
     localAddressList.push_back(localAddr);
@@ -841,13 +841,13 @@ void SCTPNatPeer::addressAddedArrived(int32 assocId, Address localAddr, Address 
         msg->setMulti((bool)par("multi"));
         msg->setPeer1(par("ownName"));
         msg->setPeer1AddressesArraySize(2);
-        msg->setPeer1Addresses(0, Address());
-        msg->setPeer1Addresses(1, Address());
+        msg->setPeer1Addresses(0, L3Address());
+        msg->setPeer1Addresses(1, L3Address());
         msg->setPortPeer1(par("localPort"));
         msg->setPeer2(par("peerName"));
         msg->setPeer2AddressesArraySize(2);
-        msg->setPeer2Addresses(0, Address());
-        msg->setPeer2Addresses(1, Address());
+        msg->setPeer2Addresses(0, L3Address());
+        msg->setPeer2Addresses(1, L3Address());
         msg->setPortPeer2(0);
         cPacket *cmsg = new cPacket(msg->getName());
         SCTPSimpleMessage *smsg = new SCTPSimpleMessage("nat_data");

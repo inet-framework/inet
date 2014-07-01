@@ -57,10 +57,10 @@ class INET_API IPv4Datagram : public IPv4Datagram_Base, public INetworkDatagram
      */
     virtual void setExplicitCongestionNotification(int ecn) { setTypeOfService((getTypeOfService() & 0x3f) | ((ecn & 0x3) << 6)); }
 
-    virtual Address getSourceAddress() const { return Address(getSrcAddress()); }
-    virtual void setSourceAddress(const Address& address) { setSrcAddress(address.toIPv4()); }
-    virtual Address getDestinationAddress() const { return Address(getDestAddress()); }
-    virtual void setDestinationAddress(const Address& address) { setDestAddress(address.toIPv4()); }
+    virtual L3Address getSourceAddress() const { return L3Address(getSrcAddress()); }
+    virtual void setSourceAddress(const L3Address& address) { setSrcAddress(address.toIPv4()); }
+    virtual L3Address getDestinationAddress() const { return L3Address(getDestAddress()); }
+    virtual void setDestinationAddress(const L3Address& address) { setDestAddress(address.toIPv4()); }
     virtual int getTransportProtocol() const { return IPv4Datagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { IPv4Datagram_Base::setTransportProtocol(protocol); }
 };

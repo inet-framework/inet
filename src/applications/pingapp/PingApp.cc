@@ -150,7 +150,7 @@ void PingApp::stopSendingPingRequests()
     pid = -1;
     lastStart = -1;
     sendSeqNo = expectedReplySeqNo = 0;
-    srcAddr = destAddr = Address();
+    srcAddr = destAddr = L3Address();
     cancelNextPingRequest();
 }
 
@@ -210,7 +210,7 @@ void PingApp::sendPingRequest()
     sendToICMP(msg, destAddr, srcAddr, hopLimit);
 }
 
-void PingApp::sendToICMP(PingPayload *msg, const Address& destAddr, const Address& srcAddr, int hopLimit)
+void PingApp::sendToICMP(PingPayload *msg, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit)
 {
     IAddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
@@ -247,7 +247,7 @@ void PingApp::processPingResponse(PingPayload *msg)
 
     // get src, hopCount etc from packet, and print them
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(msg->getControlInfo());
-    Address src = ctrl->getSourceAddress();
+    L3Address src = ctrl->getSourceAddress();
     //Address dest = ctrl->getDestinationAddress();
     int msgHopLimit = ctrl->getHopLimit();
 

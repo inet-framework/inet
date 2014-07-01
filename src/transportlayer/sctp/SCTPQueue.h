@@ -21,7 +21,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "SCTP.h"
 
 namespace inet {
@@ -85,11 +85,11 @@ class INET_API SCTPQueue : public cObject
 
     SCTPDataVariables *dequeueChunkBySSN(const uint16 ssn);
 
-    uint32 getSizeOfFirstChunk(const Address& remoteAddress);
+    uint32 getSizeOfFirstChunk(const L3Address& remoteAddress);
 
     uint16 getFirstSsnInQueue(const uint16 sid);
 
-    void findEarliestOutstandingTSNsForPath(const Address& remoteAddress,
+    void findEarliestOutstandingTSNsForPath(const L3Address& remoteAddress,
             uint32& earliestOutstandingTSN,
             uint32& rtxEarliestOutstandingTSN) const;
 

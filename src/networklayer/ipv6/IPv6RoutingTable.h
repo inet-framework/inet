@@ -375,16 +375,16 @@ class INET_API IPv6RoutingTable : public cSimpleModule, public IRoutingTable, pr
     // IRoutingTable methods:
     virtual bool isForwardingEnabled() const { return isRouter(); }    //XXX inconsistent names
     virtual bool isMulticastForwardingEnabled() const { return true;    /*TODO isMulticastForwardingEnabled();*/ }
-    virtual Address getRouterIdAsGeneric() const { return Address(IPv6Address());    /*TODO getRouterId();*/ }
-    virtual bool isLocalAddress(const Address& dest) const { return isLocalAddress(dest.toIPv6()); }
-    virtual bool isLocalBroadcastAddress(const Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const { return getInterfaceByAddress(address.toIPv6()); }
-    virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const Address& dest) const { return NULL;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
-    virtual IRoute *findBestMatchingRoute(const Address& dest) const { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : NULL; }
-    virtual Address getNextHopForDestination(const Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : Address(); }
-    virtual bool isLocalMulticastAddress(const Address& dest) const { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address& origin, const Address& group) const { return NULL;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
+    virtual L3Address getRouterIdAsGeneric() const { return L3Address(IPv6Address());    /*TODO getRouterId();*/ }
+    virtual bool isLocalAddress(const L3Address& dest) const { return isLocalAddress(dest.toIPv6()); }
+    virtual bool isLocalBroadcastAddress(const L3Address& dest) const { return false;    /*TODO isLocalBroadcastAddress(dest.toIPv6());*/ }
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const { return getInterfaceByAddress(address.toIPv6()); }
+    virtual InterfaceEntry *findInterfaceByLocalBroadcastAddress(const L3Address& dest) const { return NULL;    /*TODO findInterfaceByLocalBroadcastAddress(dest.toIPv6());*/ }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const { return const_cast<IPv6Route *>((const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6())); }    //FIXME what a name??!! also: remove const; ALSO: THIS DOES NOT UPDATE DESTCACHE LIKE METHODS BUILT ON IT!
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getInterface() : NULL; }
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const { const IPv6Route *e = (const_cast<IPv6RoutingTable *>(this))->doLongestPrefixMatch(dest.toIPv6()); return e ? e->getNextHopAsGeneric() : L3Address(); }
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const { return false;    /*TODO isLocalMulticastAddress(dest.toIPv6());*/ }
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const { return NULL;    /*TODO findBestMatchingMulticastRoute(origin.toIPv6(), group.toIPv6());*/ }
     virtual IRoute *getDefaultRoute() const { return NULL;    /*TODO getDefaultRoute();*/ }
     virtual void addRoute(IRoute *entry) { addRoutingProtocolRoute(check_and_cast<IPv6Route *>(entry)); }    //XXX contrast that with addStaticRoute()!
     virtual IRoute *removeRoute(IRoute *entry) { return removeRoute(check_and_cast<IPv6Route *>(entry)); }

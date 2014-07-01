@@ -35,12 +35,12 @@ class INET_API ModuleIdAddressType : public IAddressType
     virtual ~ModuleIdAddressType() {}
 
     virtual int getMaxPrefixLength() const { return 0; }
-    virtual Address getUnspecifiedAddress() const { return ModuleIdAddress(); }    // TODO: constant
-    virtual Address getBroadcastAddress() const { return ModuleIdAddress(-1); }
-    virtual Address getLinkLocalManetRoutersMulticastAddress() const { return ModuleIdAddress(-109); }    // TODO: constant
-    virtual Address getLinkLocalRIPRoutersMulticastAddress() const { return ModuleIdAddress(-9); }    // TODO: constant
+    virtual L3Address getUnspecifiedAddress() const { return ModuleIdAddress(); }    // TODO: constant
+    virtual L3Address getBroadcastAddress() const { return ModuleIdAddress(-1); }
+    virtual L3Address getLinkLocalManetRoutersMulticastAddress() const { return ModuleIdAddress(-109); }    // TODO: constant
+    virtual L3Address getLinkLocalRIPRoutersMulticastAddress() const { return ModuleIdAddress(-9); }    // TODO: constant
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
-    virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModuleIdAddress(); }    // TODO constant
+    virtual L3Address getLinkLocalAddress(const InterfaceEntry *ie) const { return ModuleIdAddress(); }    // TODO constant
 };
 
 } // namespace inet

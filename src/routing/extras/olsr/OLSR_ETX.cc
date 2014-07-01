@@ -1683,8 +1683,8 @@ OLSR_ETX::send_pkt()
     if (num_msgs == 0)
         return;
 
-    Address destAdd;
-    destAdd = Address(IPv4Address::ALLONES_ADDRESS);
+    L3Address destAdd;
+    destAdd = L3Address(IPv4Address::ALLONES_ADDRESS);
     // Calculates the number of needed packets
     int num_pkts = (num_msgs % OLSR_ETX_MAX_MSGS == 0) ? num_msgs / OLSR_ETX_MAX_MSGS :
                    (num_msgs / OLSR_ETX_MAX_MSGS + 1);
@@ -1745,9 +1745,9 @@ OLSR_ETX::send_pkt()
             if (i == 0)
                 op2->setSend_time(op1->send_time());
             // Sending packet pair
-            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, Address());
+            sendToIp(op1, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, L3Address());
             if (i == 0)
-                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, Address());
+                sendToIp(op2, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, L3Address());
         }
         else
         {
@@ -1767,7 +1767,7 @@ OLSR_ETX::send_pkt()
 
                 it = msgs_.erase(it);
             }
-            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, Address());
+            sendToIp(op, RT_PORT, destAdd, RT_PORT, IP_DEF_TTL, 0.0, L3Address());
 
         }
     }
@@ -2728,12 +2728,12 @@ OLSR_ETX::link_quality()
     }
 }
 
-bool OLSR_ETX::getNextHop(const Address &dest, Address &add, int &iface, double &cost)
+bool OLSR_ETX::getNextHop(const L3Address &dest, L3Address &add, int &iface, double &cost)
 {
     OLSR_ETX_rt_entry* rt_entry = rtable_.lookup(dest);
     if (!rt_entry)
     {
-        Address apAddr;
+        L3Address apAddr;
         if (getAp(dest, apAddr))
         {
 

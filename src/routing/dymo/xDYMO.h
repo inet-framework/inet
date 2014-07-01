@@ -87,10 +87,10 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     // internal
     cMessage *expungeTimer;
     DYMOSequenceNumber sequenceNumber;
-    std::map<Address, DYMOSequenceNumber> targetAddressToSequenceNumber;
-    std::map<Address, RREQTimer *> targetAddressToRREQTimer;
-    std::multimap<Address, INetworkDatagram *> targetAddressToDelayedPackets;
-    std::vector<std::pair<Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
+    std::map<L3Address, DYMOSequenceNumber> targetAddressToSequenceNumber;
+    std::map<L3Address, RREQTimer *> targetAddressToRREQTimer;
+    std::multimap<L3Address, INetworkDatagram *> targetAddressToDelayedPackets;
+    std::vector<std::pair<L3Address, int> > clientAddressAndPrefixLengthPairs;    // 5.3.  Router Clients and Client Networks
 
   public:
     DYMO();
@@ -108,37 +108,37 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void processMessage(cMessage *message);
 
     // route discovery
-    void startRouteDiscovery(const Address& target);
-    void retryRouteDiscovery(const Address& target, int retryCount);
-    void completeRouteDiscovery(const Address& target);
-    void cancelRouteDiscovery(const Address& target);
-    bool hasOngoingRouteDiscovery(const Address& target);
+    void startRouteDiscovery(const L3Address& target);
+    void retryRouteDiscovery(const L3Address& target, int retryCount);
+    void completeRouteDiscovery(const L3Address& target);
+    void cancelRouteDiscovery(const L3Address& target);
+    bool hasOngoingRouteDiscovery(const L3Address& target);
 
     // handling IP datagrams
     void delayDatagram(INetworkDatagram *datagram);
     void reinjectDelayedDatagram(INetworkDatagram *datagram);
     void dropDelayedDatagram(INetworkDatagram *datagram);
-    void eraseDelayedDatagrams(const Address& target);
-    bool hasDelayedDatagrams(const Address& target);
+    void eraseDelayedDatagrams(const L3Address& target);
+    bool hasDelayedDatagrams(const L3Address& target);
 
     // handling RREQ timers
-    void cancelRREQTimer(const Address& target);
-    void deleteRREQTimer(const Address& target);
-    void eraseRREQTimer(const Address& target);
+    void cancelRREQTimer(const L3Address& target);
+    void deleteRREQTimer(const L3Address& target);
+    void eraseRREQTimer(const L3Address& target);
 
     // handling RREQ wait RREP timer
-    RREQWaitRREPTimer *createRREQWaitRREPTimer(const Address& target, int retryCount);
+    RREQWaitRREPTimer *createRREQWaitRREPTimer(const L3Address& target, int retryCount);
     void scheduleRREQWaitRREPTimer(RREQWaitRREPTimer *message);
     void processRREQWaitRREPTimer(RREQWaitRREPTimer *message);
 
     // handling RREQ backoff timer
-    RREQBackoffTimer *createRREQBackoffTimer(const Address& target, int retryCount);
+    RREQBackoffTimer *createRREQBackoffTimer(const L3Address& target, int retryCount);
     void scheduleRREQBackoffTimer(RREQBackoffTimer *message);
     void processRREQBackoffTimer(RREQBackoffTimer *message);
     simtime_t computeRREQBackoffTime(int retryCount);
 
     // handling RREQ holddown timer
-    RREQHolddownTimer *createRREQHolddownTimer(const Address& target);
+    RREQHolddownTimer *createRREQHolddownTimer(const L3Address& target);
     void scheduleRREQHolddownTimer(RREQHolddownTimer *message);
     void processRREQHolddownTimer(RREQHolddownTimer *message);
 
@@ -147,7 +147,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void processUDPPacket(UDPPacket *packet);
 
     // handling DYMO packets
-    void sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEntry, const Address& nextHop, double delay);
+    void sendDYMOPacket(DYMOPacket *packet, const InterfaceEntry *interfaceEntry, const L3Address& nextHop, double delay);
     void processDYMOPacket(DYMOPacket *packet);
 
     // handling RteMsg packets
@@ -156,7 +156,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     int computeRteMsgBitLength(RteMsg *rteMsg);
 
     // handling RREQ packets
-    RREQ *createRREQ(const Address& target, int retryCount);
+    RREQ *createRREQ(const L3Address& target, int retryCount);
     void sendRREQ(RREQ *rreq);
     void processRREQ(RREQ *rreq);
     int computeRREQBitLength(RREQ *rreq);
@@ -170,10 +170,10 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     int computeRREPBitLength(RREP *rrep);
 
     // handling RERR packets
-    RERR *createRERR(std::vector<Address>& addresses);
+    RERR *createRERR(std::vector<L3Address>& addresses);
     void sendRERR(RERR *rerr);
-    void sendRERRForUndeliverablePacket(const Address& destination);
-    void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const Address& nextHop);
+    void sendRERRForUndeliverablePacket(const L3Address& destination);
+    void sendRERRForBrokenLink(const InterfaceEntry *interfaceEntry, const L3Address& nextHop);
     void processRERR(RERR *rerr);
     int computeRERRBitLength(RERR *rerr);
 
@@ -196,8 +196,8 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     void configureInterfaces();
 
     // address
-    Address getSelfAddress();
-    bool isClientAddress(const Address& address);
+    L3Address getSelfAddress();
+    bool isClientAddress(const L3Address& address);
 
     // added node
     void addSelfNode(RteMsg *rteMsg);
@@ -210,11 +210,11 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     Result ensureRouteForDatagram(INetworkDatagram *datagram);
 
     // netfilter
-    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
-    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) { return ACCEPT; }
-    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) { return ACCEPT; }
+    virtual Result datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) { Enter_Method("datagramPreRoutingHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramForwardHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) { return ACCEPT; }
+    virtual Result datagramPostRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) { return ACCEPT; }
     virtual Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry) { return ACCEPT; }
-    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHopAddress) { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
+    virtual Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHopAddress) { Enter_Method("datagramLocalOutHook"); return ensureRouteForDatagram(datagram); }
 
     // lifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);

@@ -103,7 +103,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     // general parameters
     int localPort;
     int destPort;
-    Address destAddress;
+    L3Address destAddress;
 
     int voipHeaderSize;
     int voipSilenceThreshold;    // the maximum amplitude of a silence packet

@@ -139,7 +139,7 @@ void GPSR::scheduleBeaconTimer()
 void GPSR::processBeaconTimer()
 {
     EV_DEBUG << "Processing beacon timer" << endl;
-    Address selfAddress = getSelfAddress();
+    L3Address selfAddress = getSelfAddress();
     if (!selfAddress.isUnspecified()) {
         sendBeacon(createBeacon(), uniform(0, maxJitter).dbl());
         // KLUDGE: implement position registry protocol
@@ -241,7 +241,7 @@ void GPSR::processBeacon(GPSRBeacon *beacon)
 // handling packets
 //
 
-GPSRPacket *GPSR::createPacket(Address destination, cPacket *content)
+GPSRPacket *GPSR::createPacket(L3Address destination, cPacket *content)
 {
     GPSRPacket *gpsrPacket = new GPSRPacket(content->getName());
     gpsrPacket->setRoutingMode(GPSR_GREEDY_ROUTING);
@@ -309,13 +309,13 @@ Coord GPSR::intersectSections(Coord& begin1, Coord& end1, Coord& begin2, Coord& 
         return Coord(NaN, NaN, NaN);
 }
 
-Coord GPSR::getDestinationPosition(const Address& address) const
+Coord GPSR::getDestinationPosition(const L3Address& address) const
 {
     // KLUDGE: implement position registry protocol
     return globalPositionTable.getPosition(address);
 }
 
-Coord GPSR::getNeighborPosition(const Address& address) const
+Coord GPSR::getNeighborPosition(const L3Address& address) const
 {
     return neighborPositionTable.getPosition(address);
 }
@@ -332,12 +332,12 @@ double GPSR::getVectorAngle(Coord vector)
     return angle;
 }
 
-double GPSR::getDestinationAngle(const Address& address)
+double GPSR::getDestinationAngle(const L3Address& address)
 {
     return getVectorAngle(getDestinationPosition(address) - mobility->getCurrentPosition());
 }
 
-double GPSR::getNeighborAngle(const Address& address)
+double GPSR::getNeighborAngle(const L3Address& address)
 {
     return getVectorAngle(getNeighborPosition(address) - mobility->getCurrentPosition());
 }
@@ -351,12 +351,12 @@ std::string GPSR::getHostName() const
     return host->getFullName();
 }
 
-Address GPSR::getSelfAddress() const
+L3Address GPSR::getSelfAddress() const
 {
     return routingTable->getRouterIdAsGeneric();
 }
 
-Address GPSR::getSenderNeighborAddress(INetworkDatagram *datagram) const
+L3Address GPSR::getSenderNeighborAddress(INetworkDatagram *datagram) const
 {
     GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     return packet->getSenderAddress();
@@ -380,18 +380,18 @@ void GPSR::purgeNeighbors()
     neighborPositionTable.removeOldPositions(simTime() - neighborValidityInterval);
 }
 
-std::vector<Address> GPSR::getPlanarNeighbors()
+std::vector<L3Address> GPSR::getPlanarNeighbors()
 {
-    std::vector<Address> planarNeighbors;
-    std::vector<Address> neighborAddresses = neighborPositionTable.getAddresses();
+    std::vector<L3Address> planarNeighbors;
+    std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
     Coord selfPosition = mobility->getCurrentPosition();
-    for (std::vector<Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
-        const Address& neighborAddress = *it;
+    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+        const L3Address& neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         if (planarizationMode == GPSR_RNG_PLANARIZATION) {
             double neighborDistance = (neighborPosition - selfPosition).length();
-            for (std::vector<Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
-                const Address& witnessAddress = *jt;
+            for (std::vector<L3Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
+                const L3Address& witnessAddress = *jt;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - selfPosition).length();
                 ;
@@ -405,8 +405,8 @@ std::vector<Address> GPSR::getPlanarNeighbors()
         else if (planarizationMode == GPSR_GG_PLANARIZATION) {
             Coord middlePosition = (selfPosition + neighborPosition) / 2;
             double neighborDistance = (neighborPosition - middlePosition).length();
-            for (std::vector<Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
-                const Address& witnessAddress = *jt;
+            for (std::vector<L3Address>::iterator jt = neighborAddresses.begin(); jt != neighborAddresses.end(); jt++) {
+                const L3Address& witnessAddress = *jt;
                 Coord witnessPosition = neighborPositionTable.getPosition(witnessAddress);
                 double witnessDistance = (witnessPosition - middlePosition).length();
                 ;
@@ -424,14 +424,14 @@ std::vector<Address> GPSR::getPlanarNeighbors()
     return planarNeighbors;
 }
 
-Address GPSR::getNextPlanarNeighborCounterClockwise(const Address& startNeighborAddress, double startNeighborAngle)
+L3Address GPSR::getNextPlanarNeighborCounterClockwise(const L3Address& startNeighborAddress, double startNeighborAngle)
 {
     EV_DEBUG << "Finding next planar neighbor (counter clockwise): startAddress = " << startNeighborAddress << ", startAngle = " << startNeighborAngle << endl;
-    Address bestNeighborAddress = startNeighborAddress;
+    L3Address bestNeighborAddress = startNeighborAddress;
     double bestNeighborAngleDifference = 2 * PI;
-    std::vector<Address> neighborAddresses = getPlanarNeighbors();
-    for (std::vector<Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
-        const Address& neighborAddress = *it;
+    std::vector<L3Address> neighborAddresses = getPlanarNeighbors();
+    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+        const L3Address& neighborAddress = *it;
         double neighborAngle = getNeighborAngle(neighborAddress);
         double neighborAngleDifference = neighborAngle - startNeighborAngle;
         if (neighborAngleDifference < 0)
@@ -449,7 +449,7 @@ Address GPSR::getNextPlanarNeighborCounterClockwise(const Address& startNeighbor
 // next hop
 //
 
-Address GPSR::findNextHop(INetworkDatagram *datagram, const Address& destination)
+L3Address GPSR::findNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
     if (packet->getRoutingMode() == GPSR_GREEDY_ROUTING)
@@ -460,18 +460,18 @@ Address GPSR::findNextHop(INetworkDatagram *datagram, const Address& destination
         throw cRuntimeError("Unknown routing mode");
 }
 
-Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const Address& destination)
+L3Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using greedy routing: destination = " << destination << endl;
     GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
-    Address selfAddress = getSelfAddress();
+    L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
     Coord destinationPosition = packet->getDestinationPosition();
     double bestDistance = (destinationPosition - selfPosition).length();
-    Address bestNeighbor;
-    std::vector<Address> neighborAddresses = neighborPositionTable.getAddresses();
-    for (std::vector<Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
-        const Address& neighborAddress = *it;
+    L3Address bestNeighbor;
+    std::vector<L3Address> neighborAddresses = neighborPositionTable.getAddresses();
+    for (std::vector<L3Address>::iterator it = neighborAddresses.begin(); it != neighborAddresses.end(); it++) {
+        const L3Address& neighborAddress = *it;
         Coord neighborPosition = neighborPositionTable.getPosition(neighborAddress);
         double neighborDistance = (destinationPosition - neighborPosition).length();
         if (neighborDistance < bestDistance) {
@@ -484,18 +484,18 @@ Address GPSR::findGreedyRoutingNextHop(INetworkDatagram *datagram, const Address
         packet->setRoutingMode(GPSR_PERIMETER_ROUTING);
         packet->setPerimeterRoutingStartPosition(selfPosition);
         packet->setCurrentFaceFirstSenderAddress(selfAddress);
-        packet->setCurrentFaceFirstReceiverAddress(Address());
+        packet->setCurrentFaceFirstReceiverAddress(L3Address());
         return findPerimeterRoutingNextHop(datagram, destination);
     }
     else
         return bestNeighbor;
 }
 
-Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Address& destination)
+L3Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const L3Address& destination)
 {
     EV_DEBUG << "Finding next hop using perimeter routing: destination = " << destination << endl;
     GPSRPacket *packet = check_and_cast<GPSRPacket *>(dynamic_cast<cPacket *>(datagram)->getEncapsulatedPacket());
-    Address selfAddress = getSelfAddress();
+    L3Address selfAddress = getSelfAddress();
     Coord selfPosition = mobility->getCurrentPosition();
     Coord perimeterRoutingStartPosition = packet->getPerimeterRoutingStartPosition();
     Coord destinationPosition = packet->getDestinationPosition();
@@ -509,9 +509,9 @@ Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Addr
         return findGreedyRoutingNextHop(datagram, destination);
     }
     else {
-        Address& firstSenderAddress = packet->getCurrentFaceFirstSenderAddress();
-        Address& firstReceiverAddress = packet->getCurrentFaceFirstReceiverAddress();
-        Address nextNeighborAddress = getSenderNeighborAddress(datagram);
+        L3Address& firstSenderAddress = packet->getCurrentFaceFirstSenderAddress();
+        L3Address& firstReceiverAddress = packet->getCurrentFaceFirstReceiverAddress();
+        L3Address nextNeighborAddress = getSenderNeighborAddress(datagram);
         bool hasIntersection;
         do {
             if (nextNeighborAddress.isUnspecified())
@@ -527,12 +527,12 @@ Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Addr
             if (hasIntersection) {
                 EV_DEBUG << "Edge to next hop intersects: intersection = " << intersection << ", nextNeighbor = " << nextNeighborAddress << ", firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
                 packet->setCurrentFaceFirstSenderAddress(selfAddress);
-                packet->setCurrentFaceFirstReceiverAddress(Address());
+                packet->setCurrentFaceFirstReceiverAddress(L3Address());
             }
         } while (hasIntersection);
         if (firstSenderAddress == selfAddress && firstReceiverAddress == nextNeighborAddress) {
             EV_DEBUG << "End of perimeter reached: firstSender = " << firstSenderAddress << ", firstReceiver = " << firstReceiverAddress << ", destination = " << destination << endl;
-            return Address();
+            return L3Address();
         }
         else {
             if (packet->getCurrentFaceFirstReceiverAddress().isUnspecified())
@@ -546,10 +546,10 @@ Address GPSR::findPerimeterRoutingNextHop(INetworkDatagram *datagram, const Addr
 // routing
 //
 
-INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop)
+INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
-    const Address& source = datagram->getSourceAddress();
-    const Address& destination = datagram->getDestinationAddress();
+    const L3Address& source = datagram->getSourceAddress();
+    const L3Address& destination = datagram->getDestinationAddress();
     EV_INFO << "Finding next hop: source = " << source << ", destination = " << destination << endl;
     nextHop = findNextHop(datagram, destination);
     if (nextHop.isUnspecified()) {
@@ -570,9 +570,9 @@ INetfilter::IHook::Result GPSR::routeDatagram(INetworkDatagram *datagram, const 
 // netfilter
 //
 
-INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramPreRoutingHook(INetworkDatagram *datagram, const InterfaceEntry *inputInterfaceEntry, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
-    const Address& destination = datagram->getDestinationAddress();
+    const L3Address& destination = datagram->getDestinationAddress();
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else
@@ -591,9 +591,9 @@ INetfilter::IHook::Result GPSR::datagramLocalInHook(INetworkDatagram *datagram, 
     return ACCEPT;
 }
 
-INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, Address& nextHop)
+INetfilter::IHook::Result GPSR::datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outputInterfaceEntry, L3Address& nextHop)
 {
-    const Address& destination = datagram->getDestinationAddress();
+    const L3Address& destination = datagram->getDestinationAddress();
     if (destination.isMulticast() || destination.isBroadcast() || routingTable->isLocalAddress(destination))
         return ACCEPT;
     else {

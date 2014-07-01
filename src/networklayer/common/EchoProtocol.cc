@@ -69,8 +69,8 @@ void EchoProtocol::processEchoRequest(EchoPacket *request)
     // swap src and dest
     // TBD check what to do if dest was multicast etc?
     INetworkProtocolControlInfo *ctrl = check_and_cast<INetworkProtocolControlInfo *>(reply->getControlInfo());
-    Address src = ctrl->getSourceAddress();
-    Address dest = ctrl->getDestinationAddress();
+    L3Address src = ctrl->getSourceAddress();
+    L3Address dest = ctrl->getDestinationAddress();
     ctrl->setInterfaceId(-1);
     ctrl->setSourceAddress(dest);
     ctrl->setDestinationAddress(src);

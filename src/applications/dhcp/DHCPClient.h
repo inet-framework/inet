@@ -112,7 +112,7 @@ class INET_API DHCPClient : public cSimpleModule, public cListener, public ILife
     /*
      * Performs UDP transmission.
      */
-    virtual void sendToUDP(cPacket *msg, int srcPort, const Address& destAddr, int destPort);
+    virtual void sendToUDP(cPacket *msg, int srcPort, const L3Address& destAddr, int destPort);
 
     /*
      * Client broadcast to locate available servers.

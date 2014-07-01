@@ -95,8 +95,8 @@ class INET_API ARP : public cSimpleModule, public IARP, public ILifecycle
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
     /// IARP implementation  @{
-    virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie);
-    virtual Address getL3AddressFor(const MACAddress& addr) const;
+    virtual MACAddress resolveL3Address(const L3Address& address, const InterfaceEntry *ie);
+    virtual L3Address getL3AddressFor(const MACAddress& addr) const;
     /// @}
 
   protected:

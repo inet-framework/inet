@@ -23,7 +23,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 #include "IPvXTrafSink.h"
 #include "ILifecycle.h"
 #include "NodeStatus.h"
@@ -44,7 +44,7 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     cPar *sendIntervalPar;
     cPar *packetLengthPar;
     int protocol;
-    std::vector<Address> destAddresses;
+    std::vector<L3Address> destAddresses;
     int numPackets;
 
     // state
@@ -64,7 +64,7 @@ class INET_API IPvXTrafGen : public cSimpleModule, public ILifecycle
     virtual bool isNodeUp();
     virtual bool isEnabled();
 
-    virtual Address chooseDestAddr();
+    virtual L3Address chooseDestAddr();
     virtual void sendPacket();
 
     virtual int numInitStages() const { return NUM_INIT_STAGES; }

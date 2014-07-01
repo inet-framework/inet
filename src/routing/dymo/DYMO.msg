@@ -17,13 +17,13 @@
 //
 
 cplusplus {{
-#include "Address.h"
+#include "L3Address.h"
 #include "DYMOdefs.h"
 }}
 
 namespace inet::DYMO;
 
-class noncobject inet::Address;
+class noncobject inet::L3Address;
 
 class noncobject DYMOSequenceNumber;
 
@@ -34,7 +34,7 @@ class noncobject DYMOMetricType;
 //
 
 class AddressBlock {
-    Address address;
+    L3Address address;
     int prefixLength;
     bool hasValidityTime;
     simtime_t validityTime;
@@ -51,7 +51,7 @@ class AddressBlock {
 //
 
 message RREQTimer {
-    Address target;
+    L3Address target;
 }
 
 message RREQWaitRREPTimer extends RREQTimer {

@@ -25,7 +25,7 @@
 
 #include "INETDefs.h"
 
-#include "Address.h"
+#include "L3Address.h"
 
 // forward declarations:
 class INetStack;
@@ -51,7 +51,7 @@ class INET_API TCP_NSC_Connection
     {
       public:
         SockAddr() : ipAddrM(), portM(-1) {}
-        Address ipAddrM;
+        L3Address ipAddrM;
         unsigned short portM;
 
         inline bool operator<(const SockAddr& b) const

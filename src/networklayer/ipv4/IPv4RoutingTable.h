@@ -367,14 +367,14 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
 
-    virtual Address getRouterIdAsGeneric() const { return getRouterId(); }
-    virtual bool isLocalAddress(const Address& dest) const { return isLocalAddress(dest.toIPv4()); }
-    virtual InterfaceEntry *getInterfaceByAddress(const Address& address) const { return getInterfaceByAddress(address.toIPv4()); }
-    virtual IRoute *findBestMatchingRoute(const Address& dest) const { return findBestMatchingRoute(dest.toIPv4()); }
-    virtual InterfaceEntry *getOutputInterfaceForDestination(const Address& dest) const { return getInterfaceForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
-    virtual Address getNextHopForDestination(const Address& dest) const { return getGatewayForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
-    virtual bool isLocalMulticastAddress(const Address& dest) const { return isLocalMulticastAddress(dest.toIPv4()); }
-    virtual IMulticastRoute *findBestMatchingMulticastRoute(const Address& origin, const Address& group) const { return const_cast<IPv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIPv4(), group.toIPv4())); }    //XXX remove 'const' from IPv4 method?
+    virtual L3Address getRouterIdAsGeneric() const { return getRouterId(); }
+    virtual bool isLocalAddress(const L3Address& dest) const { return isLocalAddress(dest.toIPv4()); }
+    virtual InterfaceEntry *getInterfaceByAddress(const L3Address& address) const { return getInterfaceByAddress(address.toIPv4()); }
+    virtual IRoute *findBestMatchingRoute(const L3Address& dest) const { return findBestMatchingRoute(dest.toIPv4()); }
+    virtual InterfaceEntry *getOutputInterfaceForDestination(const L3Address& dest) const { return getInterfaceForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
+    virtual L3Address getNextHopForDestination(const L3Address& dest) const { return getGatewayForDestAddr(dest.toIPv4()); }    //XXX inconsistent names
+    virtual bool isLocalMulticastAddress(const L3Address& dest) const { return isLocalMulticastAddress(dest.toIPv4()); }
+    virtual IMulticastRoute *findBestMatchingMulticastRoute(const L3Address& origin, const L3Address& group) const { return const_cast<IPv4MulticastRoute *>(findBestMatchingMulticastRoute(origin.toIPv4(), group.toIPv4())); }    //XXX remove 'const' from IPv4 method?
     virtual IRoute *createRoute() { return new IPv4Route(); }
 
   private:

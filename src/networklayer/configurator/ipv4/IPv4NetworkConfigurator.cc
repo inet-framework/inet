@@ -2073,7 +2073,7 @@ void IPv4NetworkConfigurator::optimizeRoutes(std::vector<IPv4Route *>& originalR
     originalRoutes = optimizedRoutes;
 }
 
-bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
+bool IPv4NetworkConfigurator::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *interfaceEntry, bool netmask)
 {
     std::map<InterfaceEntry *, InterfaceInfo *>::iterator it = topology.interfaceInfos.find(interfaceEntry);
     if (it == topology.interfaceInfos.end())

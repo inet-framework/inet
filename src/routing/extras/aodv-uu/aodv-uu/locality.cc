@@ -81,9 +81,9 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
     }
 #else
 #ifndef OMNETPP
-    char *dstnet = Address::getInstance().get_subnetaddr(dest.s_addr);
+    char *dstnet = L3Address::getInstance().get_subnetaddr(dest.s_addr);
     char *subnet =
-        Address::getInstance().get_subnetaddr(DEV_NR(NS_DEV_NR).ipaddr.s_addr);
+        L3Address::getInstance().get_subnetaddr(DEV_NR(NS_DEV_NR).ipaddr.s_addr);
     DEBUG(LOG_DEBUG, 0, "myaddr=%d, dest=%d dstnet=%s subnet=%s",
           DEV_NR(NS_DEV_NR).ipaddr.s_addr, dest.s_addr, dstnet, subnet);
     if (subnet != NULL)
@@ -109,8 +109,8 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
     struct in_addr interface;
 
     int masklen = ie->ipv4Data()->getNetmask().getNetmaskLength();
-    dstnet.s_addr = Address(dest.s_addr).getPrefix(masklen);   // dstnet.s_addr = dest.s_addr & mask.s_addr;
-    interface.s_addr = Address(ie->ipv4Data()->getIPAddress());
+    dstnet.s_addr = L3Address(dest.s_addr).getPrefix(masklen);   // dstnet.s_addr = dest.s_addr & mask.s_addr;
+    interface.s_addr = L3Address(ie->ipv4Data()->getIPAddress());
     subnet.s_addr = interface.s_addr.getPrefix(masklen);    //interface.s_addr & mask.s_addr;
     if (!subnet.s_addr.isUnspecified())
     {

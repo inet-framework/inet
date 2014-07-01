@@ -146,7 +146,7 @@ void SCTPClient::connect()
     setStatusString("connecting");
     EV_INFO << "issuing OPEN command, connect to address " << connectAddress << "\n";
     bool streamReset = par("streamReset");
-    Address destination;
+    L3Address destination;
     AddressResolver().tryResolve(connectAddress, destination);
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;
@@ -551,15 +551,15 @@ void SCTPClient::setPrimaryPath(const char *str)
     SCTPPathInfo *pinfo = new SCTPPathInfo();
 
     if (strcmp(str, "") != 0) {
-        pinfo->setRemoteAddress(Address(str));
+        pinfo->setRemoteAddress(L3Address(str));
     }
     else {
         str = par("newPrimary");
         if (strcmp(str, "") != 0)
-            pinfo->setRemoteAddress(Address(str));
+            pinfo->setRemoteAddress(L3Address(str));
         else {
             str = par("connectAddress");
-            pinfo->setRemoteAddress(Address(str));
+            pinfo->setRemoteAddress(L3Address(str));
         }
     }
 

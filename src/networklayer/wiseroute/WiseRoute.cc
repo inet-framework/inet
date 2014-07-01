@@ -101,7 +101,7 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
     if (msg->getKind() == SEND_ROUTE_FLOOD_TIMER) {
         // Send route flood packet and restart the timer
         WiseRouteDatagram *pkt = new WiseRouteDatagram("route-flood", ROUTE_FLOOD);
-        Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
+        L3Address broadcastAddress = myNetwAddr.getAddressType()->getBroadcastAddress();
         pkt->setByteLength(headerLength);
         pkt->setInitialSrcAddr(myNetwAddr);
         pkt->setFinalDestAddr(broadcastAddress);
@@ -127,9 +127,9 @@ void WiseRoute::handleSelfMessage(cMessage *msg)
 void WiseRoute::handleLowerPacket(cPacket *msg)
 {
     WiseRouteDatagram *netwMsg = check_and_cast<WiseRouteDatagram *>(msg);
-    const Address& finalDestAddr = netwMsg->getFinalDestAddr();
-    const Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
-    const Address& srcAddr = netwMsg->getSrcAddr();
+    const L3Address& finalDestAddr = netwMsg->getFinalDestAddr();
+    const L3Address& initialSrcAddr = netwMsg->getInitialSrcAddr();
+    const L3Address& srcAddr = netwMsg->getSrcAddr();
     IMACProtocolControlInfo *ctrlInfo = check_and_cast<IMACProtocolControlInfo *>(netwMsg->getControlInfo());
     // KLUDGE: TODO: get rssi and ber
     EV_ERROR << "Getting RSSI and BER from the received frame is not yet implemented. Using default values.\n";
@@ -190,7 +190,7 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
                 nbUnicastFloodForwarded++;
             }
             else {
-                Address nextHop = getRoute(finalDestAddr);
+                L3Address nextHop = getRoute(finalDestAddr);
                 if (nextHop.isBroadcast()) {
                     // no route exist to destination, attempt to send to final destination
                     nextHop = finalDestAddr;
@@ -216,8 +216,8 @@ void WiseRoute::handleLowerPacket(cPacket *msg)
 
 void WiseRoute::handleUpperPacket(cPacket *msg)
 {
-    Address finalDestAddr;
-    Address nextHopAddr;
+    L3Address finalDestAddr;
+    L3Address nextHopAddr;
     MACAddress nextHopMacAddr;
     WiseRouteDatagram *pkt = new WiseRouteDatagram(msg->getName(), DATA);
     INetworkProtocolControlInfo *cInfo = check_and_cast<INetworkProtocolControlInfo *>(msg->removeControlInfo());
@@ -287,7 +287,7 @@ void WiseRoute::finish()
     recordScalar("meanNbHops", (double)nbHops / (double)nbDataPacketsReceived);
 }
 
-void WiseRoute::updateRouteTable(const Address& origin, const Address& lastHop, double rssi, double ber)
+void WiseRoute::updateRouteTable(const L3Address& origin, const L3Address& lastHop, double rssi, double ber)
 {
     tRouteTable::iterator pos;
 

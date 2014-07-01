@@ -135,7 +135,7 @@ int TCPSerializer::serialize(const TCPSegment *tcpseg,
 
 int TCPSerializer::serialize(const TCPSegment *tcpseg,
         unsigned char *buf, unsigned int bufsize,
-        const Address& srcIp, const Address& destIp)
+        const L3Address& srcIp, const L3Address& destIp)
 {
     int writtenbytes = serialize(tcpseg, buf, bufsize);
     struct tcphdr *tcp = (struct tcphdr *)(buf);
@@ -223,12 +223,12 @@ void TCPSerializer::parse(const unsigned char *buf, unsigned int bufsize, TCPSeg
 }
 
 uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
-        const Address& srcIp, const Address& destIp)
+        const L3Address& srcIp, const L3Address& destIp)
 {
     uint32_t sum = TCPIPchecksum::_checksum(addr, count);
 
-    if (srcIp.getType() == Address::IPv4) {
-        ASSERT(destIp.getType() == Address::IPv4);
+    if (srcIp.getType() == L3Address::IPv4) {
+        ASSERT(destIp.getType() == L3Address::IPv4);
 
         //sum += srcip;
         int address = srcIp.toIPv4().getInt();
@@ -238,8 +238,8 @@ uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
         address = destIp.toIPv4().getInt();
         sum += htons(TCPIPchecksum::_checksum(&address, sizeof(uint32)));
     }
-    else if (srcIp.getType() == Address::IPv6) {
-        ASSERT(destIp.getType() == Address::IPv6);
+    else if (srcIp.getType() == L3Address::IPv6) {
+        ASSERT(destIp.getType() == L3Address::IPv6);
 
         //sum += srcip;
         sum += htons(TCPIPchecksum::_checksum(srcIp.toIPv6().words(), sizeof(uint32) * 4));

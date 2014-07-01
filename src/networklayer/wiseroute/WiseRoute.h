@@ -29,7 +29,7 @@
 #include "INetworkProtocol.h"
 #include "IARP.h"
 #include "NetworkProtocolBase.h"
-#include "Address.h"
+#include "L3Address.h"
 #include "WiseRouteDatagram.h"
 
 namespace inet {
@@ -116,11 +116,11 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
 
     typedef struct tRouteTableEntry
     {
-        Address nextHop;
+        L3Address nextHop;
         double rssi;
     } tRouteTableEntry;
 
-    typedef std::map<Address, tRouteTableEntry> tRouteTable;
+    typedef std::map<L3Address, tRouteTableEntry> tRouteTable;
     typedef std::multimap<tRouteTable::key_type, unsigned long> tFloodTable;
 
     tRouteTable routeTable;
@@ -134,8 +134,8 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
      **/
     int headerLength;
 
-    Address myNetwAddr;
-    Address sinkAddress;
+    L3Address myNetwAddr;
+    L3Address sinkAddress;
 
     /** @brief Minimal received RSSI necessary for adding source to routing table. */
     double rssiThreshold;
@@ -199,7 +199,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
      * The tuple provided in argument gives the next hop address to the origin.
      * The table is updated only if the RSSI value is above the threshold.
      */
-    virtual void updateRouteTable(const tRouteTable::key_type& origin, const Address& lastHop, double rssi, double ber);
+    virtual void updateRouteTable(const tRouteTable::key_type& origin, const L3Address& lastHop, double rssi, double ber);
 
     /** @brief Decapsulate a message */
     cMessage *decapsMsg(WiseRouteDatagram *msg);

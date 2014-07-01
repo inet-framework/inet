@@ -81,7 +81,7 @@ void NS_CLASS hello_send(void *arg)
     dlog(LOG_DEBUG, 0, __FUNCTION__, "sending HELLO");
 
     HELLO *hello = hello_create();
-    dest_addr.s_addr = Address(IPv4Address(DYMO_BROADCAST));
+    dest_addr.s_addr = L3Address(IPv4Address(DYMO_BROADCAST));
 #ifdef OMNETPP
     double delay = -1;
     int cont = numInterfacesActive;

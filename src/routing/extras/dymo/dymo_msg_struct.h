@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include  <string.h>
 #include "compatibility.h"
-#include "Address.h"
+#include "L3Address.h"
 
 #include "INETDefs.h"
 
@@ -47,8 +47,8 @@ struct DYMO_element : public cPacket
     u_int32_t   ttl : 6;
     u_int32_t   i : 1;
     u_int32_t   res : 5;
-    Address notify_addr; // if M bit set
-    Address target_addr; // if not a DYMOcast addr in IP dest addr
+    L3Address notify_addr; // if M bit set
+    L3Address target_addr; // if not a DYMOcast addr in IP dest addr
     uint8_t blockAddressGroup;
     bool previousStatic;
 
@@ -90,7 +90,7 @@ struct re_block
     u_int16_t   g : 1;
     u_int16_t   prefix : 7;
     u_int32_t   useAp : 1;
-    Address     re_node_addr;
+    L3Address     re_node_addr;
     u_int32_t   re_node_seqnum;
     unsigned char from_proactive;
     bool        staticNode;
@@ -144,7 +144,7 @@ struct Dymo_RE : public DYMO_element
 
 struct rerr_block
 {
-    Address unode_addr;
+    L3Address unode_addr;
     u_int32_t   unode_seqnum;
 };
 
@@ -154,8 +154,8 @@ struct Dymo_UERR : public DYMO_element
     Dymo_UERR &     operator=(const Dymo_UERR &m);
     Dymo_UERR(const Dymo_UERR &m);
     virtual Dymo_UERR *dup() const {return new Dymo_UERR(*this);}
-    Address uelem_target_addr;
-    Address uerr_node_addr;
+    L3Address uelem_target_addr;
+    L3Address uerr_node_addr;
     u_int8_t    uelem_type;
 
     private:

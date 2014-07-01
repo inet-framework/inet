@@ -102,10 +102,10 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
 
     virtual short getTransportProtocol() const { return IPv6ControlInfo_Base::getProtocol(); }
     virtual void setTransportProtocol(short protocol) { IPv6ControlInfo_Base::setProtocol(protocol); }
-    virtual Address getSourceAddress() const { return Address(srcAddr_var); }
-    virtual void setSourceAddress(const Address& address) { srcAddr_var = address.toIPv6(); }
-    virtual Address getDestinationAddress() const { return Address(destAddr_var); }
-    virtual void setDestinationAddress(const Address& address) { destAddr_var = address.toIPv6(); }
+    virtual L3Address getSourceAddress() const { return L3Address(srcAddr_var); }
+    virtual void setSourceAddress(const L3Address& address) { srcAddr_var = address.toIPv6(); }
+    virtual L3Address getDestinationAddress() const { return L3Address(destAddr_var); }
+    virtual void setDestinationAddress(const L3Address& address) { destAddr_var = address.toIPv6(); }
     virtual int getInterfaceId() const { return IPv6ControlInfo_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { IPv6ControlInfo_Base::setInterfaceId(interfaceId); }
     virtual short getHopLimit() const { return IPv6ControlInfo_Base::getHopLimit(); }

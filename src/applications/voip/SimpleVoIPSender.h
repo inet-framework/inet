@@ -41,7 +41,7 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     simtime_t packetizationInterval;
     int localPort, destPort;
     int talkPacketSize;
-    Address destAddress;
+    L3Address destAddress;
 
     // state
     cMessage *selfSender;    // timer for sending packets
