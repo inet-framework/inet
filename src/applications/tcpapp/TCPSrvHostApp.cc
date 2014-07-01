@@ -17,7 +17,7 @@
 
 #include "TCPSrvHostApp.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 

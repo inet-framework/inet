@@ -18,7 +18,7 @@
 
 #include "IPvXTrafGen.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "IPSocket.h"
 #include "INetworkProtocolControlInfo.h"
 #include "ModuleAccess.h"

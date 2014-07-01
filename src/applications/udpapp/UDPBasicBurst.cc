@@ -21,7 +21,7 @@
 #include "UDPBasicBurst.h"
 
 #include "UDPControlInfo_m.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 
 namespace inet {
@@ -140,7 +140,7 @@ void UDPBasicBurst::processStart()
         if (strstr(token, "Broadcast") != NULL)
             destAddresses.push_back(IPv4Address::ALLONES_ADDRESS);
         else {
-            L3Address addr = AddressResolver().resolve(token);
+            L3Address addr = L3AddressResolver().resolve(token);
             if (excludeLocalDestAddresses && ift && ift->isLocalAddress(addr))
                 continue;
             destAddresses.push_back(addr);

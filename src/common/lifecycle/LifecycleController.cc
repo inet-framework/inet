@@ -18,7 +18,7 @@
 #include "LifecycleController.h"
 #include "IInterfaceTable.h"
 #include "InterfaceEntry.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "LifecycleOperation.h"
 
 namespace inet {

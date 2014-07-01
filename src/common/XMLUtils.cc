@@ -1,5 +1,5 @@
 #include "XMLUtils.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -119,7 +119,7 @@ IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 {
     const cXMLElement *xvalue = getUniqueChildIfExists(ptr, name);
     if (xvalue)
-        return AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
+        return L3AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
     else
         return def;
 }
@@ -127,7 +127,7 @@ IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name,
 IPv4Address getParameterIPAddressValue(const cXMLElement *ptr, const char *name)
 {
     const cXMLElement *xvalue = getUniqueChild(ptr, name);
-    return AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
+    return L3AddressResolver().resolve(xvalue->getNodeValue()).toIPv4();
 }
 
 double getParameterDoubleValue(const cXMLElement *ptr, const char *name, double def)

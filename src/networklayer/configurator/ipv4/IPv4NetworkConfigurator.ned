@@ -291,7 +291,7 @@ package inet.networklayer.configurator.ipv4;
 //
 //    - @destination
 //      Optional parameter attribute that specifies the destination address in
-//      the route (AddressResolver syntax). The default value is "*".
+//      the route (L3AddressResolver syntax). The default value is "*".
 //      e.g. "192.168.1.1" or "subnet.client[3]" or "subnet.server(ipv4)" or "*"
 //
 //    - @netmask
@@ -301,7 +301,7 @@ package inet.networklayer.configurator.ipv4;
 //
 //    - @gateway
 //      Optional parameter attribute that specifies the gateway (next-hop)
-//      address in the route (AddressResolver syntax). When unspecified
+//      address in the route (L3AddressResolver syntax). When unspecified
 //      the interface parameter must be specified. The default value is "*".
 //      e.g. "192.168.1.254" or "subnet.router" or "*"
 //

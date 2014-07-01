@@ -18,7 +18,7 @@
 
 #include "UDPBasicApp.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "UDPControlInfo_m.h"
@@ -107,7 +107,7 @@ L3Address UDPBasicApp::chooseDestAddr()
 
         for (int i = 0; i <= k; ++i)
             token = tokenizer.nextToken();
-        destAddresses[k] = AddressResolver().resolve(token);
+        destAddresses[k] = L3AddressResolver().resolve(token);
     }
     return destAddresses[k];
 }
@@ -138,7 +138,7 @@ void UDPBasicApp::processStart()
 
     while ((token = tokenizer.nextToken()) != NULL) {
         L3Address result;
-        AddressResolver().tryResolve(token, result);
+        L3AddressResolver().tryResolve(token, result);
         if (result.isUnspecified())
             EV_ERROR << "cannot resolve destination address: " << token << endl;
         else

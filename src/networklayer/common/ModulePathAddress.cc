@@ -19,7 +19,7 @@
 
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -54,7 +54,7 @@ bool ModulePathAddress::tryParse(const char *addr)
         // accepts network interface modules only:
         if (isNetworkNode(module))
             return false;
-        IInterfaceTable *ift = AddressResolver().findInterfaceTableOf(findContainingNode(module));
+        IInterfaceTable *ift = L3AddressResolver().findInterfaceTableOf(findContainingNode(module));
         if (ift == NULL)
             return false;
         if (ift->getInterfaceByInterfaceModule(module) == NULL)

@@ -17,7 +17,7 @@
 
 #include "TCPAppBase.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -44,7 +44,7 @@ void TCPAppBase::initialize(int stage)
         const char *localAddress = par("localAddress");
         int localPort = par("localPort");
         socket.readDataTransferModePar(*this);
-        socket.bind(*localAddress ? AddressResolver().resolve(localAddress) : L3Address(), localPort);
+        socket.bind(*localAddress ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
 
         socket.setCallbackObject(this);
         socket.setOutputGate(gate("tcpOut"));
@@ -71,7 +71,7 @@ void TCPAppBase::connect()
     int connectPort = par("connectPort");
 
     L3Address destination;
-    AddressResolver().tryResolve(connectAddress, destination);
+    L3AddressResolver().tryResolve(connectAddress, destination);
     if (destination.isUnspecified()) {
         EV_ERROR << "Connecting to " << connectAddress << " port=" << connectPort << ": cannot resolve destination address\n";
     }

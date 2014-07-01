@@ -26,7 +26,7 @@
 #include "IInterfaceTable.h"
 #include "IPv4Address.h"
 #include "IPv4InterfaceData.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "MessageHandler.h"
 #include "OSPFArea.h"
 #include "OSPFcommon.h"

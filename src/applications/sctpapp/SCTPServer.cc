@@ -27,7 +27,7 @@
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
 #include "SCTPSocket.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -76,7 +76,7 @@ void SCTPServer::initialize(int stage)
     }
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         const char *addressesString = par("localAddress");
-        AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
         int messagesToPush = par("messagesToPush");
 

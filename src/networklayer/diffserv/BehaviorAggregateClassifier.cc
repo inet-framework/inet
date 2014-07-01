@@ -18,7 +18,7 @@
 
 #include "INETDefs.h"
 #include "L3Address.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"

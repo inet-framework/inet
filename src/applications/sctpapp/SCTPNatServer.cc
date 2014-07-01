@@ -24,7 +24,7 @@
 #include "SCTPCommand_m.h"
 #include "SCTPMessage_m.h"
 #include "SCTPSocket.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "SCTPNatTable.h"
 
 namespace inet {
@@ -44,7 +44,7 @@ void SCTPNatServer::initialize()
 
     // parameters
     const char *addressesString = par("localAddress");
-    AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+    AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
     inboundStreams = par("inboundStreams");
     outboundStreams = par("outboundStreams");

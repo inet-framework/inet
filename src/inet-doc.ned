@@ -145,9 +145,9 @@
 // both IPv4 and IPv6. Internally they use the Address C++ class, which
 // can represent both IPv4 and IPv6 addresses.
 //
-// Most modules use the AddressResolver C++ class to resolve addresses
+// Most modules use the L3AddressResolver C++ class to resolve addresses
 // specified in module parameters in omnetpp.ini.
-// AddressResolver accepts the following syntax:
+// L3AddressResolver accepts the following syntax:
 //
 //    - literal IPv4 address: "186.54.66.2"
 //    - literal IPv6 address: "3011:7cd6:750b:5fd6:aba3:c231:e9f9:6a43"

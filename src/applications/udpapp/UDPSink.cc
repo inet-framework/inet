@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "UDPSink.h"
 
 #include "ModuleAccess.h"
@@ -107,7 +107,7 @@ void UDPSink::setSocketOptions()
 
     // join multicastGroup
     const char *groupAddr = par("multicastGroup");
-    multicastGroup = AddressResolver().resolve(groupAddr);
+    multicastGroup = L3AddressResolver().resolve(groupAddr);
     if (!multicastGroup.isUnspecified()) {
         if (!multicastGroup.isMulticast())
             throw cRuntimeError("Wrong multicastGroup setting: not a multicast address: %s", groupAddr);

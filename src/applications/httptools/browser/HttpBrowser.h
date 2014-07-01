@@ -20,7 +20,7 @@
 
 #include "TCPSocket.h"
 #include "TCPSocketMap.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "HttpBrowserBase.h"
 
 namespace inet {

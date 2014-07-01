@@ -110,7 +110,7 @@ void VoIPStreamSender::initialize(int stage)
         // Hack for create results folder
         recordScalar("hackForCreateResultsFolder", 0);
 
-        destAddress = AddressResolver().resolve(par("destAddress").stringValue());
+        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);
 

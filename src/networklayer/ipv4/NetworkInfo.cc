@@ -21,7 +21,7 @@
 #include "NetworkInfo.h"
 
 #include "InterfaceEntry.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "IIPv4RoutingTable.h"
 
 namespace inet {

@@ -22,7 +22,7 @@
 #include "stlutils.h"
 #include "IIPv4RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "IPv4NetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
@@ -253,8 +253,8 @@ void IPv4NetworkConfigurator::extractTopology(IPv4Topology& topology)
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
         node->module = module;
-        node->interfaceTable = AddressResolver().findInterfaceTableOf(module);
-        node->routingTable = AddressResolver().findIPv4RoutingTableOf(module);
+        node->interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
+        node->routingTable = L3AddressResolver().findIPv4RoutingTableOf(module);
         if (node->routingTable && !node->routingTable->isForwardingEnabled())
             node->setWeight(DBL_MAX);
     }
@@ -1371,9 +1371,9 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
     for (int i = 0; i < (int)routeElements.size(); i++) {
         cXMLElement *routeElement = routeElements[i];
         const char *hostAttr = getMandatoryAttribute(routeElement, "hosts");
-        const char *destinationAttr = getMandatoryAttribute(routeElement, "destination");    // destination address  (AddressResolver syntax)
+        const char *destinationAttr = getMandatoryAttribute(routeElement, "destination");    // destination address  (L3AddressResolver syntax)
         const char *netmaskAttr = routeElement->getAttribute("netmask");    // default: 255.255.255.255; alternative notation: "/23"
-        const char *gatewayAttr = routeElement->getAttribute("gateway");    // next hop address (AddressResolver syntax)
+        const char *gatewayAttr = routeElement->getAttribute("gateway");    // next hop address (L3AddressResolver syntax)
         const char *interfaceAttr = routeElement->getAttribute("interface");    // output interface name
         const char *metricAttr = routeElement->getAttribute("metric");
 
@@ -1381,7 +1381,7 @@ void IPv4NetworkConfigurator::readManualRouteConfiguration(IPv4Topology& topolog
             // parse and check the attributes
             IPv4Address destination;
             if (!isEmpty(destinationAttr) && strcmp(destinationAttr, "*"))
-                destination = resolve(destinationAttr, AddressResolver::ADDR_IPv4).toIPv4();
+                destination = resolve(destinationAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
             IPv4Address netmask;
             if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
@@ -1433,7 +1433,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
     for (unsigned int i = 0; i < routeElements.size(); i++) {
         cXMLElement *routeElement = routeElements[i];
         const char *hostAttr = routeElement->getAttribute("hosts");
-        const char *sourceAttr = routeElement->getAttribute("source");    // source address  (AddressResolver syntax)
+        const char *sourceAttr = routeElement->getAttribute("source");    // source address  (L3AddressResolver syntax)
         const char *netmaskAttr = routeElement->getAttribute("netmask");    // default: 255.255.255.255; alternative notation: "/23"
         const char *groupsAttr = routeElement->getAttribute("groups");    // addresses of the multicast groups, default: 0.0.0.0, matching all groups
         const char *parentAttr = routeElement->getAttribute("parent");    // name of expected input interface
@@ -1444,7 +1444,7 @@ void IPv4NetworkConfigurator::readManualMulticastRouteConfiguration(IPv4Topology
             // parse and check the attributes
             IPv4Address source;
             if (!isEmpty(sourceAttr) && strcmp(sourceAttr, "*"))
-                source = resolve(sourceAttr, AddressResolver::ADDR_IPv4).toIPv4();
+                source = resolve(sourceAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
             IPv4Address netmask;
             if (!isEmpty(netmaskAttr) && strcmp(netmaskAttr, "*")) {
                 if (netmaskAttr[0] == '/')
@@ -1542,7 +1542,7 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     ASSERT(isNotEmpty(gatewayAttr));    // see "if" above
 
     // check syntax of gatewayAttr, and obtain an initial value
-    outGateway = resolve(gatewayAttr, AddressResolver::ADDR_IPv4).toIPv4();
+    outGateway = resolve(gatewayAttr, L3AddressResolver::ADDR_IPv4).toIPv4();
 
     IPv4Address gatewayAddressOnCommonLink;
 
@@ -1575,8 +1575,8 @@ void IPv4NetworkConfigurator::resolveInterfaceAndGateway(Node *node, const char 
     // the address of the interface which is towards the configured node (i.e. on the same link)
     //
     // gatewayAttr may be an IP address, or a module name, or modulename+interfacename
-    // in a syntax accepted by AddressResolver. If the gatewayAttr is a concrete IP address
-    // or contains a gateway interface name (AddressResolver accepts it after a "/"), we're done
+    // in a syntax accepted by L3AddressResolver. If the gatewayAttr is a concrete IP address
+    // or contains a gateway interface name (L3AddressResolver accepts it after a "/"), we're done
     if (IPv4Address::isWellFormed(gatewayAttr) || strchr(gatewayAttr, '/') != NULL)
         return;
 

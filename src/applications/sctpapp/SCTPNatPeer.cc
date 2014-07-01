@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "SCTPAssociation.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "NodeStatus.h"
 
 namespace inet {
@@ -59,7 +59,7 @@ void SCTPNatPeer::initialize()
     WATCH(numRequestsToSend);
     // parameters
     const char *addressesString = par("localAddress");
-    AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+    AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
     int32 port = par("localPort");
     echo = par("echo").boolValue();
     delay = par("echoDelay");
@@ -472,7 +472,7 @@ void SCTPNatPeer::handleTimer(cMessage *msg)
     switch (msg->getKind()) {
         case MSGKIND_CONNECT:
             EV << "starting session call connect\n";
-            connect(AddressResolver().resolve(par("connectAddress"), 1), par("connectPort"));
+            connect(L3AddressResolver().resolve(par("connectAddress"), 1), par("connectPort"));
             delete msg;
             break;
 
@@ -539,7 +539,7 @@ void SCTPNatPeer::socketPeerClosed(int32, void *)
         clientSocket.close();
         if (rendezvous) {
             const char *addressesString = par("localAddress");
-            AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+            AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
             int32 port = par("localPort");
             SCTPSocket *socket = new SCTPSocket();
             socket->setOutputGate(gate("sctpOut"));
@@ -572,7 +572,7 @@ void SCTPNatPeer::socketClosed(int32, void *)
     clientSocket.close();
     if (rendezvous) {
         const char *addressesString = par("localAddress");
-        AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int32 port = par("localPort");
         SCTPSocket *socket = new SCTPSocket();
         socket->setOutputGate(gate("sctpOut"));

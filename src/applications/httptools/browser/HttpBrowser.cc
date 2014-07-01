@@ -287,7 +287,7 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     socket->setCallbackObject(this, sockdata);
 
     // Issue a connect to the socket for the specified module and port.
-    socket->connect(AddressResolver().resolve(moduleName), connectPort);
+    socket->connect(L3AddressResolver().resolve(moduleName), connectPort);
 }
 
 } // namespace inet

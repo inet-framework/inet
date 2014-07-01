@@ -17,7 +17,7 @@
 #include "INETDefs.h"
 
 #include "TCPSegment.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 

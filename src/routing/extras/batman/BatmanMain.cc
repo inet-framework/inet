@@ -4,7 +4,7 @@
 
 #include "INetworkProtocolControlInfo.h"
 #include "IPv4InterfaceData.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "UDPPacket_m.h"
 #include "Ieee802Ctrl.h"
 
@@ -143,7 +143,7 @@ void Batman::initialize(int stage)
         //createTimerQueue();
 
         const char *preferedGateWay = par("preferedGateWay");
-        pref_gateway =  AddressResolver().resolve(preferedGateWay, AddressResolver::ADDR_IPv4);
+        pref_gateway =  L3AddressResolver().resolve(preferedGateWay, L3AddressResolver::ADDR_IPv4);
 
         /*
         IPv4Address vis = par("visualizationServer");
@@ -222,8 +222,8 @@ void Batman::initialize(int stage)
             if (addrPair.size() != 2)
                 throw cRuntimeError("invalid 'announcedNetworks' parameter content: '%s'", token);
 
-            IPv4Address addr = AddressResolver().resolve(addrPair[0].c_str()).toIPv4();
-            IPv4Address mask = AddressResolver().resolve(addrPair[1].c_str(), AddressResolver::ADDR_MASK).toIPv4();
+            IPv4Address addr = L3AddressResolver().resolve(addrPair[0].c_str()).toIPv4();
+            IPv4Address mask = L3AddressResolver().resolve(addrPair[1].c_str(), L3AddressResolver::ADDR_MASK).toIPv4();
             addr.doAnd(mask);
 
             // add to HNA:

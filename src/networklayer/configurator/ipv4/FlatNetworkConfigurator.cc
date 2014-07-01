@@ -18,7 +18,7 @@
 #include <algorithm>
 #include "IIPv4RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "FlatNetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "IPv4InterfaceData.h"
@@ -66,10 +66,10 @@ void FlatNetworkConfigurator::extractTopology(cTopology& topo, NodeInfoVector& n
     nodeInfo.resize(topo.getNumNodes());
     for (int i = 0; i < topo.getNumNodes(); i++) {
         cModule *mod = topo.getNode(i)->getModule();
-        nodeInfo[i].isIPNode = AddressResolver().findIPv4RoutingTableOf(mod) != NULL && AddressResolver().findInterfaceTableOf(mod) != NULL;
+        nodeInfo[i].isIPNode = L3AddressResolver().findIPv4RoutingTableOf(mod) != NULL && L3AddressResolver().findInterfaceTableOf(mod) != NULL;
         if (nodeInfo[i].isIPNode) {
-            nodeInfo[i].ift = AddressResolver().interfaceTableOf(mod);
-            nodeInfo[i].rt = AddressResolver().routingTableOf(mod);
+            nodeInfo[i].ift = L3AddressResolver().interfaceTableOf(mod);
+            nodeInfo[i].rt = L3AddressResolver().routingTableOf(mod);
             nodeInfo[i].ipForwardEnabled = mod->hasPar("IPForward") ? mod->par("IPForward").boolValue() : false;
             topo.getNode(i)->setWeight(nodeInfo[i].ipForwardEnabled ? 0.0 : INFINITY);
         }

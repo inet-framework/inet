@@ -31,7 +31,7 @@
 #include "FWMath.h"
 #include "IL3AddressType.h"
 #include "MACAddress.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "FindModule.h"
 #include "ModuleAccess.h"
 #include "SimpleLinkLayerControlInfo.h"
@@ -79,7 +79,7 @@ void WiseRoute::initialize(int stage)
         routeFloodTimer = new cMessage("route-flood-timer", SEND_ROUTE_FLOOD_TIMER);
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
-        AddressResolver addressResolver;
+        L3AddressResolver addressResolver;
         sinkAddress = addressResolver.resolve(par("sinkAddress"));
 
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

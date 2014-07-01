@@ -19,7 +19,7 @@
 //
 //#include "InterfaceOperations.h"
 //#include "IInterfaceTable.h"
-//#include "AddressResolver.h"
+//#include "L3AddressResolver.h"
 //#include "ModuleAccess.h"
 //
 //Register_Class(InterfaceDownOperation);
@@ -34,7 +34,7 @@
 //    LifecycleOperation::initialize(module, params);
 //
 //    // note: these operations cannot be generic, because their ctor requires InterfaceEntry as parameter
-//    IInterfaceTable *ift = AddressResolver().findInterfaceTableOf(module);
+//    IInterfaceTable *ift = L3AddressResolver().findInterfaceTableOf(module);
 //    if (!ift)
 //        throw cRuntimeError("Interface table of network node '%s' not found, required for operation %s", module->getFullPath().c_str(), getClassName());
 //    std::string interfaceName = params["interfacename"];

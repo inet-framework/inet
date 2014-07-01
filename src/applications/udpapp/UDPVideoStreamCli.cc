@@ -20,7 +20,7 @@
 #include "UDPVideoStreamCli.h"
 
 #include "UDPControlInfo_m.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -65,7 +65,7 @@ void UDPVideoStreamCli::requestStream()
     int svrPort = par("serverPort");
     int localPort = par("localPort");
     const char *address = par("serverAddress");
-    L3Address svrAddr = AddressResolver().resolve(address);
+    L3Address svrAddr = L3AddressResolver().resolve(address);
 
     if (svrAddr.isUnspecified()) {
         EV_ERROR << "Server address is unspecified, skip sending video stream request\n";

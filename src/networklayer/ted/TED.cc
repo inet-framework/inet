@@ -22,7 +22,7 @@
 #include "NotifierConsts.h"
 #include "IIPv4RoutingTable.h"
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
@@ -104,11 +104,11 @@ void TED::initializeTED()
         }
         if (!g) // not connected
             continue;
-        IIPv4RoutingTable *destRt = AddressResolver().findIPv4RoutingTableOf(destNode);
+        IIPv4RoutingTable *destRt = L3AddressResolver().findIPv4RoutingTableOf(destNode);
         if (!destRt) // switch, hub, bus, accesspoint, etc
             continue;
         IPv4Address destRouterId = destRt->getRouterId();
-        IInterfaceTable *destIft = AddressResolver().findInterfaceTableOf(destNode);
+        IInterfaceTable *destIft = L3AddressResolver().findInterfaceTableOf(destNode);
         ASSERT(destIft);
         InterfaceEntry *destIe = destIft->getInterfaceByNodeInputGateId(g->getId());
         ASSERT(destIe);

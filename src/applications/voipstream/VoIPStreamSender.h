@@ -43,7 +43,7 @@ extern "C" {
 };
 
 #include "AudioOutFile.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "UDPSocket.h"
 #include "VoIPStreamPacket_m.h"
 #include "ILifecycle.h"

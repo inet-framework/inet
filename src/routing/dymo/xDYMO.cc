@@ -28,7 +28,7 @@
 #include "Ieee80211Frame_m.h"
 #endif // ifdef WITH_IEEE80211
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "INetworkProtocolControlInfo.h"
 #include "UDPControlInfo.h"
 #include "NodeOperations.h"
@@ -99,7 +99,7 @@ void DYMO::initialize(int stage)
         expungeTimer = new cMessage("ExpungeTimer");
     }
     else if (stage == INITSTAGE_NETWORK_LAYER_3) {
-        AddressResolver addressResolver;
+        L3AddressResolver addressResolver;
         cStringTokenizer tokenizer(clientAddresses);
         while (tokenizer.hasMoreTokens()) {
             const char *clientAddress = tokenizer.nextToken();

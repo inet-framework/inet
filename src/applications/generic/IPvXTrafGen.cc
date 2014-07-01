@@ -20,7 +20,7 @@
 
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "IPSocket.h"
 #include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
@@ -98,7 +98,7 @@ void IPvXTrafGen::handleMessage(cMessage *msg)
             const char *token;
             while ((token = tokenizer.nextToken()) != NULL) {
                 L3Address result;
-                AddressResolver().tryResolve(token, result);
+                L3AddressResolver().tryResolve(token, result);
                 if (result.isUnspecified())
                     EV_ERROR << "cannot resolve destination address: " << token << endl;
                 else

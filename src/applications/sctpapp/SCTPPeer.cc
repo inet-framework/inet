@@ -17,7 +17,7 @@
 
 #include "SCTPPeer.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "SCTPAssociation.h"
@@ -87,7 +87,7 @@ void SCTPPeer::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER) {
         // parameters
         const char *addressesString = par("localAddress");
-        AddressVector addresses = AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
+        AddressVector addresses = L3AddressResolver().resolve(cStringTokenizer(addressesString).asVector());
         int port = par("localPort");
         echo = par("echo");
         delay = par("echoDelay");
@@ -186,7 +186,7 @@ void SCTPPeer::connect()
     numSessions++;
     bool streamReset = par("streamReset");
     L3Address destination;
-    AddressResolver().tryResolve(connectAddress, destination);
+    L3AddressResolver().tryResolve(connectAddress, destination);
     if (destination.isUnspecified())
         EV << "cannot resolve destination address: " << connectAddress << endl;
     else {

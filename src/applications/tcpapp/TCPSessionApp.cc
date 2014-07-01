@@ -18,7 +18,7 @@
 #include "TCPSessionApp.h"
 
 #include "ByteArrayMessage.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
 

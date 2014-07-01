@@ -16,7 +16,7 @@
 
 #include "RTPApplication.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
@@ -37,7 +37,7 @@ void RTPApplication::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
 
-    // because of AddressResolver, we need to wait until interfaces are registered,
+    // because of L3AddressResolver, we need to wait until interfaces are registered,
     // address auto-assignment takes place etc.
     if (stage == INITSTAGE_LOCAL) {
         // the common name (CNAME) of this host
@@ -76,7 +76,7 @@ void RTPApplication::initialize(int stage)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
         // the ip address to connect to (unicast or multicast)
-        destinationAddress = AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
+        destinationAddress = L3AddressResolver().resolve(par("destinationAddress").stringValue()).toIPv4();
 
         EV_DETAIL << "commonName" << commonName << endl
                   << "profileName" << profileName << endl

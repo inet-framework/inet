@@ -16,7 +16,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "SCTPAssociation.h"
 #include "common.h"
 
@@ -73,15 +73,15 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
                     ipParam->setRequestCorrelationId(++state->corrIdNum);
                     if (nat) {
                         ipParam->setAddressParam(L3Address("0.0.0.0"));
-                        sctpMain->addLocalAddressToAllRemoteAddresses(this, AddressResolver().resolve(sctpMain->par("addAddress"), 1), (std::vector<L3Address>)remoteAddressList);
-                        state->localAddresses.push_back(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
+                        sctpMain->addLocalAddressToAllRemoteAddresses(this, L3AddressResolver().resolve(sctpMain->par("addAddress"), 1), (std::vector<L3Address>)remoteAddressList);
+                        state->localAddresses.push_back(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                         if (remote)
                             targetAddr = remoteAddr;
                         else
                             targetAddr = getNextAddress(getPath(remoteAddr));
                     }
                     else {
-                        ipParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
+                        ipParam->setAddressParam(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     }
                     if (ipParam->getAddressParam().getType() == L3Address::IPv6) {
                         chunkLength += 20;
@@ -103,7 +103,7 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
                     chunkLength += SCTP_ADD_IP_PARAMETER_LENGTH;
                     delParam->setParameterType(DELETE_IP_ADDRESS);
                     delParam->setRequestCorrelationId(++state->corrIdNum);
-                    delParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
+                    delParam->setAddressParam(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     if (delParam->getAddressParam().getType() == L3Address::IPv6) {
                         chunkLength += 20;
                         delParam->setBitLength((SCTP_ADD_IP_PARAMETER_LENGTH + 20) * 8);
@@ -124,7 +124,7 @@ void SCTPAssociation::sendAsconf(const char *type, const bool remote)
                     chunkLength += SCTP_ADD_IP_PARAMETER_LENGTH;
                     priParam->setParameterType(SET_PRIMARY_ADDRESS);
                     priParam->setRequestCorrelationId(++state->corrIdNum);
-                    priParam->setAddressParam(AddressResolver().resolve(sctpMain->par("addAddress"), 1));
+                    priParam->setAddressParam(L3AddressResolver().resolve(sctpMain->par("addAddress"), 1));
                     if (nat) {
                         priParam->setAddressParam(L3Address("0.0.0.0"));
                     }

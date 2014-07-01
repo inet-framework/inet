@@ -35,7 +35,7 @@ extern "C" {
 #include <iostream>
 #include <sys/stat.h>
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 #include "VoIPStreamPacket_m.h"

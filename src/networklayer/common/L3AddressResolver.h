@@ -15,8 +15,8 @@
 // License along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ADDRESSRESOLVER_H
-#define __INET_ADDRESSRESOLVER_H
+#ifndef __INET_L3ADDRESSRESOLVER_H
+#define __INET_L3ADDRESSRESOLVER_H
 
 #include <vector>
 
@@ -51,7 +51,7 @@ class GenericRoutingTable;
  *    - routerId: "router1%routerId", "R1%routerId"
  *    - interface of a host or router toward defined another node: "client1>router"
  */
-class INET_API AddressResolver
+class INET_API L3AddressResolver
 {
   protected:
     // internal
@@ -86,8 +86,8 @@ class INET_API AddressResolver
     };
 
   public:
-    AddressResolver() {}
-    virtual ~AddressResolver() {}
+    L3AddressResolver() {}
+    virtual ~L3AddressResolver() {}
 
     /**
      * Accepts dotted decimal notation ("127.0.0.1"), module name of the host
@@ -203,5 +203,5 @@ class INET_API AddressResolver
 
 } // namespace inet
 
-#endif // ifndef __INET_ADDRESSRESOLVER_H
+#endif // ifndef __INET_L3ADDRESSRESOLVER_H
 

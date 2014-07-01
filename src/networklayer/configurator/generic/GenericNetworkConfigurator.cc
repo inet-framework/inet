@@ -22,7 +22,7 @@
 #include "stlutils.h"
 #include "GenericRoutingTable.h"
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "GenericNetworkConfigurator.h"
 #include "InterfaceEntry.h"
 #include "GenericNetworkProtocolInterfaceData.h"
@@ -124,8 +124,8 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
         node->module = module;
-        node->interfaceTable = AddressResolver().findInterfaceTableOf(module);
-        node->routingTable = AddressResolver().findGenericRoutingTableOf(module);
+        node->interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
+        node->routingTable = L3AddressResolver().findGenericRoutingTableOf(module);
         if (node->routingTable && !node->routingTable->isForwardingEnabled())
             node->setWeight(DBL_MAX);
     }
@@ -135,7 +135,7 @@ void GenericNetworkConfigurator::extractWiredTopology(GenericTopology& topology)
     for (int i = 0; i < topology.getNumNodes(); i++) {
         Node *node = (Node *)topology.getNode(i);
         cModule *module = node->getModule();
-        IInterfaceTable *interfaceTable = AddressResolver().findInterfaceTableOf(module);
+        IInterfaceTable *interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *ie = interfaceTable->getInterface(j);
@@ -185,7 +185,7 @@ void GenericNetworkConfigurator::extractWiredNeighbors(Topology::LinkOut *linkOu
     Node *neighborNode = (Node *)linkOut->getRemoteNode();
     cModule *neighborModule = neighborNode->getModule();
     int neighborInputGateId = linkOut->getRemoteGateId();
-    IInterfaceTable *neighborInterfaceTable = AddressResolver().findInterfaceTableOf(neighborModule);
+    IInterfaceTable *neighborInterfaceTable = L3AddressResolver().findInterfaceTableOf(neighborModule);
     if (neighborInterfaceTable) {
         // neighbor is a host or router, just add the interface
         InterfaceEntry *neighborInterfaceEntry = neighborInterfaceTable->getInterfaceByNodeInputGateId(neighborInputGateId);
@@ -228,7 +228,7 @@ void GenericNetworkConfigurator::extractWirelessTopology(GenericTopology& topolo
     for (int nodeIndex = 0; nodeIndex < topology.getNumNodes(); nodeIndex++) {
         Node *node = (Node *)topology.getNode(nodeIndex);
         cModule *module = node->getModule();
-        IInterfaceTable *interfaceTable = AddressResolver().findInterfaceTableOf(module);
+        IInterfaceTable *interfaceTable = L3AddressResolver().findInterfaceTableOf(module);
         if (interfaceTable) {
             for (int j = 0; j < interfaceTable->getNumInterfaces(); j++) {
                 InterfaceEntry *ie = interfaceTable->getInterface(j);

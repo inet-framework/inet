@@ -33,11 +33,11 @@ DYMO_RoutingTable::DYMO_RoutingTable(DYMOFau* host, const IPv4Address& myAddr)
     dymoProcess = host;
 
     // get our routing table
-    // routingTable = AddressResolver().routingTableOf(host);
+    // routingTable = L3AddressResolver().routingTableOf(host);
     // if (!routingTable) throw cRuntimeError("No routing table found");
 
     // get our interface table
-    // IInterfaceTable *ift = AddressResolver().interfaceTableOf(host);
+    // IInterfaceTable *ift = L3AddressResolver().interfaceTableOf(host);
     // look at all interface table entries
 }
 

@@ -17,7 +17,7 @@
 
 #include <set>
 #include "IInterfaceTable.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "InterfaceEntry.h"
 #include "PatternMatcher.h"
 #include "ModuleAccess.h"
@@ -119,7 +119,7 @@ int InterfaceMatcher::findMatchingSelector(const InterfaceEntry *ie)
 
 static bool hasInterfaceTable(cModule *module)
 {
-    return AddressResolver().findInterfaceTableOf(module);
+    return L3AddressResolver().findInterfaceTableOf(module);
 }
 
 static cGate *findRemoteGate(cGate *startGate)

@@ -20,7 +20,7 @@
 
 #include "PingApp.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "PingPayload_m.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
@@ -183,8 +183,8 @@ bool PingApp::isEnabled()
 void PingApp::sendPingRequest()
 {
     if (destAddr.isUnspecified()) {
-        srcAddr = AddressResolver().resolve(par("srcAddr"));
-        destAddr = AddressResolver().resolve(par("destAddr"));
+        srcAddr = L3AddressResolver().resolve(par("srcAddr"));
+        destAddr = L3AddressResolver().resolve(par("destAddr"));
         EV_INFO << "Starting up with destination = " << destAddr << ", source = " << srcAddr << ".\n";
     }
 

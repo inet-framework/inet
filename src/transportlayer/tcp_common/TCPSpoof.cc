@@ -42,8 +42,8 @@ void TCPSpoof::sendSpoofPacket()
 {
     TCPSegment *tcpseg = new TCPSegment("spoof");
 
-    L3Address srcAddr = AddressResolver().resolve(par("srcAddress"));
-    L3Address destAddr = AddressResolver().resolve(par("destAddress"));
+    L3Address srcAddr = L3AddressResolver().resolve(par("srcAddress"));
+    L3Address destAddr = L3AddressResolver().resolve(par("destAddress"));
     int srcPort = par("srcPort");
     int destPort = par("destPort");
     bool isSYN = par("isSYN");

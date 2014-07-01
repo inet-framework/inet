@@ -22,7 +22,7 @@
 #include <string.h>
 #include <list>
 #include "INETDefs.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "UDPSocket.h"
 #include "ILifecycle.h"
 #include "LifecycleOperation.h"

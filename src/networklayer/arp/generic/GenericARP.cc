@@ -20,7 +20,7 @@
 #include "InterfaceEntry.h"
 #include "IInterfaceTable.h"
 #include "ModuleAccess.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "GenericNetworkProtocolControlInfo_m.h"
 #include "Ieee802Ctrl.h"
 
@@ -75,7 +75,7 @@ MACAddress GenericARP::mapUnicastAddress(L3Address addr)
         default:
             throw cRuntimeError("Unknown address type");
     }
-    IInterfaceTable *interfaceTable = AddressResolver().findInterfaceTableOf(getContainingNode(module));
+    IInterfaceTable *interfaceTable = L3AddressResolver().findInterfaceTableOf(getContainingNode(module));
     InterfaceEntry *interfaceEntry = interfaceTable->getInterfaceByInterfaceModule(module);
     return interfaceEntry->getMacAddress();
 }

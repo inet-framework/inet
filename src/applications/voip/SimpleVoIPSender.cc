@@ -67,7 +67,7 @@ void SimpleVoIPSender::initialize(int stage)
         if (!isOperational)
             throw cRuntimeError("This module doesn't support starting in node DOWN state");
 
-        destAddress = AddressResolver().resolve(par("destAddress").stringValue());
+        destAddress = L3AddressResolver().resolve(par("destAddress").stringValue());
 
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort);

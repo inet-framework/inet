@@ -23,7 +23,7 @@
 #include <stdio.h>
 
 #include "IPv4Address.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 
 namespace inet {
 
@@ -206,12 +206,12 @@ inline bool OSPF::LSAKeyType_Less::operator()(OSPF::LSAKeyType leftKey, OSPF::LS
 
 inline IPv4Address ipv4AddressFromAddressString(const char *charForm)
 {
-    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4).toIPv4();
+    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4).toIPv4();
 }
 
 inline IPv4Address ipv4NetmaskFromAddressString(const char *charForm)
 {
-    return AddressResolver().resolve(charForm, AddressResolver::ADDR_IPv4 | AddressResolver::ADDR_MASK).toIPv4();
+    return L3AddressResolver().resolve(charForm, L3AddressResolver::ADDR_IPv4 | L3AddressResolver::ADDR_MASK).toIPv4();
 }
 
 inline char hexCharToByte(char hex)

@@ -22,7 +22,7 @@
 #include "DHCPServer.h"
 
 #include "UDPControlInfo_m.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "InterfaceTable.h"
 #include "IPv4InterfaceData.h"
 #include "NodeOperations.h"

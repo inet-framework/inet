@@ -19,7 +19,7 @@
 // @author Zoltan Bojthe
 //
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "IInterfaceTable.h"
 
 #include "ModulePathAddress.h"
@@ -43,15 +43,15 @@
 
 namespace inet {
 
-L3Address AddressResolver::resolve(const char *s, int addrType)
+L3Address L3AddressResolver::resolve(const char *s, int addrType)
 {
     L3Address addr;
     if (!tryResolve(s, addr, addrType))
-        throw cRuntimeError("AddressResolver: address `%s' not configured (yet?)", s);
+        throw cRuntimeError("L3AddressResolver: address `%s' not configured (yet?)", s);
     return addr;
 }
 
-std::vector<L3Address> AddressResolver::resolve(std::vector<std::string> strs, int addrType)
+std::vector<L3Address> L3AddressResolver::resolve(std::vector<std::string> strs, int addrType)
 {
     std::vector<L3Address> result;
     int n = strs.size();
@@ -61,7 +61,7 @@ std::vector<L3Address> AddressResolver::resolve(std::vector<std::string> strs, i
     return result;
 }
 
-bool AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
+bool L3AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
 {
     // empty address
     result = L3Address();
@@ -136,12 +136,12 @@ bool AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
     }
 
     if (c)
-        throw cRuntimeError("AddressResolver: syntax error parsing address spec `%s'", s);
+        throw cRuntimeError("L3AddressResolver: syntax error parsing address spec `%s'", s);
 
     // find module
     cModule *mod = simulation.getModuleByPath(modname.c_str());
     if (!mod)
-        throw cRuntimeError("AddressResolver: module `%s' not found", modname.c_str());
+        throw cRuntimeError("L3AddressResolver: module `%s' not found", modname.c_str());
 
     // check protocol
     if (!protocol.empty()) {
@@ -156,7 +156,7 @@ bool AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
         else if (protocol == "moduleid")
             addrType = ADDR_MODULEID;
         else
-            throw cRuntimeError("AddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
+            throw cRuntimeError("L3AddressResolver: error parsing address spec `%s': address type must be `(ipv4)' or `(ipv6)'", s);
     }
     if (netmask)
         addrType |= ADDR_MASK;
@@ -166,7 +166,7 @@ bool AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
     if (!destnodename.empty()) {
         cModule *destnode = simulation.getModuleByPath(destnodename.c_str());
         if (!destnode)
-            throw cRuntimeError("AddressResolver: destination module `%s' not found", destnodename.c_str());
+            throw cRuntimeError("L3AddressResolver: destination module `%s' not found", destnodename.c_str());
         result = addressOf(mod, destnode, addrType);
     }
     else if (ifname.empty())
@@ -178,7 +178,7 @@ bool AddressResolver::tryResolve(const char *s, L3Address& result, int addrType)
     return !result.isUnspecified();
 }
 
-L3Address AddressResolver::routerIdOf(cModule *host)
+L3Address L3AddressResolver::routerIdOf(cModule *host)
 {
 #ifdef WITH_IPv4
     IIPv4RoutingTable *rt = routingTableOf(host);
@@ -188,23 +188,23 @@ L3Address AddressResolver::routerIdOf(cModule *host)
 #endif // ifdef WITH_IPv4
 }
 
-L3Address AddressResolver::addressOf(cModule *host, int addrType)
+L3Address L3AddressResolver::addressOf(cModule *host, int addrType)
 {
     IInterfaceTable *ift = interfaceTableOf(host);
     return getAddressFrom(ift, addrType);
 }
 
-L3Address AddressResolver::addressOf(cModule *host, const char *ifname, int addrType)
+L3Address L3AddressResolver::addressOf(cModule *host, const char *ifname, int addrType)
 {
     IInterfaceTable *ift = interfaceTableOf(host);
     InterfaceEntry *ie = ift->getInterfaceByName(ifname);
     if (ie)
         return getAddressFrom(ie, addrType);
 
-    throw cRuntimeError("AddressResolver: no interface called `%s' in interface table of `%s'", ifname, host->getFullPath().c_str());
+    throw cRuntimeError("L3AddressResolver: no interface called `%s' in interface table of `%s'", ifname, host->getFullPath().c_str());
 }
 
-L3Address AddressResolver::addressOf(cModule *host, cModule *destmod, int addrType)
+L3Address L3AddressResolver::addressOf(cModule *host, cModule *destmod, int addrType)
 {
     IInterfaceTable *ift = interfaceTableOf(host);
     for (int i = 0; i < ift->getNumInterfaces(); i++) {
@@ -217,10 +217,10 @@ L3Address AddressResolver::addressOf(cModule *host, cModule *destmod, int addrTy
 
         }
     }
-    throw cRuntimeError("AddressResolver: no interface connected to `%s' module in interface table of `%s'", destmod->getFullPath().c_str(), host->getFullPath().c_str());
+    throw cRuntimeError("L3AddressResolver: no interface connected to `%s' module in interface table of `%s'", destmod->getFullPath().c_str(), host->getFullPath().c_str());
 }
 
-L3Address AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
+L3Address L3AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
 {
     L3Address ret;
     bool netmask = addrType & ADDR_MASK;
@@ -235,11 +235,11 @@ L3Address AddressResolver::getAddressFrom(IInterfaceTable *ift, int addrType)
     else if ((addrType & ADDR_MODULEID) && getModuleIdAddressFrom(ret, ift, netmask))
         return ret;
     else
-        throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
+        throw cRuntimeError("L3AddressResolver: unknown addrType %d", addrType);
     return ret;
 }
 
-L3Address AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
+L3Address L3AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
 {
     L3Address ret;
     bool mask = addrType & ADDR_MASK;
@@ -255,15 +255,15 @@ L3Address AddressResolver::getAddressFrom(InterfaceEntry *ie, int addrType)
     else if ((addrType & ADDR_MODULEID) && getInterfaceModuleIdAddress(ret, ie, mask))
         return ret;
     else
-        throw cRuntimeError("AddressResolver: unknown addrType %d", addrType);
+        throw cRuntimeError("L3AddressResolver: unknown addrType %d", addrType);
 
     return ret;
 }
 
-bool AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
-        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
 #ifdef WITH_IPv4
@@ -279,11 +279,11 @@ bool AddressResolver::getIPv4AddressFrom(L3Address& retAddr, IInterfaceTable *if
     return false;
 }
 
-bool AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     // browse interfaces and pick a globally routable address
     if (ift->getNumInterfaces() == 0)
-        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
 #ifndef WITH_IPv6
@@ -311,10 +311,10 @@ bool AddressResolver::getIPv6AddressFrom(L3Address& retAddr, IInterfaceTable *if
 #endif // ifndef WITH_IPv6
 }
 
-bool AddressResolver::getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
-        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
@@ -328,10 +328,10 @@ bool AddressResolver::getMACAddressFrom(L3Address& retAddr, IInterfaceTable *ift
     return false;
 }
 
-bool AddressResolver::getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getModulePathAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
-        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
@@ -345,10 +345,10 @@ bool AddressResolver::getModulePathAddressFrom(L3Address& retAddr, IInterfaceTab
     return false;
 }
 
-bool AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
+bool L3AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable *ift, bool netmask)
 {
     if (ift->getNumInterfaces() == 0)
-        throw cRuntimeError("AddressResolver: interface table `%s' has no interface registered "
+        throw cRuntimeError("L3AddressResolver: interface table `%s' has no interface registered "
                             "(yet? try in a later init stage!)", ift->getFullPath().c_str());
 
     // choose first usable interface address (configured for generic, non-loopback if, addr non-null)
@@ -362,7 +362,7 @@ bool AddressResolver::getModuleIdAddressFrom(L3Address& retAddr, IInterfaceTable
     return false;
 }
 
-bool AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv6
     if (netmask)
@@ -378,7 +378,7 @@ bool AddressResolver::getInterfaceIPv6Address(L3Address& ret, InterfaceEntry *ie
     return false;
 }
 
-bool AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
 #ifdef WITH_IPv4
     if (ie->ipv4Data()) {
@@ -391,7 +391,7 @@ bool AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie
     else {
         // find address in the configurator's notebook
         // TODO: how do we know where is the configurator? get the path from a NED parameter?
-        AddressResolver *configurator = dynamic_cast<AddressResolver *>(simulation.getModuleByPath("configurator"));
+        L3AddressResolver *configurator = dynamic_cast<L3AddressResolver *>(simulation.getModuleByPath("configurator"));
         if (configurator)
             return configurator->getInterfaceIPv4Address(ret, ie, netmask);
     }
@@ -399,7 +399,7 @@ bool AddressResolver::getInterfaceIPv4Address(L3Address& ret, InterfaceEntry *ie
     return false;
 }
 
-bool AddressResolver::getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
     if (!ie->getMacAddress().isUnspecified() && false) {
         ret = ie->getMacAddress();
@@ -408,55 +408,55 @@ bool AddressResolver::getInterfaceMACAddress(L3Address& ret, InterfaceEntry *ie,
     return false;
 }
 
-bool AddressResolver::getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceModulePathAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
     ret = ie->getModulePathAddress();
     return true;
 }
 
-bool AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
+bool L3AddressResolver::getInterfaceModuleIdAddress(L3Address& ret, InterfaceEntry *ie, bool netmask)
 {
     ret = ie->getModuleIdAddress();
     return true;
 }
 
-IInterfaceTable *AddressResolver::interfaceTableOf(cModule *host)
+IInterfaceTable *L3AddressResolver::interfaceTableOf(cModule *host)
 {
     // find IInterfaceTable
     cModule *mod = host->getSubmodule("interfaceTable");
     if (!mod)
-        throw cRuntimeError("AddressResolver: IInterfaceTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: IInterfaceTable not found as submodule "
                             " `interfaceTable' in host/router `%s'", host->getFullPath().c_str());
 
     return check_and_cast<IInterfaceTable *>(mod);
 }
 
-IIPv4RoutingTable *AddressResolver::routingTableOf(cModule *host)
+IIPv4RoutingTable *L3AddressResolver::routingTableOf(cModule *host)
 {
     IIPv4RoutingTable *mod = findIPv4RoutingTableOf(host);
     if (!mod)
-        throw cRuntimeError("AddressResolver: IIPv4RoutingTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: IIPv4RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
 
-IPv6RoutingTable *AddressResolver::routingTable6Of(cModule *host)
+IPv6RoutingTable *L3AddressResolver::routingTable6Of(cModule *host)
 {
     // find IPv6RoutingTable
     IPv6RoutingTable *mod = findIPv6RoutingTableOf(host);
     if (!mod)
-        throw cRuntimeError("AddressResolver: IPv6RoutingTable not found as submodule "
+        throw cRuntimeError("L3AddressResolver: IPv6RoutingTable not found as submodule "
                             " `routingTable' in host/router `%s'", host->getFullPath().c_str());
     return mod;
 }
 
-IInterfaceTable *AddressResolver::findInterfaceTableOf(cModule *host)
+IInterfaceTable *L3AddressResolver::findInterfaceTableOf(cModule *host)
 {
     cModule *mod = host->getSubmodule("interfaceTable");
     return dynamic_cast<IInterfaceTable *>(mod);
 }
 
-IIPv4RoutingTable *AddressResolver::findIPv4RoutingTableOf(cModule *host)
+IIPv4RoutingTable *L3AddressResolver::findIPv4RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv4
     // KLUDGE: TODO: look deeper temporarily
@@ -469,7 +469,7 @@ IIPv4RoutingTable *AddressResolver::findIPv4RoutingTableOf(cModule *host)
 #endif // ifdef WITH_IPv4
 }
 
-IPv6RoutingTable *AddressResolver::findIPv6RoutingTableOf(cModule *host)
+IPv6RoutingTable *L3AddressResolver::findIPv6RoutingTableOf(cModule *host)
 {
 #ifdef WITH_IPv6
     // KLUDGE: TODO: look deeper temporarily
@@ -482,7 +482,7 @@ IPv6RoutingTable *AddressResolver::findIPv6RoutingTableOf(cModule *host)
 #endif // ifdef WITH_IPv6
 }
 
-GenericRoutingTable *AddressResolver::findGenericRoutingTableOf(cModule *host)
+GenericRoutingTable *L3AddressResolver::findGenericRoutingTableOf(cModule *host)
 {
 #ifdef WITH_GENERIC
     // KLUDGE: TODO: look deeper temporarily
@@ -495,7 +495,7 @@ GenericRoutingTable *AddressResolver::findGenericRoutingTableOf(cModule *host)
 #endif // ifdef WITH_GENERIC
 }
 
-cModule *AddressResolver::findHostWithAddress(const L3Address& add)
+cModule *L3AddressResolver::findHostWithAddress(const L3Address& add)
 {
     if (add.isUnspecified() || add.isMulticast())
         return NULL;
@@ -507,7 +507,7 @@ cModule *AddressResolver::findHostWithAddress(const L3Address& add)
 
     for (int i = 0; i < topo.getNumNodes(); i++) {
         cModule *mod = topo.getNode(i)->getModule();
-        IInterfaceTable *itable = AddressResolver().findInterfaceTableOf(mod);
+        IInterfaceTable *itable = L3AddressResolver().findInterfaceTableOf(mod);
         if (itable != NULL) {
             for (int i = 0; i < itable->getNumInterfaces(); i++) {
                 InterfaceEntry *entry = itable->getInterface(i);

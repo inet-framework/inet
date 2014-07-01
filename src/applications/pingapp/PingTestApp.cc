@@ -23,7 +23,7 @@
 #include "IL3AddressType.h"
 #include "IInterfaceTable.h"
 #include "INetworkProtocolControlInfo.h"
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "PingPayload_m.h"
 
 #ifdef WITH_IPv4
@@ -99,7 +99,7 @@ void PingTestApp::handleMessage(cMessage *msg)
 {
     if (msg->isSelfMessage()) {
         if (sendSeqNo == 0) {
-            srcAddr = AddressResolver().resolve(par("srcAddr"));
+            srcAddr = L3AddressResolver().resolve(par("srcAddr"));
             const char *destAddrs = par("destAddresses");
             if (!strcmp(destAddrs, "*")) {
                 destAddresses = getAllAddresses();
@@ -109,7 +109,7 @@ void PingTestApp::handleMessage(cMessage *msg)
                 const char *token;
 
                 while ((token = tokenizer.nextToken()) != NULL) {
-                    L3Address addr = AddressResolver().resolve(token);
+                    L3Address addr = L3AddressResolver().resolve(token);
                     destAddresses.push_back(addr);
                 }
             }

@@ -17,7 +17,7 @@
 
 #include "TCPGenericSrvApp.h"
 
-#include "AddressResolver.h"
+#include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
 #include "TCPSocket.h"
@@ -53,7 +53,7 @@ void TCPGenericSrvApp::initialize(int stage)
         TCPSocket socket;
         socket.setOutputGate(gate("tcpOut"));
         socket.setDataTransferMode(TCP_TRANSFER_OBJECT);
-        socket.bind(localAddress[0] ? AddressResolver().resolve(localAddress) : L3Address(), localPort);
+        socket.bind(localAddress[0] ? L3AddressResolver().resolve(localAddress) : L3Address(), localPort);
         socket.listen();
 
         bool isOperational;
