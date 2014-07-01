@@ -27,6 +27,7 @@ Sphere::Sphere(double radius) :
 
 bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const
 {
+    // NOTE: based on http://paulbourke.net/geometry/circlesphere/
     Coord point1 = lineSegment.getPoint1();
     Coord point2 = lineSegment.getPoint2();
     double a, b, c;
@@ -39,14 +40,23 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     if (abs(a) > EPSILON && bb4ac >= 0) {
         double alpha1 = (-b + sqrt(bb4ac)) / (2 * a);
         double alpha2 = (-b - sqrt(bb4ac)) / (2 * a);
-        // TODO: complete for other cases, e.g. when there's only 1 real intersection point
-        if (0 <= alpha1 && alpha1 <= 1 && 0 <= alpha2 && alpha2 <= 1) {
+        if (alpha1 < 0)
+            alpha1 = 0;
+        else if (alpha1 > 1)
+            alpha1 = 1;
+        if (alpha2 < 0)
+            alpha2 = 0;
+        else if (alpha2 > 1)
+            alpha2 = 1;
+        if (alpha1 == alpha2)
+            return false;
+        else {
             intersection1 = point1 * (1 - alpha1) + point2 * alpha1;
             intersection2 = point1 * (1 - alpha2) + point2 * alpha2;
             return true;
         }
-        else
-            return false;
+//        else
+//            return false;
     }
     else
         return false;
