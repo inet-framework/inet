@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void FlatTransmitterBase::initialize(int stage)
 {
@@ -50,3 +50,5 @@ void FlatTransmitterBase::initialize(int stage)
 }
 
 
+
+}

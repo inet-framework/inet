@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(NakagamiFading);
 
@@ -56,3 +56,5 @@ double NakagamiFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
 }
 
 
+
+}

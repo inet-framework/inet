@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void SNIRReceiverBase::initialize(int stage)
 {
@@ -63,3 +63,5 @@ const IReceptionDecision *SNIRReceiverBase::computeReceptionDecision(const IList
 }
 
 
+
+}

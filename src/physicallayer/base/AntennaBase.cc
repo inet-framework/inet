@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void AntennaBase::initialize(int stage)
 {
@@ -32,3 +32,5 @@ void AntennaBase::initialize(int stage)
 }
 
 
+
+}

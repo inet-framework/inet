@@ -19,9 +19,11 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 
 }
 
 
+
+}

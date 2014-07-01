@@ -22,7 +22,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(Radio);
 
@@ -411,6 +411,8 @@ void Radio::updateDisplayString()
             displayString.setTagArg(tag, 2, "blue");
         }
     }
+}
+
 }
 
 }

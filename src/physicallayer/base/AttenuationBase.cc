@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const
 {
@@ -37,3 +37,5 @@ EulerAngles AttenuationBase::computeTransmissionDirection(const ITransmission *t
 }
 
 
+
+}

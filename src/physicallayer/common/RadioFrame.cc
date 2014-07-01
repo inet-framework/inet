@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void RadioFrame::printToStream(std::ostream &stream) const
 {
@@ -30,3 +30,5 @@ void RadioFrame::printToStream(std::ostream &stream) const
 }
 
 
+
+}

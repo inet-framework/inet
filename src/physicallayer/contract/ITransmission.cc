@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 int ITransmission::nextId = 0;
 
@@ -27,3 +27,5 @@ int ITransmission::nextId = 0;
 }
 
 
+
+}

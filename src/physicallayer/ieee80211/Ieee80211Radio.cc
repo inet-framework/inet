@@ -23,7 +23,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(Ieee80211Radio);
 
@@ -75,3 +75,5 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
 }
 
 
+
+}

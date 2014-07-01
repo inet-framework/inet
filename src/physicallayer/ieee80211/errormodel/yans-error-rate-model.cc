@@ -22,7 +22,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 YansErrorRateModel::YansErrorRateModel()
 {}
@@ -298,3 +298,5 @@ YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, uint32_
 }
 
 
+
+}

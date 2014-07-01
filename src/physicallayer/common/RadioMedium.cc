@@ -25,7 +25,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(RadioMedium);
 
@@ -845,3 +845,5 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
 }
 
 
+
+}

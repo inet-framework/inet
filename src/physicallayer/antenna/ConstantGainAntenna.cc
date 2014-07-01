@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(ConstantGainAntenna);
 
@@ -39,3 +39,5 @@ void ConstantGainAntenna::initialize(int stage)
 }
 
 
+
+}

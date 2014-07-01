@@ -23,7 +23,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(IdealReceiver);
 
@@ -99,3 +99,5 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
 }
 
 
+
+}

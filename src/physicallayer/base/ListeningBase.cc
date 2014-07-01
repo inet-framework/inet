@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void ListeningBase::printToStream(std::ostream &stream) const
 {
@@ -30,3 +30,5 @@ void ListeningBase::printToStream(std::ostream &stream) const
 }
 
 
+
+}

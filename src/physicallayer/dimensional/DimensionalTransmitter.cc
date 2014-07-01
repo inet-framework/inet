@@ -23,7 +23,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(DimensionalTransmitter);
 
@@ -53,3 +53,5 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
 }
 
 
+
+}

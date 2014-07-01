@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) const
 {
@@ -36,3 +36,5 @@ W DimensionalReception::computeMinPower(simtime_t startTime, simtime_t endTime) 
 }
 
 
+
+}

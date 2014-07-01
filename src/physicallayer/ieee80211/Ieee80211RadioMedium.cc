@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(Ieee80211RadioMedium);
 
@@ -36,3 +36,5 @@ void Ieee80211RadioMedium::initialize(int stage)
 }
 
 
+
+}

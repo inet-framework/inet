@@ -21,7 +21,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(IdealTransmitter);
 
@@ -60,3 +60,5 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
 }
 
 
+
+}

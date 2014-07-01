@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(RayleighFading);
 
@@ -43,3 +43,5 @@ double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
 }
 
 
+
+}

@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(RicianFading);
 
@@ -60,3 +60,5 @@ double RicianFading::computePathLoss(mps propagationSpeed, Hz frequency, m dista
 }
 
 
+
+}

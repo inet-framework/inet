@@ -21,7 +21,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(ScalarBackgroundNoise);
 
@@ -49,3 +49,5 @@ const INoise *ScalarBackgroundNoise::computeNoise(const IListening *listening) c
 }
 
 
+
+}

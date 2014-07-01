@@ -18,7 +18,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(SUIPathLoss);
 
@@ -91,3 +91,5 @@ double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distan
 }
 
 
+
+}

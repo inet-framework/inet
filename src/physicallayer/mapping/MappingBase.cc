@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 //---Dimension implementation-----------------------------
 
@@ -439,3 +439,5 @@ void SimpleConstMapping::initializeArguments(const Argument& min,
 }
 
 
+
+}

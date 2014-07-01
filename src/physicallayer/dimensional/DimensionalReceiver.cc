@@ -23,7 +23,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(DimensionalReceiver);
 
@@ -85,3 +85,5 @@ double DimensionalReceiver::computeMinSNIR(const IReception *reception, const IN
 }
 
 
+
+}

@@ -22,7 +22,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 NistErrorRateModel::NistErrorRateModel()
 {
@@ -229,3 +229,5 @@ double NistErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, 
 }
 
 
+
+}

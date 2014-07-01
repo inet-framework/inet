@@ -19,7 +19,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(IsotropicAntenna);
 
@@ -31,3 +31,5 @@ IsotropicAntenna::IsotropicAntenna() :
 }
 
 
+
+}

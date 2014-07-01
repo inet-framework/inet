@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(ImmediatePropagation);
 
@@ -45,3 +45,5 @@ void ImmediatePropagation::printToStream(std::ostream &stream) const
 }
 
 
+
+}

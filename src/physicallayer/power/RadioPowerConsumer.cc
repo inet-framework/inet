@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 RadioPowerConsumer::RadioPowerConsumer()
 {
@@ -113,3 +113,5 @@ double RadioPowerConsumer::getPowerConsumption()
 }
 
 
+
+}

@@ -27,7 +27,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 void BerParseFile::clearBerTable()
 {
@@ -401,3 +401,5 @@ BerParseFile::~BerParseFile()
 }
 
 
+
+}

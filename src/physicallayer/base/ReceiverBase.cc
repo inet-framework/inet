@@ -21,7 +21,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 bool ReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
 {
@@ -65,3 +65,5 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
 }
 
 
+
+}

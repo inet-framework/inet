@@ -22,7 +22,7 @@
 
 namespace inet {
 
-using namespace physicallayer;
+namespace physicallayer {
 
 Define_Module(ScalarTransmitter);
 
@@ -55,3 +55,5 @@ const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmi
 }
 
 
+
+}
