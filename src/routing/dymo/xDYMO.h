@@ -23,7 +23,7 @@
 #include <map>
 #include <omnetpp.h>
 #include "ILifecycle.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NodeStatus.h"
@@ -79,7 +79,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     // context
     cModule *host;
     NodeStatus *nodeStatus;
-    IAddressType *addressType;
+    IL3AddressType *addressType;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;
     INetfilter *networkProtocol;

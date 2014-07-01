@@ -19,13 +19,13 @@
 #define __INET_IPV6ADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IPv6Address.h"
 #include "IPv6ControlInfo.h"
 
 namespace inet {
 
-class INET_API IPv6AddressType : public IAddressType
+class INET_API IPv6AddressType : public IL3AddressType
 {
   public:
     static IPv6AddressType INSTANCE;

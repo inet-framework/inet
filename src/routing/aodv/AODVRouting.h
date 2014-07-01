@@ -20,7 +20,7 @@
 
 #include "INETDefs.h"
 #include "IInterfaceTable.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IRoutingTable.h"
 #include "INetfilter.h"
 #include "ILifecycle.h"
@@ -67,7 +67,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     };
 
     // context
-    IAddressType *addressType;    // to support both IPv4 and v6 addresses.
+    IL3AddressType *addressType;    // to support both IPv4 and v6 addresses.
 
     // environment
     cModule *host;

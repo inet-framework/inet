@@ -19,7 +19,7 @@
 #include "SCTP.h"
 #include "SCTPAssociation.h"
 #include "SCTPCommand_m.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 #include "IPSocket.h"
 #include "ModuleAccess.h"

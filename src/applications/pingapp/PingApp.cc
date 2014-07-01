@@ -24,7 +24,7 @@
 #include "PingPayload_m.h"
 #include "ModuleAccess.h"
 #include "NodeOperations.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
@@ -212,7 +212,7 @@ void PingApp::sendPingRequest()
 
 void PingApp::sendToICMP(PingPayload *msg, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit)
 {
-    IAddressType *addressType = destAddr.getAddressType();
+    IL3AddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(srcAddr);
     controlInfo->setDestinationAddress(destAddr);

@@ -19,13 +19,13 @@
 #define __INET_IPV4ADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IPv4Address.h"
 #include "IPv4ControlInfo.h"
 
 namespace inet {
 
-class INET_API IPv4AddressType : public IAddressType
+class INET_API IPv4AddressType : public IL3AddressType
 {
   public:
     static IPv4AddressType INSTANCE;

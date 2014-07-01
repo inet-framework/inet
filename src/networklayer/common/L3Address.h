@@ -28,7 +28,7 @@
 
 namespace inet {
 
-class IAddressType;
+class IL3AddressType;
 
 /**
  * This class provides the generic interface for network addresses. For efficiency reasons the
@@ -81,7 +81,7 @@ class INET_API L3Address
 
     std::string str() const;
     AddressType getType() const;
-    IAddressType *getAddressType() const;
+    IL3AddressType *getAddressType() const;
 
     /**
      * Get the first prefixLength bits of the address, with the rest set to zero.

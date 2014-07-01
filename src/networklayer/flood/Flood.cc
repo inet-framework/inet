@@ -21,7 +21,7 @@
  **************************************************************************/
 
 #include "Flood.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"

@@ -13,7 +13,7 @@
 
 #include "TCPSpoof.h"
 
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
 
@@ -66,7 +66,7 @@ void TCPSpoof::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     EV_INFO << "Sending: ";
     //printSegmentBrief(tcpseg);
 
-    IAddressType *addressType = dest.getAddressType();
+    IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
     controlInfo->setSourceAddress(src);

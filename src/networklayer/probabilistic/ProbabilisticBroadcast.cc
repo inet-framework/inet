@@ -10,7 +10,7 @@
 
 #include "SimpleLinkLayerControlInfo.h"
 #include "SimpleNetworkProtocolControlInfo.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "MACAddress.h"
 
 namespace inet {

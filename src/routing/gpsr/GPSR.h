@@ -23,7 +23,7 @@
 #include "Coord.h"
 #include "ILifecycle.h"
 #include "IMobility.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetfilter.h"
 #include "IRoutingTable.h"
 #include "NodeStatus.h"
@@ -58,7 +58,7 @@ class INET_API GPSR : public cSimpleModule, public ILifecycle, public cListener,
     cModule *host;
     NodeStatus *nodeStatus;
     IMobility *mobility;
-    IAddressType *addressType;
+    IL3AddressType *addressType;
     IInterfaceTable *interfaceTable;
     IRoutingTable *routingTable;    // TODO: delete when necessary functions are moved to interface table
     INetfilter *networkProtocol;

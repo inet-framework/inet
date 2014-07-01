@@ -19,13 +19,13 @@
 #define __INET_MODULEIDADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "ModuleIdAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
-class INET_API ModuleIdAddressType : public IAddressType
+class INET_API ModuleIdAddressType : public IL3AddressType
 {
   public:
     static ModuleIdAddressType INSTANCE;

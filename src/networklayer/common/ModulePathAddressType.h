@@ -19,13 +19,13 @@
 #define __INET_MODULEPATHADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "ModulePathAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
-class INET_API ModulePathAddressType : public IAddressType
+class INET_API ModulePathAddressType : public IL3AddressType
 {
   public:
     static ModulePathAddressType INSTANCE;

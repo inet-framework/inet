@@ -25,7 +25,7 @@
 #include "SCTPCommand_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IPv4RoutingTable.h"
 #include "IPv6RoutingTable.h"
 #include "InterfaceTable.h"
@@ -340,7 +340,7 @@ void SCTPAssociation::sendToIP(SCTPMessage *sctpmsg,
         sctpMain->udpSocket.sendTo(sctpmsg, remoteAddr, SCTP_UDP_PORT);
     }
     else {
-        IAddressType *addressType = dest.getAddressType();
+        IL3AddressType *addressType = dest.getAddressType();
         INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
         controlInfo->setTransportProtocol(IP_PROT_SCTP);
         //controlInfo->setSourceAddress();

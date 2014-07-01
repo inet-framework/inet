@@ -29,7 +29,7 @@
 #include "ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IPSocket.h"
 #include "INetworkProtocolControlInfo.h"
 #include "IPv6ControlInfo.h"
@@ -872,7 +872,7 @@ void TCP_NSC::sendToIP(const void *dataP, int lenP)
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP << " from " << src
              << " to " << dest << "\n";
 
-    IAddressType *addressType = dest.getAddressType();
+    IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
     controlInfo->setSourceAddress(src);

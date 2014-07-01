@@ -22,7 +22,7 @@
 #include "NodeOperations.h"
 #include "AddressResolver.h"
 #include "IPSocket.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
@@ -187,7 +187,7 @@ void IPvXTrafGen::sendPacket()
 
     L3Address destAddr = chooseDestAddr();
 
-    IAddressType *addressType = destAddr.getAddressType();
+    IL3AddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     //controlInfo->setSourceAddress();
     controlInfo->setDestinationAddress(destAddr);

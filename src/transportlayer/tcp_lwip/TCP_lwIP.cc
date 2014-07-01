@@ -30,7 +30,7 @@
 #include "ICMPv6Message_m.h"
 #endif // ifdef WITH_IPv6
 
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IPSocket.h"
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
@@ -609,7 +609,7 @@ void TCP_lwIP::ip_output(LwipTcpLayer::tcp_pcb *pcb, L3Address const& srcP,
     EV_TRACE << this << ": Sending: conn=" << conn << ", data: " << dataP << " of len " << lenP
              << " from " << srcP << " to " << destP << "\n";
 
-    IAddressType *addressType = destP.getAddressType();
+    IL3AddressType *addressType = destP.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
     controlInfo->setSourceAddress(srcP);

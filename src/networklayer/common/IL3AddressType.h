@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IADDRESSTYPE_H
-#define __INET_IADDRESSTYPE_H
+#ifndef __INET_IL3ADDRESSTYPE_H
+#define __INET_IL3ADDRESSTYPE_H
 
 #include "INETDefs.h"
 #include "L3Address.h"
@@ -28,11 +28,11 @@ namespace inet {
 /**
  * This class provides the abstract interface for different address types.
  */
-class INET_API IAddressType
+class INET_API IL3AddressType
 {
   public:
-    IAddressType() {}
-    virtual ~IAddressType() {}
+    IL3AddressType() {}
+    virtual ~IL3AddressType() {}
 
     virtual int getMaxPrefixLength() const = 0;
     virtual L3Address getUnspecifiedAddress() const = 0;
@@ -48,5 +48,5 @@ class INET_API IAddressType
 
 } // namespace inet
 
-#endif // ifndef __INET_IADDRESSTYPE_H
+#endif // ifndef __INET_IL3ADDRESSTYPE_H
 

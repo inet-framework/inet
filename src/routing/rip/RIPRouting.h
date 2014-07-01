@@ -140,7 +140,7 @@ class INET_API RIPRouting : public cSimpleModule, protected cListener, public IL
     cModule *host;    // the host module that owns this module
     IInterfaceTable *ift;    // interface table of the host
     IRoutingTable *rt;    // routing table from which routes are imported and to which learned routes are added
-    IAddressType *addressType;    // address type of the routing table
+    IL3AddressType *addressType;    // address type of the routing table
     // state
     InterfaceVector ripInterfaces;    // interfaces on which RIP is used
     RouteVector ripRoutes;    // all advertised routes (imported or learned)

@@ -20,7 +20,7 @@
 #include "PingTestApp.h"
 
 #include "InterfaceEntry.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "IInterfaceTable.h"
 #include "INetworkProtocolControlInfo.h"
 #include "AddressResolver.h"
@@ -213,7 +213,7 @@ void PingTestApp::scheduleNextPing(cMessage *timer)
 
 void PingTestApp::sendToICMP(cMessage *msg, const L3Address& destAddr, const L3Address& srcAddr, int hopLimit)
 {
-    IAddressType *addressType = destAddr.getAddressType();
+    IL3AddressType *addressType = destAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setSourceAddress(srcAddr);
     controlInfo->setDestinationAddress(destAddr);

@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <functional>
 
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "InterfaceMatcher.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"

@@ -29,7 +29,7 @@
 
 #include "WiseRoute.h"
 #include "FWMath.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "MACAddress.h"
 #include "AddressResolver.h"
 #include "FindModule.h"

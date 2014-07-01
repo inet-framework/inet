@@ -26,7 +26,7 @@
 #include "IPv4ControlInfo.h"
 #include "IPv6ControlInfo.h"
 #include "GenericNetworkProtocolControlInfo.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "ModuleAccess.h"
 
 #ifdef WITH_IPv4
@@ -801,7 +801,7 @@ void UDP::sendDown(cPacket *appData, const L3Address& srcAddr, ushort srcPort, c
     else {
         // send to generic
         EV_INFO << "Sending app packet " << appData->getName() << endl;
-        IAddressType *addressType = destAddr.getAddressType();
+        IL3AddressType *addressType = destAddr.getAddressType();
         INetworkProtocolControlInfo *ipControlInfo = addressType->createNetworkProtocolControlInfo();
         ipControlInfo->setTransportProtocol(IP_PROT_UDP);
         ipControlInfo->setSourceAddress(srcAddr);

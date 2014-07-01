@@ -19,13 +19,13 @@
 #define __INET_MACADDRESSTYPE_H
 
 #include "INETDefs.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "MACAddress.h"
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
 
-class INET_API MACAddressType : public IAddressType
+class INET_API MACAddressType : public IL3AddressType
 {
   public:
     static MACAddressType INSTANCE;

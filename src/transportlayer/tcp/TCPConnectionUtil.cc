@@ -24,7 +24,7 @@
 #include "TCPConnection.h"
 #include "TCPSegment.h"
 #include "TCPCommand_m.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 #include "INetworkProtocolControlInfo.h"
 #include "IPProtocolId_m.h"
 #include "TCPSendQueue.h"
@@ -250,7 +250,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg)
 
     // TBD reuse next function for sending
 
-    IAddressType *addressType = remoteAddr.getAddressType();
+    IL3AddressType *addressType = remoteAddr.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
     controlInfo->setSourceAddress(localAddr);
@@ -264,7 +264,7 @@ void TCPConnection::sendToIP(TCPSegment *tcpseg, L3Address src, L3Address dest)
     EV_INFO << "Sending: ";
     printSegmentBrief(tcpseg);
 
-    IAddressType *addressType = dest.getAddressType();
+    IL3AddressType *addressType = dest.getAddressType();
     INetworkProtocolControlInfo *controlInfo = addressType->createNetworkProtocolControlInfo();
     controlInfo->setTransportProtocol(IP_PROT_TCP);
     controlInfo->setSourceAddress(src);

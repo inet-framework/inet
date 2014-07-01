@@ -21,7 +21,7 @@
 #include "INETDefs.h"
 #include "IScriptable.h"
 #include "IRoutingTable.h"
-#include "IAddressType.h"
+#include "IL3AddressType.h"
 
 using namespace std;
 
