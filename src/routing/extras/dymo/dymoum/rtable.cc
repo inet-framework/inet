@@ -682,8 +682,6 @@ int NS_CLASS rtable_expire_timeout_all(struct in_addr nxthop_addr, u_int32_t ifi
 }
 #endif
 
-
-
 } // namespace inet
 
 

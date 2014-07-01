@@ -29,6 +29,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 const double EtherMACBase::SPEED_OF_LIGHT_IN_CABLE = 200000000.0;
 
 /*
@@ -714,5 +715,6 @@ int EtherMACBase::InnerQueue::packetCompare(cObject *a, cObject *b)
     int bp = (dynamic_cast<EtherPauseFrame *>(b) == NULL) ? 1 : 0;
     return ap - bp;
 }
+
 } // namespace inet
 

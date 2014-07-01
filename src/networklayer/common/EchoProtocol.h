@@ -23,6 +23,7 @@
 #include "EchoPacket_m.h"
 
 namespace inet {
+
 class PingPayload;
 
 /**
@@ -45,6 +46,7 @@ class INET_API EchoProtocol : public cSimpleModule
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ECHOPROTOCOL_H

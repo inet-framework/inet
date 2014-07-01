@@ -26,6 +26,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
@@ -258,5 +259,6 @@ uint16_t TCPSerializer::checksum(const void *addr, unsigned int count,
 
     return (uint16_t) ~sum;
 }
+
 } // namespace inet
 

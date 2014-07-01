@@ -553,8 +553,6 @@ OLSR_state::~OLSR_state()
     clear_all();
 }
 
-
-
 } // namespace inet
 
 

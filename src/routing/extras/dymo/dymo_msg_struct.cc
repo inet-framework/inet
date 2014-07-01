@@ -7,7 +7,6 @@
 
 namespace inet {
 
-
 #define DYMO_RE_TYPE    1
 #define DYMO_RERR_TYPE  2
 #define DYMO_UERR_TYPE  3
@@ -359,8 +358,6 @@ std::string DYMO_element::detailedInfo() const
 
     return out.str();
 }
-
-
 
 } // namespace inet
 

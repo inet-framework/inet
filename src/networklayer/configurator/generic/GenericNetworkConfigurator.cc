@@ -30,6 +30,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(GenericNetworkConfigurator);
 
 inline bool isEmpty(const char *s) { return !s || !s[0]; }
@@ -493,5 +494,6 @@ void GenericNetworkConfigurator::addStaticRoutes(GenericTopology& topology)
     // print some timing information
     printTimeSpentUsingDuration("calculateShortestPaths", calculateShortestPathsDuration);
 }
+
 } // namespace inet
 

@@ -27,6 +27,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::NeighborStateFull::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
@@ -74,5 +75,6 @@ void OSPF::NeighborStateFull::processEvent(OSPF::Neighbor *neighbor, OSPF::Neigh
         neighbor->deleteLastSentDDPacket();
     }
 }
+
 } // namespace inet
 

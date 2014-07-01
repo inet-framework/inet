@@ -26,6 +26,7 @@
 #include "AddressResolver.h"
 
 namespace inet {
+
 // global constants
 #define LS_REFRESH_TIME                        1800
 #define MIN_LS_INTERVAL                        5
@@ -59,6 +60,7 @@ namespace inet {
 #define OSPF_BGP_DEFAULT_COST                  1
 
 namespace OSPF {
+
 typedef unsigned long Metric;
 
 enum AuthenticationType {
@@ -162,6 +164,7 @@ const IPv4AddressRange NULL_IPV4ADDRESSRANGE(IPv4Address(0, 0, 0, 0), IPv4Addres
 const DesignatedRouterID NULL_DESIGNATEDROUTERID = {
     IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)
 };
+
 } // namespace OSPF
 
 inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
@@ -291,6 +294,7 @@ inline char hexPairToByte(char upperHex, char lowerHex)
 {
     return (hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex));
 }
+
 } // namespace inet
 
 #endif    // __COMMON_HPP__

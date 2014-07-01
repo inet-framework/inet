@@ -21,6 +21,7 @@
 #include "IReceptionDecision.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 {
@@ -64,6 +65,7 @@ class INET_API ReceptionDecision : public IReceptionDecision, public cObject
 
     virtual bool isSynchronizationSuccessful() const { return isSynchronizationSuccessful_; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

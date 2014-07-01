@@ -21,6 +21,7 @@
 #include "FlatNoiseBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarNoise : public FlatNoiseBase
 {
@@ -38,6 +39,7 @@ class INET_API ScalarNoise : public FlatNoiseBase
     virtual const std::map<simtime_t, W> *getPowerChanges() const { return powerChanges; }
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

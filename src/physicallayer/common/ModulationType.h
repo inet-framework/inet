@@ -29,6 +29,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 enum ModulationClass {
     /** Modulation class unknown or unspecified. A WifiMode with this
        WifiModulationClass has not been properly initialised. */
@@ -183,6 +184,7 @@ inline std::ostream& operator<<(std::ostream& out, const ModulationType& m)
     //FIXME TODO implements operator<<
     return out;
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULATIONTYPE_H

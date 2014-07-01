@@ -102,6 +102,7 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 
 namespace inet {
+
 #endif
 
 

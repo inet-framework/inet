@@ -24,6 +24,7 @@
 #include "TCP_NSC_Queues.h"
 
 namespace inet {
+
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  */
@@ -93,6 +94,7 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_NSC_VIRTUALDATAQUEUES_H

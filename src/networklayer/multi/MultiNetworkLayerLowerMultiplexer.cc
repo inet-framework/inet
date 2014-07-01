@@ -31,6 +31,7 @@
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
+
 Define_Module(MultiNetworkLayerLowerMultiplexer);
 
 void MultiNetworkLayerLowerMultiplexer::handleMessage(cMessage *message)
@@ -70,5 +71,6 @@ int MultiNetworkLayerLowerMultiplexer::getProtocolIndex(cMessage *message)
     else
         throw cRuntimeError("Unknown message");
 }
+
 } // namespace inet
 

@@ -24,6 +24,7 @@
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
+
 class INET_API MACAddressType : public IAddressType
 {
   public:
@@ -41,6 +42,7 @@ class INET_API MACAddressType : public IAddressType
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new GenericNetworkProtocolControlInfo(); }
     virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return MACAddress::UNSPECIFIED_ADDRESS; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MACADDRESSTYPE_H

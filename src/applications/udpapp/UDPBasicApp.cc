@@ -24,6 +24,7 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+
 Define_Module(UDPBasicApp);
 
 simsignal_t UDPBasicApp::sentPkSignal = registerSignal("sentPk");
@@ -246,5 +247,6 @@ void UDPBasicApp::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 #include "MappingUtils.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API DimensionalTransmission : public FlatTransmissionBase
 {
@@ -38,6 +39,7 @@ class INET_API DimensionalTransmission : public FlatTransmissionBase
     virtual ~DimensionalTransmission() { delete power; }
     virtual const ConstMapping *getPower() const { return power; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

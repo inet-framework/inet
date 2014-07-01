@@ -20,6 +20,7 @@
 #include "Delayer.h"
 
 namespace inet {
+
 Define_Module(Delayer);
 
 simsignal_t Delayer::rcvdPkSignal = registerSignal("rcvdPk");
@@ -45,5 +46,6 @@ void Delayer::handleMessage(cMessage *msg)
         scheduleAt(simTime() + delay, msg);
     }
 }
+
 } // namespace inet
 

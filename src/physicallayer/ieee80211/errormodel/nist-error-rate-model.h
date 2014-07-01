@@ -26,6 +26,7 @@
 #include "dsss-error-rate-model.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * \ingroup wifi
@@ -58,6 +59,7 @@ class NistErrorRateModel : public IErrorModel
     double GetFec64QamBer(double snr, uint32_t nbits,
             uint32_t bValue) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

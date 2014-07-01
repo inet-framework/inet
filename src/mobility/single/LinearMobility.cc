@@ -20,6 +20,7 @@
 #include "FWMath.h"
 
 namespace inet {
+
 Define_Module(LinearMobility);
 
 LinearMobility::LinearMobility()
@@ -61,5 +62,6 @@ void LinearMobility::move()
         stationary = true;
     }
 }
+
 } // namespace inet
 

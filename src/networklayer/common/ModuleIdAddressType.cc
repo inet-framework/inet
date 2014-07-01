@@ -18,6 +18,8 @@
 #include "ModuleIdAddressType.h"
 
 namespace inet {
+
 ModuleIdAddressType ModuleIdAddressType::INSTANCE;
+
 } // namespace inet
 

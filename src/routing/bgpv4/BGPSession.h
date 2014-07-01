@@ -28,6 +28,7 @@
 #include "BGPFSM.h"
 
 namespace inet {
+
 class INET_API BGPSession : public cObject
 {
   public:
@@ -107,6 +108,7 @@ class INET_API BGPSession : public cObject
     friend struct BGPFSM::OpenConfirm;
     friend struct BGPFSM::Established;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPSESSION_H

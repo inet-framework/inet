@@ -29,6 +29,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 Define_Module(IdealMac);
 
 simsignal_t IdealMac::dropPkNotForUsSignal = registerSignal("dropPkNotForUs");
@@ -300,5 +301,6 @@ cPacket *IdealMac::decapsulate(IdealMacFrame *frame)
     delete frame;
     return packet;
 }
+
 } // namespace inet
 

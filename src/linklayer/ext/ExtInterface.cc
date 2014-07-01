@@ -34,6 +34,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 Define_Module(ExtInterface);
 
 void ExtInterface::initialize(int stage)
@@ -208,5 +209,6 @@ void ExtInterface::clearQueue()
 {
     // does not have a queue, do nothing
 }
+
 } // namespace inet
 

@@ -24,6 +24,7 @@
 #include "RTPPayloadSender.h"
 
 namespace inet {
+
 Define_Module(RTPProfile);
 
 RTPProfile::RTPProfile()
@@ -297,5 +298,6 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
     _ssrcGates[ssrc] = ssrcGate;
     return ssrcGate;
 }
+
 } // namespace inet
 

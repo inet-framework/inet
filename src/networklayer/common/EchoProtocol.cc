@@ -22,6 +22,7 @@
 #include "PingPayload_m.h"
 
 namespace inet {
+
 Define_Module(EchoProtocol);
 
 void EchoProtocol::initialize(int stage)
@@ -107,5 +108,6 @@ void EchoProtocol::sendEchoRequest(PingPayload *msg)
     request->setControlInfo(controlInfo);
     send(request, "sendOut");
 }
+
 } // namespace inet
 

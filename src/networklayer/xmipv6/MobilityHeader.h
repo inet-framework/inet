@@ -28,6 +28,7 @@
 #include "MobilityHeader_m.h"
 
 namespace inet {
+
 /**
  * Represents an IPv6 Home Address Option. More info in the IPv6Datagram.msg
  * file (and the documentation generated from it).
@@ -41,6 +42,7 @@ class INET_API HomeAddressOption : public HomeAddressOption_Base
 
     virtual HomeAddressOption *dup() const { return new HomeAddressOption(*this); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MOBILITYHEADER_H

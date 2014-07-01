@@ -24,6 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
@@ -62,5 +63,6 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface *intf
         intf->sendDelayedAcknowledgements();
     }
 }
+
 } // namespace inet
 

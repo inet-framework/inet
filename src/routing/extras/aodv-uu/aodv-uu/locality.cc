@@ -42,7 +42,6 @@ extern int gw_prefix;
 
 namespace inet {
 
-
 int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
 {
 
@@ -128,8 +127,6 @@ int NS_CLASS locality(struct in_addr dest, unsigned int ifindex)
 #endif
     return HOST_UNKNOWN;
 }
-
-
 
 } // namespace inet
 

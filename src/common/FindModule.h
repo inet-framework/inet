@@ -4,6 +4,7 @@
 #include <omnetpp.h>
 
 namespace inet {
+
 /**
  * @brief Provides method templates to find omnet modules.
  *
@@ -135,6 +136,7 @@ class AccessModuleWrap
         return pModule;
     }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_FINDMODULE_H

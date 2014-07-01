@@ -22,6 +22,7 @@
 #include "BMacLayer.h"
 
 namespace inet {
+
 Define_Module(BMacLayer)
 
 void BMacLayer::initialize(int stage)
@@ -762,5 +763,6 @@ cObject *BMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSr
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
 } // namespace inet
 

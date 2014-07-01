@@ -23,6 +23,7 @@
 #include "TCPTahoeRenoFamily.h"
 
 namespace inet {
+
 /**
  * State variables for TCPNewReno.
  */
@@ -58,6 +59,7 @@ class INET_API TCPNewReno : public TCPTahoeRenoFamily
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPNEWRENO_H

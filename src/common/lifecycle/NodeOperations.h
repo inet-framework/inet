@@ -23,6 +23,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 /**
  * Base class for operations that manipulate network nodes.
  */
@@ -131,6 +132,7 @@ class INET_API NodeCrashOperation : public NodeOperation
     virtual int getNumStages() const { return STAGE_LAST + 1; }
     virtual Kind getKind() const { return DOWN; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_NODEOPERATIONS_H

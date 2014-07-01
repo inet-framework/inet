@@ -24,6 +24,7 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
+
 // TODO: refactor using a statemachine that is present in a single function
 // TODO: this helps understanding what interactions are there and how they affect the state
 
@@ -380,5 +381,6 @@ void EtherMACFullDuplex::beginSendFrames()
         }
     }
 }
+
 } // namespace inet
 

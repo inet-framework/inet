@@ -20,6 +20,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 OSPF::LinkStateAcknowledgementHandler::LinkStateAcknowledgementHandler(OSPF::Router *containingRouter) :
     OSPF::IMessageHandler(containingRouter)
 {
@@ -60,5 +61,6 @@ void OSPF::LinkStateAcknowledgementHandler::processPacket(OSPFPacket *packet, OS
         }
     }
 }
+
 } // namespace inet
 

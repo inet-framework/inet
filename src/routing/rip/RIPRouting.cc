@@ -30,6 +30,7 @@
 #include "RIPRouting.h"
 
 namespace inet {
+
 Define_Module(RIPRouting);
 
 std::ostream& operator<<(std::ostream& os, const RIPRoute& e)
@@ -1181,5 +1182,6 @@ bool RIPRouting::isLocalInterfaceRoute(const IRoute *route)
     InterfaceEntry *ie = dynamic_cast<InterfaceEntry *>(route->getSource());
     return ie && !ie->isLoopback();
 }
+
 } // namespace inet
 

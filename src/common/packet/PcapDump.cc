@@ -40,6 +40,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 #define MAXBUFLENGTH    65536
 
 #define PCAP_MAGIC      0xa1b2c3d4
@@ -162,5 +163,6 @@ void PcapDump::closePcap()
         dumpfile = NULL;
     }
 }
+
 } // namespace inet
 

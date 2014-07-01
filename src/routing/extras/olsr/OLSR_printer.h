@@ -36,6 +36,7 @@
 #include <trace.h>
 
 namespace inet {
+
 #endif
 
 /// Encapsulates all printing functions for OLSR data structures and messages.

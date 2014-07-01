@@ -22,6 +22,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(NetAnimTrace);
 
 simsignal_t NetAnimTrace::messageSentSignal = registerSignal("messageSent");
@@ -210,5 +211,6 @@ void NetAnimTrace::resolveNodeCoordinates(cModule *submod, double& x, double& y)
         throw cRuntimeError("Invalid layout `%s' in `p' tag of display string", layout);
     }
 }
+
 } // namespace inet
 

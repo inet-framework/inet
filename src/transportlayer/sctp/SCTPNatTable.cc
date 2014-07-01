@@ -28,6 +28,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 uint32 SCTPNatTable::nextEntryNumber = 0;
 
 Define_Module(SCTPNatTable);
@@ -148,5 +149,6 @@ SCTPNatEntry::SCTPNatEntry()
 SCTPNatEntry::~SCTPNatEntry()
 {
 }
+
 } // namespace inet
 

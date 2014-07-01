@@ -19,6 +19,7 @@
 #include "PhysicalObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(ObstacleLoss);
 
@@ -64,6 +65,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
     }
     return totalLoss;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

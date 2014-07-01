@@ -18,6 +18,7 @@
 #include "InterpolatingAntenna.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(InterpolatingAntenna);
 
@@ -87,6 +88,7 @@ double InterpolatingAntenna::computeGain(EulerAngles direction) const
            * computeGain(elevationGainMap, direction.beta)
            * computeGain(bankGainMap, direction.gamma);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

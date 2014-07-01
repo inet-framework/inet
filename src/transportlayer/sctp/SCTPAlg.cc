@@ -20,6 +20,7 @@
 #include "SCTP.h"
 
 namespace inet {
+
 Register_Class(SCTPAlg);
 
 SCTPAlg::SCTPAlg() : SCTPAlgorithm()
@@ -87,5 +88,6 @@ void SCTPAlg::sackSent()
 void SCTPAlg::dataSent(uint32)
 {
 }
+
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(Radio);
 
@@ -393,6 +394,7 @@ void Radio::updateDisplayString()
         }
     }
 }
+
 } // namespace physicallayer
 } // namespace inet
 

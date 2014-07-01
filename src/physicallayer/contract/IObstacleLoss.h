@@ -22,6 +22,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 // TODO: merge with path loss?
 class INET_API IObstacleLoss : public IPrintableObject
@@ -29,6 +30,7 @@ class INET_API IObstacleLoss : public IPrintableObject
   public:
     virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

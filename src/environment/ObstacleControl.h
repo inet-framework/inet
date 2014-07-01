@@ -30,6 +30,7 @@
 #include "AnnotationManager.h"
 
 namespace inet {
+
 /**
  * ObstacleControl models obstacles that block radio transmissions.
  *
@@ -113,6 +114,7 @@ class INET_API ObstacleControl : public cSimpleModule
     AnnotationManager::Group *annotationGroup;
     mutable CacheEntries cacheEntries;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_OBSTACLECONTROL_H

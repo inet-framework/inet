@@ -26,6 +26,7 @@
 #include "OSPFTimer.h"
 
 namespace inet {
+
 namespace OSPF {
 class NeighborState;
 class Interface;
@@ -196,6 +197,7 @@ class Neighbor
     bool isLinkStateRetransmissionListEmpty() const { return linkStateRetransmissionList.empty(); }
     void popFirstLinkStateRequest() { linkStateRequestList.pop_front(); }
 };
+
 } // namespace OSPF
 
 inline bool operator==(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
@@ -211,6 +213,7 @@ inline bool operator!=(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPack
 {
     return !(leftID == rightID);
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFNEIGHBOR_H

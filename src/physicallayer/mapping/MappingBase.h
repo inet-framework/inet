@@ -31,6 +31,7 @@
 #include "Interpolation.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * @brief Specifies a dimension for mappings (like time, frequency, etc.)
@@ -864,6 +865,7 @@ class INET_API ConstMappingIterator
 class Mapping;
 
 namespace mixim {
+
 namespace math {
 template<typename T, bool B = std::numeric_limits<T>::has_infinity>
 struct mW2dBm
@@ -1795,6 +1797,7 @@ class INET_API SimpleConstMapping : public ConstMapping
      */
     ConstMapping *constClone() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

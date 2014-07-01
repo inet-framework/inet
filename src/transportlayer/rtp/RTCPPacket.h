@@ -36,6 +36,7 @@
 #include "RTCPPacket3.h"
 
 namespace inet {
+
 } // namespace inet
 
 #endif // ifndef __INET_RTCPPACKET_H

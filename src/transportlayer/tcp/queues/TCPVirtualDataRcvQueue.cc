@@ -19,6 +19,7 @@
 #include "TCPVirtualDataRcvQueue.h"
 
 namespace inet {
+
 Register_Class(TCPVirtualDataRcvQueue);
 
 bool TCPVirtualDataRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region *other)
@@ -267,5 +268,6 @@ uint32 TCPVirtualDataRcvQueue::getFirstSeqNo()
         return rcv_nxt;
     return seqMin(regionList.front()->getBegin(), rcv_nxt);
 }
+
 } // namespace inet
 

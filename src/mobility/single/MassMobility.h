@@ -25,6 +25,7 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
+
 /**
  * @brief Models the mobility of with mass, making random motions.
  * See NED file for more info.
@@ -61,6 +62,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
   public:
     MassMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MASSMOBILITY_H

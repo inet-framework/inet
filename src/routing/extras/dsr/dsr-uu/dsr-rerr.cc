@@ -270,7 +270,6 @@ int NSCLASS dsr_rerr_opt_recv(struct dsr_pkt *dp, struct dsr_rerr_opt *rerr_opt)
     return 0;
 }
 
-
 } // namespace inet
 
 

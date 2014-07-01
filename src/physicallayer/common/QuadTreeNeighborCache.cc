@@ -18,6 +18,7 @@
 #include "QuadTreeNeighborCache.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(QuadTreeNeighborCache);
 
@@ -105,6 +106,7 @@ void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject 
 {
     radioMedium->sendToRadio(transmitter, check_and_cast<const IRadio *>(radio), frame);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

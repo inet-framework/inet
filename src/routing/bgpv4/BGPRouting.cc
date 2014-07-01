@@ -22,6 +22,7 @@
 #include "BGPSession.h"
 
 namespace inet {
+
 Define_Module(BGPRouting);
 
 BGPRouting::~BGPRouting(void)
@@ -804,5 +805,6 @@ BGP::SessionID BGPRouting::findNextSession(BGP::type type, bool startSession)
     }
     return sessionID;
 }
+
 } // namespace inet
 

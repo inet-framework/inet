@@ -23,6 +23,7 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
+
 class PatternMatcher;
 
 /**
@@ -81,6 +82,7 @@ class INET_API InterfaceMatcher
     bool linkContainsMatchingHost(const InterfaceEntry *ie, const Matcher& hostMatcher) const;
     void collectNeighbors(cGate *outGate, std::vector<cModule *>& hostNodes, std::vector<cModule *>& deviceNodes, cModule *exludedNode) const;
 };
+
 } // namespace inet
 
 #endif /* INTERFACEMATCHER_H_ */

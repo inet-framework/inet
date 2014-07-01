@@ -23,6 +23,7 @@
 #include "RTPInterfacePacket_m.h"
 
 namespace inet {
+
 Define_Module(RTPApplication)
 
 RTPApplication::RTPApplication()
@@ -250,5 +251,6 @@ bool RTPApplication::handleOperationStage(LifecycleOperation *operation, int sta
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
 } // namespace inet
 

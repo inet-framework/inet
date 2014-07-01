@@ -18,11 +18,13 @@
 #include "UnimplementedModule.h"
 
 namespace inet {
+
 Define_Module(UnimplementedModule);
 
 void UnimplementedModule::handleMessage(cMessage *msg)
 {
     throw cRuntimeError("Unimplemented module");
 }
+
 } // namespace inet
 

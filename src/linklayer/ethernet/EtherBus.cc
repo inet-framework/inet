@@ -18,6 +18,7 @@
 #include "EtherBus.h"
 
 namespace inet {
+
 Define_Module(EtherBus);
 
 inline std::ostream& operator<<(std::ostream& os, cMessage *msg)
@@ -266,5 +267,6 @@ void EtherBus::finish()
     if (t > 0)
         recordScalar("messages/sec", numMessages / t);
 }
+
 } // namespace inet
 

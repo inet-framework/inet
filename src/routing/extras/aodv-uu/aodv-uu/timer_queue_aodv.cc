@@ -51,7 +51,6 @@ static void printTQ(list_t * l);
 
 namespace inet {
 
-
 #ifdef AODV_USE_STL
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
 {
@@ -401,7 +400,6 @@ void NS_CLASS printTQ(list_t * l)
 }
 #endif
 #endif
-
 
 } // namespace inet
 

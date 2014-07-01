@@ -37,6 +37,7 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 
 using namespace INETFw;
 namespace inet {
+
 int ICMPSerializer::serialize(const ICMPMessage *pkt, unsigned char *buf, unsigned int bufsize)
 {
     struct icmp *icmp = (struct icmp *)(buf);
@@ -153,5 +154,6 @@ void ICMPSerializer::parse(const unsigned char *buf, unsigned int bufsize, ICMPM
         }
     }
 }
+
 } // namespace inet
 

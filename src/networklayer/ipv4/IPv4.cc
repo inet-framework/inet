@@ -37,6 +37,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(IPv4);
 
 //TODO TRANSLATE
@@ -1146,5 +1147,6 @@ void IPv4::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
         arpResolutionTimedOut(check_and_cast<IARP::Notification *>(obj));
     }
 }
+
 } // namespace inet
 

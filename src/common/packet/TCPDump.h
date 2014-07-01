@@ -27,6 +27,7 @@
 #include "PacketDump.h"
 
 namespace inet {
+
 /**
  * Dumps every packet using the PcapDump class and the
  * PacketDump class.
@@ -48,6 +49,7 @@ class INET_API TCPDump : public cSimpleModule
     virtual void initialize();
     virtual void finish();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPDUMP_H

@@ -22,6 +22,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
@@ -98,5 +99,6 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
     }
     return msg;
 }
+
 } // namespace inet
 

@@ -18,6 +18,7 @@
 #include "FindModule.h"
 
 namespace inet {
+
 Define_Module(LMacLayer)
 
 #define myId    (getParentModule()->getParentModule()->getIndex())
@@ -699,5 +700,6 @@ cObject *LMacLayer::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSr
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
 } // namespace inet
 

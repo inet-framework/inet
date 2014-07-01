@@ -21,6 +21,7 @@
 #include "RTPInnerPacket_m.h"
 
 namespace inet {
+
 /**
  * This class is used for communication between submodules of the RTP layer module.
  */
@@ -112,6 +113,7 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      */
     virtual int getMTU() const { return getMtu(); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPINNERPACKET_H

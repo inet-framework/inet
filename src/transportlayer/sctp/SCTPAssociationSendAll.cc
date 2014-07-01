@@ -25,6 +25,7 @@
 #include <algorithm>
 
 namespace inet {
+
 void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables *chunk,
         SCTPPathVariables *path)
 {
@@ -1416,5 +1417,6 @@ uint32 SCTPAssociation::getAllTransQ()
     }
     return sum;
 }
+
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "IPathLoss.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This class implements the deterministic free space path loss model.
@@ -43,6 +44,7 @@ class INET_API FreeSpacePathLoss : public cModule, public IPathLoss
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

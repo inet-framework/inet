@@ -25,6 +25,7 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
+
 Define_Module(GenericARP);
 
 MACAddress GenericARP::resolveL3Address(const Address& address, const InterfaceEntry *ie)
@@ -93,5 +94,6 @@ MACAddress GenericARP::mapMulticastAddress(Address addr)
     // macAddr.setAddressByte(5, addr.getDByte(3));
     return macAddr;
 }
+
 } // namespace inet
 

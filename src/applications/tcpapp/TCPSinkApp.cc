@@ -23,6 +23,7 @@
 #include "TCPSocket.h"
 
 namespace inet {
+
 Define_Module(TCPSinkApp);
 
 simsignal_t TCPSinkApp::rcvdPkSignal = registerSignal("rcvdPk");
@@ -82,5 +83,6 @@ void TCPSinkApp::handleMessage(cMessage *msg)
 void TCPSinkApp::finish()
 {
 }
+
 } // namespace inet
 

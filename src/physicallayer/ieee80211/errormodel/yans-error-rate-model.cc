@@ -21,6 +21,7 @@
 #include <math.h>
 
 namespace inet {
+
 namespace physicallayer {
 YansErrorRateModel::YansErrorRateModel()
 {}
@@ -261,6 +262,7 @@ double YansErrorRateModel::GetChunkSuccessRate(ModulationType mode, double snr, 
     }
     return 0;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

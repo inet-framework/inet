@@ -22,6 +22,7 @@
 
 #ifndef NO_GLOBALS
 namespace inet {
+
 /* Source route options header */
 /* TODO: This header is not byte order correct... is there a simple way to fix
  * it? */

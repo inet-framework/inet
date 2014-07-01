@@ -29,6 +29,7 @@
 #endif // ifndef atoi
 
 namespace inet {
+
 Define_Module(Ns2MotionMobility);
 
 Ns2MotionMobility::Ns2MotionMobility()
@@ -189,5 +190,6 @@ void Ns2MotionMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
 } // namespace inet
 

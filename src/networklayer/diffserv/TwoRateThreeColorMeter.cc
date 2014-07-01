@@ -21,6 +21,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 using namespace DiffservUtil;
 
 Define_Module(TwoRateThreeColorMeter);
@@ -124,5 +125,6 @@ int TwoRateThreeColorMeter::meterPacket(cPacket *packet)
     setColor(packet, newColor);
     return newColor;
 }
+
 } // namespace inet
 

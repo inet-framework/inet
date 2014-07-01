@@ -22,6 +22,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents the result of a receiver's reception process.
@@ -76,6 +77,7 @@ class INET_API IReceptionDecision : public IPrintableObject
      */
     virtual bool isReceptionSuccessful() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

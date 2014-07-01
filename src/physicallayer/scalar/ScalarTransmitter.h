@@ -21,6 +21,7 @@
 #include "FlatTransmitterBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarTransmitter : public FlatTransmitterBase
 {
@@ -33,6 +34,7 @@ class INET_API ScalarTransmitter : public FlatTransmitterBase
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

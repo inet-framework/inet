@@ -18,6 +18,7 @@
 #include "LogNormalShadowing.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(LogNormalShadowing);
 
@@ -52,6 +53,7 @@ double LogNormalShadowing::computePathLoss(mps propagationSpeed, Hz frequency, m
     double PL_db = PL_d0_db + 10 * alpha * log10(unit(distance / d0).get()) + normal(0.0, sigma);
     return FWMath::dB2fraction(-PL_db);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

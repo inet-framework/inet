@@ -8,6 +8,7 @@
 #include "AdaptiveProbabilisticBroadcast.h"
 
 namespace inet {
+
 using std::map;
 using std::pair;
 using std::make_pair;
@@ -121,5 +122,6 @@ void AdaptiveProbabilisticBroadcast::updateBeta()
         beta = 0.1;
     bvec.record(beta);
 }
+
 } // namespace inet
 

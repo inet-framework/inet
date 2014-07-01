@@ -23,6 +23,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 Define_Module(VoIPStreamReceiver);
 
 simsignal_t VoIPStreamReceiver::rcvdPkSignal = registerSignal("rcvdPk");
@@ -254,5 +255,6 @@ void VoIPStreamReceiver::finish()
     EV_TRACE << "Sink finish()" << endl;
     closeConnection();
 }
+
 } // namespace inet
 

@@ -19,6 +19,7 @@
 #include "TCPSACKRexmitQueue.h"
 
 namespace inet {
+
 TCPSACKRexmitQueue::TCPSACKRexmitQueue()
 {
     conn = NULL;
@@ -383,5 +384,6 @@ void TCPSACKRexmitQueue::checkSackBlock(uint32 fromSeqNum, uint32& length, bool&
     sacked = i->sacked;
     rexmitted = i->rexmitted;
 }
+
 } // namespace inet
 

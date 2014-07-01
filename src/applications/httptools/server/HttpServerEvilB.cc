@@ -18,6 +18,7 @@
 #include "HttpServerEvilB.h"
 
 namespace inet {
+
 Define_Module(HttpServerEvilB);
 
 void HttpServerEvilB::initialize(int stage)
@@ -50,5 +51,6 @@ std::string HttpServerEvilB::generateBody()
 
     return result;
 }
+
 } // namespace inet
 

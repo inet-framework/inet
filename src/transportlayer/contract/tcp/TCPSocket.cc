@@ -18,6 +18,7 @@
 #include "TCPSocket.h"
 
 namespace inet {
+
 TCPSocket::TCPSocket()
 {
     // don't allow user-specified connIds because they may conflict with
@@ -356,5 +357,6 @@ void TCPSocket::readDataTransferModePar(cComponent& component)
 
     dataTransferMode = x;
 }
+
 } // namespace inet
 

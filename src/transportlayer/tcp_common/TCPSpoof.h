@@ -20,6 +20,7 @@
 #include "AddressResolver.h"
 
 namespace inet {
+
 /**
  * Sends fabricated TCP packets.
  */
@@ -37,6 +38,7 @@ class INET_API TCPSpoof : public cSimpleModule
   protected:
     static simsignal_t sentPkSignal;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSPOOF_H

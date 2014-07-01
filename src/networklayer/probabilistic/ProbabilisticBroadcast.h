@@ -16,6 +16,7 @@
 #include "Address.h"
 
 namespace inet {
+
 /**
  * @brief This class offers a data dissemination service using
  *        probabilistic broadcast. Each packet which arrives from
@@ -230,6 +231,7 @@ class INET_API ProbabilisticBroadcast : public NetworkProtocolBase, public INetw
 
     Address myNetwAddr;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PROBABILISTICBROADCAST_H

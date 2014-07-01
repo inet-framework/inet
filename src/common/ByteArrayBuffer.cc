@@ -15,6 +15,7 @@
 #include "ByteArrayBuffer.h"
 
 namespace inet {
+
 ByteArrayBuffer::ByteArrayBuffer()
     :
     dataLengthM(0)
@@ -106,5 +107,6 @@ void ByteArrayBuffer::clear()
         dataListM.pop_front();
     }
 }
+
 } // namespace inet
 

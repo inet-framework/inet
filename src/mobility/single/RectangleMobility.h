@@ -23,6 +23,7 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
+
 /**
  * @brief Rectangle movement model. See NED file for more info.
  *
@@ -57,6 +58,7 @@ class INET_API RectangleMobility : public MovingMobilityBase
   public:
     RectangleMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RECTANGLEMOBILITY_H

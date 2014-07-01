@@ -20,6 +20,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 Register_Class(SCTPQueue);
 
 SCTPQueue::SCTPQueue()
@@ -243,5 +244,6 @@ uint32 SCTPQueue::getSizeOfFirstChunk(const Address& remoteAddress)
     }
     return 0;
 }
+
 } // namespace inet
 

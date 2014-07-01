@@ -43,6 +43,7 @@
 #include "Posture.h"
 
 namespace inet {
+
 Posture::Posture(unsigned int ID, unsigned int num)
 {
     postureID = ID;
@@ -186,5 +187,6 @@ bool Posture::isMobile()
 {
     return maxSpeed > 0;
 }
+
 } // namespace inet
 

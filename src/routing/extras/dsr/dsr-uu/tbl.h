@@ -27,7 +27,6 @@
 
 namespace inet {
 
-
 #define TBL_FIRST(tbl) (tbl)->head.next
 #define TBL_EMPTY(tbl) (TBL_FIRST(tbl) == &(tbl)->head)
 #define TBL_FULL(tbl) ((tbl)->len >= (tbl)->max_len)

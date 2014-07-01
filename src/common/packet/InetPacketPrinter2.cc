@@ -67,8 +67,10 @@ class RIPPacket;
 #include "ScalarTransmission.h"
 #else // ifdef WITH_RADIO
 namespace inet {
+
 namespace physicallayer {
 class RadioFrame;
+
 } // namespace physicallayer
 } // namespace inet
 #endif // ifdef WITH_RADIO
@@ -77,6 +79,7 @@ class RadioFrame;
 #if OMNETPP_VERSION >= 0x0405
 
 namespace inet {
+
 using namespace physicallayer;
 
 class INET_API InetPacketPrinter2 : public cMessagePrinter
@@ -511,6 +514,7 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
 #endif // ifdef WITH_RADIO
     return os.str();
 }
+
 } // namespace inet
 
 #endif    // Register_MessagePrinter

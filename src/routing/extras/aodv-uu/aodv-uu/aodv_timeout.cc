@@ -363,7 +363,6 @@ void NS_CLASS packet_queue_timeout(void *arg)
 }
 #endif
 
-
 } // namespace inet
 
 

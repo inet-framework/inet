@@ -23,6 +23,7 @@
 #include "INoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface models a source which provides background noise over space and time.
@@ -32,6 +33,7 @@ class INET_API IBackgroundNoise : public IPrintableObject
   public:
     virtual const INoise *computeNoise(const IListening *listening) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

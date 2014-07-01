@@ -35,7 +35,6 @@
 
 namespace inet {
 
-
 class OLSROPT : public OLSR
 {
   private:

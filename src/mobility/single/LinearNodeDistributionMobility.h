@@ -24,6 +24,7 @@
 #include "StationaryMobility.h"
 
 namespace inet {
+
 /**
  * @brief Mobility model which places all hosts at constant distances
  * in a line with an orientation
@@ -55,6 +56,7 @@ class INET_API LinearNodeDistributionMobility : public StationaryMobility
   public:
     LinearNodeDistributionMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LINEARNODEDISTRIBUTIONMOBILITY_H

@@ -23,6 +23,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents the space and time coordinates of a transmission
@@ -45,6 +46,7 @@ class INET_API IArrival : public IPrintableObject
     virtual const EulerAngles getStartOrientation() const = 0;
     virtual const EulerAngles getEndOrientation() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

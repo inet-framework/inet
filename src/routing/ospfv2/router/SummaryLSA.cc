@@ -18,6 +18,7 @@
 #include "LSA.h"
 
 namespace inet {
+
 bool OSPF::SummaryLSA::update(const OSPFSummaryLSA *lsa)
 {
     bool different = differsFrom(lsa);
@@ -63,5 +64,6 @@ bool OSPF::SummaryLSA::differsFrom(const OSPFSummaryLSA *summaryLSA) const
 
     return differentHeader || differentBody;
 }
+
 } // namespace inet
 

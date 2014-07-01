@@ -24,6 +24,7 @@
 #include "nist-error-rate-model.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(Ieee80211ScalarReceiver);
 
@@ -121,6 +122,7 @@ bool Ieee80211ScalarReceiver::computeHasBitError(const IListening *listening, do
     else
         return false;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

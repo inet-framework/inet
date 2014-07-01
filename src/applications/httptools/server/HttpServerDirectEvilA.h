@@ -22,6 +22,7 @@
 #include "HttpServerDirect.h"
 
 namespace inet {
+
 /**
  * An evil attacker server demonstration - type A.
  *
@@ -47,6 +48,7 @@ class INET_API HttpServerDirectEvilA : public HttpServerDirect
     virtual void initialize(int stage);
     virtual std::string generateBody();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPSERVERDIRECTEVILA_H

@@ -35,6 +35,7 @@
 #include "TED.h"
 
 namespace inet {
+
 Define_Module(LDP);
 
 std::ostream& operator<<(std::ostream& os, const LDP::fec_bind_t& f)
@@ -1252,5 +1253,6 @@ void LDP::announceLinkChange(int tedlinkindex)
     d.setTedLinkIndices(0, tedlinkindex);
     emit(NF_TED_CHANGED, &d);
 }
+
 } // namespace inet
 

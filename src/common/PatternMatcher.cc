@@ -22,6 +22,7 @@
 #include "PatternMatcher.h"
 
 namespace inet {
+
 // from common/stringutil.h
 inline bool opp_isdigit(unsigned char c) { return isdigit(c); }
 inline char opp_toupper(unsigned char c) { return toupper(c); }

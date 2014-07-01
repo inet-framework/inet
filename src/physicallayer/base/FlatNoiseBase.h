@@ -21,6 +21,7 @@
 #include "NoiseBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API FlatNoiseBase : public NoiseBase
 {
@@ -40,6 +41,7 @@ class INET_API FlatNoiseBase : public NoiseBase
 
     virtual W computeMaxPower(simtime_t startTime, simtime_t endTime) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

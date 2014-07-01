@@ -22,6 +22,7 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+
 Define_Module(UDPSink);
 
 simsignal_t UDPSink::rcvdPkSignal = registerSignal("rcvdPk");
@@ -165,5 +166,6 @@ void UDPSink::handleNodeCrash()
     if (selfMsg)
         cancelEvent(selfMsg);
 }
+
 } // namespace inet
 

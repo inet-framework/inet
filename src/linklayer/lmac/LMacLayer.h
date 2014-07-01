@@ -19,6 +19,7 @@
 #include "LMacFrame_m.h"
 
 namespace inet {
+
 using namespace physicallayer;
 
 /**
@@ -222,6 +223,7 @@ class INET_API LMacLayer : public MACProtocolBase, public IMACProtocol
 
     virtual void clearQueue();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LMACLAYER_H

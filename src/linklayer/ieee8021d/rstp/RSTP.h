@@ -30,6 +30,7 @@
 #include "STPBase.h"
 
 namespace inet {
+
 /**
  * Implements the Rapid Spanning Tree Protocol. See the NED file for details.
  */
@@ -177,6 +178,7 @@ class INET_API RSTP : public STPBase
      */
     virtual void flushOtherPorts(unsigned int portNum);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RSTP_H

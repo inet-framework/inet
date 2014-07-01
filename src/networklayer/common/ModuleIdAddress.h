@@ -24,6 +24,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * This class provides network addresses using the module id of interface modules.
  * The module id address supports unspecified, broadcast and multicast addresses too.
@@ -66,6 +67,7 @@ class INET_API ModuleIdAddress
 
     std::string str() const { std::stringstream s; s << id; return s.str(); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULEIDADDRESS_H

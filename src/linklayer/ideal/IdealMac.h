@@ -26,6 +26,7 @@
 #include "MACProtocolBase.h"
 
 namespace inet {
+
 using namespace physicallayer;
 
 class IdealMacFrame;
@@ -94,6 +95,7 @@ class INET_API IdealMac : public MACProtocolBase
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IDEALMAC_H

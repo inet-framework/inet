@@ -27,6 +27,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 // FIXME!!! Should come from a global unique number generator module.
 unsigned long OSPF::Neighbor::ddSequenceNumberInitSeed = 0;
 
@@ -780,5 +781,6 @@ void OSPF::Neighbor::deleteLastSentDDPacket()
         lastTransmittedDDPacket = NULL;
     }
 }
+
 } // namespace inet
 

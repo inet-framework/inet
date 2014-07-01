@@ -22,6 +22,7 @@
 #endif // ifdef WITH_IPv4
 
 namespace inet {
+
 UDPSocket::UDPSocket()
 {
     // don't allow user-specified sockIds because they may conflict with
@@ -332,5 +333,6 @@ std::string UDPSocket::getReceivedPacketInfo(cPacket *pk)
     os << " TTL=" << ttl << " ToS=" << tos << " on ifID=" << interfaceID;
     return os.str();
 }
+
 } // namespace inet
 

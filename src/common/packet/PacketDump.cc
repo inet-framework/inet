@@ -47,6 +47,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 PacketDump::PacketDump()
 {
     outp = &std::cout;
@@ -678,5 +679,6 @@ void PacketDump::tcpDump(bool l2r, const char *label, TCPSegment *tcpseg,
 
     out << endl;
 }
+
 } // namespace inet
 

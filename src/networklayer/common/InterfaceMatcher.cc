@@ -26,6 +26,7 @@
 #include "InterfaceMatcher.h"
 
 namespace inet {
+
 inline bool isEmpty(const char *s) { return !s || !s[0]; }
 inline bool isNotEmpty(const char *s) { return s && s[0]; }
 
@@ -176,5 +177,6 @@ void InterfaceMatcher::collectNeighbors(cGate *outGate, std::vector<cModule *>& 
         }
     }
 }
+
 } // namespace inet
 

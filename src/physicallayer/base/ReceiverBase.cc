@@ -20,6 +20,7 @@
 #include "IRadioMedium.h"
 
 namespace inet {
+
 namespace physicallayer {
 bool ReceiverBase::computeIsReceptionPossible(const ITransmission *transmission) const
 {
@@ -54,6 +55,7 @@ bool ReceiverBase::computeIsReceptionAttempted(const IListening *listening, cons
         return true;
     }
 }
+
 } // namespace physicallayer
 } // namespace inet
 

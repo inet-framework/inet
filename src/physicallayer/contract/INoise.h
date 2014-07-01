@@ -21,6 +21,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents a meaningless radio signal.
@@ -31,6 +32,7 @@ class INET_API INoise : public IPrintableObject
     virtual const simtime_t getStartTime() const = 0;
     virtual const simtime_t getEndTime() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

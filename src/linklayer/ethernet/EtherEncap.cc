@@ -24,6 +24,7 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
+
 Define_Module(EtherEncap);
 
 simsignal_t EtherEncap::encapPkSignal = registerSignal("encapPk");
@@ -183,5 +184,6 @@ void EtherEncap::handleSendPause(cMessage *msg)
     emit(pauseSentSignal, pauseUnits);
     totalPauseSent++;
 }
+
 } // namespace inet
 

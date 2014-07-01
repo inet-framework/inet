@@ -24,6 +24,7 @@
 #include <cmath>
 
 namespace inet {
+
 Define_Module(TraCITestApp);
 
 simsignal_t TraCITestApp::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -233,5 +234,6 @@ void TraCITestApp::handlePositionUpdate()
         }
     }
 }
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This purely virtual interface provides an abstraction for different radio frames.
@@ -53,6 +54,7 @@ class INET_API IRadioFrame : public IPhysicalLayerFrame, public IPrintableObject
      */
     // virtual const IReceptionDecision *getReceptionDecision() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -20,6 +20,7 @@
 #include "GaussMarkovMobility.h"
 
 namespace inet {
+
 Define_Module(GaussMarkovMobility);
 
 GaussMarkovMobility::GaussMarkovMobility()
@@ -105,5 +106,6 @@ void GaussMarkovMobility::setTargetPosition()
     EV_DEBUG << " speed = " << speed << " angle = " << angle << endl;
     EV_DEBUG << " mspeed = " << speedMean << " mangle = " << angleMean << endl;
 }
+
 } // namespace inet
 

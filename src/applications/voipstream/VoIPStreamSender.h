@@ -50,6 +50,7 @@ extern "C" {
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 //using namespace std;
 
 class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
@@ -144,6 +145,7 @@ class INET_API VoIPStreamSender : public cSimpleModule, public ILifecycle
     // statistics:
     static simsignal_t sentPkSignal;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_VOIPSTREAMSENDER_H

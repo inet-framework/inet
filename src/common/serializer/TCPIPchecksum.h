@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Calculates checksum.
  */
@@ -44,6 +45,7 @@ class TCPIPchecksum
 
     static uint16_t _checksum(const void *addr, unsigned int count);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPIPCHECKSUM_H

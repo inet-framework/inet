@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Represents a packet with MPLS headers
  */
@@ -76,6 +77,7 @@ class INET_API MPLSPacket : public cPacket
      */
     inline int getTopLabel() { return labels.back(); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MPLSPACKET_H

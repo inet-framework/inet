@@ -534,8 +534,6 @@ OLSROPT::nb_loss(OLSR_link_tuple* tuple)
     rtable_computation();
 }
 
-
-
 } // namespace inet
 
 

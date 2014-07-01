@@ -21,6 +21,7 @@
 #include "ListeningBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API IdealListening : public ListeningBase
 {
@@ -29,6 +30,7 @@ class INET_API IdealListening : public ListeningBase
         ListeningBase(radio, startTime, endTime, startPosition, endPosition)
     {}
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -25,6 +25,7 @@
 #include "RTCPPacket2_m.h"
 
 namespace inet {
+
 class RTCPReceiverReportPacket : public RTCPReceiverReportPacket_Base
 {
   public:
@@ -59,6 +60,7 @@ class RTCPByePacket : public RTCPByePacket_Base
     virtual RTCPByePacket *dup() const { return new RTCPByePacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPByePacket_Base
 };
+
 } // namespace inet
 
 #endif    // __INET_RTCPPACKET2_H_

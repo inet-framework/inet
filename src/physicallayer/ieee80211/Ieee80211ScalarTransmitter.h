@@ -22,6 +22,7 @@
 #include "WifiPreambleType.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 {
@@ -41,6 +42,7 @@ class INET_API Ieee80211ScalarTransmitter : public ScalarTransmitter
 
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, simtime_t startTime) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

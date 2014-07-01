@@ -22,6 +22,7 @@
 #include "NetworkProtocolCommand_m.h"
 
 namespace inet {
+
 /**
  * This purely virtual interface provides an abstraction for different network protocols.
  */
@@ -34,6 +35,7 @@ class INET_API INetworkProtocol
 
 //    virtual Address resolveAddress(const char * address) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_INETWORKPROTOCOL_H

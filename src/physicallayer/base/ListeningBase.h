@@ -21,6 +21,7 @@
 #include "IListening.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ListeningBase : public IListening
 {
@@ -50,6 +51,7 @@ class INET_API ListeningBase : public IListening
     virtual const Coord getStartPosition() const { return startPosition; }
     virtual const Coord getEndPosition() const { return endPosition; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

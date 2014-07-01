@@ -24,6 +24,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
+
 Define_Module(RTPAVProfilePayload32Sender);
 
 void RTPAVProfilePayload32Sender::initialize()
@@ -169,5 +170,6 @@ bool RTPAVProfilePayload32Sender::sendPacket()
     }
     EV_TRACE << "sendPacket() Exit" << endl;
 }
+
 } // namespace inet
 

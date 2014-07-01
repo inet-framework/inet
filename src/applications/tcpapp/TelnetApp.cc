@@ -23,6 +23,7 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
+
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 #define MSGKIND_CLOSE      2
@@ -208,5 +209,6 @@ void TelnetApp::socketFailure(int connId, void *ptr, int code)
     timeoutMsg->setKind(MSGKIND_CONNECT);
     checkedScheduleAt(simTime() + (simtime_t)par("reconnectInterval"), timeoutMsg);
 }
+
 } // namespace inet
 

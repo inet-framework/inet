@@ -21,6 +21,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 HttpServerBase::HttpServerBase()
 {
     rdReplyDelay = NULL;
@@ -524,5 +525,6 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     htmlfilestream.close();
     return body;
 }
+
 } // namespace inet
 

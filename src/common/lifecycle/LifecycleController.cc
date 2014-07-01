@@ -22,6 +22,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 Define_Module(LifecycleController);
 
 void LifecycleController::Callback::init(LifecycleController *controller, LifecycleOperation *operation, cModule *module)
@@ -149,5 +150,6 @@ void LifecycleController::moduleOperationStageCompleted(Callback *callback)
         resumeOperation(operation);
     }
 }
+
 } // namespace inet
 

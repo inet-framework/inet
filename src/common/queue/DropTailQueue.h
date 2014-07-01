@@ -23,6 +23,7 @@
 #include "PassiveQueueBase.h"
 
 namespace inet {
+
 /**
  * Drop-front queue. See NED for more info.
  */
@@ -62,6 +63,7 @@ class INET_API DropTailQueue : public PassiveQueueBase
      */
     virtual bool isEmpty();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_DROPTAILQUEUE_H

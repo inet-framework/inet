@@ -39,6 +39,7 @@
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
+
 Register_Abstract_Class(InterfaceEntryChangeDetails);
 Register_Abstract_Class(InterfaceEntry);
 
@@ -393,5 +394,6 @@ void InterfaceEntry::changeMulticastGroupMembership(const Address& multicastAddr
             throw cRuntimeError("Unknown address type");
     }
 }
+
 } // namespace inet
 

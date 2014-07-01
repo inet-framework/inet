@@ -18,6 +18,7 @@
 #include "ThruputMeteringChannel.h"
 
 namespace inet {
+
 Register_Class(ThruputMeteringChannel);
 
 ThruputMeteringChannel::ThruputMeteringChannel(const char *name) : cDatarateChannel(name)
@@ -163,5 +164,6 @@ void ThruputMeteringChannel::updateDisplay()
     // display label
     getSourceGate()->getDisplayString().setTagArg("t", 0, buf);
 }
+
 } // namespace inet
 

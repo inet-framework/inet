@@ -20,6 +20,7 @@
 #include "EtherFrame.h"
 
 namespace inet {
+
 Define_Module(EtherFrameClassifier);
 
 void EtherFrameClassifier::handleMessage(cMessage *msg)
@@ -29,5 +30,6 @@ void EtherFrameClassifier::handleMessage(cMessage *msg)
     else
         send(msg, "defaultOut");
 }
+
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class MultiNetworkLayerLowerMultiplexer : public cSimpleModule
 {
   public:
@@ -32,6 +33,7 @@ class MultiNetworkLayerLowerMultiplexer : public cSimpleModule
     int getProtocolCount();
     int getProtocolIndex(cMessage *message);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MULTINETWORKLAYERLOWERMULTIPLEXER_H

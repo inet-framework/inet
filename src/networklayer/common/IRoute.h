@@ -23,6 +23,7 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
+
 class IRoutingTable;
 
 /**
@@ -235,6 +236,7 @@ class INET_API IMulticastRoute
 
     static const char *sourceTypeName(SourceType sourceType);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IROUTE_H

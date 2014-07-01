@@ -25,6 +25,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 Register_Class(TCPByteStreamRcvQueue);
 
 bool TCPByteStreamRcvQueue::Region::merge(const TCPVirtualDataRcvQueue::Region *_other)
@@ -121,5 +122,6 @@ TCPVirtualDataRcvQueue::Region *TCPByteStreamRcvQueue::createRegionFromSegment(T
 
     return region;
 }
+
 } // namespace inet
 

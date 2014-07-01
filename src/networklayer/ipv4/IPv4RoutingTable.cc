@@ -34,6 +34,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 using namespace OPP_Global;
 
 Define_Module(IPv4RoutingTable);
@@ -858,5 +859,6 @@ IPv4Route *IPv4RoutingTable::createNewRoute()
 {
     return new IPv4Route();
 }
+
 } // namespace inet
 

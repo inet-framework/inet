@@ -22,6 +22,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(Ieee8021dRelay);
 
 Ieee8021dRelay::Ieee8021dRelay()
@@ -314,5 +315,6 @@ bool Ieee8021dRelay::handleOperationStage(LifecycleOperation *operation, int sta
 
     return true;
 }
+
 } // namespace inet
 

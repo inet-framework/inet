@@ -21,6 +21,7 @@
 #include "TransmissionBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API IdealTransmission : public TransmissionBase
 {
@@ -41,6 +42,7 @@ class INET_API IdealTransmission : public TransmissionBase
     virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
     virtual m getMaxDetectionRange() const { return maxDetectionRange; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

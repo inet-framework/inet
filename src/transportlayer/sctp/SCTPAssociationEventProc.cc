@@ -23,6 +23,7 @@
 #include "SCTPAlgorithm.h"
 
 namespace inet {
+
 //
 // Event processing code
 //
@@ -389,5 +390,6 @@ void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpComm
     msg->setControlInfo(statusInfo);
     sendToApp(msg);
 }
+
 } // namespace inet
 

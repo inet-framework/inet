@@ -31,7 +31,6 @@
 
 namespace inet {
 
-
 typedef void (NS_CLASS*timeout_func_t) (void *);
 
 #if defined(OMNETPP) && defined(TIMERMAPLIST)

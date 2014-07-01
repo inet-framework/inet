@@ -21,6 +21,7 @@
 #include "IRadioFrame.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API RadioFrame : public cPacket, public IRadioFrame
 {
@@ -43,6 +44,7 @@ class INET_API RadioFrame : public cPacket, public IRadioFrame
 
     virtual const ITransmission *getTransmission() const { return transmission; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

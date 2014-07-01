@@ -79,6 +79,7 @@ typedef struct
 
 #ifdef OMNETPP
 namespace inet {
+
 #endif
 
 /* A data structure to buffer information about received RREQ's */
@@ -97,6 +98,7 @@ struct blacklist
     struct timer bl_timer;
 };
 #ifdef OMNETPP
+
 } // namespace inet
 #endif
 

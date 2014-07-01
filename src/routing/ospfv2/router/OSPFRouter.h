@@ -29,10 +29,12 @@
 #include "OSPFRoutingTableEntry.h"
 
 namespace inet {
+
 /**
  * All OSPF classes are in this namespace.
  */
 namespace OSPF {
+
 /**
  * Represents the full OSPF data structure as laid out in RFC2328.
  */
@@ -368,6 +370,7 @@ class Router
      */
     RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<RoutingTableEntry *>& entries) const;
 };
+
 } // namespace OSPF
 } // namespace inet
 

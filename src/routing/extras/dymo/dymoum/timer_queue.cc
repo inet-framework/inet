@@ -345,7 +345,6 @@ struct timeval *NS_CLASS timer_age_queue()
 }
 #endif
 
-
 } // namespace inet
 
 

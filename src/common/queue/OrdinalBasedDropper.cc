@@ -18,6 +18,7 @@
 #include "OrdinalBasedDropper.h"
 
 namespace inet {
+
 Define_Module(OrdinalBasedDropper);
 
 simsignal_t OrdinalBasedDropper::rcvdPkSignal = registerSignal("rcvdPk");
@@ -103,5 +104,6 @@ void OrdinalBasedDropper::parseVector(const char *vector)
 void OrdinalBasedDropper::finish()
 {
 }
+
 } // namespace inet
 

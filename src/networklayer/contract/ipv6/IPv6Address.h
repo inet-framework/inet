@@ -25,6 +25,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class InterfaceToken;
 
 /**
@@ -318,6 +319,7 @@ inline void doUnpacking(cCommBuffer *buf, IPv6Address& addr)
 {
     buf->unpack(addr.words(), 4);
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV6ADDRESS_H

@@ -29,6 +29,7 @@
 #include "IMobility.h"
 
 namespace inet {
+
 /**
  * @brief Abstract base class for mobility modules.
  *
@@ -161,6 +162,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     /** @brief Returns the current angular speed at the current simulation time. */
     virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::IDENTITY; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MOBILITYBASE_H

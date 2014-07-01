@@ -22,6 +22,7 @@
 #include "IPv6RoutingTable.h"
 
 namespace inet {
+
 Register_Abstract_Class(IPv6Route);
 
 std::string IPv6Route::info() const
@@ -51,5 +52,6 @@ IRoutingTable *IPv6Route::getRoutingTableAsGeneric() const
 {
     return getRoutingTable();
 }
+
 } // namespace inet
 

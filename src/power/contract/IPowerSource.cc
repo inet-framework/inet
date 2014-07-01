@@ -18,6 +18,8 @@
 #include "IPowerSource.h"
 
 namespace inet {
+
 simsignal_t IPowerSource::powerConsumptionChangedSignal = cComponent::registerSignal("powerConsumptionChanged");
+
 } // namespace inet
 

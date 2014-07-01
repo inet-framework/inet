@@ -28,6 +28,7 @@
 #include "NotifierConsts.h"
 
 namespace inet {
+
 Define_Module(Loopback);
 
 simsignal_t Loopback::packetSentToUpperSignal = registerSignal("packetSentToUpper");
@@ -132,5 +133,6 @@ void Loopback::updateDisplayString()
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
+
 } // namespace inet
 

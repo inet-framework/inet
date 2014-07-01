@@ -20,6 +20,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 SCTPReceiveStream::SCTPReceiveStream()
 {
     streamId = 0;
@@ -149,5 +150,6 @@ uint32 SCTPReceiveStream::enqueueNewDataChunk(SCTPDataVariables *dchunk)
 
     return delivery;
 }
+
 } // namespace inet
 

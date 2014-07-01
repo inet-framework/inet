@@ -21,6 +21,7 @@
 #include "IBackgroundNoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 {
@@ -41,6 +42,7 @@ class INET_API ScalarBackgroundNoise : public cModule, public IBackgroundNoise
 
     virtual const INoise *computeNoise(const IListening *listening) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

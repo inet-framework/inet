@@ -1083,8 +1083,6 @@ void NS_CLASS rreq_blacklist_timeout(void *arg)
 }
 #endif
 
-
-
 } // namespace inet
 
 

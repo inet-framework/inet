@@ -25,6 +25,7 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
+
 /**
  * @brief Uses the ns2 motion native file format. See NED file for more info.
  *
@@ -81,6 +82,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
 
     virtual ~Ns2MotionMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_NS2MOTIONMOBILITY_H

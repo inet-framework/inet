@@ -21,6 +21,7 @@
 #include "GenericNetworkProtocolInterfaceData.h"
 
 namespace inet {
+
 std::string GenericNetworkProtocolInterfaceData::info() const
 {
     std::stringstream out;
@@ -38,5 +39,6 @@ std::string GenericNetworkProtocolInterfaceData::detailedInfo() const
 //    out << "Metric: " << getMetric() << "\n";
     return out.str();
 }
+
 } // namespace inet
 

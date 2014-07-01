@@ -372,7 +372,6 @@ void __exit NSCLASS neigh_tbl_cleanup(void)
 #endif
 }
 
-
 } // namespace inet
 
 

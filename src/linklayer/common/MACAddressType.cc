@@ -18,6 +18,8 @@
 #include "MACAddressType.h"
 
 namespace inet {
+
 MACAddressType MACAddressType::INSTANCE;
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "ProbabilisticBroadcastDatagram_m.h"
 
 namespace inet {
+
 /**
  * Represents an ProbabilisticBroadcast datagram. More info in the ProbabilisticBroadcastDatagram.msg file
  * (and the documentation generated from it).
@@ -42,6 +43,7 @@ class INET_API ProbabilisticBroadcastDatagram : public ProbabilisticBroadcastDat
     virtual int getTransportProtocol() const { return ProbabilisticBroadcastDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { ProbabilisticBroadcastDatagram_Base::setTransportProtocol(protocol); };
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PROBABILISTICBROADCASTDATAGRAM_H

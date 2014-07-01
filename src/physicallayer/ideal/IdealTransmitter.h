@@ -21,6 +21,7 @@
 #include "TransmitterBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API IdealTransmitter : public TransmitterBase
 {
@@ -44,6 +45,7 @@ class INET_API IdealTransmitter : public TransmitterBase
     virtual void printToStream(std::ostream& stream) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

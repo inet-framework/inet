@@ -24,6 +24,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 class InterfaceEntry;
 
 /**
@@ -71,6 +72,7 @@ class INET_API MACBase : public cSimpleModule, public ILifecycle, public cListen
      */
     virtual bool isUpperMsg(cMessage *msg) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MACBASE_H

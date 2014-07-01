@@ -10,6 +10,7 @@
 #include "DYMOdefs.h"
 
 namespace inet {
+
 namespace DYMO {
 /**
  * DYMO specific extra route data attached to routes in the routing table.
@@ -42,6 +43,7 @@ class INET_API DYMORouteData : public cObject
     DYMOMetricType getMetricType() const { return metricType; }
     void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
 };
+
 } // namespace DYMO
 } // namespace inet
 

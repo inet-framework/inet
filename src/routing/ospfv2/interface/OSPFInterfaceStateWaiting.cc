@@ -24,6 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if ((event == OSPF::Interface::BACKUP_SEEN) ||
@@ -59,5 +60,6 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface *intf, OSPF::Inte
         intf->sendDelayedAcknowledgements();
     }
 }
+
 } // namespace inet
 

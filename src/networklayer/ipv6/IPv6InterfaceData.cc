@@ -24,6 +24,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 Register_Abstract_Class(IPv6MulticastGroupInfo);
 
 //FIXME invoked changed() from state-changing methods, to trigger notification...
@@ -632,5 +633,6 @@ void IPv6InterfaceData::updateHomeNetworkInfo(const IPv6Address& hoa, const IPv6
 }
 
 #endif /* WITH_xMIPv6 */
+
 } // namespace inet
 

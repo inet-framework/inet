@@ -30,6 +30,7 @@
 
 #endif // ifdef ENABLE_GSL
 namespace inet {
+
 namespace physicallayer {
 #ifdef ENABLE_GSL
 typedef struct FunctionParameterType
@@ -85,6 +86,7 @@ class DsssErrorRateModel
     static const double WLAN_SIR_IMPOSSIBLE;
 #endif // ifdef ENABLE_GSL
 };
+
 } // namespace physicallayer
 } // namespace inet
 

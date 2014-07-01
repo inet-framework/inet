@@ -18,8 +18,10 @@
 #include "ApplicationBase.h"
 
 namespace inet {
+
 ApplicationBase::ApplicationBase()
 {
 }
+
 } // namespace inet
 

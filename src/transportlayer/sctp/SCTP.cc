@@ -32,6 +32,7 @@
 #include "UDPSocket.h"
 
 namespace inet {
+
 Define_Module(SCTP);
 
 int32 SCTP::nextAssocId = 0;
@@ -904,5 +905,6 @@ void SCTP::finish()
         recordScalar("RTXMethod", (double)par("RTXMethod"));
     }
 }
+
 } // namespace inet
 

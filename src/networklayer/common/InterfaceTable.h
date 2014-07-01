@@ -27,6 +27,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 /**
  * Represents the interface table. This object has one instance per host
  * or router. It has methods to manage the interface table,
@@ -235,6 +236,7 @@ class INET_API InterfaceTable : public cSimpleModule, public IInterfaceTable, pr
      */
     virtual MulticastGroupList collectMulticastGroups();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_INTERFACETABLE_H

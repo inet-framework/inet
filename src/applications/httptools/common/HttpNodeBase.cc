@@ -18,6 +18,7 @@
 #include "HttpNodeBase.h"
 
 namespace inet {
+
 HttpNodeBase::HttpNodeBase()
 {
     m_bDisplayMessage = false;
@@ -211,5 +212,6 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage *httpRes
 
     return str.str();
 }
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "InterfaceToken.h"
 
 namespace inet {
+
 const uint32 LINK_LOCAL_PREFIX = 0xFE800000;
 const uint32 SITE_LOCAL_PREFIX = 0xFEC00000;
 const uint32 MULTICAST_PREFIX = 0xFF000000;
@@ -379,5 +380,6 @@ int IPv6Address::getMulticastScope() const
         throw cRuntimeError("IPv6Address::getMulticastScope(): %s is not a multicast address", str().c_str());
     return (d[0] >> 16) & 0x0F;
 }
+
 } // namespace inet
 

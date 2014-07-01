@@ -28,6 +28,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 #define ICMP_TRAFFIC    6
 
 Define_Module(MPLS);
@@ -261,5 +262,6 @@ void MPLS::processMPLSPacketFromL2(MPLSPacket *mplsPacket)
         }
     }
 }
+
 } // namespace inet
 

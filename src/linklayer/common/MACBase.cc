@@ -29,6 +29,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 MACBase::MACBase()
 {
     hostModule = NULL;
@@ -121,5 +122,6 @@ void MACBase::handleMessageWhenDown(cMessage *msg)
         delete msg;
     }
 }
+
 } // namespace inet
 

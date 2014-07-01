@@ -23,6 +23,7 @@
 #include "MappingUtils.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API DimensionalReception : public FlatReceptionBase
 {
@@ -40,6 +41,7 @@ class INET_API DimensionalReception : public FlatReceptionBase
     virtual const ConstMapping *getPower() const { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -25,6 +25,7 @@
 #include "TCPSocket.h"
 
 namespace inet {
+
 /**
  * Small utility class for managing a large number of TCPSocket objects.
  */
@@ -76,6 +77,7 @@ class INET_API TCPSocketMap
      */
     void deleteSockets();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSOCKETMAP_H

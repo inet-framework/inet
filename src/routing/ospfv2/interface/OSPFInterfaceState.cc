@@ -27,6 +27,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceState *newState, OSPF::InterfaceState *currentState)
 {
     OSPF::Interface::InterfaceStateType oldState = currentState->getState();
@@ -381,5 +382,6 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
         }
     }
 }
+
 } // namespace inet
 

@@ -26,7 +26,6 @@
 
 namespace inet {
 
-
 class IPv4;
 class IInterfaceTable;
 class IRoutingTable;

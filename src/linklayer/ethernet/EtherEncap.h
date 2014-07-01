@@ -23,6 +23,7 @@
 #include "Ethernet.h"
 
 namespace inet {
+
 // Forward declarations:
 class EtherFrame;
 
@@ -53,6 +54,7 @@ class INET_API EtherEncap : public cSimpleModule
 
     virtual void updateDisplayString();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERENCAP_H

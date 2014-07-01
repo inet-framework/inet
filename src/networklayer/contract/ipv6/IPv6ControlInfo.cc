@@ -22,6 +22,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 void IPv6ControlInfo::copy(const IPv6ControlInfo& other)
 {
 #ifdef WITH_IPv6
@@ -145,5 +146,6 @@ IPv6ExtensionHeader *IPv6ControlInfo::removeFirstExtensionHeader()
     throw cRuntimeError(this, "INET was compiled without IPv6 support");
 #endif // ifdef WITH_IPv6
 }
+
 } // namespace inet
 

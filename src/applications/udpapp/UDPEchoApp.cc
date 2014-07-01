@@ -21,6 +21,7 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+
 Define_Module(UDPEchoApp);
 
 simsignal_t UDPEchoApp::pkSignal = registerSignal("pk");
@@ -100,5 +101,6 @@ bool UDPEchoApp::handleNodeShutdown(IDoneCallback *doneCallback)
 void UDPEchoApp::handleNodeCrash()
 {
 }
+
 } // namespace inet
 

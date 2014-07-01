@@ -26,6 +26,7 @@
 #include "BerParseFile.h"
 
 namespace inet {
+
 namespace physicallayer {
 void BerParseFile::clearBerTable()
 {
@@ -355,6 +356,7 @@ BerParseFile::~BerParseFile()
 {
     clearBerTable();
 }
+
 } // namespace physicallayer
 } // namespace inet
 

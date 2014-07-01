@@ -12,8 +12,6 @@
 
 namespace inet {
 
-
-
 Register_Class(AODV_msg);
 
 
@@ -297,9 +295,6 @@ std::string RREQ::detailedInfo() const
     out <<" hops :"<< hops << "\n";
     return out.str();
 }
-
-
-
 
 } // namespace inet
 

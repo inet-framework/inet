@@ -26,6 +26,7 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
+
 Define_Module(IPvXTrafGen);
 
 simsignal_t IPvXTrafGen::rcvdPkSignal = registerSignal("rcvdPk");
@@ -227,5 +228,6 @@ void IPvXTrafGen::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
+
 } // namespace inet
 

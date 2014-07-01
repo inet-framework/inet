@@ -22,6 +22,7 @@
 #include "HttpServerBase.h"
 
 namespace inet {
+
 /**
  * HttpServerDirect module.
  *
@@ -53,6 +54,7 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPSERVER_H

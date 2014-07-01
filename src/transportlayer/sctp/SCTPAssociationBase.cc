@@ -28,6 +28,7 @@
 #include "SCTPAlgorithm.h"
 
 namespace inet {
+
 SCTPPathVariables::SCTPPathVariables(const Address& addr, SCTPAssociation *assoc, const IRoutingTable *rt)
 {
     // ====== Path Variable Initialization ===================================
@@ -1567,5 +1568,6 @@ void SCTPAssociation::removePath()
         sctpPathMap.erase(pathIterator);
     }
 }
+
 } // namespace inet
 

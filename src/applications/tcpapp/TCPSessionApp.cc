@@ -23,6 +23,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(TCPSessionApp);
 
 #define MSGKIND_CONNECT    1
@@ -260,5 +261,6 @@ void TCPSessionApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+
 } // namespace inet
 

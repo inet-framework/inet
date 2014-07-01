@@ -33,6 +33,7 @@
 #include "WiseRouteDatagram.h"
 
 namespace inet {
+
 /**
  * @brief Wiseroute is a simple loop-free routing algorithm that
  * builds a routing tree from a central network point. It is especially
@@ -226,6 +227,7 @@ class INET_API WiseRoute : public NetworkProtocolBase, public INetworkProtocol
      */
     virtual cObject *setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_WISEROUTE_H

@@ -23,6 +23,7 @@
 #include "IRoute.h"
 
 namespace inet {
+
 /**
  * A C++ interface to abstract the functionality of a routing table, regardless of address type.
  */
@@ -172,6 +173,7 @@ class INET_API IRoutingTable
 
     virtual IRoute *createRoute() = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IROUTINGTABLE_H

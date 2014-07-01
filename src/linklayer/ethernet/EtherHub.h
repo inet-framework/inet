@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Models a wiring hub. It simply broadcasts the received message
  * on all other ports.
@@ -45,6 +46,7 @@ class INET_API EtherHub : public cSimpleModule, protected cListener
 
     virtual void checkConnections(bool errorWhenAsymmetric);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERHUB_H

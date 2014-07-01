@@ -21,6 +21,7 @@
 #include "AttenuationBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API DimensionalAttenuation : public AttenuationBase
 {
@@ -28,6 +29,7 @@ class INET_API DimensionalAttenuation : public AttenuationBase
     virtual void printToStream(std::ostream& stream) const { stream << "dimensional attenuation"; }
     virtual const IReception *computeReception(const IRadio *radio, const ITransmission *transmission) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

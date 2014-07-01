@@ -14,6 +14,7 @@
 #include "Address.h"
 
 namespace inet {
+
 /**
  * @brief This class extends ProbabilisticBroadcast by adding
  *        an algorithm which adapts broadcasting parameters
@@ -53,6 +54,7 @@ class INET_API AdaptiveProbabilisticBroadcast : public ProbabilisticBroadcast
     cOutVector bvec;
     NeighborMap neighMap;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ADAPTIVEPROBABILISTICBROADCAST_H

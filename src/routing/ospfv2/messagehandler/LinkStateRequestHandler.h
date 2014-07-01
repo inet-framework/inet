@@ -21,6 +21,7 @@
 #include "IMessageHandler.h"
 
 namespace inet {
+
 namespace OSPF {
 class LinkStateRequestHandler : public IMessageHandler
 {
@@ -29,6 +30,7 @@ class LinkStateRequestHandler : public IMessageHandler
 
     void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
+
 } // namespace OSPF
 } // namespace inet
 

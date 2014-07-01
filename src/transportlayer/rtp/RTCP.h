@@ -24,6 +24,7 @@
 #include "UDPSocket.h"
 
 namespace inet {
+
 //Forward declarations:
 class RTCPByePacket;
 class RTCPCompoundPacket;
@@ -238,6 +239,7 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     //statistics
     static simsignal_t rcvdPkSignal;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTCP_H

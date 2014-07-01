@@ -29,6 +29,7 @@
 #include "OSPFPacket_m.h"
 
 namespace inet {
+
 namespace OSPF {
 class RoutingTableEntry : public IPv4Route
 {
@@ -87,9 +88,11 @@ class RoutingTableEntry : public IPv4Route
     unsigned int getNextHopCount() const { return nextHops.size(); }
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
 };
+
 } // namespace OSPF
 
 std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry);
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTINGTABLEENTRY_H

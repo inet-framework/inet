@@ -32,6 +32,7 @@
 #endif /* WITH_xMIPv6 */
 
 namespace inet {
+
 #define MK_ASSIGN_LINKLOCAL_ADDRESS    0
 #define MK_SEND_PERIODIC_RTRADV        1
 #define MK_SEND_SOL_RTRADV             2
@@ -2567,5 +2568,6 @@ bool IPv6NeighbourDiscovery::isWirelessAccessPoint(cModule *module)
 }
 
 #endif /* WITH_xMIPv6 */
+
 } // namespace inet
 

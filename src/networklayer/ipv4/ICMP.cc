@@ -31,6 +31,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(ICMP);
 
 void ICMP::initialize(int stage)
@@ -290,5 +291,6 @@ void ICMP::sendToIP(ICMPMessage *msg)
     EV_INFO << "Sending " << msg << " to lower layer.\n";
     send(msg, "sendOut");
 }
+
 } // namespace inet
 

@@ -25,6 +25,7 @@
 #include "sdes.h"
 
 namespace inet {
+
 //Forward declarations:
 class ReceptionReport;
 class RTPPacket;
@@ -191,6 +192,7 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     int _silentIntervals;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPPARTICIPANTINFO_H

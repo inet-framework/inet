@@ -21,6 +21,7 @@
 #include "HttpBrowserBase.h"
 
 namespace inet {
+
 /**
  * A simulated browser module for OMNeT++ simulations.
  *
@@ -45,6 +46,7 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
     virtual void sendRequestToRandomServer();
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPBROWSERDIRECT_H

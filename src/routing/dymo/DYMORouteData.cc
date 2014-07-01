@@ -5,6 +5,7 @@
 #include "DYMORouteData.h"
 
 namespace inet {
+
 namespace DYMO {
 DYMORouteData::DYMORouteData()
 {
@@ -14,6 +15,7 @@ DYMORouteData::DYMORouteData()
     expirationTime = 0;
     metricType = HOP_COUNT;
 }
+
 } // namespace DYMO
 } // namespace inet
 

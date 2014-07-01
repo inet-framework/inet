@@ -22,6 +22,7 @@
 #include "IPv6ControlInfo_m.h"
 
 namespace inet {
+
 class IPv6Datagram;
 class IPv6ExtensionHeader;
 
@@ -110,6 +111,7 @@ class INET_API IPv6ControlInfo : public IPv6ControlInfo_Base, public INetworkPro
     virtual short getHopLimit() const { return IPv6ControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) { IPv6ControlInfo_Base::setHopLimit(hopLimit); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV6CONTROLINFO_H

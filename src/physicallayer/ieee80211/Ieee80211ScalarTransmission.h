@@ -22,6 +22,7 @@
 #include "WifiPreambleType.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API Ieee80211ScalarTransmission : public ScalarTransmission
 {
@@ -40,6 +41,7 @@ class INET_API Ieee80211ScalarTransmission : public ScalarTransmission
 
     virtual WifiPreamble getPreambleMode() const { return preambleMode; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

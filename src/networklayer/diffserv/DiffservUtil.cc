@@ -33,6 +33,7 @@
 #include "DSCP_m.h"
 
 namespace inet {
+
 namespace DiffservUtil {
 using namespace OPP_Global;
 
@@ -239,6 +240,7 @@ void setColor(cPacket *packet, int color)
     else
         packet->addObject(new ColorAttribute(color));
 }
+
 } // namespace DiffservUtil
 } // namespace inet
 

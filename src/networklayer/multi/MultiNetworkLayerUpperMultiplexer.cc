@@ -21,6 +21,7 @@
 #include "GenericNetworkProtocolControlInfo.h"
 
 namespace inet {
+
 Define_Module(MultiNetworkLayerUpperMultiplexer);
 
 void MultiNetworkLayerUpperMultiplexer::initialize()
@@ -95,5 +96,6 @@ int MultiNetworkLayerUpperMultiplexer::getProtocolIndex(cMessage *message)
     else
         throw cRuntimeError("Unknown control info");
 }
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "IPv4.h"
 
 namespace inet {
+
 Define_Module(CloudDelayerBase);
 
 #define SRCPAR    "incomingInterfaceID"
@@ -114,5 +115,6 @@ INetfilter::IHook::Result CloudDelayerBase::datagramLocalOutHook(INetworkDatagra
 {
     return INetfilter::IHook::ACCEPT;
 }
+
 } // namespace inet
 

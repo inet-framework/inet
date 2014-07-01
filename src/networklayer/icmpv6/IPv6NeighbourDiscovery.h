@@ -31,6 +31,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 //Forward declarations:
 class ICMPv6;
 class IInterfaceTable;
@@ -416,6 +417,7 @@ class INET_API IPv6NeighbourDiscovery : public cSimpleModule, public ILifecycle
     bool isWirelessAccessPoint(cModule *module);
 #endif /* WITH_xMIPv6 */
 };
+
 } // namespace inet
 
 #endif    //IPV6NEIGHBOURDISCOVERY_H

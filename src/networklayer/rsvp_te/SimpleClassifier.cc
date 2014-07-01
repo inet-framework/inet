@@ -21,6 +21,7 @@
 #include "RSVP.h"
 
 namespace inet {
+
 Define_Module(SimpleClassifier);
 
 void SimpleClassifier::initialize(int stage)
@@ -217,5 +218,6 @@ std::ostream& operator<<(std::ostream& os, const SimpleClassifier::FECEntry& fec
     os << "    inLabel:" << fec.inLabel;
     return os;
 }
+
 } // namespace inet
 

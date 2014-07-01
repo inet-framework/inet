@@ -31,13 +31,16 @@
 class INetStack;
 class INetStreamSocket;
 namespace inet {
+
 class TCPConnectInfo;
 class TCP_NSC;
 class TCP_NSC_ReceiveQueue;
 class TCP_NSC_SendQueue;
+
 } // namespace inet
 
 namespace inet {
+
 /**
  * Encapsulates a Network Simulation Cradle (NSC) instance.
  */
@@ -112,6 +115,7 @@ class INET_API TCP_NSC_Connection
     TCP_NSC_ReceiveQueue *receiveQueueM;
     TCP_NSC_SendQueue *sendQueueM;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_NSC_CONNECTION_H

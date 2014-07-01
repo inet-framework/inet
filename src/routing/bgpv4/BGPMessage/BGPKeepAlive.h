@@ -21,6 +21,7 @@
 #include "BGPKeepAlive_m.h"
 
 namespace inet {
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPKEEPALIVE_H

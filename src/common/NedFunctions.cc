@@ -26,6 +26,7 @@
 #endif // ifndef Define_NED_Math_Function
 
 namespace inet {
+
 cNEDValue nedf_haveClass(cComponent *context, cNEDValue argv[], int argc)
 {
     return classes.getInstance()->lookup(argv[0].stringValue()) != NULL;
@@ -129,5 +130,6 @@ Define_NED_Function2(nedf_absPath,
         "string",
         "Returns absolute path of given module"
         );
+
 } // namespace inet
 

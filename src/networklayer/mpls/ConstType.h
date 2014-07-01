@@ -19,6 +19,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 enum messageKind {
     MPLS_KIND,
     LDP_KIND,
@@ -26,6 +27,7 @@ enum messageKind {
 };
 
 namespace ConstType {
+
 const char libDataMarker[] = "In-lbl       In-intf     Out-lbl       Out-intf";
 const char prtDataMarker[] = "Prefix            Pointer";
 
@@ -39,6 +41,7 @@ const int ldp_port = 646;
 const int LDP_KIND = 10;
 const int HOW_KIND = 50;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_CONSTTYPE_H

@@ -20,6 +20,7 @@
 #include "IMobility.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(IdealTransmitter);
 
@@ -52,6 +53,7 @@ const ITransmission *IdealTransmitter::createTransmission(const IRadio *transmit
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new IdealTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, maxCommunicationRange, maxInterferenceRange, maxDetectionRange);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

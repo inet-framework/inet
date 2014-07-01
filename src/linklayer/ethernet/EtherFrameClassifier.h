@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Ethernet Frame classifier.
  *
@@ -36,6 +37,7 @@ class INET_API EtherFrameClassifier : public cSimpleModule
      */
     virtual void handleMessage(cMessage *msg);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERFRAMECLASSIFIER_H

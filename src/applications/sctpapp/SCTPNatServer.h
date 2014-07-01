@@ -20,6 +20,7 @@
 #include "SCTPSocket.h"
 
 namespace inet {
+
 /**
  * Accepts any number of incoming connections, and sends back whatever
  * arrives on them.
@@ -80,6 +81,7 @@ class INET_API SCTPNatServer : public cSimpleModule
     void sendInfo(NatInfo *info);
     void printNatVector();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPNATSERVER_H

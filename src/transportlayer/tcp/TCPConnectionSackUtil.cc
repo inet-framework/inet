@@ -29,6 +29,7 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
+
 //
 // helper functions for SACK
 //
@@ -665,5 +666,6 @@ TCPSegment TCPConnection::addSacks(TCPSegment *tcpseg)
 
     return *tcpseg;
 }
+
 } // namespace inet
 

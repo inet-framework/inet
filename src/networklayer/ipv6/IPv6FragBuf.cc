@@ -27,6 +27,7 @@
 #include "IPv6ExtensionHeaders.h"
 
 namespace inet {
+
 IPv6FragBuf::IPv6FragBuf()
 {
     icmpModule = NULL;
@@ -160,5 +161,6 @@ void IPv6FragBuf::purgeStaleFragments(simtime_t lastupdate)
         }
     }
 }
+
 } // namespace inet
 

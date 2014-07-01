@@ -23,12 +23,14 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API AttenuationBase : public cModule, public virtual IAttenuation
 {
   protected:
     virtual EulerAngles computeTransmissionDirection(const ITransmission *transmission, const IArrival *arrival) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -19,6 +19,7 @@
 #include "AlgorithmicDropperBase.h"
 
 namespace inet {
+
 void AlgorithmicDropperBase::initialize()
 {
     numGates = gateSize("out");
@@ -71,5 +72,6 @@ int AlgorithmicDropperBase::getByteLength() const
         len += (*it)->getByteLength();
     return len;
 }
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 #include "TCPSerializer.h"
 
 namespace inet {
+
 Register_Class(TCP_NSC_VirtualDataSendQueue);
 
 Register_Class(TCP_NSC_VirtualDataReceiveQueue);
@@ -154,5 +155,6 @@ void TCP_NSC_VirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpse
 {
     // nothing to do
 }
+
 } // namespace inet
 

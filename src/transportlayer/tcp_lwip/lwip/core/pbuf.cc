@@ -163,7 +163,6 @@ pbuf_pool_is_empty(void)
   }
 }
 
-
 } // namespace inet
 
 #endif /* PBUF_POOL_FREE_OOSEQ */

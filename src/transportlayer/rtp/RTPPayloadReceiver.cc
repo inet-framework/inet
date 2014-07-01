@@ -23,6 +23,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
+
 Define_Module(RTPPayloadReceiver);
 
 simsignal_t RTPPayloadReceiver::_rcvdPkRtpTimestampSignal = registerSignal("rcvdPkRtpTimestamp");
@@ -71,5 +72,6 @@ void RTPPayloadReceiver::closeOutputFile()
     _outputFileStream.close();
     _outputLogLoss.close();
 }
+
 } // namespace inet
 

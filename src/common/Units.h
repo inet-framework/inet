@@ -25,6 +25,7 @@
 #include <cmath>
 
 namespace units {
+
 namespace internal    // Boost would call this "detail"
 {
 // Forward
@@ -36,6 +37,7 @@ struct none;
 // Forward
 template<int Num, int Den, int Div = Num / Den, int Mod = Num % Den>
 struct fixed_power;
+
 } // namespace internal
 
 // Construct a unit equivalent to Unit1*Unit2
@@ -249,12 +251,14 @@ value<Value, pow<Unit, Num, Den> > raise(const value<Value, Unit>& a)
 {
     return value<Value, pow<Unit, Num, Den> >(internal::fixed_power<Num, Den>::pow(a.get()));
 }
+
 } // namespace units
 
 /*****************************************************************************/
 // Implementation
 
 namespace units {
+
 namespace internal {
 // Ensures (at compile-time) that the template argument is true.
 template<bool> struct legacy_static_assert;
@@ -608,6 +612,7 @@ struct scaling_factor<translate<U, N, D> >
         return scaling_factor<U>::template fn<T>();
     }
 };
+
 } // namespace internal
 } // namespace units
 
@@ -623,6 +628,7 @@ struct scaling_factor<translate<U, N, D> >
     namespace units { UNIT_DISPLAY_NAME(unit, string) }
 
 namespace units {
+
 namespace internal {
 // This is the default unit formatting mechanism
 template<typename Unit>
@@ -631,6 +637,7 @@ struct output_unit2
     template<typename Stream>
     static void fn(Stream& os) { os << "units"; }
 };
+
 } // namespace internal
 
 // Functor to write unit text to stream
@@ -644,6 +651,7 @@ struct output_unit
 UNIT_DISPLAY_NAME(unit, "1");
 
 namespace internal {
+
 template<typename U1, typename U2>
 struct output_unit2<compose<U1, U2> >
 {
@@ -701,6 +709,7 @@ struct output_unit2<scale<Unit, Num, Den> >
         output_unit<Unit>::fn(os);
     }
 };
+
 } // namespace internal
 
 template<typename Str, typename Value, typename Unit>
@@ -710,12 +719,14 @@ Str& operator<<(Str& os, const value<Value, Unit>& value)
     output_unit<Unit>::fn(os);
     return os;
 }
+
 } // namespace units
 
 /*****************************************************************************/
 // Additional units
 
 namespace units {
+
 namespace units {
 typedef::units::unit unit;
 
@@ -729,6 +740,7 @@ struct A;    // Ampere
 struct mol;    // mole
 struct cd;    // candela
 struct b;    // bit
+
 } // namespace units
 
 UNIT_DISPLAY_NAME(units::m, "m");
@@ -740,6 +752,7 @@ UNIT_DISPLAY_NAME(units::mol, "mol");
 UNIT_DISPLAY_NAME(units::cd, "cd");
 
 namespace units {
+
 // SI derived units:
 typedef compose<m, pow<m, -1> > rad;
 typedef compose<pow<m, 2>, pow<m, -2> > sr;
@@ -764,6 +777,7 @@ typedef pow<s, -1> Bq;
 typedef compose<J, pow<kg, -1> > Gy;
 typedef Gy Sv;
 typedef compose<pow<s, -1>, mol> kat;
+
 } // namespace units
 
 UNIT_DISPLAY_NAME(units::rad, "rad");
@@ -786,6 +800,7 @@ UNIT_DISPLAY_NAME(units::Gy, "Gy");
 UNIT_DISPLAY_NAME(units::kat, "kat");
 
 namespace units {
+
 // SI prefixes:
 template<typename Unit> struct deca
 {
@@ -877,6 +892,7 @@ typedef milli<kg>::type g;
 typedef milli<g>::type mg;
 typedef milli<s>::type ms;
 typedef milli<W>::type mW;
+
 } // namespace units
 
 UNIT_DISPLAY_NAME(units::cm, "cm");
@@ -888,6 +904,7 @@ UNIT_DISPLAY_NAME(units::ms, "ms");
 UNIT_DISPLAY_NAME(units::mW, "mW");
 
 namespace units {
+
 // Non-SI mass
 typedef scale<kg, 22046223, 10000000> lb;
 typedef scale<lb, 16> oz;
@@ -956,6 +973,7 @@ typedef scale<Hz, 60> rpm;
 typedef scale<unit, 100> percent;
 typedef scale<unit, 1, 12> dozen;
 typedef scale<unit, 1, 13> bakers_dozen;
+
 } // namespace units
 
 UNIT_DISPLAY_NAME(units::lb, "lb");
@@ -1000,6 +1018,7 @@ UNIT_DISPLAY_NAME(units::dozen, "dozen");
 UNIT_DISPLAY_NAME(units::bakers_dozen, "bakers dozen");
 
 namespace values {
+
 typedef value<double, units::unit> unit;
 
 // SI units
@@ -1104,9 +1123,11 @@ typedef value<double, units::percent> percent;
 typedef value<double, units::rpm> rpm;
 typedef value<double, units::dozen> dozen;
 typedef value<double, units::bakers_dozen> bakers_dozen;
+
 } // namespace values
 
 namespace constants {
+
 // Physical constants:
 const value<double, compose<units::J, pow<units::K, -1> > > k(1.3806504e-23);
 const value<double, units::kg> mu(1.660538782e-27);
@@ -1135,6 +1156,7 @@ const value<double, compose<units::W, compose<pow<units::m, -1>, pow<units::K, -
 const value<double, units::rad> pi(3.141592653589793);
 const value<double, units::m> lightyear(9.4605284e15);
 const value<double, compose<units::m, pow<units::s, -2> > > g(9.80665);
+
 } // namespace constants
 
 // Trigonometry
@@ -1156,6 +1178,7 @@ Value tan(const value<Value, Unit>& angle)
 {
     return std::tan(value<Value, units::rad>(angle).get());
 }
+
 } // namespace units
 
 #endif // ifndef __INET_UNITS_H

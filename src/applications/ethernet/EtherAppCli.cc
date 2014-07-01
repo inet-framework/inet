@@ -27,6 +27,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(EtherAppCli);
 
 simsignal_t EtherAppCli::sentPkSignal = registerSignal("sentPk");
@@ -232,5 +233,6 @@ void EtherAppCli::finish()
     cancelAndDelete(timerMsg);
     timerMsg = NULL;
 }
+
 } // namespace inet
 

@@ -27,7 +27,6 @@
 
 namespace inet {
 
-
 int8_t Batman::send_udp_packet(cPacket *packet_buff, int32_t packet_buff_len, const Address & destAdd, int32_t send_sock, BatmanIf *batman_if)
 {
     if ((batman_if != NULL) && (!batman_if->if_active))
@@ -187,8 +186,6 @@ simtime_t Batman::getTime()
 {
     return simTime() + par("desynchronized");
 }
-
-
 
 } // namespace inet
 

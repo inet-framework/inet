@@ -34,6 +34,7 @@
 #include "CSMAFrame_m.h"
 
 namespace inet {
+
 using namespace physicallayer;
 
 /**
@@ -342,6 +343,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
      */
     CSMA& operator=(const CSMA&);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_CSMA_H

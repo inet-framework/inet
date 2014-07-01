@@ -24,6 +24,7 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
+
 Define_Module(STP);
 
 const double STP::tickInterval = 1;
@@ -679,5 +680,6 @@ void STP::initInterfacedata(unsigned int portNum)
     ifd->setPortNum(-1);
     ifd->setLostBPDU(0);
 }
+
 } // namespace inet
 

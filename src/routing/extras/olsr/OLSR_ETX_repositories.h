@@ -40,7 +40,6 @@
 
 namespace inet {
 
-
 #ifndef CURRENT_TIME_OWER
 #define CURRENT_TIME_OWER   SIMTIME_DBL(simTime())
 #endif

@@ -23,6 +23,7 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+
 extern "C" {
 #include <libavutil/opt.h>
 }
@@ -532,5 +533,6 @@ void VoIPStreamSender::readFrame()
         }
     }
 }
+
 } // namespace inet
 

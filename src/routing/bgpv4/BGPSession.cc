@@ -20,6 +20,7 @@
 #include "BGPFSM.h"
 
 namespace inet {
+
 BGPSession::BGPSession(BGPRouting& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(0), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(0)
@@ -139,5 +140,6 @@ void BGPSession::getStatistics(unsigned int *statTab)
     statTab[4] += _updateMsgSent;
     statTab[5] += _updateMsgRcv;
 }
+
 } // namespace inet
 

@@ -24,6 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceStateBackup::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
@@ -54,5 +55,6 @@ void OSPF::InterfaceStateBackup::processEvent(OSPF::Interface *intf, OSPF::Inter
         intf->sendDelayedAcknowledgements();
     }
 }
+
 } // namespace inet
 

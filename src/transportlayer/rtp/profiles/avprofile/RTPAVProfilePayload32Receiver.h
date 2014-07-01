@@ -27,6 +27,7 @@
 #include "RTPPayloadReceiver.h"
 
 namespace inet {
+
 /**
  * This module is used to receive getData(mpeg video) of payload 32 for rtp
  * endsystems working under the rtp av profile.
@@ -72,6 +73,7 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
      */
     virtual void processPacket(RTPPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPAVPROFILEPAYLOAD32RECEIVER_H

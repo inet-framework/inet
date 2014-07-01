@@ -23,6 +23,7 @@
 #include "IReception.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ReceiverBase : public cModule, public virtual IReceiver
 {
@@ -38,6 +39,7 @@ class INET_API ReceiverBase : public cModule, public virtual IReceiver
     virtual W getMinInterferencePower() const { return W(qNaN); }
     virtual W getMinReceptionPower() const { return W(qNaN); }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

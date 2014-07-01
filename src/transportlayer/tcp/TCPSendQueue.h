@@ -24,6 +24,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 /**
  * Abstract base class for TCP send queues. In fact a single object
  * represents both the send queue and the retransmission queue
@@ -153,6 +154,7 @@ class INET_API TCPSendQueue : public cObject
      */
     virtual void discardUpTo(uint32 seqNum) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSENDQUEUE_H

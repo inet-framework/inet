@@ -30,6 +30,7 @@
 #include "UDPSocket.h"
 
 namespace inet {
+
 /**
  * UDP application. See NED for more info.
  */
@@ -108,6 +109,7 @@ class INET_API UDPBasicBurst : public ApplicationBase
     UDPBasicBurst();
     ~UDPBasicBurst();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_UDPBASICBURST_H

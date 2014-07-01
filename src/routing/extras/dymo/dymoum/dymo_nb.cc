@@ -160,7 +160,6 @@ nb_t *NS_CLASS nb_find(struct in_addr nb_addr, u_int32_t ifindex)
 }
 #endif
 
-
 } // namespace inet
 
 

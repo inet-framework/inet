@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Ordinal Based Duplicator module.
  */
@@ -44,6 +45,7 @@ class INET_API OrdinalBasedDuplicator : public cSimpleModule
     virtual void parseVector(const char *vector);
     virtual void finish();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ORDINALBASEDDUPLICATOR_H

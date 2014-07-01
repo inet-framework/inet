@@ -38,6 +38,7 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 
 using namespace INETFw;
 namespace inet {
+
 int UDPSerializer::serialize(const UDPPacket *pkt, unsigned char *buf, unsigned int bufsize)
 {
     struct udphdr *udphdr = (struct udphdr *)(buf);
@@ -64,5 +65,6 @@ void UDPSerializer::parse(const unsigned char *buf, unsigned int bufsize, UDPPac
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }
+
 } // namespace inet
 

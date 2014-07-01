@@ -16,6 +16,7 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
+
 Define_Module(EthernetApplication);
 simsignal_t EthernetApplication::sentPkSignal = SIMSIGNAL_NULL;
 simsignal_t EthernetApplication::rcvdPkSignal = SIMSIGNAL_NULL;
@@ -162,5 +163,6 @@ void EthernetApplication::sendPacket(cMessage *datapacket, const MACAddress& des
 void EthernetApplication::finish()
 {
 }
+
 } // namespace inet
 

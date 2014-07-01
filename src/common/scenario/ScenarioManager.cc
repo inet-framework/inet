@@ -18,6 +18,7 @@
 #include "ScenarioManager.h"
 
 namespace inet {
+
 Define_Module(ScenarioManager);
 
 void ScenarioManager::initialize()
@@ -318,5 +319,6 @@ void ScenarioManager::updateDisplayString()
     sprintf(buf, "total %d changes, %d left", numChanges, numChanges - numDone);
     getDisplayString().setTagArg("t", 0, buf);
 }
+
 } // namespace inet
 

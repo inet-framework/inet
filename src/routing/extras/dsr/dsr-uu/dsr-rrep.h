@@ -15,6 +15,7 @@
 #ifndef NO_GLOBALS
 
 namespace inet {
+
 struct dsr_rrep_opt
 {
     u_int8_t type;

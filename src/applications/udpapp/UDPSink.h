@@ -25,6 +25,7 @@
 #include "UDPSocket.h"
 
 namespace inet {
+
 /**
  * Consumes and prints packets received from the UDP module. See NED for more info.
  */
@@ -64,6 +65,7 @@ class INET_API UDPSink : public ApplicationBase
     virtual bool handleNodeShutdown(IDoneCallback *doneCallback);
     virtual void handleNodeCrash();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_UDPSINK_H

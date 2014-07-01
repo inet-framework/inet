@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * This purely virtual interface provides an abstraction for different power consumers.
  *
@@ -35,6 +36,7 @@ class INET_API IPowerConsumer
 
     virtual double getPowerConsumption() = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPOWERCONSUMER_H

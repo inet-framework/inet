@@ -23,6 +23,7 @@
 #include "BindingCache.h"
 
 namespace inet {
+
 Define_Module(BindingCache);
 
 std::ostream& operator<<(std::ostream& os, const BindingCache::BindingCacheEntry& bce)
@@ -140,5 +141,6 @@ int BindingCache::generateKey(int homeToken, int careOfToken, const IPv6Address&
     // use a dummy value
     return homeToken + careOfToken;
 }
+
 } // namespace inet
 

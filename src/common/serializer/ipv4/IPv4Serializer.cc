@@ -64,6 +64,7 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 
 using namespace INETFw;
 namespace inet {
+
 int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
 {
     int packetLength;
@@ -209,5 +210,6 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }
+
 } // namespace inet
 

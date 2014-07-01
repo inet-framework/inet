@@ -23,6 +23,7 @@
 #include "SimpleVoIPPacket_m.h"
 
 namespace inet {
+
 Define_Module(SimpleVoIPReceiver);
 
 simsignal_t SimpleVoIPReceiver::packetLossRateSignal = registerSignal("VoIPPacketLossRate");
@@ -331,5 +332,6 @@ void SimpleVoIPReceiver::finish()
     if (currentTalkspurt.isActive())
         evaluateTalkspurt(true);
 }
+
 } // namespace inet
 

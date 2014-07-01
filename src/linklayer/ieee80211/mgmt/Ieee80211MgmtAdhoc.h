@@ -23,6 +23,7 @@
 #include "Ieee80211MgmtBase.h"
 
 namespace inet {
+
 /**
  * Used in 802.11 ad-hoc mode. See corresponding NED file for a detailed description.
  * This implementation ignores many details.
@@ -68,6 +69,7 @@ class INET_API Ieee80211MgmtAdhoc : public Ieee80211MgmtBase
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211MGMTADHOC_H

@@ -1490,7 +1490,6 @@ tcp_pcbs_sane()
 
 #endif /* LWIP_TCP */
 
-
 } // namespace inet
 
 

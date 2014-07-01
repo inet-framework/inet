@@ -21,6 +21,7 @@
 #include "BGPOpen_m.h"
 
 namespace inet {
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPOPEN_H

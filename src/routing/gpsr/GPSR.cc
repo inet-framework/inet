@@ -24,6 +24,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(GPSR);
 
 static inline double determinant(double a1, double a2, double b1, double b2)
@@ -640,5 +641,6 @@ void GPSR::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
         // TODO: shall we remove the neighbor?
     }
 }
+
 } // namespace inet
 

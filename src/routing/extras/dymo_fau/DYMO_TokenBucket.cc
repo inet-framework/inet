@@ -41,7 +41,6 @@ bool DYMO_TokenBucket::consumeTokens(double tokens, simtime_t currentTime)
     return true;
 }
 
-
 } // namespace inet
 
 

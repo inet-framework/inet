@@ -22,6 +22,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 Define_Module(STPTester);
 
 STPTester::STPTester()
@@ -165,5 +166,6 @@ bool STPTester::isForwarding(Topology::Node *node, unsigned int portNum)
 
     return portData->isForwarding();
 }
+
 } // namespace inet
 

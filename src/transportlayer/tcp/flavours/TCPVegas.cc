@@ -4,6 +4,7 @@
 #include "TCPVegas.h"
 
 namespace inet {
+
 Register_Class(TCPVegas);
 
 TCPVegasStateVariables::TCPVegasStateVariables()
@@ -363,5 +364,6 @@ void TCPVegas::segmentRetransmitted(uint32 fromseq, uint32 toseq)
 
     state->regions.set(fromseq, toseq, simTime());
 }
+
 } // namespace inet
 

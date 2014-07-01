@@ -22,6 +22,7 @@
 #include "IModulation.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API FlatTransmissionBase : public TransmissionBase
 {
@@ -51,6 +52,7 @@ class INET_API FlatTransmissionBase : public TransmissionBase
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual bps getBitrate() const { return bitrate; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

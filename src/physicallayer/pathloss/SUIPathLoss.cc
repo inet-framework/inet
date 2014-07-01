@@ -17,6 +17,7 @@
 #include "SUIPathLoss.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(SUIPathLoss);
 
@@ -96,6 +97,7 @@ double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distan
     }
     return FWMath::dB2fraction(-L);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

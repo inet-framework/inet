@@ -21,6 +21,7 @@
 #include "FlatReceptionBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarReception : public FlatReceptionBase
 {
@@ -37,6 +38,7 @@ class INET_API ScalarReception : public FlatReceptionBase
     virtual W getPower() const { return power; }
     virtual W computeMinPower(simtime_t startTime, simtime_t endTime) const { return power; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

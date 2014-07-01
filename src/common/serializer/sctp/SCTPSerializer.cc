@@ -43,6 +43,7 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 
 using namespace INETFw;
 namespace inet {
+
 unsigned char SCTPSerializer::keyVector[512];
 unsigned int SCTPSerializer::sizeKeyVector = 0;
 unsigned char SCTPSerializer::peerKeyVector[512];
@@ -2083,5 +2084,6 @@ void SCTPSerializer::calculateSharedKey()
             sharedKey[i + sizePeerKeyVector] = keyVector[i];
     }
 }
+
 } // namespace inet
 

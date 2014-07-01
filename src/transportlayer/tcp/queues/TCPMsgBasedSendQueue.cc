@@ -20,6 +20,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 Register_Class(TCPMsgBasedSendQueue);
 
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
@@ -121,5 +122,6 @@ void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
         payloadQueue.pop_front();
     }
 }
+
 } // namespace inet
 

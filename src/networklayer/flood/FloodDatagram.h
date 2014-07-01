@@ -23,6 +23,7 @@
 #include "FloodDatagram_m.h"
 
 namespace inet {
+
 /**
  * Represents an flood datagram. More info in the FloodDatagram.msg file
  * (and the documentation generated from it).
@@ -43,6 +44,7 @@ class INET_API FloodDatagram : public FloodDatagram_Base, public INetworkDatagra
     virtual int getTransportProtocol() const { return FloodDatagram_Base::getTransportProtocol(); }
     virtual void setTransportProtocol(int protocol) { FloodDatagram_Base::setTransportProtocol(protocol); };
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_FLOODDATAGRAM_H

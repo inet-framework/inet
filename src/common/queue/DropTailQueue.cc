@@ -20,6 +20,7 @@
 #include "DropTailQueue.h"
 
 namespace inet {
+
 Define_Module(DropTailQueue);
 
 simsignal_t DropTailQueue::queueLengthSignal = registerSignal("queueLength");
@@ -74,5 +75,6 @@ bool DropTailQueue::isEmpty()
 {
     return queue.empty();
 }
+
 } // namespace inet
 

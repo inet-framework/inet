@@ -27,6 +27,7 @@
 #include "stlutils.h"
 
 namespace inet {
+
 Register_Class(Topology);
 
 Topology::LinkIn *Topology::Node::getLinkIn(int i)
@@ -468,5 +469,6 @@ void Topology::calculateWeightedSingleShortestPathsTo(Node *_target)
         }
     }
 }
+
 } // namespace inet
 

@@ -27,6 +27,7 @@
 #include "IARP.h"
 
 namespace inet {
+
 class IInterfaceTable;
 
 /**
@@ -57,6 +58,7 @@ class INET_API GenericARP : public cSimpleModule, public IARP
     MACAddress mapMulticastAddress(Address addr);
     void sendPacketToNIC(cMessage *msg, InterfaceEntry *ie, const MACAddress& macAddress, int etherType);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICARP_H

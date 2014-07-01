@@ -30,6 +30,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 simsignal_t ARP::sentReqSignal = registerSignal("sentReq");
 simsignal_t ARP::sentReplySignal = registerSignal("sentReply");
 
@@ -482,5 +483,6 @@ Address ARP::getL3AddressFor(const MACAddress& macAddr) const
 
     return IPv4Address::UNSPECIFIED_ADDRESS;
 }
+
 } // namespace inet
 

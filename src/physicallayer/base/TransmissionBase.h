@@ -22,6 +22,7 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API TransmissionBase : public virtual ITransmission
 {
@@ -65,6 +66,7 @@ class INET_API TransmissionBase : public virtual ITransmission
     virtual const EulerAngles getStartOrientation() const { return startOrientation; }
     virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

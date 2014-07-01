@@ -23,6 +23,7 @@
 #include "IScriptable.h"
 
 namespace inet {
+
 /**
  * TODO documentation
  */
@@ -38,6 +39,7 @@ class INET_API NetworkInfo : public cSimpleModule, public IScriptable
   protected:
     virtual void dumpRoutingInfo(cModule *target, const char *filename, bool append, bool compat);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_NETWORKINFO_H

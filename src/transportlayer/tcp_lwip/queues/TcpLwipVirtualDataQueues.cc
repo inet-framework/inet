@@ -23,6 +23,7 @@
 #include "TCPSerializer.h"
 
 namespace inet {
+
 Register_Class(TcpLwipVirtualDataSendQueue);
 
 Register_Class(TcpLwipVirtualDataReceiveQueue);
@@ -163,5 +164,6 @@ void TcpLwipVirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
+
 } // namespace inet
 

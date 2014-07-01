@@ -21,6 +21,7 @@
 #include "OSPFPacket_m.h"
 
 namespace inet {
+
 namespace OSPF {
 class Router;
 class Interface;
@@ -37,6 +38,7 @@ class IMessageHandler
 
     virtual void processPacket(OSPFPacket *, Interface *intf, Neighbor *neighbor) = 0;
 };
+
 } // namespace OSPF
 } // namespace inet
 

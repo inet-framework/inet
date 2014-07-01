@@ -22,6 +22,7 @@
 #include "Polygon.h"
 
 namespace inet {
+
 /**
  * This class represents 3 dimensional prism with a polygon base face.
  * The coordinate system origin is at the first point on the base face.
@@ -38,6 +39,7 @@ class INET_API Prism : public Shape
     virtual bool isIntersecting(const LineSegment& lineSegment) const;
     virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PRISM_H

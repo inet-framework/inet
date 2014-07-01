@@ -22,6 +22,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(Ieee80211Radio);
 
@@ -66,6 +67,7 @@ void Ieee80211Radio::setChannelNumber(int newChannelNumber)
         emit(listeningChangedSignal, 0);
     }
 }
+
 } // namespace physicallayer
 } // namespace inet
 

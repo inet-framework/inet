@@ -38,6 +38,7 @@ static DLIST_HEAD(BLACKLIST);
 #endif  /* NS_PORT */
 
 namespace inet {
+
 #ifdef MAPROUTINGTABLE
 blacklist_t *NS_CLASS blacklist_add(struct in_addr addr)
 {
@@ -147,7 +148,6 @@ blacklist_t *NS_CLASS blacklist_find(struct in_addr addr)
     return NULL;
 }
 #endif
-
 
 } // namespace inet
 

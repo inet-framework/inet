@@ -31,6 +31,7 @@
 #include "HttpController.h"
 
 namespace inet {
+
 Define_Module(HttpController);
 
 void HttpController::initialize(int stage)
@@ -489,5 +490,6 @@ HttpController::WebServerEntry *HttpController::__getRandomServerInfo()
     } while (en->activationTime > simTime());
     return en;
 }
+
 } // namespace inet
 

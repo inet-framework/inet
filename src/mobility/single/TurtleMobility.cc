@@ -19,6 +19,7 @@
 #include "FWMath.h"
 
 namespace inet {
+
 Define_Module(TurtleMobility);
 
 TurtleMobility::TurtleMobility()
@@ -334,5 +335,6 @@ void TurtleMobility::gotoNextStatement()
         nextStatement = nextStatement->getNextSibling();
     }
 }
+
 } // namespace inet
 

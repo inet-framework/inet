@@ -18,6 +18,7 @@
 #include "MessageChecker.h"
 
 namespace inet {
+
 Define_Module(MessageChecker);
 
 #if OMNETPP_VERSION < 0x0500
@@ -242,5 +243,6 @@ void MessageChecker::finish()
     if (m_iterChk != m_checkingInfo.end())
         throw cRuntimeError("Several message(s) have to be checked");
 }
+
 } // namespace inet
 

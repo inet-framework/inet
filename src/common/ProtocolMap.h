@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Maps protocol numbers to output gates
  */
@@ -53,6 +54,7 @@ class INET_API ProtocolMapping
     /** find output gate index for protocol ID and returns it. Throws an error if not found. */
     int getOutputGateForProtocol(int protocol) const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PROTOCOLMAP_H

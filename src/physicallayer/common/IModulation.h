@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * Abstract class to encapsulate bit error rate calculation of modulation schemes
@@ -32,6 +33,7 @@ class INET_API IModulation
     virtual const char *getName() = 0;
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

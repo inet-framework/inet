@@ -27,6 +27,7 @@
 #include "PcapDump.h"
 
 namespace inet {
+
 /**
  * Dumps every packet using the PcapDump and PacketDump classes
  */
@@ -52,6 +53,7 @@ class INET_API PcapRecorder : public cSimpleModule, protected cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
     virtual void recordPacket(cPacket *msg, bool l2r);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PCAPRECORDER_H

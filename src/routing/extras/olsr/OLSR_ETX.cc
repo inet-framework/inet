@@ -48,7 +48,6 @@
 
 namespace inet {
 
-
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
 /// Port Number
@@ -2776,9 +2775,6 @@ bool OLSR_ETX::getNextHop(const Address &dest, Address &add, int &iface, double 
         cost = rt_entry->quality;
     return true;
 }
-
-
-
 
 } // namespace inet
 

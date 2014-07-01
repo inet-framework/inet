@@ -21,6 +21,7 @@
 #include "Ieee80211DataRate.h"
 
 namespace inet {
+
 ModulationType WifiModulationType::GetDsssRate1Mbps()
 {
     ModulationType mode;
@@ -783,5 +784,6 @@ simtime_t WifiModulationType::get_aPHY_RX_START_Delay(ModulationType modType, Wi
             return SIMTIME_ZERO;
     }
 }
+
 } // namespace inet
 

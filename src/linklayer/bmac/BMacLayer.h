@@ -23,6 +23,7 @@
 #include "BMacFrame_m.h"
 
 namespace inet {
+
 using namespace physicallayer;
 
 /**
@@ -273,6 +274,7 @@ class INET_API BMacLayer : public MACProtocolBase, public IMACProtocol
     BMacFrame *encapsMsg(cPacket *netwPkt);
     cObject *setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BMACLAYER_H

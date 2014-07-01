@@ -21,6 +21,7 @@
 #include "PhysicalLayerDefs.h"
 
 namespace inet {
+
 /**
  * This purely virtual interface provides an abstraction for different physical layer frames.
  */
@@ -29,6 +30,7 @@ class INET_API IPhysicalLayerFrame
   public:
     virtual ~IPhysicalLayerFrame() {}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPHYSICALLAYERFRAME_H

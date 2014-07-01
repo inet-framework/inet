@@ -156,7 +156,6 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
 }
 #endif
 
-
 } // namespace inet
 
 

@@ -28,6 +28,7 @@
 #include "SCTPNatTable.h"
 
 namespace inet {
+
 Define_Module(SCTPNatServer);
 
 NatVector SCTPNatServer::natVector;
@@ -486,5 +487,6 @@ void SCTPNatServer::finish()
     EV << getFullPath() << "Over all " << packetsRcvd << " packets received\n ";
     EV << getFullPath() << "Over all " << notifications << " notifications received\n ";
 }
+
 } // namespace inet
 

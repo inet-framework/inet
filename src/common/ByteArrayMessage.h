@@ -18,6 +18,7 @@
 #include "ByteArrayMessage_m.h"
 
 namespace inet {
+
 /**
  * Message that carries raw bytes. Used with emulation-related features.
  */
@@ -73,6 +74,7 @@ class ByteArrayMessage : public ByteArrayMessage_Base
      */
     virtual void removePrefix(unsigned int length);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BYTEARRAYMESSAGE_H

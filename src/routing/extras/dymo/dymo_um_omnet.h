@@ -66,6 +66,7 @@
 #include <map>
 
 namespace inet {
+
 /* Forward declaration needed to be able to reference the class */
 class DYMOUM;
 } //namespace
@@ -115,6 +116,7 @@ class DYMOUM;
 
 
 namespace inet {
+
 /* The AODV-UU routing agent class */
 class DYMOUM : public ManetRoutingBase
 {

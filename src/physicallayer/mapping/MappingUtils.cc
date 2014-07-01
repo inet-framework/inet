@@ -18,6 +18,7 @@
 #include "MappingUtils.h"
 
 namespace inet {
+
 namespace physicallayer {
 FilledUpMappingIterator::FilledUpMappingIterator(FilledUpMapping& mapping) :
     MultiDimMappingIterator<Linear>(mapping) {}
@@ -483,6 +484,7 @@ LinearIntplMappingIterator::~LinearIntplMappingIterator()
     if (rightIt)
         delete rightIt;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

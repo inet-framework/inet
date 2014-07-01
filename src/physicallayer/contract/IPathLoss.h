@@ -21,6 +21,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface models path loss (or path attenuation) that is the reduction
@@ -42,6 +43,7 @@ class INET_API IPathLoss : public IPrintableObject
      */
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

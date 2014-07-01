@@ -37,6 +37,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 class IInterfaceTable;
 class RoutingTableParser;
 class IRoutingTable;
@@ -385,6 +386,7 @@ class INET_API IPv4RoutingTable : public cSimpleModule, public IIPv4RoutingTable
     virtual IMulticastRoute *removeMulticastRoute(IMulticastRoute *entry) { return removeMulticastRoute(check_and_cast<IPv4MulticastRoute *>(entry)); }
     virtual bool deleteMulticastRoute(IMulticastRoute *entry) { return deleteMulticastRoute(check_and_cast<IPv4MulticastRoute *>(entry)); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4ROUTINGTABLE_H

@@ -21,6 +21,7 @@
 #include "PropagationBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ImmediatePropagation : public PropagationBase
 {
@@ -31,6 +32,7 @@ class INET_API ImmediatePropagation : public PropagationBase
 
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

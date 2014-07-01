@@ -25,6 +25,7 @@
 #include "CloudDelayerBase.h"
 
 namespace inet {
+
 class IInterfaceTable;
 class PatternMatcher;
 
@@ -102,6 +103,7 @@ class INET_API MatrixCloudDelayer : public CloudDelayerBase
     /// returns path of connected node for the interface specified by 'id'
     std::string getPathOfConnectedNodeOnIfaceID(int id);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MATRIXCLOUDDELAYER_H

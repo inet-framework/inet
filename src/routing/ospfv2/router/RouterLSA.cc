@@ -18,6 +18,7 @@
 #include "LSA.h"
 
 namespace inet {
+
 bool OSPF::RouterLSA::update(const OSPFRouterLSA *lsa)
 {
     bool different = differsFrom(lsa);
@@ -83,5 +84,6 @@ bool OSPF::RouterLSA::differsFrom(const OSPFRouterLSA *routerLSA) const
 
     return differentHeader || differentBody;
 }
+
 } // namespace inet
 

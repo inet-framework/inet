@@ -32,6 +32,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(AODVRouting);
 
 void AODVRouting::initialize(int stage)
@@ -1676,5 +1677,6 @@ AODVRouting::~AODVRouting()
     delete rrepAckTimer;
     delete blacklistTimer;
 }
+
 } // namespace inet
 

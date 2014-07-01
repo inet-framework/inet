@@ -19,6 +19,7 @@
 #include "RSVPResvMsg_m.h"
 
 namespace inet {
+
 /**
  * RSVP RESV message
  *
@@ -72,6 +73,7 @@ class RSVPResvError : public RSVPResvError_Base
     inline IPv4Address getNHOP() { return getHop().Next_Hop_Address; }
     inline IPv4Address getLIH() { return getHop().Logical_Interface_Handle; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RSVPRESVMSG_H

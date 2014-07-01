@@ -18,6 +18,7 @@
 #include "Shape.h"
 
 namespace inet {
+
 Shape::Shape()
 {
 }
@@ -42,5 +43,6 @@ double Shape::computeIntersectionDistance(const LineSegment& lineSegment) const
     else
         return 0;
 }
+
 } // namespace inet
 

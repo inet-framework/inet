@@ -28,6 +28,7 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
+
 using std::cout;
 
 Define_Module(PingApp);
@@ -338,5 +339,6 @@ void PingApp::finish()
         cout << "--------------------------------------------------------" << endl;
     }
 }
+
 } // namespace inet
 

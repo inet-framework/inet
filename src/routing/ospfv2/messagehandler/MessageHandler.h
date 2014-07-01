@@ -29,6 +29,7 @@
 #include "OSPFTimer.h"
 
 namespace inet {
+
 namespace OSPF {
 class MessageHandler : public IMessageHandler
 {
@@ -63,6 +64,7 @@ class MessageHandler : public IMessageHandler
     // Authentication not implemented
     bool authenticatePacket(OSPFPacket *packet) { return true; }
 };
+
 } // namespace OSPF
 } // namespace inet
 

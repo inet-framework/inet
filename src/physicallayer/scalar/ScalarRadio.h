@@ -21,6 +21,7 @@
 #include "Radio.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarRadio : public Radio
 {
@@ -32,6 +33,7 @@ class INET_API ScalarRadio : public Radio
 
     virtual void setBitrate(bps bitrate);
 };
+
 } // namespace physicallayer
 } // namespace inet
 

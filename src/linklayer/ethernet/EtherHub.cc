@@ -18,6 +18,7 @@
 #include "EtherHub.h"
 
 namespace inet {
+
 Define_Module(EtherHub);
 
 simsignal_t EtherHub::pkSignal = registerSignal("pk");
@@ -184,5 +185,6 @@ void EtherHub::finish()
     if (t > 0)
         recordScalar("messages/sec", numMessages / t);
 }
+
 } // namespace inet
 

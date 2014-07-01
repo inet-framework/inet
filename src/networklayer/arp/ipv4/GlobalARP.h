@@ -31,6 +31,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 // Forward declarations:
 class ARPPacket;
 class IInterfaceTable;
@@ -102,6 +103,7 @@ class INET_API GlobalARP : public cSimpleModule, public IARP, public ILifecycle,
 
     virtual void updateDisplayString();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GLOBALARP_H

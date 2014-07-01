@@ -25,6 +25,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 EXECUTE_ON_STARTUP(
         cEnum * e = cEnum::find("inet::ChooseDestAddrMode");
         if (!e)
@@ -346,5 +347,6 @@ void UDPBasicBurst::handleNodeCrash()
         cancelEvent(timerNext);
     activeBurst = false;
 }
+
 } // namespace inet
 

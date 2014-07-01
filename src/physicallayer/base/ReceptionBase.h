@@ -23,6 +23,7 @@
 #include "IRadio.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ReceptionBase : public virtual IReception
 {
@@ -62,6 +63,7 @@ class INET_API ReceptionBase : public virtual IReception
     virtual const EulerAngles getStartOrientation() const { return startOrientation; }
     virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

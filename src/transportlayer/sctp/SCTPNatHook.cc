@@ -6,6 +6,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 Define_Module(SCTPNatHook);
 
 SCTPNatHook::SCTPNatHook()
@@ -295,5 +296,6 @@ void SCTPNatHook::finish()
     delete natTable;
     std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }
+
 } // namespace inet
 

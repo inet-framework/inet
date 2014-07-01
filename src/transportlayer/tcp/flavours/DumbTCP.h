@@ -23,6 +23,7 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
+
 /**
  * State variables for DumbTCP.
  */
@@ -89,6 +90,7 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_DUMBTCP_H

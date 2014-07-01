@@ -18,6 +18,7 @@
 #ifndef NO_GLOBALS
 
 namespace inet {
+
 struct neighbor_info
 {
     struct sockaddr hw_addr;

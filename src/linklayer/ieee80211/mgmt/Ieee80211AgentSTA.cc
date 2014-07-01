@@ -22,6 +22,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 Define_Module(Ieee80211AgentSTA);
 
 #define MK_STARTUP    1
@@ -326,5 +327,6 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
         // we are happy!
     }
 }
+
 } // namespace inet
 

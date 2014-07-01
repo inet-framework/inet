@@ -18,7 +18,9 @@
 #include "FlatNoiseBase.h"
 
 namespace inet {
+
 namespace physicallayer {
+
 } // namespace physicallayer
 } // namespace inet
 

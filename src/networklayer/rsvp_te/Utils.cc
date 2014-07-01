@@ -16,6 +16,7 @@
 #include "IntServ.h"
 
 namespace inet {
+
 std::string vectorToString(const IPAddressVector& vec)
 {
     return vectorToString(vec, ", ");
@@ -145,5 +146,6 @@ cModule *getPayloadOwner(cPacket *msg)
     }
    }
  */
+
 } // namespace inet
 

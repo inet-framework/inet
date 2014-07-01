@@ -21,6 +21,7 @@
 #include "UDPControlInfo_m.h"
 
 namespace inet {
+
 Define_Module(UDPVideoStreamSvr);
 
 simsignal_t UDPVideoStreamSvr::reqStreamBytesSignal = registerSignal("reqStreamBytes");
@@ -167,5 +168,6 @@ void UDPVideoStreamSvr::handleNodeCrash()
 {
     clearStreams();
 }
+
 } // namespace inet
 

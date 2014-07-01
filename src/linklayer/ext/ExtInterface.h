@@ -32,6 +32,7 @@
 #include "cSocketRTScheduler.h"
 
 namespace inet {
+
 // Forward declarations:
 class InterfaceEntry;
 
@@ -81,6 +82,7 @@ class ExtInterface : public MACBase
 
     virtual void finish();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_EXTINTERFACE_H

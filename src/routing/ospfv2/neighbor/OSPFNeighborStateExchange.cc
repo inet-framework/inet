@@ -29,6 +29,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
@@ -90,5 +91,6 @@ void OSPF::NeighborStateExchange::processEvent(OSPF::Neighbor *neighbor, OSPF::N
         neighbor->startRequestRetransmissionTimer();
     }
 }
+
 } // namespace inet
 

@@ -27,6 +27,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(PPP);
 
 simsignal_t PPP::txStateSignal = registerSignal("txState");
@@ -463,5 +464,6 @@ void PPP::clearQueue()
         txQueue.clear();
     }
 }
+
 } // namespace inet
 

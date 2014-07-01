@@ -22,6 +22,7 @@
 #include "IntServ.h"
 
 namespace inet {
+
 EroVector routeToEro(const IPAddressVector& rro);
 std::string vectorToString(const IPAddressVector& vec);
 std::string vectorToString(const IPAddressVector& vec, const char *delim);
@@ -59,6 +60,7 @@ int find(const EroVector& ERO, IPv4Address node);
 cModule *getPayloadOwner(cPacket *msg);
 
 //void prepend(EroVector& dest, const EroVector& src, bool reverse);
+
 } // namespace inet
 
 #endif // ifndef __INET_UTILS_H

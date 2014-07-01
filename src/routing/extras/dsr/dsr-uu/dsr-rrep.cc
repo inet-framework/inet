@@ -421,7 +421,6 @@ void __exit NSCLASS grat_rrep_tbl_cleanup(void)
 #endif
 }
 
-
 } // namespace inet
 
 

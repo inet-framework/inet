@@ -21,6 +21,7 @@
 #include "BonnMotionFileCache.h"
 
 namespace inet {
+
 const BonnMotionFile::Line *BonnMotionFile::getLine(int nodeId) const
 {
     LineList::const_iterator it = lines.begin();
@@ -77,5 +78,6 @@ void BonnMotionFileCache::parseFile(const char *filename, BonnMotionFile& bmFile
     }
     in.close();
 }
+
 } // namespace inet
 

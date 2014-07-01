@@ -30,6 +30,7 @@
 #include "IClassifier.h"
 
 namespace inet {
+
 /**
  * Implements the MPLS protocol; see the NED file for more info.
  */
@@ -61,6 +62,7 @@ class INET_API MPLS : public cSimpleModule
     virtual void sendToL2(cMessage *msg, int gateIndex);
     virtual void doStackOps(MPLSPacket *mplsPacket, const LabelOpVector& outLabel);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MPLS_H

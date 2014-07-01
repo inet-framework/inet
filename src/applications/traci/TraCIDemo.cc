@@ -23,6 +23,7 @@
 #include "UDPSocket.h"
 
 namespace inet {
+
 Define_Module(TraCIDemo);
 
 simsignal_t TraCIDemo::mobilityStateChangedSignal = registerSignal("mobilityStateChanged");
@@ -102,5 +103,6 @@ void TraCIDemo::handlePositionUpdate()
             sendMessage();
     }
 }
+
 } // namespace inet
 

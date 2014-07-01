@@ -23,6 +23,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 /**
  * Generic server application. It serves requests coming in GenericAppMsg
  * request messages. Clients are usually subclassed from TCPAppBase.
@@ -55,6 +56,7 @@ class INET_API TCPGenericSrvApp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPGENERICSRVAPP_H

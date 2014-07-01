@@ -22,6 +22,7 @@
 #endif // ifdef WITH_IPv4
 
 namespace inet {
+
 IPv4ControlInfo::~IPv4ControlInfo()
 {
     clean();
@@ -89,5 +90,6 @@ IPv4Datagram *IPv4ControlInfo::removeOrigDatagram()
     throw cRuntimeError(this, "INET was compiled without IPv4 support");
 #endif // ifdef WITH_IPv4
 }
+
 } // namespace inet
 

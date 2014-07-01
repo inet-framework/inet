@@ -22,6 +22,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 class IRadio;
 
@@ -39,6 +40,7 @@ class INET_API IListening : public IPrintableObject
     virtual const Coord getStartPosition() const = 0;
     virtual const Coord getEndPosition() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

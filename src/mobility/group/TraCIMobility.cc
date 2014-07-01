@@ -28,6 +28,7 @@
 #include "TraCIMobility.h"
 
 namespace inet {
+
 Define_Module(TraCIMobility);
 
 namespace {
@@ -327,5 +328,6 @@ double TraCIMobility::calculateCO2emission(double v, double a) const
 }
 
 #endif // ifdef WITH_TRACI
+
 } // namespace inet
 

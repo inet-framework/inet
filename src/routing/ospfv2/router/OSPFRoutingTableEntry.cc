@@ -18,6 +18,7 @@
 #include "OSPFRoutingTableEntry.h"
 
 namespace inet {
+
 OSPF::RoutingTableEntry::RoutingTableEntry(IInterfaceTable *_ift) :
     ift(_ift),
     IPv4Route(),
@@ -178,5 +179,6 @@ std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry
 
     return out;
 }
+
 } // namespace inet
 

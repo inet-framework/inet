@@ -25,6 +25,7 @@
 #include "OSPFPacket_m.h"
 
 namespace inet {
+
 namespace OSPF {
 struct NextHop
 {
@@ -153,6 +154,7 @@ class ASExternalLSA : public OSPFASExternalLSA,
     bool update(const OSPFASExternalLSA *lsa);
     bool differsFrom(const OSPFASExternalLSA *asExternalLSA) const;
 };
+
 } // namespace OSPF
 
 /**
@@ -198,6 +200,7 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
+
 } // namespace inet
 
 #endif    // __LSA_HPP__

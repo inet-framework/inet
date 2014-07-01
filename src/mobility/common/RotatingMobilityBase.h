@@ -19,6 +19,7 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
+
 class INET_API RotatingMobilityBase : public MobilityBase
 {
   protected:
@@ -77,6 +78,7 @@ class INET_API RotatingMobilityBase : public MobilityBase
     /** @brief Returns the current angular speed at the current simulation time. */
     virtual EulerAngles getCurrentAngularSpeed();
 };
+
 } // namespace inet
 
 #endif /* ROTATINGMOBILITYBASE_H_ */

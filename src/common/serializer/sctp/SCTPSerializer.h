@@ -21,6 +21,7 @@
 #include "SCTPMessage.h"
 
 namespace inet {
+
 /**
  * Converts between SCTPMessage and binary (network byte order) SCTP header.
  */
@@ -54,6 +55,7 @@ class SCTPSerializer
     static unsigned int sizePeerKeyVector;
     static unsigned char sharedKey[512];
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPSERIALIZER_H

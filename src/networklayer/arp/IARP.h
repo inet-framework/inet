@@ -27,6 +27,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 class InterfaceEntry;
 
 /**
@@ -73,6 +74,7 @@ class INET_API IARP
      */
     virtual MACAddress resolveL3Address(const Address& address, const InterfaceEntry *ie) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IARP_H

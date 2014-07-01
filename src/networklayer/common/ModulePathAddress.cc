@@ -22,6 +22,7 @@
 #include "AddressResolver.h"
 
 namespace inet {
+
 namespace {
 // copied the cModule::getModuleByRelativePath(), but returns NULL instead throw cRuntimeError
 cModule *getModuleByRelativePath(cModule *modp, const char *path)
@@ -70,5 +71,6 @@ std::string ModulePathAddress::str() const
     std::string fullPath = module->getFullPath();
     return strchr(fullPath.c_str(), '.') + 1;
 }
+
 } // namespace inet
 

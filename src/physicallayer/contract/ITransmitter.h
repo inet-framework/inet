@@ -21,6 +21,7 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
@@ -42,6 +43,7 @@ class INET_API ITransmitter : public IPrintableObject
      */
     virtual const ITransmission *createTransmission(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

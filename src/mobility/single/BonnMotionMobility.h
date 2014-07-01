@@ -24,6 +24,7 @@
 #include "BonnMotionFileCache.h"
 
 namespace inet {
+
 /**
  * @brief Uses the BonnMotion native file format. See NED file for more info.
  *
@@ -58,6 +59,7 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
 
     virtual ~BonnMotionMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BONNMOTIONMOBILITY_H

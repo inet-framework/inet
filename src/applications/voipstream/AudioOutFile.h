@@ -30,6 +30,7 @@ extern "C" {
 };
 
 namespace inet {
+
 /**
  * Records audio into a file.
  */
@@ -52,6 +53,7 @@ class AudioOutFile
     AVStream *audio_st;
     AVFormatContext *oc;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_AUDIOOUTFILE_H

@@ -25,6 +25,7 @@
 #include "Ieee8021dInterfaceData.h"
 
 namespace inet {
+
 /**
  * Base class for STP and RSTP.
  */
@@ -94,6 +95,7 @@ class INET_API STPBase : public cSimpleModule, public ILifecycle, public cListen
      */
     virtual InterfaceEntry *chooseInterface();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_STPBASE_H

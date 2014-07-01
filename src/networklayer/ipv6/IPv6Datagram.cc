@@ -19,6 +19,7 @@
 #include "IPv6ExtensionHeaders.h"
 
 namespace inet {
+
 Register_Class(IPv6Datagram);
 
 std::ostream& operator<<(std::ostream& os, IPv6ExtensionHeaderPtr eh)
@@ -222,5 +223,6 @@ std::ostream& operator<<(std::ostream& out, const IPv6ExtensionHeader& h)
     out << "{type:" << h.getExtensionType() << ",length:" << h.getByteLength() << "}";
     return out;
 }
+
 } // namespace inet
 

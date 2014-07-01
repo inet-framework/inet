@@ -32,6 +32,7 @@
 #include "IIPv4RoutingTable.h"
 
 namespace inet {
+
 Define_Module(RTP);
 
 simsignal_t RTP::rcvdPkSignal = registerSignal("rcvdPk");
@@ -416,5 +417,6 @@ bool RTP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneCa
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
 } // namespace inet
 

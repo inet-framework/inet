@@ -22,6 +22,7 @@
 #include "PhysicalEnvironment.h"
 
 namespace inet {
+
 namespace physicallayer {
 // TODO: add reflection from walls
 // TODO: allow dB attenuation per meter/per wall
@@ -41,6 +42,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     virtual void printToStream(std::ostream& stream) const;
     virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

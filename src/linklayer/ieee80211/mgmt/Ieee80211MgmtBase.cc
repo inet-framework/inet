@@ -24,6 +24,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = registerSignal("dataQueueLen");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
@@ -268,5 +269,6 @@ void Ieee80211MgmtBase::stop()
     mgmtQueue.clear();
     isOperational = false;
 }
+
 } // namespace inet
 

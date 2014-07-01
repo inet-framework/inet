@@ -25,6 +25,7 @@
 #include "dsss-error-rate-model.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * \brief Model the error rate for different modulations.
@@ -75,6 +76,7 @@ class YansErrorRateModel : public IErrorModel
             uint32_t m, uint32_t dfree,
             uint32_t adFree, uint32_t adFreePlusOne) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

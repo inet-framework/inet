@@ -22,6 +22,7 @@
 #include "MACAddress.h"
 
 namespace inet {
+
 /*
  * A C++ interface to abstract the functionality of IMACAddressTable.
  */
@@ -88,6 +89,7 @@ class INET_API IMACAddressTable
     virtual void setAgingTime(simtime_t agingTime) = 0;
     virtual void resetDefaultAging() = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IMACADDRESSTABLE_H

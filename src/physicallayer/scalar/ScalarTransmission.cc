@@ -18,12 +18,14 @@
 #include "ScalarTransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 void ScalarTransmission::printToStream(std::ostream& stream) const
 {
     TransmissionBase::printToStream(stream);
     stream << ", power = " << power << ", carrier frequency = " << carrierFrequency << ", bandwidth = " << bandwidth;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "OSPFInterfaceState.h"
 
 namespace inet {
+
 namespace OSPF {
 class InterfaceStateWaiting : public InterfaceState
 {
@@ -28,6 +29,7 @@ class InterfaceStateWaiting : public InterfaceState
     virtual void processEvent(Interface *intf, Interface::InterfaceEventType event);
     virtual Interface::InterfaceStateType getState() const { return Interface::WAITING_STATE; }
 };
+
 } // namespace OSPF
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "RTPInnerPacket.h"
 
 namespace inet {
+
 Define_Module(RTPPayloadSender);
 
 RTPPayloadSender::RTPPayloadSender()
@@ -207,5 +208,6 @@ bool RTPPayloadSender::sendPacket()
     throw cRuntimeError("sendPacket() not implemented");
     return false;
 }
+
 } // namespace inet
 

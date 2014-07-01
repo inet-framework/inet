@@ -29,6 +29,7 @@
 #include "TCPCommand_m.h"
 
 namespace inet {
+
 // Forward declarations:
 class TCPConnection;
 class TCPSegment;
@@ -202,6 +203,7 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     // called at shutdown/crash
     virtual void reset();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_H

@@ -23,6 +23,7 @@
 #include "Ieee80211MgmtBase.h"
 
 namespace inet {
+
 class EtherFrame;
 
 /**
@@ -78,6 +79,7 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      */
     virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211MGMTAPBASE_H

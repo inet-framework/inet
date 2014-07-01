@@ -18,6 +18,7 @@
 #include "IRadio.h"
 
 namespace inet {
+
 namespace physicallayer {
 int IRadio::nextId = 0;
 
@@ -71,6 +72,7 @@ const char *IRadio::getRadioTransmissionStateName(TransmissionState transmission
         transmissionStateEnum = cEnum::get("inet::radio::TransmissionState");
     return transmissionStateEnum->getStringFor(transmissionState) + 19;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

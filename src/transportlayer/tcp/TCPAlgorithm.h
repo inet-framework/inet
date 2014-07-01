@@ -25,6 +25,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 /**
  * Abstract base class for TCP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
@@ -182,6 +183,7 @@ class INET_API TCPAlgorithm : public cObject
      */
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPALGORITHM_H

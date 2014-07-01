@@ -20,6 +20,7 @@
 #include "TCP.h"
 
 namespace inet {
+
 Register_Class(TCPNewReno);
 
 TCPNewReno::TCPNewReno() : TCPTahoeRenoFamily(),
@@ -351,5 +352,6 @@ void TCPNewReno::receivedDuplicateAck()
         }
     }
 }
+
 } // namespace inet
 

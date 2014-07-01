@@ -40,6 +40,7 @@
 #include "DiffservUtil.h"
 
 namespace inet {
+
 using namespace DiffservUtil;
 
 Define_Module(BehaviorAggregateClassifier);
@@ -109,5 +110,6 @@ int BehaviorAggregateClassifier::getDscpFromPacket(cPacket *packet)
     }
     return -1;
 }
+
 } // namespace inet
 

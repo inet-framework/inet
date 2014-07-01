@@ -30,6 +30,7 @@
 #include "Topology.h"
 
 namespace inet {
+
 /**
  * Computes L2 configuration of the network. See the NED definition for details.
  */
@@ -142,6 +143,7 @@ class L2NetworkConfigurator : public cSimpleModule
      */
     virtual void configureInterface(InterfaceEntry *interfaceEntry);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_L2NETWORKCONFIGURATOR_H

@@ -20,6 +20,7 @@
 #include "sdes.h"
 
 namespace inet {
+
 Register_Class(SDESItem);
 
 SDESItem::SDESItem() : cObject()
@@ -196,5 +197,6 @@ int SDESChunk::getLength() const
 {
     return _length;
 }
+
 } // namespace inet
 

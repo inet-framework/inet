@@ -40,6 +40,7 @@
 #include "InitStages.h"
 
 namespace inet {
+
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
@@ -106,6 +107,7 @@ inline cObject *createOne(const char *classname)
                             "modules and channels, with Define_Module()/Define_Channel()", classname);
     return ret;
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_INETDEFS_H

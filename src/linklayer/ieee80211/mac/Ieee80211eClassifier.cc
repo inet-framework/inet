@@ -36,6 +36,7 @@
 #endif // ifdef WITH_TCP_COMMON
 
 namespace inet {
+
 Register_Class(Ieee80211eClassifier);
 
 Ieee80211eClassifier::Ieee80211eClassifier()
@@ -109,5 +110,6 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 
     return defaultAC;
 }
+
 } // namespace inet
 

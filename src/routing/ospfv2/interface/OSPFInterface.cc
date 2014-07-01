@@ -28,6 +28,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 OSPF::Interface::Interface(OSPF::Interface::OSPFInterfaceType ifType) :
     interfaceType(ifType),
     ifIndex(0),
@@ -613,5 +614,6 @@ void OSPF::Interface::ageTransmittedLSALists()
         neighboringRouters[i]->ageTransmittedLSAList();
     }
 }
+
 } // namespace inet
 

@@ -18,10 +18,12 @@
 #include "IARP.h"
 
 namespace inet {
+
 Register_Abstract_Class(IARP::Notification);
 
 const simsignal_t IARP::initiatedARPResolutionSignal = cComponent::registerSignal("initiatedARPResolution");
 const simsignal_t IARP::completedARPResolutionSignal = cComponent::registerSignal("completedARPResolution");
 const simsignal_t IARP::failedARPResolutionSignal = cComponent::registerSignal("failedARPResolution");
+
 } // namespace inet
 

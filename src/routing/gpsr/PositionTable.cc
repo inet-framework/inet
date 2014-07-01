@@ -19,6 +19,7 @@
 #include "PositionTable.h"
 
 namespace inet {
+
 std::vector<Address> PositionTable::getAddresses() const
 {
     std::vector<Address> addresses;
@@ -79,5 +80,6 @@ simtime_t PositionTable::getOldestPosition() const
     }
     return oldestPosition;
 }
+
 } // namespace inet
 

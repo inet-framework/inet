@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Absolute dropper.
  */
@@ -79,6 +80,7 @@ class INET_API MultiFieldClassifier : public cSimpleModule
 
     virtual int classifyPacket(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MULTIFIELDCLASSIFIER_H

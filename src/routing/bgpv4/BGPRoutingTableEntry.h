@@ -22,6 +22,7 @@
 #include "BGPCommon.h"
 
 namespace inet {
+
 namespace BGP {
 class INET_API RoutingTableEntry : public IPv4Route
 {
@@ -44,6 +45,7 @@ class INET_API RoutingTableEntry : public IPv4Route
     RoutingPathType _pathType;
     std::vector<ASID> _ASList;
 };
+
 } // namespace BGP
 
 inline BGP::RoutingTableEntry::RoutingTableEntry(void) :
@@ -99,6 +101,7 @@ inline std::ostream& operator<<(std::ostream& out, BGP::RoutingTableEntry& entry
     }
     return out;
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPROUTINGTABLEENTRY_H

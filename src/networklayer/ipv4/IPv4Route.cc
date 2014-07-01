@@ -30,6 +30,7 @@
 #endif // ifdef WITH_AODV
 
 namespace inet {
+
 Register_Class(IPv4Route);
 Register_Class(IPv4MulticastRoute);
 
@@ -229,5 +230,6 @@ void IPv4MulticastRoute::changed(int fieldCode)
     if (rt)
         rt->multicastRouteChanged(this, fieldCode);
 }
+
 } // namespace inet
 

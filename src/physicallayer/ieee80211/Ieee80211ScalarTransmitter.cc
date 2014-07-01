@@ -25,6 +25,7 @@
 #include "Ieee80211Consts.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(Ieee80211ScalarTransmitter);
 
@@ -69,6 +70,7 @@ const ITransmission *Ieee80211ScalarTransmitter::createTransmission(const IRadio
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new Ieee80211ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower, opMode, preambleMode);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

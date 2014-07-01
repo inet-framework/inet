@@ -18,6 +18,7 @@
 #include "OrdinalBasedDuplicator.h"
 
 namespace inet {
+
 Define_Module(OrdinalBasedDuplicator);
 
 simsignal_t OrdinalBasedDuplicator::rcvdPkSignal = registerSignal("rcvdPk");
@@ -105,5 +106,6 @@ void OrdinalBasedDuplicator::parseVector(const char *vector)
 void OrdinalBasedDuplicator::finish()
 {
 }
+
 } // namespace inet
 

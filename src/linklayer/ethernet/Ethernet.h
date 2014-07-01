@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 // Constants from the 802.3 spec
 #define MAX_PACKETBURST                     13
 
@@ -50,6 +51,7 @@ namespace inet {
 #define ETHER_SNAP_HEADER_LENGTH            (5) /* org(3)+local(2) */
 #define ETHER_PAUSE_COMMAND_BYTES           (2 + 2) /* opcode(2)+parameters(2) */
 #define ETHER_PAUSE_COMMAND_PADDED_BYTES    std::max(MIN_ETHERNET_FRAME_BYTES, ETHER_MAC_FRAME_BYTES + ETHER_PAUSE_COMMAND_BYTES)
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERNET_H

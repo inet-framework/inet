@@ -21,6 +21,7 @@
 #include "ReceptionBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API IdealReception : public ReceptionBase
 {
@@ -43,6 +44,7 @@ class INET_API IdealReception : public ReceptionBase
 
     virtual Power getPower() const { return power; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

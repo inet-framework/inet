@@ -22,6 +22,7 @@
 #include "ICMPMessage_m.h"
 
 namespace inet {
+
 /**
  * Converts between ICMPMessage and binary (network byte order) ICMP header.
  */
@@ -41,6 +42,7 @@ class ICMPSerializer
      */
     void parse(const unsigned char *buf, unsigned int bufsize, ICMPMessage *pkt);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ICMPSERIALIZER_H

@@ -169,8 +169,6 @@ bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const
     return (rt->findBestMatchingRoute(destAddr) == NULL);
 }
 
-
-
 } // namespace inet
 
 

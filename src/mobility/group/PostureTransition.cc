@@ -47,6 +47,7 @@
 #include <assert.h>
 
 namespace inet {
+
 /**
  * Constructor function of the class. It sets the value for t he number of posture. It also suppose the first given transition matrix as default.
  * However, during parsing the xml configuration file, if a matrix has attribute type with value "default", it will be considered as the default (base)
@@ -545,5 +546,6 @@ double **PostureTransition::extractMatrixFromSteadyState(double *vec)
 
     return mat;
 }
+
 } // namespace inet
 

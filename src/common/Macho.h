@@ -304,6 +304,7 @@ class TestAccess;
 // deriving classes or to mark things as library internal. Don't touch things
 // with an underscore prefix!
 namespace Macho {
+
 class _MachineBase;
 
 template<class T>
@@ -1193,6 +1194,7 @@ inline IEvent<TOP> *Event(R (TOP::*handler)())
 {
     return new _Event0<TOP, R>(handler);
 }
+
 } // namespace Macho
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1250,6 +1252,7 @@ class _VS8_Bug_101615
 };
 
 namespace Macho {
+
 ////////////////////////////////////////////////////////////////////////////////
 // Base class for state initializers.
 // Initializer are used to provide parameters to states.
@@ -2160,6 +2163,7 @@ Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 }
 
 #endif // ifdef MACHO_SNAPSHOTS
+
 } // namespace Macho
 
 #endif    // __MACHO_HPP__

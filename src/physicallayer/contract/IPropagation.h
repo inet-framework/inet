@@ -23,6 +23,7 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface models how a radio signal propagates through space over time.
@@ -45,6 +46,7 @@ class INET_API IPropagation : public IPrintableObject
      */
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

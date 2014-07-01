@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Modules that need to be scriptable by ScenarioManager should "implement"
  * (subclass from) this class.
@@ -57,6 +58,7 @@ class INET_API IScriptable
      */
     virtual void processCommand(const cXMLElement& node) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ISCRIPTABLE_H

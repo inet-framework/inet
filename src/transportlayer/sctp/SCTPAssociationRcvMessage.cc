@@ -36,6 +36,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables *chunk)
 {
     SCTPPathVariables *lastPath = chunk->getLastDestinationPath();
@@ -3238,5 +3239,6 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables *chunk,
 
     statisticsPeerRwnd->record(state->peerRwnd);
 }
+
 } // namespace inet
 

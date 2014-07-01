@@ -91,7 +91,6 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
     return best;
 }
 
-
 } // namespace inet
 
 

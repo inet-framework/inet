@@ -53,6 +53,7 @@
 #include "PostureTransition.h"
 
 namespace inet {
+
 class MoBANLocal;
 
 /**
@@ -204,6 +205,7 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     /** @brief Collect MoBAN local modules */
     void collectLocalModules(cModule *module);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MOBANCOORDINATOR_H

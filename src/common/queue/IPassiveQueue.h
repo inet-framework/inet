@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class IPassiveQueueListener;
 
 /**
@@ -89,6 +90,7 @@ class INET_API IPassiveQueueListener
      */
     virtual void packetEnqueued(IPassiveQueue *queue) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPASSIVEQUEUE_H

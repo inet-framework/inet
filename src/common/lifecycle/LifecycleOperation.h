@@ -20,6 +20,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class LifecycleController;
 class IDoneCallback;
 
@@ -84,6 +85,7 @@ class INET_API LifecycleOperation : public cObject, public noncopyable
      */
     int getCurrentStage() const { return currentStage; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LIFECYCLEOPERATION_H

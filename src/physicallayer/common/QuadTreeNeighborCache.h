@@ -22,6 +22,7 @@
 #include "QuadTree.h"
 
 namespace inet {
+
 namespace physicallayer {
 class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighborCache
 {
@@ -67,6 +68,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
 };
+
 } // namespace physicallayer
 } // namespace inet
 

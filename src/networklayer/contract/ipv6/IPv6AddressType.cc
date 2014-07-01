@@ -22,6 +22,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 IPv6AddressType IPv6AddressType::INSTANCE;
 
 const IPv6Address IPv6AddressType::ALL_RIP_ROUTERS_MCAST("FF02::9");
@@ -34,5 +35,6 @@ Address IPv6AddressType::getLinkLocalAddress(const InterfaceEntry *ie) const
 #endif // ifdef WITH_IPv6
     return IPv6Address::UNSPECIFIED_ADDRESS;
 }
+
 } // namespace inet
 

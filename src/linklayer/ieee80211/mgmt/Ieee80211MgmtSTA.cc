@@ -29,6 +29,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 using namespace physicallayer;
 
 //TBD supportedRates!
@@ -842,5 +843,6 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
     //XXX where to get this from?
     //ap->rxPower = ...
 }
+
 } // namespace inet
 

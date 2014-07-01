@@ -27,6 +27,7 @@
 #include <algorithm>
 
 namespace inet {
+
 Define_Module(IGMPv2);
 
 // RFC 2236, Section 6: Host State Diagram
@@ -846,5 +847,6 @@ void IGMPv2::processLeave(InterfaceEntry *ie, IGMPMessage *msg)
 
     delete msg;
 }
+
 } // namespace inet
 

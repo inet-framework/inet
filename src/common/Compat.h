@@ -22,6 +22,7 @@
 #include <omnetpp.h>
 
 namespace inet {
+
 #if OMNETPP_VERSION < 0x500
 #  define EV_FATAL                         EV << "FATAL: "
         #  define EV_ERROR                 EV << "ERROR: "
@@ -127,6 +128,7 @@ T check_and_cast_nullable(P *p)
 }
 
 #endif    // OMNETPP_VERSION < 0x0500
+
 } // namespace inet
 
 #endif // ifndef __INET_COMPAT_H

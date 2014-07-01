@@ -20,6 +20,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 // ###### Constructor #######################################################
 SCTPSimpleGapList::SCTPSimpleGapList()
 {
@@ -379,5 +380,6 @@ bool SCTPGapList::updateGapList(const uint32 receivedTSN,
     }
     return newChunk;
 }
+
 } // namespace inet
 

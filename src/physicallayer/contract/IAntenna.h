@@ -22,6 +22,7 @@
 #include "IMobility.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
@@ -51,6 +52,7 @@ class INET_API IAntenna : public IPrintableObject
      */
     virtual double computeGain(const EulerAngles direction) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -24,6 +24,7 @@
 #include "IPv6ControlInfo.h"
 
 namespace inet {
+
 class INET_API IPv6AddressType : public IAddressType
 {
   public:
@@ -42,6 +43,7 @@ class INET_API IPv6AddressType : public IAddressType
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new IPv6ControlInfo(); }
     virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV6ADDRESSTYPE_H

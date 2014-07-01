@@ -42,6 +42,7 @@
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
+
 Address AddressResolver::resolve(const char *s, int addrType)
 {
     Address addr;
@@ -534,5 +535,6 @@ cModule *AddressResolver::findHostWithAddress(const Address& add)
     }
     return NULL;
 }
+
 } // namespace inet
 

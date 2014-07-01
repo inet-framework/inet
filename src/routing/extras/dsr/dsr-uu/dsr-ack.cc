@@ -472,7 +472,6 @@ int NSCLASS dsr_ack_opt_recv(struct dsr_ack_opt *ack)
     return DSR_PKT_NONE;
 }
 
-
 } // namespace inet
 
 

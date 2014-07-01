@@ -20,6 +20,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class LifecycleOperation;
 
 /**
@@ -56,6 +57,7 @@ class INET_API ILifecycle
      */
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ILIFECYCLE_H

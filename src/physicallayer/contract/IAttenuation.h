@@ -23,6 +23,7 @@
 #include "IReception.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface models how a radio signal attenuates during propagation. It
@@ -39,6 +40,7 @@ class INET_API IAttenuation : public IPrintableObject
      */
     virtual const IReception *computeReception(const IRadio *receiver, const ITransmission *transmission) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

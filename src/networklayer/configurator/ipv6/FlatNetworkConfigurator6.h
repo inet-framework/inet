@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Configures IPv6 addresses and routing tables for a "flat" network,
  * "flat" meaning that all hosts and routers will have the same
@@ -43,6 +44,7 @@ class INET_API FlatNetworkConfigurator6 : public cSimpleModule
     virtual void setDisplayString(int numIPNodes, int numNonIPNodes);
     virtual bool isIPNode(cTopology::Node *node);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_FLATNETWORKCONFIGURATOR6_H

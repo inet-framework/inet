@@ -23,6 +23,7 @@
 #include "AlgorithmicDropperBase.h"
 
 namespace inet {
+
 /**
  * Drops packets above threshold.
  * Resources can be shared amongst multiple queues.
@@ -37,6 +38,7 @@ class INET_API ThresholdDropper : public AlgorithmicDropperBase
     virtual void initialize();
     virtual bool shouldDrop(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_THRESHOLDDROPPER_H

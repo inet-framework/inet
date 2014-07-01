@@ -4,6 +4,7 @@
 #include "RTCPPacket.h"
 
 namespace inet {
+
 Register_Class(RTCPPacket);
 
 Register_Class(RTCPCompoundPacket);
@@ -73,5 +74,6 @@ RTCPByePacket::RTCPByePacket(const char *name, int kind)
     // space for the ssrc identifier
     addByteLength(4);
 };
+
 } // namespace inet
 

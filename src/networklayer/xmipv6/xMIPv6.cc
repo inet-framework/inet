@@ -36,6 +36,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 #define MK_SEND_PERIODIC_BU         1
 // 18.09.07 - CB
 #define MK_SEND_PERIODIC_BR         2
@@ -2722,5 +2723,6 @@ void xMIPv6::handleTokenExpiry(cMessage *msg)
 
     //delete msg;
 }
+
 } // namespace inet
 

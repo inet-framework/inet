@@ -25,6 +25,7 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
+
 Define_Module(TCPGenericSrvApp);
 
 simsignal_t TCPGenericSrvApp::rcvdPkSignal = registerSignal("rcvdPk");
@@ -165,5 +166,6 @@ void TCPGenericSrvApp::finish()
     EV_INFO << getFullPath() << ": sent " << bytesSent << " bytes in " << msgsSent << " packets\n";
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << msgsRcvd << " packets\n";
 }
+
 } // namespace inet
 

@@ -23,7 +23,9 @@
 #include <string>
 
 namespace inet {
+
 std::string intToString(int i);
+
 } // namespace inet
 
 #endif // ifndef __INET_COMMON_H

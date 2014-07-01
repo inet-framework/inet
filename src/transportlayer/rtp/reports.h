@@ -26,6 +26,7 @@
 #include "reports_m.h"
 
 namespace inet {
+
 /**
  * The class SenderReport represents an RTP sender report as contained
  * in an RTCPSenderReportPacket.
@@ -75,6 +76,7 @@ class ReceptionReport : public ReceptionReport_Base
      */
     virtual void dump(std::ostream& os) const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_REPORTS_H

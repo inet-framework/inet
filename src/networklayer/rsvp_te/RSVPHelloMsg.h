@@ -19,6 +19,7 @@
 #include "RSVPHello_m.h"
 
 namespace inet {
+
 /**
  * RSVP HELLO REQUEST message
  *
@@ -43,6 +44,7 @@ class RSVPHelloMsg : public RSVPHelloMsg_Base
     RSVPHelloMsg& operator=(const RSVPHelloMsg& other) { RSVPHelloMsg_Base::operator=(other); return *this; }
     virtual RSVPHelloMsg *dup() const { return new RSVPHelloMsg(*this); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RSVPHELLOMSG_H

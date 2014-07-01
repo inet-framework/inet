@@ -22,6 +22,7 @@
 #include "IModulation.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API DimensionalReceiver : public FlatReceiverBase
 {
@@ -36,6 +37,7 @@ class INET_API DimensionalReceiver : public FlatReceiverBase
 
     virtual void printToStream(std::ostream& stream) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -19,6 +19,7 @@
 #include "LinearNodeDistributionMobility.h"
 
 namespace inet {
+
 Define_Module(LinearNodeDistributionMobility);
 
 LinearNodeDistributionMobility::LinearNodeDistributionMobility()
@@ -65,5 +66,6 @@ void LinearNodeDistributionMobility::finish()
     recordScalar("x", lastPosition.x);
     recordScalar("y", lastPosition.y);
 }
+
 } // namespace inet
 

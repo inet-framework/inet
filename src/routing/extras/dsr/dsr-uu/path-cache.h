@@ -18,6 +18,7 @@
 
 #define MAX_TABLE_HASH 64
 namespace inet {
+
 struct path_table
 {
     struct tbl hash[MAX_TABLE_HASH];

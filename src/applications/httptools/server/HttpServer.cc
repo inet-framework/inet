@@ -18,6 +18,7 @@
 #include "HttpServer.h"
 
 namespace inet {
+
 Define_Module(HttpServer);
 
 void HttpServer::initialize(int stage)
@@ -158,5 +159,6 @@ void HttpServer::socketFailure(int connId, void *yourPtr, int code)
     sockCollection.removeSocket(socket);
     delete socket;
 }
+
 } // namespace inet
 

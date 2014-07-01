@@ -24,6 +24,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(EtherLLC);
 
 simsignal_t EtherLLC::dsapSignal = registerSignal("dsap");
@@ -294,5 +295,6 @@ void EtherLLC::stop()
     dsapsRegistered = dsapToPort.size();
     isUp = false;
 }
+
 } // namespace inet
 

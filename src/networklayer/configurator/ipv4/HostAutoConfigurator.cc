@@ -28,6 +28,7 @@
 #include "IPv4Address.h"
 
 namespace inet {
+
 Define_Module(HostAutoConfigurator);
 
 void HostAutoConfigurator::initialize(int stage)
@@ -109,5 +110,6 @@ void HostAutoConfigurator::setupNetworkLayer()
         }
     }
 }
+
 } // namespace inet
 

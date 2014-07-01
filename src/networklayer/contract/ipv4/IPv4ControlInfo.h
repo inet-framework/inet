@@ -22,6 +22,7 @@
 #include "IPv4ControlInfo_m.h"
 
 namespace inet {
+
 class IPv4Datagram;
 
 /**
@@ -80,6 +81,7 @@ class INET_API IPv4ControlInfo : public IPv4ControlInfo_Base, public INetworkPro
     virtual short getHopLimit() const { return getTimeToLive(); }
     virtual void setHopLimit(short hopLimit) { setTimeToLive(hopLimit); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4CONTROLINFO_H

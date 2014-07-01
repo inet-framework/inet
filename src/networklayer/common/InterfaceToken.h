@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * An "interface token" as defined in RFC 1971 (IPv6 Stateless Autoconfiguration).
  * This class supports tokens of length 1..64-bits. An interface token needs
@@ -45,6 +46,7 @@ class INET_API InterfaceToken
     uint32 low() const { return _low; }
     uint32 normal() const { return _normal; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_INTERFACETOKEN_H

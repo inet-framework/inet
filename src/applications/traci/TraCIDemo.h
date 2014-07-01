@@ -26,6 +26,7 @@
 #include "TraCIMobility.h"
 
 namespace inet {
+
 /**
  * Small IVC Demo
  * Documentation for these modules is at http://veins.car2x.org/
@@ -57,6 +58,7 @@ class TraCIDemo : public cSimpleModule, protected cListener, public ILifecycle
     TraCIDemo() { traci = NULL; }
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TRACIDEMO_H

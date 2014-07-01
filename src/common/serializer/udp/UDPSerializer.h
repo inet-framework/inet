@@ -22,6 +22,7 @@
 #include "UDPPacket.h"
 
 namespace inet {
+
 /**
  * Converts between UDPPacket and binary (network byte order) UDP header.
  */
@@ -41,6 +42,7 @@ class UDPSerializer
      */
     void parse(const unsigned char *buf, unsigned int bufsize, UDPPacket *pkt);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_UDPSERIALIZER_H

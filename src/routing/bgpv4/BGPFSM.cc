@@ -19,6 +19,7 @@
 #include "BGPSession.h"
 
 namespace inet {
+
 using namespace BGPFSM;
 
 //TopState
@@ -522,5 +523,6 @@ void Established::UpdateMsgEvent()
     session.restartsHoldTimer();
     //- remains in the Established state.
 }
+
 } // namespace inet
 

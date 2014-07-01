@@ -22,6 +22,7 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(IdealReceiver);
 
@@ -87,6 +88,7 @@ const IReceptionDecision *IdealReceiver::computeReceptionDecision(const IListeni
     else
         return new ReceptionDecision(reception, indication, false, false, false);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

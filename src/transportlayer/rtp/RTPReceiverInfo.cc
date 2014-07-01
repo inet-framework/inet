@@ -21,6 +21,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
+
 Register_Class(RTPReceiverInfo);
 
 RTPReceiverInfo::RTPReceiverInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
@@ -248,5 +249,6 @@ bool RTPReceiverInfo::toBeDeleted(simtime_t now)
     // inactive for 30 minutes
     return (!isValid() && !isActive()) || (isValid() && !isActive() && (now - _startOfInactivity > 60.0 * 30.0));
 }
+
 } // namespace inet
 

@@ -27,6 +27,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(GenericRoutingTable);
 
 GenericRoutingTable::GenericRoutingTable()
@@ -406,5 +407,6 @@ IRoute *GenericRoutingTable::createRoute()
 {
     return new GenericRoute();
 }
+
 } // namespace inet
 

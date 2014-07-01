@@ -22,6 +22,7 @@
 #include "IModulation.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API FlatTransmitterBase : public TransmitterBase
 {
@@ -64,6 +65,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
     virtual W getPower() const { return power; }
     virtual void setPower(W power) { this->power = power; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

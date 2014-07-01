@@ -26,6 +26,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
 {
     if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
@@ -66,5 +67,6 @@ void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor *neighbor, OSPF::Nei
         }
     }
 }
+
 } // namespace inet
 

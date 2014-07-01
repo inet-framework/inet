@@ -33,6 +33,7 @@
 #endif // ifdef WITH_GENERIC
 
 namespace inet {
+
 Define_Module(NetworkDatagramMultiplexer);
 
 void NetworkDatagramMultiplexer::handleMessage(cMessage *message)
@@ -69,5 +70,6 @@ int NetworkDatagramMultiplexer::getProtocolIndex(cMessage *message)
     else
         throw cRuntimeError("Unknown control info");
 }
+
 } // namespace inet
 

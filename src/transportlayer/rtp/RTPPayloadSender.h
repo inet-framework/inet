@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 //Forward declarations:
 class RTPInnerPacket;
 
@@ -205,6 +206,7 @@ class INET_API RTPPayloadSender : public cSimpleModule
      */
     cMessage *_reminderMessage;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPPAYLOADSENDER_H

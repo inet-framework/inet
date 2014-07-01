@@ -41,6 +41,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 Define_Module(InterfaceTable);
 
 #define INTERFACEIDS_START    100
@@ -546,5 +547,6 @@ MulticastGroupList InterfaceTable::collectMulticastGroups()
     }
     return mglist;
 }
+
 } // namespace inet
 

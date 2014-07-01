@@ -31,6 +31,7 @@
 #include "IPv4Address.h"
 
 namespace inet {
+
 struct IPv4MulticastSourceList
 {
     typedef std::vector<IPv4Address> IPv4AddressVector;
@@ -206,6 +207,7 @@ class INET_API IPv4InterfaceData : public InterfaceProtocolData
     virtual void setMulticastListeners(IPv4Address multicastAddress, McastSourceFilterMode filterMode, const IPv4AddressVector& sourceList);
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4INTERFACEDATA_H

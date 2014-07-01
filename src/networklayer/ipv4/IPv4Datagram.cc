@@ -18,6 +18,8 @@
 #include "IPv4Datagram.h"
 
 namespace inet {
+
 Register_Class(IPv4Datagram);
+
 } // namespace inet
 

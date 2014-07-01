@@ -482,9 +482,6 @@ BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
     return pkt;
 }
 
-
-
-
 } // namespace inet
 
 

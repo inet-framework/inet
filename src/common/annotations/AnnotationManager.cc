@@ -22,6 +22,7 @@
 #include "AnnotationManager.h"
 
 namespace inet {
+
 Define_Module(AnnotationManager);
 
 AnnotationManager::~AnnotationManager()
@@ -310,5 +311,6 @@ void AnnotationManager::hideAll(Group *group)
             hide(*i);
     }
 }
+
 } // namespace inet
 

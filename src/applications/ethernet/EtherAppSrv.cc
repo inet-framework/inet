@@ -27,6 +27,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 Define_Module(EtherAppSrv);
 
 simsignal_t EtherAppSrv::sentPkSignal = registerSignal("sentPk");
@@ -162,5 +163,6 @@ bool EtherAppSrv::handleOperationStage(LifecycleOperation *operation, int stage,
 void EtherAppSrv::finish()
 {
 }
+
 } // namespace inet
 

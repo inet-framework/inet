@@ -31,6 +31,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(OSPFRouting);
 
 OSPFRouting::OSPFRouting()
@@ -149,5 +150,6 @@ bool OSPFRouting::checkExternalRoute(const IPv4Address& route)
     }
     return false;
 }
+
 } // namespace inet
 

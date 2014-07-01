@@ -30,6 +30,7 @@
 #include "FloodDatagram.h"
 
 namespace inet {
+
 /**
  * @brief A simple flooding protocol
  *
@@ -155,6 +156,7 @@ class INET_API Flood : public NetworkProtocolBase, public INetworkProtocol
      */
     virtual cObject *setDownControlInfo(cMessage *const pMsg, const MACAddress& pDestAddr);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_FLOOD_H

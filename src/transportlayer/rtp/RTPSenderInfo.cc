@@ -21,6 +21,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
+
 Register_Class(RTPSenderInfo);
 
 RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
@@ -127,5 +128,6 @@ bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 {
     return false;
 }
+
 } // namespace inet
 

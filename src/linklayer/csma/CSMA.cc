@@ -37,6 +37,7 @@
 #include "CSMAFrame_m.h"
 
 namespace inet {
+
 Define_Module(CSMA);
 
 void CSMA::initialize(int stage)
@@ -948,5 +949,6 @@ cObject *CSMA::setUpControlInfo(cMessage *const pMsg, const MACAddress& pSrcAddr
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
 } // namespace inet
 

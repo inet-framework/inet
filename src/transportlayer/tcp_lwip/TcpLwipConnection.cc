@@ -29,6 +29,7 @@
 #include "TCPSerializer.h"
 
 namespace inet {
+
 TcpLwipConnection::Stats::Stats()
     :
     sndWndVector("send window"),
@@ -336,5 +337,6 @@ void TcpLwipConnection::do_SEND()
         onCloseM = false;
     }
 }
+
 } // namespace inet
 

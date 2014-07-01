@@ -21,6 +21,7 @@
 #include "FreeSpacePathLoss.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This class implements the Nakagami fading model.
@@ -38,6 +39,7 @@ class INET_API NakagamiFading : public FreeSpacePathLoss
     virtual void printToStream(std::ostream& stream) const;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

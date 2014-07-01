@@ -22,6 +22,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 static const char *ENABLED_LINK_COLOR = "#000000";
 static const char *DISABLED_LINK_COLOR = "#bbbbbb";
 static const char *ROOT_SWITCH_COLOR = "#a5ffff";
@@ -211,5 +212,6 @@ bool STPBase::handleOperationStage(LifecycleOperation *operation, int stage, IDo
 
     return true;
 }
+
 } // namespace inet
 

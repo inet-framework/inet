@@ -16,6 +16,7 @@
 #include <LinearRotatingMobilityBase.h>
 
 namespace inet {
+
 LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 {
     targetOrientation = EulerAngles::IDENTITY;
@@ -52,5 +53,6 @@ EulerAngles LinearRotatingMobilityBase::slerp(EulerAngles from, EulerAngles to, 
 {
     return from + (to - from) * delta;
 }
+
 } // namespace inet
 

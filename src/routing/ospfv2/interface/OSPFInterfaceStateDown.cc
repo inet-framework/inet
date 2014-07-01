@@ -26,6 +26,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceStateDown::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::INTERFACE_UP) {
@@ -76,5 +77,6 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface *intf, OSPF::Interfa
         changeState(intf, new OSPF::InterfaceStateLoopback, this);
     }
 }
+
 } // namespace inet
 

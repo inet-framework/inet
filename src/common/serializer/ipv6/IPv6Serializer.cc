@@ -58,6 +58,7 @@ namespace INET6Fw    // load headers into a namespace, to avoid conflicts with p
 
 using namespace INET6Fw;
 namespace inet {
+
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {
     int packetLength, i;
@@ -122,5 +123,6 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 
     return packetLength + IPv6_HEADER_BYTES;
 }
+
 } // namespace inet
 

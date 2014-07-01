@@ -21,6 +21,7 @@
 #include "PropagationBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ConstantSpeedPropagation : public PropagationBase
 {
@@ -37,6 +38,7 @@ class INET_API ConstantSpeedPropagation : public PropagationBase
 
     virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

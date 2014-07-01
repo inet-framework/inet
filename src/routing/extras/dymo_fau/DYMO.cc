@@ -1233,8 +1233,6 @@ void DYMOFau::processLinkBreak(const cObject *details)
         packetFailed(dgram);
 }
 
-
-
 } // namespace inet
 
 

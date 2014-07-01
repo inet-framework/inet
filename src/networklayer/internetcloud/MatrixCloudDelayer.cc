@@ -25,6 +25,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 Define_Module(MatrixCloudDelayer);
 
 namespace {
@@ -239,5 +240,6 @@ std::string MatrixCloudDelayer::getPathOfConnectedNodeOnIfaceID(int id)
 
     return connNode->getFullPath();
 }
+
 } // namespace inet
 

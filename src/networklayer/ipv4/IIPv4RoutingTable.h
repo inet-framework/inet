@@ -27,6 +27,7 @@
 #include "IRoutingTable.h"
 
 namespace inet {
+
 /**
  * A C++ interface to abstract the functionality of IIPv4RoutingTable.
  * Referring to IIPv4RoutingTable via this interface makes it possible to
@@ -240,6 +241,7 @@ class INET_API IIPv4RoutingTable : public IRoutingTable
     virtual void multicastRouteChanged(IPv4MulticastRoute *entry, int fieldCode) = 0;
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IIPV4ROUTINGTABLE_H

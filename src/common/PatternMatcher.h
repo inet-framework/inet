@@ -28,6 +28,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Glob-style pattern matching class, adopted to special OMNeT++ requirements.
  * One instance represents a pattern to match.
@@ -182,6 +183,7 @@ class INET_API PatternMatcher
      */
     static bool containsWildcards(const char *pattern);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PATTERNMATCHER_H

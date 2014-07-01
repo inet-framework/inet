@@ -21,6 +21,7 @@
 #include "ITransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents the reception of a transmission at a receiver. There's
@@ -79,6 +80,7 @@ class INET_API IReception : public IPrintableObject
      */
     virtual const EulerAngles getEndOrientation() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -30,6 +30,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 namespace OSPF {
 class InterfaceState;
 class Area;
@@ -172,6 +173,7 @@ class Interface
     Area *getArea() { return parentArea; }
     const Area *getArea() const { return parentArea; }
 };
+
 } // namespace OSPF
 } // namespace inet
 

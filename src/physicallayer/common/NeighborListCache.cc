@@ -18,6 +18,7 @@
 #include "NeighborListCache.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(NeighborListCache);
 
@@ -121,6 +122,7 @@ NeighborListCache::~NeighborListCache()
 
     cancelAndDelete(updateNeighborListsTimer);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

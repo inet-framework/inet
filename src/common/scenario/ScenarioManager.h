@@ -23,6 +23,7 @@
 #include "IScriptable.h"
 
 namespace inet {
+
 /**
  * Scenario Manager (experimental) which executes a script specified in XML.
  * ScenarioManager has a few built-in commands such as \<set-param>,
@@ -71,6 +72,7 @@ class INET_API ScenarioManager : public cSimpleModule
     virtual void handleMessage(cMessage *msg);
     virtual void updateDisplayString();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCENARIOMANAGER_H

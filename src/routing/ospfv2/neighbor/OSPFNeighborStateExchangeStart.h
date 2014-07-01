@@ -21,6 +21,7 @@
 #include "OSPFNeighborState.h"
 
 namespace inet {
+
 namespace OSPF {
 class NeighborStateExchangeStart : public NeighborState
 {
@@ -28,6 +29,7 @@ class NeighborStateExchangeStart : public NeighborState
     virtual void processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event);
     virtual Neighbor::NeighborStateType getState() const { return Neighbor::EXCHANGE_START_STATE; }
 };
+
 } // namespace OSPF
 } // namespace inet
 

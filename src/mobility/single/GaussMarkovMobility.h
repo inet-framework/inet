@@ -23,6 +23,7 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
+
 /**
  * @brief Gauss Markov movement model. See NED file for more info.
  *
@@ -57,6 +58,7 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
   public:
     GaussMarkovMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GAUSSMARKOVMOBILITY_H

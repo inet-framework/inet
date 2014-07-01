@@ -29,6 +29,7 @@
 #include "Address.h"
 
 namespace inet {
+
 class PatternMatcher;
 
 /**
@@ -172,6 +173,7 @@ class INET_API GenericNetworkConfigurator : public cSimpleModule
     virtual Topology::LinkOut *findLinkOut(Node *node, int gateId);
     virtual InterfaceInfo *findInterfaceInfo(Node *node, InterfaceEntry *interfaceEntry);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICNETWORKCONFIGURATOR_H

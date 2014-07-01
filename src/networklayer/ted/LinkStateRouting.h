@@ -21,6 +21,7 @@
 #include "IntServ.h"
 
 namespace inet {
+
 #define TED_TRAFFIC    1
 
 class TED;
@@ -78,6 +79,7 @@ class LinkStateRouting : public cSimpleModule, public cListener
     virtual void sendToPeer(IPv4Address peer, const std::vector<TELinkStateInfo>& list, bool req);
     virtual void sendToIP(LinkStateMsg *msg, IPv4Address destAddr);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LINKSTATEROUTING_H

@@ -24,6 +24,7 @@
 #include "HttpBrowserBase.h"
 
 namespace inet {
+
 /**
  * Browser module for OMNeT++ simulations.
  *
@@ -150,6 +151,7 @@ class INET_API HttpBrowser : public HttpBrowserBase, public TCPSocket::CallbackI
     HttpBrowser();
     virtual ~HttpBrowser();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPBROWSER_H

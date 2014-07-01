@@ -23,6 +23,7 @@
 #include "Material.h"
 
 namespace inet {
+
 /**
  * This class represents a physical object, a rigid body and its physical properties.
  * The object can change its position and orientation over time.
@@ -61,6 +62,7 @@ class INET_API PhysicalObject
     virtual const cFigure::Color& getColor() const { return color; }
 #endif // ifdef __CCANVAS_H
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PHYSICALOBJECT_H

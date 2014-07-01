@@ -43,6 +43,7 @@
 #include "MoBANLocal.h"
 
 namespace inet {
+
 Define_Module(MoBANLocal);
 
 MoBANLocal::MoBANLocal()
@@ -126,5 +127,6 @@ Coord MoBANLocal::getCurrentSpeed()
 {
     return LineSegmentsMobilityBase::getCurrentSpeed() + coordinator->getCurrentSpeed();
 }
+
 } // namespace inet
 

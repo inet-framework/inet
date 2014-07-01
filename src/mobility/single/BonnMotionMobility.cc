@@ -20,6 +20,7 @@
 #include "FWMath.h"
 
 namespace inet {
+
 Define_Module(BonnMotionMobility);
 
 BonnMotionMobility::BonnMotionMobility()
@@ -83,5 +84,6 @@ void BonnMotionMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
 } // namespace inet
 

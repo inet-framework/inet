@@ -32,6 +32,7 @@
 #include <map>
 
 namespace inet {
+
 /*
  * This class implements AODV routing protocol and Netfilter hooks
  * in the IP-layer required by this protocol.
@@ -205,6 +206,7 @@ class INET_API AODVRouting : public cSimpleModule, public ILifecycle, public INe
     AODVRouting();
     virtual ~AODVRouting();
 };
+
 } // namespace inet
 
 #endif    // ifndef AODVROUTING_H_

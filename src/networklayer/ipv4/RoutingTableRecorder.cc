@@ -204,6 +204,7 @@ void RoutingTableRecorder::recordRoute(cModule *host, const IRoute *route, int s
 #include "RoutingTableRecorder.h"
 
 namespace inet {
+
 Define_Module(RoutingTableRecorder);
 
 #define LL    INT64_PRINTF_FORMAT  // for eventnumber_t
@@ -356,6 +357,7 @@ void RoutingTableRecorder::recordRouteChange(cModule *host, const IRoute *route,
 //            );
 //    fflush(routingLogFile);
 //}
+
 } // namespace inet
 
 #endif /*OMNETPP_VERSION*/

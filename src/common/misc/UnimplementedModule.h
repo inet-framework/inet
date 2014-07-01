@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * A module class whose handleMessage() throws a "not implemented" exception.
  */
@@ -29,6 +30,7 @@ class UnimplementedModule : public cSimpleModule
   protected:
     virtual void handleMessage(cMessage *msg);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_UNIMPLEMENTEDMODULE_H

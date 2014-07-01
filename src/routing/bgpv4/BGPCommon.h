@@ -23,10 +23,12 @@
 #include "InterfaceEntry.h"
 
 namespace inet {
+
 //Forward declarations:
 class TCPSocket;
 
 namespace BGP {
+
 const unsigned char TCP_PORT = 179;
 
 const unsigned char START_EVENT_KIND = 81;
@@ -69,6 +71,7 @@ struct SessionInfo
     TCPSocket *socketListen;
     bool sessionEstablished;
 };
+
 } // namespace BGP
 } // namespace inet
 

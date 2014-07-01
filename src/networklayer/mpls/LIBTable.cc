@@ -18,6 +18,7 @@
 #include "XMLUtils.h"
 
 namespace inet {
+
 Define_Module(LIBTable);
 
 void LIBTable::initialize(int stage)
@@ -226,5 +227,6 @@ std::ostream& operator<<(std::ostream& os, const LIBTable::LIBEntry& lib)
     os << "    color:" << lib.color;
     return os;
 }
+
 } // namespace inet
 

@@ -26,6 +26,7 @@
 #include "IPv6Datagram.h"
 
 namespace inet {
+
 Define_Module(IPv6ErrorHandling);
 
 void IPv6ErrorHandling::initialize()
@@ -164,5 +165,6 @@ void IPv6ErrorHandling::displayType4Msg(int code)
             break;
     }
 }
+
 } // namespace inet
 

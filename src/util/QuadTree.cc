@@ -18,6 +18,7 @@
 #include "QuadTree.h"
 
 namespace inet {
+
 bool QuadTree::insert(const cObject *point, Coord pos)
 {
     if (!isInRectangleRange(pos))
@@ -314,5 +315,6 @@ QuadTree::~QuadTree()
     if (parent == NULL)
         delete lastPosition;
 }
+
 } // namespace inet
 

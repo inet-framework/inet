@@ -29,6 +29,7 @@
 #include "IPv4NetworkConfigurator.h"
 
 namespace inet {
+
 /**
  * This module provides the static configuration for the IPv4RoutingTable and
  * the IPv4 network interfaces of a particular node in the network.
@@ -55,6 +56,7 @@ class IPv4NodeConfigurator : public cSimpleModule, public ILifecycle
     virtual void prepareInterface(InterfaceEntry *interfaceEntry);
     virtual void configureNode();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4NODECONFIGURATOR_H

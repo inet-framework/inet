@@ -40,6 +40,7 @@
 #include "DiffservUtil.h"
 
 namespace inet {
+
 using namespace DiffservUtil;
 
 #ifdef WITH_IPv4
@@ -285,5 +286,6 @@ void MultiFieldClassifier::configureFilters(cXMLElement *config)
         }
     }
 }
+
 } // namespace inet
 

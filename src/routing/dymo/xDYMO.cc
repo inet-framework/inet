@@ -36,6 +36,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 namespace DYMO {
 Define_Module(DYMO);
 
@@ -1454,6 +1455,7 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
             throw cRuntimeError("Unknown packet type in NF_LINK_BREAK signal");
     }
 }
+
 } // namespace DYMO
 } // namespace inet
 

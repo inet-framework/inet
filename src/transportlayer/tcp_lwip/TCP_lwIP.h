@@ -31,6 +31,7 @@
 #include "LwipTcpStackIf.h"
 
 namespace inet {
+
 // forward declarations:
 class TCPOpenCommand;
 class TCPSendCommand;
@@ -156,6 +157,7 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     bool isAliveM;
     TCPSegment *pCurTcpSegM;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_LWIP_H

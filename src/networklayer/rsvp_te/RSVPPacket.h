@@ -19,6 +19,7 @@
 #include "RSVPPacket_m.h"
 
 namespace inet {
+
 #define RSVP_TRAFFIC    2
 
 /**
@@ -47,6 +48,7 @@ class RSVPPacket : public RSVPPacket_Base
                getSession().Extended_Tunnel_Id == s->Extended_Tunnel_Id;
     }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RSVPPACKET_H

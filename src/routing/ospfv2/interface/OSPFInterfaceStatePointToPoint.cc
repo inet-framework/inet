@@ -24,6 +24,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
 {
     if (event == OSPF::Interface::INTERFACE_DOWN) {
@@ -49,5 +50,6 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface *intf, OSPF:
         intf->sendDelayedAcknowledgements();
     }
 }
+
 } // namespace inet
 

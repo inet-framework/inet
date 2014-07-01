@@ -21,6 +21,7 @@
 #include "IPropagation.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API PropagationBase : public cModule, public IPropagation
 {
@@ -37,6 +38,7 @@ class INET_API PropagationBase : public cModule, public IPropagation
 
     virtual mps getPropagationSpeed() const { return propagationSpeed; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

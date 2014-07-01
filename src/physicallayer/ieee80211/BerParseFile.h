@@ -24,6 +24,7 @@
 #include <math.h>
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * Radio model for IEEE 802.11. The implementation is largely based on the
@@ -79,6 +80,7 @@ class BerParseFile
     BerParseFile(char p) { setPhyOpMode(p); fileBer = false; }
     ~BerParseFile();
 };
+
 } // namespace physicallayer
 } // namespace inet
 

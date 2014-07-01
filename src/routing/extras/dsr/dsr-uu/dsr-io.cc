@@ -192,7 +192,6 @@ out:
     dsr_pkt_free(dp);
 }
 
-
 } // namespace inet
 
 

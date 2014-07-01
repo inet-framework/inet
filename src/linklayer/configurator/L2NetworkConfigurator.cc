@@ -29,6 +29,7 @@
 #include "stlutils.h"
 
 namespace inet {
+
 Define_Module(L2NetworkConfigurator);
 
 #define T(CODE)    { long startTime = clock(); CODE; printElapsedTime( #CODE, startTime); }
@@ -325,5 +326,6 @@ bool L2NetworkConfigurator::Matcher::matches(const char *s)
 
     return false;
 }
+
 } // namespace inet
 

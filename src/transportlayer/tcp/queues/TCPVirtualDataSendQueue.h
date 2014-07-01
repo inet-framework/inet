@@ -21,6 +21,7 @@
 #include "TCPSendQueue.h"
 
 namespace inet {
+
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  * It uses the length() field of the messages only, everything else is
@@ -80,6 +81,7 @@ class INET_API TCPVirtualDataSendQueue : public TCPSendQueue
      */
     virtual void discardUpTo(uint32 seqNum);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPVIRTUALDATASENDQUEUE_H

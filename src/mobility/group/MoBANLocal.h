@@ -48,6 +48,7 @@
 #include "MoBANCoordinator.h"
 
 namespace inet {
+
 /**
  * @brief This is the local mobility module of MoBAN. It should be instantiated in each node that belongs to a WBAN.
  * The NED parameter "coordinatorIndex" determines to which WBAN (MoBANCoordinator) it belongs.
@@ -96,6 +97,7 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
 
     void setMoBANParameters(Coord referencePoint, double radius, double speed);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MOBANLOCAL_H

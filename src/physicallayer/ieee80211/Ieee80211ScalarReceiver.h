@@ -24,6 +24,7 @@
 #include "BerParseFile.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 {
@@ -51,6 +52,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
 
     virtual ~Ieee80211ScalarReceiver();
 };
+
 } // namespace physicallayer
 } // namespace inet
 

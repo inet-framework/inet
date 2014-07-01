@@ -23,6 +23,7 @@
 #include "WifiMode.h"
 
 namespace inet {
+
 /* Bit rates for 802.11b/g/a/p.
  * Must be ordered by mode, bitrate.
  */
@@ -197,5 +198,6 @@ const Ieee80211DescriptorData& Ieee80211Descriptor::getDescriptor(int idx)
 
     return data[idx];
 }
+
 } // namespace inet
 

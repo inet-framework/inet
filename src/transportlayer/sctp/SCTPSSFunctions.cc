@@ -36,6 +36,7 @@
 #include <math.h>
 
 namespace inet {
+
 void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
     uint32 i;
@@ -494,5 +495,6 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, boo
             << " of " << workingPaths << ")" << endl;
     return sid;
 }
+
 } // namespace inet
 

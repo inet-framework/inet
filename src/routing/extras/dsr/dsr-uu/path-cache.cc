@@ -870,9 +870,6 @@ void NSCLASS path_cache_cleanup(void)
     }
 }
 
-
-
-
 } // namespace inet
 
 

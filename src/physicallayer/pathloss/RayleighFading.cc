@@ -18,6 +18,7 @@
 #include "RayleighFading.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(RayleighFading);
 
@@ -36,6 +37,7 @@ double RayleighFading::computePathLoss(mps propagationSpeed, Hz frequency, m dis
     double y = normal(0, 1);
     return freeSpacePathLoss * 0.5 * (x * x + y * y);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

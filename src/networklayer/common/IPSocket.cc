@@ -20,6 +20,7 @@
 #include "NetworkProtocolCommand_m.h"
 
 namespace inet {
+
 void IPSocket::registerProtocol(int protocol)
 {
     if (gateToIP && gateToIP->isConnected()) {
@@ -36,5 +37,6 @@ void IPSocket::sendToIP(cMessage *message)
 
     check_and_cast<cSimpleModule *>(gateToIP->getOwnerModule())->send(message, gateToIP);
 }
+
 } // namespace inet
 

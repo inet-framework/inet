@@ -49,6 +49,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 #define EPHEMERAL_PORTRANGE_START    1024
 #define EPHEMERAL_PORTRANGE_END      5000
 
@@ -1212,5 +1213,6 @@ void UDP::SockDesc::deleteMulticastMembership(MulticastMembership *membership)
             multicastMembershipTable.end());
     delete membership;
 }
+
 } // namespace inet
 

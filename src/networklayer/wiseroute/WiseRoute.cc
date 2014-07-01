@@ -38,6 +38,7 @@
 #include "SimpleNetworkProtocolControlInfo.h"
 
 namespace inet {
+
 using std::make_pair;
 
 Define_Module(WiseRoute);
@@ -382,5 +383,6 @@ cObject *WiseRoute::setDownControlInfo(cMessage *const pMsg, const MACAddress& p
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
 } // namespace inet
 

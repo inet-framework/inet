@@ -18,6 +18,7 @@
 #include "TCPVirtualDataSendQueue.h"
 
 namespace inet {
+
 Register_Class(TCPVirtualDataSendQueue);
 
 TCPVirtualDataSendQueue::TCPVirtualDataSendQueue() : TCPSendQueue()
@@ -84,5 +85,6 @@ void TCPVirtualDataSendQueue::discardUpTo(uint32 seqNum)
 
     begin = seqNum;
 }
+
 } // namespace inet
 

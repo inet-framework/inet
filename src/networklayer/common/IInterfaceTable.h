@@ -24,6 +24,7 @@
 #include "InterfaceEntry.h"    // not strictly required, but clients will need it anyway
 
 namespace inet {
+
 struct MulticastGroup
 {
     Address multicastAddr;
@@ -170,6 +171,7 @@ class INET_API IInterfaceTable
      */
     virtual MulticastGroupList collectMulticastGroups() = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IINTERFACETABLE_H

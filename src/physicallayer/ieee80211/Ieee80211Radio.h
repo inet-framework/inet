@@ -21,6 +21,7 @@
 #include "ScalarRadio.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API Ieee80211Radio : public ScalarRadio
 {
@@ -37,6 +38,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
 
     virtual void setChannelNumber(int newChannelNumber);
 };
+
 } // namespace physicallayer
 } // namespace inet
 

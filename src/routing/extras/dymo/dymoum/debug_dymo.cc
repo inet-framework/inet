@@ -105,7 +105,6 @@ return Address::getInstance().print_nodeaddr(ipaddr);
 }
 #endif
 
-
 } // namespace inet
 
 

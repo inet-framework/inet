@@ -21,6 +21,7 @@
 #include "INoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API NoiseBase : public INoise
 {
@@ -37,6 +38,7 @@ class INET_API NoiseBase : public INoise
     virtual const simtime_t getStartTime() const { return startTime; }
     virtual const simtime_t getEndTime() const { return endTime; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

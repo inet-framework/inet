@@ -21,6 +21,7 @@
 #include "IMACAddressTable.h"
 
 namespace inet {
+
 /**
  * This module handles the mapping between ports and MAC addresses. See the NED definition for details.
  */
@@ -131,6 +132,7 @@ class MACAddressTable : public cSimpleModule, public IMACAddressTable
     virtual void setAgingTime(simtime_t agingTime);
     virtual void resetDefaultAging();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MACADDRESSTABLE_H

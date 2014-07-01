@@ -21,6 +21,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 Define_Module(Battery);
 
 Battery::Battery()
@@ -94,5 +95,6 @@ void Battery::scheduleDepletedTimer()
     if (totalConsumedPower > 0)
         scheduleAt(simTime() + residualCapacity / totalConsumedPower, depletedTimer);
 }
+
 } // namespace inet
 

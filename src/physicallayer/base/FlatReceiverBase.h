@@ -22,6 +22,7 @@
 #include "IModulation.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API FlatReceiverBase : public SNIRReceiverBase
 {
@@ -70,6 +71,7 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
     virtual Hz getBandwidth() const { return bandwidth; }
     virtual void setBandwidth(Hz bandwidth) { this->bandwidth = bandwidth; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

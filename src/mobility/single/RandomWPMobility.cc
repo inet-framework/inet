@@ -19,6 +19,7 @@
 #include "RandomWPMobility.h"
 
 namespace inet {
+
 Define_Module(RandomWPMobility);
 
 RandomWPMobility::RandomWPMobility()
@@ -56,5 +57,6 @@ void RandomWPMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
 } // namespace inet
 

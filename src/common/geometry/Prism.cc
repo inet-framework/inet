@@ -18,6 +18,7 @@
 #include "Prism.h"
 
 namespace inet {
+
 Prism::Prism()
 {
 }
@@ -31,5 +32,6 @@ double Prism::computeIntersectionDistance(const LineSegment& lineSegment) const
 {
     throw cRuntimeError("Unimplemented");
 }
+
 } // namespace inet
 

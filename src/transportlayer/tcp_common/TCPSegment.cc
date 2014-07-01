@@ -18,6 +18,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 Register_Class(Sack);
 
 bool Sack::empty() const
@@ -202,5 +203,6 @@ cPacket *TCPSegment::removeFirstPayloadMessage(uint32& endSequenceNo)
     drop(msg);
     return msg;
 }
+
 } // namespace inet
 

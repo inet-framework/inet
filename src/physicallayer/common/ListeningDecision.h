@@ -21,6 +21,7 @@
 #include "IListeningDecision.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ListeningDecision : public IListeningDecision, public cObject
 {
@@ -40,6 +41,7 @@ class INET_API ListeningDecision : public IListeningDecision, public cObject
 
     virtual bool isListeningPossible() const { return isListeningPossible_; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

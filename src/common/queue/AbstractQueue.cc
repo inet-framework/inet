@@ -20,6 +20,7 @@
 #include "AbstractQueue.h"
 
 namespace inet {
+
 AbstractQueue::AbstractQueue()
 {
     msgServiced = NULL;
@@ -88,5 +89,6 @@ cPacket *AbstractQueue::cancelService()
         return ret;
     }
 }
+
 } // namespace inet
 

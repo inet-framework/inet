@@ -52,6 +52,7 @@
 #include <algorithm>
 
 namespace inet {
+
 Define_Module(IPv6Tunneling);
 
 IPv6Tunneling::IPv6Tunneling()
@@ -618,5 +619,6 @@ std::ostream& operator<<(std::ostream& os, const IPv6Tunneling::Tunnel& tun)
 
     return os;
 }
+
 } // namespace inet
 

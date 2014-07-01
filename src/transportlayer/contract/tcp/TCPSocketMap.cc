@@ -20,6 +20,7 @@
 #include "TCPSocketMap.h"
 
 namespace inet {
+
 TCPSocket *TCPSocketMap::findSocketFor(cMessage *msg)
 {
     TCPCommand *ind = dynamic_cast<TCPCommand *>(msg->getControlInfo());
@@ -52,5 +53,6 @@ void TCPSocketMap::deleteSockets()
         delete i->second;
     socketMap.clear();
 }
+
 } // namespace inet
 

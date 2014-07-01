@@ -470,8 +470,6 @@ static void dymo_socket_read(int fd)
 }
 #endif  /* NS_PORT */
 
-
-
 } // namespace inet
 
 

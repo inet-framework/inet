@@ -49,6 +49,7 @@
 #include "Coord.h"
 
 namespace inet {
+
 /**
  * @brief to store the specification of a posture on the MoBAN mobility model.
  *
@@ -151,6 +152,7 @@ class INET_API Posture
     /** @brief Returns the standard deviation of a normal distribution for path lost coefficient of wave propagation between two nodes in this posture. */
     double getAlphaSD(unsigned int, unsigned int);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_POSTURE_H

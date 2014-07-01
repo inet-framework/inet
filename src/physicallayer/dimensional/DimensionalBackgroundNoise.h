@@ -21,6 +21,7 @@
 #include "IBackgroundNoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
@@ -39,6 +40,7 @@ class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNo
     virtual void printToStream(std::ostream& stream) const { stream << "dimensional background noise"; }
     virtual const INoise *computeNoise(const IListening *listening) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

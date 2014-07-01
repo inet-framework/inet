@@ -22,6 +22,7 @@
 #include "IMobility.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(DimensionalTransmitter);
 
@@ -46,6 +47,7 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
     const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

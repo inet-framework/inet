@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * This class can be used as a meter in an ITrafficConditioner.
  * It marks the packets according to three parameters,
@@ -58,6 +59,7 @@ class INET_API SingleRateThreeColorMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SINGLERATETHREECOLORMETER_H

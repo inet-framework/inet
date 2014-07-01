@@ -29,6 +29,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 /**
  * Implements the OSPFv2 routing protocol. See the NED file for more information.
  */
@@ -66,6 +67,7 @@ class OSPFRouting : public cSimpleModule, public ILifecycle
     virtual void createOspfRouter();
     virtual bool isNodeUp();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_OSPFROUTING_H

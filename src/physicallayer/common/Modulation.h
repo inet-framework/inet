@@ -22,6 +22,7 @@
 #include "IModulation.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * Ideal modulation which returns zero bit error rate, regardless of the parameters.
@@ -62,6 +63,7 @@ class INET_API QAM256Modulation : public IModulation
     virtual const char *getName() { return "256-QAM"; }
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -78,6 +78,7 @@
 #endif
 
 namespace inet {
+
 /* Data for a network device */
 struct dev_info
 {

@@ -25,6 +25,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(IPvXTrafSink);
 
 simsignal_t IPvXTrafSink::rcvdPkSignal = registerSignal("rcvdPk");
@@ -105,5 +106,6 @@ void IPvXTrafSink::processPacket(cPacket *msg)
     delete msg;
     numReceived++;
 }
+
 } // namespace inet
 

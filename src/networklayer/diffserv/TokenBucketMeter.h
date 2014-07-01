@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Simple token bucket meter.
  */
@@ -50,6 +51,7 @@ class INET_API TokenBucketMeter : public cSimpleModule
 
     virtual int meterPacket(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TOKENBUCKETMETER_H

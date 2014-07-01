@@ -38,6 +38,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 using std::cout;
 
 Define_Module(PingTestApp);
@@ -323,5 +324,6 @@ void PingTestApp::finish()
         cout << "--------------------------------------------------------" << endl;
     }
 }
+
 } // namespace inet
 

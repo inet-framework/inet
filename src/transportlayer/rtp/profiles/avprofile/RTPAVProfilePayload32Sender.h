@@ -23,6 +23,7 @@
 #include "RTPPayloadSender.h"
 
 namespace inet {
+
 /**
  * An RTPAVProfilePayload32Sender is a module for sending data of payload
  * type 32 in the rtp audio/video profile, which is mpeg video.
@@ -72,6 +73,7 @@ class INET_API RTPAVProfilePayload32Sender : public RTPPayloadSender
      */
     double _frameNumber;
 };
+
 } // namespace inet
 
 #endif    // __INET_RTPAVPROFILEPAYLOAD32SENDER_H

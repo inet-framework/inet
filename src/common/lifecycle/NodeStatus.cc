@@ -23,6 +23,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Register_Enum(inet::NodeStatus, (NodeStatus::UP, NodeStatus::DOWN, NodeStatus::GOING_UP, NodeStatus::GOING_DOWN));
 Define_Module(NodeStatus);
 
@@ -137,5 +138,6 @@ void NodeStatus::updateDisplayString()
     else
         node->getDisplayString().removeTag("i2");
 }
+
 } // namespace inet
 

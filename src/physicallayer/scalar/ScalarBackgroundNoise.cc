@@ -20,6 +20,7 @@
 #include "BandListening.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(ScalarBackgroundNoise);
 
@@ -41,6 +42,7 @@ const INoise *ScalarBackgroundNoise::computeNoise(const IListening *listening) c
     powerChanges->insert(std::pair<simtime_t, W>(endTime, -power));
     return new ScalarNoise(startTime, endTime, bandListening->getCarrierFrequency(), bandListening->getBandwidth(), powerChanges);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

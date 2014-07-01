@@ -30,6 +30,7 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
 //----
 
 Define_Module(PcapRecorder);
@@ -173,5 +174,6 @@ void PcapRecorder::finish()
     packetDumper.dump("", "pcapRecorder finished");
     pcapDumper.closePcap();
 }
+
 } // namespace inet
 

@@ -871,7 +871,6 @@ void NSCLASS maint_buf_cleanup(void)
 #endif
 }
 
-
 } // namespace inet
 
 

@@ -929,9 +929,6 @@ void Batman::parseIncomingPacket(Address neigh, BatmanIf *if_incoming, BatmanPac
     }
 }
 
-
-
-
 } // namespace inet
 
 

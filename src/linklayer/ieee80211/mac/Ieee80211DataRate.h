@@ -6,6 +6,7 @@
 #include "ModulationType.h"
 
 namespace inet {
+
 struct Ieee80211DescriptorData
 {
     char mode;
@@ -29,6 +30,7 @@ class Ieee80211Descriptor
     static const Ieee80211DescriptorData& getDescriptor(int idx);
     static int size() { return descriptorSize; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211DATARATE_H

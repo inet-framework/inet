@@ -22,6 +22,7 @@
 #include "IMACAddressTable.h"
 
 namespace inet {
+
 class EtherFrame;
 
 class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
@@ -77,6 +78,7 @@ class INET_API MACRelayUnit : public cSimpleModule, public ILifecycle
     virtual void start();
     virtual void stop();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MACRELAYUNIT_H

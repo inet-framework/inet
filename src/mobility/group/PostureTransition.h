@@ -50,6 +50,7 @@
 #include "Coord.h"
 
 namespace inet {
+
 /**
  * @brief Class to provide spatial and temporal correlation in the posture selection process of the MoBAN mobility model.
  * This class obtains and stores Markovian transition matrices. There is also the possibility to get a steady state vector. In this
@@ -207,6 +208,7 @@ class INET_API PostureTransition
     /** @brief Gets a time and location, and returns the corresponding Markov transition matrix. */
     double **getMatrix(simtime_t, Coord);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_POSTURETRANSITION_H

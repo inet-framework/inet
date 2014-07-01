@@ -21,6 +21,7 @@
 #include "IPowerSource.h"
 
 namespace inet {
+
 /**
  * This is an abstract base class for different power sources.
  *
@@ -70,6 +71,7 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
 
     virtual void setPowerConsumption(int id, double consumedPower);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_POWERSOURCEBASE_H

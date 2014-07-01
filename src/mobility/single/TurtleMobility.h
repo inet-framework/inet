@@ -25,6 +25,7 @@
 #include "LineSegmentsMobilityBase.h"
 
 namespace inet {
+
 /**
  * @brief LOGO-style movement model, with the script coming from XML.
  * See NED file for more info.
@@ -75,6 +76,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
   public:
     TurtleMobility();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TURTLEMOBILITY_H

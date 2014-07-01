@@ -25,6 +25,7 @@
 #include "ByteArrayBuffer.h"
 
 namespace inet {
+
 /**
  * Send queue that manages actual bytes.
  */
@@ -94,6 +95,7 @@ class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
   protected:
     ByteArrayBuffer byteArrayBufferM;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_NSC_BYTESTREAMQUEUES_H

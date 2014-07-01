@@ -23,6 +23,7 @@
 #include "AddressResolver.h"
 
 namespace inet {
+
 Define_Module(UDPVideoStreamCli);
 
 simsignal_t UDPVideoStreamCli::rcvdPkSignal = registerSignal("rcvdPk");
@@ -106,5 +107,6 @@ void UDPVideoStreamCli::handleNodeCrash()
 {
     cancelEvent(selfMsg);
 }
+
 } // namespace inet
 

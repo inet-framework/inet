@@ -32,6 +32,7 @@
 #include "QueueBase.h"
 
 namespace inet {
+
 class ARPPacket;
 class ICMPMessage;
 class IInterfaceTable;
@@ -308,6 +309,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     virtual void start();
     virtual void flush();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4_H

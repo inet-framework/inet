@@ -25,6 +25,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 /**
  * Simple traffic generator for the Ethernet model.
  */
@@ -75,6 +76,7 @@ class INET_API EtherTrafGen : public cSimpleModule, public ILifecycle
     EtherTrafGen();
     virtual ~EtherTrafGen();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERTRAFGEN_H

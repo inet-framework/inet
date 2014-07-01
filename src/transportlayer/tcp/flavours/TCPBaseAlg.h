@@ -24,6 +24,7 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
+
 /**
  * State variables for TCPBaseAlg.
  */
@@ -197,6 +198,7 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
 
     virtual void restartRexmitTimer();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPBASEALG_H

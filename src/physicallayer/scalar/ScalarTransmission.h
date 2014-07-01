@@ -21,6 +21,7 @@
 #include "FlatTransmissionBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API ScalarTransmission : public FlatTransmissionBase
 {
@@ -37,6 +38,7 @@ class INET_API ScalarTransmission : public FlatTransmissionBase
 
     virtual W getPower() const { return power; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

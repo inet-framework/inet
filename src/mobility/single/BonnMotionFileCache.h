@@ -24,6 +24,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 class BonnMotionFileCache;
 
 /**
@@ -78,6 +79,7 @@ class INET_API BonnMotionFileCache
      */
     virtual const BonnMotionFile *getFile(const char *filename);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BONNMOTIONFILECACHE_H

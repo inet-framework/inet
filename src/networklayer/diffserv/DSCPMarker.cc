@@ -30,6 +30,7 @@
 #include "DiffservUtil.h"
 
 namespace inet {
+
 using namespace DiffservUtil;
 
 Define_Module(DSCPMarker);
@@ -99,5 +100,6 @@ bool DSCPMarker::markPacket(cPacket *packet, int dscp)
 
     return false;
 }
+
 } // namespace inet
 

@@ -24,6 +24,7 @@
 #include "SCTPQueue.h"
 
 namespace inet {
+
 class INET_API SCTPReceiveStream : public cObject
 {
   protected:
@@ -53,6 +54,7 @@ class INET_API SCTPReceiveStream : public cObject
     inline void setExpectedStreamSeqNum(const int32 num) { expectedStreamSeqNum = num; };
     inline void setStreamId(const uint16 id) { streamId = id; };
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPRECEIVESTREAM_H

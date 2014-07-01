@@ -22,6 +22,7 @@
 #include "HttpServer.h"
 
 namespace inet {
+
 /**
  * An evil attacker server demonstration - type B.
  *
@@ -49,6 +50,7 @@ class INET_API HttpServerEvilB : public HttpServer
     virtual void initialize(int stage);
     virtual std::string generateBody();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPSERVEREVILB_H

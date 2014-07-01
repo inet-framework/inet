@@ -18,6 +18,7 @@
 #include "ThruputMeter.h"
 
 namespace inet {
+
 Define_Module(ThruputMeter);
 
 void ThruputMeter::initialize()
@@ -90,5 +91,6 @@ void ThruputMeter::finish()
     recordScalar("avg throughput (bit/s)", numBits / duration.dbl());
     recordScalar("avg packets/s", numPackets / duration.dbl());
 }
+
 } // namespace inet
 

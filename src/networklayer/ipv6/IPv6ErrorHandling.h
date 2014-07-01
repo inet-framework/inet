@@ -29,6 +29,7 @@
 #include "ICMPv6Message_m.h"
 
 namespace inet {
+
 /**
  * Error Handling: print out received error for IPv6
  */
@@ -45,6 +46,7 @@ class INET_API IPv6ErrorHandling : public cSimpleModule
     virtual void displayType3Msg(int code);
     virtual void displayType4Msg(int code);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV6ERRORHANDLING_H

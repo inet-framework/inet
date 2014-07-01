@@ -18,6 +18,7 @@
 #include "PropagationBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 PropagationBase::PropagationBase() :
     propagationSpeed(mps(sNaN)),
@@ -35,6 +36,7 @@ void PropagationBase::finish()
     EV_INFO << "Radio signal arrival computation count = " << arrivalComputationCount << endl;
     recordScalar("Radio signal arrival computation count", arrivalComputationCount);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

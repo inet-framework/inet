@@ -22,9 +22,11 @@
 #include "Macho.h"
 
 namespace inet {
+
 class BGPSession;
 
 namespace BGPFSM {
+
 ////////////////////////////////////////////////////////
 // State declarations
 
@@ -214,6 +216,7 @@ SUBSTATE(Established, TopState) {
     void entry();
     void exit() { std::cout << "Established::exit" << std::endl; }
 };
+
 } // namespace BGPFSM
 } // namespace inet
 

@@ -23,6 +23,7 @@
 #include "SchedulerBase.h"
 
 namespace inet {
+
 /**
  * Schedule packets in strict priority order.
  *
@@ -33,6 +34,7 @@ class INET_API PriorityScheduler : public SchedulerBase
   protected:
     virtual bool schedulePacket();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PRIORITYSCHEDULER_H

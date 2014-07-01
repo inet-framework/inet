@@ -21,12 +21,14 @@
 #include "ITransmitter.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API TransmitterBase : public cModule, public virtual ITransmitter
 {
   public:
     virtual W getMaxPower() const { return W(qNaN); }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

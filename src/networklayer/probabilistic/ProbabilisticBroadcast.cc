@@ -14,6 +14,7 @@
 #include "MACAddress.h"
 
 namespace inet {
+
 using std::make_pair;
 using std::endl;
 
@@ -357,5 +358,6 @@ cObject *ProbabilisticBroadcast::setDownControlInfo(cMessage *const pMsg, const 
     pMsg->setControlInfo(cCtrlInfo);
     return cCtrlInfo;
 }
+
 } // namespace inet
 

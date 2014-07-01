@@ -23,6 +23,7 @@
 #include <vector>
 
 namespace inet {
+
 namespace physicallayer {
 class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
@@ -65,6 +66,7 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
     NeighborListCache() : radioMedium(NULL), updateNeighborListsTimer(NULL) {};
     ~NeighborListCache();
 };
+
 } // namespace physicallayer
 } // namespace inet
 

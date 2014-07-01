@@ -24,6 +24,7 @@
 #include "SCTPQueue.h"
 
 namespace inet {
+
 /**
  * Abstract base class for SCTP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
@@ -77,6 +78,7 @@ class INET_API SCTPAlgorithm : public cObject
 
     virtual void dataSent(uint32 fromseq) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPALGORITHM_H

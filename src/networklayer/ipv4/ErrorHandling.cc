@@ -24,6 +24,7 @@
 #include "IPv4Datagram.h"
 
 namespace inet {
+
 Define_Module(ErrorHandling);
 
 void ErrorHandling::initialize()
@@ -72,5 +73,6 @@ void ErrorHandling::handleMessage(cMessage *msg)
         getDisplayString().setTagArg("t", 0, buf);
     }
 }
+
 } // namespace inet
 

@@ -156,7 +156,6 @@ void NS_CLASS nb_timeout(void *arg)
     nb_remove(nb);
 }
 
-
 } // namespace inet
 
 

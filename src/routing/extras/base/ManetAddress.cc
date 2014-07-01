@@ -20,7 +20,6 @@
 
 namespace inet {
 
-
 void ManetNetworkAddress::set(IPv4Address addr, short unsigned int masklen)
 {
     IPv4Address maskedAddr = addr;
@@ -109,8 +108,6 @@ bool ManetNetworkAddress::contains(const ManetNetworkAddress& other) const
     }
     return false;
 }
-
-
 
 } // namespace inet
 

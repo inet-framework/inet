@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * The class RTPSenderInfo is used by an RTP end system for storing information
  * about itself. With the stored information it can create a SenderReport.
@@ -133,6 +134,7 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      */
     uint32 _bytesSent;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPSENDERINFO_H

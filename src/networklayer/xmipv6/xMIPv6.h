@@ -34,6 +34,7 @@
 #include "MobilityHeader.h"    // for HAOpt & RH2
 
 namespace inet {
+
 // Foreign declarations:
 class BindingCache;
 class BindingUpdate;
@@ -555,6 +556,7 @@ class INET_API xMIPv6 : public cSimpleModule
      */
     void handleTokenExpiry(cMessage *msg);
 };
+
 } // namespace inet
 
 #endif    //__XMIPV6_H__

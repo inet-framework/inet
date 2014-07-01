@@ -112,7 +112,6 @@ void NS_CLASS uerr_process(UERR *e, struct in_addr ip_src, u_int32_t ifindex)
 #endif
 }
 
-
 } // namespace inet
 
 

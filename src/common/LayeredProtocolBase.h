@@ -21,6 +21,7 @@
 #include "OperationalBase.h"
 
 namespace inet {
+
 class INET_API LayeredProtocolBase : public OperationalBase
 {
   public:
@@ -45,6 +46,7 @@ class INET_API LayeredProtocolBase : public OperationalBase
     virtual bool isUpperMessage(cMessage *message) = 0;
     virtual bool isLowerMessage(cMessage *message) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LAYEREDPROTOCOLBASE_H

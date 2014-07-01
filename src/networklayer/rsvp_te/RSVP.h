@@ -29,6 +29,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 class SimpleClassifier;
 class IIPv4RoutingTable;
 class IInterfaceTable;
@@ -305,6 +306,7 @@ bool operator!=(const SenderTemplateObj_t& a, const SenderTemplateObj_t& b);
 std::ostream& operator<<(std::ostream& os, const SessionObj_t& a);
 std::ostream& operator<<(std::ostream& os, const SenderTemplateObj_t& a);
 std::ostream& operator<<(std::ostream& os, const FlowSpecObj_t& a);
+
 } // namespace inet
 
 #endif // ifndef __INET_RSVP_H

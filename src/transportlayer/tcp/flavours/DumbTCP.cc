@@ -19,6 +19,7 @@
 #include "TCP.h"
 
 namespace inet {
+
 Register_Class(DumbTCP);
 
 // just a dummy value
@@ -131,5 +132,6 @@ void DumbTCP::restartRexmitTimer()
 void DumbTCP::rttMeasurementCompleteUsingTS(uint32 echoedTS)
 {
 }
+
 } // namespace inet
 

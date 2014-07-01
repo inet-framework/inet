@@ -23,6 +23,7 @@
 #include "dsss-error-rate-model.h"
 
 namespace inet {
+
 namespace physicallayer {
 #ifndef ENABLE_GSL
 const double DsssErrorRateModel::WLAN_SIR_PERFECT = 10.0;
@@ -156,6 +157,7 @@ double DsssErrorRateModel::SymbolErrorProb256Cck(double e1)
 }
 
 #endif // ifdef ENABLE_GSL
+
 } // namespace physicallayer
 } // namespace inet
 

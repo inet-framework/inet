@@ -22,6 +22,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 class INET_API TransportProtocolBase : public LayeredProtocolBase
 {
   public:
@@ -32,6 +33,7 @@ class INET_API TransportProtocolBase : public LayeredProtocolBase
     virtual bool isNodeStartStage(int stage) { return stage == NodeStartOperation::STAGE_TRANSPORT_LAYER; }
     virtual bool isNodeShutdownStage(int stage) { return stage == NodeShutdownOperation::STAGE_TRANSPORT_LAYER; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TRANSPORTPROTOCOLBASE_H

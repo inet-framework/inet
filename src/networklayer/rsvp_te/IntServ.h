@@ -18,6 +18,7 @@
 #include "IntServ_m.h"
 
 namespace inet {
+
 } // namespace inet
 
 #endif // ifndef __INET_INTSERV_H

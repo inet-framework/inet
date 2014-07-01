@@ -21,6 +21,7 @@
 #include "Address.h"
 
 namespace inet {
+
 class INetworkDatagram
 {
   public:
@@ -32,6 +33,7 @@ class INetworkDatagram
     virtual int getTransportProtocol() const = 0;
     virtual void setTransportProtocol(int protocol) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_INETWORKDATAGRAM_H

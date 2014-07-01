@@ -23,6 +23,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Generic reassembly buffer for a fragmented datagram (or a fragmented anything).
  *
@@ -80,6 +81,7 @@ class INET_API ReassemblyBuffer
      */
     ushort getTotalLength() const { return main.end; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_REASSEMBLYBUFFER_H

@@ -18,6 +18,7 @@
 #include "GridNeighborCache.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(GridNeighborCache);
 
@@ -243,6 +244,7 @@ GridNeighborCache::~GridNeighborCache()
 {
     cancelAndDelete(refillCellsTimer);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

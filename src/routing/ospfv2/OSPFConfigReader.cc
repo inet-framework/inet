@@ -36,6 +36,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 OSPFConfigReader::OSPFConfigReader(cModule *ospfModule, IInterfaceTable *ift) : ospfModule(ospfModule), ift(ift)
 {
 }
@@ -488,5 +489,6 @@ bool OSPFConfigReader::loadConfigFromXML(cXMLElement *asConfig, OSPF::Router *os
     }
     return true;
 }
+
 } // namespace inet
 

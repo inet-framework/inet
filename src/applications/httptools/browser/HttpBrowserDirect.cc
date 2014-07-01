@@ -19,6 +19,7 @@
 #include "HttpServerBase.h"
 
 namespace inet {
+
 Define_Module(HttpBrowserDirect);
 
 void HttpBrowserDirect::initialize(int stage)
@@ -87,5 +88,6 @@ void HttpBrowserDirect::sendRequestsToServer(std::string www, HttpRequestQueue q
         }
     }
 }
+
 } // namespace inet
 

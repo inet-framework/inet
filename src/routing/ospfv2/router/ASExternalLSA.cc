@@ -18,6 +18,7 @@
 #include "LSA.h"
 
 namespace inet {
+
 bool OSPF::ASExternalLSA::update(const OSPFASExternalLSA *lsa)
 {
     bool different = differsFrom(lsa);
@@ -74,5 +75,6 @@ bool OSPF::ASExternalLSA::differsFrom(const OSPFASExternalLSA *asExternalLSA) co
 
     return differentHeader || differentBody;
 }
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 class INET_API RTPApplication : public cSimpleModule, public ILifecycle
 {
   protected:
@@ -58,6 +59,7 @@ class INET_API RTPApplication : public cSimpleModule, public ILifecycle
   public:
     RTPApplication();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_RTPAPPLICATION_H

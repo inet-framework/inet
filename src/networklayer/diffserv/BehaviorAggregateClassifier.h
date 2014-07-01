@@ -22,6 +22,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Behavior Aggregate Classifier.
  */
@@ -47,6 +48,7 @@ class INET_API BehaviorAggregateClassifier : public cSimpleModule
 
     int getDscpFromPacket(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BEHAVIORAGGREGATECLASSIFIER_H

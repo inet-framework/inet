@@ -44,6 +44,7 @@
 #include "lwip/pbuf.h"
 
 namespace inet {
+
 #if LWIP_DHCP
 struct dhcp;
 #endif

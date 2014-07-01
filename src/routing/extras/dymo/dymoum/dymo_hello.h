@@ -31,6 +31,7 @@
 #endif
 #ifndef OMNETPP
 namespace inet {
+
 /* HELLO message */
 typedef struct      // FIXME: adjust byte ordering
 {

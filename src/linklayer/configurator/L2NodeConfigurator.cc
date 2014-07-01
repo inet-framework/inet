@@ -19,6 +19,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(L2NodeConfigurator);
 
 L2NodeConfigurator::L2NodeConfigurator()
@@ -90,5 +91,6 @@ void L2NodeConfigurator::receiveSignal(cComponent *source, simsignal_t signalID,
             networkConfigurator->configureInterface(ie);
     }
 }
+
 } // namespace inet
 

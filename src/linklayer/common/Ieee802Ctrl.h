@@ -23,6 +23,7 @@
 #include "Ieee802Ctrl_m.h"
 
 namespace inet {
+
 /**
  * Represents a IEEE 802 control info. More info in the Ieee802Ctrl.msg file
  * (and the documentation generated from it).
@@ -43,6 +44,7 @@ class INET_API Ieee802Ctrl : public Ieee802Ctrl_Base, public IMACProtocolControl
     virtual int getInterfaceId() const { return Ieee802Ctrl_Base::getInterfaceId(); }
     virtual void setInterfaceId(int interfaceId) { Ieee802Ctrl_Base::setInterfaceId(interfaceId); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE802CTRL_H

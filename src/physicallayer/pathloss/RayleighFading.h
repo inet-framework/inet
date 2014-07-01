@@ -21,6 +21,7 @@
 #include "FreeSpacePathLoss.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This class implements the probabilistic Rayleigh fading model, see Rappaport
@@ -34,6 +35,7 @@ class INET_API RayleighFading : public FreeSpacePathLoss
     virtual void printToStream(std::ostream& stream) const;
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

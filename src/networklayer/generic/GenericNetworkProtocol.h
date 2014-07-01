@@ -33,6 +33,7 @@
 #include "ProtocolMap.h"
 
 namespace inet {
+
 /**
  * Implements a generic network protocol that routes generic datagrams through the network.
  * Routing decisions are based on a generic routing table, but it also supports the netfilter
@@ -172,6 +173,7 @@ class INET_API GenericNetworkProtocol : public QueueBase, public INetfilter, pub
      */
     virtual void endService(cPacket *packet);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICNETWORKPROTOCOL_H

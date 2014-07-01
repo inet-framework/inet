@@ -25,6 +25,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 class INET_API SCTPNatEntry : public cPolymorphic
 {
   protected:
@@ -95,6 +96,7 @@ class INET_API SCTPNatTable : public cSimpleModule
 
     static uint32 getNextEntryNumber() { return nextEntryNumber++; };
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPNATTABLE_H

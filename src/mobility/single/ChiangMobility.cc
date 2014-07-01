@@ -20,6 +20,7 @@
 #include "ChiangMobility.h"
 
 namespace inet {
+
 Define_Module(ChiangMobility);
 
 static const double stateMatrix[3][3] = {
@@ -85,5 +86,6 @@ void ChiangMobility::move()
     Coord dummyPosition;
     handleIfOutside(REFLECT, dummyPosition, lastSpeed, dummyAngle);
 }
+
 } // namespace inet
 

@@ -19,6 +19,7 @@
 #include "ByteArray_m.h"
 
 namespace inet {
+
 /**
  * Class that carries raw bytes.
  */
@@ -91,6 +92,7 @@ class ByteArray : public ByteArray_Base
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright = 0);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BYTEARRAY_H

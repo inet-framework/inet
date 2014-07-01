@@ -28,6 +28,7 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 // TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
 // TODO: control frames must send before
 
@@ -2682,5 +2683,6 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     return ret;
 }
+
 } // namespace inet
 

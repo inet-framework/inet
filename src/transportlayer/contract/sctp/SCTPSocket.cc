@@ -29,6 +29,7 @@
 #endif // ifdef WITH_SCTP
 
 namespace inet {
+
 static inline int32_t getNewAssocId()
 {
 #ifdef WITH_SCTP
@@ -492,5 +493,6 @@ void SCTPSocket::setStreamPriority(uint32 stream, uint32 priority)
     msg->setControlInfo(cmd);
     sendToSCTP(msg);
 }
+
 } // namespace inet
 

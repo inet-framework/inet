@@ -19,6 +19,7 @@
 #include "SCTPAssociation.h"
 
 namespace inet {
+
 #ifdef _MSC_VER
 inline double rint(double x) { return floor(x + .5); }
 #endif // ifdef _MSC_VER
@@ -805,5 +806,6 @@ void SCTPAssociation::cwndUpdateAfterCwndTimeout(SCTPPathVariables *path)
             << "\tcwnd=" << path->cwnd << endl;
     recordCwndUpdate(path);
 }
+
 } // namespace inet
 

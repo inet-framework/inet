@@ -28,6 +28,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 namespace OSPF {
 class Router;
 
@@ -149,6 +150,7 @@ inline std::ostream& operator<<(std::ostream& ostr, Area& area)
     ostr << area.detailedInfo();
     return ostr;
 }
+
 } // namespace OSPF
 } // namespace inet
 

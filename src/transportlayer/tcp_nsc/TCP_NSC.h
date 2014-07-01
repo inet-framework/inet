@@ -36,6 +36,7 @@
 #include "TCP_NSC_Connection.h"
 
 namespace inet {
+
 // forward declarations:
 class TCPCommand;
 class TCPSegment;
@@ -178,6 +179,7 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     cOutVector *rcvSeqVector;    // received seqNo
     cOutVector *rcvAckVector;    // received ackNo (= snd_una)
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCP_NSC_H

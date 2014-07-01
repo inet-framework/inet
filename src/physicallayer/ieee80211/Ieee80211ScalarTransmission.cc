@@ -18,7 +18,9 @@
 #include "Ieee80211ScalarTransmission.h"
 
 namespace inet {
+
 namespace physicallayer {
+
 } // namespace physicallayer
 } // namespace inet
 

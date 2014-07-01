@@ -655,8 +655,6 @@ char *NS_CLASS ip_to_str(struct in_addr addr)
     return str;
 }
 
-
-
 } // namespace inet
 
 

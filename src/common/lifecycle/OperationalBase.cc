@@ -23,6 +23,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 OperationalBase::OperationalBase() :
     isOperational(false)
 {
@@ -108,5 +109,6 @@ void OperationalBase::setOperational(bool isOperational)
     this->isOperational = isOperational;
     lastChange = simTime();
 }
+
 } // namespace inet
 

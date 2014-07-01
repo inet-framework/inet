@@ -43,6 +43,7 @@
 #include "HttpEventMessages_m.h"
 
 namespace inet {
+
 // Definitions for the insertion of registered servers into the picklist.
 #define INSERT_END           0
 #define INSERT_RANDOM        -1
@@ -193,6 +194,7 @@ class HttpController : public cSimpleModule
     /** Get a random server from the special list with p=pspecial or from the general population with p=1-pspecial. */
     WebServerEntry *__getRandomServerInfo();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_HTTPCONTROLLER_H

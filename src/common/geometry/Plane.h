@@ -21,6 +21,7 @@
 #include "LineSegment.h"
 
 namespace inet {
+
 /**
  * This class represents a 2 dimensional plane in the 3 dimensional space.
  */
@@ -37,6 +38,7 @@ class INET_API Plane
     const Coord& getNormalVector() { return normalVector; }
     Coord computeIntersection(const LineSegment& lineSegment);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PLANE_H

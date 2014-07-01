@@ -21,6 +21,7 @@
 #include "PowerSourceBase.h"
 
 namespace inet {
+
 /**
  * This class implements a voltage regulated battery.
  *
@@ -88,6 +89,7 @@ class INET_API Battery : public PowerSourceBase
 
     virtual void scheduleDepletedTimer();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BATTERY_H

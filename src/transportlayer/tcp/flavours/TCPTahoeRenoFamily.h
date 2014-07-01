@@ -23,6 +23,7 @@
 #include "TCPBaseAlg.h"
 
 namespace inet {
+
 /**
  * State variables for TCPTahoeRenoFamily.
  */
@@ -49,6 +50,7 @@ class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
     /** Ctor */
     TCPTahoeRenoFamily();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPTAHOERENOFAMILY_H

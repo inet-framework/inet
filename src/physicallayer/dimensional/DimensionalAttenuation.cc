@@ -21,6 +21,7 @@
 #include "IRadioMedium.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(DimensionalAttenuation);
 
@@ -74,6 +75,7 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     EV_DEBUG << "Reception power end" << endl;
     return new DimensionalReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, dimensionalTransmission->getCarrierFrequency(), dimensionalTransmission->getBandwidth(), receptionPower);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -28,7 +28,6 @@
 
 namespace inet {
 
-
 class DYMO_OutstandingRREQ
 {
   public:

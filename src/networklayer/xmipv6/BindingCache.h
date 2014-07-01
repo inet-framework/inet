@@ -28,6 +28,7 @@
 #include "IPv6Address.h"
 
 namespace inet {
+
 // these token must be equal to those in the BindingUpdateList file!
 #define HO_TOKEN    1101
 #define CO_TOKEN    2101
@@ -149,6 +150,7 @@ class INET_API BindingCache : public cSimpleModule
      */
     virtual int generateKey(int homeToken, int careOfToken, const IPv6Address& CoA);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BINDINGCACHE_H

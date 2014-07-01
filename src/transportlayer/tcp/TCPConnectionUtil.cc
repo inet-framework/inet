@@ -33,6 +33,7 @@
 #include "TCPAlgorithm.h"
 
 namespace inet {
+
 //
 // helper functions
 //
@@ -1490,5 +1491,6 @@ bool TCPConnection::isSendQueueEmpty()
 {
     return sendQueue->getBytesAvailable(state->snd_nxt) == 0;
 }
+
 } // namespace inet
 

@@ -45,6 +45,7 @@
 #endif
 
 namespace inet {
+
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 

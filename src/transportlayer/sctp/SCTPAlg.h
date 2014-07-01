@@ -24,6 +24,7 @@
 #include "SCTPAlgorithm.h"
 
 namespace inet {
+
 /**
  * State variables for SCTPAlg.
  */
@@ -72,6 +73,7 @@ class INET_API SCTPAlg : public SCTPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPALG_H

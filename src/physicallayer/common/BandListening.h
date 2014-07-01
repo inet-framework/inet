@@ -21,6 +21,7 @@
 #include "ListeningBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API BandListening : public ListeningBase
 {
@@ -38,6 +39,7 @@ class INET_API BandListening : public ListeningBase
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual Hz getBandwidth() const { return bandwidth; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

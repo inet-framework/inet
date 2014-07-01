@@ -19,6 +19,7 @@
 #include "ModulationType.h"
 
 namespace inet {
+
 namespace physicallayer {
 class IErrorModel
 {
@@ -27,6 +28,7 @@ class IErrorModel
     virtual ~IErrorModel() {};
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

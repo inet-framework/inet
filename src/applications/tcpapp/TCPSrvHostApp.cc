@@ -22,6 +22,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 Define_Module(TCPSrvHostApp);
 
 void TCPSrvHostApp::initialize(int stage)
@@ -99,5 +100,6 @@ void TCPSrvHostApp::removeThread(TCPServerThreadBase *thread)
 
     updateDisplay();
 }
+
 } // namespace inet
 

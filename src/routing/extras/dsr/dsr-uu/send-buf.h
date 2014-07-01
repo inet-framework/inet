@@ -26,6 +26,7 @@ typedef int (*xmit_fct_t) (struct dsr_pkt *);
 #include "dsr-uu-omnetpp.h"
 
 namespace inet {
+
 typedef void (DSRUU::*xmit_fct_t) (struct dsr_pkt *);
 } // namespace
 #endif /* OMNETPP */

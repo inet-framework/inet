@@ -19,6 +19,7 @@
 #include "NotifierConsts.h"
 
 namespace inet {
+
 simsignal_t NF_SUBSCRIBERLIST_CHANGED = cComponent::registerSignal("NF_SUBSCRIBERLIST_CHANGED");
 
 simsignal_t NF_NODE_FAILURE = cComponent::registerSignal("NF_NODE_FAILURE");
@@ -108,5 +109,6 @@ void printNotificationBanner(simsignal_t signalID, const cObject *obj)
        << notificationCategoryName(signalID) << " "
        << (obj ? obj->info() : "") << "\n";
 }
+
 } // namespace inet
 

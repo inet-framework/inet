@@ -23,6 +23,7 @@
 #include "INetworkProtocolControlInfo.h"
 
 namespace inet {
+
 class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocolControlInfo_Base, public INetworkProtocolControlInfo
 {
   private:
@@ -45,6 +46,7 @@ class INET_API GenericNetworkProtocolControlInfo : public GenericNetworkProtocol
     virtual short getHopLimit() const { return GenericNetworkProtocolControlInfo_Base::getHopLimit(); }
     virtual void setHopLimit(short hopLimit) { GenericNetworkProtocolControlInfo_Base::setHopLimit(hopLimit); }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICNETWORKPROTOCOLCONTROLINFO_H

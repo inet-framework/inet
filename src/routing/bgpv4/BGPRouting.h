@@ -32,6 +32,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 class BGPSession;
 
 class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPSocket::CallbackInterface
@@ -146,6 +147,7 @@ class INET_API BGPRouting : public cSimpleModule, public ILifecycle, public TCPS
     static const int BGP_TCP_CONNECT_OPEN_RCV = 74;
     static const int BGP_TCP_KEEP_ALIVE_RCV = 75;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPROUTING_H

@@ -24,6 +24,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 /**
  * Retransmission data for SACK.
  */
@@ -178,6 +179,7 @@ class INET_API TCPSACKRexmitQueue
      */
     bool checkQueue() const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSACKREXMITQUEUE_H

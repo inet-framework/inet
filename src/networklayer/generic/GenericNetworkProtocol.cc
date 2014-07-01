@@ -28,6 +28,7 @@
 #include "IPSocket.h"
 
 namespace inet {
+
 Define_Module(GenericNetworkProtocol);
 
 void GenericNetworkProtocol::initialize()
@@ -667,5 +668,6 @@ INetfilter::IHook::Result GenericNetworkProtocol::datagramLocalOutHook(GenericDa
     }
     return IHook::ACCEPT;
 }
+
 } // namespace inet
 

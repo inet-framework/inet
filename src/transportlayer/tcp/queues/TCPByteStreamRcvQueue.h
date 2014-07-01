@@ -29,6 +29,7 @@
 #include "ByteArray.h"
 
 namespace inet {
+
 /**
  * TCP send queue that stores actual bytes.
  *
@@ -85,6 +86,7 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPBYTESTREAMRCVQUEUE_H

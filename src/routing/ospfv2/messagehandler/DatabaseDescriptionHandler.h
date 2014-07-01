@@ -21,6 +21,7 @@
 #include "IMessageHandler.h"
 
 namespace inet {
+
 namespace OSPF {
 class DatabaseDescriptionHandler : public IMessageHandler
 {
@@ -32,6 +33,7 @@ class DatabaseDescriptionHandler : public IMessageHandler
 
     void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
+
 } // namespace OSPF
 } // namespace inet
 

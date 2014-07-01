@@ -24,6 +24,7 @@
 #include "IPv4ControlInfo.h"
 
 namespace inet {
+
 class INET_API IPv4AddressType : public IAddressType
 {
   public:
@@ -42,6 +43,7 @@ class INET_API IPv4AddressType : public IAddressType
     virtual INetworkProtocolControlInfo *createNetworkProtocolControlInfo() const { return new IPv4ControlInfo(); }
     virtual Address getLinkLocalAddress(const InterfaceEntry *ie) const { return IPv4Address::UNSPECIFIED_ADDRESS; }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4ADDRESSTYPE_H

@@ -23,6 +23,7 @@
 #include "NodeOperations.h"
 
 namespace inet {
+
 Define_Module(TCPEchoApp);
 
 simsignal_t TCPEchoApp::rcvdPkSignal = registerSignal("rcvdPk");
@@ -180,5 +181,6 @@ void TCPEchoApp::finish()
     recordScalar("bytesRcvd", bytesRcvd);
     recordScalar("bytesSent", bytesSent);
 }
+
 } // namespace inet
 

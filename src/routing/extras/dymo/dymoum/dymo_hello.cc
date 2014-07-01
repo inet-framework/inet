@@ -155,8 +155,6 @@ long NS_CLASS hello_jitter(void)
 #endif
 }
 
-
-
 } // namespace inet
 
 

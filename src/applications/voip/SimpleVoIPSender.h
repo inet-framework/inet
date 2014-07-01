@@ -27,6 +27,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 /**
  * Implements a simple VoIP source. See the NED file for more information.
  */
@@ -66,6 +67,7 @@ class SimpleVoIPSender : public cSimpleModule, public ILifecycle
     virtual ~SimpleVoIPSender();
     SimpleVoIPSender();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SIMPLEVOIPSENDER_H

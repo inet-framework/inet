@@ -27,6 +27,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 class TCPSegment;
 class TCPCommand;
 class TCPOpenCommand;
@@ -683,6 +684,7 @@ class INET_API TCPConnection
      */
     virtual bool isSendQueueEmpty();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPCONNECTION_H

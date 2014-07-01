@@ -27,6 +27,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 /**
  * Abstract base class for 802.11 infrastructure mode management components.
  * Performs queueing for MAC, and dispatching incoming frames by frame type.
@@ -120,6 +121,7 @@ class INET_API Ieee80211MgmtBase : public PassiveQueueBase, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback);
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211MGMTBASE_H

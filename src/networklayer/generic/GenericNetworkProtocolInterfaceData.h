@@ -26,6 +26,7 @@
 #include "Address.h"
 
 namespace inet {
+
 /**
  * Generic network protocol specific data for an InterfaceEntry, stores generic network address.
  *
@@ -68,6 +69,7 @@ class INET_API GenericNetworkProtocolInterfaceData : public InterfaceProtocolDat
 
     virtual void joinMulticastGroup(Address address) {}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICNETWORKPROTOCOLINTERFACEDATA_H

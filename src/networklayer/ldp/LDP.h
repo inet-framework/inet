@@ -31,6 +31,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 #define LDP_PORT             646
 
 #define LDP_TRAFFIC          4       // session (TCP) traffic
@@ -213,6 +214,7 @@ class INET_API LDP : public cSimpleModule, public TCPSocket::CallbackInterface, 
     // cListener
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LDP_H

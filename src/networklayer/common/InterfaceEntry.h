@@ -28,6 +28,7 @@
 #include "NotifierConsts.h"
 
 namespace inet {
+
 // Forward declarations. Do NOT #include the corresponding header files
 // since that would create dependence on IPv4 and IPv6 stuff!
 class InterfaceEntry;
@@ -247,6 +248,7 @@ class INET_API InterfaceEntry : public cNamedObject
     virtual MacEstimateCostProcess *getEstimateCostProcess(int);
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_INTERFACEENTRY_H

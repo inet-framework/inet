@@ -19,6 +19,7 @@
 #include "IPv6NeighbourCache.h"
 
 namespace inet {
+
 void IPv6NeighbourCache::DefaultRouterList::add(Neighbour& router)
 {
     ASSERT(router.isRouter);
@@ -220,5 +221,6 @@ const char *IPv6NeighbourCache::stateName(ReachabilityState state)
             return "???";
     }
 }
+
 } // namespace inet
 

@@ -185,6 +185,7 @@ namespace inet {
 } // namespace
 
 namespace inet {
+
 #ifdef MobilityFramework
 class DSRUU:public cSimpleModule, public ImNotifiable
 {

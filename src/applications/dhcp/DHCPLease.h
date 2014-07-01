@@ -24,6 +24,7 @@
 #include "ARP.h"
 
 namespace inet {
+
 /**
  * Describes a DHCP lease.
  */
@@ -51,6 +52,7 @@ inline std::ostream& operator<<(std::ostream& os, DHCPLease obj)
        << " to " << obj.mac;
     return os;
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_DHCPLEASE_H

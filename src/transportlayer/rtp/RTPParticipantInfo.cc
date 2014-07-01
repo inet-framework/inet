@@ -21,6 +21,7 @@
 #include "RTPPacket.h"
 
 namespace inet {
+
 Register_Class(RTPParticipantInfo);
 
 RTPParticipantInfo::RTPParticipantInfo(uint32 ssrc) :
@@ -148,5 +149,6 @@ char *RTPParticipantInfo::ssrcToName(uint32 ssrc)
     sprintf(name, "%08x", ssrc);
     return opp_strdup(name);
 }
+
 } // namespace inet
 

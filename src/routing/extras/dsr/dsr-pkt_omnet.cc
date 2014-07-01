@@ -25,8 +25,6 @@
 
 namespace inet {
 
-
-
 #define DSR_RREQ_HDR_LEN sizeof(struct dsr_rreq_opt)
 #define DSR_RREQ_OPT_LEN (DSR_RREQ_HDR_LEN - 2)
 #define DSR_RREQ_TOT_LEN IP_HDR_LEN + sizeof(struct dsr_opt_hdr) + sizeof(struct dsr_rreq_opt)

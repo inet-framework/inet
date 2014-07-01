@@ -23,6 +23,7 @@
 #include "TCPSegment_m.h"
 
 namespace inet {
+
 /** @name Comparing sequence numbers */
 //@{
 inline bool seqLess(uint32 a, uint32 b) { return a != b && (b - a) < (1UL << 31); }
@@ -128,6 +129,7 @@ class INET_API TCPSegment : public TCPSegment_Base
      */
     virtual void truncateData(unsigned int truncleft, unsigned int truncright);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSEGMENT_H

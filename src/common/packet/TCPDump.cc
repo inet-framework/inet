@@ -26,6 +26,7 @@
 #endif // ifdef WITH_IPv4
 
 namespace inet {
+
 //----
 
 Define_Module(TCPDump);
@@ -92,5 +93,6 @@ void TCPDump::finish()
     tcpdump.dump("", "tcpdump finished");
     pcapDump.closePcap();
 }
+
 } // namespace inet
 

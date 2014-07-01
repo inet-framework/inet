@@ -3104,8 +3104,6 @@ Address OLSR::getIfaceAddressFromIndex(int index)
         return Address(entry->ipv4Data()->getIPAddress());
 }
 
-
-
 } // namespace inet
 
 

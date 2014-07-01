@@ -28,6 +28,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 class SimpleVoIPPacket;
 
 /**
@@ -109,6 +110,7 @@ class SimpleVoIPReceiver : public cSimpleModule, public ILifecycle
     SimpleVoIPReceiver();
     ~SimpleVoIPReceiver();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_SIMPLEVOIPRECEIVER_H

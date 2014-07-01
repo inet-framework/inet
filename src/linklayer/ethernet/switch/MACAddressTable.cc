@@ -18,6 +18,7 @@
 #include "MACAddressTable.h"
 
 namespace inet {
+
 #define MAX_LINE    100
 
 Define_Module(MACAddressTable);
@@ -341,5 +342,6 @@ void MACAddressTable::resetDefaultAging()
 {
     agingTime = par("agingTime");
 }
+
 } // namespace inet
 

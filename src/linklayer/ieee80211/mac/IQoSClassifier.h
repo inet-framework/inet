@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * Abstract interface for QoS classifiers, used in QoS queues.
  * A QoS classifier looks at a packet, determines its priority,
@@ -42,6 +43,7 @@ class INET_API IQoSClassifier : public cObject
      */
     virtual int classifyPacket(cMessage *msg) = 0;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IQOSCLASSIFIER_H

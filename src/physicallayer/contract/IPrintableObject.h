@@ -21,6 +21,7 @@
 #include "PhysicalLayerDefs.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This purely virtual interface provides an abstraction for printable objects.
@@ -62,6 +63,7 @@ inline std::ostream& operator<<(std::ostream& stream, const IPrintableObject& ob
     object.printToStream(stream);
     return stream;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

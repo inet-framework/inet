@@ -21,6 +21,7 @@
 #include "IPv6ExtensionHeaders_m.h"
 
 namespace inet {
+
 class IPv6RoutingHeader : public IPv6RoutingHeader_Base
 {
   public:
@@ -31,6 +32,7 @@ class IPv6RoutingHeader : public IPv6RoutingHeader_Base
     // ADD CODE HERE to redefine and implement pure virtual functions from IPv6RoutingHeader_Base
     virtual void setAddressArraySize(unsigned int size);
 };
+
 } // namespace inet
 
 #endif    // __INET_IPV6EXTENSIONHEADERS_H_

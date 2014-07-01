@@ -22,7 +22,9 @@
 #include "Units.h"
 
 namespace inet {
+
 using namespace units::values;
+
 } // namespace inet
 
 #endif // ifndef __INET_PHYSICALLAYERDEFS_H

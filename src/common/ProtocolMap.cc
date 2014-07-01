@@ -20,6 +20,7 @@
 #include "ProtocolMap.h"
 
 namespace inet {
+
 void ProtocolMapping::parseProtocolMapping(const char *s)
 {
     while (isspace(*s))
@@ -88,5 +89,6 @@ void ProtocolMapping::addProtocolMapping(int protocol, int gateIndex)
     else
         throw cRuntimeError("The protocol %d should not register to gate index=%d because it already registered to gate index=%d.", protocol, gateIndex, registered);
 }
+
 } // namespace inet
 

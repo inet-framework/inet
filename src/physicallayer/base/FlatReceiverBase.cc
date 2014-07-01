@@ -25,6 +25,7 @@
 #include "ReceptionDecision.h"
 
 namespace inet {
+
 namespace physicallayer {
 void FlatReceiverBase::initialize(int stage)
 {
@@ -114,6 +115,7 @@ const IReceptionDecision *FlatReceiverBase::computeReceptionDecision(const IList
     else
         return new ReceptionDecision(reception, new RadioReceptionIndication(), false, false, false);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

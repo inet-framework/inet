@@ -25,6 +25,7 @@
 #include "IIPv4RoutingTable.h"
 
 namespace inet {
+
 Define_Module(NetworkInfo);
 
 void NetworkInfo::initialize()
@@ -154,5 +155,6 @@ void NetworkInfo::dumpRoutingInfo(cModule *target, const char *filename, bool ap
     s << endl;
     s.close();
 }
+
 } // namespace inet
 

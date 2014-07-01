@@ -21,6 +21,7 @@
 #include "SchedulerBase.h"
 
 namespace inet {
+
 SchedulerBase::SchedulerBase()
     : packetsRequestedFromUs(0), packetsToBeRequestedFromInputs(0), outGate(NULL)
 {
@@ -138,5 +139,6 @@ void SchedulerBase::notifyListeners()
     for (std::list<IPassiveQueueListener *>::iterator it = listeners.begin(); it != listeners.end(); ++it)
         (*it)->packetEnqueued(this);
 }
+
 } // namespace inet
 

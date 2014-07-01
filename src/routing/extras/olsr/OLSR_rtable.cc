@@ -226,7 +226,6 @@ std::string OLSR_rtable::detailedInfo()
     return out.str();
 }
 
-
 } // namespace inet
 
 

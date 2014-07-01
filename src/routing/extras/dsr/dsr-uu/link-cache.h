@@ -16,6 +16,7 @@
 #ifndef NO_GLOBALS
 
 namespace inet {
+
 struct lc_graph
 {
     struct tbl nodes;

@@ -19,6 +19,7 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
+
 Define_Module(Ieee80211MgmtSTASimplified);
 
 void Ieee80211MgmtSTASimplified::initialize(int stage)
@@ -148,5 +149,6 @@ void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponse
 {
     dropManagementFrame(frame);
 }
+
 } // namespace inet
 

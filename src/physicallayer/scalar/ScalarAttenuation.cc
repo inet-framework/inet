@@ -21,6 +21,7 @@
 #include "IRadioMedium.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(ScalarAttenuation);
 
@@ -50,6 +51,7 @@ const IReception *ScalarAttenuation::computeReception(const IRadio *receiverRadi
     W receptionPower = transmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
     return new ScalarReception(receiverRadio, transmission, receptionStartTime, receptionEndTime, receptionStartPosition, receptionEndPosition, receptionStartOrientation, receptionEndOrientation, scalarTransmission->getCarrierFrequency(), scalarTransmission->getBandwidth(), receptionPower);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

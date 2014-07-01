@@ -24,6 +24,7 @@
 #include "IPrintableObject.h"
 
 namespace inet {
+
 namespace physicallayer {
 class IRadio;
 
@@ -90,6 +91,7 @@ class INET_API ITransmission : public IPrintableObject
      */
     virtual const EulerAngles getEndOrientation() const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

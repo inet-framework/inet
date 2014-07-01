@@ -21,6 +21,7 @@
 #include "TCP.h"
 
 namespace inet {
+
 Register_Class(TCPReno);
 
 TCPReno::TCPReno() : TCPTahoeRenoFamily(),
@@ -320,5 +321,6 @@ void TCPReno::receivedDuplicateAck()
         sendData(false);
     }
 }
+
 } // namespace inet
 

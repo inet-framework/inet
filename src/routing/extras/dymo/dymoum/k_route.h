@@ -25,7 +25,6 @@
 
 namespace inet {
 
-
 /* Add a new route in the kernel routing table */
 int k_add_rte(struct in_addr dest_addr,
               struct in_addr nxthop_addr,

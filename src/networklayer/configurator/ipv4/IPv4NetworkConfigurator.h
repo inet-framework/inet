@@ -33,6 +33,7 @@
 #include "PatternMatcher.h"
 
 namespace inet {
+
 /**
  * This module provides the global static configuration for the IPv4RoutingTable and
  * the IPv4 network interfaces of all nodes in the network.
@@ -352,6 +353,7 @@ class INET_API IPv4NetworkConfigurator : public cSimpleModule, public AddressRes
     // address resolver interface
     bool getInterfaceIPv4Address(Address& ret, InterfaceEntry *interfaceEntry, bool netmask);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IPV4NETWORKCONFIGURATOR_H

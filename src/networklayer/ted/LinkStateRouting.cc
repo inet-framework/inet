@@ -27,6 +27,7 @@
 #include "TED.h"
 
 namespace inet {
+
 Define_Module(LinkStateRouting);
 
 LinkStateRouting::LinkStateRouting()
@@ -230,5 +231,6 @@ void LinkStateRouting::sendToIP(LinkStateMsg *msg, IPv4Address destAddr)
 
     send(msg, "ipOut");
 }
+
 } // namespace inet
 

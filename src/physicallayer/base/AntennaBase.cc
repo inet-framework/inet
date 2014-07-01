@@ -19,12 +19,14 @@
 #include "ModuleAccess.h"
 
 namespace inet {
+
 namespace physicallayer {
 void AntennaBase::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
         mobility = check_and_cast<IMobility *>(getContainingNode(this)->getSubmodule("mobility"));
 }
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -18,6 +18,7 @@
 #include "opp_utils.h"
 
 namespace inet {
+
 namespace OPP_Global {
 std::string ltostr(long i)
 {
@@ -83,6 +84,7 @@ std::string vstringf(const char *fmt, va_list& args)
 }
 
 #undef BUFLEN
+
 } // namespace OPP_Global
 } // namespace inet
 

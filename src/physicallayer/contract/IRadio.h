@@ -25,6 +25,7 @@
 #include "ITransmitter.h"
 
 namespace inet {
+
 namespace physicallayer {
 class IRadioMedium;
 
@@ -283,6 +284,7 @@ class INET_API IRadio : public IPhysicalLayer, public IPrintableObject
      */
     static const char *getRadioTransmissionStateName(TransmissionState transmissionState);
 };
+
 } // namespace physicallayer
 } // namespace inet
 

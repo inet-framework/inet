@@ -30,6 +30,7 @@
 #include "AddressResolver.h"
 
 namespace inet {
+
 Define_Module(SCTPServer);
 
 void SCTPServer::initialize(int stage)
@@ -539,5 +540,6 @@ SCTPServer::SCTPServer()
     delayFirstReadTimer = NULL;
     delayTimer = NULL;
 }
+
 } // namespace inet
 

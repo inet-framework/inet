@@ -21,6 +21,7 @@
 #include "LifecycleOperation.h"
 
 namespace inet {
+
 class PingPayload;
 
 // how many ping request's send time is stored
@@ -79,5 +80,6 @@ class INET_API PingTestApp : public cSimpleModule, public ILifecycle
     virtual bool handleOperationStage(LifecycleOperation *operation, int stage, IDoneCallback *doneCallback)
     { Enter_Method_Silent(); throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName()); return true; }
 };
+
 } // namespace inet
 

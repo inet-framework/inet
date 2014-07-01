@@ -698,7 +698,6 @@ void Batman::hna_free(void)
     }
 }
 
-
 } // namespace inet
 
 

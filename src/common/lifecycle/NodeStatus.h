@@ -23,6 +23,7 @@
 #include "ILifecycle.h"
 
 namespace inet {
+
 /**
  * Keeps track of the status of network node (up, down, etc.) for other
  * modules, and also displays it as a small overlay icon on this module
@@ -55,6 +56,7 @@ class INET_API NodeStatus : public cSimpleModule, public ILifecycle
     virtual void updateDisplayString();
     static State getStateByName(const char *name);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_NODESTATUS_H

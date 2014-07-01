@@ -30,6 +30,7 @@
 #include "IListeningDecision.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents the whole radio medium. It keeps track of all radio
@@ -137,6 +138,7 @@ class INET_API IRadioMedium : public IPrintableObject
      */
     virtual const IArrival *getArrival(const IRadio *receiver, const ITransmission *transmission) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

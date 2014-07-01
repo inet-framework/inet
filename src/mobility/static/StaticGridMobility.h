@@ -24,6 +24,7 @@
 #include "StationaryMobility.h"
 
 namespace inet {
+
 /**
  * @brief Mobility model which places all hosts at constant distances
  *  within the simulation area (resulting in a regular grid).
@@ -40,6 +41,7 @@ class INET_API StaticGridMobility : public StationaryMobility
   public:
     StaticGridMobility() {};
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_STATICGRIDMOBILITY_H

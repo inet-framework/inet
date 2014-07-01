@@ -30,6 +30,7 @@
 #include "MACAddress.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * The default implementation of the radio medium interface.
@@ -443,6 +444,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     virtual void receiveSignal(cComponent *source, simsignal_t signal, long value);
 };
+
 } // namespace physicallayer
 } // namespace inet
 

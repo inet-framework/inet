@@ -21,6 +21,7 @@
 #include "IArrival.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API Arrival : public virtual IArrival
 {
@@ -60,6 +61,7 @@ class INET_API Arrival : public virtual IArrival
     virtual const EulerAngles getStartOrientation() const { return startOrientation; }
     virtual const EulerAngles getEndOrientation() const { return endOrientation; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

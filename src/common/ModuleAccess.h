@@ -22,6 +22,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 /**
  * Returns true if the given module is a network node, i.e. a module
  * with the @node property set.
@@ -158,6 +159,7 @@ class INET_API ModuleAccess
         return dynamic_cast<T *>(m);
     }
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_MODULEACCESS_H

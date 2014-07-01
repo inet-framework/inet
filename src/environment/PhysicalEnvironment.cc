@@ -21,6 +21,7 @@
 #include "Material.h"
 
 namespace inet {
+
 Define_Module(PhysicalEnvironment);
 
 PhysicalEnvironment::PhysicalEnvironment() :
@@ -177,5 +178,6 @@ void PhysicalEnvironment::updateCanvas()
     }
 #endif // ifdef __CCANVAS_H
 }
+
 } // namespace inet
 

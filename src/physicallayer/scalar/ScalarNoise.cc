@@ -18,6 +18,7 @@
 #include "ScalarNoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
@@ -30,6 +31,7 @@ W ScalarNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
     }
     return maxNoisePower;
 }
+
 } // namespace physicallayer
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "Shape.h"
 
 namespace inet {
+
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
  * The coordinate system origin is in the center of the cuboid and the faces
@@ -44,6 +45,7 @@ class INET_API Cuboid : public Shape
 
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_CUBOID_H

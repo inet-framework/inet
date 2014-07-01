@@ -21,6 +21,7 @@
 #include "FIFOQueue.h"
 
 namespace inet {
+
 Define_Module(FIFOQueue);
 
 simsignal_t FIFOQueue::queueLengthSignal = registerSignal("queueLength");
@@ -61,5 +62,6 @@ bool FIFOQueue::isEmpty()
 {
     return queue.empty();
 }
+
 } // namespace inet
 

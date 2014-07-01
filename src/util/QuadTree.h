@@ -23,6 +23,7 @@
 #include <algorithm>
 
 namespace inet {
+
 //
 // It is a QuadTree implementation for efficient orthogonal range queries
 //
@@ -72,6 +73,7 @@ class INET_API QuadTree
     QuadTree(Coord boundaryMin, Coord boundaryMax, unsigned int quadrantCapacity, QuadTree *parent);
     ~QuadTree();
 };
+
 } // namespace inet
 
 #endif /* QUADTREE_H_ */

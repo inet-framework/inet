@@ -21,6 +21,7 @@
 #include "TCPSegment.h"
 
 namespace inet {
+
 Register_Class(TCPByteStreamSendQueue);
 
 TCPByteStreamSendQueue::TCPByteStreamSendQueue() : TCPSendQueue()
@@ -98,5 +99,6 @@ void TCPByteStreamSendQueue::discardUpTo(uint32 seqNum)
     dataBuffer.drop(seqNum - begin);
     begin = seqNum;
 }
+
 } // namespace inet
 

@@ -19,6 +19,7 @@
 #include "TCP.h"
 
 namespace inet {
+
 TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
 {
     ssthresh = 65535;
@@ -46,5 +47,6 @@ TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
     state((TCPTahoeRenoFamilyStateVariables *&)TCPAlgorithm::state)
 {
 }
+
 } // namespace inet
 

@@ -21,6 +21,7 @@
 #include "RadioMedium.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cSimpleModule
 {
@@ -68,6 +69,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
     GridNeighborCache() : refillCellsTimer(NULL) {};
     virtual ~GridNeighborCache();
 };
+
 } // namespace physicallayer
 } // namespace inet
 

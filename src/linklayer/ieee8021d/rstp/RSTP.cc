@@ -25,6 +25,7 @@
 #include "NodeStatus.h"
 
 namespace inet {
+
 Define_Module(RSTP);
 
 RSTP::RSTP()
@@ -896,5 +897,6 @@ void RSTP::stop()
     cancelEvent(helloTimer);
     cancelEvent(upgradeTimer);
 }
+
 } // namespace inet
 

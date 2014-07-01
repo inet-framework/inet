@@ -26,6 +26,7 @@
 #include "headers/tcphdr.h"
 
 namespace inet {
+
 //forward declarations:
 class TCPSegment;
 
@@ -69,6 +70,7 @@ class TCPSerializer
     static uint16_t checksum(const void *addr, unsigned int count,
             const Address& srcIp, const Address& destIp);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_TCPSERIALIZER_H

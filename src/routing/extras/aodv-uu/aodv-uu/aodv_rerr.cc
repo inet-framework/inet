@@ -299,8 +299,6 @@ void NS_CLASS rerr_process(RERR * rerr, int rerrlen,struct in_addr ip_src,
     }
 }
 
-
-
 } // namespace inet
 
 

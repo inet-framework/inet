@@ -23,6 +23,7 @@
 #include "IRoute.h"
 
 namespace inet {
+
 class InterfaceEntry;
 class IRoutingTable;
 class GenericRoutingTable;
@@ -172,6 +173,7 @@ class INET_API GenericMulticastRoute : public cObject, public IGenericMulticastR
     virtual int getMetric() const { return metric; }
 };
 #endif /*0*/
+
 } // namespace inet
 
 #endif // ifndef __INET_GENERICROUTE_H

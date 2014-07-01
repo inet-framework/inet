@@ -23,6 +23,8 @@
 #include "MobilityHeader.h"
 
 namespace inet {
+
 Register_Class(HomeAddressOption);
+
 } // namespace inet
 

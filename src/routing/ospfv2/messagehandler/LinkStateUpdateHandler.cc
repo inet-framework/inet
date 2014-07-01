@@ -23,6 +23,7 @@
 #include "OSPFRouter.h"
 
 namespace inet {
+
 class LSAProcessingMarker
 {
   private:
@@ -364,5 +365,6 @@ void OSPF::LinkStateUpdateHandler::acknowledgeLSA(OSPFLSAHeader& lsaHeader,
         }
     }
 }
+
 } // namespace inet
 

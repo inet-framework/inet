@@ -29,6 +29,7 @@
 #include "XMLUtils.h"
 
 namespace inet {
+
 Define_Module(IPv4NetworkConfigurator);
 
 #define ADDRLEN_BITS    32
@@ -2084,5 +2085,6 @@ bool IPv4NetworkConfigurator::getInterfaceIPv4Address(Address& ret, InterfaceEnt
         return interfaceInfo->configure;
     }
 }
+
 } // namespace inet
 

@@ -22,6 +22,7 @@
 #include "TCPSegmentTransmitInfoList.h"
 
 namespace inet {
+
 void TCPSegmentTransmitInfoList::set(uint32_t beg, uint32_t end, simtime_t sentTime)
 {
     ASSERT(seqLess(beg, end));
@@ -88,5 +89,6 @@ void TCPSegmentTransmitInfoList::clearTo(uint32_t endseq)
     if (!regions.empty() && seqLess(regions.front().beg, endseq))
         regions.front().beg = endseq;
 }
+
 } // namespace inet
 

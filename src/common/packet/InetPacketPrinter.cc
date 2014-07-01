@@ -42,6 +42,7 @@ class UDPPacket;
 #endif // ifdef WITH_UDP
 
 namespace inet {
+
 //TODO Do not move next line to top of file - opp_makemake can not detect dependencies inside of '#if' with omnetpp-specific defines
 #if OMNETPP_VERSION >= 0x0405
 
@@ -205,5 +206,6 @@ void InetPacketPrinter::printICMPPacket(std::ostream& os, Address srcAddr, Addre
 }
 
 #endif    // Register_MessagePrinter
+
 } // namespace inet
 

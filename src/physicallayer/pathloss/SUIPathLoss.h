@@ -21,6 +21,7 @@
 #include "IPathLoss.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This class implements the empirical Stanford University Interim path loss model.
@@ -47,6 +48,7 @@ class INET_API SUIPathLoss : public cModule, public IPathLoss
     virtual double computePathLoss(mps propagationSpeed, Hz frequency, m distance) const;
     virtual m computeRange(mps propagationSpeed, Hz frequency, double loss) const { return m(qNaN); }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

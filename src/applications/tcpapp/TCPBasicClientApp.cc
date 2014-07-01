@@ -22,6 +22,7 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
+
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 
@@ -212,5 +213,6 @@ void TCPBasicClientApp::socketFailure(int connId, void *ptr, int code)
         rescheduleOrDeleteTimer(d, MSGKIND_CONNECT);
     }
 }
+
 } // namespace inet
 

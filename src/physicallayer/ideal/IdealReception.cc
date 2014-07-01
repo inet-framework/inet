@@ -18,7 +18,9 @@
 #include "IdealReception.h"
 
 namespace inet {
+
 namespace physicallayer {
+
 } // namespace physicallayer
 } // namespace inet
 

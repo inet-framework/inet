@@ -18,6 +18,7 @@
 #include "DimensionalNoise.h"
 
 namespace inet {
+
 namespace physicallayer {
 W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) const
 {
@@ -29,6 +30,7 @@ W DimensionalNoise::computeMaxPower(simtime_t startTime, simtime_t endTime) cons
     end.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
     return W(MappingUtils::findMax(*power));    // TODO: W(MappingUtils::findMax(*power), start, end));
 }
+
 } // namespace physicallayer
 } // namespace inet
 

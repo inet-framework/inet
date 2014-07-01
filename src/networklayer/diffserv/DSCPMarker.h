@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 
 namespace inet {
+
 /**
  * DSCP Marker.
  */
@@ -44,6 +45,7 @@ class INET_API DSCPMarker : public cSimpleModule
 
     virtual bool markPacket(cPacket *msg, int dscp);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_DSCPMARKER_H

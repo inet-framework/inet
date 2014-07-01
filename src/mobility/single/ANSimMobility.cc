@@ -19,6 +19,7 @@
 #include "FWMath.h"
 
 namespace inet {
+
 Define_Module(ANSimMobility);
 
 static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
@@ -126,5 +127,6 @@ void ANSimMobility::move()
     LineSegmentsMobilityBase::move();
     raiseErrorIfOutside();
 }
+
 } // namespace inet
 

@@ -23,6 +23,7 @@
 #include "Ieee80211MgmtBase.h"
 
 namespace inet {
+
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
@@ -74,6 +75,7 @@ class INET_API Ieee80211MgmtSTASimplified : public Ieee80211MgmtBase
     virtual void handleProbeResponseFrame(Ieee80211ProbeResponseFrame *frame);
     //@}
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_IEEE80211MGMTSTASIMPLIFIED_H

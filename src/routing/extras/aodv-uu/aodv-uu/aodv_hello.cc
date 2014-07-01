@@ -429,8 +429,6 @@ NS_INLINE void NS_CLASS hello_update_timeout(rt_table_t * rt,
     memcpy(&rt->last_hello_time, now, sizeof(struct timeval));
 }
 
-
-
 } // namespace inet
 
 

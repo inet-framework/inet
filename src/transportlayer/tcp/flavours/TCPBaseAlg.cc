@@ -21,6 +21,7 @@
 #include "TCPSACKRexmitQueue.h"
 
 namespace inet {
+
 //
 // Some constants below. MIN_REXMIT_TIMEOUT is the minimum allowed retransmit
 // interval.  It is currently one second but e.g. a FreeBSD kernel comment says
@@ -675,5 +676,6 @@ void TCPBaseAlg::restartRexmitTimer()
 
     startRexmitTimer();
 }
+
 } // namespace inet
 

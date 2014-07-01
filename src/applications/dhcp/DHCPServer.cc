@@ -30,6 +30,7 @@
 #include "NotifierConsts.h"
 
 namespace inet {
+
 Define_Module(DHCPServer);
 
 DHCPServer::DHCPServer()
@@ -492,5 +493,6 @@ bool DHCPServer::handleOperationStage(LifecycleOperation *operation, int stage, 
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
 } // namespace inet
 

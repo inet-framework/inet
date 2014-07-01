@@ -20,6 +20,7 @@
 #include "GenericAppMsg_m.h"
 
 namespace inet {
+
 Register_Class(TCPGenericSrvThread);
 
 void TCPGenericSrvThread::established()
@@ -65,5 +66,6 @@ void TCPGenericSrvThread::timerExpired(cMessage *timer)
 {
     // no timers in this serverThread
 }
+
 } // namespace inet
 

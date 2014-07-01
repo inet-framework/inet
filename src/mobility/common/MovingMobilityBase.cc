@@ -23,6 +23,7 @@
 #include "MovingMobilityBase.h"
 
 namespace inet {
+
 MovingMobilityBase::MovingMobilityBase()
 {
     moveTimer = NULL;
@@ -102,5 +103,6 @@ Coord MovingMobilityBase::getCurrentSpeed()
     moveAndUpdate();
     return lastSpeed;
 }
+
 } // namespace inet
 

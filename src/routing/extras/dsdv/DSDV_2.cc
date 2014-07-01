@@ -432,10 +432,6 @@ void DSDV_2::handleMessage(cMessage *msg)
     }
 }
 
-
-
-
-
 } // namespace inet
 
 

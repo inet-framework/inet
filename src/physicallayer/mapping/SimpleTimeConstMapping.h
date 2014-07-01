@@ -24,6 +24,7 @@
 #include "MappingBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * @brief A simple constant mapping for one value over time.
@@ -64,6 +65,7 @@ class INET_API SimpleTimeConstMapping : public SimpleConstMapping
         return new SimpleTimeConstMapping(myValue, start, stop);
     }
 };
+
 } // namespace physicallayer
 } // namespace inet
 

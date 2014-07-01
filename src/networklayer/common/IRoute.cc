@@ -18,6 +18,7 @@
 #include "IRoute.h"
 
 namespace inet {
+
 const char *IRoute::sourceTypeName(SourceType sourceType)
 {
     switch (sourceType) {
@@ -81,5 +82,6 @@ const char *IMulticastRoute::sourceTypeName(SourceType sourceType)
             return "???";
     }
 }
+
 } // namespace inet
 

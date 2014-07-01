@@ -1469,7 +1469,6 @@ std::string ManetRoutingBase::convertAddressToString(const Address& add)
     return add.str();
 }
 
-
 } // namespace inet
 
 

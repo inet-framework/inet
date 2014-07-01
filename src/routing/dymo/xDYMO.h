@@ -33,6 +33,7 @@
 #include "DYMO_m.h"
 
 namespace inet {
+
 namespace DYMO {
 /**
  * This class provides Dynamic MANET On-demand (DYMO also known as AODVv2) Routing
@@ -220,6 +221,7 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
     // notification
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
 };
+
 } // namespace DYMO
 } // namespace inet
 

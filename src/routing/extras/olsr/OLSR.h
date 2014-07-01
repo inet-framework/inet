@@ -46,9 +46,6 @@
 
 namespace inet {
 
-
-
-
 /********** Useful macros **********/
 
 /// Returns maximum of two numbers.

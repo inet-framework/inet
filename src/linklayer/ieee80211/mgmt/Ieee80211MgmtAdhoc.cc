@@ -19,6 +19,7 @@
 #include "Ieee802Ctrl.h"
 
 namespace inet {
+
 Define_Module(Ieee80211MgmtAdhoc);
 
 void Ieee80211MgmtAdhoc::initialize(int stage)
@@ -131,5 +132,6 @@ void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *f
 {
     dropManagementFrame(frame);
 }
+
 } // namespace inet
 

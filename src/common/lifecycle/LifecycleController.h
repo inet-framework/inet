@@ -22,6 +22,7 @@
 #include "IScriptable.h"
 
 namespace inet {
+
 /**
  * Manages operations like shutdown/restart, suspend/resume, crash/recover
  * and similar operations for nodes (routers, hosts, etc), interfaces, and
@@ -100,6 +101,7 @@ class INET_API LifecycleController : public cSimpleModule, public IScriptable
      */
     virtual bool initiateOperation(LifecycleOperation *operation, IDoneCallback *completionCallback = NULL);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_LIFECYCLECONTROLLER_H

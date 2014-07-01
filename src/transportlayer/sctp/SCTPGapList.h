@@ -23,6 +23,7 @@
 #include <assert.h>
 
 namespace inet {
+
 //#include "SCTPSeqNumbers.h"
 
 #define MAX_GAP_COUNT    500
@@ -178,6 +179,7 @@ class SCTPGapList
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, const SCTPGapList& gapList) { gapList.print(ostr); return ostr; }
+
 } // namespace inet
 
 #endif // ifndef __INET_SCTPGAPLIST_H

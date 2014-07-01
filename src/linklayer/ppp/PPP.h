@@ -27,6 +27,7 @@
 #include "MACBase.h"
 
 namespace inet {
+
 class InterfaceEntry;
 class IPassiveQueue;
 
@@ -90,6 +91,7 @@ class INET_API PPP : public MACBase
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_PPP_H

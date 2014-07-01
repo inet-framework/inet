@@ -23,6 +23,7 @@
 #include "IInterfaceTable.h"
 
 namespace inet {
+
 namespace DiffservUtil {
 // colors for naming the output of meters
 enum Color { GREEN, YELLOW, RED };
@@ -111,6 +112,7 @@ int getColor(cPacket *packet);
  * The color is stored in the parlist of the cPacket object.
  */
 void setColor(cPacket *packet, int color);
+
 } // namespace DiffservUtil
 } // namespace inet
 

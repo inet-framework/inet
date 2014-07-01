@@ -34,6 +34,7 @@
 
 #endif
 namespace inet {
+
 /* Here we maintain a list of those RREQs which haven't been answered with a
    RREP yet */
 typedef struct pending_rreq

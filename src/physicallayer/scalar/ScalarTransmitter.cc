@@ -21,6 +21,7 @@
 #include "IMobility.h"
 
 namespace inet {
+
 namespace physicallayer {
 Define_Module(ScalarTransmitter);
 
@@ -48,6 +49,7 @@ const ITransmission *ScalarTransmitter::createTransmission(const IRadio *transmi
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
     return new ScalarTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, transmissionBitrate, transmissionPower);
 }
+
 } // namespace physicallayer
 } // namespace inet
 

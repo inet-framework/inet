@@ -25,6 +25,7 @@
 #include "SCTPCommand_m.h"
 
 namespace inet {
+
 #define MSGKIND_CONNECT    0
 #define MSGKIND_SEND       1
 #define MSGKIND_ABORT      2
@@ -625,5 +626,6 @@ void SCTPClient::finish()
     EV_INFO << getFullPath() << ": received " << bytesRcvd << " bytes in " << packetsRcvd << " packets\n";
     EV_INFO << "Client finished\n";
 }
+
 } // namespace inet
 

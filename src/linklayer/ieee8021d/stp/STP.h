@@ -31,6 +31,7 @@
 #include "STPBase.h"
 
 namespace inet {
+
 /**
  * Implements the Spanning Tree Protocol. See the NED file for details.
  */
@@ -255,6 +256,7 @@ inline std::ostream& operator<<(std::ostream& os, STP i)
 
     return os;
 }
+
 } // namespace inet
 
 #endif // ifndef __INET_STP_H

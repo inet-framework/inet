@@ -18,6 +18,7 @@
 #include "HttpServerDirect.h"
 
 namespace inet {
+
 Define_Module(HttpServerDirect);
 
 void HttpServerDirect::initialize(int stage)
@@ -59,5 +60,6 @@ void HttpServerDirect::handleMessage(cMessage *msg)
     }
     updateDisplay();
 }
+
 } // namespace inet
 

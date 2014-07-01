@@ -463,9 +463,6 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const Addres
     origNode->neigh_list.push_back(this);
 }
 
-
-
-
 } // namespace inet
 
 

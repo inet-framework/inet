@@ -26,6 +26,7 @@
 #include "RadioControlInfo_m.h"
 
 namespace inet {
+
 namespace physicallayer {
 /**
  * This interface represents a physical device (a part of the radio) which converts
@@ -101,6 +102,7 @@ class INET_API IReceiver : public IPrintableObject
      */
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions, const INoise *backgroundNoise) const = 0;
 };
+
 } // namespace physicallayer
 } // namespace inet
 

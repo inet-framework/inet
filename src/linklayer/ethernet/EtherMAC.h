@@ -23,6 +23,7 @@
 #include "EtherMACBase.h"
 
 namespace inet {
+
 class EtherJam;
 class EtherPauseFrame;
 class IPassiveQueue;
@@ -115,6 +116,7 @@ class INET_API EtherMAC : public EtherMACBase
 
     virtual void printState();
 };
+
 } // namespace inet
 
 #endif // ifndef __INET_ETHERMAC_H

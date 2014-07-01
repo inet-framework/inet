@@ -19,6 +19,7 @@
 #include "lwip/lwip_tcp.h"
 
 namespace inet {
+
 //forward declarations:
 class Address;
 struct pbuf;

@@ -21,6 +21,7 @@
 #include "AntennaBase.h"
 
 namespace inet {
+
 namespace physicallayer {
 class INET_API IsotropicAntenna : public AntennaBase
 {
@@ -31,6 +32,7 @@ class INET_API IsotropicAntenna : public AntennaBase
     virtual double getMaxGain() const { return 1; }
     virtual double computeGain(const EulerAngles direction) const { return 1; }
 };
+
 } // namespace physicallayer
 } // namespace inet
 
