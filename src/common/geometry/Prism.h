@@ -36,8 +36,7 @@ class INET_API Prism : public Shape
   public:
     Prism();
 
-    virtual bool isIntersecting(const LineSegment& lineSegment) const;
-    virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
 } // namespace inet

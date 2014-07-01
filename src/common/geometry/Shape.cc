@@ -27,22 +27,5 @@ Shape::~Shape()
 {
 }
 
-bool Shape::isIntersecting(const LineSegment& lineSegment) const
-{
-    Coord intersection1;
-    Coord intersection2;
-    return computeIntersection(lineSegment, intersection1, intersection2);
-}
-
-double Shape::computeIntersectionDistance(const LineSegment& lineSegment) const
-{
-    Coord intersection1;
-    Coord intersection2;
-    if (computeIntersection(lineSegment, intersection1, intersection2))
-        return intersection2.distance(intersection1);
-    else
-        return 0;
-}
-
 } // namespace inet
 

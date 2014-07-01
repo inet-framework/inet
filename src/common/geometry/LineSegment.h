@@ -27,15 +27,25 @@ namespace inet {
  */
 class INET_API LineSegment
 {
+  public:
+    static const LineSegment NIL;
+
   protected:
     Coord point1;
     Coord point2;
 
   public:
+    LineSegment();
     LineSegment(const Coord& point1, const Coord& point2);
 
     const Coord& getPoint1() const { return point1; }
+    void setPoint1(const Coord& point) { point1 = point; }
     const Coord& getPoint2() const { return point2; }
+    void setPoint2(const Coord& point) { point2 = point; }
+
+    bool isNil() const { return this == &NIL; }
+    bool isUnspecified() const { return point1.isUnspecified() && point2.isUnspecified(); }
+    double length() const { return point2.distance(point1); }
 };
 
 } // namespace inet

@@ -23,6 +23,7 @@
 namespace inet {
 
 const Coord Coord::ZERO = Coord(0.0, 0.0, 0.0);
+const Coord Coord::NIL = Coord(NaN, NaN, NaN);
 
 /**
  * On a torus the end and the begin of the axes are connected so you

@@ -25,12 +25,18 @@ Cuboid::Cuboid(const Coord& size) :
 {
 }
 
-bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const
+bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
     int i = 0;
     Coord points[2];
     Coord min = size / -2;
     Coord max = size / 2;
+    const Coord& point1 = lineSegment.getPoint1();
+    const Coord& point2 = lineSegment.getPoint2();
+    if (isInsideX(point1) && isInsideY(point1) && isInsideZ(point1))
+        points[i++ % 2] = point1;
+    if (isInsideX(point2) && isInsideY(point2) && isInsideZ(point2))
+        points[i++ % 2] = point2;
     Coord xMin = Plane(min, Coord(1, 0, 0)).computeIntersection(lineSegment);
     if (!xMin.isUnspecified() && isInsideY(xMin) && isInsideZ(xMin))
         points[i++ % 2] = xMin;
@@ -49,8 +55,8 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     Coord zMax = Plane(max, Coord(0, 0, -1)).computeIntersection(lineSegment);
     if (!zMax.isUnspecified() && isInsideX(zMax) && isInsideY(zMax))
         points[i++ % 2] = zMax;
-    // TODO: complete for other cases, e.g. when there's only 1 real intersection point
-    if (i == 0)
+    // TODO: what about the degenerate cases when there are more than two points?
+    if (i < 2)
         return false;
     else {
         intersection1 = points[0];

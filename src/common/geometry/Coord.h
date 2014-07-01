@@ -39,6 +39,7 @@ class INET_API Coord : public cObject
   public:
     /** @brief Constant with all values set to 0. */
     static const Coord ZERO;
+    static const Coord NIL;
 
   public:
     /** @name x, y and z coordinate of the position. */
@@ -236,6 +237,11 @@ class INET_API Coord : public cObject
         return lowerBound.x <= x && x <= upperBound.x &&
                lowerBound.y <= y && y <= upperBound.y &&
                lowerBound.z <= z && z <= upperBound.z;
+    }
+
+    bool isNil() const
+    {
+        return this == &NIL;
     }
 
     /**

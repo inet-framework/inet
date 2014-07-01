@@ -32,9 +32,7 @@ class INET_API Shape
     Shape();
     virtual ~Shape();
 
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const = 0;
-    virtual double computeIntersectionDistance(const LineSegment& lineSegment) const;
-    virtual bool isIntersecting(const LineSegment& lineSegment) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const = 0;
 };
 
 } // namespace inet

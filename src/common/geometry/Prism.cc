@@ -23,12 +23,7 @@ Prism::Prism()
 {
 }
 
-bool Prism::isIntersecting(const LineSegment& lineSegment) const
-{
-    throw cRuntimeError("Unimplemented");
-}
-
-double Prism::computeIntersectionDistance(const LineSegment& lineSegment) const
+bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
     throw cRuntimeError("Unimplemented");
 }

@@ -19,6 +19,14 @@
 
 namespace inet {
 
+const LineSegment LineSegment::NIL(Coord(0, 0, 0), Coord(0, 0, 0));
+
+LineSegment::LineSegment() :
+    point1(Coord::NIL),
+    point2(Coord::NIL)
+{
+}
+
 LineSegment::LineSegment(const Coord& point1, const Coord& point2) :
     point1(point1),
     point2(point2)

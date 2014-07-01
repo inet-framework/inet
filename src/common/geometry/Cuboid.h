@@ -43,7 +43,7 @@ class INET_API Cuboid : public Shape
     const Coord& getSize() const { return size; }
     void setSize(const Coord& size) { this->size = size; }
 
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
 } // namespace inet

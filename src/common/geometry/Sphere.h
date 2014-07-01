@@ -37,7 +37,7 @@ class INET_API Sphere : public Shape
     const double getRadius() const { return radius; }
     void setRadius(double radius) { this->radius = radius; }
 
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2) const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
 } // namespace inet
