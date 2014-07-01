@@ -17,8 +17,8 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#ifndef __INET_YANS - ERROR - RATE - MODEL_H
-#define __INET_YANS    -ERROR - RATE - MODEL_H
+#ifndef __INET_YANS_ERROR_RATE_MODEL_H
+#define __INET_YANS_ERROR_RATE_MODEL_H
 
 #include "WifiMode.h"
 #include "IErrorModel.h"

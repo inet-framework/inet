@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_ADDRESS_H
-#define __INET_ADDRESS_H
+#ifndef __INET_L3ADDRESS_H
+#define __INET_L3ADDRESS_H
 
 #include "INETDefs.h"
 
