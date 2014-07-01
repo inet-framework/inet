@@ -1,0 +1,30 @@
+<environment>
+    <!-- Roads -->
+    <object position="500 50 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" color="112 128 144"/>
+    <object position="500 150 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" color="112 128 144"/>
+    <object position="500 250 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" color="112 128 144"/>
+    <object position="500 350 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" color="112 128 144"/>
+    <object position="500 450 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" color="112 128 144"/>
+    <object position="100 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" color="112 128 144"/>
+    <object position="300 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" color="112 128 144"/>
+    <object position="500 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" color="112 128 144"/>
+    <object position="700 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" color="112 128 144"/>
+    <object position="900 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" color="112 128 144"/>
+    <!-- Houses -->
+    <object position="200 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="400 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="600 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="800 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="200 200 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="400 200 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="600 200 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="800 200 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="200 300 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="400 300 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="600 300 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="800 300 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="200 400 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="400 400 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="600 400 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+    <object position="800 400 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" color="203 65 84"/>
+</environment>
