@@ -35,17 +35,22 @@ class INET_API PhysicalEnvironment : public cModule
     Coord spaceMin;
     Coord spaceMax;
     const char *viewAngle;
+    std::map<int, const Shape *> shapes;
+    std::map<int, const Material *> materials;
     std::vector<PhysicalObject *> objects;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 
+    virtual void parseShapes(cXMLElement *xml);
+    virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
 
   public:
     PhysicalEnvironment();
+    virtual ~PhysicalEnvironment();
 
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }

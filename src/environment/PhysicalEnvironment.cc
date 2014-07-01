@@ -33,6 +33,16 @@ PhysicalEnvironment::PhysicalEnvironment() :
 {
 }
 
+PhysicalEnvironment::~PhysicalEnvironment()
+{
+    for (std::map<int, const Shape *>::iterator it = shapes.begin(); it != shapes.end(); it++)
+        delete it->second;
+    for (std::map<int, const Material *>::iterator it =  materials.begin(); it != materials.end(); it++)
+        delete it->second;
+    for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
+        delete *it;
+}
+
 void PhysicalEnvironment::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -46,29 +56,116 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
         viewAngle = par("viewAngle");
-        parseObjects(par("objects"));
+        cXMLElement *environment = par("environment");
+        parseShapes(environment);
+        parseMaterials(environment);
+        parseObjects(environment);
     }
     else if (stage == INITSTAGE_LAST) {
         updateCanvas();
     }
 }
 
+void PhysicalEnvironment::parseShapes(cXMLElement *xml)
+{
+    cXMLElementList children = xml->getChildren();
+    // TODO: move parsers to the appropriate classes
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+        cXMLElement *element = *it;
+        const char *tag = element->getTagName();
+        if (strcmp(tag, "shape"))
+            continue;
+        Shape *shape = NULL;
+        // id
+        const char *idAttribute = element->getAttribute("id");
+        int id = -1;
+        if (idAttribute)
+            id = atoi(idAttribute);
+        // type
+        const char *typeAttribute = element->getAttribute("type");
+        if (!typeAttribute)
+            throw cRuntimeError("Missing type attribute of shape");
+        else if (!strcmp(typeAttribute, "cuboid")) {
+            Coord size;
+            const char *sizeAttribute = element->getAttribute("size");
+            if (!sizeAttribute)
+                throw cRuntimeError("Missing size attribute of cuboid shape");
+            cStringTokenizer tokenizer(sizeAttribute);
+            if (tokenizer.hasMoreTokens())
+                size.x = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                size.y = atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                size.z = atof(tokenizer.nextToken());
+            shape = new Cuboid(size);
+        }
+        else if (!strcmp(typeAttribute, "sphere")) {
+            double radius;
+            const char *radiusAttribute = element->getAttribute("radius");
+            if (!radiusAttribute)
+                throw cRuntimeError("Missing radius attribute of sphere shape");
+            cStringTokenizer tokenizer(radiusAttribute);
+            if (tokenizer.hasMoreTokens())
+                radius = atof(tokenizer.nextToken());
+            shape = new Sphere(radius);
+        }
+        // insert
+        shapes.insert(std::pair<int, Shape *>(id, shape));
+    }
+}
+
+void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
+{
+    cXMLElementList children = xml->getChildren();
+    // TODO: move parsers to the appropriate classes
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+        cXMLElement *element = *it;
+        const char *tag = element->getTagName();
+        if (strcmp(tag, "material"))
+            continue;
+        // id
+        const char *idAttribute = element->getAttribute("id");
+        int id = -1;
+        if (idAttribute)
+            id = atoi(idAttribute);
+        // resistivity
+        Ohmm resistivity = Ohmm(NaN);
+        const char *resistivityAttribute = element->getAttribute("resistivity");
+        if (resistivityAttribute)
+            resistivity = Ohmm(atof(resistivityAttribute));
+        // relativePermittivity
+        double relativePermittivity = NaN;
+        const char *relativePermittivityAttribute = element->getAttribute("relativePermittivity");
+        if (relativePermittivity)
+            relativePermittivity = atof(relativePermittivityAttribute);
+        // relativePermeability
+        double relativePermeability = NaN;
+        const char *relativePermeabilityAttribute = element->getAttribute("relativePermeability");
+        if (relativePermeabilityAttribute)
+            relativePermeability = atof(relativePermeabilityAttribute);
+        // insert
+        Material *material = new Material(resistivity, relativePermittivity, relativePermeability);
+        materials.insert(std::pair<int, Material *>(id, material));
+    }
+}
+
 void PhysicalEnvironment::parseObjects(cXMLElement *xml)
 {
-    std::string rootTag = xml->getTagName();
-    cXMLElementList list = xml->getChildren();
+    cXMLElementList children = xml->getChildren();
     // TODO: move parsers to the appropriate classes
-    for (cXMLElementList::const_iterator i = list.begin(); i != list.end(); ++i) {
-        cXMLElement *e = *i;
-        std::string tag = e->getTagName();
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+        cXMLElement *element = *it;
+        const char *tag = element->getTagName();
+        if (strcmp(tag, "object"))
+            continue;
         // id
-        const char *idAttribute = e->getAttribute("id");
+        const char *idAttribute = element->getAttribute("id");
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
         // position
         Coord position;
-        const char *positionAttribute = e->getAttribute("position");
+        const char *positionAttribute = element->getAttribute("position");
         if (positionAttribute) {
             cStringTokenizer tokenizer(positionAttribute);
             if (tokenizer.hasMoreTokens())
@@ -80,7 +177,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         // orientation
         EulerAngles orientation;
-        const char *orientationAttribute = e->getAttribute("orientation");
+        const char *orientationAttribute = element->getAttribute("orientation");
         if (orientationAttribute) {
             cStringTokenizer tokenizer(orientationAttribute);
             if (tokenizer.hasMoreTokens())
@@ -91,8 +188,10 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 orientation.gamma = atof(tokenizer.nextToken());
         }
         // shape
-        Shape *shape;
-        const char *shapeAttribute = e->getAttribute("shape");
+        const Shape *shape;
+        const char *shapeAttribute = element->getAttribute("shape");
+        if (!shapeAttribute)
+            throw cRuntimeError("Missing shape attribute of object");
         cStringTokenizer shapeTokenizer(shapeAttribute);
         const char *shapeType = shapeTokenizer.nextToken();
         if (!strcmp(shapeType, "cuboid")) {
@@ -111,21 +210,31 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 radius = atof(shapeTokenizer.nextToken());
             shape = new Sphere(radius);
         }
-        else
+        else {
+            int id = atoi(shapeAttribute);
+            shape = shapes[id];
+        }
+        if (!shape)
             throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
         // material
-        Material *material;
-        const char *materialAttribute = e->getAttribute("material");
-        if (!strcmp(materialAttribute, "brick"))
+        const Material *material;
+        const char *materialAttribute = element->getAttribute("material");
+        if (!materialAttribute)
+            throw cRuntimeError("Missing material attribute of object");
+        else if (!strcmp(materialAttribute, "brick"))
             material = &Material::brick;
         else if (!strcmp(materialAttribute, "concrete"))
             material = &Material::concrete;
-        else
+        else {
+            int id = atoi(materialAttribute);
+            material = materials[id];
+        }
+        if (!material)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
         // color
 #ifdef __CCANVAS_H
         cFigure::Color color;
-        const char *colorAttribute = e->getAttribute("color");
+        const char *colorAttribute = element->getAttribute("color");
         if (colorAttribute) {
             cStringTokenizer tokenizer(colorAttribute);
             if (tokenizer.hasMoreTokens())
@@ -135,6 +244,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (tokenizer.hasMoreTokens())
                 color.blue = atoi(tokenizer.nextToken());
         }
+        // insert
         PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, color);
 #else // ifdef __CCANVAS_H
         PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material);

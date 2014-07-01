@@ -32,7 +32,7 @@ module PhysicalEnvironment
         double spaceMaxY @unit(m) = default(1m/0); // max y position of space, unconstrained by default (positive infinity)
         double spaceMaxZ @unit(m) = default(1m/0); // max z position of space, unconstrained by default (positive infinity)
         string viewAngle = default("z"); // the angle of view is either x, y or z 
-        xml objects = default(xml("<objects/>"));
+        xml environment = default(xml("<environment/>"));
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);
 }

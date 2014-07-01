@@ -29,14 +29,14 @@ using namespace units::constants;
 class INET_API Material
 {
   public:
-    static Material vacuum;
-    static Material air;
-    static Material copper;
-    static Material aluminium;
-    static Material wood;
-    static Material brick;
-    static Material concrete;
-    static Material glass;
+    static const Material vacuum;
+    static const Material air;
+    static const Material copper;
+    static const Material aluminium;
+    static const Material wood;
+    static const Material brick;
+    static const Material concrete;
+    static const Material glass;
 
   protected:
     Ohmm resistivity;
@@ -45,6 +45,7 @@ class INET_API Material
 
   public:
     Material(Ohmm resistivity, double relativePermittivity, double relativePermeability);
+    virtual ~Material();
 
     virtual Ohmm getResistivity() const { return resistivity; }
     virtual double getRelativePermittivity() const { return relativePermittivity; }
