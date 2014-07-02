@@ -20,7 +20,7 @@
 
 namespace inet {
 
-using namespace BGPFSM;
+namespace BGPFSM {
 
 //TopState
 void TopState::init()
@@ -523,6 +523,8 @@ void Established::UpdateMsgEvent()
     session.restartsHoldTimer();
     //- remains in the Established state.
 }
+
+} // namespace BGPFSM
 
 } // namespace inet
 
