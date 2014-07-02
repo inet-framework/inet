@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class OLSROPT : public OLSR
 {
   private:
@@ -65,7 +67,9 @@ class OLSROPT : public OLSR
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

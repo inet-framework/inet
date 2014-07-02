@@ -32,6 +32,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Generic header for all options */
 struct dsr_opt
 {
@@ -122,7 +124,9 @@ struct iphdr *dsr_build_ip(struct dsr_pkt *dp, struct in_addr src,
                            int protocol, int ttl);
 #endif
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 
@@ -133,6 +137,5 @@ int dsr_opt_recv(struct dsr_pkt *dp);
 
 #endif              /* NO_DECLS */
 
-
-
 #endif
+

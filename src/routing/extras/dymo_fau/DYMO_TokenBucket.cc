@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 DYMO_TokenBucket::DYMO_TokenBucket(double tokensPerTick, double maxTokens, simtime_t currentTime) : tokensPerTick(tokensPerTick), maxTokens(maxTokens), availableTokens(maxTokens), lastUpdate(currentTime)
 {
 }
@@ -41,6 +43,7 @@ bool DYMO_TokenBucket::consumeTokens(double tokens, simtime_t currentTime)
     return true;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

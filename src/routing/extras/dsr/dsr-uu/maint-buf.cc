@@ -43,6 +43,8 @@ static DSRUUTimer ack_timer;
 
 namespace inet {
 
+namespace inetmanet {
+
 struct maint_entry
 {
     dsr_list_t l;
@@ -871,6 +873,7 @@ void NSCLASS maint_buf_cleanup(void)
 #endif
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

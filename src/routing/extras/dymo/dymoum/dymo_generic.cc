@@ -43,6 +43,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS generic_process_message(DYMO_element *e,struct in_addr src, u_int32_t ifindex)
 {
     // Generic preprocessing
@@ -139,6 +141,7 @@ void NS_CLASS generic_process_message(DYMO_element *e,struct in_addr src, u_int3
     }
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

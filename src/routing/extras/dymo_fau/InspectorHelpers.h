@@ -29,10 +29,14 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 std::ostream& operator<<(std::ostream& os, const std::vector<DYMO_AddressBlock>& abs);
 std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab);
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 
 #endif

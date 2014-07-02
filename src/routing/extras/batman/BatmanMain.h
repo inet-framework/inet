@@ -13,6 +13,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class Batman : public ManetRoutingBase
 {
   private:
@@ -171,8 +173,9 @@ class Batman : public ManetRoutingBase
     virtual bool getDestAddress(cPacket *, L3Address &) {return false;};
 };
 
+} // namespace inetmanet
 
-} //namespace
-
+} // namespace inet
 
 #endif  // __INET_BATMANMAIN_H
+

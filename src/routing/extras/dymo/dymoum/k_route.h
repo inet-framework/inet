@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Add a new route in the kernel routing table */
 int k_add_rte(struct in_addr dest_addr,
               struct in_addr nxthop_addr,
@@ -42,7 +44,9 @@ int k_chg_rte(struct in_addr dest_addr,
 /* Delete a route in the kernel routing table */
 int k_del_rte(struct in_addr dest_addr);
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif  /* __K_ROUTE_H__ */
+

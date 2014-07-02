@@ -10,6 +10,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 Define_Module(Batman);
 
 std::ostream& operator<<(std::ostream& os, const OrigNode& e)
@@ -482,6 +484,7 @@ BatmanPacket *Batman::buildDefaultBatmanPkt(const BatmanIf *batman_if)
     return pkt;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

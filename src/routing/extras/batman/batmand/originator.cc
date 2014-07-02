@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 NeighNode * Batman::create_neighbor(OrigNode *orig_node, OrigNode *orig_neigh_node, const L3Address &neigh, BatmanIf *if_incoming)
 {
     return new NeighNode(orig_node, orig_neigh_node, neigh, if_incoming, num_words, global_win_size);
@@ -463,6 +465,7 @@ NeighNode::NeighNode(OrigNode* origNode, OrigNode *orig_neigh_node, const L3Addr
     origNode->neigh_list.push_back(this);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

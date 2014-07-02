@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define K_PARAM   5
 
 /* Dynamic configuration values. Default numbers are for HELLO messages. */
@@ -72,7 +74,9 @@ extern int ttl_start;
 extern int delete_period;
 #endif
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _PARAMS_H */
+

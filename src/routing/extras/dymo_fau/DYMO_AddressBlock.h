@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class DYMO_AddressBlock
 {
   protected:
@@ -144,8 +146,9 @@ class DYMO_AddressBlock
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
 

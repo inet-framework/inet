@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Doubly linked list based on the Linux kernel implementation */
 
 #define DLIST_SUCCESS   0
@@ -129,7 +131,9 @@ static inline int dlist_empty(const struct dlist_head *head)
         for (pos = (head)->next, n = pos->next; pos != (head); \
                 pos = n, n = pos->next)
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif  /* __DLIST_H__ */
+

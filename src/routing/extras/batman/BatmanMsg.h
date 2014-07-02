@@ -7,6 +7,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 inline bool operator < (HnaElement const &a, HnaElement const &b)
 {
     return (a.addr < b.addr) || (a.addr == b.addr && a.netmask < b.netmask);
@@ -27,8 +29,8 @@ inline bool operator != (HnaElement const &a, HnaElement const &b)
     return !(a.addr == b.addr && a.netmask == b.netmask);
 }
 
+} // namespace inetmanet
 
-}
-
+} // namespace inet
 
 #endif

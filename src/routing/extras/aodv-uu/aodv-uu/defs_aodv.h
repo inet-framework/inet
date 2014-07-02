@@ -101,6 +101,8 @@ using std::max;
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Data for a network device */
 struct dev_info
 {
@@ -267,7 +269,9 @@ typedef void (*callback_func_t) (int);
 extern int attach_callback_func(int fd, callback_func_t func);
 #endif
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 
 #endif              /* DEFS_H */

@@ -54,6 +54,8 @@ static struct lc_graph LC;
 
 namespace inet {
 
+namespace inetmanet {
+
 struct lc_node
 {
     dsr_list_t l;
@@ -843,4 +845,7 @@ void __exit NSCLASS lc_cleanup(void)
 #endif
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
+

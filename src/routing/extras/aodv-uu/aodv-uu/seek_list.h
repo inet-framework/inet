@@ -30,6 +30,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define IP_DATA_MAX_LEN 60 + 8  /* Max IP header + 64 bits of data */
 
 struct ip_data
@@ -51,7 +53,9 @@ typedef struct seek_list
     struct timer seek_timer;
 } seek_list_t;
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NS_NO_GLOBALS */
 

@@ -44,6 +44,8 @@ static int send_buf_print(struct tbl *t, char *buffer);
 
 namespace inet {
 
+namespace inetmanet {
+
 struct send_buf_entry
 {
     dsr_list_t l;
@@ -377,4 +379,7 @@ void __exit NSCLASS send_buf_cleanup(void)
 #endif
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
+

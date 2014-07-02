@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 struct dsr_rreq_opt
 {
     u_int8_t type;
@@ -34,8 +36,9 @@ struct dsr_rreq_opt
 #define DSR_RREQ_TOT_LEN IP_HDR_LEN + sizeof(struct dsr_opt_hdr) + sizeof(struct dsr_rreq_opt)
 #define DSR_RREQ_ADDRS_LEN(rreq_opt) (rreq_opt->length - 6)
 
+} // namespace inetmanet
 
-} //namespace
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

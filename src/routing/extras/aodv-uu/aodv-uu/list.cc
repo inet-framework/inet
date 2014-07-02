@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 static inline int listelm_detach(list_t * prev, list_t * next)
 {
     next->prev = prev;
@@ -98,5 +100,7 @@ int  list_unattached(list_t *le)
     return 0;
 }
 
-}
+} // namespace inetmanet
+
+} // namespace inet
 

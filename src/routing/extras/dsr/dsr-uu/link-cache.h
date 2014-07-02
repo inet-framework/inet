@@ -17,6 +17,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 struct lc_graph
 {
     struct tbl nodes;
@@ -34,7 +36,10 @@ struct lc_graph
 #define dsr_rtc_find(s,d) RouteFind(s,d)
 #define dsr_rtc_add(srt,t,f) RouteAdd(srt,t,f)
 #endif
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

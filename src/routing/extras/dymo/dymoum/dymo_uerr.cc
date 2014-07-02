@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 UERR *NS_CLASS uerr_create(struct in_addr target_addr,
                            struct in_addr uelem_target_addr,
                            struct in_addr uerr_node_addr,
@@ -112,6 +114,7 @@ void NS_CLASS uerr_process(UERR *e, struct in_addr ip_src, u_int32_t ifindex)
 #endif
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

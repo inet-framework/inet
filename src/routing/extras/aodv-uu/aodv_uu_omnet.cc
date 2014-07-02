@@ -42,6 +42,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
@@ -1601,5 +1603,7 @@ void NS_CLASS actualizeTablesWithCollaborative(const L3Address &dest)
    return;
 }
 
-}
+} // namespace inetmanet
+
+} // namespace inet
 

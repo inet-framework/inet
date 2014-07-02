@@ -33,6 +33,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Verdicts for queued packets: */
 enum
 {
@@ -73,7 +75,9 @@ struct packet_queue
 
 #endif
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NS_NO_GLOBALS */
 

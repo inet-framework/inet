@@ -33,6 +33,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define OLSR_ETX_CAPPROBE_PACKET_SIZE 1000
 #define CAPPROBE_MAX_ARRAY              16
 
@@ -101,7 +103,9 @@ class OLSR_ETX_parameter : public cObject
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 std::ostream& operator<<(std::ostream& os, const DYMO_QueuedData& o)
 {
     os << "[ ";
@@ -149,6 +151,8 @@ std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o)
     os << o.info();
     return os;
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

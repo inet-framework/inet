@@ -31,6 +31,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 Define_Module( DYMOFau );
 
 
@@ -1233,6 +1235,7 @@ void DYMOFau::processLinkBreak(const cObject *details)
         packetFailed(dgram);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

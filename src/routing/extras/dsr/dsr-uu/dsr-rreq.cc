@@ -50,6 +50,8 @@ static unsigned int rreq_seqno;
 
 namespace inet {
 
+namespace inetmanet {
+
 #define STATE_IDLE          0
 #define STATE_IN_ROUTE_DISC 1
 
@@ -993,6 +995,8 @@ void NSCLASS rreq_timer_test(cMessage *msg)
     }
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif

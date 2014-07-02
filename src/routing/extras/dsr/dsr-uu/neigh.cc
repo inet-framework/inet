@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define NEIGH_TBL_MAX_LEN 50
 
 /* We calculate RTO in milliseconds */
@@ -372,6 +374,7 @@ void __exit NSCLASS neigh_tbl_cleanup(void)
 #endif
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

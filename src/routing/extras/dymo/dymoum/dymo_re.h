@@ -99,7 +99,6 @@ typedef struct      // FIXME: adjust byte ordering
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-//namespace inet {
 /* Create a RREQ */
 RE *re_create_rreq(struct in_addr target_addr,
                    u_int32_t target_seqnum,
@@ -233,7 +232,7 @@ NS_STATIC NS_INLINE int re_info_type(struct re_block *b, rtable_entry_t *e, u_in
     return RB_FRESH;
 }
 #endif
-//} // namespace
+
 #endif  /* NS_NO_DECLARATIONS */
 
 #endif  /* __DYMO_RE_H__ */

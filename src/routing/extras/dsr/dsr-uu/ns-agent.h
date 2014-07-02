@@ -167,6 +167,8 @@ class DSRUU:public Tap, public Agent
 
 namespace inet {
 
+namespace inetmanet {
+
 #undef NO_GLOBALS
 
     struct in_addr my_addr()
@@ -212,7 +214,9 @@ namespace inet {
     struct lc_graph LC;
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _DSR_NS_AGENT_H */
+

@@ -16,6 +16,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 struct dsr_rrep_opt
 {
     u_int8_t type;
@@ -38,7 +40,9 @@ struct dsr_rrep_opt
  * the last source route hop (which is the destination) */
 #define DSR_RREP_ADDRS_LEN(rrep_opt) (rrep_opt->length - 1 - sizeof(struct in_addr))
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

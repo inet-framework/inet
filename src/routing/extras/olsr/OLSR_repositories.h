@@ -40,6 +40,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 typedef L3Address nsaddr_t;
 
 //#ifndef nsaddr_t
@@ -334,7 +336,9 @@ typedef std::vector<OLSR_topology_tuple*>   topologyset_t;  ///< Topology Set ty
 typedef std::vector<OLSR_dup_tuple*>        dupset_t;   ///< Duplicate Set type.
 typedef std::vector<OLSR_iface_assoc_tuple*>    ifaceassocset_t; ///< Interface Association Set type.
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

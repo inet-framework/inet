@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* DSR route cache API */
 
 struct dsr_srt *dsr_rtc_find(struct in_addr src, struct in_addr dst);
@@ -26,7 +28,9 @@ int dsr_rtc_add(struct dsr_srt *srt, unsigned long time, unsigned short flags);
 int dsr_rtc_del(struct in_addr src, struct in_addr dst);
 void dsr_rtc_flush(void);
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _DSR_RTC_H */
+

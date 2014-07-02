@@ -63,6 +63,8 @@ struct timer rt_log_timer;
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS log_init()
 {
 #ifndef _WIN32
@@ -655,6 +657,7 @@ char *NS_CLASS ip_to_str(struct in_addr addr)
     return str;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

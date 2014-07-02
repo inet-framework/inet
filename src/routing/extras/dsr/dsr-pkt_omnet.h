@@ -19,7 +19,7 @@
 
 
 #ifdef MobilityFramework
-#include <NetwPkt_m.h>
+#include "NetwPkt_m.h"
 #ifndef IPv4Address
 #define IPv4Address int
 #endif
@@ -45,6 +45,8 @@
 #endif
 
 namespace inet {
+
+namespace inetmanet {
 
 class EtxCost
 {
@@ -146,8 +148,9 @@ class DSRPktExt: public IPv4Datagram
 
 };
 
+} // namespace inetmanet
 
-} //namespace
-
+} // namespace inet
 
 #endif              /* _DSR_PKT_H */
+

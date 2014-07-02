@@ -81,6 +81,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define ETH_ALEN 6
 #define NSCLASS DSRUU::
 
@@ -89,12 +91,16 @@ class DSRUU;
 #define ConfVal(name) DSRUU::get_confval(name)
 #define ConfValToUsecs(cv) confval_to_usecs(cv)
 
-}
+} // namespace inetmanet
+
+} // namespace inet
 
 #include "dsr-uu/tbl.h"
 #include "dsr-uu/timer.h"
 
 namespace inet{
+
+namespace inetmanet {
 
 static inline char *print_ip(struct in_addr addr)
 {
@@ -137,7 +143,9 @@ static inline char *print_pkt(char *p, int len)
     return buf;
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #define NO_DECLS
 #include "dsr-uu/dsr.h"
@@ -156,6 +164,8 @@ static inline char *print_pkt(char *p, int len)
 #undef NO_DECLS
 
 namespace inet {
+
+namespace inetmanet {
 
 #define init_timer(timer)
 #define timer_pending(timer) ((timer)->pending())
@@ -181,10 +191,6 @@ namespace inet {
 #define  lc_timer  (*lc_timer_ptr)
 #define  ack_timer  (*ack_timer_ptr)
 #define  etx_timer  (*etx_timer_ptr)
-
-} // namespace
-
-namespace inet {
 
 #ifdef MobilityFramework
 class DSRUU:public cSimpleModule, public ImNotifiable
@@ -397,10 +403,6 @@ class DSRUU:public cSimpleModule, public cListener, public ManetNetfilterHook
 
 };
 
-} // namespace
-
-namespace inet {
-
 static inline usecs_t confval_to_usecs(enum confval cv)
 {
     usecs_t usecs = 0;
@@ -431,8 +433,6 @@ static inline usecs_t confval_to_usecs(enum confval cv)
 
     return usecs;
 }
-
-
 
 
 static inline int omnet_vprintk(const char *fmt, va_list args)
@@ -482,6 +482,8 @@ static inline void gettime(struct timeval *tv)
     }
 }
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* _DSR_NS_AGENT_H */

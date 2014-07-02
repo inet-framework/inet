@@ -46,6 +46,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 const int UDP_HEADER_BYTES = 8;
 typedef std::vector<IPv4Address> IPAddressVector;
 
@@ -1837,4 +1839,7 @@ void DYMOUM::processLocatorDisAssoc(const cObject *details)
 #endif
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
+

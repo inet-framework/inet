@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 using namespace std;
 
 /**
@@ -92,6 +94,9 @@ class INET_API DSDVIPv4Route : public IPv4Route
         unsigned int getSequencenumber() const {return sequencenumber;}
 };
 
-}
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif
+

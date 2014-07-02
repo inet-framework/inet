@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 DYMO_Timer::DYMO_Timer(cSimpleModule* parent, const char *name, simtime_t interval) :
         parent(parent), interval(interval), active(false)
 {
@@ -92,6 +94,8 @@ std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o)
     os << o.info();
     return os;
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

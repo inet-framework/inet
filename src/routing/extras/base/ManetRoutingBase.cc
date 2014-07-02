@@ -40,6 +40,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define IP_DEF_TTL 32
 #define UDP_HDR_LEN 8
 
@@ -1469,6 +1471,7 @@ std::string ManetRoutingBase::convertAddressToString(const L3Address& add)
     return add.str();
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

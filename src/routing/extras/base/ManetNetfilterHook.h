@@ -32,6 +32,8 @@ class IRoutingTable;
 class INetworkDatagram;
 class InterfaceEntry;
 
+namespace inetmanet {
+
 class INET_API ManetNetfilterHook : public INetfilter::IHook
 {
   protected:
@@ -84,7 +86,8 @@ class INET_API ManetNetfilterHook : public INetfilter::IHook
     virtual IHook::Result datagramLocalOutHook(INetworkDatagram* datagram, const InterfaceEntry*& outIE, L3Address& nextHopAddr);
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif

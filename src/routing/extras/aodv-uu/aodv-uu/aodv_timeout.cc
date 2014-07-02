@@ -53,6 +53,8 @@ void route_delete_timeout(void *arg);
 
 namespace inet {
 
+namespace inetmanet {
+
 /* These are timeout functions which are called when timers expire... */
 
 void NS_CLASS route_discovery_timeout(void *arg)
@@ -363,6 +365,7 @@ void NS_CLASS packet_queue_timeout(void *arg)
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

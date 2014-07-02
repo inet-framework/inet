@@ -42,6 +42,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 //===========================================================================================
 // class DYMO_TokenBucket: Simple rate limiting mechanism
 //===========================================================================================
@@ -61,8 +63,9 @@ class DYMO_TokenBucket
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
 

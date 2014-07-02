@@ -21,7 +21,10 @@
 
 
 #ifndef NO_GLOBALS
+
 namespace inet {
+
+namespace inetmanet {
 
 /* Source route options header */
 /* TODO: This header is not byte order correct... is there a simple way to fix
@@ -112,7 +115,9 @@ void dsr_srt_del(struct dsr_srt *srt);
 struct dsr_srt *dsr_srt_concatenate(struct dsr_srt *srt1, struct dsr_srt *srt2); int dsr_srt_check_duplicate(struct dsr_srt *srt);
 struct dsr_srt *dsr_srt_new_split(struct dsr_srt *srt, struct in_addr addr);
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

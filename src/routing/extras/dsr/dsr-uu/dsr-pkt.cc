@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 char *dsr_pkt_alloc_opts(struct dsr_pkt *dp, int len)
 {
     if (!dp)
@@ -473,6 +475,9 @@ void dsr_pkt_free(dsr_pkt *dp)
 
 }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif
+

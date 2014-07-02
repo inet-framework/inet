@@ -57,7 +57,6 @@ typedef struct      // FIXME: adjust byte ordering
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-//namespace inet {
 /* Create a UERR message */
 UERR *uerr_create(struct in_addr target_addr, struct in_addr uelem_target_addr,
                   struct in_addr uerr_node_addr, u_int8_t uelem_type, u_int8_t ttl);
@@ -67,7 +66,6 @@ void uerr_send(DYMO_element *e, u_int32_t ifindex);
 
 /* Process a UERR message */
 void uerr_process(UERR *e, struct in_addr ip_src, u_int32_t ifindex);
-//} //namespace
 #endif  /* NS_NO_DECLARATIONS */
 
 

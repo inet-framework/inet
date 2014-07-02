@@ -32,6 +32,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class DYMOFau;
 
 /**
@@ -82,6 +84,9 @@ class DYMO_RoutingEntry
     bool hasActiveTimer() { return routeAgeMin.isActive() || routeAgeMax.isActive() || routeNew.isActive() || routeUsed.isActive() || routeDelete.isActive(); }
 };
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif
+

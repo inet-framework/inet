@@ -17,7 +17,10 @@
 #ifndef NO_GLOBALS
 
 #define MAX_TABLE_HASH 64
+
 namespace inet {
+
+namespace inetmanet {
 
 struct path_table
 {
@@ -27,7 +30,11 @@ struct path_table
     rwlock_t lock;
 #endif
 };
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #define VALID 0
 #define GET_HASH(s,dest) &((s)->hash[dest%MAX_TABLE_HASH])
 

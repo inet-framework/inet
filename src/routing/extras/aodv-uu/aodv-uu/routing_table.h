@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 typedef struct rt_table rt_table_t;
 
 /* Neighbor struct for active routes in Route Table */
@@ -122,7 +124,9 @@ struct routing_table
 };
 void precursor_list_destroy(rt_table_t * rt);
 
-} //namespace inet
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NS_NO_GLOBALS */
 

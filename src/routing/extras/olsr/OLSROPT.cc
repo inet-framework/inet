@@ -42,6 +42,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
 /// Port Number
@@ -534,6 +536,7 @@ OLSROPT::nb_loss(OLSR_link_tuple* tuple)
     rtable_computation();
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

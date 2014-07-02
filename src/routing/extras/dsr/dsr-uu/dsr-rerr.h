@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 struct dsr_rerr_opt
 {
     u_int8_t type;
@@ -53,7 +55,9 @@ struct node_unreach_info
 #define FLOW_STATE_NOT_SUPPORTED  2
 #define OPTION_NOT_SUPPORTED      3
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

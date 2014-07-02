@@ -23,12 +23,12 @@ cplusplus
 #include "MACAddress.h"
 }};
 
-namespace inet;
+class noncobject inet::MACAddress;
 
-class noncobject MACAddress;
+namespace inet::inetmanet;
+
 class ControlInfoBreakLink
 {
       MACAddress dest;   //
 }
-
 

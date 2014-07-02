@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 typedef unsigned long usecs_t;
 
 #ifndef OMNETPP
@@ -258,7 +260,10 @@ static inline int timeval_add_usecs(struct timeval *tv, usecs_t usecs)
 
     return 0;
 }
-} //namespace
 
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* _TIMER_H */
+

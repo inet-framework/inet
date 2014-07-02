@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define TBL_FIRST(tbl) (tbl)->head.next
 #define TBL_EMPTY(tbl) (TBL_FIRST(tbl) == &(tbl)->head)
 #define TBL_FULL(tbl) ((tbl)->len >= (tbl)->max_len)
@@ -415,7 +417,9 @@ static inline void tbl_flush(struct tbl *t, do_t at_flush)
     DSR_WRITE_UNLOCK(&t->lock);
 }
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _TBL_H */
+

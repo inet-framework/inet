@@ -103,7 +103,6 @@ typedef DYMO_element hdr_dymoum;
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS
-//namespace inet {
 /* Decrements TTL */
 NS_STATIC NS_INLINE void generic_preprocess(DYMO_element *e)
 {
@@ -120,8 +119,8 @@ NS_STATIC NS_INLINE int generic_postprocess(DYMO_element *e)
 
 /* Processes a DYMO message */
 void generic_process_message(DYMO_element *e,struct in_addr src, u_int32_t ifindex);
-//} // namespace
+
 #endif  /* NS_NO_DECLARATIONS */
 
-
 #endif  /* __DYMO_GENERIC_H__ */
+

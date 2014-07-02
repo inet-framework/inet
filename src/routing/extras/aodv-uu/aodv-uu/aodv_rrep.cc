@@ -49,6 +49,8 @@ extern int unidir_hack, optimized_hellos, llfeedback;
 
 namespace inet {
 
+namespace inetmanet {
+
 RREP *NS_CLASS rrep_create(u_int8_t flags,
                            u_int8_t prefix,
                            u_int8_t hcnt,
@@ -582,6 +584,8 @@ int rrep_add_hello_ext(RREP * rrep, int offset, u_int32_t interval)
 #endif
     return (offset + AODV_EXT_SIZE(ext));
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

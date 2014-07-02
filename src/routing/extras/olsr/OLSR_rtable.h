@@ -37,6 +37,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 ///
 /// \brief Defines rtable_t as a map of OLSR_rt_entry, whose key is the destination address.
 ///
@@ -76,7 +78,9 @@ class OLSR_rtable : public cObject
 //  void        print(Trace*);
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

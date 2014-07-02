@@ -32,6 +32,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 ///
 /// \brief Creates a new empty routing table.
 ///
@@ -226,6 +228,7 @@ std::string OLSR_rtable::detailedInfo()
     return out.str();
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

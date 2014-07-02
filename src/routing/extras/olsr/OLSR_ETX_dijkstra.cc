@@ -31,6 +31,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 Dijkstra::Dijkstra()
 {
     highest_hop_ = 0;
@@ -347,6 +349,7 @@ Dijkstra::~Dijkstra()
         delete all_nodes_;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

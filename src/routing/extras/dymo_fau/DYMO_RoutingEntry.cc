@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 DYMO_RoutingEntry::DYMO_RoutingEntry(DYMOFau* dymo) :
     routeNextHopInterface(NULL),
     routeAgeMin(dymo, "routeAgeMin"),
@@ -71,4 +73,8 @@ std::ostream& operator<<(std::ostream& os, const DYMO_RoutingEntry& o)
 
     return os;
 };
-}
+
+} // namespace inetmanet
+
+} // namespace inet
+

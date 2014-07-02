@@ -21,10 +21,9 @@ cplusplus {{
 #include "Ieee802Ctrl.h"
 }}
 
-namespace inet;
+class noncobject inet::Ieee802Ctrl;
 
-class noncobject Ieee802Ctrl;
-//class noncobject Address;
+namespace inet::inetmanet;
 
 //
 // Control structure for communication between LLC and higher layers
@@ -37,3 +36,4 @@ class MeshControlInfo extends Ieee802Ctrl
     int maxHopCollaborative;
     bool collaborativeFeedback;
 }
+

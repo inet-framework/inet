@@ -51,6 +51,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifndef NS_PORT
 #define SO_RECVBUF_SIZE 256*1024
 
@@ -707,6 +709,7 @@ void aodv_socket_cleanup(void)
 #endif              /* NS_PORT */
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

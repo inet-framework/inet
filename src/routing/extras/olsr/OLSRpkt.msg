@@ -24,7 +24,7 @@ cplusplus {{
 #include <string.h>
 }}
 
-namespace inet;
+namespace inet::inetmanet;
 
 cplusplus {{
 #ifndef nsaddr_t

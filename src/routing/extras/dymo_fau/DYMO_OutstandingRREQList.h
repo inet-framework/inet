@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class DYMO_OutstandingRREQ
 {
   public:
@@ -83,7 +85,9 @@ class DYMO_OutstandingRREQList : public cObject
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

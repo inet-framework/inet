@@ -44,6 +44,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
 /// Port Number
@@ -3104,6 +3106,7 @@ L3Address OLSR::getIfaceAddressFromIndex(int index)
         return L3Address(entry->ipv4Data()->getIPAddress());
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

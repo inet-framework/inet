@@ -33,10 +33,10 @@ cplusplus {{
 
 }}
 
-namespace inet;
+class noncobject inet::IPv4Address;
+class noncobject inet::L3Address;
 
-class noncobject IPv4Address;
-class noncobject L3Address;
+namespace inet::inetmanet;
 
 struct vis_data
 {

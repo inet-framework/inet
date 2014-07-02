@@ -48,6 +48,8 @@ DSRUUTimer grat_rrep_tbl_timer;
 
 namespace inet {
 
+namespace inetmanet {
+
 struct grat_rrep_entry
 {
     dsr_list_t l;
@@ -421,6 +423,7 @@ void __exit NSCLASS grat_rrep_tbl_cleanup(void)
 #endif
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

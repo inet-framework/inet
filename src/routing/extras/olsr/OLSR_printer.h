@@ -34,10 +34,11 @@
 #include <packet.h>
 #include <ip.h>
 #include <trace.h>
+#endif
 
 namespace inet {
 
-#endif
+namespace inetmanet {
 
 /// Encapsulates all printing functions for OLSR data structures and messages.
 class OLSR_printer
@@ -64,7 +65,9 @@ class OLSR_printer
 #endif
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

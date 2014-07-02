@@ -79,6 +79,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Data for a network device */
 struct dev_info
 {
@@ -100,7 +102,11 @@ struct host_info
     int         nif;        /* Number of interfaces to broadcast on */
     struct dev_info devs[DYMO_MAX_NR_INTERFACES];
 };
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #endif  /* NS_NO_GLOBALS */
 
 #ifndef NS_NO_DECLARATIONS

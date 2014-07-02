@@ -12,7 +12,10 @@
 
 
 #ifndef NO_GLOBALS
+
 namespace inet {
+
+namespace inetmanet {
 
 struct dsr_ack_req_opt
 {
@@ -36,7 +39,11 @@ struct dsr_ack_opt
 #define DSR_ACK_OPT_LEN (DSR_ACK_HDR_LEN - 2)
 
 int dsr_ack_add_ack_req(struct in_addr neigh);
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS

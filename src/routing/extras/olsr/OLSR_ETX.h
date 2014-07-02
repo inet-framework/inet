@@ -42,6 +42,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define OLSR_ETX_C OLSR_C
 
 
@@ -256,7 +258,9 @@ class OLSR_ETX : public OLSR
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

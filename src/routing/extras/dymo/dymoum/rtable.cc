@@ -46,6 +46,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifndef MAPROUTINGTABLE
 
 void NS_CLASS rtable_init()
@@ -682,6 +684,7 @@ int NS_CLASS rtable_expire_timeout_all(struct in_addr nxthop_addr, u_int32_t ifi
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

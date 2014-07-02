@@ -42,6 +42,8 @@ extern int reissue_rreq;
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS route_valid_timeout(void *arg)
 {
     rtable_entry_t *entry = (rtable_entry_t *) arg;
@@ -156,6 +158,7 @@ void NS_CLASS nb_timeout(void *arg)
     nb_remove(nb);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

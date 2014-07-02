@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 //===========================================================================================
 // FIXME obsolete
 // simple, OMNeT++-aware timer class.
@@ -84,7 +86,9 @@ class DYMO_Timer : public cObject
 
 std::ostream& operator<<(std::ostream& os, const DYMO_Timer& o);
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 
 #endif

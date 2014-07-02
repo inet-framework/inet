@@ -36,6 +36,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /// This class encapsulates all data structures needed for maintaining internal state of an OLSR_ETX node.
 class OLSR_ETX_state : public OLSR_state
 {
@@ -46,7 +48,9 @@ class OLSR_ETX_state : public OLSR_state
     OLSR_ETX_state();
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

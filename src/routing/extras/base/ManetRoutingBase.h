@@ -42,9 +42,11 @@
 
 namespace inet {
 
-class ManetRoutingBase;
-
 class IARP;
+
+namespace inetmanet {
+
+class ManetRoutingBase;
 
 typedef std::set<L3Address> AddressGroup;
 typedef std::set<L3Address>::iterator AddressGroupIterator;
@@ -407,7 +409,10 @@ class INET_API ManetRoutingBase : public cSimpleModule, public cListener, public
 };
 
 #define interface80211ptr getInterfaceWlanByAddress()
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
 
 
 #endif

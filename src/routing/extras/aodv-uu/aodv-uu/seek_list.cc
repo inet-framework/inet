@@ -55,6 +55,8 @@ void seek_list_print();
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifndef AODV_USE_STL
 seek_list_t *NS_CLASS seek_list_insert(struct in_addr dest_addr,
                                        u_int32_t dest_seqno,
@@ -204,6 +206,8 @@ void NS_CLASS seek_list_print()
 #endif
 
 #endif
+
+} // namespace inetmanet
 
 } // namespace inet
 

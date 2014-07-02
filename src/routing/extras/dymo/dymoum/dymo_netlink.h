@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Here we implement communications from user space to kernel space via
    netlink sockets */
 
@@ -45,7 +47,9 @@ void netlink_del_route(struct in_addr addr);
 /* Send a message to kernel space to inform that a route discovery failed */
 void netlink_no_route_found(struct in_addr addr);
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif  /* __DYMO_NETLINK_H__ */
+

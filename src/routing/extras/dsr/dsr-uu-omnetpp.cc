@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 unsigned int DSRUU::confvals[CONFVAL_MAX];
 //simtime_t DSRUU::current_time;
 struct dsr_pkt * DSRUU::lifoDsrPkt;
@@ -1066,4 +1068,7 @@ bool DSRUU::proccesICMP(cMessage *msg)
     return true;
  }
 
-} // namespace
+} // namespace inetmanet
+
+} // namespace inet
+

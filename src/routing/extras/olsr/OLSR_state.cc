@@ -31,6 +31,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /********** MPR Selector Set Manipulation **********/
 
 OLSR_mprsel_tuple*
@@ -553,6 +555,7 @@ OLSR_state::~OLSR_state()
     clear_all();
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

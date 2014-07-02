@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQ& o)
 {
     os << "[ ";
@@ -142,6 +144,8 @@ std::ostream& operator<<(std::ostream& os, const DYMO_OutstandingRREQList& o)
     os << o.info();
     return os;
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

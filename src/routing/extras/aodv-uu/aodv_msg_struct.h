@@ -13,6 +13,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 // this structures are a redifinition of def.h struct for omnet
 
 typedef struct
@@ -246,8 +248,10 @@ struct RREQ : public AODV_msg
 };
 
 #define RREQ_SIZE 24
-} //namespace
 
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif
 

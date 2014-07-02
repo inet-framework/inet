@@ -40,6 +40,8 @@ static DLIST_HEAD(TQ);
 
 namespace inet {
 
+namespace inetmanet {
+
 #if defined(OMNETPP) && defined(TIMERMAPLIST)
 
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
@@ -345,6 +347,7 @@ struct timeval *NS_CLASS timer_age_queue()
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

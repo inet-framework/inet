@@ -71,7 +71,7 @@
 #include "aodv_msg_struct.h"
 /* Forward declaration needed to be able to reference the class */
 
-namespace inet { class AODVUU; }
+namespace inet { namespace inetmanet { class AODVUU; } }
 
 
 #ifndef IP_BROADCAST
@@ -109,6 +109,8 @@ namespace inet { class AODVUU; }
 #define ntohs(x) x
 
 namespace inet {
+
+namespace inetmanet {
 
 /* The AODV-UU routing agent class */
 class AODVUU : public ManetRoutingBase
@@ -349,7 +351,9 @@ inline int NS_CLASS ifindex2devindex(unsigned int ifindex)
 }
 #endif
 
-}
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

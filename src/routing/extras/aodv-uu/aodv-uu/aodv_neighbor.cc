@@ -43,6 +43,8 @@ extern int llfeedback;
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Add/Update neighbor from a non HELLO AODV control message... */
 void NS_CLASS neighbor_add(AODV_msg * aodv_msg, struct in_addr source,
                            unsigned int ifindex)
@@ -405,6 +407,8 @@ void NS_CLASS neighbor_link_break(rt_table_t * rt)
     }
 }
 #endif
+
+} // namespace inetmanet
 
 } // namespace inet
 

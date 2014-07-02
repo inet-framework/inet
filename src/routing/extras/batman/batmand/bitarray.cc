@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* clear the bits */
 void Batman::bit_init(std::vector<TYPE_OF_WORD> &seq_bits) {
     int i;
@@ -177,6 +179,7 @@ uint8_t Batman::bit_count(int32_t to_count)
     return(hamming);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

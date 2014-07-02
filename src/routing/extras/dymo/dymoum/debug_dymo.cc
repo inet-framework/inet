@@ -40,6 +40,8 @@ extern int debug, daemonize;
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS dlog_init()
 {
 #ifndef NS_PORT
@@ -105,6 +107,7 @@ return L3Address::getInstance().print_nodeaddr(ipaddr);
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

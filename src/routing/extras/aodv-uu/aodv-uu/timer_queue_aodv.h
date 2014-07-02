@@ -33,6 +33,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifdef NS_PORT
 typedef void (AODVUU::*timeout_func_t) (void *);
 #else
@@ -87,7 +89,9 @@ static inline int timeval_add_msec(struct timeval *t, unsigned long msec)
     return 0;
 }
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NS_NO_GLOBALS */
 

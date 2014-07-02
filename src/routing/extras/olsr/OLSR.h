@@ -46,6 +46,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /********** Useful macros **********/
 
 /// Returns maximum of two numbers.
@@ -553,7 +555,9 @@ class OLSR : public ManetRoutingBase
     virtual bool getNextHopGroup(const L3Address&, L3Address &add, int &iface, L3Address&, bool &, int group = 0);
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

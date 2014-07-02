@@ -17,9 +17,9 @@ cplusplus {{
 
 }}
 
-namespace inet;
+class noncobject inet::IPv4Address;
 
-class noncobject IPv4Address;
+namespace inet::inetmanet;
 
 packet DSDV_HelloMessage
 {

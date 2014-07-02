@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define NOforwardHello
 
 Define_Module(DSDV_2);
@@ -432,6 +434,7 @@ void DSDV_2::handleMessage(cMessage *msg)
     }
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

@@ -56,6 +56,8 @@ static struct path_table PCH;
 
 namespace inet {
 
+namespace inetmanet {
+
 /* LC_TIMER */
 
 struct node_cache
@@ -870,6 +872,7 @@ void NSCLASS path_cache_cleanup(void)
     }
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

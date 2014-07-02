@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Simple linked list inspired from the Linux kernel list implementation */
 typedef struct list_t
 {
@@ -69,6 +71,8 @@ list_t* list_first(list_t*);
 int list_unattached(list_t*);
 
 #endif
+
+} // namespace inetmanet
 
 } // namespace inet
 

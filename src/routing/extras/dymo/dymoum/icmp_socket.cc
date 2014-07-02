@@ -47,6 +47,8 @@ static void icmp_socket_read(int fd);
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS icmp_socket_init(void)
 {
 #ifndef NS_PORT
@@ -279,6 +281,7 @@ static void icmp_socket_read(int fd)
 }
 #endif  /* NS_PORT */
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

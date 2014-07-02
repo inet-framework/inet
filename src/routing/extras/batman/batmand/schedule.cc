@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 void Batman::schedule_own_packet(BatmanIf *batman_if)
 {
     ForwNode *forw_node_new = NULL;
@@ -315,6 +317,7 @@ packet_free:    //list_del((struct list_head *)&forw_list, forw_pos, &forw_list)
     }
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

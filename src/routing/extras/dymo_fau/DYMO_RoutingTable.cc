@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 DYMO_RoutingTable::DYMO_RoutingTable(DYMOFau* host, const IPv4Address& myAddr)
 {
     // get our host module
@@ -243,6 +245,7 @@ std::ostream& operator<<(std::ostream& os, const DYMO_RoutingTable& o)
     return os;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

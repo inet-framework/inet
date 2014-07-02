@@ -26,6 +26,8 @@ using namespace std;
 
 namespace inet {
 
+namespace inetmanet {
+
 ostream& operator<<(ostream& os, const std::vector<DYMO_AddressBlock>& abs)
 {
     os << "{" << std::endl;
@@ -74,6 +76,8 @@ std::ostream& operator<<(std::ostream& os, const DYMO_AddressBlock& ab)
     os << "}";
     return os;
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

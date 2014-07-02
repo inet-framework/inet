@@ -27,8 +27,14 @@ typedef int (*xmit_fct_t) (struct dsr_pkt *);
 
 namespace inet {
 
+namespace inetmanet {
+
 typedef void (DSRUU::*xmit_fct_t) (struct dsr_pkt *);
-} // namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #endif /* OMNETPP */
 
 #endif              /* NO_GLOBALS */

@@ -80,6 +80,8 @@ typedef struct
 #ifdef OMNETPP
 namespace inet {
 
+namespace inetmanet {
+
 #endif
 
 /* A data structure to buffer information about received RREQ's */
@@ -98,6 +100,8 @@ struct blacklist
     struct timer bl_timer;
 };
 #ifdef OMNETPP
+
+} // namespace inetmanet
 
 } // namespace inet
 #endif

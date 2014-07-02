@@ -40,6 +40,8 @@ static DLIST_HEAD(PENDING_RREQ);
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifdef MAPROUTINGTABLE
 pending_rreq_t *NS_CLASS pending_rreq_add(struct in_addr dest_addr, u_int32_t seqnum)
 {
@@ -156,6 +158,7 @@ pending_rreq_t *NS_CLASS pending_rreq_find(struct in_addr dest_addr)
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

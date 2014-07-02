@@ -40,6 +40,8 @@ extern int hello_ival;
 
 namespace inet {
 
+namespace inetmanet {
+
 void NS_CLASS hello_init(void)
 {
     if (hello_timer.used || hello_ival <= 0)
@@ -155,6 +157,7 @@ long NS_CLASS hello_jitter(void)
 #endif
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

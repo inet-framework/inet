@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /**
   * class describes the functionality of the routing table
 **/
@@ -81,7 +83,9 @@ class DYMO_RoutingTable : public cObject
 
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

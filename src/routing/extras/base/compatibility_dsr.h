@@ -10,6 +10,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;
 #endif
@@ -97,7 +99,8 @@ struct iphdr
     /*The options start here. */
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _DSR_H */

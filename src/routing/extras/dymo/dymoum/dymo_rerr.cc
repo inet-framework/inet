@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 RERR *NS_CLASS rerr_create(struct rerr_block *blocks, int nblocks, int ttl)
 {
     int i;
@@ -330,6 +332,7 @@ void NS_CLASS rerr_forward(RERR *rerr,struct in_addr dest_addr)
 }
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

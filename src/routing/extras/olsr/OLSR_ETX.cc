@@ -48,6 +48,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /// Length (in bytes) of UDP header.
 #define UDP_HDR_LEN 8
 /// Port Number
@@ -2776,6 +2778,7 @@ bool OLSR_ETX::getNextHop(const L3Address &dest, L3Address &add, int &iface, dou
     return true;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

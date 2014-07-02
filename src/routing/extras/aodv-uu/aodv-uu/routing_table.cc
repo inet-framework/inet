@@ -51,6 +51,8 @@ static unsigned int hashing(struct in_addr *addr, hash_value * hash);
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifdef AODV_USE_STL_RT
 
 
@@ -1459,6 +1461,8 @@ void NS_CLASS rt_table_update_route_timeouts(rt_table_t * fwd_rt,
         /*  } */
     }
 }
+
+} // namespace inetmanet
 
 } // namespace inet
 

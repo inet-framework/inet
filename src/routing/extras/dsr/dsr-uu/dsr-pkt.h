@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class DSRPkt;
 class EtxCost;
 #undef NS2
@@ -164,7 +166,9 @@ char *dsr_pkt_alloc_opts_expand(struct dsr_pkt *dp, int len);
 void dsr_pkt_free(struct dsr_pkt *dp);
 int dsr_pkt_free_opts(struct dsr_pkt *dp);
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _DSR_PKT_H */
+

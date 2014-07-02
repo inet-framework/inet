@@ -39,7 +39,6 @@
 
 #endif  /* NS_NO_GLOBALS */
 #ifndef NS_NO_DECLARATIONS
-//namespace inet {
 /* Used to limit rate of sending DYMO messages */
 #ifdef OMNETPP
 struct timeval dymo_rate[50 - 1];
@@ -75,7 +74,7 @@ void recv_dymoum_pkt(DYMO_element *e,const struct in_addr &src_addr,int);
 #endif
 
 #endif  /* NS_PORT */
-//} // namespace
+
 #endif  /* NS_NO_DECLARATIONS */
 
 

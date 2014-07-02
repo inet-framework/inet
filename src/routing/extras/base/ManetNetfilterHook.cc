@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 void ManetNetfilterHook::initHook(cModule* _module)
 {
     module = _module;
@@ -169,6 +171,7 @@ bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const
     return (rt->findBestMatchingRoute(destAddr) == NULL);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

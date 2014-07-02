@@ -21,7 +21,7 @@ cplusplus {{
 #include "L3Address.h"
 }}
 
-namespace inet;
+namespace inet::inetmanet;
 
 enum ManetControlType
 {

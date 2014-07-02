@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 class DYMOFau;
 enum Result {DROP, ACCEPT};
 
@@ -88,7 +90,9 @@ class DYMO_DataQueue : public cObject
     friend std::ostream& operator<<(std::ostream& os, const DYMO_DataQueue& o);
 };
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif
 

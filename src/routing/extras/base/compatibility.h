@@ -11,6 +11,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #ifndef u_int8_t
 typedef uint8_t u_int8_t;
 #endif
@@ -72,7 +74,9 @@ struct Sockaddr
 #define in_addr In_addr
 #define sockaddr Sockaddr
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif              /* _DSR_H */
+

@@ -37,6 +37,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 typedef struct edge
 {
     nsaddr_t last_node_; // last node to reach node X
@@ -97,7 +99,9 @@ class Dijkstra : public cOwnedObject
     inline hop& D(const nsaddr_t &node) { return dijkstraMap[node]; }
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
+

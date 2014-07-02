@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 struct neighbor_info
 {
     struct sockaddr hw_addr;
@@ -26,7 +28,11 @@ struct neighbor_info
     usecs_t rtt, rto;       /* RTT and Round Trip Timeout */
     struct timeval last_ack_req;
 };
-} //namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #endif              /* NO_GLOBALS */
 
 #ifndef NO_DECLS

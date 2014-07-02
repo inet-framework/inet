@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Authors: Erik Nordström, <erik.nordstrom@it.uu.se>
+ * Authors: Erik Nordstrï¿½m, <erik.nordstrom@it.uu.se>
  *
  *****************************************************************************/
 #define NS_PORT
@@ -50,6 +50,8 @@ static void printTQ(list_t * l);
 #endif              /* NS_PORT */
 
 namespace inet {
+
+namespace inetmanet {
 
 #ifdef AODV_USE_STL
 int NS_CLASS timer_init(struct timer *t, timeout_func_t f, void *data)
@@ -401,6 +403,7 @@ void NS_CLASS printTQ(list_t * l)
 #endif
 #endif
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

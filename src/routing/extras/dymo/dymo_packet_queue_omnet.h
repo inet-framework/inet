@@ -33,6 +33,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 /* Verdicts for queued packets: */
 enum
 {
@@ -72,19 +74,21 @@ struct packet_queue
     struct timer garbage_collect_timer;
 };
 #endif
-} // namespace
+
+} // namespace inetmanet
+
+} // namespace inet
+
 #endif              /* NS_NO_GLOBALS */
 
 
 #ifndef NS_NO_DECLARATIONS
-//namespace inet {
 struct packet_queue PQ;
 void packet_queue_add(cPacket * p, struct in_addr dest_addr);
 void packet_queue_init();
 void packet_queue_destroy();
 int packet_queue_set_verdict(struct in_addr dest_addr, int verdict);
 int packet_queue_garbage_collect(void);
-//} //namespace
 #endif              /* NS_NO_DECLARATIONS */
 
 

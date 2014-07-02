@@ -31,6 +31,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 OLSR_ETX_state::OLSR_ETX_state()
 {
     parameter = &(dynamic_cast<OLSR_ETX*>(getOwner())->parameter_);
@@ -91,6 +93,7 @@ OLSR_ETX_link_tuple*  OLSR_ETX_state::find_best_sym_link_tuple(const nsaddr_t &m
     return best;
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

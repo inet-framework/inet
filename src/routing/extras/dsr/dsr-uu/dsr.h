@@ -40,6 +40,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 #define DSR_BROADCAST ((unsigned int) 0xffffffff)
 
 #ifndef OMNETPP
@@ -274,7 +276,9 @@ int do_mackill(char *mac);
 
 #endif
 
-} //namespace
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* NO_GLOBALS */
 

@@ -47,6 +47,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 //===========================================================================================
 // class QueueElement: defines a data type for all queued data messages
 //===========================================================================================
@@ -272,8 +274,9 @@ class DYMOFau : public ManetRoutingBase
     void rescheduleTimer();
 };
 
-} //namespace
+} // namespace inetmanet
 
+} // namespace inet
 
 #endif
 

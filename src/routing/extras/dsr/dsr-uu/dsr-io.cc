@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace inetmanet {
+
 int NSCLASS dsr_recv(struct dsr_pkt *dp)
 {
     int i = 0, action;
@@ -192,6 +194,7 @@ out:
     dsr_pkt_free(dp);
 }
 
-} // namespace inet
+} // namespace inetmanet
 
+} // namespace inet
 

@@ -20,9 +20,9 @@ cplusplus {{
 #include "aodv_msg_struct.h"
 }}
 
-namespace inet;
+class noncobject inet::L3Address;
 
-class noncobject L3Address;
+namespace inet::inetmanet;
 
 struct AODV_ext
 {
