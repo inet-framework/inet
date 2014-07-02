@@ -39,16 +39,16 @@ cmdenv-express-mode=false
 %#--------------------------------------------------------------------------------------------------------------
 
 %contains: logfile-0.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
-#2:10000008960000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
-#4:20000008960000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000008960000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000008960000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
 
 %contains: logfile-1.txt
-#1:10000000000000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
-#2:10000008960000: 'PK at 10: 92 Bytes' (EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
-#3:20000000000000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
-#4:20000008960000: 'PK at 20: 92 Bytes' (EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#1:10000000000000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#2:10000008960000: 'PK at 10: 92 Bytes' (inet::EtherFrame) sent:10000008960000 (100 byte) discard:0, delay:0, duration:8000000
+#3:20000000000000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000000000000 (100 byte) discard:0, delay:0, duration:8000000
+#4:20000008960000: 'PK at 20: 92 Bytes' (inet::EtherFrame) sent:20000008960000 (100 byte) discard:0, delay:0, duration:8000000
 
 %#--------------------------------------------------------------------------------------------------------------
 %not-contains: stdout
