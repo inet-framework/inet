@@ -37,23 +37,32 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     b = 2 * (dp.x * point1.x + dp.y * point1.y + dp.z * point1.z);
     c = point1 * point1 - radius * radius;
     bb4ac = b * b - 4 * a * c;
-    if (abs(a) > EPSILON && bb4ac >= 0) {
+    if (bb4ac >= 0) {
         double alpha1 = (-b + sqrt(bb4ac)) / (2 * a);
         double alpha2 = (-b - sqrt(bb4ac)) / (2 * a);
+        bool inside1 = false;
         if (alpha1 < 0)
             alpha1 = 0;
         else if (alpha1 > 1)
             alpha1 = 1;
+        else
+            inside1 = true;
+        bool inside2 = false;
         if (alpha2 < 0)
             alpha2 = 0;
         else if (alpha2 > 1)
             alpha2 = 1;
+        else
+            inside2 = true;
         if (alpha1 == alpha2)
             return false;
         else {
-            // TODO: face normal vectors
             intersection1 = point1 * (1 - alpha1) + point2 * alpha1;
             intersection2 = point1 * (1 - alpha2) + point2 * alpha2;
+            if (inside1)
+                normal1 = intersection1 / intersection1.length();
+            if (inside2)
+                normal2 = intersection2 / intersection2.length();
             return true;
         }
     }
