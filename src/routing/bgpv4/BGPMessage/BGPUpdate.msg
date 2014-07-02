@@ -20,7 +20,10 @@ cplusplus {{
 #include "BGPUpdatePathAttributes_m.h"
 #include "IPv4Address.h"
 
+namespace inet {
 const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPathAttributeLength (2)
+} // namespace inet
+
 }}
 
 
