@@ -730,8 +730,8 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         Coord transmissionStartPosition = transmission->getStartPosition();
         Coord receptionStartPosition = decision->getReception()->getStartPosition();
         communicationLine->setStart(cFigure::Point(transmissionStartPosition.x, transmissionStartPosition.y));
-        communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEnd(cFigure::Point(receptionStartPosition.x, receptionStartPosition.y));
+        communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
         communicationTrail.push_back(communicationLine);
         layer->addChild(communicationLine);

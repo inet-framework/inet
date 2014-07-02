@@ -23,6 +23,7 @@ module ObstacleLoss like IObstacleLoss
 {
     parameters:
         string environmentModule = "environment";
+        bool leaveIntersectionTrail = default(false);
         @display("i=block/control");
         @class(ObstacleLoss);
 }

@@ -18,6 +18,7 @@
 #ifndef __INET_OBSTACLELOSS_H
 #define __INET_OBSTACLELOSS_H
 
+#include <deque>
 #include "IObstacleLoss.h"
 #include "PhysicalEnvironment.h"
 
@@ -33,6 +34,10 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
   protected:
     IRadioMedium *medium;
     PhysicalEnvironment *environment;
+    bool leaveIntersectionTrail;
+#ifdef __CCANVAS_H
+    mutable std::deque<cFigure *> intersectionTrail;
+#endif // ifdef __CCANVAS_H
 
   protected:
     virtual void initialize(int stage);

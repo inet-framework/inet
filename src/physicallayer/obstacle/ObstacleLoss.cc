@@ -36,6 +36,7 @@ void ObstacleLoss::initialize(int stage)
         medium = check_and_cast<IRadioMedium *>(getParentModule());
         const char *environmentModule = par("environmentModule");
         environment = check_and_cast<PhysicalEnvironment *>(simulation.getModuleByPath(environmentModule));
+        leaveIntersectionTrail = par("leaveIntersectionTrail");
     }
 }
 
@@ -69,7 +70,7 @@ double ObstacleLoss::computeReflectionLoss(const Material *incidentMaterial, con
     double rp = pow((n1k - n2ct) / (n1k + n2ct), 2);
     double r = (rs + rp) / 2;
     double transmittance = 1 - r;
-    ASSERT(0 <= transmittance && transmittance <= 1);
+    ASSERT(isNaN(transmittance) || (0 <= transmittance && transmittance <= 1));
     return transmittance;
 }
 
@@ -85,6 +86,22 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
         Coord intersection1, intersection2, normal1, normal2;
         if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
         {
+#ifdef __CCANVAS_H
+            if (leaveIntersectionTrail) {
+                cLayer *layer = environment->getParentModule()->getCanvas()->getDefaultLayer();
+                if (intersectionTrail.size() > 100) {
+                    cFigure *front = intersectionTrail.front();
+                    intersectionTrail.pop_front();
+                    layer->removeChild(front);
+                    delete front;
+                }
+                cLineFigure *intersectionLine = new cLineFigure();
+                intersectionLine->setStart(cFigure::Point(intersection1.x + obstaclePosition.x, intersection1.y + obstaclePosition.y));
+                intersectionLine->setEnd(cFigure::Point(intersection2.x + obstaclePosition.x, intersection2.y + obstaclePosition.y));
+                intersectionTrail.push_back(intersectionLine);
+                layer->addChild(intersectionLine);
+            }
+#endif
             Coord direction = intersection2 - intersection1;
             const Material *material = object->getMaterial();
             totalLoss *= computeDielectricLoss(material, frequency, m(direction.length()));
