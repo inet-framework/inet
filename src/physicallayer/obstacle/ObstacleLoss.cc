@@ -70,7 +70,7 @@ double ObstacleLoss::computeReflectionLoss(const Material *incidentMaterial, con
     double rp = pow((n1k - n2ct) / (n1k + n2ct), 2);
     double r = (rs + rp) / 2;
     double transmittance = 1 - r;
-    ASSERT(isNaN(transmittance) || (0 <= transmittance && transmittance <= 1));
+    ASSERT(0 <= transmittance && transmittance <= 1);
     return transmittance;
 }
 
@@ -98,19 +98,34 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
                 cLineFigure *intersectionLine = new cLineFigure();
                 intersectionLine->setStart(cFigure::Point(intersection1.x + obstaclePosition.x, intersection1.y + obstaclePosition.y));
                 intersectionLine->setEnd(cFigure::Point(intersection2.x + obstaclePosition.x, intersection2.y + obstaclePosition.y));
+                intersectionLine->setLineColor(cFigure::GREY);
                 intersectionTrail.push_back(intersectionLine);
                 layer->addChild(intersectionLine);
+                cLineFigure *normal1Line = new cLineFigure();
+                normal1Line->setStart(cFigure::Point(intersection1.x + obstaclePosition.x, intersection1.y + obstaclePosition.y));
+                normal1Line->setEnd(cFigure::Point(intersection1.x + normal1.x + obstaclePosition.x, intersection1.y + normal1.y + obstaclePosition.y));
+                normal1Line->setLineColor(cFigure::RED);
+                intersectionTrail.push_back(normal1Line);
+                layer->addChild(normal1Line);
+                cLineFigure *normal2Line = new cLineFigure();
+                normal2Line->setStart(cFigure::Point(intersection2.x + obstaclePosition.x, intersection2.y + obstaclePosition.y));
+                normal2Line->setEnd(cFigure::Point(intersection2.x + normal2.x + obstaclePosition.x, intersection2.y + normal2.y + obstaclePosition.y));
+                normal2Line->setLineColor(cFigure::RED);
+                intersectionTrail.push_back(normal2Line);
+                layer->addChild(normal2Line);
             }
 #endif
-            Coord direction = intersection2 - intersection1;
             const Material *material = object->getMaterial();
-            totalLoss *= computeDielectricLoss(material, frequency, m(direction.length()));
-            double angle1 = direction.angle(normal1);
-            double angle2 = direction.angle(normal2);
-            if (!isNaN(angle1))
+            totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
+            if (!normal1.isUnspecified()) {
+                double angle1 = (intersection1 - intersection2).angle(normal1);
                 totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
-            if (!isNaN(angle2))
-                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
+            }
+            // TODO: this returns NaN because n1 > n2
+//            if (!normal2.isUnspecified()) {
+//                double angle2 = (intersection2 - intersection1).angle(normal2);
+//                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
+//            }
         }
     }
     return totalLoss;
