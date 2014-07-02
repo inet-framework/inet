@@ -19,6 +19,7 @@
 #include "Cuboid.h"
 #include "Sphere.h"
 #include "Material.h"
+#include "Quaternion.h"
 
 namespace inet {
 
@@ -56,6 +57,8 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
         viewAngle = par("viewAngle");
+        if (!viewAngle || !*viewAngle)
+            throw cRuntimeError("Invalid view angle");
         cXMLElement *environment = par("environment");
         parseShapes(environment);
         parseMaterials(environment);
@@ -181,11 +184,11 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (orientationAttribute) {
             cStringTokenizer tokenizer(orientationAttribute);
             if (tokenizer.hasMoreTokens())
-                orientation.alpha = atof(tokenizer.nextToken());
+                orientation.alpha = FWMath::deg2rad(atof(tokenizer.nextToken()));
             if (tokenizer.hasMoreTokens())
-                orientation.beta = atof(tokenizer.nextToken());
+                orientation.beta = FWMath::deg2rad(atof(tokenizer.nextToken()));
             if (tokenizer.hasMoreTokens())
-                orientation.gamma = atof(tokenizer.nextToken());
+                orientation.gamma = FWMath::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
         const Shape *shape;
@@ -254,16 +257,28 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
 }
 
 #ifdef __CCANVAS_H
-cFigure::Point PhysicalEnvironment::projectPoint(Coord point)
+cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point, char viewAngle)
 {
-    if (!strcmp(viewAngle, "x"))
-        return cFigure::Point(point.y, point.z);
-    else if (!strcmp(viewAngle, "y"))
-        return cFigure::Point(point.x, point.z);
-    else if (!strcmp(viewAngle, "z"))
-        return cFigure::Point(point.x, point.y);
+    switch (viewAngle)
+    {
+        case 'x':
+            return cFigure::Point(point.y, point.z);
+        case 'y':
+            return cFigure::Point(point.x, point.z);
+        case 'z':
+            return cFigure::Point(point.x, point.y);
+        default:
+            throw cRuntimeError("Unknown view angle");
+    }
+}
+
+cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
+{
+    PhysicalEnvironment *environment = dynamic_cast<PhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
+    if (environment)
+        return environment->computeCanvasPoint(point, *(environment->viewAngle));
     else
-        throw cRuntimeError("Unknown view angle");
+        return environment->computeCanvasPoint(point, 'x');
 }
 #endif // ifdef __CCANVAS_H
 
@@ -276,13 +291,16 @@ void PhysicalEnvironment::updateCanvas()
         PhysicalObject *object = *it;
         const Shape *shape = object->getShape();
         const Coord& position = object->getPosition();
+        const EulerAngles& orientation = object->getOrientation();
+        const Quaternion rotation(orientation);
+        // TODO: rotate points
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
             const Coord& size = cuboid->getSize();
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(projectPoint(position - size / 2));
-            figure->setP2(projectPoint(position + size / 2));
+            figure->setP1(computeCanvasPoint(position - size / 2));
+            figure->setP2(computeCanvasPoint(position + size / 2));
             figure->setFillColor(object->getColor());
             layer->addChild(figure);
             continue;
@@ -292,8 +310,8 @@ void PhysicalEnvironment::updateCanvas()
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(projectPoint(position - Coord(radius, radius, radius)));
-            figure->setP2(projectPoint(position + Coord(radius, radius, radius)));
+            figure->setP1(computeCanvasPoint(position - Coord(radius, radius, radius)));
+            figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius)));
             figure->setFillColor(object->getColor());
             layer->addChild(figure);
             continue;

@@ -25,7 +25,6 @@ namespace inet {
 /**
  * This class represents the physical environment specifying certain physical properties.
  */
-// TODO: add loading objects from XML file
 class INET_API PhysicalEnvironment : public cModule
 {
   protected:
@@ -44,8 +43,8 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void initialize(int stage);
 
 #ifdef __CCANVAS_H
-    virtual cFigure::Point projectPoint(Coord point);
-#endif // ifdef __CCANVAS_H
+    static cFigure::Point computeCanvasPoint(Coord point, char viewAngle);
+#endif // #ifdef __CCANVAS_H
 
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
@@ -56,12 +55,16 @@ class INET_API PhysicalEnvironment : public cModule
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
+#ifdef __CCANVAS_H
+    static cFigure::Point computeCanvasPoint(Coord point);
+#endif // #ifdef __CCANVAS_H
+
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }
     virtual percent getRelativeHumidity() const { return relativeHumidity; }
-    virtual const Coord getSpaceMin() { return spaceMin; }
-    virtual const Coord getSpaceMax() { return spaceMax; }
-    virtual const std::vector<PhysicalObject *>& getObjects() { return objects; }
+    virtual const Coord getSpaceMin() const { return spaceMin; }
+    virtual const Coord getSpaceMax() const { return spaceMax; }
+    virtual const std::vector<PhysicalObject *>& getObjects() const { return objects; }
 };
 
 } // namespace inet
