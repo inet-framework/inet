@@ -16,7 +16,11 @@
 //
 
 cplusplus {{
+
+namespace inet {
 const int BGP_HEADER_OCTETS = 19;
+} // namespace inet
+
 }}
 
 

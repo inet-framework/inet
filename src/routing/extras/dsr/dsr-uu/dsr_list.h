@@ -1,6 +1,11 @@
 #ifndef _DSR_LIST_H
 #define _DSR_LIST_H
 /* Simple linked list inspired by the Linux kernel list implementation */
+
+namespace inet {
+
+namespace inetmanet {
+
 typedef struct list
 {
     struct list *prev, *next;
@@ -91,5 +96,9 @@ static inline int list_detach(dsr_list_t * le)
 #define list_unattached(le) ((le)->next == NULL && (le)->prev == NULL)
 
 #define list_del(le) list_detach(le)
+
+} // namespace inetmanet
+
+} // namespace inet
 
 #endif              /* _LIST_H */

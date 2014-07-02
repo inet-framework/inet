@@ -19,7 +19,10 @@ cplusplus {{
 #include "BGPHeader_m.h"
 #include "IPv4Address.h"
 
+namespace inet {
 const int BGP_OPEN_OCTETS = 10;
+} // namespace inet
+
 }}
 
 
