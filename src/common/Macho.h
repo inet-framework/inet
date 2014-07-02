@@ -209,6 +209,8 @@
 #include <new>
 #include <cassert>
 
+namespace inet {
+
 class TestAccess;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,16 +218,16 @@ class TestAccess;
 
 // Use this macro to define your top state class.
 #define TOPSTATE(TOP) \
-    struct TOP : public::Macho::MachoLink < TOP, ::Macho::TopBase<TOP> >
+    struct TOP : public ::inet::Macho::MachoLink < TOP, ::inet::Macho::TopBase<TOP> >
 
 // Use this macro for all other state classes.
 #define SUBSTATE(STATE, SUPERSTATE) \
-    struct STATE : public::Macho::MachoLink < STATE, SUPERSTATE >
+    struct STATE : public ::inet::Macho::MachoLink < STATE, SUPERSTATE >
 
 // Use this macro for template states that receive an anchor as template
 // parameter.
 #define TSUBSTATE(STATE, SUPERSTATE) \
-    struct STATE : public::Macho::MAchoLink < STATE<typename SUPERSTATE::ANCHOR>, typename SUPERSTATE::SELF >
+    struct STATE : public ::inet::Macho::MAchoLink < STATE<typename SUPERSTATE::ANCHOR>, typename SUPERSTATE::SELF >
 
 // Use this macro in your class definition to give it state functionality
 // (mandatory). If you have a state box declare it BEFORE macro invocation!
@@ -235,12 +237,12 @@ class TestAccess;
     typedef S ANCHOR;    /* Anchor is the first non-template state in the inheritance chain */ \
     /* Constructor and destructor already defined: you can't (and shouldn't) have your own! */ \
     /* For the user a state class "constructor" and "destructor" are its entry and exit method! */ \
-    S(::Macho::_StateInstance & instance) : MLINK(instance) {} \
+    S(::inet::Macho::_StateInstance & instance) : MLINK(instance) {} \
     ~S() {} \
     static const char *_state_name() { return #S; } \
     /* Get to your Box with this method: */ \
     Box& box() { return *static_cast<Box *>(_box()); } \
-    friend class::_VS8_Bug_101615;
+    friend class ::inet::_VS8_Bug_101615;
 
 // Use this macro in your template class definition to give it state functionality
 // (mandatory). If you have a state box declare it BEFORE macro invocation!
@@ -669,7 +671,7 @@ class MachoLink : public P
     friend class Alias;
 
     // for Tests
-    friend class::TestAccess;
+    friend class ::inet::TestAccess;
 
     // Create StateInstance object of state.
     static _StateInstance& _getInstance(_MachineBase& machine);
@@ -1345,7 +1347,7 @@ class _Initializer1 : public _Initializer
 
     virtual void execute(_StateInstance& instance)
     {
-        ::_VS8_Bug_101615::execute<S, P1>(instance, myParam1);
+        ::inet::_VS8_Bug_101615::execute<S, P1>(instance, myParam1);
     }
 
     P1 myParam1;
@@ -1367,7 +1369,7 @@ class _Initializer2 : public _Initializer
 
     void execute(_StateInstance& instance)
     {
-        ::_VS8_Bug_101615::execute<S, P1, P2>(instance, myParam1, myParam2);
+        ::inet::_VS8_Bug_101615::execute<S, P1, P2>(instance, myParam1, myParam2);
     }
 
     P1 myParam1;
@@ -1391,7 +1393,7 @@ class _Initializer3 : public _Initializer
 
     void execute(_StateInstance& instance)
     {
-        ::_VS8_Bug_101615::execute<S, P1, P2, P3>(instance, myParam1, myParam2, myParam3);
+        ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3>(instance, myParam1, myParam2, myParam3);
     }
 
     P1 myParam1;
@@ -1417,7 +1419,7 @@ class _Initializer4 : public _Initializer
 
     void execute(_StateInstance& instance)
     {
-        ::_VS8_Bug_101615::execute<S, P1, P2, P3, P4>(instance, myParam1, myParam2, myParam3, myParam4);
+        ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3, P4>(instance, myParam1, myParam2, myParam3, myParam4);
     }
 
     P1 myParam1;
@@ -1445,7 +1447,7 @@ class _Initializer5 : public _Initializer
 
     void execute(_StateInstance& instance)
     {
-        ::_VS8_Bug_101615::execute<S, P1, P2, P3, P4, P5>(instance, myParam1, myParam2, myParam3, myParam4, myParam5);
+        ::inet::_VS8_Bug_101615::execute<S, P1, P2, P3, P4, P5>(instance, myParam1, myParam2, myParam3, myParam4, myParam5);
     }
 
     P1 myParam1;
@@ -1592,7 +1594,7 @@ class _MachineBase
     friend class _StateInstance;
 
     // for Tests
-    friend class::TestAccess;
+    friend class ::inet::TestAccess;
 
     // Current state of Machine object.
     _StateInstance *myCurrentState;
@@ -2165,6 +2167,8 @@ Snapshot<TOP>::Snapshot(Machine<TOP>& machine)
 #endif // ifdef MACHO_SNAPSHOTS
 
 } // namespace Macho
+
+} // namespace inet
 
 #endif    // __MACHO_HPP__
 

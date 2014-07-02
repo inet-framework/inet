@@ -14,6 +14,9 @@
 // See Macho.hpp for more information.
 
 #include "Macho.h"
+
+namespace inet {
+
 using namespace Macho;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -423,4 +426,6 @@ Key _AdaptingInitializer::adapt(Key key)
 // Singleton initializers.
 _DefaultInitializer _theDefaultInitializer;
 _HistoryInitializer _theHistoryInitializer;
+
+} // namespace inet
 
