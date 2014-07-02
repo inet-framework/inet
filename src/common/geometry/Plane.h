@@ -27,15 +27,24 @@ namespace inet {
  */
 class INET_API Plane
 {
+  public:
+    static const Plane NIL;
+
   protected:
     Coord basePoint;
     Coord normalVector;
 
   public:
+    Plane();
     Plane(const Coord& basePoint, const Coord& normalVector);
 
     const Coord& getBasePoint() { return basePoint; }
+    void setBasePoint(const Coord& basePoint) { this->basePoint = basePoint; }
     const Coord& getNormalVector() { return normalVector; }
+    void setNormalVector(const Coord& normalVector) { this->normalVector = normalVector; }
+
+    bool isNil() const { return this == &NIL; }
+    bool isUnspecified() const { return basePoint.isUnspecified() && normalVector.isUnspecified(); }
     Coord computeIntersection(const LineSegment& lineSegment);
 };
 

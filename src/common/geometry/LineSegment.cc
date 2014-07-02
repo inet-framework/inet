@@ -19,7 +19,7 @@
 
 namespace inet {
 
-const LineSegment LineSegment::NIL(Coord(0, 0, 0), Coord(0, 0, 0));
+const LineSegment LineSegment::NIL(Coord::NIL, Coord::NIL);
 
 LineSegment::LineSegment() :
     point1(Coord::NIL),

@@ -39,9 +39,9 @@ class INET_API LineSegment
     LineSegment(const Coord& point1, const Coord& point2);
 
     const Coord& getPoint1() const { return point1; }
-    void setPoint1(const Coord& point) { point1 = point; }
+    void setPoint1(const Coord& point1) { this->point1 = point1; }
     const Coord& getPoint2() const { return point2; }
-    void setPoint2(const Coord& point) { point2 = point; }
+    void setPoint2(const Coord& point2) { this->point2 = point2; }
 
     bool isNil() const { return this == &NIL; }
     bool isUnspecified() const { return point1.isUnspecified() && point2.isUnspecified(); }

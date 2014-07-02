@@ -27,43 +27,98 @@ Cuboid::Cuboid(const Coord& size) :
 
 bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
-    int i = 0;
-    Coord points[2];
-    Coord min = size / -2;
-    Coord max = size / 2;
+    Coord minPoint = size / -2;
+    Coord maxPoint = size / 2;
+    intersection1 = intersection2 = normal1 = normal2 = Coord::NIL;
     const Coord& point1 = lineSegment.getPoint1();
     const Coord& point2 = lineSegment.getPoint2();
-    if (isInsideX(point1) && isInsideY(point1) && isInsideZ(point1))
-        points[i++ % 2] = point1;
-    if (isInsideX(point2) && isInsideY(point2) && isInsideZ(point2))
-        points[i++ % 2] = point2;
-    Coord xMin = Plane(min, Coord(1, 0, 0)).computeIntersection(lineSegment);
-    if (!xMin.isUnspecified() && isInsideY(xMin) && isInsideZ(xMin))
-        points[i++ % 2] = xMin;
-    Coord xMax = Plane(max, Coord(-1, 0, 0)).computeIntersection(lineSegment);
-    if (!xMax.isUnspecified() && isInsideY(xMax) && isInsideZ(xMax))
-        points[i++ % 2] = xMax;
-    Coord yMin = Plane(min, Coord(0, 1, 0)).computeIntersection(lineSegment);
-    if (!yMin.isUnspecified() && isInsideX(yMin) && isInsideZ(yMin))
-        points[i++ % 2] = yMin;
-    Coord yMax = Plane(max, Coord(0, -1, 0)).computeIntersection(lineSegment);
-    if (!yMax.isUnspecified() && isInsideX(yMax) && isInsideZ(yMax))
-        points[i++ % 2] = yMax;
-    Coord zMin = Plane(min, Coord(0, 0, 1)).computeIntersection(lineSegment);
-    if (!zMin.isUnspecified() && isInsideX(zMin) && isInsideY(zMin))
-        points[i++ % 2] = zMin;
-    Coord zMax = Plane(max, Coord(0, 0, -1)).computeIntersection(lineSegment);
-    if (!zMax.isUnspecified() && isInsideX(zMax) && isInsideY(zMax))
-        points[i++ % 2] = zMax;
-    // TODO: what about the degenerate cases when there are more than two points?
-    if (i < 2)
-        return false;
-    else {
-        // TODO: face normal vectors
-        intersection1 = points[0];
-        intersection2 = points[1];
+    bool isInside1 = isInsideX(point1) && isInsideY(point1) && isInsideZ(point1);
+    bool isInside2 = isInsideX(point2) && isInsideY(point2) && isInsideZ(point2);
+    if (isInside1)
+        intersection1 = point1;
+    if (isInside2)
+        intersection2 = point2;
+    if (isInside1 && isInside2)
         return true;
+    // x min
+    Coord xMinNormal(-1, 0, 0);
+    Coord xMinIntersecion = Plane(minPoint, xMinNormal).computeIntersection(lineSegment);
+    if (!xMinIntersecion.isNil() && isInsideY(xMinIntersecion) && isInsideZ(xMinIntersecion)) {
+        if (point1.x < minPoint.x) {
+            intersection1 = xMinIntersecion;
+            normal1 = xMinNormal;
+        }
+        else {
+            intersection2 = xMinIntersecion;
+            normal2 = xMinNormal;
+        }
     }
+    // x max
+    Coord xMaxNormal(1, 0, 0);
+    Coord xMaxIntersection = Plane(maxPoint, xMaxNormal).computeIntersection(lineSegment);
+    if (!xMaxIntersection.isNil() && isInsideY(xMaxIntersection) && isInsideZ(xMaxIntersection)) {
+        if (point1.x > maxPoint.x) {
+            intersection1 = xMaxIntersection;
+            normal1 = xMaxNormal;
+        }
+        else {
+            intersection2 = xMaxIntersection;
+            normal2 = xMaxNormal;
+        }
+    }
+    // y min
+    Coord yMinNormal(0, -1, 0);
+    Coord yMinIntersection = Plane(minPoint, yMinNormal).computeIntersection(lineSegment);
+    if (!yMinIntersection.isNil() && isInsideX(yMinIntersection) && isInsideZ(yMinIntersection)) {
+        if (point1.y < minPoint.y) {
+            intersection1 = yMinIntersection;
+            normal1 = yMinNormal;
+        }
+        else {
+            intersection2 = yMinIntersection;
+            normal2 = yMinNormal;
+        }
+    }
+    // y max
+    Coord yMaxNormal(0, 1, 0);
+    Coord yMaxIntersection = Plane(maxPoint, yMaxNormal).computeIntersection(lineSegment);
+    if (!yMaxIntersection.isNil() && isInsideX(yMaxIntersection) && isInsideZ(yMaxIntersection)) {
+        if (point1.y > maxPoint.y) {
+            intersection1 = yMaxIntersection;
+            normal1 = yMaxNormal;
+        }
+        else {
+            intersection2 = yMaxIntersection;
+            normal2 = yMaxNormal;
+        }
+    }
+    // z min
+    Coord zMinNormal(0, 0, -1);
+    Coord zMinIntersection = Plane(minPoint, zMinNormal).computeIntersection(lineSegment);
+    if (!zMinIntersection.isNil() && isInsideX(zMinIntersection) && isInsideY(zMinIntersection)) {
+        if (point1.z < minPoint.z) {
+            intersection1 = zMinIntersection;
+            normal1 = zMinNormal;
+        }
+        else {
+            intersection2 = zMinIntersection;
+            normal2 = zMinNormal;
+        }
+    }
+    // z max
+    Coord zMaxNormal(0, 0, 1);
+    Coord zMaxIntersection = Plane(maxPoint, zMaxNormal).computeIntersection(lineSegment);
+    if (!zMaxIntersection.isNil() && isInsideX(zMaxIntersection) && isInsideY(zMaxIntersection)) {
+        if (point1.z > maxPoint.z) {
+            intersection1 = zMaxIntersection;
+            normal1 = zMaxNormal;
+        }
+        else {
+            intersection2 = zMaxIntersection;
+            normal2 = zMaxNormal;
+        }
+    }
+    return !intersection1.isUnspecified() && !intersection2.isUnspecified();
 }
 
 } // namespace inet
