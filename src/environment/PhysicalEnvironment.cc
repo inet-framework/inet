@@ -253,6 +253,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     }
 }
 
+#ifdef __CCANVAS_H
 cFigure::Point PhysicalEnvironment::projectPoint(Coord point)
 {
     if (!strcmp(viewAngle, "x"))
@@ -264,6 +265,7 @@ cFigure::Point PhysicalEnvironment::projectPoint(Coord point)
     else
         throw cRuntimeError("Unknown view angle");
 }
+#endif // ifdef __CCANVAS_H
 
 void PhysicalEnvironment::updateCanvas()
 {
