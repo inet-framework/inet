@@ -19,7 +19,6 @@
 #define __INET_RADIOMEDIUM_H
 
 #include <vector>
-#include <deque>
 #include <algorithm>
 #include <fstream>
 #include "IRadioMedium.h"
@@ -28,6 +27,7 @@
 #include "IAttenuation.h"
 #include "IBackgroundNoise.h"
 #include "MACAddress.h"
+#include "TrailLayer.h"
 
 namespace inet {
 
@@ -263,13 +263,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The output file where communication log is written to.
      */
     std::ofstream communicationLog;
-#ifdef __CCANVAS_H
     /**
      * The list of trail figures representing successful communication.
      */
-    std::deque<cFigure *> communicationTrail;
-#endif // ifdef __CCANVAS_H
-       //@}
+    TrailLayer *communcationTrail;
+    //@}
 
     /** @name Statistics */
     //@{

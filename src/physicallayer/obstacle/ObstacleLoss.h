@@ -18,26 +18,22 @@
 #ifndef __INET_OBSTACLELOSS_H
 #define __INET_OBSTACLELOSS_H
 
-#include <deque>
 #include "IObstacleLoss.h"
 #include "PhysicalEnvironment.h"
+#include "TrailLayer.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-// TODO: add reflection from walls
 // TODO: allow dB attenuation per meter/per wall
-// TODO: fix problem when one end is in the obstacle
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
   protected:
     IRadioMedium *medium;
     PhysicalEnvironment *environment;
     bool leaveIntersectionTrail;
-#ifdef __CCANVAS_H
-    mutable std::deque<cFigure *> intersectionTrail;
-#endif // ifdef __CCANVAS_H
+    TrailLayer *intersectionTrail;
 
   protected:
     virtual void initialize(int stage);

@@ -22,7 +22,6 @@
 #ifndef __INET_MOBILITYBASE_H
 #define __INET_MOBILITYBASE_H
 
-#include <deque>
 #include "INETDefs.h"
 #include "ModuleAccess.h"
 #include "Coord.h"

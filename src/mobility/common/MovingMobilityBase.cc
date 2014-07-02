@@ -21,6 +21,7 @@
  **************************************************************************/
 
 #include "MovingMobilityBase.h"
+#include "PhysicalEnvironment.h"
 
 namespace inet {
 
@@ -31,7 +32,8 @@ MovingMobilityBase::MovingMobilityBase() :
     lastSpeed(Coord::ZERO),
     lastUpdate(0),
     nextChange(-1),
-    leaveMovementTrail(false)
+    leaveMovementTrail(false),
+    movementTrail(NULL)
 {
 }
 
@@ -48,6 +50,12 @@ void MovingMobilityBase::initialize(int stage)
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
         leaveMovementTrail = par("leaveMovementTrail");
+#ifdef __CCANVAS_H
+        if (leaveMovementTrail) {
+            movementTrail = new TrailLayer(100, "movement trail");
+            visualRepresentation->getParentModule()->getCanvas()->addToplevelLayer(movementTrail);
+        }
+#endif
     }
 }
 
@@ -74,29 +82,21 @@ void MovingMobilityBase::updateVisualRepresentation()
     MobilityBase::updateVisualRepresentation();
     if (leaveMovementTrail && visualRepresentation && ev.isGUI()) {
 #ifdef __CCANVAS_H
-        cLayer *layer = visualRepresentation->getParentModule()->getCanvas()->getDefaultLayer();
-        if (movementTrail.size() > 100) {
-            cFigure *front = movementTrail.front();
-            movementTrail.pop_front();
-            int index = layer->findChild(front);
-            if (index != -1)
-                layer->removeChild(index);
-            delete front;
-        }
         Coord endPosition = lastPosition;
         Coord startPosition;
-        if (movementTrail.size() > 0) {
-            cFigure::Point previousEnd = static_cast<cLineFigure *>(movementTrail.back())->getEnd();
+        if (movementTrail->getNumChildren() == 0)
+            startPosition = endPosition;
+        else {
+            cFigure::Point previousEnd = static_cast<cLineFigure *>(movementTrail->getChild(movementTrail->getNumChildren() - 1))->getEnd();
             startPosition.x = previousEnd.x;
             startPosition.y = previousEnd.y;
         }
-        if (startPosition.distance(endPosition) > 10) {
+        if (movementTrail->getNumChildren() == 0 || startPosition.distance(endPosition) > 10) {
             cLineFigure *movementLine = new cLineFigure();
-            movementLine->setStart(cFigure::Point(startPosition.x, startPosition.y));
-            movementLine->setEnd(cFigure::Point(endPosition.x, endPosition.y));
-            movementTrail.push_back(movementLine);
-            if (movementTrail.size() > 1)
-                layer->addChild(movementLine);
+            movementLine->setStart(PhysicalEnvironment::computeCanvasPoint(startPosition));
+            movementLine->setEnd(PhysicalEnvironment::computeCanvasPoint(endPosition));
+            movementLine->setLineColor(cFigure::BLACK);
+            movementTrail->addChild(movementLine);
         }
 #endif
     }

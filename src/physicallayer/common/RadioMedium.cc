@@ -22,6 +22,7 @@
 #include "NotifierConsts.h"
 #include "ModuleAccess.h"
 #include "IInterfaceTable.h"
+#include "PhysicalEnvironment.h"
 
 namespace inet {
 
@@ -53,6 +54,7 @@ RadioMedium::RadioMedium() :
     baseRadioId(0),
     baseTransmissionId(0),
     neighborCache(NULL),
+    communcationTrail(NULL),
     transmissionCount(0),
     sendCount(0),
     receptionComputationCount(0),
@@ -119,6 +121,10 @@ void RadioMedium::initialize(int stage)
         if (recordCommunicationLog)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
         leaveCommunicationTrail = par("leaveCommunicationTrail");
+        if (leaveCommunicationTrail) {
+            communcationTrail = new TrailLayer(100, "communication trail");
+            getParentModule()->getCanvas()->addToplevelLayer(communcationTrail);
+        }
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         updateLimits();
@@ -719,22 +725,12 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     delete listening;
 #ifdef __CCANVAS_H
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
-        cLayer *layer = getParentModule()->getCanvas()->getDefaultLayer();
-        if (communicationTrail.size() > 100) {
-            cFigure *front = communicationTrail.front();
-            communicationTrail.pop_front();
-            layer->removeChild(front);
-            delete front;
-        }
         cLineFigure *communicationLine = new cLineFigure();
-        Coord transmissionStartPosition = transmission->getStartPosition();
-        Coord receptionStartPosition = decision->getReception()->getStartPosition();
-        communicationLine->setStart(cFigure::Point(transmissionStartPosition.x, transmissionStartPosition.y));
-        communicationLine->setEnd(cFigure::Point(receptionStartPosition.x, receptionStartPosition.y));
+        communicationLine->setStart(PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition()));
+        communicationLine->setEnd(PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition()));
         communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
-        communicationTrail.push_back(communicationLine);
-        layer->addChild(communicationLine);
+        communcationTrail->addChild(communicationLine);
     }
 #endif // ifdef __CCANVAS_H
     return macFrame;

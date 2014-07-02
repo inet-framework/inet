@@ -23,8 +23,8 @@
 #define __INET_MOVINGMOBILITYBASE_H
 
 #include "INETDefs.h"
-
 #include "MobilityBase.h"
+#include "TrailLayer.h"
 
 namespace inet {
 
@@ -64,12 +64,8 @@ class INET_API MovingMobilityBase : public MobilityBase
     /** @brief Draw the path on the canvas. */
     bool leaveMovementTrail;
 
-#ifdef __CCANVAS_H
-    /**
-     * The list of trail figures representing the movement.
-     */
-    std::deque<cFigure *> movementTrail;
-#endif // ifdef __CCANVAS_H
+    /** @brief The list of trail figures representing the movement. */
+    TrailLayer *movementTrail;
 
   protected:
     MovingMobilityBase();

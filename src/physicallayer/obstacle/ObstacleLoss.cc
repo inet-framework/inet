@@ -26,7 +26,10 @@ namespace physicallayer {
 Define_Module(ObstacleLoss);
 
 ObstacleLoss::ObstacleLoss() :
-    environment(NULL)
+    medium(NULL),
+    environment(NULL),
+    leaveIntersectionTrail(false),
+    intersectionTrail(NULL)
 {
 }
 
@@ -37,6 +40,12 @@ void ObstacleLoss::initialize(int stage)
         const char *environmentModule = par("environmentModule");
         environment = check_and_cast<PhysicalEnvironment *>(simulation.getModuleByPath(environmentModule));
         leaveIntersectionTrail = par("leaveIntersectionTrail");
+#ifdef __CCANVAS_H
+        if (leaveIntersectionTrail) {
+            intersectionTrail = new TrailLayer(100, "obstacle intersection trail");
+            simulation.getSystemModule()->getCanvas()->addToplevelLayer(intersectionTrail);
+        }
+#endif
     }
 }
 
@@ -88,31 +97,21 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
         {
 #ifdef __CCANVAS_H
             if (leaveIntersectionTrail) {
-                cLayer *layer = environment->getParentModule()->getCanvas()->getDefaultLayer();
-                if (intersectionTrail.size() > 100) {
-                    cFigure *front = intersectionTrail.front();
-                    intersectionTrail.pop_front();
-                    layer->removeChild(front);
-                    delete front;
-                }
                 cLineFigure *intersectionLine = new cLineFigure();
-                intersectionLine->setStart(cFigure::Point(intersection1.x + obstaclePosition.x, intersection1.y + obstaclePosition.y));
-                intersectionLine->setEnd(cFigure::Point(intersection2.x + obstaclePosition.x, intersection2.y + obstaclePosition.y));
+                intersectionLine->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
+                intersectionLine->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition));
                 intersectionLine->setLineColor(cFigure::GREY);
-                intersectionTrail.push_back(intersectionLine);
-                layer->addChild(intersectionLine);
+                intersectionTrail->addChild(intersectionLine);
                 cLineFigure *normal1Line = new cLineFigure();
-                normal1Line->setStart(cFigure::Point(intersection1.x + obstaclePosition.x, intersection1.y + obstaclePosition.y));
-                normal1Line->setEnd(cFigure::Point(intersection1.x + normal1.x + obstaclePosition.x, intersection1.y + normal1.y + obstaclePosition.y));
+                normal1Line->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
+                normal1Line->setEnd(environment->computeCanvasPoint(intersection1 + obstaclePosition + normal1));
                 normal1Line->setLineColor(cFigure::RED);
-                intersectionTrail.push_back(normal1Line);
-                layer->addChild(normal1Line);
+                intersectionTrail->addChild(normal1Line);
                 cLineFigure *normal2Line = new cLineFigure();
-                normal2Line->setStart(cFigure::Point(intersection2.x + obstaclePosition.x, intersection2.y + obstaclePosition.y));
-                normal2Line->setEnd(cFigure::Point(intersection2.x + normal2.x + obstaclePosition.x, intersection2.y + normal2.y + obstaclePosition.y));
+                normal2Line->setStart(environment->computeCanvasPoint(intersection2 + obstaclePosition));
+                normal2Line->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition + normal2));
                 normal2Line->setLineColor(cFigure::RED);
-                intersectionTrail.push_back(normal2Line);
-                layer->addChild(normal2Line);
+                intersectionTrail->addChild(normal2Line);
             }
 #endif
             const Material *material = object->getMaterial();
