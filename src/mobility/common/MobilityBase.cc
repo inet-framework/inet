@@ -52,7 +52,7 @@ MobilityBase::MobilityBase() :
     constraintAreaMin(Coord::ZERO),
     constraintAreaMax(Coord::ZERO),
     lastPosition(Coord::ZERO),
-    lastOrientation(EulerAngles::IDENTITY)
+    lastOrientation(EulerAngles::ZERO)
 {
 }
 

@@ -156,10 +156,10 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
   public:
     virtual double getMaxSpeed() { return NaN; }
 
-    virtual EulerAngles getCurrentAngularPosition() { return EulerAngles::IDENTITY; }
+    virtual EulerAngles getCurrentAngularPosition() { return EulerAngles::ZERO; }
 
     /** @brief Returns the current angular speed at the current simulation time. */
-    virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::IDENTITY; }
+    virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::ZERO; }
 };
 
 } // namespace inet

@@ -19,7 +19,7 @@ namespace inet {
 
 LinearRotatingMobilityBase::LinearRotatingMobilityBase()
 {
-    targetOrientation = EulerAngles::IDENTITY;
+    targetOrientation = EulerAngles::ZERO;
 }
 
 void LinearRotatingMobilityBase::initializeOrientation()

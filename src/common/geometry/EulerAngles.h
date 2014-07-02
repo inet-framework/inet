@@ -9,7 +9,8 @@ class EulerAngles
 {
   public:
     // Constant with all values set to 0
-    static const EulerAngles IDENTITY;
+    static const EulerAngles ZERO;
+    static const EulerAngles NIL;
 
   public:
     // alpha, beta and gamma angle of the orientation
@@ -26,6 +27,16 @@ class EulerAngles
 
     EulerAngles(double alpha, double beta = 0.0, double gamma = 0.0)
         : alpha(alpha), beta(beta), gamma(gamma) {}
+
+    bool isNil() const
+    {
+        return this == &NIL;
+    }
+
+    bool isUnspecified() const
+    {
+        return isNaN(alpha) && isNaN(beta) && isNaN(gamma);
+    }
 
     EulerAngles operator+(const EulerAngles a) const { return EulerAngles(alpha + a.alpha, beta + a.beta, gamma + a.gamma); }
 
