@@ -280,10 +280,14 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *materialAttribute = element->getAttribute("material");
         if (!materialAttribute)
             throw cRuntimeError("Missing material attribute of object");
+        else if (!strcmp(materialAttribute, "wood"))
+            material = &Material::wood;
         else if (!strcmp(materialAttribute, "brick"))
             material = &Material::brick;
         else if (!strcmp(materialAttribute, "concrete"))
             material = &Material::concrete;
+        else if (!strcmp(materialAttribute, "glass"))
+            material = &Material::glass;
         else {
             int id = atoi(materialAttribute);
             material = materials[id];

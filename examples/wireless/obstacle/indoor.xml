@@ -1,2 +1,8 @@
 <environment>
+    <!-- Walls -->
+    <object position="min 100 100 0" orientation="0 0 0" shape="cuboid 10 0.5 2" material="brick" fill-color="203 65 84"/>
+    <object position="min 100 109.5 0" orientation="0 0 0" shape="cuboid 10 0.5 2" material="brick" fill-color="203 65 84"/>
+    <object position="min 100 100 0" orientation="0 0 0" shape="cuboid 0.5 10 2" material="brick" fill-color="203 65 84"/>
+    <object position="min 109.5 100 0" orientation="0 0 0" shape="cuboid 0.5 10 2" material="brick" fill-color="203 65 84"/>
+    <!-- Doors -->
 </environment>
