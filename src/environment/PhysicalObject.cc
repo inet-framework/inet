@@ -21,7 +21,8 @@ namespace inet {
 
 PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
 #ifdef __CCANVAS_H
-        , const cFigure::Color& color
+        , const cFigure::Color& lineColor
+        , const cFigure::Color& fillColor
 #endif // ifdef __CCANVAS_H
         ) :
     id(id),
@@ -30,7 +31,8 @@ PhysicalObject::PhysicalObject(int id, const Coord& position, const EulerAngles&
     shape(shape),
     material(material)
 #ifdef __CCANVAS_H
-    , color(color)
+    , lineColor(lineColor)
+    , fillColor(fillColor)
 #endif // ifdef __CCANVAS_H
 {
 }

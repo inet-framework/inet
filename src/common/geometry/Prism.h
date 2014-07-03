@@ -36,6 +36,7 @@ class INET_API Prism : public Shape
   public:
     Prism();
 
+    virtual Coord computeSize() const { throw cRuntimeError("Unimplemented"); }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 

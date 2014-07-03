@@ -166,18 +166,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
-        // position
-        Coord position;
-        const char *positionAttribute = element->getAttribute("position");
-        if (positionAttribute) {
-            cStringTokenizer tokenizer(positionAttribute);
-            if (tokenizer.hasMoreTokens())
-                position.x = atof(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                position.y = atof(tokenizer.nextToken());
-            if (tokenizer.hasMoreTokens())
-                position.z = atof(tokenizer.nextToken());
-        }
         // orientation
         EulerAngles orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
@@ -219,6 +207,29 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         if (!shape)
             throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
+        // position
+        Coord position = Coord::NIL;
+        const char *positionAttribute = element->getAttribute("position");
+        if (positionAttribute) {
+            cStringTokenizer tokenizer(positionAttribute);
+            const char *kind = tokenizer.nextToken();
+            if (!kind)
+                throw cRuntimeError("Missing position kind");
+            else if (!strcmp(kind, "min"))
+                position = shape->computeSize() / 2;
+            else if (!strcmp(kind, "max"))
+                position = shape->computeSize() / -2;
+            else if (!strcmp(kind, "center"))
+                position = Coord::ZERO;
+            else
+                throw cRuntimeError("Unknown position kind");
+            if (tokenizer.hasMoreTokens())
+                position.x += atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                position.y += atof(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                position.z += atof(tokenizer.nextToken());
+        }
         // material
         const Material *material;
         const char *materialAttribute = element->getAttribute("material");
@@ -236,19 +247,32 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
         // color
 #ifdef __CCANVAS_H
-        cFigure::Color color;
-        const char *colorAttribute = element->getAttribute("color");
-        if (colorAttribute) {
-            cStringTokenizer tokenizer(colorAttribute);
+        // line color
+        cFigure::Color lineColor;
+        const char *lineColorAttribute = element->getAttribute("line-color");
+        if (lineColorAttribute) {
+            cStringTokenizer tokenizer(lineColorAttribute);
             if (tokenizer.hasMoreTokens())
-                color.red = atoi(tokenizer.nextToken());
+                lineColor.red = atoi(tokenizer.nextToken());
             if (tokenizer.hasMoreTokens())
-                color.green = atoi(tokenizer.nextToken());
+                lineColor.green = atoi(tokenizer.nextToken());
             if (tokenizer.hasMoreTokens())
-                color.blue = atoi(tokenizer.nextToken());
+                lineColor.blue = atoi(tokenizer.nextToken());
+        }
+        // fill color
+        cFigure::Color fillColor;
+        const char *fillColorAttribute = element->getAttribute("fill-color");
+        if (fillColorAttribute) {
+            cStringTokenizer tokenizer(fillColorAttribute);
+            if (tokenizer.hasMoreTokens())
+                fillColor.red = atoi(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                fillColor.green = atoi(tokenizer.nextToken());
+            if (tokenizer.hasMoreTokens())
+                fillColor.blue = atoi(tokenizer.nextToken());
         }
         // insert
-        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, color);
+        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, lineColor, fillColor);
 #else // ifdef __CCANVAS_H
         PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material);
 #endif // ifdef __CCANVAS_H
@@ -301,7 +325,8 @@ void PhysicalEnvironment::updateCanvas()
             figure->setFilled(true);
             figure->setP1(computeCanvasPoint(position - size / 2));
             figure->setP2(computeCanvasPoint(position + size / 2));
-            figure->setFillColor(object->getColor());
+            figure->setLineColor(object->getLineColor());
+            figure->setFillColor(object->getFillColor());
             layer->addChild(figure);
             continue;
         }
@@ -312,7 +337,8 @@ void PhysicalEnvironment::updateCanvas()
             figure->setFilled(true);
             figure->setP1(computeCanvasPoint(position - Coord(radius, radius, radius)));
             figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius)));
-            figure->setFillColor(object->getColor());
+            figure->setLineColor(object->getLineColor());
+            figure->setFillColor(object->getFillColor());
             layer->addChild(figure);
             continue;
         }
