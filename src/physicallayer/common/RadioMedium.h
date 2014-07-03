@@ -80,6 +80,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          * The radio frame that was created by the transmitter is never NULL.
          */
         const IRadioFrame *frame;
+
+#ifdef __CCANVAS_H
+        /**
+         * The figure representing this transmission.
+         */
+        cOvalFigure *figure;
+#endif // ifdef __CCANVAS_H
+
         /**
          * The list of intermediate reception computation results.
          */
@@ -88,6 +96,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
       public:
         TransmissionCacheEntry() :
             frame(NULL),
+
+#ifdef __CCANVAS_H
+            figure(NULL),
+#endif // ifdef __CCANVAS_H
+
             receptionCacheEntries(NULL)
         {}
     };
@@ -206,6 +219,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     bool recordCommunicationLog;
     /**
+     * Displays ongoing communications on the canvas.
+     */
+    bool displayCommunication;
+    /**
      * Leaves graphical trail of successful communication between radios.
      */
     bool leaveCommunicationTrail;
@@ -263,8 +280,19 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * The output file where communication log is written to.
      */
     std::ofstream communicationLog;
+    //@}
+
+    /** @name Graphics     */
+    //@{
+#ifdef __CCANVAS_H
     /**
-     * The list of trail figures representing successful communication.
+     * The list figures representing ongoing communications.
+     */
+    cLayer *communicationLayer;
+#endif
+
+    /**
+     * The list of trail figures representing successful communications.
      */
     TrailLayer *communcationTrail;
     //@}
@@ -409,6 +437,11 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * transmission by the receiver.
      */
     virtual const IReceptionDecision *receiveFromMedium(const IRadio *radio, const IListening *listening, const ITransmission *transmission) const;
+    //@}
+
+    /** @name Graphics */
+    //@{
+    virtual void updateCanvas();
     //@}
 
   public:

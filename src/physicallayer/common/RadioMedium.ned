@@ -56,6 +56,9 @@ module RadioMedium like IRadioMedium
 
         // logging parameters
         bool recordCommunicationLog = default(false);
+
+        // graphics parameters
+        bool displayCommunication = default(false);
         bool leaveCommunicationTrail = default(false);
 
         @class(RadioMedium);
