@@ -24,7 +24,7 @@
 
 #include "INETDefs.h"
 #include "MobilityBase.h"
-#include "TrailLayer.h"
+#include "TrailFigure.h"
 
 namespace inet {
 
@@ -65,7 +65,7 @@ class INET_API MovingMobilityBase : public MobilityBase
     bool leaveMovementTrail;
 
     /** @brief The list of trail figures representing the movement. */
-    TrailLayer *movementTrail;
+    TrailFigure *movementTrail;
 
   protected:
     MovingMobilityBase();

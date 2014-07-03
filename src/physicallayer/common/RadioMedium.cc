@@ -129,16 +129,17 @@ void RadioMedium::initialize(int stage)
         // initialize graphics
         displayCommunication = par("displayCommunication");
 #ifdef __CCANVAS_H
+        cCanvas *canvas = getParentModule()->getCanvas();
         if (displayCommunication) {
-            communicationLayer = new cLayer("communication");
-            getParentModule()->getCanvas()->addToplevelLayer(communicationLayer);
+            communicationLayer = new cGroupFigure("communication");
+            canvas->addFigure(communicationLayer, canvas->findFigure("submodules"));
         }
 #endif
         leaveCommunicationTrail = par("leaveCommunicationTrail");
 #ifdef __CCANVAS_H
         if (leaveCommunicationTrail) {
-            communcationTrail = new TrailLayer(100, "communication trail");
-            getParentModule()->getCanvas()->addToplevelLayer(communcationTrail);
+            communcationTrail = new TrailFigure(100, "communication trail");
+            canvas->addFigure(communcationTrail, canvas->findFigure("submodules"));
         }
 #endif
     }
@@ -523,7 +524,7 @@ void RadioMedium::removeNonInterferingTransmissions()
 
 #ifdef __CCANVAS_H
             if (displayCommunication && transmissionCacheEntry.figure)
-                delete communicationLayer->removeChild(transmissionCacheEntry.figure);
+                delete communicationLayer->removeChildFigure(transmissionCacheEntry.figure);
 #endif
 
         }
@@ -732,11 +733,15 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         cOvalFigure *communicationFigure = new cOvalFigure();
         communicationFigure->setP1(position);
         communicationFigure->setP2(position);
-        communicationFigure->setFilled(true);
+        communicationFigure->setFilled(false);
         communicationFigure->setLineWidth(0);
-        communicationFigure->setFillColor(cFigure::CYAN);
-        communicationLayer->addChild(communicationFigure);
+        communicationFigure->setLineColor(cFigure::CYAN);
+        communicationLayer->addChildFigure(communicationFigure);
         transmissionCacheEntry->figure = communicationFigure;
+        cTextFigure *nameFigure = new cTextFigure();
+        nameFigure->setPos(cFigure::Point(0, 0));
+        nameFigure->setText(macFrame->getName());
+        communicationFigure->addChildFigure(nameFigure);
         updateCanvas();
     }
 #endif // ifdef __CCANVAS_H
@@ -769,7 +774,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         communicationLine->setEnd(PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition()));
         communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
-        communcationTrail->addChild(communicationLine);
+        communcationTrail->addChildFigure(communicationLine);
     }
     if (displayCommunication)
         updateCanvas();
@@ -878,9 +883,13 @@ void RadioMedium::updateCanvas()
         cOvalFigure *figure = transmissionCacheEntry->figure;
         if (figure) {
             const Coord transmissionStart = transmission->getStartPosition();
-            double radius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
+            double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
+            double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
+            if (endRadius < 0) endRadius = 0;
+            double radius = (startRadius + endRadius) / 2;
             figure->setP1(PhysicalEnvironment::computeCanvasPoint(transmissionStart - Coord(radius, radius, radius)));
             figure->setP2(PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(radius, radius, radius)));
+            figure->setLineWidth(startRadius - endRadius);
         }
     }
 #endif // ifdef __CCANVAS_H

@@ -20,7 +20,7 @@
 
 #include "IObstacleLoss.h"
 #include "PhysicalEnvironment.h"
-#include "TrailLayer.h"
+#include "TrailFigure.h"
 
 namespace inet {
 
@@ -33,7 +33,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     IRadioMedium *medium;
     PhysicalEnvironment *environment;
     bool leaveIntersectionTrail;
-    TrailLayer *intersectionTrail;
+    TrailFigure *intersectionTrail;
 
   protected:
     virtual void initialize(int stage);

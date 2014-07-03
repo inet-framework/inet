@@ -15,30 +15,30 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_TRAILLAYER_H
-#define __INET_TRAILLAYER_H
+#ifndef __INET_TRAILFIGURE_H
+#define __INET_TRAILFIGURE_H
 
 #include "INETDefs.h"
 
 namespace inet {
 
-class INET_API TrailLayer
+class INET_API TrailFigure
 #ifdef __CCANVAS_H
-: public cLayer
+: public cGroupFigure
 #endif
 {
   protected:
     int maxChildCount;
 
   public:
-    TrailLayer(int maxChildCount, const char *name = NULL);
+    TrailFigure(int maxChildCount, const char *name = NULL);
 
 #ifdef __CCANVAS_H
-    virtual void addChild(cFigure *figure);
+    virtual void addChildFigure(cFigure *figure);
 #endif
 };
 
 } // namespace inet
 
-#endif // ifndef __INET_TRAILLAYER_H
+#endif // ifndef __INET_TRAILFIGURE_H
 

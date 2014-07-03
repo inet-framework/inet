@@ -42,8 +42,9 @@ void ObstacleLoss::initialize(int stage)
         leaveIntersectionTrail = par("leaveIntersectionTrail");
 #ifdef __CCANVAS_H
         if (leaveIntersectionTrail) {
-            intersectionTrail = new TrailLayer(100, "obstacle intersection trail");
-            simulation.getSystemModule()->getCanvas()->addToplevelLayer(intersectionTrail);
+            intersectionTrail = new TrailFigure(100, "obstacle intersection trail");
+            cCanvas *canvas = simulation.getSystemModule()->getCanvas();
+            canvas->addFigure(intersectionTrail, canvas->findFigure("submodules"));
         }
 #endif
     }
@@ -101,17 +102,17 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
                 intersectionLine->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
                 intersectionLine->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition));
                 intersectionLine->setLineColor(cFigure::GREY);
-                intersectionTrail->addChild(intersectionLine);
+                intersectionTrail->addChildFigure(intersectionLine);
                 cLineFigure *normal1Line = new cLineFigure();
                 normal1Line->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
                 normal1Line->setEnd(environment->computeCanvasPoint(intersection1 + obstaclePosition + normal1));
                 normal1Line->setLineColor(cFigure::RED);
-                intersectionTrail->addChild(normal1Line);
+                intersectionTrail->addChildFigure(normal1Line);
                 cLineFigure *normal2Line = new cLineFigure();
                 normal2Line->setStart(environment->computeCanvasPoint(intersection2 + obstaclePosition));
                 normal2Line->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition + normal2));
                 normal2Line->setLineColor(cFigure::RED);
-                intersectionTrail->addChild(normal2Line);
+                intersectionTrail->addChildFigure(normal2Line);
             }
 #endif
             const Material *material = object->getMaterial();

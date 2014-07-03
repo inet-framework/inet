@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "TrailLayer.h"
+#include "TrailFigure.h"
 
 namespace inet {
 
-TrailLayer::TrailLayer(int maxChildCount, const char *name) :
+TrailFigure::TrailFigure(int maxChildCount, const char *name) :
 #ifdef __CCANVAS_H
-    cLayer(name),
+    cGroupFigure(name),
 #endif
     maxChildCount(maxChildCount)
 {}
 
 #ifdef __CCANVAS_H
-void TrailLayer::addChild(cFigure *figure)
+void TrailFigure::addChildFigure(cFigure *figure)
 {
-    cLayer::addChild(figure);
-    if (getNumChildren() > maxChildCount)
-        delete removeChild(0);
+    cGroupFigure::addChildFigure(figure);
+    if (getNumChildFigures() > maxChildCount)
+        delete removeChildFigure(0);
 }
 #endif
 

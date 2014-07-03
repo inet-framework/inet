@@ -28,7 +28,7 @@ namespace inet {
  * This class represents a physical object, a rigid body and its physical properties.
  * The object can change its position and orientation over time.
  */
-class INET_API PhysicalObject
+class INET_API PhysicalObject : public cNamedObject
 {
   protected:
     const int id;
@@ -39,10 +39,11 @@ class INET_API PhysicalObject
 #ifdef __CCANVAS_H
     const cFigure::Color lineColor;
     const cFigure::Color fillColor;
+    cFigure *figure;
 #endif // ifdef __CCANVAS_H
 
   public:
-    PhysicalObject(int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
+    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
 #ifdef __CCANVAS_H
             , const cFigure::Color& lineColor
             , const cFigure::Color& fillColor

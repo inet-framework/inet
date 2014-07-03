@@ -31,7 +31,9 @@ PhysicalEnvironment::PhysicalEnvironment() :
     pressure(sNaN),
     relativeHumidity(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
-    spaceMax(Coord(sNaN, sNaN, sNaN))
+    spaceMax(Coord(sNaN, sNaN, sNaN)),
+    viewAngle(NULL),
+    objectsLayer(NULL)
 {
 }
 
@@ -60,6 +62,13 @@ void PhysicalEnvironment::initialize(int stage)
         viewAngle = par("viewAngle");
         if (!viewAngle || !*viewAngle)
             throw cRuntimeError("Invalid view angle");
+
+#ifdef __CCANVAS_H
+        objectsLayer = new cGroupFigure();
+        cCanvas *canvas = getParentModule()->getCanvas();
+        canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
+#endif // #ifdef __CCANVAS_H
+
         cXMLElement *environment = par("environment");
         parseShapes(environment);
         parseMaterials(environment);
@@ -189,6 +198,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *tag = element->getTagName();
         if (strcmp(tag, "object"))
             continue;
+        // name
+        const char *nameAttribute = element->getAttribute("name");
         // id
         const char *idAttribute = element->getAttribute("id");
         int id = -1;
@@ -321,9 +332,9 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 fillColor.blue = atoi(tokenizer.nextToken());
         }
         // insert
-        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material, lineColor, fillColor);
+        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineColor, fillColor);
 #else // ifdef __CCANVAS_H
-        PhysicalObject *object = new PhysicalObject(id, position, orientation, shape, material);
+        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material);
 #endif // ifdef __CCANVAS_H
         objects.push_back(object);
     }
@@ -358,15 +369,13 @@ cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
 void PhysicalEnvironment::updateCanvas()
 {
 #ifdef __CCANVAS_H
-    cCanvas *canvas = getParentModule()->getCanvas();
-    cLayer *layer = canvas->getDefaultLayer();
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
         PhysicalObject *object = *it;
         const Shape *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
-        const Quaternion rotation(orientation);
         // TODO: rotate points
+        const Quaternion rotation(orientation);
         // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
@@ -377,8 +386,7 @@ void PhysicalEnvironment::updateCanvas()
             figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            layer->addChild(figure);
-            continue;
+            objectsLayer->addChildFigure(figure);
         }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
@@ -390,8 +398,7 @@ void PhysicalEnvironment::updateCanvas()
             figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius), *viewAngle));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            layer->addChild(figure);
-            continue;
+            objectsLayer->addChildFigure(figure);
         }
         // prism
         const Prism *prism = dynamic_cast<const Prism *>(shape);
@@ -405,10 +412,16 @@ void PhysicalEnvironment::updateCanvas()
             figure->setPoints(canvasPoints);
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            layer->addChild(figure);
-            continue;
+            objectsLayer->addChildFigure(figure);
         }
-        throw cRuntimeError("Unknown shape");
+        // add name to the end
+        const char *name = object->getName();
+        if (name) {
+            cTextFigure *nameFigure = new cTextFigure(NULL);
+            nameFigure->setPos(computeCanvasPoint(position));
+            nameFigure->setText(name);
+            objectsLayer->addChildFigure(nameFigure);
+        }
     }
 #endif // ifdef __CCANVAS_H
 }

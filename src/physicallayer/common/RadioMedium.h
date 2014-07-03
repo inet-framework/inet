@@ -27,7 +27,7 @@
 #include "IAttenuation.h"
 #include "IBackgroundNoise.h"
 #include "MACAddress.h"
-#include "TrailLayer.h"
+#include "TrailFigure.h"
 
 namespace inet {
 
@@ -288,13 +288,13 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The list figures representing ongoing communications.
      */
-    cLayer *communicationLayer;
+    cGroupFigure *communicationLayer;
 #endif
 
     /**
      * The list of trail figures representing successful communications.
      */
-    TrailLayer *communcationTrail;
+    TrailFigure *communcationTrail;
     //@}
 
     /** @name Statistics */

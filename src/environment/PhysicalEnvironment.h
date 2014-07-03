@@ -38,6 +38,10 @@ class INET_API PhysicalEnvironment : public cModule
     std::map<int, const Material *> materials;
     std::vector<PhysicalObject *> objects;
 
+#ifdef __CCANVAS_H
+    cGroupFigure *objectsLayer;
+#endif // #ifdef __CCANVAS_H
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
