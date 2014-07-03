@@ -29,6 +29,7 @@ namespace INET6Fw // load headers into a namespace, to avoid conflicts with plat
 };
 
 #include "IPv6Serializer.h"
+#include "ICMPv6Message_m.h"
 
 #ifdef WITH_UDP
 #include "UDPSerializer.h"
@@ -94,6 +95,7 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
         /*packetLength += ICMPv6Serializer().serialize(check_and_cast<ICMPv6Message *>(encapPacket),
                                                    buf+IPv6_HEADER_BYTES, bufsize-IPv6_HEADER_BYTES);
         */
+        // TODO: implement ICMPv6Serializer
         break;
 #ifdef WITH_UDP
       case IP_PROT_UDP:
@@ -130,74 +132,61 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 void IPv6Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest)
 {
     const struct ip6_hdr *ip6h = (struct ip6_hdr *) buf;
+    uint32_t flowinfo = ntohl(ip6h->ip6_flow);
+    dest->setFlowLabel(flowinfo & 0xFFFFF);
+    flowinfo >>= 20;
+    dest->setTrafficClass(flowinfo & 0xFF);
 
-    flowinfo = 0x06;
-    flowinfo <<= 8;
-    flowinfo |= dgram->getTrafficClass();
-    flowinfo <<= 20;
-    flowinfo |= dgram->getFlowLabel();
-    ip6h->ip6_flow = htonl(flowinfo);
-    ip6h->ip6_hlim = htons(dgram->getHopLimit());
+    unsigned int packetLength = ntohs(ip6h->ip6_plen);
 
-    ip6h->ip6_nxt = dgram->getTransportProtocol();
+    dest->setTransportProtocol(ip6h->ip6_nxt);
+    dest->setHopLimit(ntohs(ip6h->ip6_hlim));
 
-    for (i = 0; i < 4; i++) {
-        ip6h->ip6_src.__u6_addr.__u6_addr32[i] = htonl(dgram->getSrcAddress().words()[i]);
-    }
-    for (i = 0; i < 4; i++) {
-        ip6h->ip6_dst.__u6_addr.__u6_addr32[i] = htonl(dgram->getDestAddress().words()[i]);
-    }
+    IPv6Address temp;
+    temp.set(ntohl(ip6h->ip6_src.__u6_addr.__u6_addr32[0]),
+             ntohl(ip6h->ip6_src.__u6_addr.__u6_addr32[1]),
+             ntohl(ip6h->ip6_src.__u6_addr.__u6_addr32[2]),
+             ntohl(ip6h->ip6_src.__u6_addr.__u6_addr32[3]));
+    dest->setSrcAddress(temp);
 
-    /*dest->setVersion(ip->ip_v);
-    dest->setHeaderLength(IP_HEADER_BYTES);
-    dest->setSrcAddress(IPv4Address(ntohl(ip->ip_src.s_addr)));
-    dest->setDestAddress(IPv4Address(ntohl(ip->ip_dst.s_addr)));
-    dest->setTransportProtocol(ip->ip_p);
-    dest->setTimeToLive(ip->ip_ttl);
-    dest->setIdentification(ntohs(ip->ip_id));
-    uint16_t ip_off = ntohs(ip->ip_off);
-    dest->setMoreFragments((ip_off & IP_MF) != 0);
-    dest->setDontFragment((ip_off & IP_DF) != 0);
-    dest->setFragmentOffset((ntohs(ip->ip_off) & IP_OFFMASK)*8);
-    dest->setTypeOfService(ip->ip_tos);
-    totalLength = ntohs(ip->ip_len);
-    headerLength = ip->ip_hl << 2;*/
+    temp.set(ntohl(ip6h->ip6_dst.__u6_addr.__u6_addr32[0]),
+             ntohl(ip6h->ip6_dst.__u6_addr.__u6_addr32[1]),
+             ntohl(ip6h->ip6_dst.__u6_addr.__u6_addr32[2]),
+             ntohl(ip6h->ip6_dst.__u6_addr.__u6_addr32[3]));
+    dest->setDestAddress(temp);
 
-    if (headerLength > (unsigned int)IP_HEADER_BYTES)
-        EV << "Handling an captured IPv4 packet with options. Dropping the options.\n";
-
-    if (totalLength > bufsize)
-        EV << "Can not handle IPv4 packet of total length " << totalLength << "(captured only " << bufsize << " bytes).\n";
-
-    dest->setByteLength(IP_HEADER_BYTES);
+    if (packetLength + IPv6_HEADER_BYTES > bufsize)
+        EV << "Can not handle IPv6 packet of total length " << packetLength + IPv6_HEADER_BYTES << "(captured only " << bufsize << " bytes).\n";
 
     cPacket *encapPacket = NULL;
-    unsigned int encapLength = std::min(totalLength, bufsize) - headerLength;
+    unsigned int encapLength = std::min(packetLength, bufsize - IPv6_HEADER_BYTES);
 
     switch (dest->getTransportProtocol())
     {
-      case IIP_PROT_IPv6_ICMP:
+      case IP_PROT_IPv6_ICMP:
         encapPacket = new ICMPv6Message("icmp-from-wire");
+        //ICMPv6Serializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (ICMPv6Message *)encapPacket);
+        // TODO: implement ICMPv6Serializer
         break;
 
 #ifdef WITH_UDP
       case IP_PROT_UDP:
         encapPacket = new UDPPacket("udp-from-wire");
-        UDPSerializer().parse(buf + headerLength, encapLength, (UDPPacket *)encapPacket);
+        UDPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (UDPPacket *)encapPacket);
         break;
 #endif
 
 #ifdef WITH_SCTP
       case IP_PROT_SCTP:
         encapPacket = new SCTPMessage("sctp-from-wire");
-        SCTPSerializer().parse(buf + headerLength, encapLength, (SCTPMessage *)encapPacket);
+        SCTPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (SCTPMessage *)encapPacket);
         break;
 #endif
 
 #ifdef WITH_TCP_COMMON
       case IP_PROT_TCP:
         encapPacket = new TCPSegment("tcp-from-wire");
-        TCPSerializer().parse(buf + headerLength, encapLength, (TCPSegment *)encapPacket, true);
+        TCPSerializer().parse(buf + IPv6_HEADER_BYTES, encapLength, (TCPSegment *)encapPacket, true);
         break;
 #endif
 
