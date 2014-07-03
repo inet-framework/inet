@@ -19,7 +19,8 @@
 
 namespace inet {
 
-Polygon::Polygon()
+Polygon::Polygon(const std::vector<Coord>& points) :
+        points(points)
 {
 }
 

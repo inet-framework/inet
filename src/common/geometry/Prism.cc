@@ -19,8 +19,21 @@
 
 namespace inet {
 
-Prism::Prism()
+Prism::Prism(double height, const Polygon& base) :
+    height(height),
+    base(base)
 {
+}
+
+Coord Prism::computeSize() const
+{
+    Coord min;
+    Coord max;
+    for (std::vector<Coord>::const_iterator it = base.getPoints().begin(); it != base.getPoints().end(); it++) {
+        min = min.min(*it);
+        max = max.max(*it);
+    }
+    return max - min;
 }
 
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const

@@ -25,7 +25,6 @@ namespace inet {
 
 /**
  * This class represents 3 dimensional prism with a polygon base face.
- * The coordinate system origin is at the first point on the base face.
  */
 class INET_API Prism : public Shape
 {
@@ -34,9 +33,15 @@ class INET_API Prism : public Shape
     Polygon base;
 
   public:
-    Prism();
+    Prism(double height, const Polygon& base);
 
-    virtual Coord computeSize() const { throw cRuntimeError("Unimplemented"); }
+    double getHeight() const { return height; }
+    void setHeight(double height) { this->height = height; }
+
+    const Polygon& getBase() const { return base; }
+    void setBase(const Polygon& base) { this->base = base; }
+
+    virtual Coord computeSize() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 

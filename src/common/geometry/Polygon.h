@@ -28,7 +28,9 @@ class INET_API Polygon
     std::vector<Coord> points;
 
   public:
-    Polygon();
+    Polygon(const std::vector<Coord>& points);
+
+    const std::vector<Coord>& getPoints() const { return points; }
 };
 
 } // namespace inet

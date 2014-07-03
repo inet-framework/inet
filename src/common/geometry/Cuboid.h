@@ -24,8 +24,6 @@ namespace inet {
 
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
- * The coordinate system origin is in the center of the cuboid and the faces
- * are parallel to the axes.
  */
 class INET_API Cuboid : public Shape
 {

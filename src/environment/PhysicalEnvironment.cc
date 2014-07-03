@@ -18,6 +18,7 @@
 #include "PhysicalEnvironment.h"
 #include "Cuboid.h"
 #include "Sphere.h"
+#include "Prism.h"
 #include "Material.h"
 #include "Quaternion.h"
 
@@ -92,7 +93,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             Coord size;
             const char *sizeAttribute = element->getAttribute("size");
             if (!sizeAttribute)
-                throw cRuntimeError("Missing size attribute of cuboid shape");
+                throw cRuntimeError("Missing size attribute of cuboid");
             cStringTokenizer tokenizer(sizeAttribute);
             if (tokenizer.hasMoreTokens())
                 size.x = atof(tokenizer.nextToken());
@@ -106,12 +107,39 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             double radius;
             const char *radiusAttribute = element->getAttribute("radius");
             if (!radiusAttribute)
-                throw cRuntimeError("Missing radius attribute of sphere shape");
-            cStringTokenizer tokenizer(radiusAttribute);
-            if (tokenizer.hasMoreTokens())
-                radius = atof(tokenizer.nextToken());
+                throw cRuntimeError("Missing radius attribute of sphere");
+            else
+                radius = atof(radiusAttribute);
             shape = new Sphere(radius);
         }
+        else if (!strcmp(typeAttribute, "prism")) {
+            double height;
+            const char *heightAttribute = element->getAttribute("height");
+            if (!heightAttribute)
+                throw cRuntimeError("Missing height attribute of prism");
+            else
+                height = atof(heightAttribute);
+            std::vector<Coord> points;
+            const char *pointsAttribute = element->getAttribute("points");
+            if (!pointsAttribute)
+                throw cRuntimeError("Missing points attribute of prism");
+            else {
+                cStringTokenizer tokenizer(pointsAttribute);
+                while (tokenizer.hasMoreTokens()) {
+                    Coord point;
+                    if (tokenizer.hasMoreTokens())
+                        point.x = atof(tokenizer.nextToken());
+                    if (tokenizer.hasMoreTokens())
+                        point.y = atof(tokenizer.nextToken());
+                    if (tokenizer.hasMoreTokens())
+                        point.z = atof(tokenizer.nextToken());
+                    points.push_back(point);
+                }
+            }
+            shape = new Prism(height, Polygon(points));
+        }
+        else
+            throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
         shapes.insert(std::pair<int, Shape *>(id, shape));
     }
@@ -200,6 +228,23 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (shapeTokenizer.hasMoreTokens())
                 radius = atof(shapeTokenizer.nextToken());
             shape = new Sphere(radius);
+        }
+        else if (!strcmp(shapeType, "prism")) {
+            double height;
+            if (shapeTokenizer.hasMoreTokens())
+                height = atof(shapeTokenizer.nextToken());
+            std::vector<Coord> points;
+            while (shapeTokenizer.hasMoreTokens()) {
+                Coord point;
+                if (shapeTokenizer.hasMoreTokens())
+                    point.x = atof(shapeTokenizer.nextToken());
+                if (shapeTokenizer.hasMoreTokens())
+                    point.y = atof(shapeTokenizer.nextToken());
+                if (shapeTokenizer.hasMoreTokens())
+                    point.z = atof(shapeTokenizer.nextToken());
+                points.push_back(point);
+            }
+            shape = new Prism(height, Polygon(points));
         }
         else {
             int id = atoi(shapeAttribute);
@@ -318,25 +363,42 @@ void PhysicalEnvironment::updateCanvas()
         const EulerAngles& orientation = object->getOrientation();
         const Quaternion rotation(orientation);
         // TODO: rotate points
+        // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
             const Coord& size = cuboid->getSize();
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(computeCanvasPoint(position - size / 2));
-            figure->setP2(computeCanvasPoint(position + size / 2));
+            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
+            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
             layer->addChild(figure);
             continue;
         }
+        // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
         if (sphere) {
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(computeCanvasPoint(position - Coord(radius, radius, radius)));
-            figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius)));
+            figure->setP1(computeCanvasPoint(position - Coord(radius, radius, radius), *viewAngle));
+            figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius), *viewAngle));
+            figure->setLineColor(object->getLineColor());
+            figure->setFillColor(object->getFillColor());
+            layer->addChild(figure);
+            continue;
+        }
+        // prism
+        const Prism *prism = dynamic_cast<const Prism *>(shape);
+        if (prism) {
+            std::vector<cFigure::Point> canvasPoints;
+            const std::vector<Coord>& points = prism->getBase().getPoints();
+            for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
+                canvasPoints.push_back(computeCanvasPoint(position + *it, *viewAngle));
+            cPolygonFigure *figure = new cPolygonFigure(NULL);
+            figure->setFilled(true);
+            figure->setPoints(canvasPoints);
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
             layer->addChild(figure);

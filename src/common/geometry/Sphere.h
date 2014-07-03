@@ -23,8 +23,7 @@
 namespace inet {
 
 /**
- * This class represents a 3 dimensional sphere shape. The coordinate system
- * origin is in the center of the sphere.
+ * This class represents a 3 dimensional sphere shape.
  */
 class INET_API Sphere : public Shape
 {
