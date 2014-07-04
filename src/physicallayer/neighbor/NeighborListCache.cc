@@ -94,7 +94,7 @@ void NeighborListCache::removeRadio(const IRadio *radio)
         radios.erase(it);
     }
     else {
-        // TODO: is it an error?
+        throw cRuntimeError("You can't remove radio: %d because it is not in our radio vector", radio->getId());
     }
 }
 
