@@ -149,7 +149,7 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
             cancelAndDelete(refillCellsTimer);
     }
     else {
-        // TODO: is it an error?
+        throw cRuntimeError("You can't remove radio: %d because it is not in our radio vector", radio->getId());
     }
 }
 
