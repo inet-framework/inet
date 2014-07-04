@@ -1,0 +1,3 @@
+<environment>
+    <object name="ball" position="center 500 250 0" orientation="0 0 0" shape="sphere 150" material="brick" fill-color="40 114 110"/>
+</environment>

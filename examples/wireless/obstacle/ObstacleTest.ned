@@ -44,6 +44,6 @@ network ObstacleTest
         }
         host[numHosts]: AdhocHost {
             parameters:
-                @display("r=,,#707070;p=250,58");
+                @display("r=,,#707070;p=250,50");
         }
 }
