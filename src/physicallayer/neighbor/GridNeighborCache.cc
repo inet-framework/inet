@@ -196,11 +196,11 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
         for (int j = jStart; j <= jEnd; j++) {
             for (int k = kStart; k <= kEnd; k++) {
                 int cellID = rowmajorIndex(i, j, k);
-                Radios *neighborCube = &grid[cellID];
-                unsigned int cellSize = neighborCube->size();
+                Radios& neighborCube = grid[cellID];
+                unsigned int cellSize = neighborCube.size();
 
                 for (unsigned int l = 0; l < cellSize; l++)
-                    radioMedium->sendToRadio(transmitter, (*neighborCube)[l], frame);
+                    radioMedium->sendToRadio(transmitter, neighborCube[l], frame);
             }
         }
     }

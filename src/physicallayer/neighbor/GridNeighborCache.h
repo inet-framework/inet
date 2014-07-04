@@ -40,7 +40,6 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
     double range;
     cMessage *refillCellsTimer;
     double refillPeriod;
-    bool useMaxDimension;
     double maxSpeed;
 
     Coord splittingUnits;
