@@ -41,7 +41,6 @@ void GridNeighborCache::initialize(int stage)
         splittingUnits.z = par("zSplittingUnit");
         range = par("range");
         refillPeriod = par("refillPeriod");
-        useMaxDimension = par("useMaxDimension");
 
         init();
     }
@@ -212,14 +211,6 @@ void GridNeighborCache::calculateDimension(int *dim)
     int xDim = sideLengths.x / splittingUnits.x;
     int yDim = sideLengths.y / splittingUnits.y;
     int zDim = sideLengths.z / splittingUnits.z;
-
-    if (useMaxDimension) {
-        int maxDim = std::max(std::max(xDim, yDim), zDim);
-
-        xDim = xDim == 0 ? xDim : maxDim;
-        yDim = yDim == 0 ? yDim : maxDim;
-        zDim = zDim == 0 ? zDim : maxDim;
-    }
 
     dim[0] = xDim;
     dim[1] = yDim;
