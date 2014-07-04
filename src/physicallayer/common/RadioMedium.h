@@ -443,6 +443,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual W getMinReceptionPower() const { return minReceptionPower; }
     virtual double getMaxAntennaGain() const { return maxAntennaGain; }
     virtual mps getMaxSpeed() const { return maxSpeed; }
+    virtual m getMaxInterferenceRangeForRadio(const IRadio *radio) const;
+    virtual m getMaxCommunicationRangeForRadio(const IRadio *radio) const;
 
     virtual const Material *getMaterial() const { return &Material::air; }
     virtual const IPropagation *getPropagation() const { return propagation; }

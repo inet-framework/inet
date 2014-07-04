@@ -875,7 +875,16 @@ void RadioMedium::updateCanvas()
     }
 }
 
+m RadioMedium::getMaxInterferenceRangeForRadio(const IRadio* radio) const
+{
+    return computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
+}
+
+m RadioMedium::getMaxCommunicationRangeForRadio(const IRadio* radio) const
+{
+    return computeMaxRange(radio->getTransmitter()->getMaxPower(), minReceptionPower);
+}
+
 } // namespace physicallayer
 
 } // namespace inet
-
