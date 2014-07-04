@@ -36,9 +36,9 @@ void GridNeighborCache::initialize(int stage)
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMax.z = par("constraintAreaMaxZ");
 
-        splittingUnits.x = par("xSplittingUnit");
-        splittingUnits.y = par("ySplittingUnit");
-        splittingUnits.z = par("zSplittingUnit");
+        cellSize.x = par("cellSizeX");
+        cellSize.y = par("cellSizeY");
+        cellSize.z = par("cellSizeZ");
         range = par("range");
         refillPeriod = par("refillPeriod");
 
@@ -208,9 +208,9 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
 
 void GridNeighborCache::calculateDimension(int *dim)
 {
-    int xDim = sideLengths.x / splittingUnits.x;
-    int yDim = sideLengths.y / splittingUnits.y;
-    int zDim = sideLengths.z / splittingUnits.z;
+    int xDim = sideLengths.x / cellSize.x;
+    int yDim = sideLengths.y / cellSize.y;
+    int zDim = sideLengths.z / cellSize.z;
 
     dim[0] = xDim;
     dim[1] = yDim;

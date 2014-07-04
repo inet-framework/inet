@@ -20,9 +20,9 @@ import inet.physicallayer.contract.INeighborCache;
 module GridNeighborCache like INeighborCache
 {
     parameters:
-        double xSplittingUnit @unit(m);
-        double ySplittingUnit @unit(m);
-        double zSplittingUnit @unit(m);
+        double cellSizeX @unit(m);
+        double cellSizeY @unit(m);
+        double cellSizeZ @unit(m);
 
         double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
         double constraintAreaMinY @unit(m); // min y position of the constraint area, unconstrained by default (negative infinity)
