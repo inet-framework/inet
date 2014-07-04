@@ -39,7 +39,6 @@ void QuadTreeNeighborCache::initialize(int stage)
         constraintAreaMax.y = par("constraintAreaMaxY");
         constraintAreaMin.x = par("constraintAreaMinX");
         constraintAreaMin.y = par("constraintAreaMinY");
-        range = par("range");
         rebuildPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
@@ -85,7 +84,7 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio container", radio->getId());
 }
 
-void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame)
+void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range)
 {
     double radius = range + rebuildPeriod * maxSpeed;
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();

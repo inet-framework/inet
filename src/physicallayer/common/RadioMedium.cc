@@ -665,8 +665,18 @@ void RadioMedium::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
     const RadioFrame *radioFrame = check_and_cast<const RadioFrame *>(frame);
     EV_DEBUG << "Sending " << frame << " with " << radioFrame->getBitLength() << " bits in " << radioFrame->getDuration() * 1E+6 << " us transmission duration"
              << " from " << radio << " on " << (IRadioMedium *)this << "." << endl;
-    if (neighborCache)
-        neighborCache->sendToNeighbors(radio, frame);
+    if (neighborCache && rangeFilter != RANGE_FILTER_ANYWHERE)
+    {
+        double range;
+        if (rangeFilter == RANGE_FILTER_COMMUNICATION_RANGE)
+            range = getMaxCommunicationRangeForRadio(radio).get();
+        else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE)
+            range = getMaxInterferenceRangeForRadio(radio).get();
+        else
+            throw cRuntimeError("Unknown range filter %d", rangeFilter);
+
+        neighborCache->sendToNeighbors(radio, frame, range);
+    }
     else
         for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
             sendToRadio(radio, *it, frame);

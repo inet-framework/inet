@@ -39,7 +39,6 @@ void GridNeighborCache::initialize(int stage)
         cellSize.x = par("cellSizeX");
         cellSize.y = par("cellSizeY");
         cellSize.z = par("cellSizeZ");
-        range = par("range");
         refillPeriod = par("refillPeriod");
 
         init();
@@ -153,7 +152,7 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
     }
 }
 
-void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame)
+void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range)
 {
     double radius = range + (maxSpeed * refillPeriod);
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();

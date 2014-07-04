@@ -63,7 +63,7 @@ class NeighborListCache : public RadioMedium::INeighborCache, public cSimpleModu
   public:
     void addRadio(const IRadio *radio);
     void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range);
     NeighborListCache() : radioMedium(NULL), updateNeighborListsTimer(NULL) {};
     ~NeighborListCache();
 };

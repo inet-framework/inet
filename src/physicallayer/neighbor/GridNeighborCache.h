@@ -37,7 +37,6 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
 
     unsigned int numberOfCells;
     Coord constraintAreaMin, constraintAreaMax;
-    double range;
     cMessage *refillCellsTimer;
     double refillPeriod;
     double maxSpeed;
@@ -64,7 +63,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
   public:
     void addRadio(const IRadio *radio);
     void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range);
 
     GridNeighborCache() : refillCellsTimer(NULL) {};
     virtual ~GridNeighborCache();

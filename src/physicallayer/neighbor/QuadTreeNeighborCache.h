@@ -52,7 +52,6 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
     RadioMedium *radioMedium;
     Coord constraintAreaMax, constraintAreaMin;
     unsigned int maxNumOfPointsPerQuadrant;
-    double range;
     double rebuildPeriod;
     double maxSpeed;
 
@@ -65,7 +64,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
   public:
     void addRadio(const IRadio *radio);
     void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range);
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
 };
