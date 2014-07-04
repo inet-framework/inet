@@ -41,11 +41,11 @@ void QuadTreeNeighborCache::initialize(int stage)
         constraintAreaMin.y = par("constraintAreaMinY");
         range = par("range");
         rebuildPeriod = par("refillPeriod");
-        maxSpeed = par("maxSpeed");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
+        maxSpeed = radioMedium->getMaxSpeed().get();
         if (maxSpeed != 0)
             scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
     }
@@ -66,6 +66,9 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
     radios.push_back(radio);
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
     quadTree->insert(check_and_cast<const cObject *>(radio), radioPos);
+    maxSpeed = radioMedium->getMaxSpeed().get();
+    if (maxSpeed != 0 && !rebuildQuadTreeTimer->isScheduled())
+        scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
 }
 
 void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
@@ -74,6 +77,9 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
     if (it != radios.end()) {
         radios.erase(it);
         quadTree->remove(check_and_cast<const cObject *>(radio));
+        maxSpeed = radioMedium->getMaxSpeed().get();
+        if (maxSpeed == 0)
+            cancelAndDelete(rebuildQuadTreeTimer);
     }
     else
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio container", radio->getId());

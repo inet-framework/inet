@@ -33,7 +33,6 @@ module GridNeighborCache like INeighborCache
 
         double range @unit(m);
         double refillPeriod @unit(s);
-        double maxSpeed @unit(mps);
         bool useMaxDimension;
 
         @class(GridNeighborCache);

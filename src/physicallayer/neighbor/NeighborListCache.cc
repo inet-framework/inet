@@ -29,7 +29,6 @@ void NeighborListCache::initialize(int stage)
         // TODO: NED parameter?
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
         updatePeriod = par("refillPeriod");
-        maxSpeed = par("maxSpeed");
         range = par("range");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?

@@ -27,7 +27,7 @@ void GridNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         // TODO: NED parameter?
-        radioChannel = check_and_cast<RadioMedium *>(getParentModule());
+        radioMedium = check_and_cast<RadioMedium *>(getParentModule());
 
         constraintAreaMin.x = par("constraintAreaMinX");
         constraintAreaMin.y = par("constraintAreaMinY");
@@ -39,9 +39,7 @@ void GridNeighborCache::initialize(int stage)
         splittingUnits.x = par("xSplittingUnit");
         splittingUnits.y = par("ySplittingUnit");
         splittingUnits.z = par("zSplittingUnit");
-
         range = par("range");
-        maxSpeed = par("maxSpeed");
         refillPeriod = par("refillPeriod");
         useMaxDimension = par("useMaxDimension");
 
@@ -50,7 +48,9 @@ void GridNeighborCache::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
         fillCubeVector();
         refillCellsTimer = new cMessage("refillCellsTimer");
-        scheduleAt(simTime() + refillPeriod, refillCellsTimer);
+        maxSpeed = radioMedium->getMaxSpeed().get();
+        if (maxSpeed != 0)
+            scheduleAt(simTime() + refillPeriod, refillCellsTimer);
     }
 }
 
@@ -132,13 +132,23 @@ void GridNeighborCache::handleMessage(cMessage *msg)
 void GridNeighborCache::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
+    Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
+    grid[posToCubeId(radioPos)].push_back(radio);
+    maxSpeed = radioMedium->getMaxSpeed().get();
+    if (maxSpeed != 0 && !refillCellsTimer->isScheduled())
+        scheduleAt(simTime() + refillPeriod, refillCellsTimer);
 }
 
 void GridNeighborCache::removeRadio(const IRadio *radio)
 {
     Radios::iterator it = find(radios.begin(), radios.end(), radio);
-    if (it != radios.end())
+    if (it != radios.end()) {
         radios.erase(it);
+        maxSpeed = radioMedium->getMaxSpeed().get();
+        fillCubeVector();
+        if (maxSpeed == 0)
+            cancelAndDelete(refillCellsTimer);
+    }
     else {
         // TODO: is it an error?
     }
@@ -191,7 +201,7 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
                 unsigned int cellSize = neighborCube->size();
 
                 for (unsigned int l = 0; l < cellSize; l++)
-                    radioChannel->sendToRadio(transmitter, (*neighborCube)[l], frame);
+                    radioMedium->sendToRadio(transmitter, (*neighborCube)[l], frame);
             }
         }
     }

@@ -33,15 +33,15 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
   protected:
     RadioGrid grid;
     Radios radios;
-    RadioMedium *radioChannel;
+    RadioMedium *radioMedium;
 
     unsigned int numberOfCells;
     Coord constraintAreaMin, constraintAreaMax;
     double range;
-    double maxSpeed;
     cMessage *refillCellsTimer;
     double refillPeriod;
     bool useMaxDimension;
+    double maxSpeed;
 
     Coord splittingUnits;
     Coord sideLengths;

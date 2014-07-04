@@ -23,7 +23,6 @@ module QuadTreeNeighborCache like INeighborCache
         int maxNumOfPointsPerQuadrant;
         double range @unit(m);
         double refillPeriod @unit(s);
-        double maxSpeed @unit(mps);
         double constraintAreaMaxX @unit(m); // max x position of the constraint area, unconstrained by default (positive infinity)
         double constraintAreaMaxY @unit(m); // max y position of the constraint area, unconstrained by default (positive infinity)
         double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
