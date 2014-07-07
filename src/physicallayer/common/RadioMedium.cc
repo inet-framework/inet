@@ -135,7 +135,7 @@ void RadioMedium::initialize(int stage)
             canvas->addFigure(communcationTrail, canvas->findFigure("submodules"));
         }
     }
-    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
+    else if (stage == INITSTAGE_LINK_LAYER) {
         updateLimits();
     }
     else if (stage == INITSTAGE_LAST) {
