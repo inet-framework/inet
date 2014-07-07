@@ -32,8 +32,10 @@ PhysicalEnvironment::PhysicalEnvironment() :
     relativeHumidity(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
-    viewAngle(NULL),
-    objectsLayer(NULL)
+    viewAngle(NULL)
+#ifdef __CCANVAS_H
+    ,objectsLayer(NULL)
+#endif
 {
 }
 
