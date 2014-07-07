@@ -911,11 +911,11 @@ Coord RadioMedium::computeConstreaintAreaMax() const
 {
     Coord constraintAreaMax;
     if (radios.size() > 0)
-        constraintAreaMax = radios[0]->getAntenna()->getMobility()->getConstraintAreaMin();
+        constraintAreaMax = radios[0]->getAntenna()->getMobility()->getConstraintAreaMax();
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
     {
         const IMobility *mobility = (*it)->getAntenna()->getMobility();
-        Coord currConstraintAreaMax = mobility->getConstraintAreaMin();
+        Coord currConstraintAreaMax = mobility->getConstraintAreaMax();
 
         if (constraintAreaMax.x < currConstraintAreaMax.x)
             constraintAreaMax.x = currConstraintAreaMax.x;
