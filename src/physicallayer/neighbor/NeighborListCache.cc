@@ -22,7 +22,6 @@ namespace inet {
 namespace physicallayer {
 
 Define_Module(NeighborListCache);
-// TODO: maxSpeed
 void NeighborListCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -32,9 +31,11 @@ void NeighborListCache::initialize(int stage)
         range = par("range");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
+        maxSpeed = radioMedium->getMaxSpeed().get();
         updateNeighborLists();
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
-        scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
+        if (maxSpeed != 0)
+            scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
     }
 }
 
@@ -87,6 +88,9 @@ void NeighborListCache::addRadio(const IRadio *radio)
     radios.push_back(newEntry);
     radioToEntry[radio] = newEntry;
     updateNeighborLists();
+    maxSpeed = radioMedium->getMaxSpeed().get();
+    if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled())
+        scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
 }
 
 void NeighborListCache::removeRadio(const IRadio *radio)
@@ -95,6 +99,9 @@ void NeighborListCache::removeRadio(const IRadio *radio)
     if (it != radios.end()) {
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
+        maxSpeed = radioMedium->getMaxSpeed().get();
+        if (maxSpeed == 0)
+            cancelAndDelete(updateNeighborListsTimer);
     }
     else {
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio vector", radio->getId());

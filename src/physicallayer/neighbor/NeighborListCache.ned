@@ -22,7 +22,6 @@ module NeighborListCache like INeighborCache
     parameters:
         double range @unit(m);
         double refillPeriod @unit(s);
-        double maxSpeed @unit(mps);
         @class(NeighborListCache);
 }
 
