@@ -352,7 +352,7 @@ cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
     if (environment)
         return environment->computeCanvasPoint(point, *(environment->viewAngle));
     else
-        return environment->computeCanvasPoint(point, 'x');
+        return environment->computeCanvasPoint(point, 'z');
 }
 
 void PhysicalEnvironment::updateCanvas()
