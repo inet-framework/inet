@@ -35,13 +35,11 @@ void GridNeighborCache::initialize(int stage)
         init();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
-        fillCubeVector();
         refillCellsTimer = new cMessage("refillCellsTimer");
         maxSpeed = radioMedium->getMaxSpeed().get();
         constraintAreaMax = radioMedium->getConstraintAreaMax();
         constraintAreaMin = radioMedium->getConstraintAreaMin();
-        if (maxSpeed != 0)
-            scheduleAt(simTime() + refillPeriod, refillCellsTimer);
+        fillCubeVector();
     }
 }
 
@@ -131,12 +129,13 @@ void GridNeighborCache::addRadio(const IRadio *radio)
     {
         constraintAreaMin = newConstraintAreaMin;
         constraintAreaMax = newConstraintAreaMax;
-        fillCubeVector();
+        if (initialized())
+            fillCubeVector();
     }
     else
         grid[posToCubeId(radioPos)].push_back(radio);
     maxSpeed = radioMedium->getMaxSpeed().get();
-    if (maxSpeed != 0 && !refillCellsTimer->isScheduled())
+    if (maxSpeed != 0 && !refillCellsTimer->isScheduled() && initialized())
         scheduleAt(simTime() + refillPeriod, refillCellsTimer);
 }
 
@@ -155,7 +154,7 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
         maxSpeed = radioMedium->getMaxSpeed().get();
         fillCubeVector();
         if (maxSpeed == 0)
-            cancelAndDelete(refillCellsTimer);
+            cancelEvent(refillCellsTimer);
     }
     else {
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio vector", radio->getId());

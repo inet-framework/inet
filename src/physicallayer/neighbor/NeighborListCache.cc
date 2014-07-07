@@ -29,13 +29,11 @@ void NeighborListCache::initialize(int stage)
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
         updatePeriod = par("refillPeriod");
         range = par("range");
+        updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
         maxSpeed = radioMedium->getMaxSpeed().get();
         updateNeighborLists();
-        updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
-        if (maxSpeed != 0)
-            scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
     }
 }
 
@@ -89,7 +87,7 @@ void NeighborListCache::addRadio(const IRadio *radio)
     radioToEntry[radio] = newEntry;
     updateNeighborLists();
     maxSpeed = radioMedium->getMaxSpeed().get();
-    if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled())
+    if (maxSpeed != 0 && !updateNeighborListsTimer->isScheduled() && initialized())
         scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
 }
 
@@ -101,7 +99,7 @@ void NeighborListCache::removeRadio(const IRadio *radio)
         radios.erase(it);
         maxSpeed = radioMedium->getMaxSpeed().get();
         if (maxSpeed == 0)
-            cancelAndDelete(updateNeighborListsTimer);
+            cancelEvent(updateNeighborListsTimer);
     }
     else {
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio vector", radio->getId());
