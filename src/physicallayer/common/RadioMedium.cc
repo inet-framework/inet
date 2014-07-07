@@ -441,6 +441,8 @@ void RadioMedium::updateLimits()
     maxTransmissionDuration = computeMaxTransmissionDuration();
     maxCommunicationRange = computeMaxCommunicationRange();
     maxInterferenceRange = computeMaxInterferenceRange();
+    constraintAreaMin = computeConstraintAreaMin();
+    constraintAreaMax = computeConstreaintAreaMax();
 }
 
 bool RadioMedium::isRadioMacAddress(const IRadio *radio, const MACAddress address) const
@@ -885,6 +887,46 @@ void RadioMedium::updateCanvas()
     }
 }
 
+Coord RadioMedium::computeConstraintAreaMin() const
+{
+    Coord constraintAreaMin;
+    if (radios.size() > 0)
+        constraintAreaMin = radios[0]->getAntenna()->getMobility()->getConstraintAreaMin();
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+    {
+        const IMobility *mobility = (*it)->getAntenna()->getMobility();
+        Coord currConstreaintAreaMin = mobility->getConstraintAreaMin();
+
+        if (constraintAreaMin.x > currConstreaintAreaMin.x)
+            constraintAreaMin.x = currConstreaintAreaMin.x;
+        if (constraintAreaMin.y > currConstreaintAreaMin.y)
+            constraintAreaMin.y = currConstreaintAreaMin.y;
+        if (constraintAreaMin.z > currConstreaintAreaMin.z)
+            constraintAreaMin.z = currConstreaintAreaMin.z;
+    }
+    return constraintAreaMin;
+}
+
+Coord RadioMedium::computeConstreaintAreaMax() const
+{
+    Coord constraintAreaMax;
+    if (radios.size() > 0)
+        constraintAreaMax = radios[0]->getAntenna()->getMobility()->getConstraintAreaMin();
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+    {
+        const IMobility *mobility = (*it)->getAntenna()->getMobility();
+        Coord currConstraintAreaMax = mobility->getConstraintAreaMin();
+
+        if (constraintAreaMax.x < currConstraintAreaMax.x)
+            constraintAreaMax.x = currConstraintAreaMax.x;
+        if (constraintAreaMax.y < currConstraintAreaMax.y)
+            constraintAreaMax.y = currConstraintAreaMax.y;
+        if (constraintAreaMax.z < currConstraintAreaMax.z)
+            constraintAreaMax.z = currConstraintAreaMax.z;
+    }
+    return constraintAreaMax;
+}
+
 m RadioMedium::getMaxInterferenceRangeForRadio(const IRadio* radio) const
 {
     return computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
@@ -898,3 +940,4 @@ m RadioMedium::getMaxCommunicationRangeForRadio(const IRadio* radio) const
 } // namespace physicallayer
 
 } // namespace inet
+

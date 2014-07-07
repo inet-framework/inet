@@ -23,15 +23,6 @@ module GridNeighborCache like INeighborCache
         double cellSizeX @unit(m);
         double cellSizeY @unit(m);
         double cellSizeZ @unit(m);
-
-        double constraintAreaMinX @unit(m); // min x position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinY @unit(m); // min y position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMinZ @unit(m); // min z position of the constraint area, unconstrained by default (negative infinity)
-        double constraintAreaMaxX @unit(m); // max x position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxY @unit(m); // max y position of the constraint area, unconstrained by default (positive infinity)
-        double constraintAreaMaxZ @unit(m); // max z position of the constraint area, unconstrained by default (positive infinity)
-
         double refillPeriod @unit(s);
-
         @class(GridNeighborCache);
 }

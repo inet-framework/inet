@@ -160,6 +160,9 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
 
     /** @brief Returns the current angular speed at the current simulation time. */
     virtual EulerAngles getCurrentAngularSpeed() { return EulerAngles::ZERO; }
+
+    virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
+    virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
 };
 
 } // namespace inet

@@ -28,25 +28,18 @@ void GridNeighborCache::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         // TODO: NED parameter?
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
-
-        constraintAreaMin.x = par("constraintAreaMinX");
-        constraintAreaMin.y = par("constraintAreaMinY");
-        constraintAreaMin.z = par("constraintAreaMinZ");
-        constraintAreaMax.x = par("constraintAreaMaxX");
-        constraintAreaMax.y = par("constraintAreaMaxY");
-        constraintAreaMax.z = par("constraintAreaMaxZ");
-
         cellSize.x = par("cellSizeX");
         cellSize.y = par("cellSizeY");
         cellSize.z = par("cellSizeZ");
         refillPeriod = par("refillPeriod");
-
         init();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
         fillCubeVector();
         refillCellsTimer = new cMessage("refillCellsTimer");
         maxSpeed = radioMedium->getMaxSpeed().get();
+        constraintAreaMax = radioMedium->getConstraintAreaMax();
+        constraintAreaMin = radioMedium->getConstraintAreaMin();
         if (maxSpeed != 0)
             scheduleAt(simTime() + refillPeriod, refillCellsTimer);
     }
@@ -131,7 +124,17 @@ void GridNeighborCache::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
-    grid[posToCubeId(radioPos)].push_back(radio);
+    Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
+    Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+    // If the constraintArea changed we must rebuild the grid
+    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
+    {
+        constraintAreaMin = newConstraintAreaMin;
+        constraintAreaMax = newConstraintAreaMax;
+        fillCubeVector();
+    }
+    else
+        grid[posToCubeId(radioPos)].push_back(radio);
     maxSpeed = radioMedium->getMaxSpeed().get();
     if (maxSpeed != 0 && !refillCellsTimer->isScheduled())
         scheduleAt(simTime() + refillPeriod, refillCellsTimer);
@@ -142,6 +145,13 @@ void GridNeighborCache::removeRadio(const IRadio *radio)
     Radios::iterator it = find(radios.begin(), radios.end(), radio);
     if (it != radios.end()) {
         radios.erase(it);
+        Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
+        Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
+        {
+            constraintAreaMin = newConstraintAreaMin;
+            constraintAreaMax = newConstraintAreaMax;
+        }
         maxSpeed = radioMedium->getMaxSpeed().get();
         fillCubeVector();
         if (maxSpeed == 0)

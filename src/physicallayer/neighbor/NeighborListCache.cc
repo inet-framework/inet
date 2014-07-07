@@ -22,7 +22,7 @@ namespace inet {
 namespace physicallayer {
 
 Define_Module(NeighborListCache);
-
+// TODO: maxSpeed
 void NeighborListCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {

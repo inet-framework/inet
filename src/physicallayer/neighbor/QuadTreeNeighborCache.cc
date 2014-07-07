@@ -35,16 +35,14 @@ void QuadTreeNeighborCache::initialize(int stage)
     if (stage == INITSTAGE_LOCAL) {
         radioMedium = check_and_cast<RadioMedium *>(getParentModule());
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
-        constraintAreaMax.x = par("constraintAreaMaxX");
-        constraintAreaMax.y = par("constraintAreaMaxY");
-        constraintAreaMin.x = par("constraintAreaMinX");
-        constraintAreaMin.y = par("constraintAreaMinY");
         rebuildPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         maxSpeed = radioMedium->getMaxSpeed().get();
+        constraintAreaMax = radioMedium->getConstraintAreaMax();
+        constraintAreaMin = radioMedium->getConstraintAreaMin();
         if (maxSpeed != 0)
             scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
     }
@@ -54,9 +52,7 @@ void QuadTreeNeighborCache::handleMessage(cMessage *msg)
 {
     if (!msg->isSelfMessage())
         throw cRuntimeError("This module only handles self messages");
-    delete quadTree;
-    quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
-    fillQuadTreeWithRadios();
+    rebuildQuadTree();
     scheduleAt(simTime() + rebuildPeriod, msg);
 }
 
@@ -64,10 +60,20 @@ void QuadTreeNeighborCache::addRadio(const IRadio *radio)
 {
     radios.push_back(radio);
     Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
-    quadTree->insert(check_and_cast<const cObject *>(radio), radioPos);
     maxSpeed = radioMedium->getMaxSpeed().get();
     if (maxSpeed != 0 && !rebuildQuadTreeTimer->isScheduled())
         scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
+    Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
+    Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+    // If the constraintArea changed we must rebuild the QuadTree
+    if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
+    {
+        constraintAreaMin = newConstraintAreaMin;
+        constraintAreaMax = newConstraintAreaMax;
+        rebuildQuadTree();
+    }
+    else
+        quadTree->insert(check_and_cast<const cObject *>(radio), radioPos);
 }
 
 void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
@@ -75,7 +81,17 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
     Radios::iterator it = find(radios.begin(), radios.end(), radio);
     if (it != radios.end()) {
         radios.erase(it);
-        quadTree->remove(check_and_cast<const cObject *>(radio));
+        Coord newConstraintAreaMin = radioMedium->getConstraintAreaMin();
+        Coord newConstraintAreaMax = radioMedium->getConstraintAreaMax();
+        // If the constraintArea changed we must rebuild the QuadTree
+        if (newConstraintAreaMin != constraintAreaMin || newConstraintAreaMax != constraintAreaMax)
+        {
+            constraintAreaMin = newConstraintAreaMin;
+            constraintAreaMax = newConstraintAreaMax;
+            rebuildQuadTree();
+        }
+        else
+            quadTree->remove(check_and_cast<const cObject *>(radio));
         maxSpeed = radioMedium->getMaxSpeed().get();
         if (maxSpeed == 0)
             cancelAndDelete(rebuildQuadTreeTimer);
@@ -100,6 +116,13 @@ void QuadTreeNeighborCache::fillQuadTreeWithRadios()
         if (!quadTree->insert(check_and_cast<const cObject *>(radios[i]), radioPos))
             throw cRuntimeError("Unsuccessful QuadTree building");
     }
+}
+
+void QuadTreeNeighborCache::rebuildQuadTree()
+{
+    delete quadTree;
+    quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
+    fillQuadTreeWithRadios();
 }
 
 QuadTreeNeighborCache::~QuadTreeNeighborCache()

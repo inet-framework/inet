@@ -143,6 +143,14 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     mps maxSpeed;
     /**
+     *
+     */
+    Coord constraintAreaMin;
+    /**
+     *
+     */
+    Coord constraintAreaMax;
+    /**
      * The maximum transmission power among the radio transmitters is in the
      * range [0, +infinity) or NaN if unspecified.
      */
@@ -375,7 +383,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual m computeMaxRange(W maxTransmissionPower, W minReceptionPower) const;
     virtual m computeMaxCommunicationRange() const;
     virtual m computeMaxInterferenceRange() const;
-
+    virtual Coord computeConstraintAreaMin() const;
+    virtual Coord computeConstreaintAreaMax() const;
     virtual void updateLimits();
     //@}
 
@@ -445,6 +454,8 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual mps getMaxSpeed() const { return maxSpeed; }
     virtual m getMaxInterferenceRangeForRadio(const IRadio *radio) const;
     virtual m getMaxCommunicationRangeForRadio(const IRadio *radio) const;
+    virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
+    virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
 
     virtual const Material *getMaterial() const { return &Material::air; }
     virtual const IPropagation *getPropagation() const { return propagation; }

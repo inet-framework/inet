@@ -64,6 +64,9 @@ class INET_API IMobility
 
     /** @brief Returns the current angular acceleration at the current simulation time. */
     // virtual Orientation getCurrentAngularAcceleration() = 0;
+
+    virtual Coord getConstraintAreaMax() const = 0;
+    virtual Coord getConstraintAreaMin() const = 0;
 };
 
 } // namespace inet

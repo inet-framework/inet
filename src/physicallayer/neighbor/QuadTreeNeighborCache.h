@@ -60,6 +60,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
     virtual void initialize(int stage);
     virtual void handleMessage(cMessage *msg);
     void fillQuadTreeWithRadios();
+    void rebuildQuadTree();
 
   public:
     void addRadio(const IRadio *radio);
