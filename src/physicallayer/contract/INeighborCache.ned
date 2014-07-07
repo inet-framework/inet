@@ -19,5 +19,4 @@ moduleinterface INeighborCache
 {
     parameters:
         double refillPeriod @unit(s);
-        double maxSpeed @unit(mps);
 }
