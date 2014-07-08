@@ -38,6 +38,7 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     bool is3D;
     const BonnMotionFile::Line *lines;
     int currentLine;
+    double maxSpeed; // the possible maximum speed at any future time
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -54,10 +55,14 @@ class INET_API BonnMotionMobility : public LineSegmentsMobilityBase
     /** @brief Overridden from LineSegmentsMobilityBase. */
     virtual void move();
 
+    virtual void computeMaxSpeed();
+
   public:
     BonnMotionMobility();
 
     virtual ~BonnMotionMobility();
+
+    virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
 } // namespace inet

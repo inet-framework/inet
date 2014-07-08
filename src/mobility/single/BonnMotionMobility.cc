@@ -28,6 +28,28 @@ BonnMotionMobility::BonnMotionMobility()
     is3D = false;
     lines = NULL;
     currentLine = -1;
+    maxSpeed = 0;
+}
+
+void BonnMotionMobility::computeMaxSpeed()
+{
+    const BonnMotionFile::Line& vec = *lines;
+    double lastTime = vec[0];
+    Coord lastPos(vec[1],vec[2],(is3D ? vec[3] : 0));
+    unsigned int step = (is3D ? 4: 3);
+    for (unsigned int i = step; i < vec.size(); i += step)
+    {
+        double elapsedTime = vec[i] - lastTime;
+        Coord currPos(vec[i+1], vec[i+2], (is3D ? vec[i+3] : 0));
+        double distance = currPos.distance(lastPos);
+        double speed = distance / elapsedTime;
+        if (speed > maxSpeed)
+            maxSpeed = speed;
+        lastPos.x = currPos.x;
+        lastPos.y = currPos.y;
+        lastPos.z = currPos.z;
+        lastTime = vec[i];
+    }
 }
 
 BonnMotionMobility::~BonnMotionMobility()
@@ -51,6 +73,7 @@ void BonnMotionMobility::initialize(int stage)
         if (!lines)
             throw cRuntimeError("Invalid nodeId %d -- no such line in file '%s'", nodeId, fname);
         currentLine = 0;
+        computeMaxSpeed();
     }
 }
 
