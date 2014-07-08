@@ -33,25 +33,24 @@ namespace inet {
  */
 class INET_API PcapRecorder : public cSimpleModule, protected cListener
 {
-  protected:
-    typedef std::map<simsignal_t, bool> SignalList;
-    SignalList signalList;
-    PacketDump packetDumper;
-    PcapDump pcapDumper;
-    unsigned int snaplen;
-    unsigned long first, last, space;
-    bool dumpBadFrames;
-
-  public:
-    PcapRecorder();
-    ~PcapRecorder();
-
-  protected:
-    virtual void initialize();
-    virtual void handleMessage(cMessage *msg);
-    virtual void finish();
-    virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
-    virtual void recordPacket(cPacket *msg, bool l2r);
+    protected:
+        typedef std::map<simsignal_t,bool> SignalList;
+        SignalList signalList;
+        PacketDump packetDumper;
+        PcapDump pcapDumper;
+        unsigned int snaplen;
+        unsigned int linkType;
+        unsigned long first, last, space;
+        bool dumpBadFrames;
+    public:
+        PcapRecorder();
+        ~PcapRecorder();
+    protected:
+        virtual void initialize();
+        virtual void handleMessage(cMessage *msg);
+        virtual void finish();
+        virtual void receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj);
+        virtual void recordPacket(cPacket *msg, bool l2r);
 };
 
 } // namespace inet

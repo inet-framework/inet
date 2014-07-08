@@ -51,7 +51,7 @@ void TCPDump::initialize()
     tcpdump.setOutStream(EVSTREAM);
 
     if (*file)
-        pcapDump.openPcap(file, snaplen);
+        pcapDump.openPcap(file, snaplen, 0);
 }
 
 void TCPDump::handleMessage(cMessage *msg)

@@ -29,6 +29,7 @@
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
 #endif // ifdef WITH_IPv6
 #include "EtherFrame.h"
+#include "Ieee80211Frame_m.h"
 
 namespace inet {
 
@@ -48,6 +49,7 @@ void PcapRecorder::initialize()
 {
     const char *file = par("pcapFile");
     snaplen = this->par("snaplen");
+    linkType = par("linkType");
     dumpBadFrames = par("dumpBadFrames").boolValue();
     packetDumper.setVerbose(par("verbose").boolValue());
     packetDumper.setOutStream(EVSTREAM);
@@ -100,7 +102,7 @@ void PcapRecorder::initialize()
     }
 
     if (*file)
-        pcapDumper.openPcap(file, snaplen);
+        pcapDumper.openPcap(file, snaplen, linkType);
 }
 
 void PcapRecorder::handleMessage(cMessage *msg)
@@ -132,21 +134,49 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 
     bool hasBitError = false;
 
-    EthernetIIFrame *etherFrame = NULL;
-    while (msg)
+    switch (linkType)
     {
-        if (msg->hasBitError())
-            hasBitError = true;
-        if (NULL != (etherFrame = dynamic_cast<EthernetIIFrame *>(msg))) {
-            break;
-        }
+    case 1:
+        {
+            EthernetIIFrame *etherFrame = NULL;
+            while (msg)
+            {
+                if (msg->hasBitError())
+                    hasBitError = true;
+                if (NULL != (etherFrame = dynamic_cast<EthernetIIFrame *>(msg))) {
+                    break;
+                }
 
-        msg = msg->getEncapsulatedPacket();
-    }
-    if (etherFrame && (dumpBadFrames || !hasBitError))
-    {
-        const simtime_t stime = simulation.getSimTime();
-        pcapDumper.writeEtherFrame(stime, etherFrame);
+                msg = msg->getEncapsulatedPacket();
+            }
+            if (etherFrame && (dumpBadFrames || !hasBitError))
+            {
+                const simtime_t stime = simulation.getSimTime();
+                pcapDumper.writeEtherFrame(stime, etherFrame);
+            }
+        }
+        break;
+
+    case 105:
+        {
+            Ieee80211Frame *ieee80211Frame = NULL;
+            while (msg)
+            {
+                if (msg->hasBitError())
+                    hasBitError = true;
+                if (NULL != (ieee80211Frame = dynamic_cast<Ieee80211Frame *>(msg))) {
+                    break;
+                }
+
+                msg = msg->getEncapsulatedPacket();
+            }
+            if (ieee80211Frame && (dumpBadFrames || !hasBitError))
+            {
+                const simtime_t stime = simulation.getSimTime();
+                pcapDumper.writeIeee80211Frame(stime, ieee80211Frame);
+            }
+        }
+        break;
     }
 }
 
