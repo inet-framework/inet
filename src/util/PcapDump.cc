@@ -29,6 +29,7 @@
 #include "IPProtocolId_m.h"
 
 #include "EthernetSerializer.h"
+#include "Ieee80211Serializer.h"
 
 #ifdef WITH_UDP
 #include "UDPPacket_m.h"
@@ -52,7 +53,7 @@ PcapDump::~PcapDump()
     closePcap();
 }
 
-void PcapDump::openPcap(const char* filename, unsigned int snaplen_par)
+void PcapDump::openPcap(const char* filename, unsigned int snaplen_par, unsigned int linktype)
 {
     struct pcap_hdr fh;
 
@@ -72,7 +73,7 @@ void PcapDump::openPcap(const char* filename, unsigned int snaplen_par)
     fh.thiszone = 0;
     fh.sigfigs = 0;
     fh.snaplen = snaplen;
-    fh.network = 1;
+    fh.network = linktype;
     fwrite(&fh, sizeof(fh), 1, dumpfile);
 }
 
@@ -126,6 +127,27 @@ void PcapDump::writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPack
     }
 }
 
+void PcapDump::writeIeee80211Frame(simtime_t stime, Ieee80211Frame *ieee80211Packet)
+{
+    if (!dumpfile)
+        throw cRuntimeError("Cannot write frame: pcap output file is not open");
+
+    uint8 buf[MAXBUFLENGTH];
+    memset((void*)&buf, 0, sizeof(buf));
+
+    struct pcaprec_hdr ph;
+    ph.ts_sec = (int32)stime.dbl();
+    ph.ts_usec = (uint32)((stime.dbl() - ph.ts_sec) * 1000000);
+
+    int32 serialized_ieee80211 = Ieee80211Serializer().serialize(ieee80211Packet, buf, sizeof(buf));
+    if (serialized_ieee80211 > 0) {
+        ph.orig_len = serialized_ieee80211;
+
+        ph.incl_len = ph.orig_len > snaplen ? snaplen : ph.orig_len;
+        fwrite(&ph, sizeof(ph), 1, dumpfile);
+        fwrite(buf, ph.incl_len, 1, dumpfile);
+    }
+}
 
 void PcapDump::closePcap()
 {

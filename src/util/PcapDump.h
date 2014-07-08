@@ -25,6 +25,7 @@
 #include "INETDefs.h"
 
 #include "EtherFrame.h"
+#include "Ieee80211Frame_m.h"
 
 // Foreign declarations:
 class IPv4Datagram;
@@ -59,7 +60,7 @@ class PcapDump
          * is the length that packets will be truncated to. Throws an exception
          * if the file cannot be opened.
          */
-        void openPcap(const char *filename, unsigned int snaplen);
+        void openPcap(const char *filename, unsigned int snaplen, unsigned int linktype);
 
         /**
          * Returns true if the pcap file is currently open.
@@ -72,6 +73,7 @@ class PcapDump
          */
         void writeFrame(simtime_t time, const IPv4Datagram *ipPacket);
         void writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPacket);
+        void writeIeee80211Frame(simtime_t stime, Ieee80211Frame *ieee80211Packet);
 
         /**
          * Closes the output file if it is open.
