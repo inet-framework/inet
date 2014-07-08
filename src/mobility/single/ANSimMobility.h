@@ -38,7 +38,7 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
     int nodeId;    ///< we'll have to compare this to the \<node_id> elements
     // state
     cXMLElement *nextPositionChange;    ///< points to the next \<position_change> element
-
+    double maxSpeed; // the possible maximum speed at any future time
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
@@ -59,8 +59,9 @@ class INET_API ANSimMobility : public LineSegmentsMobilityBase
 
     /** @brief Utility: extract data from given \<position_update> element. */
     virtual void extractDataFrom(cXMLElement *node);
-
+    virtual void computeMaxSpeed();
   public:
+    virtual double getMaxSpeed() const { return maxSpeed; }
     ANSimMobility();
 };
 

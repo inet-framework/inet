@@ -35,8 +35,45 @@ static cXMLElement *firstChildWithTag(cXMLElement *node, const char *tagname)
     return child;
 }
 
+
+void ANSimMobility::computeMaxSpeed()
+{
+    cXMLElement *rootElem = par("ansimTrace");
+    rootElem = rootElem->getElementByPath("mobility/position_change");
+    if (!rootElem)
+        throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
+                rootElem->getSourceLocation());
+    rootElem = findNextPositionChange(rootElem);
+    cXMLElement *destElem = firstChildWithTag(rootElem, "destination");
+    const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
+    const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
+    Coord lastPos(atof(xStr), atof(yStr), 0);
+    // first position is the initial position so we don't take it into account to compute maxSpeed
+    if (rootElem)
+        rootElem = rootElem->getNextSibling();
+    while (rootElem)
+    {
+        cXMLElement *destElem = firstChildWithTag(rootElem, "destination");
+        const char *xStr = firstChildWithTag(destElem, "xpos")->getNodeValue();
+        const char *yStr = firstChildWithTag(destElem, "ypos")->getNodeValue();
+        const char *startTimeStr = firstChildWithTag(rootElem, "start_time")->getNodeValue();
+        const char *endTimeStr = firstChildWithTag(rootElem, "end_time")->getNodeValue();
+        double elapsedTime = atof(endTimeStr) - atof(startTimeStr);
+        if (elapsedTime == 0)
+            throw cRuntimeError("Elapsed time is zero: infinite speed");
+        Coord currentPos(atof(xStr), atof(yStr), 0);
+        double distance = currentPos.distance(lastPos);
+        double currentSpeed = distance / elapsedTime;
+        if (currentSpeed > maxSpeed)
+            maxSpeed = currentSpeed;
+        lastPos = currentPos;
+        rootElem = findNextPositionChange(rootElem->getNextSibling());
+    }
+}
+
 ANSimMobility::ANSimMobility()
 {
+    maxSpeed = 0;
     nodeId = -1;
     nextPositionChange = NULL;
 }
@@ -60,6 +97,7 @@ void ANSimMobility::initialize(int stage)
         if (!nextPositionChange)
             throw cRuntimeError("Element doesn't have <mobility> child or <position_change> grandchild at %s",
                     rootElem->getSourceLocation());
+        computeMaxSpeed();
     }
 }
 
