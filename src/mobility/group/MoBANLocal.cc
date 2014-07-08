@@ -52,6 +52,7 @@ MoBANLocal::MoBANLocal()
     referencePosition = Coord::ZERO;
     radius = 0;
     speed = 0;
+    maxSpeed = 0;
 }
 
 void MoBANLocal::initialize(int stage)
@@ -66,7 +67,10 @@ void MoBANLocal::initialize(int stage)
         WATCH(speed);
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT_2)
+    {
         updateVisualRepresentation();
+        computeMaxSpeed();
+    }
 }
 
 void MoBANLocal::setInitialPosition()
@@ -107,6 +111,11 @@ void MoBANLocal::updateVisualRepresentation()
     }
 }
 
+void MoBANLocal::computeMaxSpeed()
+{
+    maxSpeed = coordinator->getMaxSpeed();
+}
+
 void MoBANLocal::setMoBANParameters(Coord referencePoint, double radius, double speed)
 {
     Enter_Method_Silent();
@@ -127,6 +136,7 @@ Coord MoBANLocal::getCurrentSpeed()
 {
     return LineSegmentsMobilityBase::getCurrentSpeed() + coordinator->getCurrentSpeed();
 }
+
 
 } // namespace inet
 

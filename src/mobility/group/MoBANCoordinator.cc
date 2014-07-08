@@ -78,6 +78,7 @@ void MoBANCoordinator::initialize(int stage)
 
         lastPosition = selectDestination();
         publishToNodes();
+        computeMaxSpeed();
     }
 }
 
@@ -694,6 +695,29 @@ void MoBANCoordinator::collectLocalModules(cModule *module)
             localModule->setCoordinator(this);
             localModules.push_back(localModule);
         }
+    }
+}
+
+void MoBANCoordinator::computeMaxSpeed()
+{
+    if (useMobilityPattern)
+    {
+        for (int i = 0; i < patternLength; i++)
+        {
+            double patSpeed = mobilityPattern[i].speed;
+            if (maxSpeed < patSpeed)
+                maxSpeed = patSpeed;
+        }
+    }
+    else
+    {
+        for (unsigned int i = 0; i < postureList.size(); i++)
+        {
+            double postureMaxSpeed = postureList[i]->getMaxSpeed();
+            if (maxSpeed < postureMaxSpeed)
+                maxSpeed = postureMaxSpeed;
+        }
+
     }
 }
 

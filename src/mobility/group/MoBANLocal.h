@@ -75,6 +75,9 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
     /** @brief The speed of local mobility of the node in the current posture. */
     double speed;
 
+    /** @brief The possible maximum speed at any future time */
+    double maxSpeed;
+
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
 
@@ -86,6 +89,7 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
 
     virtual void updateVisualRepresentation();
 
+    virtual void computeMaxSpeed();
   public:
     MoBANLocal();
 
@@ -96,6 +100,8 @@ class INET_API MoBANLocal : public LineSegmentsMobilityBase
     void setCoordinator(MoBANCoordinator *coordinator) { this->coordinator = coordinator; }
 
     void setMoBANParameters(Coord referencePoint, double radius, double speed);
+
+    virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
 } // namespace inet

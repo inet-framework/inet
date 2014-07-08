@@ -100,6 +100,9 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
     /** @brief Currently selected speed for the mobile posture */
     double speed;
 
+    /** @brief The possible maximum speed at any future time */
+    double maxSpeed;
+
     /** @brief Pointer to the file for logging MoBAN mobility pattern for future use */
     FILE *logfile;
 
@@ -204,6 +207,12 @@ class INET_API MoBANCoordinator : public LineSegmentsMobilityBase
 
     /** @brief Collect MoBAN local modules */
     void collectLocalModules(cModule *module);
+
+    void computeMaxSpeed();
+
+  public:
+    MoBANCoordinator() : maxSpeed(0) {};
+    virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
 } // namespace inet
