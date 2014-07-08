@@ -56,6 +56,7 @@ class INET_API RectangleMobility : public MovingMobilityBase
     virtual void move();
 
   public:
+    virtual double getMaxSpeed() const { return speed; }
     RectangleMobility();
 };
 

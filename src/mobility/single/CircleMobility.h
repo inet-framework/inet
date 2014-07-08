@@ -58,6 +58,7 @@ class INET_API CircleMobility : public MovingMobilityBase
     virtual void move();
 
   public:
+    virtual double getMaxSpeed() const { return speed; }
     CircleMobility();
 };
 

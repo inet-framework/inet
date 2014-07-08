@@ -61,6 +61,7 @@ class INET_API MassMobility : public LineSegmentsMobilityBase
 
   public:
     MassMobility();
+    virtual double getMaxSpeed() const;
 };
 
 } // namespace inet

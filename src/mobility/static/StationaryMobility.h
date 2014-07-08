@@ -48,6 +48,8 @@ class INET_API StationaryMobility : public MobilityBase
 
     /** @brief Returns the current speed at the current simulation time. */
     virtual Coord getCurrentSpeed() { return Coord::ZERO; }
+
+    virtual double getMaxSpeed() const { return 0; }
 };
 
 } // namespace inet
