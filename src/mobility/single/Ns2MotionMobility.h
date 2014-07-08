@@ -59,6 +59,7 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     int nodeId;
     double scrollX;
     double scrollY;
+    double maxSpeed;
 
   protected:
     void parseFile(const char *filename);
@@ -77,10 +78,11 @@ class INET_API Ns2MotionMobility : public LineSegmentsMobilityBase
     /** @brief Overridden from LineSegmentsMobilityBase.*/
     virtual void move();
 
+    virtual void computeMaxSpeed();
   public:
     Ns2MotionMobility();
-
     virtual ~Ns2MotionMobility();
+    virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
 } // namespace inet

@@ -39,6 +39,18 @@ Ns2MotionMobility::Ns2MotionMobility()
     nodeId = 0;
     scrollX = 0;
     scrollY = 0;
+    maxSpeed = 0;
+}
+
+void Ns2MotionMobility::computeMaxSpeed()
+{
+    unsigned int fileSize = ns2File->lines.size();
+    for (unsigned int i = 0; i < fileSize; i++)
+    {
+        const Ns2MotionFile::Line& vec = ns2File->lines[i];
+        if (vec[3] > maxSpeed)
+            maxSpeed = vec[3];
+    }
 }
 
 Ns2MotionMobility::~Ns2MotionMobility()
