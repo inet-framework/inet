@@ -45,6 +45,7 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     double angle;
     BorderPolicy borderPolicy;
     std::stack<long> loopVars;    // for <repeat>
+    double maxSpeed;
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -73,8 +74,13 @@ class INET_API TurtleMobility : public LineSegmentsMobilityBase
     /** @brief Advance nextStatement pointer */
     virtual void gotoNextStatement();
 
+    // XXX: In turtleScript xml config files, speed attributes may contain expressions (like uniform(10,30)),
+    // in this case, we can't compute the maxSpeed
+    virtual void computeMaxSpeed(cXMLElement *nodes);
+
   public:
     TurtleMobility();
+    virtual double getMaxSpeed() const { return maxSpeed; }
 };
 
 } // namespace inet
