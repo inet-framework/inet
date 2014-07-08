@@ -54,6 +54,7 @@ class INET_API TractorMobility : public LineSegmentsMobilityBase
 
   public:
     TractorMobility();
+    virtual double getMaxSpeed() const { return speed; }
 };
 
 } // namespace inet

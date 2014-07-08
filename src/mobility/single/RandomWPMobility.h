@@ -51,6 +51,7 @@ class INET_API RandomWPMobility : public LineSegmentsMobilityBase
 
   public:
     RandomWPMobility();
+    virtual double getMaxSpeed() const;
 };
 
 } // namespace inet
