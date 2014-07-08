@@ -80,8 +80,6 @@ void GPSR::initialize(int stage)
         // internal
         beaconTimer = new cMessage("BeaconTimer");
         purgeNeighborsTimer = new cMessage("PurgeNeighborsTimer");
-        scheduleBeaconTimer();
-        schedulePurgeNeighborsTimer();
     }
     else if (stage == INITSTAGE_ROUTING_PROTOCOLS) {
         IPSocket socket(gate("ipOut"));
@@ -91,8 +89,11 @@ void GPSR::initialize(int stage)
         host->subscribe(NF_LINK_BREAK, this);
         addressType = getSelfAddress().getAddressType();
         networkProtocol->registerHook(0, this);
-        if (isNodeUp())
+        if (isNodeUp()) {
             configureInterfaces();
+            scheduleBeaconTimer();
+            schedulePurgeNeighborsTimer();
+        }
     }
 }
 
@@ -616,13 +617,19 @@ bool GPSR::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
             configureInterfaces();
     }
     else if (dynamic_cast<NodeShutdownOperation *>(operation)) {
-        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER)
+        if (stage == NodeShutdownOperation::STAGE_APPLICATION_LAYER) {
             // TODO: send a beacon to remove ourself from peers neighbor position table
             neighborPositionTable.clear();
+            cancelEvent(beaconTimer);
+            cancelEvent(purgeNeighborsTimer);
+        }
     }
     else if (dynamic_cast<NodeCrashOperation *>(operation)) {
-        if (stage == NodeCrashOperation::STAGE_CRASH)
+        if (stage == NodeCrashOperation::STAGE_CRASH) {
             neighborPositionTable.clear();
+            cancelEvent(beaconTimer);
+            cancelEvent(purgeNeighborsTimer);
+        }
     }
     else
         throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
