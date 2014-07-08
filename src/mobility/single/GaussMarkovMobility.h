@@ -56,6 +56,7 @@ class INET_API GaussMarkovMobility : public LineSegmentsMobilityBase
     virtual void setTargetPosition();
 
   public:
+    virtual double getMaxSpeed() const { return speed; }
     GaussMarkovMobility();
 };
 

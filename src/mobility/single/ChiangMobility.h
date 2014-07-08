@@ -53,6 +53,7 @@ class INET_API ChiangMobility : public LineSegmentsMobilityBase
     virtual void move();
 
   public:
+    virtual double getMaxSpeed() const { return speed; }
     ChiangMobility();
 };
 

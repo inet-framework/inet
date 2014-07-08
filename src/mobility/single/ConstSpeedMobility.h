@@ -49,6 +49,7 @@ class INET_API ConstSpeedMobility : public LineSegmentsMobilityBase
     virtual void setTargetPosition();
 
   public:
+    virtual double getMaxSpeed() const { return speed; }
     ConstSpeedMobility();
 };
 
