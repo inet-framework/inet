@@ -154,7 +154,7 @@ class INET_API MobilityBase : public cSimpleModule, public IMobility
     virtual void handleIfOutside(BorderPolicy policy, Coord& targetPosition, Coord& speed, double& angle);
 
   public:
-    virtual double getMaxSpeed() { return NaN; }
+    virtual double getMaxSpeed() const { return NaN; }
 
     virtual EulerAngles getCurrentAngularPosition() { return EulerAngles::ZERO; }
 
