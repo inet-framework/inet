@@ -32,10 +32,10 @@ void GridNeighborCache::initialize(int stage)
         cellSize.y = par("cellSizeY");
         cellSize.z = par("cellSizeZ");
         refillPeriod = par("refillPeriod");
+        refillCellsTimer = new cMessage("refillCellsTimer");
         init();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
-        refillCellsTimer = new cMessage("refillCellsTimer");
         maxSpeed = radioMedium->getMaxSpeed().get();
         constraintAreaMax = radioMedium->getConstraintAreaMax();
         constraintAreaMin = radioMedium->getConstraintAreaMin();
