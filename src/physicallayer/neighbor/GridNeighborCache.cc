@@ -16,6 +16,7 @@
 //
 
 #include "GridNeighborCache.h"
+#include "ModuleAccess.h"
 
 namespace inet {
 
@@ -27,7 +28,7 @@ void GridNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         // TODO: NED parameter?
-        radioMedium = check_and_cast<RadioMedium *>(getParentModule());
+        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
         cellSize.x = par("cellSizeX");
         cellSize.y = par("cellSizeY");
         cellSize.z = par("cellSizeZ");

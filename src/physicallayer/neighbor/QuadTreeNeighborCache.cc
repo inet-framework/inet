@@ -16,6 +16,7 @@
 //
 
 #include "QuadTreeNeighborCache.h"
+#include "ModuleAccess.h"
 
 namespace inet {
 
@@ -33,7 +34,7 @@ QuadTreeNeighborCache::QuadTreeNeighborCache()
 void QuadTreeNeighborCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        radioMedium = check_and_cast<RadioMedium *>(getParentModule());
+        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
         rebuildQuadTreeTimer = new cMessage("rebuildQuadTreeTimer");
         rebuildPeriod = par("refillPeriod");
         maxNumOfPointsPerQuadrant = par("maxNumOfPointsPerQuadrant");

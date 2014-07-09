@@ -20,6 +20,7 @@ import inet.physicallayer.contract.INeighborCache;
 module NeighborListCache like INeighborCache
 {
     parameters:
+        string radioMediumModule = default("^");
         double range @unit(m);
         double refillPeriod @unit(s);
         @class(NeighborListCache);

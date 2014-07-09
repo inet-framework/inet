@@ -20,6 +20,7 @@ import inet.physicallayer.contract.INeighborCache;
 module QuadTreeNeighborCache like INeighborCache
 {
     parameters:
+        string radioMediumModule = default("^");
         int maxNumOfPointsPerQuadrant;
         double refillPeriod @unit(s);
         @class(QuadTreeNeighborCache);

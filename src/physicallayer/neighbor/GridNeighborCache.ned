@@ -20,6 +20,7 @@ import inet.physicallayer.contract.INeighborCache;
 module GridNeighborCache like INeighborCache
 {
     parameters:
+        string radioMediumModule = default("^");
         double cellSizeX @unit(m);
         double cellSizeY @unit(m);
         double cellSizeZ @unit(m);

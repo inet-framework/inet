@@ -16,6 +16,7 @@
 //
 
 #include "NeighborListCache.h"
+#include "ModuleAccess.h"
 
 namespace inet {
 
@@ -26,7 +27,7 @@ void NeighborListCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         // TODO: NED parameter?
-        radioMedium = check_and_cast<RadioMedium *>(getParentModule());
+        radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
         updatePeriod = par("refillPeriod");
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
