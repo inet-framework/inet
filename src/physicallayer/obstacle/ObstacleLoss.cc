@@ -113,7 +113,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
             }
             const Material *material = object->getMaterial();
             totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
-            if (!normal1.isUnspecified()) {
+            if (normal1 != Coord(0,0,0)) {
                 double angle1 = (intersection1 - intersection2).angle(normal1);
                 totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
             }
