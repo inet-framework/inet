@@ -93,11 +93,11 @@ struct ieee80211_qoscntl {
 
 struct ieee80211_frame_addr4 {
     uint8_t     i_fc[2];
-    uint8_t     i_dur[2];
+    uint16_t     i_dur;
     uint8_t     i_addr1[IEEE80211_ADDR_LEN];
     uint8_t     i_addr2[IEEE80211_ADDR_LEN];
     uint8_t     i_addr3[IEEE80211_ADDR_LEN];
-    uint8_t     i_seq[2];
+    uint16_t     i_seq;
     uint8_t     i_addr4[IEEE80211_ADDR_LEN];
 } __PACKED__;
 
@@ -450,7 +450,7 @@ struct ieee80211_frame_min {
 
 struct ieee80211_frame_rts {
     uint8_t     i_fc[2];
-    uint8_t     i_dur[2];
+    uint16_t    i_dur;
     uint8_t     i_ra[IEEE80211_ADDR_LEN];
     uint8_t     i_ta[IEEE80211_ADDR_LEN];
     /* FCS */
@@ -458,14 +458,14 @@ struct ieee80211_frame_rts {
 
 struct ieee80211_frame_cts {
     uint8_t     i_fc[2];
-    uint8_t     i_dur[2];
+    uint16_t    i_dur;
     uint8_t     i_ra[IEEE80211_ADDR_LEN];
     /* FCS */
 } __PACKED__;
 
 struct ieee80211_frame_ack {
     uint8_t     i_fc[2];
-    uint8_t     i_dur[2];
+    uint16_t    i_dur;
     uint8_t     i_ra[IEEE80211_ADDR_LEN];
     /* FCS */
 } __PACKED__;

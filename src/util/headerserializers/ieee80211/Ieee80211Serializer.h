@@ -33,7 +33,7 @@ class Ieee80211Serializer
          * Serializes an Ieee802.11Frame for transmission on the network card.
          * Returns the length of data written into buffer.
          */
-        int serialize(const Ieee80211Frame *pkt, unsigned char *buf, unsigned int bufsize);
+        int serialize(Ieee80211Frame *pkt, unsigned char *buf, unsigned int bufsize);
 
         /**
          * Puts a packet sniffed from the network card into an Ieee802.11Frame.
