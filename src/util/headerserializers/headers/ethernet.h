@@ -9,6 +9,12 @@
 #ifndef _NET_ETHERNET_H_
 #define _NET_ETHERNET_H_
 
+#ifdef _MSC_VER
+#define __PACKED__
+#else
+#define __PACKED__  __attribute__((packed))
+#endif
+
 /*
  * The number of bytes in an ethernet (MAC) address.
  */
@@ -74,6 +80,17 @@ struct  ether_header {
 struct  ether_addr {
         u_char octet[ETHER_ADDR_LEN];
 };
+
+/*
+ * Structure of SNAP header
+ */
+struct snap_header {
+    u_char dsap;
+    u_char ssap;
+    u_char ctrl;
+    uint64_t snap;
+}__PACKED__;
+
 
 extern const uint8_t    etherbroadcastaddr[ETHER_ADDR_LEN];
 
