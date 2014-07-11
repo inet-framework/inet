@@ -114,9 +114,11 @@ void PcapDump::writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPack
     memset((void*)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
-    ph.ts_sec = (int32)stime.dbl();
-    ph.ts_usec = (uint32)((stime.dbl() - ph.ts_sec) * 1000000);
-
+    simtime_t stime_usec;
+    int64 temp_sec;
+    stime.split(SIMTIME_S, temp_sec, stime_usec);
+    ph.ts_sec = (int32)temp_sec;
+    ph.ts_usec = stime_usec.inUnit(SIMTIME_US);
     int32 serialized_ethernet = EthernetSerializer().serialize(etherPacket, buf, sizeof(buf));
     if (serialized_ethernet > 0) {
         ph.orig_len = serialized_ethernet;
