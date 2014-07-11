@@ -45,6 +45,7 @@ void QuadTreeNeighborCache::initialize(int stage)
         quadTree = new QuadTree(constraintAreaMin, constraintAreaMax, maxNumOfPointsPerQuadrant, NULL);
         maxSpeed = radioMedium->getMaxSpeed().get();
         rebuildQuadTree();
+        scheduleAt(simTime() + rebuildPeriod, rebuildQuadTreeTimer);
     }
 }
 
