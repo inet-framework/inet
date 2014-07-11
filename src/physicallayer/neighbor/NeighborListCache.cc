@@ -35,6 +35,7 @@ void NeighborListCache::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
         maxSpeed = radioMedium->getMaxSpeed().get();
         updateNeighborLists();
+        scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
     }
 }
 
