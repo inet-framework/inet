@@ -21,6 +21,9 @@
 
 Define_Module(PcapParser);
 
+
+simsignal_t PcapParser::packetSentSignal = registerSignal("packetSent");
+
 PcapParser::PcapParser()
 {
     pcapFile = NULL;
@@ -45,6 +48,8 @@ void PcapParser::initialize()
 
 void PcapParser::handleMessage(cMessage *msg)
 {
+    EV_DEBUG<< "Packet sent: " << nextPkt << endl;
+    emit(packetSentSignal, nextPkt);
     send(nextPkt,"packageOut");
     readRecord();
 }

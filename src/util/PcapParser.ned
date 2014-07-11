@@ -22,6 +22,8 @@ simple PcapParser
 {
     parameters:
         string pcapFile = default(""); // the PCAP file
+        
+        @signal[packetSent];
     gates:
         output packageOut;
 }

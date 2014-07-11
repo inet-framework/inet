@@ -29,9 +29,12 @@ class PcapParser : public cSimpleModule
         cMessage* nextMsgTimer;
         cPacket *nextPkt;
 
+        static simsignal_t packetSentSignal;
+
     public:
         PcapParser();
         ~PcapParser();
+
     protected:
         virtual void initialize();
         virtual void handleMessage(cMessage *msg);
