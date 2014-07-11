@@ -88,7 +88,6 @@ void PcapParser::readRecord()
 
         nextPkt = new EthernetIIFrame;
         EthernetSerializer().parse(buf, recordHeader.incl_len, (EthernetIIFrame *)nextPkt);
-
-        scheduleAt((double)recordHeader.ts_sec+(double)recordHeader.ts_usec/1000000.0, nextMsgTimer);
+        scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
     }
 }
