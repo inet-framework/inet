@@ -29,6 +29,7 @@ import inet.nodes.wireless.AccessPoint;
 import inet.physicallayer.radio.simplified.SimplifiedRadioChannel;
 import inet.util.PcapParser;
 import inet.base.Sink;
+import inet.util.PcapRecorder;
 
 
 network PcapRecorderTest
@@ -120,10 +121,20 @@ network PcapRecorderTest80211
 network PcapParserTest
 {
     submodules:
-        PCAP: PcapParser;
+        PCAP: PcapParser {
+            @display("p=58,56");
+        }
         Sink: Sink {
-            @display("p=216");
+            @display("p=212,56");
         }
     connections:
         PCAP.packageOut --> Sink.in++;
+}
+
+network PcapToPcap extends PcapParserTest
+{
+    submodules:
+        Recorder: PcapRecorder {
+            @display("p=134,119");
+        }
 }
