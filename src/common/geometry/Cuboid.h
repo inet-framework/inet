@@ -19,30 +19,25 @@
 #define __INET_CUBOID_H
 
 #include "Shape.h"
+#include "Prism.h"
+#include "Polygon.h"
 
 namespace inet {
 
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
  */
-class INET_API Cuboid : public Shape
+class INET_API Cuboid : public Prism
 {
   protected:
     Coord size;
-
-  protected:
-    bool isInsideX(const Coord& point) const { return -size.x / 2 <= point.x && point.x <= size.x / 2; }
-    bool isInsideY(const Coord& point) const { return -size.x / 2 <= point.y && point.y <= size.y / 2; }
-    bool isInsideZ(const Coord& point) const { return -size.x / 2 <= point.z && point.z <= size.z / 2; }
 
   public:
     Cuboid(const Coord& size);
 
     const Coord& getSize() const { return size; }
     void setSize(const Coord& size) { this->size = size; }
-
     virtual Coord computeSize() const { return size; }
-    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
 } // namespace inet
