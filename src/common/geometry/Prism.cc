@@ -40,28 +40,32 @@ Coord Prism::computeSize() const
 
 void Prism::genereateFaces()
 {
-    faces.clear();
-    faces.push_back(base);
-    std::vector<Coord> basePoints = base.getPoints();
-    std::vector<Coord> translatedCopyPoints;
-    for (unsigned int i = 0; i < basePoints.size(); i++)
+    if (base.getPoints().size() > 0)
     {
-        Coord point = basePoints[i];
-        point.z += height;
-        translatedCopyPoints.push_back(point);
-    }
-    Polygon translatedCopy(translatedCopyPoints);
-    faces.push_back(translatedCopy);
-    unsigned int basePointsSize = basePoints.size();
-    for (unsigned int i = 0; i < basePointsSize; i++)
-    {
-        std::vector<Coord> facePoints;
-        facePoints.push_back(basePoints[i]);
-        facePoints.push_back(translatedCopyPoints[i]);
-        facePoints.push_back(translatedCopyPoints[(i+1) % basePointsSize]);
-        facePoints.push_back(basePoints[(i+1) % basePointsSize]);
-        Polygon face(facePoints);
-        faces.push_back(face);
+        faces.clear();
+        faces.push_back(base);
+        Coord baseNormalUnitVector = base.getNormalUnitVector();
+        std::vector<Coord> basePoints = base.getPoints();
+        std::vector<Coord> translatedCopyPoints;
+        for (unsigned int i = 0; i < basePoints.size(); i++)
+        {
+            Coord point = basePoints[i];
+            point += (baseNormalUnitVector * height);
+            translatedCopyPoints.push_back(point);
+        }
+        Polygon translatedCopy(translatedCopyPoints);
+        faces.push_back(translatedCopy);
+        unsigned int basePointsSize = basePoints.size();
+        for (unsigned int i = 0; i < basePointsSize; i++)
+        {
+            std::vector<Coord> facePoints;
+            facePoints.push_back(basePoints[i]);
+            facePoints.push_back(translatedCopyPoints[i]);
+            facePoints.push_back(translatedCopyPoints[(i+1) % basePointsSize]);
+            facePoints.push_back(basePoints[(i+1) % basePointsSize]);
+            Polygon face(facePoints);
+            faces.push_back(face);
+        }
     }
 }
 
@@ -103,6 +107,7 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
     {
         Polygon face = faces[i];
         Coord normalVec = normalVectorsForFaces[i];
+        std::cout << "normalvec: " << normalVec << endl;
         std::vector<Coord> pointList = face.getPoints();
         Coord f0 = pointList[0];
         double N = (f0 - p0) * normalVec;

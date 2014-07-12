@@ -33,6 +33,7 @@ class INET_API Prism : public Shape
     Polygon base;
     std::vector<Polygon> faces;
     std::vector<Coord> normalVectorsForFaces;
+
   protected:
     void genereateFaces();
     Coord calculateOutwardNormalVectorForFace(unsigned int i) const;
