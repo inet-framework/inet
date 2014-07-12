@@ -99,7 +99,7 @@ void NeighborListCache::removeRadio(const IRadio *radio)
         removeRadioFromNeighborLists(radio);
         radios.erase(it);
         maxSpeed = radioMedium->getMaxSpeed().get();
-        if (maxSpeed == 0)
+        if (maxSpeed == 0 && initialized())
             cancelEvent(updateNeighborListsTimer);
     }
     else {
