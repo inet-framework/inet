@@ -23,8 +23,11 @@ Prism::Prism(double height, const Polygon& base) :
     height(height),
     base(base)
 {
-    genereateFaces();
-    calculateOutwardNormalVectors();
+    if (height != 0)
+    {
+        genereateFaces();
+        calculateOutwardNormalVectors();
+    }
 }
 
 Coord Prism::computeSize() const
@@ -97,55 +100,60 @@ void Prism::calculateOutwardNormalVectors()
 
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
-    // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
-    Coord p0 = lineSegment.getPoint1();
-    Coord p1 = lineSegment.getPoint2();
-    Coord segmentDirection = p1 - p0;
-    double tE = 0;
-    double tL = 1;
-    for (unsigned int i = 0; i < faces.size(); i++)
+    if (height > 0)
     {
-        Polygon face = faces[i];
-        Coord normalVec = normalVectorsForFaces[i];
-        std::vector<Coord> pointList = face.getPoints();
-        Coord f0 = pointList[0];
-        double N = (f0 - p0) * normalVec;
-        double D = segmentDirection * normalVec;
-        if (D < 0)
+        // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
+        Coord p0 = lineSegment.getPoint1();
+        Coord p1 = lineSegment.getPoint2();
+        Coord segmentDirection = p1 - p0;
+        double tE = 0;
+        double tL = 1;
+        for (unsigned int i = 0; i < faces.size(); i++)
         {
-            double t = N / D;
-            if (t > tE)
+            Polygon face = faces[i];
+            Coord normalVec = normalVectorsForFaces[i];
+            std::vector<Coord> pointList = face.getPoints();
+            Coord f0 = pointList[0];
+            double N = (f0 - p0) * normalVec;
+            double D = segmentDirection * normalVec;
+            if (D < 0)
             {
-                tE = t;
-                normal1 = normalVec;
-                if (tE > tL)
+                double t = N / D;
+                if (t > tE)
+                {
+                    tE = t;
+                    normal1 = normalVec;
+                    if (tE > tL)
+                        return false;
+                }
+            }
+            else if (D > 0)
+            {
+                double t = N / D;
+                if (t < tL)
+                {
+                    tL = t;
+                    normal2 = normalVec;
+                    if (tL < tE)
+                        return false;
+                }
+            }
+            else
+            {
+                if (N < 0)
                     return false;
             }
         }
-        else if (D > 0)
-        {
-            double t = N / D;
-            if (t < tL)
-            {
-                tL = t;
-                normal2 = normalVec;
-                if (tL < tE)
-                    return false;
-            }
-        }
-        else
-        {
-            if (N < 0)
-                return false;
-        }
+        if (tE == 0)
+            normal1 = Coord(0,0,0);
+        if (tL == 1)
+            normal2 = Coord(0,0,0);
+        intersection1 = p0 + segmentDirection * tE;
+        intersection2 = p0 + segmentDirection * tL;
+        return true;
     }
-    if (tE == 0)
-        normal1 = Coord(0,0,0);
-    if (tL == 1)
-        normal2 = Coord(0,0,0);
-    intersection1 = p0 + segmentDirection * tE;
-    intersection2 = p0 + segmentDirection * tL;
-    return true;
+    else
+        return base.computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
 }
 
 void inet::Prism::setHeight(double height)
@@ -153,8 +161,11 @@ void inet::Prism::setHeight(double height)
     if (height != this->height)
     {
         this->height = height;
-        genereateFaces();
-        calculateOutwardNormalVectors();
+        if (height != 0)
+        {
+            genereateFaces();
+            calculateOutwardNormalVectors();
+        }
     }
 }
 
@@ -163,8 +174,11 @@ void inet::Prism::setBase(const Polygon& base)
     if (base.getPoints() != this->base.getPoints())
     {
         this->base = base;
-        genereateFaces();
-        calculateOutwardNormalVectors();
+        if (height != 0)
+        {
+            genereateFaces();
+            calculateOutwardNormalVectors();
+        }
     }
 }
 
