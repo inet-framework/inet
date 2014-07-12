@@ -19,9 +19,12 @@
 
 namespace inet {
 
-Polygon::Polygon(const std::vector<Coord>& points) :
-        points(points)
+Polygon::Polygon(const std::vector<Coord>& points)
 {
+    if (points.size() < 3)
+        throw cRuntimeError("A Euclidean polygon has at least three points");
+    this->points = points;
+}
 }
 
 } // namespace inet
