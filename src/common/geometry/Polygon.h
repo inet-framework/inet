@@ -19,20 +19,25 @@
 #define __INET_POLYGON_H
 
 #include "Coord.h"
+#include "LineSegment.h"
+#include "Shape.h"
 
 namespace inet {
 
-class INET_API Polygon
+class INET_API Polygon : public Shape
 {
   protected:
     std::vector<Coord> points;
+    Coord getEdgeOutwardNormalVector(const Coord& edgeP1, const Coord& edgeP2) const;
 
   public:
     Polygon() {}
     Polygon(const std::vector<Coord>& points);
 
     const std::vector<Coord>& getPoints() const { return points; }
+    virtual Coord computeSize() const;
     Coord getNormalUnitVector() const;
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
 } // namespace inet
