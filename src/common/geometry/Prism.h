@@ -43,10 +43,10 @@ class INET_API Prism : public Shape
     Prism(double height, const Polygon& base);
 
     double getHeight() const { return height; }
-    void setHeight(double height) { this->height = height; }
+    void setHeight(double height);
 
     const Polygon& getBase() const { return base; }
-    void setBase(const Polygon& base) { this->base = base; }
+    void setBase(const Polygon& base);
 
     virtual Coord computeSize() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;

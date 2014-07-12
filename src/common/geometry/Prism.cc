@@ -40,6 +40,7 @@ Coord Prism::computeSize() const
 
 void Prism::genereateFaces()
 {
+    faces.clear();
     faces.push_back(base);
     std::vector<Coord> basePoints = base.getPoints();
     std::vector<Coord> translatedCopyPoints;
@@ -85,6 +86,7 @@ Coord Prism::calculateOutwardNormalVectorForFace(unsigned int i) const
 
 void Prism::calculateOutwardNormalVectors()
 {
+    normalVectorsForFaces.clear();
     for (unsigned int i = 0; i < faces.size(); i++)
         normalVectorsForFaces.push_back(calculateOutwardNormalVectorForFace(i));
 }
@@ -142,5 +144,24 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
     return true;
 }
 
-} // namespace inet
+void inet::Prism::setHeight(double height)
+{
+    if (height != this->height)
+    {
+        this->height = height;
+        genereateFaces();
+        calculateOutwardNormalVectors();
+    }
+}
 
+void inet::Prism::setBase(const Polygon& base)
+{
+    if (base.getPoints() != this->base.getPoints())
+    {
+        this->base = base;
+        genereateFaces();
+        calculateOutwardNormalVectors();
+    }
+}
+
+} // namespace inet
