@@ -42,16 +42,17 @@ class SpatialGrid
           virtual ~SpatialGridVisitor() {}
       };
 
-      class Integer3Tuple
+      template<typename T>
+      class ThreeTuple
       {
           public:
-              int x;
-              int y;
-              int z;
-              Integer3Tuple() : x(0), y(0), z(0) {}
-              Integer3Tuple(int xNum, int yNum, int zNum) :
+              T x;
+              T y;
+              T z;
+              ThreeTuple() : x(0), y(0), z(0) {}
+              ThreeTuple(T xNum, T yNum, T zNum) :
                   x(xNum), y(yNum), z(zNum) {}
-              int& operator[](int i)
+              T& operator[](int i)
               {
                 switch (i)
                 {
@@ -62,7 +63,7 @@ class SpatialGrid
                         throw cRuntimeError("Out of range with index: %d", i);
                 }
               }
-              const int& operator[](int i) const
+              const T& operator[](int i) const
               {
                 switch (i)
                 {
@@ -85,16 +86,16 @@ class SpatialGrid
         Coord voxelSizes;
         Coord constraintAreaSideLengths;
         Coord constraintAreaMin, constraintAreaMax;
-        Integer3Tuple numVoxels;
+        ThreeTuple<int> numVoxels;
 
    protected:
         Coord calculateConstraintAreaSideLengths() const;
-        Integer3Tuple calculateNumberOfVoxels() const;
+        ThreeTuple<int> calculateNumberOfVoxels() const;
         unsigned int calculateGridVectorLength() const;
-        Integer3Tuple decodeRowMajorIndex(unsigned int ind) const;
-        unsigned int rowMajorIndex(const Integer3Tuple& indices) const;
+        ThreeTuple<int> decodeRowMajorIndex(unsigned int ind) const;
+        unsigned int rowMajorIndex(const ThreeTuple<int>& indices) const;
         unsigned int coordToRowMajorIndex(Coord pos) const;
-        Integer3Tuple coordToMatrixIndices(Coord pos) const;
+        ThreeTuple<int> coordToMatrixIndices(Coord pos) const;
 
     public:
         bool insertPoint(const cObject *point, Coord pos);

@@ -59,9 +59,9 @@ void SpatialGrid::rangeQuery(Coord pos, double range, const SpatialGridVisitor *
     int xVoxel = constraintAreaSideLengths.x == 0 ? 0 : ceil((range * numVoxels[0]) / constraintAreaSideLengths.x);
     int yVoxel = constraintAreaSideLengths.y == 0 ? 0 : ceil((range * numVoxels[1]) / constraintAreaSideLengths.y);
     int zVoxel = constraintAreaSideLengths.z == 0 ? 0 : ceil((range * numVoxels[2]) / constraintAreaSideLengths.z);
-    Integer3Tuple voxels(xVoxel, yVoxel, zVoxel);
-    Integer3Tuple matrixIndices = coordToMatrixIndices(pos);
-    Integer3Tuple start, end;
+    ThreeTuple<int> voxels(xVoxel, yVoxel, zVoxel);
+    ThreeTuple<int> matrixIndices = coordToMatrixIndices(pos);
+    ThreeTuple<int> start, end;
     for (unsigned int i = 0; i < 3; i++)
     {
         start[i] = matrixIndices[i] - voxels[i] < 0 ? 0 : matrixIndices[i] - voxels[i];
@@ -74,7 +74,7 @@ void SpatialGrid::rangeQuery(Coord pos, double range, const SpatialGridVisitor *
     for (int i = start[0]; i <= end[0]; i++) {
         for (int j = start[1]; j <= end[1]; j++) {
             for (int k = start[2]; k <= end[2]; k++) {
-                int voxelIndex = rowMajorIndex(Integer3Tuple(i,j,k));
+                int voxelIndex = rowMajorIndex(ThreeTuple<int>(i,j,k));
                 const Voxel& neighborVoxel = grid[voxelIndex];
                 for (Voxel::const_iterator it = neighborVoxel.begin(); it != neighborVoxel.end(); it++)
                     visitor->visitor(*it);
@@ -94,9 +94,9 @@ Coord SpatialGrid::calculateConstraintAreaSideLengths() const
             constraintAreaMax.z - constraintAreaMin.z);
 }
 
-SpatialGrid::Integer3Tuple SpatialGrid::calculateNumberOfVoxels() const
+SpatialGrid::ThreeTuple<int> SpatialGrid::calculateNumberOfVoxels() const
 {
-    return Integer3Tuple(constraintAreaSideLengths.x / voxelSizes.x, constraintAreaSideLengths.y / voxelSizes.y,
+    return ThreeTuple<int>(constraintAreaSideLengths.x / voxelSizes.x, constraintAreaSideLengths.y / voxelSizes.y,
             constraintAreaSideLengths.z / voxelSizes.z);
 }
 
@@ -109,9 +109,9 @@ unsigned int SpatialGrid::calculateGridVectorLength() const
     return gridVectorLength;
 }
 
-SpatialGrid::Integer3Tuple SpatialGrid::decodeRowMajorIndex(unsigned int ind) const
+SpatialGrid::ThreeTuple<int> SpatialGrid::decodeRowMajorIndex(unsigned int ind) const
 {
-    Integer3Tuple indices;
+    ThreeTuple<int> indices;
     for (unsigned int k = 0; k < 3; k++)
     {
         unsigned int prodDim = 1;
@@ -124,7 +124,7 @@ SpatialGrid::Integer3Tuple SpatialGrid::decodeRowMajorIndex(unsigned int ind) co
     return indices;
 }
 
-unsigned int SpatialGrid::rowMajorIndex(const Integer3Tuple& indices) const
+unsigned int SpatialGrid::rowMajorIndex(const ThreeTuple<int>& indices) const
 {
     int ind = 0;
     for (unsigned int k = 0; k < 3; k++)
@@ -149,12 +149,12 @@ void SpatialGrid::clearGrid()
         grid[i].clear();
 }
 
-SpatialGrid::Integer3Tuple SpatialGrid::coordToMatrixIndices(Coord pos) const
+SpatialGrid::ThreeTuple<int> SpatialGrid::coordToMatrixIndices(Coord pos) const
 {
     int xCoord = voxelSizes.x == 0 ? 0 : floor(pos.x / voxelSizes.x);
     int yCoord = voxelSizes.y == 0 ? 0 : floor(pos.y / voxelSizes.y);
     int zCoord = voxelSizes.z == 0 ? 0 : floor(pos.z / voxelSizes.z);
-    return Integer3Tuple(xCoord, yCoord, zCoord);
+    return ThreeTuple<int>(xCoord, yCoord, zCoord);
 }
 
 } /* namespace inet */
