@@ -26,13 +26,12 @@ Define_Module(NeighborListCache);
 void NeighborListCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        // TODO: NED parameter?
         radioMedium = getModuleFromPar<RadioMedium>(par("radioMediumModule"), this);
         updatePeriod = par("refillPeriod");
         range = par("range");
         updateNeighborListsTimer = new cMessage("updateNeighborListsTimer");
     }
-    else if (stage == INITSTAGE_LINK_LAYER_2) {    // TODO: is it the correct stage to do this?
+    else if (stage == INITSTAGE_LINK_LAYER_2) {
         maxSpeed = radioMedium->getMaxSpeed().get();
         updateNeighborLists();
         scheduleAt(simTime() + updatePeriod, updateNeighborListsTimer);
