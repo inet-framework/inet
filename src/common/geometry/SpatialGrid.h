@@ -83,7 +83,7 @@ class SpatialGrid
     protected:
         Grid grid;
         unsigned int gridVectorLength;
-        Coord voxelSizes;
+        ThreeTuple<double> voxelSizes;
         Coord constraintAreaSideLengths;
         Coord constraintAreaMin, constraintAreaMax;
         ThreeTuple<int> numVoxels;

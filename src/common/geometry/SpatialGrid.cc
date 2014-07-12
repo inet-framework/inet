@@ -21,7 +21,7 @@ namespace inet {
 
 SpatialGrid::SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constraintAreaMax)
 {
-    this->voxelSizes = voxelSizes;
+    this->voxelSizes = ThreeTuple<double>(voxelSizes.x, voxelSizes.y, voxelSizes.z);
     this->constraintAreaMin = constraintAreaMin;
     this->constraintAreaMax = constraintAreaMax;
     constraintAreaSideLengths = calculateConstraintAreaSideLengths();
