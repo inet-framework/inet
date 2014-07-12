@@ -107,7 +107,6 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
     {
         Polygon face = faces[i];
         Coord normalVec = normalVectorsForFaces[i];
-        std::cout << "normalvec: " << normalVec << endl;
         std::vector<Coord> pointList = face.getPoints();
         Coord f0 = pointList[0];
         double N = (f0 - p0) * normalVec;
