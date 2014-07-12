@@ -25,6 +25,18 @@ Polygon::Polygon(const std::vector<Coord>& points)
         throw cRuntimeError("A Euclidean polygon has at least three points");
     this->points = points;
 }
+
+Coord Polygon::getNormalUnitVector() const
+{
+    Coord point1 = points[0];
+    Coord point2 = points[1];
+    Coord point3 = points[2];
+    Coord vectorA = point2 - point1;
+    Coord vectorB = point3 - point1;
+    Coord vectorC(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
+                 vectorA.z * vectorB.x - vectorA.x * vectorB.z,
+                 vectorA.x * vectorB.y - vectorA.y * vectorB.x);
+    return vectorC / vectorC.length();
 }
 
 } // namespace inet
