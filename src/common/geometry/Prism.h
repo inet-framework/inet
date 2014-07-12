@@ -39,6 +39,7 @@ class INET_API Prism : public Shape
     void calculateOutwardNormalVectors();
 
   public:
+    Prism() : height(0) {}
     Prism(double height, const Polygon& base);
 
     double getHeight() const { return height; }
