@@ -97,9 +97,9 @@ class SpatialGrid
         Integer3Tuple coordToMatrixIndices(Coord pos) const;
 
     public:
-        bool insert(const cObject *point, Coord pos);
-        bool remove(const cObject *point);
-        bool move(const cObject *point, Coord newPos);
+        bool insertPoint(const cObject *point, Coord pos);
+        bool removePoint(const cObject *point);
+        bool movePoint(const cObject *point, Coord newPos);
         void clearGrid();
         void rangeQuery(Coord pos, double range, const SpatialGridVisitor *visitor) const;
         void lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const;

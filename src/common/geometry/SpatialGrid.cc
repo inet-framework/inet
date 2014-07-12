@@ -32,7 +32,7 @@ SpatialGrid::SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constr
     grid.resize(gridVectorLength);
 }
 
-bool SpatialGrid::insert(const cObject *point, Coord pos)
+bool SpatialGrid::insertPoint(const cObject *point, Coord pos)
 {
     unsigned int ind = coordToRowMajorIndex(pos);
     if (ind >= gridVectorLength)
@@ -44,12 +44,12 @@ bool SpatialGrid::insert(const cObject *point, Coord pos)
     return true;
 }
 
-bool SpatialGrid::remove(const cObject *point)
+bool SpatialGrid::removePoint(const cObject *point)
 {
     throw cRuntimeError("Unimplemented");
 }
 
-bool SpatialGrid::move(const cObject *point, Coord newPos)
+bool SpatialGrid::movePoint(const cObject *point, Coord newPos)
 {
     throw cRuntimeError("Unimplemented");
 }

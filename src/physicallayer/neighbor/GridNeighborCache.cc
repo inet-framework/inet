@@ -51,7 +51,7 @@ void GridNeighborCache::fillCubeVector()
     for (unsigned int i = 0; i < radios.size(); i++) {
         const IRadio *radio = radios[i];
         Coord radioPos = radio->getAntenna()->getMobility()->getCurrentPosition();
-        grid->insert(check_and_cast<const cObject *>(radio), radioPos);
+        grid->insertPoint(check_and_cast<const cObject *>(radio), radioPos);
     }
 }
 
@@ -83,7 +83,7 @@ void GridNeighborCache::addRadio(const IRadio *radio)
             fillCubeVector();
     }
     else if(initialized())
-        grid->insert(check_and_cast<const cObject *>(radio),radioPos);
+        grid->insertPoint(check_and_cast<const cObject *>(radio),radioPos);
 }
 
 void GridNeighborCache::removeRadio(const IRadio *radio)
