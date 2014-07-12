@@ -32,6 +32,7 @@ Prism::Prism(double height, const Polygon& base) :
 
 Coord Prism::computeSize() const
 {
+    // TODO: translatedCopy
     Coord min;
     Coord max;
     for (std::vector<Coord>::const_iterator it = base.getPoints().begin(); it != base.getPoints().end(); it++) {
