@@ -135,7 +135,9 @@ QuadTreeNeighborCache::~QuadTreeNeighborCache()
 
 void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject *radio)
 {
-    radioMedium->sendToRadio(transmitter, check_and_cast<const IRadio *>(radio), frame);
+    const IRadio *neighbor = check_and_cast<IRadio *>(radio);
+    if (neighbor->getId() != transmitter->getId())
+        radioMedium->sendToRadio(transmitter, neighbor, frame);
 }
 
 } // namespace physicallayer
