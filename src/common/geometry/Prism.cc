@@ -51,6 +51,8 @@ Coord Prism::computeSize() const
 
 void Prism::genereateFaces()
 {
+    if (height == 0)
+        throw cRuntimeError("A polygon has no faces");
     if (base.getPoints().size() > 0)
     {
         faces.clear();
