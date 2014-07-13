@@ -19,6 +19,11 @@
 
 namespace inet {
 
+bool SpatialGrid::insertShape(const Shape *shape)
+{
+    throw cRuntimeError("Unimplemented");
+}
+
 SpatialGrid::SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constraintAreaMax)
 {
     this->voxelSizes = ThreeTuple<double>(voxelSizes.x, voxelSizes.y, voxelSizes.z);
@@ -85,7 +90,11 @@ void SpatialGrid::rangeQuery(Coord pos, double range, const SpatialGridVisitor *
 
 void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const
 {
-    throw cRuntimeError("Unimplemented");
+    for (LineSegmentIterator it(lineSegment, voxelSizes, numVoxels); !it.end(); ++it)
+    {
+        ThreeTuple<int> ind = it.getMatrixIndices();
+        unsigned int voxelIndex = rowMajorIndex(ind);
+    }
 }
 
 Coord SpatialGrid::calculateConstraintAreaSideLengths() const
@@ -155,6 +164,65 @@ SpatialGrid::ThreeTuple<int> SpatialGrid::coordToMatrixIndices(Coord pos) const
     int yCoord = voxelSizes.y == 0 ? 0 : floor(pos.y / voxelSizes.y);
     int zCoord = voxelSizes.z == 0 ? 0 : floor(pos.z / voxelSizes.z);
     return ThreeTuple<int>(xCoord, yCoord, zCoord);
+}
+
+
+SpatialGrid::LineSegmentIterator::LineSegmentIterator(const LineSegment &lineSegment, const ThreeTuple<double> &voxelSizes, const ThreeTuple<int>& numVoxels)
+{
+    reachedEnd = false;
+    Coord p0 = lineSegment.getPoint1();
+    Coord p1 = lineSegment.getPoint2();
+    Coord segmentDirection = p1 - p0;
+    ThreeTuple<double> point0 = ThreeTuple<double>(p0.x, p0.y, p0.z);
+    ThreeTuple<double> point1 = ThreeTuple<double>(p1.x, p1.y, p1.z);
+    ThreeTuple<double> direction = ThreeTuple<double>(segmentDirection.x, segmentDirection.y, segmentDirection.z);
+    for (int i = 0; i < 3; i++)
+    {
+        index[i] = voxelSizes[i] == 0 ? 0 : floor(point0[i] / voxelSizes[i]);
+        endPoint[i] = voxelSizes[i] == 0 ? 0 : floor(point1[i] / voxelSizes[i]);
+        tDelta[i] = voxelSizes[i] / std::abs(direction[i]);
+        double ithdirection = direction[i];
+        if (ithdirection > 0)
+            step[i] = 1;
+        else if (ithdirection < 0)
+            step[i] = -1;
+        else
+            step[i] = 0;
+        double d = point0[i] - index[i] * voxelSizes[i];
+        if (step[i] > 0)
+        {
+            d = voxelSizes[i] - d;
+        }
+        ASSERT(d >= 0 && d <= voxelSizes[i]);
+        if (ithdirection != 0)
+            tExit[i] = d / std::abs(ithdirection);
+        else
+            tExit[i] = std::numeric_limits<double>::max();
+    }
+}
+
+SpatialGrid::LineSegmentIterator& SpatialGrid::LineSegmentIterator::operator++()
+{
+    if (index.x != endPoint.x || index.y != endPoint.y || index.z != endPoint.z)
+    {
+        int axis = 0;
+        if (tExit.x < tExit.y)
+        {
+            if (tExit.x < tExit.z)
+                axis = 0;
+            else
+                axis = 2;
+        }
+        else if (tExit.y < tExit.z)
+            axis = 1;
+        else
+            axis = 2;
+        index[axis] += step[axis];
+        tExit[axis] += tDelta[axis];
+    }
+    else
+        reachedEnd = true;
+    return *this;
 }
 
 } /* namespace inet */

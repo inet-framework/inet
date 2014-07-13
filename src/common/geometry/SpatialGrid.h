@@ -76,6 +76,26 @@ class SpatialGrid
               }
       };
 
+    protected:
+        // This class implements a LineSegmentIterator based on the G3D library's RayGridIterator class
+        // http://graphics.cs.williams.edu/courses/cs371/f10/G3D/manual/class_g3_d_1_1_ray_grid_iterator.html
+        class LineSegmentIterator
+        {
+            protected:
+                ThreeTuple<int> index;
+                ThreeTuple<int> endPoint;
+                ThreeTuple<int> step;
+                ThreeTuple<double> tDelta;
+                ThreeTuple<double> tExit;
+                LineSegmentIterator *endIter;
+                bool reachedEnd;
+            public:
+                LineSegmentIterator(const LineSegment &lineSegment, const ThreeTuple<double>& voxelSizes, const ThreeTuple<int>& numVoxels);
+                LineSegmentIterator& operator++();
+                const ThreeTuple<int>& getMatrixIndices() const { return index; }
+                bool end() const { return reachedEnd; }
+        };
+
     public:
         typedef std::list<const cObject *> Voxel;
         typedef std::vector<Voxel> Grid;
