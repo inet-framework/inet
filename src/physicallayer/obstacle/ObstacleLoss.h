@@ -21,6 +21,7 @@
 #include "IObstacleLoss.h"
 #include "PhysicalEnvironment.h"
 #include "TrailFigure.h"
+#include "SpatialGrid.h"
 
 namespace inet {
 
@@ -30,6 +31,25 @@ namespace physicallayer {
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
   protected:
+    class ObstacleLossVisitor: public SpatialGrid::SpatialGridVisitor
+    {
+        protected:
+            mutable double totalLoss;
+            const ObstacleLoss *obstacleLoss;
+            Hz frequency;
+            Coord transmissionPosition;
+            Coord receptionPosition;
+        public:
+            ObstacleLossVisitor(const ObstacleLoss *obstacleLoss, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) :
+                totalLoss(1), obstacleLoss(obstacleLoss), frequency(frequency),
+                transmissionPosition(transmissionPosition),
+                receptionPosition(receptionPosition) {}
+            void visit(const cObject *object) const;
+            double getTotalLoss() const { return totalLoss; }
+            LineSegment getLineSegment() const { return LineSegment(transmissionPosition, receptionPosition); }
+    };
+
+    protected:
     IRadioMedium *medium;
     PhysicalEnvironment *environment;
     bool leaveIntersectionTrail;
@@ -45,7 +65,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     ObstacleLoss();
 
     virtual void printToStream(std::ostream& stream) const;
-    virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const;
+    virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
 };
 
 } // namespace physicallayer
