@@ -135,7 +135,7 @@ void RadioMedium::initialize(int stage)
             canvas->addFigure(communcationTrail, canvas->findFigure("submodules"));
         }
     }
-    else if (stage == INITSTAGE_LINK_LAYER) {
+    else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         updateLimits();
     }
     else if (stage == INITSTAGE_LAST) {
@@ -616,8 +616,7 @@ void RadioMedium::addRadio(const IRadio *radio)
         setCachedArrival(radio, transmission, arrival);
         setCachedListening(radio, transmission, listening);
     }
-    if (initialized())
-        updateLimits();
+    updateLimits();
     cModule *radioModule = const_cast<cModule *>(check_and_cast<const cModule *>(radio));
     if (radioModeFilter)
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
