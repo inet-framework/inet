@@ -15,7 +15,6 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Ieee80211RadioMedium.h"
 #include "Ieee80211MgmtSTA.h"
 
 #include "IRadioMedium.h"

@@ -27,5 +27,4 @@ module Ieee80211RadioMedium extends ScalarRadioMedium
         minReceptionPower = default(-85dBm);
         minInterferencePower = default(-110dBm);
         backgroundNoise.power = default(-110dBm);
-        @class(Ieee80211RadioMedium);
 }
