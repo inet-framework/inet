@@ -509,7 +509,7 @@ std::string InetPacketPrinter2::formatRadioFrame(RadioFrame *packet) const
     if (scalarTransmission)
         os << " on " << scalarTransmission->getCarrierFrequency().get() / 1e6 << "MHz, ";
     // TODO: revive
-    // const Ieee80211RadioSignalTransmission *ieee80211Transmission = dynamic_cast<const Ieee80211RadioSignalTransmission *>(transmission);
+    // const Ieee80211Transmission *ieee80211Transmission = dynamic_cast<const Ieee80211Transmission *>(transmission);
     // if (ieee80211Transmission)
     //     os << "ch=" << ieee80211Transmission->getChannelNumber() << ", ";
     os << "duration=" << SIMTIME_DBL(packet->getDuration()) * 1000 << "ms";
