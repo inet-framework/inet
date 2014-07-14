@@ -45,6 +45,8 @@ class INET_API IdealTransmitter : public TransmitterBase
 
     virtual void printToStream(std::ostream& stream) const;
     virtual const ITransmission *createTransmission(const IRadio *radio, const cPacket *packet, const simtime_t startTime) const;
+    virtual m getMaxCommunicationRange() const { return maxCommunicationRange; }
+    virtual m getMaxInterferenceRange() const { return maxInterferenceRange; }
 };
 
 } // namespace physicallayer
