@@ -18,13 +18,13 @@
 #ifndef __INET_IEEE80211RADIO_H
 #define __INET_IEEE80211RADIO_H
 
-#include "ScalarRadio.h"
+#include "Radio.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API Ieee80211Radio : public ScalarRadio
+class INET_API Ieee80211Radio : public Radio
 {
   protected:
     int channelNumber;
@@ -37,6 +37,7 @@ class INET_API Ieee80211Radio : public ScalarRadio
   public:
     Ieee80211Radio();
 
+    virtual void setBitrate(bps newBitrate);
     virtual void setChannelNumber(int newChannelNumber);
 };
 

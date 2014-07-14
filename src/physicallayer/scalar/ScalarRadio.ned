@@ -29,5 +29,5 @@ module ScalarRadio extends Radio
         receiverType = default("ScalarReceiver");
         *.carrierFrequency = carrierFrequency;
         *.bandwidth = bandwidth;
-        @class(ScalarRadio);
+        @class(Radio);
 }
