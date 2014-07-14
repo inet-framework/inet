@@ -19,19 +19,19 @@
 
 namespace inet {
 
-TrailFigure::TrailFigure(int maxChildCount, const char *name) :
+TrailFigure::TrailFigure(int maxCount, const char *name) :
 #ifdef __CCANVAS_H
     cGroupFigure(name),
 #endif
-    maxChildCount(maxChildCount)
+    maxCount(maxCount)
 {}
 
 #ifdef __CCANVAS_H
-void TrailFigure::addChildFigure(cFigure *figure)
+void TrailFigure::addFigure(cFigure *figure)
 {
-    cGroupFigure::addChildFigure(figure);
-    if (getNumChildFigures() > maxChildCount)
-        delete removeChildFigure(0);
+    cGroupFigure::addFigure(figure);
+    if (getNumFigures() > maxCount)
+        delete removeFigure(0);
 }
 #endif
 

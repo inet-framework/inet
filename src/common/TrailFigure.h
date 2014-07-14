@@ -28,13 +28,13 @@ class INET_API TrailFigure
 #endif
 {
   protected:
-    int maxChildCount;
+    int maxCount;
 
   public:
-    TrailFigure(int maxChildCount, const char *name = NULL);
+    TrailFigure(int maxCount, const char *name = NULL);
 
 #ifdef __CCANVAS_H
-    virtual void addChildFigure(cFigure *figure);
+    virtual void addFigure(cFigure *figure);
 #endif
 };
 

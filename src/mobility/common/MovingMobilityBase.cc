@@ -85,19 +85,19 @@ void MovingMobilityBase::updateVisualRepresentation()
 #ifdef __CCANVAS_H
         Coord endPosition = lastPosition;
         Coord startPosition;
-        if (movementTrail->getNumChildFigures() == 0)
+        if (movementTrail->getNumFigures() == 0)
             startPosition = endPosition;
         else {
-            cFigure::Point previousEnd = static_cast<cLineFigure *>(movementTrail->getChildFigure(movementTrail->getNumChildFigures() - 1))->getEnd();
+            cFigure::Point previousEnd = static_cast<cLineFigure *>(movementTrail->getFigure(movementTrail->getNumFigures() - 1))->getEnd();
             startPosition.x = previousEnd.x;
             startPosition.y = previousEnd.y;
         }
-        if (movementTrail->getNumChildFigures() == 0 || startPosition.distance(endPosition) > 10) {
+        if (movementTrail->getNumFigures() == 0 || startPosition.distance(endPosition) > 10) {
             cLineFigure *movementLine = new cLineFigure();
             movementLine->setStart(PhysicalEnvironment::computeCanvasPoint(startPosition));
             movementLine->setEnd(PhysicalEnvironment::computeCanvasPoint(endPosition));
             movementLine->setLineColor(cFigure::BLACK);
-            movementTrail->addChildFigure(movementLine);
+            movementTrail->addFigure(movementLine);
         }
 #endif
     }

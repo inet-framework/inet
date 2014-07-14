@@ -384,11 +384,12 @@ void PhysicalEnvironment::updateCanvas()
             const Coord& size = cuboid->getSize();
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
-            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
+            cFigure::Point topLeft = computeCanvasPoint(position - size / 2, *viewAngle);
+            cFigure::Point bottomRight = computeCanvasPoint(position + size / 2, *viewAngle);
+            figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
+            objectsLayer->addFigure(figure);
         }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
@@ -396,11 +397,12 @@ void PhysicalEnvironment::updateCanvas()
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
-            figure->setP1(computeCanvasPoint(position - Coord(radius, radius, radius), *viewAngle));
-            figure->setP2(computeCanvasPoint(position + Coord(radius, radius, radius), *viewAngle));
+            cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), *viewAngle);
+            cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), *viewAngle);
+            figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
+            objectsLayer->addFigure(figure);
         }
         // prism
         const Prism *prism = dynamic_cast<const Prism *>(shape);
@@ -414,15 +416,15 @@ void PhysicalEnvironment::updateCanvas()
             figure->setPoints(canvasPoints);
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
+            objectsLayer->addFigure(figure);
         }
         // add name to the end
         const char *name = object->getName();
         if (name) {
             cTextFigure *nameFigure = new cTextFigure(NULL);
-            nameFigure->setPos(computeCanvasPoint(position));
+            nameFigure->setLocation(computeCanvasPoint(position));
             nameFigure->setText(name);
-            objectsLayer->addChildFigure(nameFigure);
+            objectsLayer->addFigure(nameFigure);
         }
     }
 #endif // ifdef __CCANVAS_H

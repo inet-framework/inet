@@ -524,7 +524,7 @@ void RadioMedium::removeNonInterferingTransmissions()
 
 #ifdef __CCANVAS_H
             if (displayCommunication && transmissionCacheEntry.figure)
-                delete communicationLayer->removeChildFigure(transmissionCacheEntry.figure);
+                delete communicationLayer->removeFigure(transmissionCacheEntry.figure);
 #endif
 
         }
@@ -731,17 +731,16 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
         cOvalFigure *communicationFigure = new cOvalFigure();
-        communicationFigure->setP1(position);
-        communicationFigure->setP2(position);
+        communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFilled(false);
         communicationFigure->setLineWidth(0);
         communicationFigure->setLineColor(cFigure::CYAN);
-        communicationLayer->addChildFigure(communicationFigure);
+        communicationLayer->addFigure(communicationFigure);
         transmissionCacheEntry->figure = communicationFigure;
         cTextFigure *nameFigure = new cTextFigure();
-        nameFigure->setPos(cFigure::Point(0, 0));
+        nameFigure->setLocation(cFigure::Point(0, 0));
         nameFigure->setText(macFrame->getName());
-        communicationFigure->addChildFigure(nameFigure);
+        communicationFigure->addFigure(nameFigure);
         updateCanvas();
     }
 #endif // ifdef __CCANVAS_H
@@ -774,7 +773,7 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
         communicationLine->setEnd(PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition()));
         communicationLine->setLineColor(cFigure::BLUE);
         communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
-        communcationTrail->addChildFigure(communicationLine);
+        communcationTrail->addFigure(communicationLine);
     }
     if (displayCommunication)
         updateCanvas();
@@ -887,8 +886,9 @@ void RadioMedium::updateCanvas()
             double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
             if (endRadius < 0) endRadius = 0;
             double radius = (startRadius + endRadius) / 2;
-            figure->setP1(PhysicalEnvironment::computeCanvasPoint(transmissionStart - Coord(radius, radius, radius)));
-            figure->setP2(PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(radius, radius, radius)));
+            cFigure::Point topLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart - Coord(radius, radius, radius));
+            cFigure::Point bottomRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(radius, radius, radius));
+            figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineWidth(startRadius - endRadius);
         }
     }
