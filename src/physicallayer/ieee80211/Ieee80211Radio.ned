@@ -23,6 +23,8 @@ module Ieee80211Radio extends ScalarRadio
 {
     parameters:
         int channelNumber = default(0);
+        string opMode @enum("b","g","a","p") = default("g");
+        string preambleMode @enum("long", "short") = default("long");
         carrierFrequency = default(2.412GHz);
         bandwidth = default(2MHz);
         transmitterType = default("Ieee80211ScalarTransmitter");
@@ -34,7 +36,7 @@ module Ieee80211Radio extends ScalarRadio
         receiver.energyDetection = default(-85dBm);
         receiver.snirThreshold = default(4dB);
         *.channelNumber = channelNumber;
-        *.opMode = default("g");
-        *.preambleMode = default("long");
+        *.opMode = opMode;
+        *.preambleMode = preambleMode;
         @class(Ieee80211Radio);
 }
