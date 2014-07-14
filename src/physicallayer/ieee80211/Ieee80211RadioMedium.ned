@@ -22,8 +22,6 @@ import inet.physicallayer.scalar.ScalarRadioMedium;
 module Ieee80211RadioMedium extends ScalarRadioMedium
 {
     parameters:
-        // TODO: move to management and remove channel class
-        int numChannels = default(1);
         // TODO: move to addRadio, query radios for these parameters
         carrierFrequency = default(2.4GHz);
         minReceptionPower = default(-85dBm);

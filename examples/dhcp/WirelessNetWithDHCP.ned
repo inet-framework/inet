@@ -30,10 +30,10 @@ network WirelessNetWithDHCP
 {
     @display("bgb=590,407;bgl=2");
     int numHosts;
+    **.mgmt.numChannels = 5;
     submodules:
         radioMedium: Ieee80211RadioMedium {
             @display("p=64,34");
-            numChannels = 5;
         }
         gateway: Router {
             @display("p=365,35");

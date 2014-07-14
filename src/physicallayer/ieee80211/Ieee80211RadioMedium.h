@@ -27,18 +27,12 @@ namespace physicallayer {
 class INET_API Ieee80211RadioMedium : public RadioMedium
 {
   protected:
-    int numChannels;
-
-  protected:
     virtual void initialize(int stage);
 
   public:
     Ieee80211RadioMedium() :
-        RadioMedium(),
-        numChannels(-1)
+        RadioMedium()
     {}
-
-    virtual int getNumChannels() const { return numChannels; }
 };
 
 } // namespace physicallayer

@@ -28,6 +28,7 @@ network Lan80211
 {
     parameters:
         int numHosts;
+        **.mgmt.numChannels = 2;
     submodules:
         host[numHosts]: WirelessHost {
             @display("r=,,#707070");
@@ -38,7 +39,6 @@ network Lan80211
             wlan[*].mgmtType = "Ieee80211MgmtAPSimplified";
         }
         radioMedium: Ieee80211RadioMedium {
-            numChannels = 2;
             @display("p=61,46");
         }
         configurator: IPv4NetworkConfigurator {

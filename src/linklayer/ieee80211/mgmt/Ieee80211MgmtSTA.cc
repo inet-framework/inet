@@ -102,6 +102,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
         isAssociated = false;
         assocTimeoutMsg = NULL;
         myIface = NULL;
+        numChannels = par("numChannels");
 
         host = getContainingNode(this);
         host->subscribe(NF_LINK_FULL_PROMISCUOUS, this);
@@ -112,10 +113,6 @@ void Ieee80211MgmtSTA::initialize(int stage)
         WATCH(scanning);
         WATCH(assocAP);
         WATCH_LIST(apList);
-    }
-    else if (stage == INITSTAGE_LINK_LAYER) {
-        Ieee80211RadioMedium *radioMedium = check_and_cast<Ieee80211RadioMedium *>(simulation.getModuleByPath("radioMedium"));
-        numChannels = radioMedium->getNumChannels();
     }
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);

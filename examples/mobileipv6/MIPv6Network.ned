@@ -52,6 +52,7 @@ network mIPv6Network
     parameters:
         double total_mn;
         double total_cn;
+        **.mgmt.numChannels = 5;
 
         @display("bgb=799,698");
     submodules:
@@ -61,7 +62,6 @@ network mIPv6Network
         }
         radioMedium: Ieee80211RadioMedium {
             parameters:
-                numChannels = 5;
                 @display("p=753,123");
         }
         Home_Agent: HomeAgent6 {

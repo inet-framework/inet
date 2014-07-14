@@ -141,7 +141,7 @@ sim-time-limit = 50s
 **.debug = true
 **.coreDebug = false
 **.channelNumber = 0
-**.radioMedium.numChannels = 1
+**.mgmt.numChannels = 1
 
 # positions
 **.mobility.cx = 200m

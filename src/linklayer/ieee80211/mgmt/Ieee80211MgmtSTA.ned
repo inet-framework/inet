@@ -29,6 +29,7 @@ simple Ieee80211MgmtSTA like IIeee80211Mgmt
 {
     parameters:
         string interfaceTableModule;   // The path to the InterfaceTable module
+        int numChannels = default(1);  // number of channels to scan
         int frameCapacity = default(100); // maximum queue length
         @display("i=block/cogwheel");
         @signal[enqueuePk](type=cPacket);
