@@ -19,6 +19,8 @@
 #define __INET_PHYSICALENVIRONMENT_H
 
 #include "PhysicalObject.h"
+#include "SpatialGrid.h"
+#include "IVisitor.h"
 
 namespace inet {
 
@@ -27,6 +29,13 @@ namespace inet {
  */
 class INET_API PhysicalEnvironment : public cModule
 {
+  public:
+    class IObjectCache
+    {
+        public:
+            virtual bool insertObject(const PhysicalObject *object) = 0;
+            virtual void visitObjects(const IVisitor *visitor) = 0;
+    };
   protected:
     K temperature;
     Pa pressure;
@@ -36,6 +45,7 @@ class INET_API PhysicalEnvironment : public cModule
     const char *viewAngle;
     std::map<int, const Shape *> shapes;
     std::map<int, const Material *> materials;
+    IObjectCache *objectCache;
     std::vector<PhysicalObject *> objects;
 
     cGroupFigure *objectsLayer;
@@ -57,12 +67,14 @@ class INET_API PhysicalEnvironment : public cModule
 
     static cFigure::Point computeCanvasPoint(Coord point);
 
+    virtual bool hasObjectCache() const { return objectCache != NULL; }
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }
     virtual percent getRelativeHumidity() const { return relativeHumidity; }
     virtual const Coord getSpaceMin() const { return spaceMin; }
     virtual const Coord getSpaceMax() const { return spaceMax; }
-    virtual const std::vector<PhysicalObject *>& getObjects() const { return objects; }
+    virtual const std::vector<PhysicalObject *>& getObjects() const;
+    virtual void visitObjects(const IVisitor *visitor) const;
 };
 
 } // namespace inet

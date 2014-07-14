@@ -17,9 +17,13 @@
 
 package inet.environment;
 
+import inet.environment.cache.IObjectCache;
+
+
 module PhysicalEnvironment
 {
     parameters:
+        string objectCacheType = default("");
         double temperature @unit(K) = default(293K);
         double pressure @unit(Pa) = default(101325Pa);
         double relativeHumidity = default(60);
@@ -33,5 +37,7 @@ module PhysicalEnvironment
         xml environment = default(xml("<environment/>"));
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);
+    submodules:
+        objectCache: <objectCacheType> like IObjectCache;
 }
 

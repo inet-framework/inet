@@ -33,6 +33,7 @@ PhysicalEnvironment::PhysicalEnvironment() :
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
     viewAngle(NULL),
+    objectCache(NULL),
     objectsLayer(NULL)
 {
 }
@@ -50,6 +51,7 @@ PhysicalEnvironment::~PhysicalEnvironment()
 void PhysicalEnvironment::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
+        objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
         temperature = K(par("temperature"));
         pressure = Pa(par("pressure"));
         relativeHumidity = percent(par("relativeHumidity"));
@@ -464,6 +466,16 @@ void PhysicalEnvironment::updateCanvas()
             objectsLayer->addFigure(nameFigure);
         }
     }
+}
+
+const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
+{
+    return objects;
+}
+
+void PhysicalEnvironment::visitObjects(const IVisitor *visitor) const
+{
+    objectCache->visitObjects(visitor);
 }
 
 } // namespace inet
