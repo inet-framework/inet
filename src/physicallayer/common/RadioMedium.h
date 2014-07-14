@@ -402,6 +402,9 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual void sendToAffectedRadios(IRadio *transmitter, const IRadioFrame *frame);
     //@}
 
+    // TODO: revise name
+    virtual void sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame);
+
     /** @name Reception */
     //@{
     virtual bool isRadioMacAddress(const IRadio *radio, const MACAddress address) const;

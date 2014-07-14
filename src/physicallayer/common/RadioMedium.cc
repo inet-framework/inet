@@ -670,17 +670,20 @@ void RadioMedium::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
     {
         double range;
         if (rangeFilter == RANGE_FILTER_COMMUNICATION_RANGE)
-            range = getMaxCommunicationRangeForRadio(radio).get();
+            range = getMaxCommunicationRange(radio).get();
         else if (rangeFilter == RANGE_FILTER_INTERFERENCE_RANGE)
-            range = getMaxInterferenceRangeForRadio(radio).get();
+            range = getMaxInterferenceRange(radio).get();
         else
             throw cRuntimeError("Unknown range filter %d", rangeFilter);
-
+        if (isNaN(range))
+        {
+            EV_WARN << "We can't use the NeighborCache for radio " << radio->getId() << ": range is NaN" << endl;
+            sendToAllRadios(radio, frame);
+        }
         neighborCache->sendToNeighbors(radio, frame, range);
     }
     else
-        for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
-            sendToRadio(radio, *it, frame);
+        sendToAllRadios(radio, frame);
 
 }
 
@@ -828,6 +831,12 @@ const IArrival *RadioMedium::getArrival(const IRadio *radio, const ITransmission
     return getCachedArrival(radio, transmission);
 }
 
+void RadioMedium::sendToAllRadios(IRadio *transmitter, const IRadioFrame *frame)
+{
+    for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
+        sendToRadio(transmitter, *it, frame);
+}
+
 void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long value)
 {
     if (signal == IRadio::radioModeChangedSignal || signal == IRadio::listeningChangedSignal || signal == NF_INTERFACE_CONFIG_CHANGED) {
@@ -926,14 +935,20 @@ Coord RadioMedium::computeConstreaintAreaMax() const
     return constraintAreaMax;
 }
 
-m RadioMedium::getMaxInterferenceRangeForRadio(const IRadio* radio) const
+m RadioMedium::getMaxInterferenceRange(const IRadio* radio) const
 {
-    return computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
+    m maxInterferenceRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minInterferencePower);
+    if (!isNaN(maxInterferenceRange.get()))
+        return maxInterferenceRange;
+    return radio->getTransmitter()->getMaxInterferenceRange();
 }
 
-m RadioMedium::getMaxCommunicationRangeForRadio(const IRadio* radio) const
+m RadioMedium::getMaxCommunicationRange(const IRadio* radio) const
 {
-    return computeMaxRange(radio->getTransmitter()->getMaxPower(), minReceptionPower);
+    m maxCommunicationRange = computeMaxRange(radio->getTransmitter()->getMaxPower(), minReceptionPower);
+    if (!isNaN(maxCommunicationRange.get()))
+        return maxCommunicationRange;
+    return radio->getTransmitter()->getMaxCommunicationRange();
 }
 
 } // namespace physicallayer
