@@ -19,12 +19,12 @@
 
 namespace inet {
 
-bool SpatialGrid::insertShape(const Shape *shape)
+bool SpatialGrid::insertShape(const Shape *shape, const Coord& pos)
 {
-    throw cRuntimeError("Unimplemented");
+
 }
 
-SpatialGrid::SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constraintAreaMax)
+SpatialGrid::SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax)
 {
     this->voxelSizes = ThreeTuple<double>(voxelSizes.x, voxelSizes.y, voxelSizes.z);
     this->constraintAreaMin = constraintAreaMin;
@@ -37,7 +37,7 @@ SpatialGrid::SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constr
     grid.resize(gridVectorLength);
 }
 
-bool SpatialGrid::insertPoint(const cObject *point, Coord pos)
+bool SpatialGrid::insertPoint(const cObject *point, const Coord& pos)
 {
     unsigned int ind = coordToRowMajorIndex(pos);
     if (ind >= gridVectorLength)
@@ -54,12 +54,12 @@ bool SpatialGrid::removePoint(const cObject *point)
     throw cRuntimeError("Unimplemented");
 }
 
-bool SpatialGrid::movePoint(const cObject *point, Coord newPos)
+bool SpatialGrid::movePoint(const cObject *point, const Coord& newPos)
 {
     throw cRuntimeError("Unimplemented");
 }
 
-void SpatialGrid::rangeQuery(Coord pos, double range, const SpatialGridVisitor *visitor) const
+void SpatialGrid::rangeQuery(const Coord& pos, double range, const SpatialGridVisitor *visitor) const
 {
     int xVoxel = constraintAreaSideLengths.x == 0 ? 0 : ceil((range * numVoxels[0]) / constraintAreaSideLengths.x);
     int yVoxel = constraintAreaSideLengths.y == 0 ? 0 : ceil((range * numVoxels[1]) / constraintAreaSideLengths.y);
@@ -147,7 +147,7 @@ unsigned int SpatialGrid::rowMajorIndex(const ThreeTuple<int>& indices) const
     return ind;
 }
 
-unsigned int SpatialGrid::coordToRowMajorIndex(Coord pos) const
+unsigned int SpatialGrid::coordToRowMajorIndex(const Coord& pos) const
 {
     return rowMajorIndex(coordToMatrixIndices(pos));
 }
@@ -158,7 +158,7 @@ void SpatialGrid::clearGrid()
         grid[i].clear();
 }
 
-SpatialGrid::ThreeTuple<int> SpatialGrid::coordToMatrixIndices(Coord pos) const
+SpatialGrid::ThreeTuple<int> SpatialGrid::coordToMatrixIndices(const Coord& pos) const
 {
     int xCoord = voxelSizes.x == 0 ? 0 : floor(pos.x / voxelSizes.x);
     int yCoord = voxelSizes.y == 0 ? 0 : floor(pos.y / voxelSizes.y);

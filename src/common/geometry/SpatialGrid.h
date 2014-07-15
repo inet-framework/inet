@@ -21,6 +21,7 @@
 #include "INETDefs.h"
 #include "Coord.h"
 #include "LineSegment.h"
+#include "Shape.h"
 
 namespace inet {
 
@@ -114,17 +115,18 @@ class SpatialGrid
         unsigned int calculateGridVectorLength() const;
         ThreeTuple<int> decodeRowMajorIndex(unsigned int ind) const;
         unsigned int rowMajorIndex(const ThreeTuple<int>& indices) const;
-        unsigned int coordToRowMajorIndex(Coord pos) const;
-        ThreeTuple<int> coordToMatrixIndices(Coord pos) const;
+        unsigned int coordToRowMajorIndex(const Coord& pos) const;
+        ThreeTuple<int> coordToMatrixIndices(const Coord& pos) const;
 
     public:
-        bool insertPoint(const cObject *point, Coord pos);
+        bool insertShape(const Shape *shape, const Coord& pos);
+        bool insertPoint(const cObject *point, const Coord& pos);
         bool removePoint(const cObject *point);
-        bool movePoint(const cObject *point, Coord newPos);
+        bool movePoint(const cObject *point, const Coord& newPos);
         void clearGrid();
-        void rangeQuery(Coord pos, double range, const SpatialGridVisitor *visitor) const;
+        void rangeQuery(const Coord& pos, double range, const SpatialGridVisitor *visitor) const;
         void lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const;
-        SpatialGrid(Coord voxelSizes, Coord constraintAreaMin, Coord constraintAreaMax);
+        SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax);
 };
 
 } /* namespace inet */
