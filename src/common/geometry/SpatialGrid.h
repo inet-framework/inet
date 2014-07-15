@@ -22,6 +22,7 @@
 #include "Coord.h"
 #include "LineSegment.h"
 #include "Shape.h"
+#include "IVisitor.h"
 
 namespace inet {
 
@@ -36,10 +37,11 @@ namespace inet {
 class SpatialGrid
 {
     public:
-      class SpatialGridVisitor
+      class SpatialGridVisitor : public IVisitor
       {
         public:
           virtual void visit(const cObject *) const = 0;
+          virtual LineSegment getLineSegment() const { return LineSegment::NIL; }
           virtual ~SpatialGridVisitor() {}
       };
 
