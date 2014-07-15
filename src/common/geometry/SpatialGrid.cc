@@ -21,6 +21,20 @@ namespace inet {
 
 bool SpatialGrid::insertShape(const Shape *shape, const Coord& pos)
 {
+    Coord boundingBoxSize = shape->computeSize();
+    ThreeTuple<int> start, end;
+    calculateBoundingVoxels(pos, ThreeTuple<double>(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z), start, end);
+    for (int i = start[0]; i <= end[0]; i++) {
+        for (int j = start[1]; j <= end[1]; j++) {
+            for (int k = start[2]; k <= end[2]; k++) {
+                int voxelIndex = rowMajorIndex(ThreeTuple<int>(i,j,k));
+                Voxel& neighborVoxel = grid[voxelIndex];
+                neighborVoxel.push_back(check_and_cast<const cObject*>(shape));
+            }
+        }
+    }
+    return true;
+}
 
 void SpatialGrid::calculateBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const
 {
