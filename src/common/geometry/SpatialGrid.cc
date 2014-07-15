@@ -82,7 +82,7 @@ void SpatialGrid::rangeQuery(Coord pos, double range, const SpatialGridVisitor *
                 int voxelIndex = rowMajorIndex(ThreeTuple<int>(i,j,k));
                 const Voxel& neighborVoxel = grid[voxelIndex];
                 for (Voxel::const_iterator it = neighborVoxel.begin(); it != neighborVoxel.end(); it++)
-                    visitor->visitor(*it);
+                    visitor->visit(*it);
             }
         }
     }

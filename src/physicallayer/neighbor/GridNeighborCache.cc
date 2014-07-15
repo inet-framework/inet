@@ -117,7 +117,7 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
     delete visitor;
 }
 
-void GridNeighborCache::GridNeighborCacheVisitor::visitor(const cObject *radio) const
+void GridNeighborCache::GridNeighborCacheVisitor::visit(const cObject *radio) const
 {
     const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
     if (transmitter->getId() != neighbor->getId())

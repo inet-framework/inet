@@ -38,7 +38,7 @@ class SpatialGrid
       class SpatialGridVisitor
       {
         public:
-          virtual void visitor(const cObject *) const = 0;
+          virtual void visit(const cObject *) const = 0;
           virtual ~SpatialGridVisitor() {}
       };
 

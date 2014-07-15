@@ -39,7 +39,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
         const IRadioFrame *frame;
 
       public:
-        void visitor(const cObject *radio) const;
+        void visit(const cObject *radio) const;
         GridNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
             radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
     };
