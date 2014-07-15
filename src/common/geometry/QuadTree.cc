@@ -115,14 +115,14 @@ void QuadTree::setToLeaf()
         quadrants[i] = NULL;
 }
 
-void QuadTree::rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
+void QuadTree::rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor) const
 {
     // If our rectangle intersects with a quadrant then we insert its objects to the
     // neighbors vector
     // Note that, a node have points only if it is a leaf node
     if (!hasChild() && doesIntersectWithQuadrant(pos, range))
         for (unsigned int i = 0; i < points.size(); i++)
-            visitor->visitor(points[i]);
+            visitor->visit(points[i]);
 
     else if (hasChild())
         for (unsigned int i = 0; i < 4; i++)
@@ -130,13 +130,13 @@ void QuadTree::rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
 
 }
 
-void QuadTree::strictRangeQuery(Coord pos, double range, QuadTreeVisitor *visitor)
+void QuadTree::strictRangeQuery(Coord pos, double range, QuadTreeVisitor *visitor) const
 {
     if (!hasChild() && doesIntersectWithQuadrant(pos, range)) {
         for (unsigned int i = 0; i < points.size(); i++) {
             Coord otherPos = (*lastPosition)[points[i]];
             if (pos.sqrdist(otherPos) <= range * range)
-                visitor->visitor(points[i]);
+                visitor->visit(points[i]);
         }
     }
     else if (hasChild()) {
