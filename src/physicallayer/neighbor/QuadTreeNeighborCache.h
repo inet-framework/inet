@@ -40,7 +40,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
         const IRadioFrame *frame;
 
       public:
-        void visitor(const cObject *radio);
+        void visit(const cObject *radio) const;
         QuadTreeNeighborCacheVisitor(RadioMedium *radioMedium, IRadio *transmitter, const IRadioFrame *frame) :
             radioMedium(radioMedium), transmitter(transmitter), frame(frame) {}
     };

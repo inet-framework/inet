@@ -133,7 +133,7 @@ QuadTreeNeighborCache::~QuadTreeNeighborCache()
     cancelAndDelete(rebuildQuadTreeTimer);
 }
 
-void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visitor(const cObject *radio)
+void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visit(const cObject *radio) const
 {
     const IRadio *neighbor = check_and_cast<IRadio *>(radio);
     if (neighbor->getId() != transmitter->getId())
