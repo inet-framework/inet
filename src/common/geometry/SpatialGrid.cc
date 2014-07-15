@@ -94,6 +94,9 @@ void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const Spatial
     {
         ThreeTuple<int> ind = it.getMatrixIndices();
         unsigned int voxelIndex = rowMajorIndex(ind);
+        const Voxel& intersectedVoxel = grid[voxelIndex];
+        for (Voxel::const_iterator it = intersectedVoxel.begin(); it != intersectedVoxel.end(); it++)
+            visitor->visit(*it);
     }
 }
 
