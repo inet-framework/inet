@@ -366,6 +366,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // insert
         PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineColor, fillColor);
         objects.push_back(object);
+        if (hasObjectCache())
+            objectCache->insertObject(object);
     }
 }
 
