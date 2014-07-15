@@ -22,6 +22,22 @@ namespace inet {
 bool SpatialGrid::insertShape(const Shape *shape, const Coord& pos)
 {
 
+void SpatialGrid::calculateBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const
+{
+    int xVoxel = constraintAreaSideLengths.x == 0 ? 0 : ceil((boundings.x * numVoxels[0]) / constraintAreaSideLengths.x);
+    int yVoxel = constraintAreaSideLengths.y == 0 ? 0 : ceil((boundings.y * numVoxels[1]) / constraintAreaSideLengths.y);
+    int zVoxel = constraintAreaSideLengths.z == 0 ? 0 : ceil((boundings.z * numVoxels[2]) / constraintAreaSideLengths.z);
+    ThreeTuple<int> voxels(xVoxel, yVoxel, zVoxel);
+    ThreeTuple<int> matrixIndices = coordToMatrixIndices(pos);
+    for (unsigned int i = 0; i < 3; i++)
+    {
+        start[i] = matrixIndices[i] - voxels[i] < 0 ? 0 : matrixIndices[i] - voxels[i];
+        int endCell = matrixIndices[i] + voxels[i] >= numVoxels[i] ? numVoxels[i] - 1 : matrixIndices[i] + voxels[i];
+        if (endCell < 0)
+            end[i] = 0;
+        else
+            end[i] = endCell;
+    }
 }
 
 SpatialGrid::SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax)
@@ -61,21 +77,8 @@ bool SpatialGrid::movePoint(const cObject *point, const Coord& newPos)
 
 void SpatialGrid::rangeQuery(const Coord& pos, double range, const SpatialGridVisitor *visitor) const
 {
-    int xVoxel = constraintAreaSideLengths.x == 0 ? 0 : ceil((range * numVoxels[0]) / constraintAreaSideLengths.x);
-    int yVoxel = constraintAreaSideLengths.y == 0 ? 0 : ceil((range * numVoxels[1]) / constraintAreaSideLengths.y);
-    int zVoxel = constraintAreaSideLengths.z == 0 ? 0 : ceil((range * numVoxels[2]) / constraintAreaSideLengths.z);
-    ThreeTuple<int> voxels(xVoxel, yVoxel, zVoxel);
-    ThreeTuple<int> matrixIndices = coordToMatrixIndices(pos);
     ThreeTuple<int> start, end;
-    for (unsigned int i = 0; i < 3; i++)
-    {
-        start[i] = matrixIndices[i] - voxels[i] < 0 ? 0 : matrixIndices[i] - voxels[i];
-        int endCell = matrixIndices[i] + voxels[i] >= numVoxels[i] ? numVoxels[i] - 1 : matrixIndices[i] + voxels[i];
-        if (endCell < 0)
-            end[i] = 0;
-        else
-            end[i] = endCell;
-    }
+    calculateBoundingVoxels(pos, ThreeTuple<double>(range, range, range), start, end);
     for (int i = start[0]; i <= end[0]; i++) {
         for (int j = start[1]; j <= end[1]; j++) {
             for (int k = start[2]; k <= end[2]; k++) {
