@@ -29,7 +29,7 @@ namespace physicallayer {
 class INET_API IObstacleLoss : public IPrintableObject
 {
   public:
-    virtual double computeObstacleLoss(Hz frequency, const Coord transmissionPosition, const Coord receptionPosition) const = 0;
+    virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const = 0;
 };
 
 } // namespace physicallayer
