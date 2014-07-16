@@ -67,6 +67,10 @@ void PhysicalEnvironment::initialize(int stage)
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
         canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
+
+    }
+    else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
+    {
         cXMLElement *environment = par("environment");
         parseShapes(environment);
         parseMaterials(environment);
