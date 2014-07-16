@@ -116,7 +116,6 @@ void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const Spatial
         const Voxel& intersectedVoxel = grid[voxelIndex];
         for (Voxel::const_iterator it = intersectedVoxel.begin(); it != intersectedVoxel.end(); it++)
         {
-            const PhysicalObject *phyObj = check_and_cast<PhysicalObject*>(*it);
             std::map<const cObject *, bool>::const_iterator objIter = visited.find(*it);
             if (objIter == visited.end() || !objIter->second)
                 visitor->visit(*it);
