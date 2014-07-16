@@ -81,20 +81,22 @@ int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf
     return packetLength;
 }
 
-void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, EthernetIIFrame *pkt)
+void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt)
 {
     struct ether_header *etherhdr = (struct ether_header*) buf;
+    *pkt = new EthernetIIFrame;
+    EthernetIIFrame *etherPacket = (EthernetIIFrame*)*pkt;
 
     MACAddress temp;
     temp.setAddressBytes(etherhdr->ether_dhost);
-    pkt->setDest(temp);
+    etherPacket->setDest(temp);
     temp.setAddressBytes(etherhdr->ether_shost);
-    pkt->setSrc(temp);
-    pkt->setEtherType(ntohs(etherhdr->ether_type));
+    etherPacket->setSrc(temp);
+    etherPacket->setEtherType(ntohs(etherhdr->ether_type));
 
     cPacket *encapPacket = NULL;
 
-    switch (pkt->getEtherType())
+    switch (etherPacket->getEtherType())
     {
 #ifdef WITH_IPv4
         case ETHERTYPE_IP:
@@ -116,11 +118,11 @@ void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, E
             break;
 
         default:
-            throw cRuntimeError("EthernetSerializer: cannot parse protocol %x", pkt->getEtherType());
+            throw cRuntimeError("EthernetSerializer: cannot parse protocol %x", etherPacket->getEtherType());
     }
     ASSERT(encapPacket);
-    pkt->encapsulate(encapPacket);
-    pkt->setName(encapPacket->getName());
+    etherPacket->encapsulate(encapPacket);
+    etherPacket->setName(encapPacket->getName());
 }
 
 

@@ -149,8 +149,134 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
 
-void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, Ieee80211Frame *pkt)
+void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt)
 {
-    struct ieee80211_frame *frame = (struct ieee80211_frame *) (buf);
+    uint8_t *type = (uint8_t *) (buf);
+    switch(*type)
+    {
+        case 0xD4:
+        {
+            struct ieee80211_frame_ack *frame = (struct ieee80211_frame_ack *) (buf);
+            *pkt = new Ieee80211ACKFrame;
+            Ieee80211ACKFrame *ackFrame = (Ieee80211ACKFrame*)*pkt;
+            ackFrame->setType(ST_ACK);
+            ackFrame->setToDS(false);
+            ackFrame->setFromDS(false);
+            ackFrame->setRetry(false);
+            ackFrame->setMoreFragments(false);
+            ackFrame->setDuration(SimTime((double)frame->i_dur/1000.0));
+            MACAddress temp;
+            temp.setAddressBytes(frame->i_ra);
+            ackFrame->setReceiverAddress(temp);
+            return;
+        }
+        case 0xB4:
+        {
+            struct ieee80211_frame_rts *frame = (struct ieee80211_frame_rts *) (buf);
+            *pkt = new Ieee80211RTSFrame;
+            Ieee80211RTSFrame *rtsFrame = (Ieee80211RTSFrame*)*pkt;
+            rtsFrame->setType(ST_RTS);
+            rtsFrame->setToDS(false);
+            rtsFrame->setFromDS(false);
+            rtsFrame->setRetry(false);
+            rtsFrame->setMoreFragments(false);
+            rtsFrame->setDuration(SimTime((double)frame->i_dur/1000.0));
+            MACAddress temp;
+            temp.setAddressBytes(frame->i_ra);
+            rtsFrame->setReceiverAddress(temp);
+            temp.setAddressBytes(frame->i_ta);
+            rtsFrame->setTransmitterAddress(temp);
+            return;
+        }
+        case 0xC4:
+        {
+            struct ieee80211_frame_cts *frame = (struct ieee80211_frame_cts *) (buf);
+            *pkt = new Ieee80211CTSFrame;
+            Ieee80211CTSFrame *ctsFrame = (Ieee80211CTSFrame*)*pkt;
+            ctsFrame->setType(ST_CTS);
+            ctsFrame->setToDS(false);
+            ctsFrame->setFromDS(false);
+            ctsFrame->setRetry(false);
+            ctsFrame->setMoreFragments(false);
+            ctsFrame->setDuration(SimTime((double)frame->i_dur/1000.0));
+            MACAddress temp;
+            temp.setAddressBytes(frame->i_ra);
+            ctsFrame->setReceiverAddress(temp);
+            return;
+        }
+        case 0x8:
+        {
+            struct ieee80211_frame_addr4 *frame = (struct ieee80211_frame_addr4 *) (buf);
+            *pkt = new Ieee80211DataFrameWithSNAP;
+            Ieee80211DataFrameWithSNAP *dataFrame = (Ieee80211DataFrameWithSNAP*)*pkt;
+            dataFrame->setType(ST_DATA);
+            dataFrame->setToDS(frame->i_fc[1]&0x1);
+            dataFrame->setFromDS(frame->i_fc[1]&0x2);
+            dataFrame->setRetry(frame->i_fc[1]&0x4);
+            dataFrame->setMoreFragments(frame->i_fc[1]&0x8);
+            dataFrame->setDuration(SimTime((double)frame->i_dur/1000.0));
+            MACAddress temp;
+            temp.setAddressBytes(frame->i_addr1);
+            dataFrame->setReceiverAddress(temp);
+            temp.setAddressBytes(frame->i_addr2);
+            dataFrame->setTransmitterAddress(temp);
+            temp.setAddressBytes(frame->i_addr3);
+            dataFrame->setAddress3(temp);
+            if (dataFrame->getFromDS() && dataFrame->getToDS())
+            {
+                temp.setAddressBytes(frame->i_addr4);
+                dataFrame->setAddress4(temp);
+            }
+            dataFrame->setSequenceNumber(frame->i_seq & 0xFFF);
+            frame->i_seq >>= 12;
+            dataFrame->setFragmentNumber(frame->i_seq);
+
+            unsigned int packetLength;
+            if (dataFrame->getFromDS() && dataFrame->getToDS())
+                packetLength = 6 + 4*IEEE80211_ADDR_LEN;
+            else
+                packetLength = 6 + 3*IEEE80211_ADDR_LEN;
+
+            struct snap_header *snap_hdr = (struct snap_header *) (buf + packetLength);
+            snap_hdr->snap >>= 24;
+            dataFrame->setEtherType(ntohs(snap_hdr->snap));
+
+            packetLength += 8;
+            EV_DEBUG << "packetLength: " << packetLength << endl;
+            cPacket *encapPacket = NULL;
+
+            switch (dataFrame->getEtherType())
+            {
+#ifdef WITH_IPv4
+                case ETHERTYPE_IP:
+                    encapPacket = new IPv4Datagram("ipv4-from-wire");
+                    IPv4Serializer().parse(buf+packetLength, bufsize-packetLength, (IPv4Datagram *)encapPacket);
+                    break;
+#endif
+
+#ifdef WITH_IPv6
+                case ETHERTYPE_IPV6:
+                    encapPacket = new IPv6Datagram("ipv6-from-wire");
+                    IPv6Serializer().parse(buf+packetLength, bufsize-packetLength, (IPv6Datagram *)encapPacket);
+                    break;
+#endif
+
+                case ETHERTYPE_ARP:
+                    encapPacket = new ARPPacket("arp-from-wire");
+                    ARPSerializer().parse(buf+packetLength, bufsize-packetLength, (ARPPacket *)encapPacket);
+                    break;
+
+                default:
+                    throw cRuntimeError("Ieee80211Serializer: cannot parse protocol %x", dataFrame->getEtherType());
+            }
+
+            ASSERT(encapPacket);
+            dataFrame->encapsulate(encapPacket);
+            dataFrame->setName(encapPacket->getName());
+            return;
+        }
+        default:
+            throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
+    }
 }
 
