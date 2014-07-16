@@ -108,13 +108,20 @@ void SpatialGrid::rangeQuery(const Coord& pos, double range, const SpatialGridVi
 
 void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const
 {
+    std::map<const cObject *,bool> visited;
     for (LineSegmentIterator it(lineSegment, voxelSizes, numVoxels); !it.end(); ++it)
     {
         ThreeTuple<int> ind = it.getMatrixIndices();
         unsigned int voxelIndex = rowMajorIndex(ind);
         const Voxel& intersectedVoxel = grid[voxelIndex];
         for (Voxel::const_iterator it = intersectedVoxel.begin(); it != intersectedVoxel.end(); it++)
-            visitor->visit(*it);
+        {
+            const PhysicalObject *phyObj = check_and_cast<PhysicalObject*>(*it);
+            std::map<const cObject *, bool>::const_iterator objIter = visited.find(*it);
+            if (objIter == visited.end() || !objIter->second)
+                visitor->visit(*it);
+            visited.insert(std::pair<const cObject*,bool>(*it, true));
+        }
     }
 }
 
