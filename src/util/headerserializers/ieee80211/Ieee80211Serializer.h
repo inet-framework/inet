@@ -38,7 +38,7 @@ class Ieee80211Serializer
         /**
          * Puts a packet sniffed from the network card into an Ieee802.11Frame.
          */
-        void parse(const unsigned char *buf, unsigned int bufsize, Ieee80211Frame *pkt);
+        void parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt);
 };
 
 #endif /* IEEE80211SERIALIZER_H_ */

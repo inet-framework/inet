@@ -18,6 +18,7 @@
 #include "PcapParser.h"
 
 #include <EthernetSerializer.h>
+#include <Ieee80211Serializer.h>
 
 Define_Module(PcapParser);
 
@@ -91,8 +92,17 @@ void PcapParser::readRecord()
 
         fread(&buf, recordHeader.orig_len, 1, pcapFile);
 
-        nextPkt = new EthernetIIFrame;
-        EthernetSerializer().parse(buf, recordHeader.incl_len, (EthernetIIFrame *)nextPkt);
-        scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
+        switch(fileHeader.network)
+        {
+            case 1:
+                EthernetSerializer().parse(buf, recordHeader.incl_len, &nextPkt);
+                scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
+                break;
+
+            case 105:
+                Ieee80211Serializer().parse(buf, recordHeader.incl_len, &nextPkt);
+                scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
+                break;
+        }
     }
 }
