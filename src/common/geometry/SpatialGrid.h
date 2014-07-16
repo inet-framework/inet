@@ -23,6 +23,7 @@
 #include "LineSegment.h"
 #include "Shape.h"
 #include "IVisitor.h"
+#include "PhysicalObject.h"
 
 namespace inet {
 
@@ -122,7 +123,7 @@ class SpatialGrid
         void calculateBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const;
 
     public:
-        bool insertShape(const Shape *shape, const Coord& pos);
+        bool insertObject(const PhysicalObject *object);
         bool insertPoint(const cObject *point, const Coord& pos);
         bool removePoint(const cObject *point);
         bool movePoint(const cObject *point, const Coord& newPos);
