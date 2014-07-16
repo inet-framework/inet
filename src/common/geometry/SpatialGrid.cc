@@ -24,7 +24,7 @@ bool SpatialGrid::insertObject(const PhysicalObject *object)
     Coord pos = object->getPosition();
     Coord boundingBoxSize = object->getShape()->computeSize();
     ThreeTuple<int> start, end;
-    calculateBoundingVoxels(pos, ThreeTuple<double>(boundingBoxSize.x, boundingBoxSize.y, boundingBoxSize.z), start, end);
+    calculateBoundingVoxels(pos, ThreeTuple<double>(boundingBoxSize.x / 2, boundingBoxSize.y / 2, boundingBoxSize.z / 2), start, end);
     for (int i = start[0]; i <= end[0]; i++) {
         for (int j = start[1]; j <= end[1]; j++) {
             for (int k = start[2]; k <= end[2]; k++) {
