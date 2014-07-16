@@ -125,8 +125,8 @@ Coord SpatialGrid::calculateConstraintAreaSideLengths() const
 
 SpatialGrid::ThreeTuple<int> SpatialGrid::calculateNumberOfVoxels() const
 {
-    return ThreeTuple<int>(constraintAreaSideLengths.x / voxelSizes.x, constraintAreaSideLengths.y / voxelSizes.y,
-            constraintAreaSideLengths.z / voxelSizes.z);
+    return ThreeTuple<int>(ceil(constraintAreaSideLengths.x / voxelSizes.x), ceil(constraintAreaSideLengths.y / voxelSizes.y),
+            ceil(constraintAreaSideLengths.z / voxelSizes.z));
 }
 
 unsigned int SpatialGrid::calculateGridVectorLength() const
