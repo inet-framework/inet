@@ -35,6 +35,7 @@ class INET_API PhysicalEnvironment : public cModule
         public:
             virtual bool insertObject(const PhysicalObject *object) = 0;
             virtual void visitObjects(const IVisitor *visitor) = 0;
+            virtual void buildCache() {}
     };
   protected:
     K temperature;

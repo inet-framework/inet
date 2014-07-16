@@ -373,6 +373,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (hasObjectCache())
             objectCache->insertObject(object);
     }
+    if (hasObjectCache())
+        objectCache->buildCache();
 }
 
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point, char viewAngle)
