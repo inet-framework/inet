@@ -68,6 +68,11 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
     Coord p0 = lineSegment.getPoint1();
     Coord p1 = lineSegment.getPoint2();
     Coord segmentDirection = p1 - p0;
+    Coord polygonNormal = getNormalUnitVector();
+    // The segment is not in the polygon's plane
+    // The length of the intersection segment will be 0
+    if (polygonNormal * segmentDirection != 0 || (p0 - points[0]) * polygonNormal != 0)
+        return false;
     double tE = 0;
     double tL = 1;
     unsigned int pointSize = points.size();
