@@ -212,8 +212,8 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             dataFrame->setType(ST_DATA);
             dataFrame->setToDS(frame->i_fc[1]&0x1);
             dataFrame->setFromDS(frame->i_fc[1]&0x2);
-            dataFrame->setRetry(frame->i_fc[1]&0x4);
-            dataFrame->setMoreFragments(frame->i_fc[1]&0x8);
+            dataFrame->setMoreFragments(frame->i_fc[1]&0x4);
+            dataFrame->setRetry(frame->i_fc[1]&0x8);
             dataFrame->setDuration(SimTime((double)frame->i_dur/1000.0));
             MACAddress temp;
             temp.setAddressBytes(frame->i_addr1);
@@ -228,8 +228,9 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
                 dataFrame->setAddress4(temp);
             }
             dataFrame->setSequenceNumber(frame->i_seq & 0xFFF);
-            frame->i_seq >>= 12;
-            dataFrame->setFragmentNumber(frame->i_seq);
+            uint16_t temp16 = frame->i_seq;
+            temp16 >>= 12;
+            dataFrame->setFragmentNumber(frame->i_seq >> 12);
 
             unsigned int packetLength;
             if (dataFrame->getFromDS() && dataFrame->getToDS())
@@ -238,11 +239,12 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
                 packetLength = 6 + 3*IEEE80211_ADDR_LEN;
 
             struct snap_header *snap_hdr = (struct snap_header *) (buf + packetLength);
-            snap_hdr->snap >>= 24;
-            dataFrame->setEtherType(ntohs(snap_hdr->snap));
+            uint64_t temp64 = snap_hdr->snap;
+            temp64 >>= 24;
+            dataFrame->setEtherType(ntohs(snap_hdr->snap >> 24));
 
             packetLength += 8;
-            EV_DEBUG << "packetLength: " << packetLength << endl;
+
             cPacket *encapPacket = NULL;
 
             switch (dataFrame->getEtherType())
