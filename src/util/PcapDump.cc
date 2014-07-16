@@ -87,8 +87,13 @@ void PcapDump::writeFrame(simtime_t stime, const IPv4Datagram *ipPacket)
     memset((void*)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
-    ph.ts_sec = (int32)stime.dbl();
-    ph.ts_usec = (uint32)((stime.dbl() - ph.ts_sec) * 1000000);
+
+    simtime_t stime_usec;
+    int64 temp_sec;
+    stime.split(SIMTIME_S, temp_sec, stime_usec);
+    ph.ts_sec = (int32)temp_sec;
+    ph.ts_usec = stime_usec.inUnit(SIMTIME_US);
+
      // Write Ethernet header
     uint32 hdr = 2; //AF_INET
 
@@ -114,11 +119,13 @@ void PcapDump::writeEtherFrame(simtime_t stime, const EthernetIIFrame *etherPack
     memset((void*)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
+
     simtime_t stime_usec;
     int64 temp_sec;
     stime.split(SIMTIME_S, temp_sec, stime_usec);
     ph.ts_sec = (int32)temp_sec;
     ph.ts_usec = stime_usec.inUnit(SIMTIME_US);
+
     int32 serialized_ethernet = EthernetSerializer().serialize(etherPacket, buf, sizeof(buf));
     if (serialized_ethernet > 0) {
         ph.orig_len = serialized_ethernet;
@@ -138,8 +145,12 @@ void PcapDump::writeIeee80211Frame(simtime_t stime, Ieee80211Frame *ieee80211Pac
     memset((void*)&buf, 0, sizeof(buf));
 
     struct pcaprec_hdr ph;
-    ph.ts_sec = (int32)stime.dbl();
-    ph.ts_usec = (uint32)((stime.dbl() - ph.ts_sec) * 1000000);
+
+    simtime_t stime_usec;
+    int64 temp_sec;
+    stime.split(SIMTIME_S, temp_sec, stime_usec);
+    ph.ts_sec = (int32)temp_sec;
+    ph.ts_usec = stime_usec.inUnit(SIMTIME_US);
 
     int32 serialized_ieee80211 = Ieee80211Serializer().serialize(ieee80211Packet, buf, sizeof(buf));
     if (serialized_ieee80211 > 0) {
