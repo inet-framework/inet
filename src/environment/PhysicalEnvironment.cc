@@ -481,9 +481,9 @@ const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
     return objects;
 }
 
-void PhysicalEnvironment::visitObjects(const IVisitor *visitor) const
+void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
-    objectCache->visitObjects(visitor);
+    objectCache->visitObjects(visitor, lineSegment);
 }
 
 } // namespace inet

@@ -45,9 +45,8 @@ void GridObjectCache::initialize(int stage)
     }
 }
 
-void GridObjectCache::visitObjects(const IVisitor *visitor)
+void GridObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
-    LineSegment lineSegment = visitor->getLineSegment();
     grid->lineSegmentQuery(lineSegment, visitor);
 }
 

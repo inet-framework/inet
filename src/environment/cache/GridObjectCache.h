@@ -22,6 +22,7 @@
 #include "PhysicalEnvironment.h"
 #include "PhysicalObject.h"
 #include "IVisitor.h"
+#include "ObstacleLoss.h"
 
 namespace inet {
 
@@ -38,7 +39,7 @@ class GridObjectCache : public PhysicalEnvironment::IObjectCache, public cSimple
 
     public:
         bool insertObject(const PhysicalObject *object);
-        void visitObjects(const IVisitor *visitor);
+        void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
         GridObjectCache();
         virtual ~GridObjectCache();
 };

@@ -22,6 +22,7 @@
 #include "PhysicalEnvironment.h"
 #include "TrailFigure.h"
 #include "SpatialGrid.h"
+#include "RadioMedium.h"
 
 namespace inet {
 
@@ -30,8 +31,9 @@ namespace physicallayer {
 // TODO: allow dB attenuation per meter/per wall
 class INET_API ObstacleLoss : public cModule, public IObstacleLoss
 {
+
   protected:
-    class ObstacleLossVisitor: public SpatialGrid::SpatialGridVisitor
+    class ObstacleLossVisitor : public IVisitor
     {
         protected:
             mutable double totalLoss;
@@ -46,10 +48,9 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
                 receptionPosition(receptionPosition) {}
             void visit(const cObject *object) const;
             double getTotalLoss() const { return totalLoss; }
-            LineSegment getLineSegment() const { return LineSegment(transmissionPosition, receptionPosition); }
     };
 
-    protected:
+  protected:
     IRadioMedium *medium;
     PhysicalEnvironment *environment;
     bool leaveIntersectionTrail;

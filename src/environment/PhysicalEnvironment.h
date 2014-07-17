@@ -19,8 +19,8 @@
 #define __INET_PHYSICALENVIRONMENT_H
 
 #include "PhysicalObject.h"
-#include "SpatialGrid.h"
 #include "IVisitor.h"
+#include "LineSegment.h"
 
 namespace inet {
 
@@ -34,7 +34,7 @@ class INET_API PhysicalEnvironment : public cModule
     {
         public:
             virtual bool insertObject(const PhysicalObject *object) = 0;
-            virtual void visitObjects(const IVisitor *visitor) = 0;
+            virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
             virtual void buildCache() {}
     };
   protected:
@@ -75,7 +75,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual const Coord getSpaceMin() const { return spaceMin; }
     virtual const Coord getSpaceMax() const { return spaceMax; }
     virtual const std::vector<PhysicalObject *>& getObjects() const;
-    virtual void visitObjects(const IVisitor *visitor) const;
+    virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
 };
 
 } // namespace inet

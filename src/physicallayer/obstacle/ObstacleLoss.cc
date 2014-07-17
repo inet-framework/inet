@@ -88,7 +88,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
     if (environment->hasObjectCache())
     {
         ObstacleLossVisitor *obstacleLossVisitor = new ObstacleLossVisitor(this, frequency, transmissionPosition, receptionPosition);
-        environment->visitObjects(obstacleLossVisitor);
+        environment->visitObjects(obstacleLossVisitor, LineSegment(transmissionPosition, receptionPosition));
         totalLoss = obstacleLossVisitor->getTotalLoss();
         delete obstacleLossVisitor;
     }
