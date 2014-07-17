@@ -31,16 +31,6 @@ namespace inet {
 class INET_API QuadTree
 {
   public:
-    class QuadTreeVisitor : public IVisitor
-    {
-      public:
-        // Must be implemented whenever you use QuadTree for your own purposes
-        // Invoked from rangeQuery() and strictRangeQuery()
-        virtual void visit(const cObject *) const = 0;
-        virtual ~QuadTreeVisitor() {}
-    };
-
-  public:
     typedef std::vector<const cObject *> Points;
 
   protected:
@@ -69,8 +59,8 @@ class INET_API QuadTree
     bool move(const cObject *point, Coord newPos);    // move an object to newPos
     bool remove(const cObject *point);    // remove an object from the tree
     bool insert(const cObject *point, Coord pos);    // insert an object with position pos
-    void rangeQuery(Coord pos, double range, QuadTreeVisitor *visitor) const; // orthogonal range query from a point
-    void strictRangeQuery(Coord pos, double range, QuadTreeVisitor *visitor) const; // query for points which lie in a circle with radius=range and center=pos
+    void rangeQuery(Coord pos, double range, IVisitor *visitor) const; // orthogonal range query from a point
+    void strictRangeQuery(Coord pos, double range, IVisitor *visitor) const; // query for points which lie in a circle with radius=range and center=pos
     QuadTree(Coord boundaryMin, Coord boundaryMax, unsigned int quadrantCapacity, QuadTree *parent);
     ~QuadTree();
 };

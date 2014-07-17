@@ -29,10 +29,9 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
 {
   public:
     typedef std::vector<const IRadio *> Radios;
-    typedef QuadTree::QuadTreeVisitor QuadTreeVisitor;
 
   protected:
-    class QuadTreeNeighborCacheVisitor : public QuadTree::QuadTreeVisitor
+    class QuadTreeNeighborCacheVisitor : public IVisitor
     {
       protected:
         RadioMedium *radioMedium;

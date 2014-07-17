@@ -38,14 +38,6 @@ namespace inet {
 class SpatialGrid
 {
     public:
-      class SpatialGridVisitor : public IVisitor
-      {
-        public:
-          virtual void visit(const cObject *) const = 0;
-          virtual LineSegment getLineSegment() const { return LineSegment::NIL; }
-          virtual ~SpatialGridVisitor() {}
-      };
-
       template<typename T>
       class ThreeTuple
       {
@@ -128,8 +120,8 @@ class SpatialGrid
         bool removePoint(const cObject *point);
         bool movePoint(const cObject *point, const Coord& newPos);
         void clearGrid();
-        void rangeQuery(const Coord& pos, double range, const SpatialGridVisitor *visitor) const;
-        void lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const;
+        void rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const;
+        void lineSegmentQuery(const LineSegment &lineSegment, const IVisitor *visitor) const;
         SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin, const Coord& constraintAreaMax);
 };
 

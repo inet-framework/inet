@@ -106,7 +106,7 @@ void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFra
 {
     double radius = range + rebuildPeriod * maxSpeed;
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
-    QuadTreeVisitor *visitor = new QuadTreeNeighborCacheVisitor(radioMedium, transmitter, frame);
+    QuadTreeNeighborCacheVisitor *visitor = new QuadTreeNeighborCacheVisitor(radioMedium, transmitter, frame);
     quadTree->rangeQuery(transmitterPos, radius, visitor);
     delete visitor;
 }

@@ -90,7 +90,7 @@ bool SpatialGrid::movePoint(const cObject *point, const Coord& newPos)
     throw cRuntimeError("Unimplemented");
 }
 
-void SpatialGrid::rangeQuery(const Coord& pos, double range, const SpatialGridVisitor *visitor) const
+void SpatialGrid::rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
 {
     ThreeTuple<int> start, end;
     calculateBoundingVoxels(pos, ThreeTuple<double>(range, range, range), start, end);
@@ -106,7 +106,7 @@ void SpatialGrid::rangeQuery(const Coord& pos, double range, const SpatialGridVi
     }
 }
 
-void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const SpatialGridVisitor *visitor) const
+void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const IVisitor *visitor) const
 {
     std::map<const cObject *,bool> visited;
     for (LineSegmentIterator it(lineSegment, voxelSizes, numVoxels); !it.end(); ++it)

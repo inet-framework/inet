@@ -31,7 +31,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
     typedef std::vector<const IRadio *> Radios;
 
   protected:
-    class GridNeighborCacheVisitor : public SpatialGrid::SpatialGridVisitor
+    class GridNeighborCacheVisitor : public IVisitor
     {
       protected:
         RadioMedium *radioMedium;

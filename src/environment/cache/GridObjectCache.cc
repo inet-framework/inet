@@ -47,9 +47,8 @@ void GridObjectCache::initialize(int stage)
 
 void GridObjectCache::visitObjects(const IVisitor *visitor)
 {
-    const SpatialGrid::SpatialGridVisitor *spatialGridVisitor = check_and_cast<const SpatialGrid::SpatialGridVisitor *>(visitor);
-    LineSegment lineSegment = spatialGridVisitor->getLineSegment();
-    grid->lineSegmentQuery(lineSegment, spatialGridVisitor);
+    LineSegment lineSegment = visitor->getLineSegment();
+    grid->lineSegmentQuery(lineSegment, visitor);
 }
 
 GridObjectCache::~GridObjectCache()
