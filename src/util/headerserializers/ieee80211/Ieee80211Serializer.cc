@@ -15,6 +15,8 @@
 
 #include <Ieee80211Serializer.h>
 #include <Ieee80211Frame_m.h>
+#include <Ieee80211MgmtFrames_m.h>
+
 namespace INETFw // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 {
 #include "headers/bsdint.h"
@@ -145,6 +147,71 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         return packetLength;
     }
 
+    else if (NULL != dynamic_cast<Ieee80211AuthenticationFrame *>(pkt))
+    {
+        //type = ST_AUTHENTICATION;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211DeauthenticationFrame *>(pkt))
+    {
+        //type = ST_DEAUTHENTICATION;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211DisassociationFrame *>(pkt))
+    {
+        //type = ST_DISASSOCIATION;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211ProbeRequestFrame *>(pkt))
+    {
+        //type = ST_PROBEREQUEST;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211AssociationRequestFrame *>(pkt))
+    {
+        //type = ST_ASSOCIATIONREQUEST;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211ReassociationRequestFrame *>(pkt))
+    {
+        //type = ST_REASSOCIATIONREQUEST;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211AssociationResponseFrame *>(pkt))
+    {
+        //type = ST_ASSOCIATIONRESPONSE;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211ReassociationResponseFrame *>(pkt))
+    {
+        //type = ST_REASSOCIATIONRESPONSE;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211BeaconFrame *>(pkt))
+    {
+        //type = ST_BEACON;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211ProbeResponseFrame *>(pkt))
+    {
+        //type = ST_PROBERESPONSE;
+        return 0;
+    }
+
+    else if (NULL != dynamic_cast<Ieee80211ActionFrame *>(pkt))
+    {
+        //type = ST_ACTION;
+        return 0;
+    }
     else
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
@@ -154,7 +221,7 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
     uint8_t *type = (uint8_t *) (buf);
     switch(*type)
     {
-        case 0xD4:
+        case 0xD4: // ST_ACK
         {
             struct ieee80211_frame_ack *frame = (struct ieee80211_frame_ack *) (buf);
             *pkt = new Ieee80211ACKFrame;
@@ -170,7 +237,7 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             ackFrame->setReceiverAddress(temp);
             return;
         }
-        case 0xB4:
+        case 0xB4: // ST_RTS
         {
             struct ieee80211_frame_rts *frame = (struct ieee80211_frame_rts *) (buf);
             *pkt = new Ieee80211RTSFrame;
@@ -188,7 +255,7 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             rtsFrame->setTransmitterAddress(temp);
             return;
         }
-        case 0xC4:
+        case 0xC4: // ST_CTS
         {
             struct ieee80211_frame_cts *frame = (struct ieee80211_frame_cts *) (buf);
             *pkt = new Ieee80211CTSFrame;
@@ -204,7 +271,7 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             ctsFrame->setReceiverAddress(temp);
             return;
         }
-        case 0x8:
+        case 0x8: // ST_DATA
         {
             struct ieee80211_frame_addr4 *frame = (struct ieee80211_frame_addr4 *) (buf);
             *pkt = new Ieee80211DataFrameWithSNAP;
@@ -277,6 +344,62 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             dataFrame->setName(encapPacket->getName());
             return;
         }
+
+        case 0xB0: // ST_AUTHENTICATION
+        {
+            // Ieee80211AuthenticationFrame
+        }
+
+        case 0xC0: //ST_ST_DEAUTHENTICATION
+        {
+            // Ieee80211DeauthenticationFrame
+        }
+
+        case 0xA0: // ST_DISASSOCIATION
+        {
+            // Ieee80211DisassociationFrame
+        }
+
+        case 0x40: // ST_PROBEREQUEST
+        {
+            // Ieee80211ProbeRequestFrame
+        }
+
+        case 0x00: // ST_ASSOCIATIONREQUEST
+        {
+            // Ieee80211AssociationRequestFrame
+        }
+
+        case 0x02: // ST_REASSOCIATIONREQUEST
+        {
+            // Ieee80211ReassociationRequestFrame
+        }
+
+        case 0x01: // ST_ASSOCIATIONRESPONSE
+        {
+            // Ieee80211AssociationResponseFrame
+        }
+
+        case 0x03: // ST_REASSOCIATIONRESPONSE
+        {
+            // Ieee80211ReassociationResponseFrame
+        }
+
+        case 0x80: // ST_BEACON
+        {
+            // Ieee80211BeaconFrame
+        }
+
+        case 0x50: //  ST_PROBERESPONSE
+        {
+            // Ieee80211ProbeResponseFrame
+        }
+
+        case 0xD0: // type = ST_ACTION
+        {
+            // Ieee80211ActionFrame
+        }
+
         default:
             throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
     }
