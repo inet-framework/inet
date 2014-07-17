@@ -66,11 +66,11 @@ struct ieee80211_plcp_hdr {
  */
 struct ieee80211_frame {
     uint8_t     i_fc[2];
-    uint8_t     i_dur[2];
+    uint16_t     i_dur;
     uint8_t     i_addr1[IEEE80211_ADDR_LEN];
     uint8_t     i_addr2[IEEE80211_ADDR_LEN];
     uint8_t     i_addr3[IEEE80211_ADDR_LEN];
-    uint8_t     i_seq[2];
+    uint16_t     i_seq;
     /* possibly followed by addr4[IEEE80211_ADDR_LEN]; */
     /* see below */
 } __PACKED__;

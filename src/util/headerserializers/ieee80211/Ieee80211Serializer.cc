@@ -78,139 +78,146 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         ctsFrame->getReceiverAddress().getAddressBytes(frame->i_ra);
         return 4 + IEEE80211_ADDR_LEN;
     }
-
-    else if (NULL != dynamic_cast<Ieee80211DataFrameWithSNAP *>(pkt))
+    else if (NULL != dynamic_cast<Ieee80211DataOrMgmtFrame *>(pkt))
     {
-        Ieee80211DataFrameWithSNAP *dataFrame = dynamic_cast<Ieee80211DataFrameWithSNAP *>(pkt);
+        Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(pkt);
+
         unsigned int packetLength;
-        struct ieee80211_frame_addr4 *frame = (struct ieee80211_frame_addr4 *) (buf);
+
+        struct ieee80211_frame *frame = (struct ieee80211_frame *) (buf);
         frame->i_fc[0] = 0x8;
         frame->i_fc[1] = 0; // TODO: Order, Protected Frame, MoreData, Power Mgt
-        frame->i_fc[1] |= dataFrame->getRetry();
+        frame->i_fc[1] |= dataOrMgmtFrame->getRetry();
         frame->i_fc[1] <<= 1;
-        frame->i_fc[1] |= dataFrame->getMoreFragments();
+        frame->i_fc[1] |= dataOrMgmtFrame->getMoreFragments();
         frame->i_fc[1] <<= 1;
-        frame->i_fc[1] |= dataFrame->getFromDS();
+        frame->i_fc[1] |= dataOrMgmtFrame->getFromDS();
         frame->i_fc[1] <<= 1;
-        frame->i_fc[1] |= dataFrame->getToDS();
-        frame->i_dur = (int)(dataFrame->getDuration().dbl()*1000);
-        dataFrame->getReceiverAddress().getAddressBytes(frame->i_addr1);
-        dataFrame->getTransmitterAddress().getAddressBytes(frame->i_addr2);
-        dataFrame->getAddress3().getAddressBytes(frame->i_addr3);
-        dataFrame->getAddress4().getAddressBytes(frame->i_addr4);
-        frame->i_seq = dataFrame->getFragmentNumber();
+        frame->i_fc[1] |= dataOrMgmtFrame->getToDS();
+        frame->i_dur = (int)(dataOrMgmtFrame->getDuration().dbl()*1000);
+        dataOrMgmtFrame->getReceiverAddress().getAddressBytes(frame->i_addr1);
+        dataOrMgmtFrame->getTransmitterAddress().getAddressBytes(frame->i_addr2);
+        dataOrMgmtFrame->getAddress3().getAddressBytes(frame->i_addr3);
+        frame->i_seq = dataOrMgmtFrame->getFragmentNumber();
         frame->i_seq <<= 12;
-        frame->i_seq |= (dataFrame->getSequenceNumber() & 0xFFF);
-        //If there's no address 3 then we overwrite it
-        if (dataFrame->getFromDS() && dataFrame->getToDS())
-            packetLength = 6 + 4*IEEE80211_ADDR_LEN;
-        else
-            packetLength = 6 + 3*IEEE80211_ADDR_LEN;
+        frame->i_seq |= (dataOrMgmtFrame->getSequenceNumber() & 0xFFF);
 
-        struct snap_header *snap_hdr = (struct snap_header *) (buf + packetLength);
+        packetLength = 6 + 3*IEEE80211_ADDR_LEN;
 
-        snap_hdr->dsap = 0xAA;
-        snap_hdr->ssap = 0xAA;
-        snap_hdr->ctrl = 0x03;
-        snap_hdr->snap = htons(dataFrame->getEtherType());
-        snap_hdr->snap <<= 24;
-
-        packetLength += 8;
-        cMessage *encapPacket = dataFrame->getEncapsulatedPacket();
-
-        switch (dataFrame->getEtherType())
+        if (NULL != dynamic_cast<Ieee80211DataFrameWithSNAP *>(pkt))
         {
+            Ieee80211DataFrameWithSNAP *dataFrame = dynamic_cast<Ieee80211DataFrameWithSNAP *>(pkt);
+            if (dataFrame->getFromDS() && dataFrame->getToDS())
+            {
+                packetLength += IEEE80211_ADDR_LEN;
+                dataFrame->getAddress4().getAddressBytes((uint8_t *) (buf));
+            }
+
+            struct snap_header *snap_hdr = (struct snap_header *) (buf + packetLength);
+
+            snap_hdr->dsap = 0xAA;
+            snap_hdr->ssap = 0xAA;
+            snap_hdr->ctrl = 0x03;
+            snap_hdr->snap = htons(dataFrame->getEtherType());
+            snap_hdr->snap <<= 24;
+
+            packetLength += 8;
+            cMessage *encapPacket = dataFrame->getEncapsulatedPacket();
+
+            switch (dataFrame->getEtherType())
+            {
 #ifdef WITH_IPv4
-            case ETHERTYPE_IP:
-                packetLength += IPv4Serializer().serialize(check_and_cast<IPv4Datagram *>(encapPacket),
-                                                                   buf+packetLength, bufsize-packetLength, true);
-                break;
+                case ETHERTYPE_IP:
+                    packetLength += IPv4Serializer().serialize(check_and_cast<IPv4Datagram *>(encapPacket),
+                                                                       buf+packetLength, bufsize-packetLength, true);
+                    break;
 #endif
 
 #ifdef WITH_IPv6
-            case ETHERTYPE_IPV6:
-                packetLength += IPv6Serializer().serialize(check_and_cast<IPv6Datagram *>(encapPacket),
-                                                                   buf+packetLength, bufsize-packetLength);
-                break;
+                case ETHERTYPE_IPV6:
+                    packetLength += IPv6Serializer().serialize(check_and_cast<IPv6Datagram *>(encapPacket),
+                                                                       buf+packetLength, bufsize-packetLength);
+                    break;
 #endif
 
 #ifdef WITH_IPv4
-            case ETHERTYPE_ARP:
-                packetLength += ARPSerializer().serialize(check_and_cast<ARPPacket *>(encapPacket),
-                                                                   buf+packetLength, bufsize-packetLength);
-                break;
+                case ETHERTYPE_ARP:
+                    packetLength += ARPSerializer().serialize(check_and_cast<ARPPacket *>(encapPacket),
+                                                                       buf+packetLength, bufsize-packetLength);
+                    break;
 #endif
 
-            default:
-                throw cRuntimeError("Ieee80211Serializer: cannot serialize protocol %x", dataFrame->getEtherType());
+                default:
+                    throw cRuntimeError("Ieee80211Serializer: cannot serialize protocol %x", dataFrame->getEtherType());
+            }
+            return packetLength;
         }
-        return packetLength;
-    }
 
-    else if (NULL != dynamic_cast<Ieee80211AuthenticationFrame *>(pkt))
-    {
-        //type = ST_AUTHENTICATION;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211AuthenticationFrame *>(pkt))
+        {
+            //type = ST_AUTHENTICATION;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211DeauthenticationFrame *>(pkt))
-    {
-        //type = ST_DEAUTHENTICATION;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211DeauthenticationFrame *>(pkt))
+        {
+            //type = ST_DEAUTHENTICATION;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211DisassociationFrame *>(pkt))
-    {
-        //type = ST_DISASSOCIATION;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211DisassociationFrame *>(pkt))
+        {
+            //type = ST_DISASSOCIATION;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211ProbeRequestFrame *>(pkt))
-    {
-        //type = ST_PROBEREQUEST;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211ProbeRequestFrame *>(pkt))
+        {
+            //type = ST_PROBEREQUEST;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211AssociationRequestFrame *>(pkt))
-    {
-        //type = ST_ASSOCIATIONREQUEST;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211AssociationRequestFrame *>(pkt))
+        {
+            //type = ST_ASSOCIATIONREQUEST;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211ReassociationRequestFrame *>(pkt))
-    {
-        //type = ST_REASSOCIATIONREQUEST;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211ReassociationRequestFrame *>(pkt))
+        {
+            //type = ST_REASSOCIATIONREQUEST;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211AssociationResponseFrame *>(pkt))
-    {
-        //type = ST_ASSOCIATIONRESPONSE;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211AssociationResponseFrame *>(pkt))
+        {
+            //type = ST_ASSOCIATIONRESPONSE;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211ReassociationResponseFrame *>(pkt))
-    {
-        //type = ST_REASSOCIATIONRESPONSE;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211ReassociationResponseFrame *>(pkt))
+        {
+            //type = ST_REASSOCIATIONRESPONSE;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211BeaconFrame *>(pkt))
-    {
-        //type = ST_BEACON;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211BeaconFrame *>(pkt))
+        {
+            //type = ST_BEACON;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211ProbeResponseFrame *>(pkt))
-    {
-        //type = ST_PROBERESPONSE;
-        return 0;
-    }
+        else if (NULL != dynamic_cast<Ieee80211ProbeResponseFrame *>(pkt))
+        {
+            //type = ST_PROBERESPONSE;
+            return 0;
+        }
 
-    else if (NULL != dynamic_cast<Ieee80211ActionFrame *>(pkt))
-    {
-        //type = ST_ACTION;
-        return 0;
+        else if (NULL != dynamic_cast<Ieee80211ActionFrame *>(pkt))
+        {
+            //type = ST_ACTION;
+            return 0;
+        }
     }
     else
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
