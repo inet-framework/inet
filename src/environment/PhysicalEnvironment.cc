@@ -32,10 +32,8 @@ PhysicalEnvironment::PhysicalEnvironment() :
     relativeHumidity(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
-    viewAngle(NULL)
-#ifdef __CCANVAS_H
-    ,objectsLayer(NULL)
-#endif
+    viewAngle(NULL),
+    objectsLayer(NULL)
 {
 }
 
@@ -64,13 +62,9 @@ void PhysicalEnvironment::initialize(int stage)
         viewAngle = par("viewAngle");
         if (!viewAngle || !*viewAngle)
             throw cRuntimeError("Invalid view angle");
-
-#ifdef __CCANVAS_H
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
         canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
-#endif // #ifdef __CCANVAS_H
-
         cXMLElement *environment = par("environment");
         parseShapes(environment);
         parseMaterials(environment);
@@ -307,8 +301,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         if (!material)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
-        // color
-#ifdef __CCANVAS_H
         // line color
         cFigure::Color lineColor;
         const char *lineColorAttribute = element->getAttribute("line-color");
@@ -335,14 +327,10 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         // insert
         PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineColor, fillColor);
-#else // ifdef __CCANVAS_H
-        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material);
-#endif // ifdef __CCANVAS_H
         objects.push_back(object);
     }
 }
 
-#ifdef __CCANVAS_H
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point, char viewAngle)
 {
     switch (viewAngle)
@@ -366,11 +354,9 @@ cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
     else
         return environment->computeCanvasPoint(point, 'x');
 }
-#endif // ifdef __CCANVAS_H
 
 void PhysicalEnvironment::updateCanvas()
 {
-#ifdef __CCANVAS_H
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
         PhysicalObject *object = *it;
         const Shape *shape = object->getShape();
@@ -427,7 +413,6 @@ void PhysicalEnvironment::updateCanvas()
             objectsLayer->addFigure(nameFigure);
         }
     }
-#endif // ifdef __CCANVAS_H
 }
 
 } // namespace inet

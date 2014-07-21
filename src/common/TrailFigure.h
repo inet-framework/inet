@@ -22,10 +22,7 @@
 
 namespace inet {
 
-class INET_API TrailFigure
-#ifdef __CCANVAS_H
-: public cGroupFigure
-#endif
+class INET_API TrailFigure : public cGroupFigure
 {
   protected:
     int maxCount;
@@ -33,9 +30,7 @@ class INET_API TrailFigure
   public:
     TrailFigure(int maxCount, const char *name = NULL);
 
-#ifdef __CCANVAS_H
     virtual void addFigure(cFigure *figure);
-#endif
 };
 
 } // namespace inet

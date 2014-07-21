@@ -36,19 +36,12 @@ class INET_API PhysicalObject : public cNamedObject
     EulerAngles orientation;
     const Shape *shape;
     const Material *material;
-#ifdef __CCANVAS_H
     const cFigure::Color lineColor;
     const cFigure::Color fillColor;
     cFigure *figure;
-#endif // ifdef __CCANVAS_H
 
   public:
-    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material
-#ifdef __CCANVAS_H
-            , const cFigure::Color& lineColor
-            , const cFigure::Color& fillColor
-#endif // ifdef __CCANVAS_H
-            );
+    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material, const cFigure::Color& lineColor, const cFigure::Color& fillColor);
     virtual ~PhysicalObject();
 
     virtual int getId() const { return id; }
@@ -61,10 +54,8 @@ class INET_API PhysicalObject : public cNamedObject
 
     virtual const Shape *getShape() const { return shape; }
     virtual const Material *getMaterial() const { return material; }
-#ifdef __CCANVAS_H
     virtual const cFigure::Color& getLineColor() const { return lineColor; }
     virtual const cFigure::Color& getFillColor() const { return fillColor; }
-#endif // ifdef __CCANVAS_H
 };
 
 } // namespace inet

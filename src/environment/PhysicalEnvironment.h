@@ -38,17 +38,13 @@ class INET_API PhysicalEnvironment : public cModule
     std::map<int, const Material *> materials;
     std::vector<PhysicalObject *> objects;
 
-#ifdef __CCANVAS_H
     cGroupFigure *objectsLayer;
-#endif // #ifdef __CCANVAS_H
 
   protected:
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
 
-#ifdef __CCANVAS_H
     static cFigure::Point computeCanvasPoint(Coord point, char viewAngle);
-#endif // #ifdef __CCANVAS_H
 
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
@@ -59,9 +55,7 @@ class INET_API PhysicalEnvironment : public cModule
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
-#ifdef __CCANVAS_H
     static cFigure::Point computeCanvasPoint(Coord point);
-#endif // #ifdef __CCANVAS_H
 
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }

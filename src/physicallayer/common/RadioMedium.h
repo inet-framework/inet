@@ -80,14 +80,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
          * The radio frame that was created by the transmitter is never NULL.
          */
         const IRadioFrame *frame;
-
-#ifdef __CCANVAS_H
         /**
          * The figure representing this transmission.
          */
         cOvalFigure *figure;
-#endif // ifdef __CCANVAS_H
-
         /**
          * The list of intermediate reception computation results.
          */
@@ -96,11 +92,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
       public:
         TransmissionCacheEntry() :
             frame(NULL),
-
-#ifdef __CCANVAS_H
             figure(NULL),
-#endif // ifdef __CCANVAS_H
-
             receptionCacheEntries(NULL)
         {}
     };
@@ -284,13 +276,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
 
     /** @name Graphics     */
     //@{
-#ifdef __CCANVAS_H
     /**
      * The list figures representing ongoing communications.
      */
     cGroupFigure *communicationLayer;
-#endif
-
     /**
      * The list of trail figures representing successful communications.
      */

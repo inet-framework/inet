@@ -147,14 +147,9 @@ void MobilityBase::updateVisualRepresentation()
 {
     EV_DEBUG << "current position = " << lastPosition << endl;
     if (ev.isGUI() && visualRepresentation) {
-#ifdef __CCANVAS_H
         cFigure::Point point = PhysicalEnvironment::computeCanvasPoint(lastPosition);
         visualRepresentation->getDisplayString().setTagArg("p", 0, (long)point.x);
         visualRepresentation->getDisplayString().setTagArg("p", 1, (long)point.y);
-#else
-        visualRepresentation->getDisplayString().setTagArg("p", 0, (long)lastPosition.x);
-        visualRepresentation->getDisplayString().setTagArg("p", 1, (long)lastPosition.y);
-#endif
     }
 }
 

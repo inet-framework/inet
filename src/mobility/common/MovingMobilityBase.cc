@@ -50,13 +50,11 @@ void MovingMobilityBase::initialize(int stage)
         moveTimer = new cMessage("move");
         updateInterval = par("updateInterval");
         leaveMovementTrail = par("leaveMovementTrail");
-#ifdef __CCANVAS_H
         if (leaveMovementTrail) {
             movementTrail = new TrailFigure(100, "movement trail");
             cCanvas *canvas = visualRepresentation->getParentModule()->getCanvas();
             canvas->addFigure(movementTrail, canvas->findFigure("submodules"));
         }
-#endif
     }
 }
 
@@ -82,7 +80,6 @@ void MovingMobilityBase::updateVisualRepresentation()
 {
     MobilityBase::updateVisualRepresentation();
     if (leaveMovementTrail && visualRepresentation && ev.isGUI()) {
-#ifdef __CCANVAS_H
         Coord endPosition = lastPosition;
         Coord startPosition;
         if (movementTrail->getNumFigures() == 0)
@@ -99,7 +96,6 @@ void MovingMobilityBase::updateVisualRepresentation()
             movementLine->setLineColor(cFigure::BLACK);
             movementTrail->addFigure(movementLine);
         }
-#endif
     }
 }
 

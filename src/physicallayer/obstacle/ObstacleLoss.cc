@@ -40,13 +40,11 @@ void ObstacleLoss::initialize(int stage)
         const char *environmentModule = par("environmentModule");
         environment = check_and_cast<PhysicalEnvironment *>(simulation.getModuleByPath(environmentModule));
         leaveIntersectionTrail = par("leaveIntersectionTrail");
-#ifdef __CCANVAS_H
         if (leaveIntersectionTrail) {
             intersectionTrail = new TrailFigure(100, "obstacle intersection trail");
             cCanvas *canvas = simulation.getSystemModule()->getCanvas();
             canvas->addFigure(intersectionTrail, canvas->findFigure("submodules"));
         }
-#endif
     }
 }
 
@@ -96,7 +94,6 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
         Coord intersection1, intersection2, normal1, normal2;
         if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
         {
-#ifdef __CCANVAS_H
             if (leaveIntersectionTrail) {
                 cLineFigure *intersectionLine = new cLineFigure();
                 intersectionLine->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
@@ -114,7 +111,6 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord transmissionP
                 normal2Line->setLineColor(cFigure::RED);
                 intersectionTrail->addFigure(normal2Line);
             }
-#endif
             const Material *material = object->getMaterial();
             totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
             if (!normal1.isUnspecified()) {

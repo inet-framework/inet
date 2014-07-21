@@ -20,20 +20,17 @@
 namespace inet {
 
 TrailFigure::TrailFigure(int maxCount, const char *name) :
-#ifdef __CCANVAS_H
     cGroupFigure(name),
-#endif
     maxCount(maxCount)
-{}
+{
+}
 
-#ifdef __CCANVAS_H
 void TrailFigure::addFigure(cFigure *figure)
 {
     cGroupFigure::addFigure(figure);
     if (getNumFigures() > maxCount)
         delete removeFigure(0);
 }
-#endif
 
 } // namespace inet
 

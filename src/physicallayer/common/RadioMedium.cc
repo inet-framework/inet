@@ -55,11 +55,7 @@ RadioMedium::RadioMedium() :
     baseRadioId(0),
     baseTransmissionId(0),
     neighborCache(NULL),
-
-#ifdef __CCANVAS_H
     communicationLayer(NULL),
-#endif
-
     communcationTrail(NULL),
     transmissionCount(0),
     sendCount(0),
@@ -128,20 +124,16 @@ void RadioMedium::initialize(int stage)
             communicationLog.open(ev.getConfig()->substituteVariables("${resultdir}/${configname}-${runnumber}.tlog"));
         // initialize graphics
         displayCommunication = par("displayCommunication");
-#ifdef __CCANVAS_H
         cCanvas *canvas = getParentModule()->getCanvas();
         if (displayCommunication) {
             communicationLayer = new cGroupFigure("communication");
             canvas->addFigure(communicationLayer, canvas->findFigure("submodules"));
         }
-#endif
         leaveCommunicationTrail = par("leaveCommunicationTrail");
-#ifdef __CCANVAS_H
         if (leaveCommunicationTrail) {
             communcationTrail = new TrailFigure(100, "communication trail");
             canvas->addFigure(communcationTrail, canvas->findFigure("submodules"));
         }
-#endif
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         updateLimits();
@@ -521,12 +513,8 @@ void RadioMedium::removeNonInterferingTransmissions()
                 delete cacheEntry.decision;
             }
             delete receptionCacheEntries;
-
-#ifdef __CCANVAS_H
             if (displayCommunication && transmissionCacheEntry.figure)
                 delete communicationLayer->removeFigure(transmissionCacheEntry.figure);
-#endif
-
         }
     }
     cache.erase(cache.begin(), cache.begin() + transmissionIndex);
@@ -726,8 +714,6 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     cMethodCallContextSwitcher contextSwitcher(this);
     TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
     transmissionCacheEntry->frame = radioFrame->dup();
-
-#ifdef __CCANVAS_H
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
         cOvalFigure *communicationFigure = new cOvalFigure();
@@ -743,8 +729,6 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         communicationFigure->addFigure(nameFigure);
         updateCanvas();
     }
-#endif // ifdef __CCANVAS_H
-
     return radioFrame;
 }
 
@@ -766,7 +750,6 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     macFrame->setBitError(!decision->isReceptionSuccessful());
     macFrame->setControlInfo(const_cast<RadioReceptionIndication *>(decision->getIndication()));
     delete listening;
-#ifdef __CCANVAS_H
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
         cLineFigure *communicationLine = new cLineFigure();
         communicationLine->setStart(PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition()));
@@ -777,7 +760,6 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     }
     if (displayCommunication)
         updateCanvas();
-#endif // ifdef __CCANVAS_H
     return macFrame;
 }
 
@@ -875,7 +857,6 @@ void RadioMedium::receiveSignal(cComponent *source, simsignal_t signal, long val
 
 void RadioMedium::updateCanvas()
 {
-#ifdef __CCANVAS_H
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
         const TransmissionCacheEntry* transmissionCacheEntry = getTransmissionCacheEntry(transmission);
@@ -892,7 +873,6 @@ void RadioMedium::updateCanvas()
             figure->setLineWidth(startRadius - endRadius);
         }
     }
-#endif // ifdef __CCANVAS_H
 }
 
 } // namespace physicallayer
