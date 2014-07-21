@@ -28,6 +28,13 @@ Polygon::Polygon(const std::vector<Coord>& points)
 
 Coord Polygon::getNormalUnitVector() const
 {
+    Coord normalVec = getNormalVector();
+    return normalVec / normalVec.length();
+}
+
+
+Coord Polygon::getNormalVector() const
+{
     Coord point1 = points[0];
     Coord point2 = points[1];
     Coord point3 = points[2];
@@ -36,7 +43,7 @@ Coord Polygon::getNormalUnitVector() const
     Coord vectorC(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
                  vectorA.z * vectorB.x - vectorA.x * vectorB.z,
                  vectorA.x * vectorB.y - vectorA.y * vectorB.x);
-    return vectorC / vectorC.length();
+    return vectorC;
 }
 
 Coord Polygon::computeSize() const

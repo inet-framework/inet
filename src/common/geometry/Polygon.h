@@ -37,6 +37,7 @@ class INET_API Polygon : public Shape
     const std::vector<Coord>& getPoints() const { return points; }
     virtual Coord computeSize() const;
     Coord getNormalUnitVector() const;
+    Coord getNormalVector() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 
