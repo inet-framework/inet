@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 #define HTTPT_REQUEST_MESSAGE             10000
 #define HTTPT_DELAYED_REQUEST_MESSAGE     10001
 #define HTTPT_RESPONSE_MESSAGE            10010
@@ -95,6 +97,8 @@ class HttpNodeBase : public cSimpleModule, public ILifecycle
   public:
     HttpNodeBase();
 };
+
+} // namespace httptools
 
 } // namespace inet
 

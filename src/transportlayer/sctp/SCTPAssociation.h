@@ -40,9 +40,12 @@
 
 namespace inet {
 
-class SCTPMessage;
 class SCTPCommand;
 class SCTPOpenCommand;
+
+namespace sctp {
+
+class SCTPMessage;
 class SCTPReceiveStream;
 class SCTPSendStream;
 class SCTPAlgorithm;
@@ -1373,6 +1376,8 @@ class INET_API SCTPAssociation : public cObject
         return false;
     }
 };
+
+} // namespace sctp
 
 } // namespace inet
 

@@ -65,7 +65,7 @@ class INET_API ModuleIdAddress
     bool operator>(const ModuleIdAddress& addr1) const { return id > addr1.id; }
     bool operator>=(const ModuleIdAddress& addr1) const { return id >= addr1.id; }
 
-    std::string str() const { std::stringstream s; s << id; return s.str(); }
+    std::string str() const { std::ostringstream s; s << id; return s.str(); }
 };
 
 } // namespace inet

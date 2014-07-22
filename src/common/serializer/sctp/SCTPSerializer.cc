@@ -20,17 +20,16 @@
 
 #include "headers/defs.h"
 
-namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
-#include "headers/bsdint.h"
-#include "headers/in.h"
 #include "headers/in_systm.h"
 #include "headers/ip.h"
+#include "headers/bsdint.h"
+#include "headers/in.h"
 #include "headers/sctphdr.h"
-};
 
 #include "SCTPSerializer.h"
+
 #include "SCTPAssociation.h"
+#include "SCTPCommand_m.h"
 #include "IPv4Serializer.h"
 
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
@@ -41,8 +40,11 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 
 #include <sys/types.h>
 
-using namespace INETFw;
 namespace inet {
+
+using namespace serializer;
+
+namespace sctp {
 
 unsigned char SCTPSerializer::keyVector[512];
 unsigned int SCTPSerializer::sizeKeyVector = 0;
@@ -2084,6 +2086,8 @@ void SCTPSerializer::calculateSharedKey()
             sharedKey[i + sizePeerKeyVector] = keyVector[i];
     }
 }
+
+} // namespace sctp
 
 } // namespace inet
 

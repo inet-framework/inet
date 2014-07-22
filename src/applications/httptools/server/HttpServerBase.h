@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 // Event message kinds
 #define MSGKIND_START_SESSION    0
 #define MSGKIND_NEXT_MESSAGE     1
@@ -105,6 +107,8 @@ class INET_API HttpServerBase : public HttpNodeBase
      */
     const std::string& getHostName() { return hostName; }
 };
+
+} // namespace httptools
 
 } // namespace inet
 

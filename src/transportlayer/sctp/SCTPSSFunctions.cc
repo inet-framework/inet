@@ -31,11 +31,15 @@
 
 ************************************************************/
 
-#include "SCTPAssociation.h"
 #include <list>
 #include <math.h>
 
+#include "SCTPAssociation.h"
+#include "SCTPCommand_m.h"
+
 namespace inet {
+
+namespace sctp {
 
 void SCTPAssociation::initStreams(uint32 inStreams, uint32 outStreams)
 {
@@ -495,6 +499,8 @@ int32 SCTPAssociation::pathStreamSchedulerMapToPath(SCTPPathVariables *path, boo
             << " of " << workingPaths << ")" << endl;
     return sid;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

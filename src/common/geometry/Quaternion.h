@@ -2,7 +2,7 @@
 #define __INET_QUATERNION_H
 
 #include "Coord.h"
-#include "FWMath.h"
+#include "INETMath.h"
 #include "EulerAngles.h"
 
 namespace inet {
@@ -63,7 +63,7 @@ class Quaternion
         // TODO:
     }
 
-    double getRotationAngle() { return FWMath::rad2deg(atan2(d.length(), s) * 2); }
+    double getRotationAngle() { return math::rad2deg(atan2(d.length(), s) * 2); }
 
     Coord& getAxis() { return d; }
 };

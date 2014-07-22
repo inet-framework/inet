@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class InterfaceStateLoopback : public InterfaceState
 {
@@ -31,7 +31,7 @@ class InterfaceStateLoopback : public InterfaceState
     virtual Interface::InterfaceStateType getState() const { return Interface::LOOPBACK_STATE; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

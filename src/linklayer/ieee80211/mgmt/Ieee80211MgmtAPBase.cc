@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 void Ieee80211MgmtAPBase::initialize(int stage)
 {
     Ieee80211MgmtBase::initialize(stage);
@@ -199,6 +201,8 @@ Ieee80211DataFrame *Ieee80211MgmtAPBase::encapsulate(cPacket *msg)
     }
     return NULL;
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

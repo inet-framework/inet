@@ -24,6 +24,7 @@
 namespace inet {
 
 namespace {
+
 // copied the cModule::getModuleByRelativePath(), but returns NULL instead throw cRuntimeError
 cModule *getModuleByRelativePath(cModule *modp, const char *path)
 {
@@ -45,7 +46,8 @@ cModule *getModuleByRelativePath(cModule *modp, const char *path)
     }
     return modp;    // NULL if not found
 }
-} // namespace {
+
+} // namespace
 
 bool ModulePathAddress::tryParse(const char *addr)
 {
@@ -67,9 +69,27 @@ bool ModulePathAddress::tryParse(const char *addr)
 
 std::string ModulePathAddress::str() const
 {
-    cModule *module = simulation.getModule(id);
-    std::string fullPath = module->getFullPath();
-    return strchr(fullPath.c_str(), '.') + 1;
+    if (id == 0) {
+        return "<unspec>";
+    }
+    else if (id == -1) {
+        return "<BROADCAST>";
+    }
+    else if (id < -1) {
+        std::ostringstream s;
+        s << "<MULTICAST ID=" << -id << ">";
+        return s.str();
+    }
+    else /* if (id > 0) */ {
+        cModule *module = simulation.getModule(id);
+        if (module) {
+            std::string fullPath = module->getFullPath();
+            return strchr(fullPath.c_str(), '.') + 1;
+        }
+        std::ostringstream s;
+        s << "<module ID=" << id << ">";
+        return s.str();
+    }
 }
 
 } // namespace inet

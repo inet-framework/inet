@@ -19,7 +19,9 @@
 #ifndef __INET_TCPHDR_H
 #define __INET_TCPHDR_H
 
-//#include "headers/defs.h"   // for endian macros
+namespace inet {
+
+namespace serializer {
 
 #  define TH_FIN     0x01
 #  define TH_SYN     0x02
@@ -53,5 +55,9 @@ struct tcphdr
     //unsigned char data[0];        XXX MSVC only allows zero-size arrays at the end of a struct
 };    // TODO  __attribute__((packed));
 
-#endif /* netinet/tcp.h */
+} // namespace serializer
+
+} // namespace inet
+
+#endif // ifndef __INET_TCPHDR_H
 

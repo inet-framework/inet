@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace serializer {
+
 /**
  * Converts between IGMPMessage and binary (network byte order) IGMP header.
  */
@@ -42,6 +44,8 @@ class IGMPSerializer
      */
     void parse(const unsigned char *buf, unsigned int bufsize, IGMPMessage *pkt);
 };
+
+} // namespace serializer
 
 } // namespace inet
 

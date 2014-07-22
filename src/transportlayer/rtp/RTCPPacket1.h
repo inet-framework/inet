@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 class RTCPPacket : public RTCPPacket_Base
 {
   public:
@@ -53,6 +55,8 @@ class RTCPCompoundPacket : public RTCPCompoundPacket_Base
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPCompoundPacket_Base
     void addRTCPPacket(RTCPPacket *rtcpPacket);
 };
+
+} // namespace rtp
 
 } // namespace inet
 

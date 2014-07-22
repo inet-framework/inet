@@ -25,9 +25,11 @@
 #include "NotifierConsts.h"
 #include "RadioControlInfo_m.h"
 #include "Radio80211aControlInfo_m.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
+
+namespace ieee80211 {
 
 using namespace physicallayer;
 
@@ -116,7 +118,7 @@ void Ieee80211MgmtSTA::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         if (ift) {
-            myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
+            myIface = ift->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
         }
     }
 }
@@ -839,6 +841,8 @@ void Ieee80211MgmtSTA::storeAPInfo(const MACAddress& address, const Ieee80211Bea
     //XXX where to get this from?
     //ap->rxPower = ...
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

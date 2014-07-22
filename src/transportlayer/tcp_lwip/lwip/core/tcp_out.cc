@@ -66,6 +66,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /* Forward declarations.*/
 // ...moved to tcp.h
 
@@ -1072,6 +1074,8 @@ tcp_zero_window_probe(struct tcp_pcb *pcb)
                           " ackno %" U32_F ".\n",
                           pcb->snd_nxt - 1, pcb->rcv_nxt));
 }
+
+} // namespace tcp
 
 } // namespace inet
 

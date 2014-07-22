@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 class SCTPDataVariables;
 class SCTPAssociation;
 
@@ -103,6 +105,8 @@ class INET_API SCTPQueue : public cObject
   private:
     PayloadQueue::iterator GetChunkFastIterator;
 };
+
+} // namespace sctp
 
 } // namespace inet
 

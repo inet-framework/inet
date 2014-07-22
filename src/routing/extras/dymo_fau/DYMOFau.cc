@@ -19,7 +19,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DYMO.h"
+#include "DYMOFau.h"
 #include "UDPControlInfo_m.h"
 #include "UDPSocket.h"
 #include "IPProtocolId_m.h"
@@ -33,7 +33,7 @@ namespace inet {
 
 namespace inetmanet {
 
-Define_Module( DYMOFau );
+Define_Module(DYMOFau);
 
 
 #define DYMO_PORT 653

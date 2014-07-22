@@ -43,6 +43,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -217,7 +219,9 @@ void ip_debug_print(struct pbuf *p);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 
 #endif /* __LWIP_IP_H__ */

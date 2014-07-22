@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCPNoCongestionControl);
 
 TCPNoCongestionControl::TCPNoCongestionControl() : TCPBaseAlg(),
@@ -53,6 +55,8 @@ void TCPNoCongestionControl::receivedDataAck(uint32 firstSeqAcked)
     // ack may have freed up some room in the window, try sending
     sendData(false);
 }
+
+} // namespace tcp
 
 } // namespace inet
 

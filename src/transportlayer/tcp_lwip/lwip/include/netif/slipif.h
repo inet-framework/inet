@@ -38,6 +38,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,8 +51,9 @@ void slipif_poll(struct netif *netif);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif
 

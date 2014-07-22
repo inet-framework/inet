@@ -20,6 +20,7 @@
 #include "L3AddressResolver.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
+#include "INETUtils.h"
 
 namespace inet {
 
@@ -72,7 +73,7 @@ void TCPSrvHostApp::handleMessage(cMessage *msg)
 
             const char *serverThreadClass = par("serverThreadClass");
             TCPServerThreadBase *proc =
-                check_and_cast<TCPServerThreadBase *>(createOne(serverThreadClass));
+                check_and_cast<TCPServerThreadBase *>(inet::utils::createOne(serverThreadClass));
 
             socket->setCallbackObject(proc);
             proc->init(this, socket);

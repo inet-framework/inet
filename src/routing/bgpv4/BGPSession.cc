@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace bgp {
+
 BGPSession::BGPSession(BGPRouting& _bgpRouting)
     : _bgpRouting(_bgpRouting), _ptrStartEvent(0), _connectRetryCounter(0)
     , _connectRetryTime(BGP_RETRY_TIME), _ptrConnectRetryTimer(0)
@@ -29,8 +31,8 @@ BGPSession::BGPSession(BGPRouting& _bgpRouting)
     , _openMsgSent(0), _openMsgRcv(0), _keepAliveMsgSent(0)
     , _keepAliveMsgRcv(0), _updateMsgSent(0), _updateMsgRcv(0)
 {
-    _box = new BGPFSM::TopState::Box(*this);
-    _fsm = new Macho::Machine<BGPFSM::TopState>(_box);
+    _box = new fsm::TopState::Box(*this);
+    _fsm = new Macho::Machine<fsm::TopState>(_box);
     _info.sessionEstablished = false;
 };
 
@@ -44,7 +46,7 @@ BGPSession::~BGPSession()
     _info.socketListen->~TCPSocket();
 }
 
-void BGPSession::setInfo(BGP::SessionInfo info)
+void BGPSession::setInfo(SessionInfo info)
 {
     _info.sessionType = info.sessionType;
     _info.ASValue = info.ASValue;
@@ -60,18 +62,18 @@ void BGPSession::setTimers(simtime_t *delayTab)
     _connectRetryTime = delayTab[0];
     _holdTime = delayTab[1];
     _keepAliveTime = delayTab[2];
-    if (_info.sessionType == BGP::IGP) {
+    if (_info.sessionType == IGP) {
         _StartEventTime = delayTab[3];
     }
     else if (delayTab[3] != SIMTIME_ZERO) {
         _StartEventTime = delayTab[3];
-        _ptrStartEvent = new cMessage("BGP Start", BGP::START_EVENT_KIND);
+        _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
         _bgpRouting.getScheduleAt(_bgpRouting.getSimTime() + _StartEventTime, _ptrStartEvent);
         _ptrStartEvent->setContextPointer(this);
     }
-    _ptrConnectRetryTimer = new cMessage("BGP Connect Retry", BGP::CONNECT_RETRY_KIND);
-    _ptrHoldTimer = new cMessage("BGP Hold Timer", BGP::HOLD_TIME_KIND);
-    _ptrKeepAliveTimer = new cMessage("BGP Keep Alive Timer", BGP::KEEP_ALIVE_KIND);
+    _ptrConnectRetryTimer = new cMessage("BGP Connect Retry", CONNECT_RETRY_KIND);
+    _ptrHoldTimer = new cMessage("BGP Hold Timer", HOLD_TIME_KIND);
+    _ptrKeepAliveTimer = new cMessage("BGP Keep Alive Timer", KEEP_ALIVE_KIND);
 
     _ptrConnectRetryTimer->setContextPointer(this);
     _ptrHoldTimer->setContextPointer(this);
@@ -81,9 +83,9 @@ void BGPSession::setTimers(simtime_t *delayTab)
 void BGPSession::startConnection()
 {
     if (_ptrStartEvent == 0) {
-        _ptrStartEvent = new cMessage("BGP Start", BGP::START_EVENT_KIND);
+        _ptrStartEvent = new cMessage("BGP Start", START_EVENT_KIND);
     }
-    if (_info.sessionType == BGP::IGP) {
+    if (_info.sessionType == IGP) {
         if (_bgpRouting.getSimTime() > _StartEventTime) {
             _StartEventTime = _bgpRouting.getSimTime();
         }
@@ -140,6 +142,8 @@ void BGPSession::getStatistics(unsigned int *statTab)
     statTab[4] += _updateMsgSent;
     statTab[5] += _updateMsgRcv;
 }
+
+} // namespace bgp
 
 } // namespace inet
 

@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TcpLwipVirtualDataSendQueue);
 
 Register_Class(TcpLwipVirtualDataReceiveQueue);
@@ -164,6 +166,8 @@ void TcpLwipVirtualDataReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 class WifiModulationType
 {
   public:
@@ -77,6 +79,8 @@ class WifiModulationType
     static simtime_t get_aPHY_RX_START_Delay(ModulationType payloadMode, WifiPreamble preamble);
     static ModulationType getPlcpHeaderMode(ModulationType payloadMode, WifiPreamble preamble);
 };
+
+} // namespace ieee80211
 
 } // namespace inet
 

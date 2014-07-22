@@ -19,7 +19,7 @@ cplusplus {{
 #include "sdes.h"
 }}
 
-namespace inet;
+namespace inet::rtp;
 
 class noncobject SenderReport;
 packet RTCPReceiverReportPacket;

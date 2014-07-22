@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPNoCongestionControl.
  */
@@ -57,6 +59,8 @@ class INET_API TCPNoCongestionControl : public TCPBaseAlg
     /** Redefine what should happen when data got acked, to add congestion window management */
     virtual void receivedDataAck(uint32 firstSeqAcked);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

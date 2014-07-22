@@ -37,6 +37,10 @@
 
 namespace inet {
 
+namespace rtp {
+
+} // namespace rtp
+
 } // namespace inet
 
 #endif // ifndef __INET_RTCPPACKET_H

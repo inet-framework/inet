@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 /**
  * An example packet classifier based on the UDP/TCP port number.
  * Access point management frames are classified into the 'defaultManagement' class (3 by default).
@@ -53,6 +55,8 @@ class INET_API Ieee80211eClassifier : public IQoSClassifier
      */
     virtual int classifyPacket(cMessage *msg);
 };
+
+} // namespace ieee80211
 
 } // namespace inet
 

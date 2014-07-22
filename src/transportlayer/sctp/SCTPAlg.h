@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 /**
  * State variables for SCTPAlg.
  */
@@ -73,6 +75,8 @@ class INET_API SCTPAlg : public SCTPAlgorithm
 
     virtual void dataSent(uint32 fromseq);
 };
+
+} // namespace sctp
 
 } // namespace inet
 

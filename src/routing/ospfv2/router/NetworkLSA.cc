@@ -19,7 +19,9 @@
 
 namespace inet {
 
-bool OSPF::NetworkLSA::update(const OSPFNetworkLSA *lsa)
+namespace ospf {
+
+bool NetworkLSA::update(const OSPFNetworkLSA *lsa)
 {
     bool different = differsFrom(lsa);
     (*this) = (*lsa);
@@ -33,7 +35,7 @@ bool OSPF::NetworkLSA::update(const OSPFNetworkLSA *lsa)
     }
 }
 
-bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA *networkLSA) const
+bool NetworkLSA::differsFrom(const OSPFNetworkLSA *networkLSA) const
 {
     const OSPFLSAHeader& lsaHeader = networkLSA->getHeader();
     bool differentHeader = ((header_var.getLsOptions() != lsaHeader.getLsOptions()) ||
@@ -59,6 +61,8 @@ bool OSPF::NetworkLSA::differsFrom(const OSPFNetworkLSA *networkLSA) const
 
     return differentHeader || differentBody;
 }
+
+} // namespace ospf
 
 } // namespace inet
 

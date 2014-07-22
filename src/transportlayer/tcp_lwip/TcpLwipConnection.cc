@@ -27,8 +27,11 @@
 #include "TcpLwipQueues.h"
 #include "TCPSegment.h"
 #include "TCPSerializer.h"
+#include "INETUtils.h"
 
 namespace inet {
+
+namespace tcp {
 
 TcpLwipConnection::Stats::Stats()
     :
@@ -96,8 +99,8 @@ TcpLwipConnection::TcpLwipConnection(TcpLwipConnection& connP, int connIdP,
     connIdM(connIdP),
     appGateIndexM(connP.appGateIndexM),
     pcbM(pcbP),
-    sendQueueM(check_and_cast<TcpLwipSendQueue *>(createOne(connP.sendQueueM->getClassName()))),
-    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(createOne(connP.receiveQueueM->getClassName()))),
+    sendQueueM(check_and_cast<TcpLwipSendQueue *>(inet::utils::createOne(connP.sendQueueM->getClassName()))),
+    receiveQueueM(check_and_cast<TcpLwipReceiveQueue *>(inet::utils::createOne(connP.receiveQueueM->getClassName()))),
     tcpLwipM(connP.tcpLwipM),
     totalSentM(0),
     isListenerM(false),
@@ -337,6 +340,8 @@ void TcpLwipConnection::do_SEND()
         onCloseM = false;
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 

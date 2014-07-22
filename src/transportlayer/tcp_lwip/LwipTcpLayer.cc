@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 LwipTcpLayer::LwipTcpLayer(LwipTcpStackIf& stackIfP) :
     stackIf(stackIfP),
     tcp_input_pcb(NULL),
@@ -115,13 +117,15 @@ void LwipTcpLayer::memp_free(memp_t type, void *ptr)
     if ((ptr != NULL) && ((type == MEMP_TCP_PCB) || (type == MEMP_TCP_PCB_LISTEN)))
         stackIf.lwip_free_pcb_event((LwipTcpLayer::tcp_pcb *)ptr);
 
-    inet::memp_free(type, ptr);
+    inet::tcp::memp_free(type, ptr);
 }
 
 void LwipTcpLayer::notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32_t seqNo, const void *dataptr, int len)
 {
     stackIf.notifyAboutIncomingSegmentProcessing(pcb, seqNo, dataptr, len);
 }
+
+} // namespace tcp
 
 } // namespace inet
 

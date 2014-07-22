@@ -45,6 +45,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #if LWIP_DHCP
 struct dhcp;
 #endif
@@ -263,7 +265,8 @@ void netif_poll_all(void);
 #endif /* !LWIP_NETIF_LOOPBACK_MULTITHREADING */
 #endif /* ENABLE_LOOPBACK */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_NETIF_H__ */

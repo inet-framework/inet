@@ -47,6 +47,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /*
    -----------------------------------------------
    ---------- Platform specific locking ----------
@@ -1839,7 +1841,8 @@ namespace inet {
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_OPT_H__ */

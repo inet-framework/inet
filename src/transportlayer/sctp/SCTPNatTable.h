@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 class INET_API SCTPNatEntry : public cPolymorphic
 {
   protected:
@@ -96,6 +98,8 @@ class INET_API SCTPNatTable : public cSimpleModule
 
     static uint32 getNextEntryNumber() { return nextEntryNumber++; };
 };
+
+} // namespace sctp
 
 } // namespace inet
 

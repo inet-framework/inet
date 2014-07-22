@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 /**
  * This class, a subclass of RTPParticipantInfo, is used for storing information
  * about other RTP endsystems.
@@ -208,6 +210,8 @@ class INET_API RTPReceiverInfo : public RTPParticipantInfo
 
     FILE *packetSequenceLostLogFile;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

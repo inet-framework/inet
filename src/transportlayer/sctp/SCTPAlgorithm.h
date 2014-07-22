@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 /**
  * Abstract base class for SCTP algorithms which encapsulate all behaviour
  * during data transfer state: flavour of congestion control, fast
@@ -78,6 +80,8 @@ class INET_API SCTPAlgorithm : public cObject
 
     virtual void dataSent(uint32 fromseq) = 0;
 };
+
+} // namespace sctp
 
 } // namespace inet
 

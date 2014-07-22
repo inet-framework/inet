@@ -4,8 +4,11 @@
 #include "SCTPNatHook.h"
 #include "IPv4InterfaceData.h"
 #include "SCTPAssociation.h"
+#include "SCTPCommand_m.h"
 
 namespace inet {
+
+namespace sctp {
 
 Define_Module(SCTPNatHook);
 
@@ -296,6 +299,8 @@ void SCTPNatHook::finish()
     delete natTable;
     std::cout << getFullPath() << ": Natted packets: " << nattedPackets << "\n";
 }
+
+} // namespace sctp
 
 } // namespace inet
 

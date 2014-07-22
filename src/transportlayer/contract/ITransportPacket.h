@@ -18,6 +18,8 @@
 #ifndef __INET_ITRANSPORTPACKET_H
 #define __INET_ITRANSPORTPACKET_H
 
+namespace inet {
+
 /**
  * This interface provides an abstraction for different transport layer packets.
  */
@@ -30,6 +32,8 @@ class ITransportPacket
     virtual unsigned int getDestinationPort() const = 0;
     virtual void setDestinationPort(unsigned int port) = 0;
 };
+
+} // namespace inet
 
 #endif // ifndef __INET_ITRANSPORTPACKET_H
 

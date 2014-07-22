@@ -22,7 +22,7 @@ cplusplus {{
 #include "IPv4Address.h"
 }}
 
-namespace inet;
+namespace inet::rtp;
 
 class noncobject IPv4Address;
 

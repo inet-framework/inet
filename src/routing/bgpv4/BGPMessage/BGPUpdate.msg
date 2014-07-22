@@ -27,7 +27,7 @@ const int BGP_EMPTY_UPDATE_OCTETS = 4; // UnfeasibleRoutesLength (2) + TotalPath
 }}
 
 
-namespace inet;
+namespace inet::bgp;
 
 class BGPHeader;
 

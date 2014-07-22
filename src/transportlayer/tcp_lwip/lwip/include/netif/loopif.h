@@ -38,6 +38,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -52,7 +54,8 @@ err_t loopif_init(struct netif *netif);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __NETIF_LOOPIF_H__ */

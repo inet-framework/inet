@@ -22,6 +22,10 @@
 
 namespace inet {
 
+namespace utils {
+
+namespace filters {
+
 /**
  * Filter that expects a cMessage and outputs its age in seconds
  * (t - msg->getCreationTime()).
@@ -77,6 +81,10 @@ class INET_API ZCoordFilter : public cObjectResultFilter
   public:
     virtual void receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object);
 };
+
+} // namespace filters
+
+} // namespace utils
 
 } // namespace inet
 

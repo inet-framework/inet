@@ -43,9 +43,6 @@ using namespace physicallayer;
  * Supports constant, linear and exponential backoffs as well as
  * MAC ACKs.
  *
- * @class csma
- * @ingroup csma
- * @ingroup macLayer
  * @author Jerome Rousselot, Amre El-Hoiydi, Marc Loebbers, Yosia Hadisusanto, Andreas Koepke
  * @author Karl Wessel (port for MiXiM)
  *

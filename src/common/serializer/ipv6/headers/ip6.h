@@ -64,6 +64,10 @@
 #ifndef __INET_IP6_H
 #define __INET_IP6_H
 
+namespace inet {
+
+namespace serializer {
+
 #if defined(_WIN32)
 typedef uint8_t u_int8_t;
 typedef uint16_t u_int16_t;
@@ -302,6 +306,10 @@ struct ip6_frag
 #define IPV6_MMTU             1280    /* minimal MTU and reassembly. 1024 + 256 */
 #define IPV6_MAXPACKET        65535    /* ip6 max packet size without Jumbo payload*/
 #define IPV6_MAXOPTHDR        2048    /* max option header size, 256 64-bit words */
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif /* not _NETINET_IP6_H_ */
 

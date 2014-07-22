@@ -19,9 +19,11 @@
 #include "Ieee80211Primitives_m.h"
 #include "ModuleAccess.h"
 #include "NotifierConsts.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
+
+namespace ieee80211 {
 
 Define_Module(Ieee80211AgentSTA);
 
@@ -65,7 +67,7 @@ void Ieee80211AgentSTA::initialize(int stage)
     else if (stage == INITSTAGE_LINK_LAYER_2) {
         IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         if (ift) {
-            myIface = ift->getInterfaceByName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
+            myIface = ift->getInterfaceByName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
         }
     }
 }
@@ -327,6 +329,8 @@ void Ieee80211AgentSTA::processReassociateConfirm(Ieee80211Prim_ReassociateConfi
         // we are happy!
     }
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 Register_Class(SCTPAlg);
 
 SCTPAlg::SCTPAlg() : SCTPAlgorithm()
@@ -88,6 +90,8 @@ void SCTPAlg::sackSent()
 void SCTPAlg::dataSent(uint32)
 {
 }
+
+} // namespace sctp
 
 } // namespace inet
 

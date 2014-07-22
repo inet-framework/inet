@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class InterfaceState
 {
@@ -37,7 +37,7 @@ class InterfaceState
     virtual Interface::InterfaceStateType getState() const = 0;
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

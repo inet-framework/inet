@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPBaseAlg.
  */
@@ -198,6 +200,8 @@ class INET_API TCPBaseAlg : public TCPAlgorithm
 
     virtual void restartRexmitTimer();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

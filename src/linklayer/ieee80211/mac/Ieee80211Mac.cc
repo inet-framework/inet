@@ -24,10 +24,12 @@
 #include "Radio80211aControlInfo_m.h"
 #include "Ieee80211eClassifier.h"
 #include "Ieee80211DataRate.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 #include "ModuleAccess.h"
 
 namespace inet {
+
+namespace ieee80211 {
 
 // TODO: 9.3.2.1, If there are buffered multicast or broadcast frames, the PC shall transmit these prior to any unicast frames.
 // TODO: control frames must send before
@@ -104,7 +106,7 @@ void Ieee80211Mac::initialize(int stage)
         int numQueues = 1;
         if (par("EDCA")) {
             const char *classifierClass = par("classifier");
-            classifier = check_and_cast<IQoSClassifier *>(createOne(classifierClass));
+            classifier = check_and_cast<IQoSClassifier *>(inet::utils::createOne(classifierClass));
             numQueues = classifier->getNumQueues();
         }
 
@@ -471,7 +473,7 @@ InterfaceEntry *Ieee80211Mac::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NetworkInterface module's name without special characters ([])
-    std::string interfaceName = OPP_Global::stripnonalnum(getParentModule()->getFullName());
+    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
     e->setName(interfaceName.c_str());
 
     // address
@@ -2619,7 +2621,7 @@ const MACAddress& Ieee80211Mac::isInterfaceRegistered()
     IInterfaceTable *ift = findModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
     if (!ift)
         return MACAddress::UNSPECIFIED_ADDRESS;
-    std::string interfaceName = OPP_Global::stripnonalnum(getParentModule()->getFullName());
+    std::string interfaceName = utils::stripnonalnum(getParentModule()->getFullName());
     InterfaceEntry *e = ift->getInterfaceByName(interfaceName.c_str());
     if (e)
         return e->getMacAddress();
@@ -2683,6 +2685,8 @@ bool Ieee80211Mac::handleNodeStart(IDoneCallback *doneCallback)
     radio->setRadioMode(IRadio::RADIO_MODE_RECEIVER);
     return ret;
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

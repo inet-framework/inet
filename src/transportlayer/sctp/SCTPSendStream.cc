@@ -18,7 +18,11 @@
 
 #include "SCTPSendStream.h"
 
+#include "SCTPCommand_m.h"
+
 namespace inet {
+
+namespace sctp {
 
 SCTPSendStream::SCTPSendStream(const uint16 id)
 {
@@ -59,6 +63,8 @@ void SCTPSendStream::deleteQueue()
     delete uStreamQ;
     totalLength = 0;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

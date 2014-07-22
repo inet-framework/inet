@@ -66,7 +66,7 @@
 //
 
 
-namespace inet;
+namespace inet::httptools;
 
 //
 // Base class for HTTP messages

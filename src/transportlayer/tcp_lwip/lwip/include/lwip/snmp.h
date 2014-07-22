@@ -39,6 +39,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -363,7 +365,8 @@ void snmp_get_snmpenableauthentraps(u8_t *value);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_SNMP_H__ */

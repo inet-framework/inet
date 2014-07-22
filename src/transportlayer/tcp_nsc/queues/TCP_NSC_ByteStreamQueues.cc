@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCP_NSC_ByteStreamSendQueue);
 
 Register_Class(TCP_NSC_ByteStreamReceiveQueue);
@@ -166,6 +168,8 @@ void TCP_NSC_ByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpseg
 {
     // nothing to do
 }
+
+} // namespace tcp
 
 } // namespace inet
 

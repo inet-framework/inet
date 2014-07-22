@@ -35,6 +35,10 @@ namespace inet {
 // forward declarations:
 class TCPOpenCommand;
 class TCPSendCommand;
+
+namespace tcp {
+
+// forward declarations:
 class TCPSegment;
 
 class TcpLwipConnection;
@@ -157,6 +161,8 @@ class INET_API TCP_lwIP : public cSimpleModule, public LwipTcpStackIf, public IL
     bool isAliveM;
     TCPSegment *pCurTcpSegM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

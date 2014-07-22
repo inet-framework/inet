@@ -381,7 +381,7 @@ W RadioMedium::computeMaxTransmissionPower() const
 
 W RadioMedium::computeMinInterferencePower() const
 {
-    W minInterferencePower = mW(FWMath::dBm2mW(par("minInterferencePower")));
+    W minInterferencePower = mW(math::dBm2mW(par("minInterferencePower")));
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
         minInterferencePower = minIgnoreNaN(minInterferencePower, (*it)->getReceiver()->getMinInterferencePower());
     return minInterferencePower;
@@ -389,7 +389,7 @@ W RadioMedium::computeMinInterferencePower() const
 
 W RadioMedium::computeMinReceptionPower() const
 {
-    W minReceptionPower = mW(FWMath::dBm2mW(par("minReceptionPower")));
+    W minReceptionPower = mW(math::dBm2mW(par("minReceptionPower")));
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
         minReceptionPower = minIgnoreNaN(minReceptionPower, (*it)->getReceiver()->getMinReceptionPower());
     return minReceptionPower;
@@ -397,7 +397,7 @@ W RadioMedium::computeMinReceptionPower() const
 
 double RadioMedium::computeMaxAntennaGain() const
 {
-    double maxAntennaGain = FWMath::dB2fraction(par("maxAntennaGain"));
+    double maxAntennaGain = math::dB2fraction(par("maxAntennaGain"));
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
         maxAntennaGain = maxIgnoreNaN(maxAntennaGain, (*it)->getAntenna()->getMaxGain());
     return maxAntennaGain;

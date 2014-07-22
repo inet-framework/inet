@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 Define_Module(Ieee80211MgmtAdhoc);
 
 void Ieee80211MgmtAdhoc::initialize(int stage)
@@ -132,6 +134,8 @@ void Ieee80211MgmtAdhoc::handleProbeResponseFrame(Ieee80211ProbeResponseFrame *f
 {
     dropManagementFrame(frame);
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

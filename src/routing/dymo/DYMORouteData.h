@@ -11,7 +11,7 @@
 
 namespace inet {
 
-namespace DYMO {
+namespace dymo {
 
 /**
  * DYMO specific extra route data attached to routes in the routing table.
@@ -45,7 +45,7 @@ class INET_API DYMORouteData : public cObject
     void setMetricType(DYMOMetricType metricType) { this->metricType = metricType; }
 };
 
-} // namespace DYMO
+} // namespace dymo
 
 } // namespace inet
 

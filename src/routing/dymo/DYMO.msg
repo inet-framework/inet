@@ -21,9 +21,9 @@ cplusplus {{
 #include "DYMOdefs.h"
 }}
 
-namespace inet::DYMO;
+namespace inet::dymo;
 
-class noncobject inet::L3Address;
+class noncobject L3Address;
 
 class noncobject DYMOSequenceNumber;
 

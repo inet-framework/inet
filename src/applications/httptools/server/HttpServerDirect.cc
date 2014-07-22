@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 Define_Module(HttpServerDirect);
 
 void HttpServerDirect::initialize(int stage)
@@ -60,6 +62,8 @@ void HttpServerDirect::handleMessage(cMessage *msg)
     }
     updateDisplay();
 }
+
+} // namespace httptools
 
 } // namespace inet
 

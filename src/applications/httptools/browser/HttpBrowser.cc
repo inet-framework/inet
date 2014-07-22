@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 Define_Module(HttpBrowser);
 
 HttpBrowser::HttpBrowser()
@@ -289,6 +291,8 @@ void HttpBrowser::submitToSocket(const char *moduleName, int connectPort, HttpRe
     // Issue a connect to the socket for the specified module and port.
     socket->connect(L3AddressResolver().resolve(moduleName), connectPort);
 }
+
+} // namespace httptools
 
 } // namespace inet
 

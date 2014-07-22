@@ -20,6 +20,7 @@
 #include "InterfaceEntry.h"
 #include "L3AddressResolver.h"
 #include "LifecycleOperation.h"
+#include "INETUtils.h"
 
 namespace inet {
 
@@ -69,7 +70,7 @@ void LifecycleController::processCommand(const cXMLElement& node)
 
     // resolve operation
     const char *operationName = node.getAttribute("operation");
-    LifecycleOperation *operation = check_and_cast<LifecycleOperation *>(createOne(operationName));
+    LifecycleOperation *operation = check_and_cast<LifecycleOperation *>(inet::utils::createOne(operationName));
     std::map<std::string, std::string> params = node.getAttributes();
     params.erase("module");
     params.erase("t");

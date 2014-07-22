@@ -16,7 +16,7 @@
 //
 
 #include "Material.h"
-#include "FWMath.h"
+#include "INETMath.h"
 
 namespace inet {
 

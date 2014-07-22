@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class HelloHandler : public IMessageHandler
 {
@@ -32,7 +32,7 @@ class HelloHandler : public IMessageHandler
     void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *unused = NULL);
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

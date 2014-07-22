@@ -12,7 +12,7 @@
 #error "To compile the ns-2 version of DSR-UU, NS2 must be defined!"
 #endif              /* NS2 */
 
-class DSRUU;
+namespace inet { namespace inetmanet { class DSRUU; } }
 
 #include <stdarg.h>
 
@@ -68,6 +68,10 @@ typedef dsr_opt_hdr hdr_dsr;
 #define ntohs(x) x
 
 #define IPDEFTTL 64
+
+namespace inet {
+
+namespace inetmanet {
 
 class DSRUU:public Tap, public Agent
 {
@@ -164,10 +168,6 @@ class DSRUU:public Tap, public Agent
 
 #undef _DEBUG_H
 #include "debug_dsr.h"
-
-namespace inet {
-
-namespace inetmanet {
 
 #undef NO_GLOBALS
 

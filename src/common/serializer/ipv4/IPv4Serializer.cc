@@ -20,17 +20,13 @@
 #include <algorithm>    // std::min
 #include <platdep/sockets.h>
 
-#include "headers/defs.h"
+#include "IPv4Serializer.h"
 
-namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
+#include "headers/defs.h"
 #include "headers/bsdint.h"
 #include "headers/in.h"
 #include "headers/in_systm.h"
 #include "headers/ip.h"
-};
-
-#include "IPv4Serializer.h"
 
 #include "ICMPSerializer.h"
 #include "IGMPSerializer.h"
@@ -62,8 +58,9 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
 #undef s_addr
 
-using namespace INETFw;
 namespace inet {
+
+namespace serializer {
 
 int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, unsigned int bufsize, bool hasCalcChkSum)
 {
@@ -113,14 +110,14 @@ int IPv4Serializer::serialize(const IPv4Datagram *dgram, unsigned char *buf, uns
 
 #ifdef WITH_SCTP
         case IP_PROT_SCTP:    //I.R.
-            packetLength += SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
+            packetLength += sctp::SCTPSerializer().serialize(check_and_cast<sctp::SCTPMessage *>(encapPacket),
                         buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES);
             break;
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
         case IP_PROT_TCP:    //I.R.
-            packetLength += TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
+            packetLength += TCPSerializer().serialize(check_and_cast<tcp::TCPSegment *>(encapPacket),
                         buf + IP_HEADER_BYTES, bufsize - IP_HEADER_BYTES,
                         dgram->getSrcAddress(), dgram->getDestAddress());
             break;
@@ -190,15 +187,15 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
 
 #ifdef WITH_SCTP
         case IP_PROT_SCTP:
-            encapPacket = new SCTPMessage("sctp-from-wire");
-            SCTPSerializer().parse(buf + headerLength, encapLength, (SCTPMessage *)encapPacket);
+            encapPacket = new sctp::SCTPMessage("sctp-from-wire");
+            sctp::SCTPSerializer().parse(buf + headerLength, encapLength, (sctp::SCTPMessage *)encapPacket);
             break;
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
         case IP_PROT_TCP:
-            encapPacket = new TCPSegment("tcp-from-wire");
-            TCPSerializer().parse(buf + headerLength, encapLength, (TCPSegment *)encapPacket, true);
+            encapPacket = new tcp::TCPSegment("tcp-from-wire");
+            TCPSerializer().parse(buf + headerLength, encapLength, (tcp::TCPSegment *)encapPacket, true);
             break;
 #endif // ifdef WITH_TCP_COMMON
 
@@ -210,6 +207,8 @@ void IPv4Serializer::parse(const unsigned char *buf, unsigned int bufsize, IPv4D
     dest->encapsulate(encapPacket);
     dest->setName(encapPacket->getName());
 }
+
+} // namespace serializer
 
 } // namespace inet
 

@@ -23,17 +23,19 @@
 
 namespace inet {
 
-void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborState *newState, OSPF::NeighborState *currentState)
+namespace ospf {
+
+void NeighborState::changeState(Neighbor *neighbor, NeighborState *newState, NeighborState *currentState)
 {
-    OSPF::Neighbor::NeighborStateType oldState = currentState->getState();
-    OSPF::Neighbor::NeighborStateType nextState = newState->getState();
+    Neighbor::NeighborStateType oldState = currentState->getState();
+    Neighbor::NeighborStateType nextState = newState->getState();
     bool shouldRebuildRoutingTable = false;
 
     neighbor->changeState(newState, currentState);
 
-    if ((oldState == OSPF::Neighbor::FULL_STATE) || (nextState == OSPF::Neighbor::FULL_STATE)) {
-        OSPF::RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
-        OSPF::RouterLSA *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
+    if ((oldState == Neighbor::FULL_STATE) || (nextState == Neighbor::FULL_STATE)) {
+        RouterID routerID = neighbor->getInterface()->getArea()->getRouter()->getRouterID();
+        RouterLSA *routerLSA = neighbor->getInterface()->getArea()->findRouterLSA(routerID);
 
         if (routerLSA != NULL) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -43,7 +45,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborSt
                 routerLSA->incrementInstallTime();
             }
             else {
-                OSPF::RouterLSA *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
+                RouterLSA *newLSA = neighbor->getInterface()->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -53,8 +55,8 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborSt
             }
         }
 
-        if (neighbor->getInterface()->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-            OSPF::NetworkLSA *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
+        if (neighbor->getInterface()->getState() == Interface::DESIGNATED_ROUTER_STATE) {
+            NetworkLSA *networkLSA = neighbor->getInterface()->getArea()->findNetworkLSA(neighbor->getInterface()->getAddressRange().address);
 
             if (networkLSA != NULL) {
                 long sequenceNumber = networkLSA->getHeader().getLsSequenceNumber();
@@ -64,7 +66,7 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborSt
                     networkLSA->incrementInstallTime();
                 }
                 else {
-                    OSPF::NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
+                    NetworkLSA *newLSA = neighbor->getInterface()->getArea()->originateNetworkLSA(neighbor->getInterface());
 
                     if (newLSA != NULL) {
                         newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
@@ -86,6 +88,8 @@ void OSPF::NeighborState::changeState(OSPF::Neighbor *neighbor, OSPF::NeighborSt
         neighbor->getInterface()->getArea()->getRouter()->rebuildRoutingTable();
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

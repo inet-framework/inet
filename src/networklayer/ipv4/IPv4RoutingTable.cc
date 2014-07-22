@@ -30,12 +30,12 @@
 #include "RoutingTableParser.h"
 #include "NodeOperations.h"
 #include "NodeStatus.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 #include "ModuleAccess.h"
 
 namespace inet {
 
-using namespace OPP_Global;
+using namespace utils;
 
 Define_Module(IPv4RoutingTable);
 

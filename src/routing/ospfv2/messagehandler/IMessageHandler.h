@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class Router;
 class Interface;
@@ -40,7 +40,7 @@ class IMessageHandler
     virtual void processPacket(OSPFPacket *, Interface *intf, Neighbor *neighbor) = 0;
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

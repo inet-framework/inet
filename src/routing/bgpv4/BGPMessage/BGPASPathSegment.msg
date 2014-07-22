@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace inet;
+cplusplus {{
+#include "BGPCommon_m.h"
+}}
 
-enum BGPPathSegmentType
-{
-    AS_SET = 1;
-    AS_SEQUENCE = 2;
-}
+namespace inet::bgp;
+
+enum BGPPathSegmentType;
 
 //
 // Represents a BGPv4 AS_PATH path attribute (RFC 4271 Section 4.3)

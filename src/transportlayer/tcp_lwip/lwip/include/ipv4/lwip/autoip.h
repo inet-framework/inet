@@ -54,6 +54,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -115,7 +117,9 @@ void autoip_network_changed(struct netif *netif);
 
 #endif /* LWIP_AUTOIP */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_AUTOIP_H__ */
+

@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace ospf {
+
 // global constants
 #define LS_REFRESH_TIME                        1800
 #define MIN_LS_INTERVAL                        5
@@ -58,8 +60,6 @@ namespace inet {
 #define OSPF_ASEXTERNALLSA_TOS_INFO_LENGTH     12
 #define OSPF_EXTERNAL_ROUTES_LEARNED_BY_BGP    179
 #define OSPF_BGP_DEFAULT_COST                  1
-
-namespace OSPF {
 
 typedef unsigned long Metric;
 
@@ -111,7 +111,7 @@ struct IPv4AddressRange
         return IPv4Address::maskedAddrAreEqual(otherAddress, address, otherMask) && (otherMask <= mask);
     }
 
-    bool operator!=(OSPF::IPv4AddressRange other) const
+    bool operator!=(IPv4AddressRange other) const
     {
         return !operator==(other);
     }
@@ -165,8 +165,6 @@ const DesignatedRouterID NULL_DESIGNATEDROUTERID = {
     IPv4Address(0, 0, 0, 0), IPv4Address(0, 0, 0, 0)
 };
 
-} // namespace OSPF
-
 inline IPv4Address operator&(IPv4Address address, IPv4Address mask)
 {
     IPv4Address maskedAddress;
@@ -186,18 +184,18 @@ inline bool isSameNetwork(IPv4Address address1, IPv4Address mask1, IPv4Address a
     return (mask1 == mask2) && ((address1 & mask1) == (address2 & mask2));
 }
 
-inline bool operator==(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+inline bool operator==(DesignatedRouterID leftID, DesignatedRouterID rightID)
 {
     return leftID.routerID == rightID.routerID &&
            leftID.ipInterfaceAddress == rightID.ipInterfaceAddress;
 }
 
-inline bool operator!=(OSPF::DesignatedRouterID leftID, OSPF::DesignatedRouterID rightID)
+inline bool operator!=(DesignatedRouterID leftID, DesignatedRouterID rightID)
 {
     return !(leftID == rightID);
 }
 
-inline bool OSPF::LSAKeyType_Less::operator()(OSPF::LSAKeyType leftKey, OSPF::LSAKeyType rightKey) const
+inline bool LSAKeyType_Less::operator()(LSAKeyType leftKey, LSAKeyType rightKey) const
 {
     return (leftKey.linkStateID < rightKey.linkStateID) ||
            ((leftKey.linkStateID == rightKey.linkStateID) &&
@@ -294,6 +292,8 @@ inline char hexPairToByte(char upperHex, char lowerHex)
 {
     return (hexCharToByte(upperHex) << 4) & (hexCharToByte(lowerHex));
 }
+
+} // namespace ospf
 
 } // namespace inet
 

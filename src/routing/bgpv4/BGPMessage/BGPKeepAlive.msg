@@ -19,7 +19,7 @@ cplusplus {{
 #include "BGPHeader_m.h"
 }}
 
-namespace inet;
+namespace inet::bgp;
 
 class BGPHeader;
 

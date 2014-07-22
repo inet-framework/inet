@@ -78,7 +78,7 @@ class QueueElement : public cPacket
 };
 
 //===========================================================================================
-// class DYMO: implements the network layer to route incoming messages
+// class DYMOFau: implements the network layer to route incoming messages
 //===========================================================================================
 class DYMOFau : public ManetRoutingBase
 {

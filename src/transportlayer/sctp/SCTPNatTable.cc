@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 uint32 SCTPNatTable::nextEntryNumber = 0;
 
 Define_Module(SCTPNatTable);
@@ -149,6 +151,8 @@ SCTPNatEntry::SCTPNatEntry()
 SCTPNatEntry::~SCTPNatEntry()
 {
 }
+
+} // namespace sctp
 
 } // namespace inet
 

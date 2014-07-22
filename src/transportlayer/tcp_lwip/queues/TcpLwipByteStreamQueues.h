@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages "data stream", that is, actual bytes.
  */
@@ -108,6 +110,8 @@ class INET_API TcpLwipByteStreamReceiveQueue : public TcpLwipReceiveQueue
     /// store bytes
     ByteArrayBuffer byteArrayBufferM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

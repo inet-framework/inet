@@ -25,20 +25,22 @@
 #include "ICMPMessage.h"
 #include "IPv4Datagram.h"
 #else // ifdef WITH_IPv4
+namespace inet {
 class ICMPMessage;
 class IPv4Datagram;
+} // namespace inet
 #endif // ifdef WITH_IPv4
 
 #ifdef WITH_TCP_COMMON
 #include "TCPSegment.h"
 #else // ifdef WITH_TCP_COMMON
-class TCPSegment;
+namespace inet { namespace tcp { class TCPSegment; } }
 #endif // ifdef WITH_TCP_COMMON
 
 #ifdef WITH_UDP
 #include "UDPPacket.h"
 #else // ifdef WITH_UDP
-class UDPPacket;
+namespace inet { class UDPPacket; }
 #endif // ifdef WITH_UDP
 
 namespace inet {
@@ -49,7 +51,7 @@ namespace inet {
 class INET_API InetPacketPrinter : public cMessagePrinter
 {
   protected:
-    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, TCPSegment *tcpSeg) const;
+    void printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const;
     void printUDPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, UDPPacket *udpPacket) const;
     void printICMPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, ICMPMessage *packet) const;
 
@@ -86,8 +88,8 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
 #endif // ifdef WITH_IPv4
         }
 #ifdef WITH_TCP_COMMON
-        else if (dynamic_cast<TCPSegment *>(pk)) {
-            printTCPPacket(os, srcAddr, destAddr, static_cast<TCPSegment *>(pk));
+        else if (dynamic_cast<tcp::TCPSegment *>(pk)) {
+            printTCPPacket(os, srcAddr, destAddr, static_cast<tcp::TCPSegment *>(pk));
             return;
         }
 #endif // ifdef WITH_TCP_COMMON
@@ -107,7 +109,7 @@ void InetPacketPrinter::printMessage(std::ostream& os, cMessage *msg) const
     os << "(" << msg->getClassName() << ")" << " id=" << msg->getId() << " kind=" << msg->getKind();
 }
 
-void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, TCPSegment *tcpSeg) const
+void InetPacketPrinter::printTCPPacket(std::ostream& os, L3Address srcAddr, L3Address destAddr, tcp::TCPSegment *tcpSeg) const
 {
 #ifdef WITH_TCP_COMMON
     os << " TCP: " << srcAddr << '.' << tcpSeg->getSrcPort() << " > " << destAddr << '.' << tcpSeg->getDestPort() << ": ";

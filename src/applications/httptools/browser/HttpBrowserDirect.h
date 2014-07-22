@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 /**
  * A simulated browser module for OMNeT++ simulations.
  *
@@ -46,6 +48,8 @@ class INET_API HttpBrowserDirect : public HttpBrowserBase
     virtual void sendRequestToRandomServer();
     virtual void sendRequestsToServer(std::string www, HttpRequestQueue queue);
 };
+
+} // namespace httptools
 
 } // namespace inet
 

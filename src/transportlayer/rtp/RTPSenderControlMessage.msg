@@ -20,7 +20,7 @@ cplusplus {{
 #include "INETDefs.h"
 }}
 
-namespace inet;
+namespace inet::rtp;
 
 //
 // A message of the type ~RTPSenderControlMessage is created by an application to control

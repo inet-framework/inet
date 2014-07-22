@@ -43,6 +43,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -94,7 +96,9 @@ u8_t             raw_input      (struct pbuf *p, struct netif *inp);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* LWIP_RAW */
 

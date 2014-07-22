@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 Register_Class(SCTPMessage);
 
 SCTPMessage& SCTPMessage::operator=(const SCTPMessage& other)
@@ -380,6 +382,8 @@ cPacket *SCTPAsconfAckChunk::removeAsconfResponse()
     this->setByteLength(this->getByteLength() + ADD_PADDING(msg->getByteLength()));
     return msg;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

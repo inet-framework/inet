@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 /**
  * This class is used for communication between submodules of the RTP layer module.
  */
@@ -113,6 +115,8 @@ class RTPInnerPacket : public RTPInnerPacket_Base
      */
     virtual int getMTU() const { return getMtu(); }
 };
+
+} // namespace rtp
 
 } // namespace inet
 

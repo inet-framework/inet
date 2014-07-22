@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 Register_Class(SCTPQueue);
 
 SCTPQueue::SCTPQueue()
@@ -244,6 +246,8 @@ uint32 SCTPQueue::getSizeOfFirstChunk(const L3Address& remoteAddress)
     }
     return 0;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

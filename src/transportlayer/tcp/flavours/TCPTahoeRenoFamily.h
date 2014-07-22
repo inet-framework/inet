@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPTahoeRenoFamily.
  */
@@ -50,6 +52,8 @@ class INET_API TCPTahoeRenoFamily : public TCPBaseAlg
     /** Ctor */
     TCPTahoeRenoFamily();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

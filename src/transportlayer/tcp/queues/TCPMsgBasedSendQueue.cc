@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCPMsgBasedSendQueue);
 
 TCPMsgBasedSendQueue::TCPMsgBasedSendQueue() : TCPSendQueue()
@@ -122,6 +124,8 @@ void TCPMsgBasedSendQueue::discardUpTo(uint32 seqNum)
         payloadQueue.pop_front();
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 

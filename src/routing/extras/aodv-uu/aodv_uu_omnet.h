@@ -150,7 +150,7 @@ class AODVUU : public ManetRoutingBase
     void actualizeTablesWithCollaborative(const L3Address &);
 
     void packetFailed(IPv4Datagram *p);
-    void packetFailedMac(Ieee80211DataFrame *);
+    void packetFailedMac(ieee80211::Ieee80211DataFrame *);
 
     // Routing information access
     virtual bool supportGetRoute() {return false;}

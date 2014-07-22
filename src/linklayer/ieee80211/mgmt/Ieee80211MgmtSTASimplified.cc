@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 Define_Module(Ieee80211MgmtSTASimplified);
 
 void Ieee80211MgmtSTASimplified::initialize(int stage)
@@ -149,6 +151,8 @@ void Ieee80211MgmtSTASimplified::handleProbeResponseFrame(Ieee80211ProbeResponse
 {
     dropManagementFrame(frame);
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

@@ -37,6 +37,10 @@
 #ifndef __INET_IGMP_H
 #define __INET_IGMP_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * Internet Group Management Protocol (IGMP) definitions.
  *
@@ -89,6 +93,10 @@ struct igmp
 #define IGMP_HOST_MEMBERSHIP_REPORT        IGMP_V1_MEMBERSHIP_REPORT
 #define IGMP_HOST_NEW_MEMBERSHIP_REPORT    IGMP_V2_MEMBERSHIP_REPORT
 #define IGMP_HOST_LEAVE_MESSAGE            IGMP_V2_LEAVE_GROUP
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif /* _NETINET_IGMP_H_ */
 

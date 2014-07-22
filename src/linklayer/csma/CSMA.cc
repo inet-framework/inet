@@ -28,8 +28,8 @@
 
 #include <cassert>
 
-#include "opp_utils.h"
-#include "FWMath.h"
+#include "INETUtils.h"
+#include "INETMath.h"
 #include "InterfaceEntry.h"
 #include "IMACProtocolControlInfo.h"
 #include "FindModule.h"
@@ -184,7 +184,7 @@ InterfaceEntry *CSMA::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     e->setDatarate(bitrate);

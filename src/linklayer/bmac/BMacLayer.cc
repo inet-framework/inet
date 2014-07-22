@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#include "opp_utils.h"
-#include "FWMath.h"
+#include "INETUtils.h"
+#include "INETMath.h"
 #include "InterfaceEntry.h"
 #include "ModuleAccess.h"
 #include "IMACProtocolControlInfo.h"
@@ -163,7 +163,7 @@ InterfaceEntry *BMacLayer::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     e->setDatarate(bitrate);

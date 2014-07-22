@@ -23,6 +23,8 @@
 
 namespace inet {
 
+using namespace ieee80211;
+
 namespace physicallayer {
 
 Define_Module(Ieee80211Radio);

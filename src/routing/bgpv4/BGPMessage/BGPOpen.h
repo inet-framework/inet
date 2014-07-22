@@ -22,6 +22,10 @@
 
 namespace inet {
 
+namespace bgp {
+
+} // namespace bgp
+
 } // namespace inet
 
 #endif // ifndef __INET_BGPOPEN_H

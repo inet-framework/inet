@@ -39,6 +39,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -110,7 +112,9 @@ void icmp_time_exceeded(struct pbuf *p, enum icmp_te_type t);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 
 #endif /* __LWIP_ICMP_H__ */

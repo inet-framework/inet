@@ -18,6 +18,10 @@
 #ifndef __INET_DEFS_H
 #define __INET_DEFS_H
 
+namespace inet {
+
+namespace serializer {
+
 //
 // Get integer types defined
 //
@@ -68,6 +72,10 @@ typedef unsigned __int64 uint64_t;
 #if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
 #error Endian macros (LITTLE_ENDIAN, BIG_ENDIAN, BYTE_ORDER) are not set up correctly -- please fix this header file and report it.
 #endif // if !defined(LITTLE_ENDIAN) || !defined(BIG_ENDIAN) || !defined(BYTE_ORDER) || (BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN)
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_DEFS_H
 

@@ -36,6 +36,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /** lower two bits indicate debug level
  * - 0 all
  * - 1 warning
@@ -96,8 +98,9 @@ namespace inet {
 #define LWIP_DEBUGF(debug, message)
 #endif /* LWIP_DEBUG */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_DEBUG_H__ */
 

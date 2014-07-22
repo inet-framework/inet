@@ -20,6 +20,8 @@
 
 namespace inet {
 
+Register_Class(GenericRoute);
+
 std::string GenericRoute::info() const
 {
     return "";    //TODO

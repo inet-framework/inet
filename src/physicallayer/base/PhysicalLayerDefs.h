@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALLAYERDEFS_H
 #define __INET_PHYSICALLAYERDEFS_H
 
-#include "FWMath.h"
+#include "INETMath.h"
 #include "Units.h"
 
 namespace inet {

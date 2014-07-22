@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCPNewReno);
 
 TCPNewReno::TCPNewReno() : TCPTahoeRenoFamily(),
@@ -352,6 +354,8 @@ void TCPNewReno::receivedDuplicateAck()
         }
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 

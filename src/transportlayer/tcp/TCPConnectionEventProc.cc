@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 //
 // Event processing code
 //
@@ -292,6 +294,8 @@ void TCPConnection::process_QUEUE_BYTES_LIMIT(TCPEventCode& event, TCPCommand *t
     delete msg;
     delete tcpCommand;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

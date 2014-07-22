@@ -15,7 +15,6 @@
 #include "RSVP.h"
 #include "IPv4ControlInfo.h"
 #include "L3AddressResolver.h"
-#include "common.h"
 #include "Utils.h"
 #include "XMLUtils.h"
 #include "IPv4InterfaceData.h"
@@ -40,6 +39,8 @@ namespace inet {
 #define PATH_ERR_NEXTHOP_FAILED    3
 
 Define_Module(RSVP);
+
+using namespace xmlutils;
 
 RSVP::RSVP()
 {

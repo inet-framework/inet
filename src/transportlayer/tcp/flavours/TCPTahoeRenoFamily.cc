@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 TCPTahoeRenoFamilyStateVariables::TCPTahoeRenoFamilyStateVariables()
 {
     ssthresh = 65535;
@@ -47,6 +49,8 @@ TCPTahoeRenoFamily::TCPTahoeRenoFamily() : TCPBaseAlg(),
     state((TCPTahoeRenoFamilyStateVariables *&)TCPAlgorithm::state)
 {
 }
+
+} // namespace tcp
 
 } // namespace inet
 

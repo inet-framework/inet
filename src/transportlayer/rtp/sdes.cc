@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Register_Class(SDESItem);
 
 SDESItem::SDESItem() : cObject()
@@ -197,6 +199,8 @@ int SDESChunk::getLength() const
 {
     return _length;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

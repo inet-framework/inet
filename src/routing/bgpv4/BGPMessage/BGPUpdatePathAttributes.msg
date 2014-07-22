@@ -18,9 +18,12 @@
 cplusplus {{
 #include "IPv4Address.h"
 #include "BGPASPathSegment_m.h"
+#include "BGPCommon_m.h"
 }}
 
-namespace inet;
+namespace inet::bgp;
+
+enum BGPSessionType;
 
 class noncobject IPv4Address;
 class noncobject BGPASPathSegment;
@@ -56,16 +59,9 @@ class BGPUpdatePathAttributes
 }
 
 // ORIGIN (RFC4271 Section 4.3, Type code 1):
-enum BGPUpdateOriginValues
-{
-    IGP = 0;
-    EGP = 1;
-    INCOMPLETE = 2;
-}
-
 class BGPUpdatePathAttributesOrigin extends BGPUpdatePathAttributes
 {
-    int value @enum(BGPUpdateOriginValues);
+    int value @enum(BGPSessionType);
 }
 
 // AS_PATH (RFC4271 Section 4.3, Type code 2):

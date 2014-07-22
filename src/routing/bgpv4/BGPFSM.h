@@ -23,9 +23,11 @@
 
 namespace inet {
 
+namespace bgp {
+
 class BGPSession;
 
-namespace BGPFSM {
+namespace fsm {
 
 ////////////////////////////////////////////////////////
 // State declarations
@@ -217,7 +219,9 @@ SUBSTATE(Established, TopState) {
     void exit() { std::cout << "Established::exit" << std::endl; }
 };
 
-} // namespace BGPFSM
+} // namespace fsm
+
+} // namespace bgp
 
 } // namespace inet
 

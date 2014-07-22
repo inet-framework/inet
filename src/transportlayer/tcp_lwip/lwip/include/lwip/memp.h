@@ -51,6 +51,8 @@ extern "C" {
 
 namespace inet {
 
+namespace tcp {
+
 typedef enum {
 #define LWIP_MEMPOOL(name,num,size,desc)  MEMP_##name,
 #include "lwip/memp_std.h"
@@ -90,6 +92,8 @@ typedef enum {
 extern const u16_t memp_sizes[MEMP_MAX];
 #endif /* MEMP_MEM_MALLOC || MEM_USE_POOLS */
 
+} // namespace tcp
+
 } // namespace inet
 
 #if MEMP_MEM_MALLOC
@@ -97,6 +101,8 @@ extern const u16_t memp_sizes[MEMP_MAX];
 #include "mem.h"
 
 namespace inet {
+
+namespace tcp {
 
 inline void memp_init() {}
 inline void* memp_malloc(memp_t type) { return mem_malloc(memp_sizes[type]); }
@@ -107,11 +113,15 @@ inline void memp_free(memp_t type, void * mem) { mem_free(mem); }
 #define memp_free(type, mem)  mem_free(mem)
 */
 
+} // namespace tcp
+
 } // namespace inet
 
 #else /* MEMP_MEM_MALLOC */
 
 namespace inet {
+
+namespace tcp {
 
 #if MEM_USE_POOLS
 /** This structure is used to save the pool one element came from. */
@@ -131,7 +141,9 @@ void *memp_malloc(memp_t type);
 #endif
 void  memp_free(memp_t type, void *mem);
 
-// namespace inet
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* MEMP_MEM_MALLOC */
 

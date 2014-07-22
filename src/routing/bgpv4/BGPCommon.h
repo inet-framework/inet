@@ -18,16 +18,18 @@
 #ifndef __INET_BGPCOMMON_H
 #define __INET_BGPCOMMON_H
 
-#include "IPv4Datagram.h"
-//#include "TCPSocket.h"
+#include "INETDefs.h"
+
+#include "BGPCommon_m.h"
 #include "InterfaceEntry.h"
+#include "IPv4Datagram.h"
 
 namespace inet {
 
 //Forward declarations:
 class TCPSocket;
 
-namespace BGP {
+namespace bgp {
 
 const unsigned char TCP_PORT = 179;
 
@@ -46,15 +48,6 @@ const unsigned char NEW_SESSION_ESTABLISHED = 92;
 const unsigned char ASLOOP_NO_DETECTED = 93;
 const unsigned char ASLOOP_DETECTED = 94;
 
-enum type {
-    IGP = 0,
-    EGP = 1,
-    Incomplete = 2
-};
-
-const unsigned char AS_SET = 1;
-const unsigned char AS_SEQUENCE = 2;
-
 typedef IPv4Address NextHop;
 typedef unsigned short ASID;
 typedef unsigned long SessionID;
@@ -62,7 +55,7 @@ typedef unsigned long SessionID;
 struct SessionInfo
 {
     SessionID sessionID;
-    type sessionType;
+    BGPSessionType sessionType;
     ASID ASValue;
     IPv4Address routerID;
     IPv4Address peerAddr;
@@ -72,7 +65,7 @@ struct SessionInfo
     bool sessionEstablished;
 };
 
-} // namespace BGP
+} // namespace bgp
 
 } // namespace inet
 

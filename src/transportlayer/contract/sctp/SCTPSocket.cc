@@ -30,6 +30,8 @@
 
 namespace inet {
 
+using namespace sctp;
+
 static inline int32_t getNewAssocId()
 {
 #ifdef WITH_SCTP

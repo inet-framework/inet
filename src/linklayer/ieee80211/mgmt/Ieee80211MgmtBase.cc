@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 simsignal_t Ieee80211MgmtBase::dataQueueLenSignal = registerSignal("dataQueueLen");
 
 static std::ostream& operator<<(std::ostream& out, cMessage *msg)
@@ -269,6 +271,8 @@ void Ieee80211MgmtBase::stop()
     mgmtQueue.clear();
     isOperational = false;
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

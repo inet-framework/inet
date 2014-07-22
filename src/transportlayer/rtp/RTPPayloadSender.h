@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 //Forward declarations:
 class RTPInnerPacket;
 
@@ -206,6 +208,8 @@ class INET_API RTPPayloadSender : public cSimpleModule
      */
     cMessage *_reminderMessage;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

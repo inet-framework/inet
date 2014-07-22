@@ -39,6 +39,10 @@ namespace inet {
 
 // forward declarations:
 class TCPCommand;
+
+namespace tcp {
+
+// forward declarations:
 class TCPSegment;
 class TCP_NSC_SendQueue;
 class TCP_NSC_ReceiveQueue;
@@ -179,6 +183,8 @@ class INET_API TCP_NSC : public cSimpleModule, ISendCallback, IInterruptCallback
     cOutVector *rcvSeqVector;    // received seqNo
     cOutVector *rcvAckVector;    // received ackNo (= snd_una)
 };
+
+} // namespace tcp
 
 } // namespace inet
 

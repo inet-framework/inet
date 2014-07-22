@@ -29,13 +29,17 @@
 namespace inet {
 
 // forward declarations:
-class TCP_lwIP;
 class TCPConnectInfo;
+class TCPStatusInfo;
+
+namespace tcp {
+
+// forward declarations:
+class TCP_lwIP;
 class TcpLwipReceiveQueue;
 class TcpLwipSendQueue;
 class INetStack;
 class INetStreamSocket;
-class TCPStatusInfo;
 
 /**
  *
@@ -118,6 +122,8 @@ class INET_API TcpLwipConnection
 
     Stats *statsM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

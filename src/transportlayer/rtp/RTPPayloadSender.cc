@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Define_Module(RTPPayloadSender);
 
 RTPPayloadSender::RTPPayloadSender()
@@ -208,6 +210,8 @@ bool RTPPayloadSender::sendPacket()
     throw cRuntimeError("sendPacket() not implemented");
     return false;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

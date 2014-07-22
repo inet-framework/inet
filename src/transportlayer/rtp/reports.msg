@@ -7,7 +7,7 @@
 // (C) 2001 by Matthias Oppitz <Matthias.Oppitz@gmx.de>
 //
 
-namespace inet;
+namespace inet::rtp;
 
 //
 // Represents an RTP sender report as contained

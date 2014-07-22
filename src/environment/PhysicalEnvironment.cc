@@ -207,11 +207,11 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         if (orientationAttribute) {
             cStringTokenizer tokenizer(orientationAttribute);
             if (tokenizer.hasMoreTokens())
-                orientation.alpha = FWMath::deg2rad(atof(tokenizer.nextToken()));
+                orientation.alpha = math::deg2rad(atof(tokenizer.nextToken()));
             if (tokenizer.hasMoreTokens())
-                orientation.beta = FWMath::deg2rad(atof(tokenizer.nextToken()));
+                orientation.beta = math::deg2rad(atof(tokenizer.nextToken()));
             if (tokenizer.hasMoreTokens())
-                orientation.gamma = FWMath::deg2rad(atof(tokenizer.nextToken()));
+                orientation.gamma = math::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
         const Shape *shape;

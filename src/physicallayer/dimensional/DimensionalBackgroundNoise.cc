@@ -30,7 +30,7 @@ void DimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        power = mW(FWMath::dBm2mW(par("power")));
+        power = mW(math::dBm2mW(par("power")));
     }
 }
 

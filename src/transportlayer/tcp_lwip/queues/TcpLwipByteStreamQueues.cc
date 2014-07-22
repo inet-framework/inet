@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TcpLwipByteStreamSendQueue);
 
 Register_Class(TcpLwipByteStreamReceiveQueue);
@@ -174,6 +176,8 @@ void TcpLwipByteStreamReceiveQueue::notifyAboutSending(const TCPSegment *tcpsegP
 {
     // nothing to do
 }
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -27,32 +27,34 @@
 
 namespace inet {
 
-void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor *neighbor, OSPF::Neighbor::NeighborEventType event)
+namespace ospf {
+
+void NeighborStateTwoWay::processEvent(Neighbor *neighbor, Neighbor::NeighborEventType event)
 {
-    if ((event == OSPF::Neighbor::KILL_NEIGHBOR) || (event == OSPF::Neighbor::LINK_DOWN)) {
+    if ((event == Neighbor::KILL_NEIGHBOR) || (event == Neighbor::LINK_DOWN)) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         neighbor->reset();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
-        changeState(neighbor, new OSPF::NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::INACTIVITY_TIMER) {
+    if (event == Neighbor::INACTIVITY_TIMER) {
         neighbor->reset();
-        if (neighbor->getInterface()->getType() == OSPF::Interface::NBMA) {
+        if (neighbor->getInterface()->getType() == Interface::NBMA) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             messageHandler->startTimer(neighbor->getPollTimer(), neighbor->getInterface()->getPollInterval());
         }
-        changeState(neighbor, new OSPF::NeighborStateDown, this);
+        changeState(neighbor, new NeighborStateDown, this);
     }
-    if (event == OSPF::Neighbor::ONEWAY_RECEIVED) {
+    if (event == Neighbor::ONEWAY_RECEIVED) {
         neighbor->reset();
-        changeState(neighbor, new OSPF::NeighborStateInit, this);
+        changeState(neighbor, new NeighborStateInit, this);
     }
-    if (event == OSPF::Neighbor::HELLO_RECEIVED) {
+    if (event == Neighbor::HELLO_RECEIVED) {
         MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
         messageHandler->clearTimer(neighbor->getInactivityTimer());
         messageHandler->startTimer(neighbor->getInactivityTimer(), neighbor->getRouterDeadInterval());
     }
-    if (event == OSPF::Neighbor::IS_ADJACENCY_OK) {
+    if (event == Neighbor::IS_ADJACENCY_OK) {
         if (neighbor->needAdjacency()) {
             MessageHandler *messageHandler = neighbor->getInterface()->getArea()->getRouter()->getMessageHandler();
             if (!(neighbor->isFirstAdjacencyInited())) {
@@ -63,10 +65,12 @@ void OSPF::NeighborStateTwoWay::processEvent(OSPF::Neighbor *neighbor, OSPF::Nei
             }
             neighbor->sendDatabaseDescriptionPacket(true);
             messageHandler->startTimer(neighbor->getDDRetransmissionTimer(), neighbor->getInterface()->getRetransmissionInterval());
-            changeState(neighbor, new OSPF::NeighborStateExchangeStart, this);
+            changeState(neighbor, new NeighborStateExchangeStart, this);
         }
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

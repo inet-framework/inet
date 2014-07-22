@@ -25,28 +25,30 @@
 
 namespace inet {
 
-void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
+namespace ospf {
+
+void InterfaceStateNotDesignatedRouter::processEvent(Interface *intf, Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::NEIGHBOR_CHANGE) {
+    if (event == Interface::NEIGHBOR_CHANGE) {
         calculateDesignatedRouter(intf);
     }
-    if (event == OSPF::Interface::INTERFACE_DOWN) {
+    if (event == Interface::INTERFACE_DOWN) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateDown, this);
+        changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LOOP_INDICATION) {
+    if (event == Interface::LOOP_INDICATION) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateLoopback, this);
+        changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HELLO_TIMER) {
-        if (intf->getType() == OSPF::Interface::BROADCAST) {
+    if (event == Interface::HELLO_TIMER) {
+        if (intf->getType() == Interface::BROADCAST) {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
-        else {    // OSPF::Interface::NBMA
+        else {    // Interface::NBMA
             if (intf->getRouterPriority() > 0) {
                 unsigned long neighborCount = intf->getNeighborCount();
                 for (unsigned long i = 0; i < neighborCount; i++) {
-                    const OSPF::Neighbor *neighbor = intf->getNeighbor(i);
+                    const Neighbor *neighbor = intf->getNeighbor(i);
                     if (neighbor->getPriority() > 0) {
                         intf->sendHelloPacket(neighbor->getAddress());
                     }
@@ -59,10 +61,12 @@ void OSPF::InterfaceStateNotDesignatedRouter::processEvent(OSPF::Interface *intf
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
+    if (event == Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

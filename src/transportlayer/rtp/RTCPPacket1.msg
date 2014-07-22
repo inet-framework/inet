@@ -15,7 +15,7 @@
 
 class cArray;
 
-namespace inet;
+namespace inet::rtp;
 
 enum RTCPPacketType
 {

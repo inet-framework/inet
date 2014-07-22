@@ -39,6 +39,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -282,7 +284,8 @@ void stats_display_sys(struct stats_sys *sys);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_STATS_H__ */

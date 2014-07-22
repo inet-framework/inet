@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace bgp {
+
 class BGPUpdateMessage : public BGPUpdateMessage_Base
 {
   protected:
@@ -34,6 +36,8 @@ class BGPUpdateMessage : public BGPUpdateMessage_Base
     void setPathAttributeList(const BGPUpdatePathAttributeList& pathAttributeList_var);
     void setNLRI(const BGPUpdateNLRI& NLRI_var);
 };
+
+} // namespace bgp
 
 } // namespace inet
 

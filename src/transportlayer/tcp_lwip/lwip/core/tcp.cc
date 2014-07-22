@@ -64,6 +64,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 static
 const char *tcp_state_str[] = {
   "CLOSED",
@@ -1489,6 +1491,8 @@ tcp_pcbs_sane()
 #endif /* TCP_DEBUG */
 
 #endif /* LWIP_TCP */
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 Define_Module(Ieee80211MgmtAPSimplified);
 
 // FIXME add sequence number handling
@@ -119,6 +121,8 @@ void Ieee80211MgmtAPSimplified::handleProbeResponseFrame(Ieee80211ProbeResponseF
 {
     dropManagementFrame(frame);
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

@@ -24,20 +24,22 @@
 
 namespace inet {
 
-OSPF::LinkStateRequestHandler::LinkStateRequestHandler(OSPF::Router *containingRouter) :
-    OSPF::IMessageHandler(containingRouter)
+namespace ospf {
+
+LinkStateRequestHandler::LinkStateRequestHandler(Router *containingRouter) :
+    IMessageHandler(containingRouter)
 {
 }
 
-void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Interface *intf, OSPF::Neighbor *neighbor)
+void LinkStateRequestHandler::processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor)
 {
     router->getMessageHandler()->printEvent("Link State Request packet received", intf, neighbor);
 
-    OSPF::Neighbor::NeighborStateType neighborState = neighbor->getState();
+    Neighbor::NeighborStateType neighborState = neighbor->getState();
 
-    if ((neighborState == OSPF::Neighbor::EXCHANGE_STATE) ||
-        (neighborState == OSPF::Neighbor::LOADING_STATE) ||
-        (neighborState == OSPF::Neighbor::FULL_STATE))
+    if ((neighborState == Neighbor::EXCHANGE_STATE) ||
+        (neighborState == Neighbor::LOADING_STATE) ||
+        (neighborState == Neighbor::FULL_STATE))
     {
         OSPFLinkStateRequestPacket *lsRequestPacket = check_and_cast<OSPFLinkStateRequestPacket *>(packet);
 
@@ -49,7 +51,7 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Inte
 
         for (unsigned long i = 0; i < requestCount; i++) {
             LSARequest& request = lsRequestPacket->getRequests(i);
-            OSPF::LSAKeyType lsaKey;
+            LSAKeyType lsaKey;
 
             EV_INFO << "    LSARequest: type=" << request.lsType
                     << ", LSID=" << request.linkStateID
@@ -66,23 +68,23 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Inte
             }
             else {
                 error = true;
-                neighbor->processEvent(OSPF::Neighbor::BAD_LINK_STATE_REQUEST);
+                neighbor->processEvent(Neighbor::BAD_LINK_STATE_REQUEST);
                 break;
             }
         }
 
         if (!error) {
             int updatesCount = lsas.size();
-            int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
-            OSPF::MessageHandler *messageHandler = router->getMessageHandler();
+            int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            MessageHandler *messageHandler = router->getMessageHandler();
 
             for (int j = 0; j < updatesCount; j++) {
                 OSPFLinkStateUpdatePacket *updatePacket = intf->createUpdatePacket(lsas[j]);
                 if (updatePacket != NULL) {
-                    if (intf->getType() == OSPF::Interface::BROADCAST) {
-                        if ((intf->getState() == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
-                            (intf->getState() == OSPF::Interface::BACKUP_STATE) ||
-                            (intf->getDesignatedRouter() == OSPF::NULL_DESIGNATEDROUTERID))
+                    if (intf->getType() == Interface::BROADCAST) {
+                        if ((intf->getState() == Interface::DESIGNATED_ROUTER_STATE) ||
+                            (intf->getState() == Interface::BACKUP_STATE) ||
+                            (intf->getDesignatedRouter() == NULL_DESIGNATEDROUTERID))
                         {
                             messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         }
@@ -91,7 +93,7 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Inte
                         }
                     }
                     else {
-                        if (intf->getType() == OSPF::Interface::POINTTOPOINT) {
+                        if (intf->getType() == Interface::POINTTOPOINT) {
                             messageHandler->sendPacket(updatePacket, IPv4Address::ALL_OSPF_ROUTERS_MCAST, intf->getIfIndex(), ttl);
                         }
                         else {
@@ -104,6 +106,8 @@ void OSPF::LinkStateRequestHandler::processPacket(OSPFPacket *packet, OSPF::Inte
         }
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

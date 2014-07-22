@@ -5,13 +5,13 @@
 <checker>
     <message occurence="3"/> <!-- tcp: CONNECTION_RESET, CLOSED, ESTABLISHED -->
     <message occurence="1">
-        <fieldValue name="className" value="inet::BGPOpenMessage"/>
+        <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
         <fieldValue name="byteLength" value="29"/>
         <fieldValue name="myAS" value="65248"/>
         <fieldValue name="holdTime" value="180"/>
         <fieldValue name="BGPIdentifier" value="10.10.10.2"/>
     </message>
     <message occurence="1">
-        <fieldValue name="className" value="inet::BGPKeepAliveMessage"/>
+        <fieldValue name="className" value="inet::bgp::BGPKeepAliveMessage"/>
     </message>
 </checker>

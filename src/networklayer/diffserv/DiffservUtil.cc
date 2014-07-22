@@ -19,7 +19,7 @@
 #include "cnedvalue.h"
 
 #include "InterfaceEntry.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 #ifdef WITH_IPv4
 #include "IPv4Datagram.h"
@@ -36,7 +36,7 @@ namespace inet {
 
 namespace DiffservUtil {
 
-using namespace OPP_Global;
+using namespace utils;
 
 // cached enums
 cEnum *dscpEnum = NULL;

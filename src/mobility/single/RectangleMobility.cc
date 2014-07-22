@@ -16,7 +16,7 @@
 //
 
 #include "RectangleMobility.h"
-#include "FWMath.h"
+#include "INETMath.h"
 
 namespace inet {
 

@@ -37,6 +37,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #define LWIP_MAX(x , y)  (((x) > (y)) ? (x) : (y))
 #define LWIP_MIN(x , y)  (((x) < (y)) ? (x) : (y))
 
@@ -45,8 +47,9 @@ namespace inet {
 #endif
 
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_DEF_H__ */
 

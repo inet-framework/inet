@@ -22,7 +22,7 @@
 
 #include "INETDefs.h"
 
-#include "FWMath.h"
+#include "INETMath.h"
 
 namespace inet {
 
@@ -178,12 +178,12 @@ class INET_API Coord : public cObject
      * @brief Tests whether two coordinate vectors are equal.
      *
      * Because coordinates are of type double, this is done through the
-     * FWMath::close function.
+     * math::close function.
      */
     friend bool operator==(const Coord& a, const Coord& b)
     {
         // FIXME: this implementation is not transitive
-        return FWMath::close(a.x, b.x) && FWMath::close(a.y, b.y) && FWMath::close(a.z, b.z);
+        return math::close(a.x, b.x) && math::close(a.y, b.y) && math::close(a.z, b.z);
     }
 
     /**

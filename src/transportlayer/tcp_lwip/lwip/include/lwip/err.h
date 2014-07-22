@@ -37,6 +37,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -86,7 +88,9 @@ extern const char *lwip_strerr(err_t err);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_ERR_H__ */
+

@@ -25,8 +25,11 @@
 
 namespace inet {
 
-class TCPSegment;
 class TCPCommand;
+
+namespace tcp {
+
+class TCPSegment;
 
 /**
  * Abstract base class for TCP receive queues. This class represents
@@ -121,6 +124,8 @@ class INET_API TCPReceiveQueue : public cObject
     /** Returns the minimum of first byte seq.no. in queue and rcv_nxt */
     virtual uint32 getFirstSeqNo() = 0;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

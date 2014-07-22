@@ -103,6 +103,8 @@ PACK_STRUCT_END
 
 namespace inet {
 
+namespace tcp {
+
 #endif
 
 
@@ -161,7 +163,8 @@ extern int pppoe_hdrlen;
 
 #endif /* PPPOE_SUPPORT */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* PPP_OE_H */

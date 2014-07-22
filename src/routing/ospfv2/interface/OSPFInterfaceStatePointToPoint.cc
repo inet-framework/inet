@@ -25,18 +25,20 @@
 
 namespace inet {
 
-void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
+namespace ospf {
+
+void InterfaceStatePointToPoint::processEvent(Interface *intf, Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::INTERFACE_DOWN) {
+    if (event == Interface::INTERFACE_DOWN) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateDown, this);
+        changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LOOP_INDICATION) {
+    if (event == Interface::LOOP_INDICATION) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateLoopback, this);
+        changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HELLO_TIMER) {
-        if (intf->getType() == OSPF::Interface::VIRTUAL) {
+    if (event == Interface::HELLO_TIMER) {
+        if (intf->getType() == Interface::VIRTUAL) {
             if (intf->getNeighborCount() > 0) {
                 intf->sendHelloPacket(intf->getNeighbor(0)->getAddress(), VIRTUAL_LINK_TTL);
             }
@@ -46,10 +48,12 @@ void OSPF::InterfaceStatePointToPoint::processEvent(OSPF::Interface *intf, OSPF:
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
+    if (event == Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

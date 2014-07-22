@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 class TCPSegmentTransmitInfoList
 {
   public:
@@ -59,6 +61,8 @@ class TCPSegmentTransmitInfoList
 
     void clearTo(uint32_t endseg);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

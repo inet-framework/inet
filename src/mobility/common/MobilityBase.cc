@@ -21,7 +21,7 @@
  **************************************************************************/
 
 #include "MobilityBase.h"
-#include "FWMath.h"
+#include "INETMath.h"
 #include "PhysicalEnvironment.h"
 
 namespace inet {
@@ -178,9 +178,9 @@ static int reflect(double min, double max, double& coordinate, double& speed)
 {
     double size = max - min;
     double value = coordinate - min;
-    int sign = 1 - FWMath::modulo(floor(value / size), 2) * 2;
+    int sign = 1 - math::modulo(floor(value / size), 2) * 2;
     ASSERT(sign == 1 || sign == -1);
-    coordinate = FWMath::modulo(sign * value, size) + min;
+    coordinate = math::modulo(sign * value, size) + min;
     speed = sign * speed;
     return sign;
 }
@@ -208,7 +208,7 @@ void MobilityBase::reflectIfOutside(Coord& targetPosition, Coord& speed, double&
 
 static void wrap(double min, double max, double& coordinate)
 {
-    coordinate = FWMath::modulo(coordinate - min, max - min) + min;
+    coordinate = math::modulo(coordinate - min, max - min) + min;
 }
 
 void MobilityBase::wrapIfOutside(Coord& targetPosition)

@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 //
 // Event processing code
 //
@@ -390,6 +392,8 @@ void SCTPAssociation::process_STATUS(SCTPEventCode& event, SCTPCommand *sctpComm
     msg->setControlInfo(statusInfo);
     sendToApp(msg);
 }
+
+} // namespace sctp
 
 } // namespace inet
 

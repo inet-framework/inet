@@ -15,6 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
+#ifndef __INET_LWIPTCPSTACKIF_H
+#define __INET_LWIPTCPSTACKIF_H
+
 #include "lwip/opt.h"
 #include "lwip/lwip_tcp.h"
 
@@ -22,6 +25,10 @@ namespace inet {
 
 //forward declarations:
 class L3Address;
+
+namespace tcp {
+
+//forward declarations:
 struct pbuf;
 
 /**
@@ -64,5 +71,10 @@ class LwipTcpStackIf
     virtual void notifyAboutIncomingSegmentProcessing(LwipTcpLayer::tcp_pcb *pcb, uint32 seqNo,
             const void *dataptr, int len) = 0;
 };
-}    // namespae inet
+
+} // namespace tcp
+
+} // namespace inet
+
+#endif // ifndef __INET_LWIPTCPSTACKIF_H
 

@@ -24,6 +24,10 @@
 
 namespace inet {
 
+namespace utils {
+
+namespace filters {
+
 Register_ResultFilter("messageAge", MessageAgeFilter);
 
 void MessageAgeFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject *object)
@@ -78,6 +82,10 @@ void ZCoordFilter::receiveSignal(cResultFilter *prev, simtime_t_cref t, cObject 
     if (dynamic_cast<Coord *>(object))
         fire(this, t, ((Coord *)object)->z);
 }
+
+} // namespace filters
+
+} // namespace utils
 
 } // namespace inet
 

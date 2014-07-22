@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace ospf {
+
 enum OSPFTimerType {
     INTERFACE_HELLO_TIMER = 0,
     INTERFACE_WAIT_TIMER = 1,
@@ -33,6 +35,8 @@ enum OSPFTimerType {
     NEIGHBOR_REQUEST_RETRANSMISSION_TIMER = 8,
     DATABASE_AGE_TIMER = 9,
 };
+
+} // namespace ospf
 
 } // namespace inet
 

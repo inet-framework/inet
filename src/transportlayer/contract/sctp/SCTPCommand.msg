@@ -197,3 +197,12 @@ class SCTPSendQueueAbated extends SCTPCommand
     uint64 bytesLimit;
     uint64 queuedForStream[];
 }
+
+message SCTPSimpleMessage extends cPacket
+{
+    uint32 dataLen;     //TODO remove it, use set/getDataArraySize() functions only
+    char data[];
+    simtime_t creationTime = 0;
+    bool encaps = false;
+}
+

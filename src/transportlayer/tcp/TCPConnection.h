@@ -28,9 +28,12 @@
 
 namespace inet {
 
-class TCPSegment;
 class TCPCommand;
 class TCPOpenCommand;
+
+namespace tcp {
+
+class TCPSegment;
 class TCPSendQueue;
 class TCPSACKRexmitQueue;
 class TCPReceiveQueue;
@@ -684,6 +687,8 @@ class INET_API TCPConnection
      */
     virtual bool isSendQueueEmpty();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

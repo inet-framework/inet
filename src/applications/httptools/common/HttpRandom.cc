@@ -18,6 +18,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 std::string rdObject::typeStr()
 {
     switch (m_type) {
@@ -357,6 +359,8 @@ rdObject *rdObjectFactory::create(cXMLAttributeMap attributes)
             return NULL;
     }
 }
+
+} // namespace httptools
 
 } // namespace inet
 

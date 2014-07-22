@@ -93,6 +93,8 @@ void RTPApplication::initialize(int stage)
 
 void RTPApplication::handleMessage(cMessage *msgIn)
 {
+    using namespace rtp;
+
     if (msgIn->isSelfMessage()) {
         switch (msgIn->getKind()) {
             case ENTER_SESSION:

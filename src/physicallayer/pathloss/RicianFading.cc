@@ -32,7 +32,7 @@ void RicianFading::initialize(int stage)
 {
     FreeSpacePathLoss::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        k = FWMath::dB2fraction(par("k"));
+        k = math::dB2fraction(par("k"));
     }
 }
 

@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 HttpNodeBase::HttpNodeBase()
 {
     m_bDisplayMessage = false;
@@ -212,6 +214,8 @@ std::string HttpNodeBase::formatHttpResponseLong(const HttpReplyMessage *httpRes
 
     return str.str();
 }
+
+} // namespace httptools
 
 } // namespace inet
 

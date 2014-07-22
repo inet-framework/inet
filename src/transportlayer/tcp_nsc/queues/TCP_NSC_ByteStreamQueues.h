@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages actual bytes.
  */
@@ -95,6 +97,8 @@ class INET_API TCP_NSC_ByteStreamReceiveQueue : public TCP_NSC_ReceiveQueue
   protected:
     ByteArrayBuffer byteArrayBufferM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

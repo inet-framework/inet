@@ -29,7 +29,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class Router;
 
@@ -126,7 +126,7 @@ class Area : public cObject
     std::string detailedInfo() const;
 
   private:
-    SummaryLSA *originateSummaryLSA(const OSPF::SummaryLSA *summaryLSA);
+    SummaryLSA *originateSummaryLSA(const SummaryLSA *summaryLSA);
     bool hasLink(OSPFLSA *fromLSA, OSPFLSA *toLSA) const;
     std::vector<NextHop> *calculateNextHops(OSPFLSA *destination, OSPFLSA *parent) const;
     std::vector<NextHop> *calculateNextHops(Link& destination, OSPFLSA *parent) const;
@@ -135,15 +135,15 @@ class Area : public cObject
             Metric destinationCost,
             SummaryLSA *& lsaToReoriginate) const;
 
-    bool findSameOrWorseCostRoute(const std::vector<OSPF::RoutingTableEntry *>& newRoutingTable,
-            const OSPF::SummaryLSA& currentLSA,
+    bool findSameOrWorseCostRoute(const std::vector<RoutingTableEntry *>& newRoutingTable,
+            const SummaryLSA& currentLSA,
             unsigned short currentCost,
             bool& destinationInRoutingTable,
-            std::list<OSPF::RoutingTableEntry *>& sameOrWorseCost) const;
+            std::list<RoutingTableEntry *>& sameOrWorseCost) const;
 
-    RoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const OSPF::SummaryLSA& summaryLSA,
+    RoutingTableEntry *createRoutingTableEntryFromSummaryLSA(const SummaryLSA& summaryLSA,
             unsigned short entryCost,
-            const OSPF::RoutingTableEntry& borderRouterEntry) const;
+            const RoutingTableEntry& borderRouterEntry) const;
 };
 
 inline std::ostream& operator<<(std::ostream& ostr, Area& area)
@@ -152,7 +152,7 @@ inline std::ostream& operator<<(std::ostream& ostr, Area& area)
     return ostr;
 }
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

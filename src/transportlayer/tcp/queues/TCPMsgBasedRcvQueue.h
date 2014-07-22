@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * @see TCPMsgBasedSendQueue
  */
@@ -74,6 +76,8 @@ class INET_API TCPMsgBasedRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual cPacket *extractBytesUpTo(uint32 seq);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

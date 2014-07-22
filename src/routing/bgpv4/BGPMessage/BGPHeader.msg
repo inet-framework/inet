@@ -24,7 +24,7 @@ const int BGP_HEADER_OCTETS = 19;
 }}
 
 
-namespace inet;
+namespace inet::bgp;
 
 //
 // BGPv4 message types

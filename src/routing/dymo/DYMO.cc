@@ -16,7 +16,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#include "xDYMO.h"
+#include "DYMO.h"
 #include "IPSocket.h"
 #include "IPProtocolId_m.h"
 
@@ -37,7 +37,7 @@
 
 namespace inet {
 
-namespace DYMO {
+namespace dymo {
 
 Define_Module(DYMO);
 
@@ -1431,7 +1431,7 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
 
         if (false
 #ifdef WITH_IEEE80211
-            || dynamic_cast<Ieee80211Frame *>(frame)
+            || dynamic_cast<ieee80211::Ieee80211Frame *>(frame)
 #endif // ifdef WITH_IEEE80211
 #ifdef WITH_IDEALWIRELESS
             || dynamic_cast<IdealMacFrame *>(frame)
@@ -1457,7 +1457,7 @@ void DYMO::receiveSignal(cComponent *source, simsignal_t signalID, cObject *obj)
     }
 }
 
-} // namespace DYMO
+} // namespace dymo
 
 } // namespace inet
 

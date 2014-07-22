@@ -9,6 +9,10 @@
 #ifndef __INET_ETHERNETHDR_H
 #define __INET_ETHERNETHDR_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * The number of bytes in an ethernet (MAC) address.
  */
@@ -351,6 +355,10 @@ extern const uint8_t etherbroadcastaddr[ETHER_ADDR_LEN];
 
 #define ETHERMTU                 (ETHER_MAX_LEN - ETHER_HDR_LEN - ETHER_CRC_LEN)
 #define ETHERMIN                 (ETHER_MIN_LEN - ETHER_HDR_LEN - ETHER_CRC_LEN)
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif /* !_NET_ETHERNET_H_ */
 

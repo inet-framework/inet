@@ -44,6 +44,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -159,7 +161,9 @@ void   igmp_send( struct igmp_group *group, u8_t type);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* LWIP_IGMP */
 

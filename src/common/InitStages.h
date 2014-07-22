@@ -20,6 +20,8 @@
 #ifndef __INET_INITSTAGES
 #define __INET_INITSTAGES
 
+namespace inet {
+
 /**
  * Initialization stages.
  */
@@ -113,6 +115,8 @@ enum InitStages {
      */
     NUM_INIT_STAGES,
 };
+
+} // namespace inet
 
 #endif    // __INET_INITSTAGES
 

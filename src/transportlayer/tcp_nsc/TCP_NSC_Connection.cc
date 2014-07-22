@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 struct nsc_iphdr
 {
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -215,6 +217,8 @@ void TCP_NSC_Connection::abort()
     sendQueueM->dequeueTcpLayerMsg(sendQueueM->getBytesAvailable());
     close();
 }
+
+} // namespace tcp
 
 } // namespace inet
 

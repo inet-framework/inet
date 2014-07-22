@@ -20,7 +20,9 @@
 
 namespace inet {
 
-namespace BGPFSM {
+namespace bgp {
+
+namespace fsm {
 
 //TopState
 void TopState::init()
@@ -406,7 +408,7 @@ void Established::entry()
     //if it's an EGP Session, send update messages with all routing information to BGP peer
     //if it's an IGP Session, send update message with only the BGP routes learned by EGP
     const IPv4Route *rtEntry;
-    BGP::RoutingTableEntry *BGPEntry;
+    RoutingTableEntry *BGPEntry;
     IIPv4RoutingTable *IPRoutingTable = session.getIPRoutingTable();
 
     for (int i = 1; i < IPRoutingTable->getNumRoutes(); i++) {
@@ -419,11 +421,11 @@ void Established::entry()
             continue;
         }
 
-        if (session.getType() == BGP::EGP) {
+        if (session.getType() == EGP) {
             if (rtEntry->getSourceType() == IRoute::OSPF && session.checkExternalRoute(rtEntry)) {
                 continue;
             }
-            BGPEntry = new BGP::RoutingTableEntry(rtEntry);
+            BGPEntry = new RoutingTableEntry(rtEntry);
             std::string entryh = rtEntry->getDestination().str();
             std::string entryn = rtEntry->getNetmask().str();
             BGPEntry->addAS(session._info.ASValue);
@@ -431,15 +433,15 @@ void Established::entry()
         }
     }
 
-    std::vector<BGP::RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
-    for (std::vector<BGP::RoutingTableEntry *>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
+    std::vector<RoutingTableEntry *> BGPRoutingTable = session.getBGPRoutingTable();
+    for (std::vector<RoutingTableEntry *>::iterator it = BGPRoutingTable.begin(); it != BGPRoutingTable.end(); it++) {
         session.updateSendProcess((*it));
     }
 
     //when all EGP Session is in established state, start IGP Session(s)
-    BGP::SessionID nextSession = session.findAndStartNextSession(BGP::EGP);
-    if (nextSession == (BGP::SessionID)-1) {
-        session.findAndStartNextSession(BGP::IGP);
+    SessionID nextSession = session.findAndStartNextSession(EGP);
+    if (nextSession == (SessionID)-1) {
+        session.findAndStartNextSession(IGP);
     }
 }
 
@@ -524,7 +526,9 @@ void Established::UpdateMsgEvent()
     //- remains in the Established state.
 }
 
-} // namespace BGPFSM
+} // namespace fsm
+
+} // namespace bgp
 
 } // namespace inet
 

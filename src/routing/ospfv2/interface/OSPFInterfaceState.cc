@@ -28,30 +28,32 @@
 
 namespace inet {
 
-void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceState *newState, OSPF::InterfaceState *currentState)
+namespace ospf {
+
+void InterfaceState::changeState(Interface *intf, InterfaceState *newState, InterfaceState *currentState)
 {
-    OSPF::Interface::InterfaceStateType oldState = currentState->getState();
-    OSPF::Interface::InterfaceStateType nextState = newState->getState();
-    OSPF::Interface::OSPFInterfaceType intfType = intf->getType();
+    Interface::InterfaceStateType oldState = currentState->getState();
+    Interface::InterfaceStateType nextState = newState->getState();
+    Interface::OSPFInterfaceType intfType = intf->getType();
     bool shouldRebuildRoutingTable = false;
 
     intf->changeState(newState, currentState);
 
-    if ((oldState == OSPF::Interface::DOWN_STATE) ||
-        (nextState == OSPF::Interface::DOWN_STATE) ||
-        (oldState == OSPF::Interface::LOOPBACK_STATE) ||
-        (nextState == OSPF::Interface::LOOPBACK_STATE) ||
-        (oldState == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
-        (nextState == OSPF::Interface::DESIGNATED_ROUTER_STATE) ||
-        ((intfType == OSPF::Interface::POINTTOPOINT) &&
-         ((oldState == OSPF::Interface::POINTTOPOINT_STATE) ||
-          (nextState == OSPF::Interface::POINTTOPOINT_STATE))) ||
-        (((intfType == OSPF::Interface::BROADCAST) ||
-          (intfType == OSPF::Interface::NBMA)) &&
-         ((oldState == OSPF::Interface::WAITING_STATE) ||
-          (nextState == OSPF::Interface::WAITING_STATE))))
+    if ((oldState == Interface::DOWN_STATE) ||
+        (nextState == Interface::DOWN_STATE) ||
+        (oldState == Interface::LOOPBACK_STATE) ||
+        (nextState == Interface::LOOPBACK_STATE) ||
+        (oldState == Interface::DESIGNATED_ROUTER_STATE) ||
+        (nextState == Interface::DESIGNATED_ROUTER_STATE) ||
+        ((intfType == Interface::POINTTOPOINT) &&
+         ((oldState == Interface::POINTTOPOINT_STATE) ||
+          (nextState == Interface::POINTTOPOINT_STATE))) ||
+        (((intfType == Interface::BROADCAST) ||
+          (intfType == Interface::NBMA)) &&
+         ((oldState == Interface::WAITING_STATE) ||
+          (nextState == Interface::WAITING_STATE))))
     {
-        OSPF::RouterLSA *routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
+        RouterLSA *routerLSA = intf->getArea()->findRouterLSA(intf->getArea()->getRouter()->getRouterID());
 
         if (routerLSA != NULL) {
             long sequenceNumber = routerLSA->getHeader().getLsSequenceNumber();
@@ -61,7 +63,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
                 routerLSA->incrementInstallTime();
             }
             else {
-                OSPF::RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
+                RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
                 newLSA->getHeader().setLsSequenceNumber(sequenceNumber + 1);
                 shouldRebuildRoutingTable |= routerLSA->update(newLSA);
@@ -71,7 +73,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
             }
         }
         else {    // (lsa == NULL) -> This must be the first time any interface is up...
-            OSPF::RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
+            RouterLSA *newLSA = intf->getArea()->originateRouterLSA();
 
             shouldRebuildRoutingTable |= intf->getArea()->installRouterLSA(newLSA);
 
@@ -83,8 +85,8 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
         }
     }
 
-    if (nextState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-        OSPF::NetworkLSA *newLSA = intf->getArea()->originateNetworkLSA(intf);
+    if (nextState == Interface::DESIGNATED_ROUTER_STATE) {
+        NetworkLSA *newLSA = intf->getArea()->originateNetworkLSA(intf);
         if (newLSA != NULL) {
             shouldRebuildRoutingTable |= intf->getArea()->installNetworkLSA(newLSA);
 
@@ -92,7 +94,7 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
             delete newLSA;
         }
         else {    // no neighbors on the network -> old NetworkLSA must be flushed
-            OSPF::NetworkLSA *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
+            NetworkLSA *oldLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
             if (oldLSA != NULL) {
                 oldLSA->getHeader().setLsAge(MAX_AGE);
@@ -102,8 +104,8 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
         }
     }
 
-    if (oldState == OSPF::Interface::DESIGNATED_ROUTER_STATE) {
-        OSPF::NetworkLSA *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
+    if (oldState == Interface::DESIGNATED_ROUTER_STATE) {
+        NetworkLSA *networkLSA = intf->getArea()->findNetworkLSA(intf->getAddressRange().address);
 
         if (networkLSA != NULL) {
             networkLSA->getHeader().setLsAge(MAX_AGE);
@@ -117,51 +119,51 @@ void OSPF::InterfaceState::changeState(OSPF::Interface *intf, OSPF::InterfaceSta
     }
 }
 
-void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
+void InterfaceState::calculateDesignatedRouter(Interface *intf)
 {
-    OSPF::RouterID routerID = intf->parentArea->getRouter()->getRouterID();
-    OSPF::DesignatedRouterID currentDesignatedRouter = intf->designatedRouter;
-    OSPF::DesignatedRouterID currentBackupRouter = intf->backupDesignatedRouter;
+    RouterID routerID = intf->parentArea->getRouter()->getRouterID();
+    DesignatedRouterID currentDesignatedRouter = intf->designatedRouter;
+    DesignatedRouterID currentBackupRouter = intf->backupDesignatedRouter;
 
     unsigned int neighborCount = intf->neighboringRouters.size();
     unsigned char repeatCount = 0;
     unsigned int i;
 
-    OSPF::DesignatedRouterID declaredBackup;
+    DesignatedRouterID declaredBackup;
     unsigned char declaredBackupPriority;
-    OSPF::RouterID declaredBackupID;
+    RouterID declaredBackupID;
     bool backupDeclared;
 
-    OSPF::DesignatedRouterID declaredDesignatedRouter;
+    DesignatedRouterID declaredDesignatedRouter;
     unsigned char declaredDesignatedRouterPriority;
-    OSPF::RouterID declaredDesignatedRouterID;
+    RouterID declaredDesignatedRouterID;
     bool designatedRouterDeclared;
 
     do {
         // calculating backup designated router
-        declaredBackup = OSPF::NULL_DESIGNATEDROUTERID;
+        declaredBackup = NULL_DESIGNATEDROUTERID;
         declaredBackupPriority = 0;
-        declaredBackupID = OSPF::NULL_ROUTERID;
+        declaredBackupID = NULL_ROUTERID;
         backupDeclared = false;
 
-        OSPF::DesignatedRouterID highestRouter = OSPF::NULL_DESIGNATEDROUTERID;
+        DesignatedRouterID highestRouter = NULL_DESIGNATEDROUTERID;
         unsigned char highestPriority = 0;
-        OSPF::RouterID highestID = OSPF::NULL_ROUTERID;
+        RouterID highestID = NULL_ROUTERID;
 
         for (i = 0; i < neighborCount; i++) {
-            OSPF::Neighbor *neighbor = intf->neighboringRouters[i];
+            Neighbor *neighbor = intf->neighboringRouters[i];
             unsigned char neighborPriority = neighbor->getPriority();
 
-            if (neighbor->getState() < OSPF::Neighbor::TWOWAY_STATE) {
+            if (neighbor->getState() < Neighbor::TWOWAY_STATE) {
                 continue;
             }
             if (neighborPriority == 0) {
                 continue;
             }
 
-            OSPF::RouterID neighborID = neighbor->getNeighborID();
-            OSPF::DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
-            OSPF::DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
+            RouterID neighborID = neighbor->getNeighborID();
+            DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
+            DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
 
             if (neighborsDesignatedRouter.routerID != neighborID) {
                 if (neighborsBackupDesignatedRouter.routerID == neighborID) {
@@ -225,25 +227,25 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
         }
 
         // calculating backup designated router
-        declaredDesignatedRouter = OSPF::NULL_DESIGNATEDROUTERID;
+        declaredDesignatedRouter = NULL_DESIGNATEDROUTERID;
         declaredDesignatedRouterPriority = 0;
-        declaredDesignatedRouterID = OSPF::NULL_ROUTERID;
+        declaredDesignatedRouterID = NULL_ROUTERID;
         designatedRouterDeclared = false;
 
         for (i = 0; i < neighborCount; i++) {
-            OSPF::Neighbor *neighbor = intf->neighboringRouters[i];
+            Neighbor *neighbor = intf->neighboringRouters[i];
             unsigned char neighborPriority = neighbor->getPriority();
 
-            if (neighbor->getState() < OSPF::Neighbor::TWOWAY_STATE) {
+            if (neighbor->getState() < Neighbor::TWOWAY_STATE) {
                 continue;
             }
             if (neighborPriority == 0) {
                 continue;
             }
 
-            OSPF::RouterID neighborID = neighbor->getNeighborID();
-            OSPF::DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
-            OSPF::DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
+            RouterID neighborID = neighbor->getNeighborID();
+            DesignatedRouterID neighborsDesignatedRouter = neighbor->getDesignatedRouter();
+            DesignatedRouterID neighborsBackupDesignatedRouter = neighbor->getBackupDesignatedRouter();
 
             if (neighborsDesignatedRouter.routerID == neighborID) {
                 if ((neighborPriority > declaredDesignatedRouterPriority) ||
@@ -282,7 +284,7 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
         // if the router is any kind of DR or is no longer one of them, then repeat
         if (
             (
-                (declaredDesignatedRouter.routerID != OSPF::NULL_ROUTERID) &&
+                (declaredDesignatedRouter.routerID != NULL_ROUTERID) &&
                 ((
                      (currentDesignatedRouter.routerID == routerID) &&
                      (declaredDesignatedRouter.routerID != routerID)
@@ -293,7 +295,7 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
                  ))
             ) ||
             (
-                (declaredBackup.routerID != OSPF::NULL_ROUTERID) &&
+                (declaredBackup.routerID != NULL_ROUTERID) &&
                 ((
                      (currentBackupRouter.routerID == routerID) &&
                      (declaredBackup.routerID != routerID)
@@ -314,15 +316,15 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
         }
     } while (repeatCount < 2);
 
-    OSPF::RouterID routersOldDesignatedRouterID = intf->designatedRouter.routerID;
-    OSPF::RouterID routersOldBackupID = intf->backupDesignatedRouter.routerID;
+    RouterID routersOldDesignatedRouterID = intf->designatedRouter.routerID;
+    RouterID routersOldBackupID = intf->backupDesignatedRouter.routerID;
 
     intf->designatedRouter = declaredDesignatedRouter;
     intf->backupDesignatedRouter = declaredBackup;
 
     bool wasBackupDesignatedRouter = (routersOldBackupID == routerID);
     bool wasDesignatedRouter = (routersOldDesignatedRouterID == routerID);
-    bool wasOther = (intf->getState() == OSPF::Interface::NOT_DESIGNATED_ROUTER_STATE);
+    bool wasOther = (intf->getState() == Interface::NOT_DESIGNATED_ROUTER_STATE);
     bool wasWaiting = (!wasBackupDesignatedRouter && !wasDesignatedRouter && !wasOther);
     bool isBackupDesignatedRouter = (declaredBackup.routerID == routerID);
     bool isDesignatedRouter = (declaredDesignatedRouter.routerID == routerID);
@@ -330,58 +332,60 @@ void OSPF::InterfaceState::calculateDesignatedRouter(OSPF::Interface *intf)
 
     if (wasBackupDesignatedRouter) {
         if (isDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new InterfaceStateDesignatedRouter, this);
         }
         if (isOther) {
-            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new InterfaceStateNotDesignatedRouter, this);
         }
     }
     if (wasDesignatedRouter) {
         if (isBackupDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new InterfaceStateBackup, this);
         }
         if (isOther) {
-            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new InterfaceStateNotDesignatedRouter, this);
         }
     }
     if (wasOther) {
         if (isDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new InterfaceStateDesignatedRouter, this);
         }
         if (isBackupDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new InterfaceStateBackup, this);
         }
     }
     if (wasWaiting) {
         if (isDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateDesignatedRouter, this);
+            changeState(intf, new InterfaceStateDesignatedRouter, this);
         }
         if (isBackupDesignatedRouter) {
-            changeState(intf, new OSPF::InterfaceStateBackup, this);
+            changeState(intf, new InterfaceStateBackup, this);
         }
         if (isOther) {
-            changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+            changeState(intf, new InterfaceStateNotDesignatedRouter, this);
         }
     }
 
     for (i = 0; i < neighborCount; i++) {
-        if ((intf->interfaceType == OSPF::Interface::NBMA) &&
+        if ((intf->interfaceType == Interface::NBMA) &&
             ((!wasBackupDesignatedRouter && isBackupDesignatedRouter) ||
              (!wasDesignatedRouter && isDesignatedRouter)))
         {
             if (intf->neighboringRouters[i]->getPriority() == 0) {
-                intf->neighboringRouters[i]->processEvent(OSPF::Neighbor::START);
+                intf->neighboringRouters[i]->processEvent(Neighbor::START);
             }
         }
         if ((declaredDesignatedRouter.routerID != routersOldDesignatedRouterID) ||
             (declaredBackup.routerID != routersOldBackupID))
         {
-            if (intf->neighboringRouters[i]->getState() >= OSPF::Neighbor::TWOWAY_STATE) {
-                intf->neighboringRouters[i]->processEvent(OSPF::Neighbor::IS_ADJACENCY_OK);
+            if (intf->neighboringRouters[i]->getState() >= Neighbor::TWOWAY_STATE) {
+                intf->neighboringRouters[i]->processEvent(Neighbor::IS_ADJACENCY_OK);
             }
         }
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

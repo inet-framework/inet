@@ -27,6 +27,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Define_Module(RTPAVProfilePayload32Receiver);
 
 int compareRTPPacketsBySequenceNumber(cObject *packet1, cObject *packet2)
@@ -155,6 +157,8 @@ void RTPAVProfilePayload32Receiver::processPacket(RTPPacket *rtpPacket)
         }
     }
 }
+
+} // namespace rtp
 
 } // namespace inet
 

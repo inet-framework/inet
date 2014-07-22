@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace serializer {
+
 /**
  * Converts between IPv6Datagram and binary (network byte order) IPv6 header.
  */
@@ -41,6 +43,8 @@ class IPv6Serializer
      */
     void parse(const unsigned char *buf, unsigned int bufsize, IPv6Datagram *dest);
 };
+
+} // namespace serializer
 
 } // namespace inet
 

@@ -17,7 +17,7 @@
 
 #include "BonnMotionMobility.h"
 #include "BonnMotionFileCache.h"
-#include "FWMath.h"
+#include "INETMath.h"
 
 namespace inet {
 

@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for DumbTCP.
  */
@@ -90,6 +92,8 @@ class INET_API DumbTCP : public TCPAlgorithm
 
     virtual void rttMeasurementCompleteUsingTS(uint32 echoedTS);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

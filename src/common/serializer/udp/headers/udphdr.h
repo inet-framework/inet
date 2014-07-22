@@ -36,6 +36,10 @@
 #ifndef __INET_UDPHDR_H
 #define __INET_UDPHDR_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * Udp protocol header.
  * Per RFC 768, September, 1981.
@@ -47,6 +51,10 @@ struct udphdr
     u_short uh_ulen;    /* udp length */
     u_short uh_sum;    /* udp checksum */
 };
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_UDPHDR_H
 

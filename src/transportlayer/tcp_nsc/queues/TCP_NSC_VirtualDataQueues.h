@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  */
@@ -94,6 +96,8 @@ class INET_API TCP_NSC_VirtualDataReceiveQueue : public TCP_NSC_ReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -38,6 +38,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -119,7 +121,8 @@ struct pbuf *pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_PBUF_H__ */

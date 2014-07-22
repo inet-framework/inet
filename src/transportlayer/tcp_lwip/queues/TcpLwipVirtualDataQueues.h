@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages "virtual bytes", that is, byte counts only.
  */
@@ -103,6 +105,8 @@ class INET_API TcpLwipVirtualDataReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

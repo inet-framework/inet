@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace ospf {
+
 bool operator<(const OSPFLSAHeader& leftLSA, const OSPFLSAHeader& rightLSA)
 {
     long leftSequenceNumber = leftLSA.getLsSequenceNumber();
@@ -249,6 +251,8 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa)
     ostr << lsa.getHeader();
     return ostr;
 }
+
+} // namespace ospf
 
 } // namespace inet
 

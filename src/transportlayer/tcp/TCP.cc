@@ -45,6 +45,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Define_Module(TCP);
 
 #define EPHEMERAL_PORTRANGE_START    1024
@@ -570,6 +572,8 @@ void TCP::reset()
     usedEphemeralPorts.clear();
     lastEphemeralPort = EPHEMERAL_PORTRANGE_START;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

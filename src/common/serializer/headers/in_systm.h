@@ -37,6 +37,10 @@
 #ifndef __INET_IN_SYSTM_H
 #define __INET_IN_SYSTM_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * Miscellaneous internetwork
  * definitions for kernel.
@@ -56,6 +60,10 @@ typedef u_int32_t n_long;    /* long as received from the net */
 typedef u_int32_t n_time;    /* ms since 00:00 GMT, byte rev */
 
 /*...*/
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_IN_SYSTM_H
 

@@ -16,7 +16,7 @@
 //
 
 
-namespace inet;
+namespace inet::httptools;
 
 //
 // Server status update event

@@ -46,6 +46,8 @@
 
 namespace inet {
 
+using namespace ieee80211;
+
 namespace inetmanet {
 
 const int UDP_HEADER_BYTES = 8;

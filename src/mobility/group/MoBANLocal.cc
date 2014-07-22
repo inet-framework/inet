@@ -39,7 +39,7 @@
  *
  **************************************************************************/
 
-#include <FWMath.h>
+#include <INETMath.h>
 #include "MoBANLocal.h"
 
 namespace inet {

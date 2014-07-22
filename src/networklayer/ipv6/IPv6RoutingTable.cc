@@ -18,7 +18,7 @@
 
 #include <algorithm>
 
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 #include "IPv6RoutingTable.h"
 #include "IInterfaceTable.h"
@@ -327,20 +327,20 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
     //TODO: leave this off first!! They overwrite stuff!
 
     /* TODO: Wei commented out the stuff below. To be checked why (Andras).
-       d->setMaxRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
-       d->setMinRtrAdvInterval(OPP_Global::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
+       d->setMaxRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MaxRtrAdvInterval")));
+       d->setMinRtrAdvInterval(utils::atod(getRequiredAttr(cfg, "MinRtrAdvInterval")));
        d->setAdvManagedFlag(toBool(getRequiredAttr(cfg, "AdvManagedFlag")));
        d->setAdvOtherConfigFlag(toBool(getRequiredAttr(cfg, "AdvOtherConfigFlag")));
-       d->setAdvLinkMTU(OPP_Global::atoul(getRequiredAttr(cfg, "AdvLinkMTU")));
-       d->setAdvReachableTime(OPP_Global::atoul(getRequiredAttr(cfg, "AdvReachableTime")));
-       d->setAdvRetransTimer(OPP_Global::atoul(getRequiredAttr(cfg, "AdvRetransTimer")));
-       d->setAdvCurHopLimit(OPP_Global::atoul(getRequiredAttr(cfg, "AdvCurHopLimit")));
-       d->setAdvDefaultLifetime(OPP_Global::atoul(getRequiredAttr(cfg, "AdvDefaultLifetime")));
-       ie->setMtu(OPP_Global::atoul(getRequiredAttr(cfg, "HostLinkMTU")));
-       d->setCurHopLimit(OPP_Global::atoul(getRequiredAttr(cfg, "HostCurHopLimit")));
-       d->setBaseReachableTime(OPP_Global::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
-       d->setRetransTimer(OPP_Global::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
-       d->setDupAddrDetectTransmits(OPP_Global::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
+       d->setAdvLinkMTU(utils::atoul(getRequiredAttr(cfg, "AdvLinkMTU")));
+       d->setAdvReachableTime(utils::atoul(getRequiredAttr(cfg, "AdvReachableTime")));
+       d->setAdvRetransTimer(utils::atoul(getRequiredAttr(cfg, "AdvRetransTimer")));
+       d->setAdvCurHopLimit(utils::atoul(getRequiredAttr(cfg, "AdvCurHopLimit")));
+       d->setAdvDefaultLifetime(utils::atoul(getRequiredAttr(cfg, "AdvDefaultLifetime")));
+       ie->setMtu(utils::atoul(getRequiredAttr(cfg, "HostLinkMTU")));
+       d->setCurHopLimit(utils::atoul(getRequiredAttr(cfg, "HostCurHopLimit")));
+       d->setBaseReachableTime(utils::atoul(getRequiredAttr(cfg, "HostBaseReachableTime")));
+       d->setRetransTimer(utils::atoul(getRequiredAttr(cfg, "HostRetransTimer")));
+       d->setDupAddrDetectTransmits(utils::atoul(getRequiredAttr(cfg, "HostDupAddrDetectTransmits")));
      */
 
     // parse prefixes (AdvPrefix elements; they should be inside an AdvPrefixList
@@ -359,9 +359,9 @@ void IPv6RoutingTable::configureInterfaceFromXML(InterfaceEntry *ie, cXMLElement
                     node->getTagName(), node->getSourceLocation(), node->getNodeValue());
 
         prefix.prefixLength = pfxLen;
-        prefix.advValidLifetime = OPP_Global::atoul(getRequiredAttr(node, "AdvValidLifetime"));
+        prefix.advValidLifetime = utils::atoul(getRequiredAttr(node, "AdvValidLifetime"));
         prefix.advOnLinkFlag = toBool(getRequiredAttr(node, "AdvOnLinkFlag"));
-        prefix.advPreferredLifetime = OPP_Global::atoul(getRequiredAttr(node, "AdvPreferredLifetime"));
+        prefix.advPreferredLifetime = utils::atoul(getRequiredAttr(node, "AdvPreferredLifetime"));
         prefix.advAutonomousFlag = toBool(getRequiredAttr(node, "AdvAutonomousFlag"));
         d->addAdvPrefix(prefix);
     }

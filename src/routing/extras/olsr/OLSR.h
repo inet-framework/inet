@@ -37,7 +37,7 @@
 #include "OLSR_state.h"
 #include "OLSR_rtable.h"
 #include "OLSR_repositories.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 #include <map>
 #include <vector>
@@ -76,7 +76,7 @@ namespace inetmanet {
 #define CURRENT_TIME_T  SIMTIME_DBL(simTime())
 #endif
 
-#define debug  EV << OPP_Global::stringf
+#define debug  EV << utils::stringf
 
 
 

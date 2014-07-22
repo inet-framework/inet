@@ -18,7 +18,8 @@
  */
 
 #include "DYMO_RoutingEntry.h"
-#include "DYMO.h"
+
+#include "DYMOFau.h"
 
 namespace inet {
 

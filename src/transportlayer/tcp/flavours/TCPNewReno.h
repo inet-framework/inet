@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPNewReno.
  */
@@ -59,6 +61,8 @@ class INET_API TCPNewReno : public TCPTahoeRenoFamily
     /** Redefine what should happen when dupAck was received, to add congestion window management */
     virtual void receivedDuplicateAck();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

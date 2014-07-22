@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages messages.
  *
@@ -63,6 +65,8 @@ class INET_API TCPByteStreamSendQueue : public TCPSendQueue
 
     virtual void discardUpTo(uint32 seqNum);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

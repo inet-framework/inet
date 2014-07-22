@@ -46,6 +46,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -159,7 +161,9 @@ void netconn_free(struct netconn *conn);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* LWIP_NETCONN */
 

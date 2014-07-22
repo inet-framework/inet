@@ -27,7 +27,7 @@
 namespace inet {
 
 class SCTPStatusInfo;
-class SCTP;
+namespace sctp { class SCTP; }
 
 typedef std::vector<L3Address> AddressVector;
 
@@ -283,4 +283,5 @@ class INET_API SCTPSocket
 } // namespace inet
 
 #endif // ifndef __INET_SCTPSOCKET_H
+
 

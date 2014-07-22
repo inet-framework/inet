@@ -30,7 +30,7 @@
 // @see ~RTPAVProfilePayload32Receiver
 //
 
-namespace inet;
+namespace inet::rtp;
 
 packet RTPMpegPacket
 {

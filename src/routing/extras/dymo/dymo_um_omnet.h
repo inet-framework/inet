@@ -237,7 +237,7 @@ class DYMOUM : public ManetRoutingBase
     DYMOUM();
     ~DYMOUM();
     void packetFailed(IPv4Datagram *);
-    void packetFailedMac(Ieee80211DataFrame *);
+    void packetFailedMac(ieee80211::Ieee80211DataFrame *);
     virtual std::string detailedInfo() const;
 
     // Routing information access

@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 SCTPPathVariables::SCTPPathVariables(const L3Address& addr, SCTPAssociation *assoc, const IRoutingTable *rt)
 {
     // ====== Path Variable Initialization ===================================
@@ -1568,6 +1570,8 @@ void SCTPAssociation::removePath()
         sctpPathMap.erase(pathIterator);
     }
 }
+
+} // namespace sctp
 
 } // namespace inet
 

@@ -58,6 +58,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #if !MEMP_MEM_MALLOC /* don't build if not configured for use in lwipopts.h */
 
 struct memp {
@@ -386,6 +388,8 @@ memp_free(memp_t type, void *mem)
 }
 
 #endif /* MEMP_MEM_MALLOC */
+
+} // namespace tcp
 
 } // namespace inet
 

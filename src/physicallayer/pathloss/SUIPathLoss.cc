@@ -96,7 +96,7 @@ double SUIPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distan
     else {
         L = 20 * log10(unit(4 * M_PI * R / lambda).get()) + s;
     }
-    return FWMath::dB2fraction(-L);
+    return math::dB2fraction(-L);
 }
 
 } // namespace physicallayer

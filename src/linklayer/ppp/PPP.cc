@@ -20,7 +20,7 @@
 
 #include "PPP.h"
 
-#include "opp_utils.h"
+#include "INETUtils.h"
 #include "IInterfaceTable.h"
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
@@ -126,7 +126,7 @@ InterfaceEntry *PPP::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     bool connected = datarateChannel != NULL;

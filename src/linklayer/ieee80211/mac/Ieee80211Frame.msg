@@ -26,7 +26,7 @@ cplusplus {{
 
 class noncobject MACAddress;
 
-namespace inet;
+namespace inet::ieee80211;
 
 enum EtherType;
 

@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class InterfaceStateBackup : public InterfaceState
 {
@@ -31,7 +31,7 @@ class InterfaceStateBackup : public InterfaceState
     virtual Interface::InterfaceStateType getState() const { return Interface::BACKUP_STATE; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

@@ -32,8 +32,8 @@ void FlatReceiverBase::initialize(int stage)
 {
     SNIRReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        energyDetection = mW(FWMath::dBm2mW(par("energyDetection")));
-        sensitivity = mW(FWMath::dBm2mW(par("sensitivity")));
+        energyDetection = mW(math::dBm2mW(par("energyDetection")));
+        sensitivity = mW(math::dBm2mW(par("sensitivity")));
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *modulationName = par("modulation");

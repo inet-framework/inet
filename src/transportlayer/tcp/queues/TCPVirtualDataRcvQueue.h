@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Receive queue that manages "virtual bytes", that is, byte counts only.
  *
@@ -129,6 +131,8 @@ class INET_API TCPVirtualDataRcvQueue : public TCPReceiveQueue
 
     virtual uint32 getFirstSeqNo();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -37,6 +37,10 @@
 #ifndef __INET_IP_H
 #define __INET_IP_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * Definitions for internet protocol version 4.
  * Per RFC 791, September 1981.
@@ -189,6 +193,10 @@ struct  ip_timestamp
 #define IP_MSS                   576             /* default maximum segment size */
 
 /*...*/
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_IP_H
 

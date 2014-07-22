@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class InterfaceStatePointToPoint : public InterfaceState
 {
@@ -31,7 +31,7 @@ class InterfaceStatePointToPoint : public InterfaceState
     virtual Interface::InterfaceStateType getState() const { return Interface::POINTTOPOINT_STATE; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

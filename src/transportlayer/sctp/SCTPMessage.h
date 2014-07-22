@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 /**
  * Represents a SCTP Message. More info in the SCTPMessage.msg file
  * (and the documentation generated from it).
@@ -206,6 +208,8 @@ class INET_API SCTPAsconfAckChunk : public SCTPAsconfAckChunk_Base
      */
     virtual cPacket *removeAsconfResponse();
 };
+
+} // namespace sctp
 
 } // namespace inet
 

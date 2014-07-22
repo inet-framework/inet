@@ -23,7 +23,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class LinkStateUpdateHandler : public IMessageHandler
 {
@@ -49,7 +49,7 @@ class LinkStateUpdateHandler : public IMessageHandler
     void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Define_Module(RTPAVProfile);
 
 void RTPAVProfile::initialize()
@@ -28,6 +30,8 @@ void RTPAVProfile::initialize()
     _rtcpPercentage = 5;
     _preferredPort = 5005;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

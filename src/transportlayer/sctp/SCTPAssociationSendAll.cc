@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 void SCTPAssociation::increaseOutstandingBytes(SCTPDataVariables *chunk,
         SCTPPathVariables *path)
 {
@@ -1417,6 +1419,8 @@ uint32 SCTPAssociation::getAllTransQ()
     }
     return sum;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

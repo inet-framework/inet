@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCPReno);
 
 TCPReno::TCPReno() : TCPTahoeRenoFamily(),
@@ -321,6 +323,8 @@ void TCPReno::receivedDuplicateAck()
         sendData(false);
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 

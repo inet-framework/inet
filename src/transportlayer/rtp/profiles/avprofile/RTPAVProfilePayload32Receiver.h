@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 /**
  * This module is used to receive getData(mpeg video) of payload 32 for rtp
  * endsystems working under the rtp av profile.
@@ -73,6 +75,8 @@ class INET_API RTPAVProfilePayload32Receiver : public RTPPayloadReceiver
      */
     virtual void processPacket(RTPPacket *packet);
 };
+
+} // namespace rtp
 
 } // namespace inet
 

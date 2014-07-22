@@ -42,7 +42,7 @@
 #include <string>
 #include <stdio.h>
 #include <assert.h>
-#include <FWMath.h>
+#include <INETMath.h>
 
 #include "MoBANCoordinator.h"
 #include "MoBANLocal.h"

@@ -26,7 +26,7 @@
 #include "InterfaceEntry.h"
 #include "IPassiveQueue.h"
 #include "NodeOperations.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
 
@@ -293,7 +293,7 @@ InterfaceEntry *EtherMACBase::createInterfaceEntry()
     InterfaceEntry *interfaceEntry = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    interfaceEntry->setName(OPP_Global::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
+    interfaceEntry->setName(utils::stripnonalnum(findModuleUnderContainingNode(this)->getFullName()).c_str());
 
     // generate a link-layer address to be used as interface token for IPv6
     interfaceEntry->setMACAddress(address);

@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 Register_Class(TCPMsgBasedRcvQueue);
 
 TCPMsgBasedRcvQueue::TCPMsgBasedRcvQueue() : TCPVirtualDataRcvQueue()
@@ -99,6 +101,8 @@ cPacket *TCPMsgBasedRcvQueue::extractBytesUpTo(uint32 seq)
     }
     return msg;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

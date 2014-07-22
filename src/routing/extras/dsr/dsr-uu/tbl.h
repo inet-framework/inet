@@ -5,8 +5,8 @@
  *
  * Author: Erik Nordström, <erikn@it.uu.se>
  */
-#ifndef _TBL_H
-#define _TBL_H
+#ifndef __INET_DSR_TBL_H
+#define __INET_DSR_TBL_H
 #ifndef OMNETPP
 #ifdef __KERNEL__
 #include <linux/list.h>
@@ -21,8 +21,8 @@
 #include "dsr_list.h"
 #endif
 #else
-#include "dsr_list.h"
 #include <errno.h>
+#include "dsr_list.h"
 #endif
 
 namespace inet {
@@ -421,5 +421,5 @@ static inline void tbl_flush(struct tbl *t, do_t at_flush)
 
 } // namespace inet
 
-#endif              /* _TBL_H */
+#endif    // __INET_DSR_TBL_H
 

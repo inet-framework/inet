@@ -519,8 +519,8 @@ class SimulationTextTestResult(ThreadedTestResult):
     def _splitMsg(self, msg):
         cause = str(msg)
         detail = None
-        if cause.count(':'):
-            (cause, detail) = cause.split(':',1)
+        if cause.count(': '):
+            (cause, detail) = cause.split(': ',1)
         return (cause, detail)
 
 

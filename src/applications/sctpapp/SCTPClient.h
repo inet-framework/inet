@@ -26,7 +26,11 @@
 
 namespace inet {
 
+namespace sctp {
+
 class SCTPAssociation;
+
+} // namespace sctp
 
 /**
  * Implements the SCTPClient simple module. See the NED file for more info.

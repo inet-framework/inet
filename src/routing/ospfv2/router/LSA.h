@@ -26,7 +26,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 struct NextHop
 {
@@ -156,8 +156,6 @@ class ASExternalLSA : public OSPFASExternalLSA,
     bool differsFrom(const OSPFASExternalLSA *asExternalLSA) const;
 };
 
-} // namespace OSPF
-
 /**
  * Returns true if leftLSA is older than rightLSA.
  */
@@ -175,14 +173,14 @@ inline bool operator!=(const OSPFOptions& leftOptions, const OSPFOptions& rightO
     return !(leftOptions == rightOptions);
 }
 
-inline bool operator==(const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
+inline bool operator==(const NextHop& leftHop, const NextHop& rightHop)
 {
     return (leftHop.ifIndex == rightHop.ifIndex) &&
            (leftHop.hopAddress == rightHop.hopAddress) &&
            (leftHop.advertisingRouter == rightHop.advertisingRouter);
 }
 
-inline bool operator!=(const OSPF::NextHop& leftHop, const OSPF::NextHop& rightHop)
+inline bool operator!=(const NextHop& leftHop, const NextHop& rightHop)
 {
     return !(leftHop == rightHop);
 }
@@ -201,6 +199,8 @@ std::ostream& operator<<(std::ostream& ostr, const OSPFRouterLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const OSPFSummaryLSA& lsa);
 std::ostream& operator<<(std::ostream& ostr, const ExternalTOSInfo& tos);
 std::ostream& operator<<(std::ostream& ostr, const OSPFASExternalLSA& lsa);
+
+} // namespace ospf
 
 } // namespace inet
 

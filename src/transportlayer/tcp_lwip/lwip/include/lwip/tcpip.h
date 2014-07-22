@@ -45,6 +45,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -138,7 +140,9 @@ struct tcpip_msg {
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* !NO_SYS */
 

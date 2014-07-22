@@ -19,7 +19,7 @@ cplusplus {{
 #include "IPv4Address.h"
 }}
 
-namespace inet;
+namespace inet::ospf;
 
 class noncobject IPv4Address;
 

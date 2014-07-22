@@ -22,7 +22,7 @@
 
 #include "Loopback.h"
 
-#include "opp_utils.h"
+#include "INETUtils.h"
 #include "IInterfaceTable.h"
 #include "IPassiveQueue.h"
 #include "NotifierConsts.h"
@@ -67,7 +67,7 @@ InterfaceEntry *Loopback::createInterfaceEntry()
     InterfaceEntry *ie = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    ie->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    ie->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
 //    // generate a link-layer address to be used as interface token for IPv6
 //    InterfaceToken token(0, simulation.getUniqueNumber(), 64);

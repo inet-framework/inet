@@ -8,6 +8,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPWestwood.
  */
@@ -67,6 +69,8 @@ class INET_API TCPWestwood : public TCPBaseAlg
 
     virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

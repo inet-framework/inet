@@ -6,7 +6,7 @@
 
 namespace inet {
 
-namespace DYMO {
+namespace dymo {
 
 DYMORouteData::DYMORouteData()
 {
@@ -17,7 +17,7 @@ DYMORouteData::DYMORouteData()
     metricType = HOP_COUNT;
 }
 
-} // namespace DYMO
+} // namespace dymo
 
 } // namespace inet
 

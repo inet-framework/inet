@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Register_Class(RTPSenderInfo);
 
 RTPSenderInfo::RTPSenderInfo(uint32 ssrc) : RTPParticipantInfo(ssrc)
@@ -128,6 +130,8 @@ bool RTPSenderInfo::toBeDeleted(simtime_t now) const
 {
     return false;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

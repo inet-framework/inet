@@ -30,6 +30,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 using namespace physicallayer;
 
 Define_Module(Ieee80211MgmtAP);
@@ -421,6 +423,8 @@ void Ieee80211MgmtAP::stop()
     staList.clear();
     Ieee80211MgmtAPBase::stop();
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

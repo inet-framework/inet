@@ -38,6 +38,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -85,7 +87,8 @@ void              netbuf_first    (struct netbuf *buf);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_NETBUF_H__ */

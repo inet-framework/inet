@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 /**
  * The class SDESItem is used for storing a source description item
  * (type of description, description string) for an RTP end system.
@@ -200,6 +202,8 @@ class INET_API SDESChunk : public cArray
      */
     int _length;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

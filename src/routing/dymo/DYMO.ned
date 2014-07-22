@@ -43,7 +43,7 @@ simple DYMO like IDYMO
 {
     parameters:
         // properties
-        @class("DYMO::DYMO");
+        @class("dymo::DYMO");
         @display("i=block/routing");
 
         // context parameters

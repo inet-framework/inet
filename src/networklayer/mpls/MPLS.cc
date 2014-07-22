@@ -69,6 +69,8 @@ void MPLS::sendToL2(cMessage *msg, int gateIndex)
 
 void MPLS::processPacketFromL3(cMessage *msg)
 {
+    using namespace tcp;
+
     IPv4Datagram *ipdatagram = check_and_cast<IPv4Datagram *>(msg);
     //int gateIndex = msg->getArrivalGate()->getIndex();
 

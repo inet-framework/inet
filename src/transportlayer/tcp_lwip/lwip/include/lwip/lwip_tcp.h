@@ -56,6 +56,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /*-----------------------------------*/
 #ifndef TCP_LOCAL_PORT_RANGE_START
 #define TCP_LOCAL_PORT_RANGE_START 4096
@@ -907,7 +909,9 @@ extern struct tcp_pcb *tcp_tmp_pcb;      /* Only used for temporary storage. */
 
 #endif /* LWIP_TCP */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_TCP_H__ */
+

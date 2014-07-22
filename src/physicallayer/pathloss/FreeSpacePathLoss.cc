@@ -33,7 +33,7 @@ void FreeSpacePathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         alpha = par("alpha");
-        systemLoss = FWMath::dB2fraction(par("systemLoss"));
+        systemLoss = math::dB2fraction(par("systemLoss"));
     }
 }
 

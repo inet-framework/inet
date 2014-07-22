@@ -51,6 +51,10 @@
 
 namespace inet {
 
+namespace tcp {
+
+using namespace serializer;
+
 Define_Module(TCP_lwIP);
 
 TCP_lwIP::TCP_lwIP()
@@ -805,6 +809,8 @@ bool TCP_lwIP::handleOperationStage(LifecycleOperation *operation, int stage, ID
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

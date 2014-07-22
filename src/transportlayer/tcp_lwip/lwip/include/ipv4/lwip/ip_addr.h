@@ -40,6 +40,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 //extern "C" {
 #endif
@@ -177,7 +179,9 @@ u8_t ip_addr_isbroadcast(struct ip_addr *, struct netif *);
 //}
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* __LWIP_IP_ADDR_H__ */
 

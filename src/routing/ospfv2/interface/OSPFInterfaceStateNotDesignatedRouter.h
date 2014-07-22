@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class InterfaceStateNotDesignatedRouter : public InterfaceState
 {
@@ -31,7 +31,7 @@ class InterfaceStateNotDesignatedRouter : public InterfaceState
     virtual Interface::InterfaceStateType getState() const { return Interface::NOT_DESIGNATED_ROUTER_STATE; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

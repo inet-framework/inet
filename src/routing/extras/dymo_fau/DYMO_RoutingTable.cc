@@ -21,7 +21,7 @@
 #include <sstream>
 #include <algorithm>
 #include "DYMO_RoutingTable.h"
-#include "DYMO.h"
+#include "DYMOFau.h"
 
 namespace inet {
 

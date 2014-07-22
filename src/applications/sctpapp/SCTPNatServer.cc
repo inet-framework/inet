@@ -29,6 +29,8 @@
 
 namespace inet {
 
+using namespace sctp;
+
 Define_Module(SCTPNatServer);
 
 NatVector SCTPNatServer::natVector;

@@ -30,6 +30,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * TCP send queue that stores actual bytes.
  *
@@ -86,6 +88,8 @@ class INET_API TCPByteStreamRcvQueue : public TCPVirtualDataRcvQueue
      */
     virtual TCPVirtualDataRcvQueue::Region *createRegionFromSegment(TCPSegment *tcpseg);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

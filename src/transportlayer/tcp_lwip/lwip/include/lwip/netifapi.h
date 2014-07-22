@@ -39,6 +39,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -104,7 +106,8 @@ err_t netifapi_netif_common    ( struct netif *netif,
 
 #endif /* LWIP_NETIF_API */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_NETIFAPI_H__ */

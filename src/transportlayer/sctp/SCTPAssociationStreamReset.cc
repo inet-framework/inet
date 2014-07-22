@@ -20,6 +20,8 @@
 #include "SCTPCommand_m.h"
 
 namespace inet {
+
+namespace sctp {
 void SCTPAssociation::retransmitReset()
 {
     SCTPMessage *sctpmsg = new SCTPMessage();
@@ -279,5 +281,8 @@ void SCTPAssociation::resetSsns()
     EV_INFO << "SSns resetted on " << localAddr << "\n";
     sendIndicationToApp(SCTP_I_SEND_STREAMS_RESETTED);
 }
+
+} // namespace sctp
+
 } // namespace inet
 

@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 enum DISTR_TYPE { dt_normal, dt_uniform, dt_exponential, dt_histogram, dt_constant, dt_zipf };
 
 // Defines for the distribution names
@@ -293,6 +295,8 @@ class rdObjectFactory
      */
     rdObject *create(cXMLAttributeMap attributes);
 };
+
+} // namespace httptools
 
 } // namespace inet
 

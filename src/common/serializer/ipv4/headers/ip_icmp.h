@@ -37,6 +37,10 @@
 #ifndef __INET_IP_ICMP_H
 #define __INET_IP_ICMP_H
 
+namespace inet {
+
+namespace serializer {
+
 /*
  * Interface Control Message Protocol Definitions.
  * Per RFC 792, September 1981.
@@ -195,6 +199,10 @@ struct icmp
      (type) == ICMP_MASKREQ || (type) == ICMP_MASKREPLY)
 
 /*...*/
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_IP_ICMP_H
 

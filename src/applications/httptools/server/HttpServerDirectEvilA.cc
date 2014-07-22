@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 Define_Module(HttpServerDirectEvilA);
 
 void HttpServerDirectEvilA::initialize(int stage)
@@ -48,6 +50,8 @@ std::string HttpServerDirectEvilA::generateBody()
 
     return result;
 }
+
+} // namespace httptools
 
 } // namespace inet
 

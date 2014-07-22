@@ -26,6 +26,8 @@ namespace inet {
 
 class EtherFrame;
 
+namespace ieee80211 {
+
 /**
  * Used in 802.11 infrastructure mode: abstract base class for management frame
  * handling for access points (APs). This class extends Ieee80211MgmtBase
@@ -79,6 +81,8 @@ class INET_API Ieee80211MgmtAPBase : public Ieee80211MgmtBase
      */
     virtual void sendToUpperLayer(Ieee80211DataFrame *frame);
 };
+
+} // namespace ieee80211
 
 } // namespace inet
 

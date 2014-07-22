@@ -28,8 +28,11 @@
 
 namespace inet {
 
-class SCTPMessage;
 class SCTPCommand;
+
+namespace sctp {
+
+class SCTPMessage;
 class SCTPDataVariables;
 
 class INET_API SCTPSendStream : public cObject
@@ -55,6 +58,8 @@ class INET_API SCTPSendStream : public cObject
     inline void setStreamId(const uint16 id) { streamId = id; };
     void deleteQueue();
 };
+
+} // namespace sctp
 
 } // namespace inet
 

@@ -31,7 +31,7 @@
 #include "InterfaceEntry.h"
 #include "InterfaceTable.h"
 #include "IPv4Serializer.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
 
@@ -82,7 +82,7 @@ InterfaceEntry *ExtInterface::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: our module name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getFullName()).c_str());
+    e->setName(utils::stripnonalnum(getFullName()).c_str());
 
     e->setMtu(par("mtu"));
     e->setMulticast(true);
@@ -93,6 +93,8 @@ InterfaceEntry *ExtInterface::createInterfaceEntry()
 
 void ExtInterface::handleMessage(cMessage *msg)
 {
+    using namespace serializer;
+
     if (!isOperational) {
         handleMessageWhenDown(msg);
         return;

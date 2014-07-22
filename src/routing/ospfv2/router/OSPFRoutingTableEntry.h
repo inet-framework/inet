@@ -30,7 +30,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class RoutingTableEntry : public IPv4Route
 {
@@ -90,9 +90,9 @@ class RoutingTableEntry : public IPv4Route
     NextHop getNextHop(unsigned int index) const { return nextHops[index]; }
 };
 
-} // namespace OSPF
+std::ostream& operator<<(std::ostream& out, const RoutingTableEntry& entry);
 
-std::ostream& operator<<(std::ostream& out, const OSPF::RoutingTableEntry& entry);
+} // namespace ospf
 
 } // namespace inet
 

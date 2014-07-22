@@ -27,7 +27,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class NeighborState;
 class Interface;
@@ -199,9 +199,7 @@ class Neighbor
     void popFirstLinkStateRequest() { linkStateRequestList.pop_front(); }
 };
 
-} // namespace OSPF
-
-inline bool operator==(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
+inline bool operator==(Neighbor::DDPacketID leftID, Neighbor::DDPacketID rightID)
 {
     return (leftID.ddOptions.I_Init == rightID.ddOptions.I_Init) &&
            (leftID.ddOptions.M_More == rightID.ddOptions.M_More) &&
@@ -210,10 +208,12 @@ inline bool operator==(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPack
            (leftID.sequenceNumber == rightID.sequenceNumber);
 }
 
-inline bool operator!=(OSPF::Neighbor::DDPacketID leftID, OSPF::Neighbor::DDPacketID rightID)
+inline bool operator!=(Neighbor::DDPacketID leftID, Neighbor::DDPacketID rightID)
 {
     return !(leftID == rightID);
 }
+
+} // namespace ospf
 
 } // namespace inet
 

@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 HttpServerBase::HttpServerBase()
 {
     rdReplyDelay = NULL;
@@ -525,6 +527,8 @@ std::string HttpServerBase::readHtmlBodyFile(std::string file, std::string path)
     htmlfilestream.close();
     return body;
 }
+
+} // namespace httptools
 
 } // namespace inet
 

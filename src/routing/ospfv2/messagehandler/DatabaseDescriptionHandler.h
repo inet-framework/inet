@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class DatabaseDescriptionHandler : public IMessageHandler
 {
@@ -35,7 +35,7 @@ class DatabaseDescriptionHandler : public IMessageHandler
     void processPacket(OSPFPacket *packet, Interface *intf, Neighbor *neighbor);
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

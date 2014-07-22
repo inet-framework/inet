@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 /**
  * HttpServerDirect module.
  *
@@ -54,6 +56,8 @@ class INET_API HttpServer : public HttpServerBase, public TCPSocket::CallbackInt
     virtual void socketClosed(int connId, void *yourPtr);
     virtual void socketFailure(int connId, void *yourPtr, int code);
 };
+
+} // namespace httptools
 
 } // namespace inet
 

@@ -45,6 +45,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -219,7 +221,9 @@ err_t             netconn_gethostbyname(const char *name, struct ip_addr *addr);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} // namespace inet
 
 #endif /* LWIP_NETCONN */
 

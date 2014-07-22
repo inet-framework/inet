@@ -18,17 +18,10 @@
 #include <algorithm>    // std::min
 #include <platdep/sockets.h>
 
-#include "headers/defs.h"
-
-namespace INET6Fw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
-/*#include "headers/bsdint.h"
-   #include "headers/in.h"
- #include "headers/in_systm.h"*/
-#include "headers/ip6.h"
-};
-
 #include "IPv6Serializer.h"
+
+#include "headers/defs.h"
+#include "headers/ip6.h"
 
 #ifdef WITH_UDP
 #include "UDPSerializer.h"
@@ -56,8 +49,9 @@ namespace INET6Fw    // load headers into a namespace, to avoid conflicts with p
 // This in_addr field is defined as a macro in Windows and Solaris, which interferes with us
 #undef s_addr
 
-using namespace INET6Fw;
 namespace inet {
+
+namespace serializer {
 
 int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, unsigned int bufsize)
 {
@@ -101,14 +95,14 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 
 #ifdef WITH_SCTP
         case IP_PROT_SCTP:
-            packetLength = SCTPSerializer().serialize(check_and_cast<SCTPMessage *>(encapPacket),
+            packetLength = sctp::SCTPSerializer().serialize(check_and_cast<sctp::SCTPMessage *>(encapPacket),
                         buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES);
             break;
 #endif // ifdef WITH_SCTP
 
 #ifdef WITH_TCP_COMMON
         case IP_PROT_TCP:
-            packetLength = TCPSerializer().serialize(check_and_cast<TCPSegment *>(encapPacket),
+            packetLength = TCPSerializer().serialize(check_and_cast<tcp::TCPSegment *>(encapPacket),
                         buf + IPv6_HEADER_BYTES, bufsize - IPv6_HEADER_BYTES,
                         dgram->getSrcAddress(), dgram->getDestAddress());
             break;
@@ -123,6 +117,8 @@ int IPv6Serializer::serialize(const IPv6Datagram *dgram, unsigned char *buf, uns
 
     return packetLength + IPv6_HEADER_BYTES;
 }
+
+} // namespace serializer
 
 } // namespace inet
 

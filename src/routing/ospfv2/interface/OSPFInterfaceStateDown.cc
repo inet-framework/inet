@@ -27,43 +27,45 @@
 
 namespace inet {
 
-void OSPF::InterfaceStateDown::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
+namespace ospf {
+
+void InterfaceStateDown::processEvent(Interface *intf, Interface::InterfaceEventType event)
 {
-    if (event == OSPF::Interface::INTERFACE_UP) {
-        OSPF::MessageHandler *messageHandler = intf->getArea()->getRouter()->getMessageHandler();
+    if (event == Interface::INTERFACE_UP) {
+        MessageHandler *messageHandler = intf->getArea()->getRouter()->getMessageHandler();
         messageHandler->startTimer(intf->getHelloTimer(), truncnormal(0.1, 0.01));    // add some deviation to avoid startup collisions
         messageHandler->startTimer(intf->getAcknowledgementTimer(), intf->getAcknowledgementDelay());
         switch (intf->getType()) {
-            case OSPF::Interface::POINTTOPOINT:
-            case OSPF::Interface::POINTTOMULTIPOINT:
-            case OSPF::Interface::VIRTUAL:
-                changeState(intf, new OSPF::InterfaceStatePointToPoint, this);
+            case Interface::POINTTOPOINT:
+            case Interface::POINTTOMULTIPOINT:
+            case Interface::VIRTUAL:
+                changeState(intf, new InterfaceStatePointToPoint, this);
                 break;
 
-            case OSPF::Interface::NBMA:
+            case Interface::NBMA:
                 if (intf->getRouterPriority() == 0) {
-                    changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+                    changeState(intf, new InterfaceStateNotDesignatedRouter, this);
                 }
                 else {
-                    changeState(intf, new OSPF::InterfaceStateWaiting, this);
+                    changeState(intf, new InterfaceStateWaiting, this);
                     messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
 
                     long neighborCount = intf->getNeighborCount();
                     for (long i = 0; i < neighborCount; i++) {
-                        OSPF::Neighbor *neighbor = intf->getNeighbor(i);
+                        Neighbor *neighbor = intf->getNeighbor(i);
                         if (neighbor->getPriority() > 0) {
-                            neighbor->processEvent(OSPF::Neighbor::START);
+                            neighbor->processEvent(Neighbor::START);
                         }
                     }
                 }
                 break;
 
-            case OSPF::Interface::BROADCAST:
+            case Interface::BROADCAST:
                 if (intf->getRouterPriority() == 0) {
-                    changeState(intf, new OSPF::InterfaceStateNotDesignatedRouter, this);
+                    changeState(intf, new InterfaceStateNotDesignatedRouter, this);
                 }
                 else {
-                    changeState(intf, new OSPF::InterfaceStateWaiting, this);
+                    changeState(intf, new InterfaceStateWaiting, this);
                     messageHandler->startTimer(intf->getWaitTimer(), intf->getRouterDeadInterval());
                 }
                 break;
@@ -72,11 +74,13 @@ void OSPF::InterfaceStateDown::processEvent(OSPF::Interface *intf, OSPF::Interfa
                 break;
         }
     }
-    if (event == OSPF::Interface::LOOP_INDICATION) {
+    if (event == Interface::LOOP_INDICATION) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateLoopback, this);
+        changeState(intf, new InterfaceStateLoopback, this);
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

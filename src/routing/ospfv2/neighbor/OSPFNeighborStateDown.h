@@ -22,7 +22,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class NeighborStateDown : public NeighborState
 {
@@ -31,7 +31,7 @@ class NeighborStateDown : public NeighborState
     virtual Neighbor::NeighborStateType getState() const { return Neighbor::DOWN_STATE; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

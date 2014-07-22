@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
 {
   public:
@@ -35,6 +37,8 @@ class RTCPSenderReportPacket : public RTCPSenderReportPacket_Base
     virtual RTCPSenderReportPacket *dup() const { return new RTCPSenderReportPacket(*this); }
     // ADD CODE HERE to redefine and implement pure virtual functions from RTCPSenderReportPacket_Base
 };
+
+} // namespace rtp
 
 } // namespace inet
 

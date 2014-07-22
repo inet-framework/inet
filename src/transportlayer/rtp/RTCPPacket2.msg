@@ -21,7 +21,7 @@ cplusplus {{
 
 class cArray;
 
-namespace inet;
+namespace inet::rtp;
 
 packet RTCPPacket;
 

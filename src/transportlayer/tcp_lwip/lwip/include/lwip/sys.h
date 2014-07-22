@@ -45,9 +45,13 @@ extern "C" {
 
 namespace inet {
 
+namespace tcp {
+
 typedef u8_t sys_sem_t;
 typedef u8_t sys_mbox_t;
 struct sys_timeo {u8_t dummy;};
+
+} // namespace tcp
 
 } // namespace inet
 
@@ -83,6 +87,8 @@ struct sys_timeo {u8_t dummy;};
 #include "arch/sys_arch.h"
 
 namespace inet {
+
+namespace tcp {
 
 typedef void (* sys_timeout_handler)(void *arg);
 
@@ -145,11 +151,15 @@ void sys_mbox_fetch(sys_mbox_t mbox, void **msg);
 /* Thread functions. */
 sys_thread_t sys_thread_new(char *name, void (* thread)(void *arg), void *arg, int stacksize, int prio);
 
+} // namespace tcp
+
 } // namespace inet
 
 #endif /* NO_SYS */
 
 namespace inet {
+
+namespace tcp {
 
 /** Returns the current time in milliseconds. */
 u32_t sys_now(void);
@@ -251,7 +261,8 @@ void sys_arch_unprotect(sys_prot_t pval);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_SYS_H__ */

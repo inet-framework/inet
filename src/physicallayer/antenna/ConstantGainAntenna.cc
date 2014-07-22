@@ -32,7 +32,7 @@ void ConstantGainAntenna::initialize(int stage)
 {
     AntennaBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        gain = FWMath::dB2fraction(par("gain"));
+        gain = math::dB2fraction(par("gain"));
 }
 
 } // namespace physicallayer

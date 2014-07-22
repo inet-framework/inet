@@ -37,6 +37,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 Register_Class(Ieee80211eClassifier);
 
 Ieee80211eClassifier::Ieee80211eClassifier()
@@ -95,7 +97,7 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 #endif // ifdef WITH_UDP
 
 #ifdef WITH_TCP_COMMON
-    TCPSegment *tcp = dynamic_cast<TCPSegment *>(ipData->getEncapsulatedPacket());
+    tcp::TCPSegment *tcp = dynamic_cast<tcp::TCPSegment *>(ipData->getEncapsulatedPacket());
     if (tcp) {
         if (tcp->getDestPort() == 21 || tcp->getSrcPort() == 21)
             return 0;
@@ -110,6 +112,8 @@ int Ieee80211eClassifier::classifyPacket(cMessage *frame)
 
     return defaultAC;
 }
+
+} // namespace ieee80211
 
 } // namespace inet
 

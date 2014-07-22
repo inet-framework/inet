@@ -34,6 +34,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 #define SCTP_UDP_PORT    9899
 
 class SCTPAssociation;
@@ -255,6 +257,8 @@ class INET_API SCTP : public cSimpleModule
 
     void bindPortForUDP();
 };
+
+} // namespace sctp
 
 } // namespace inet
 

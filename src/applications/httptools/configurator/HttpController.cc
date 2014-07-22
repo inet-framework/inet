@@ -32,6 +32,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 Define_Module(HttpController);
 
 void HttpController::initialize(int stage)
@@ -490,6 +492,8 @@ HttpController::WebServerEntry *HttpController::__getRandomServerInfo()
     } while (en->activationTime > simTime());
     return en;
 }
+
+} // namespace httptools
 
 } // namespace inet
 

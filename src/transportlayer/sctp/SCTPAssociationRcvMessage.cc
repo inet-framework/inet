@@ -25,7 +25,6 @@
 #include "SCTPMessage_m.h"
 #include "SCTPQueue.h"
 #include "SCTPAlgorithm.h"
-#include "common.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -36,6 +35,8 @@
 #endif // ifdef WITH_IPv6
 
 namespace inet {
+
+namespace sctp {
 
 void SCTPAssociation::decreaseOutstandingBytes(SCTPDataVariables *chunk)
 {
@@ -3239,6 +3240,8 @@ void SCTPAssociation::moveChunkToOtherPath(SCTPDataVariables *chunk,
 
     statisticsPeerRwnd->record(state->peerRwnd);
 }
+
+} // namespace sctp
 
 } // namespace inet
 

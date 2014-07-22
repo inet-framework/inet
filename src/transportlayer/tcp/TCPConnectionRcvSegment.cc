@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 bool TCPConnection::tryFastRoute(TCPSegment *tcpseg)
 {
     // fast route processing not yet implemented
@@ -1352,6 +1354,8 @@ void TCPConnection::process_TIMEOUT_SYN_REXMIT(TCPEventCode& event)
 //    and for any outstanding calls, delete the TCB, enter the CLOSED
 //    state and return.
 //"
+
+} // namespace tcp
 
 } // namespace inet
 

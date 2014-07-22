@@ -30,6 +30,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 // Forward declarations:
 class TCPConnection;
 class TCPSegment;
@@ -203,6 +205,8 @@ class INET_API TCP : public cSimpleModule, public ILifecycle
     // called at shutdown/crash
     virtual void reset();
 };
+
+} // namespace tcp
 
 } // namespace inet
 

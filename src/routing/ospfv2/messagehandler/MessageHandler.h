@@ -30,7 +30,7 @@
 
 namespace inet {
 
-namespace OSPF {
+namespace ospf {
 
 class MessageHandler : public IMessageHandler
 {
@@ -66,7 +66,7 @@ class MessageHandler : public IMessageHandler
     bool authenticatePacket(OSPFPacket *packet) { return true; }
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

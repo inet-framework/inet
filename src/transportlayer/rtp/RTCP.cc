@@ -31,6 +31,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Define_Module(RTCP);
 
 simsignal_t RTCP::rcvdPkSignal = registerSignal("rcvdPk");
@@ -538,6 +540,8 @@ bool RTCP::handleOperationStage(LifecycleOperation *operation, int stage, IDoneC
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

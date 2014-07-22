@@ -133,6 +133,8 @@ MatrixCloudDelayer::~MatrixCloudDelayer()
 
 void MatrixCloudDelayer::initialize(int stage)
 {
+    using namespace xmlutils;
+
     CloudDelayerBase::initialize(stage);
 
     if (stage == INITSTAGE_LOCAL) {

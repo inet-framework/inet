@@ -24,7 +24,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "FWMath.h"    // for M_PI
+#include "INETMath.h"    // for M_PI
 #include "TraCIMobility.h"
 
 namespace inet {

@@ -9,6 +9,8 @@ namespace inet {
 
 class IPv4;
 
+namespace sctp {
+
 class INET_API SCTPNatHook : public cSimpleModule, INetfilter::IHook
 {
   protected:
@@ -32,6 +34,8 @@ class INET_API SCTPNatHook : public cSimpleModule, INetfilter::IHook
     IHook::Result datagramLocalInHook(INetworkDatagram *datagram, const InterfaceEntry *inIE);
     IHook::Result datagramLocalOutHook(INetworkDatagram *datagram, const InterfaceEntry *& outIE, L3Address& nextHopAddr);
 };
+
+} // namespace sctp
 
 } // namespace inet
 

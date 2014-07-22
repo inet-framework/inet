@@ -43,7 +43,7 @@
 #include <PostureTransition.h>
 #include <stdio.h>
 #include <string.h>
-#include <FWMath.h>
+#include <INETMath.h>
 #include <assert.h>
 
 namespace inet {
@@ -357,7 +357,7 @@ bool PostureTransition::isMarkovian(double **matrix)
             sumCol += matrix[i][j];
         }
 
-        if (!FWMath::close(sumCol, 1.0))
+        if (!math::close(sumCol, 1.0))
             return false;
     }
 
@@ -377,7 +377,7 @@ bool PostureTransition::isMarkovian(double *vec)
         sumCol += vec[i];
     }
 
-    if (!FWMath::close(sumCol, 1.0))
+    if (!math::close(sumCol, 1.0))
         return false;
     else
         return true;

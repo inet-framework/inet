@@ -25,30 +25,32 @@
 
 namespace inet {
 
-void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface *intf, OSPF::Interface::InterfaceEventType event)
+namespace ospf {
+
+void InterfaceStateWaiting::processEvent(Interface *intf, Interface::InterfaceEventType event)
 {
-    if ((event == OSPF::Interface::BACKUP_SEEN) ||
-        (event == OSPF::Interface::WAIT_TIMER))
+    if ((event == Interface::BACKUP_SEEN) ||
+        (event == Interface::WAIT_TIMER))
     {
         calculateDesignatedRouter(intf);
     }
-    if (event == OSPF::Interface::INTERFACE_DOWN) {
+    if (event == Interface::INTERFACE_DOWN) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateDown, this);
+        changeState(intf, new InterfaceStateDown, this);
     }
-    if (event == OSPF::Interface::LOOP_INDICATION) {
+    if (event == Interface::LOOP_INDICATION) {
         intf->reset();
-        changeState(intf, new OSPF::InterfaceStateLoopback, this);
+        changeState(intf, new InterfaceStateLoopback, this);
     }
-    if (event == OSPF::Interface::HELLO_TIMER) {
-        if (intf->getType() == OSPF::Interface::BROADCAST) {
+    if (event == Interface::HELLO_TIMER) {
+        if (intf->getType() == Interface::BROADCAST) {
             intf->sendHelloPacket(IPv4Address::ALL_OSPF_ROUTERS_MCAST);
         }
-        else {    // OSPF::Interface::NBMA
+        else {    // Interface::NBMA
             unsigned long neighborCount = intf->getNeighborCount();
-            int ttl = (intf->getType() == OSPF::Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
+            int ttl = (intf->getType() == Interface::VIRTUAL) ? VIRTUAL_LINK_TTL : 1;
             for (unsigned long i = 0; i < neighborCount; i++) {
-                OSPF::Neighbor *neighbor = intf->getNeighbor(i);
+                Neighbor *neighbor = intf->getNeighbor(i);
                 if (neighbor->getPriority() > 0) {
                     intf->sendHelloPacket(neighbor->getAddress(), ttl);
                 }
@@ -56,10 +58,12 @@ void OSPF::InterfaceStateWaiting::processEvent(OSPF::Interface *intf, OSPF::Inte
         }
         intf->getArea()->getRouter()->getMessageHandler()->startTimer(intf->getHelloTimer(), intf->getHelloInterval());
     }
-    if (event == OSPF::Interface::ACKNOWLEDGEMENT_TIMER) {
+    if (event == Interface::ACKNOWLEDGEMENT_TIMER) {
         intf->sendDelayedAcknowledgements();
     }
 }
+
+} // namespace ospf
 
 } // namespace inet
 

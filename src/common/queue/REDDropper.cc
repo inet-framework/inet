@@ -17,7 +17,7 @@
 //
 
 #include "REDDropper.h"
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
 
@@ -46,11 +46,11 @@ void REDDropper::initialize()
     cStringTokenizer maxthTokens(par("maxths"));
     cStringTokenizer maxpTokens(par("maxps"));
     for (int i = 0; i < numGates; ++i) {
-        minths[i] = minthTokens.hasMoreTokens() ? OPP_Global::atod(minthTokens.nextToken()) :
+        minths[i] = minthTokens.hasMoreTokens() ? utils::atod(minthTokens.nextToken()) :
             (i > 0 ? minths[i - 1] : 5.0);
-        maxths[i] = maxthTokens.hasMoreTokens() ? OPP_Global::atod(maxthTokens.nextToken()) :
+        maxths[i] = maxthTokens.hasMoreTokens() ? utils::atod(maxthTokens.nextToken()) :
             (i > 0 ? maxths[i - 1] : 50.0);
-        maxps[i] = maxpTokens.hasMoreTokens() ? OPP_Global::atod(maxpTokens.nextToken()) :
+        maxps[i] = maxpTokens.hasMoreTokens() ? utils::atod(maxpTokens.nextToken()) :
             (i > 0 ? maxps[i - 1] : 0.02);
 
         if (minths[i] < 0.0)

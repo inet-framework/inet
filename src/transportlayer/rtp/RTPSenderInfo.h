@@ -24,6 +24,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 /**
  * The class RTPSenderInfo is used by an RTP end system for storing information
  * about itself. With the stored information it can create a SenderReport.
@@ -134,6 +136,8 @@ class INET_API RTPSenderInfo : public RTPParticipantInfo
      */
     uint32 _bytesSent;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

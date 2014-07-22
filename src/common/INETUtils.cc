@@ -15,11 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "opp_utils.h"
+#include "INETUtils.h"
 
 namespace inet {
 
-namespace OPP_Global {
+namespace utils {
 
 std::string ltostr(long i)
 {
@@ -86,7 +86,33 @@ std::string vstringf(const char *fmt, va_list& args)
 
 #undef BUFLEN
 
-} // namespace OPP_Global
+cObject *createOneIfClassIsKnown(const char *className, const char *defaultNamespace)
+{
+    std::string ns = defaultNamespace;
+    do {
+        std::string::size_type found = ns.rfind("::");
+        if (found == std::string::npos)
+            found = 0;
+        ns.erase(found);
+        std::string cn = found ? ns + "::" + className : className;
+        cObject *ret = cObjectFactory::createOneIfClassIsKnown(cn.c_str());
+        if (ret)
+            return ret;
+    } while (!ns.empty());
+    return NULL;
+}
+
+cObject *createOne(const char *className, const char *defaultNamespace)
+{
+    cObject *ret = createOneIfClassIsKnown(className, defaultNamespace);
+    if (!ret)
+        throw cRuntimeError("Class \"%s\" not found -- perhaps its code was not linked in, "
+                            "or the class wasn't registered with Register_Class(), or in the case of "
+                            "modules and channels, with Define_Module()/Define_Channel()", className);
+    return ret;
+}
+
+} // namespace utils
 
 } // namespace inet
 

@@ -28,7 +28,7 @@
 namespace inet {
 
 //forward declarations:
-class TCPSegment;
+namespace tcp { class TCPSegment; }
 
 /**
  * Converts between TCPSegment and binary (network byte order) TCP header.
@@ -44,7 +44,7 @@ class TCPSerializer
      * Returns the length of data written into buffer.
      * TODO msg why not a const reference?
      */
-    int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
+    int serialize(const tcp::TCPSegment *source, unsigned char *destbuf, unsigned int bufsize);
 
     /**
      * Serializes a TCPSegment for transmission on the wire.
@@ -54,14 +54,14 @@ class TCPSerializer
      * TODO msg why not a const reference?
      * TODO pseudoheader vs IPv6, pseudoheder.len should calculated by the serialize(), etc
      */
-    int serialize(const TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
+    int serialize(const tcp::TCPSegment *source, unsigned char *destbuf, unsigned int bufsize,
             const L3Address& srcIp, const L3Address& destIp);
 
     /**
      * Puts a packet sniffed from the wire into a TCPSegment.
      * TODO dest why not reference?
      */
-    void parse(const unsigned char *srcbuf, unsigned int bufsize, TCPSegment *dest,
+    void parse(const unsigned char *srcbuf, unsigned int bufsize, tcp::TCPSegment *dest,
             bool withBytes);
 
     /**

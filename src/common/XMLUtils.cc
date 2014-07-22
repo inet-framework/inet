@@ -3,6 +3,8 @@
 
 namespace inet {
 
+namespace xmlutils {
+
 const cXMLElement *getUniqueChild(const cXMLElement *node, const char *name)
 {
     const cXMLElement *child = getUniqueChildIfExists(node, name);
@@ -167,6 +169,8 @@ bool getAttributeBoolValue(const cXMLElement *node, const char *attrName)
     const char *attrStr = getRequiredAttribute(*node, attrName);
     return parseBool(attrStr);
 }
+
+} // namespace xmlutils
 
 } // namespace inet
 

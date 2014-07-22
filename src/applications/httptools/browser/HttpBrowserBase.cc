@@ -35,6 +35,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 HttpBrowserBase::HttpBrowserBase()
 {
     m_bDisplayMessage = true;
@@ -589,6 +591,8 @@ void HttpBrowserBase::readScriptedEvents(const char *filename)
         scheduleAt(be.time, eventTimer);
     }
 }
+
+} // namespace httptools
 
 } // namespace inet
 

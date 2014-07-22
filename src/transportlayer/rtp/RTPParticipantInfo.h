@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 //Forward declarations:
 class ReceptionReport;
 class RTPPacket;
@@ -192,6 +194,8 @@ class INET_API RTPParticipantInfo : public RTPParticipantInfo_Base
      */
     int _silentIntervals;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

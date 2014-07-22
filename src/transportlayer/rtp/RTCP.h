@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 //Forward declarations:
 class RTCPByePacket;
 class RTCPCompoundPacket;
@@ -239,6 +241,8 @@ class INET_API RTCP : public cSimpleModule, public ILifecycle
     //statistics
     static simsignal_t rcvdPkSignal;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

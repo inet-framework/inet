@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,19 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include <sstream>
 
-#include "common.h"
+namespace inet::bgp;
 
-namespace inet {
-
-std::string intToString(int i)
+enum BGPSessionType
 {
-    std::ostringstream stream;
-    stream << i << std::flush;
-    std::string str(stream.str());
-    return str;
+    IGP = 0;
+    EGP = 1;
+    INCOMPLETE = 2;
 }
 
-} // namespace inet
+enum BGPPathSegmentType
+{
+    AS_SET = 1;
+    AS_SEQUENCE = 2;
+}
 

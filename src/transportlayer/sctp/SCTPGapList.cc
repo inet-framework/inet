@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace sctp {
+
 // ###### Constructor #######################################################
 SCTPSimpleGapList::SCTPSimpleGapList()
 {
@@ -380,6 +382,8 @@ bool SCTPGapList::updateGapList(const uint32 receivedTSN,
     }
     return newChunk;
 }
+
+} // namespace sctp
 
 } // namespace inet
 

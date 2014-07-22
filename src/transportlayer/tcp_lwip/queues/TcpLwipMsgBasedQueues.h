@@ -26,6 +26,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Send queue that manages "objects".
  */
@@ -197,6 +199,8 @@ class INET_API TcpLwipMsgBasedReceiveQueue : public TcpLwipReceiveQueue
   protected:
     long int bytesInQueueM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -26,7 +26,7 @@ void SNIRReceiverBase::initialize(int stage)
 {
     ReceiverBase::initialize(stage);
     if (stage == INITSTAGE_LOCAL)
-        snirThreshold = FWMath::dB2fraction(par("snirThreshold"));
+        snirThreshold = math::dB2fraction(par("snirThreshold"));
 }
 
 bool SNIRReceiverBase::areOverlappingBands(Hz carrierFrequency1, Hz bandwidth1, Hz carrierFrequency2, Hz bandwidth2) const

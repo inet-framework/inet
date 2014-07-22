@@ -30,7 +30,6 @@
 #include "IPv6RoutingTable.h"
 #include "InterfaceTable.h"
 #include "IPProtocolId_m.h"
-#include "common.h"
 
 #ifdef WITH_IPv4
 #include "IPv4InterfaceData.h"
@@ -41,8 +40,11 @@
 #endif // ifdef WITH_IPv6
 
 #include "UDPControlInfo_m.h"
+#include "INETUtils.h"
 
 namespace inet {
+
+namespace sctp {
 
 void SCTPAssociation::calculateRcvBuffer()
 {
@@ -164,6 +166,7 @@ const char *SCTPAssociation::eventName(const int32 event)
 #undef CASE
 }
 
+//TODO move this function to contrib
 const char *SCTPAssociation::indicationName(const int32 code)
 {
 #define CASE(x)    case x: \
@@ -263,11 +266,11 @@ SCTPAssociation *SCTPAssociation::cloneAssociation()
 {
     SCTPAssociation *assoc = new SCTPAssociation(sctpMain, appGateIndex, assocId, rt, ift);
     const char *queueClass = transmissionQ->getClassName();
-    assoc->transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
-    assoc->retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
+    assoc->transmissionQ = check_and_cast<SCTPQueue *>(inet::utils::createOne(queueClass));
+    assoc->retransmissionQ = check_and_cast<SCTPQueue *>(inet::utils::createOne(queueClass));
 
     const char *sctpAlgorithmClass = sctpAlgorithm->getClassName();
-    assoc->sctpAlgorithm = check_and_cast<SCTPAlgorithm *>(createOne(sctpAlgorithmClass));
+    assoc->sctpAlgorithm = check_and_cast<SCTPAlgorithm *>(inet::utils::createOne(sctpAlgorithmClass));
     assoc->sctpAlgorithm->setAssociation(assoc);
     assoc->sctpAlgorithm->initialize();
     assoc->state = assoc->sctpAlgorithm->createStateVariables();
@@ -421,16 +424,16 @@ void SCTPAssociation::initAssociation(SCTPOpenCommand *openCmd)
     EV_INFO << "SCTPAssociationUtil:initAssociation\n";
     // create send/receive queues
     const char *queueClass = openCmd->getQueueClass();
-    transmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
+    transmissionQ = check_and_cast<SCTPQueue *>(inet::utils::createOne(queueClass));
 
-    retransmissionQ = check_and_cast<SCTPQueue *>(createOne(queueClass));
+    retransmissionQ = check_and_cast<SCTPQueue *>(inet::utils::createOne(queueClass));
     inboundStreams = openCmd->getInboundStreams();
     outboundStreams = openCmd->getOutboundStreams();
     // create algorithm
     const char *sctpAlgorithmClass = openCmd->getSctpAlgorithmClass();
     if (!sctpAlgorithmClass || !sctpAlgorithmClass[0])
         sctpAlgorithmClass = sctpMain->par("sctpAlgorithmClass");
-    sctpAlgorithm = check_and_cast<SCTPAlgorithm *>(createOne(sctpAlgorithmClass));
+    sctpAlgorithm = check_and_cast<SCTPAlgorithm *>(inet::utils::createOne(sctpAlgorithmClass));
     sctpAlgorithm->setAssociation(this);
     sctpAlgorithm->initialize();
     // create state block
@@ -2773,6 +2776,8 @@ void SCTPAssociation::putInTransmissionQ(const uint32 tsn, SCTPDataVariables *ch
         }
     }
 }
+
+} // namespace sctp
 
 } // namespace inet
 

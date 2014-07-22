@@ -50,14 +50,14 @@ void InterpolatingAntenna::parseMap(std::map<double, double>& gainMap, const cha
     const char *firstGain = tokenizer.nextToken();
     if (!firstGain)
         throw cRuntimeError("Insufficient number of values");
-    gainMap.insert(std::pair<double, double>(0, FWMath::dB2fraction(atof(firstGain))));
-    gainMap.insert(std::pair<double, double>(2 * M_PI, FWMath::dB2fraction(atof(firstGain))));
+    gainMap.insert(std::pair<double, double>(0, math::dB2fraction(atof(firstGain))));
+    gainMap.insert(std::pair<double, double>(2 * M_PI, math::dB2fraction(atof(firstGain))));
     while (tokenizer.hasMoreTokens()) {
         const char *angle = tokenizer.nextToken();
         const char *gain = tokenizer.nextToken();
         if (!angle || !gain)
             throw cRuntimeError("Insufficient number of values");
-        gainMap.insert(std::pair<double, double>(atof(angle) * M_PI / 180, FWMath::dB2fraction(atof(gain))));
+        gainMap.insert(std::pair<double, double>(atof(angle) * M_PI / 180, math::dB2fraction(atof(gain))));
     }
 }
 

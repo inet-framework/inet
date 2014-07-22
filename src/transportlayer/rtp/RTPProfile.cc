@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Define_Module(RTPProfile);
 
 RTPProfile::RTPProfile()
@@ -298,6 +300,8 @@ RTPProfile::SSRCGate *RTPProfile::newSSRCGate(uint32 ssrc)
     _ssrcGates[ssrc] = ssrcGate;
     return ssrcGate;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

@@ -28,6 +28,8 @@ namespace inet {
 
 class InterfaceEntry;
 
+namespace ieee80211 {
+
 /**
  * Used in 802.11 infrastructure mode: handles management frames for
  * a station (STA). See corresponding NED file for a detailed description.
@@ -211,6 +213,8 @@ class INET_API Ieee80211MgmtSTA : public Ieee80211MgmtBase, protected cListener
     virtual void processDisassociateCommand(Ieee80211Prim_DisassociateRequest *ctrl);
     //@}
 };
+
+} // namespace ieee80211
 
 } // namespace inet
 

@@ -9,9 +9,9 @@
  *  Converted to MiXiM by Kapourniotis Theodoros
  */
 
-#include "opp_utils.h"
+#include "INETUtils.h"
 #include "LMacLayer.h"
-#include "FWMath.h"
+#include "INETMath.h"
 #include "LMacFrame_m.h"
 #include "InterfaceEntry.h"
 #include "SimpleLinkLayerControlInfo.h"
@@ -133,7 +133,7 @@ InterfaceEntry *LMacLayer::createInterfaceEntry()
     InterfaceEntry *e = new InterfaceEntry(this);
 
     // interface name: NIC module's name without special characters ([])
-    e->setName(OPP_Global::stripnonalnum(getParentModule()->getFullName()).c_str());
+    e->setName(utils::stripnonalnum(getParentModule()->getFullName()).c_str());
 
     // data rate
     e->setDatarate(bitrate);

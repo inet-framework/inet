@@ -21,6 +21,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 Register_Class(RTPInnerPacket);
 
 std::string RTPInnerPacket::info() const
@@ -159,6 +161,8 @@ void RTPInnerPacket::setDataInPkt(RTPPacket *packet, IPv4Address address, int po
     port_var = port;
     encapsulate(packet);
 }
+
+} // namespace rtp
 
 } // namespace inet
 

@@ -5,12 +5,12 @@
 <checker>
     <message occurence="1"/> <!-- ESTABLISHED -->
     <message occurence="1">
-        <fieldValue name="className" value="inet::BGPOpenMessage"/>
+        <fieldValue name="className" value="inet::bgp::BGPOpenMessage"/>
     </message>
     <message occurence="1">
-        <fieldValue name="className" value="inet::BGPKeepAliveMessage"/>
+        <fieldValue name="className" value="inet::bgp::BGPKeepAliveMessage"/>
     </message>
     <message occurence="1">
-        <fieldValue name="className" value="inet::BGPUpdate"/>
+        <fieldValue name="className" value="inet::bgp::BGPUpdate"/>
     </message>
 </checker>

@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 // forward declarations:
 class TcpLwipConnection;
 class TCPSegment;
@@ -213,6 +215,8 @@ class INET_API TcpLwipReceiveQueue : public cObject
   protected:
     TcpLwipConnection *connM;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

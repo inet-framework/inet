@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 //Forward declarations:
 class RTPInnerPacket;
 
@@ -212,6 +214,8 @@ class INET_API RTPProfile : public cSimpleModule
      */
     bool _autoOutputFileNames;
 };
+
+} // namespace rtp
 
 } // namespace inet
 

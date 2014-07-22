@@ -22,7 +22,7 @@
 #include <string>
 
 #include "Ns2MotionMobility.h"
-#include "FWMath.h"
+#include "INETMath.h"
 
 #ifndef atoi
 #include <cstdlib>

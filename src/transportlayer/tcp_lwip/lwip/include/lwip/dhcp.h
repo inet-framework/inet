@@ -113,6 +113,8 @@ PACK_STRUCT_END
 
 namespace inet {
 
+namespace tcp {
+
 #endif
 
 /** start DHCP configuration */
@@ -246,7 +248,8 @@ void dhcp_fine_tmr(void);
 
 #endif /* LWIP_DHCP */
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /*__LWIP_DHCP_H__*/

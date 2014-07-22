@@ -34,6 +34,8 @@
 
 namespace inet {
 
+using namespace ieee80211;
+
 namespace inetmanet {
 
 unsigned int DSRUU::confvals[CONFVAL_MAX];

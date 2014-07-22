@@ -8,6 +8,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * State variables for TCPVegas.
  */
@@ -74,6 +76,8 @@ class INET_API TCPVegas : public TCPBaseAlg
 
     virtual void segmentRetransmitted(uint32 fromseq, uint32 toseq);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

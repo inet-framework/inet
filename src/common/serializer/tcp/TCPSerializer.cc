@@ -27,12 +27,16 @@
 
 namespace inet {
 
-namespace INETFw    // load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
-{
+namespace serializer {
+
+// load headers into a namespace, to avoid conflicts with platform definitions of the same stuff
 #include "headers/bsdint.h"
 #include "headers/in.h"
 #include "headers/in_systm.h"
-};
+
+} // namespace serializer
+
+} // namespace inet
 
 #if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 #include <netinet/in.h>    // htonl, ntohl, ...
@@ -41,7 +45,10 @@ namespace INETFw    // load headers into a namespace, to avoid conflicts with pl
 //#include <arpa/inet.h>
 #endif // if !defined(_WIN32) && !defined(__WIN32__) && !defined(WIN32) && !defined(__CYGWIN__) && !defined(_WIN64)
 
-using namespace INETFw;
+namespace inet {
+
+using namespace serializer;
+using namespace tcp;
 
 int TCPSerializer::serialize(const TCPSegment *tcpseg,
         unsigned char *buf, unsigned int bufsize)

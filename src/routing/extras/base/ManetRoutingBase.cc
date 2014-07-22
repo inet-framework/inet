@@ -40,6 +40,8 @@
 
 namespace inet {
 
+using namespace ieee80211;
+
 namespace inetmanet {
 
 #define IP_DEF_TTL 32

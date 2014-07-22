@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace rtp {
+
 //
 // SenderReport
 //
@@ -65,6 +67,8 @@ void ReceptionReport::dump(std::ostream& os) const
     os << "  lastSR = " << lastSR_var << endl;
     os << "  delaySinceLastSR = " << delaySinceLastSR_var << endl;
 }
+
+} // namespace rtp
 
 } // namespace inet
 

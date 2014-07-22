@@ -37,6 +37,10 @@
 #ifndef __INET_IN_H
 #define __INET_IN_H
 
+namespace inet {
+
+namespace serializer {
+
 #ifdef s_addr
 #undef s_addr
 #endif // ifdef s_addr
@@ -60,6 +64,10 @@ struct in_addr
 };
 
 /*...*/
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_IN_H
 

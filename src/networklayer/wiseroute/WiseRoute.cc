@@ -28,7 +28,7 @@
 #include <algorithm>
 
 #include "WiseRoute.h"
-#include "FWMath.h"
+#include "INETMath.h"
 #include "IL3AddressType.h"
 #include "MACAddress.h"
 #include "L3AddressResolver.h"
@@ -50,7 +50,7 @@ void WiseRoute::initialize(int stage)
         arp = check_and_cast<IARP *>(getParentModule()->getSubmodule("arp"));
         headerLength = par("headerLength");
         rssiThreshold = par("rssiThreshold").doubleValue();
-        rssiThreshold = FWMath::dBm2mW(rssiThreshold);
+        rssiThreshold = math::dBm2mW(rssiThreshold);
         routeFloodsInterval = par("routeFloodsInterval");
 
         floodSeqNumber = 0;

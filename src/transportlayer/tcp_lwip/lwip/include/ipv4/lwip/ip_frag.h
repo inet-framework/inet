@@ -42,6 +42,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -75,7 +77,9 @@ err_t ip_frag(struct pbuf *p, struct netif *netif, struct ip_addr *dest);
 }
 #endif
 
-} //namespace
+} // namespace tcp
+
+} //namespace inet
 
 
 #endif /* __LWIP_IP_FRAG_H__ */

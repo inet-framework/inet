@@ -54,6 +54,8 @@ extern "C" {
 
 namespace inet {
 
+namespace tcp {
+
 PACK_STRUCT_BEGIN
 struct udp_hdr {
   PACK_STRUCT_FIELD(u16_t src);
@@ -62,6 +64,8 @@ struct udp_hdr {
   PACK_STRUCT_FIELD(u16_t chksum);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
+
+} // namespace tcp
 
 } // namespace inet
 
@@ -75,6 +79,8 @@ PACK_STRUCT_END
 #define UDP_FLAGS_CONNECTED  0x04U
 
 namespace inet {
+
+namespace tcp {
 
 struct udp_pcb {
 /* Common members of all PCB types */
@@ -152,6 +158,8 @@ void udp_debug_print(struct udp_hdr *udphdr);
 #else
 #define udp_debug_print(udphdr)
 #endif
+
+} // namespace tcp
 
 } // namespace inet
 

@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Retransmission data for SACK.
  */
@@ -179,6 +181,8 @@ class INET_API TCPSACKRexmitQueue
      */
     bool checkQueue() const;
 };
+
+} // namespace tcp
 
 } // namespace inet
 

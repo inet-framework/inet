@@ -20,6 +20,8 @@
 
 namespace inet {
 
+namespace ieee80211 {
+
 // frame lengths in bits
 const unsigned int LENGTH_RTS = 160;    //bits
 const unsigned int LENGTH_CTS = 112;    //bits
@@ -79,6 +81,8 @@ const double RED_PHY_HEADER_DURATION = 0.000020;
 
 /* @brief Length of PLCP header and preamble */
 const double PHY_HEADER_LENGTH = 192;
+
+} // namespace ieee80211
 
 } // namespace inet
 

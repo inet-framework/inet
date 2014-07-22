@@ -26,7 +26,7 @@ enum messageKind {
     SIGNAL_KIND
 };
 
-namespace ConstType {
+namespace mpls_constants {
 
 const char libDataMarker[] = "In-lbl       In-intf     Out-lbl       Out-intf";
 const char prtDataMarker[] = "Prefix            Pointer";
@@ -40,7 +40,8 @@ const int ldp_port = 646;
 
 const int LDP_KIND = 10;
 const int HOW_KIND = 50;
-};
+
+} // namespace mpls_constants
 
 } // namespace inet
 

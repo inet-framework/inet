@@ -18,6 +18,10 @@
 #ifndef __INET_BSDINT_H
 #define __INET_BSDINT_H
 
+namespace inet {
+
+namespace serializer {
+
 // non-stdc integer type names that occur in BSD headers
 
 typedef uint8_t u_int8_t;
@@ -34,6 +38,10 @@ typedef unsigned char u_char;
 typedef unsigned short u_short;
 typedef unsigned int u_int;
 typedef unsigned long u_long;
+
+} // namespace serializer
+
+} // namespace inet
 
 #endif // ifndef __INET_BSDINT_H
 

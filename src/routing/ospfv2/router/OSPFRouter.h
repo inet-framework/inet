@@ -30,11 +30,11 @@
 
 namespace inet {
 
+namespace ospf {
+
 /**
  * All OSPF classes are in this namespace.
  */
-namespace OSPF {
-
 /**
  * Represents the full OSPF data structure as laid out in RFC2328.
  */
@@ -218,7 +218,7 @@ class Router
      * @param advertise    [out] Whether the advertise flag is set in the returned
      *                           preconfigured address range.
      * @return The containing preconfigured address range if found,
-     *         OSPF::NULL_IPV4ADDRESSRANGE otherwise.
+     *         NULL_IPV4ADDRESSRANGE otherwise.
      */
     IPv4AddressRange getContainingAddressRange(const IPv4AddressRange& addressRange, bool *advertise = NULL) const;
 
@@ -262,7 +262,7 @@ class Router
      *                                used instead.
      * @return The preferred RoutingTableEntry, or NULL if no such entry exists.
      * @sa RFC2328 Section 16.4. points(1) through(3)
-     * @sa OSPF::Area::originateSummaryLSA
+     * @sa Area::originateSummaryLSA
      */
     RoutingTableEntry *getPreferredEntry(const OSPFLSA& lsa, bool skipSelfOriginated, std::vector<RoutingTableEntry *> *fromRoutingTable = NULL);
 
@@ -310,11 +310,11 @@ class Router
      *                                   Type2 external metric.
      * @return the LinkStateID for the destination.
      * @sa RFC2328 Appendix E.
-     * @sa OSPF::Area::getUniqueLinkStateID
+     * @sa Area::getUniqueLinkStateID
      */
     LinkStateID getUniqueLinkStateID(const IPv4AddressRange& destination,
             Metric destinationCost,
-            OSPF::ASExternalLSA *& lsaToReoriginate,
+            ASExternalLSA *& lsaToReoriginate,
             bool externalMetricIsType2 = false) const;
 
     /**
@@ -342,7 +342,7 @@ class Router
      * @param inRoutingTable [in] The routing table to look in.
      * @param asbrRouterID   [in] The ID of the AS Boundary Router to look for.
      */
-    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, OSPF::RouterID routerID) const;
+    bool hasRouteToASBoundaryRouter(const std::vector<RoutingTableEntry *>& inRoutingTable, RouterID routerID) const;
 
     /**
      * Returns an std::vector of routes leading to the AS Boundary Router
@@ -352,7 +352,7 @@ class Router
      * @param asbrRouterID     [in] The ID of the AS Boundary Router to look for.
      */
     std::vector<RoutingTableEntry *>
-    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, OSPF::RouterID routerID) const;
+    getRoutesToASBoundaryRouter(const std::vector<RoutingTableEntry *>& fromRoutingTable, RouterID routerID) const;
 
     /**
      * Prunes the input std::vector of RoutingTableEntries according to the RFC2328
@@ -371,7 +371,7 @@ class Router
     RoutingTableEntry *selectLeastCostRoutingEntry(std::vector<RoutingTableEntry *>& entries) const;
 };
 
-} // namespace OSPF
+} // namespace ospf
 
 } // namespace inet
 

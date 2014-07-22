@@ -31,8 +31,11 @@
 #include "TCPSACKRexmitQueue.h"
 #include "TCPReceiveQueue.h"
 #include "TCPAlgorithm.h"
+#include "INETUtils.h"
 
 namespace inet {
+
+namespace tcp {
 
 //
 // helper functions
@@ -199,11 +202,11 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     conn->transferMode = transferMode;
     // following code to be kept consistent with initConnection()
     const char *sendQueueClass = sendQueue->getClassName();
-    conn->sendQueue = check_and_cast<TCPSendQueue *>(createOne(sendQueueClass));
+    conn->sendQueue = check_and_cast<TCPSendQueue *>(inet::utils::createOne(sendQueueClass));
     conn->sendQueue->setConnection(conn);
 
     const char *receiveQueueClass = receiveQueue->getClassName();
-    conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(createOne(receiveQueueClass));
+    conn->receiveQueue = check_and_cast<TCPReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
     conn->receiveQueue->setConnection(conn);
 
     // create SACK retransmit queue
@@ -211,7 +214,7 @@ TCPConnection *TCPConnection::cloneListeningConnection()
     rexmitQueue->setConnection(this);
 
     const char *tcpAlgorithmClass = tcpAlgorithm->getClassName();
-    conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
+    conn->tcpAlgorithm = check_and_cast<TCPAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
     conn->tcpAlgorithm->setConnection(conn);
 
     conn->state = conn->tcpAlgorithm->getStateVariables();
@@ -338,7 +341,7 @@ void TCPConnection::initConnection(TCPOpenCommand *openCmd)
     if (!tcpAlgorithmClass || !tcpAlgorithmClass[0])
         tcpAlgorithmClass = tcpMain->par("tcpAlgorithmClass");
 
-    tcpAlgorithm = check_and_cast<TCPAlgorithm *>(createOne(tcpAlgorithmClass));
+    tcpAlgorithm = check_and_cast<TCPAlgorithm *>(inet::utils::createOne(tcpAlgorithmClass));
     tcpAlgorithm->setConnection(this);
 
     // create state block
@@ -1491,6 +1494,8 @@ bool TCPConnection::isSendQueueEmpty()
 {
     return sendQueue->getBytesAvailable(state->snd_nxt) == 0;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

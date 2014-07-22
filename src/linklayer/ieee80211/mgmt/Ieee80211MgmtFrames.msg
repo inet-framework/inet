@@ -22,18 +22,17 @@ cplusplus {{
 #include "MACAddress.h"
 #include "Ieee80211Frame_m.h"
 }}
+
 class noncobject MACAddress;
-namespace inet;
+
+namespace inet::ieee80211;
 
 cplusplus {{
 #define PREQElemLen 11
 #define PERRElemLen 13
 }}
 
-
-
 packet Ieee80211ManagementFrame;
-
 
 //
 // Capability Information field format. This field is not used
@@ -446,3 +445,4 @@ packet Ieee80211ActionFrame extends Ieee80211ManagementFrame
     byteLength = 28+getBody().getBodyLength();
     Ieee80211ActionFrameBody body;
 }
+

@@ -23,6 +23,8 @@
 
 namespace inet {
 
+namespace httptools {
+
 /**
  * An evil attacker server demonstration - type A.
  *
@@ -50,6 +52,8 @@ class INET_API HttpServerEvilA : public HttpServer
     virtual void initialize(int stage);
     virtual std::string generateBody();
 };
+
+} // namespace httptools
 
 } // namespace inet
 

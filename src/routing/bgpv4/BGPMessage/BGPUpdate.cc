@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace bgp {
+
 Register_Class(BGPUpdateMessage)
 
 void BGPUpdateMessage::setWithdrawnRoutesArraySize(unsigned int size)
@@ -64,6 +66,8 @@ void BGPUpdateMessage::setNLRI(const BGPUpdateNLRI& NLRI_var)
     setByteLength(getByteLength() + 5);    //5 = NLRI (length (1) + IPv4Address (4))
     BGPUpdateMessage_Base::NLRI_var = NLRI_var;
 }
+
+} // namespace bgp
 
 } // namespace inet
 

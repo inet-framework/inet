@@ -51,10 +51,15 @@
 #include "LifecycleOperation.h"
 #include "ModuleAccess.h"
 #include "NodeStatus.h"
+#include "INETUtils.h"
 
 #include <sim_errno.h>
 
 namespace inet {
+
+using namespace serializer;
+
+namespace tcp {
 
 Define_Module(TCP_NSC);
 
@@ -435,11 +440,11 @@ void TCP_NSC::handleIpInputMessage(TCPSegment *tcpsegP)
 
                 // following code to be kept consistent with initConnection()
                 const char *sendQueueClass = c.sendQueueM->getClassName();
-                conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(createOne(sendQueueClass));
+                conn->sendQueueM = check_and_cast<TCP_NSC_SendQueue *>(inet::utils::createOne(sendQueueClass));
                 conn->sendQueueM->setConnection(conn);
 
                 const char *receiveQueueClass = c.receiveQueueM->getClassName();
-                conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(createOne(receiveQueueClass));
+                conn->receiveQueueM = check_and_cast<TCP_NSC_ReceiveQueue *>(inet::utils::createOne(receiveQueueClass));
                 conn->receiveQueueM->setConnection(conn);
                 EV_DETAIL << this << ": NSC: got accept!\n";
 
@@ -1143,6 +1148,8 @@ bool TCP_NSC::handleOperationStage(LifecycleOperation *operation, int stage, IDo
     throw cRuntimeError("Unsupported lifecycle operation '%s'", operation->getClassName());
     return true;
 }
+
+} // namespace tcp
 
 } // namespace inet
 

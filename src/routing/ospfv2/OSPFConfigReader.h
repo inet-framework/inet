@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace ospf {
+
 /**
  * Configuration reader for the OSPF module.
  */
@@ -37,7 +39,7 @@ class INET_API OSPFConfigReader
   private:
     cModule *ospfModule;
     IInterfaceTable *ift;    // provides access to the interface table
-    OSPF::Router *ospfRouter;    // data structure to fill in
+    Router *ospfRouter;    // data structure to fill in
 
     cPar& par(const char *name) const { return ospfModule->par(name); }
     int getIntAttrOrPar(const cXMLElement& ifConfig, const char *name) const;
@@ -60,18 +62,18 @@ class INET_API OSPFConfigReader
      * @param routerNode [in]  XML node describing this router.
      * @param areaList   [out] A set of OSPF Areas connected to this router.
      */
-    void getAreaListFromXML(const cXMLElement& routerNode, std::set<OSPF::AreaID>& areaList) const;
+    void getAreaListFromXML(const cXMLElement& routerNode, std::set<AreaID>& areaList) const;
 
     /**
      * Loads basic configuration information for a given area from the config XML.
      * Reads the configured address ranges, and whether this Area should be handled as a stub Area.
      */
-    void loadAreaFromXML(const cXMLElement& asConfig, OSPF::AreaID areaID);
+    void loadAreaFromXML(const cXMLElement& asConfig, AreaID areaID);
 
     /**
      * Loads authenticationType and authenticationKey attributes for a router interface
      */
-    void loadAuthenticationConfig(OSPF::Interface *intf, const cXMLElement& ifConfig);
+    void loadAuthenticationConfig(Interface *intf, const cXMLElement& ifConfig);
 
     /**
      * Loads OSPF configuration information for a router interface.
@@ -104,8 +106,10 @@ class INET_API OSPFConfigReader
      * Loads the configuration of the OSPF data structure from the config XML.
      * Returns true if the configuration was successfully loaded.
      */
-    bool loadConfigFromXML(cXMLElement *asConfig, OSPF::Router *ospfRouter);
+    bool loadConfigFromXML(cXMLElement *asConfig, Router *ospfRouter);
 };
+
+} // namespace ospf
 
 } // namespace inet
 

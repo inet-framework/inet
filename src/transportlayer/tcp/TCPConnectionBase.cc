@@ -29,6 +29,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 TCPStateVariables::TCPStateVariables()
 {
     // set everything to 0 -- real init values will be set manually
@@ -805,6 +807,8 @@ void TCPConnection::stateEntered(int state, int oldState, TCPEventCode event)
             break;
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 

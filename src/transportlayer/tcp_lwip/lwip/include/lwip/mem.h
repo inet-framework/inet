@@ -44,6 +44,8 @@ extern "C" {
 
 namespace inet {
 
+namespace tcp {
+
 typedef size_t mem_size_t;
 
 /* aliases for C library malloc() */
@@ -106,7 +108,9 @@ void  mem_free(void *mem);
 }
 #endif
 
-} //namespace
+} // namespace tcp
 
+} // namespace inet
 
 #endif /* __LWIP_MEM_H__ */
+
