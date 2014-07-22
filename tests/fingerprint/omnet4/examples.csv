@@ -99,6 +99,9 @@
 # /examples/inet/hierarchical/,        -f omnetpp.ini -c Hosts9000 -r 0,              1s,              0000-0000    # cpu time limit exceeded during 0s simtime
 
 /examples/inet/hierarchical99/,      -f omnetpp.ini -c General -r 0,                10000s,          1e52-f085
+
+/examples/inet/ipv4hook/,            -f omnetpp.ini -c General -r 0,                100s,            4cfb-4572
+
 /examples/inet/ipv4largenet/,        -f omnetpp.ini -c IPv4LargeNet -r 0,           20s,             3485-6be4
 
 /examples/inet/kidsnw1/,             -f omnetpp.ini -c General -r 0,                1000s,           8db1-70a2

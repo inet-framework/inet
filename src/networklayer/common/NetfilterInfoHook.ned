@@ -16,8 +16,8 @@
 //
 
 
-package inet.networklayer.ipv4;
+package inet.networklayer.common;
 
-simple IPv4HookInfo
+simple NetfilterInfoHook
 {
 }

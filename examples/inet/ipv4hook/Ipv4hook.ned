@@ -4,8 +4,8 @@
 
 package inet.examples.inet.ipv4hook;
 
+import inet.networklayer.common.NetfilterInfoHook;
 import inet.networklayer.configurator.ipv4.IPv4NetworkConfigurator;
-import inet.networklayer.ipv4.IPv4HookInfo;
 import inet.node.inet.Router;
 import inet.node.inet.StandardHost;
 import ned.DatarateChannel;
@@ -14,7 +14,7 @@ import ned.DatarateChannel;
 module MyHost extends StandardHost
 {
     submodules:
-        iPv4HookInfo: IPv4HookInfo {
+        iPv4HookInfo: NetfilterInfoHook {
             @display("p=626,265");
         }
 }
@@ -22,7 +22,7 @@ module MyHost extends StandardHost
 module MyRouter extends Router
 {
     submodules:
-        iPv4HookInfo: IPv4HookInfo {
+        iPv4HookInfo: NetfilterInfoHook {
             @display("p=524,98");
         }
 }
@@ -49,7 +49,7 @@ network Ipv4hook
         router: MyRouter {
             @display("p=157,197");
         }
-        iPv4NetworkConfigurator: IPv4NetworkConfigurator {
+        configurator: IPv4NetworkConfigurator {
             @display("p=112,278");
         }
     connections:
