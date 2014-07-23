@@ -117,9 +117,9 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
         }
     }
     if (tE == 0)
-        normal1 = Coord(0,0,0);
+        normal1 = Coord::NIL;
     if (tL == 1)
-        normal2 = Coord(0,0,0);
+        normal2 = Coord::NIL;
     intersection1 = p0 + segmentDirection * tE;
     intersection2 = p0 + segmentDirection * tL;
     return true;

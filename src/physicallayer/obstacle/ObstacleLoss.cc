@@ -133,7 +133,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
     #endif
                 const Material *material = object->getMaterial();
                 totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
-                if (normal1 != Coord(0,0,0)) {
+                if (!normal1.isUnspecified()) {
                     double angle1 = (intersection1 - intersection2).angle(normal1);
                     totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
                 }
@@ -180,7 +180,7 @@ void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
 #endif
         const Material *material = physicalObject->getMaterial();
         totalLoss *= obstacleLoss->computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
-        if (normal1 != Coord(0,0,0)) {
+        if (!normal1.isUnspecified()) {
             double angle1 = (intersection1 - intersection2).angle(normal1);
             totalLoss *= obstacleLoss->computeReflectionLoss(obstacleLoss->medium->getMaterial(), material, angle1);
         }
