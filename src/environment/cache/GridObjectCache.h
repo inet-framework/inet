@@ -40,6 +40,7 @@ class GridObjectCache : public PhysicalEnvironment::IObjectCache, public cSimple
     public:
         bool insertObject(const PhysicalObject *object);
         void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
+        void buildCache() {}
         GridObjectCache();
         virtual ~GridObjectCache();
 };

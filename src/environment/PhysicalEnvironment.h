@@ -35,7 +35,7 @@ class INET_API PhysicalEnvironment : public cModule
         public:
             virtual bool insertObject(const PhysicalObject *object) = 0;
             virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
-            virtual void buildCache() {}
+            virtual void buildCache() = 0;
     };
     struct Box
     {
