@@ -112,9 +112,8 @@ void GridNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *
 {
     double radius = range + (maxSpeed * refillPeriod);
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();
-    GridNeighborCacheVisitor *visitor = new GridNeighborCacheVisitor(radioMedium, transmitter, frame);
-    grid->rangeQuery(transmitterPos, radius, visitor);
-    delete visitor;
+    GridNeighborCacheVisitor visitor(radioMedium, transmitter, frame);
+    grid->rangeQuery(transmitterPos, radius, &visitor);
 }
 
 void GridNeighborCache::GridNeighborCacheVisitor::visit(const cObject *radio) const

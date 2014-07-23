@@ -95,10 +95,10 @@ bool BVHTree::intersectWithLineSegment(const LineSegment& lineSegment) const
     Coord size = Coord(boundingMax.x - boundingMin.x, boundingMax.y - boundingMin.y, boundingMax.z - boundingMin.z);
     Coord p0 = lineSegment.getPoint1() - center;
     Coord p1 = lineSegment.getPoint2() - center;
-    Cuboid *cuboid = new Cuboid(size);
+    Cuboid cuboid(size);
     LineSegment translatedLineSegment(p0, p1);
     Coord intersection1, intersection2, normal1, normal2; // TODO: implement a bool computeIntersection(lineSegment) function
-    if (cuboid->computeIntersection(translatedLineSegment, intersection1, intersection2, normal1, normal2))
+    if (cuboid.computeIntersection(translatedLineSegment, intersection1, intersection2, normal1, normal2))
         return true;
     return false;
 }
