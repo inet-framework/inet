@@ -32,7 +32,7 @@ class INET_API PhysicalObject : public cNamedObject
 {
   protected:
     const int id;
-    Coord position;
+    Coord position; // center of the object's bounding box
     EulerAngles orientation;
     const Shape *shape;
     const Material *material;
