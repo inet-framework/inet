@@ -1,3 +1,5 @@
+2014-06-12  ------ inet-2.4.0 released ------
+
 2014-05-05  Rudolf Hornig
 
 	Ieee802.1d: Added missing INET_API macros

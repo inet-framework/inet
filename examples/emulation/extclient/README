@@ -6,6 +6,10 @@ can be used to run ICMP and SCTP as echo server or discard server.
 
 To run this example, some parameters have to be adjusted in the omnetpp.ini.
 
+- Make sure that you have libpcap-dev installed on your machine. Check whether
+  pcap library is correctly detected in the main OMNeT++ ./configure script.
+- Enable PCAP support in inet/src/makefrag and regenerate the makefile
+  (i.e. run: make makefiles)
 - Set **.ext[0].device to the device name of the interface of the computer
   running the simulation.
 - On your server, add a route to the host 10.1.1.1 and set the gateway to the

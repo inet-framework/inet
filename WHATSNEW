@@ -1,7 +1,7 @@
 Recent changes in the INET Framework
 ====================================
 
-INET-2.4.0 (June 02, 2014)
+INET-2.4.0 (June 12, 2014)
 --------------------------
 
    - Added support for link break detection in IdealWireless 
@@ -9,6 +9,7 @@ INET-2.4.0 (June 02, 2014)
    - VoIPStream updated to match the latest version of ffmpeg library.
    - Added packet printers that can dump packet data in OMNeT++ 4.5/Tkenv
      in the packet trace window.
+   - Fixed non-conformant 802.11 WAITACK timeout computation
 
 Added new routing protocol:
 
@@ -125,6 +126,7 @@ Other, smaller changes:
   - IPv4Route/IPv6Route: added administrative distance field
   - Added IPv6 header serializer (so ext interfaces can be used with IPv6, too)
   - Invalid access of message pointers fixed in: OSPF, SCTP, DHCP, PingApp
+
   - Battery: code review, small fixes.
   - Revised init stages in all modules
   - Many smaller fixes and improvements (see the ChangeLog files for further detail.)
