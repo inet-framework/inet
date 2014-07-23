@@ -898,6 +898,8 @@ typedef milli<kg>::type g;
 typedef milli<g>::type mg;
 typedef milli<s>::type ms;
 typedef milli<W>::type mW;
+typedef kilo<Hz>::type kHz;
+typedef mega<Hz>::type MHz;
 
 } // namespace units
 
@@ -908,6 +910,8 @@ UNIT_DISPLAY_NAME(units::g, "g");
 UNIT_DISPLAY_NAME(units::mg, "mg");
 UNIT_DISPLAY_NAME(units::ms, "ms");
 UNIT_DISPLAY_NAME(units::mW, "mW");
+UNIT_DISPLAY_NAME(units::kHz, "kHz");
+UNIT_DISPLAY_NAME(units::MHz, "MHz");
 
 namespace units {
 
@@ -1070,6 +1074,8 @@ typedef value<double, units::g> g;
 typedef value<double, units::mg> mg;
 typedef value<double, units::ms> ms;
 typedef value<double, units::mW> mW;
+typedef value<double, units::kHz> kHz;
+typedef value<double, units::MHz> MHz;
 
 // Non-SI
 typedef value<double, units::lb> lb;
