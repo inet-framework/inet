@@ -24,10 +24,10 @@ Cuboid::Cuboid(const Coord& size) :
     size(size)
 {
     std::vector<Coord> polygonPoints;
-    polygonPoints.push_back(Coord(-size.x / 2, -size.y / 2, 0));
-    polygonPoints.push_back(Coord(-size.x / 2, size.y / 2, 0));
-    polygonPoints.push_back(Coord(size.x / 2, size.y / 2, 0));
-    polygonPoints.push_back(Coord(size.x / 2, -size.y / 2, 0));
+    polygonPoints.push_back(Coord(-size.x / 2, -size.y / 2, -size.z / 2));
+    polygonPoints.push_back(Coord(-size.x / 2, size.y / 2, -size.z / 2));
+    polygonPoints.push_back(Coord(size.x / 2, size.y / 2, -size.z / 2));
+    polygonPoints.push_back(Coord(size.x / 2, -size.y / 2, -size.z / 2));
     setHeight(size.z);
     Polygon base(polygonPoints);
     setBase(base);

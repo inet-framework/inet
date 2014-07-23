@@ -142,8 +142,6 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                         point.x = atof(tokenizer.nextToken());
                     if (tokenizer.hasMoreTokens())
                         point.y = atof(tokenizer.nextToken());
-                    if (tokenizer.hasMoreTokens())
-                        point.z = atof(tokenizer.nextToken());
                     points.push_back(point);
                 }
             }
@@ -274,27 +272,30 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     point.x = atof(shapeTokenizer.nextToken());
                 if (shapeTokenizer.hasMoreTokens())
                     point.y = atof(shapeTokenizer.nextToken());
-                if (shapeTokenizer.hasMoreTokens())
-                    point.z = atof(shapeTokenizer.nextToken());
                 points.push_back(point);
             }
-            shape = new Prism(height, Polygon(points));
+            Box boundingBox = calculateBoundingBox(points);
+            Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
+            std::vector<Coord> prismPoints;
+            for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
+                prismPoints.push_back(*it - center);
+            shape = new Prism(height, Polygon(prismPoints));
         }
-        else if (!strcmp(shapeType, "polygon"))
-        {
-            std::vector<Coord> points;
-            while (shapeTokenizer.hasMoreTokens()) {
-                Coord point;
-                if (shapeTokenizer.hasMoreTokens())
-                    point.x = atof(shapeTokenizer.nextToken());
-                if (shapeTokenizer.hasMoreTokens())
-                    point.y = atof(shapeTokenizer.nextToken());
-                if (shapeTokenizer.hasMoreTokens())
-                    point.z = atof(shapeTokenizer.nextToken());
-                points.push_back(point);
-            }
-            shape = new Polygon(points);
-        }
+//        else if (!strcmp(shapeType, "polygon"))
+//        {
+//            std::vector<Coord> points;
+//            while (shapeTokenizer.hasMoreTokens()) {
+//                Coord point;
+//                if (shapeTokenizer.hasMoreTokens())
+//                    point.x = atof(shapeTokenizer.nextToken());
+//                if (shapeTokenizer.hasMoreTokens())
+//                    point.y = atof(shapeTokenizer.nextToken());
+//                if (shapeTokenizer.hasMoreTokens())
+//                    point.z = atof(shapeTokenizer.nextToken());
+//                points.push_back(point);
+//            }
+//            shape = new Polygon(points);
+//        }
         else {
             int id = atoi(shapeAttribute);
             shape = shapes[id];
@@ -411,18 +412,17 @@ void PhysicalEnvironment::updateCanvas()
         // TODO: rotate points
         const Quaternion rotation(orientation);
         // cuboid
-        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
-        if (cuboid) {
-            const Coord& size = cuboid->getSize();
-            cRectangleFigure *figure = new cRectangleFigure(NULL);
-            figure->setFilled(true);
-            cFigure::Point topLeft = computeCanvasPoint(position - size / 2, *viewAngle);
-            cFigure::Point bottomRight = computeCanvasPoint(position + size / 2, *viewAngle);
-            figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            objectsLayer->addFigure(figure);
-        }
+//        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
+//        if (cuboid) {
+//            const Coord& size = cuboid->getSize();
+//            cRectangleFigure *figure = new cRectangleFigure(NULL);
+//            figure->setFilled(true);
+//            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
+//            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
+//            figure->setLineColor(object->getLineColor());
+//            figure->setFillColor(object->getFillColor());
+//            objectsLayer->addChildFigure(figure);
+//        }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
         if (sphere) {
@@ -442,7 +442,7 @@ void PhysicalEnvironment::updateCanvas()
             std::vector<cFigure::Point> canvasPoints;
             const std::vector<Coord>& points = prism->getBase().getPoints();
             for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-                canvasPoints.push_back(computeCanvasPoint(position + *it, *viewAngle));
+                canvasPoints.push_back(computeCanvasPoint(*it + position, *viewAngle));
             cPolygonFigure *figure = new cPolygonFigure(NULL);
             figure->setFilled(true);
             figure->setPoints(canvasPoints);
@@ -451,20 +451,20 @@ void PhysicalEnvironment::updateCanvas()
             objectsLayer->addFigure(figure);
         }
         // polygon
-        const Polygon *polygon = dynamic_cast<const Polygon *>(shape);
-        if (polygon)
-        {
-            std::vector<cFigure::Point> canvasPoints;
-            const std::vector<Coord>& points = polygon->getPoints();
-            for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-                canvasPoints.push_back(computeCanvasPoint(position + *it, *viewAngle));
-            cPolygonFigure *figure = new cPolygonFigure(NULL);
-            figure->setFilled(true);
-            figure->setPoints(canvasPoints);
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
-        }
+//        const Polygon *polygon = dynamic_cast<const Polygon *>(shape);
+//        if (polygon)
+//        {
+//            std::vector<cFigure::Point> canvasPoints;
+//            const std::vector<Coord>& points = polygon->getPoints();
+//            for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
+//                canvasPoints.push_back(computeCanvasPoint(position + *it, *viewAngle));
+//            cPolygonFigure *figure = new cPolygonFigure(NULL);
+//            figure->setFilled(true);
+//            figure->setPoints(canvasPoints);
+//            figure->setLineColor(object->getLineColor());
+//            figure->setFillColor(object->getFillColor());
+//            objectsLayer->addChildFigure(figure);
+//        }
         // add name to the end
         const char *name = object->getName();
         if (name) {
@@ -479,6 +479,22 @@ void PhysicalEnvironment::updateCanvas()
 const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
 {
     return objects;
+}
+
+PhysicalEnvironment::Box PhysicalEnvironment::calculateBoundingBox(const std::vector<Coord>& points) const
+{
+    Coord min = Coord::NIL;
+    Coord max = Coord::NIL;
+    if (points.begin() != points.end())
+    {
+        min = *points.begin();
+        max = min;
+    }
+    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++) {
+        min = min.min(*it);
+        max = max.max(*it);
+    }
+    return Box(min, max);
 }
 
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const

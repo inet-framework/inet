@@ -37,6 +37,13 @@ class INET_API PhysicalEnvironment : public cModule
             virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
             virtual void buildCache() {}
     };
+    struct Box
+    {
+        Coord min;
+        Coord max;
+        Box(const Coord& min, const Coord& max) :
+            min(min), max(max) {}
+    };
   protected:
     K temperature;
     Pa pressure;
@@ -61,6 +68,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
+    Box calculateBoundingBox(const std::vector<Coord>& points) const;
 
   public:
     PhysicalEnvironment();
