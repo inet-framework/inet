@@ -55,9 +55,12 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     PhysicalEnvironment *environment;
     bool leaveIntersectionTrail;
     TrailFigure *intersectionTrail;
+    mutable unsigned int intersectionComputationCount;
+    mutable unsigned int intersectionCount;
 
   protected:
     virtual void initialize(int stage);
+    virtual void finish();
 
     virtual double computeDielectricLoss(const Material *material, Hz frequency, m distance) const;
     virtual double computeReflectionLoss(const Material *incidentMaterial, const Material *refractiveMaterial, double angle) const;

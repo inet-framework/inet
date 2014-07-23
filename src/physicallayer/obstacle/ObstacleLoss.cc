@@ -29,7 +29,9 @@ ObstacleLoss::ObstacleLoss() :
     medium(NULL),
     environment(NULL),
     leaveIntersectionTrail(false),
-    intersectionTrail(NULL)
+    intersectionTrail(NULL),
+    intersectionComputationCount(0),
+    intersectionCount(0)
 {
 }
 
@@ -82,6 +84,12 @@ double ObstacleLoss::computeReflectionLoss(const Material *incidentMaterial, con
     return transmittance;
 }
 
+void ObstacleLoss::finish()
+{
+    std::cout << "Number of intersection computation attempt: " << intersectionComputationCount << endl;
+    std::cout << "Number of successful intersection computation: " << intersectionCount << endl;
+}
+
 double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
 {
     double totalLoss = 1;
@@ -101,8 +109,10 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
             const Coord& obstaclePosition = object->getPosition();
             const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
             Coord intersection1, intersection2, normal1, normal2;
+            intersectionComputationCount++;
             if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
             {
+                intersectionCount++;
     #ifdef __CCANVAS_H
                 if (leaveIntersectionTrail) {
                     cLineFigure *intersectionLine = new cLineFigure();
@@ -146,8 +156,10 @@ void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
     const Coord& obstaclePosition = physicalObject->getPosition();
     const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
     Coord intersection1, intersection2, normal1, normal2;
+    obstacleLoss->intersectionComputationCount++;
     if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
     {
+        obstacleLoss->intersectionCount++;
 #ifdef __CCANVAS_H
         if (obstacleLoss->leaveIntersectionTrail) {
             cLineFigure *intersectionLine = new cLineFigure();
