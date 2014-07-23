@@ -38,15 +38,7 @@ Coord Prism::computeSize() const
         min = min.min(*it);
         max = max.max(*it);
     }
-    if (height > 0)
-    {
-        Polygon translatedCopy = faces[1];
-        for (std::vector<Coord>::const_iterator it = translatedCopy.getPoints().begin(); it != translatedCopy.getPoints().end(); it++) {
-            min = min.min(*it);
-            max = max.max(*it);
-        }
-    }
-    return max - min;
+    return max - min + Coord(0, 0, height);
 }
 
 void Prism::genereateFaces()
