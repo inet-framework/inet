@@ -63,7 +63,7 @@ void Prism::genereateFaces()
         for (unsigned int i = 0; i < basePoints.size(); i++)
         {
             Coord point = basePoints[i];
-            point += (baseNormalUnitVector * height);
+            point.z += height;
             translatedCopyPoints.push_back(point);
         }
         Polygon translatedCopy(translatedCopyPoints);
@@ -85,20 +85,27 @@ void Prism::genereateFaces()
 Coord Prism::calculateOutwardNormalVectorForFace(unsigned int i) const
 {
     Polygon face = faces[i];
-    std::vector<Coord> facePoints = face.getPoints();
-    // Note that, vectorA and vectorB are not parallel vectors
-    // See the order of the points in generateFaces()
-    Coord vectorA = facePoints[0] - facePoints[1];
-    Coord vectorB = facePoints[2] - facePoints[1];
-    // Then the cross product vectorC of vectorA and vectorB
-    // is normal to the plane that vectorA and vectorB generate
-    Coord vectorC(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
-                 vectorA.z * vectorB.x - vectorA.x * vectorB.z,
-                 vectorA.x * vectorB.y - vectorA.y * vectorB.x);
-    // The outward direction normal will be -vectorC for the translatedCopy
-    if (i == 1)
-        return vectorC * (-1);
-    return vectorC;
+    Coord facePoint = face.getPoints()[0];
+    Coord faceNormal = face.getNormalVector();
+    double mult = 1;
+    for (unsigned int j = 0; j < faces.size(); j++)
+    {
+        if (j == i)
+            continue;
+        Coord fPoint = faces[j].getPoints()[0];
+        int tp = 0;
+        while (fPoint == facePoint)
+        {
+            tp++;
+            fPoint = faces[j].getPoints()[tp];
+        }
+        if ((fPoint - facePoint) * faceNormal > 0)
+        {
+            mult = -1;
+            break;
+        }
+    }
+    return faceNormal * mult;
 }
 
 void Prism::calculateOutwardNormalVectors()
