@@ -16,21 +16,30 @@
 //
 
 #include "Cuboid.h"
-#include "Plane.h"
+#include "Polygon.h"
 
 namespace inet {
 
 Cuboid::Cuboid(const Coord& size) :
-    size(size)
+    size(size), prism(NULL)
 {
     std::vector<Coord> polygonPoints;
     polygonPoints.push_back(Coord(-size.x / 2, -size.y / 2, -size.z / 2));
     polygonPoints.push_back(Coord(-size.x / 2, size.y / 2, -size.z / 2));
     polygonPoints.push_back(Coord(size.x / 2, size.y / 2, -size.z / 2));
     polygonPoints.push_back(Coord(size.x / 2, -size.y / 2, -size.z / 2));
-    setHeight(size.z);
     Polygon base(polygonPoints);
-    setBase(base);
+    prism = new Prism(size.z, base);
+}
+
+bool Cuboid::computeIntersection(const LineSegment& lineSegment,Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
+{
+    return prism->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
+}
+
+Cuboid::~Cuboid()
+{
+    delete prism;
 }
 
 } // namespace inet

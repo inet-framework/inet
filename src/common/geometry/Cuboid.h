@@ -20,24 +20,25 @@
 
 #include "Shape.h"
 #include "Prism.h"
-#include "Polygon.h"
 
 namespace inet {
 
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
  */
-class INET_API Cuboid : public Prism
+class INET_API Cuboid : public Shape
 {
   protected:
     Coord size;
+    Prism *prism;
 
   public:
     Cuboid(const Coord& size);
-
     const Coord& getSize() const { return size; }
     void setSize(const Coord& size) { this->size = size; }
     virtual Coord computeSize() const { return size; }
+    virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
+    virtual ~Cuboid();
 };
 
 } // namespace inet

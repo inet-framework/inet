@@ -412,17 +412,17 @@ void PhysicalEnvironment::updateCanvas()
         // TODO: rotate points
         const Quaternion rotation(orientation);
         // cuboid
-//        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
-//        if (cuboid) {
-//            const Coord& size = cuboid->getSize();
-//            cRectangleFigure *figure = new cRectangleFigure(NULL);
-//            figure->setFilled(true);
-//            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
-//            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
-//            figure->setLineColor(object->getLineColor());
-//            figure->setFillColor(object->getFillColor());
-//            objectsLayer->addChildFigure(figure);
-//        }
+        const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
+        if (cuboid) {
+            const Coord& size = cuboid->getSize();
+            cRectangleFigure *figure = new cRectangleFigure(NULL);
+            figure->setFilled(true);
+            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
+            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
+            figure->setLineColor(object->getLineColor());
+            figure->setFillColor(object->getFillColor());
+            objectsLayer->addChildFigure(figure);
+        }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
         if (sphere) {
