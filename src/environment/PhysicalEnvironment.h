@@ -21,6 +21,7 @@
 #include "PhysicalObject.h"
 #include "IVisitor.h"
 #include "LineSegment.h"
+#include "Box.h"
 
 namespace inet {
 
@@ -36,13 +37,6 @@ class INET_API PhysicalEnvironment : public cModule
             virtual bool insertObject(const PhysicalObject *object) = 0;
             virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
             virtual void buildCache() = 0;
-    };
-    struct Box
-    {
-        Coord min;
-        Coord max;
-        Box(const Coord& min, const Coord& max) :
-            min(min), max(max) {}
     };
   protected:
     K temperature;
