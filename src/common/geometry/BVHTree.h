@@ -35,13 +35,20 @@ namespace inet {
 class BVHTree
 {
     public:
-        enum Axis
+        class Axis
         {
-            X,
-            Y,
-            Z
+            protected:
+                std::string axisOrder;
+                unsigned int curr;
+            public:
+                Axis(const std::string& axisOrder) : axisOrder(axisOrder), curr(0) {}
+                char getNextAxis()
+                {
+                    curr = (curr + 1) % axisOrder.size();
+                    return axisOrder[curr];
+                }
+                char getCurrentAxis() const { return axisOrder[curr]; }
         };
-
     public:
       class BVHTreeVisitor : public IVisitor
       {
@@ -54,17 +61,17 @@ class BVHTree
     protected:
         struct AxisComparator
         {
-            Axis axis;
-            AxisComparator(Axis axis) : axis(axis) {}
+            char axis;
+            AxisComparator(char axis) : axis(axis) {}
             bool operator()(const PhysicalObject *left, const PhysicalObject *right) const
             {
                 Coord leftPos = left->getPosition() + left->getShape()->computeSize() / 2;
                 Coord rightPos = right->getPosition() + right->getShape()->computeSize() / 2;
                 switch (axis)
                 {
-                    case X: return leftPos.x < rightPos.x;
-                    case Y: return leftPos.y < rightPos.y;
-                    case Z: return leftPos.z < rightPos.z;
+                    case 'X': return leftPos.x < rightPos.x;
+                    case 'Y': return leftPos.y < rightPos.y;
+                    case 'Z': return leftPos.z < rightPos.z;
                     default: throw cRuntimeError("Unknown axis");
                 }
             }
@@ -72,21 +79,22 @@ class BVHTree
         typedef std::vector<const PhysicalObject *>::iterator ObjVecIterator;
 
     protected:
+        unsigned int leafCapacity;
+        std::string axisOrder;
         Coord boundingMin, boundingMax;
         Coord center;
         BVHTree *left;
         BVHTree *right;
-        const PhysicalObject *object;
+        std::vector<const PhysicalObject *> objects;
 
     protected:
-        Axis switchAxis(Axis axis) const;
         bool isLeaf() const;
         void buildHierarchy(std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis);
         void computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end) const;
         bool intersectWithLineSegment(const LineSegment& lineSegment) const;
 
     public:
-        BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis);
+        BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
         void traverse() const;
         virtual ~BVHTree();
         void lineSegmentQuery(const LineSegment& lineSegment,  const IVisitor *visitor) const;

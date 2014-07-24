@@ -24,36 +24,40 @@ namespace inet {
 
 bool BVHTree::isLeaf() const
 {
-    return object != NULL;
+    return objects.size() != 0;
 }
 
-BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
+BVHTree::BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity)
 {
     this->left = NULL;
     this->right = NULL;
-    this->object = NULL;
     this->boundingMin = boundingMin;
     this->boundingMax = boundingMax;
     this->center = (boundingMax - boundingMin) / 2 + boundingMin;
+    this->leafCapacity = leafCapacity;
     buildHierarchy(objects, start, end, axis);
 }
 
 void BVHTree::buildHierarchy(std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end, Axis axis)
 {
-    if (end - start == 0)
-        this->object = objects[start];
+    if (end - start + 1 <= leafCapacity)
+    {
+        for (unsigned int i = start; i <= end; i++)
+           this->objects.push_back(objects[i]);
+    }
     else
     {
         ObjVecIterator s = objects.begin();
         ObjVecIterator e = s;
         std::advance(s, start);
         std::advance(e, end + 1);
-        sort(s, e, AxisComparator(axis));
+        sort(s, e, AxisComparator(axis.getCurrentAxis()));
+        axis.getNextAxis();
         Coord boundingMin, boundingMax;
         computeBoundingBox(boundingMin, boundingMax, objects, start, (start + end) / 2);
-        left = new BVHTree(boundingMin, boundingMax, objects, start, (start + end) / 2, switchAxis(axis));
+        left = new BVHTree(boundingMin, boundingMax, objects, start, (start + end) / 2, axis, leafCapacity);
         computeBoundingBox(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end);
-        right = new BVHTree(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end, switchAxis(axis));
+        right = new BVHTree(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end, axis, leafCapacity);
     }
 }
 
@@ -103,21 +107,13 @@ bool BVHTree::intersectWithLineSegment(const LineSegment& lineSegment) const
     return false;
 }
 
-BVHTree::Axis BVHTree::switchAxis(Axis axis) const
-{
-    switch (axis)
-    {
-        case X: return Y;
-        case Y: return Z;
-        case Z: return X;
-        default: throw cRuntimeError("Unknown axis");
-    }
-}
-
 void BVHTree::lineSegmentQuery(const LineSegment& lineSegment, const IVisitor *visitor) const
 {
     if (isLeaf())
-        visitor->visit(object);
+    {
+        for (unsigned int i = 0; i < objects.size(); i++)
+            visitor->visit(objects[i]);
+    }
     else if (intersectWithLineSegment(lineSegment))
     {
         left->lineSegmentQuery(lineSegment, visitor);

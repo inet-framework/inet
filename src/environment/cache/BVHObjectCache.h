@@ -31,6 +31,8 @@ class BVHObjectCache : public PhysicalEnvironment::IObjectCache, public cSimpleM
         BVHTree *bvhTree;
         PhysicalEnvironment *physicalEnvironment;
         std::vector<const PhysicalObject *> objects;
+        unsigned int leafCapacity;
+        std::string axisOrder;
 
     protected:
        virtual int numInitStages() const { return NUM_INIT_STAGES; }

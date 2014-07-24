@@ -21,5 +21,7 @@ module BVHObjectCache like IObjectCache
 {
     parameters:
         string physicalEnvironmentModule = default("^");
+        int leafCapacity = default(1);
+        string axisOrder = default("XYZ"); //  "X", "XY", "ZYZ", "ZZXZZYXYX", etc are all allowed combinations
         @class(BVHObjectCache);
 }

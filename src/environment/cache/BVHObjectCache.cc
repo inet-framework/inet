@@ -32,7 +32,11 @@ BVHObjectCache::BVHObjectCache() :
 void BVHObjectCache::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
+    {
         physicalEnvironment = getModuleFromPar<PhysicalEnvironment>(par("physicalEnvironmentModule"), this);
+        leafCapacity = par("leafCapacity");
+        axisOrder = par("axisOrder").stdstringValue();
+    }
 }
 
 BVHObjectCache::~BVHObjectCache()
@@ -53,8 +57,8 @@ void BVHObjectCache::visitObjects(const IVisitor *visitor, const LineSegment& li
 
 void BVHObjectCache::buildCache()
 {
-    bvhTree = new BVHTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, BVHTree::Axis::X);
-    //bvhTree->traverse();
+    BVHTree::Axis axis(axisOrder);
+    bvhTree = new BVHTree(physicalEnvironment->getSpaceMin(), physicalEnvironment->getSpaceMax(), objects, 0, objects.size() - 1, axis, leafCapacity);
 }
 
 } /* namespace inet */
