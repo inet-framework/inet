@@ -82,7 +82,7 @@ class BVHTree
         Axis switchAxis(Axis axis) const;
         bool isLeaf() const;
         void buildHierarchy(std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis);
-        void calculateBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end) const;
+        void computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end) const;
         bool intersectWithLineSegment(const LineSegment& lineSegment) const;
 
     public:

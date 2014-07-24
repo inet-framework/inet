@@ -50,14 +50,14 @@ void BVHTree::buildHierarchy(std::vector<const PhysicalObject*>& objects, unsign
         std::advance(e, end + 1);
         sort(s, e, AxisComparator(axis));
         Coord boundingMin, boundingMax;
-        calculateBoundingBox(boundingMin, boundingMax, objects, start, (start + end) / 2);
+        computeBoundingBox(boundingMin, boundingMax, objects, start, (start + end) / 2);
         left = new BVHTree(boundingMin, boundingMax, objects, start, (start + end) / 2, switchAxis(axis));
-        calculateBoundingBox(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end);
+        computeBoundingBox(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end);
         right = new BVHTree(boundingMin, boundingMax, objects, 1 + (start + end) / 2, end, switchAxis(axis));
     }
 }
 
-void BVHTree::calculateBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end) const
+void BVHTree::computeBoundingBox(Coord& boundingMin, Coord& boundingMax, std::vector<const PhysicalObject*>& objects, unsigned int start, unsigned int end) const
 {
     double xMin = std::numeric_limits<double>::max();
     double yMin = xMin;

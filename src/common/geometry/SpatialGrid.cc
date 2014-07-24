@@ -24,7 +24,7 @@ bool SpatialGrid::insertObject(const PhysicalObject *object)
     Coord pos = object->getPosition();
     Coord boundingBoxSize = object->getShape()->computeSize();
     ThreeTuple<int> start, end;
-    calculateBoundingVoxels(pos, ThreeTuple<double>(boundingBoxSize.x / 2, boundingBoxSize.y / 2, boundingBoxSize.z / 2), start, end);
+    computeBoundingVoxels(pos, ThreeTuple<double>(boundingBoxSize.x / 2, boundingBoxSize.y / 2, boundingBoxSize.z / 2), start, end);
     for (int i = start[0]; i <= end[0]; i++) {
         for (int j = start[1]; j <= end[1]; j++) {
             for (int k = start[2]; k <= end[2]; k++) {
@@ -37,7 +37,7 @@ bool SpatialGrid::insertObject(const PhysicalObject *object)
     return true;
 }
 
-void SpatialGrid::calculateBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const
+void SpatialGrid::computeBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const
 {
     int xVoxel = constraintAreaSideLengths.x == 0 ? 0 : ceil((boundings.x * numVoxels[0]) / constraintAreaSideLengths.x);
     int yVoxel = constraintAreaSideLengths.y == 0 ? 0 : ceil((boundings.y * numVoxels[1]) / constraintAreaSideLengths.y);
@@ -60,9 +60,9 @@ SpatialGrid::SpatialGrid(const Coord& voxelSizes, const Coord& constraintAreaMin
     this->voxelSizes = ThreeTuple<double>(voxelSizes.x, voxelSizes.y, voxelSizes.z);
     this->constraintAreaMin = constraintAreaMin;
     this->constraintAreaMax = constraintAreaMax;
-    constraintAreaSideLengths = calculateConstraintAreaSideLengths();
-    numVoxels = calculateNumberOfVoxels();
-    gridVectorLength = calculateGridVectorLength();
+    constraintAreaSideLengths = computeConstraintAreaSideLengths();
+    numVoxels = computeNumberOfVoxels();
+    gridVectorLength = computeGridVectorLength();
     if (gridVectorLength <= 0)
         throw cRuntimeError("Invalid gridVectorLength = %d", gridVectorLength);
     grid.resize(gridVectorLength);
@@ -93,7 +93,7 @@ bool SpatialGrid::movePoint(const cObject *point, const Coord& newPos)
 void SpatialGrid::rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
 {
     ThreeTuple<int> start, end;
-    calculateBoundingVoxels(pos, ThreeTuple<double>(range, range, range), start, end);
+    computeBoundingVoxels(pos, ThreeTuple<double>(range, range, range), start, end);
     for (int i = start[0]; i <= end[0]; i++) {
         for (int j = start[1]; j <= end[1]; j++) {
             for (int k = start[2]; k <= end[2]; k++) {
@@ -124,19 +124,19 @@ void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const IVisito
     }
 }
 
-Coord SpatialGrid::calculateConstraintAreaSideLengths() const
+Coord SpatialGrid::computeConstraintAreaSideLengths() const
 {
     return Coord(constraintAreaMax.x - constraintAreaMin.x, constraintAreaMax.y - constraintAreaMin.y,
             constraintAreaMax.z - constraintAreaMin.z);
 }
 
-SpatialGrid::ThreeTuple<int> SpatialGrid::calculateNumberOfVoxels() const
+SpatialGrid::ThreeTuple<int> SpatialGrid::computeNumberOfVoxels() const
 {
     return ThreeTuple<int>(ceil(constraintAreaSideLengths.x / voxelSizes.x), ceil(constraintAreaSideLengths.y / voxelSizes.y),
             ceil(constraintAreaSideLengths.z / voxelSizes.z));
 }
 
-unsigned int SpatialGrid::calculateGridVectorLength() const
+unsigned int SpatialGrid::computeGridVectorLength() const
 {
     unsigned int gridVectorLength = 1;
     for (unsigned int i = 0; i < 3; i++)

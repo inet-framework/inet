@@ -105,14 +105,14 @@ class SpatialGrid
         ThreeTuple<int> numVoxels;
 
    protected:
-        Coord calculateConstraintAreaSideLengths() const;
-        ThreeTuple<int> calculateNumberOfVoxels() const;
-        unsigned int calculateGridVectorLength() const;
+        Coord computeConstraintAreaSideLengths() const;
+        ThreeTuple<int> computeNumberOfVoxels() const;
+        unsigned int computeGridVectorLength() const;
         ThreeTuple<int> decodeRowMajorIndex(unsigned int ind) const;
         unsigned int rowMajorIndex(const ThreeTuple<int>& indices) const;
         unsigned int coordToRowMajorIndex(const Coord& pos) const;
         ThreeTuple<int> coordToMatrixIndices(const Coord& pos) const;
-        void calculateBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const;
+        void computeBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const;
 
     public:
         bool insertObject(const PhysicalObject *object);

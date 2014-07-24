@@ -26,7 +26,7 @@ Prism::Prism(double height, const Polygon& base) :
     if (height != 0)
     {
         genereateFaces();
-        calculateOutwardNormalVectors();
+        computeOutwardNormalVectors();
     }
 }
 
@@ -74,7 +74,7 @@ void Prism::genereateFaces()
     }
 }
 
-Coord Prism::calculateOutwardNormalVectorForFace(unsigned int i) const
+Coord Prism::computeOutwardNormalVectorForFace(unsigned int i) const
 {
     Polygon face = faces[i];
     Coord facePoint = face.getPoints()[0];
@@ -100,11 +100,11 @@ Coord Prism::calculateOutwardNormalVectorForFace(unsigned int i) const
     return faceNormal * mult;
 }
 
-void Prism::calculateOutwardNormalVectors()
+void Prism::computeOutwardNormalVectors()
 {
     normalVectorsForFaces.clear();
     for (unsigned int i = 0; i < faces.size(); i++)
-        normalVectorsForFaces.push_back(calculateOutwardNormalVectorForFace(i));
+        normalVectorsForFaces.push_back(computeOutwardNormalVectorForFace(i));
 }
 
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
@@ -173,7 +173,7 @@ void inet::Prism::setHeight(double height)
         if (height != 0)
         {
             genereateFaces();
-            calculateOutwardNormalVectors();
+            computeOutwardNormalVectors();
         }
     }
 }
@@ -186,7 +186,7 @@ void inet::Prism::setBase(const Polygon& base)
         if (height != 0)
         {
             genereateFaces();
-            calculateOutwardNormalVectors();
+            computeOutwardNormalVectors();
         }
     }
 }

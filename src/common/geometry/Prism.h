@@ -36,8 +36,8 @@ class INET_API Prism : public Shape3D
 
   protected:
     void genereateFaces();
-    Coord calculateOutwardNormalVectorForFace(unsigned int i) const;
-    void calculateOutwardNormalVectors();
+    Coord computeOutwardNormalVectorForFace(unsigned int i) const;
+    void computeOutwardNormalVectors();
 
   public:
     Prism() : height(0) {}
