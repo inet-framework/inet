@@ -26,7 +26,7 @@ namespace inet {
  * This class represents a 3 dimensional convex shape independently of its
  * position and orientation.
  */
-class INET_API Shape3D : public cObject
+class INET_API Shape3D
 {
   public:
     Shape3D();
