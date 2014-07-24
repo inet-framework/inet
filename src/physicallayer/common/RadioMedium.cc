@@ -897,7 +897,7 @@ void RadioMedium::updateCanvas()
 
 Coord RadioMedium::computeConstraintAreaMin() const
 {
-    Coord constraintAreaMin;
+    Coord constraintAreaMin = Coord::NIL;
     if (radios.size() > 0)
         constraintAreaMin = radios[0]->getAntenna()->getMobility()->getConstraintAreaMin();
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
@@ -917,7 +917,7 @@ Coord RadioMedium::computeConstraintAreaMin() const
 
 Coord RadioMedium::computeConstreaintAreaMax() const
 {
-    Coord constraintAreaMax;
+    Coord constraintAreaMax = Coord::NIL;
     if (radios.size() > 0)
         constraintAreaMax = radios[0]->getAntenna()->getMobility()->getConstraintAreaMax();
     for (std::vector<const IRadio *>::const_iterator it = radios.begin(); it != radios.end(); it++)
