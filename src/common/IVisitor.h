@@ -20,7 +20,7 @@
 
 namespace inet {
 
-// This is the interface for geometry data structure visitors
+// This is the interface for data structure visitors
 class IVisitor
 {
     public:
