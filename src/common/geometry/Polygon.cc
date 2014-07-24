@@ -74,6 +74,11 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
     // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
     Coord p0 = lineSegment.getPoint1();
     Coord p1 = lineSegment.getPoint2();
+    if (p0 == p1)
+    {
+        normal1 = normal2 = Coord::NIL;
+        return false;
+    }
     Coord segmentDirection = p1 - p0;
     Coord polygonNormal = getNormalUnitVector();
     // The segment is not in the polygon's plane
@@ -122,6 +127,11 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
         normal2 = Coord::NIL;
     intersection1 = p0 + segmentDirection * tE;
     intersection2 = p0 + segmentDirection * tL;
+    if (intersection1 == intersection2)
+    {
+        normal1 = normal2 = Coord::NIL;
+        return false;
+    }
     return true;
 }
 

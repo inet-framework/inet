@@ -114,6 +114,11 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
         // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
         Coord p0 = lineSegment.getPoint1();
         Coord p1 = lineSegment.getPoint2();
+        if (p0 == p1)
+        {
+            normal1 = normal2 = Coord::NIL;
+            return false;
+        }
         Coord segmentDirection = p1 - p0;
         double tE = 0;
         double tL = 1;
@@ -159,6 +164,11 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
             normal2 = Coord::NIL;
         intersection1 = p0 + segmentDirection * tE;
         intersection2 = p0 + segmentDirection * tL;
+        if (intersection1 == intersection2)
+        {
+            normal1 = normal2 = Coord::NIL;
+            return false;
+        }
         return true;
     }
     else
