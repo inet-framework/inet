@@ -20,11 +20,10 @@
 
 #include "Coord.h"
 #include "LineSegment.h"
-#include "Shape.h"
 
 namespace inet {
 
-class INET_API Polygon : public Shape
+class INET_API Polygon
 {
   protected:
     std::vector<Coord> points;

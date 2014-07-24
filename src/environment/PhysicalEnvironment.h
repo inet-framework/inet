@@ -51,7 +51,7 @@ class INET_API PhysicalEnvironment : public cModule
     Coord spaceMin;
     Coord spaceMax;
     const char *viewAngle;
-    std::map<int, const Shape *> shapes;
+    std::map<int, const Shape3D *> shapes;
     std::map<int, const Material *> materials;
     IObjectCache *objectCache;
     std::vector<PhysicalObject *> objects;

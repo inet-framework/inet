@@ -18,7 +18,7 @@
 #ifndef __INET_CUBOID_H
 #define __INET_CUBOID_H
 
-#include "Shape.h"
+#include "Shape3D.h"
 #include "Prism.h"
 
 namespace inet {
@@ -26,7 +26,7 @@ namespace inet {
 /**
  * This class represents a 3 dimensional shape with 6 pairwise parallel faces.
  */
-class INET_API Cuboid : public Shape
+class INET_API Cuboid : public Shape3D
 {
   protected:
     Coord size;

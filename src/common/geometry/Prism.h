@@ -18,7 +18,7 @@
 #ifndef __INET_PRISM_H
 #define __INET_PRISM_H
 
-#include "Shape.h"
+#include "Shape3D.h"
 #include "Polygon.h"
 
 namespace inet {
@@ -26,7 +26,7 @@ namespace inet {
 /**
  * This class represents 3 dimensional prism with a polygon base face.
  */
-class INET_API Prism : public Shape
+class INET_API Prism : public Shape3D
 {
   protected:
     double height;

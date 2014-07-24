@@ -104,7 +104,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
         const std::vector<PhysicalObject *>& objects = environment->getObjects();
         for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++) {
             const PhysicalObject *object = *it;
-            const Shape *shape = object->getShape();
+            const Shape3D *shape = object->getShape();
             const Coord& obstaclePosition = object->getPosition();
             const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
             Coord intersection1, intersection2, normal1, normal2;
@@ -151,7 +151,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
 void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
 {
     PhysicalObject *physicalObject = check_and_cast<PhysicalObject *>(object);
-    const Shape *shape = physicalObject->getShape();
+    const Shape3D *shape = physicalObject->getShape();
     const Coord& obstaclePosition = physicalObject->getPosition();
     const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
     Coord intersection1, intersection2, normal1, normal2;

@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_SHAPE_H
-#define __INET_SHAPE_H
+#ifndef __INET_SHAPE3D_H
+#define __INET_SHAPE3D_H
 
 #include "LineSegment.h"
 
@@ -26,11 +26,11 @@ namespace inet {
  * This class represents a 3 dimensional convex shape independently of its
  * position and orientation.
  */
-class INET_API Shape : public cObject
+class INET_API Shape3D : public cObject
 {
   public:
-    Shape();
-    virtual ~Shape();
+    Shape3D();
+    virtual ~Shape3D();
 
     virtual Coord computeSize() const = 0;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const = 0;
@@ -38,5 +38,5 @@ class INET_API Shape : public cObject
 
 } // namespace inet
 
-#endif // ifndef __INET_SHAPE_H
+#endif // ifndef __INET_SHAPE3D_H
 

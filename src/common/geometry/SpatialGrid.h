@@ -21,7 +21,7 @@
 #include "INETDefs.h"
 #include "Coord.h"
 #include "LineSegment.h"
-#include "Shape.h"
+#include "Shape3D.h"
 #include "IVisitor.h"
 #include "PhysicalObject.h"
 

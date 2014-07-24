@@ -15,15 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Shape.h"
+#include "Shape3D.h"
 
 namespace inet {
 
-Shape::Shape()
+Shape3D::Shape3D()
 {
 }
 
-Shape::~Shape()
+Shape3D::~Shape3D()
 {
 }
 

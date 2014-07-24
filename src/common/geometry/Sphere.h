@@ -18,14 +18,14 @@
 #ifndef __INET_SPHERE_H
 #define __INET_SPHERE_H
 
-#include "Shape.h"
+#include "Shape3D.h"
 
 namespace inet {
 
 /**
  * This class represents a 3 dimensional sphere shape.
  */
-class INET_API Sphere : public Shape
+class INET_API Sphere : public Shape3D
 {
   protected:
     double radius;

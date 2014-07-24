@@ -40,7 +40,7 @@ PhysicalEnvironment::PhysicalEnvironment() :
 
 PhysicalEnvironment::~PhysicalEnvironment()
 {
-    for (std::map<int, const Shape *>::iterator it = shapes.begin(); it != shapes.end(); it++)
+    for (std::map<int, const Shape3D *>::iterator it = shapes.begin(); it != shapes.end(); it++)
         delete it->second;
     for (std::map<int, const Material *>::iterator it =  materials.begin(); it != materials.end(); it++)
         delete it->second;
@@ -90,7 +90,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         const char *tag = element->getTagName();
         if (strcmp(tag, "shape"))
             continue;
-        Shape *shape = NULL;
+        Shape3D *shape = NULL;
         // id
         const char *idAttribute = element->getAttribute("id");
         int id = -1;
@@ -147,31 +147,31 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             }
             shape = new Prism(height, Polygon(points));
         }
-        else if (!strcmp(typeAttribute, "polygon"))
-        {
-            std::vector<Coord> points;
-            const char *pointsAttribute = element->getAttribute("points");
-            if (!pointsAttribute)
-                throw cRuntimeError("Missing points attribute of polygon");
-            else {
-                cStringTokenizer tokenizer(pointsAttribute);
-                while (tokenizer.hasMoreTokens()) {
-                    Coord point;
-                    if (tokenizer.hasMoreTokens())
-                        point.x = atof(tokenizer.nextToken());
-                    if (tokenizer.hasMoreTokens())
-                        point.y = atof(tokenizer.nextToken());
-                    if (tokenizer.hasMoreTokens())
-                        point.z = atof(tokenizer.nextToken());
-                    points.push_back(point);
-                }
-            }
-            shape = new Polygon(points);
-        }
+//        else if (!strcmp(typeAttribute, "polygon"))
+//        {
+//            std::vector<Coord> points;
+//            const char *pointsAttribute = element->getAttribute("points");
+//            if (!pointsAttribute)
+//                throw cRuntimeError("Missing points attribute of polygon");
+//            else {
+//                cStringTokenizer tokenizer(pointsAttribute);
+//                while (tokenizer.hasMoreTokens()) {
+//                    Coord point;
+//                    if (tokenizer.hasMoreTokens())
+//                        point.x = atof(tokenizer.nextToken());
+//                    if (tokenizer.hasMoreTokens())
+//                        point.y = atof(tokenizer.nextToken());
+//                    if (tokenizer.hasMoreTokens())
+//                        point.z = atof(tokenizer.nextToken());
+//                    points.push_back(point);
+//                }
+//            }
+//            shape = new Polygon(points);
+//        }
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
-        shapes.insert(std::pair<int, Shape *>(id, shape));
+        shapes.insert(std::pair<int, Shape3D *>(id, shape));
     }
 }
 
@@ -239,7 +239,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 orientation.gamma = math::deg2rad(atof(tokenizer.nextToken()));
         }
         // shape
-        const Shape *shape;
+        const Shape3D *shape;
         const char *shapeAttribute = element->getAttribute("shape");
         if (!shapeAttribute)
             throw cRuntimeError("Missing shape attribute of object");
@@ -406,7 +406,7 @@ void PhysicalEnvironment::updateCanvas()
 {
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
         PhysicalObject *object = *it;
-        const Shape *shape = object->getShape();
+        const Shape3D *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
         // TODO: rotate points

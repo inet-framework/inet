@@ -18,7 +18,7 @@
 #ifndef __INET_PHYSICALOBJECT_H
 #define __INET_PHYSICALOBJECT_H
 
-#include "Shape.h"
+#include "Shape3D.h"
 #include "EulerAngles.h"
 #include "Material.h"
 
@@ -34,14 +34,14 @@ class INET_API PhysicalObject : public cNamedObject
     const int id;
     Coord position; // center of the object's bounding box
     EulerAngles orientation;
-    const Shape *shape;
+    const Shape3D *shape;
     const Material *material;
     const cFigure::Color lineColor;
     const cFigure::Color fillColor;
     cFigure *figure;
 
   public:
-    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material, const cFigure::Color& lineColor, const cFigure::Color& fillColor);
+    PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape3D *shape, const Material *material, const cFigure::Color& lineColor, const cFigure::Color& fillColor);
     virtual ~PhysicalObject();
 
     virtual int getId() const { return id; }
@@ -52,7 +52,7 @@ class INET_API PhysicalObject : public cNamedObject
     virtual const EulerAngles& getOrientation() const { return orientation; }
     virtual void setOrientation(const EulerAngles& orientation) { this->orientation = orientation; }
 
-    virtual const Shape *getShape() const { return shape; }
+    virtual const Shape3D *getShape() const { return shape; }
     virtual const Material *getMaterial() const { return material; }
     virtual const cFigure::Color& getLineColor() const { return lineColor; }
     virtual const cFigure::Color& getFillColor() const { return fillColor; }
