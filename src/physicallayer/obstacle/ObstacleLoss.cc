@@ -90,6 +90,49 @@ void ObstacleLoss::finish()
     std::cout << "Number of successful intersection computation: " << intersectionCount << endl;
 }
 
+void ObstacleLoss::obstacleLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition, double& totalLoss) const
+{
+    const Shape3D *shape = object->getShape();
+    const Coord& obstaclePosition = object->getPosition();
+    const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
+    Coord intersection1, intersection2, normal1, normal2;
+    intersectionComputationCount++;
+    if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
+    {
+        intersectionCount++;
+#ifdef __CCANVAS_H
+        if (leaveIntersectionTrail) {
+            cLineFigure *intersectionLine = new cLineFigure();
+            intersectionLine->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
+            intersectionLine->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition));
+            intersectionLine->setLineColor(cFigure::GREY);
+            intersectionTrail->addChildFigure(intersectionLine);
+            cLineFigure *normal1Line = new cLineFigure();
+            normal1Line->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
+            normal1Line->setEnd(environment->computeCanvasPoint(intersection1 + obstaclePosition + normal1));
+            normal1Line->setLineColor(cFigure::RED);
+            intersectionTrail->addChildFigure(normal1Line);
+            cLineFigure *normal2Line = new cLineFigure();
+            normal2Line->setStart(environment->computeCanvasPoint(intersection2 + obstaclePosition));
+            normal2Line->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition + normal2));
+            normal2Line->setLineColor(cFigure::RED);
+            intersectionTrail->addChildFigure(normal2Line);
+        }
+#endif
+        const Material *material = object->getMaterial();
+        totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
+        if (!normal1.isUnspecified()) {
+            double angle1 = (intersection1 - intersection2).angle(normal1);
+            totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
+        }
+        // TODO: this returns NaN because n1 > n2
+//            if (!normal2.isUnspecified()) {
+//                double angle2 = (intersection2 - intersection1).angle(normal2);
+//                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
+//            }
+    }
+}
+
 double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const
 {
     double totalLoss = 1;
@@ -103,46 +146,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
     {
         const std::vector<PhysicalObject *>& objects = environment->getObjects();
         for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++) {
-            const PhysicalObject *object = *it;
-            const Shape3D *shape = object->getShape();
-            const Coord& obstaclePosition = object->getPosition();
-            const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
-            Coord intersection1, intersection2, normal1, normal2;
-            intersectionComputationCount++;
-            if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
-            {
-                intersectionCount++;
-    #ifdef __CCANVAS_H
-                if (leaveIntersectionTrail) {
-                    cLineFigure *intersectionLine = new cLineFigure();
-                    intersectionLine->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
-                    intersectionLine->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition));
-                    intersectionLine->setLineColor(cFigure::GREY);
-                    intersectionTrail->addChildFigure(intersectionLine);
-                    cLineFigure *normal1Line = new cLineFigure();
-                    normal1Line->setStart(environment->computeCanvasPoint(intersection1 + obstaclePosition));
-                    normal1Line->setEnd(environment->computeCanvasPoint(intersection1 + obstaclePosition + normal1));
-                    normal1Line->setLineColor(cFigure::RED);
-                    intersectionTrail->addChildFigure(normal1Line);
-                    cLineFigure *normal2Line = new cLineFigure();
-                    normal2Line->setStart(environment->computeCanvasPoint(intersection2 + obstaclePosition));
-                    normal2Line->setEnd(environment->computeCanvasPoint(intersection2 + obstaclePosition + normal2));
-                    normal2Line->setLineColor(cFigure::RED);
-                    intersectionTrail->addChildFigure(normal2Line);
-                }
-    #endif
-                const Material *material = object->getMaterial();
-                totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
-                if (!normal1.isUnspecified()) {
-                    double angle1 = (intersection1 - intersection2).angle(normal1);
-                    totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);
-                }
-                // TODO: this returns NaN because n1 > n2
-    //            if (!normal2.isUnspecified()) {
-    //                double angle2 = (intersection2 - intersection1).angle(normal2);
-    //                totalLoss *= computeReflectionLoss(material, medium->getMaterial(), angle2);
-    //            }
-            }
+            obstacleLoss(*it, frequency, transmissionPosition, receptionPosition, totalLoss);
         }
     }
     return totalLoss;
@@ -150,46 +154,7 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
 
 void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
 {
-    PhysicalObject *physicalObject = check_and_cast<PhysicalObject *>(object);
-    const Shape3D *shape = physicalObject->getShape();
-    const Coord& obstaclePosition = physicalObject->getPosition();
-    const LineSegment lineSegment(transmissionPosition - obstaclePosition, receptionPosition - obstaclePosition);
-    Coord intersection1, intersection2, normal1, normal2;
-    obstacleLoss->intersectionComputationCount++;
-    if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
-    {
-        obstacleLoss->intersectionCount++;
-#ifdef __CCANVAS_H
-        if (obstacleLoss->leaveIntersectionTrail) {
-            cLineFigure *intersectionLine = new cLineFigure();
-            intersectionLine->setStart(obstacleLoss->environment->computeCanvasPoint(intersection1 + obstaclePosition));
-            intersectionLine->setEnd(obstacleLoss->environment->computeCanvasPoint(intersection2 + obstaclePosition));
-            intersectionLine->setLineColor(cFigure::GREY);
-            obstacleLoss->intersectionTrail->addChildFigure(intersectionLine);
-            cLineFigure *normal1Line = new cLineFigure();
-            normal1Line->setStart(obstacleLoss->environment->computeCanvasPoint(intersection1 + obstaclePosition));
-            normal1Line->setEnd(obstacleLoss->environment->computeCanvasPoint(intersection1 + obstaclePosition + normal1));
-            normal1Line->setLineColor(cFigure::RED);
-            obstacleLoss->intersectionTrail->addChildFigure(normal1Line);
-            cLineFigure *normal2Line = new cLineFigure();
-            normal2Line->setStart(obstacleLoss->environment->computeCanvasPoint(intersection2 + obstaclePosition));
-            normal2Line->setEnd(obstacleLoss->environment->computeCanvasPoint(intersection2 + obstaclePosition + normal2));
-            normal2Line->setLineColor(cFigure::RED);
-            obstacleLoss->intersectionTrail->addChildFigure(normal2Line);
-        }
-#endif
-        const Material *material = physicalObject->getMaterial();
-        totalLoss *= obstacleLoss->computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
-        if (!normal1.isUnspecified()) {
-            double angle1 = (intersection1 - intersection2).angle(normal1);
-            totalLoss *= obstacleLoss->computeReflectionLoss(obstacleLoss->medium->getMaterial(), material, angle1);
-        }
-        // TODO: this returns NaN because n1 > n2
-//            if (!normal2.isUnspecified()) {
-//                double angle2 = (intersection2 - intersection1).angle(normal2);
-//                totalLoss *= obstacleLoss->computeReflectionLoss(material, obstacleLoss->medium->getMaterial(), angle2);
-//            }
-    }
+    obstacleLoss->obstacleLoss(check_and_cast<const PhysicalObject *>(object), frequency, transmissionPosition, receptionPosition, totalLoss);
 }
 
 } // namespace physicallayer
