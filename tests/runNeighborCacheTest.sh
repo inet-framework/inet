@@ -2,6 +2,6 @@
 
 # module tests
 cd module
-./runtest GridCacheTest.test QuadTreeCache.test NeighborListCache.test
+./runtest GridNeighborCache.test QuadTreeNeighborCache.test NeighborListCache.test
 cd ..
 

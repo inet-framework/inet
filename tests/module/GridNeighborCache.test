@@ -1,5 +1,5 @@
 %description:
-GridCache test based on Ping results.
+GridNeighborCache test based on Ping results.
 %#--------------------------------------------------------------------------------------------------------------
 %file: test.ned
 
