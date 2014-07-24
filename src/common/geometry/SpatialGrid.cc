@@ -109,10 +109,12 @@ void SpatialGrid::rangeQuery(const Coord& pos, double range, const IVisitor *vis
 void SpatialGrid::lineSegmentQuery(const LineSegment &lineSegment, const IVisitor *visitor) const
 {
     std::map<const cObject *,bool> visited;
-    for (LineSegmentIterator it(lineSegment, voxelSizes, numVoxels); !it.end(); ++it)
+    for (LineSegmentIterator it(this, lineSegment, voxelSizes, numVoxels); !it.end(); ++it)
     {
         ThreeTuple<int> ind = it.getMatrixIndices();
         unsigned int voxelIndex = rowMajorIndex(ind);
+        if (voxelIndex >= gridVectorLength)
+            throw cRuntimeError("Out of index, gridVectorLength = %d, voxelIndex = %d", gridVectorLength, voxelIndex);
         const Voxel& intersectedVoxel = grid[voxelIndex];
         for (Voxel::const_iterator it = intersectedVoxel.begin(); it != intersectedVoxel.end(); it++)
         {
@@ -190,23 +192,26 @@ SpatialGrid::ThreeTuple<int> SpatialGrid::coordToMatrixIndices(const Coord& pos)
     int xCoord = voxelSizes.x == 0 ? 0 : floor(pos.x / voxelSizes.x);
     int yCoord = voxelSizes.y == 0 ? 0 : floor(pos.y / voxelSizes.y);
     int zCoord = voxelSizes.z == 0 ? 0 : floor(pos.z / voxelSizes.z);
-    return ThreeTuple<int>(xCoord, yCoord, zCoord);
+    ThreeTuple<int> matCoord = ThreeTuple<int>(xCoord, yCoord, zCoord);
+    for (unsigned int i = 0; i < 3; i++)
+        if (matCoord[i] == numVoxels[i])
+            matCoord[i]--;
+    return matCoord;
 }
 
 
-SpatialGrid::LineSegmentIterator::LineSegmentIterator(const LineSegment &lineSegment, const ThreeTuple<double> &voxelSizes, const ThreeTuple<int>& numVoxels)
+SpatialGrid::LineSegmentIterator::LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const ThreeTuple<double> &voxelSizes, const ThreeTuple<int>& numVoxels)
 {
     reachedEnd = false;
     Coord p0 = lineSegment.getPoint1();
     Coord p1 = lineSegment.getPoint2();
     Coord segmentDirection = p1 - p0;
     ThreeTuple<double> point0 = ThreeTuple<double>(p0.x, p0.y, p0.z);
-    ThreeTuple<double> point1 = ThreeTuple<double>(p1.x, p1.y, p1.z);
     ThreeTuple<double> direction = ThreeTuple<double>(segmentDirection.x, segmentDirection.y, segmentDirection.z);
+    index = spatialGrid->coordToMatrixIndices(p0);
+    endPoint = spatialGrid->coordToMatrixIndices(p1);
     for (int i = 0; i < 3; i++)
     {
-        index[i] = voxelSizes[i] == 0 ? 0 : floor(point0[i] / voxelSizes[i]);
-        endPoint[i] = voxelSizes[i] == 0 ? 0 : floor(point1[i] / voxelSizes[i]);
         tDelta[i] = voxelSizes[i] / std::abs(direction[i]);
         double ithdirection = direction[i];
         if (ithdirection > 0)
@@ -217,9 +222,7 @@ SpatialGrid::LineSegmentIterator::LineSegmentIterator(const LineSegment &lineSeg
             step[i] = 0;
         double d = point0[i] - index[i] * voxelSizes[i];
         if (step[i] > 0)
-        {
             d = voxelSizes[i] - d;
-        }
         ASSERT(d >= 0 && d <= voxelSizes[i]);
         if (ithdirection != 0)
             tExit[i] = d / std::abs(ithdirection);

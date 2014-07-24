@@ -86,7 +86,7 @@ class SpatialGrid
                 LineSegmentIterator *endIter;
                 bool reachedEnd;
             public:
-                LineSegmentIterator(const LineSegment &lineSegment, const ThreeTuple<double>& voxelSizes, const ThreeTuple<int>& numVoxels);
+                LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const ThreeTuple<double>& voxelSizes, const ThreeTuple<int>& numVoxels);
                 LineSegmentIterator& operator++();
                 const ThreeTuple<int>& getMatrixIndices() const { return index; }
                 bool end() const { return reachedEnd; }
