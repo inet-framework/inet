@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef IVISITOR_H_
-#define IVISITOR_H_
+#ifndef __INET_IVISITOR_H_
+#define __INET_IVISITOR_H_
 
 namespace inet {
 
@@ -30,4 +30,4 @@ class IVisitor
 
 } /* namespace inet */
 
-#endif /* IVISITOR_H_ */
+#endif /* __INET_IVISITOR_H_ */

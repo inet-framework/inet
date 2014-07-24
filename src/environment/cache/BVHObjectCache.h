@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BVHOBJECTCACHE_H_
-#define BVHOBJECTCACHE_H_
+#ifndef __INET_BVHOBJECTCACHE_H_
+#define __INET_BVHOBJECTCACHE_H_
 
 #include "BVHTree.h"
 #include "PhysicalEnvironment.h"
@@ -47,4 +47,4 @@ class BVHObjectCache : public PhysicalEnvironment::IObjectCache, public cSimpleM
 
 } /* namespace inet */
 
-#endif /* BVHOBJECTCACHE_H_ */
+#endif /* __INET_BVHOBJECTCACHE_H_ */

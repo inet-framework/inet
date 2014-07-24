@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef SPATIALGRID_H_
-#define SPATIALGRID_H_
+#ifndef __INET_SPATIALGRID_H_
+#define __INET_SPATIALGRID_H_
 
 #include "INETDefs.h"
 #include "Coord.h"
@@ -127,4 +127,4 @@ class SpatialGrid
 
 } /* namespace inet */
 
-#endif /* SPATIALGRID_H_ */
+#endif /* __INET_SPATIALGRID_H_ */

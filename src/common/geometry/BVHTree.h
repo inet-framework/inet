@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef BVHTREE_H_
-#define BVHTREE_H_
+#ifndef __INET_BVHTREE_H_
+#define __INET_BVHTREE_H_
 
 #include "INETDefs.h"
 #include "IVisitor.h"
@@ -94,4 +94,4 @@ class BVHTree
 
 } /* namespace inet */
 
-#endif /* BVHTREE_H_ */
+#endif /* __INET_BVHTREE_H_ */
