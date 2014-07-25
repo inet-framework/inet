@@ -1,0 +1,48 @@
+ <environment>
+    <object position="center 200 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" fill-color="203 65 84"/>
+    <object position="center 400 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 600 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 800 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 200 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 400 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 600 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 800 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 200 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 400 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 600 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 800 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 200 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 400 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 600 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 800 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+
+    <object position="center 700 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" fill-color="203 65 84"/>
+    <object position="center 900 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1100 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1300 100 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 700 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 900 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1100 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1300 200 10" orientation="0 0 0" shape="cuboid 100 50 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 700 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 900 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 1100 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 1300 300 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 700 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 900 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 1100 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+    <object position="center 1300 400 10" orientation="0 0 0" shape="cuboid 100 50 50" material="brick" fill-color="203 65 84"/>
+
+    <object position="center 1000 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1200 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1400 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 1600 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 800 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 600 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 400 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+    <object position="center 200 700 10" orientation="0 0 0" shape="sphere 100" material="brick" fill-color="203 65 84"/>
+
+    <object position="center 1500 100 10" orientation="0 0 0" shape="prism 100 -86.6 -50 0 -100 86.6 -50 86.6 50 0 100 -86.6 50" material="brick" fill-color="203 65 84" />
+    <object position="center 1500 300 10" orientation="0 0 0" shape="prism 100 -86.6 -50 0 -100 86.6 -50 86.6 50 0 100 -86.6 50" material="brick" fill-color="203 65 84" />
+    <object position="center 1500 500 10" orientation="0 0 0" shape="prism 100 -86.6 -50 0 -100 86.6 -50 86.6 50 0 100 -86.6 50" material="brick" fill-color="203 65 84" />
+</environment>
