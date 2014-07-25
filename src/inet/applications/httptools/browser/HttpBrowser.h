@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -28,7 +28,7 @@ namespace inet {
 namespace httptools {
 
 /**
- * Browser module for OMNeT++ simulations.
+ * Browser module.
  *
  * The component is designed to plug into the existing INET StandardHost module as a
  * tcpApp. See the INET documentation and examples for details.
@@ -38,7 +38,6 @@ namespace httptools {
  * A light-weight module which uses direct message passing is also available (HttpBrowserDirect).
  *
  * @author Kristjan V. Jonsson (kristjanvj@gmail.com)
- * @version 1.0
  *
  * @see HttpBrowserBase
  * @see HttpBrowserDirect

@@ -1,5 +1,6 @@
 //
-// Copyright (C) 2004 Andras Varga
+// Copyright (C) 2013 Opensim Ltd.
+// Author: Levente Meszaros
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,8 +17,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
 
-#ifndef __INET_XDYMO_H
-#define __INET_XDYMO_H
+#ifndef __INET_DYMO_H
+#define __INET_DYMO_H
 
 #include <vector>
 #include <map>
@@ -227,5 +228,5 @@ class INET_API DYMO : public cSimpleModule, public ILifecycle, public cListener,
 
 } // namespace inet
 
-#endif // ifndef __INET_XDYMO_H
+#endif // ifndef __INET_DYMO_H
 

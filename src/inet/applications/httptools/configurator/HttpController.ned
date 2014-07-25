@@ -1,18 +1,5 @@
-
-// ----------------------------------------------------------------------------
 //
-// HttpTools Project
-//
-// This file is a part of the HttpTools project. The project was created at
-// Reykjavik University, the Laboratory for Dependable Secure Systems (LDSS).
-// Its purpose is to create a set of OMNeT++ components to simulate browsing
-// behaviour in a high-fidelity manner along with a highly configurable
-// Web server component.
-//
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
-// Project home page: code.google.com/p/omnet-httptools
-//
-// ----------------------------------------------------------------------------
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -27,21 +14,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 //
-// ----------------------------------------------------------------------------
 
 package inet.applications.httptools.configurator;
 
 //
-// HttpController
-//
 // A controller object for OMNeT++ simulations which use the HttpTools browser and
 // server components. A single controller must exist at the scenario level in each
 // simulation.
-//
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @version 1.0
-// @author  Kristjan V. Jonsson
 //
 // The purpose of the HttpController object is to support the server and browser components.
 // A single controller instance must exist in all scenarios in which the browser and server
@@ -65,6 +44,8 @@ package inet.applications.httptools.configurator;
 // using its assigned random distribution, with $p<sub>p</sub>=1-p<sub>c</sub>.
 // The special probability of a site can be <i>amortized</i> by a constant <i>alpha</i> for
 // each hit, eventually reducing it to zero, at which time it is removed from the special list.
+//
+// @author  Kristjan V. Jonsson
 //
 simple HttpController
 {

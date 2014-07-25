@@ -150,7 +150,7 @@ void ManetNetfilterHook::sendNoRouteMessageToManet(INetworkDatagram *datagram)
 
 void ManetNetfilterHook::sendToManet(cPacket *packet)
 {
-    ipLayer->sendOnTransPortOutGateByProtocolId(packet, IP_PROT_MANET);
+    ipLayer->sendOnTransportOutGateByProtocolId(packet, IP_PROT_MANET);
 }
 
 bool ManetNetfilterHook::checkPacketUnroutable(INetworkDatagram* datagram, const InterfaceEntry* outIE)

@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -36,10 +36,7 @@ namespace httptools {
  *
  * @see HttpServer
  *
- * @version 0.9
  * @author  Kristjan V. Jonsson
- *
- * @todo Refactor this code and the direct version to cut down on duplicated code.
  */
 class INET_API HttpServerEvilA : public HttpServer
 {

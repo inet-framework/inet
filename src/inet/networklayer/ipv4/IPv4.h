@@ -293,7 +293,7 @@ class INET_API IPv4 : public QueueBase, public INetfilter, public ILifecycle, pu
     /**
      * send packet on transportOut gate specified by protocolId
      */
-    void sendOnTransPortOutGateByProtocolId(cPacket *packet, int protocolId);
+    void sendOnTransportOutGateByProtocolId(cPacket *packet, int protocolId);
 
     /**
      * ILifecycle method

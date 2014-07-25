@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -33,7 +33,6 @@ import inet.applications.ITCPApp;
 // * minBadRequests specifies the lower bound on bad requests caused to be sent to the victim by the browser.
 // * maxBadRequests specifies the upper bound on bad requests caused to be sent to the victim by the browser.
 //
-// @version 0.9
 // @author  Kristjan V. Jonsson
 //
 simple HttpServerEvilB like ITCPApp

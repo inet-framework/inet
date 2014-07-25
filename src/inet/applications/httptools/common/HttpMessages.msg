@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -19,9 +19,6 @@
 //
 // HTTP message definitions for the HttpTools components.
 //
-// NEW: The module has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 // ----------------------------------------------------------------------------
@@ -71,11 +68,6 @@ namespace inet::httptools;
 //
 // Base class for HTTP messages
 //
-// NEW: The message definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @author Kristjan V. Jonsson
-// @version 1.0
-//
 packet HttpBaseMessage
 {
     @omitGetVerb(true);
@@ -90,11 +82,6 @@ packet HttpBaseMessage
 
 //
 // Message class for HTTP requests
-//
-// NEW: The message definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @author Kristjan V. Jonsson
-// @version 1.0
 //
 packet HttpRequestMessage extends HttpBaseMessage
 {
@@ -118,17 +105,9 @@ enum HttpContentType
 //
 // Message class for HTTP replies
 //
-// NEW: The message definition has been migrated to OMNeT++ 4.0 and the latest INET version.
-//
-// @author Kristjan V. Jonsson
-// @version 1.0
-//
 packet HttpReplyMessage extends HttpBaseMessage
 {
     @omitGetVerb(true);
     int result = 0;      // e.g. 200 for OK, 404 for NOT FOUND.
     int contentType @enum(HttpContentType) = CT_UNKNOWN;
 }
-
-
-

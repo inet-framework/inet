@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -25,7 +25,6 @@ namespace inet::httptools;
 //
 // NEW: The definition has been migrated to OMNeT++ 4.0 and the latest INET version.
 //
-// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 packet HttpServerStatusUpdateMsg

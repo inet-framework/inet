@@ -32,7 +32,6 @@ namespace physicallayer {
  * Mobility Framework's SnrEval80211 and Decider80211 modules.
  * See the NED file for more info.
  */
-
 class BerParseFile
 {
   protected:

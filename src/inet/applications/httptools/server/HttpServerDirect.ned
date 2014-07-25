@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -28,7 +28,6 @@ import inet.applications.httptools.common.IHttpDirectApp;
 // @see HttpServer
 // @see DirectHost
 //
-// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 simple HttpServerDirect like IHttpDirectApp

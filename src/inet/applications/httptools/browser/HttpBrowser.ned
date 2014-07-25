@@ -1,5 +1,5 @@
 //
-// Maintainer: Kristjan V. Jonsson (LDSS) kristjanvj@gmail.com
+// Copyright (C) 2009 Kristjan V. Jonsson, LDSS (kristjanvj@gmail.com)
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License version 3
@@ -105,7 +105,6 @@ import inet.applications.ITCPApp;
 // The simulation time parameter indicates the time at which the request for a specific resource,
 // indicated by the resource URL, is made.
 //
-// @version 1.0
 // @author  Kristjan V. Jonsson
 //
 simple HttpBrowser like ITCPApp
