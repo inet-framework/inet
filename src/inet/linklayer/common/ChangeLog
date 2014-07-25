@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-01-22  Levente Meszaros
 
 	Moved classes shared by implementations from contract to common.

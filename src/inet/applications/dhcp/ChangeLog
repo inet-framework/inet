@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
@@ -12,7 +14,7 @@
 	backport: IPv4Route: renamed source to sourceType, getSource to
 	getSourceType, setSource to setSourceType
 
-2013-12-02  Benmartin92
+2013-12-02  Benjamin Seregi (benmartin92)
 
 	DHCP: added startTime to the DHCPServer - startTime handling now works
 	similarly as in UDP apps.
@@ -24,7 +26,7 @@
 	DHCP server: docu, fixes
 	- support interface autoselection
 
-2013-11-28  Benmartin92
+2013-11-28  Benjamin Seregi (benmartin92)
 
 	DHCP: added openSocket() to DHCPClient. FIX: missing msg type in DHCPNAK.
 
@@ -33,7 +35,7 @@
 	DHCP: DHCPMessage: 'flags' changed to 'broadcast', the only bit it
 	contains
 
-2013-11-27  Benmartin92
+2013-11-27  Benjamin Seregi (benmartin92)
 
 	DHCP: - DHCP.msg renamed to DHCPMessage.msg and merged with
 	DHCPOptions.msg. - Logging.

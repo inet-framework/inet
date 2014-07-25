@@ -1,35 +1,13 @@
-2014-03-19  ------ inet-2.3.0 released ------
 
 2014-01-22  Levente Meszaros
 
-	Renamed IdealWirelessMac to IdealMac because there it's independent of radios.
+	Renamed IdealWirelessMac to IdealMac because it is independent of radios.
 
-2013-10-30  Zoltan Bojthe
+2013-07-25  ====== inet-3.x development started (integration branch) ======
 
-	backport: registerSignal() calls moved from initialize() to static
-	variable declaration
+2014-06-12  ------ inet-2.4.0 released ------
 
-2013-07-29  Zoltan Bojthe
-
-	MACBase and it descendants: added clearQueue() for clear outgoing queue
-	at CRASH operation
-
-	also added missing IdealWirelessMac::flushQueue() implementation
-
-2013-07-26  Zoltan Bojthe
-
-	MACBase: bugfix: isNodeUp() uses another module, should use it in stage 1
-	or later
-
-2013-04-09  Andras Varga
-
-	link layer: introduced MACBase (INotifiable and ILifecycle), all MACs
-	adapted to it
-
-	Details:
-	- introduce isOperational etc in MACs
-	- remove hasSubscribers optimization from PPP, we'll use signals soon
-	anyway
+2014-03-19  ------ inet-2.3.0 released ------
 
 2013-08-22  ------ inet-2.2.0 released ------
 

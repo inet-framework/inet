@@ -1,19 +1,21 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-02-20  Alfonso Ariza Quintana
-    
-    802.11: Fix WAITACK timeout computation
-    
-    The standard say that the node must wait a time sifs+slot+aPHY_RX_START_Delay after
-    the transmission before the ack timeout, but, if after the reception of the
-    timeout the radio status is in reception the node must wait until the end
-    of the reception, with this modification the node set the ACK time out
-    to the appropriate value but in the moment that the timeout is received
-    if the radio is in recv status the node will set an additional timeout
-    delay equal to the transmission of and ACK.
 
-    see: https://github.com/aarizaq/inetmanet-2.0/commit/0572d4cf332415833b33a730d14a87373d5fec11
-    
+	802.11: Fix WAITACK timeout computation
+
+	The standard say that the node must wait a time sifs+slot+aPHY_RX_START_Delay after
+	the transmission before the ack timeout, but, if after the reception of the
+	timeout the radio status is in reception the node must wait until the end
+	of the reception, with this modification the node set the ACK time out
+	to the appropriate value but in the moment that the timeout is received
+	if the radio is in recv status the node will set an additional timeout
+	delay equal to the transmission of and ACK.
+
+	See: https://github.com/aarizaq/inetmanet-2.0/commit/0572d4cf332415833b33a730d14a87373d5fec11
+
 2014-03-19  ------ inet-2.3.0 released ------
 
 2013-11-15  Rudolf Hornig

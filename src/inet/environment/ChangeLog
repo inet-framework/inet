@@ -1,3 +1,25 @@
+2014-07-03  Levente Meszaros
+
+	Environment: Removed obsolete Obstacle, ObstacleControl and AnnotationManager classes
+    
+	Replaced by:
+	- Shape/Cuboid/Sphere/Prism/etc (in common/geometry/)
+	- PhysicalEnvironment/PhysicalObject/Material
+	- IObstacleLoss/ObstacleLoss (in physicallayer/contract/, physicallayer/obstacles/)
+
+2014-06-25  Levente Meszaros
+
+	Added PhysicalEnvironment, PhysicalObject, Material classes
+
+2014-06-13  Rudolf Hornig
+
+	Contents of world/obstacles/ (Obstacle, ObstactleControl) moved to new
+	toplevel src directory environment/.
+
+	Rest of the ChangeLog describes world/obstacles/.
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------

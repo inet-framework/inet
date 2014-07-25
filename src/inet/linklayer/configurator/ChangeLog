@@ -1,8 +1,10 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
 
-2013-10-03  Benmartin92
+2013-10-03  Benjamin Seregi (benmartin92)
 
 	L2NetworkConfigurator: module added. This module allows to configure
 	network scenarios at Layer 2. Used by (Rapid) Spanning Tree protocol.

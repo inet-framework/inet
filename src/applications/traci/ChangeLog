@@ -1,0 +1,15 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-04-25  Levente Meszaros
+
+	* ILifecycle support: throw an error when executing on lifecycle operations
+
+2012-06-15  Rudolf Hornig
+
+	* TraCI module taken from https://github.com/sommer/inet-sommer @ bec0647

@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-05-15  Zoltan Bojthe
@@ -31,7 +33,7 @@
 
 	omnet5 related fixes: getLastModuleId() --> getLastComponentId()
 
-2013-10-28  Benmartin92
+2013-10-28  Benjamin Seregi (benmartin92)
 
 	IPv4: drop non-IPv4 packets to avoid error when a
 	StandardHost receives a BPDU packet

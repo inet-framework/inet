@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
@@ -7,45 +9,45 @@
 	MACAddressTable: changed default value of agingTime parameter -
 	fingerprints changed
 
-2013-12-05  Benmartin92
+2013-12-05  Benjamin Seregi (benmartin92)
 
 	Ieee8021DRelay: added interface autoselection.
 
-2013-12-04  Benmartin92
+2013-12-04  Benjamin Seregi (benmartin92)
 
 	STP/RSTP/Relays: MAC table module access changed to work with
 	IMACAddressTable.
 
-2013-11-07  Benmartin92
+2013-11-07  Benjamin Seregi (benmartin92)
 
 	Relay: folder name Relay -> relay - added isStpAware: if the switch is
 	STP/RSTP unaware then all its ports are forwarding (and learning) -
 	IEEE8021DRelay implements IMACRelayUnit interface - added STPGate to each
 	IMACRelayUnit implementations
 
-2013-10-31  Benmartin92
+2013-10-31  Benjamin Seregi (benmartin92)
 
 	IEEE8021DRelay: InterfaceTableAccess replaced with getSubmodule()
 
-2013-10-31  Benmartin92
+2013-10-31  Benjamin Seregi (benmartin92)
 
 	IEEE8021DRelay: EthernetIIFrame --> EtherFrame.
 
-2013-10-28  Benmartin92
+2013-10-28  Benjamin Seregi (benmartin92)
 
 	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
 
-2013-10-28  Benmartin92
+2013-10-28  Benjamin Seregi (benmartin92)
 
 	IEEE8021DRelay: module added. This relay module is intended to work with
 	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
 
-2013-10-11  Benmartin92
+2013-10-11  Benjamin Seregi (benmartin92)
 
 	MACAddressTable: Some (eg.: STP, RSTP) protocols may need to change
 	agingTime
 
-2013-09-18  Benmartin92
+2013-09-18  Benjamin Seregi (benmartin92)
 
 	MACAddressTable:
 
@@ -67,7 +69,7 @@
 
 	MACAddressTableAccess: MACAddressTable access name changed to macTable.
 
-2013-09-12  Benmartin92
+2013-09-12  Benjamin Seregi (benmartin92)
 
 	Switch: MACAddressTable changes:
 

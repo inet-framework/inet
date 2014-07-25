@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-05-05  Rudolf Hornig
@@ -6,15 +8,15 @@
 
 2014-03-19  ------ inet-2.3.0 released ------
 
-2013-10-30  Benmartin92
+2013-10-30  Benjamin Seregi (benmartin92)
 
 	STP: added switch-related STP/RSTP config parameters.
 
-2013-10-28  Benmartin92
+2013-10-28  Benjamin Seregi (benmartin92)
 
 	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
 
-2013-10-24  Benmartin92
+2013-10-24  Benjamin Seregi (benmartin92)
 
 	EtherSwitch: EtherSwitch now supports Spanning Tree algorithm.
 
@@ -25,7 +27,7 @@
 	protocol described in IEEE 802.1D-1998.
 	STPTester and IEEE8021DInterfaceData moved to ieee8021d folder.
 
-2013-10-17  Benmartin92
+2013-10-17  Benjamin Seregi (benmartin92)
 
 	IEEE8021DRelay: module added. This relay module is intended to work with
 	both STP and RSTP. IEEE8021DBPDU: BPDU message added for RSTP/STP.
@@ -46,4 +48,4 @@
 
 2013-01-15  Zoltan Bojthe
 
-	added vlan code from inetmanet - 2996f0d703dc47b54d6262ae18b60f7a9e3e9757
+	Added vlan code from inetmanet - 2996f0d703dc47b54d6262ae18b60f7a9e3e9757

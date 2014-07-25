@@ -1,0 +1,52 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
+2014-03-19  ------ inet-2.3.0 released ------
+
+2013-08-22  ------ inet-2.2.0 released ------
+
+2013-08-02  Zoltan Bojthe
+
+	apps: startTime/stopTime fixes
+
+	- apps start sending at startTime, and sending last packet before stopTime
+	- negative stopTime means forever
+	- if startTime and stopTime are same, app send one packet (except TCP apps)
+
+2013-05-02  Zoltan Bojthe
+
+	Added NodeStatus::DOWN checks for initialize()
+
+2013-05-02  Zoltan Bojthe
+
+	lifecycle: Enter_Method_Silent() was missing in some
+	handleOperationStage() functions
+
+2013-04-25  Levente Mészáros
+
+	App: Added ILifecycle to the rest of applications.
+
+	All application must either support lifecycle operations properly or
+	throw an error when executing any lifecycle operations.
+
+2013-04-22  Levente Mészáros
+
+	App: Changed stopTime to use -1 to run the application forever.
+
+2012-12-11  Zoltan Bojthe
+
+	simplevoip: renamed statistics
+
+2012-12-11  Zoltan Bojthe
+
+	simplevoip: added adaptivePlayoutDelay boolean parameter to
+	SimpleVoIPReceiver
+
+2012-09-17  Zoltan Bojthe
+
+	simplevoip: finished 1st round of development
+
+2012-07-10  Zoltan Bojthe
+
+	simplevoip: added voip apps

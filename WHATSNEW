@@ -1,20 +1,100 @@
 Recent changes in the INET Framework
 ====================================
 
+INET-2.99.0 (July 2014)
+-----------------------
+
+Requires OMNeT++ 4.5.
+
+XXX note: "gitk integration"; changes start from the "inet3-branch-start" tag
+Radio infrastructure and physical layer:
+- modules taken over from MiXiM: TODO
+- TODO
+
+New protocols:
+- TODO
+
+Revised protocols:
+- TODO
+
+Refactoring:
+- directory reorganization
+    - base/ and util/ have been consolidated into common/ and its several subdirectories (e.g. common/misc/, common/geometry/, common/queue/, common/lifecycle/)
+    - queue/ became common/queue/
+    - world/annotations/ became common/annotations/
+    -
+    - routing protocols have been moved into the new routing/ toplevel directory from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/
+    - protocols in networklayer/manetrouting/ have been moved into routing/extras/
+    - transport/ has been renamed to transportlayer/
+    - battery/ has been renamed to power/, intended to hold all models for all kinds of power sources and power management related components
+    - the physicallayer/ toplevel directory has been created to hold the new physical layer model
+    - the environment/ toplevel directory has been created for models that represent the global physical environment
+    - world/ no longer exists, its contents has been distributed to other directories
+    - status/ lives on as common/lifecycle/
+    - networklayer/autorouting/ has become networklayer/configurator/
+    - applications/httptools/ split up to several subdirectories: browser/, server/, configurator/, common/
+
+- code formatting
+- uniform header guards
+- namespaces: inet, inet::utils, inet::ospf, inet::bgp, inet::sctp, ...
+- init stages: reorganized by layers
+- use signals everywhere for pub/sub communication, instead of INotifiable and NotificationBoard
+- logging revised
+    EV_ERROR, EV_WARN, EV (for EV_INFO), EV_DETAIL, EV_DEBUG,... TODO document when to use which!
+- several apps adapted to the coding conventions, e.g. the RTP models
+
+Network layer refactoring:
+
+- IPv4/IPv6: dynamic registration of upper layer protocols.
+  TCP, UDP, SCTP, RSVP, OSPF, MANET are all merged into transport gates.
+  Network user modules must register their protocol number by sending
+  an IPRegisterProtocolCommand from initialize.
+  Introduced an IPSocket class that wraps the registration process.
+
+- BIG REFACTORING: routing tables and routes now implement a common IRoutingTable and IRoute (details below)
+
+    Motivation: allow uniform access to the IPv4, IPv6 and possibly other routing tables;
+    e.g. some wireless networks may use MAC address as network address. Also, in
+    simulation it sometimes makes sense to work with simple abstract addresses like
+    module names, indices or IDs.
+
+    Being able to uniformly access routing tables containing different types of
+    addresses makes it possible to implement routing protocols in generic way.
+    I.e. the same DYMO module can work with IPv6, IPv6, MAC and other addresses
+    without change and recompiling.
+
+    Ingredients of this patch:
+    - generic L3Address class that can hold all kinds of addresses (=union)
+    - interfaces for generic access: IRoutingTable, IRoute, INetworkDatagram, etc.
+    - Ping refactoring (use generic addressing instead of hardcoded IPv4IPv6)
+    - merged routing table change notification constants for IPv4 and IPv6
+
+- NetworkLayer was renamed to IPv4NetworkLayer and moved into src/networklayer/ipv4; same for IPv6 (NetworkLayer6 -> IPv6NetworkLayer)
+- IPvXAddress --> L3Address, IPvXAddressResolver --> L3AddressResolver
+- new address types: MACAddress, ModuleIdAddress, ModulePathAddress; added GenericNetworkProtocol & co. ---- TODO revise!!!!
+- added MultiNetworkLayer
+- TODO
+
+TODO inet manual -- document the above conventions!!! coding conventions too!
+
+
 INET-2.4.0 (June 12, 2014)
 --------------------------
 
-   - Added support for link break detection in IdealWireless 
+New AODV protocol implementation:
+
+   - From-scratch AODV implementation backported from the integration
+     branch; see src/network/routing/
+
+Miscellaneous:
+
+   - Added support for link break detection in IdealWireless
      (using the NF_LINK_BREAK signal)
    - VoIPStream updated to match the latest version of ffmpeg library.
    - Added packet printers that can dump packet data in OMNeT++ 4.5/Tkenv
      in the packet trace window.
    - Fixed non-conformant 802.11 WAITACK timeout computation
 
-Added new routing protocol:
-
-   - Brand new AODV implementation in network/routing folder 
-     backported from the integration branch.
 
 INET-2.3.0 (March 17, 2014)
 ---------------------------
@@ -24,28 +104,28 @@ backported from the current integration branch (destined to be INET 3.0).
 
 Application startTime/stopTime fixes:
 
-   - apps start sending at startTime, and send their last packet 
+   - apps start sending at startTime, and send their last packet
      before stopTime
    - negative stopTime means sending forever
-   - if startTime and stopTime are the same, the app sends a single 
+   - if startTime and stopTime are the same, the app sends a single
      packet only (except TCP apps)
 
-DHCPServer and Client: 
+DHCPServer and Client:
 
-   - The whole implementation has been reviewed to bring it closer to 
+   - The whole implementation has been reviewed to bring it closer to
      the standards defined in RFC 2131 and 2132.
 
-   - Major changes were made both in client's and server's state machines. 
-     It is now extended with new states (INIT-REBOOT, REBOOTING) and 
-     with new message types (DHCPNAK, DHCPDECLINE). The new states allow 
+   - Major changes were made both in client's and server's state machines.
+     It is now extended with new states (INIT-REBOOT, REBOOTING) and
+     with new message types (DHCPNAK, DHCPDECLINE). The new states allow
      the user to model scenarios with lifecycle events.
 
-   - The server's performance model has been removed. 
+   - The server's performance model has been removed.
 
-   - The internal representation of the DHCP options were moved to the 
+   - The internal representation of the DHCP options were moved to the
      DHCPOptions INET message definition file.
 
-   - Limitation: The client module currently does not support multiple 
+   - Limitation: The client module currently does not support multiple
      DHCP servers and BOOTP relay agents.
 
 SCTP improvements submitted by Irene Rungeler and Thomas Dreibholz:
@@ -64,7 +144,7 @@ STP / RSTP support (802.1d) added to the EthernetSwitch:
      The source code is based on Juan Luis Garrote Molinero's implementation
      from INETMANET.
 
-   - Interfaces can be configured using the new L2NetworkConfigurator module. 
+   - Interfaces can be configured using the new L2NetworkConfigurator module.
      This module allows one to configure network scenarios at Layer 2.
 
    - Replaced the EtherSwitch relay unit with a new, STP/RSTP capable one.
@@ -72,14 +152,14 @@ STP / RSTP support (802.1d) added to the EthernetSwitch:
 
 Nodes automatically pick-up the network configuration on restart:
 
-   - An IPv4NodeConfigurator module has been added to hosts, which is responsible 
+   - An IPv4NodeConfigurator module has been added to hosts, which is responsible
      for configuring the host on restart based on information stored in the
      IPv4NetworkConfigurator module.
 
 INetFilter::IHook API:
 
    Modules can now hook into the IP module with the new 'NetFilter' API.
-   Routing protocols can be implemented now without modifying the IP 
+   Routing protocols can be implemented now without modifying the IP
    module's code. ManetRoutingBase, InternetCloud and ARP have been updated
    to use the new 'NetFilter' API.
 
@@ -90,11 +170,11 @@ Added new routing protocols:
    - DYMO (networklayer/routing/dymo)
    These protocols use INetFilter::IHook, too.
 
-Revised Mobility code: 
+Revised Mobility code:
 
    Split the 'models' directory into multiple directories:
    - contract - specifies the interface of mobility models
-   - common - shared files among mobility models that are not complete 
+   - common - shared files among mobility models that are not complete
      mobility models
    - static - mobility models that actually don't move
    - single - mobility models controlling only one moving object
@@ -102,7 +182,7 @@ Revised Mobility code:
 
 Radio:
 
-    Added the Stanford University Interim radio propagation model contributed 
+    Added the Stanford University Interim radio propagation model contributed
     by Konrad Polys and Krzysztof Grochla.
 
 Other, smaller changes:
@@ -115,13 +195,13 @@ Other, smaller changes:
   - UDPApp*: Added AppBase and subclassed UDP apps from it.
     Binds sockets at startTime and closes them at stopTime.
   - EtherApp* bugfixes
-  - Added a command to set TCP queue length threshold. TCP will notify the 
+  - Added a command to set TCP queue length threshold. TCP will notify the
     application if it is ready to transmit more bytes.
-  - registerSignal() calls were moved from initialize() to static 
+  - registerSignal() calls were moved from initialize() to static
     variable declarations.
   - Added/fixed @signal declarations, fixed the type of emitted values.
   - httptools: removed the fileExists() function.
-  - New logging mechanism + EV handling in preparation for the new OMNeT++ 5.0 
+  - New logging mechanism + EV handling in preparation for the new OMNeT++ 5.0
     logging mechanism.
   - IPv4Route/IPv6Route: added administrative distance field
   - Added IPv6 header serializer (so ext interfaces can be used with IPv6, too)

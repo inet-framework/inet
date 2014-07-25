@@ -1,0 +1,5 @@
+2013-02-20  Levente Meszaros
+
+	Added GenericNetworkConfigurator to configure GenericRoutingTables with static routes.
+
+2013-07-25  ====== inet-3.x development started (integration branch) ======

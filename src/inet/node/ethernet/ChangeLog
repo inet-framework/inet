@@ -1,26 +1,28 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
 
-2013-11-13  Benmartin92
+2013-11-13  Benjamin Seregi (benmartin92)
 
 	EtherSwitch: L2NodeConfigurator is not needed in STP-unaware switch.
 
-2013-11-07  Benmartin92
+2013-11-07  Benjamin Seregi (benmartin92)
 
 	EtherSwitch: spanningTreeProtocolVersion -> spanningTreeProtocol. - By
 	default the switch is STP/RSTP unaware. - relayUnit implements
 	IMACRelayUnit. - organized imports
 
-2013-10-30  Benmartin92
+2013-10-30  Benjamin Seregi (benmartin92)
 
 	L2NetworkConfigurator, STP/RSTP: removed obsolete switches and examples.
 
-2013-10-28  Benmartin92
+2013-10-28  Benjamin Seregi (benmartin92)
 
 	EtherSwitch, IEEE8021DRelay: changed to work with scenarios without STP.
 
-2013-10-24  Benmartin92
+2013-10-24  Benjamin Seregi (benmartin92)
 
 	EtherSwitch: EtherSwitch now supports Spanning Tree algorithm.
 
@@ -30,11 +32,11 @@
 	SpanningTree: module renamed to "STP", this abbreviation refer to the
 	protocol described in IEEE 802.1D-1998.
 
-2013-10-17  Benmartin92
+2013-10-17  Benjamin Seregi (benmartin92)
 
 	STP: Spanning Tree Protocol added to INET.
 
-2013-09-18  Benmartin92
+2013-09-18  Benjamin Seregi (benmartin92)
 
 	Switch:
 

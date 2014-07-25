@@ -1,3 +1,7 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
+2014-06-12  ------ inet-2.4.0 released ------
+
 2014-03-19  ------ inet-2.3.0 released ------
 
 2014-01-24  Zoltan Bojthe
@@ -34,9 +38,7 @@
 
 2014-01-22  Levente Meszaros
 
-	Added OperationalBase and LayeredProtocolBase classes.
-	Deleted NF_RADIOSTATE_CHANGED, NF_RADIO_CHANNEL_CHANGED, NF_RADIO_CHANGE_NOISE notifications.
-	These notifications were replaced with signals defined in the radio contract.
+	Added OperationalBase class.
 
 2013-08-22  ------ inet-2.2.0 released ------
 

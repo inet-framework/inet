@@ -1,10 +1,12 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
 
 2014-03-18  Irene Rungeler
 
-	sctp: added SCTP/IPv6 support 
+	sctp: added SCTP/IPv6 support
 
 2014-03-14  Irene Rungeler
 

@@ -1,3 +1,5 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
@@ -32,11 +34,11 @@
 
 	backport: copied IPv4 and ARP codes from integration branch
 
-2013-10-12  Benmartin92
+2013-10-12  Benjamin Seregi (benmartin92)
 
 	InterfaceEntry: IEEE8021DInterfaceData added to InterfaceEntry
 
-2013-09-16  ProZsolt
+2013-09-16  Zsolt Prontvai (prozsolt)
 
 	Added VLANInterfacedata to InterfaceEntry
 

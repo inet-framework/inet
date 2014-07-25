@@ -1,7 +1,8 @@
+2013-07-25  ====== inet-3.x development started (integration branch) ======
+
 2014-06-12  ------ inet-2.4.0 released ------
 
 2014-03-19  ------ inet-2.3.0 released ------
-
 
 2014-01-24  Zoltan Bojthe
 
@@ -36,7 +37,7 @@
 
 	IMACAddressTable: added class and moduleinterface for MAC tables.
 
-2013-11-21  ProZsolt
+2013-11-21  Zsolt Prontvai (prozsolt)
 
 	EtherMAC: transmission coloring
 
