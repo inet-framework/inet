@@ -136,7 +136,7 @@ class INET_API Coord : public cObject
     /**
      * @brief Dot product
      */
-    float operator*(const Coord& v)
+    float operator*(const Coord& v) const
     {
         return x * v.x + y * v.y + z * v.z;
     }
@@ -144,7 +144,7 @@ class INET_API Coord : public cObject
     /**
      * @brief Cross product
      */
-    Coord operator%(const Coord& v)
+    Coord operator%(const Coord& v) const
     {
         return Coord(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
     }
