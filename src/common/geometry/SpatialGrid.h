@@ -39,14 +39,14 @@ class SpatialGrid
 {
     public:
       template<typename T>
-      class ThreeTuple
+      class Triplet
       {
           public:
               T x;
               T y;
               T z;
-              ThreeTuple() : x(0), y(0), z(0) {}
-              ThreeTuple(T xNum, T yNum, T zNum) :
+              Triplet() : x(0), y(0), z(0) {}
+              Triplet(T xNum, T yNum, T zNum) :
                   x(xNum), y(yNum), z(zNum) {}
               T& operator[](int i)
               {
@@ -78,17 +78,17 @@ class SpatialGrid
         class LineSegmentIterator
         {
             protected:
-                ThreeTuple<int> index;
-                ThreeTuple<int> endPoint;
-                ThreeTuple<int> step;
-                ThreeTuple<double> tDelta;
-                ThreeTuple<double> tExit;
+                Triplet<int> index;
+                Triplet<int> endPoint;
+                Triplet<int> step;
+                Triplet<double> tDelta;
+                Triplet<double> tExit;
                 LineSegmentIterator *endIter;
                 bool reachedEnd;
             public:
-                LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const ThreeTuple<double>& voxelSizes, const ThreeTuple<int>& numVoxels);
+                LineSegmentIterator(const SpatialGrid *spatialGrid, const LineSegment &lineSegment, const Triplet<double>& voxelSizes, const Triplet<int>& numVoxels);
                 LineSegmentIterator& operator++();
-                const ThreeTuple<int>& getMatrixIndices() const { return index; }
+                const Triplet<int>& getMatrixIndices() const { return index; }
                 bool end() const { return reachedEnd; }
         };
 
@@ -99,20 +99,20 @@ class SpatialGrid
     protected:
         Grid grid;
         unsigned int gridVectorLength;
-        ThreeTuple<double> voxelSizes;
+        Triplet<double> voxelSizes;
         Coord constraintAreaSideLengths;
         Coord constraintAreaMin, constraintAreaMax;
-        ThreeTuple<int> numVoxels;
+        Triplet<int> numVoxels;
 
    protected:
         Coord computeConstraintAreaSideLengths() const;
-        ThreeTuple<int> computeNumberOfVoxels() const;
+        Triplet<int> computeNumberOfVoxels() const;
         unsigned int computeGridVectorLength() const;
-        ThreeTuple<int> decodeRowMajorIndex(unsigned int ind) const;
-        unsigned int rowMajorIndex(const ThreeTuple<int>& indices) const;
+        Triplet<int> decodeRowMajorIndex(unsigned int ind) const;
+        unsigned int rowMajorIndex(const Triplet<int>& indices) const;
         unsigned int coordToRowMajorIndex(const Coord& pos) const;
-        ThreeTuple<int> coordToMatrixIndices(const Coord& pos) const;
-        void computeBoundingVoxels(const Coord& pos, const ThreeTuple<double>& boundings, ThreeTuple<int>& start, ThreeTuple<int>& end) const;
+        Triplet<int> coordToMatrixIndices(const Coord& pos) const;
+        void computeBoundingVoxels(const Coord& pos, const Triplet<double>& boundings, Triplet<int>& start, Triplet<int>& end) const;
 
     public:
         bool insertObject(const PhysicalObject *object);
