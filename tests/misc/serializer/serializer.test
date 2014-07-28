@@ -1,0 +1,58 @@
+%description:
+Test parsing IPv6 addresses
+
+%includes:
+#include <stdio.h>
+#include "pcap.h"
+#include "EthernetSerializer.h"
+#include "Ieee80211Serializer.h"
+
+%global:
+static void testRecord(const char* filename)
+{
+    FILE *pcapFile;
+    struct pcap_hdr fileHeader;
+	struct pcaprec_hdr recordHeader;
+	
+	pcapFile  = fopen(filename, "rb");
+	fread(&fileHeader, sizeof(fileHeader), 1, pcapFile);
+	fread(&recordHeader, sizeof(recordHeader), 1, pcapFile)
+
+    uint8 readBuf[MAXBUFLENGTH];
+	uint8 writeBuf[MAXBUFLENGTH];
+    memset((void*)&readBuf, 0, sizeof(readBuf));
+    memset((void*)&writeBuf, 0, sizeof(writeBuf));
+
+    fread(&readBuf, recordHeader.orig_len, 1, pcapFile);
+	
+	uint32 serializedLength;
+		
+    switch(fileHeader.network)
+    {
+        case 1:
+			EthernetIIFrame *etherFrame = NULL;
+            EthernetSerializer().parse(readBuf, recordHeader.incl_len, &etherFrame);
+			serializedLength = EthernetSerializer().serialize(etherFrame, writeBuf, sizeof(writeBuf));
+            break;
+
+        case 105:
+			Ieee80211Frame *ieee80211Frame = NULL;
+            Ieee80211Serializer().parse(readBuf, recordHeader.incl_len, &ieee80211Frame);
+			serializedLength = Ieee80211Serializer().serialize(ieee80211Frame, writeBuf, sizeof(writeBuf));
+            break;
+    }
+	
+	if(recordHeader.incl_len == serializedLength && !memcmp(readBuf, writeBuf, serializedLength))
+		EV << "Frames are the same\n";
+	else
+		EV << "Frames are not the same\n";
+}
+
+%activity:
+testRecord("TCP.pcap");
+
+%contains: stdout
+Frames are the same
+
+%not-contains: stdout
+Frames are not the same
