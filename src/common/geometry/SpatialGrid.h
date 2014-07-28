@@ -21,9 +21,7 @@
 #include "INETDefs.h"
 #include "Coord.h"
 #include "LineSegment.h"
-#include "Shape3D.h"
 #include "IVisitor.h"
-#include "PhysicalObject.h"
 
 namespace inet {
 
@@ -115,7 +113,7 @@ class SpatialGrid
         void computeBoundingVoxels(const Coord& pos, const Triplet<double>& boundings, Triplet<int>& start, Triplet<int>& end) const;
 
     public:
-        bool insertObject(const PhysicalObject *object);
+        bool insertObject(const cObject *object, const Coord& pos, const Coord& boundingBoxSize);
         bool insertPoint(const cObject *point, const Coord& pos);
         bool removePoint(const cObject *point);
         bool movePoint(const cObject *point, const Coord& newPos);

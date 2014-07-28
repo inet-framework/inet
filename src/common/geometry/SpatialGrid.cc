@@ -19,10 +19,8 @@
 
 namespace inet {
 
-bool SpatialGrid::insertObject(const PhysicalObject *object)
+bool SpatialGrid::insertObject(const cObject *object, const Coord& pos, const Coord& boundingBoxSize)
 {
-    Coord pos = object->getPosition();
-    Coord boundingBoxSize = object->getShape()->computeSize();
     Triplet<int> start, end;
     computeBoundingVoxels(pos, Triplet<double>(boundingBoxSize.x / 2, boundingBoxSize.y / 2, boundingBoxSize.z / 2), start, end);
     for (int i = start[0]; i <= end[0]; i++) {

@@ -31,7 +31,9 @@ GridObjectCache::GridObjectCache() :
 
 bool GridObjectCache::insertObject(const PhysicalObject *object)
 {
-    grid->insertObject(object);
+    Coord pos = object->getPosition();
+    Coord boundingBoxSize = object->getShape()->computeSize();
+    grid->insertObject(object, pos, boundingBoxSize);
     return true;
 }
 
