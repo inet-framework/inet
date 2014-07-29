@@ -40,12 +40,12 @@ void Rotation::computeRotationMatrix(const double& q0, const double& q1, const d
     // Ref: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     rotationMatrix[0][0] = 1 - 2*(q2*q2 + q3*q3);
     rotationMatrix[0][1] = 2*(q1*q2 - q0*q3);
-    rotationMatrix[0][2] = 2*(q0*q3 + q1*q3);
+    rotationMatrix[0][2] = 2*(q0*q2 + q1*q3);
     rotationMatrix[1][0] = 2*(q1*q2 + q0*q3);
     rotationMatrix[1][1] = 1 - 2*(q1*q1 + q3*q3);
     rotationMatrix[1][2] = 2*(q2*q3 - q0*q1);
     rotationMatrix[2][0] = 2*(q1*q3 - q0*q2);
-    rotationMatrix[2][1] = 1 - 2*(q0*q1 + q2*q3);
+    rotationMatrix[2][1] = 2*(q0*q1 + q2*q3);
     rotationMatrix[2][2] = 1 - 2*(q1*q1 - q2*q2);
 }
 
