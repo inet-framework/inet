@@ -35,6 +35,12 @@ class Rotation
 
     public:
         Rotation(const EulerAngles& eulerAngle);
+        /*
+         * TODO: implement two different rotateVector
+         * rotateVectorClockwise()
+         * rotateVectorCounterClockwise()
+         * The current is the rotateVectorClockwise().
+         */
         Coord rotateVector(const Coord& vector) const;
 };
 
