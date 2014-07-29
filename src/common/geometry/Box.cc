@@ -15,24 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BOX_H_
-#define __INET_BOX_H_
-
-#include "INETDefs.h"
-#include "Coord.h"
+#include "Box.h"
 
 namespace inet {
 
-class Box
+Box inet::Box::calculateBoundingBox(const std::vector<Coord>& points)
 {
-    public:
-        Coord min;
-        Coord max;
-        Box(const Coord& min, const Coord& max) :
-            min(min), max(max) {}
+    Coord min = Coord::NIL;
+    Coord max = Coord::NIL;
+    if (points.begin() != points.end())
+    {
+        min = *points.begin();
+        max = min;
+    }
+    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
+    {
+        min = min.min(*it);
+        max = max.max(*it);
+    }
+    return Box(min, max);
+}
 
-        static Box calculateBoundingBox(const std::vector<Coord>& points);
-};
 } /* namespace inet */
-
-#endif /* __INET_BOX_H_ */

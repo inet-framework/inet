@@ -62,7 +62,6 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
-    Box calculateBoundingBox(const std::vector<Coord>& points) const;
 
   public:
     PhysicalEnvironment();

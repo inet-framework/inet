@@ -482,22 +482,6 @@ const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
     return objects;
 }
 
-Box PhysicalEnvironment::calculateBoundingBox(const std::vector<Coord>& points) const
-{
-    Coord min = Coord::NIL;
-    Coord max = Coord::NIL;
-    if (points.begin() != points.end())
-    {
-        min = *points.begin();
-        max = min;
-    }
-    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++) {
-        min = min.min(*it);
-        max = max.max(*it);
-    }
-    return Box(min, max);
-}
-
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     objectCache->visitObjects(visitor, lineSegment);
