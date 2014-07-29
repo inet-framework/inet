@@ -20,7 +20,7 @@
 #include "Sphere.h"
 #include "Prism.h"
 #include "Material.h"
-#include "Quaternion.h"
+#include "Rotation.h"
 
 namespace inet {
 
@@ -274,7 +274,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                     point.y = atof(shapeTokenizer.nextToken());
                 points.push_back(point);
             }
-            Box boundingBox = calculateBoundingBox(points);
+            Box boundingBox = Box::calculateBoundingBox(points);
             Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
             std::vector<Coord> prismPoints;
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
@@ -410,11 +410,12 @@ void PhysicalEnvironment::updateCanvas()
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
         // TODO: rotate points
-        const Quaternion rotation(orientation);
+        const Rotation rotation(orientation);
         // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
             const Coord& size = cuboid->getSize();
+            // TODO: orientation
             cRectangleFigure *figure = new cRectangleFigure(NULL);
             figure->setFilled(true);
             figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
@@ -442,7 +443,7 @@ void PhysicalEnvironment::updateCanvas()
             std::vector<cFigure::Point> canvasPoints;
             const std::vector<Coord>& points = prism->getBase().getPoints();
             for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-                canvasPoints.push_back(computeCanvasPoint(*it + position, *viewAngle));
+                canvasPoints.push_back(computeCanvasPoint(rotation.rotateVector(*it) + position, *viewAngle));
             cPolygonFigure *figure = new cPolygonFigure(NULL);
             figure->setFilled(true);
             figure->setPoints(canvasPoints);
