@@ -33,7 +33,7 @@ class INET_API PhysicalObject : public cNamedObject
   protected:
     const int id;
     Coord position; // center of the object's bounding box
-    EulerAngles orientation;
+    EulerAngles orientation; // TODO: (sequence of rotation axes: xyz or something else?)
     const Shape3D *shape;
     const Material *material;
     const cFigure::Color lineColor;
