@@ -16,7 +16,6 @@
 //
 
 #include "Rotation.h"
-#include "Quaternion.h"
 
 namespace inet {
 

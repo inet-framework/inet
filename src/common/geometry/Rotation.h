@@ -19,7 +19,6 @@
 #define __INET_ROTATION_H_
 
 #include "EulerAngles.h"
-#include "Quaternion.h"
 #include "Coord.h"
 
 namespace inet {
