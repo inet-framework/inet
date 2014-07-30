@@ -96,10 +96,8 @@ void ObstacleLoss::obstacleLoss(const PhysicalObject *object, Hz frequency, cons
     const Shape3D *shape = object->getShape();
     const Coord& obstaclePosition = object->getPosition();
     const EulerAngles& orientation = object->getOrientation();
-    EulerAngles invOrientation = EulerAngles(-orientation.alpha, -orientation.beta, -orientation.gamma);
     Rotation rotation(orientation);
-    Rotation rotationInverse(invOrientation);
-    const LineSegment lineSegment(rotationInverse.rotateVector((transmissionPosition - obstaclePosition)), rotationInverse.rotateVector((receptionPosition - obstaclePosition)));
+    const LineSegment lineSegment(rotation.rotateVectorCounterClockwise(transmissionPosition - obstaclePosition), rotation.rotateVectorCounterClockwise(receptionPosition - obstaclePosition));
     Coord intersection1, intersection2, normal1, normal2;
     intersectionComputationCount++;
     if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
@@ -108,20 +106,20 @@ void ObstacleLoss::obstacleLoss(const PhysicalObject *object, Hz frequency, cons
 #ifdef __CCANVAS_H
         if (leaveIntersectionTrail) {
             cLineFigure *intersectionLine = new cLineFigure();
-            Coord rotatedIntersection1 = rotation.rotateVector(intersection1);
-            Coord rotatedIntersection2 = rotation.rotateVector(intersection2);
+            Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
+            Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
             intersectionLine->setStart(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition));
             intersectionLine->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition));
             intersectionLine->setLineColor(cFigure::RED);
             intersectionTrail->addChildFigure(intersectionLine);
             cLineFigure *normal1Line = new cLineFigure();
             normal1Line->setStart(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition));
-            normal1Line->setEnd(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition + rotation.rotateVector(normal1)));
+            normal1Line->setEnd(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition + rotation.rotateVectorClockwise(normal1)));
             normal1Line->setLineColor(cFigure::GREY);
             intersectionTrail->addChildFigure(normal1Line);
             cLineFigure *normal2Line = new cLineFigure();
             normal2Line->setStart(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition));
-            normal2Line->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition + rotation.rotateVector(normal2)));
+            normal2Line->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition + rotation.rotateVectorClockwise(normal2)));
             normal2Line->setLineColor(cFigure::GREY);
             intersectionTrail->addChildFigure(normal2Line);
         }
