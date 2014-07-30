@@ -74,7 +74,7 @@ void Prism::genereateFaces()
     }
 }
 
-Coord Prism::computeOutwardNormalVectorForFace(unsigned int i) const
+Coord Prism::computeOutwardNormalVector(unsigned int i) const
 {
     Polygon face = faces[i];
     Coord facePoint = face.getPoints()[0];
@@ -104,7 +104,7 @@ void Prism::computeOutwardNormalVectors()
 {
     normalVectorsForFaces.clear();
     for (unsigned int i = 0; i < faces.size(); i++)
-        normalVectorsForFaces.push_back(computeOutwardNormalVectorForFace(i));
+        normalVectorsForFaces.push_back(computeOutwardNormalVector(i));
 }
 
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
