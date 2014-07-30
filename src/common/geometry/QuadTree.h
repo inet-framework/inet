@@ -45,23 +45,23 @@ class INET_API QuadTree
     QuadTree *parent;    // if we divide a quadrant then the divided quadrant will be the parent of it's four subquadrant
 
   protected:
-    QuadTree *searchQuadrant(Coord lastPos);
-    unsigned int whichQuadrant(Coord pos) const;
+    QuadTree *searchQuadrant(const Coord& lastPos);
+    unsigned int whichQuadrant(const Coord& pos) const;
     bool hasChild() const;
-    void setBoundary(Coord *minBoundaries, Coord *maxBoundaries);
+    void setBoundary(Coord *minBoundaries, Coord *maxBoundaries) const;
     void splitPoints();
     void setToLeaf();
-    bool isInRectangleRange(Coord pointCoord) const;
-    bool doesIntersectWithQuadrant(Coord pos, double range) const;
+    bool isInRectangleRange(const Coord& pointCoord) const;
+    bool doesIntersectWithQuadrant(const Coord& pos, double range) const;
     void tryToJoinChildQuadrants();
 
   public:
-    bool move(const cObject *point, Coord newPos);    // move an object to newPos
+    bool move(const cObject *point, const Coord& newPos);    // move an object to newPos
     bool remove(const cObject *point);    // remove an object from the tree
-    bool insert(const cObject *point, Coord pos);    // insert an object with position pos
-    void rangeQuery(Coord pos, double range, IVisitor *visitor) const; // orthogonal range query from a point
-    void strictRangeQuery(Coord pos, double range, IVisitor *visitor) const; // query for points which lie in a circle with radius=range and center=pos
-    QuadTree(Coord boundaryMin, Coord boundaryMax, unsigned int quadrantCapacity, QuadTree *parent);
+    bool insert(const cObject *point, const Coord& pos);    // insert an object with position pos
+    void rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const; // orthogonal range query from a point
+    void strictRangeQuery(const Coord& pos, double range, const IVisitor *visitor) const; // query for points which lie in a circle with radius=range and center=pos
+    QuadTree(const Coord& boundaryMin, const Coord& boundaryMax, unsigned int quadrantCapacity, QuadTree *parent);
     ~QuadTree();
 };
 

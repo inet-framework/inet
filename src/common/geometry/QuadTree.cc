@@ -19,7 +19,7 @@
 
 namespace inet {
 
-bool QuadTree::insert(const cObject *point, Coord pos)
+bool QuadTree::insert(const cObject *point, const Coord& pos)
 {
     if (!isInRectangleRange(pos))
         return false;
@@ -45,7 +45,7 @@ bool QuadTree::insert(const cObject *point, Coord pos)
     return false;
 }
 
-unsigned int QuadTree::whichQuadrant(Coord pos) const
+unsigned int QuadTree::whichQuadrant(const Coord& pos) const
 {
     for (unsigned int i = 0; i < 4; i++)
         if (quadrants[i]->isInRectangleRange(pos))
@@ -55,7 +55,7 @@ unsigned int QuadTree::whichQuadrant(Coord pos) const
     return 19920213;
 }
 
-void QuadTree::setBoundary(Coord *minBoundaries, Coord *maxBoundaries)
+void QuadTree::setBoundary(Coord *minBoundaries, Coord *maxBoundaries) const
 {
     // We just divide a rectangle into four smaller congruent rectangle
 
@@ -115,7 +115,7 @@ void QuadTree::setToLeaf()
         quadrants[i] = NULL;
 }
 
-void QuadTree::rangeQuery(Coord pos, double range, IVisitor *visitor) const
+void QuadTree::rangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
 {
     // If our rectangle intersects with a quadrant then we insert its objects to the
     // neighbors vector
@@ -130,7 +130,7 @@ void QuadTree::rangeQuery(Coord pos, double range, IVisitor *visitor) const
 
 }
 
-void QuadTree::strictRangeQuery(Coord pos, double range, IVisitor *visitor) const
+void QuadTree::strictRangeQuery(const Coord& pos, double range, const IVisitor *visitor) const
 {
     if (!hasChild() && doesIntersectWithQuadrant(pos, range)) {
         for (unsigned int i = 0; i < points.size(); i++) {
@@ -145,7 +145,7 @@ void QuadTree::strictRangeQuery(Coord pos, double range, IVisitor *visitor) cons
     }
 }
 
-bool QuadTree::isInRectangleRange(Coord pointCoord) const
+bool QuadTree::isInRectangleRange(const Coord& pointCoord) const
 {
     if (pointCoord.x <= boundaryMax.x && pointCoord.x >= boundaryMin.x &&
         pointCoord.y <= boundaryMax.y && pointCoord.y >= boundaryMin.y)
@@ -153,7 +153,7 @@ bool QuadTree::isInRectangleRange(Coord pointCoord) const
     return false;
 }
 
-bool QuadTree::doesIntersectWithQuadrant(Coord pos, double range) const
+bool QuadTree::doesIntersectWithQuadrant(const Coord& pos, double range) const
 {
     Coord minRectangleBoundary = pos;
     Coord maxRectangleBoundary = pos;
@@ -201,7 +201,7 @@ bool QuadTree::remove(const cObject *point)
     return true;
 }
 
-QuadTree *QuadTree::searchQuadrant(Coord lastPos)
+QuadTree *QuadTree::searchQuadrant(const Coord& lastPos)
 {
     // If lastPos is in the quadrant and that quadrant has no child,
     // then we found the quadrant which _may_ contain our object.
@@ -266,7 +266,7 @@ void QuadTree::tryToJoinChildQuadrants()
     }
 }
 
-bool QuadTree::move(const cObject *point, Coord newPos)
+bool QuadTree::move(const cObject *point, const Coord& newPos)
 {
     QuadTree *quadrant = searchQuadrant(newPos);
 
@@ -287,7 +287,7 @@ bool QuadTree::move(const cObject *point, Coord newPos)
         return remove(point) && insert(point, newPos);
 }
 
-QuadTree::QuadTree(Coord boundaryMin, Coord boundaryMax, unsigned int quadrantCapacity, QuadTree *parent)
+QuadTree::QuadTree(const Coord& boundaryMin, const Coord& boundaryMax, unsigned int quadrantCapacity, QuadTree *parent)
 {
     this->boundaryMax = boundaryMax;
     this->boundaryMin = boundaryMin;
