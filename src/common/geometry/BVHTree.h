@@ -95,7 +95,6 @@ class BVHTree
 
     public:
         BVHTree(const Coord& boundingMin, const Coord& boundingMax, std::vector<const PhysicalObject *>& objects, unsigned int start, unsigned int end, Axis axis, unsigned int leafCapacity);
-        void traverse() const;
         virtual ~BVHTree();
         void lineSegmentQuery(const LineSegment& lineSegment,  const IVisitor *visitor) const;
 };
