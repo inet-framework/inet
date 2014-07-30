@@ -102,7 +102,7 @@ void QuadTreeNeighborCache::removeRadio(const IRadio *radio)
         throw cRuntimeError("You can't remove radio: %d because it is not in our radio container", radio->getId());
 }
 
-void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range)
+void QuadTreeNeighborCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
 {
     double radius = range + rebuildPeriod * maxSpeed;
     Coord transmitterPos = transmitter->getAntenna()->getMobility()->getCurrentPosition();

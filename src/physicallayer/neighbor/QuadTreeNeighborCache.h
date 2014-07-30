@@ -64,7 +64,7 @@ class QuadTreeNeighborCache : public cSimpleModule, public RadioMedium::INeighbo
   public:
     void addRadio(const IRadio *radio);
     void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
     QuadTreeNeighborCache();
     ~QuadTreeNeighborCache();
 };

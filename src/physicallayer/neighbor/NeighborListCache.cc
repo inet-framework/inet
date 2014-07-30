@@ -38,12 +38,12 @@ void NeighborListCache::initialize(int stage)
     }
 }
 
-void NeighborListCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range)
+void NeighborListCache::sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const
 {
     if (this->range < range)
         throw cRuntimeError("The transmitter's (id: %d) range is bigger then the global NeighborListCache range", transmitter->getId());
 
-    RadioEntryCache::iterator it = radioToEntry.find(transmitter);
+    RadioEntryCache::const_iterator it = radioToEntry.find(transmitter);
     if (it == radioToEntry.end())
         throw cRuntimeError("Transmitter is not found");
 

@@ -62,7 +62,7 @@ class INET_API GridNeighborCache : public RadioMedium::INeighborCache, public cS
   public:
     void addRadio(const IRadio *radio);
     void removeRadio(const IRadio *radio);
-    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range);
+    void sendToNeighbors(IRadio *transmitter, const IRadioFrame *frame, double range) const;
 
     GridNeighborCache() : grid(NULL), radioMedium(NULL), refillCellsTimer(NULL) {};
     virtual ~GridNeighborCache();
