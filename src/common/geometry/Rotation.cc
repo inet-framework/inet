@@ -22,7 +22,6 @@ namespace inet {
 Rotation::Rotation(const EulerAngles& eulerAngle)
 {
     // Note that, we don't need to use our Quaternion class since we don't use its operators
-    // roll (z), pitch (y), yaw (z)
     double q0 = cos(eulerAngle.gamma/2) * cos(eulerAngle.beta/2) * cos(eulerAngle.alpha/2) +
                 sin(eulerAngle.gamma/2) * sin(eulerAngle.beta/2) * sin(eulerAngle.alpha/2);
     double q1 = sin(eulerAngle.gamma/2) * cos(eulerAngle.beta/2) * cos(eulerAngle.alpha/2) -
@@ -31,10 +30,10 @@ Rotation::Rotation(const EulerAngles& eulerAngle)
                 sin(eulerAngle.gamma/2) * cos(eulerAngle.beta/2) * sin(eulerAngle.alpha/2);
     double q3 = cos(eulerAngle.gamma/2) * cos(eulerAngle.beta/2) * sin(eulerAngle.alpha/2) -
                 sin(eulerAngle.gamma/2) * sin(eulerAngle.beta/2) * cos(eulerAngle.alpha/2);
-    computeRotationMatrix(q0, q1, q2, q3);
+    computeRotationMatrices(q0, q1, q2, q3);
 }
 
-void Rotation::computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3)
+void Rotation::computeRotationMatrices(const double& q0, const double& q1, const double& q2, const double& q3)
 {
     // Ref: http://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
     rotationMatrix[0][0] = 1 - 2*(q2*q2 + q3*q3);
@@ -46,15 +45,31 @@ void Rotation::computeRotationMatrix(const double& q0, const double& q1, const d
     rotationMatrix[2][0] = 2*(q1*q3 - q0*q2);
     rotationMatrix[2][1] = 2*(q0*q1 + q2*q3);
     rotationMatrix[2][2] = 1 - 2*(q1*q1 - q2*q2);
+
+    // A^T = A^-1 since it is an orthogonal matrix
+    for (unsigned int i = 0; i < 3; i++)
+        for (unsigned int j = 0; j < 3; j++)
+            invRotationMatrix[i][j] = rotationMatrix[j][i];
 }
 
-Coord Rotation::rotateVector(const Coord& vector) const
+Coord Rotation::rotateVectorClockwise(const Coord& vector) const
 {
-    // Compute rotationMatrix * vector
-    return Coord(
-            vector.x * rotationMatrix[0][0] + vector.y * rotationMatrix[0][1] + vector.z * rotationMatrix[0][2],
-            vector.x * rotationMatrix[1][0] + vector.y * rotationMatrix[1][1] + vector.z * rotationMatrix[1][2],
-            vector.x * rotationMatrix[2][0] + vector.y * rotationMatrix[2][1] + vector.z * rotationMatrix[2][2]);
+    return matrixMultiplication(rotationMatrix, vector);
 }
+
+Coord Rotation::rotateVectorCounterClockwise(const Coord& vector) const
+{
+    return matrixMultiplication(invRotationMatrix, vector);
+}
+
+Coord Rotation::matrixMultiplication(const double matrix[3][3], const Coord& vector) const
+{
+    return Coord(
+            vector.x * matrix[0][0] + vector.y * matrix[0][1] + vector.z * matrix[0][2],
+            vector.x * matrix[1][0] + vector.y * matrix[1][1] + vector.z * matrix[1][2],
+            vector.x * matrix[2][0] + vector.y * matrix[2][1] + vector.z * matrix[2][2]);
+}
+
+
 
 } /* namespace inet */

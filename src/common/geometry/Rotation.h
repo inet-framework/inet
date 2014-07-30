@@ -30,17 +30,14 @@ class Rotation
 {
     protected:
         double rotationMatrix[3][3];
-        void computeRotationMatrix(const double& q0, const double& q1, const double& q2, const double& q3);
+        double invRotationMatrix[3][3];
+        void computeRotationMatrices(const double& q0, const double& q1, const double& q2, const double& q3);
+        Coord matrixMultiplication(const double matrix[3][3], const Coord& vector) const;
 
     public:
         Rotation(const EulerAngles& eulerAngle);
-        /*
-         * TODO: implement two different rotateVector
-         * rotateVectorClockwise()
-         * rotateVectorCounterClockwise()
-         * The current is the rotateVectorClockwise().
-         */
-        Coord rotateVector(const Coord& vector) const;
+        Coord rotateVectorClockwise(const Coord& vector) const;
+        Coord rotateVectorCounterClockwise(const Coord& vector) const;
 };
 
 } /* namespace inet */
