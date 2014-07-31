@@ -13,7 +13,7 @@
 
 2014-06-13  Rudolf Hornig
 
-	Contents of world/obstacles/ (Obstacle, ObstactleControl) moved to new
+	Contents of world/obstacles/ (Obstacle, ObstacleControl) moved to new
 	toplevel src directory environment/.
 
 	Rest of the ChangeLog describes world/obstacles/.

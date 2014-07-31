@@ -2,6 +2,15 @@
 
 	Changes on the inet-3.x branch so far:
 
+	ARP refactoring (Andras Varga)
+	- ARP is now next to the IPv4 module not below it, so outgoing packets
+	  no longer pass through the ARP module. The IPv4 module uses the IARP
+	  interface to query the ARP cache and to initiate address resolution.
+	- Motivation:
+	  (1) performance improvement (datagrams no longer go through ARP)
+	  (2) conceptually better (packets to PPP used to go through ARP, too!)
+	  (3) more consistent with how IPv6 and NeighbourDiscovery are organized
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards

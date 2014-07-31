@@ -2,6 +2,31 @@
 
 	Changes on the inet-3.x branch so far:
 
+	Network layer abstraction (Levente Meszaros, Andras Varga):
+	- Added IRoute, IRoutingTable, IPSocket.h, L3Address, L3AddressResolver,
+	  IL3AddressType, ModuleIdAddress, ModuleIdAddressType, ModulePathAddress,
+	  ModulePathAddressType, NetworkProtocolBase, NetworkDatagramBase
+
+	  - IPvXAddress is replaced by L3Address
+	  - IPvXAddressResolver is L3AddressResolver
+          - new address types: MACAddress, ModuleIdAddress, ModulePathAddress
+
+	- Motivation: allow uniform access to the IPv4, IPv6 and possibly other
+	  routing tables; e.g. some wireless networks may use MAC address as
+	  network address. Also, in simulation it sometimes makes sense to work
+	  with simple abstract addresses like module names, indices or IDs.
+
+	  Being able to uniformly access routing tables containing different
+	  types of addresses makes it possible to implement routing protocols
+	  in a generic way. I.e. the same DYMO module can work with IPv6, IPv6,
+	  MAC and other addresses without change and recompiling.
+
+	Added SimpleNetworkProtocol (Levente Meszaros)
+	- SimpleNetworkLayer, SimpleNetworkProtocolControlInfo
+
+	Added EchoProtocol (Levente Meszaros)
+	- EchoPacket, EchoProtocol, EchoProtocol, EchoProtocol
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards
@@ -46,7 +71,7 @@
 2013-08-30  Zoltan Bojthe
 
 	backport: InterfaceEntry: send notification only when the new and old
-	values are differs
+	values differ
 
 2014-01-15  Zoltan Bojthe
 

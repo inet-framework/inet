@@ -2,12 +2,15 @@
 
 	Changes on the inet-3.x branch so far:
 
+	Directory restructuring:
+	- code moved from networklayer/ospfv2/ to routing/ospfv2/
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards
 
 	Namespace (Zoltan Bojthe, Zsolt Prontvai)
-	- code has been moved into the inet namespace
+	- code has been moved into the inet::ospf namespace
 
 	Init stages (Zoltan Bojthe, Andras Varga)
 	- init stages: reorganized by layers

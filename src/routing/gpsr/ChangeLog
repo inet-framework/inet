@@ -1,3 +1,8 @@
+2014-06-14  Levente Meszaros
+
+	First version added to the integration branch. Development was done
+	in Q1 2013 by Tamas Borbely, in src/networklayer/routing/rip/
+
 2013-07-25  ====== inet-3.x development started (integration branch) ======
 
 2014-06-12  ------ inet-2.4.0 released ------

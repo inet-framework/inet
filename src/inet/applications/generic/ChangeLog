@@ -2,6 +2,12 @@
 
 	Changes on the inet-3.x branch so far:
 
+	Follow network layer refactoring (Levente Meszaros)
+	- IIPvXTrafficGenerator, IPvXTrafSink: merged ipv4In/ipv6In and
+	  ipv4Out/ipv6Out gates into ipIn and ipOut.
+	- IPvXAddress has been replaced by L3Address
+	- dynamic registration in the IP layer
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards

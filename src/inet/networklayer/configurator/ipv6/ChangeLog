@@ -2,6 +2,9 @@
 
 	Changes on the inet-3.x branch so far:
 
+	Directory restructuring:
+	- networklayer/autorouting renamed to networklayer/configurator/
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards

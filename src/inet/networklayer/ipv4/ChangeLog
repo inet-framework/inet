@@ -2,6 +2,46 @@
 
 	Changes on the inet-3.x branch so far:
 
+	Dynamic registration of upper layer protocols (Levente Meszaros)
+	- TCP, UDP, SCTP, RSVP, OSPF and MANET used to have separate in/out
+	  gates in the IPv4 module. They have been merged into transportIn[]/
+	  transportOut[] gate vectors.
+	- Higher layer protocols must register their protocol numbers by
+	  sending an IPRegisterProtocolCommand in the initialization stage
+	  to IPv4.
+	- Introduced an IPSocket class that wraps the registration process
+
+	Network layer abstraction (Levente Meszaros, Andras Varga):
+	- Routing tables and routes now implement a common IRoutingTable and IRoute.
+
+	  Motivation: allow uniform access to the IPv4, IPv6 and possibly other
+	  routing tables; e.g. some wireless networks may use MAC address as
+	  network address. Also, in simulation it sometimes makes sense to work
+	  with simple abstract addresses like module names, indices or IDs.
+
+	  Being able to uniformly access routing tables containing different
+	  types of addresses makes it possible to implement routing protocols
+	  in a generic way. I.e. the same DYMO module can work with IPv6, IPv6,
+	  MAC and other addresses without change and recompiling.
+
+	- Overview:
+	  - interfaces for generic access: IRoutingTable, IRoute, INetworkDatagram, etc.
+          - generic L3Address class that can hold all kinds of addresses (=union)
+	  - Ping refactoring (use generic addressing instead of hardcoded IPv4IPv6)
+	  - merged routing table change notification constants for IPv4 and IPv6
+
+	Directory restructuring:
+	- NetworkLayer was renamed to IPv4NetworkLayer and moved into src/networklayer/ipv4
+
+	ARP refactoring (Andras Varga)
+	- ARP is now next to the IPv4 module not below it, so outgoing packets
+	  no longer pass through the ARP module. The IPv4 module uses the IARP
+	  interface to query the ARP cache and to initiate address resolution.
+	- Motivation:
+	  (1) performance improvement (datagrams no longer go through ARP)
+	  (2) conceptually better (packets to PPP used to go through ARP, too!)
+	  (3) more consistent with how IPv6 and NeighbourDiscovery are organized
+
 	Code formatting (Zoltan Bojthe)
 	- using uncrustify, see _scripts/reformat/*
 	- common style for header guards
