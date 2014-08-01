@@ -24,6 +24,8 @@
 #ifdef WITH_IPv4
 #include "inet/networklayer/ipv4/IPv4Datagram.h"
 #endif // ifdef WITH_IPv4
+#include "PcapRecorder.h"
+#include "pcap.h"
 
 #ifdef WITH_IPv6
 #include "inet/networklayer/ipv6/IPv6Datagram.h"
@@ -136,7 +138,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
 
     switch (linkType)
     {
-    case 1:
+    case LINKTYPE_ETHERNET:
         {
             EthernetIIFrame *etherFrame = NULL;
             while (msg)
@@ -157,7 +159,7 @@ void PcapRecorder::recordPacket(cPacket *msg, bool l2r)
         }
         break;
 
-    case 105:
+    case LINKTYPE_IEEE801_11:
         {
             Ieee80211Frame *ieee80211Frame = NULL;
             while (msg)

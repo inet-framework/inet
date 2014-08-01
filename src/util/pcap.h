@@ -20,6 +20,12 @@
 
 #define PCAP_MAGIC           0xa1b2c3d4
 
+// Link-layer header type values
+#define LINKTYPE_NULL            0
+#define LINKTYPE_ETHERNET        1
+#define LINKTYPE_IEEE801_11      105
+
+
 /* "libpcap" file header (minus magic number). */
 struct pcap_hdr {
      uint32 magic;      /* magic */
