@@ -39,7 +39,7 @@ class EthernetSerializer
         /**
          * Puts a packet sniffed from the wire into an EtherFrame.
          */
-        void parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt);
+        cPacket* parse(const unsigned char *buf, unsigned int bufsize);
 };
 
 #endif /* ETHERNETSERIALIZER_H_ */
