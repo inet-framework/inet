@@ -95,12 +95,12 @@ void PcapParser::readRecord()
         switch(fileHeader.network)
         {
             case LINKTYPE_ETHERNET:
-                EthernetSerializer().parse(buf, recordHeader.incl_len, &nextPkt);
+                nextPkt = EthernetSerializer().parse(buf, recordHeader.incl_len);
                 scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
                 break;
 
             case LINKTYPE_IEEE801_11:
-                Ieee80211Serializer().parse(buf, recordHeader.incl_len, &nextPkt);
+                nextPkt = Ieee80211Serializer().parse(buf, recordHeader.incl_len);
                 scheduleAt(SimTime(recordHeader.ts_sec, SIMTIME_S) + SimTime(recordHeader.ts_usec, SIMTIME_US), nextMsgTimer);
                 break;
         }

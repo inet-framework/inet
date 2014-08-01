@@ -81,11 +81,11 @@ int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf
     return packetLength;
 }
 
-void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt)
+cPacket* EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize)
 {
     struct ether_header *etherhdr = (struct ether_header*) buf;
-    *pkt = new EthernetIIFrame;
-    EthernetIIFrame *etherPacket = (EthernetIIFrame*)*pkt;
+    cPacket *pkt = new EthernetIIFrame;
+    EthernetIIFrame *etherPacket = (EthernetIIFrame*)pkt;
 
     MACAddress temp;
     temp.setAddressBytes(etherhdr->ether_dhost);
@@ -123,6 +123,7 @@ void EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize, c
     ASSERT(encapPacket);
     etherPacket->encapsulate(encapPacket);
     etherPacket->setName(encapPacket->getName());
+    return pkt;
 }
 
 

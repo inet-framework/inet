@@ -223,7 +223,7 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
 }
 
-void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, cPacket **pkt)
+cPacket* Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize)
 {
     uint8_t *type = (uint8_t *) (buf);
     switch(*type)
@@ -231,8 +231,8 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
         case 0xD4: // ST_ACK
         {
             struct ieee80211_frame_ack *frame = (struct ieee80211_frame_ack *) (buf);
-            *pkt = new Ieee80211ACKFrame;
-            Ieee80211ACKFrame *ackFrame = (Ieee80211ACKFrame*)*pkt;
+            cPacket *pkt = new Ieee80211ACKFrame;
+            Ieee80211ACKFrame *ackFrame = (Ieee80211ACKFrame*)pkt;
             ackFrame->setType(ST_ACK);
             ackFrame->setToDS(false);
             ackFrame->setFromDS(false);
@@ -242,13 +242,13 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             MACAddress temp;
             temp.setAddressBytes(frame->i_ra);
             ackFrame->setReceiverAddress(temp);
-            return;
+            return pkt;
         }
         case 0xB4: // ST_RTS
         {
             struct ieee80211_frame_rts *frame = (struct ieee80211_frame_rts *) (buf);
-            *pkt = new Ieee80211RTSFrame;
-            Ieee80211RTSFrame *rtsFrame = (Ieee80211RTSFrame*)*pkt;
+            cPacket *pkt = new Ieee80211RTSFrame;
+            Ieee80211RTSFrame *rtsFrame = (Ieee80211RTSFrame*)pkt;
             rtsFrame->setType(ST_RTS);
             rtsFrame->setToDS(false);
             rtsFrame->setFromDS(false);
@@ -260,13 +260,13 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             rtsFrame->setReceiverAddress(temp);
             temp.setAddressBytes(frame->i_ta);
             rtsFrame->setTransmitterAddress(temp);
-            return;
+            return pkt;
         }
         case 0xC4: // ST_CTS
         {
             struct ieee80211_frame_cts *frame = (struct ieee80211_frame_cts *) (buf);
-            *pkt = new Ieee80211CTSFrame;
-            Ieee80211CTSFrame *ctsFrame = (Ieee80211CTSFrame*)*pkt;
+            cPacket *pkt = new Ieee80211CTSFrame;
+            Ieee80211CTSFrame *ctsFrame = (Ieee80211CTSFrame*)pkt;
             ctsFrame->setType(ST_CTS);
             ctsFrame->setToDS(false);
             ctsFrame->setFromDS(false);
@@ -276,13 +276,13 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             MACAddress temp;
             temp.setAddressBytes(frame->i_ra);
             ctsFrame->setReceiverAddress(temp);
-            return;
+            return pkt;
         }
         case 0x8: // ST_DATA
         {
             struct ieee80211_frame_addr4 *frame = (struct ieee80211_frame_addr4 *) (buf);
-            *pkt = new Ieee80211DataFrameWithSNAP;
-            Ieee80211DataFrameWithSNAP *dataFrame = (Ieee80211DataFrameWithSNAP*)*pkt;
+            cPacket *pkt = new Ieee80211DataFrameWithSNAP;
+            Ieee80211DataFrameWithSNAP *dataFrame = (Ieee80211DataFrameWithSNAP*)pkt;
             dataFrame->setType(ST_DATA);
             dataFrame->setToDS(frame->i_fc[1]&0x1);
             dataFrame->setFromDS(frame->i_fc[1]&0x2);
@@ -349,7 +349,7 @@ void Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize, 
             ASSERT(encapPacket);
             dataFrame->encapsulate(encapPacket);
             dataFrame->setName(encapPacket->getName());
-            return;
+            return pkt;
         }
 
         case 0xB0: // ST_AUTHENTICATION
