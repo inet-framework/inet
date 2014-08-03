@@ -18,7 +18,9 @@
 #include "PhysicalEnvironment.h"
 #include "Cuboid.h"
 #include "Sphere.h"
+#include "Face.h"
 #include "Prism.h"
+#include "ConvexPolytope.h"
 #include "Material.h"
 #include "Rotation.h"
 
@@ -147,27 +149,27 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
             }
             shape = new Prism(height, Polygon(points));
         }
-//        else if (!strcmp(typeAttribute, "polygon"))
-//        {
-//            std::vector<Coord> points;
-//            const char *pointsAttribute = element->getAttribute("points");
-//            if (!pointsAttribute)
-//                throw cRuntimeError("Missing points attribute of polygon");
-//            else {
-//                cStringTokenizer tokenizer(pointsAttribute);
-//                while (tokenizer.hasMoreTokens()) {
-//                    Coord point;
-//                    if (tokenizer.hasMoreTokens())
-//                        point.x = atof(tokenizer.nextToken());
-//                    if (tokenizer.hasMoreTokens())
-//                        point.y = atof(tokenizer.nextToken());
-//                    if (tokenizer.hasMoreTokens())
-//                        point.z = atof(tokenizer.nextToken());
-//                    points.push_back(point);
-//                }
-//            }
-//            shape = new Polygon(points);
-//        }
+        else if (!strcmp(typeAttribute, "polytope"))
+        {
+            std::vector<Coord> points;
+            const char *pointsAttribute = element->getAttribute("points");
+            if (!pointsAttribute)
+                throw cRuntimeError("Missing points attribute of polytope");
+            else {
+                cStringTokenizer tokenizer(pointsAttribute);
+                while (tokenizer.hasMoreTokens()) {
+                    Coord point;
+                    if (tokenizer.hasMoreTokens())
+                        point.x = atof(tokenizer.nextToken());
+                    if (tokenizer.hasMoreTokens())
+                        point.y = atof(tokenizer.nextToken());
+                    if (tokenizer.hasMoreTokens())
+                        point.z = atof(tokenizer.nextToken());
+                    points.push_back(point);
+                }
+            }
+            shape = new ConvexPolytope(points);
+        }
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
@@ -281,21 +283,26 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 prismPoints.push_back(*it - center);
             shape = new Prism(height, Polygon(prismPoints));
         }
-//        else if (!strcmp(shapeType, "polygon"))
-//        {
-//            std::vector<Coord> points;
-//            while (shapeTokenizer.hasMoreTokens()) {
-//                Coord point;
-//                if (shapeTokenizer.hasMoreTokens())
-//                    point.x = atof(shapeTokenizer.nextToken());
-//                if (shapeTokenizer.hasMoreTokens())
-//                    point.y = atof(shapeTokenizer.nextToken());
-//                if (shapeTokenizer.hasMoreTokens())
-//                    point.z = atof(shapeTokenizer.nextToken());
-//                points.push_back(point);
-//            }
-//            shape = new Polygon(points);
-//        }
+        else if (!strcmp(shapeType, "polytope"))
+        {
+            std::vector<Coord> points;
+            while (shapeTokenizer.hasMoreTokens()) {
+                Coord point;
+                if (shapeTokenizer.hasMoreTokens())
+                    point.x = atof(shapeTokenizer.nextToken());
+                if (shapeTokenizer.hasMoreTokens())
+                    point.y = atof(shapeTokenizer.nextToken());
+                if (shapeTokenizer.hasMoreTokens())
+                    point.z = atof(shapeTokenizer.nextToken());
+                points.push_back(point);
+            }
+            Box boundingBox = Box::calculateBoundingBox(points);
+            Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
+            std::vector<Coord> polytopePoints;
+            for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
+                polytopePoints.push_back(*it - center);
+            shape = new ConvexPolytope(polytopePoints);
+        }
         else {
             int id = atoi(shapeAttribute);
             shape = shapes[id];
@@ -451,21 +458,22 @@ void PhysicalEnvironment::updateCanvas()
             figure->setFillColor(object->getFillColor());
             objectsLayer->addFigure(figure);
         }
-        // polygon
-//        const Polygon *polygon = dynamic_cast<const Polygon *>(shape);
-//        if (polygon)
-//        {
-//            std::vector<cFigure::Point> canvasPoints;
-//            const std::vector<Coord>& points = polygon->getPoints();
-//            for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-//                canvasPoints.push_back(computeCanvasPoint(position + *it, *viewAngle));
-//            cPolygonFigure *figure = new cPolygonFigure(NULL);
-//            figure->setFilled(true);
-//            figure->setPoints(canvasPoints);
-//            figure->setLineColor(object->getLineColor());
-//            figure->setFillColor(object->getFillColor());
-//            objectsLayer->addChildFigure(figure);
-//        }
+        // polytope
+        const ConvexPolytope *polytope = dynamic_cast<const ConvexPolytope *>(shape);
+        if (polytope)
+        {
+            std::vector<Coord> projPoints;
+            polytope->computeProjection(projPoints, *viewAngle);
+            std::vector<cFigure::Point> canvasPoints;
+            for (std::vector<Coord>::const_iterator it = projPoints.begin(); it != projPoints.end(); it++)
+                canvasPoints.push_back(computeCanvasPoint(rotation.rotateVectorClockwise(*it) + position, *viewAngle));
+            cPolygonFigure *figure = new cPolygonFigure(NULL);
+            figure->setFilled(true);
+            figure->setPoints(canvasPoints);
+            figure->setLineColor(object->getLineColor());
+            figure->setFillColor(object->getFillColor());
+            objectsLayer->addChildFigure(figure);
+        }
         // add name to the end
         const char *name = object->getName();
         if (name) {
