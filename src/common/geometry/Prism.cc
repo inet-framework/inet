@@ -74,30 +74,21 @@ void Prism::genereateFaces()
     }
 }
 
-Coord Prism::computeOutwardNormalVector(unsigned int i) const
+Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
 {
-    Polygon face = faces[i];
+    Polygon face = faces[faceId];
+    Polygon testFace = faces[(faceId + 1) % faces.size()];
+    std::vector<Coord> testPoints = testFace.getPoints();
+    // This is a good test point: for convex polygons, the centroid is always an interior point.
+    Coord testCentroid;
+    for (unsigned int i = 0; i < testPoints.size(); i++)
+        testCentroid += testPoints[i];
+    testCentroid /= testPoints.size();
     Coord facePoint = face.getPoints()[0];
     Coord faceNormal = face.getNormalVector();
-    double mult = 1;
-    for (unsigned int j = 0; j < faces.size(); j++)
-    {
-        if (j == i)
-            continue;
-        Coord fPoint = faces[j].getPoints()[0];
-        int tp = 0;
-        while (fPoint == facePoint)
-        {
-            tp++;
-            fPoint = faces[j].getPoints()[tp];
-        }
-        if ((fPoint - facePoint) * faceNormal > 0)
-        {
-            mult = -1;
-            break;
-        }
-    }
-    return faceNormal * mult;
+    if ((testCentroid - facePoint) * faceNormal > 0)
+        return faceNormal * (-1);
+    return faceNormal;
 }
 
 void Prism::computeOutwardNormalVectors()
