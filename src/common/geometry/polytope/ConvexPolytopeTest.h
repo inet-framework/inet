@@ -24,6 +24,10 @@
 
 namespace inet {
 
+/*
+ * This class takes a 3D point set, creates a ConvexPolytope with its point set
+ * and then writes the faces and edges out to the standard output.
+ */
 class ConvexPolytopeTest : public cSimpleModule
 {
     protected:
