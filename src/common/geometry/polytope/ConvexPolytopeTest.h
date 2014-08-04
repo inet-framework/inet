@@ -39,6 +39,7 @@ class ConvexPolytopeTest : public cSimpleModule
        virtual void initialize(int stage);
        virtual void handleMessage(cMessage *msg) { throw cRuntimeError("This module doesn't handle self messages"); }
        void parsePoints(const char *strPoints);
+       void test() const;
        void printFaces() const;
 
     public:

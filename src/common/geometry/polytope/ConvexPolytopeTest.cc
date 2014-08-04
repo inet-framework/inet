@@ -16,6 +16,8 @@
 // 
 
 #include "ConvexPolytopeTest.h"
+#include "PolytopePoint.h"
+#include "Face.h"
 
 namespace inet {
 
@@ -67,6 +69,47 @@ void ConvexPolytopeTest::initialize(int stage)
         parsePoints(strPoints);
         polytope = new ConvexPolytope(points);
         printFaces();
+        test();
+    }
+}
+
+void ConvexPolytopeTest::test() const
+{
+    // Let P := {p_1,p_2,...,p_n} be a point set with finite number of elements then conv(P)
+    // (donates the convex hull of P) is the minimal convex set containing P, and equivalently
+    // is the set of all convex combinations of points in P.
+    // So we can test our algorithm in the following way:
+    // Generate a lot of convex combinations and test if the combination is in the convex hull.
+    // If it is not, then the algorithm is incorrect.
+    unsigned int numberOfPoints = points.size();
+    // We are testing with 1000 random convex combination.
+    const ConvexPolytope::Faces& faces = polytope->getFaces();
+    for (unsigned int i = 1; i != 1000; i++)
+    {
+        // Create a convex combination:
+        // lambda_1 p_1 + lambda_2 p_2 + ... + lambda_n p_n where lambda_1 +
+        // lambda_2 + ... + lambda_n = 1 and lambda_k >= 0 for all k.
+        double lambda = 1.0;
+        unsigned int id = 0;
+        Coord convexCombination;
+        while (id < numberOfPoints - 1)
+        {
+            double randLambda = (rand() % 5000) / 10000.0;
+            while (lambda - randLambda < 0)
+                randLambda =  (rand() % 5000) / 10000.0;
+            lambda -= randLambda;
+            convexCombination += points[id++] * randLambda;
+        }
+        convexCombination += points[numberOfPoints - 1] * lambda;
+        std::cout << "Testing with convex combination: " << convexCombination << endl;
+        for (ConvexPolytope::Faces::const_iterator fit = faces.begin(); fit != faces.end(); fit++)
+        {
+            Face *face = *fit;
+            PolytopePoint testPoint(convexCombination);
+            // An arbitrary point is an inner point if and only if it can't see any faces.
+            if (face->isVisibleFrom(&testPoint))
+                throw cRuntimeError("The algorithm is incorrect!");
+        }
     }
 }
 
