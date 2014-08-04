@@ -20,6 +20,7 @@
 
 #include "Shape3D.h"
 #include "Polygon.h"
+#include "Rotation.h"
 
 namespace inet {
 
@@ -28,6 +29,10 @@ namespace inet {
  */
 class INET_API Prism : public Shape3D
 {
+  public:
+    typedef std::vector<Polygon> Faces;
+    typedef std::vector<Coord> Points;
+
   protected:
     double height;
     Polygon base;
@@ -38,6 +43,8 @@ class INET_API Prism : public Shape3D
     void genereateFaces();
     Coord computeOutwardNormalVector(unsigned int faceId) const;
     void computeOutwardNormalVectors();
+    bool isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const;
+    bool isVisibleFromPlane(unsigned int faceId, const Coord& planeNormal, const Rotation& rotation) const;
 
   public:
     Prism() : height(0) {}
@@ -51,6 +58,7 @@ class INET_API Prism : public Shape3D
 
     virtual Coord computeSize() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
+    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
 };
 
 } // namespace inet

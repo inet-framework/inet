@@ -91,6 +91,21 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
     return faceNormal;
 }
 
+bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const
+{
+    std::vector<Coord> polygonPoints = faces.at(faceId).getPoints();
+    Coord facePoint = polygonPoints.at(0);
+    Coord facePointPoint = point - facePoint;
+    Coord rotatedFaceNormal = rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId));
+    return facePointPoint * rotatedFaceNormal > 0;
+}
+
+bool Prism::isVisibleFromPlane(unsigned int faceId, const Coord& planeNormal, const Rotation& rotation) const
+{
+    Coord rotatedFaceNormal = rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId));
+    return rotatedFaceNormal * planeNormal > 0;
+}
+
 void Prism::computeOutwardNormalVectors()
 {
     normalVectorsForFaces.clear();
@@ -188,6 +203,22 @@ void inet::Prism::setBase(const Polygon& base)
         {
             genereateFaces();
             computeOutwardNormalVectors();
+        }
+    }
+}
+
+void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const
+{
+    for (unsigned int i = 0; i < this->faces.size(); i++)
+    {
+        const Polygon& face = this->faces.at(i);
+        if (isVisibleFromPlane(i, viewNormal, rotation))
+        {
+            const std::vector<Coord>& facePoints = face.getPoints();
+            std::vector<Coord> points;
+            for (Points::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
+                points.push_back(*pit);
+            faces.push_back(points);
         }
     }
 }

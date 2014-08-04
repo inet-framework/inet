@@ -38,6 +38,7 @@ class INET_API Cuboid : public Shape3D
     void setSize(const Coord& size) { this->size = size; }
     virtual Coord computeSize() const { return size; }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
+    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
     virtual ~Cuboid();
 };
 

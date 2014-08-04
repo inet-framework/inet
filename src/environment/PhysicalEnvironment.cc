@@ -448,7 +448,8 @@ void PhysicalEnvironment::updateCanvas()
         const Prism *prism = dynamic_cast<const Prism *>(shape);
         if (prism) {
             std::vector<cFigure::Point> canvasPoints;
-            const std::vector<Coord>& points = prism->getBase().getPoints();
+            std::vector<Coord> points;
+            prism->computeProjection(points, *viewAngle);
             for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
                 canvasPoints.push_back(computeCanvasPoint(rotation.rotateVectorClockwise(*it) + position, *viewAngle));
             cPolygonFigure *figure = new cPolygonFigure(NULL);

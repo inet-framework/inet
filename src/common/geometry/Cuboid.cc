@@ -42,5 +42,10 @@ Cuboid::~Cuboid()
     delete prism;
 }
 
+void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const
+{
+    prism->computeVisibleFaces(faces, rotation, viewNormal);
+}
+
 } // namespace inet
 
