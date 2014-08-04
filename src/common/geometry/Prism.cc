@@ -23,11 +23,18 @@ Prism::Prism(double height, const Polygon& base) :
     height(height),
     base(base)
 {
-    if (height != 0)
+    if (height > 0)
     {
-        genereateFaces();
-        computeOutwardNormalVectors();
+        if (base.getPoints().size() >= 3)
+        {
+            genereateFaces();
+            computeOutwardNormalVectors();
+        }
+        else
+            throw cRuntimeError("We need at least three points to construct a prism");
     }
+    else
+        throw cRuntimeError("A prism has a positive height");
 }
 
 Coord Prism::computeSize() const
@@ -43,34 +50,29 @@ Coord Prism::computeSize() const
 
 void Prism::genereateFaces()
 {
-    if (height == 0)
-        throw cRuntimeError("A polygon has no faces");
-    if (base.getPoints().size() > 0)
+    faces.clear();
+    faces.push_back(base);
+    Coord baseNormalUnitVector = base.getNormalUnitVector();
+    const std::vector<Coord>& basePoints = base.getPoints();
+    std::vector<Coord> translatedCopyPoints;
+    for (unsigned int i = 0; i < basePoints.size(); i++)
     {
-        faces.clear();
-        faces.push_back(base);
-        Coord baseNormalUnitVector = base.getNormalUnitVector();
-        const std::vector<Coord>& basePoints = base.getPoints();
-        std::vector<Coord> translatedCopyPoints;
-        for (unsigned int i = 0; i < basePoints.size(); i++)
-        {
-            Coord point = basePoints[i];
-            point.z += height;
-            translatedCopyPoints.push_back(point);
-        }
-        Polygon translatedCopy(translatedCopyPoints);
-        faces.push_back(translatedCopy);
-        unsigned int basePointsSize = basePoints.size();
-        for (unsigned int i = 0; i < basePointsSize; i++)
-        {
-            std::vector<Coord> facePoints;
-            facePoints.push_back(basePoints[i]);
-            facePoints.push_back(translatedCopyPoints[i]);
-            facePoints.push_back(translatedCopyPoints[(i+1) % basePointsSize]);
-            facePoints.push_back(basePoints[(i+1) % basePointsSize]);
-            Polygon face(facePoints);
-            faces.push_back(face);
-        }
+        Coord point = basePoints[i];
+        point.z += height;
+        translatedCopyPoints.push_back(point);
+    }
+    Polygon translatedCopy(translatedCopyPoints);
+    faces.push_back(translatedCopy);
+    unsigned int basePointsSize = basePoints.size();
+    for (unsigned int i = 0; i < basePointsSize; i++)
+    {
+        std::vector<Coord> facePoints;
+        facePoints.push_back(basePoints[i]);
+        facePoints.push_back(translatedCopyPoints[i]);
+        facePoints.push_back(translatedCopyPoints[(i+1) % basePointsSize]);
+        facePoints.push_back(basePoints[(i+1) % basePointsSize]);
+        Polygon face(facePoints);
+        faces.push_back(face);
     }
 }
 
@@ -115,82 +117,79 @@ void Prism::computeOutwardNormalVectors()
 
 bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const
 {
-    if (height > 0)
+    // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
+    Coord p0 = lineSegment.getPoint1();
+    Coord p1 = lineSegment.getPoint2();
+    if (p0 == p1)
     {
-        // Note: based on http://geomalgorithms.com/a13-_intersect-4.html
-        Coord p0 = lineSegment.getPoint1();
-        Coord p1 = lineSegment.getPoint2();
-        if (p0 == p1)
+        normal1 = normal2 = Coord::NIL;
+        return false;
+    }
+    Coord segmentDirection = p1 - p0;
+    double tE = 0;
+    double tL = 1;
+    for (unsigned int i = 0; i < faces.size(); i++)
+    {
+        Polygon face = faces[i];
+        Coord normalVec = normalVectorsForFaces[i];
+        const std::vector<Coord>& pointList = face.getPoints();
+        Coord f0 = pointList[0];
+        double N = (f0 - p0) * normalVec;
+        double D = segmentDirection * normalVec;
+        if (D < 0)
         {
-            normal1 = normal2 = Coord::NIL;
-            return false;
-        }
-        Coord segmentDirection = p1 - p0;
-        double tE = 0;
-        double tL = 1;
-        for (unsigned int i = 0; i < faces.size(); i++)
-        {
-            Polygon face = faces[i];
-            Coord normalVec = normalVectorsForFaces[i];
-            const std::vector<Coord>& pointList = face.getPoints();
-            Coord f0 = pointList[0];
-            double N = (f0 - p0) * normalVec;
-            double D = segmentDirection * normalVec;
-            if (D < 0)
+            double t = N / D;
+            if (t > tE)
             {
-                double t = N / D;
-                if (t > tE)
-                {
-                    tE = t;
-                    normal1 = normalVec;
-                    if (tE > tL)
-                        return false;
-                }
-            }
-            else if (D > 0)
-            {
-                double t = N / D;
-                if (t < tL)
-                {
-                    tL = t;
-                    normal2 = normalVec;
-                    if (tL < tE)
-                        return false;
-                }
-            }
-            else
-            {
-                if (N < 0)
+                tE = t;
+                normal1 = normalVec;
+                if (tE > tL)
                     return false;
             }
         }
-        if (tE == 0)
-            normal1 = Coord::NIL;
-        if (tL == 1)
-            normal2 = Coord::NIL;
-        intersection1 = p0 + segmentDirection * tE;
-        intersection2 = p0 + segmentDirection * tL;
-        if (intersection1 == intersection2)
+        else if (D > 0)
         {
-            normal1 = normal2 = Coord::NIL;
-            return false;
+            double t = N / D;
+            if (t < tL)
+            {
+                tL = t;
+                normal2 = normalVec;
+                if (tL < tE)
+                    return false;
+            }
         }
-        return true;
+        else
+        {
+            if (N < 0)
+                return false;
+        }
     }
-    else
-        return base.computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2);
+    if (tE == 0)
+        normal1 = Coord::NIL;
+    if (tL == 1)
+        normal2 = Coord::NIL;
+    intersection1 = p0 + segmentDirection * tE;
+    intersection2 = p0 + segmentDirection * tL;
+    if (intersection1 == intersection2)
+    {
+        normal1 = normal2 = Coord::NIL;
+        return false;
+    }
+    return true;
 }
 
 void inet::Prism::setHeight(double height)
 {
     if (height != this->height)
     {
-        this->height = height;
-        if (height != 0)
+        if (height > 0)
         {
+            this->height = height;
             genereateFaces();
             computeOutwardNormalVectors();
         }
+        else
+            throw cRuntimeError("A prism has a positive height");
     }
 }
 
@@ -198,12 +197,14 @@ void inet::Prism::setBase(const Polygon& base)
 {
     if (base.getPoints() != this->base.getPoints())
     {
-        this->base = base;
-        if (height != 0)
+        if (base.getPoints().size() >= 3)
         {
+            this->base = base;
             genereateFaces();
             computeOutwardNormalVectors();
         }
+        else
+            throw cRuntimeError("We need at least three points to construct a prism");
     }
 }
 
