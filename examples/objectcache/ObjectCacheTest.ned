@@ -26,7 +26,7 @@ network ObjectCacheTest
 {
     parameters:
         int numHosts;
-        @display("bgb=2000,1000");
+        @display("bgb=2000,2000");
     submodules:
         environment: PhysicalEnvironment {
             parameters:
