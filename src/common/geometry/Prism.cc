@@ -50,7 +50,7 @@ void Prism::genereateFaces()
         faces.clear();
         faces.push_back(base);
         Coord baseNormalUnitVector = base.getNormalUnitVector();
-        std::vector<Coord> basePoints = base.getPoints();
+        const std::vector<Coord>& basePoints = base.getPoints();
         std::vector<Coord> translatedCopyPoints;
         for (unsigned int i = 0; i < basePoints.size(); i++)
         {
@@ -78,7 +78,7 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
 {
     Polygon face = faces[faceId];
     Polygon testFace = faces[(faceId + 1) % faces.size()];
-    std::vector<Coord> testPoints = testFace.getPoints();
+    const std::vector<Coord>& testPoints = testFace.getPoints();
     // This is a good test point: for convex polygons, the centroid is always an interior point.
     Coord testCentroid;
     for (unsigned int i = 0; i < testPoints.size(); i++)
@@ -93,7 +93,7 @@ Coord Prism::computeOutwardNormalVector(unsigned int faceId) const
 
 bool Prism::isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const
 {
-    std::vector<Coord> polygonPoints = faces.at(faceId).getPoints();
+    const std::vector<Coord>& polygonPoints = faces.at(faceId).getPoints();
     Coord facePoint = polygonPoints.at(0);
     Coord facePointPoint = point - facePoint;
     Coord rotatedFaceNormal = rotation.rotateVectorClockwise(normalVectorsForFaces.at(faceId));
@@ -132,7 +132,7 @@ bool Prism::computeIntersection(const LineSegment& lineSegment, Coord& intersect
         {
             Polygon face = faces[i];
             Coord normalVec = normalVectorsForFaces[i];
-            std::vector<Coord> pointList = face.getPoints();
+            const std::vector<Coord>& pointList = face.getPoints();
             Coord f0 = pointList[0];
             double N = (f0 - p0) * normalVec;
             double D = segmentDirection * normalVec;
