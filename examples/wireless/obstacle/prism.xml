@@ -1,4 +1,0 @@
-<environment>
-    <!-- Roads -->
-    <object position="center 300 50 0" orientation="0 0 0" shape="prism 10 20 100 0 150 100 0 500 250 0 200 300 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-</environment>
