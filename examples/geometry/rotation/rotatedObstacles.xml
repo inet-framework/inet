@@ -18,4 +18,5 @@
 
     <!-- Rotated polytopes -->
     <object position="center 500 450 0" orientation="30 0 0" shape="polytope 0 0 100 0 100 0 0 100 100 100 0 100 100 100 100 100 0 0 100 100 0 0 0 0" material="brick" fill-color="47 165 28" />
+    <object position="center 700 450 0" orientation="67 0 0" shape="polytope 0 100 100 100 100 0 0 0 0 100 0 100" material="brick" fill-color="47 165 28" />
 </environment>
