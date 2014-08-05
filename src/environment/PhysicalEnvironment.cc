@@ -278,6 +278,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             }
             Box boundingBox = Box::calculateBoundingBox(points);
             Coord center = (boundingBox.max - boundingBox.min) / 2 + boundingBox.min;
+            center.z = height / 2;
             std::vector<Coord> prismPoints;
             for (std::vector<Coord>::iterator it = points.begin(); it != points.end(); it++)
                 prismPoints.push_back(*it - center);
