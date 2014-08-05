@@ -22,6 +22,7 @@
 #include "IVisitor.h"
 #include "LineSegment.h"
 #include "Box.h"
+#include "Rotation.h"
 
 namespace inet {
 
@@ -57,11 +58,13 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void initialize(int stage);
 
     static cFigure::Point computeCanvasPoint(Coord point, char viewAngle);
+    static Coord getPlaneNormal(char viewAngle);
 
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
+    virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& position);
 
   public:
     PhysicalEnvironment();

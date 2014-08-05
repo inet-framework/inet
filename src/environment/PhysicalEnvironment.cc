@@ -409,6 +409,22 @@ cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
         return environment->computeCanvasPoint(point, 'z');
 }
 
+Coord PhysicalEnvironment::getPlaneNormal(char viewAngle)
+{
+    switch (viewAngle)
+    {
+        case 'x':
+            return Coord(1, 0, 0);
+        case 'y':
+            return Coord(0, 1, 0);
+        case 'z':
+            return Coord(0, 0, 1);
+        default:
+            throw cRuntimeError("Unknown viewAngle = %c", viewAngle);
+    }
+}
+
+
 void PhysicalEnvironment::updateCanvas()
 {
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
@@ -416,20 +432,13 @@ void PhysicalEnvironment::updateCanvas()
         const Shape3D *shape = object->getShape();
         const Coord& position = object->getPosition();
         const EulerAngles& orientation = object->getOrientation();
-        // TODO: rotate points
         const Rotation rotation(orientation);
         // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
-            const Coord& size = cuboid->getSize();
-            // TODO: orientation
-            cRectangleFigure *figure = new cRectangleFigure(NULL);
-            figure->setFilled(true);
-            figure->setP1(computeCanvasPoint(position - size / 2, *viewAngle));
-            figure->setP2(computeCanvasPoint(position + size / 2, *viewAngle));
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
+            std::vector<std::vector<Coord> > faces;
+            cuboid->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            computeFacePoints(object, faces, rotation, position);
         }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
@@ -447,33 +456,17 @@ void PhysicalEnvironment::updateCanvas()
         // prism
         const Prism *prism = dynamic_cast<const Prism *>(shape);
         if (prism) {
-            std::vector<cFigure::Point> canvasPoints;
-            std::vector<Coord> points;
-            prism->computeProjection(points, *viewAngle);
-            for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
-                canvasPoints.push_back(computeCanvasPoint(rotation.rotateVectorClockwise(*it) + position, *viewAngle));
-            cPolygonFigure *figure = new cPolygonFigure(NULL);
-            figure->setFilled(true);
-            figure->setPoints(canvasPoints);
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            objectsLayer->addFigure(figure);
+            std::vector<std::vector<Coord> > faces;
+            prism->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            computeFacePoints(object, faces, rotation, position);
         }
         // polytope
         const ConvexPolytope *polytope = dynamic_cast<const ConvexPolytope *>(shape);
         if (polytope)
         {
-            std::vector<Coord> projPoints;
-            polytope->computeProjection(projPoints, *viewAngle);
-            std::vector<cFigure::Point> canvasPoints;
-            for (std::vector<Coord>::const_iterator it = projPoints.begin(); it != projPoints.end(); it++)
-                canvasPoints.push_back(computeCanvasPoint(rotation.rotateVectorClockwise(*it) + position, *viewAngle));
-            cPolygonFigure *figure = new cPolygonFigure(NULL);
-            figure->setFilled(true);
-            figure->setPoints(canvasPoints);
-            figure->setLineColor(object->getLineColor());
-            figure->setFillColor(object->getFillColor());
-            objectsLayer->addChildFigure(figure);
+            std::vector<std::vector<Coord> > faces;
+            polytope->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            computeFacePoints(object, faces, rotation, position);
         }
         // add name to the end
         const char *name = object->getName();
@@ -489,6 +482,26 @@ void PhysicalEnvironment::updateCanvas()
 const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
 {
     return objects;
+}
+
+void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& position)
+{
+    for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
+    {
+        std::vector<cFigure::Point> canvasPoints;
+        const std::vector<Coord>& facePoints = *it;
+        for (std::vector<Coord>::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
+        {
+            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, *viewAngle);
+            canvasPoints.push_back(canvPoint);
+        }
+        cPolygonFigure *figure = new cPolygonFigure(NULL);
+        figure->setFilled(true);
+        figure->setPoints(canvasPoints);
+        figure->setLineColor(object->getLineColor());
+        figure->setFillColor(object->getFillColor());
+        objectsLayer->addFigure(figure);
+    }
 }
 
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
