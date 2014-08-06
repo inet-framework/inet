@@ -496,7 +496,7 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
             cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, *viewAngle);
             canvasPoints.push_back(canvPoint);
         }
-        cPolygonFigure *figure = new cPolygonFigure(NULL);
+        cPolygonFigure *figure = new cPolygonFigure(NULL); // TODO: Valgrind found a memory leak here: cFigure: std::vector<cFigure*> children.
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
         figure->setLineColor(object->getLineColor());
