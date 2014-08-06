@@ -711,7 +711,7 @@ void RadioMedium::sendToRadio(IRadio *transmitter, const IRadio *receiver, const
 
 IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
 {
-    const ITransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime());
+    const ITransmission *transmission = radio->getTransmitter()->createTransmission(radio, macFrame, simTime()); // TODO: memory leak
     addTransmission(radio, transmission);
     RadioFrame *radioFrame = new RadioFrame(transmission);
     radioFrame->setName(macFrame->getName());
