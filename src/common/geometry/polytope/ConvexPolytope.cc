@@ -350,7 +350,10 @@ void ConvexPolytope::purgeWrappedFaces()
     {
         Face *face = *fit;
         if (face->isWrapped())
+        {
             fit = faces.erase(fit);
+            delete face;
+        }
         else
             fit++;
     }
@@ -462,7 +465,7 @@ ConvexPolytope::~ConvexPolytope()
     for (Points::iterator pit = points.begin(); pit != points.end(); pit++)
         delete *pit;
 
-    for (Faces::iterator fit = faces.end(); fit != faces.end(); fit++)
+    for (Faces::iterator fit = faces.begin(); fit != faces.end(); fit++)
         delete *fit;
 
 }
