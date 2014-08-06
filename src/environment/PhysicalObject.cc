@@ -28,7 +28,7 @@ PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, 
     material(material),
     lineColor(lineColor),
     fillColor(fillColor),
-    figure(figure)
+    figure(NULL)
 {
 }
 
