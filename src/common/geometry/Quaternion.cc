@@ -38,7 +38,7 @@ Quaternion Quaternion::operator%(const Quaternion& rhs) const
 
 Quaternion operator*(double scalar, const Quaternion& lhs)
 {
-    Quaternion(lhs.realPart * scalar, lhs.vectorPart * scalar);
+    return Quaternion(lhs.realPart * scalar, lhs.vectorPart * scalar);
 }
 
 } /* namespace inet */
