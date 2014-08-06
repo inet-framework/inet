@@ -19,7 +19,7 @@
 
 namespace inet {
 
-PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape *shape, const Material *material, const cFigure::Color& lineColor, const cFigure::Color& fillColor) :
+PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape3D *shape, const Material *material, const cFigure::Color& lineColor, const cFigure::Color& fillColor) :
     cNamedObject(name),
     id(id),
     position(position),
