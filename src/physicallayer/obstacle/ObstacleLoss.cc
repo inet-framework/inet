@@ -162,7 +162,13 @@ void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
     obstacleLoss->obstacleLoss(check_and_cast<const PhysicalObject *>(object), frequency, transmissionPosition, receptionPosition, totalLoss);
 }
 
+ObstacleLoss::~ObstacleLoss()
+{
+    delete intersectionTrail;
+}
+
 } // namespace physicallayer
+
 
 } // namespace inet
 

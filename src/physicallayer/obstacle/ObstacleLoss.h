@@ -68,7 +68,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     void obstacleLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition, double& totalLoss) const;
   public:
     ObstacleLoss();
-
+    virtual ~ObstacleLoss();
     virtual void printToStream(std::ostream& stream) const;
     virtual double computeObstacleLoss(Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition) const;
 };
