@@ -111,17 +111,17 @@ void ObstacleLoss::obstacleLoss(const PhysicalObject *object, Hz frequency, cons
             intersectionLine->setStart(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition));
             intersectionLine->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition));
             intersectionLine->setLineColor(cFigure::RED);
-            intersectionTrail->addChildFigure(intersectionLine);
+            intersectionTrail->addFigure(intersectionLine);
             cLineFigure *normal1Line = new cLineFigure();
             normal1Line->setStart(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition));
             normal1Line->setEnd(environment->computeCanvasPoint(rotatedIntersection1 + obstaclePosition + rotation.rotateVectorClockwise(normal1)));
             normal1Line->setLineColor(cFigure::GREY);
-            intersectionTrail->addChildFigure(normal1Line);
+            intersectionTrail->addFigure(normal1Line);
             cLineFigure *normal2Line = new cLineFigure();
             normal2Line->setStart(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition));
             normal2Line->setEnd(environment->computeCanvasPoint(rotatedIntersection2 + obstaclePosition + rotation.rotateVectorClockwise(normal2)));
             normal2Line->setLineColor(cFigure::GREY);
-            intersectionTrail->addChildFigure(normal2Line);
+            intersectionTrail->addFigure(normal2Line);
         }
 #endif
         const Material *material = object->getMaterial();
