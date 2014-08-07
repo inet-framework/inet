@@ -43,13 +43,12 @@ Face::Face(PolytopePoint *p1, PolytopePoint *p2, PolytopePoint  *p3)
 
 void Face::computeCentroid()
 {
-    unsigned int numberOfPoints = 0;
     centroid = Coord(0,0,0);
+    unsigned int numberOfPoints = edges.size();
     for (Edges::const_iterator eit = edges.begin(); eit != edges.end(); eit++)
     {
         PolytopePoint *point = (*eit)->getP1();
         centroid += *point;
-        numberOfPoints++;
     }
     ASSERT(numberOfPoints != 0);
     centroid /= numberOfPoints;
