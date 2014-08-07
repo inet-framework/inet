@@ -133,10 +133,8 @@ void QuadTree::strictRangeQuery(const Coord& pos, double range, const IVisitor *
 
 bool QuadTree::isInRectangleRange(const Coord& pointCoord) const
 {
-    if (pointCoord.x <= boundaryMax.x && pointCoord.x >= boundaryMin.x &&
-        pointCoord.y <= boundaryMax.y && pointCoord.y >= boundaryMin.y)
-        return true;
-    return false;
+    return  pointCoord.x <= boundaryMax.x && pointCoord.x >= boundaryMin.x &&
+            pointCoord.y <= boundaryMax.y && pointCoord.y >= boundaryMin.y;
 }
 
 bool QuadTree::doesIntersectWithQuadrant(const Coord& pos, double range) const
