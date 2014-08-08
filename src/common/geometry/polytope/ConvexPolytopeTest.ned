@@ -19,5 +19,6 @@ module ConvexPolytopeTest
 {
     parameters:
         string points = default("");
+        bool convexCombinationTest = default(true);
         @class(ConvexPolytopeTest);
 }

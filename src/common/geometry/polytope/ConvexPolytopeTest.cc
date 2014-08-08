@@ -66,10 +66,12 @@ void ConvexPolytopeTest::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         const char *strPoints = par("points").stringValue();
+        bool testWithConvexCombations = par("convexCombinationTest").boolValue();
         parsePoints(strPoints);
         polytope = new ConvexPolytope(points);
         printFaces();
-        test();
+        if (testWithConvexCombations)
+            test();
     }
 }
 

@@ -33,6 +33,7 @@ class ConvexPolytopeTest : public cSimpleModule
     protected:
         ConvexPolytope *polytope;
         std::vector<Coord> points;
+        bool testWithConvexCombations;
 
     protected:
        virtual int numInitStages() const { return NUM_INIT_STAGES; }
