@@ -1,15 +1,15 @@
 <environment>
     <!-- Roads -->
-    <object position="center 500 50 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 500 150 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 500 250 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 500 350 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 500 450 0" orientation="0 0 0" shape="cuboid 820 20 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 100 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 300 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 500 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 700 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
-    <object position="center 900 250 0" orientation="0 0 0" shape="cuboid 20 420 0" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 50 0" orientation="0 0 0" shape="cuboid 820 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 150 0" orientation="0 0 0" shape="cuboid 820 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 250 0" orientation="0 0 0" shape="cuboid 820 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 350 0" orientation="0 0 0" shape="cuboid 820 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 450 0" orientation="0 0 0" shape="cuboid 820 20 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 100 250 0" orientation="0 0 0" shape="cuboid 20 420 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 300 250 0" orientation="0 0 0" shape="cuboid 20 420 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 500 250 0" orientation="0 0 0" shape="cuboid 20 420 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 700 250 0" orientation="0 0 0" shape="cuboid 20 420 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
+    <object position="center 900 250 0" orientation="0 0 0" shape="cuboid 20 420 1" material="concrete" line-color="112 128 144" fill-color="112 128 144"/>
     <!-- Houses -->
     <object position="center 200 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" fill-color="203 65 84"/>
     <object position="center 400 100 10" orientation="0 0 0" shape="cuboid 100 50 20" material="brick" fill-color="203 65 84"/>
