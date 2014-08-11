@@ -1,30 +1,30 @@
-isp_traffic_shaping
-===================
+xkalp
+=====
 
-Shortdesc:	'isp_traffic_shaping' is a set of simulation models and scenarios
-            for the investigation of the effect of ISP traffic shaping on
-			user-perceived performances in next-generation access networks
-            based on OMNeT++ and INET.
+Shortdesc:	'xkalp' is a set of simulation models and scenarios for the
+			investigation of the performance of asynchronous source clock
+			frequency recovery schemes.
 Author:		Kyeong Soo (Joseph) Kim (kyeongsoo.kim@gmail.com)
 License:	GPL
 Requires:	OMNeT++ 4.2.2 or later version with INET-HNRL
 
 
-The 'isp_traffic_shaping' is a set of simulation models and scenarios
-for the investigation of the effect of ISP traffic shaping on
-user-perceived performances in next-generation access networks based
-on OMNeT++ and INET, which implements token-bucket filter (TBF) and
-VLAN-based abstract models of access switches and nodes.
+The 'xkalp' is a set of simulation models and scenarios for the investigation
+of the performance of asynchronous source clock frequency recovery schemes.
 
 
 Features:
 
 
 Note:
-The results from this work is published in [1].
+1. Before running a simulation, an SQL database for vectors should be created
+   first. For example,
+   $ sqlite3 N16_n1_vlow-vector.db < INET-HNRL_ROOT/src/util/database/sqlite/sql/vectors.sql
+
+2. The results from this work is published in [1].
 
 
 References:
-[1] Kyeong Soo Kim, "Effect of ISP traffic shaping on user-perceived
-    performances in broadband access networks," Submitted to FOAN
-    2012, Jun. 2012.
+[1] Kyeong Soo Kim, "Asynchronous Source Clock Frequency Recovery through
+    Aperiodic Packet Streams," IEEE Communications Letters, vol. 17, no. 7,
+    pp. 1455-1458, Jul. 2013.
