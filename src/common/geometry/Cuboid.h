@@ -19,7 +19,7 @@
 #define __INET_CUBOID_H
 
 #include "Shape3D.h"
-#include "Prism.h"
+#include "Rotation.h"
 
 namespace inet {
 
@@ -30,7 +30,11 @@ class INET_API Cuboid : public Shape3D
 {
   protected:
     Coord size;
-    Prism *prism;
+
+  protected:
+    bool isInsideX(const Coord& point) const { return -size.x / 2 <= point.x && point.x <= size.x / 2; }
+    bool isInsideY(const Coord& point) const { return -size.y / 2 <= point.y && point.y <= size.y / 2; }
+    bool isInsideZ(const Coord& point) const { return -size.z / 2 <= point.z && point.z <= size.z / 2; }
 
   public:
     Cuboid(const Coord& size);
@@ -38,8 +42,7 @@ class INET_API Cuboid : public Shape3D
     void setSize(const Coord& size) { this->size = size; }
     virtual Coord computeSize() const { return size; }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
-    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
-    virtual ~Cuboid();
+    virtual void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
 };
 
 } // namespace inet
