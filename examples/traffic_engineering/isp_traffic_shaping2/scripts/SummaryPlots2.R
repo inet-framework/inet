@@ -905,3 +905,136 @@ if (.resp == 'y') {
         }   # end of for(.j)
     }   # end of for(.i)
 }   # end of if()
+#################################################################################
+### summary plots for shared architecture with worst-case traffic (i.e., periodic
+### on-off pattern) configurations
+###
+### Note: This is for the Elsevier Computer Networks paper.
+#################################################################################
+.resp <- readline("Process data from shared access with WCT configuration? (hit y or n) ")
+if (.resp == 'y') {
+    .config <- readline("Type OMNeT++ configuration name: ")
+    .sw_tbf.wd <- paste(.base.directory, "results/SharedWithWct", .config, sep="/")
+    .sw_tbf.rdata <- paste(.config, 'RData', sep=".")
+    if (file.exists(paste(.sw_tbf.wd, .sw_tbf.rdata, sep='/')) == FALSE) {
+        ## Do the processing of OMNeT++ data files unless there is a corresponding RData file in the working directory
+        .n_totalFiles <- length(list.files(path=.sw_tbf.wd, pattern='*.sca$'))  # total number of (scalar) files to process
+        .n_repetitions <- 10    # number of repetitions per experiment
+        .n_experiments <- ceiling(.n_totalFiles/.n_repetitions)   # number of experiments
+        .n_files <- ceiling(.n_totalFiles/.n_experiments)   # number of files per experiment
+        .scalars_dfs <- list()  # list of OMNeT++ scalar data frames from experiments
+        .dfs <- list()  # list of data frames from experiments for performances measures
+        .dfs_fi <- list()  # list of data frames from experiments for fairness indexes
+        .fileNames <- rep('', .n_files)  # vector of file names
+        for (.i in 1:.n_experiments) {
+            cat(paste("Processing ", as.character(.i), "th experiment ...\n", sep=""))
+            for (.j in 1:.n_files) {
+                .fileNames[.j] <- paste(.sw_tbf.wd,
+                                        paste(.config, "-", as.character((.i-1)*.n_files+.j-1), ".sca", sep=""),
+                                        sep='/')
+            }
+            .df <- loadDataset(.fileNames)
+            .scalars <- merge(cast(.df$runattrs, runid ~ attrname, value='attrvalue',
+                                   subset=attrname %in% c('experiment', 'measurement', 'module', 'N', 'numWcts', 'dr', 'ur', 'mr', 'bs', 'n')),
+                              .df$scalars, by='runid',
+                              all.x=TRUE)
+            .scalars_dfs[[.i]] <- .scalars
+            ## collect average session delay, average session throughput, and mean session transfer rate of FTP traffic, and their fairness indexes
+            .tmp_ftp <- collectMeasures(.scalars,
+                                        "experiment+measurement+N+numWcts+dr+ur+mr+bs+n+name ~ .",
+                                        '.*\\.ftpApp.*',
+                                        '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
+                                        c('N', 'numWcts', 'dr', 'ur', 'mr', 'bs', 'n'),
+                                        'ftp')
+            ## collect average & percentile session delays, average session throughput, mean session transfer rate of HTTP traffic, and their fairness indexes
+            .tmp_http <- collectMeasures(.scalars,
+                                         "experiment+measurement+N+numWcts+dr+ur+mr+bs+n+name ~ .",
+                                         '.*\\.httpApp.*',
+                                         '(average session delay|average session throughput|mean session transfer rate|90th-sessionDelay:percentile|95th-sessionDelay:percentile|99th-sessionDelay:percentile)',
+                                         c('N', 'numWcts', 'dr', 'ur', 'mr', 'bs', 'n'),
+                                         'http')
+            ## collect decodable frame rate of video traffic and its fairness index
+            .tmp_video <- collectMeasures(.scalars,
+                                          "experiment+measurement+N+numWcts+dr+ur+mr+bs+n+name ~ .",
+                                          '.*\\.videoApp.*',
+                                          'decodable frame rate',
+                                          c('N', 'numWcts', 'dr', 'ur', 'mr', 'bs', 'n'),
+                                          'video')
+            .dfs[[.i]] <- rbind(.tmp_ftp, .tmp_http, .tmp_video)
+        }   # end of for(.i)
+        ## combine the data frames from experiments into one
+        .scalars_df <- .scalars_dfs[[1]]
+        .tmp.df <- .dfs[[1]]
+        for (.i in 2:.n_experiments) {
+            .scalars_df <- rbind(.scalars_df, .scalars_dfs[[.i]])
+            .tmp.df <- rbind(.tmp.df, .dfs[[.i]])
+        }
+        ## save data frames for later use
+        .scalars_df.name <- paste('.sw_tbf_scalars_', .config, '.df', sep='')
+        .df.name <- paste('.sw_tbf_', .config, '.df', sep='')
+        assign(.scalars_df.name, .scalars_df)
+        assign(.df.name, sort_df(.tmp.df, vars=c('N', 'numWcts', 'dr', 'ur', 'mr', 'bs', 'n')))
+        save(list=c(.scalars_df.name, .df.name), file=paste(.sw_tbf.wd, .sw_tbf.rdata, sep="/"))
+    }
+    else {
+        ## Otherwise, load objects from the saved file
+        load(paste(.sw_tbf.wd, .sw_tbf.rdata, sep='/'))
+        .df.name <- paste('.sw_tbf_', .config, '.df', sep='')
+    }   # end of if() for the processing of OMNeT++ data files
+    .sw_tbf.df <- get(.df.name)
+    .ur.range <- unique(.sw_tbf.df$ur)
+    .mr.range <- unique(.sw_tbf.df$mr)
+    for (.i in 1:length(.ur.range)) {
+        .mr.idx <- 0
+        for (.j in 1:length(.mr.range)) {
+            ## process performance measures
+            if (length(subset(.sw_tbf.df, ur==.ur.range[.i] & mr==.mr.range[.j])$mean) > 0) {
+                .plots <- list()
+                ## for (.k in 1:length(.measure.type)) {
+                for (.k in 1:(length(.measure.type)-7)) { # subtract 7 because we do not include 'packet' and 'queue' in the processing
+                    .df <- subset(.sw_tbf.df, ur==.ur.range[.i] & mr==.mr.range[.j] & name==.measure[.k] & measure.type==.measure.type[.k], select=c(2, 6, 9, 10))
+                    is.na(.df) <- is.na(.df) # remove NaNs
+                    .df <- .df[!is.infinite(.df$ci.width),] # remove Infs
+                    .limits <- aes(ymin = mean - ci.width, ymax = mean +ci.width)
+                    .p <- ggplot(data=.df, aes(group=bs, linetype=factor(bs), x=numWcts, y=mean)) + geom_line() + scale_y_continuous(limits=c(0, 1.1*max(.df$mean+.df$ci.width)))
+                    .p <- .p + xlab(expression(paste("Number of Subscribers with On-Off Traffic Pattern  (", italic(N[on-off]), ")"))) + ylab(.labels.measure[.k])
+                    .p <- .p + geom_point(aes(group=bs, shape=factor(bs), x=numWcts, y=mean), size=.pt_size) + scale_shape_manual("Burst Size\n[MB]", values=0:9)
+                    .p <- .p + geom_errorbar(.limits, width=0.1) + scale_colour_discrete("Burst Size\n[MB]")
+                    #.p <- .p + stat_summary(fun.data=mean_cl_boot, geom='errorbar', width=0.1) + scale_linetype_discrete("Burst Size\n[MB]")
+                    .plots[[.k]] <- .p
+                    ## save each plot as a PDF file
+                    .p
+                    if (.ur.range[.i] == 1) {
+                        .ur.unit <- 'G'
+                    }
+                    else if (.ur.range[.i] == 100) {
+                        .ur.unit <- 'M'
+                    }
+                    else {
+                        stop("Unknown value of 'ur'.")
+                    }
+                    ggsave(paste(.sw_tbf.wd,
+                                 paste(.config, "_ur", as.character(.ur.range[.i]), .ur.unit,
+                                       "_mr", as.character(.mr.range[.j]), 'M',
+                                       "-", .measure.type[.k],
+                                       "-", .measure.abbrv[.k], ".pdf", sep=""), sep="/"))
+                }   # end of for(.k)
+                ## save combined plots into a PDF file per measure.type (e.g., ftp, http)
+                pdf(paste(.sw_tbf.wd,
+                          paste(.config,
+                                "_ur", as.character(.ur.range[.i]), .ur.unit,
+                                "_mr", as.character(.mr.range[.j]), 'M',
+                                "-ftp.pdf", sep=""), sep='/'))
+                grid.arrange(.plots[[1]], .plots[[2]], .plots[[3]], .plots[[4]], .plots[[5]], .plots[[6]])
+                dev.off()
+                pdf(paste(.sw_tbf.wd,
+                          paste(.config,
+                                "_ur", as.character(.ur.range[.i]), .ur.unit,
+                                "_mr", as.character(.mr.range[.j]), 'M',
+                                "-http.pdf", sep=""), sep='/'))
+                grid.arrange(.plots[[7]], .plots[[8]], .plots[[9]], .plots[[10]], .plots[[11]], .plots[[12]], ncol=2)
+                dev.off()
+            }   # end of if()
+        }   # end of for(.j)
+    }   # end of for(.i)
+}   # end of if()
