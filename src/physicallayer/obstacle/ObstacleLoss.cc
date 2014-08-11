@@ -87,8 +87,10 @@ double ObstacleLoss::computeReflectionLoss(const Material *incidentMaterial, con
 
 void ObstacleLoss::finish()
 {
-    std::cout << "Number of intersection computation attempt: " << intersectionComputationCount << endl;
-    std::cout << "Number of successful intersection computation: " << intersectionCount << endl;
+    EV_INFO << "Obstacle loss intersection computation count: " << intersectionComputationCount << endl;
+    EV_INFO << "Obstacle loss intersection count: " << intersectionCount << endl;
+    recordScalar("Obstacle loss intersection computation count", intersectionComputationCount);
+    recordScalar("Obstacle loss intersection count", intersectionCount);
 }
 
 void ObstacleLoss::obstacleLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition, double& totalLoss) const
