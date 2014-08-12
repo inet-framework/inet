@@ -64,7 +64,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
-    virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& position);
+    virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
 
   public:
     PhysicalEnvironment();

@@ -412,7 +412,7 @@ void PhysicalEnvironment::updateCanvas()
         if (cuboid) {
             std::vector<std::vector<Coord> > faces;
             cuboid->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation, position);
+            computeFacePoints(object, faces, rotation);
         }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
@@ -432,7 +432,7 @@ void PhysicalEnvironment::updateCanvas()
         if (prism) {
             std::vector<std::vector<Coord> > faces;
             prism->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation, position);
+            computeFacePoints(object, faces, rotation);
         }
         // polytope
         const ConvexPolytope *polytope = dynamic_cast<const ConvexPolytope *>(shape);
@@ -440,7 +440,7 @@ void PhysicalEnvironment::updateCanvas()
         {
             std::vector<std::vector<Coord> > faces;
             polytope->computeVisibleFaces(faces, rotation, viewRotation);
-            computeFacePoints(object, faces, rotation, position);
+            computeFacePoints(object, faces, rotation);
         }
         // add name to the end
         const char *name = object->getName();
@@ -458,8 +458,9 @@ const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
     return objects;
 }
 
-void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& position)
+void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation)
 {
+    const Coord& position = object->getPosition();
     for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
     {
         std::vector<cFigure::Point> canvasPoints;
