@@ -434,12 +434,12 @@ bool ConvexPolytope::computeIntersection(const LineSegment& lineSegment, Coord& 
     return true;
 }
 
-void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& planeNormal) const
+void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     for (Faces::const_iterator fit = this->faces.begin(); fit != this->faces.end(); fit++)
     {
         const Face *face = *fit;
-        if (isVisibleFromPlane(face, planeNormal, rotation))
+        if (isVisibleFromView(face, viewRotation, rotation))
         {
             const Edges& edges = face->getEdges();
             std::vector<Coord> points;
@@ -454,10 +454,11 @@ void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces
     }
 }
 
-bool ConvexPolytope::isVisibleFromPlane(const Face *face, const Coord& planeNormal, const Rotation& rotation) const
+bool ConvexPolytope::isVisibleFromView(const Face *face, const Rotation& viewRotation, const Rotation& rotation) const
 {
-    Coord rotatedFaceNormal = rotation.rotateVectorClockwise(face->getOutwardNormalVector());
-    return rotatedFaceNormal * planeNormal > 0;
+    Coord zNormal(0,0,1);
+    Coord rotatedFaceNormal = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(face->getOutwardNormalVector()));
+    return rotatedFaceNormal * zNormal > 0;
 }
 
 ConvexPolytope::~ConvexPolytope()

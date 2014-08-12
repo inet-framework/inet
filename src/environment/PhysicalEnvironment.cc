@@ -34,7 +34,6 @@ PhysicalEnvironment::PhysicalEnvironment() :
     relativeHumidity(sNaN),
     spaceMin(Coord(sNaN, sNaN, sNaN)),
     spaceMax(Coord(sNaN, sNaN, sNaN)),
-    viewAngle(NULL),
     objectCache(NULL),
     objectsLayer(NULL)
 {
@@ -63,9 +62,7 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
-        viewAngle = par("viewAngle");
-        if (!viewAngle || !*viewAngle)
-            throw cRuntimeError("Invalid view angle");
+        viewRotation = computeViewRotation(par("viewAngle"));
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
         canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
@@ -386,48 +383,24 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         objectCache->buildCache();
 }
 
-cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point, char viewAngle)
+cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation)
 {
-    switch (viewAngle)
-    {
-        case 'x':
-            return cFigure::Point(point.y, point.z);
-        case 'y':
-            return cFigure::Point(point.x, point.z);
-        case 'z':
-            return cFigure::Point(point.x, point.y);
-        default:
-            throw cRuntimeError("Unknown view angle");
-    }
+    Coord rotatedPoint = rotation.rotateVectorClockwise(point);
+    return cFigure::Point(rotatedPoint.x, rotatedPoint.y);
 }
 
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
 {
     PhysicalEnvironment *environment = dynamic_cast<PhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
     if (environment)
-        return environment->computeCanvasPoint(point, *(environment->viewAngle));
+        return environment->computeCanvasPoint(point, environment->viewRotation);
     else
-        return environment->computeCanvasPoint(point, 'z');
+        return environment->computeCanvasPoint(point, Rotation(EulerAngles(0,0,0)));
 }
-
-Coord PhysicalEnvironment::getPlaneNormal(char viewAngle)
-{
-    switch (viewAngle)
-    {
-        case 'x':
-            return Coord(1, 0, 0);
-        case 'y':
-            return Coord(0, 1, 0);
-        case 'z':
-            return Coord(0, 0, 1);
-        default:
-            throw cRuntimeError("Unknown viewAngle = %c", viewAngle);
-    }
-}
-
-
 void PhysicalEnvironment::updateCanvas()
 {
+    while (objectsLayer->getNumFigures())
+        delete objectsLayer->removeFigure(0);
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
         PhysicalObject *object = *it;
         const Shape3D *shape = object->getShape();
@@ -438,7 +411,7 @@ void PhysicalEnvironment::updateCanvas()
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
             std::vector<std::vector<Coord> > faces;
-            cuboid->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            cuboid->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation, position);
         }
         // sphere
@@ -447,8 +420,8 @@ void PhysicalEnvironment::updateCanvas()
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
-            cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), *viewAngle);
-            cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), *viewAngle);
+            cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), viewRotation);
+            cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), viewRotation);
             figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
             figure->setLineColor(object->getLineColor());
             figure->setFillColor(object->getFillColor());
@@ -458,7 +431,7 @@ void PhysicalEnvironment::updateCanvas()
         const Prism *prism = dynamic_cast<const Prism *>(shape);
         if (prism) {
             std::vector<std::vector<Coord> > faces;
-            prism->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            prism->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation, position);
         }
         // polytope
@@ -466,7 +439,7 @@ void PhysicalEnvironment::updateCanvas()
         if (polytope)
         {
             std::vector<std::vector<Coord> > faces;
-            polytope->computeVisibleFaces(faces, rotation, getPlaneNormal(*viewAngle));
+            polytope->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation, position);
         }
         // add name to the end
@@ -493,7 +466,7 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
         const std::vector<Coord>& facePoints = *it;
         for (std::vector<Coord>::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
         {
-            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, *viewAngle);
+            cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, viewRotation);
             canvasPoints.push_back(canvPoint);
         }
         cPolygonFigure *figure = new cPolygonFigure(NULL); // TODO: Valgrind found a memory leak here: cFigure: std::vector<cFigure*> children.
@@ -508,6 +481,28 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
     objectCache->visitObjects(visitor, lineSegment);
+}
+
+void PhysicalEnvironment::handleParameterChange(const char* name)
+{
+    if (name && !strcmp(name,"viewAngle"))
+    {
+        viewRotation = computeViewRotation(par("viewAngle"));
+        updateCanvas();
+    }
+}
+
+Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
+{
+    double x, y, z;
+    if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
+    {
+      EulerAngles angle(FWMath::deg2rad(x), FWMath::deg2rad(y), FWMath::deg2rad(z));
+      Rotation rotation(angle);
+      return rotation;
+    }
+    else
+        throw cRuntimeError("viewAngle must be a triplet representing three degrees");
 }
 
 } // namespace inet

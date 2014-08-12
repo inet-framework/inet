@@ -44,7 +44,7 @@ class INET_API Prism : public Shape3D
     Coord computeOutwardNormalVector(unsigned int faceId) const;
     void computeOutwardNormalVectors();
     bool isVisibleFromPoint(unsigned int faceId, const Coord& point, const Rotation& rotation) const;
-    bool isVisibleFromPlane(unsigned int faceId, const Coord& planeNormal, const Rotation& rotation) const;
+    bool isVisibleFromView(unsigned int faceId, const Rotation& viewRotation, const Rotation& rotation) const;
 
   public:
     Prism() : height(0) {}
@@ -58,7 +58,7 @@ class INET_API Prism : public Shape3D
 
     virtual Coord computeSize() const;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
-    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
+    void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
 };
 
 } // namespace inet

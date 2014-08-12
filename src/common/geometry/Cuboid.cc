@@ -124,7 +124,7 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     return !intersection1.isUnspecified() && !intersection2.isUnspecified();
 }
 
-void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const
+void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     // TODO: specialize
     std::vector<Coord> polygonPoints;
@@ -134,7 +134,7 @@ void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const 
     polygonPoints.push_back(Coord(size.x / 2, -size.y / 2, -size.z / 2));
     Polygon base(polygonPoints);
     Prism prism(size.z, base);
-    prism.computeVisibleFaces(faces, rotation, viewNormal);
+    prism.computeVisibleFaces(faces, rotation, viewRotation);
 }
 
 } // namespace inet

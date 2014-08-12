@@ -58,12 +58,12 @@ class ConvexPolytope : public Shape3D
         PolytopePoint computeOutwardNormalVector(const Face *face) const;
         void addFace(Face *face);
         Edges computeHorizonEdges(const Faces& visibleFaces) const;
-        bool isVisibleFromPlane(const Face *face, const Coord& planeNormal, const Rotation& rotation) const;
+        bool isVisibleFromView(const Face *face, const Rotation& viewRotation, const Rotation& rotation) const;
 
     public:
         ConvexPolytope(const std::vector<Coord>& points);
         Coord computeSize() const;
-        void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Coord& viewNormal) const;
+        void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
         bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
         const Faces& getFaces() const { return faces; }
         virtual ~ConvexPolytope();
