@@ -44,7 +44,7 @@ void Rotation::computeRotationMatrices(const double& q0, const double& q1, const
     rotationMatrix[1][2] = 2*(q2*q3 - q0*q1);
     rotationMatrix[2][0] = 2*(q1*q3 - q0*q2);
     rotationMatrix[2][1] = 2*(q0*q1 + q2*q3);
-    rotationMatrix[2][2] = 1 - 2*(q1*q1 - q2*q2);
+    rotationMatrix[2][2] = 1 - 2*(q1*q1 + q2*q2);
 
     // A^T = A^-1 since it is an orthogonal matrix
     for (unsigned int i = 0; i < 3; i++)
@@ -69,7 +69,5 @@ Coord Rotation::matrixMultiplication(const double matrix[3][3], const Coord& vec
             vector.x * matrix[1][0] + vector.y * matrix[1][1] + vector.z * matrix[1][2],
             vector.x * matrix[2][0] + vector.y * matrix[2][1] + vector.z * matrix[2][2]);
 }
-
-
 
 } /* namespace inet */
