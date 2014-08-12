@@ -6,6 +6,102 @@ INET-2.99.0 (July 2014)
 
 Requires OMNeT++ 4.5.
 
+Geometry model:
+ - Added new orientation related classes: EulerAngles, Rotation and Quaternion.
+ - Added new basic 3D geometry classes: LineSegment, Box, Plane, Polygon.
+ - Added new 3D convex shapes: Cuboid, Sphere, Prism and Polyhedron.
+ - Added new geometry cache data structures: SpatialGrid, QuadTree and BVHTree.
+
+Physical environment model:
+ - Removed obsolete classes: Obstacle, ObstacleControl and AnnotationManager.
+ - Implemented a completely new physical environment model as follows.
+ - Added a new global PhysicalEnvironment module that provides some trivial
+   global properties: temperature, pressure, humidity, space limits and a list
+   of physical objects.
+ - Added a new PhysicalObject class that has shape, position, orientation,
+   material and various graphics properties.
+ - Added a new Material class along with some default materials: vacuum, air,
+   copper, aluminium, wood, brick, concrete, glass.
+ - Added a new IObjectCache interface for efficient physical object queries
+   along a line segment.
+ - Added IObjectCache implementations: GridObjectCache and BVHObjectCache.
+ - Added an XML file format to initialize the physical environment with shapes,
+   materials and physical objects.
+ - Added support for drawing the physical objects on a compound module canvas
+   (Tkenv) in 2D as seen from a configured view angle.
+ - Added examples that demonstrate the initialization and usage of the physical
+   environment and physical objects and the configuration of the object cache.
+
+Power model:
+ - Removed obsolete classes: IBattery, BasicBattery, InetSimpleBattery and Energy.
+ - Implemented a completely new power source and power consumer model.
+ - Added new interfaces: IPowerSource and IPowerConsumer.
+ - Added power source implementations: IdealPowerSource and voltage regulated
+   Battery.
+ - Added a new power consumer implementation for radios based on radio mode,
+   reception state and transmission state: RadioPowerConsumer.
+
+Physical layer:
+ - Refactored and unified the existing INET and MiXiM physical layer models into
+   a new extended and scalable model as follows.
+ - Designed new interfaces and classes to support optimistic parallel computation
+   of reception results utilizing multicore CPUs and/or GPUs.
+ - Designed new model that supports different level of details with respect to
+   transmitters, receivers, radio signals, antennas, propagation models, etc.
+ - Added new radio signal power representations: scalar and dimensional over
+   time, frequency, space, etc.
+ - Added various performance vs. accuracy tradeoff configuration options (e.g.
+   range filter, radio mode filter, listening mode filter, MAC address filter)
+ - Added concurrent transmitter and receiver radio mode (transceiver mode).
+ - Added separate controllable radio mode and automatic signaling of reception
+   state and transmission state.
+ - Added configurable non-zero time radio mode switching.
+ - Added separate power consumption model based on radio mode, reception state
+   and transmission state.
+ - Added support for burst mode (back to back) transmissions.
+ - Introduced compile time checked physical units in C++ code to avoid conversion
+   errors and to enhance self documentation.
+
+Physical layer radio model:
+ - Removed obsolete classes: Radio, IdealRadio, GenericRadio, GenericRadioModel,
+   IRadio, IRadioModel, INoiseGenerator and some others.
+ - Added new interfaces: IRadio, IAntenna, ITransmitter and IReceiver.
+ - Added new implementation classes: Radio, IdealRadio and BandListening
+ - Added a number of implementation base classes unlisted here.
+ - Introduced controllable radio mode: off, sleep, receiver, transmitter,
+   transceiver and switching.
+ - Introduced automatically signaled reception state: undefined, idle, busy,
+   synchronizing and receiving.
+ - Introduced automatically signaled transmission state: undefined, transmitting.
+ - Added new antenna classes: IsotropicAntenna, ConstantGainAntenna,
+   DipoleAntenna and InterpolatingAntenna.
+
+Physical layer radio medium model:
+ - Removed obsolete classes: ChannelAccess ChannelControl, IdealChannelModel,
+   IdealChannelModelAccess and some others.
+ - Added new interfaces to model the radio medium: IRadioMedium, IPropagation,
+   IBackgroundNoise, IPathLoss, IObstacleLoss, IAttenuation and INeighborCache.
+ - Added new implementation classes: RadioMedium.
+ - Added propagation models: ImmediatePropagation and ConstantSpeedPropagation.
+ - Added background noise source models: ScalarBackgroundNoise and
+   DimensionalBackgroundNoise.
+ - Refactored existing path loss models: FreeSpacePathLoss, LogNormalShadowing,
+   TwoRayGroundReflection, NakagamiFading, RayleighFading, RicianFading and
+   SUIPathLoss.
+ - Added new path loss models: BreakpointPathLoss and UWBIRStochasticPathLoss.
+ - Added a new obstacle loss model: ObstacleLoss.
+ - Added INeighborCache implementations: ListNeighborCache, GridNeighborCache
+   and QuadTreeNeighborCache.
+
+Physical layer communication model:
+ - Removed obsolete classes: AirFrame, IdealAirFrame and SnrList.
+ - Added new interfaces: IRadioFrame, ITransmission, IArrival, IReception,
+   INoise, IListening and IReceptionDecision.
+ - Added new implementation classes: RadioFrame, Arrival.
+ - Added a number of implementation base classes unlisted here.
+ - Added range based, narrow band scalar and dimensional powered radio signal
+   representations for transmissions, receptions and noise.
+
 XXX note: "gitk integration"; changes start from the "inet3-branch-start" tag
 Radio infrastructure and physical layer:
 - modules taken over from MiXiM: TODO
@@ -21,12 +117,11 @@ Refactoring:
 - directory reorganization
     - base/ and util/ have been consolidated into common/ and its several subdirectories (e.g. common/misc/, common/geometry/, common/queue/, common/lifecycle/)
     - queue/ became common/queue/
-    - world/annotations/ became common/annotations/
     -
     - routing protocols have been moved into the new routing/ toplevel directory from networklayer/routing/, networklayer/bgpv4 and networklayer/ospfv2/
     - protocols in networklayer/manetrouting/ have been moved into routing/extras/
     - transport/ has been renamed to transportlayer/
-    - battery/ has been renamed to power/, intended to hold all models for all kinds of power sources and power management related components
+    - battery/ has been replaced with power/, intended to hold all models for all kinds of power sources and power management related components
     - the physicallayer/ toplevel directory has been created to hold the new physical layer model
     - the environment/ toplevel directory has been created for models that represent the global physical environment
     - world/ no longer exists, its contents has been distributed to other directories
