@@ -57,6 +57,17 @@ Coord Rotation::rotateVectorClockwise(const Coord& vector) const
     return matrixMultiplication(rotationMatrix, vector);
 }
 
+Rotation::Rotation()
+{
+    // identity matrix
+    rotationMatrix[0][0] = 1;
+    rotationMatrix[0][1] = rotationMatrix[0][2] = 0;
+    rotationMatrix[1][1] = 1;
+    rotationMatrix[1][0] = rotationMatrix[1][2] = 0;
+    rotationMatrix[2][2] = 1;
+    rotationMatrix[2][1] = rotationMatrix[2][0] = 0;
+}
+
 Coord Rotation::rotateVectorCounterClockwise(const Coord& vector) const
 {
     return matrixMultiplication(invRotationMatrix, vector);

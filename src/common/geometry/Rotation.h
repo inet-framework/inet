@@ -35,6 +35,7 @@ class Rotation
         Coord matrixMultiplication(const double matrix[3][3], const Coord& vector) const;
 
     public:
+        Rotation();
         Rotation(const EulerAngles& eulerAngle);
         Coord rotateVectorClockwise(const Coord& vector) const;
         Coord rotateVectorCounterClockwise(const Coord& vector) const;
