@@ -23,6 +23,7 @@
 #include "ConvexPolytope.h"
 #include "Material.h"
 #include "Rotation.h"
+#include <algorithm>
 
 namespace inet {
 
@@ -381,6 +382,9 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     }
     if (hasObjectCache())
         objectCache->buildCache();
+    // KLUDGE: sorting objects with their position's z coordinate. With this kludge we can
+    // draw them in a "better" order
+    std::sort(objects.begin(), objects.end(), ObjectPositionComparator());
 }
 
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation)

@@ -39,6 +39,13 @@ class INET_API PhysicalEnvironment : public cModule
             virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
             virtual void buildCache() = 0;
     };
+    struct ObjectPositionComparator
+    {
+        bool operator()(const PhysicalObject *left, const PhysicalObject *right) const
+        {
+            return left->getPosition().z < right->getPosition().z;
+        }
+    };
   protected:
     K temperature;
     Pa pressure;
