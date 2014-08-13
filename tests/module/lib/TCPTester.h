@@ -28,6 +28,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 /**
  * Base class for TCP testing modules.
  */
@@ -103,6 +105,8 @@ class INET_API TCPRandomTester : public TCPTesterBase
     virtual void initialize();
     virtual void handleMessage(cMessage *msg);
 };
+
+} // namespace tcp
 
 } // namespace inet
 

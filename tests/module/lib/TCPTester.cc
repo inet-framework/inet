@@ -25,6 +25,8 @@
 
 namespace inet {
 
+namespace tcp {
+
 TCPTesterBase::TCPTesterBase() : cSimpleModule()
 {
 }
@@ -311,6 +313,8 @@ void TCPRandomTester::processIncomingSegment(TCPSegment *seg, bool fromA)
         send(seg, fromA ? "out2" : "out1");
     }
 }
+
+} // namespace tcp
 
 } // namespace inet
 
