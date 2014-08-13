@@ -22,7 +22,6 @@
 #include "IVisitor.h"
 #include "PhysicalObject.h"
 #include "LineSegment.h"
-#include "Box.h"
 #include "Rotation.h"
 
 namespace inet {
@@ -78,6 +77,7 @@ class INET_API PhysicalEnvironment : public cModule
     PhysicalEnvironment();
     virtual ~PhysicalEnvironment();
 
+    // TODO: eventually delete this function?
     static cFigure::Point computeCanvasPoint(Coord point);
 
     virtual K getTemperature() const { return temperature; }

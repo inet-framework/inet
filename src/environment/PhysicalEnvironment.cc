@@ -16,6 +16,7 @@
 //
 
 #include "PhysicalEnvironment.h"
+#include "Box.h"
 #include "Cuboid.h"
 #include "Sphere.h"
 #include "Face.h"

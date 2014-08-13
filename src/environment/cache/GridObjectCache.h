@@ -23,7 +23,6 @@
 #include "PhysicalEnvironment.h"
 #include "PhysicalObject.h"
 #include "IVisitor.h"
-#include "ObstacleLoss.h"
 
 namespace inet {
 
