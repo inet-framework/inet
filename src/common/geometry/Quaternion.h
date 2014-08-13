@@ -1,74 +1,47 @@
-#ifndef __INET_QUATERNION_H
-#define __INET_QUATERNION_H
+//
+// Copyright (C) 2014 OpenSim Ltd.
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, see <http://www.gnu.org/licenses/>.
+//
+
+#ifndef __INET_QUATERNION_H_
+#define __INET_QUATERNION_H_
 
 #include "Coord.h"
-#include "INETMath.h"
-#include "EulerAngles.h"
 
 namespace inet {
 
+/*
+ * This class represents quaternions as a four dimensional vector space over the real field
+ */
 class Quaternion
 {
-  public:
-    static const Quaternion IDENTITY;
+    protected:
+        double realPart;
+        Coord vectorPart;
 
-  protected:
-    double s;    // cosine of half rotation axis
-    Coord d;    // rotation axis
+    public:
+        Quaternion() : realPart(0), vectorPart(Coord(0,0,0)) {}
+        Quaternion(double realPart, const Coord& vectorPart) :
+            realPart(realPart), vectorPart(vectorPart) {};
 
-  public:
-    Quaternion() : d(0, 0, 1) { s = 0; }
-    Quaternion(double s0, double x0 = 0, double y0 = 0, double z0 = 1) : d(x0, y0, z0) { s = s0; }
-    Quaternion(double s0, Coord d0) : d(d0) { s = s0; }
-
-    Quaternion(const EulerAngles& a)
-    {
-        s = cos(a.gamma / 2) * cos(a.beta / 2) * cos(a.alpha / 2) + sin(a.gamma / 2) * sin(a.beta / 2) * sin(a.alpha / 2);
-        double x = sin(a.gamma / 2) * cos(a.beta / 2) * cos(a.alpha / 2) - cos(a.gamma / 2) * sin(a.beta / 2) * sin(a.alpha / 2);
-        double y = cos(a.gamma / 2) * sin(a.beta / 2) * cos(a.alpha / 2) + sin(a.gamma / 2) * cos(a.beta / 2) * sin(a.alpha / 2);
-        double z = cos(a.gamma / 2) * cos(a.beta / 2) * sin(a.alpha / 2) - sin(a.gamma / 2) * sin(a.beta / 2) * cos(a.alpha / 2);
-        d = Coord(x, y, z);
-    }
-
-    Quaternion(double m[3][3])
-    {
-        s = sqrt(m[0][0] + m[1][1] + m[2][2] + 1) / 2;
-        d = Coord(m[1][2] - m[2][1], m[2][0] - m[0][2], m[0][1] - m[1][0]) / (4 * s);
-    }
-
-    Quaternion operator+(Quaternion& q) { return Quaternion(s + q.s, d + q.d); }
-
-    void operator+=(Quaternion& q) { s += q.s; d += q.d; }
-
-    Quaternion operator*(double f) { return Quaternion(s * f, d * f); }
-
-    double operator*(Quaternion& q) { return s * s + d * d; }
-
-    void normalize() { (*this) = (*this) * (1 / sqrt((*this) * (*this))); }
-
-    Quaternion operator%(Quaternion& q) { return Quaternion(s * q.s - d * q.d, q.d * s + d * q.s + d % q.d); }
-
-    void getMatrix()
-    {
-        double m[3][3];
-        m[0][0] = 1 - 2 * d.y * d.y - 2 * d.z * d.z;
-        m[0][1] = 2 * d.x * d.y + 2 * s * d.z;
-        m[0][2] = 2 * d.x * d.z - 2 * s * d.y;
-        m[1][0] = 2 * d.x * d.y - 2 * s * d.z;
-        m[1][1] = 1 - 2 * d.x * d.x - 2 * d.z * d.z;
-        m[1][2] = 2 * d.y * d.z + 2 * s * d.x;
-        m[2][0] = 2 * d.x * d.z + 2 * s * d.y;
-        m[2][1] = 2 * d.y * d.z - 2 * s * d.x;
-        m[2][2] = 1 - 2 * d.x * d.x - 2 * d.y * d.y;
-        // TODO:
-    }
-
-    double getRotationAngle() { return math::rad2deg(atan2(d.length(), s) * 2); }
-
-    Coord& getAxis() { return d; }
+        Quaternion operator*(double scalar) const;
+        friend Quaternion operator*(double scalar, const Quaternion& lhs);
+        Quaternion operator+(const Quaternion& rhs) const;
+        Quaternion operator%(const Quaternion& rhs) const;
 };
 
-} // namespace inet
+} /* namespace inet */
 
-#endif /* QUATERNION_H_ */
-
+#endif /* __INET_QUATERNION_H_ */
