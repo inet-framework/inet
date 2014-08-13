@@ -30,9 +30,9 @@ class Rotation
 {
     protected:
         double rotationMatrix[3][3];
-        double invRotationMatrix[3][3];
         void computeRotationMatrices(const double& q0, const double& q1, const double& q2, const double& q3);
         Coord matrixMultiplication(const double matrix[3][3], const Coord& vector) const;
+        Coord matrixTransposeMultiplication(const double matrix[3][3], const Coord& vector) const;
 
     public:
         Rotation();

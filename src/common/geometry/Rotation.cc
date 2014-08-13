@@ -45,11 +45,6 @@ void Rotation::computeRotationMatrices(const double& q0, const double& q1, const
     rotationMatrix[2][0] = 2*(q1*q3 - q0*q2);
     rotationMatrix[2][1] = 2*(q0*q1 + q2*q3);
     rotationMatrix[2][2] = 1 - 2*(q1*q1 + q2*q2);
-
-    // A^T = A^-1 since it is an orthogonal matrix
-    for (unsigned int i = 0; i < 3; i++)
-        for (unsigned int j = 0; j < 3; j++)
-            invRotationMatrix[i][j] = rotationMatrix[j][i];
 }
 
 Coord Rotation::rotateVectorClockwise(const Coord& vector) const
@@ -70,7 +65,7 @@ Rotation::Rotation()
 
 Coord Rotation::rotateVectorCounterClockwise(const Coord& vector) const
 {
-    return matrixMultiplication(invRotationMatrix, vector);
+    return matrixTransposeMultiplication(rotationMatrix, vector);
 }
 
 Coord Rotation::matrixMultiplication(const double matrix[3][3], const Coord& vector) const
@@ -79,6 +74,14 @@ Coord Rotation::matrixMultiplication(const double matrix[3][3], const Coord& vec
             vector.x * matrix[0][0] + vector.y * matrix[0][1] + vector.z * matrix[0][2],
             vector.x * matrix[1][0] + vector.y * matrix[1][1] + vector.z * matrix[1][2],
             vector.x * matrix[2][0] + vector.y * matrix[2][1] + vector.z * matrix[2][2]);
+}
+
+Coord Rotation::matrixTransposeMultiplication(const double matrix[3][3], const Coord& vector) const
+{
+    return Coord(
+            vector.x * matrix[0][0] + vector.y * matrix[1][0] + vector.z * matrix[2][0],
+            vector.x * matrix[0][1] + vector.y * matrix[1][1] + vector.z * matrix[2][1],
+            vector.x * matrix[0][2] + vector.y * matrix[1][2] + vector.z * matrix[2][2]);
 }
 
 } /* namespace inet */
