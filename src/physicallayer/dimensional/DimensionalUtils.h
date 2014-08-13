@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API DimensionalUtils
 {
   public:
-    static ConstMapping *createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power);
+    static ConstMapping *createFlatMapping(const DimensionSet& dimensions, const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power);
 };
 
 } // namespace physicallayer

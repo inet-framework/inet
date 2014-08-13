@@ -22,6 +22,7 @@ import inet.physicallayer.contract.IRadioBackgroundNoise;
 module DimensionalBackgroundNoise like IRadioBackgroundNoise
 {
     parameters:
+        string dimensions = default("time frequency");
         double power @unit(dBm); // TODO: @unit(W) + dBm/dBW <--> W
         @class(DimensionalBackgroundNoise);
 }

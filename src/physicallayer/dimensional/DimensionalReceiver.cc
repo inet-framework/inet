@@ -50,7 +50,7 @@ const INoise *DimensionalReceiver::computeNoise(const IListening *listening, con
     const BandListening *bandListening = check_and_cast<const BandListening *>(listening);
     Hz carrierFrequency = bandListening->getCarrierFrequency();
     Hz bandwidth = bandListening->getBandwidth();
-    ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, W(0));
+    ConstMapping *listeningMapping = DimensionalUtils::createFlatMapping(receptionPowers[0]->getDimensionSet(), startTime, endTime, carrierFrequency, bandwidth, W(0));
     ConcatConstMapping<std::plus<double> > *noisePower = new ConcatConstMapping<std::plus<double> >(listeningMapping, receptionPowers.begin(), receptionPowers.end(), false, Argument::MappedZero);
     EV_DEBUG << "Noise power begin " << endl;
     noisePower->print(EVSTREAM);

@@ -15,19 +15,17 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.ieee802154;
 
-import inet.physicallayer.contract.ITransmitter;
+import inet.physicallayer.dimensional.DimensionalRadioMedium;
 
-module DimensionalTransmitter like ITransmitter
+module Ieee802154UWBIRRadioMedium extends DimensionalRadioMedium
 {
     parameters:
-        double bitrate @unit(bps);
-        double headerBitLength @unit(b);
-        double power @unit(W);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
-        string dimensions = default("time frequency");
-        @class(DimensionalTransmitter);
+        // TODO: move to addRadio, query radios for these parameters
+        carrierFrequency = default(2.4GHz);
+        minReceptionPower = default(-85dBm);
+        minInterferencePower = default(-110dBm);
+        backgroundNoise.power = default(-110dBm);
+        backgroundNoise.dimensions = default("time");
 }

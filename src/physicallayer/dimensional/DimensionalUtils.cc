@@ -21,20 +21,24 @@ namespace inet {
 
 namespace physicallayer {
 
-ConstMapping *DimensionalUtils::createFlatMapping(const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power)
+ConstMapping *DimensionalUtils::createFlatMapping(const DimensionSet& dimensions, const simtime_t startTime, const simtime_t endTime, Hz carrierFrequency, Hz bandwidth, W power)
 {
-    Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, DimensionSet::timeFreqDomain, Mapping::LINEAR);
-    Argument position(DimensionSet::timeFreqDomain);
+    Mapping *powerMapping = MappingUtils::createMapping(Argument::MappedZero, dimensions, Mapping::LINEAR);
+    Argument position(dimensions);
     position.setTime(startTime);
-    position.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
+    if (dimensions.hasDimension(Dimension::frequency))
+        position.setArgValue(Dimension::frequency, carrierFrequency.get() - bandwidth.get() / 2);
     powerMapping->setValue(position, power.get());
     position.setTime(endTime);
     powerMapping->setValue(position, power.get());
-    position.setTime(startTime);
-    position.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
-    powerMapping->setValue(position, power.get());
-    position.setTime(endTime);
-    powerMapping->setValue(position, power.get());
+    if (dimensions.hasDimension(Dimension::frequency))
+    {
+        position.setTime(startTime);
+        position.setArgValue(Dimension::frequency, carrierFrequency.get() + bandwidth.get() / 2);
+        powerMapping->setValue(position, power.get());
+        position.setTime(endTime);
+        powerMapping->setValue(position, power.get());
+    }
     return powerMapping;
 }
 

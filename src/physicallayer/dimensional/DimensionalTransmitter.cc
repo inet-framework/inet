@@ -27,6 +27,26 @@ namespace physicallayer {
 
 Define_Module(DimensionalTransmitter);
 
+void DimensionalTransmitter::initialize(int stage)
+{
+    FlatTransmitterBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+    {
+        const char *dimensionsString = par("dimensions");
+        // TODO: move parsing?
+        cStringTokenizer tokenizer(dimensionsString);
+        while (tokenizer.hasMoreTokens()) {
+            const char *dimensionString = tokenizer.nextToken();
+            if (!strcmp("time", dimensionString))
+                dimensions.addDimension(Dimension::time);
+            else if (!strcmp("frequency", dimensionString))
+                dimensions.addDimension(Dimension::frequency);
+            else
+                throw cRuntimeError("Unknown dimension");
+        }
+    }
+}
+
 void DimensionalTransmitter::printToStream(std::ostream& stream) const
 {
     stream << "dimensional transmitter, "
@@ -45,7 +65,7 @@ const ITransmission *DimensionalTransmitter::createTransmission(const IRadio *tr
     const Coord endPosition = mobility->getCurrentPosition();
     const EulerAngles startOrientation = mobility->getCurrentAngularPosition();
     const EulerAngles endOrientation = mobility->getCurrentAngularPosition();
-    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
+    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(dimensions, startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalTransmission(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation, modulation, headerBitLength, macFrame->getBitLength(), carrierFrequency, bandwidth, bitrate, powerMapping);
 }
 

@@ -19,6 +19,7 @@
 #define __INET_DIMENSIONALBACKGROUNDNOISE_H
 
 #include "IBackgroundNoise.h"
+#include "MappingBase.h"
 
 namespace inet {
 
@@ -27,15 +28,14 @@ namespace physicallayer {
 class INET_API DimensionalBackgroundNoise : public cModule, public IBackgroundNoise
 {
   protected:
+    DimensionSet dimensions;
     W power;
 
   protected:
     virtual void initialize(int stage);
 
   public:
-    DimensionalBackgroundNoise() :
-        power(W(sNaN))
-    {}
+    DimensionalBackgroundNoise();
 
   public:
     virtual void printToStream(std::ostream& stream) const { stream << "dimensional background noise"; }

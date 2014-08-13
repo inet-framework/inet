@@ -15,19 +15,12 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.physicallayer.dimensional;
+package inet.physicallayer.ieee802154;
 
-import inet.physicallayer.contract.ITransmitter;
+import inet.physicallayer.contract.IReceiver;
 
-module DimensionalTransmitter like ITransmitter
+module Ieee802154UWBIRReceiver like IReceiver
 {
     parameters:
-        double bitrate @unit(bps);
-        double headerBitLength @unit(b);
-        double power @unit(W);
-        double carrierFrequency @unit(Hz);
-        double bandwidth @unit(Hz);
-        string modulation = default("NULL"); // "BPSK", "16-QAM", "256-QAM" or "NULL"
-        string dimensions = default("time frequency");
-        @class(DimensionalTransmitter);
+        @class(Ieee802154UWBIRReceiver);
 }

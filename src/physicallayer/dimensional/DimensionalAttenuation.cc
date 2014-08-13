@@ -54,18 +54,18 @@ const IReception *DimensionalAttenuation::computeReception(const IRadio *receive
     transmissionPower->print(EVSTREAM);
     EV_DEBUG << "Transmission power end" << endl;
     ConstMappingIterator *it = transmissionPower->createConstIterator();
-    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, DimensionSet::timeFreqDomain, Mapping::LINEAR);
+    Mapping *receptionPower = MappingUtils::createMapping(Argument::MappedZero, transmissionPower->getDimensionSet(), Mapping::LINEAR);
     while (true) {
         const Argument& position = it->getPosition();
-        Hz carrierFrequency = Hz(position.getArgValue(Dimension::frequency));
+        Hz carrierFrequency = transmissionPower->getDimensionSet().hasDimension(Dimension::frequency) ? Hz(position.getArgValue(Dimension::frequency)) : dimensionalTransmission->getCarrierFrequency();
         double pathLoss = channel->getPathLoss()->computePathLoss(propagationSpeed, carrierFrequency, distance);
         double obstacleLoss = channel->getObstacleLoss() ? channel->getObstacleLoss()->computeObstacleLoss(carrierFrequency, transmission->getStartPosition(), receptionStartPosition) : 1;
-        W frequencyTransmissionPower = W(it->getValue());
-        W frequencyReceptionPower = frequencyTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
+        W elementTransmissionPower = W(it->getValue());
+        W elementReceptionPower = elementTransmissionPower * std::min(1.0, transmitterAntennaGain * receiverAntennaGain * pathLoss * obstacleLoss);
         Argument receptionPosition = position;
         double alpha = (position.getTime() - transmissionStartTime).dbl() / (transmissionEndTime - transmissionStartTime).dbl();
         receptionPosition.setTime(receptionStartTime + alpha * (receptionEndTime - receptionStartTime).dbl());
-        receptionPower->setValue(receptionPosition, frequencyReceptionPower.get());
+        receptionPower->setValue(receptionPosition, elementReceptionPower.get());
         if (it->hasNext())
             it->next();
         else

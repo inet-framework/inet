@@ -26,11 +26,27 @@ namespace physicallayer {
 
 Define_Module(DimensionalBackgroundNoise);
 
+DimensionalBackgroundNoise::DimensionalBackgroundNoise() :
+    power(W(sNaN))
+{}
+
 void DimensionalBackgroundNoise::initialize(int stage)
 {
     cModule::initialize(stage);
     if (stage == INITSTAGE_LOCAL) {
-        power = mW(math::dBm2mW(par("power")));
+        const char *dimensionsString = par("dimensions");
+        // TODO: move parsing?
+        cStringTokenizer tokenizer(dimensionsString);
+        while (tokenizer.hasMoreTokens()) {
+            const char *dimensionString = tokenizer.nextToken();
+            if (!strcmp("time", dimensionString))
+                dimensions.addDimension(Dimension::time);
+            else if (!strcmp("frequency", dimensionString))
+                dimensions.addDimension(Dimension::frequency);
+            else
+                throw cRuntimeError("Unknown dimension");
+        }
+        power = mW(FWMath::dBm2mW(par("power")));
     }
 }
 
@@ -41,7 +57,7 @@ const INoise *DimensionalBackgroundNoise::computeNoise(const IListening *listeni
     const simtime_t endTime = listening->getEndTime();
     Hz carrierFrequency = bandListening->getCarrierFrequency();
     Hz bandwidth = bandListening->getBandwidth();
-    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(startTime, endTime, carrierFrequency, bandwidth, power);
+    const ConstMapping *powerMapping = DimensionalUtils::createFlatMapping(dimensions, startTime, endTime, carrierFrequency, bandwidth, power);
     return new DimensionalNoise(startTime, endTime, carrierFrequency, bandwidth, powerMapping);
 }
 

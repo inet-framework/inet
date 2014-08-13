@@ -19,6 +19,7 @@
 #define __INET_DIMENSIONALTRANSMITTER_H
 
 #include "FlatTransmitterBase.h"
+#include "MappingBase.h"
 
 namespace inet {
 
@@ -26,6 +27,12 @@ namespace physicallayer {
 
 class INET_API DimensionalTransmitter : public FlatTransmitterBase
 {
+  protected:
+    DimensionSet dimensions;
+
+  protected:
+    virtual void initialize(int stage);
+
   public:
     DimensionalTransmitter() :
         FlatTransmitterBase()
