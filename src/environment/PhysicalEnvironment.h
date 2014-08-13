@@ -18,8 +18,9 @@
 #ifndef __INET_PHYSICALENVIRONMENT_H
 #define __INET_PHYSICALENVIRONMENT_H
 
-#include "PhysicalObject.h"
+#include "IObjectCache.h"
 #include "IVisitor.h"
+#include "PhysicalObject.h"
 #include "LineSegment.h"
 #include "Box.h"
 #include "Rotation.h"
@@ -32,14 +33,6 @@ namespace inet {
 class INET_API PhysicalEnvironment : public cModule
 {
   public:
-    class IObjectCache
-    {
-        public:
-            virtual bool insertObject(const PhysicalObject *object) = 0;
-            virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
-            virtual void buildCache() = 0;
-    };
-
     class ObjectPositionComparator
     {
         protected:

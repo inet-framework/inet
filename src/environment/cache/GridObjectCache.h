@@ -18,6 +18,7 @@
 #ifndef __INET_GRIDOBJECTCACHE_H_
 #define __INET_GRIDOBJECTCACHE_H_
 
+#include "IObjectCache.h"
 #include "SpatialGrid.h"
 #include "PhysicalEnvironment.h"
 #include "PhysicalObject.h"
@@ -26,7 +27,7 @@
 
 namespace inet {
 
-class GridObjectCache : public PhysicalEnvironment::IObjectCache, public cSimpleModule
+class GridObjectCache : public IObjectCache, public cSimpleModule
 {
     protected:
         SpatialGrid *grid;

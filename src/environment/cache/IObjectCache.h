@@ -15,21 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IVISITOR_H_
-#define __INET_IVISITOR_H_
+#ifndef __INET_IOBJECTCACHE_H
+#define __INET_IOBJECTCACHE_H
 
-#include "INETDefs.h"
+#include "IVisitor.h"
+#include "PhysicalObject.h"
+#include "LineSegment.h"
 
 namespace inet {
 
-// This is the interface for data structure visitors
-class IVisitor
+class IObjectCache
 {
     public:
-        virtual void visit(const cObject *) const = 0;
-        virtual ~IVisitor() {}
+        virtual bool insertObject(const PhysicalObject *object) = 0;
+        virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const = 0;
+        virtual void buildCache() = 0;
 };
 
 } /* namespace inet */
 
-#endif /* __INET_IVISITOR_H_ */
+#endif /* __INET_IOBJECTCACHE_H */

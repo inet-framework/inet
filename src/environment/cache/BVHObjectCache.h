@@ -18,6 +18,7 @@
 #ifndef __INET_BVHOBJECTCACHE_H_
 #define __INET_BVHOBJECTCACHE_H_
 
+#include "IObjectCache.h"
 #include "BVHTree.h"
 #include "PhysicalEnvironment.h"
 #include "PhysicalObject.h"
@@ -25,7 +26,7 @@
 
 namespace inet {
 
-class BVHObjectCache : public PhysicalEnvironment::IObjectCache, public cSimpleModule
+class BVHObjectCache : public IObjectCache, public cSimpleModule
 {
     protected:
         BVHTree *bvhTree;
