@@ -280,7 +280,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     std::ofstream communicationLog;
     //@}
 
-    /** @name Graphics     */
+    /** @name Graphics */
     //@{
     /**
      * The list figures representing ongoing communications.

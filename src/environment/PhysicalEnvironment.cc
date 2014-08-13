@@ -377,10 +377,10 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // insert
         PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineColor, fillColor);
         objects.push_back(object);
-        if (hasObjectCache())
+        if (objectCache)
             objectCache->insertObject(object);
     }
-    if (hasObjectCache())
+    if (objectCache)
         objectCache->buildCache();
 }
 
@@ -485,7 +485,11 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
 
 void PhysicalEnvironment::visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const
 {
-    objectCache->visitObjects(visitor, lineSegment);
+    if (objectCache)
+        objectCache->visitObjects(visitor, lineSegment);
+    else
+        for (std::vector<PhysicalObject *>::const_iterator it = objects.begin(); it != objects.end(); it++)
+            visitor->visit(*it);
 }
 
 void PhysicalEnvironment::handleParameterChange(const char* name)

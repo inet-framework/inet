@@ -56,16 +56,15 @@ class INET_API PhysicalEnvironment : public cModule
     Rotation viewRotation;
     std::map<int, const Shape3D *> shapes;
     std::map<int, const Material *> materials;
-    IObjectCache *objectCache;
     std::vector<PhysicalObject *> objects;
-
+    IObjectCache *objectCache;
     cGroupFigure *objectsLayer;
 
   protected:
+    static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation);
+
     virtual int numInitStages() const { return NUM_INIT_STAGES; }
     virtual void initialize(int stage);
-
-    static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation);
     virtual void handleParameterChange(const char *name);
 
     virtual void parseShapes(cXMLElement *xml);
@@ -73,6 +72,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
     virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
+    virtual Rotation computeViewRotation(const char *viewAngle);
 
   public:
     PhysicalEnvironment();
@@ -80,7 +80,6 @@ class INET_API PhysicalEnvironment : public cModule
 
     static cFigure::Point computeCanvasPoint(Coord point);
 
-    virtual bool hasObjectCache() const { return objectCache != NULL; }
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }
     virtual percent getRelativeHumidity() const { return relativeHumidity; }
@@ -88,7 +87,6 @@ class INET_API PhysicalEnvironment : public cModule
     virtual const Coord getSpaceMax() const { return spaceMax; }
     virtual const std::vector<PhysicalObject *>& getObjects() const;
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
-    Rotation computeViewRotation(const char *viewAngle);
 };
 
 } // namespace inet

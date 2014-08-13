@@ -19,11 +19,11 @@ package inet.physicallayer.obstacle;
 
 import inet.physicallayer.contract.IObstacleLoss;
 
-module ObstacleLoss like IObstacleLoss
+module TracingObstacleLoss like IObstacleLoss
 {
     parameters:
         string environmentModule = "environment";
         bool leaveIntersectionTrail = default(false);
         @display("i=block/control");
-        @class(ObstacleLoss);
+        @class(TracingObstacleLoss);
 }
