@@ -36,6 +36,10 @@ ObstacleLoss::ObstacleLoss() :
 {
 }
 
+ObstacleLoss::~ObstacleLoss()
+{
+}
+
 void ObstacleLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
@@ -162,11 +166,6 @@ double ObstacleLoss::computeObstacleLoss(Hz frequency, const Coord& transmission
 void ObstacleLoss::ObstacleLossVisitor::visit(const cObject *object) const
 {
     obstacleLoss->obstacleLoss(check_and_cast<const PhysicalObject *>(object), frequency, transmissionPosition, receptionPosition, totalLoss);
-}
-
-ObstacleLoss::~ObstacleLoss()
-{
-    delete intersectionTrail;
 }
 
 } // namespace physicallayer

@@ -66,6 +66,7 @@ class INET_API ObstacleLoss : public cModule, public IObstacleLoss
     virtual double computeReflectionLoss(const Material *incidentMaterial, const Material *refractiveMaterial, double angle) const;
     // TODO: revise name
     void obstacleLoss(const PhysicalObject *object, Hz frequency, const Coord& transmissionPosition, const Coord& receptionPosition, double& totalLoss) const;
+
   public:
     ObstacleLoss();
     virtual ~ObstacleLoss();
