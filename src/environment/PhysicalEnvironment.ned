@@ -38,6 +38,8 @@ module PhysicalEnvironment
         @display("i=misc/town_s");
         @class(PhysicalEnvironment);
     submodules:
-        objectCache: <objectCacheType> like IObjectCache if objectCacheType != "";
+        objectCache: <objectCacheType> like IObjectCache if objectCacheType != "" {
+            @display("p=100,50");
+        }
 }
 

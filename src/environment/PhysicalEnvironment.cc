@@ -382,9 +382,6 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
     }
     if (hasObjectCache())
         objectCache->buildCache();
-    // KLUDGE: sorting objects with their position's z coordinate. With this kludge we can
-    // draw them in a "better" order
-    std::sort(objects.begin(), objects.end(), ObjectPositionComparator());
 }
 
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const Rotation& rotation)
@@ -405,7 +402,10 @@ void PhysicalEnvironment::updateCanvas()
 {
     while (objectsLayer->getNumFigures())
         delete objectsLayer->removeFigure(0);
-    for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++) {
+    // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
+    std::vector<PhysicalObject *> objectsCopy = objects;
+    std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
+    for (std::vector<PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++) {
         PhysicalObject *object = *it;
         const Shape3D *shape = object->getShape();
         const Coord& position = object->getPosition();
@@ -500,14 +500,31 @@ void PhysicalEnvironment::handleParameterChange(const char* name)
 Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
 {
     double x, y, z;
-    if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
+    if (!strcmp(viewAngle, "x"))
     {
-      EulerAngles angle(FWMath::deg2rad(x), FWMath::deg2rad(y), FWMath::deg2rad(z));
-      Rotation rotation(angle);
-      return rotation;
+        x = 0;
+        y = M_PI / 2;
+        z = M_PI / -2;
+    }
+    else if (!strcmp(viewAngle, "y"))
+    {
+        x = M_PI / 2;
+        y = 0;
+        z = 0;
+    }
+    else if (!strcmp(viewAngle, "z"))
+    {
+        x = y = z = 0;
+    }
+    else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
+    {
+        x = FWMath::deg2rad(x);
+        y = FWMath::deg2rad(y);
+        z = FWMath::deg2rad(z);
     }
     else
         throw cRuntimeError("viewAngle must be a triplet representing three degrees");
+    return Rotation(EulerAngles(x, y, z));
 }
 
 } // namespace inet
