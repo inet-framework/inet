@@ -349,7 +349,9 @@
 ### /examples/voipstream/* : see voipstream.csv
 
 /examples/wireless/handover/,        -f omnetpp.ini -c General -r 0,                1500s,           90f2-5a57
+
 /examples/wireless/hosttohost/,      -f omnetpp.ini -c Throughput1 -r 0,            5s,              1982-7118
+
 /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c TwoHosts -r 0,           100s,            c8a6-cdec
 # /examples/wireless/lan80211/,        -f omnetpp-ftp.ini -c NHosts -r 0,             100s,         0000-0000   # interactive config, needed a *.numHosts parameter
 /examples/wireless/lan80211/,        -f omnetpp-streaming.ini -c Streaming1 -r 0,   50s,             bf5f-152d
@@ -359,10 +361,13 @@
 /examples/wireless/multiradio/,      -f omnetpp.ini -c IndependentWlans -r 0,       100s,            4b66-a576
 /examples/wireless/multiradio/,      -f omnetpp.ini -c SwitchedWlans -r 0,          100s,            e786-e97d
 /examples/wireless/multiradio/,      -f omnetpp.ini -c RoutedWlans -r 0,            100s,            f2f8-c96f
+
 /examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           2s,              6408-f420
 /examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        2s,              acf5-8dbb
+
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            20s,             e2ed-7c3d
 /examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            10s,             c926-505f
+
 /examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,                100s,            149a-a3aa
 
 /examples/wireless/nic/,             -f omnetpp.ini -c IdealMacWithIdealRadio -r 0,      100s,             1d64-9dc5
@@ -379,15 +384,7 @@
 /examples/wireless/nic/,             -f omnetpp.ini -c CSMAWithDimensionalRadio -r 0,    100s,             2e27-a23e
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithIdealRadio -r 0,  100s,             c29a-19af
 /examples/wireless/nic/,             -f omnetpp.ini -c Ieee80211MacWithScalarRadio -r 0, 100s,             1d22-e83c
+
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Outdoor -r 0,                100s,            bf46-6211
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Indoor -r 0,                 100s,            4bf1-7ee5
 /examples/wireless/obstacle/,        -f omnetpp.ini -c Orbit -r 0,                  100s,            dc71-c290
-# /examples/wireless/scaling/,         -f omnetpp.ini -c AbstractIdealMac -r 0,       100s,            0000-0000    # it's a base config
-/examples/wireless/scaling/,         -f omnetpp.ini -c IdealRadioMedium -r 0,       100s,            8c82-0300
-/examples/wireless/scaling/,         -f omnetpp.ini -c SequentialRadioMedium -r 0,  100s,            0000-0000
-/examples/wireless/scaling/,         -f omnetpp.ini -c DimensionalRadioMedium -r 0, 100s,            0000-0000
-/examples/wireless/synchronized/,    -f omnetpp.ini -c Synchronized -r 0,           100s,            0000-0000
-/examples/wireless/synchronized/,    -f omnetpp.ini -c NonSynchronized -r 0,        100s,            0000-0000
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput1 -r 0,            100s,            c2bb-5feb
-/examples/wireless/throughput/,      -f omnetpp.ini -c Throughput2 -r 0,            100s,            476e-c20d
-/examples/wireless/wiredandwirelesshostswithap/, -f omnetpp.ini -c General -r 0,    100s,            149a-a3aa
