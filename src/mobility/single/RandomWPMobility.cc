@@ -60,8 +60,7 @@ void RandomWPMobility::move()
 
 double RandomWPMobility::getMaxSpeed() const
 {
-    throw cRuntimeError("RandomWPMobility has a volatile speed parameter so we can't predict the speed at any future time");
-    return 0;
+    return NaN;
 }
 
 } // namespace inet
