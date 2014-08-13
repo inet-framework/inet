@@ -80,19 +80,19 @@ void MovingMobilityBase::updateVisualRepresentation()
 {
     MobilityBase::updateVisualRepresentation();
     if (leaveMovementTrail && visualRepresentation && ev.isGUI()) {
-        Coord endPosition = lastPosition;
-        Coord startPosition;
+        cFigure::Point startPosition;
         if (movementTrail->getNumFigures() == 0)
-            startPosition = endPosition;
-        else {
-            cFigure::Point previousEnd = static_cast<cLineFigure *>(movementTrail->getFigure(movementTrail->getNumFigures() - 1))->getEnd();
-            startPosition.x = previousEnd.x;
-            startPosition.y = previousEnd.y;
-        }
-        if (movementTrail->getNumFigures() == 0 || startPosition.distance(endPosition) > 10) {
+            startPosition = PhysicalEnvironment::computeCanvasPoint(lastPosition);
+        else
+            startPosition = static_cast<cLineFigure *>(movementTrail->getFigure(movementTrail->getNumFigures() - 1))->getEnd();
+        cFigure::Point endPosition = PhysicalEnvironment::computeCanvasPoint(lastPosition);
+        double dx = startPosition.x - endPosition.x;
+        double dy = startPosition.y - endPosition.y;
+        if (movementTrail->getNumFigures() == 0 || (dx * dx + dy * dy) > 100) {
             cLineFigure *movementLine = new cLineFigure();
-            movementLine->setStart(PhysicalEnvironment::computeCanvasPoint(startPosition));
-            movementLine->setEnd(PhysicalEnvironment::computeCanvasPoint(endPosition));
+            std::cout << startPosition.x << ", " << startPosition.y << " -> " << endPosition.x << ", " << endPosition.y << endl;
+            movementLine->setStart(startPosition);
+            movementLine->setEnd(endPosition);
             movementLine->setLineColor(cFigure::BLACK);
             movementTrail->addFigure(movementLine);
         }
