@@ -518,9 +518,9 @@ Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
     }
     else if (sscanf(viewAngle, "%lf %lf %lf", &x, &y, &z) == 3)
     {
-        x = FWMath::deg2rad(x);
-        y = FWMath::deg2rad(y);
-        z = FWMath::deg2rad(z);
+        x = math::deg2rad(x);
+        y = math::deg2rad(y);
+        z = math::deg2rad(z);
     }
     else
         throw cRuntimeError("viewAngle must be a triplet representing three degrees");
