@@ -64,7 +64,8 @@ void PhysicalEnvironment::initialize(int stage)
         spaceMax.x = par("spaceMaxX");
         spaceMax.y = par("spaceMaxY");
         spaceMax.z = par("spaceMaxZ");
-        viewRotation = computeViewRotation(par("viewAngle"));
+        viewAngle = computeViewAngle(par("viewAngle"));
+        viewRotation = Rotation(viewAngle);
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
         canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
@@ -497,12 +498,13 @@ void PhysicalEnvironment::handleParameterChange(const char* name)
 {
     if (name && !strcmp(name,"viewAngle"))
     {
-        viewRotation = computeViewRotation(par("viewAngle"));
+        viewAngle = computeViewAngle(par("viewAngle"));
+        viewRotation = Rotation(viewAngle);
         updateCanvas();
     }
 }
 
-Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
+EulerAngles PhysicalEnvironment::computeViewAngle(const char* viewAngle)
 {
     double x, y, z;
     if (!strcmp(viewAngle, "x"))
@@ -529,7 +531,7 @@ Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
     }
     else
         throw cRuntimeError("viewAngle must be a triplet representing three degrees");
-    return Rotation(EulerAngles(x, y, z));
+    return EulerAngles(x, y, z);
 }
 
 } // namespace inet

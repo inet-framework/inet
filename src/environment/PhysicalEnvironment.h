@@ -52,6 +52,7 @@ class INET_API PhysicalEnvironment : public cModule
     percent relativeHumidity;
     Coord spaceMin;
     Coord spaceMax;
+    EulerAngles viewAngle;
     Rotation viewRotation;
     std::map<int, const Shape3D *> shapes;
     std::map<int, const Material *> materials;
@@ -71,7 +72,7 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseObjects(cXMLElement *xml);
     virtual void updateCanvas();
     virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
-    virtual Rotation computeViewRotation(const char *viewAngle);
+    virtual EulerAngles computeViewAngle(const char *viewAngle);
 
   public:
     PhysicalEnvironment();
@@ -83,8 +84,10 @@ class INET_API PhysicalEnvironment : public cModule
     virtual K getTemperature() const { return temperature; }
     virtual Pa getPressure() const { return pressure; }
     virtual percent getRelativeHumidity() const { return relativeHumidity; }
-    virtual const Coord getSpaceMin() const { return spaceMin; }
-    virtual const Coord getSpaceMax() const { return spaceMax; }
+    virtual const Coord& getSpaceMin() const { return spaceMin; }
+    virtual const Coord& getSpaceMax() const { return spaceMax; }
+    virtual const EulerAngles& getViewAngle() const { return viewAngle; }
+    virtual const Rotation& getViewRotation() const { return viewRotation; }
     virtual const std::vector<PhysicalObject *>& getObjects() const;
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
 };
