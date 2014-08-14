@@ -37,13 +37,12 @@ class INET_API PhysicalEnvironment : public cModule
         protected:
             const Rotation &viewRotation;
 
+        protected:
+            void frob(std::vector<std::vector<Coord> > &faces, const Coord &position, const Rotation &rotation) const;
+
         public:
             ObjectPositionComparator(const Rotation &viewRotation) : viewRotation(viewRotation) {}
-
-            bool operator() (const PhysicalObject *left, const PhysicalObject *right) const
-            {
-                return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
-            }
+            bool operator() (const PhysicalObject *left, const PhysicalObject *right) const;
     };
 
   protected:

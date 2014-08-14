@@ -70,5 +70,10 @@ bool Sphere::computeIntersection(const LineSegment& lineSegment, Coord& intersec
         return false;
 }
 
+void Sphere::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+{
+    throw cRuntimeError("Unsupported operation");
+}
+
 } // namespace inet
 

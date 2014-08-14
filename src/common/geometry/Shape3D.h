@@ -18,6 +18,7 @@
 #ifndef __INET_SHAPE3D_H
 #define __INET_SHAPE3D_H
 
+#include "Rotation.h"
 #include "LineSegment.h"
 
 namespace inet {
@@ -34,6 +35,8 @@ class INET_API Shape3D
 
     virtual Coord computeSize() const = 0;
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const = 0;
+    // TODO: too many rotations?
+    virtual void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const = 0;
 };
 
 } // namespace inet

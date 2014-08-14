@@ -83,7 +83,7 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
     Coord polygonNormal = getNormalUnitVector();
     // The segment is not in the polygon's plane
     // The length of the intersection segment will be 0
-    if (polygonNormal * segmentDirection != 0 || (p0 - points[0]) * polygonNormal != 0)
+    if (polygonNormal * segmentDirection == 0) // TODO: wtf? || (p0 - points[0]) * polygonNormal != 0)
         return false;
     double tE = 0;
     double tL = 1;
