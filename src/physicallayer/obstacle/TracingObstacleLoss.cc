@@ -103,7 +103,10 @@ double TracingObstacleLoss::computeObjectLoss(const PhysicalObject *object, Hz f
     if (shape->computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
     {
         intersectionCount++;
+        double intersectionDistance = intersection2.distance(intersection1);
         if (leaveIntersectionTrail) {
+            normal1 = normal1 / normal1.length() * intersectionDistance / 10;
+            normal2 = normal2 / normal2.length() * intersectionDistance / 10;
             cLineFigure *intersectionLine = new cLineFigure();
             Coord rotatedIntersection1 = rotation.rotateVectorClockwise(intersection1);
             Coord rotatedIntersection2 = rotation.rotateVectorClockwise(intersection2);
@@ -123,7 +126,7 @@ double TracingObstacleLoss::computeObjectLoss(const PhysicalObject *object, Hz f
             intersectionTrail->addFigure(normal2Line);
         }
         const Material *material = object->getMaterial();
-        totalLoss *= computeDielectricLoss(material, frequency, m(intersection2.distance(intersection1)));
+        totalLoss *= computeDielectricLoss(material, frequency, m(intersectionDistance));
         if (!normal1.isUnspecified()) {
             double angle1 = (intersection1 - intersection2).angle(normal1);
             totalLoss *= computeReflectionLoss(medium->getMaterial(), material, angle1);

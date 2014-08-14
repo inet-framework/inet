@@ -227,6 +227,11 @@ class INET_API Coord : public cObject
     double length() const { return sqrt(squareLength()); }
 
     /**
+     * @brief Updates the length of this position vector to be 1.
+     */
+    void normalize() { *this /= length(); }
+
+    /**
      * @brief Checks if this coordinate is inside a specified rectangle.
      *
      * @param lowerBound The upper bound of the rectangle.
