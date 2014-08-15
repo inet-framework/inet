@@ -732,13 +732,13 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     transmissionCacheEntry->frame = radioFrame->dup();
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
-        cOvalFigure *communicationFigure = new cOvalFigure();
+        cRingFigure *communicationFigure = new cRingFigure();
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
-        communicationFigure->setFilled(drawCommunication2D);
+        communicationFigure->setFilled(true);
         communicationFigure->setFillColor(cFigure::CYAN);
         communicationFigure->setFillOpacity(0.5);
-        communicationFigure->setLineWidth(drawCommunication2D ? 1 : 0);
-        communicationFigure->setLineColor(drawCommunication2D ? cFigure::BLACK : cFigure::CYAN);
+        communicationFigure->setLineWidth(1);
+        communicationFigure->setLineColor(cFigure::BLACK);
         communicationFigure->setLineOpacity(0.5);
         communicationLayer->addFigure(communicationFigure);
         transmissionCacheEntry->figure = communicationFigure;
@@ -885,40 +885,50 @@ void RadioMedium::updateCanvas()
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
         const TransmissionCacheEntry* transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-        cOvalFigure *figure = transmissionCacheEntry->figure;
+        cRingFigure *figure = transmissionCacheEntry->figure;
         if (figure) {
             const Coord transmissionStart = transmission->getStartPosition();
             double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
             double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
             if (endRadius < 0) endRadius = 0;
-            double radius = (startRadius + endRadius) / 2;
             // KLUDGE: to workaround overflow bugs in drawing
-            figure->setVisible(radius < 10000);
+            if (startRadius > 10000)
+                startRadius = 10000;
+            if (endRadius > 10000)
+                endRadius = 10000;
             if (drawCommunication2D) {
                 // determine the rotated 2D canvas points of the four corners of flat 3D circle's bounding box
                 // it defines a 2D rotated parallelogram that needs to be filled with an oval
-                cFigure::Point topLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-radius, -radius, 0));
-                cFigure::Point topRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(radius, -radius, 0));
-                cFigure::Point bottomLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-radius, radius, 0));
-                cFigure::Point bottomRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(radius, radius, 0));
+                cFigure::Point topLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-startRadius, -startRadius, 0));
+                cFigure::Point topRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(startRadius, -startRadius, 0));
+                cFigure::Point bottomLeft = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(-startRadius, startRadius, 0));
+                cFigure::Point bottomRight = PhysicalEnvironment::computeCanvasPoint(transmissionStart + Coord(startRadius, startRadius, 0));
                 cFigure::Point bottomDirectionVector = bottomLeft - bottomRight;
-                LineSegment heightLineSegment(Coord(topLeft.x, topLeft.y, 0), Coord(topLeft.x, topLeft.y, 0) + Coord(-bottomDirectionVector.y, bottomDirectionVector.x, 0));
-                LineSegment bottomLineSegment(Coord(bottomLeft.x, bottomLeft.y, 0), Coord(bottomRight.x, bottomRight.y, 0));
+                LineSegment bottomHeight(Coord(topLeft.x, topLeft.y, 0), Coord(topLeft.x, topLeft.y, 0) + Coord(-bottomDirectionVector.y, bottomDirectionVector.x, 0));
+                LineSegment bottomSide(Coord(bottomLeft.x, bottomLeft.y, 0), Coord(bottomRight.x, bottomRight.y, 0));
                 Coord intersection1, intersection2;
-                bool intersectionFound = heightLineSegment.computeIntersection(bottomLineSegment, intersection1, intersection2);
-                ASSERT(intersectionFound);
-                cFigure::Point intersection(intersection1.x, intersection1.y);
+                // TODO: use the real intersection
+//                bool intersectionFound = heightLineSegment.computeIntersection(bottomLineSegment, intersection1, intersection2);
+//                ASSERT(intersectionFound);
+//                cFigure::Point intersection(intersection1.x, intersection1.y);
+                // KLUDGE: for the simple case when the top and bottom sides are horizontal
+                cFigure::Point bottomHeightIntersection(topLeft.x, bottomLeft.y);
                 double width = (topLeft - topRight).getLength();
-                double height = (topLeft - intersection).getLength();
-                double skewXAngle = M_PI / 2 - atan2(height, (bottomLeft - intersection).getLength());
+                double height = (topLeft - bottomHeightIntersection).getLength();
+                cFigure::Point leftSideVector = topLeft - bottomLeft;
+                cFigure::Point bottomSideVector = bottomRight - bottomLeft;
+                double bottomRightCosAlpha = leftSideVector * bottomSideVector / leftSideVector.getLength() / bottomSideVector.getLength();
+                double skewXAngle = acos(bottomRightCosAlpha);
                 double rotationAngle = atan2(topRight.y - topLeft.y, topRight.x - topLeft.x);
                 cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
                 figure->setTransform(cFigure::Transform());
-                figure->skewx(skewXAngle, center.y);
+                figure->skewx(-skewXAngle, center.y);
                 figure->rotate(rotationAngle, center.x, center.y);
-                figure->setBounds(cFigure::Rectangle(center.x - width, center.y - height, 2 * width, 2 * height));
+                figure->setBounds(cFigure::Rectangle(center.x - width / 2, center.y - height / 2, width, height));
+                figure->setInnerRx(width * endRadius / startRadius / 2);
+                figure->setInnerRy(height * endRadius / startRadius / 2);
                 // TODO: delete debug code (this is the parallelogram where the oval should fit in)
-//                std::cout << "ANGLE " << math::rad2deg(angle) << endl;
+//                std::cout << "ANGLE " << math::rad2deg(skewXAngle) << endl;
 //                std::vector<cFigure::Point> points;
 //                points.push_back(topLeft);
 //                points.push_back(topRight);
@@ -932,8 +942,9 @@ void RadioMedium::updateCanvas()
             else {
                 // a sphere looks like a circle from any view angle
                 cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
-                figure->setBounds(cFigure::Rectangle(center.x - radius, center.y - radius, radius * 2, radius * 2));
-                figure->setLineWidth(startRadius - endRadius);
+                figure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
+                figure->setInnerRx(endRadius);
+                figure->setInnerRy(endRadius);
             }
         }
     }
