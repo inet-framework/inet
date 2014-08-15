@@ -13,6 +13,8 @@ src/Makefile.vc
 /examples/*/*/*/results/
 /tests/*/work/
 /tests/*/results*/
+*.log
+*.sim
 *.pyc
 *.pcap
 *.sca
