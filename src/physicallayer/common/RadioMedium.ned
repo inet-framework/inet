@@ -61,6 +61,7 @@ module RadioMedium like IRadioMedium
         bool displayCommunication = default(false);
         bool drawCommunication2D = default(false);
         bool leaveCommunicationTrail = default(false);
+        double updateCanvasInterval @unit(s) = default(100ns);
 
         @class(RadioMedium);
         @display("i=misc/sun");

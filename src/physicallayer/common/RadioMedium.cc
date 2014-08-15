@@ -52,6 +52,8 @@ RadioMedium::RadioMedium() :
     displayCommunication(false),
     drawCommunication2D(false),
     leaveCommunicationTrail(false),
+    updateCanvasInterval(sNaN),
+    updateCanvasTimer(NULL),
     removeNonInterferingTransmissionsTimer(NULL),
     baseRadioId(0),
     baseTransmissionId(0),
@@ -75,6 +77,7 @@ RadioMedium::~RadioMedium()
     delete backgroundNoise;
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
         delete *it;
+    cancelAndDelete(updateCanvasTimer);
     cancelAndDelete(removeNonInterferingTransmissionsTimer);
     for (std::vector<TransmissionCacheEntry>::const_iterator it = cache.begin(); it != cache.end(); it++) {
         const TransmissionCacheEntry& transmissionCacheEntry = *it;
@@ -118,6 +121,7 @@ void RadioMedium::initialize(int stage)
         listeningFilter = par("listeningFilter");
         macAddressFilter = par("macAddressFilter");
         // initialize timers
+        updateCanvasTimer = new cMessage("updateCanvas");
         removeNonInterferingTransmissionsTimer = new cMessage("removeNonInterferingTransmissions");
         // initialize logging
         recordCommunicationLog = par("recordCommunicationLog");
@@ -136,6 +140,7 @@ void RadioMedium::initialize(int stage)
             communcationTrail = new TrailFigure(100, "communication trail");
             canvas->addFigure(communcationTrail, canvas->findFigure("submodules"));
         }
+        updateCanvasInterval = par("updateCanvasInterval");
     }
     else if (stage == INITSTAGE_PHYSICAL_LAYER) {
         updateLimits();
@@ -183,6 +188,10 @@ void RadioMedium::handleMessage(cMessage *message)
 {
     if (message == removeNonInterferingTransmissionsTimer)
         removeNonInterferingTransmissions();
+    else if (message == updateCanvasTimer) {
+        updateCanvas();
+        scheduleUpdateCanvasTimer();
+    }
     else
         throw cRuntimeError("Unknown message");
 }
@@ -661,6 +670,8 @@ void RadioMedium::addTransmission(const IRadio *transmitterRadio, const ITransmi
         Enter_Method_Silent();
         scheduleAt(cache[0].interferenceEndTime, removeNonInterferingTransmissionsTimer);
     }
+    if (updateCanvasInterval > 0 && !updateCanvasTimer->isScheduled())
+        scheduleUpdateCanvasTimer();
 }
 
 void RadioMedium::sendToAffectedRadios(IRadio *radio, const IRadioFrame *frame)
@@ -948,6 +959,34 @@ void RadioMedium::updateCanvas()
             }
         }
     }
+}
+
+void RadioMedium::scheduleUpdateCanvasTimer()
+{
+    simtime_t now = simTime();
+    for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++)
+    {
+        const ITransmission *transmission = *it;
+        const TransmissionCacheEntry *transmissionCacheEntry = getTransmissionCacheEntry(transmission);
+        const simtime_t startTime = transmission->getStartTime();
+        const simtime_t endTime = transmission->getEndTime();
+        simtime_t maxPropagationTime = transmissionCacheEntry->interferenceEndTime - endTime - maxTransmissionDuration;
+        if ((startTime <= now && now <= startTime + maxPropagationTime) ||
+            (endTime <= now && now <= endTime + maxPropagationTime))
+        {
+            scheduleAt(simTime() + updateCanvasInterval, updateCanvasTimer);
+            return;
+        }
+    }
+    simtime_t nextEndTime = -1;
+    for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
+        const ITransmission *transmission = *it;
+        const simtime_t endTime = transmission->getEndTime();
+        if (endTime > now && (nextEndTime == -1 || endTime < nextEndTime))
+            nextEndTime = endTime;
+    }
+    if (nextEndTime > now)
+        scheduleAt(nextEndTime, updateCanvasTimer);
 }
 
 Coord RadioMedium::computeConstraintAreaMin() const

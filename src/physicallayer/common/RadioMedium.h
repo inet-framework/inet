@@ -228,10 +228,18 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      * Leaves graphical trail of successful communication between radios.
      */
     bool leaveCommunicationTrail;
+    /**
+     * Update canvas interval when ongoing communication exists.
+     */
+    simtime_t updateCanvasInterval;
     //@}
 
     /** @name Timer */
     //@{
+    /**
+     * The message used to update the canvas when ongoing communication exists.
+     */
+    cMessage *updateCanvasTimer;
     /**
      * The message used to purge internal state and cache.
      */
@@ -445,6 +453,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /** @name Graphics */
     //@{
     virtual void updateCanvas();
+    virtual void scheduleUpdateCanvasTimer();
     //@}
 
   public:
