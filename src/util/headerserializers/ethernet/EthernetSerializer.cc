@@ -37,6 +37,8 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "ARPSerializer.h"
 
+#include "EthernetCRC.h"
+
 using namespace INETFw;
 
 int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf, unsigned int bufsize)
@@ -78,7 +80,9 @@ int EthernetSerializer::serialize(const EthernetIIFrame *pkt, unsigned char *buf
             throw cRuntimeError("EthernetSerializer: cannot serialize protocol %x", pkt->getEtherType());
     }
 
-    return packetLength;
+    uint32_t *fcs = (uint32_t *) (buf + packetLength);
+    *fcs = ethernetCRC(buf, packetLength);
+    return packetLength + 4;
 }
 
 cPacket* EthernetSerializer::parse(const unsigned char *buf, unsigned int bufsize)
