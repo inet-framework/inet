@@ -83,7 +83,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
         /**
          * The figure representing this transmission.
          */
-        cRingFigure *figure;
+        cFigure *figure;
         /**
          * The list of intermediate reception computation results.
          */

@@ -743,20 +743,24 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
     transmissionCacheEntry->frame = radioFrame->dup();
     if (displayCommunication) {
         cFigure::Point position = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
+        cFigure::Color color = cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))];
+        cGroupFigure *groupFigure = new cGroupFigure();
         cRingFigure *communicationFigure = new cRingFigure();
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFilled(true);
-        communicationFigure->setFillColor(cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
+        communicationFigure->setFillColor(color);
         communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineWidth(1);
         communicationFigure->setLineColor(cFigure::BLACK);
         communicationFigure->setLineOpacity(0.5);
-        communicationLayer->addFigure(communicationFigure);
-        transmissionCacheEntry->figure = communicationFigure;
-        cTextFigure *nameFigure = new cTextFigure();
-        nameFigure->setLocation(cFigure::Point(0, 0));
+        groupFigure->addFigure(communicationFigure);
+        cLabelFigure *nameFigure = new cLabelFigure();
+        nameFigure->setLocation(position);
         nameFigure->setText(macFrame->getName());
-        communicationFigure->addFigure(nameFigure);
+        nameFigure->setColor(color);
+        groupFigure->addFigure(nameFigure);
+        communicationLayer->addFigure(groupFigure);
+        transmissionCacheEntry->figure = groupFigure;
         updateCanvas();
     }
     return radioFrame;
@@ -781,12 +785,14 @@ cPacket *RadioMedium::receivePacket(const IRadio *radio, IRadioFrame *radioFrame
     macFrame->setControlInfo(const_cast<RadioReceptionIndication *>(decision->getIndication()));
     delete listening;
     if (leaveCommunicationTrail && decision->isReceptionSuccessful()) {
-        cLineFigure *communicationLine = new cLineFigure();
-        communicationLine->setStart(PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition()));
-        communicationLine->setEnd(PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition()));
-        communicationLine->setLineColor(cFigure::BLUE);
-        communicationLine->setEndArrowHead(cFigure::ARROW_SIMPLE);
-        communcationTrail->addFigure(communicationLine);
+        cLineFigure *communicationFigure = new cLineFigure();
+        cFigure::Point start = PhysicalEnvironment::computeCanvasPoint(transmission->getStartPosition());
+        cFigure::Point end = PhysicalEnvironment::computeCanvasPoint(decision->getReception()->getStartPosition());
+        communicationFigure->setStart(start);
+        communicationFigure->setEnd(end);
+        communicationFigure->setLineColor(cFigure::BLUE);
+        communicationFigure->setEndArrowHead(cFigure::ARROW_SIMPLE);
+        communcationTrail->addFigure(communicationFigure);
     }
     if (displayCommunication)
         updateCanvas();
@@ -896,8 +902,9 @@ void RadioMedium::updateCanvas()
     for (std::vector<const ITransmission *>::const_iterator it = transmissions.begin(); it != transmissions.end(); it++) {
         const ITransmission *transmission = *it;
         const TransmissionCacheEntry* transmissionCacheEntry = getTransmissionCacheEntry(transmission);
-        cRingFigure *figure = transmissionCacheEntry->figure;
-        if (figure) {
+        cFigure *groupFigure = transmissionCacheEntry->figure;
+        if (groupFigure) {
+            cRingFigure *communicationFigure = (cRingFigure *)groupFigure->getFigure(0);
             const Coord transmissionStart = transmission->getStartPosition();
             double startRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getStartTime()).dbl();
             double endRadius = propagation->getPropagationSpeed().get() * (simTime() - transmission->getEndTime()).dbl();
@@ -932,12 +939,12 @@ void RadioMedium::updateCanvas()
                 double skewXAngle = acos(bottomRightCosAlpha);
                 double rotationAngle = atan2(topRight.y - topLeft.y, topRight.x - topLeft.x);
                 cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
-                figure->setTransform(cFigure::Transform());
-                figure->skewx(-skewXAngle, center.y);
-                figure->rotate(rotationAngle, center.x, center.y);
-                figure->setBounds(cFigure::Rectangle(center.x - width / 2, center.y - height / 2, width, height));
-                figure->setInnerRx(width * endRadius / startRadius / 2);
-                figure->setInnerRy(height * endRadius / startRadius / 2);
+                communicationFigure->setTransform(cFigure::Transform());
+                communicationFigure->skewx(-skewXAngle, center.y);
+                communicationFigure->rotate(rotationAngle, center.x, center.y);
+                communicationFigure->setBounds(cFigure::Rectangle(center.x - width / 2, center.y - height / 2, width, height));
+                communicationFigure->setInnerRx(width * endRadius / startRadius / 2);
+                communicationFigure->setInnerRy(height * endRadius / startRadius / 2);
                 // TODO: delete debug code (this is the parallelogram where the oval should fit in)
 //                std::cout << "ANGLE " << math::rad2deg(skewXAngle) << endl;
 //                std::vector<cFigure::Point> points;
@@ -953,9 +960,9 @@ void RadioMedium::updateCanvas()
             else {
                 // a sphere looks like a circle from any view angle
                 cFigure::Point center = PhysicalEnvironment::computeCanvasPoint(transmissionStart);
-                figure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
-                figure->setInnerRx(endRadius);
-                figure->setInnerRy(endRadius);
+                communicationFigure->setBounds(cFigure::Rectangle(center.x - startRadius, center.y - startRadius, 2 * startRadius, 2 * startRadius));
+                communicationFigure->setInnerRx(endRadius);
+                communicationFigure->setInnerRy(endRadius);
             }
         }
     }
