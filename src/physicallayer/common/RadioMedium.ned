@@ -59,6 +59,7 @@ module RadioMedium like IRadioMedium
 
         // graphics parameters
         bool displayCommunication = default(false);
+        bool drawCommunication2D = default(false);
         bool leaveCommunicationTrail = default(false);
 
         @class(RadioMedium);

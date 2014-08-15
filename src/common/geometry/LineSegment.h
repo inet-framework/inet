@@ -46,6 +46,8 @@ class INET_API LineSegment
     bool isNil() const { return this == &NIL; }
     bool isUnspecified() const { return point1.isUnspecified() && point2.isUnspecified(); }
     double length() const { return point2.distance(point1); }
+
+    bool computeIntersection(const LineSegment &lineSegment, Coord &intersection1, Coord &intersection2);
 };
 
 } // namespace inet

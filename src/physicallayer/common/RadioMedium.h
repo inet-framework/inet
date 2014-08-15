@@ -221,6 +221,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     bool displayCommunication;
     /**
+     * Determines ongoing communication figure: 3D spheres or 2D circles on the X-Y plane.
+     */
+    bool drawCommunication2D;
+    /**
      * Leaves graphical trail of successful communication between radios.
      */
     bool leaveCommunicationTrail;
