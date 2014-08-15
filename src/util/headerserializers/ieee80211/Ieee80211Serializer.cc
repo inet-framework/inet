@@ -40,11 +40,15 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 
 #include "ARPSerializer.h"
 
+#include "EthernetCRC.h"
+
 using namespace INETFw;
 
 
 int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsigned int bufsize)
 {
+    unsigned int packetLength = 0;
+
     if (NULL != dynamic_cast<Ieee80211ACKFrame *>(pkt))
     {
         Ieee80211ACKFrame *ackFrame = dynamic_cast<Ieee80211ACKFrame *>(pkt);
@@ -54,7 +58,7 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         frame->i_dur = (int)(ackFrame->getDuration().dbl()*1000);
         ackFrame->getReceiverAddress().getAddressBytes(frame->i_ra);
 
-        return 4 + IEEE80211_ADDR_LEN;
+        packetLength = 4 + IEEE80211_ADDR_LEN;
     }
     else if (NULL != dynamic_cast<Ieee80211RTSFrame *>(pkt))
     {
@@ -65,7 +69,7 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         frame->i_dur = (int)(rtsFrame->getDuration().dbl()*1000);
         rtsFrame->getReceiverAddress().getAddressBytes(frame->i_ra);
         rtsFrame->getTransmitterAddress().getAddressBytes(frame->i_ta);
-        return 4+ 2*IEEE80211_ADDR_LEN;
+        packetLength = 4+ 2*IEEE80211_ADDR_LEN;
     }
 
     else if (NULL != dynamic_cast<Ieee80211CTSFrame *>(pkt))
@@ -76,13 +80,11 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         frame->i_fc[1] = 0;
         frame->i_dur = (int)(ctsFrame->getDuration().dbl()*1000);
         ctsFrame->getReceiverAddress().getAddressBytes(frame->i_ra);
-        return 4 + IEEE80211_ADDR_LEN;
+        packetLength = 4 + IEEE80211_ADDR_LEN;
     }
     else if (NULL != dynamic_cast<Ieee80211DataOrMgmtFrame *>(pkt))
     {
         Ieee80211DataOrMgmtFrame *dataOrMgmtFrame = dynamic_cast<Ieee80211DataOrMgmtFrame *>(pkt);
-
-        unsigned int packetLength;
 
         struct ieee80211_frame *frame = (struct ieee80211_frame *) (buf);
         frame->i_fc[0] = 0x8;
@@ -150,7 +152,6 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
                 default:
                     throw cRuntimeError("Ieee80211Serializer: cannot serialize protocol %x", dataFrame->getEtherType());
             }
-            return packetLength;
         }
 
         else if (NULL != dynamic_cast<Ieee80211AuthenticationFrame *>(pkt))
@@ -221,10 +222,16 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
     }
     else
         throw cRuntimeError("Ieee80211Serializer: cannot serialize the frame");
+
+    uint32_t *fcs = (uint32_t *) (buf + packetLength);
+    *fcs = ethernetCRC(buf, packetLength);
+    return packetLength + 4;
 }
 
 cPacket* Ieee80211Serializer::parse(const unsigned char *buf, unsigned int bufsize)
 {
+    uint32_t crc = ethernetCRC(buf, bufsize);
+    EV_DEBUG << "CRC: "<< crc << " (" << (0x2144DF1C == crc ) << ")"<< endl;
     uint8_t *type = (uint8_t *) (buf);
     switch(*type)
     {
