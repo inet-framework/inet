@@ -73,8 +73,34 @@ static void testRecord(const char* filename)
 
 %activity:
 testRecord("../../arp.pcap");
+testRecord("../../tcp.pcap");
 
-%contains: stdout
+%contains-regex: stdout
+dest: FF-FF-FF-FF-FF-FF
+src: 00-07-0D-AF-F4-54
+.*
+etherType: 2054
+.*
+srcMACAddress: 00-07-0D-AF-F4-54
+destMACAddress: 00-00-00-00-00-00
+srcIPAddress: 24.166.172.1
+destIPAddress: 24.166.173.159
+.*
+Frames are the same
+.*
+dest: 00-13-C6-00-55-A5
+src: 00-1D-60-B3-01-84
+.*
+etherType: 2048
+.*
+srcAddress: 192.168.1.140
+destAddress: 192.168.1.194
+transportProtocol: 6
+.*
+srcPort: 56760
+destPort: 23
+sequenceNo: 3671007701
+.*
 Frames are the same
 
 %not-contains: stdout
