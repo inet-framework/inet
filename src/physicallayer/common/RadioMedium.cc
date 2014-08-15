@@ -746,7 +746,7 @@ IRadioFrame *RadioMedium::transmitPacket(const IRadio *radio, cPacket *macFrame)
         cRingFigure *communicationFigure = new cRingFigure();
         communicationFigure->setBounds(cFigure::Rectangle(position.x, position.y, 0, 0));
         communicationFigure->setFilled(true);
-        communicationFigure->setFillColor(cFigure::CYAN);
+        communicationFigure->setFillColor(cFigure::GOOD_DARK_COLORS[transmission->getId() % (sizeof(cFigure::GOOD_DARK_COLORS) / sizeof(cFigure::Color))]);
         communicationFigure->setFillOpacity(0.5);
         communicationFigure->setLineWidth(1);
         communicationFigure->setLineColor(cFigure::BLACK);
