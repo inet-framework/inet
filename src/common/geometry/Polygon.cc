@@ -48,10 +48,7 @@ Coord Polygon::getNormalVector() const
     Coord point3 = points[2];
     Coord vectorA = point2 - point1;
     Coord vectorB = point3 - point1;
-    Coord vectorC(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
-                 vectorA.z * vectorB.x - vectorA.x * vectorB.z,
-                 vectorA.x * vectorB.y - vectorA.y * vectorB.x);
-    return vectorC;
+    return vectorA % vectorB;
 }
 
 Coord Polygon::computeSize() const
@@ -70,9 +67,7 @@ Coord Polygon::getEdgeOutwardNormalVector(const Coord& edgeP1, const Coord& edge
     Coord polygonNormal = getNormalUnitVector();
     Coord vectorA = edgeP1 - polygonNormal;
     Coord vectorB = edgeP2 - polygonNormal;
-    Coord vectorC(vectorA.y * vectorB.z - vectorA.z * vectorB.y,
-                 vectorA.z * vectorB.x - vectorA.x * vectorB.z,
-                 vectorA.x * vectorB.y - vectorA.y * vectorB.x);
+    Coord vectorC = vectorA % vectorB;
     // The projection of a vector image v onto a plane with unit normal vector n is: p = v - (v*n)*n.
     return vectorC - polygonNormal * (vectorC * polygonNormal);
 }
