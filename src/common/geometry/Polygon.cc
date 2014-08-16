@@ -80,14 +80,11 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
     if (p0 == p1)
     {
         normal1 = normal2 = Coord::NIL;
+        // TODO: test for inclusion
         return false;
     }
     Coord segmentDirection = p1 - p0;
     Coord polygonNormal = getNormalUnitVector();
-    // The segment is not in the polygon's plane
-    // The length of the intersection segment will be 0
-    if (polygonNormal * segmentDirection == 0) // TODO: wtf? || (p0 - points[0]) * polygonNormal != 0)
-        return false;
     double tE = 0;
     double tL = 1;
     unsigned int pointSize = points.size();
@@ -130,11 +127,6 @@ bool Polygon::computeIntersection(const LineSegment& lineSegment, Coord& interse
         normal2 = Coord::NIL;
     intersection1 = p0 + segmentDirection * tE;
     intersection2 = p0 + segmentDirection * tL;
-    if (intersection1 == intersection2)
-    {
-        normal1 = normal2 = Coord::NIL;
-        return false;
-    }
     return true;
 }
 
