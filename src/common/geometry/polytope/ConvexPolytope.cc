@@ -434,7 +434,7 @@ bool ConvexPolytope::computeIntersection(const LineSegment& lineSegment, Coord& 
     return true;
 }
 
-void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void ConvexPolytope::computeVisibleFaces(std::vector<Polygon>& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     for (Faces::const_iterator fit = this->faces.begin(); fit != this->faces.end(); fit++)
     {
@@ -449,7 +449,7 @@ void ConvexPolytope::computeVisibleFaces(std::vector<std::vector<Coord> >& faces
                 Coord point = *edge->getP1();
                 points.push_back(point);
             }
-            faces.push_back(points);
+            faces.push_back(Polygon(points));
         }
     }
 }

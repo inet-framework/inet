@@ -415,7 +415,7 @@ void PhysicalEnvironment::updateCanvas()
         // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
         if (cuboid) {
-            std::vector<std::vector<Coord> > faces;
+            std::vector<Polygon> faces;
             cuboid->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
@@ -435,7 +435,7 @@ void PhysicalEnvironment::updateCanvas()
         // prism
         const Prism *prism = dynamic_cast<const Prism *>(shape);
         if (prism) {
-            std::vector<std::vector<Coord> > faces;
+            std::vector<Polygon> faces;
             prism->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
@@ -443,7 +443,7 @@ void PhysicalEnvironment::updateCanvas()
         const ConvexPolytope *polytope = dynamic_cast<const ConvexPolytope *>(shape);
         if (polytope)
         {
-            std::vector<std::vector<Coord> > faces;
+            std::vector<Polygon> faces;
             polytope->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
@@ -463,13 +463,13 @@ const std::vector<PhysicalObject*>& PhysicalEnvironment::getObjects() const
     return objects;
 }
 
-void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation)
+void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<Polygon>& faces, const Rotation& rotation)
 {
     const Coord& position = object->getPosition();
-    for (std::vector<std::vector<Coord> >::const_iterator it = faces.begin(); it != faces.end(); it++)
+    for (std::vector<Polygon>::const_iterator it = faces.begin(); it != faces.end(); it++)
     {
         std::vector<cFigure::Point> canvasPoints;
-        const std::vector<Coord>& facePoints = *it;
+        const std::vector<Coord>& facePoints = (*it).getPoints();
         for (std::vector<Coord>::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
         {
             cFigure::Point canvPoint = computeCanvasPoint(rotation.rotateVectorClockwise(*pit) + position, viewRotation);

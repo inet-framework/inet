@@ -209,19 +209,13 @@ void inet::Prism::setBase(const Polygon& base)
     }
 }
 
-void Prism::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void Prism::computeVisibleFaces(std::vector<Polygon>& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     for (unsigned int i = 0; i < this->faces.size(); i++)
     {
         const Polygon& face = this->faces.at(i);
         if (isVisibleFromView(i, viewRotation, rotation))
-        {
-            const std::vector<Coord>& facePoints = face.getPoints();
-            std::vector<Coord> points;
-            for (Points::const_iterator pit = facePoints.begin(); pit != facePoints.end(); pit++)
-                points.push_back(*pit);
-            faces.push_back(points);
-        }
+            faces.push_back(face);
     }
 }
 

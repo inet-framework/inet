@@ -19,6 +19,7 @@
 #define __INET_SPHERE_H
 
 #include "Shape3D.h"
+#include "Polygon.h"
 
 namespace inet {
 
@@ -38,7 +39,7 @@ class INET_API Sphere : public Shape3D
 
     virtual Coord computeSize() const { return Coord(radius * 2, radius * 2, radius * 2); }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
-    virtual void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
+    virtual void computeVisibleFaces(std::vector<Polygon>& faces, const Rotation& rotation, const Rotation& viewRotation) const;
 };
 
 } // namespace inet

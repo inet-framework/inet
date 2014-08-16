@@ -20,6 +20,7 @@
 
 #include "Shape3D.h"
 #include "Rotation.h"
+#include "Polygon.h"
 
 namespace inet {
 
@@ -42,7 +43,7 @@ class INET_API Cuboid : public Shape3D
     void setSize(const Coord& size) { this->size = size; }
     virtual Coord computeSize() const { return size; }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
-    virtual void computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const;
+    virtual void computeVisibleFaces(std::vector<Polygon>& faces, const Rotation& rotation, const Rotation& viewRotation) const;
 };
 
 } // namespace inet

@@ -124,7 +124,7 @@ bool Cuboid::computeIntersection(const LineSegment& lineSegment, Coord& intersec
     return !intersection1.isUnspecified() && !intersection2.isUnspecified();
 }
 
-void Cuboid::computeVisibleFaces(std::vector<std::vector<Coord> >& faces, const Rotation& rotation, const Rotation& viewRotation) const
+void Cuboid::computeVisibleFaces(std::vector<Polygon>& faces, const Rotation& rotation, const Rotation& viewRotation) const
 {
     // TODO: specialize
     std::vector<Coord> polygonPoints;
