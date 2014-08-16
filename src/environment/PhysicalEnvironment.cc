@@ -405,7 +405,6 @@ void PhysicalEnvironment::updateCanvas()
         delete objectsLayer->removeFigure(0);
     // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
     std::vector<PhysicalObject *> objectsCopy = objects;
-    std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
     for (std::vector<PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++) {
         PhysicalObject *object = *it;
         const Shape3D *shape = object->getShape();
@@ -530,65 +529,6 @@ Rotation PhysicalEnvironment::computeViewRotation(const char* viewAngle)
     else
         throw cRuntimeError("viewAngle must be a triplet representing three degrees");
     return Rotation(EulerAngles(x, y, z));
-}
-
-static int coversFace(const std::vector<Coord> &face1, const std::vector<Coord> &face2)
-{
-    Polygon polygon(face2);
-    double minZ = DBL_MAX;
-    double maxZ = DBL_MIN;
-    for (std::vector<Coord>::const_iterator it = face2.begin(); it != face2.end(); it++) {
-        double z = (*it).z;
-        minZ = std::min(minZ, z);
-        maxZ = std::max(maxZ, z);
-    }
-    for (std::vector<Coord>::const_iterator it = face1.begin(); it != face1.end(); it++) {
-        Coord p = *it;
-        Coord intersection1, intersection2, normal1, normal2;
-        LineSegment lineSegment(Coord(p.x, p.y, minZ), Coord(p.x, p.y, maxZ));
-        if (polygon.computeIntersection(lineSegment, intersection1, intersection2, normal1, normal2))
-        {
-            if ((intersection1.z > p.z || intersection2.z > p.z))
-                return 1;
-            else if ((intersection1.z < p.z || intersection2.z < p.z))
-                return -1;
-        }
-        std::cout << "P " << p << " minZ " << minZ << " maxZ " << maxZ << " polygon " << face2[0] << ", " << face2[1] << ", " << face2[2] << ", " << face2[3] << " intersections " << intersection1 << " " << intersection2 << endl;
-    }
-    return 0;
-}
-
-void PhysicalEnvironment::ObjectPositionComparator::frob(std::vector<std::vector<Coord> > &faces, const Coord &position, const Rotation &rotation) const
-{
-    for (std::vector<std::vector<Coord> >::iterator it = faces.begin(); it != faces.end(); it++) {
-        std::vector<Coord> &face = *it;
-        for (std::vector<Coord>::iterator jt = face.begin(); jt != face.end(); jt++) {
-            *jt = viewRotation.rotateVectorClockwise(rotation.rotateVectorClockwise(*jt) + position);
-        }
-    }
-}
-
-bool PhysicalEnvironment::ObjectPositionComparator::operator() (const PhysicalObject *left, const PhysicalObject *right) const
-{
-    std::vector<std::vector<Coord> > leftFaces;
-    std::vector<std::vector<Coord> > rightFaces;
-    Rotation leftRotation(left->getOrientation());
-    Rotation rightRotation(right->getOrientation());
-    left->getShape()->computeVisibleFaces(leftFaces, leftRotation, viewRotation);
-    right->getShape()->computeVisibleFaces(rightFaces, rightRotation, viewRotation);
-    frob(leftFaces, left->getPosition(), leftRotation);
-    frob(rightFaces, right->getPosition(), rightRotation);
-    for (std::vector<std::vector<Coord> >::const_iterator lt = leftFaces.begin(); lt != leftFaces.end(); lt++) {
-        for (std::vector<std::vector<Coord> >::const_iterator rt = rightFaces.begin(); rt != rightFaces.end(); rt++) {
-            int c1 = coversFace(*lt, *rt);
-            if (c1)
-                return c1 > 0;
-            int c2 = coversFace(*rt, *lt);
-            if (c2)
-                return c2 < 0;
-        }
-    }
-    return viewRotation.rotateVectorClockwise(left->getPosition()).z < viewRotation.rotateVectorClockwise(right->getPosition()).z;
 }
 
 } // namespace inet
