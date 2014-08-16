@@ -27,6 +27,8 @@ class INET_API Polygon
 {
   protected:
     std::vector<Coord> points;
+    double minZ;
+    double maxZ;
     Coord getEdgeOutwardNormalVector(const Coord& edgeP1, const Coord& edgeP2) const;
 
   public:
@@ -37,6 +39,8 @@ class INET_API Polygon
     virtual Coord computeSize() const;
     Coord getNormalUnitVector() const;
     Coord getNormalVector() const;
+    double getMinZ() const { return minZ; }
+    double getMaxZ() const { return maxZ; }
     virtual bool computeIntersection(const LineSegment& lineSegment, Coord& intersection1, Coord& intersection2, Coord& normal1, Coord& normal2) const;
 };
 

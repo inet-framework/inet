@@ -24,6 +24,14 @@ Polygon::Polygon(const std::vector<Coord>& points)
     if (points.size() < 3)
         throw cRuntimeError("A Euclidean polygon has at least three points");
     this->points = points;
+    minZ = DBL_MAX;
+    maxZ = DBL_MIN;
+    for (std::vector<Coord>::const_iterator it = points.begin(); it != points.end(); it++)
+    {
+        double z = (*it).z;
+        minZ = std::min(minZ, z);
+        maxZ = std::max(maxZ, z);
+    }
 }
 
 Coord Polygon::getNormalUnitVector() const
