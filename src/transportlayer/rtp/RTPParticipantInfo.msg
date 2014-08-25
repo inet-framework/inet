@@ -26,16 +26,16 @@ namespace inet::rtp;
 
 class noncobject IPv4Address;
 
-///**
-// * This class is a super class for classes intended for storing information
-// * about ~RTP end systems.
-// * It has two subclasses: RTPReceiverInformation which is used for storing
-// * information about other system participating in an ~RTP session.
-// * RTPSenderInformation is used by an ~RTP endsystem for storing information
-// * about itself.
-// * sa RTPReceiverInformation
-// * sa RTPSenderInformation
-// */
+//
+// This class is a super class for classes intended for storing information
+// about ~RTP end systems.
+// It has two subclasses: RTPReceiverInformation which is used for storing
+// information about other system participating in an ~RTP session.
+// RTPSenderInformation is used by an ~RTP endsystem for storing information
+// about itself.
+// sa RTPReceiverInformation
+// sa RTPSenderInformation
+//
 class RTPParticipantInfo extends cNamedObject
 {
     @customize(true);  // see the generated C++ header for more info
