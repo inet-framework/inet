@@ -301,7 +301,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     /**
      * The list of trail figures representing successful communications.
      */
-    TrailFigure *communcationTrail;
+    TrailFigure *communicationTrail;
     //@}
 
     /** @name Statistics */
