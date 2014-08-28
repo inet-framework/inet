@@ -15,25 +15,25 @@
 
 #include <SerializerUtil.h>
 
-void setOneByte(uint8_t value, unsigned char *buf, unsigned int offset)
+void setOneByte(const uint8_t value, unsigned char *buf, unsigned int offset)
 {
     uint8_t *p = (uint8_t *) (buf + offset);
     *p = value;
 }
 
-void setTwoByte(uint16_t value, unsigned char *buf, unsigned int offset)
+void setTwoByte(const uint16_t value, unsigned char *buf, unsigned int offset)
 {
     uint16_t *p = (uint16_t *) (buf + offset);
     *p = htons(value);
 }
 
-void setFourByte(uint32_t value, unsigned char *buf, unsigned int offset)
+void setFourByte(const uint32_t value, unsigned char *buf, unsigned int offset)
 {
     uint32_t *p = (uint32_t *) (buf + offset);
     *p = htonl(value);
 }
 
-void setNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset)
+void setNByte(const uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset)
 {
     for (unsigned int i = 0; i < n; i++)
     {
@@ -48,32 +48,32 @@ void setNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int o
     }
 }
 
-void setBit(bool value, unsigned int bitOffset, unsigned char *buf, unsigned int offset)
+void setBit(const bool value, unsigned int bitOffset, unsigned char *buf, unsigned int offset)
 {
     uint8_t *p = (uint8_t *) (buf + offset);
     uint8_t byteValue = 1U << bitOffset;
     *p = value ? *p | byteValue : *p & ~byteValue;
 }
 
-uint8_t getOneByte(unsigned char *buf, unsigned int offset)
+uint8_t getOneByte(const unsigned char *buf, unsigned int offset)
 {
     uint8_t *p = (uint8_t *) (buf + offset);
     return *p;
 }
 
-uint16_t getTwoByte(unsigned char *buf, unsigned int offset)
+uint16_t getTwoByte(const unsigned char *buf, unsigned int offset)
 {
     uint16_t *p = (uint16_t *) (buf + offset);
     return ntohs(*p);
 }
 
-uint32_t getFourByte(unsigned char *buf, unsigned int offset)
+uint32_t getFourByte(const unsigned char *buf, unsigned int offset)
 {
     uint32_t *p = (uint32_t *) (buf + offset);
     return ntohl(*p);
 }
 
-void getNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset)
+void getNByte(uint8_t *value, unsigned int n, const unsigned char *buf, unsigned int offset)
 {
     for (unsigned int i = 0; i < n; i++)
     {
@@ -88,7 +88,7 @@ void getNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int o
     }
 }
 
-bool getBit(unsigned int bitOffset, unsigned char *buf, unsigned int offset)
+bool getBit(unsigned int bitOffset, const unsigned char *buf, unsigned int offset)
 {
     uint8_t *p = (uint8_t *) (buf + offset);
     uint8_t byteValue = 1U << bitOffset;

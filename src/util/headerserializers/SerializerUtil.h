@@ -18,16 +18,16 @@
 
 #include "INETDefs.h"
 
-void setOneByte(uint8_t value, unsigned char *buf, unsigned int offset = 0);
-void setTwoByte(uint16_t value, unsigned char *buf, unsigned int offset = 0);
-void setFourByte(uint32_t value, unsigned char *buf, unsigned int offset = 0);
-void setNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset = 0);
-void setBit(bool value, unsigned int bitOffset, unsigned char *buf, unsigned int offset = 0);
+void setOneByte(const uint8_t value, unsigned char *buf, unsigned int offset = 0);
+void setTwoByte(const uint16_t value, unsigned char *buf, unsigned int offset = 0);
+void setFourByte(const uint32_t value, unsigned char *buf, unsigned int offset = 0);
+void setNByte(const uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset = 0);
+void setBit(const bool value, unsigned int bitOffset, unsigned char *buf, unsigned int offset = 0);
 
-uint8_t getOneByte(unsigned char *buf, unsigned int offset = 0);
-uint16_t getTwoByte(unsigned char *buf, unsigned int offset = 0);
-uint32_t getFourByte(unsigned char *buf, unsigned int offset = 0);
-void getNByte(uint8_t *value, unsigned int n, unsigned char *buf, unsigned int offset = 0);
-bool getBit(unsigned int bitOffset, unsigned char *buf, unsigned int offset = 0);
+uint8_t getOneByte(const unsigned char *buf, unsigned int offset = 0);
+uint16_t getTwoByte(const unsigned char *buf, unsigned int offset = 0);
+uint32_t getFourByte(const unsigned char *buf, unsigned int offset = 0);
+void getNByte(uint8_t *value, unsigned int n, const unsigned char *buf, unsigned int offset = 0);
+bool getBit(unsigned int bitOffset, const unsigned char *buf, unsigned int offset = 0);
 
 #endif /* SERIALIZERUTIL_H_ */
