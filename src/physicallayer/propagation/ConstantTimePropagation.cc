@@ -15,30 +15,39 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "ImmediatePropagation.h"
+#include "ConstantTimePropagation.h"
 #include "Arrival.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Define_Module(ImmediatePropagation);
+Define_Module(ConstantTimePropagation);
 
-ImmediatePropagation::ImmediatePropagation() :
+ConstantTimePropagation::ConstantTimePropagation() :
     PropagationBase()
 {}
 
-const IArrival *ImmediatePropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const
+void ConstantTimePropagation::initialize(int stage)
+{
+    PropagationBase::initialize(stage);
+    if (stage == INITSTAGE_LOCAL)
+        propagationTime = par("propagationTime");
+}
+
+const IArrival *ConstantTimePropagation::computeArrival(const ITransmission *transmission, IMobility *mobility) const
 {
     arrivalComputationCount++;
     const Coord position = mobility->getCurrentPosition();
     const EulerAngles orientation = mobility->getCurrentAngularPosition();
-    return new Arrival(0.0, 0.0, transmission->getStartTime(), transmission->getEndTime(), position, position, orientation, orientation);
+    const simtime_t startTime = transmission->getStartTime();
+    const simtime_t endTime = transmission->getEndTime();
+    return new Arrival(propagationTime, propagationTime, startTime + propagationTime, endTime + propagationTime, position, position, orientation, orientation);
 }
 
-void ImmediatePropagation::printToStream(std::ostream& stream) const
+void ConstantTimePropagation::printToStream(std::ostream& stream) const
 {
-    stream << "immediate radio signal propagation, theoretical propagation speed = " << propagationSpeed;
+    stream << "constant time radio signal propagation, propagation time = " << propagationTime << " theoretical propagation speed = " << propagationSpeed;
 }
 
 } // namespace physicallayer

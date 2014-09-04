@@ -15,28 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMMEDIATEPROPAGATION_H
-#define __INET_IMMEDIATEPROPAGATION_H
+package inet.physicallayer.propagation;
 
-#include "PropagationBase.h"
+import inet.physicallayer.base.PropagationBase;
 
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API ImmediatePropagation : public PropagationBase
+module ConstantTimePropagation extends PropagationBase
 {
-  public:
-    ImmediatePropagation();
-
-    virtual void printToStream(std::ostream& stream) const;
-
-    virtual const IArrival *computeArrival(const ITransmission *transmission, IMobility *mobility) const;
-};
-
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_IMMEDIATEPROPAGATION_H
-
+    parameters:
+        double propagationTime @unit(s) = default(0s);
+        @class(ConstantTimePropagation);
+}
