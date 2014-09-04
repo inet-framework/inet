@@ -33,6 +33,8 @@ Define_Module(RadioMedium);
 RadioMedium::RadioMedium() :
     propagation(NULL),
     pathLoss(NULL),
+    obstacleLoss(NULL),
+    multipath(NULL),
     attenuation(NULL),
     backgroundNoise(NULL),
     maxSpeed(mps(sNaN)),
@@ -105,6 +107,7 @@ void RadioMedium::initialize(int stage)
         propagation = check_and_cast<IPropagation *>(getSubmodule("propagation"));
         pathLoss = check_and_cast<IPathLoss *>(getSubmodule("pathLoss"));
         obstacleLoss = dynamic_cast<IObstacleLoss *>(getSubmodule("obstacleLoss"));
+        multipath = dynamic_cast<IMultipath *>(getSubmodule("multipath"));
         attenuation = check_and_cast<IAttenuation *>(getSubmodule("attenuation"));
         backgroundNoise = dynamic_cast<IBackgroundNoise *>(getSubmodule("backgroundNoise"));
         neighborCache = dynamic_cast<INeighborCache *>(getSubmodule("neighborCache"));

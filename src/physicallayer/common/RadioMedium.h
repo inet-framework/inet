@@ -128,6 +128,10 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
      */
     const IObstacleLoss *obstacleLoss;
     /**
+     * The multipath model of transmissions or NULL if unused.
+     */
+    const IMultipath *multipath;
+    /**
      * The attenuation model of transmissions is never NULL.
      */
     const IAttenuation *attenuation;
@@ -475,6 +479,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual const IPropagation *getPropagation() const { return propagation; }
     virtual const IPathLoss *getPathLoss() const { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }
+    virtual const IMultipath *getMultipath() const { return multipath; }
     virtual const IAttenuation *getAttenuation() const { return attenuation; }
     virtual const IBackgroundNoise *getBackgroundNoise() const { return backgroundNoise; }
 

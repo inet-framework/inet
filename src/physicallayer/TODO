@@ -1,5 +1,6 @@
  - rename speed to velocity (speed is scalar)
  - rename loss to gain?
+ - port UWBIR radio from mixim
  - consider generalizing the implementation from radio to radio/cable physical layer with naming, directories etc.
  - create a new interface for stream like transmitters/receivers (transmissionStart, transmissionEnd, receptionStart, receptionEnd)
  - extend receiver interface to allow a separate decision for the detection of preambles during synchronization

@@ -25,6 +25,7 @@
 #include "IPropagation.h"
 #include "IPathLoss.h"
 #include "IObstacleLoss.h"
+#include "IMultipath.h"
 #include "IAttenuation.h"
 #include "IBackgroundNoise.h"
 #include "IReceptionDecision.h"
@@ -84,6 +85,12 @@ class INET_API IRadioMedium : public IPrintableObject
      * function may return NULL.
      */
     virtual const IObstacleLoss *getObstacleLoss() const = 0;
+
+    /**
+     * Returns the radio signal multipath model of this radio medium. This
+     * function may return NULL.
+     */
+    virtual const IMultipath *getMultipath() const = 0;
 
     /**
      * Returns the radio signal attenuation model of this radio medium. This

@@ -18,6 +18,7 @@
 package inet.physicallayer.common;
 
 import inet.physicallayer.contract.IAttenuation;
+import inet.physicallayer.contract.IMultipath;
 import inet.physicallayer.contract.INeighborCache;
 import inet.physicallayer.contract.IObstacleLoss;
 import inet.physicallayer.contract.IPathLoss;
@@ -32,6 +33,7 @@ module RadioMedium like IRadioMedium
         string propagationType;
         string pathLossType;
         string obstacleLossType = default("");
+        string multipathType = default("");
         string attenuationType;
         string backgroundNoiseType = default("");
         string neighborCacheType = default("");
@@ -79,16 +81,20 @@ module RadioMedium like IRadioMedium
             parameters:
                 @display("p=100,250");
         }
-        attenuation: <attenuationType> like IAttenuation {
+        multipath: <multipathType> like IMultipath if multipathType != "" {
             parameters:
                 @display("p=100,350");
         }
-        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
+        attenuation: <attenuationType> like IAttenuation {
             parameters:
                 @display("p=100,450");
         }
-        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+        backgroundNoise: <backgroundNoiseType> like IRadioBackgroundNoise if backgroundNoiseType != "" {
             parameters:
                 @display("p=100,550");
+        }
+        neighborCache: <neighborCacheType> like INeighborCache if neighborCacheType != "" {
+            parameters:
+                @display("p=100,650");
         }
 }

@@ -15,33 +15,28 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RECEIVERBASE_H
-#define __INET_RECEIVERBASE_H
+#ifndef __INET_IMULTIPATH_H
+#define __INET_IMULTIPATH_H
 
-#include "IReceiver.h"
-#include "ITransmission.h"
+#include "INoise.h"
 #include "IReception.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-class INET_API ReceiverBase : public cModule, public virtual IReceiver
+/**
+ * This interface models multipath echoes.
+ */
+class INET_API IMultipath : public IPrintableObject
 {
   public:
-    ReceiverBase() {}
-
-    virtual W getMinInterferencePower() const { return W(qNaN); }
-    virtual W getMinReceptionPower() const { return W(qNaN); }
-
-    virtual bool computeIsReceptionPossible(const ITransmission *transmission) const;
-    virtual bool computeIsReceptionPossible(const IListening *listening, const IReception *reception) const = 0;
-    virtual bool computeIsReceptionAttempted(const IListening *listening, const IReception *reception, const std::vector<const IReception *> *interferingReceptions) const;
+    virtual const INoise *computeMultipathNoise(const IReception *reception) const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_RECEIVERBASE_H
+#endif // ifndef __INET_IMULTIPATH_H
 
