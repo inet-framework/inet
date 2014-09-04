@@ -26,10 +26,9 @@ cplusplus {{
 
 class noncobject MACAddress;
 
-namespace inet::ieee80211;
-
 enum EtherType;
 
+namespace inet::ieee80211;
 
 //
 // 802.11 frame type constants (type+subtype), for the "type" field of
