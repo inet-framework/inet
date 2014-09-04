@@ -88,7 +88,7 @@ double UWBIRStochasticPathLoss::getGhassemzadehPathLoss(double gamma, double S, 
     attenuation = attenuation - 10 * gamma * log10(unit(distance / d0).get());
     if (shadowing)
         attenuation = attenuation - S;
-    return FWMath::dB2fraction(attenuation);
+    return math::dB2fraction(attenuation);
 }
 
 double UWBIRStochasticPathLoss::computePathLoss(mps propagationSpeed, Hz frequency, m distance) const

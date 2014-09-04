@@ -18,8 +18,8 @@ BreakpointPathLoss::BreakpointPathLoss() :
 void BreakpointPathLoss::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        l01 = FWMath::dB2fraction(par("L01"));
-        l02 = FWMath::dB2fraction(par("L02"));
+        l01 = math::dB2fraction(par("L01"));
+        l02 = math::dB2fraction(par("L02"));
         alpha1 = par("alpha1");
         alpha2 = par("alpha2");
         breakpointDistance = m(par("breakpointDistance"));

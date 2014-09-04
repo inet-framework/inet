@@ -46,7 +46,7 @@ void DimensionalBackgroundNoise::initialize(int stage)
             else
                 throw cRuntimeError("Unknown dimension");
         }
-        power = mW(FWMath::dBm2mW(par("power")));
+        power = mW(math::dBm2mW(par("power")));
     }
 }
 
