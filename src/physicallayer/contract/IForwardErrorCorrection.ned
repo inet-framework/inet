@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,25 +15,9 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IFORWARDERRORCORRECTION_H
-#define __INET_IFORWARDERRORCORRECTION_H
+package inet.physicallayer.contract;
 
-#include "IPrintableObject.h"
-#include "BitVector.h"
-
-namespace inet {
-
-namespace physicallayer {
-
-class INET_API IForwardErrorCorrection : public IPrintableObject
+moduleinterface IForwardErrorCorrection
 {
-    public:
-        virtual BitVector encode(const BitVector& informationBits) const = 0;
-        virtual BitVector decode(const BitVector& encodedBits) const = 0;
-};
 
-} // namespace physicallayer
-
-} // namespace inet
-
-#endif // ifndef __INET_IFORWARDERRORCORRECTION_H
+}
