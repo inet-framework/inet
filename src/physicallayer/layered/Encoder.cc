@@ -16,21 +16,35 @@
 //
 
 #include "Encoder.h"
+#include "BitVector.h"
+#include "ModuleAccess.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Encoder::Encoder() :
-    bitRate(sNaN),
-    headerBitLength(-1),
-    forwardErrorCorrection(NULL)
-{}
+Define_Module(Encoder);
+
+void Encoder::initialize(int stage)
+{
+    if (stage == INITSTAGE_LOCAL)
+    {
+        serializer = check_and_cast<ISerializer *>(getSubmodule("serializer"));
+        scrambler = dynamic_cast<IScrambler *>(getSubmodule("scrambler"));
+        forwardErrorCorrection = dynamic_cast<IForwardErrorCorrection *>(getSubmodule("forwardErrorCorrection"));
+        interleaver = dynamic_cast<IInterleaver *>(getSubmodule("interleaver"));
+    }
+}
 
 const ITransmissionBitModel *Encoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     const int bitLength = headerBitLength + packetModel->getPacket()->getBitLength();
-    return new TransmissionBitModel(bitLength, bitRate, NULL, NULL, forwardErrorCorrection);
+    const cPacket *packet = packetModel->getPacket();
+    BitVector serializedPacket = serializer->serialize(packet);
+    BitVector scrambledBits = scrambler->scrambling(serializedPacket);
+    BitVector fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
+    BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
+    return new TransmissionBitModel(bitLength, bitRate, interleavedBits, NULL, forwardErrorCorrection);
 }
 
 } // namespace physicallayer
