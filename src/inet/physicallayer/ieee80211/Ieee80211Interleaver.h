@@ -43,8 +43,8 @@ class Ieee80211Interleaver : public cSimpleModule
     virtual void handleMessage(cMessage *msg) { cRuntimeError("This module doesn't handle self messages."); }
 
   public:
-    BitVector interleaving(const BitVector bits) const;
-    BitVector deinterleaving(const BitVector bits) const;
+    BitVector interleaving(const BitVector& bits) const;
+    BitVector deinterleaving(const BitVector& bits) const;
 
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }

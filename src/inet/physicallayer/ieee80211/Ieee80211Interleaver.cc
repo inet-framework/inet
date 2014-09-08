@@ -32,7 +32,7 @@ void Ieee80211Interleaver::initialize(int stage)
     }
 }
 
-BitVector Ieee80211Interleaver::interleaving(const BitVector deinterleavedBits) const
+BitVector Ieee80211Interleaver::interleaving(const BitVector& deinterleavedBits) const
 {
     if (deinterleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("deinterleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
@@ -57,7 +57,7 @@ BitVector Ieee80211Interleaver::interleaving(const BitVector deinterleavedBits) 
     return interleavedBits;
 }
 
-BitVector Ieee80211Interleaver::deinterleaving(const BitVector interleavedBits) const
+BitVector Ieee80211Interleaver::deinterleaving(const BitVector& interleavedBits) const
 {
     if (interleavedBits.getSize() % numberOfCodedBitsPerSymbol)
         throw cRuntimeError("interleavedBits length must be a multiple of numberOfCodedBitsPerSymbol = %d", numberOfCodedBitsPerSymbol);
