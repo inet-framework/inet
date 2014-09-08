@@ -20,6 +20,7 @@
 
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
+#include "IInterleaver.h"
 
 namespace inet {
 namespace physicallayer {
@@ -30,7 +31,7 @@ namespace physicallayer {
  * Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.7 Data interleaving
  */
-class Ieee80211Interleaver : public cSimpleModule
+class Ieee80211Interleaver : public cSimpleModule, public IInterleaver
 {
 
   protected:
@@ -48,6 +49,8 @@ class Ieee80211Interleaver : public cSimpleModule
 
     int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
     int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
+
+    void printToStream(std::ostream& stream) const;
 };
 
 } /* namespace physicallayer */

@@ -81,5 +81,10 @@ BitVector Ieee80211Interleaver::deinterleaving(const BitVector& interleavedBits)
     return deinterleavedBits;
 }
 
+void Ieee80211Interleaver::printToStream(std::ostream& stream) const
+{
+    stream << "Ieee80211Interleaver"; // TODO: extend this info
+}
+
 } /* namespace physicallayer */
 } /* namespace inet */

@@ -17,7 +17,9 @@
 
 package inet.physicallayer.ieee80211;
 
-simple Ieee80211Interleaver
+import inet.physicallayer.contract.IInterleaver;
+
+module Ieee80211Interleaver like IInterleaver
 {
     parameters:
         int numberOfCodedBitsPerSymbol = default(192);
