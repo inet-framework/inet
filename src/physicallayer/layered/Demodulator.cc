@@ -31,7 +31,7 @@ const IReceptionBitModel *Demodulator::demodulate(const IReceptionSymbolModel *s
     const int codeWordLength = modulation->getCodeWordLength();
     const int bitLength = (symbolModel->getSymbolLength() - preambleSymbolLength) * codeWordLength; // TODO: -
     const double bitRate = symbolModel->getSymbolRate() * codeWordLength;
-    return new ReceptionBitModel(bitLength, bitRate, NULL, NULL, NULL, 0, 0);
+    return new ReceptionBitModel(bitLength, bitRate, BitVector::UNDEF, NULL, NULL, 0, 0);
 }
 
 } // namespace physicallayer

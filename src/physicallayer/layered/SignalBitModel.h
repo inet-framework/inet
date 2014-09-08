@@ -19,6 +19,7 @@
 #define __INET_SIGNALBITMODEL_H
 
 #include <vector>
+#include "BitVector.h"
 #include "ISignalBitModel.h"
 
 namespace inet {
@@ -30,7 +31,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
   protected:
     const int bitLength;
     const double bitRate;
-    const std::vector<bool> *bits;
+    const BitVector& bits;
     const ICyclicRedundancyCheck *cyclicRedundancyCheck;
     const IForwardErrorCorrection *forwardErrorCorrection;
 
@@ -38,12 +39,12 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     SignalBitModel() :
         bitLength(-1),
         bitRate(sNaN),
-        bits(NULL),
+        bits(BitVector::UNDEF),
         cyclicRedundancyCheck(NULL),
         forwardErrorCorrection(NULL)
     {}
 
-    SignalBitModel(int bitLength, double bitRate, const std::vector<bool> *bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection) :
+    SignalBitModel(int bitLength, double bitRate, const BitVector& bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection) :
         bitLength(bitLength),
         bitRate(bitRate),
         bits(bits),
@@ -57,7 +58,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
 
     virtual double getBitRate() const { return bitRate; }
 
-    virtual const std::vector<bool> *getBits() const { return bits; }
+    virtual const BitVector& getBits() const { return bits; }
 
     virtual const ICyclicRedundancyCheck *getCyclicRedundancyCheck() const { return cyclicRedundancyCheck; }
 
@@ -71,7 +72,7 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
         SignalBitModel()
     {}
 
-    TransmissionBitModel(int bitLength, double bitRate, const std::vector<bool> *bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection) :
+    TransmissionBitModel(int bitLength, double bitRate, const BitVector& bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection) :
         SignalBitModel(bitLength, bitRate, bits, cyclicRedundancyCheck, forwardErrorCorrection)
     {}
 };
@@ -89,7 +90,7 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
         bitErrorCount(-1)
     {}
 
-    ReceptionBitModel(int bitLength, double bitRate, const std::vector<bool> *bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection, double ber, int bitErrorCount) :
+    ReceptionBitModel(int bitLength, double bitRate, const BitVector& bits, const ICyclicRedundancyCheck *cyclicRedundancyCheck, const IForwardErrorCorrection *forwardErrorCorrection, double ber, int bitErrorCount) :
         SignalBitModel(bitLength, bitRate, bits, cyclicRedundancyCheck, forwardErrorCorrection),
         ber(ber),
         bitErrorCount(bitErrorCount)

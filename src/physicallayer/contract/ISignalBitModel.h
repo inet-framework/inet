@@ -38,7 +38,7 @@ class INET_API ISignalBitModel : public IPrintableObject
     // TODO: separate header and payload
     virtual double getBitRate() const = 0;
 
-    virtual const std::vector<bool> *getBits() const = 0;
+    virtual const BitVector& getBits() const = 0;
 
     virtual const ICyclicRedundancyCheck *getCyclicRedundancyCheck() const = 0;
 
