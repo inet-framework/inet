@@ -237,7 +237,7 @@ class INET_API CSMA : public MACProtocolBase, public IMACProtocol
     simtime_t rxSetupTime;
     /** @brief Time to switch radio from Rx to Tx state */
     simtime_t aTurnaroundTime;
-    /** @brief maximum number of backoffs before frame drop */
+    /** @brief maximum number of extra backoffs (excluding the first unconditional one) before frame drop */
     int macMaxCSMABackoffs;
     /** @brief maximum number of frame retransmissions without ack */
     unsigned int macMaxFrameRetries;

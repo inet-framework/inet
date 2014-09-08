@@ -78,7 +78,7 @@ simple CSMA extends MACProtocolBase like IMACProtocol
 
         //Backoff method to use: constant, linear or exponential
         string backoffMethod = default("linear");
-        // maximum backoffs
+        // maximum number of extra backoffs (excluding the first unconditional one) before frame drop
         int macMaxCSMABackoffs = default(5);
         // base unit for all backoff calculations
         double aUnitBackoffPeriod @unit(s) = default(0.00032 s);

@@ -559,7 +559,7 @@ void CSMA::updateStatusWaitAck(t_mac_event event, cMessage *msg)
 
 void CSMA::manageMissingAck(t_mac_event    /*event*/, cMessage *    /*msg*/)
 {
-    if (txAttempts < macMaxFrameRetries + 1) {
+    if (txAttempts < macMaxFrameRetries) {
         // increment counter
         txAttempts++;
         EV_DETAIL << "I will retransmit this packet (I already tried "
