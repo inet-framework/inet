@@ -21,6 +21,7 @@
 #include "inet/common/INETDefs.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
+#include "IForwardErrorCorrection.h"
 #include <vector>
 #include <queue>
 
@@ -55,7 +56,7 @@ namespace physicallayer {
     (MAC) and Physical Layer (PHY) Specifications
     [4]  Puncturing matrices came from http://en.wikipedia.org/wiki/Convolutional_code#Punctured_convolutional_codes
  */
-class ConvolutionalCoder : public cSimpleModule
+class ConvolutionalCoder : public cSimpleModule, public IForwardErrorCorrection
 {
     public:
         typedef std::vector<std::vector<ShortBitVector> > ShortBitVectorMatrix;
@@ -162,6 +163,8 @@ class ConvolutionalCoder : public cSimpleModule
         const int** getStateTransitionTable() const { return (const int**)stateTransitions; }
         const int** getOutputTable() const { return (const int**)inputSymbols; }
 
+        /* IPrintable object */
+        void printToStream(std::ostream& stream) const;
         ~ConvolutionalCoder();
 };
 

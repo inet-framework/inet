@@ -542,6 +542,11 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
     return decodedMsg;
 }
 
+void ConvolutionalCoder::printToStream(std::ostream& stream) const
+{
+    stream << codeRatePuncturingK << "/" << codeRateParamaterN << " convolutional encoder/decoder";
+}
+
 ConvolutionalCoder::~ConvolutionalCoder()
 {
     for (int i = 0; i < numberOfOutputSymbols; i++)
