@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2006 Andras Varga
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,30 +15,32 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMODULATION_H
-#define __INET_IMODULATION_H
+#ifndef __INET_ENCODER_H
+#define __INET_ENCODER_H
 
-#include "inet/common/INETDefs.h"
+#include "IEncoder.h"
+#include "SignalPacketModel.h"
+#include "SignalBitModel.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-/**
- * Abstract class to encapsulate bit error rate calculation of modulation schemes
- */
-// TODO: obsolete class, merge with XIModulation
-class INET_API IModulation
+class INET_API Encoder : public IEncoder
 {
+  protected:
+    double bitRate;
+    int headerBitLength;
+    const IForwardErrorCorrection *forwardErrorCorrection;
+
   public:
-    virtual ~IModulation() {}
-    virtual const char *getName() = 0;
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
+    Encoder();
+
+    virtual const ITransmissionBitModel *encode(const ITransmissionPacketModel *packetModel) const;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IMODULATION_H
-
+#endif // ifndef __INET_ENCODER_H

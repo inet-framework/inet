@@ -15,30 +15,27 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMODULATION_H
-#define __INET_IMODULATION_H
+#ifndef __INET_XIMODULATION_H
+#define __INET_XIMODULATION_H
 
-#include "inet/common/INETDefs.h"
+#include "IPrintableObject.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-/**
- * Abstract class to encapsulate bit error rate calculation of modulation schemes
- */
-// TODO: obsolete class, merge with XIModulation
-class INET_API IModulation
+// TODO: rename to IModulation
+class INET_API XIModulation : public IPrintableObject
 {
   public:
-    virtual ~IModulation() {}
-    virtual const char *getName() = 0;
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
+    virtual int getCodeWordLength() const = 0;
+
+    virtual int getConstellationSize() const = 0;
 };
 
 } // namespace physicallayer
 
 } // namespace inet
 
-#endif // ifndef __INET_IMODULATION_H
+#endif // ifndef __INET_XIMODULATION_H
 
