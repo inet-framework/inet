@@ -68,5 +68,10 @@ BitVector Ieee80211Scrambler::generateScramblingSequence(const ShortBitVector& g
     return scramblingSequence;
 }
 
+void Ieee80211Scrambler::printToStream(std::ostream& stream) const
+{
+    stream << "Ieee80211Scrambler with scrambling sequence: " << scramblingSequence;
+}
+
 } /* namespace physicallayer */
 } /* namespace inet */

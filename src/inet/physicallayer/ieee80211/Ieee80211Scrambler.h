@@ -19,19 +19,22 @@
 #define __INET_IEEE80211SCRAMBLER_H_
 
 #include "inet/common/INETDefs.h"
+#include "IScrambler.h"
 #include "inet/common/BitVector.h"
 #include "inet/common/ShortBitVector.h"
 
 namespace inet {
 namespace physicallayer {
 
-/*
+/* TODO: It is not a completely generic scrambler, it implements a 802.11a scrambler, however it can be parameterized
+ * with a seed and a generator polynomial. Make it more generic and implement other scramblers. For example: there is
+ * difference between a multiplicative scrambler and an additive scrambler.
+ *
  * It is a IEEE 802.11 data scrambler/descrambler implementation.
- * The default generator polynomial is S(x) = x^7 + x^4 + 1.
  * The details can be found in: Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications,
  * 18.3.5.5 PLCP DATA scrambler and descrambler
  */
-class Ieee80211Scrambler : public cSimpleModule
+class Ieee80211Scrambler : public cSimpleModule, public IScrambler
 {
     protected:
         BitVector scramblingSequence;
@@ -47,7 +50,9 @@ class Ieee80211Scrambler : public cSimpleModule
 
     public:
         BitVector scrambling(const BitVector& bits) const;
+        BitVector descrambling(const BitVector& bits) const { return scrambling(bits); }
         const BitVector& getScramblingSequcene() const { return scramblingSequence; }
+        void printToStream(std::ostream& stream) const;
 };
 
 } /* namespace physicallayer */
