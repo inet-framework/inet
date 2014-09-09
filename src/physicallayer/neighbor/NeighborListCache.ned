@@ -23,6 +23,7 @@ module NeighborListCache like INeighborCache
         string radioMediumModule = default("^");
         double range @unit(m);
         double refillPeriod @unit(s);
+        @display("i=block/cogwheel");
         @class(NeighborListCache);
 }
 

@@ -23,5 +23,6 @@ module QuadTreeNeighborCache like INeighborCache
         string radioMediumModule = default("^");
         int maxNumOfPointsPerQuadrant;
         double refillPeriod @unit(s);
+        @display("i=block/cogwheel");
         @class(QuadTreeNeighborCache);
 }

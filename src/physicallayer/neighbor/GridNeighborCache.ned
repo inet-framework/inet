@@ -25,5 +25,6 @@ module GridNeighborCache like INeighborCache
         double cellSizeY @unit(m);
         double cellSizeZ @unit(m);
         double refillPeriod @unit(s);
+        @display("i=block/cogwheel");
         @class(GridNeighborCache);
 }
