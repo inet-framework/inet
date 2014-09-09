@@ -23,5 +23,6 @@ module BVHObjectCache like IObjectCache
         string physicalEnvironmentModule = default("^");
         int leafCapacity = default(1);
         string axisOrder = default("XYZ"); //  "X", "XY", "ZYZ", "ZZXZZYXYX", etc are all allowed combinations
+        @display("i=block/cogwheel");
         @class(BVHObjectCache);
 }

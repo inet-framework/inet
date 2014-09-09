@@ -22,5 +22,6 @@ module GridObjectCache like IObjectCache
         double cellSizeX @unit(m);
         double cellSizeY @unit(m);
         double cellSizeZ @unit(m);
+        @display("i=block/cogwheel");
         @class(GridObjectCache);
 }

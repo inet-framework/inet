@@ -19,4 +19,6 @@ package inet.environment.cache;
 
 moduleinterface IObjectCache
 {
+    parameters:
+        @display("i=block/cogwheel");
 }
