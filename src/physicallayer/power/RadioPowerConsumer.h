@@ -34,15 +34,15 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 {
   protected:
     // parameters
-    double offPowerConsumption;
-    double sleepPowerConsumption;
-    double switchingPowerConsumption;
-    double receiverIdlePowerConsumption;
-    double receiverBusyPowerConsumption;
-    double receiverSynchronizingPowerConsumption;
-    double receiverReceivingPowerConsumption;
-    double transmitterIdlePowerConsumption;
-    double transmitterTransmittingPowerConsumption;
+    W offPowerConsumption;
+    W sleepPowerConsumption;
+    W switchingPowerConsumption;
+    W receiverIdlePowerConsumption;
+    W receiverBusyPowerConsumption;
+    W receiverSynchronizingPowerConsumption;
+    W receiverReceivingPowerConsumption;
+    W transmitterIdlePowerConsumption;
+    W transmitterTransmittingPowerConsumption;
 
     // environment
     IRadio *radio;
@@ -54,7 +54,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
   public:
     RadioPowerConsumer();
 
-    virtual double getPowerConsumption();
+    virtual W getPowerConsumption();
 
     virtual void receiveSignal(cComponent *source, simsignal_t signalID, long value);
 

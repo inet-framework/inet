@@ -18,7 +18,7 @@
 #ifndef __INET_IPOWERCONSUMER_H
 #define __INET_IPOWERCONSUMER_H
 
-#include "INETDefs.h"
+#include "PowerDefs.h"
 
 namespace inet {
 
@@ -34,7 +34,7 @@ class INET_API IPowerConsumer
 
 //    virtual const char *getName() = 0;
 
-    virtual double getPowerConsumption() = 0;
+    virtual W getPowerConsumption() = 0;
 };
 
 } // namespace inet

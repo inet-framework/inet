@@ -22,19 +22,20 @@ namespace inet {
 
 namespace physicallayer {
 
-RadioPowerConsumer::RadioPowerConsumer()
+RadioPowerConsumer::RadioPowerConsumer() :
+    offPowerConsumption(W(sNaN)),
+    sleepPowerConsumption(W(sNaN)),
+    switchingPowerConsumption(W(sNaN)),
+    receiverIdlePowerConsumption(W(sNaN)),
+    receiverBusyPowerConsumption(W(sNaN)),
+    receiverSynchronizingPowerConsumption(W(sNaN)),
+    receiverReceivingPowerConsumption(W(sNaN)),
+    transmitterIdlePowerConsumption(W(sNaN)),
+    transmitterTransmittingPowerConsumption(W(sNaN)),
+    radio(NULL),
+    powerSource(NULL),
+    powerConsumerId(-1)
 {
-    powerConsumerId = 0;
-    powerSource = NULL;
-    offPowerConsumption = 0;
-    sleepPowerConsumption = 0;
-    switchingPowerConsumption = 0;
-    receiverIdlePowerConsumption = 0;
-    receiverBusyPowerConsumption = 0;
-    receiverSynchronizingPowerConsumption = 0;
-    receiverReceivingPowerConsumption = 0;
-    transmitterIdlePowerConsumption = 0;
-    transmitterTransmittingPowerConsumption = 0;
 }
 
 void RadioPowerConsumer::initialize(int stage)
@@ -42,15 +43,15 @@ void RadioPowerConsumer::initialize(int stage)
     cSimpleModule::initialize(stage);
     EV << "Initializing RadioPowerConsumer, stage = " << stage << endl;
     if (stage == INITSTAGE_LOCAL) {
-        offPowerConsumption = par("offPowerConsumption");
-        sleepPowerConsumption = par("sleepPowerConsumption");
-        switchingPowerConsumption = par("switchingPowerConsumption");
-        receiverIdlePowerConsumption = par("receiverIdlePowerConsumption");
-        receiverBusyPowerConsumption = par("receiverBusyPowerConsumption");
-        receiverSynchronizingPowerConsumption = par("receiverSynchronizingPowerConsumption");
-        receiverReceivingPowerConsumption = par("receiverReceivingPowerConsumption");
-        transmitterIdlePowerConsumption = par("transmitterIdlePowerConsumption");
-        transmitterTransmittingPowerConsumption = par("transmitterTransmittingPowerConsumption");
+        offPowerConsumption = W(par("offPowerConsumption"));
+        sleepPowerConsumption = W(par("sleepPowerConsumption"));
+        switchingPowerConsumption = W(par("switchingPowerConsumption"));
+        receiverIdlePowerConsumption = W(par("receiverIdlePowerConsumption"));
+        receiverBusyPowerConsumption = W(par("receiverBusyPowerConsumption"));
+        receiverSynchronizingPowerConsumption = W(par("receiverSynchronizingPowerConsumption"));
+        receiverReceivingPowerConsumption = W(par("receiverReceivingPowerConsumption"));
+        transmitterIdlePowerConsumption = W(par("transmitterIdlePowerConsumption"));
+        transmitterTransmittingPowerConsumption = W(par("transmitterTransmittingPowerConsumption"));
         cModule *radioModule = getParentModule()->getSubmodule("radio");
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
@@ -71,7 +72,7 @@ void RadioPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID,
     }
 }
 
-double RadioPowerConsumer::getPowerConsumption()
+W RadioPowerConsumer::getPowerConsumption()
 {
     IRadio::RadioMode radioMode = radio->getRadioMode();
     if (radioMode == IRadio::RADIO_MODE_OFF)
@@ -80,7 +81,7 @@ double RadioPowerConsumer::getPowerConsumption()
         return sleepPowerConsumption;
     else if (radioMode == IRadio::RADIO_MODE_SWITCHING)
         return switchingPowerConsumption;
-    double powerConsumption = 0;
+    W powerConsumption = W(0);
     IRadio::ReceptionState receptionState = radio->getReceptionState();
     IRadio::TransmissionState transmissionState = radio->getTransmissionState();
     if (radioMode == IRadio::RADIO_MODE_RECEIVER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {

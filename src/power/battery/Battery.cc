@@ -24,15 +24,15 @@ namespace inet {
 
 Define_Module(Battery);
 
-Battery::Battery()
+Battery::Battery() :
+    crashNodeWhenDepleted(false),
+    nominalCapacity(J(sNaN)),
+    residualCapacity(J(sNaN)),
+    nominalVoltage(V(sNaN)),
+    internalResistance(Ohm(sNaN)),
+    lastResidualCapacityUpdate(-1),
+    depletedTimer(NULL)
 {
-    crashNodeWhenDepleted = false;
-    nominalCapacity = 0;
-    residualCapacity = 0;
-    nominalVoltage = 0;
-    internalResistance = 0;
-    lastResidualCapacityUpdate = 0;
-    depletedTimer = NULL;
 }
 
 Battery::~Battery()
@@ -44,9 +44,9 @@ void Battery::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         crashNodeWhenDepleted = par("crashNodeWhenDepleted");
-        nominalCapacity = residualCapacity = par("nominalCapacity");
-        nominalVoltage = par("nominalVoltage");
-        internalResistance = par("internalResistance");
+        nominalCapacity = residualCapacity = J(par("nominalCapacity"));
+        nominalVoltage = V(par("nominalVoltage"));
+        internalResistance = Ohm(par("internalResistance"));
         depletedTimer = new cMessage("depleted");
     }
 }
@@ -55,7 +55,7 @@ void Battery::handleMessage(cMessage *message)
 {
     if (message == depletedTimer) {
         updateResidualCapacity();
-        emit(powerConsumptionChangedSignal, residualCapacity);
+        emit(powerConsumptionChangedSignal, residualCapacity.get());
         if (crashNodeWhenDepleted) {
             LifecycleController *lifecycleController = check_and_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
             NodeCrashOperation *operation = new NodeCrashOperation();
@@ -66,10 +66,10 @@ void Battery::handleMessage(cMessage *message)
     }
 }
 
-void Battery::setPowerConsumption(int id, double consumedPower)
+void Battery::setPowerConsumption(int id, W consumedPower)
 {
     Enter_Method_Silent();
-    if (residualCapacity == 0)
+    if (residualCapacity == J(0))
         throw cRuntimeError("Battery is already depleted");
     else {
         updateResidualCapacity();
@@ -82,9 +82,9 @@ void Battery::updateResidualCapacity()
 {
     simtime_t now = simTime();
     if (now != lastResidualCapacityUpdate) {
-        residualCapacity -= (now - lastResidualCapacityUpdate).dbl() * totalConsumedPower;
+        residualCapacity -= s((now - lastResidualCapacityUpdate).dbl()) * totalConsumedPower;
         lastResidualCapacityUpdate = now;
-        ASSERT(residualCapacity >= 0);
+        ASSERT(residualCapacity >= J(0));
     }
 }
 
@@ -92,8 +92,8 @@ void Battery::scheduleDepletedTimer()
 {
     if (depletedTimer->isScheduled())
         cancelEvent(depletedTimer);
-    if (totalConsumedPower > 0)
-        scheduleAt(simTime() + residualCapacity / totalConsumedPower, depletedTimer);
+    if (totalConsumedPower > W(0))
+        scheduleAt(simTime() + unit(residualCapacity / totalConsumedPower / s(1.0)).get(), depletedTimer);
 }
 
 } // namespace inet

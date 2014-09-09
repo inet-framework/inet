@@ -57,24 +57,24 @@ class INET_API IPowerSource
     virtual void removePowerConsumer(int id) = 0;
 
     /**
-     * Returns the nominal capacity [J] in the range [0, +infinity].
+     * Returns the nominal capacity in the range [0, +infinity].
      */
-    virtual double getNominalCapacity() = 0;
+    virtual J getNominalCapacity() = 0;
 
     /**
-     * Returns the residual capacity [J] in the range [0, +infinity].
+     * Returns the residual capacity in the range [0, +infinity].
      */
-    virtual double getResidualCapacity() = 0;
+    virtual J getResidualCapacity() = 0;
 
     /**
-     * Returns the current total power consumption [W] in the range [0, +infinity).
+     * Returns the current total power consumption in the range [0, +infinity).
      */
-    virtual double getTotalPowerConsumption() = 0;
+    virtual W getTotalPowerConsumption() = 0;
 
     /**
-     * Changes the consumed power [W] for the provided consumer.
+     * Changes the consumed power for the provided consumer.
      */
-    virtual void setPowerConsumption(int id, double consumedPower) = 0;
+    virtual void setPowerConsumption(int id, W consumedPower) = 0;
 };
 
 } // namespace inet

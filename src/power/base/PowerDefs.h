@@ -2,30 +2,30 @@
 // Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.ideal;
+#ifndef __INET_POWERDEFS_H
+#define __INET_POWERDEFS_H
 
-import inet.power.base.PowerSourceBase;
+#include "INETMath.h"
+#include "Units.h"
 
-//
-// This module implements an ideal power source. 
-//
-// @author Levente Meszaros
-//
-simple IdealPowerSource extends PowerSourceBase
-{
-    parameters:
-        @class(IdealPowerSource);
-}
+namespace inet {
+
+using namespace units::values;
+
+} // namespace inet
+
+#endif // ifndef __INET_POWERDEFS_H
+

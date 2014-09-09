@@ -30,9 +30,9 @@ namespace inet {
 class INET_API IdealPowerSource : public PowerSourceBase
 {
   public:
-    virtual double getNominalCapacity() { return INFINITY; }
+    virtual J getNominalCapacity() { return J(INFINITY); }
 
-    virtual double getResidualCapacity() { return INFINITY; }
+    virtual J getResidualCapacity() { return J(INFINITY); }
 };
 
 } // namespace inet

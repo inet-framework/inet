@@ -26,22 +26,22 @@ IPowerConsumer *PowerSourceBase::getPowerConsumer(int index)
 
 int PowerSourceBase::addPowerConsumer(IPowerConsumer *powerConsumer)
 {
-    powerConsumers.push_back(PowerConsumerEntry(powerConsumer, 0));
+    powerConsumers.push_back(PowerConsumerEntry(powerConsumer, W(0)));
     return powerConsumers.size() - 1;
 }
 
 void PowerSourceBase::removePowerConsumer(int id)
 {
     totalConsumedPower -= powerConsumers[id].consumedPower;
-    powerConsumers[id].consumedPower = 0;
+    powerConsumers[id].consumedPower = W(0);
     powerConsumers[id].powerConsumer = NULL;
 }
 
-void PowerSourceBase::setPowerConsumption(int id, double consumedPower)
+void PowerSourceBase::setPowerConsumption(int id, W consumedPower)
 {
     this->totalConsumedPower += consumedPower - powerConsumers[id].consumedPower;
     powerConsumers[id].consumedPower = consumedPower;
-    emit(powerConsumptionChangedSignal, getResidualCapacity());
+    emit(powerConsumptionChangedSignal, getResidualCapacity().get());
 }
 
 } // namespace inet

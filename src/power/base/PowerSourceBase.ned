@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.common;
+package inet.power.base;
 
 import inet.power.contract.IPowerSource;
 

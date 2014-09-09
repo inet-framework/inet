@@ -36,24 +36,24 @@ class INET_API Battery : public PowerSourceBase
     bool crashNodeWhenDepleted;
 
     /**
-     * Nominal capacity [J].
+     * Nominal capacity.
      */
-    double nominalCapacity;
+    J nominalCapacity;
 
     /**
-     * Residual capacity [J].
+     * Residual capacity.
      */
-    double residualCapacity;
+    J residualCapacity;
 
     /**
-     * Nominal regulated voltage [V].
+     * Nominal regulated voltage.
      */
-    double nominalVoltage;
+    V nominalVoltage;
 
     /**
-     * Internal resistance of the battery [Ω].
+     * Internal resistance of the battery.
      */
-    double internalResistance;
+    Ohm internalResistance;
 
     /**
      * Last simulation time when residual capacity was updated.
@@ -70,15 +70,15 @@ class INET_API Battery : public PowerSourceBase
 
     virtual ~Battery();
 
-    virtual double getNominalCapacity() { return nominalCapacity; }
+    virtual J getNominalCapacity() { return nominalCapacity; }
 
-    virtual double getResidualCapacity() { updateResidualCapacity(); return residualCapacity; }
+    virtual J getResidualCapacity() { updateResidualCapacity(); return residualCapacity; }
 
-    virtual double getNominalVoltage() { return nominalVoltage; }
+    virtual V getNominalVoltage() { return nominalVoltage; }
 
-    virtual double getCurrentVoltage() { updateResidualCapacity(); ASSERT(false); return nominalVoltage; }
+    virtual V getCurrentVoltage() { updateResidualCapacity(); ASSERT(false); return nominalVoltage; }
 
-    virtual void setPowerConsumption(int id, double consumedPower);
+    virtual void setPowerConsumption(int id, W consumedPower);
 
   protected:
     virtual void initialize(int stage);

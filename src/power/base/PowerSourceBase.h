@@ -39,12 +39,12 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
         IPowerConsumer *powerConsumer;
 
         /**
-         * Current power consumption [W].
+         * Current power consumption.
          */
-        double consumedPower;
+        W consumedPower;
 
       public:
-        PowerConsumerEntry(IPowerConsumer *powerConsumer, double consumedPower) :
+        PowerConsumerEntry(IPowerConsumer *powerConsumer, W consumedPower) :
             powerConsumer(powerConsumer), consumedPower(consumedPower) {}
     };
 
@@ -54,9 +54,9 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
     std::vector<PowerConsumerEntry> powerConsumers;
 
     /**
-     * Current total power consumption [W].
+     * Current total power consumption.
      */
-    double totalConsumedPower;
+    W totalConsumedPower;
 
   public:
     virtual int getNumPowerConsumers() { return powerConsumers.size(); }
@@ -67,9 +67,9 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
 
     virtual void removePowerConsumer(int id);
 
-    virtual double getTotalPowerConsumption() { return totalConsumedPower; }
+    virtual W getTotalPowerConsumption() { return totalConsumedPower; }
 
-    virtual void setPowerConsumption(int id, double consumedPower);
+    virtual void setPowerConsumption(int id, W consumedPower);
 };
 
 } // namespace inet

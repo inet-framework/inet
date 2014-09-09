@@ -17,7 +17,7 @@
 
 package inet.power.battery;
 
-import inet.power.common.PowerSourceBase;
+import inet.power.base.PowerSourceBase;
 
 //
 // This module implements a voltage regulated battery.
@@ -26,10 +26,10 @@ import inet.power.common.PowerSourceBase;
 //
 simple Battery extends PowerSourceBase
 {
-	bool crashNodeWhenDepleted = default(true);
+    bool crashNodeWhenDepleted = default(true);
     double nominalCapacity @unit(J);
     double nominalVoltage @unit(V);
-	double internalResistance = default(0); // @unit(Ω) = default(0Ω);
-	
-	@class(Battery);
+    double internalResistance = default(0); // @unit(Ω) = default(0Ω);
+
+    @class(Battery);
 }
