@@ -406,7 +406,7 @@ void CSMA::updateStatusCCA(t_mac_event event, cMessage *msg)
                 //BE = std::min(BE+1, macMaxBE);
 
                 // decide if we go for another backoff or if we drop the frame.
-                if (NB > macMaxCSMABackoffs) {
+                if (NB > macMaxCSMABackoffs - 1) {
                     // drop the frame
                     EV_DETAIL << "Tried " << NB << " backoffs, all reported a busy "
                               << "channel. Dropping the packet." << endl;
