@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Encoder.h"
+#include "LayeredEncoder.h"
 #include "BitVector.h"
 #include "ModuleAccess.h"
 
@@ -23,9 +23,9 @@ namespace inet {
 
 namespace physicallayer {
 
-Define_Module(Encoder);
+Define_Module(LayeredEncoder);
 
-void Encoder::initialize(int stage)
+void LayeredEncoder::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
@@ -36,7 +36,7 @@ void Encoder::initialize(int stage)
     }
 }
 
-const ITransmissionBitModel *Encoder::encode(const ITransmissionPacketModel *packetModel) const
+const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketModel *packetModel) const
 {
     const int bitLength = headerBitLength + packetModel->getPacket()->getBitLength();
     const cPacket *packet = packetModel->getPacket();

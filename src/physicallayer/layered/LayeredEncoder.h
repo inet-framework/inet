@@ -30,7 +30,7 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Encoder : public IEncoder, public cSimpleModule
+class INET_API LayeredEncoder : public IEncoder, public cSimpleModule
 {
   protected:
     double bitRate;

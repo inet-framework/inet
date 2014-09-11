@@ -24,14 +24,14 @@ import inet.physicallayer.contract.IScrambler;
 import inet.physicallayer.contract.ISerializer;
 
 
-module Encoder like IEncoder
+module LayeredEncoder like IEncoder
 {
     parameters:
         string serializerType = default("");
         string scramblerType = default("");
         string forwardErrorCorrectionType = default("");
         string interleaverType = default("");
-        @class(Encoder);
+        @class(LayeredEncoder);
 
     submodules:
         serializer: <serializerType> like ISerializer if serializerType != "" {
