@@ -33,7 +33,7 @@ namespace physicallayer {
  */
 class Ieee80211Interleaver : public cSimpleModule, public IInterleaver
 {
-  protected:
+  public:
     class Ieee80211InterleaverInfo : public IInterleaverInfo
     {
         const Ieee80211Interleaver *interleaver;

@@ -36,7 +36,7 @@ namespace physicallayer {
  */
 class Ieee80211Scrambler : public cSimpleModule, public IScrambler
 {
-    protected:
+    public:
         class Ieee80211ScramblerInfo : public IScramblerInfo
         {
             const Ieee80211Scrambler *scrambler;
