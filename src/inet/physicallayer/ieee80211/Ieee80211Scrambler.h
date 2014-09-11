@@ -59,8 +59,8 @@ class Ieee80211Scrambler : public cSimpleModule, public IScrambler
         BitVector generateScramblingSequence(const ShortBitVector& generatorPolynomial, const ShortBitVector& seed) const;
 
     public:
-        BitVector scrambling(const BitVector& bits) const;
-        BitVector descrambling(const BitVector& bits) const { return scrambling(bits); }
+        BitVector scramble(const BitVector& bits) const;
+        BitVector descramble(const BitVector& bits) const { return scramble(bits); }
         const Ieee80211ScramblerInfo *getInfo() const { return info; }
         ~Ieee80211Scrambler();
 };

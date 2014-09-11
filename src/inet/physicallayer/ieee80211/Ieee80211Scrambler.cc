@@ -34,7 +34,7 @@ void Ieee80211Scrambler::initialize(int stage)
     }
 }
 
-BitVector Ieee80211Scrambler::scrambling(const BitVector& bits) const
+BitVector Ieee80211Scrambler::scramble(const BitVector& bits) const
 {
     EV_DETAIL << "Scrambling the following bits: " << bits << endl;
     BitVector scrambledBits;

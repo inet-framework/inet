@@ -32,8 +32,8 @@ class INET_API IScramblerInfo : public IPrintableObject
 class INET_API IScrambler
 {
     public:
-        virtual BitVector scrambling(const BitVector& bits) const = 0;
-        virtual BitVector descrambling(const BitVector& bits) const = 0;
+        virtual BitVector scramble(const BitVector& bits) const = 0;
+        virtual BitVector descramble(const BitVector& bits) const = 0;
         virtual const IScramblerInfo *getInfo() const = 0;
 };
 
