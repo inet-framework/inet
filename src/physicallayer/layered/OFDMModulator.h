@@ -35,8 +35,11 @@ class INET_API OFDMModulator : public IModulator
 
   public:
     OFDMModulator();
-
+    OFDMModulator(const char *modulationScheme);
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
+    double calculateBER(double snir, double bandwidth, double bitrate) const { return 42; } // TODO: (Modulator, ModulationScheme) -> BER
+    const IModulationScheme *getModulation() const { return modulationScheme; }
+    void printToStream(std::ostream& stream) const { stream << "TODO"; }
 };
 
 } // namespace physicallayer

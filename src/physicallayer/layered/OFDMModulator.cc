@@ -26,6 +26,11 @@ OFDMModulator::OFDMModulator() :
     modulationScheme(NULL)
 {}
 
+OFDMModulator::OFDMModulator(const char* modulationScheme)
+{
+
+}
+
 const ITransmissionSymbolModel *OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
     const int codeWordLength = modulationScheme->getCodeWordLength();
@@ -33,6 +38,7 @@ const ITransmissionSymbolModel *OFDMModulator::modulate(const ITransmissionBitMo
     const double symbolRate = bitModel->getBitRate() / codeWordLength;
     return new TransmissionSymbolModel(symbolLength, symbolRate, NULL, modulationScheme);
 }
+
 
 } // namespace physicallayer
 
