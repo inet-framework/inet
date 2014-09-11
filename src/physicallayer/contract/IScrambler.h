@@ -24,11 +24,17 @@
 namespace inet {
 namespace physicallayer {
 
-class IScrambler : public IPrintableObject
+class INET_API IScramblerInfo : public IPrintableObject
+{
+    // TODO: common properties?
+};
+
+class INET_API IScrambler
 {
     public:
         virtual BitVector scrambling(const BitVector& bits) const = 0;
         virtual BitVector descrambling(const BitVector& bits) const = 0;
+        virtual const IScramblerInfo *getInfo() const = 0;
 };
 
 } /* namespace physicallayer */

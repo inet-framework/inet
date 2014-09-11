@@ -33,20 +33,22 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     const double bitRate;
     const BitVector& bits;
     const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo;
-
+    const IScramblerInfo *scramblerInfo;
   public:
     SignalBitModel() :
         bitLength(-1),
         bitRate(sNaN),
         bits(BitVector::UNDEF),
-        forwardErrorCorrectionInfo(NULL)
+        forwardErrorCorrectionInfo(NULL),
+        scramblerInfo(NULL)
     {}
 
-    SignalBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo) :
+    SignalBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo, const IScramblerInfo *scramblerInfo) :
         bitLength(bitLength),
         bitRate(bitRate),
         bits(bits),
-        forwardErrorCorrectionInfo(forwardErrorCorrectionInfo)
+        forwardErrorCorrectionInfo(forwardErrorCorrectionInfo),
+        scramblerInfo(scramblerInfo)
     {}
 
     virtual void printToStream(std::ostream &stream) const;
@@ -58,6 +60,7 @@ class INET_API SignalBitModel : public virtual ISignalBitModel
     virtual const BitVector& getBits() const { return bits; }
 
     virtual const IForwardErrorCorrectionInfo *getForwardErrorCorrectionInfo() const { return forwardErrorCorrectionInfo; }
+    virtual const IScramblerInfo *getScramblerInfo() const { return scramblerInfo; }
 };
 
 class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITransmissionBitModel
@@ -67,8 +70,8 @@ class INET_API TransmissionBitModel : public SignalBitModel, public virtual ITra
         SignalBitModel()
     {}
 
-    TransmissionBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo) :
-        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo)
+    TransmissionBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo, const IScramblerInfo *scramblerInfo) :
+        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo, scramblerInfo)
     {}
 };
 
@@ -85,8 +88,8 @@ class INET_API ReceptionBitModel : public SignalBitModel, public virtual IRecept
         bitErrorCount(-1)
     {}
 
-    ReceptionBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo, double ber, int bitErrorCount) :
-        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo),
+    ReceptionBitModel(int bitLength, double bitRate, const BitVector& bits, const IForwardErrorCorrectionInfo *forwardErrorCorrectionInfo, const IScramblerInfo *scramblerInfo, double ber, int bitErrorCount) :
+        SignalBitModel(bitLength, bitRate, bits, forwardErrorCorrectionInfo, scramblerInfo),
         ber(ber),
         bitErrorCount(bitErrorCount)
     {}

@@ -37,7 +37,17 @@ namespace physicallayer {
 class Ieee80211Scrambler : public cSimpleModule, public IScrambler
 {
     protected:
+        class Ieee80211ScramblerInfo : public IScramblerInfo
+        {
+            const Ieee80211Scrambler *scrambler;
+            public:
+                Ieee80211ScramblerInfo(const Ieee80211Scrambler *scrambler) : scrambler(scrambler) {}
+                void printToStream(std::ostream& stream) const;
+                const BitVector& getScramblingSequcene() const { return scrambler->scramblingSequence; }
+        };
+    protected:
         BitVector scramblingSequence;
+        const Ieee80211ScramblerInfo *info;
 
     protected:
         virtual void initialize(int stage);
@@ -51,8 +61,8 @@ class Ieee80211Scrambler : public cSimpleModule, public IScrambler
     public:
         BitVector scrambling(const BitVector& bits) const;
         BitVector descrambling(const BitVector& bits) const { return scrambling(bits); }
-        const BitVector& getScramblingSequcene() const { return scramblingSequence; }
-        void printToStream(std::ostream& stream) const;
+        const Ieee80211ScramblerInfo *getInfo() const { return info; }
+        ~Ieee80211Scrambler();
 };
 
 } /* namespace physicallayer */

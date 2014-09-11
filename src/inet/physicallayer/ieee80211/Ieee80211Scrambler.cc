@@ -27,6 +27,7 @@ void Ieee80211Scrambler::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        info = new Ieee80211ScramblerInfo(this);
         ShortBitVector seed(par("seed").stringValue());
         ShortBitVector generatorPolynomial(par("generatorPolynomial").stringValue());
         scramblingSequence = generateScramblingSequence(generatorPolynomial, seed);
@@ -68,9 +69,14 @@ BitVector Ieee80211Scrambler::generateScramblingSequence(const ShortBitVector& g
     return scramblingSequence;
 }
 
-void Ieee80211Scrambler::printToStream(std::ostream& stream) const
+void Ieee80211Scrambler::Ieee80211ScramblerInfo::printToStream(std::ostream& stream) const
 {
-    stream << "Ieee80211Scrambler with scrambling sequence: " << scramblingSequence;
+    stream << "Ieee80211Scrambler with scrambling sequence: " << scrambler->scramblingSequence;
+}
+
+Ieee80211Scrambler::~Ieee80211Scrambler()
+{
+    delete info;
 }
 
 } /* namespace physicallayer */
