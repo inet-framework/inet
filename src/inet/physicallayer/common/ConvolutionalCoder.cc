@@ -28,6 +28,7 @@ void ConvolutionalCoder::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        info = new ConvolutionalCoderInfo(this);
         const char *strTransferFunctionMatrix = par("transferFunctionMatrix");
         const char *strPuncturingMatrix = par("puncturingMatrix");
         const char *strConstraintLengthVector = par("constraintLengthVector");
@@ -542,9 +543,9 @@ BitVector ConvolutionalCoder::decode(const BitVector& encodedBits) const
     return decodedMsg;
 }
 
-void ConvolutionalCoder::printToStream(std::ostream& stream) const
+void ConvolutionalCoder::ConvolutionalCoderInfo::printToStream(std::ostream& stream) const
 {
-    stream << codeRatePuncturingK << "/" << codeRateParamaterN << " convolutional encoder/decoder";
+    stream << convCoder->codeRatePuncturingK << "/" << convCoder->codeRateParamaterN << " convolutional encoder/decoder";
 }
 
 ConvolutionalCoder::~ConvolutionalCoder()
@@ -567,6 +568,7 @@ ConvolutionalCoder::~ConvolutionalCoder()
     delete[] inputSymbols;
     delete[] decimalToOutputSymbol;
     delete[] decimalToInputSymbol;
+    delete info;
 }
 
 } /* namespace physicallayer */

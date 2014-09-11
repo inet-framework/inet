@@ -75,6 +75,34 @@ class ConvolutionalCoder : public cSimpleModule, public IForwardErrorCorrection
                     symbol(symbol), state(state), prevState(prevState), comulativeHammingDistance(hammingDistance), numberOfErrors(numberOfErrors), depth(depth) {};
         };
 
+        class ConvolutionalCoderInfo : public IForwardErrorCorrectionInfo
+        {
+            private:
+                const ConvolutionalCoder *convCoder;
+
+            public:
+                ConvolutionalCoderInfo(const ConvolutionalCoder *convCoder) : convCoder(convCoder) {}
+            /*
+             * Getters for the encoder's/decoder's parameters
+             */
+            unsigned int getMemorySizeSum() const { return convCoder->memorySizeSum; }
+            const std::vector<int>& getConstraintLengthVector() const { return convCoder->constraintLengths; }
+            const ShortBitVectorMatrix& getTransferFunctionMatrix() const { return convCoder->transferFunctionMatrix; }
+            const std::vector<ShortBitVector>& getPuncturingMatrix() const { return convCoder->puncturingMatrix; }
+            int getNumberOfStates() const { return convCoder->numberOfStates; }
+            int getNumberOfOutputSymbols() const { return convCoder->numberOfOutputSymbols; }
+            int getNumberOfInputSymbols() const { return convCoder->numberOfInputSymbols; }
+
+            /*
+             * Getters for the code's state transition table and output table
+             */
+            const int** getStateTransitionTable() const { return (const int**)convCoder->stateTransitions; }
+            const int** getOutputTable() const { return (const int**)convCoder->inputSymbols; }
+
+            /* IPrintable object */
+            void printToStream(std::ostream& stream) const;
+        };
+
     protected:
         const char *mode;
         unsigned int codeRateParamaterK, codeRateParamaterN; // these define the k/n code rate
@@ -94,6 +122,7 @@ class ConvolutionalCoder : public cSimpleModule, public IForwardErrorCorrection
         int **stateTransitions; // maps a (state, inputSymbol) pair to the corresponding next state
         unsigned char ***hammingDistanceLookupTable; // lookup table for Hamming distances, the three dimensions are: [outputSymbol, outputSymbol, excludedBits]
         std::vector<std::vector<TrellisGraphNode> > trellisGraph; // the decoder's trellis graph
+        const ConvolutionalCoderInfo *info; // this info class holds information related to this encoder
 
     protected:
         virtual int numInitStages() const { return NUM_INIT_STAGES; }
@@ -142,29 +171,9 @@ class ConvolutionalCoder : public cSimpleModule, public IForwardErrorCorrection
         BitVector traversePath(const TrellisGraphNode& bestNode, TrellisGraphNode **bestPaths) const;
 
     public:
-
         BitVector encode(const BitVector& informationBits) const;
         BitVector decode(const BitVector& encodedBits) const;
-
-        /*
-         * Getters for the encoder's/decoder's parameters
-         */
-        unsigned int getMemorySizeSum() const { return memorySizeSum; }
-        const std::vector<int>& getConstraintLengthVector() const { return constraintLengths; }
-        const ShortBitVectorMatrix& getTransferFunctionMatrix() const { return transferFunctionMatrix; }
-        const std::vector<ShortBitVector>& getPuncturingMatrix() const { return puncturingMatrix; }
-        int getNumberOfStates() const { return numberOfStates; }
-        int getNumberOfOutputSymbols() const { return numberOfOutputSymbols; }
-        int getNumberOfInputSymbols() const { return numberOfInputSymbols; }
-
-        /*
-         * Getters for the code's state transition table and output table
-         */
-        const int** getStateTransitionTable() const { return (const int**)stateTransitions; }
-        const int** getOutputTable() const { return (const int**)inputSymbols; }
-
-        /* IPrintable object */
-        void printToStream(std::ostream& stream) const;
+        const ConvolutionalCoderInfo *getInfo() const { return info; }
         ~ConvolutionalCoder();
 };
 
