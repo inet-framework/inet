@@ -96,8 +96,8 @@ void Ieee80211BitDomainTest::testScrambler() const
     while (*fileStream >> line)
     {
         BitVector input(line.c_str());
-        BitVector scrambledInput = scrambler->scrambling(input);
-        if (input != scrambler->scrambling(scrambledInput))
+        BitVector scrambledInput = scrambler->scramble(input);
+        if (input != scrambler->descramble(scrambledInput))
             EV_DETAIL << "Descrambling has failed" << endl;
     }
 }
@@ -121,11 +121,12 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
     fileStream->clear();
     fileStream->seekg(0, std::ios::beg);
     std::string line;
-    EV_DETAIL << "The scrambling sequence is: " << scrambler->getScramblingSequcene() << endl;
+    const Ieee80211Scrambler::Ieee80211ScramblerInfo *scramblerInfo = check_and_cast<const Ieee80211Scrambler::Ieee80211ScramblerInfo *>(scrambler->getInfo());
+    EV_DETAIL << "The scrambling sequence is: " << scramblerInfo->getScramblingSequcene() << endl;
     while (*fileStream >> line)
     {
         BitVector input(line.c_str());
-        BitVector scrambledInput = scrambler->scrambling(input);
+        BitVector scrambledInput = scrambler->scramble(input);
         BitVector bccEncodedInput = convCoder->encode(scrambledInput);
         BitVector interleavedInput = interleaver->interleaving(bccEncodedInput);
         BitVector deinterleavedInput = interleaver->deinterleaving(interleavedInput);
@@ -134,7 +135,7 @@ void Ieee80211BitDomainTest::testIeee80211BitDomain() const
         BitVector bccDecodedInput = convCoder->decode(deinterleavedInput);
         if (bccDecodedInput != scrambledInput)
             EV_DETAIL << "BCC decoding has failed" << endl;
-        BitVector descrambledInput = scrambler->scrambling(bccDecodedInput); // Note: scrambling and descrambling are the same operations
+        BitVector descrambledInput = scrambler->descramble(bccDecodedInput); // Note: scrambling and descrambling are the same operations
         if (descrambledInput != input)
             EV_DETAIL << "Descrambling has failed" << endl;
     }

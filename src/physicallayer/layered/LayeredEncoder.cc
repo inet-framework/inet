@@ -41,7 +41,7 @@ const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketMod
     const int bitLength = headerBitLength + packetModel->getPacket()->getBitLength();
     const cPacket *packet = packetModel->getPacket();
     BitVector serializedPacket = serializer->serialize(packet);
-    BitVector scrambledBits = scrambler->scrambling(serializedPacket);
+    BitVector scrambledBits = scrambler->scramble(serializedPacket);
     BitVector fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
     BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
     return new TransmissionBitModel(bitLength, bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo(), interleaver->getInfo());
