@@ -17,16 +17,23 @@
 
 #include "BPSKModulation.h"
 
+
 namespace inet {
 namespace physicallayer {
 
-BPSKModulation::BPSKModulation()
+const Complex BPSKModulation::encodingTable[] = {Complex(-1,0), Complex(1,0)};
+
+BPSKModulation::BPSKModulation() : Modulation(1, 2, 1)
 {
-    normalizationFactor = 1;
 }
 
-BPSKModulation::~BPSKModulation() {
+const Complex& BPSKModulation::map(const ShortBitVector& input) const
+{
+    if (input.toDecimal() >= constellationSize)
+        throw cRuntimeError("Undefined ...");
+    return encodingTable[input.toDecimal()];
 }
+
 
 } /* namespace physicallayer */
 } /* namespace inet */

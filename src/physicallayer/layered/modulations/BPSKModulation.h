@@ -25,9 +25,11 @@ namespace physicallayer {
 
 class INET_API BPSKModulation : public Modulation
 {
+    protected:
+        static const Complex encodingTable[2];
     public:
+        const Complex& map(const ShortBitVector& input) const; // TODO: revise name
         BPSKModulation();
-        virtual ~BPSKModulation();
 };
 
 } /* namespace physicallayer */
