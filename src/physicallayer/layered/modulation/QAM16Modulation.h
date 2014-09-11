@@ -15,25 +15,22 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMODULATIONSCHEME_H
-#define __INET_IMODULATIONSCHEME_H
+#ifndef __INET_QAM16MODULATION_H_
+#define __INET_QAM16MODULATION_H_
 
-#include "IPrintableObject.h"
+#include "Modulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-class INET_API IModulationScheme : public IPrintableObject
+class INET_API QAM16Modulation : public Modulation
 {
     public:
-        virtual int getCodeWordLength() const = 0;
-        virtual int getConstellationSize() const = 0;
+        QAM16Modulation();
+        virtual ~QAM16Modulation();
 };
 
-} // namespace physicallayer
+} /* namespace physicallayer */
+} /* namespace inet */
 
-} // namespace inet
-
-#endif /* __INET_IMODULATIONSCHEME_H */
-
+#endif /*__INET_QAM16MODULATION_H_ */

@@ -1,68 +1,49 @@
 //
-// Copyright (C) 2006 Andras Varga
-// Based on the Mobility Framework's SnrEval by Marc Loebbers
+// Copyright (C) 2013 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
+// modify it under the terms of the GNU Lesser General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU Lesser General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU Lesser General Public License
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
 #ifndef __INET_MODULATION_H
 #define __INET_MODULATION_H
 
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/IModulationScheme.h"
+#include "Complex.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-/**
- * Ideal modulation which returns zero bit error rate, regardless of the parameters.
- */
-class INET_API NullModulation : public IModulation
+class INET_API Modulation : public IModulationScheme
 {
-  public:
-    virtual const char *getName() { return "no bit errors"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
-};
+  protected:
+    const int codeWordLength;
+    const int constellationSize;
+    const double normalizationFactor; // BPSK, QPSK, 16-QAM and 64-QAM have normalizationFactor.
+    Complex *encodingTable;
 
-/**
- * BPSK modulation.
- */
-class INET_API BPSKModulation : public IModulation
-{
   public:
-    virtual const char *getName() { return "BPSK"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
-};
-
-/**
- * 16-QAM modulation.
- */
-class INET_API QAM16Modulation : public IModulation
-{
-  public:
-    virtual const char *getName() { return "16-QAM"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
-};
-
-/**
- * 256-QAM modulation.
- */
-class INET_API QAM256Modulation : public IModulation
-{
-  public:
-    virtual const char *getName() { return "256-QAM"; }
-    virtual double calculateBER(double snir, double bandwidth, double bitrate) const;
+    Modulation(const Type type, int codeWordLength, int constellationSize, double normalizationFactor) :
+        type(type),
+        codeWordLength(codeWordLength),
+        constellationSize(constellationSize),
+        normalizationFactor(normalizationFactor)
+    {}
+    virtual void printToStream(std::ostream &stream) const;
+    virtual int getCodeWordLength() const { return codeWordLength; }
+    virtual int getConstellationSize() const { return constellationSize; }
+    virtual double getNormalizationFactor() const { return normalizationFactor; }
 };
 
 } // namespace physicallayer
@@ -70,4 +51,3 @@ class INET_API QAM256Modulation : public IModulation
 } // namespace inet
 
 #endif // ifndef __INET_MODULATION_H
-

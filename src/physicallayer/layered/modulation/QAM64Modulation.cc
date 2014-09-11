@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,17 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "XModulation.h"
+#include "QAM64Modulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-void XModulation::printToStream(std::ostream &stream) const
+QAM64Modulation::QAM64Modulation()
 {
-    stream << "type = " << type << ", constellation size = " << constellationSize;
+    normalizationFactor = 1 / sqrt(42);
 }
 
-} // namespace physicallayer
+QAM64Modulation::~QAM64Modulation()
+{
+}
 
-} // namespace inet
+} /* namespace physicallayer */
+} /* namespace inet */

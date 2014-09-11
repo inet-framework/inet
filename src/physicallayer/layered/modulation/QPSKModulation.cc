@@ -15,25 +15,18 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IMODULATIONSCHEME_H
-#define __INET_IMODULATIONSCHEME_H
-
-#include "IPrintableObject.h"
+#include "QPSKModulation.h"
 
 namespace inet {
-
 namespace physicallayer {
 
-class INET_API IModulationScheme : public IPrintableObject
+QPSKModulation::QPSKModulation()
 {
-    public:
-        virtual int getCodeWordLength() const = 0;
-        virtual int getConstellationSize() const = 0;
-};
+    normalizationFactor = 1 / sqrt(2);
+}
 
-} // namespace physicallayer
+QPSKModulation::~QPSKModulation() {
+}
 
-} // namespace inet
-
-#endif /* __INET_IMODULATIONSCHEME_H */
-
+} /* namespace physicallayer */
+} /* namespace inet */
