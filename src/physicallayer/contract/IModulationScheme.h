@@ -24,13 +24,14 @@ namespace inet {
 
 namespace physicallayer {
 
-// TODO: rename to IModulation
-class INET_API XIModulation : public IPrintableObject
+class INET_API IModulationScheme : public IPrintableObject
 {
-  public:
-    virtual int getCodeWordLength() const = 0;
+    protected:
+        double normalizationFactor; // BPSK, QPSK, 16-QAM and 64-QAM have normalizationFactor.
 
-    virtual int getConstellationSize() const = 0;
+    public:
+        virtual int getCodeWordLength() const = 0;
+        virtual int getConstellationSize() const = 0;
 };
 
 } // namespace physicallayer
