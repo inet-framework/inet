@@ -15,23 +15,23 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Modulator.h"
+#include "OFDMModulator.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-Modulator::Modulator() :
+OFDMModulator::OFDMModulator() :
     preambleSymbolLength(-1),
-    modulation(NULL)
+    modulationScheme(NULL)
 {}
 
-const ITransmissionSymbolModel *Modulator::modulate(const ITransmissionBitModel *bitModel) const
+const ITransmissionSymbolModel *OFDMModulator::modulate(const ITransmissionBitModel *bitModel) const
 {
-    const int codeWordLength = modulation->getCodeWordLength();
+    const int codeWordLength = modulationScheme->getCodeWordLength();
     const int symbolLength = preambleSymbolLength + (bitModel->getBitLength() + codeWordLength - 1) / codeWordLength;
     const double symbolRate = bitModel->getBitRate() / codeWordLength;
-    return new TransmissionSymbolModel(symbolLength, symbolRate, NULL, modulation);
+    return new TransmissionSymbolModel(symbolLength, symbolRate, NULL, modulationScheme);
 }
 
 } // namespace physicallayer

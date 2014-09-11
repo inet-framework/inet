@@ -19,7 +19,7 @@
 #define __INET_MODULATOR_H
 
 #include "IModulator.h"
-#include "XIModulation.h"
+#include "IModulationScheme.h"
 #include "SignalBitModel.h"
 #include "SignalSymbolModel.h"
 
@@ -27,14 +27,14 @@ namespace inet {
 
 namespace physicallayer {
 
-class INET_API Modulator : public IModulator
+class INET_API OFDMModulator : public IModulator
 {
   protected:
     int preambleSymbolLength;
-    const XIModulation *modulation;
+    const IModulationScheme *modulationScheme;
 
   public:
-    Modulator();
+    OFDMModulator();
 
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const;
 };
