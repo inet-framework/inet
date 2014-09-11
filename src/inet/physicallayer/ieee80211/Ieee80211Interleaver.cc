@@ -26,6 +26,7 @@ void Ieee80211Interleaver::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL)
     {
+        info = new Ieee80211InterleaverInfo(this);
         numberOfCodedBitsPerSymbol = par("numberOfCodedBitsPerSymbol");
         numberOfCodedBitsPerSubcarrier = par("numberOfCodedBitsPerSubcarrier");
         s = std::max(numberOfCodedBitsPerSubcarrier / 2, 1);
@@ -81,9 +82,14 @@ BitVector Ieee80211Interleaver::deinterleaving(const BitVector& interleavedBits)
     return deinterleavedBits;
 }
 
-void Ieee80211Interleaver::printToStream(std::ostream& stream) const
+void Ieee80211Interleaver::Ieee80211InterleaverInfo::printToStream(std::ostream& stream) const
 {
     stream << "Ieee80211Interleaver"; // TODO: extend this info
+}
+
+Ieee80211Interleaver::~Ieee80211Interleaver()
+{
+    delete info;
 }
 
 } /* namespace physicallayer */

@@ -24,11 +24,17 @@
 namespace inet {
 namespace physicallayer {
 
-class INET_API IInterleaver : public IPrintableObject
+class INET_API IInterleaverInfo : public IPrintableObject
+{
+    // TODO: what are the common properties?
+};
+
+class INET_API IInterleaver
 {
     public:
         virtual BitVector interleaving(const BitVector& bits) const = 0;
         virtual BitVector deinterleaving(const BitVector& bits) const = 0;
+        virtual const IInterleaverInfo *getInfo() const = 0;
 };
 
 } /* namespace physicallayer */

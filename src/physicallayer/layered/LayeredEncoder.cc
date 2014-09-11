@@ -44,7 +44,7 @@ const ITransmissionBitModel *LayeredEncoder::encode(const ITransmissionPacketMod
     BitVector scrambledBits = scrambler->scrambling(serializedPacket);
     BitVector fecEncodedBits = forwardErrorCorrection->encode(scrambledBits);
     BitVector interleavedBits = interleaver->interleaving(fecEncodedBits);
-    return new TransmissionBitModel(bitLength, bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo());
+    return new TransmissionBitModel(bitLength, bitRate, interleavedBits, forwardErrorCorrection->getInfo(), scrambler->getInfo(), interleaver->getInfo());
 }
 
 } // namespace physicallayer

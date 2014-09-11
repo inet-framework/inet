@@ -33,11 +33,22 @@ namespace physicallayer {
  */
 class Ieee80211Interleaver : public cSimpleModule, public IInterleaver
 {
+  protected:
+    class Ieee80211InterleaverInfo : public IInterleaverInfo
+    {
+        const Ieee80211Interleaver *interleaver;
+        public:
+            Ieee80211InterleaverInfo(const Ieee80211Interleaver *interleaver) : interleaver(interleaver) {}
+            int getNumberOfCodedBitsPerSymbol() const { return interleaver->numberOfCodedBitsPerSymbol; }
+            int getNumberOfCodedBitsPerSubcarrier() const { return interleaver->numberOfCodedBitsPerSubcarrier; }
+            void printToStream(std::ostream& stream) const;
+    };
 
   protected:
     int numberOfCodedBitsPerSymbol;
     int numberOfCodedBitsPerSubcarrier;
     int s;
+    const Ieee80211InterleaverInfo *info;
 
   protected:
     virtual void initialize(int stage);
@@ -46,11 +57,8 @@ class Ieee80211Interleaver : public cSimpleModule, public IInterleaver
   public:
     BitVector interleaving(const BitVector& bits) const;
     BitVector deinterleaving(const BitVector& bits) const;
-
-    int getNumberOfCodedBitsPerSymbol() const { return numberOfCodedBitsPerSymbol; }
-    int getNumberOfCodedBitsPerSubcarrier() const { return numberOfCodedBitsPerSubcarrier; }
-
-    void printToStream(std::ostream& stream) const;
+    const Ieee80211InterleaverInfo *getInfo() const { return info; }
+    ~Ieee80211Interleaver();
 };
 
 } /* namespace physicallayer */
