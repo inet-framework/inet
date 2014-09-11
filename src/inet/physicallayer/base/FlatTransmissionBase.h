@@ -19,7 +19,7 @@
 #define __INET_FLATTRANSMISSIONBASE_H
 
 #include "inet/physicallayer/base/TransmissionBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "inet/physicallayer/contract/IModulator.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API FlatTransmissionBase : public TransmissionBase
 {
   protected:
-    const IModulation *modulation;
+    const IModulator *modulator;
     const int headerBitLength;
     const int payloadBitLength;
     const Hz carrierFrequency;
@@ -36,9 +36,9 @@ class INET_API FlatTransmissionBase : public TransmissionBase
     const bps bitrate;
 
   public:
-    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulation *modulation, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
+    FlatTransmissionBase(const IRadio *transmitter, const cPacket *macFrame, const simtime_t startTime, const simtime_t endTime, const Coord startPosition, const Coord endPosition, const EulerAngles startOrientation, const EulerAngles endOrientation, const IModulator *modulator, int headerBitLength, int payloadBitLength, Hz carrierFrequency, Hz bandwidth, bps bitrate) :
         TransmissionBase(transmitter, macFrame, startTime, endTime, startPosition, endPosition, startOrientation, endOrientation),
-        modulation(modulation),
+        modulator(modulator),
         headerBitLength(headerBitLength),
         payloadBitLength(payloadBitLength),
         carrierFrequency(carrierFrequency),
@@ -46,7 +46,7 @@ class INET_API FlatTransmissionBase : public TransmissionBase
         bitrate(bitrate)
     {}
 
-    virtual const IModulation *getModulation() const { return modulation; }
+    virtual const IModulator *getModulator() const { return modulator; }
     virtual int getHeaderBitLength() const { return headerBitLength; }
     virtual int getPayloadBitLength() const { return payloadBitLength; }
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }

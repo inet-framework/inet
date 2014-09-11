@@ -23,7 +23,7 @@ namespace physicallayer {
 
 void Modulation::printToStream(std::ostream &stream) const
 {
-    stream << "type = " << type << ", constellation size = " << constellationSize;
+    stream << "constellation size = " << constellationSize;
 }
 
 } // namespace physicallayer

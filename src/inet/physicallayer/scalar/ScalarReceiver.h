@@ -19,7 +19,6 @@
 #define __INET_SCALARRECEIVER_H
 
 #include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
 
 namespace inet {
 

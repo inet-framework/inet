@@ -16,7 +16,7 @@
 //
 
 #include "inet/physicallayer/base/FlatTransmitterBase.h"
-#include "inet/physicallayer/common/Modulation.h"
+#include "OFDMModulator.h"
 
 namespace inet {
 
@@ -30,14 +30,14 @@ void FlatTransmitterBase::initialize(int stage)
         carrierFrequency = Hz(par("carrierFrequency"));
         bandwidth = Hz(par("bandwidth"));
         const char *modulationName = par("modulation");
-        if (strcmp(modulationName, "NULL") == 0)
-            modulation = new NullModulation();
+        if (strcmp(modulationName, "NULL") == 0); // TODO:
+//            modulation = new NullModulation();
         else if (strcmp(modulationName, "BPSK") == 0)
-            modulation = new BPSKModulation();
+            modulator = new OFDMModulator("BPSK");
         else if (strcmp(modulationName, "16-QAM") == 0)
-            modulation = new QAM16Modulation();
-        else if (strcmp(modulationName, "256-QAM") == 0)
-            modulation = new QAM256Modulation();
+            modulator = new OFDMModulator("16-QAM");
+        else if (strcmp(modulationName, "256-QAM") == 0) // TODO:
+            modulator = new OFDMModulator("TODO");
         else
             throw cRuntimeError(this, "Unknown modulation '%s'", modulationName);
         bitrate = bps(par("bitrate"));

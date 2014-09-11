@@ -19,7 +19,7 @@
 #define __INET_DIMENSIONALRECEIVER_H
 
 #include "inet/physicallayer/base/FlatReceiverBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "IModulator.h"
 
 namespace inet {
 

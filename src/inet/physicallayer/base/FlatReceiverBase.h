@@ -18,9 +18,10 @@
 #ifndef __INET_FLATRECEIVERBASE_H
 #define __INET_FLATRECEIVERBASE_H
 
-#include "inet/physicallayer/contract/IModulation.h"
-#include "inet/physicallayer/contract/IErrorModel.h"
 #include "inet/physicallayer/base/SNIRReceiverBase.h"
+#include "IModulator.h"
+#include "OFDMModulator.h"
+#include "inet/physicallayer/contract/IErrorModel.h"
 
 namespace inet {
 
@@ -29,7 +30,7 @@ namespace physicallayer {
 class INET_API FlatReceiverBase : public SNIRReceiverBase
 {
   protected:
-    const IModulation *modulation;
+    const IModulator *modulator;
     const IErrorModel *errorModel;
     W energyDetection;
     W sensitivity;
@@ -57,7 +58,7 @@ class INET_API FlatReceiverBase : public SNIRReceiverBase
     virtual const IListeningDecision *computeListeningDecision(const IListening *listening, const IInterference *interference) const;
     virtual const IReceptionDecision *computeReceptionDecision(const IListening *listening, const IReception *reception, const IInterference *interference) const;
 
-    virtual const IModulation *getModulation() const { return modulation; }
+    virtual const IModulator *getModulator() const { return modulator; }
 
     virtual Hz getCarrierFrequency() const { return carrierFrequency; }
     virtual void setCarrierFrequency(Hz carrierFrequency) { this->carrierFrequency = carrierFrequency; }

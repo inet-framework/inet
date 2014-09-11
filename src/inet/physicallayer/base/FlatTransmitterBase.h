@@ -19,7 +19,7 @@
 #define __INET_FLATTRANSMITTERBASE_H
 
 #include "inet/physicallayer/base/TransmitterBase.h"
-#include "inet/physicallayer/contract/IModulation.h"
+#include "IModulator.h"
 
 namespace inet {
 
@@ -28,7 +28,7 @@ namespace physicallayer {
 class INET_API FlatTransmitterBase : public TransmitterBase
 {
   protected:
-    const IModulation *modulation;
+    const IModulator *modulator;
     int headerBitLength;
     Hz carrierFrequency;
     Hz bandwidth;
@@ -40,7 +40,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
 
   public:
     FlatTransmitterBase() :
-        modulation(NULL),
+        modulator(NULL),
         headerBitLength(-1),
         carrierFrequency(Hz(sNaN)),
         bandwidth(Hz(sNaN)),
@@ -49,7 +49,7 @@ class INET_API FlatTransmitterBase : public TransmitterBase
     {}
 
     virtual W getMaxPower() const { return power; }
-    virtual const IModulation *getModulation() const { return modulation; }
+    virtual const IModulator *getModulator() const { return modulator; }
 
     virtual int getHeaderBitLength() const { return headerBitLength; }
     virtual void setHeaderBitLength(int headerBitLength) { this->headerBitLength = headerBitLength; }

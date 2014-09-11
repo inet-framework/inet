@@ -30,12 +30,10 @@ class INET_API Modulation : public IModulationScheme
   protected:
     const int codeWordLength;
     const int constellationSize;
-    const double normalizationFactor; // BPSK, QPSK, 16-QAM and 64-QAM have normalizationFactor.
-    Complex *encodingTable;
+    double normalizationFactor; // BPSK, QPSK, 16-QAM and 64-QAM have normalizationFactor.
 
   public:
-    Modulation(const Type type, int codeWordLength, int constellationSize, double normalizationFactor) :
-        type(type),
+    Modulation(int codeWordLength, int constellationSize, double normalizationFactor) :
         codeWordLength(codeWordLength),
         constellationSize(constellationSize),
         normalizationFactor(normalizationFactor)
@@ -44,6 +42,7 @@ class INET_API Modulation : public IModulationScheme
     virtual int getCodeWordLength() const { return codeWordLength; }
     virtual int getConstellationSize() const { return constellationSize; }
     virtual double getNormalizationFactor() const { return normalizationFactor; }
+    virtual const Complex& map(const ShortBitVector& input) const = 0;
 };
 
 } // namespace physicallayer
