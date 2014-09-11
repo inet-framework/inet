@@ -18,14 +18,14 @@
 #ifndef __INET_XMODULATION_H
 #define __INET_XMODULATION_H
 
-#include "XIModulation.h"
+#include "IModulationScheme.h"
 
 namespace inet {
 
 namespace physicallayer {
 
 // TODO: rename to Modulation
-class INET_API XModulation : public XIModulation
+class INET_API XModulation : public IModulationScheme
 {
   public:
     enum Type {
