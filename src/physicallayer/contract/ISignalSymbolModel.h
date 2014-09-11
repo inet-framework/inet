@@ -18,7 +18,7 @@
 #ifndef __INET_ISIGNALSYMBOLMODEL_H
 #define __INET_ISIGNALSYMBOLMODEL_H
 
-#include "XIModulation.h"
+#include "IModulationScheme.h"
 
 namespace inet {
 
@@ -37,7 +37,7 @@ class INET_API ISignalSymbolModel : public IPrintableObject
 
     virtual const std::vector<int> *getSymbols() const = 0;
 
-    virtual const XIModulation *getModulation() const = 0;
+    virtual const IModulationScheme *getModulation() const = 0;
 };
 
 class INET_API ITransmissionSymbolModel : public virtual ISignalSymbolModel
