@@ -30,10 +30,10 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
     const int symbolLength;
     const double symbolRate;
     const std::vector<int> *symbols;
-    const XIModulation *modulation;
+    const IModulationScheme *modulation;
 
   public:
-    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const XIModulation *modulation) :
+    SignalSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation) :
         symbolLength(symbolLength),
         symbolRate(symbolRate),
         symbols(symbols),
@@ -48,13 +48,13 @@ class INET_API SignalSymbolModel : public virtual ISignalSymbolModel
 
     virtual const std::vector<int> *getSymbols() const { return symbols; }
 
-    virtual const XIModulation *getModulation() const { return modulation; }
+    virtual const IModulationScheme *getModulation() const { return modulation; }
 };
 
 class INET_API TransmissionSymbolModel : public SignalSymbolModel, public virtual ITransmissionSymbolModel
 {
   public:
-    TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const XIModulation *modulation) :
+    TransmissionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation) :
         SignalSymbolModel(symbolLength, symbolRate, symbols, modulation)
     {}
 };
@@ -66,7 +66,7 @@ class INET_API ReceptionSymbolModel : public SignalSymbolModel, public virtual I
     const double symbolErrorCount;
 
   public:
-    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const XIModulation *modulation, double ser, double symbolErrorCount) :
+    ReceptionSymbolModel(int symbolLength, double symbolRate, const std::vector<int> *symbols, const IModulationScheme *modulation, double ser, double symbolErrorCount) :
         SignalSymbolModel(symbolLength, symbolRate, symbols, modulation),
         ser(ser),
         symbolErrorCount(symbolErrorCount)
