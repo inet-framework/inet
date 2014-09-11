@@ -19,6 +19,8 @@
 #define __INET_IMODULATIONSCHEME_H
 
 #include "IPrintableObject.h"
+#include "ShortBitVector.h"
+#include "Complex.h"
 
 namespace inet {
 
@@ -29,6 +31,7 @@ class INET_API IModulationScheme : public IPrintableObject
     public:
         virtual int getCodeWordLength() const = 0;
         virtual int getConstellationSize() const = 0;
+        virtual const Complex& map(const ShortBitVector& input) const = 0;
 };
 
 } // namespace physicallayer
