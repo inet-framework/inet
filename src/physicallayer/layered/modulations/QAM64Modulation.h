@@ -25,9 +25,12 @@ namespace physicallayer {
 
 class INET_API QAM64Modulation : public Modulation
 {
+    protected:
+        static const Complex encodingTable[64];
+        static const double kMOD;
+
     public:
         QAM64Modulation();
-        virtual ~QAM64Modulation();
 };
 
 } /* namespace physicallayer */

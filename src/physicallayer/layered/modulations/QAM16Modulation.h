@@ -25,9 +25,11 @@ namespace physicallayer {
 
 class INET_API QAM16Modulation : public Modulation
 {
+    protected:
+        static const Complex encodingTable[16];
+        static const double kMOD;
     public:
         QAM16Modulation();
-        virtual ~QAM16Modulation();
 };
 
 } /* namespace physicallayer */

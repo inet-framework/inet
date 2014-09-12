@@ -25,9 +25,12 @@ namespace physicallayer {
 
 class QPSKModulation : public Modulation
 {
+    protected:
+        static const Complex encodingTable[4];
+        static const double kMOD;
+
     public:
         QPSKModulation();
-        virtual ~QPSKModulation();
 };
 
 } /* namespace physicallayer */

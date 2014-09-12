@@ -27,8 +27,9 @@ class INET_API BPSKModulation : public Modulation
 {
     protected:
         static const Complex encodingTable[2];
+        static const double kMOD;
+
     public:
-        const Complex& map(const ShortBitVector& input) const; // TODO: revise name
         BPSKModulation();
 };
 

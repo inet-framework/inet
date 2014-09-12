@@ -20,12 +20,11 @@
 namespace inet {
 namespace physicallayer {
 
-QPSKModulation::QPSKModulation()
-{
-    normalizationFactor = 1 / sqrt(2);
-}
+const double QPSKModulation::kMOD = 1 / sqrt(2);
+const Complex QPSKModulation::encodingTable[] = {kMOD * Complex(-1,-1), kMOD * Complex(1,-1), kMOD * Complex(-1, 1), kMOD * Complex(1,1)};
 
-QPSKModulation::~QPSKModulation() {
+QPSKModulation::QPSKModulation() : Modulation(encodingTable, 2, 4, kMOD)
+{
 }
 
 } /* namespace physicallayer */

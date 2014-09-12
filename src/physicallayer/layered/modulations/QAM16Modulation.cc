@@ -20,12 +20,16 @@
 namespace inet {
 namespace physicallayer {
 
-QAM16Modulation::QAM16Modulation()
-{
-    normalizationFactor = 1 / sqrt(10);
-}
+const double QAM16Modulation::kMOD = 1/sqrt(10);
+const Complex QAM16Modulation::encodingTable[] = {kMOD * Complex(-1, -3), kMOD * Complex(1, -3), kMOD * Complex(3, -3),
+                                                  kMOD * Complex(-3, -1), kMOD * Complex(-1, -1), kMOD * Complex(1, -1),
+                                                  kMOD * Complex(3, -1), kMOD * Complex(-3, 1), kMOD * Complex(-1, 1),
+                                                  kMOD * Complex(1, 1), kMOD * Complex(3, 1), kMOD * Complex(-3, 3),
+                                                  kMOD * Complex(-1, 3), kMOD * Complex(1, 3), kMOD * Complex(3, 3)};
 
-QAM16Modulation::~QAM16Modulation() {
+QAM16Modulation::QAM16Modulation() : Modulation(encodingTable, 4,16, kMOD)
+{
+
 }
 
 } /* namespace physicallayer */

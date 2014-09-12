@@ -21,19 +21,12 @@
 namespace inet {
 namespace physicallayer {
 
+const double BPSKModulation::kMOD = 1;
 const Complex BPSKModulation::encodingTable[] = {Complex(-1,0), Complex(1,0)};
 
-BPSKModulation::BPSKModulation() : Modulation(1, 2, 1)
+BPSKModulation::BPSKModulation() : Modulation(encodingTable, 1, 2, kMOD)
 {
 }
-
-const Complex& BPSKModulation::map(const ShortBitVector& input) const
-{
-    if (input.toDecimal() >= constellationSize)
-        throw cRuntimeError("Undefined ...");
-    return encodingTable[input.toDecimal()];
-}
-
 
 } /* namespace physicallayer */
 } /* namespace inet */
