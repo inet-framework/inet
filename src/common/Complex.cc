@@ -61,8 +61,17 @@ double Complex::abs() const
     return sqrt(this->re * this->re + this->im * this->im);
 }
 
+Complex Complex::operator*(const double& rhs) const
+{
+    return Complex(rhs * this->re, rhs * this->im);
+}
+
 Complex Complex::conjugate() const
 {
     return Complex(this->re, -this->im);
 }
 
+Complex operator*(const double& scalar, const Complex& comp)
+{
+    return comp * scalar;
+}

@@ -35,12 +35,14 @@ class INET_API Complex
         Complex operator+(const Complex& rhs) const;
         Complex operator-(const Complex& rhs) const;
         Complex operator*(const Complex& rhs) const;
+        Complex operator*(const double& rhs) const;
         Complex operator/(const Complex& rhs) const;
         bool operator==(const Complex& rhs) const;
         bool operator!=(const Complex& rhs) const;
         
         friend std::ostream& operator<<(std::ostream& out, const Complex& w);
-        
+        friend Complex operator*(const double& scalar, const Complex& comp);
+
         double abs() const;
         Complex conjugate() const;
         double getReal() const { return re; }
