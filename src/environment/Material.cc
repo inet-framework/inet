@@ -21,16 +21,17 @@
 namespace inet {
 
 // TODO: check values, add frequency dependence
-const Material Material::vacuum(Ohmm(sNaN), 1, 1);
-const Material Material::air(Ohmm(sNaN), 1.00058986, 1.00000037);
-const Material Material::copper(Ohmm(1.68), sNaN, sNaN);
-const Material Material::aluminium(Ohmm(2.65), sNaN, sNaN);
-const Material Material::wood(Ohmm(1E+15), 5, 1.00000043);
-const Material Material::brick(Ohmm(3E+3), 4.5, 1);
-const Material Material::concrete(Ohmm(1E+2), 4.5, 1);
-const Material Material::glass(Ohmm(1E+12), 7, 1);
+const Material Material::vacuum("vacuum", Ohmm(sNaN), 1, 1);
+const Material Material::air("air", Ohmm(sNaN), 1.00058986, 1.00000037);
+const Material Material::copper("copper", Ohmm(1.68), sNaN, sNaN);
+const Material Material::aluminium("aluminium", Ohmm(2.65), sNaN, sNaN);
+const Material Material::wood("wood", Ohmm(1E+15), 5, 1.00000043);
+const Material Material::brick("brick", Ohmm(3E+3), 4.5, 1);
+const Material Material::concrete("concrete", Ohmm(1E+2), 4.5, 1);
+const Material Material::glass("glass", Ohmm(1E+12), 7, 1);
 
-Material::Material(Ohmm resistivity, double relativePermittivity, double relativePermeability) :
+Material::Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability) :
+    cNamedObject(name),
     resistivity(resistivity),
     relativePermittivity(relativePermittivity),
     relativePermeability(relativePermeability)

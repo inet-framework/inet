@@ -191,6 +191,8 @@ void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
+        // name
+        const char *name = element->getAttribute("name");
         // resistivity
         Ohmm resistivity = Ohmm(NaN);
         const char *resistivityAttribute = element->getAttribute("resistivity");
@@ -207,7 +209,7 @@ void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
         if (relativePermeabilityAttribute)
             relativePermeability = atof(relativePermeabilityAttribute);
         // insert
-        Material *material = new Material(resistivity, relativePermittivity, relativePermeability);
+        Material *material = new Material(name, resistivity, relativePermittivity, relativePermeability);
         materials.insert(std::pair<int, Material *>(id, material));
     }
 }
@@ -221,13 +223,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *tag = element->getTagName();
         if (strcmp(tag, "object"))
             continue;
-        // name
-        const char *nameAttribute = element->getAttribute("name");
         // id
         const char *idAttribute = element->getAttribute("id");
         int id = -1;
         if (idAttribute)
             id = atoi(idAttribute);
+        // name
+        const char *name = element->getAttribute("name");
         // orientation
         EulerAngles orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
@@ -389,7 +391,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // tags
         const char *tags = element->getAttribute("tags");
         // insert object
-        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
+        PhysicalObject *object = new PhysicalObject(name, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
         objects.push_back(object);
         if (objectCache)
             objectCache->insertObject(object);

@@ -26,7 +26,7 @@ namespace inet {
 using namespace units::values;
 using namespace units::constants;
 
-class INET_API Material
+class INET_API Material : public cNamedObject
 {
   public:
     static const Material vacuum;
@@ -39,12 +39,12 @@ class INET_API Material
     static const Material glass;
 
   protected:
-    Ohmm resistivity;
-    double relativePermittivity;
-    double relativePermeability;
+    const Ohmm resistivity;
+    const double relativePermittivity;
+    const double relativePermeability;
 
   public:
-    Material(Ohmm resistivity, double relativePermittivity, double relativePermeability);
+    Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability);
     virtual ~Material();
 
     virtual Ohmm getResistivity() const { return resistivity; }
