@@ -352,8 +352,13 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         if (!material)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
+        // line width
+        double lineWidth = 1;
+        const char *lineWidthAttribute = element->getAttribute("line-width");
+        if (lineWidthAttribute)
+            lineWidth = atof(lineWidthAttribute);
         // line color
-        cFigure::Color lineColor;
+        cFigure::Color lineColor = cFigure::BLACK;
         const char *lineColorAttribute = element->getAttribute("line-color");
         if (lineColorAttribute) {
             cStringTokenizer tokenizer(lineColorAttribute);
@@ -365,7 +370,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 lineColor.blue = atoi(tokenizer.nextToken());
         }
         // fill color
-        cFigure::Color fillColor;
+        cFigure::Color fillColor = cFigure::WHITE;
         const char *fillColorAttribute = element->getAttribute("fill-color");
         if (fillColorAttribute) {
             cStringTokenizer tokenizer(fillColorAttribute);
@@ -376,8 +381,15 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             if (tokenizer.hasMoreTokens())
                 fillColor.blue = atoi(tokenizer.nextToken());
         }
-        // insert
-        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineColor, fillColor);
+        // opacity
+        double opacity = 1;
+        const char *opacityAttribute = element->getAttribute("opacity");
+        if (opacityAttribute)
+            opacity = atof(opacityAttribute);
+        // tags
+        const char *tags = element->getAttribute("tags");
+        // insert object
+        PhysicalObject *object = new PhysicalObject(nameAttribute, id, position, orientation, shape, material, lineWidth, lineColor, fillColor, opacity, tags);
         objects.push_back(object);
         if (objectCache)
             objectCache->insertObject(object);
@@ -429,8 +441,12 @@ void PhysicalEnvironment::updateCanvas()
             cFigure::Point topLeft = computeCanvasPoint(position - Coord(radius, radius, radius), viewRotation);
             cFigure::Point bottomRight = computeCanvasPoint(position + Coord(radius, radius, radius), viewRotation);
             figure->setBounds(cFigure::Rectangle(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y));
+            figure->setLineWidth(object->getLineWidth());
             figure->setLineColor(object->getLineColor());
+            figure->setLineOpacity(object->getOpacity());
             figure->setFillColor(object->getFillColor());
+            figure->setFillOpacity(object->getOpacity());
+            figure->setTags(object->getTags());
             objectsLayer->addFigure(figure);
         }
         // prism
@@ -479,8 +495,12 @@ void PhysicalEnvironment::computeFacePoints(PhysicalObject *object, std::vector<
         cPolygonFigure *figure = new cPolygonFigure(NULL); // TODO: Valgrind found a memory leak here: cFigure: std::vector<cFigure*> children.
         figure->setFilled(true);
         figure->setPoints(canvasPoints);
+        figure->setLineWidth(object->getLineWidth());
         figure->setLineColor(object->getLineColor());
+        figure->setLineOpacity(object->getOpacity());
         figure->setFillColor(object->getFillColor());
+        figure->setFillOpacity(object->getOpacity());
+        figure->setTags(object->getTags());
         objectsLayer->addFigure(figure);
     }
 }
