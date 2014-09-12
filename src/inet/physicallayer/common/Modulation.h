@@ -28,12 +28,14 @@ namespace physicallayer {
 class INET_API Modulation : public IModulationScheme
 {
   protected:
+    const Complex *encodingTable;
     const int codeWordLength;
     const int constellationSize;
-    double normalizationFactor; // BPSK, QPSK, 16-QAM and 64-QAM have normalizationFactor.
+    double normalizationFactor;
 
   public:
-    Modulation(int codeWordLength, int constellationSize, double normalizationFactor) :
+    Modulation(const Complex *encodingTable, int codeWordLength, int constellationSize, double normalizationFactor) :
+        encodingTable(encodingTable),
         codeWordLength(codeWordLength),
         constellationSize(constellationSize),
         normalizationFactor(normalizationFactor)
@@ -42,7 +44,8 @@ class INET_API Modulation : public IModulationScheme
     virtual int getCodeWordLength() const { return codeWordLength; }
     virtual int getConstellationSize() const { return constellationSize; }
     virtual double getNormalizationFactor() const { return normalizationFactor; }
-    virtual const Complex& map(const ShortBitVector& input) const = 0;
+    virtual const Complex& map(const ShortBitVector& symbol) const;
+
 };
 
 } // namespace physicallayer

@@ -26,6 +26,13 @@ void Modulation::printToStream(std::ostream &stream) const
     stream << "constellation size = " << constellationSize;
 }
 
+const Complex& inet::physicallayer::Modulation::map(const ShortBitVector& symbol) const
+{
+    if (symbol.toDecimal() >= constellationSize)
+        throw cRuntimeError("Unknown input: %d", symbol.toDecimal());
+    return encodingTable[symbol.toDecimal()];
+}
+
 } // namespace physicallayer
 
 } // namespace inet
