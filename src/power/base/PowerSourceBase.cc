@@ -19,9 +19,9 @@
 
 namespace inet {
 
-IPowerConsumer *PowerSourceBase::getPowerConsumer(int index)
+IPowerConsumer *PowerSourceBase::getPowerConsumer(int id)
 {
-    return powerConsumers[index].powerConsumer;
+    return powerConsumers[id].powerConsumer;
 }
 
 int PowerSourceBase::addPowerConsumer(IPowerConsumer *powerConsumer)

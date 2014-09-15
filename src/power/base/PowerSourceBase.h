@@ -61,7 +61,7 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
   public:
     virtual int getNumPowerConsumers() { return powerConsumers.size(); }
 
-    virtual IPowerConsumer *getPowerConsumer(int index);
+    virtual IPowerConsumer *getPowerConsumer(int id);
 
     virtual int addPowerConsumer(IPowerConsumer *powerConsumer);
 
