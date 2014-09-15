@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_RADIOPOWERCONSUMER_H
-#define __INET_RADIOPOWERCONSUMER_H
+#ifndef __INET_STATEBASEDPOWERCONSUMER_H
+#define __INET_STATEBASEDPOWERCONSUMER_H
 
 #include "IPowerSource.h"
 #include "IRadio.h"
@@ -28,11 +28,13 @@ namespace physicallayer {
 using namespace inet::power;
 
 /**
- * This is radio power consumer model.
+ * This is a simple radio power consumer model. The power consumption is
+ * determined by the radio mode, the transmitter state and the receiver state
+ * using constant parameters.
  *
  * @author Levente Meszaros
  */
-class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer, public cListener
+class INET_API StateBasedPowerConsumer : public cSimpleModule, public IPowerConsumer, public cListener
 {
   protected:
     // parameters
@@ -54,7 +56,7 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
     int powerConsumerId;
 
   public:
-    RadioPowerConsumer();
+    StateBasedPowerConsumer();
 
     virtual W getPowerConsumption();
 
@@ -70,5 +72,5 @@ class INET_API RadioPowerConsumer : public cSimpleModule, public IPowerConsumer,
 
 } // namespace inet
 
-#endif // ifndef __INET_RADIOPOWERCONSUMER_H
+#endif // ifndef __INET_STATEBASEDPOWERCONSUMER_H
 

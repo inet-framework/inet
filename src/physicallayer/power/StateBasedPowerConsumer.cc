@@ -15,14 +15,14 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "RadioPowerConsumer.h"
+#include "StateBasedPowerConsumer.h"
 #include "ModuleAccess.h"
 
 namespace inet {
 
 namespace physicallayer {
 
-RadioPowerConsumer::RadioPowerConsumer() :
+StateBasedPowerConsumer::StateBasedPowerConsumer() :
     offPowerConsumption(W(sNaN)),
     sleepPowerConsumption(W(sNaN)),
     switchingPowerConsumption(W(sNaN)),
@@ -38,7 +38,7 @@ RadioPowerConsumer::RadioPowerConsumer() :
 {
 }
 
-void RadioPowerConsumer::initialize(int stage)
+void StateBasedPowerConsumer::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
     EV << "Initializing RadioPowerConsumer, stage = " << stage << endl;
@@ -64,7 +64,7 @@ void RadioPowerConsumer::initialize(int stage)
     }
 }
 
-void RadioPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
+void StateBasedPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
     if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal) {
         if (powerSource)
@@ -72,7 +72,7 @@ void RadioPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID,
     }
 }
 
-W RadioPowerConsumer::getPowerConsumption()
+W StateBasedPowerConsumer::getPowerConsumption()
 {
     IRadio::RadioMode radioMode = radio->getRadioMode();
     if (radioMode == IRadio::RADIO_MODE_OFF)

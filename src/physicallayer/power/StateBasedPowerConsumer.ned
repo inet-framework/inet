@@ -20,9 +20,11 @@ package inet.physicallayer.power;
 import inet.power.contract.IPowerConsumer;
 
 //
-// This module provides a radio power consumer model.
+// This module provides a radio power consumer model. The power consumption is
+// determined by the radio mode, the transmitter state and the receiver state
+// using constant parameters.
 //
-simple RadioPowerConsumer like IPowerConsumer
+simple StateBasedPowerConsumer like IPowerConsumer
 {
     parameters:
         double offPowerConsumption @unit(W) = default(0mW);
