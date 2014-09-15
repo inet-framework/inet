@@ -15,34 +15,38 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALACCUMULATOR_H
-#define __INET_IDEALACCUMULATOR_H
-
-#include "IPowerAccumulator.h"
-#include "PowerSourceBase.h"
 #include "PowerSinkBase.h"
 
 namespace inet {
 
 namespace power {
 
-/**
- * This class implements an ideal accumulator. The ideal accumulator stores
- * infinite amount of energy and it never gets depleted.
- *
- * @author Levente Meszaros
- */
-class INET_API IdealAccumulator : public virtual PowerSourceBase, public virtual PowerSinkBase, public virtual IPowerAccumulator
+IPowerGenerator *PowerSinkBase::getPowerGenerator(int id)
 {
-  public:
-    virtual J getNominalCapacity() { return J(INFINITY); }
+    return powerGenerators[id].powerGenerator;
+}
 
-    virtual J getResidualCapacity() { return J(INFINITY); }
-};
+int PowerSinkBase::addPowerGenerator(IPowerGenerator *powerGenerator)
+{
+    powerGenerators.push_back(PowerGeneratorEntry(powerGenerator, W(0)));
+    return powerGenerators.size() - 1;
+}
+
+void PowerSinkBase::removePowerGenerator(int id)
+{
+    totalGeneratedPower -= powerGenerators[id].generatedPower;
+    powerGenerators[id].generatedPower = W(0);
+    powerGenerators[id].powerGenerator = NULL;
+}
+
+void PowerSinkBase::setPowerGeneration(int id, W generatedPower)
+{
+    totalGeneratedPower += generatedPower - powerGenerators[id].generatedPower;
+    powerGenerators[id].generatedPower = generatedPower;
+    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
+}
 
 } // namespace power
 
 } // namespace inet
-
-#endif // ifndef __INET_IDEALACCUMULATOR_H
 

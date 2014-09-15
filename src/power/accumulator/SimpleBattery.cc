@@ -15,7 +15,7 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "Battery.h"
+#include "SimpleBattery.h"
 #include "LifecycleController.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
@@ -24,36 +24,32 @@ namespace inet {
 
 namespace power {
 
-Define_Module(Battery);
+Define_Module(SimpleBattery);
 
-Battery::Battery() :
+SimpleBattery::SimpleBattery() :
     crashNodeWhenDepleted(false),
     nominalCapacity(J(sNaN)),
     residualCapacity(J(sNaN)),
-    nominalVoltage(V(sNaN)),
-    internalResistance(Ohm(sNaN)),
     lastResidualCapacityUpdate(-1),
     depletedTimer(NULL)
 {
 }
 
-Battery::~Battery()
+SimpleBattery::~SimpleBattery()
 {
     cancelAndDelete(depletedTimer);
 }
 
-void Battery::initialize(int stage)
+void SimpleBattery::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
         crashNodeWhenDepleted = par("crashNodeWhenDepleted");
         nominalCapacity = residualCapacity = J(par("nominalCapacity"));
-        nominalVoltage = V(par("nominalVoltage"));
-        internalResistance = Ohm(par("internalResistance"));
         depletedTimer = new cMessage("depleted");
     }
 }
 
-void Battery::handleMessage(cMessage *message)
+void SimpleBattery::handleMessage(cMessage *message)
 {
     if (message == depletedTimer) {
         updateResidualCapacity();
@@ -65,9 +61,11 @@ void Battery::handleMessage(cMessage *message)
             lifecycleController->initiateOperation(operation);
         }
     }
+    else
+        throw cRuntimeError("Unknown message");
 }
 
-void Battery::setPowerConsumption(int id, W consumedPower)
+void SimpleBattery::setPowerConsumption(int id, W consumedPower)
 {
     Enter_Method_Silent();
     if (residualCapacity == J(0))
@@ -79,13 +77,7 @@ void Battery::setPowerConsumption(int id, W consumedPower)
     }
 }
 
-V Battery::getCurrentVoltage()
-{
-    updateResidualCapacity();
-    return (nominalVoltage + V(sqrt(nominalVoltage.get() * nominalVoltage.get() - 4 * totalConsumedPower.get() * internalResistance.get()))) / 2;
-}
-
-void Battery::updateResidualCapacity()
+void SimpleBattery::updateResidualCapacity()
 {
     simtime_t now = simTime();
     if (now != lastResidualCapacityUpdate) {
@@ -96,7 +88,7 @@ void Battery::updateResidualCapacity()
     }
 }
 
-void Battery::scheduleDepletedTimer()
+void SimpleBattery::scheduleDepletedTimer()
 {
     if (depletedTimer->isScheduled())
         cancelEvent(depletedTimer);

@@ -18,14 +18,14 @@
 package inet.power.contract;
 
 //
-// This interface provides an abstraction for different power sources. Power
-// sources provide power for multiple power consumers.
+// This interface provides an abstraction for different power sinks. Power sinks
+// consume power from multiple power generators.
 //
 // @author Levente Meszaros
 //
-moduleinterface IPowerSource
+moduleinterface IPowerSink
 {
     parameters:
         @display("i=block/cogwheel");
-        @signal[powerConsumptionChanged](type=double);
+        @signal[powerGenerationChanged](type=double);
 }

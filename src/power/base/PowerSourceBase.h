@@ -25,11 +25,12 @@ namespace inet {
 namespace power {
 
 /**
- * This is an abstract base class for different power sources.
+ * This is an abstract base class for different power sources. It provides a
+ * list of power consumers attached to the power source.
  *
  * @author Levente Meszaros
  */
-class INET_API PowerSourceBase : public cSimpleModule, public virtual IPowerSource
+class INET_API PowerSourceBase : public virtual cSimpleModule, public virtual IPowerSource
 {
   protected:
     struct PowerConsumerEntry

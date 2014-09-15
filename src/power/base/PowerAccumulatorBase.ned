@@ -17,17 +17,23 @@
 
 package inet.power.base;
 
+import inet.power.contract.IPowerAccumulator;
+import inet.power.contract.IPowerSink;
 import inet.power.contract.IPowerSource;
 
 //
-// This is an abstract base module for power source models.
+// This is an abstract base module for accumulator models.
 //
 // @author Levente Meszaros
 //
-simple PowerSourceBase like IPowerSource
+simple PowerAccumulatorBase like IPowerSource, IPowerSink, IPowerAccumulator
 {
     parameters:
         @display("i=block/cogwheel");
         @signal[powerConsumptionChanged];
+        @signal[powerGenerationChanged];
+        @signal[residualCapacityChanged];
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
+        @statistic[residualCapacity](title="Residual capacity"; source=residualCapacityChanged; record=vector; interpolationmode=linear);
 }

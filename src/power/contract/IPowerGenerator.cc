@@ -15,34 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALACCUMULATOR_H
-#define __INET_IDEALACCUMULATOR_H
-
-#include "IPowerAccumulator.h"
-#include "PowerSourceBase.h"
-#include "PowerSinkBase.h"
+#include "IPowerGenerator.h"
 
 namespace inet {
 
 namespace power {
 
-/**
- * This class implements an ideal accumulator. The ideal accumulator stores
- * infinite amount of energy and it never gets depleted.
- *
- * @author Levente Meszaros
- */
-class INET_API IdealAccumulator : public virtual PowerSourceBase, public virtual PowerSinkBase, public virtual IPowerAccumulator
-{
-  public:
-    virtual J getNominalCapacity() { return J(INFINITY); }
-
-    virtual J getResidualCapacity() { return J(INFINITY); }
-};
-
 } // namespace power
 
 } // namespace inet
-
-#endif // ifndef __INET_IDEALACCUMULATOR_H
 

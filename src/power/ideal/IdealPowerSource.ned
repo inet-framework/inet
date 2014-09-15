@@ -20,7 +20,7 @@ package inet.power.ideal;
 import inet.power.base.PowerSourceBase;
 
 //
-// This module implements an ideal power source. An ideal power source always
+// This module implements an ideal power source. The ideal power source always
 // provides as much power as needed.
 //
 // @author Levente Meszaros

@@ -15,24 +15,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BATTERY_H
-#define __INET_BATTERY_H
+#ifndef __INET_SIMPLEBATTERY_H
+#define __INET_SIMPLEBATTERY_H
 
-#include "IAccumulator.h"
+#include "IPowerAccumulator.h"
 #include "PowerSourceBase.h"
+#include "PowerSinkBase.h"
 
 namespace inet {
 
 namespace power {
 
 /**
- * This class implements a voltage regulated battery. A simple voltage regulated
- * battery is determined by its nominal capacity, nominal voltage and internal
- * resistance.
+ * This class implements a simple battery. The simple battery is determined by
+ * its nominal capacity.
  *
  * @author Levente Meszaros
  */
-class INET_API Battery : public PowerSourceBase, public virtual IAccumulator
+class INET_API SimpleBattery : public PowerSourceBase, public PowerSinkBase, public virtual IPowerAccumulator
 {
   protected:
     /**
@@ -51,16 +51,6 @@ class INET_API Battery : public PowerSourceBase, public virtual IAccumulator
     J residualCapacity;
 
     /**
-     * Nominal regulated voltage.
-     */
-    V nominalVoltage;
-
-    /**
-     * Internal resistance of the battery.
-     */
-    Ohm internalResistance;
-
-    /**
      * Last simulation time when residual capacity was updated.
      */
     simtime_t lastResidualCapacityUpdate;
@@ -71,17 +61,13 @@ class INET_API Battery : public PowerSourceBase, public virtual IAccumulator
     cMessage *depletedTimer;
 
   public:
-    Battery();
+    SimpleBattery();
 
-    virtual ~Battery();
+    virtual ~SimpleBattery();
 
     virtual J getNominalCapacity() { return nominalCapacity; }
 
     virtual J getResidualCapacity() { updateResidualCapacity(); return residualCapacity; }
-
-    virtual V getNominalVoltage() { return nominalVoltage; }
-
-    virtual V getCurrentVoltage();
 
     virtual void setPowerConsumption(int id, W consumedPower);
 
@@ -99,5 +85,5 @@ class INET_API Battery : public PowerSourceBase, public virtual IAccumulator
 
 } // namespace inet
 
-#endif // ifndef __INET_BATTERY_H
+#endif // ifndef __INET_SIMPLEBATTERY_H
 

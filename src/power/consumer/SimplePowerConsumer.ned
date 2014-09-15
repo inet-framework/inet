@@ -15,18 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.ideal;
+package inet.power.consumer;
 
-import inet.power.base.PowerAccumulatorBase;
+import inet.power.base.PowerConsumerBase;
 
 //
-// This module implements an ideal accumulator. The ideal accumulator stores
-// infinite amount of energy and it never gets depleted.
+// This module implements a simple power consumer which consumes a randomly
+// selected constant power for a random time interval.
 //
 // @author Levente Meszaros
 //
-simple IdealAccumulator extends PowerAccumulatorBase
+simple SimplePowerConsumer extends PowerConsumerBase
 {
     parameters:
-        @class(IdealAccumulator);
+        string sinkModule = default("^.battery");
+        volatile double powerConsumption @unit(W);
+        volatile double interval @unit(s);
+        @class(SimplePowerConsumer);
 }

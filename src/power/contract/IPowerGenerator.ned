@@ -18,14 +18,13 @@
 package inet.power.contract;
 
 //
-// This interface provides an abstraction for different power sources. Power
-// sources provide power for multiple power consumers.
+// This interface provides an abstraction for different power generators.
 //
 // @author Levente Meszaros
 //
-moduleinterface IPowerSource
+moduleinterface IPowerGenerator
 {
     parameters:
         @display("i=block/cogwheel");
-        @signal[powerConsumptionChanged](type=double);
+        @signal[powerGenerationChanged](type=double);
 }

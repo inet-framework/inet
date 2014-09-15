@@ -15,13 +15,13 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "IAccumulator.h"
+#include "IPowerAccumulator.h"
 
 namespace inet {
 
 namespace power {
 
-simsignal_t IAccumulator::residualCapacityChangedSignal = cComponent::registerSignal("residualCapacityChanged");
+simsignal_t IPowerAccumulator::residualCapacityChangedSignal = cComponent::registerSignal("residualCapacityChanged");
 
 } // namespace power
 

@@ -15,10 +15,11 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IACCUMULATOR_H
-#define __INET_IACCUMULATOR_H
+#ifndef __INET_IPOWERACCUMULATOR_H
+#define __INET_IPOWERACCUMULATOR_H
 
 #include "IPowerSource.h"
+#include "IPowerSink.h"
 
 namespace inet {
 
@@ -31,7 +32,7 @@ namespace power {
  *
  * @author Levente Meszaros
  */
-class INET_API IAccumulator : public virtual IPowerSource
+class INET_API IPowerAccumulator : public virtual IPowerSource, public virtual IPowerSink
 {
   public:
         /** @brief A signal used to publish residual capacity changes. */
@@ -53,5 +54,5 @@ class INET_API IAccumulator : public virtual IPowerSource
 
 } // namespace inet
 
-#endif // ifndef __INET_IACCUMULATOR_H
+#endif // ifndef __INET_IPOWERACCUMULATOR_H
 

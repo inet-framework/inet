@@ -15,34 +15,48 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IDEALACCUMULATOR_H
-#define __INET_IDEALACCUMULATOR_H
+#ifndef __INET_SIMPLEPOWERGENERATOR_H
+#define __INET_SIMPLEPOWERGENERATOR_H
 
-#include "IPowerAccumulator.h"
-#include "PowerSourceBase.h"
-#include "PowerSinkBase.h"
+#include "IPowerGenerator.h"
+#include "IPowerSink.h"
 
 namespace inet {
 
 namespace power {
 
 /**
- * This class implements an ideal accumulator. The ideal accumulator stores
- * infinite amount of energy and it never gets depleted.
+ * This class implements a simple power generator.
  *
  * @author Levente Meszaros
  */
-class INET_API IdealAccumulator : public virtual PowerSourceBase, public virtual PowerSinkBase, public virtual IPowerAccumulator
+class INET_API SimplePowerGenerator : public cSimpleModule, public IPowerGenerator
 {
-  public:
-    virtual J getNominalCapacity() { return J(INFINITY); }
+  protected:
+    int powerGeneratorId;
+    IPowerSink *powerSink;
+    W powerGeneration;
+    cMessage *timer;
 
-    virtual J getResidualCapacity() { return J(INFINITY); }
+  protected:
+    virtual void initialize(int stage);
+
+    virtual void handleMessage(cMessage *message);
+
+    virtual void updatePowerGeneration();
+
+    virtual void scheduleIntervalTimer();
+
+  public:
+    SimplePowerGenerator();
+    virtual ~SimplePowerGenerator();
+
+    virtual W getPowerGeneration() { return powerGeneration; }
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_IDEALACCUMULATOR_H
+#endif // ifndef __INET_SIMPLEPOWERGENERATOR_H
 

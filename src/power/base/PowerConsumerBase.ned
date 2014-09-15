@@ -15,17 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.contract;
+package inet.power.base;
+
+import inet.power.contract.IPowerConsumer;
 
 //
-// This interface provides an abstraction for different power sources. Power
-// sources provide power for multiple power consumers.
+// This is an abstract base module for power consumer models.
 //
 // @author Levente Meszaros
 //
-moduleinterface IPowerSource
+simple PowerConsumerBase like IPowerConsumer
 {
     parameters:
         @display("i=block/cogwheel");
         @signal[powerConsumptionChanged](type=double);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }

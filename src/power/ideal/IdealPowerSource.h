@@ -25,8 +25,8 @@ namespace inet {
 namespace power {
 
 /**
- * This class implements an ideal power source. An ideal power source always
- * provides as much power as needed by its power consumers.
+ * This class implements an ideal power source. The ideal power source always
+ * produces as much power as needed by its power consumers.
  *
  * @author Levente Meszaros
  */

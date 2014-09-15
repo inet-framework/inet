@@ -15,20 +15,21 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.battery;
+package inet.power.generator;
 
-import inet.power.base.AccumulatorBase;
+import inet.power.base.PowerGeneratorBase;
 
 //
-// This module implements a voltage regulated battery.
+// This module implements a simple power generator which generates a randomly
+// selected constant power for a random time interval.
 //
 // @author Levente Meszaros
 //
-simple Battery extends AccumulatorBase
+simple SimplePowerGenerator extends PowerGeneratorBase
 {
-    bool crashNodeWhenDepleted = default(true);
-    double nominalCapacity @unit(J);
-    double nominalVoltage @unit(V);
-    double internalResistance = default(0); // @unit(Ω) = default(0Ω);
-    @class(Battery);
+    parameters:
+        string sinkModule = default("^.battery");
+        volatile double powerGeneration @unit(W);
+        volatile double interval @unit(s);
+        @class(SimplePowerGenerator);
 }

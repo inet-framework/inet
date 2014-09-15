@@ -15,17 +15,19 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-package inet.power.contract;
+package inet.power.base;
+
+import inet.power.contract.IPowerGenerator;
 
 //
-// This interface provides an abstraction for different power sources. Power
-// sources provide power for multiple power consumers.
+// This is an abstract base module for generator models.
 //
 // @author Levente Meszaros
 //
-moduleinterface IPowerSource
+simple PowerGeneratorBase like IPowerGenerator
 {
     parameters:
         @display("i=block/cogwheel");
-        @signal[powerConsumptionChanged](type=double);
+        @signal[powerGenerationChanged];
+        @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
 }

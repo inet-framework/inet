@@ -26,4 +26,5 @@ moduleinterface IPowerConsumer
 {
     parameters:
         @display("i=block/cogwheel");
+        @signal[powerConsumptionChanged](type=double);
 }
