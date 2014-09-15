@@ -21,7 +21,7 @@
 #define __INET_YANS_ERROR_RATE_MODEL_H
 
 #include "WifiMode.h"
-#include "IErrorModel.h"
+#include "IIeee80211ErrorModel.h"
 #include "dsss-error-rate-model.h"
 
 namespace inet {
@@ -52,7 +52,7 @@ namespace physicallayer {
  *    - More detailed description and validation can be found in
  *      http://www.nsnam.org/~pei/80211b.pdf
  */
-class YansErrorRateModel : public IErrorModel
+class YansErrorRateModel : public IIeee80211ErrorModel
 {
   public:
     YansErrorRateModel();

@@ -20,7 +20,7 @@
 
 #include "ScalarReceiver.h"
 #include "WifiPreambleType.h"
-#include "IErrorModel.h"
+#include "IIeee80211ErrorModel.h"
 #include "BerParseFile.h"
 
 namespace inet {
@@ -32,7 +32,7 @@ class INET_API Ieee80211ScalarReceiver : public ScalarReceiver
   protected:
     char opMode;
     WifiPreamble preambleMode;
-    IErrorModel *errorModel;
+    IIeee80211ErrorModel *errorModel;
     bool autoHeaderSize;
     BerParseFile *parseTable;
 

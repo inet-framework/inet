@@ -13,8 +13,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef __INET_IERRORMODEL_H
-#define __INET_IERRORMODEL_H
+#ifndef __INET_IIEEE80211ERRORMODEL_H
+#define __INET_IIEEE80211ERRORMODEL_H
 
 #include "ModulationType.h"
 
@@ -22,11 +22,11 @@ namespace inet {
 
 namespace physicallayer {
 
-class IErrorModel
+class IIeee80211ErrorModel
 {
   public:
-    IErrorModel() {};
-    virtual ~IErrorModel() {};
+    IIeee80211ErrorModel() {};
+    virtual ~IIeee80211ErrorModel() {};
     virtual double GetChunkSuccessRate(ModulationType mode, double snr, uint32_t nbits) const = 0;
 };
 
@@ -34,5 +34,5 @@ class IErrorModel
 
 } // namespace inet
 
-#endif /* IERRORMODEL_H_ */
+#endif /* IIEEE80211ERRORMODEL_H_ */
 

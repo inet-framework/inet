@@ -22,7 +22,7 @@
 
 //#include <stdint.h>
 #include "WifiMode.h"
-#include "IErrorModel.h"
+#include "IIeee80211ErrorModel.h"
 #include "dsss-error-rate-model.h"
 
 namespace inet {
@@ -37,7 +37,7 @@ namespace physicallayer {
  * http://www.nsnam.org/~pei/80211ofdm.pdf.  For DSSS modulations (802.11b),
  * the model uses the DsssErrorRateModel.
  */
-class NistErrorRateModel : public IErrorModel
+class NistErrorRateModel : public IIeee80211ErrorModel
 {
   public:
 
