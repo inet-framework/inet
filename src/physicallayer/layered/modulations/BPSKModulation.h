@@ -18,12 +18,12 @@
 #ifndef __INET_BPSKMODULATION_H_
 #define __INET_BPSKMODULATION_H_
 
-#include "Modulation.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API BPSKModulation : public Modulation
+class INET_API BPSKModulation : public APSKModulationBase
 {
     protected:
         static const Complex encodingTable[2];

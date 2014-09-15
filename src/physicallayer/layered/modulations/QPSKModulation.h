@@ -18,12 +18,12 @@
 #ifndef __INET_QPSKMODULATION_H_
 #define __INET_QPSKMODULATION_H_
 
-#include "Modulation.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
 
-class QPSKModulation : public Modulation
+class INET_API QPSKModulation : public APSKModulationBase
 {
     protected:
         static const Complex encodingTable[4];

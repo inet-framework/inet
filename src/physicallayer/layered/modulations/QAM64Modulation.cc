@@ -28,7 +28,7 @@ const Complex QAM64Modulation::encodingTable[] = {kMOD * Complex(-7, -7), kMOD *
                                                          kMOD * Complex(3, 3), kMOD * Complex(5, 3), kMOD * Complex(7, 3), kMOD * Complex(-7, 5), kMOD * Complex(-5, 5), kMOD * Complex(-3, 5), kMOD * Complex(-1, 5), kMOD * Complex(1, 5), kMOD * Complex(3, 5), kMOD * Complex(5, 5), kMOD * Complex(7, 5), kMOD * Complex(-7, 7),
                                                          kMOD * kMOD * Complex(-5, 7), kMOD * Complex(-3, 7), kMOD * Complex(-1, 7), kMOD * Complex(1, 7), kMOD * Complex(3, 7), kMOD * Complex(5, 7), kMOD * Complex(7, 7)};
 
-QAM64Modulation::QAM64Modulation() : Modulation(encodingTable, 6, 64, kMOD)
+QAM64Modulation::QAM64Modulation() : APSKModulationBase(encodingTable, 6, 64, kMOD)
 {
 }
 

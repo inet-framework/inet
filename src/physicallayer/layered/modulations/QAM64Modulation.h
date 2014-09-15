@@ -18,12 +18,12 @@
 #ifndef __INET_QAM64MODULATION_H_
 #define __INET_QAM64MODULATION_H_
 
-#include "Modulation.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API QAM64Modulation : public Modulation
+class INET_API QAM64Modulation : public APSKModulationBase
 {
     protected:
         static const Complex encodingTable[64];

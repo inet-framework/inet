@@ -27,7 +27,7 @@ const Complex QAM16Modulation::encodingTable[] = {kMOD * Complex(-1, -3), kMOD *
                                                   kMOD * Complex(1, 1), kMOD * Complex(3, 1), kMOD * Complex(-3, 3),
                                                   kMOD * Complex(-1, 3), kMOD * Complex(1, 3), kMOD * Complex(3, 3)};
 
-QAM16Modulation::QAM16Modulation() : Modulation(encodingTable, 4,16, kMOD)
+QAM16Modulation::QAM16Modulation() : APSKModulationBase(encodingTable, 4,16, kMOD)
 {
 
 }

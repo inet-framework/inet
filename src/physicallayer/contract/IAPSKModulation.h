@@ -15,18 +15,25 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BPSKModulation.h"
+#ifndef __INET_IAPSKMODULATION_H_
+#define __INET_IAPSKMODULATION_H_
 
+#include "IPrintableObject.h"
+#include "Complex.h"
 
 namespace inet {
 namespace physicallayer {
 
-const double BPSKModulation::kMOD = 1;
-const Complex BPSKModulation::encodingTable[] = {Complex(-1,0), Complex(1,0)};
-
-BPSKModulation::BPSKModulation() : APSKModulationBase(encodingTable, 1, 2, kMOD)
+class INET_API IAPSKModulation : public IPrintableObject
 {
-}
+    public:
+        virtual void printToStream(std::ostream &stream) const = 0;
+        virtual int getCodeWordLength() const = 0;
+        virtual int getConstellationSize() const = 0;
+        virtual double getNormalizationFactor() const = 0;
+};
 
 } /* namespace physicallayer */
 } /* namespace inet */
+
+#endif /* __INET_IAPSKMODULATION_H_ */

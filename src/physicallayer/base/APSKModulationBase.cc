@@ -15,17 +15,24 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#include "BPSKModulation.h"
-
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
 
-const double BPSKModulation::kMOD = 1;
-const Complex BPSKModulation::encodingTable[] = {Complex(-1,0), Complex(1,0)};
-
-BPSKModulation::BPSKModulation() : APSKModulationBase(encodingTable, 1, 2, kMOD)
+void APSKModulationBase::printToStream(std::ostream &stream) const
 {
+    stream << "APSK modulation with";
+    stream << " constellation size = " << constellationSize << " codeword length = " << codeWordLength;
+    stream << " normalization factor = " << normalizationFactor << endl;
+}
+
+const Complex& APSKModulationBase::map(const ShortBitVector& symbol) const
+{
+    int decimalSymbol = symbol.toDecimal();
+    if (decimalSymbol >= constellationSize)
+        throw cRuntimeError("Unknown input: %d", decimalSymbol);
+    return encodingTable[decimalSymbol];
 }
 
 } /* namespace physicallayer */

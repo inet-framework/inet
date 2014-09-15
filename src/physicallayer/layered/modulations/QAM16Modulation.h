@@ -18,12 +18,12 @@
 #ifndef __INET_QAM16MODULATION_H_
 #define __INET_QAM16MODULATION_H_
 
-#include "Modulation.h"
+#include "APSKModulationBase.h"
 
 namespace inet {
 namespace physicallayer {
 
-class INET_API QAM16Modulation : public Modulation
+class INET_API QAM16Modulation : public APSKModulationBase
 {
     protected:
         static const Complex encodingTable[16];
