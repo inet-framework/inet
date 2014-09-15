@@ -15,31 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPOWERCONSUMER_H
-#define __INET_IPOWERCONSUMER_H
-
-#include "PowerDefs.h"
+#include "IAccumulator.h"
 
 namespace inet {
 
 namespace power {
 
-/**
- * This purely virtual interface provides an abstraction for different power consumers.
- *
- * @author Levente Meszaros
- */
-class INET_API IPowerConsumer
-{
-  public:
-    virtual ~IPowerConsumer() {}
-
-    virtual W getPowerConsumption() = 0;
-};
+simsignal_t IAccumulator::residualCapacityChangedSignal = cComponent::registerSignal("residualCapacityChanged");
 
 } // namespace power
 
 } // namespace inet
-
-#endif // ifndef __INET_IPOWERCONSUMER_H
 

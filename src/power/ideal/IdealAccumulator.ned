@@ -20,13 +20,13 @@ package inet.power.ideal;
 import inet.power.base.PowerSourceBase;
 
 //
-// This module implements an ideal power source. An ideal power source always
-// provides as much power as needed.
+// This module implements an ideal accumulator. The ideal accumulator stores
+// infinite amount of energy and its internal resistance is zero.
 //
 // @author Levente Meszaros
 //
-simple IdealPowerSource extends PowerSourceBase
+simple IdealAccumulator extends PowerSourceBase
 {
     parameters:
-        @class(IdealPowerSource);
+        @class(IdealAccumulator);
 }

@@ -57,7 +57,6 @@ void Battery::handleMessage(cMessage *message)
 {
     if (message == depletedTimer) {
         updateResidualCapacity();
-        emit(powerConsumptionChangedSignal, residualCapacity.get());
         if (crashNodeWhenDepleted) {
             LifecycleController *lifecycleController = check_and_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
             NodeCrashOperation *operation = new NodeCrashOperation();
@@ -80,12 +79,19 @@ void Battery::setPowerConsumption(int id, W consumedPower)
     }
 }
 
+V Battery::getCurrentVoltage()
+{
+    updateResidualCapacity();
+    return (nominalVoltage + V(sqrt(nominalVoltage.get() * nominalVoltage.get() - 4 * totalConsumedPower.get() * internalResistance.get()))) / 2;
+}
+
 void Battery::updateResidualCapacity()
 {
     simtime_t now = simTime();
     if (now != lastResidualCapacityUpdate) {
         residualCapacity -= s((now - lastResidualCapacityUpdate).dbl()) * totalConsumedPower;
         lastResidualCapacityUpdate = now;
+        emit(residualCapacityChangedSignal, residualCapacity.get());
         ASSERT(residualCapacity >= J(0));
     }
 }

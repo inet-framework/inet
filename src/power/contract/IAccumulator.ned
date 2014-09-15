@@ -15,31 +15,15 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPOWERCONSUMER_H
-#define __INET_IPOWERCONSUMER_H
+package inet.power.contract;
 
-#include "PowerDefs.h"
-
-namespace inet {
-
-namespace power {
-
-/**
- * This purely virtual interface provides an abstraction for different power consumers.
- *
- * @author Levente Meszaros
- */
-class INET_API IPowerConsumer
+//
+// This interface provides an abstraction for different accumulators.
+//
+// @author Levente Meszaros
+//
+moduleinterface IAccumulator extends IPowerSource
 {
-  public:
-    virtual ~IPowerConsumer() {}
-
-    virtual W getPowerConsumption() = 0;
-};
-
-} // namespace power
-
-} // namespace inet
-
-#endif // ifndef __INET_IPOWERCONSUMER_H
-
+    parameters:
+        @signal[residualCapacityChanged](type=double);
+}

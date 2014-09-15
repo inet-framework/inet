@@ -25,16 +25,13 @@ namespace inet {
 namespace power {
 
 /**
- * This class implements an ideal power source.
+ * This class implements an ideal power source. An ideal power source always
+ * provides as much power as needed by its power consumers.
  *
  * @author Levente Meszaros
  */
 class INET_API IdealPowerSource : public PowerSourceBase
 {
-  public:
-    virtual J getNominalCapacity() { return J(INFINITY); }
-
-    virtual J getResidualCapacity() { return J(INFINITY); }
 };
 
 } // namespace power

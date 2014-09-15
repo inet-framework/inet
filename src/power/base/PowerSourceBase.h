@@ -29,7 +29,7 @@ namespace power {
  *
  * @author Levente Meszaros
  */
-class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
+class INET_API PowerSourceBase : public cSimpleModule, public virtual IPowerSource
 {
   protected:
     struct PowerConsumerEntry

@@ -18,6 +18,7 @@
 #ifndef __INET_BATTERY_H
 #define __INET_BATTERY_H
 
+#include "IAccumulator.h"
 #include "PowerSourceBase.h"
 
 namespace inet {
@@ -25,13 +26,15 @@ namespace inet {
 namespace power {
 
 /**
- * This class implements a voltage regulated battery.
+ * This class implements a voltage regulated battery. A simple voltage regulated
+ * battery is determined by its nominal capacity, nominal voltage and internal
+ * resistance.
  *
  * @author Levente Meszaros
  */
-class INET_API Battery : public PowerSourceBase
+class INET_API Battery : public PowerSourceBase, public virtual IAccumulator
 {
-  private:
+  protected:
     /**
      * Specifies if the node should be crashed when the battery becomes depleted.
      */
@@ -78,7 +81,7 @@ class INET_API Battery : public PowerSourceBase
 
     virtual V getNominalVoltage() { return nominalVoltage; }
 
-    virtual V getCurrentVoltage() { updateResidualCapacity(); ASSERT(false); return nominalVoltage; }
+    virtual V getCurrentVoltage();
 
     virtual void setPowerConsumption(int id, W consumedPower);
 

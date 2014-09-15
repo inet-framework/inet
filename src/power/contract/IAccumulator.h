@@ -15,31 +15,43 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_IPOWERCONSUMER_H
-#define __INET_IPOWERCONSUMER_H
+#ifndef __INET_IACCUMULATOR_H
+#define __INET_IACCUMULATOR_H
 
-#include "PowerDefs.h"
+#include "IPowerSource.h"
 
 namespace inet {
 
 namespace power {
 
 /**
- * This purely virtual interface provides an abstraction for different power consumers.
+ * This purely virtual interface provides an abstraction for different
+ * accumulators. Accumulators store energy that is later used by power
+ * consumers.
  *
  * @author Levente Meszaros
  */
-class INET_API IPowerConsumer
+class INET_API IAccumulator : public virtual IPowerSource
 {
   public:
-    virtual ~IPowerConsumer() {}
+        /** @brief A signal used to publish residual capacity changes. */
+    static simsignal_t residualCapacityChangedSignal;
 
-    virtual W getPowerConsumption() = 0;
+  public:
+    /**
+     * Returns the nominal capacity in the range [0, +infinity].
+     */
+    virtual J getNominalCapacity() = 0;
+
+    /**
+     * Returns the residual capacity in the range [0, +infinity].
+     */
+    virtual J getResidualCapacity() = 0;
 };
 
 } // namespace power
 
 } // namespace inet
 
-#endif // ifndef __INET_IPOWERCONSUMER_H
+#endif // ifndef __INET_IACCUMULATOR_H
 

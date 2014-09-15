@@ -29,5 +29,5 @@ simple PowerSourceBase like IPowerSource
     parameters:
         @display("i=block/cogwheel_s");
         @signal[powerConsumptionChanged];
-        @statistic[residualCapacity](title="Residual capacity"; source=powerConsumptionChanged; record=vector; interpolationmode=linear);
+        @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }

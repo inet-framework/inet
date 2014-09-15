@@ -25,7 +25,8 @@ namespace inet {
 namespace power {
 
 /**
- * This purely virtual interface provides an abstraction for different power sources.
+ * This purely virtual interface provides an abstraction for different power
+ * sources. Power sources provide power for multiple power consumers.
  *
  * @author Levente Meszaros
  */
@@ -44,9 +45,9 @@ class INET_API IPowerSource
     virtual int getNumPowerConsumers() = 0;
 
     /**
-     * Returns the power consumer for the provided index.
+     * Returns the power consumer for the provided id.
      */
-    virtual IPowerConsumer *getPowerConsumer(int index) = 0;
+    virtual IPowerConsumer *getPowerConsumer(int id) = 0;
 
     /**
      * Adds a new power consumer to the power source and returns its id.
@@ -59,22 +60,12 @@ class INET_API IPowerSource
     virtual void removePowerConsumer(int id) = 0;
 
     /**
-     * Returns the nominal capacity in the range [0, +infinity].
-     */
-    virtual J getNominalCapacity() = 0;
-
-    /**
-     * Returns the residual capacity in the range [0, +infinity].
-     */
-    virtual J getResidualCapacity() = 0;
-
-    /**
      * Returns the current total power consumption in the range [0, +infinity).
      */
     virtual W getTotalPowerConsumption() = 0;
 
     /**
-     * Changes the consumed power for the provided consumer.
+     * Changes the consumed power for the provided power consumer.
      */
     virtual void setPowerConsumption(int id, W consumedPower) = 0;
 };

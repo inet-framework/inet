@@ -41,9 +41,9 @@ void PowerSourceBase::removePowerConsumer(int id)
 
 void PowerSourceBase::setPowerConsumption(int id, W consumedPower)
 {
-    this->totalConsumedPower += consumedPower - powerConsumers[id].consumedPower;
+    totalConsumedPower += consumedPower - powerConsumers[id].consumedPower;
     powerConsumers[id].consumedPower = consumedPower;
-    emit(powerConsumptionChangedSignal, getResidualCapacity().get());
+    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
 }
 
 } // namespace power
