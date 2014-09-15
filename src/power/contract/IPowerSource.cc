@@ -19,7 +19,11 @@
 
 namespace inet {
 
+namespace power {
+
 simsignal_t IPowerSource::powerConsumptionChangedSignal = cComponent::registerSignal("powerConsumptionChanged");
+
+} // namespace power
 
 } // namespace inet
 

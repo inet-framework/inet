@@ -19,6 +19,8 @@
 
 namespace inet {
 
+namespace power {
+
 IPowerConsumer *PowerSourceBase::getPowerConsumer(int id)
 {
     return powerConsumers[id].powerConsumer;
@@ -43,6 +45,8 @@ void PowerSourceBase::setPowerConsumption(int id, W consumedPower)
     powerConsumers[id].consumedPower = consumedPower;
     emit(powerConsumptionChangedSignal, getResidualCapacity().get());
 }
+
+} // namespace power
 
 } // namespace inet
 

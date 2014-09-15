@@ -19,7 +19,11 @@
 
 namespace inet {
 
+namespace power {
+
 Define_Module(IdealPowerSource);
+
+} // namespace power
 
 } // namespace inet
 

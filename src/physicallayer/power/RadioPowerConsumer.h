@@ -25,6 +25,8 @@ namespace inet {
 
 namespace physicallayer {
 
+using namespace inet::power;
+
 /**
  * This is radio power consumer model.
  *

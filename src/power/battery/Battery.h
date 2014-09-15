@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 /**
  * This class implements a voltage regulated battery.
  *
@@ -89,6 +91,8 @@ class INET_API Battery : public PowerSourceBase
 
     virtual void scheduleDepletedTimer();
 };
+
+} // namespace power
 
 } // namespace inet
 

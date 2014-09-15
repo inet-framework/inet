@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 /**
  * This is an abstract base class for different power sources.
  *
@@ -71,6 +73,8 @@ class INET_API PowerSourceBase : public cSimpleModule, public IPowerSource
 
     virtual void setPowerConsumption(int id, W consumedPower);
 };
+
+} // namespace power
 
 } // namespace inet
 

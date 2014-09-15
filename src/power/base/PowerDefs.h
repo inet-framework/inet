@@ -23,7 +23,11 @@
 
 namespace inet {
 
+namespace power {
+
 using namespace units::values;
+
+} // namespace power
 
 } // namespace inet
 

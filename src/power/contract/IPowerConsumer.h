@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 /**
  * This purely virtual interface provides an abstraction for different power consumers.
  *
@@ -36,6 +38,8 @@ class INET_API IPowerConsumer
 
     virtual W getPowerConsumption() = 0;
 };
+
+} // namespace power
 
 } // namespace inet
 

@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 Define_Module(Battery);
 
 Battery::Battery() :
@@ -95,6 +97,8 @@ void Battery::scheduleDepletedTimer()
     if (totalConsumedPower > W(0))
         scheduleAt(simTime() + unit(residualCapacity / totalConsumedPower / s(1.0)).get(), depletedTimer);
 }
+
+} // namespace power
 
 } // namespace inet
 

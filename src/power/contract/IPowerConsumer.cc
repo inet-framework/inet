@@ -19,5 +19,9 @@
 
 namespace inet {
 
+namespace power {
+
+} // namespace power
+
 } // namespace inet
 

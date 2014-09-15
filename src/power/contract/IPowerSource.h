@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 /**
  * This purely virtual interface provides an abstraction for different power sources.
  *
@@ -76,6 +78,8 @@ class INET_API IPowerSource
      */
     virtual void setPowerConsumption(int id, W consumedPower) = 0;
 };
+
+} // namespace power
 
 } // namespace inet
 

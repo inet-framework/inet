@@ -22,6 +22,8 @@
 
 namespace inet {
 
+namespace power {
+
 /**
  * This class implements an ideal power source.
  *
@@ -34,6 +36,8 @@ class INET_API IdealPowerSource : public PowerSourceBase
 
     virtual J getResidualCapacity() { return J(INFINITY); }
 };
+
+} // namespace power
 
 } // namespace inet
 
