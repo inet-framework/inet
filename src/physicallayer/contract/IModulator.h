@@ -30,7 +30,6 @@ class INET_API IModulator : public IPrintableObject
   public:
     virtual const ITransmissionSymbolModel *modulate(const ITransmissionBitModel *bitModel) const = 0;
     virtual double calculateBER(double snir, double bandwidth, double bitrate) const = 0;
-    virtual const IModulationScheme *getModulation() const = 0;
 };
 
 } // namespace physicallayer
