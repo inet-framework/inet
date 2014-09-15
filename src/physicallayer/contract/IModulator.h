@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -36,4 +36,4 @@ class INET_API IModulator : public IPrintableObject
 
 } // namespace inet
 
-#endif // ifndef __INET_IMODULATOR_H
+#endif /* __INET_IMODULATOR_H */

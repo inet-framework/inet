@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2013 OpenSim Ltd.
+// Copyright (C) 2014 OpenSim Ltd.
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public License
@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_MODULATOR_H
-#define __INET_MODULATOR_H
+#ifndef __INET_OFDMMODULATOR_H
+#define __INET_OFDMMODULATOR_H
 
 #include "IModulator.h"
 #include "IModulationScheme.h"
@@ -46,4 +46,4 @@ class INET_API OFDMModulator : public IModulator
 
 } // namespace inet
 
-#endif // ifndef __INET_MODULATOR_H
+#endif /* __INET_OFDMMODULATOR_H */
