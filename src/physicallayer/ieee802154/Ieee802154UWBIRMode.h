@@ -34,9 +34,9 @@ class INET_API Ieee802154UWBIRMode
 {
   public:
     /**@brief Total triangular pulse peak energy in mW (0 dBm / 50 MHz over 500 MHz) */
-    static const double maxPulse = 1;
+    static const double maxPulse;
     // mandatory pulse duration ( = 1 / bandwidth = 2 ns)
-    static const double mandatory_pulse = 0.000000002003203125;
+    static const double mandatory_pulse;
     static const short C31[8][31];
     static const short Ci = 5;
     static const short shortSFD[8];

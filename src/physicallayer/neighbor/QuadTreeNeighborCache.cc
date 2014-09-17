@@ -134,7 +134,7 @@ QuadTreeNeighborCache::~QuadTreeNeighborCache()
 
 void QuadTreeNeighborCache::QuadTreeNeighborCacheVisitor::visit(const cObject *radio) const
 {
-    const IRadio *neighbor = check_and_cast<IRadio *>(radio);
+    const IRadio *neighbor = check_and_cast<const IRadio *>(radio);
     if (neighbor->getId() != transmitter->getId())
         radioMedium->sendToRadio(transmitter, neighbor, frame);
 }

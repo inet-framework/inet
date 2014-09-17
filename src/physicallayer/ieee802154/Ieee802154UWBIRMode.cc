@@ -26,6 +26,9 @@ namespace inet {
 
 namespace physicallayer {
 
+const double Ieee802154UWBIRMode::maxPulse = 1;
+const double Ieee802154UWBIRMode::mandatory_pulse = 0.000000002003203125;
+
 // Ci values
 const short Ieee802154UWBIRMode::C31[8][31] = {
     // C1
