@@ -28,11 +28,16 @@
 namespace inet {
 
 /**
- * This class represents the physical environment specifying certain physical properties.
+ * This class represents the physical environment. The physical environment
+ * contains a set of physical objects and it also specifies certain physical
+ * properties.
+ *
+ * The physical environment draws the physical objects on the canvas of its
+ * parent module.
  */
 class INET_API PhysicalEnvironment : public cModule
 {
-  public:
+  protected:
     class ObjectPositionComparator
     {
         protected:
@@ -48,19 +53,34 @@ class INET_API PhysicalEnvironment : public cModule
     };
 
   protected:
+    /** @name Parameters */
+    //@{
     K temperature;
     Pa pressure;
     percent relativeHumidity;
     Coord spaceMin;
     Coord spaceMax;
+    //@}
+
+    /** @name Internal state */
+    //@{
     EulerAngles viewAngle;
     Rotation viewRotation;
+    std::vector<PhysicalObject *> objects;
+    //@}
+
+    /** @name Cache */
+    //@{
     std::map<int, const Shape3D *> idToShapes;
     std::map<int, const Material *> idToMaterials;
     std::map<const std::string, const Material *> nameToMaterials;
-    std::vector<PhysicalObject *> objects;
     IObjectCache *objectCache;
+    //@}
+
+    /** @name Graphics */
+    //@{
     cGroupFigure *objectsLayer;
+    //@}
 
   protected:
     static cFigure::Point computeCanvasPoint(const Coord& point, const Rotation& rotation);
@@ -72,7 +92,9 @@ class INET_API PhysicalEnvironment : public cModule
     virtual void parseShapes(cXMLElement *xml);
     virtual void parseMaterials(cXMLElement *xml);
     virtual void parseObjects(cXMLElement *xml);
+
     virtual void updateCanvas();
+
     virtual void computeFacePoints(PhysicalObject *object, std::vector<std::vector<Coord> >& faces, const Rotation& rotation);
     virtual EulerAngles computeViewAngle(const char *viewAngle);
 
@@ -88,9 +110,11 @@ class INET_API PhysicalEnvironment : public cModule
     virtual percent getRelativeHumidity() const { return relativeHumidity; }
     virtual const Coord& getSpaceMin() const { return spaceMin; }
     virtual const Coord& getSpaceMax() const { return spaceMax; }
+
     virtual const EulerAngles& getViewAngle() const { return viewAngle; }
     virtual const Rotation& getViewRotation() const { return viewRotation; }
     virtual const std::vector<PhysicalObject *>& getObjects() const;
+
     virtual void visitObjects(const IVisitor *visitor, const LineSegment& lineSegment) const;
 };
 

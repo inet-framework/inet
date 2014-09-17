@@ -30,14 +30,8 @@ PhysicalObject::PhysicalObject(const char *name, int id, const Coord& position, 
     lineColor(lineColor),
     fillColor(fillColor),
     opacity(opacity),
-    tags(tags),
-    figure(NULL)
+    tags(tags)
 {
-}
-
-PhysicalObject::~PhysicalObject()
-{
-    delete shape;
 }
 
 } // namespace inet

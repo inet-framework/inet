@@ -54,7 +54,7 @@ const Material *Material::getMaterial(const char *name)
 {
     if (materials.size() == 0)
     {
-        // TODO: check values, add frequency dependence?
+        // TODO: check values?
         addMaterial(new Material("vacuum", Ohmm(sNaN), 1, 1));
         addMaterial(new Material("air", Ohmm(sNaN), 1.00058986, 1.00000037));
         addMaterial(new Material("copper", Ohmm(1.68), sNaN, sNaN));

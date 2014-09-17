@@ -53,7 +53,8 @@ PhysicalEnvironment::~PhysicalEnvironment()
 
 void PhysicalEnvironment::initialize(int stage)
 {
-    if (stage == INITSTAGE_LOCAL) {
+    if (stage == INITSTAGE_LOCAL)
+    {
         objectCache = dynamic_cast<IObjectCache *>(getSubmodule("objectCache"));
         temperature = K(par("temperature"));
         pressure = Pa(par("pressure"));
@@ -77,7 +78,8 @@ void PhysicalEnvironment::initialize(int stage)
         parseMaterials(environment);
         parseObjects(environment);
     }
-    else if (stage == INITSTAGE_LAST) {
+    else if (stage == INITSTAGE_LAST)
+    {
         updateCanvas();
     }
 }
@@ -86,7 +88,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
 {
     cXMLElementList children = xml->getChildren();
     // TODO: move parsers to the appropriate classes
-    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
+    {
         cXMLElement *element = *it;
         const char *tag = element->getTagName();
         if (strcmp(tag, "shape"))
@@ -101,7 +104,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         const char *typeAttribute = element->getAttribute("type");
         if (!typeAttribute)
             throw cRuntimeError("Missing type attribute of shape");
-        else if (!strcmp(typeAttribute, "cuboid")) {
+        else if (!strcmp(typeAttribute, "cuboid"))
+        {
             Coord size;
             const char *sizeAttribute = element->getAttribute("size");
             if (!sizeAttribute)
@@ -115,7 +119,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 size.z = atof(tokenizer.nextToken());
             shape = new Cuboid(size);
         }
-        else if (!strcmp(typeAttribute, "sphere")) {
+        else if (!strcmp(typeAttribute, "sphere"))
+        {
             double radius;
             const char *radiusAttribute = element->getAttribute("radius");
             if (!radiusAttribute)
@@ -124,7 +129,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 radius = atof(radiusAttribute);
             shape = new Sphere(radius);
         }
-        else if (!strcmp(typeAttribute, "prism")) {
+        else if (!strcmp(typeAttribute, "prism"))
+        {
             double height;
             const char *heightAttribute = element->getAttribute("height");
             if (!heightAttribute)
@@ -137,7 +143,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 throw cRuntimeError("Missing points attribute of prism");
             else {
                 cStringTokenizer tokenizer(pointsAttribute);
-                while (tokenizer.hasMoreTokens()) {
+                while (tokenizer.hasMoreTokens())
+                {
                     Coord point;
                     if (tokenizer.hasMoreTokens())
                         point.x = atof(tokenizer.nextToken());
@@ -156,7 +163,8 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
                 throw cRuntimeError("Missing points attribute of polytope");
             else {
                 cStringTokenizer tokenizer(pointsAttribute);
-                while (tokenizer.hasMoreTokens()) {
+                while (tokenizer.hasMoreTokens())
+                {
                     Coord point;
                     if (tokenizer.hasMoreTokens())
                         point.x = atof(tokenizer.nextToken());
@@ -180,7 +188,8 @@ void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
 {
     cXMLElementList children = xml->getChildren();
     // TODO: move parsers to the appropriate classes
-    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
+    {
         cXMLElement *element = *it;
         const char *tag = element->getTagName();
         if (strcmp(tag, "material"))
@@ -218,7 +227,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
 {
     cXMLElementList children = xml->getChildren();
     // TODO: move parsers to the appropriate classes
-    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it) {
+    for (cXMLElementList::const_iterator it = children.begin(); it != children.end(); ++it)
+    {
         cXMLElement *element = *it;
         const char *tag = element->getTagName();
         if (strcmp(tag, "object"))
@@ -233,7 +243,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // orientation
         EulerAngles orientation;
         const char *orientationAttribute = element->getAttribute("orientation");
-        if (orientationAttribute) {
+        if (orientationAttribute)
+        {
             cStringTokenizer tokenizer(orientationAttribute);
             if (tokenizer.hasMoreTokens())
                 orientation.alpha = math::deg2rad(atof(tokenizer.nextToken()));
@@ -249,7 +260,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
             throw cRuntimeError("Missing shape attribute of object");
         cStringTokenizer shapeTokenizer(shapeAttribute);
         const char *shapeType = shapeTokenizer.nextToken();
-        if (!strcmp(shapeType, "cuboid")) {
+        if (!strcmp(shapeType, "cuboid"))
+        {
             Coord size;
             if (shapeTokenizer.hasMoreTokens())
                 size.x = atof(shapeTokenizer.nextToken());
@@ -259,18 +271,21 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
                 size.z = atof(shapeTokenizer.nextToken());
             shape = new Cuboid(size);
         }
-        else if (!strcmp(shapeType, "sphere")) {
+        else if (!strcmp(shapeType, "sphere"))
+        {
             double radius = 0;
             if (shapeTokenizer.hasMoreTokens())
                 radius = atof(shapeTokenizer.nextToken());
             shape = new Sphere(radius);
         }
-        else if (!strcmp(shapeType, "prism")) {
+        else if (!strcmp(shapeType, "prism"))
+        {
             double height;
             if (shapeTokenizer.hasMoreTokens())
                 height = atof(shapeTokenizer.nextToken());
             std::vector<Coord> points;
-            while (shapeTokenizer.hasMoreTokens()) {
+            while (shapeTokenizer.hasMoreTokens())
+            {
                 Coord point;
                 if (shapeTokenizer.hasMoreTokens())
                     point.x = atof(shapeTokenizer.nextToken());
@@ -289,7 +304,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         else if (!strcmp(shapeType, "polytope"))
         {
             std::vector<Coord> points;
-            while (shapeTokenizer.hasMoreTokens()) {
+            while (shapeTokenizer.hasMoreTokens())
+            {
                 Coord point;
                 if (shapeTokenizer.hasMoreTokens())
                     point.x = atof(shapeTokenizer.nextToken());
@@ -315,7 +331,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // position
         Coord position = Coord::NIL;
         const char *positionAttribute = element->getAttribute("position");
-        if (positionAttribute) {
+        if (positionAttribute)
+        {
             cStringTokenizer tokenizer(positionAttribute);
             const char *kind = tokenizer.nextToken();
             if (!kind)
@@ -356,7 +373,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // line color
         cFigure::Color lineColor = cFigure::BLACK;
         const char *lineColorAttribute = element->getAttribute("line-color");
-        if (lineColorAttribute) {
+        if (lineColorAttribute)
+        {
             cStringTokenizer tokenizer(lineColorAttribute);
             if (tokenizer.hasMoreTokens())
                 lineColor.red = atoi(tokenizer.nextToken());
@@ -368,7 +386,8 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         // fill color
         cFigure::Color fillColor = cFigure::WHITE;
         const char *fillColorAttribute = element->getAttribute("fill-color");
-        if (fillColorAttribute) {
+        if (fillColorAttribute)
+        {
             cStringTokenizer tokenizer(fillColorAttribute);
             if (tokenizer.hasMoreTokens())
                 fillColor.red = atoi(tokenizer.nextToken());
@@ -402,6 +421,7 @@ cFigure::Point PhysicalEnvironment::computeCanvasPoint(const Coord& point, const
 
 cFigure::Point PhysicalEnvironment::computeCanvasPoint(Coord point)
 {
+    // KLUDGE: TODO: don't lookup the environment this way
     PhysicalEnvironment *environment = dynamic_cast<PhysicalEnvironment *>(simulation.getSystemModule()->getSubmodule("environment"));
     if (environment)
         return environment->computeCanvasPoint(point, environment->viewRotation);
@@ -415,7 +435,8 @@ void PhysicalEnvironment::updateCanvas()
     // KLUDGE: sorting objects with their rotated position's z coordinate to draw them in a "better" order
     std::vector<PhysicalObject *> objectsCopy = objects;
     std::sort(objectsCopy.begin(), objectsCopy.end(), ObjectPositionComparator(viewRotation));
-    for (std::vector<PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++) {
+    for (std::vector<PhysicalObject *>::iterator it = objectsCopy.begin(); it != objectsCopy.end(); it++)
+    {
         PhysicalObject *object = *it;
         const Shape3D *shape = object->getShape();
         const Coord& position = object->getPosition();
@@ -423,14 +444,16 @@ void PhysicalEnvironment::updateCanvas()
         const Rotation rotation(orientation);
         // cuboid
         const Cuboid *cuboid = dynamic_cast<const Cuboid *>(shape);
-        if (cuboid) {
+        if (cuboid)
+        {
             std::vector<std::vector<Coord> > faces;
             cuboid->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
         }
         // sphere
         const Sphere *sphere = dynamic_cast<const Sphere *>(shape);
-        if (sphere) {
+        if (sphere)
+        {
             double radius = sphere->getRadius();
             cOvalFigure *figure = new cOvalFigure(NULL);
             figure->setFilled(true);
@@ -447,7 +470,8 @@ void PhysicalEnvironment::updateCanvas()
         }
         // prism
         const Prism *prism = dynamic_cast<const Prism *>(shape);
-        if (prism) {
+        if (prism)
+        {
             std::vector<std::vector<Coord> > faces;
             prism->computeVisibleFaces(faces, rotation, viewRotation);
             computeFacePoints(object, faces, rotation);
@@ -462,7 +486,8 @@ void PhysicalEnvironment::updateCanvas()
         }
         // add name to the end
         const char *name = object->getName();
-        if (name) {
+        if (name)
+        {
             cTextFigure *nameFigure = new cTextFigure(NULL);
             nameFigure->setLocation(computeCanvasPoint(position));
             nameFigure->setText(name);

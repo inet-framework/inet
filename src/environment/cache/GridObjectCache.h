@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_GRIDOBJECTCACHE_H_
-#define __INET_GRIDOBJECTCACHE_H_
+#ifndef __INET_GRIDOBJECTCACHE_H
+#define __INET_GRIDOBJECTCACHE_H
 
 #include "IObjectCache.h"
 #include "SpatialGrid.h"
@@ -45,6 +45,6 @@ class GridObjectCache : public IObjectCache, public cSimpleModule
         virtual ~GridObjectCache();
 };
 
-} /* namespace inet */
+} // namespace inet
 
-#endif /* __INET_GRIDOBJECTCACHE_H_ */
+#endif // ifndef __INET_GRIDOBJECTCACHE_H

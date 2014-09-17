@@ -28,6 +28,10 @@ namespace inet {
 using namespace units::values;
 using namespace units::constants;
 
+/**
+ * This class represents a material with its physical properties.
+ */
+// TODO: what about the dependency of physical properties on temperature, pressure, frequency, etc.?
 class INET_API Material : public cNamedObject
 {
   protected:

@@ -32,6 +32,6 @@ class IObjectCache
         virtual void buildCache() = 0;
 };
 
-} /* namespace inet */
+} // namespace inet
 
-#endif /* __INET_IOBJECTCACHE_H */
+#endif // ifndef __INET_IOBJECTCACHE_H

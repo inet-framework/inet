@@ -25,24 +25,38 @@
 namespace inet {
 
 /**
- * This class represents a physical object, a rigid body and its physical properties.
- * The object can change its position and orientation over time.
+ * This class represents an immobile physical object, a rigid body and its
+ * physical properties. The properties of physical objects cannot change over
+ * time.
  */
 class INET_API PhysicalObject : public cNamedObject
 {
   protected:
-    /** Globally unique identifier for the whole lifetime of the simulation among all objects. */
+    /**
+     * A globally unique identifier for the whole lifetime of the simulation
+     * among all physical objects.
+     */
     const int id;
 
     /** @name Object properties */
     //@{
-    /** The center of the object's bounding box. */
+    /**
+     * The center of the object's bounding box.
+     */
     Coord position;
-    /** The orientation of the object relative to the default orientation of the shape. */
-    EulerAngles orientation; // TODO: (sequence of rotation axes: xyz or something else?)
-    /** The shape of the object independently of its position and orientation. */
+    /**
+     * The orientation of the object relative to the default orientation of the shape.
+     */
+    EulerAngles orientation;
+    /**
+     * The shape of the object independently of its position and orientation.
+     * The physical object doesn't own its shape.
+     */
     const Shape3D *shape;
-    /** The material of the object determines its physical properties. */
+    /**
+     * The material of the object determines its physical properties.
+     * The physical object doesn't own its material.
+     */
     const Material *material;
     //@}
 
@@ -55,14 +69,8 @@ class INET_API PhysicalObject : public cNamedObject
     const char *tags;
     //@}
 
-    /** @name Cache */
-    //@{
-    cFigure *figure;
-    //@}
-
   public:
     PhysicalObject(const char *name, int id, const Coord& position, const EulerAngles& orientation, const Shape3D *shape, const Material *material, double lineWidth, const cFigure::Color& lineColor, const cFigure::Color& fillColor, double opacity, const char *tags);
-    virtual ~PhysicalObject();
 
     virtual int getId() const { return id; }
 

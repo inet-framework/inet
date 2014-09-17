@@ -15,8 +15,8 @@
 // along with this program; if not, see <http://www.gnu.org/licenses/>.
 //
 
-#ifndef __INET_BVHOBJECTCACHE_H_
-#define __INET_BVHOBJECTCACHE_H_
+#ifndef __INET_BVHOBJECTCACHE_H
+#define __INET_BVHOBJECTCACHE_H
 
 #include "IObjectCache.h"
 #include "BVHTree.h"
@@ -48,6 +48,6 @@ class BVHObjectCache : public IObjectCache, public cSimpleModule
         void buildCache();
 };
 
-} /* namespace inet */
+} // namespace inet
 
-#endif /* __INET_BVHOBJECTCACHE_H_ */
+#endif // ifndef __INET_BVHOBJECTCACHE_H
