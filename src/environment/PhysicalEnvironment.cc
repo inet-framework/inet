@@ -43,9 +43,9 @@ PhysicalEnvironment::PhysicalEnvironment() :
 
 PhysicalEnvironment::~PhysicalEnvironment()
 {
-    for (std::map<int, const Shape3D *>::iterator it = shapes.begin(); it != shapes.end(); it++)
+    for (std::map<int, const Shape3D *>::iterator it = idToShapes.begin(); it != idToShapes.end(); it++)
         delete it->second;
-    for (std::map<int, const Material *>::iterator it =  materials.begin(); it != materials.end(); it++)
+    for (std::map<int, const Material *>::iterator it =  idToMaterials.begin(); it != idToMaterials.end(); it++)
         delete it->second;
     for (std::vector<PhysicalObject *>::iterator it = objects.begin(); it != objects.end(); it++)
         delete *it;
@@ -69,7 +69,6 @@ void PhysicalEnvironment::initialize(int stage)
         objectsLayer = new cGroupFigure();
         cCanvas *canvas = getParentModule()->getCanvas();
         canvas->addFigure(objectsLayer, canvas->findFigure("submodules"));
-
     }
     else if (stage == INITSTAGE_PHYSICAL_ENVIRONMENT)
     {
@@ -173,7 +172,7 @@ void PhysicalEnvironment::parseShapes(cXMLElement *xml)
         else
             throw cRuntimeError("Unknown shape type '%s'", typeAttribute);
         // insert
-        shapes.insert(std::pair<int, Shape3D *>(id, shape));
+        idToShapes.insert(std::pair<int, const Shape3D *>(id, shape));
     }
 }
 
@@ -210,7 +209,8 @@ void PhysicalEnvironment::parseMaterials(cXMLElement *xml)
             relativePermeability = atof(relativePermeabilityAttribute);
         // insert
         Material *material = new Material(name, resistivity, relativePermittivity, relativePermeability);
-        materials.insert(std::pair<int, Material *>(id, material));
+        idToMaterials.insert(std::pair<int, const Material *>(id, material));
+        nameToMaterials.insert(std::pair<const std::string, const Material *>(material->getName(), material));
     }
 }
 
@@ -308,7 +308,7 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         }
         else {
             int id = atoi(shapeAttribute);
-            shape = shapes[id];
+            shape = idToShapes[id];
         }
         if (!shape)
             throw cRuntimeError("Unknown shape '%s'", shapeAttribute);
@@ -340,18 +340,12 @@ void PhysicalEnvironment::parseObjects(cXMLElement *xml)
         const char *materialAttribute = element->getAttribute("material");
         if (!materialAttribute)
             throw cRuntimeError("Missing material attribute of object");
-        else if (!strcmp(materialAttribute, "wood"))
-            material = &Material::wood;
-        else if (!strcmp(materialAttribute, "brick"))
-            material = &Material::brick;
-        else if (!strcmp(materialAttribute, "concrete"))
-            material = &Material::concrete;
-        else if (!strcmp(materialAttribute, "glass"))
-            material = &Material::glass;
-        else {
-            int id = atoi(materialAttribute);
-            material = materials[id];
-        }
+        else if (nameToMaterials.find(materialAttribute) != nameToMaterials.end())
+            material = nameToMaterials[materialAttribute];
+        else if (Material::getMaterial(materialAttribute))
+            material = Material::getMaterial(materialAttribute);
+        else
+            material = idToMaterials[atoi(materialAttribute)];
         if (!material)
             throw cRuntimeError("Unknown material '%s'", materialAttribute);
         // line width

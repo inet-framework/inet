@@ -18,6 +18,8 @@
 #ifndef __INET_MATERIAL_H
 #define __INET_MATERIAL_H
 
+#include <string>
+#include <map>
 #include "INETDefs.h"
 #include "Units.h"
 
@@ -28,24 +30,18 @@ using namespace units::constants;
 
 class INET_API Material : public cNamedObject
 {
-  public:
-    static const Material vacuum;
-    static const Material air;
-    static const Material copper;
-    static const Material aluminium;
-    static const Material wood;
-    static const Material brick;
-    static const Material concrete;
-    static const Material glass;
-
   protected:
     const Ohmm resistivity;
     const double relativePermittivity;
     const double relativePermeability;
 
+    static std::map<const std::string, const Material *> materials;
+
+  protected:
+    static void addMaterial(const Material *material);
+
   public:
     Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability);
-    virtual ~Material();
 
     virtual Ohmm getResistivity() const { return resistivity; }
     virtual double getRelativePermittivity() const { return relativePermittivity; }
@@ -53,6 +49,8 @@ class INET_API Material : public cNamedObject
     virtual double getDielectricLossTangent(Hz frequency) const;
     virtual double getRefractiveIndex() const;
     virtual mps getPropagationSpeed() const;
+
+    static const Material *getMaterial(const char *name);
 };
 
 } // namespace inet

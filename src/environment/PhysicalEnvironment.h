@@ -20,6 +20,7 @@
 
 #include "IObjectCache.h"
 #include "IVisitor.h"
+#include "Shape3D.h"
 #include "PhysicalObject.h"
 #include "LineSegment.h"
 #include "Rotation.h"
@@ -54,8 +55,9 @@ class INET_API PhysicalEnvironment : public cModule
     Coord spaceMax;
     EulerAngles viewAngle;
     Rotation viewRotation;
-    std::map<int, const Shape3D *> shapes;
-    std::map<int, const Material *> materials;
+    std::map<int, const Shape3D *> idToShapes;
+    std::map<int, const Material *> idToMaterials;
+    std::map<const std::string, const Material *> nameToMaterials;
     std::vector<PhysicalObject *> objects;
     IObjectCache *objectCache;
     cGroupFigure *objectsLayer;

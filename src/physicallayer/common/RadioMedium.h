@@ -471,7 +471,7 @@ class INET_API RadioMedium : public cSimpleModule, public cListener, public IRad
     virtual Coord getConstraintAreaMin() const { return constraintAreaMin; }
     virtual Coord getConstraintAreaMax() const { return constraintAreaMax; }
 
-    virtual const Material *getMaterial() const { return &Material::air; }
+    virtual const Material *getMaterial() const { return Material::getMaterial("air"); }
     virtual const IPropagation *getPropagation() const { return propagation; }
     virtual const IPathLoss *getPathLoss() const { return pathLoss; }
     virtual const IObstacleLoss *getObstacleLoss() const { return obstacleLoss; }

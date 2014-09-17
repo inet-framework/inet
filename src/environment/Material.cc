@@ -20,25 +20,13 @@
 
 namespace inet {
 
-// TODO: check values, add frequency dependence
-const Material Material::vacuum("vacuum", Ohmm(sNaN), 1, 1);
-const Material Material::air("air", Ohmm(sNaN), 1.00058986, 1.00000037);
-const Material Material::copper("copper", Ohmm(1.68), sNaN, sNaN);
-const Material Material::aluminium("aluminium", Ohmm(2.65), sNaN, sNaN);
-const Material Material::wood("wood", Ohmm(1E+15), 5, 1.00000043);
-const Material Material::brick("brick", Ohmm(3E+3), 4.5, 1);
-const Material Material::concrete("concrete", Ohmm(1E+2), 4.5, 1);
-const Material Material::glass("glass", Ohmm(1E+12), 7, 1);
+std::map<const std::string, const Material *> Material::materials;
 
 Material::Material(const char *name, Ohmm resistivity, double relativePermittivity, double relativePermeability) :
     cNamedObject(name),
     resistivity(resistivity),
     relativePermittivity(relativePermittivity),
     relativePermeability(relativePermeability)
-{
-}
-
-Material::~Material()
 {
 }
 
@@ -55,6 +43,29 @@ double Material::getRefractiveIndex() const
 mps Material::getPropagationSpeed() const
 {
     return mps(SPEED_OF_LIGHT) / getRefractiveIndex();
+}
+
+void Material::addMaterial(const Material *material)
+{
+    materials.insert(std::pair<const std::string, const Material *>(material->getName(), material));
+}
+
+const Material *Material::getMaterial(const char *name)
+{
+    if (materials.size() == 0)
+    {
+        // TODO: check values, add frequency dependence?
+        addMaterial(new Material("vacuum", Ohmm(sNaN), 1, 1));
+        addMaterial(new Material("air", Ohmm(sNaN), 1.00058986, 1.00000037));
+        addMaterial(new Material("copper", Ohmm(1.68), sNaN, sNaN));
+        addMaterial(new Material("aluminium", Ohmm(2.65), sNaN, sNaN));
+        addMaterial(new Material("wood", Ohmm(1E+15), 5, 1.00000043));
+        addMaterial(new Material("brick", Ohmm(3E+3), 4.5, 1));
+        addMaterial(new Material("concrete", Ohmm(1E+2), 4.5, 1));
+        addMaterial(new Material("glass", Ohmm(1E+12), 7, 1));
+    }
+    std::map<const std::string, const Material *>::iterator it = materials.find(name);
+    return it != materials.end() ? it->second : NULL;
 }
 
 } // namespace inet
