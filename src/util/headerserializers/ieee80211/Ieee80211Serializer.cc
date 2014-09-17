@@ -43,6 +43,7 @@ namespace INETFw // load headers into a namespace, to avoid conflicts with platf
 #include "EthernetCRC.h"
 
 #include "SerializerUtil.h"
+#include <ostream>
 using namespace INETFw;
 
 
@@ -70,7 +71,7 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         frame->i_dur = (int)(rtsFrame->getDuration().dbl()*1000);
         rtsFrame->getReceiverAddress().getAddressBytes(frame->i_ra);
         rtsFrame->getTransmitterAddress().getAddressBytes(frame->i_ta);
-        packetLength = 4+ 2*IEEE80211_ADDR_LEN;
+        packetLength = 4 + 2*IEEE80211_ADDR_LEN;
     }
 
     else if (NULL != dynamic_cast<Ieee80211CTSFrame *>(pkt))
@@ -101,9 +102,9 @@ int Ieee80211Serializer::serialize(Ieee80211Frame *pkt, unsigned char *buf, unsi
         dataOrMgmtFrame->getReceiverAddress().getAddressBytes(frame->i_addr1);
         dataOrMgmtFrame->getTransmitterAddress().getAddressBytes(frame->i_addr2);
         dataOrMgmtFrame->getAddress3().getAddressBytes(frame->i_addr3);
-        frame->i_seq = dataOrMgmtFrame->getFragmentNumber();
-        frame->i_seq <<= 12;
-        frame->i_seq |= (dataOrMgmtFrame->getSequenceNumber() & 0xFFF);
+        frame->i_seq = dataOrMgmtFrame->getSequenceNumber();
+        frame->i_seq <<= 4;
+        frame->i_seq |= dataOrMgmtFrame->getFragmentNumber();
 
         packetLength = 6 + 3*IEEE80211_ADDR_LEN;
 
@@ -470,10 +471,8 @@ unsigned int parseDataOrMgmtFrame(const unsigned char *buf, unsigned int bufsize
     Frame->setTransmitterAddress(temp);
     temp.setAddressBytes(frame->i_addr3);
     Frame->setAddress3(temp);
-    Frame->setSequenceNumber(frame->i_seq & 0xFFF);
-    uint16_t temp16 = frame->i_seq;
-    temp16 >>= 12;
-    Frame->setFragmentNumber(frame->i_seq >> 12);
+    Frame->setSequenceNumber(frame->i_seq >> 4);
+    Frame->setFragmentNumber(frame->i_seq & 0xF);
 
     if (type == ST_DATA && Frame->getFromDS() && Frame->getToDS())
     {
