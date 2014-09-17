@@ -27,8 +27,8 @@ import inet.mobility.contract.IMobility;
 import inet.networklayer.common.IRoutingTable;
 import inet.networklayer.common.InterfaceTable;
 import inet.networklayer.contract.INetworkLayer;
-import inet.power.contract.IPowerSource;
-
+import inet.power.contract.IPowerAccumulator;
+import inet.power.contract.IPowerGenerator;
 
 //
 // Contains the common lower layers (linklayer and networklayer)
@@ -54,12 +54,13 @@ module NodeBase
         string routingTableType = default("IPv4RoutingTable");
         bool IPForward = default(true);               // TODO should we remove these parameters from the routingTable
         bool forwardMulticast = default(false);
-        string powerSourceType = default("");
+        string accumulatorType = default("");
+        string generatorType = default("");
         routingTable.IPForward = IPForward;
         routingTable.forwardMulticast = forwardMulticast; //      and use the parameters of the node in the C++ code?
         *.interfaceTableModule = default(absPath(".interfaceTable"));
         *.routingTableModule = default(routingTableType != "" ? absPath(".routingTable") : "");
-        *.powerSourceModule = default(powerSourceType != "" ? absPath(".powerSource") : "");
+        *.powerSourceModule = default(accumulatorType != "" ? absPath(".accumulator") : "");
         *.mobilityModule = default(mobilityType != "" ? absPath(".mobility") : "");
     gates:
         input radioIn[numRadios] @directIn;
@@ -69,40 +70,37 @@ module NodeBase
         status: NodeStatus if hasStatus {
             @display("p=50,50");
         }
-
-        powerSource: <powerSourceType> like IPowerSource if powerSourceType != "" {
+        accumulator: <accumulatorType> like IPowerAccumulator if accumulatorType != "" {
             parameters:
-                @display("p=53,77;i=block/plug;is=s");
+                @display("p=50,100;i=block/plug;is=s");
         }
-
+        generator: <generatorType> like IPowerGenerator if generatorType != "" {
+            parameters:
+                @display("p=50,150;i=block/plug;is=s");
+        }
         // optional mobility module. Required only if wireless cards are present
         mobility: <mobilityType> like IMobility if mobilityType != "" {
             parameters:
-                @display("p=53,111");
+                @display("p=53,200");
         }
-
         // network layer
         networkLayer: <networkLayerType> like INetworkLayer {
             parameters:
                 @display("p=329,287;q=queue");
         }
-
         // routing table
         routingTable: <routingTableType> like IRoutingTable if routingTableType != "" {
             parameters:
-                @display("p=53,225;is=s");
+                @display("p=53,250;is=s");
         }
-
         // linklayer
         interfaceTable: InterfaceTable {
             parameters:
-                @display("p=53,287;is=s");
+                @display("p=53,300;is=s");
         }
-
         pcapRecorder[numPcapRecorders]: PcapRecorder {
-            @display("p=53,338,r,10");
+            @display("p=53,350,r,10");
         }
-
         lo0: LoopbackInterface {
             @display("p=78,406");
         }

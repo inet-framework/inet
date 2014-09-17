@@ -27,6 +27,7 @@ import inet.power.base.PowerConsumerBase;
 simple StateBasedPowerConsumer extends PowerConsumerBase
 {
     parameters:
+        string powerSourceModule;
         double offPowerConsumption @unit(W) = default(0mW);
         double sleepPowerConsumption @unit(W) = default(1mW);
         double switchingPowerConsumption @unit(W) = default(1mW);
@@ -37,4 +38,5 @@ simple StateBasedPowerConsumer extends PowerConsumerBase
         double transmitterIdlePowerConsumption @unit(W) = default(2mW);
         double transmitterTransmittingPowerConsumption @unit(W) = default(100mW);
         @display("i=block/cogwheel");
+        @class(StateBasedPowerConsumer);
 }

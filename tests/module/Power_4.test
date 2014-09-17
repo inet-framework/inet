@@ -25,7 +25,6 @@ network Test
         configurator: IPv4NetworkConfigurator;
         hostSource: AdhocHost;
         hostDestination: AdhocHost;
-        generator: SimplePowerGenerator;
 }
 
 %inifile: omnetpp.ini
@@ -43,17 +42,18 @@ cmdenv-express-mode = false
 *.hostDestination.status.initialStatus = "up"
 
 # power
-**.powerSourceType = "SimpleBattery"
+**.accumulatorType = "SimpleBattery"
 **.powerConsumerType = "StateBasedPowerConsumer"
-**.powerSource.nominalCapacity = 1J
-**.powerSource.nodeShutdownCapacity = 0J
-**.powerSource.nodeStartCapacity = 0.2 * this.nominalCapacity
-*.hostSource.powerSource.initialCapacity = 0J
-*.hostDestination.powerSource.initialCapacity = 0.1J
-**.generator.powerSinkModule = "hostSource.powerSource"
-**.generator.powerGeneration = 10mW
-**.generator.sleepInterval = 0s
-**.generator.generationInterval = 10s
+**.accumulator.nominalCapacity = 1J
+**.accumulator.nodeShutdownCapacity = 0J
+**.accumulator.nodeStartCapacity = 0.2 * this.nominalCapacity
+*.hostSource.accumulator.initialCapacity = 0J
+*.hostDestination.accumulator.initialCapacity = 0.1J
+*.hostSource.generatorType = "SimplePowerGenerator"
+*.hostSource.generator.powerSinkModule = "hostSource.accumulator"
+*.hostSource.generator.powerGeneration = 10mW
+*.hostSource.generator.sleepInterval = 0s
+*.hostSource.generator.generationInterval = 10s
 
 # mobility
 **.mobility.constraintAreaMinZ = 0m

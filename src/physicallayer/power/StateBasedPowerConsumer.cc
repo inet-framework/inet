@@ -22,6 +22,8 @@ namespace inet {
 
 namespace physicallayer {
 
+Define_Module(StateBasedPowerConsumer);
+
 StateBasedPowerConsumer::StateBasedPowerConsumer() :
     offPowerConsumption(W(sNaN)),
     sleepPowerConsumption(W(sNaN)),
@@ -52,24 +54,23 @@ void StateBasedPowerConsumer::initialize(int stage)
         receiverReceivingPowerConsumption = W(par("receiverReceivingPowerConsumption"));
         transmitterIdlePowerConsumption = W(par("transmitterIdlePowerConsumption"));
         transmitterTransmittingPowerConsumption = W(par("transmitterTransmittingPowerConsumption"));
-        cModule *radioModule = getParentModule()->getSubmodule("radio");
+        cModule *radioModule = getParentModule();
         radioModule->subscribe(IRadio::radioModeChangedSignal, this);
         radioModule->subscribe(IRadio::receptionStateChangedSignal, this);
         radioModule->subscribe(IRadio::transmissionStateChangedSignal, this);
         radio = check_and_cast<IRadio *>(radioModule);
-        cModule *node = findContainingNode(this);
-        powerSource = dynamic_cast<IPowerSource *>(node->getSubmodule("powerSource"));
-        if (powerSource)
-            powerConsumerId = powerSource->addPowerConsumer(this);
+        const char *powerSourceModule = par("powerSourceModule");
+        powerSource = dynamic_cast<IPowerSource *>(getModuleByPath(powerSourceModule));
+        if (!powerSource)
+            throw cRuntimeError("Cannot find power source");
+        powerConsumerId = powerSource->addPowerConsumer(this);
     }
 }
 
 void StateBasedPowerConsumer::receiveSignal(cComponent *source, simsignal_t signalID, long value)
 {
-    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal) {
-        if (powerSource)
-            powerSource->setPowerConsumption(powerConsumerId, getPowerConsumption());
-    }
+    if (signalID == IRadio::radioModeChangedSignal || signalID == IRadio::receptionStateChangedSignal || signalID == IRadio::transmissionStateChangedSignal)
+        powerSource->setPowerConsumption(powerConsumerId, getPowerConsumption());
 }
 
 W StateBasedPowerConsumer::getPowerConsumption()
@@ -93,7 +94,7 @@ W StateBasedPowerConsumer::getPowerConsumption()
             powerConsumption += receiverSynchronizingPowerConsumption;
         else if (receptionState == IRadio::RECEPTION_STATE_RECEIVING)
             powerConsumption += receiverReceivingPowerConsumption;
-        else
+        else if (receptionState != IRadio::RECEPTION_STATE_UNDEFINED)
             throw cRuntimeError("Unknown radio reception state");
     }
     if (radioMode == IRadio::RADIO_MODE_TRANSMITTER || radioMode == IRadio::RADIO_MODE_TRANSCEIVER) {
@@ -101,7 +102,7 @@ W StateBasedPowerConsumer::getPowerConsumption()
             powerConsumption += transmitterIdlePowerConsumption;
         else if (transmissionState == IRadio::TRANSMISSION_STATE_TRANSMITTING)
             powerConsumption += transmitterTransmittingPowerConsumption;
-        else
+        else if (transmissionState != IRadio::TRANSMISSION_STATE_UNDEFINED)
             throw cRuntimeError("Unknown radio transmission state");
     }
     return powerConsumption;
