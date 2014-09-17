@@ -27,7 +27,7 @@ import inet.power.contract.IPowerSource;
 simple PowerSourceBase like IPowerSource
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerConsumptionChanged];
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }

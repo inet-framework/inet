@@ -27,7 +27,7 @@ import inet.power.contract.IPowerConsumer;
 simple PowerConsumerBase like IPowerConsumer
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerConsumptionChanged](type=double);
         @statistic[powerConsumption](title="Power consumption"; source=powerConsumptionChanged; record=vector; interpolationmode=sample-hold);
 }

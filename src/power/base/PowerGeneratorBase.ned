@@ -27,7 +27,7 @@ import inet.power.contract.IPowerGenerator;
 simple PowerGeneratorBase like IPowerGenerator
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerGenerationChanged];
         @statistic[powerGeneration](title="Power generation"; source=powerGenerationChanged; record=vector; interpolationmode=sample-hold);
 }

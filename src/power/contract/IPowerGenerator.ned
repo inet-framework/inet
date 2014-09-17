@@ -25,6 +25,6 @@ package inet.power.contract;
 moduleinterface IPowerGenerator
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerGenerationChanged](type=double);
 }

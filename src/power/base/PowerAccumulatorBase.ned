@@ -29,7 +29,7 @@ import inet.power.contract.IPowerSource;
 simple PowerAccumulatorBase like IPowerSource, IPowerSink, IPowerAccumulator
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerConsumptionChanged];
         @signal[powerGenerationChanged];
         @signal[residualCapacityChanged];

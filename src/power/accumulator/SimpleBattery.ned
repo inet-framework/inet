@@ -32,5 +32,5 @@ simple SimpleBattery extends PowerAccumulatorBase
     double nodeShutdownCapacity @unit(J) = default(0J/0);
     double nodeStartCapacity @unit(J) = default(0J/0);
     @class(SimpleBattery);
-    @display("i=block/cogwheel");
+    @display("i=block/plug");
 }

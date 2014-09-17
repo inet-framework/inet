@@ -26,6 +26,6 @@ package inet.power.contract;
 moduleinterface IPowerSource
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerConsumptionChanged](type=double);
 }

@@ -26,6 +26,6 @@ package inet.power.contract;
 moduleinterface IPowerSink
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[powerGenerationChanged](type=double);
 }

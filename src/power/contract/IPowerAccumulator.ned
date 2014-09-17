@@ -25,6 +25,6 @@ package inet.power.contract;
 moduleinterface IPowerAccumulator extends IPowerSource
 {
     parameters:
-        @display("i=block/cogwheel");
+        @display("i=block/plug");
         @signal[residualCapacityChanged](type=double);
 }
