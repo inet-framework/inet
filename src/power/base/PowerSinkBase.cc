@@ -21,6 +21,19 @@ namespace inet {
 
 namespace power {
 
+PowerSinkBase::PowerSinkBase() :
+    totalGeneratedPower(W(0))
+{
+}
+
+W PowerSinkBase::computeTotalGeneratedPower()
+{
+    W totalGeneratedPower = W(0);
+    for (std::vector<PowerGeneratorEntry>::iterator it = powerGenerators.begin(); it != powerGenerators.end(); it++)
+        totalGeneratedPower += (*it).generatedPower;
+    return totalGeneratedPower;
+}
+
 IPowerGenerator *PowerSinkBase::getPowerGenerator(int id)
 {
     return powerGenerators[id].powerGenerator;
@@ -28,21 +41,29 @@ IPowerGenerator *PowerSinkBase::getPowerGenerator(int id)
 
 int PowerSinkBase::addPowerGenerator(IPowerGenerator *powerGenerator)
 {
-    powerGenerators.push_back(PowerGeneratorEntry(powerGenerator, W(0)));
+    powerGenerators.push_back(PowerGeneratorEntry(powerGenerator, powerGenerator->getPowerGeneration()));
+    totalGeneratedPower = computeTotalGeneratedPower();
+    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
     return powerGenerators.size() - 1;
 }
 
 void PowerSinkBase::removePowerGenerator(int id)
 {
-    totalGeneratedPower -= powerGenerators[id].generatedPower;
     powerGenerators[id].generatedPower = W(0);
     powerGenerators[id].powerGenerator = NULL;
+    totalGeneratedPower = computeTotalGeneratedPower();
+    emit(powerGenerationChangedSignal, totalGeneratedPower.get());
+}
+
+W PowerSinkBase::getPowerGeneration(int id)
+{
+    return powerGenerators[id].generatedPower;
 }
 
 void PowerSinkBase::setPowerGeneration(int id, W generatedPower)
 {
-    totalGeneratedPower += generatedPower - powerGenerators[id].generatedPower;
     powerGenerators[id].generatedPower = generatedPower;
+    totalGeneratedPower = computeTotalGeneratedPower();
     emit(powerGenerationChangedSignal, totalGeneratedPower.get());
 }
 

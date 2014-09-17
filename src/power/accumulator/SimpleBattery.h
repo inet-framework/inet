@@ -21,14 +21,15 @@
 #include "IPowerAccumulator.h"
 #include "PowerSourceBase.h"
 #include "PowerSinkBase.h"
+#include "LifecycleController.h"
+#include "NodeStatus.h"
 
 namespace inet {
 
 namespace power {
 
 /**
- * This class implements a simple battery. The simple battery is determined by
- * its nominal capacity.
+ * This class implements a simple battery.
  *
  * @author Levente Meszaros
  */
@@ -36,29 +37,61 @@ class INET_API SimpleBattery : public PowerSourceBase, public PowerSinkBase, pub
 {
   protected:
     /**
-     * Specifies if the node should be crashed when the battery becomes depleted.
-     */
-    bool crashNodeWhenDepleted;
-
-    /**
-     * Nominal capacity.
+     * The nominal capacity of the battery is in the range [0, +infinity).
      */
     J nominalCapacity;
 
     /**
-     * Residual capacity.
+     * The residual capacity of the battery is in the range [0, nominalCapacity].
      */
     J residualCapacity;
 
     /**
-     * Last simulation time when residual capacity was updated.
+     * Specifies the amount of capacity change which will be reported.
+     */
+    J printCapacityStep;
+
+    /**
+     * The last simulation time when the residual capacity was updated.
      */
     simtime_t lastResidualCapacityUpdate;
 
     /**
-     * Timer that is scheduled to the time when the battery will be depleted.
+     * The timer that is scheduled to the time when the battery will be depleted,
+     * the battery will be charged, the node will shut down, or the node will
+     * start.
      */
-    cMessage *depletedTimer;
+    cMessage *timer;
+
+    /**
+     * The capacity that will be set when the timer expires.
+     */
+    J targetCapacity;
+
+    /**
+     * When the residual capacity becomes less than this limit the node shuts down.
+     */
+    J nodeShutdownCapacity;
+
+    /**
+     * When the residual capacity becomes more than this limit the node starts.
+     */
+    J nodeStartCapacity;
+
+    /**
+     * The lifecycle controller used to shutdown and start the node.
+     */
+    LifecycleController *lifecycleController;
+
+    /**
+     * The containing node module.
+     */
+    cModule *node;
+
+    /**
+     * The status of the node.
+     */
+    NodeStatus *nodeStatus;
 
   public:
     SimpleBattery();
@@ -71,14 +104,20 @@ class INET_API SimpleBattery : public PowerSourceBase, public PowerSinkBase, pub
 
     virtual void setPowerConsumption(int id, W consumedPower);
 
+    virtual void setPowerGeneration(int id, W generatedPower);
+
   protected:
     virtual void initialize(int stage);
 
     virtual void handleMessage(cMessage *message);
 
+    virtual void executeNodeOperation(J newResidualCapacity);
+
+    virtual void setResidualCapacity(J newResidualCapacity);
+
     virtual void updateResidualCapacity();
 
-    virtual void scheduleDepletedTimer();
+    virtual void scheduleTimer();
 };
 
 } // namespace power

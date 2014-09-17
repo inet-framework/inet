@@ -33,6 +33,7 @@ namespace power {
 class INET_API SimplePowerGenerator : public cSimpleModule, public IPowerGenerator
 {
   protected:
+    bool isSleeping;
     int powerGeneratorId;
     IPowerSink *powerSink;
     W powerGeneration;

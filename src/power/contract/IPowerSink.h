@@ -65,6 +65,11 @@ class INET_API IPowerSink
     virtual W getTotalPowerGeneration() = 0;
 
     /**
+     * Returns the generated power for the provided power generator.
+     */
+    virtual W getPowerGeneration(int id) = 0;
+
+    /**
      * Changes the generated power for the provided power generator.
      */
     virtual void setPowerGeneration(int id, W generatedPower) = 0;

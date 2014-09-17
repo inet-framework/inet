@@ -21,28 +21,49 @@ namespace inet {
 
 namespace power {
 
+PowerSourceBase::PowerSourceBase() :
+    totalConsumedPower(W(0))
+{
+}
+
 IPowerConsumer *PowerSourceBase::getPowerConsumer(int id)
 {
     return powerConsumers[id].powerConsumer;
 }
 
+W PowerSourceBase::computeTotalConsumedPower()
+{
+    W totalConsumedPower = W(0);
+    for (std::vector<PowerConsumerEntry>::iterator it = powerConsumers.begin(); it != powerConsumers.end(); it++)
+        totalConsumedPower += (*it).consumedPower;
+    return totalConsumedPower;
+}
+
 int PowerSourceBase::addPowerConsumer(IPowerConsumer *powerConsumer)
 {
-    powerConsumers.push_back(PowerConsumerEntry(powerConsumer, W(0)));
+    powerConsumers.push_back(PowerConsumerEntry(powerConsumer, powerConsumer->getPowerConsumption()));
+    totalConsumedPower = computeTotalConsumedPower();
+    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
     return powerConsumers.size() - 1;
 }
 
 void PowerSourceBase::removePowerConsumer(int id)
 {
-    totalConsumedPower -= powerConsumers[id].consumedPower;
     powerConsumers[id].consumedPower = W(0);
     powerConsumers[id].powerConsumer = NULL;
+    totalConsumedPower = computeTotalConsumedPower();
+    emit(powerConsumptionChangedSignal, totalConsumedPower.get());
+}
+
+W PowerSourceBase::getPowerConsumption(int id)
+{
+    return powerConsumers[id].consumedPower;
 }
 
 void PowerSourceBase::setPowerConsumption(int id, W consumedPower)
 {
-    totalConsumedPower += consumedPower - powerConsumers[id].consumedPower;
     powerConsumers[id].consumedPower = consumedPower;
+    totalConsumedPower = computeTotalConsumedPower();
     emit(powerConsumptionChangedSignal, totalConsumedPower.get());
 }
 

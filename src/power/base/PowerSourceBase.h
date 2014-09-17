@@ -61,7 +61,12 @@ class INET_API PowerSourceBase : public virtual cSimpleModule, public virtual IP
      */
     W totalConsumedPower;
 
+  protected:
+    W computeTotalConsumedPower();
+
   public:
+    PowerSourceBase();
+
     virtual int getNumPowerConsumers() { return powerConsumers.size(); }
 
     virtual IPowerConsumer *getPowerConsumer(int id);
@@ -71,6 +76,8 @@ class INET_API PowerSourceBase : public virtual cSimpleModule, public virtual IP
     virtual void removePowerConsumer(int id);
 
     virtual W getTotalPowerConsumption() { return totalConsumedPower; }
+
+    virtual W getPowerConsumption(int id);
 
     virtual void setPowerConsumption(int id, W consumedPower);
 };

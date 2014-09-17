@@ -65,6 +65,11 @@ class INET_API IPowerSource
     virtual W getTotalPowerConsumption() = 0;
 
     /**
+     * Returns the consumed power for the provided power consumer.
+     */
+    virtual W getPowerConsumption(int id) = 0;
+
+    /**
      * Changes the consumed power for the provided power consumer.
      */
     virtual void setPowerConsumption(int id, W consumedPower) = 0;

@@ -33,6 +33,7 @@ namespace power {
 class INET_API SimplePowerConsumer : public cSimpleModule, public IPowerConsumer
 {
   protected:
+    bool isSleeping;
     int powerConsumerId;
     IPowerSource *powerSource;
     W powerConsumption;

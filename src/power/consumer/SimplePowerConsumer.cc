@@ -24,8 +24,10 @@ namespace power {
 Define_Module(SimplePowerConsumer);
 
 SimplePowerConsumer::SimplePowerConsumer() :
+    isSleeping(false),
     powerConsumerId(-1),
     powerSource(NULL),
+    powerConsumption(W(sNaN)),
     timer(NULL)
 {
 }
@@ -40,17 +42,20 @@ void SimplePowerConsumer::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         timer = new cMessage("timer");
+        const char *powerSourceModule = par("powerSourceModule");
+        powerSource = dynamic_cast<IPowerSource *>(getModuleByPath(powerSourceModule));
+        if (!powerSource)
+            throw cRuntimeError("Power source module '%s' not found", powerSourceModule);
+        powerConsumerId = powerSource->addPowerConsumer(this);
         updatePowerConsumption();
         scheduleIntervalTimer();
-        powerSource = dynamic_cast<IPowerSource *>(getModuleByPath(par("powerSource")));
-        if (powerSource)
-            powerConsumerId = powerSource->addPowerConsumer(this);
     }
 }
 
 void SimplePowerConsumer::handleMessage(cMessage *message)
 {
     if (message == timer) {
+        isSleeping = !isSleeping;
         updatePowerConsumption();
         scheduleIntervalTimer();
     }
@@ -60,13 +65,14 @@ void SimplePowerConsumer::handleMessage(cMessage *message)
 
 void SimplePowerConsumer::updatePowerConsumption()
 {
-    powerConsumption = W(par("powerConsumption"));
+    powerConsumption = isSleeping ? W(0) : W(par("powerConsumption"));
     powerSource->setPowerConsumption(powerConsumerId, powerConsumption);
+    emit(IPowerSource::powerConsumptionChangedSignal, powerConsumption.get());
 }
 
 void SimplePowerConsumer::scheduleIntervalTimer()
 {
-    scheduleAt(simTime() + par("interval"), timer);
+    scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("consumptionInterval")), timer);
 }
 
 } // namespace power

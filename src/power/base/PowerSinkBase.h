@@ -61,7 +61,12 @@ class INET_API PowerSinkBase : public virtual cSimpleModule, public virtual IPow
      */
     W totalGeneratedPower;
 
+  protected:
+    W computeTotalGeneratedPower();
+
   public:
+    PowerSinkBase();
+
     virtual int getNumPowerGenerators() { return powerGenerators.size(); }
 
     virtual IPowerGenerator *getPowerGenerator(int id);
@@ -71,6 +76,8 @@ class INET_API PowerSinkBase : public virtual cSimpleModule, public virtual IPow
     virtual void removePowerGenerator(int id);
 
     virtual W getTotalPowerGeneration() { return totalGeneratedPower; }
+
+    virtual W getPowerGeneration(int id);
 
     virtual void setPowerGeneration(int id, W generatedPower);
 };

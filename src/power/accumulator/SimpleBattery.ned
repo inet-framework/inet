@@ -26,8 +26,11 @@ import inet.power.base.PowerAccumulatorBase;
 //
 simple SimpleBattery extends PowerAccumulatorBase
 {
-    bool crashNodeWhenDepleted = default(true);
     double nominalCapacity @unit(J);
+    double initialCapacity @unit(J) = default(nominalCapacity);
+    double printCapacityStep @unit(J) = default(0.01 * nominalCapacity);
+    double nodeShutdownCapacity @unit(J) = default(0J/0);
+    double nodeStartCapacity @unit(J) = default(0J/0);
     @class(SimpleBattery);
     @display("i=block/cogwheel");
 }

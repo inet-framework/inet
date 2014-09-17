@@ -28,8 +28,9 @@ import inet.power.base.PowerGeneratorBase;
 simple SimplePowerGenerator extends PowerGeneratorBase
 {
     parameters:
-        string sinkModule = default("^.battery");
+        string powerSinkModule = default("^.battery");
         volatile double powerGeneration @unit(W);
-        volatile double interval @unit(s);
+        volatile double generationInterval @unit(s);
+        volatile double sleepInterval @unit(s);
         @class(SimplePowerGenerator);
 }

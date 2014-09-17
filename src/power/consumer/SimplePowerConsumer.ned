@@ -28,8 +28,9 @@ import inet.power.base.PowerConsumerBase;
 simple SimplePowerConsumer extends PowerConsumerBase
 {
     parameters:
-        string sinkModule = default("^.battery");
+        string powerSourceModule = default("^.battery");
         volatile double powerConsumption @unit(W);
-        volatile double interval @unit(s);
+        volatile double consumptionInterval @unit(s);
+        volatile double sleepInterval @unit(s);
         @class(SimplePowerConsumer);
 }

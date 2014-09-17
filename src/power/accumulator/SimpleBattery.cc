@@ -16,7 +16,6 @@
 //
 
 #include "SimpleBattery.h"
-#include "LifecycleController.h"
 #include "NodeOperations.h"
 #include "ModuleAccess.h"
 
@@ -27,39 +26,54 @@ namespace power {
 Define_Module(SimpleBattery);
 
 SimpleBattery::SimpleBattery() :
-    crashNodeWhenDepleted(false),
     nominalCapacity(J(sNaN)),
     residualCapacity(J(sNaN)),
+    printCapacityStep(J(sNaN)),
     lastResidualCapacityUpdate(-1),
-    depletedTimer(NULL)
+    timer(NULL),
+    nodeShutdownCapacity(J(sNaN)),
+    nodeStartCapacity(J(sNaN)),
+    lifecycleController(NULL),
+    node(NULL),
+    nodeStatus(NULL)
 {
 }
 
 SimpleBattery::~SimpleBattery()
 {
-    cancelAndDelete(depletedTimer);
+    cancelAndDelete(timer);
 }
 
 void SimpleBattery::initialize(int stage)
 {
     if (stage == INITSTAGE_LOCAL) {
-        crashNodeWhenDepleted = par("crashNodeWhenDepleted");
-        nominalCapacity = residualCapacity = J(par("nominalCapacity"));
-        depletedTimer = new cMessage("depleted");
+        nominalCapacity = J(par("nominalCapacity"));
+        residualCapacity = J(par("initialCapacity"));
+        printCapacityStep = J(par("printCapacityStep"));
+        nodeShutdownCapacity = J(par("nodeShutdownCapacity"));
+        nodeStartCapacity = J(par("nodeStartCapacity"));
+        lastResidualCapacityUpdate = simTime();
+        emit(residualCapacityChangedSignal, residualCapacity.get());
+        timer = new cMessage("timer");
+        if (!isNaN(nodeStartCapacity.get()) || !isNaN(nodeShutdownCapacity.get())) {
+            node = findContainingNode(this);
+            nodeStatus = dynamic_cast<NodeStatus *>(node->getSubmodule("status"));
+            if (!nodeStatus)
+                throw cRuntimeError("Cannot find node status");
+            lifecycleController = dynamic_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
+            if (!lifecycleController)
+                throw cRuntimeError("Cannot find lifecycle controller");
+        }
+        scheduleTimer();
     }
 }
 
 void SimpleBattery::handleMessage(cMessage *message)
 {
-    if (message == depletedTimer) {
-        updateResidualCapacity();
-        if (crashNodeWhenDepleted) {
-            LifecycleController *lifecycleController = check_and_cast<LifecycleController *>(simulation.getModuleByPath("lifecycleController"));
-            NodeCrashOperation *operation = new NodeCrashOperation();
-            LifecycleOperation::StringMap params;
-            operation->initialize(findContainingNode(this), params);
-            lifecycleController->initiateOperation(operation);
-        }
+    if (message == timer) {
+        setResidualCapacity(targetCapacity);
+        scheduleTimer();
+        EV_INFO << "Battery, residual capacity = " << residualCapacity << " (" << (int)round(unit(residualCapacity / nominalCapacity).get() * 100) << "%)" << endl;
     }
     else
         throw cRuntimeError("Unknown message");
@@ -68,12 +82,51 @@ void SimpleBattery::handleMessage(cMessage *message)
 void SimpleBattery::setPowerConsumption(int id, W consumedPower)
 {
     Enter_Method_Silent();
-    if (residualCapacity == J(0))
-        throw cRuntimeError("Battery is already depleted");
-    else {
-        updateResidualCapacity();
-        PowerSourceBase::setPowerConsumption(id, consumedPower);
-        scheduleDepletedTimer();
+    updateResidualCapacity();
+    PowerSourceBase::setPowerConsumption(id, consumedPower);
+    scheduleTimer();
+}
+
+void SimpleBattery::setPowerGeneration(int id, W generatedPower)
+{
+    Enter_Method_Silent();
+    updateResidualCapacity();
+    PowerSinkBase::setPowerGeneration(id, generatedPower);
+    scheduleTimer();
+}
+
+void SimpleBattery::executeNodeOperation(J newResidualCapacity)
+{
+    if (!isNaN(nodeShutdownCapacity.get()) && newResidualCapacity <= nodeShutdownCapacity && nodeStatus->getState() == NodeStatus::UP)
+    {
+        EV_WARN << "Battery capacity reached node shutdown threshold" << endl;
+        LifecycleOperation::StringMap params;
+        NodeShutdownOperation *operation = new NodeShutdownOperation();
+        operation->initialize(node, params);
+        lifecycleController->initiateOperation(operation);
+    }
+    else if (!isNaN(nodeStartCapacity.get()) && newResidualCapacity >= nodeStartCapacity && nodeStatus->getState() == NodeStatus::DOWN)
+    {
+        EV_INFO << "Battery capacity reached node start threshold" << endl;
+        LifecycleOperation::StringMap params;
+        NodeStartOperation *operation = new NodeStartOperation();
+        operation->initialize(node, params);
+        lifecycleController->initiateOperation(operation);
+    }
+}
+
+void SimpleBattery::setResidualCapacity(J newResidualCapacity)
+{
+    if (newResidualCapacity != residualCapacity)
+    {
+        residualCapacity = newResidualCapacity;
+        lastResidualCapacityUpdate = simTime();
+        executeNodeOperation(newResidualCapacity);
+        if (residualCapacity == J(0))
+            EV_WARN << "Battery depleted" << endl;
+        else if (residualCapacity == nominalCapacity)
+            EV_INFO << "Battery charged" << endl;
+        emit(residualCapacityChangedSignal, residualCapacity.get());
     }
 }
 
@@ -81,19 +134,50 @@ void SimpleBattery::updateResidualCapacity()
 {
     simtime_t now = simTime();
     if (now != lastResidualCapacityUpdate) {
-        residualCapacity -= s((now - lastResidualCapacityUpdate).dbl()) * totalConsumedPower;
-        lastResidualCapacityUpdate = now;
-        emit(residualCapacityChangedSignal, residualCapacity.get());
-        ASSERT(residualCapacity >= J(0));
+        J newResidualCapacity = residualCapacity + s((now - lastResidualCapacityUpdate).dbl()) * (totalGeneratedPower - totalConsumedPower);
+        if (newResidualCapacity < J(0))
+            newResidualCapacity = J(0);
+        else if (newResidualCapacity > nominalCapacity)
+            newResidualCapacity = nominalCapacity;
+        setResidualCapacity(newResidualCapacity);
     }
 }
 
-void SimpleBattery::scheduleDepletedTimer()
+void SimpleBattery::scheduleTimer()
 {
-    if (depletedTimer->isScheduled())
-        cancelEvent(depletedTimer);
-    if (totalConsumedPower > W(0))
-        scheduleAt(simTime() + unit(residualCapacity / totalConsumedPower / s(1.0)).get(), depletedTimer);
+    W totalPower = totalGeneratedPower - totalConsumedPower;
+    targetCapacity = residualCapacity;
+    if (totalPower > W(0)) {
+        targetCapacity = isNaN(printCapacityStep.get()) ? nominalCapacity : ceil(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        // NOTE: make sure capacity will change over time despite double arithmetic
+        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        if (remainingTime == 0)
+            targetCapacity += printCapacityStep;
+        // override target capacity if start is needed
+        if (!isNaN(nodeStartCapacity.get()) && nodeStatus->getState() == NodeStatus::DOWN && residualCapacity < nodeStartCapacity && nodeStartCapacity < targetCapacity)
+            targetCapacity = nodeStartCapacity;
+    }
+    else if (totalPower < W(0)) {
+        targetCapacity = isNaN(printCapacityStep.get()) ? J(0) : floor(unit(residualCapacity / printCapacityStep).get()) * printCapacityStep;
+        // make sure capacity will change over time despite double arithmetic
+        simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+        if (remainingTime == 0)
+            targetCapacity -= printCapacityStep;
+        // override target capacity if shutdown is needed
+        if (!isNaN(nodeShutdownCapacity.get()) && nodeStatus->getState() == NodeStatus::UP && residualCapacity > nodeStartCapacity && nodeShutdownCapacity > targetCapacity)
+            targetCapacity = nodeShutdownCapacity;
+    }
+    // enforce target capacity to be in range
+    if (targetCapacity < J(0))
+        targetCapacity = J(0);
+    else if (targetCapacity > nominalCapacity)
+        targetCapacity = nominalCapacity;
+    simtime_t remainingTime = unit((targetCapacity - residualCapacity) / totalPower / s(1)).get();
+    if (timer->isScheduled())
+        cancelEvent(timer);
+    // don't schedule if there's no progress
+    if (remainingTime > 0)
+        scheduleAt(simTime() + remainingTime, timer);
 }
 
 } // namespace power

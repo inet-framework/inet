@@ -24,8 +24,10 @@ namespace power {
 Define_Module(SimplePowerGenerator);
 
 SimplePowerGenerator::SimplePowerGenerator() :
+    isSleeping(false),
     powerGeneratorId(-1),
     powerSink(NULL),
+    powerGeneration(W(sNaN)),
     timer(NULL)
 {
 }
@@ -40,17 +42,20 @@ void SimplePowerGenerator::initialize(int stage)
     if (stage == INITSTAGE_LOCAL)
     {
         timer = new cMessage("timer");
+        const char *powerSinkModule = par("powerSinkModule");
+        powerSink = dynamic_cast<IPowerSink *>(getModuleByPath(powerSinkModule));
+        if (!powerSink)
+            throw cRuntimeError("Power sink module '%s' not found", powerSinkModule);
+        powerGeneratorId = powerSink->addPowerGenerator(this);
         updatePowerGeneration();
         scheduleIntervalTimer();
-        powerSink = dynamic_cast<IPowerSink *>(getModuleByPath(par("powerSink")));
-        if (powerSink)
-            powerGeneratorId = powerSink->addPowerGenerator(this);
     }
 }
 
 void SimplePowerGenerator::handleMessage(cMessage *message)
 {
     if (message == timer) {
+        isSleeping = !isSleeping;
         updatePowerGeneration();
         scheduleIntervalTimer();
     }
@@ -60,13 +65,14 @@ void SimplePowerGenerator::handleMessage(cMessage *message)
 
 void SimplePowerGenerator::updatePowerGeneration()
 {
-    powerGeneration = W(par("powerGeneration"));
+    powerGeneration = isSleeping ? W(0) : W(par("powerGeneration"));
     powerSink->setPowerGeneration(powerGeneratorId, powerGeneration);
+    emit(IPowerSink::powerGenerationChangedSignal, powerGeneration.get());
 }
 
 void SimplePowerGenerator::scheduleIntervalTimer()
 {
-    scheduleAt(simTime() + par("interval"), timer);
+    scheduleAt(simTime() + (isSleeping ? par("sleepInterval") : par("generationInterval")), timer);
 }
 
 } // namespace power

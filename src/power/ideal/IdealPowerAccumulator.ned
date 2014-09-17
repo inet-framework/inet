@@ -25,8 +25,8 @@ import inet.power.base.PowerAccumulatorBase;
 //
 // @author Levente Meszaros
 //
-simple IdealAccumulator extends PowerAccumulatorBase
+simple IdealPowerAccumulator extends PowerAccumulatorBase
 {
     parameters:
-        @class(IdealAccumulator);
+        @class(IdealPowerAccumulator);
 }
